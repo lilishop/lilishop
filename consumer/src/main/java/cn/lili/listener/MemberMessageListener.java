@@ -91,7 +91,7 @@ public class MemberMessageListener implements RocketMQListener<MessageExt> {
                                 e);
                     }
                 }
-
+                break;
             default:
                 break;
         }

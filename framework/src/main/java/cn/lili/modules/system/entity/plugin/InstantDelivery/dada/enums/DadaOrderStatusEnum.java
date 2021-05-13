@@ -47,15 +47,18 @@ public enum DadaOrderStatusEnum {
         this.text = text;
     }
 
+    //获取配送模版
     public static String getText(Integer status) {
-        if (status != null) {
+        //如果空，则直接返回
+        if (status == null) {
             return null;
         }
+        //对状态枚举值进行处理
         for (DadaOrderStatusEnum dadaOrderStatusEnum : DadaOrderStatusEnum.values()) {
             if (status.equals(dadaOrderStatusEnum.getStatus())) {
                 return dadaOrderStatusEnum.getText();
             }
         }
-        return null;
+        return WAIT_RECEIVING.getText();
     }
 }

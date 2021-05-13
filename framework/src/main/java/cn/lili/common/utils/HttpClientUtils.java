@@ -57,13 +57,9 @@ public class HttpClientUtils {
     // 每个细化配置之最大并发数(不重要,在特殊场景很有用)
     static final int detailMaxPerRoute = 100;
 
-    private static CloseableHttpClient getHttpClient() {
+    private synchronized static CloseableHttpClient getHttpClient() {
         if (null == httpClient) {
-            synchronized (HttpClientUtils.class) {
-                if (null == httpClient) {
-                    httpClient = init();
-                }
-            }
+            httpClient = init();
         }
         return httpClient;
     }

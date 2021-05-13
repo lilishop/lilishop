@@ -70,13 +70,16 @@ public class PromotionServiceImpl implements PromotionService {
         log.info("更新促销活动状态：{}", promotionMessage);
         boolean result = false;
         switch (promotionTypeEnum) {
+            //满减
             case FULL_DISCOUNT:
                 result = this.updateFullDiscount(promotionMessage, esPromotionKey, promotionTypeEnum);
                 break;
+            //秒杀
             case SECKILL:
                 SeckillVO seckill = this.mongoTemplate.findById(promotionMessage.getPromotionId(), SeckillVO.class);
                 if (seckill == null) {
                     this.throwPromotionException(promotionTypeEnum, promotionMessage.getPromotionId(), promotionMessage.getPromotionStatus());
+                    break;
                 }
                 seckill.setPromotionStatus(promotionMessage.getPromotionStatus());
                 result = this.seckillService.update(promotionMessage.updateWrapper());
@@ -111,10 +114,12 @@ public class PromotionServiceImpl implements PromotionService {
                 }
                 this.mongoTemplate.save(seckill);
                 break;
+            //拼团
             case PINTUAN:
                 PintuanVO pintuanVO = this.mongoTemplate.findById(promotionMessage.getPromotionId(), PintuanVO.class);
                 if (pintuanVO == null) {
                     this.throwPromotionException(promotionTypeEnum, promotionMessage.getPromotionId(), promotionMessage.getPromotionStatus());
+                    break;
                 }
                 pintuanVO.setPromotionStatus(promotionMessage.getPromotionStatus());
                 result = this.pintuanService.update(promotionMessage.updateWrapper());
@@ -127,13 +132,16 @@ public class PromotionServiceImpl implements PromotionService {
                 }
                 this.mongoTemplate.save(pintuanVO);
                 break;
+            //优惠券
             case COUPON:
                 result = this.updateCoupon(promotionMessage, esPromotionKey, promotionTypeEnum);
                 break;
+            //积分商品
             case POINTS_GOODS:
                 PointsGoodsVO pointsGoodsVO = this.mongoTemplate.findById(promotionMessage.getPromotionId(), PointsGoodsVO.class);
                 if (pointsGoodsVO == null) {
                     this.throwPromotionException(promotionTypeEnum, promotionMessage.getPromotionId(), promotionMessage.getPromotionStatus());
+                    break;
                 }
                 pointsGoodsVO.setPromotionStatus(promotionMessage.getPromotionStatus());
                 result = this.pointsGoodsService.update(promotionMessage.updateWrapper());
@@ -271,11 +279,15 @@ public class PromotionServiceImpl implements PromotionService {
 
     private boolean updateFullDiscount(PromotionMessage promotionMessage, String esPromotionKey, PromotionTypeEnum promotionTypeEnum) {
         boolean result;
+        //从mongo中获取促销备份
         FullDiscountVO fullDiscountVO = mongoTemplate.findById(promotionMessage.getPromotionId(), FullDiscountVO.class);
         if (fullDiscountVO == null) {
             this.throwPromotionException(promotionTypeEnum, promotionMessage.getPromotionId(), promotionMessage.getPromotionStatus());
+            return false;
         }
+        //写入促销状态
         fullDiscountVO.setPromotionStatus(promotionMessage.getPromotionStatus());
+        //修改促销数据
         result = this.fullDiscountService.update(promotionMessage.updateWrapper());
         // clone一个活动信息，用于存放与索引中
         FullDiscountVO clone = ObjectUtil.clone(fullDiscountVO);
@@ -300,8 +312,10 @@ public class PromotionServiceImpl implements PromotionService {
         CouponVO couponVO = this.mongoTemplate.findById(promotionMessage.getPromotionId(), CouponVO.class);
         if (couponVO == null) {
             this.throwPromotionException(promotionTypeEnum, promotionMessage.getPromotionId(), promotionMessage.getPromotionStatus());
+            return false;
         }
         couponVO.setPromotionStatus(promotionMessage.getPromotionStatus());
+
         result = this.couponService.update(promotionMessage.updateWrapper());
 
         LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<MemberCoupon>().eq(MemberCoupon::getCouponId, couponVO.getId()).set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.EXPIRE.name());

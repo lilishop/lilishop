@@ -69,6 +69,7 @@ public class PaymentExecute implements OrderStatusChangeEvent {
                     case BANK_TRANSFER:
                         break;
                 }
+                break;
             default:
                 break;
         }

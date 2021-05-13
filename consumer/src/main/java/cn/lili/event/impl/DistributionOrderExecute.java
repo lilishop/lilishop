@@ -44,8 +44,8 @@ public class DistributionOrderExecute implements OrderStatusChangeEvent, EveryDa
             case CANCELLED: {
                 //修改分销订单状态
                 distributionOrderService.cancelOrder(orderMessage.getOrderSn());
+                break;
             }
-            break;
         }
     }
 

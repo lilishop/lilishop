@@ -232,7 +232,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         }
 
         //如果没有会员，则根据手机号注册会员
-        Member newMember = new Member("m" + phone,"111111",phone,params.getNickName(),params.getImage());
+        Member newMember = new Member("m" + phone, "111111", phone, params.getNickName(), params.getImage());
         memberService.save(newMember);
         newMember = memberService.findByUsername(newMember.getUsername());
         bindMpMember(openId, unionId, newMember);
@@ -294,7 +294,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         WechatConnectSetting wechatConnectSetting = JSONUtil.toBean(setting.getSettingValue(), WechatConnectSetting.class);
 
         if (wechatConnectSetting == null) {
-            return null;
+            throw new ServiceException(ResultCode.WECHAT_CONNECT_NOT_EXIST);
         }
         //寻找对应对微信小程序登录配置
         for (WechatConnectSettingItem wechatConnectSettingItem : wechatConnectSetting.getWechatConnectSettingItems()) {
@@ -303,7 +303,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             }
         }
 
-        return null;
+        throw new ServiceException(ResultCode.WECHAT_CONNECT_NOT_EXIST);
     }
 
 
