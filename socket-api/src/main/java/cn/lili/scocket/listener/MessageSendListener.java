@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.other-topic}", consumerGroup = "${lili.data.rocketmq.other-group}")
 public class MessageSendListener implements RocketMQListener<MessageExt> {
 
-    @Autowired
-    private StoreMessageMapper storeMessageMapper;
+
+
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
 
