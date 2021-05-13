@@ -18,7 +18,6 @@ import cn.lili.modules.search.entity.dto.SelectorOptions;
 import cn.lili.modules.search.entity.enums.HotWordsRedisKeyEnum;
 import cn.lili.modules.search.repository.EsGoodsIndexRepository;
 import cn.lili.modules.search.service.EsGoodsSearchService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.lucene.search.function.FunctionScoreQuery;
@@ -55,7 +54,6 @@ import java.util.*;
  **/
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
     private static final String ATTR_PATH = "attrList";
@@ -64,15 +62,20 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     private static final String ATTR_NAME_KEY = "nameList";
     private static final String ATTR_VALUE_KEY = "valueList";
 
-    private final EsGoodsIndexRepository goodsIndexRepository;
+    @Autowired
+    private EsGoodsIndexRepository goodsIndexRepository;
     //商品分类
-    private final CategoryService categoryService;
+    @Autowired
+    private CategoryService categoryService;
     //品牌
-    private final BrandService brandService;
+    @Autowired
+    private BrandService brandService;
     //ES
-    private final ElasticsearchRestTemplate restTemplate;
+    @Autowired
+    private ElasticsearchRestTemplate restTemplate;
     //缓存
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
 
     @Override
     public Page<EsGoodsIndex> searchGoods(EsGoodsSearchDTO searchDTO, PageVO pageVo) {

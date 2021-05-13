@@ -7,7 +7,6 @@ import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.mapper.MemberEvaluationMapper;
 import cn.lili.timetask.handler.EveryDayExecute;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,12 +20,13 @@ import java.util.Map;
  * @date 2021/3/18 3:23 下午
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsExecute implements EveryDayExecute {
     //会员评价
-    private final MemberEvaluationMapper memberEvaluationMapper;
+    @Autowired
+    private MemberEvaluationMapper memberEvaluationMapper;
     //商品
-    private final GoodsMapper goodsMapper;
+    @Autowired
+    private GoodsMapper goodsMapper;
 
     /**
      * 查询已上架的商品的评价数量并赋值

@@ -25,10 +25,9 @@ import javax.validation.Valid;
 @RestController
 @Api(tags = "管理端,会员地址API")
 @RequestMapping("/manager/member/address")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberAddressManagerController {
-
-    private final MemberAddressService memberAddressService;
+    @Autowired
+    private MemberAddressService memberAddressService;
 
     @ApiOperation(value = "会员地址分页列表")
     @GetMapping("/{memberId}")

@@ -5,7 +5,6 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
 import cn.lili.modules.member.service.MemberWalletService;
 import cn.lili.modules.order.trade.entity.enums.DepositServiceTypeEnum;
 import cn.lili.modules.payment.entity.RefundLog;
@@ -17,7 +16,6 @@ import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
 import cn.lili.modules.payment.service.PaymentService;
 import cn.lili.modules.payment.service.RefundLogService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,16 +32,19 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WalletPlugin implements Payment {
 
     //支付日志
-    private final PaymentService paymentService;
+    @Autowired
+    private PaymentService paymentService;
     //退款日志
-    private final RefundLogService refundLogService;
+    @Autowired
+    private RefundLogService refundLogService;
     //会员余额
-    private final MemberWalletService memberWalletService;
+    @Autowired
+    private MemberWalletService memberWalletService;
     //收银台
+    @Autowired
     private CashierSupport cashierSupport;
 
     @Override
@@ -169,9 +170,4 @@ public class WalletPlugin implements Payment {
 
     }
 
-
-    @Autowired
-    public void setCashierSupport(CashierSupport cashierSupport) {
-        this.cashierSupport = cashierSupport;
-    }
 }

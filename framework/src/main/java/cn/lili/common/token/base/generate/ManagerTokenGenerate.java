@@ -12,7 +12,6 @@ import cn.lili.modules.permission.entity.dos.AdminUser;
 import cn.lili.modules.permission.entity.vo.UserMenuVO;
 import cn.lili.modules.permission.service.AdminUserService;
 import cn.lili.modules.permission.service.RoleMenuService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,21 +29,17 @@ import java.util.Map;
  * @since 2020/11/16 10:51
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ManagerTokenGenerate extends AbstractTokenGenerate {
 
-    private AdminUserService adminUserService;
-
-    private final TokenUtil tokenUtil;
-
-    private final RoleMenuService roleMenuService;
-
-    private final Cache cache;
-
     @Autowired
-    public void setAdminUserService(AdminUserService adminUserService) {
-        this.adminUserService = adminUserService;
-    }
+    private AdminUserService adminUserService;
+    @Autowired
+    private TokenUtil tokenUtil;
+    @Autowired
+    private RoleMenuService roleMenuService;
+    @Autowired
+    private Cache cache;
+
 
     @Override
     public Token createToken(String username, Boolean longTerm) {

@@ -28,17 +28,14 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "买家端,会员接口")
 @RequestMapping("/buyer/members")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberBuyerController {
 
-    /**
-     * 会员
-     */
-    private final MemberService memberService;
-
-    private final SmsUtil smsUtil;
-
-    private final VerificationService verificationService;
+    @Autowired
+    private MemberService memberService;
+    @Autowired
+    private SmsUtil smsUtil;
+    @Autowired
+    private VerificationService verificationService;
 
 
     @ApiOperation(value = "登录接口")

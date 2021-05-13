@@ -15,12 +15,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author Chopper
  */
 @Configuration
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UrlConfiguration implements WebMvcConfigurer {
-
-    private final IgnoredUrlsProperties ignoredUrlsProperties;
-
-    private final RequestInterceptorAdapter requestInterceptorAdapter;
+    @Autowired
+    private IgnoredUrlsProperties ignoredUrlsProperties;
+    @Autowired
+    private RequestInterceptorAdapter requestInterceptorAdapter;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {

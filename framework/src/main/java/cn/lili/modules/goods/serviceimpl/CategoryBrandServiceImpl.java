@@ -22,10 +22,11 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategoryBrandServiceImpl extends ServiceImpl<CategoryBrandMapper, CategoryBrand> implements CategoryBrandService {
+
     //分类品牌绑定
-    private final CategoryBrandMapper categoryBrandMapper;
+    @Autowired
+    private CategoryBrandMapper categoryBrandMapper;
 
     @Override
     public List<CategoryBrandVO> getCategoryBrandList(String categoryId) {

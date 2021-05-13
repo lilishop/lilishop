@@ -32,21 +32,23 @@ import java.util.List;
 @Api(tags = "店铺端,订单统计接口")
 @RestController
 @RequestMapping("/store/statistics/order")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderStatisticsStoreController {
 
     /**
      * 订单
      */
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
     /**
      * 售后
      */
-    private final AfterSaleService afterSaleService;
+    @Autowired
+    private AfterSaleService afterSaleService;
     /**
      * 订单统计
      */
-    private final OrderStatisticsDataService orderStatisticsDataService;
+    @Autowired
+    private OrderStatisticsDataService orderStatisticsDataService;
 
     @ApiOperation(value = "订单概览统计")
     @GetMapping("/overview")

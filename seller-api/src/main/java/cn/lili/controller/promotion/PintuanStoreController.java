@@ -16,7 +16,6 @@ import cn.lili.modules.promotion.service.PromotionGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,11 +30,12 @@ import java.util.Date;
 @RestController
 @Api(tags = "店铺端,拼团管理接口")
 @RequestMapping("/store/promotion/pintuan")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PintuanStoreController {
 
-    private final PintuanService pintuanService;
-    private final PromotionGoodsService promotionGoodsService;
+    @Autowired
+    private PintuanService pintuanService;
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
 
 
     @GetMapping

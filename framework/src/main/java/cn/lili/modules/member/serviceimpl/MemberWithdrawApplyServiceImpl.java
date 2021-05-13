@@ -17,7 +17,6 @@ import cn.lili.modules.order.trade.entity.enums.DepositServiceTypeEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,12 +32,13 @@ import java.util.Date;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawApplyMapper, MemberWithdrawApply> implements MemberWithdrawApplyService {
     //提现申请数据层
-    private final MemberWithdrawApplyMapper memberWithdrawApplyMapper;
+    @Autowired
+    private MemberWithdrawApplyMapper memberWithdrawApplyMapper;
     //会员余额
-    private final MemberWalletService memberWalletService;
+    @Autowired
+    private MemberWalletService memberWalletService;
 
     @Override
     public Boolean audit(String applyId, Boolean result, String remark) {

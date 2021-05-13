@@ -22,7 +22,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,11 +39,13 @@ import java.util.Map;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SpecificationServiceImpl extends ServiceImpl<SpecificationMapper, Specification> implements SpecificationService {
+
     //分类-规格绑定
-    private final CategorySpecificationService categorySpecificationService;
+    @Autowired
+    private CategorySpecificationService categorySpecificationService;
     //规格值
+    @Autowired
     private SpecValuesService specValuesService;
 
     @Override
@@ -162,8 +163,4 @@ public class SpecificationServiceImpl extends ServiceImpl<SpecificationMapper, S
         return true;
     }
 
-    @Autowired
-    public void setSpecValuesService(SpecValuesService specValuesService) {
-        this.specValuesService = specValuesService;
-    }
 }

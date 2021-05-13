@@ -23,13 +23,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "买家端,意见反馈接口")
 @RequestMapping("/buyer/feedback")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FeedbackBuyerController {
 
     /**
      * 意见反馈
      */
-    private final FeedbackService feedbackService;
+    @Autowired
+    private FeedbackService feedbackService;
 
     @ApiOperation(value = "添加意见反馈")
     @PostMapping()

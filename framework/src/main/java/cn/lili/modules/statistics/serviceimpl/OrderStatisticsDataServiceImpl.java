@@ -35,15 +35,17 @@ import java.util.*;
  * @date 2020/12/9 17:16
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsDataMapper, StoreFlow> implements OrderStatisticsDataService {
 
     //订单统计
-    private final OrderStatisticsDataMapper orderStatisticsDataMapper;
+    @Autowired
+    private OrderStatisticsDataMapper orderStatisticsDataMapper;
     //平台PV统计
-    private final PlatformViewDataService platformViewDataService;
+    @Autowired
+    private PlatformViewDataService platformViewDataService;
     //订单
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
 
     @Override
     public OrderOverviewVO overview(StatisticsQueryParam statisticsQueryParam) {

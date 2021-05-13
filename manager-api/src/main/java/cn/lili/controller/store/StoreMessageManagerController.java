@@ -9,7 +9,6 @@ import cn.lili.modules.message.service.StoreMessageService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,10 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "管理端,店铺消息消息管理接口")
 @RequestMapping("/manager/message/store")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreMessageManagerController {
-
-    private final StoreMessageService storeMessageService;
+    @Autowired
+    private StoreMessageService storeMessageService;
 
 
     @GetMapping

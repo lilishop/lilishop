@@ -29,13 +29,13 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "买家端,会员商品评价接口")
 @RequestMapping("/buyer/memberEvaluation")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberEvaluationBuyerController {
 
     /**
      * 会员商品评价
      */
-    private final MemberEvaluationService memberEvaluationService;
+    @Autowired
+    private MemberEvaluationService memberEvaluationService;
 
     @ApiOperation(value = "添加会员评价")
     @PostMapping

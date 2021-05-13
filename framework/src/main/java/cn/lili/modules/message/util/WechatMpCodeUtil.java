@@ -7,7 +7,6 @@ import cn.lili.modules.message.entity.dos.ShortLink;
 import cn.lili.modules.message.service.ShortLinkService;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
@@ -38,16 +37,13 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WechatMpCodeUtil {
 
     private static String UN_LIMIT_API = "https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=";
     private static String CREATE_QR_CODE = "https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode?access_token=";
 
-
     @Autowired
     private WechatAccessTokenUtil wechatAccessTokenUtil;
-
     @Autowired
     private ShortLinkService shortLinkService;
 

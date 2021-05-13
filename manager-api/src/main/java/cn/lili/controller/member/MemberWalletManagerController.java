@@ -7,7 +7,6 @@ import cn.lili.modules.member.service.MemberWalletService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,10 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "管理端,预存款接口")
 @RequestMapping("/manager/members/wallet")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberWalletManagerController {
-
-    private final MemberWalletService memberWalletService;
+    @Autowired
+    private MemberWalletService memberWalletService;
 
     @GetMapping
     @ApiOperation(value = "查询会员预存款余额")

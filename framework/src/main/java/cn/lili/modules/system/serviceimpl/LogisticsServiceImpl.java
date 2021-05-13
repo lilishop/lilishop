@@ -38,10 +38,9 @@ import java.util.Map;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics> implements LogisticsService {
-
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
 
     @Override
     public Traces getLogistic(String logisticsId, String logisticsNo) {

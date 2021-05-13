@@ -43,7 +43,6 @@ import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -65,22 +64,29 @@ import java.util.Objects;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WechatPlugin implements Payment {
+
     //收银台
-    private final CashierSupport cashierSupport;
+    @Autowired
+    private CashierSupport cashierSupport;
     //支付日志
-    private final PaymentService paymentService;
+    @Autowired
+    private PaymentService paymentService;
     //缓存
-    private final Cache<String> cache;
+    @Autowired
+    private Cache<String> cache;
     //退款日志
-    private final RefundLogService refundLogService;
+    @Autowired
+    private RefundLogService refundLogService;
     //API域名
-    private final ApiProperties apiProperties;
+    @Autowired
+    private ApiProperties apiProperties;
     //配置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
     //联合登陆
-    private final ConnectService connectService;
+    @Autowired
+    private ConnectService connectService;
 
 
     @Override

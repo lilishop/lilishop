@@ -26,7 +26,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -42,15 +41,17 @@ import java.util.Date;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements BillService {
 
     //店铺详情
-    private final StoreDetailService storeDetailService;
+    @Autowired
+    private StoreDetailService storeDetailService;
     //商家流水
+    @Autowired
     private StoreFlowService storeFlowService;
     //结算单
-    private final BillMapper billMapper;
+    @Autowired
+    private BillMapper billMapper;
 
     @Override
     public void createBill(String storeId, Date startTime) {
@@ -194,11 +195,6 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         lambdaUpdateWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
                 Bill::getStoreId, UserContext.getCurrentUser().getStoreId());
         return this.count(lambdaUpdateWrapper);
-    }
-
-    @Autowired
-    public void setStoreFlowService(StoreFlowService storeFlowService) {
-        this.storeFlowService = storeFlowService;
     }
 
 }

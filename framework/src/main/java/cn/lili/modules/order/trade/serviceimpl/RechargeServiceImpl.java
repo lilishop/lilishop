@@ -33,12 +33,13 @@ import java.util.Date;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> implements RechargeService {
 
     //预存款
-    private final RechargeMapper rechargeMapper;
+    @Autowired
+    private RechargeMapper rechargeMapper;
     //会员预存款
+    @Autowired
     private MemberWalletService memberWalletService;
 
     @Override
@@ -102,8 +103,4 @@ public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> i
         throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
     }
 
-    @Autowired
-    public void setMemberWalletService(MemberWalletService memberWalletService) {
-        this.memberWalletService = memberWalletService;
-    }
 }

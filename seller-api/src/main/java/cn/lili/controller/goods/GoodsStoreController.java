@@ -37,15 +37,17 @@ import java.util.List;
 @RestController
 @Api(tags = "店铺端,商品接口")
 @RequestMapping("/store/goods")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsStoreController {
 
     //商品
-    private final GoodsService goodsService;
+    @Autowired
+    private GoodsService goodsService;
     //商品sku
-    private final GoodsSkuService goodsSkuService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
     //店铺详情
-    private final StoreDetailService storeDetailService;
+    @Autowired
+    private StoreDetailService storeDetailService;
 
     @ApiOperation(value = "分页获取商品列表")
     @GetMapping(value = "/list")

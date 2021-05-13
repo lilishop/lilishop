@@ -12,7 +12,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,10 +27,10 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "管理端,页面设置管理接口")
 @RequestMapping("/manager/pageData")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PageDataManagerController {
 
-    private final PageDataService pageDataService;
+    @Autowired
+    private PageDataService pageDataService;
 
     @ApiOperation(value = "获取页面信息")
     @ApiImplicitParam(name = "id", value = "页面ID", required = true, dataType = "String", paramType = "path")

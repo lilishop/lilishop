@@ -21,10 +21,9 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> implements UserRoleService {
-
-    private final UserRoleMapper userRoleMapper;
+    @Autowired
+    private UserRoleMapper userRoleMapper;
 
     @Override
     public List<UserRole> listByUserId(String userId) {

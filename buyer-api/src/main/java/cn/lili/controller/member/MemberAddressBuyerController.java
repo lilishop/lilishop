@@ -28,15 +28,16 @@ import javax.validation.Valid;
 @RestController
 @Api(tags = "买家端,会员地址接口")
 @RequestMapping("/buyer/memberAddress")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberAddressBuyerController {
 
     /**
      * 会员收件地址
      */
-    private final MemberAddressService memberAddressService;
+    @Autowired
+    private MemberAddressService memberAddressService;
 
-    private final RegionService regionService;
+    @Autowired
+    private RegionService regionService;
 
     @ApiOperation(value = "获取会员收件地址分页列表")
     @GetMapping

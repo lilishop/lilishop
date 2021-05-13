@@ -26,10 +26,9 @@ import java.util.Map;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SmsTemplateServiceImpl extends ServiceImpl<SmsTemplateMapper, SmsTemplate> implements SmsTemplateService {
-
-    private final AliSmsUtil aliSmsUtil;
+    @Autowired
+    private AliSmsUtil aliSmsUtil;
 
 
     @Override

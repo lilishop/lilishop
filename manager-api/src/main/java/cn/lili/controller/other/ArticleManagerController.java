@@ -28,13 +28,13 @@ import javax.validation.Valid;
 @RestController
 @Api(tags = "管理端,文章接口")
 @RequestMapping("/manager/article")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ArticleManagerController {
 
     /**
      * 文章
      */
-    private final ArticleService articleService;
+    @Autowired
+    private ArticleService articleService;
 
     @ApiOperation(value = "查看文章")
     @ApiImplicitParam(name = "id", value = "文章ID", required = true, dataType = "String", paramType = "path")

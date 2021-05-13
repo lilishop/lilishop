@@ -25,10 +25,10 @@ import java.util.List;
  */
 @Order(4)
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SkuFreightRender implements CartRenderStep {
 
-    private final FreightTemplateService freightTemplateService;
+    @Autowired
+    private FreightTemplateService freightTemplateService;
 
     @Override
     public void render(TradeDTO tradeDTO) {

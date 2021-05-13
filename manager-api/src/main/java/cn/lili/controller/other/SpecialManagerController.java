@@ -28,10 +28,10 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,专题活动接口")
 @RequestMapping("/manager/special")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SpecialManagerController {
 
-    private final SpecialService specialService;
+    @Autowired
+    private SpecialService specialService;
 
     @ApiOperation(value = "添加专题活动")
     @PostMapping("/addSpecial")

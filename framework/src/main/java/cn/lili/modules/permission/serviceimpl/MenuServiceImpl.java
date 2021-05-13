@@ -34,17 +34,13 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
     //菜单
-    private final MenuMapper menuMapper;
-    //菜单角色
-    private RoleMenuService roleMenuService;
-
     @Autowired
-    public void setRoleMenuService(RoleMenuService roleMenuService) {
-        this.roleMenuService = roleMenuService;
-    }
+    private MenuMapper menuMapper;
+    //菜单角色
+    @Autowired
+    private RoleMenuService roleMenuService;
 
     @Override
     public void deleteIds(List<String> ids) {

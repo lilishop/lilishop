@@ -11,7 +11,6 @@ import cn.lili.modules.goods.service.GoodsGalleryService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,10 +25,9 @@ import java.util.List;
 @RestController
 @Api(tags = "店铺端,商品相册接口")
 @RequestMapping("/store/goodsGallery")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsGalleryController {
-
-    private final GoodsGalleryService goodsGalleryService;
+    @Autowired
+    private GoodsGalleryService goodsGalleryService;
 
     @ApiOperation(value = "通过id获取")
     @GetMapping(value = "/get/{id}")

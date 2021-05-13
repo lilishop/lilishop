@@ -13,7 +13,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,13 +29,12 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @Api(tags = "买家端,收银台接口")
 @RequestMapping("/buyer/cashier")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CashierController {
 
-
-    private final CashierSupport cashierSupport;
-
-    private final PaymentService paymentService;
+    @Autowired
+    private CashierSupport cashierSupport;
+    @Autowired
+    private PaymentService paymentService;
 
 
     @ApiImplicitParams({

@@ -30,7 +30,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,17 +45,21 @@ import java.util.List;
  **/
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper, OrderComplaint> implements OrderComplaintService {
 
     //订单
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
     //订单货物
-    private final OrderItemService orderItemService;
+    @Autowired
+    private OrderItemService orderItemService;
     //商品规格
-    private final GoodsSkuService goodsSkuService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
     //交易投诉沟通
-    private final OrderComplaintCommunicationService orderComplaintCommunicationService;
+    @Autowired
+    private OrderComplaintCommunicationService orderComplaintCommunicationService;
 
     /**
      * 分页获取交易投诉信息

@@ -28,18 +28,19 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,商品分类规格接口")
 @RequestMapping("/manager/goods/category/spec")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategorySpecificationManagerController {
 
     /**
      * 分类规格
      */
-    private final CategorySpecificationService categorySpecificationService;
+    @Autowired
+    private CategorySpecificationService categorySpecificationService;
 
     /**
      * 规格
      */
-    private final SpecificationService specificationService;
+    @Autowired
+    private SpecificationService specificationService;
 
 
     @ApiOperation(value = "查询某分类下绑定的规格信息")

@@ -26,13 +26,13 @@ import java.util.List;
 @Api(tags = "管理端,首页统计数据接口")
 @RestController
 @RequestMapping("/manager/statistics/index")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class IndexStatisticsManagerController {
 
     /**
      * 首页统计
      */
-    private final IndexStatisticsService indexStatisticsService;
+    @Autowired
+    private IndexStatisticsService indexStatisticsService;
 
     @ApiOperation(value = "获取首页查询数据")
     @GetMapping

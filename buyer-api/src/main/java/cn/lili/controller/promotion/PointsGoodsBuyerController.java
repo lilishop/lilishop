@@ -11,7 +11,6 @@ import cn.lili.modules.promotion.service.PointsGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,12 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "买家端,积分商品接口")
 @RequestMapping("/buyer/promotion/pointsGoods")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PointsGoodsBuyerController {
-
-    private final PointsGoodsService pointsGoodsService;
-
-    private final PointsGoodsCategoryService pointsGoodsCategoryService;
+    @Autowired
+    private PointsGoodsService pointsGoodsService;
+    @Autowired
+    private PointsGoodsCategoryService pointsGoodsCategoryService;
 
     @GetMapping
     @ApiOperation(value = "分页获取积分商品")

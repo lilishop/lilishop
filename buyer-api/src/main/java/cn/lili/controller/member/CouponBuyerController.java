@@ -33,18 +33,19 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "买家端,买家优惠券接口")
 @RequestMapping("/buyer/promotion/coupon")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CouponBuyerController {
 
     /**
      * 优惠券
      */
-    private final CouponService couponService;
+    @Autowired
+    private CouponService couponService;
 
     /**
      * 会员优惠券
      */
-    private final MemberCouponService memberCouponService;
+    @Autowired
+    private MemberCouponService memberCouponService;
 
     @GetMapping
     @ApiOperation(value = "获取可领取优惠券列表")

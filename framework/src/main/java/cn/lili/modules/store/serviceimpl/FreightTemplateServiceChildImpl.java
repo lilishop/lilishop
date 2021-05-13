@@ -21,11 +21,11 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FreightTemplateServiceChildImpl extends ServiceImpl<FreightTemplateChildMapper, FreightTemplateChild> implements FreightTemplateChildService {
 
     //配送子模板数据层
-    private final FreightTemplateChildMapper freightTemplateChildMapper;
+    @Autowired
+    private FreightTemplateChildMapper freightTemplateChildMapper;
 
     @Override
     public List<FreightTemplateChild> getFreightTemplateChild(String freightTemplateId) {

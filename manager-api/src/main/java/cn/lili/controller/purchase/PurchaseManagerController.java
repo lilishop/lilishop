@@ -14,7 +14,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,17 +29,18 @@ import java.util.List;
 @Api(tags = "管理端,采购接口")
 @RestController
 @RequestMapping("/manager/purchase")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PurchaseManagerController {
 
     /**
      * 采购单
      */
-    private final PurchaseOrderService purchaseOrderService;
+    @Autowired
+    private PurchaseOrderService purchaseOrderService;
     /**
      * 采购单报价
      */
-    private final PurchaseQuotedService purchaseQuotedService;
+    @Autowired
+    private PurchaseQuotedService purchaseQuotedService;
 
 
     @ApiOperation(value = "采购单分页")

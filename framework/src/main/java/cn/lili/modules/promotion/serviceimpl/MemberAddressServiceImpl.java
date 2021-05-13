@@ -26,7 +26,6 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, MemberAddress> implements MemberAddressService {
 
     @Override

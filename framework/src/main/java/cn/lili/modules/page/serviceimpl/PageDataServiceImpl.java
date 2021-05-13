@@ -29,10 +29,9 @@ import org.springframework.stereotype.Service;
  * @date 2020/12/11 9:15
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> implements PageDataService {
-
-    private final PageDataMapper pageDataMapper;
+    @Autowired
+    private PageDataMapper pageDataMapper;
 
     @Override
     public void addStorePageData(String storeId) {

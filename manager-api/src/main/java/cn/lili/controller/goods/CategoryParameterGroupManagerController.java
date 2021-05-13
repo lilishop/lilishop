@@ -27,18 +27,19 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,分类绑定参数组接口")
 @RequestMapping("/manager/goods/category/parameters")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategoryParameterGroupManagerController {
 
     /**
      * 参数组
      */
-    private final ParametersService parametersService;
+    @Autowired
+    private ParametersService parametersService;
 
     /**
      * 分类参数
      */
-    private final CategoryParameterGroupService categoryParameterGroupService;
+    @Autowired
+    private CategoryParameterGroupService categoryParameterGroupService;
 
     @ApiOperation(value = "查询某分类下绑定的参数信息")
     @GetMapping(value = "/{categoryId}")

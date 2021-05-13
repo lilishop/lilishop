@@ -28,12 +28,14 @@ import java.util.stream.Collectors;
  **/
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 public class CancelOrderTaskExecute implements EveryMinuteExecute {
     //订单
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
     //设置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
 
 
     @Override

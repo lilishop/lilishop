@@ -42,16 +42,19 @@ import java.util.List;
  * 2021/1/18 12:07
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMapper, PlatformViewData> implements PlatformViewDataService {
     //在线人数统计
-    private final StatisticsProperties statisticsProperties;
+    @Autowired
+    private StatisticsProperties statisticsProperties;
     //会员
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
     //平台流量统计
-    private final PlatformViewDataMapper platformViewDataMapper;
+    @Autowired
+    private PlatformViewDataMapper platformViewDataMapper;
     //缓存
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
 
 
     @Override

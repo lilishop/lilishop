@@ -28,10 +28,9 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "管理端,会员商品评价接口")
 @RequestMapping("/manager/memberEvaluation")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberEvaluationManagerController {
-
-    private final MemberEvaluationService memberEvaluationService;
+    @Autowired
+    private MemberEvaluationService memberEvaluationService;
 
     @ApiOperation(value = "通过id获取评论")
     @ApiImplicitParam(name = "id", value = "评价ID", required = true, dataType = "String", paramType = "path")

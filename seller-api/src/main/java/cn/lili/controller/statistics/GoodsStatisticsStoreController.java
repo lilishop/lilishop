@@ -25,13 +25,13 @@ import java.util.List;
 @Api(tags = "店铺端,商品统计接口")
 @RestController
 @RequestMapping("/store/statistics/goods")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsStatisticsStoreController {
 
     /**
      * 商品统计
      */
-    private final GoodsStatisticsDataService goodsStatisticsDataService;
+    @Autowired
+    private GoodsStatisticsDataService goodsStatisticsDataService;
 
     @ApiOperation(value = "获取统计列表,排行前一百的数据")
     @GetMapping

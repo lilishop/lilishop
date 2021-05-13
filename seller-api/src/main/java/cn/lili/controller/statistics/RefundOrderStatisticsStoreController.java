@@ -10,7 +10,6 @@ import cn.lili.modules.statistics.service.RefundOrderStatisticsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,10 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "店铺端,退款统计接口")
 @RestController
 @RequestMapping("/store/statistics/refund/order")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RefundOrderStatisticsStoreController {
 
-    private final RefundOrderStatisticsService refundOrderStatisticsService;
+    @Autowired
+    private RefundOrderStatisticsService refundOrderStatisticsService;
 
     @ApiOperation(value = "获取退款统计列表")
     @GetMapping("/getByPage")

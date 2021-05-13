@@ -10,7 +10,6 @@ import cn.lili.modules.store.service.StoreGoodsLabelService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,13 +25,13 @@ import java.util.List;
 @Api(tags = "店铺端,店铺分类接口")
 @RestController
 @RequestMapping("/store/goods/label")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsLabelStoreController {
 
     /**
      * 店铺分类
      */
-    private final StoreGoodsLabelService storeGoodsLabelService;
+    @Autowired
+    private StoreGoodsLabelService storeGoodsLabelService;
 
     @ApiOperation(value = "获取当前店铺商品分类列表")
     @GetMapping

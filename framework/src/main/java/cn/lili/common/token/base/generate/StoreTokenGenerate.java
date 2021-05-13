@@ -25,24 +25,13 @@ import org.springframework.stereotype.Component;
  * @since 2020/11/16 10:51
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreTokenGenerate extends AbstractTokenGenerate {
-
+    @Autowired
     private MemberService memberService;
-
+    @Autowired
     private StoreService storeService;
-
-    private final TokenUtil tokenUtil;
-
     @Autowired
-    public void setMemberService(MemberService memberService) {
-        this.memberService = memberService;
-    }
-
-    @Autowired
-    public void setStoreService(StoreService storeService) {
-        this.storeService = storeService;
-    }
+    private TokenUtil tokenUtil;
 
     @Override
     public Token createToken(String username, Boolean longTerm) {

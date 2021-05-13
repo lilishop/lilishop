@@ -32,13 +32,13 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "买家端，购物车接口")
 @RequestMapping("/buyer/trade/carts")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CartController {
 
     /**
      * 购物车
      */
-    private final CartService cartService;
+    @Autowired
+    private CartService cartService;
 
 
     @ApiOperation(value = "向购物车中添加一个产品")

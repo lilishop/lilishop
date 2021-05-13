@@ -28,10 +28,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "管理端,会员积分历史接口")
 @RequestMapping("/manager/member/memberPointsHistory")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberPointsHistoryManagerController {
-
-    private final MemberPointsHistoryService memberPointsHistoryService;
+    @Autowired
+    private MemberPointsHistoryService memberPointsHistoryService;
 
     @ApiOperation(value = "分页获取")
     @ApiImplicitParams({

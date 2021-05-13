@@ -24,10 +24,9 @@ import java.util.List;
 @Api(tags = "管理端,会员统计接口")
 @RestController
 @RequestMapping("/manager/statistics/member")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberStatisticsManagerController {
-
-    private final MemberStatisticsDataService memberStatisticsDataService;
+    @Autowired
+    private MemberStatisticsDataService memberStatisticsDataService;
 
     @ApiOperation(value = "获取会员统计")
     @GetMapping

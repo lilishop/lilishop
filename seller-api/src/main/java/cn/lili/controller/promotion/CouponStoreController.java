@@ -15,7 +15,6 @@ import cn.lili.modules.promotion.service.CouponService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,10 +30,10 @@ import java.util.List;
 @RestController
 @Api(tags = "店铺端,优惠券接口")
 @RequestMapping("/store/promotion/coupon")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CouponStoreController {
 
-    private final CouponService couponService;
+    @Autowired
+    private CouponService couponService;
 
     @GetMapping
     @ApiOperation(value = "获取优惠券列表")

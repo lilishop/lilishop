@@ -26,10 +26,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,会员消息接口")
 @RequestMapping("/manager/memberNoticeSenter")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberNoticeSenterManagerController {
-
-    private final MemberNoticeSenterService memberNoticeSenterService;
+    @Autowired
+    private MemberNoticeSenterService memberNoticeSenterService;
 
     @ApiOperation(value = "通过id获取")
     @GetMapping(value = "/get/{id}")

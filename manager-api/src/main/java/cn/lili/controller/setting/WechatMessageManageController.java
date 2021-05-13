@@ -26,10 +26,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,微信消息接口")
 @RequestMapping("/manager/message/wechat")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WechatMessageManageController {
-
-    private final WechatMessageService wechatMessageService;
+    @Autowired
+    private WechatMessageService wechatMessageService;
 
 
     @GetMapping(value = "/init")

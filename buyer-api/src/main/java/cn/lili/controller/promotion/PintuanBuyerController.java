@@ -33,12 +33,11 @@ import java.util.List;
 @Api(tags = "买家端,拼团接口")
 @RestController
 @RequestMapping("/buyer/promotion/pintuan")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PintuanBuyerController {
-
-    private final PromotionGoodsService promotionGoodsService;
-
-    private final PintuanService pintuanService;
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
+    @Autowired
+    private PintuanService pintuanService;
 
     @ApiOperation(value = "获取拼团商品")
     @GetMapping

@@ -24,13 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "买家端,页面接口")
 @RequestMapping("/buyer/pageData")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PageBuyerController {
 
     /**
      * 页面管理
      */
-    private final PageDataService pageService;
+    @Autowired
+    private PageDataService pageService;
 
     @ApiOperation(value = "获取首页数据")
     @GetMapping("/getIndex")

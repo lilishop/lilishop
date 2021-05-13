@@ -8,7 +8,6 @@ import cn.lili.modules.base.entity.systemlog.SystemLogVO;
 import cn.lili.modules.permission.service.SystemLogService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -29,11 +28,10 @@ import java.util.regex.Pattern;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SystemLogServiceImpl implements SystemLogService {
 
-
-    private final MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Override
     public void saveLog(SystemLogVO systemLogVO) {

@@ -11,7 +11,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,12 +23,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Api(tags = "短信验证码接口")
 @RequestMapping("/common/sms")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SmsController {
 
-    private final SmsUtil smsUtil;
-
-    private final VerificationService verificationService;
+    @Autowired
+    private SmsUtil smsUtil;
+    @Autowired
+    private VerificationService verificationService;
 
     //一分钟同一个ip请求1次
     @LimitPoint(name = "sms_send", key = "sms")

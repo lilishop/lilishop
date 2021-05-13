@@ -12,7 +12,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,10 +28,10 @@ import java.util.List;
 
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SpecValuesServiceImpl extends ServiceImpl<SpecValuesMapper, SpecValues> implements SpecValuesService {
 
     //规格
+    @Autowired
     private SpecificationService specificationService;
 
     @Override
@@ -111,8 +110,4 @@ public class SpecValuesServiceImpl extends ServiceImpl<SpecValuesMapper, SpecVal
         return this.page(PageUtil.initPage(pageVo), queryWrapper);
     }
 
-    @Autowired
-    public void setSpecificationService(SpecificationService specificationService) {
-        this.specificationService = specificationService;
-    }
 }

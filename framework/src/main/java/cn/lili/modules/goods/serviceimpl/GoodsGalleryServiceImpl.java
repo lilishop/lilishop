@@ -29,14 +29,16 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, GoodsGallery> implements GoodsGalleryService {
     //文件
-    private final FileManagerPlugin fileManagerPlugin;
+    @Autowired
+    private FileManagerPlugin fileManagerPlugin;
     //商品相册数据层
-    private final GoodsGalleryMapper goodsGalleryMapper;
+    @Autowired
+    private GoodsGalleryMapper goodsGalleryMapper;
     //设置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
 
 
     @Override

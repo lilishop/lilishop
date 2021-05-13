@@ -36,21 +36,23 @@ import javax.validation.constraints.Pattern;
 @RestController
 @Api(tags = "买家端,会员余额接口")
 @RequestMapping("/buyer/members/wallet")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberWalletBuyerController {
 
     /**
      * 会员
      */
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
     /**
      * 会员余额
      */
-    private final MemberWalletService memberWalletService;
+    @Autowired
+    private MemberWalletService memberWalletService;
     /**
      * 验证码
      */
-    private final VerificationService verificationService;
+    @Autowired
+    private VerificationService verificationService;
 
     @GetMapping
     @ApiOperation(value = "查询会员预存款余额")

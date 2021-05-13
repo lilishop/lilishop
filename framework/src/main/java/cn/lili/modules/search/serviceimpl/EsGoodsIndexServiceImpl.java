@@ -49,20 +49,18 @@ import java.util.stream.Collectors;
  **/
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements EsGoodsIndexService {
 
-    private final ElasticsearchProperties elasticsearchProperties;
-    private final EsGoodsIndexRepository goodsIndexRepository;
-    private final EsGoodsSearchService goodsSearchService;
-    private final GoodsWordsService goodsWordsService;
-
-    private PromotionService promotionService;
-
     @Autowired
-    public void setPromotionService(PromotionService promotionService) {
-        this.promotionService = promotionService;
-    }
+    private ElasticsearchProperties elasticsearchProperties;
+    @Autowired
+    private EsGoodsIndexRepository goodsIndexRepository;
+    @Autowired
+    private EsGoodsSearchService goodsSearchService;
+    @Autowired
+    private GoodsWordsService goodsWordsService;
+    @Autowired
+    private PromotionService promotionService;
 
     @Override
     public void addIndex(EsGoodsIndex goods) {

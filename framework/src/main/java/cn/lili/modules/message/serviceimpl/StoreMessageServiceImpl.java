@@ -13,7 +13,6 @@ import cn.lili.modules.message.service.StoreMessageService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.elasticsearch.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,10 +28,9 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreMessageServiceImpl extends ServiceImpl<StoreMessageMapper, StoreMessage> implements StoreMessageService {
-
-    private final StoreMessageMapper storeMessageMapper;
+    @Autowired
+    private StoreMessageMapper storeMessageMapper;
 
     @Override
     public boolean deleteByMessageId(String messageId) {

@@ -6,7 +6,6 @@ import cn.lili.modules.page.mapper.SpecialMapper;
 import cn.lili.modules.page.service.PageDataService;
 import cn.lili.modules.page.service.SpecialService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +16,14 @@ import org.springframework.stereotype.Service;
  * @date 2020/12/7 11:27
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SpecialServiceImpl extends ServiceImpl<SpecialMapper, Special> implements SpecialService {
 
     //专题
-    private final SpecialMapper specialMapper;
+    @Autowired
+    private SpecialMapper specialMapper;
     //页面数据
-    private final PageDataService pageDataService;
+    @Autowired
+    private PageDataService pageDataService;
 
     @Override
     public Special addSpecial(Special special) {

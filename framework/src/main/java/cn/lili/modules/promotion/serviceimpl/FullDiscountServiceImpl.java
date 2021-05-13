@@ -46,22 +46,28 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, FullDiscount> implements FullDiscountService {
 
     private static final String SELLER_ID_COLUMN = "storeId";
     private static final String PROMOTION_STATUS_COLUMN = "promotionStatus";
+
     //延时任务
-    private final TimeTrigger timeTrigger;
+    @Autowired
+    private TimeTrigger timeTrigger;
     //Mongo
-    private final MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
     //满额活动
-    private final FullDiscountMapper fullDiscountMapper;
+    @Autowired
+    private FullDiscountMapper fullDiscountMapper;
     //Rocketmq
-    private final RocketmqCustomProperties rocketmqCustomProperties;
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
     //优惠券
+    @Autowired
     private CouponService couponService;
     //促销商品
+    @Autowired
     private PromotionGoodsService promotionGoodsService;
 
     @Override
@@ -316,15 +322,4 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
         query.addCriteria(Criteria.where("endTime").gt(now));
         return query;
     }
-
-    @Autowired
-    public void setPromotionGoodsService(PromotionGoodsService promotionGoodsService) {
-        this.promotionGoodsService = promotionGoodsService;
-    }
-
-    @Autowired
-    public void setCouponService(CouponService couponService) {
-        this.couponService = couponService;
-    }
-
 }

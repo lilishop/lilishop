@@ -19,7 +19,6 @@ import cn.lili.modules.search.service.EsGoodsIndexService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -39,27 +38,36 @@ import java.util.*;
 @Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PromotionServiceImpl implements PromotionService {
     //会员优惠券
+    @Autowired
     private MemberCouponService memberCouponService;
     //秒杀
+    @Autowired
     private SeckillService seckillService;
     //秒杀申请
+    @Autowired
     private SeckillApplyService seckillApplyService;
     //满额活动
+    @Autowired
     private FullDiscountService fullDiscountService;
     //拼团
+    @Autowired
     private PintuanService pintuanService;
     //优惠券
+    @Autowired
     private CouponService couponService;
     //促销商品
+    @Autowired
     private PromotionGoodsService promotionGoodsService;
     //积分商品
+    @Autowired
     private PointsGoodsService pointsGoodsService;
     //ES商品
+    @Autowired
     private EsGoodsIndexService goodsIndexService;
     //Mongo
+    @Autowired
     private MongoTemplate mongoTemplate;
 
 
@@ -344,56 +352,5 @@ public class PromotionServiceImpl implements PromotionService {
     private void throwPromotionException(PromotionTypeEnum type, String id, String status) {
         log.error("当前" + type.name() + "活动ID为[" + id + "] 不存在，更改活动状态至[ " + status + " ]失败！");
         throw new ServiceException("当前活动已停止");
-    }
-
-
-    @Autowired
-    public void setPintuanService(PintuanService pintuanService) {
-        this.pintuanService = pintuanService;
-    }
-
-    @Autowired
-    public void setMemberCouponService(MemberCouponService memberCouponService) {
-        this.memberCouponService = memberCouponService;
-    }
-
-    @Autowired
-    public void setSeckillService(SeckillService seckillService) {
-        this.seckillService = seckillService;
-    }
-
-    @Autowired
-    public void setSeckillApplyService(SeckillApplyService seckillApplyService) {
-        this.seckillApplyService = seckillApplyService;
-    }
-
-    @Autowired
-    public void setFullDiscountService(FullDiscountService fullDiscountService) {
-        this.fullDiscountService = fullDiscountService;
-    }
-
-    @Autowired
-    public void setCouponService(CouponService couponService) {
-        this.couponService = couponService;
-    }
-
-    @Autowired
-    public void setPromotionGoodsService(PromotionGoodsService promotionGoodsService) {
-        this.promotionGoodsService = promotionGoodsService;
-    }
-
-    @Autowired
-    public void setPointsGoodsService(PointsGoodsService pointsGoodsService) {
-        this.pointsGoodsService = pointsGoodsService;
-    }
-
-    @Autowired
-    public void setGoodsIndexService(EsGoodsIndexService goodsIndexService) {
-        this.goodsIndexService = goodsIndexService;
-    }
-
-    @Autowired
-    public void setMongoTemplate(MongoTemplate mongoTemplate) {
-        this.mongoTemplate = mongoTemplate;
     }
 }

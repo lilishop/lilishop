@@ -34,14 +34,15 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryService {
 
     private static final String DELETE_FLAG_COLUMN = "delete_flag";
     //缓存
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
     //分类
-    private final CategoryMapper categoryMapper;
+    @Autowired
+    private CategoryMapper categoryMapper;
 
     @Override
     public List<Category> dbList(String parentId) {

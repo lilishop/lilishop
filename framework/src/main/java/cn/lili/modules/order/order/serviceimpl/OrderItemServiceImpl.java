@@ -28,10 +28,10 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem> implements OrderItemService {
 
-    private final OrderItemMapper orderItemMapper;
+    @Autowired
+    private OrderItemMapper orderItemMapper;
 
     @Override
     public void updateCommentStatus(String orderItemSn, CommentStatusEnum commentStatusEnum) {

@@ -42,25 +42,28 @@ import java.util.Map;
 @Api(tags = "买家端,商品接口")
 @RestController
 @RequestMapping("/buyer/goods")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsBuyerController {
 
     /**
      * 商品
      */
-    private final GoodsService goodsService;
+    @Autowired
+    private GoodsService goodsService;
     /**
      * 商品SKU
      */
-    private final GoodsSkuService goodsSkuService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
     /**
      * ES商品搜索
      */
-    private final EsGoodsSearchService goodsSearchService;
+    @Autowired
+    private EsGoodsSearchService goodsSearchService;
     /**
      * 分销员
      */
-    private final DistributionService distributionService;
+    @Autowired
+    private DistributionService distributionService;
 
 
     @ApiOperation(value = "通过id获取商品信息")

@@ -19,7 +19,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,12 +41,11 @@ import java.util.List;
 @RequestMapping("/manager/user")
 @Transactional
 @Validated
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AdminUserManagerController {
-
-    private final AdminUserService adminUserService;
-
-    private final DepartmentService departmentService;
+    @Autowired
+    private AdminUserService adminUserService;
+    @Autowired
+    private DepartmentService departmentService;
 
 
     @GetMapping(value = "/login")

@@ -39,19 +39,23 @@ import java.util.Map;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberSign> implements MemberSignService {
 
     //会员签到
-    private final MemberSignMapper memberSignMapper;
+    @Autowired
+    private MemberSignMapper memberSignMapper;
     //RocketMQ
-    private final RocketMQTemplate rocketMQTemplate;
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
     //RocketMQ 配置
-    private final RocketmqCustomProperties rocketmqCustomProperties;
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
     //配置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
     //会员
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
 
 
     @Override

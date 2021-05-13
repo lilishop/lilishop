@@ -20,7 +20,7 @@ import org.springframework.security.config.annotation.web.configurers.Expression
 @Slf4j
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 public class ScoketSecurityConfig extends WebSecurityConfigurerAdapter {
 
 

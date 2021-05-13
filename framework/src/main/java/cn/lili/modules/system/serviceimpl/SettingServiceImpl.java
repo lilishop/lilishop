@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting> implements SettingService {
 
     @Override

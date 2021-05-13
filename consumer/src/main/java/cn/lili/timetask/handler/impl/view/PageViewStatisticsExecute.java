@@ -8,7 +8,6 @@ import cn.lili.modules.statistics.model.dos.PlatformViewData;
 import cn.lili.modules.statistics.service.PlatformViewDataService;
 import cn.lili.timetask.handler.EveryDayExecute;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +27,13 @@ import java.util.List;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PageViewStatisticsExecute implements EveryDayExecute {
     //缓存
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
     //平台PV统计
-    private final PlatformViewDataService platformViewDataService;
+    @Autowired
+    private PlatformViewDataService platformViewDataService;
 
     @Override
     public void execute() {

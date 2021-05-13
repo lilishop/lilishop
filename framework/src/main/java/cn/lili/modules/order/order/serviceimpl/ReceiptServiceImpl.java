@@ -28,11 +28,11 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> implements ReceiptService {
 
     //发票mapper
-    private final ReceiptMapper receiptMapper;
+    @Autowired
+    private ReceiptMapper receiptMapper;
 
 
     @Override

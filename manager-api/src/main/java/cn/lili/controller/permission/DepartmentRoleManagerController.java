@@ -23,10 +23,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,部门角色接口")
 @RequestMapping("/manager/departmentRole")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DepartmentRoleManagerController {
-
-    private final DepartmentRoleService departmentRoleService;
+    @Autowired
+    private DepartmentRoleService departmentRoleService;
 
     @GetMapping(value = "/{departmentId}")
     @ApiOperation(value = "查看部门拥有的角色")

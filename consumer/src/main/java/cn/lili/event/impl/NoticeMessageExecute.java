@@ -31,12 +31,12 @@ import java.util.Map;
  * @date 2020-07-03 11:20
  **/
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent, AfterSaleStatusChangeEvent, MemberPointChangeEvent, MemberWithdrawalEvent {
 
-    private final NoticeMessageService noticeMessageService;
-
-    private final OrderService orderService;
+    @Autowired
+    private NoticeMessageService noticeMessageService;
+    @Autowired
+    private OrderService orderService;
 
 
     @Override

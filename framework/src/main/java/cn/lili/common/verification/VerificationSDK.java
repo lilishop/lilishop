@@ -2,7 +2,6 @@ package cn.lili.common.verification;
 
 import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,10 +14,10 @@ import org.springframework.stereotype.Component;
  * @since 2020/11/17 15:43
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class VerificationSDK {
 
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
 
     /**
      * 生成一个token 用于获取校验中心的验证码逻辑

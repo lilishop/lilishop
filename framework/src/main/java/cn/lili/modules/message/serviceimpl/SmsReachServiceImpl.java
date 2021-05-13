@@ -26,11 +26,11 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SmsReachServiceImpl extends ServiceImpl<SmsReachMapper, SmsReach> implements SmsReachService {
-
-    private final RocketMQTemplate rocketMQTemplate;
-    private final RocketmqCustomProperties rocketmqCustomProperties;
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
 
 
     @Override

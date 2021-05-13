@@ -26,11 +26,11 @@ import org.springframework.stereotype.Service;
  * @date 2020/12/10 11:30
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RefundOrderStatisticsServiceImpl extends ServiceImpl<RefundOrderStatisticsDataMapper, StoreFlow> implements RefundOrderStatisticsService {
 
     //退款统计
-    private final RefundOrderStatisticsDataMapper refundOrderStatisticsDataMapper;
+    @Autowired
+    private RefundOrderStatisticsDataMapper refundOrderStatisticsDataMapper;
 
     @Override
     public IPage<RefundOrderStatisticsDataVO> getRefundOrderStatisticsData(PageVO pageVO, StatisticsQueryParam statisticsQueryParam) {

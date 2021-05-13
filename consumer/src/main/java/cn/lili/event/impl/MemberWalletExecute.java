@@ -15,10 +15,10 @@ import org.springframework.stereotype.Service;
  * @date 2020-07-03 11:20
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberWalletExecute implements MemberRegisterEvent {
 
-    private final MemberWalletService memberWalletService;
+    @Autowired
+    private MemberWalletService memberWalletService;
 
     @Override
     public void memberRegister(Member member) {

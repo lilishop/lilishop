@@ -25,17 +25,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "买家端,分销订单接口")
 @RequestMapping("/buyer/distribution/order")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DistributionOrderBuyerController {
 
     /**
      * 分销订单
      */
-    private final DistributionOrderService distributionOrderService;
+    @Autowired
+    private DistributionOrderService distributionOrderService;
     /**
      * 分销员
      */
-    private final DistributionService distributionService;
+    @Autowired
+    private DistributionService distributionService;
 
 
     @ApiOperation(value = "分销员订单")

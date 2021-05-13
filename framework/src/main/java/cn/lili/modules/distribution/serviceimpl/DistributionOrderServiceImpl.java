@@ -40,17 +40,20 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderMapper, DistributionOrder> implements DistributionOrderService {
 
     //订单
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
     //店铺流水
-    private final StoreFlowService storeFlowService;
+    @Autowired
+    private StoreFlowService storeFlowService;
     //分销员
-    private final DistributionService distributionService;
+    @Autowired
+    private DistributionService distributionService;
     //系统设置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
 
     @Override
     public IPage<DistributionOrder> getDistributionOrderPage(DistributionOrderSearchParams distributionOrderSearchParams) {

@@ -12,7 +12,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,21 +33,23 @@ import java.util.List;
 @RequestMapping("/store/goods/category")
 @CacheConfig(cacheNames = "category")
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategoryStoreController {
 
     /**
      * 分类
      */
-    private final CategoryService categoryService;
+    @Autowired
+    private CategoryService categoryService;
     /**
      * 分类品牌
      */
-    private final CategoryBrandService categoryBrandService;
+    @Autowired
+    private CategoryBrandService categoryBrandService;
     /**
      * 店铺详情
      */
-    private final StoreDetailService storeDetailService;
+    @Autowired
+    private StoreDetailService storeDetailService;
 
     @ApiOperation(value = "获取店铺经营的分类")
     @GetMapping(value = "/all")

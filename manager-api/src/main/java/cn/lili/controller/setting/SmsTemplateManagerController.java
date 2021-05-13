@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,9 +24,9 @@ import javax.validation.Valid;
 @RestController
 @Api(tags = "管理端,短信模板接口")
 @RequestMapping("/manager/sms/template")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SmsTemplateManagerController {
-    private final SmsTemplateService smsTemplateService;
+    @Autowired
+    private SmsTemplateService smsTemplateService;
 
     @ApiOperation(value = "新增短信模板")
     @PostMapping

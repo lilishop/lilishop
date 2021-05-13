@@ -13,7 +13,6 @@ import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,17 +28,20 @@ import java.util.stream.Collectors;
  **/
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PromotionPriceServiceImpl implements PromotionPriceService {
 
     //ES商品
-    private final EsGoodsSearchService goodsSearchService;
+    @Autowired
+    private EsGoodsSearchService goodsSearchService;
     //限时抢购申请
-    private final SeckillApplyService seckillApplyService;
+    @Autowired
+    private SeckillApplyService seckillApplyService;
     //促销商品
-    private final PromotionGoodsService promotionGoodsService;
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
     //规格商品
-    private final GoodsSkuService goodsSkuService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
 
     @Override
     public PromotionPriceDTO calculationPromotionPrice(List<PromotionPriceParamDTO> tradeSkuList, List<MemberCoupon> memberCouponList) {

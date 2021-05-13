@@ -10,7 +10,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,10 +24,10 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "管理端,分销佣金管理接口")
 @RequestMapping("/manager/distribution/cash")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DistributionCashManagerController {
 
-    private final DistributionCashService distributorCashService;
+    @Autowired
+    private DistributionCashService distributorCashService;
 
     @ApiOperation(value = "通过id获取分销佣金详情")
     @GetMapping(value = "/get/{id}")

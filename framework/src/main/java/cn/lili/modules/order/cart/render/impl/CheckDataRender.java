@@ -21,10 +21,10 @@ import org.springframework.stereotype.Service;
  */
 @Order(0)
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CheckDataRender implements CartRenderStep {
 
-    private final GoodsSkuService goodsSkuService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
 
     @Override
     public void render(TradeDTO tradeDTO) {

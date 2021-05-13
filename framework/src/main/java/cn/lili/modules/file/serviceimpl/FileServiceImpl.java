@@ -15,7 +15,6 @@ import cn.lili.modules.file.service.FileService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,10 +30,10 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements FileService {
 
-    private final FileManagerPlugin fileManagerPlugin;
+    @Autowired
+    private FileManagerPlugin fileManagerPlugin;
 
     @Override
     public void batchDelete(List<String> ids) {

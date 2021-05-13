@@ -19,7 +19,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,18 +33,19 @@ import javax.validation.Valid;
 @RestController
 @Api(tags = "买家端,交易投诉接口")
 @RequestMapping("/buyer/complain")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderComplaintBuyerController {
 
     /**
      * 交易投诉
      */
-    private final OrderComplaintService orderComplaintService;
+    @Autowired
+    private OrderComplaintService orderComplaintService;
 
     /**
      * 交易投诉沟通
      */
-    private final OrderComplaintCommunicationService orderComplaintCommunicationService;
+    @Autowired
+    private OrderComplaintCommunicationService orderComplaintCommunicationService;
 
 
     @ApiOperation(value = "通过id获取")

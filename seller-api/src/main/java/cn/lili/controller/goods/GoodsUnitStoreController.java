@@ -27,10 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "店铺端,商品计量单位接口")
 @RequestMapping("/store/goods/unit")
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsUnitStoreController {
-
-    private final GoodsUnitService goodsUnitService;
+    @Autowired
+    private GoodsUnitService goodsUnitService;
 
 
     @ApiOperation(value = "分页获取商品计量单位")

@@ -12,7 +12,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,13 +26,13 @@ import javax.validation.constraints.NotNull;
 @Api(tags = "买家端,采购接口")
 @RestController
 @RequestMapping("/buyer/purchase")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PurchaseBuyerController {
 
     /**
      * 采购单
      */
-    private final PurchaseOrderService purchaseOrderService;
+    @Autowired
+    private PurchaseOrderService purchaseOrderService;
 
     @ApiOperation(value = "添加采购单")
     @PostMapping

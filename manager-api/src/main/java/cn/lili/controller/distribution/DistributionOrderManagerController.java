@@ -24,10 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "管理端,分销订单管理接口")
 @RequestMapping("/manager/distribution/order")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DistributionOrderManagerController {
 
-    private final DistributionOrderService distributionOrderService;
+    @Autowired
+    private DistributionOrderService distributionOrderService;
 
     @ApiOperation(value = "通过id获取分销订单")
     @GetMapping(value = "/get/{id}")

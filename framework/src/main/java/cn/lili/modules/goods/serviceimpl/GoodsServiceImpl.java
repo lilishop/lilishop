@@ -54,27 +54,35 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements GoodsService {
 
     //商品
-    private final GoodsMapper goodsMapper;
+    @Autowired
+    private GoodsMapper goodsMapper;
     //商品属性
-    private final GoodsParamsService goodsParamsService;
+    @Autowired
+    private GoodsParamsService goodsParamsService;
     //分类
-    private final CategoryService categoryService;
+    @Autowired
+    private CategoryService categoryService;
     //设置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
     //商品相册
-    private final GoodsGalleryService goodsGalleryService;
+    @Autowired
+    private GoodsGalleryService goodsGalleryService;
     //商品规格
+    @Autowired
     private GoodsSkuService goodsSkuService;
     //店铺详情
+    @Autowired
     private StoreService storeService;
     //rocketMq
-    private final RocketMQTemplate rocketMQTemplate;
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
     //rocketMq配置
-    private final RocketmqCustomProperties rocketmqCustomProperties;
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Override
     public void underStoreGoods(String storeId) {
@@ -351,13 +359,4 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         return goods;
     }
 
-    @Autowired
-    public void setGoodsSkuService(GoodsSkuService goodsSkuService) {
-        this.goodsSkuService = goodsSkuService;
-    }
-
-    @Autowired
-    public void setStoreService(StoreService storeService) {
-        this.storeService = storeService;
-    }
 }

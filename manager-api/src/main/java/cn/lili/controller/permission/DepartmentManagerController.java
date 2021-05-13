@@ -26,10 +26,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,部门管理接口")
 @RequestMapping("/manager/department")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DepartmentManagerController {
-
-    private final DepartmentService departmentService;
+    @Autowired
+    private DepartmentService departmentService;
 
     @GetMapping(value = "/{id}")
     @ApiOperation(value = "查看部门详情")

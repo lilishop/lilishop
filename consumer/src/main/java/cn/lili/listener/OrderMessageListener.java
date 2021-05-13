@@ -7,7 +7,6 @@ import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.event.TradeEvent;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -25,16 +24,18 @@ import java.util.List;
  **/
 @Component
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.order-topic}", consumerGroup = "${lili.data.rocketmq.order-group}")
 public class OrderMessageListener implements RocketMQListener<MessageExt> {
 
     //交易
-    private final List<TradeEvent> tradeEvent;
+    @Autowired
+    private List<TradeEvent> tradeEvent;
     //订单状态
-    private final List<OrderStatusChangeEvent> orderStatusChangeEvents;
+    @Autowired
+    private List<OrderStatusChangeEvent> orderStatusChangeEvents;
     //缓存
-    private final Cache<Object> cache;
+    @Autowired
+    private Cache<Object> cache;
 
     @Override
     public void onMessage(MessageExt messageExt) {

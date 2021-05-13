@@ -6,7 +6,6 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.config.properties.StatisticsProperties;
 import cn.lili.modules.statistics.model.vo.OnlineMemberVO;
 import cn.lili.timetask.handler.EveryHourExecute;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,13 +22,14 @@ import java.util.stream.Collectors;
  * @date 2021-02-21 09:47
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OnlineMemberStatistics implements EveryHourExecute {
 
     //缓存
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
     //统计小时
-    private final StatisticsProperties statisticsProperties;
+    @Autowired
+    private StatisticsProperties statisticsProperties;
 
 
     @Override

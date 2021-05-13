@@ -9,7 +9,6 @@ import cn.lili.modules.purchase.service.PurchaseQuotedService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +24,11 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PurchaseQuotedServiceImpl extends ServiceImpl<PurchaseQuotedMapper, PurchaseQuoted> implements PurchaseQuotedService {
-
-    private final PurchaseQuotedMapper purchaseQuotedMapper;
-    private final PurchaseQuotedItemService purchaseQuotedItemService;
+    @Autowired
+    private PurchaseQuotedMapper purchaseQuotedMapper;
+    @Autowired
+    private PurchaseQuotedItemService purchaseQuotedItemService;
 
     @Override
     public PurchaseQuotedVO addPurchaseQuoted(PurchaseQuotedVO purchaseQuotedVO) {

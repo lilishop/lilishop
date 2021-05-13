@@ -29,7 +29,6 @@ import com.alipay.api.domain.*;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.response.AlipayTradeCancelResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,18 +46,22 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AliPayPlugin implements Payment {
     //支付日志
-    private final PaymentService paymentService;
+    @Autowired
+    private PaymentService paymentService;
     //退款日志
-    private final RefundLogService refundLogService;
+    @Autowired
+    private RefundLogService refundLogService;
     //收银台
-    private final CashierSupport cashierSupport;
+    @Autowired
+    private CashierSupport cashierSupport;
     //设置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
     //API域名
-    private final ApiProperties apiProperties;
+    @Autowired
+    private ApiProperties apiProperties;
 
 
     @Override

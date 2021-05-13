@@ -28,11 +28,10 @@ import java.util.Map;
 @Slf4j
 @Aspect
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AfterSaleOperationLogAspect {
 
-
-    private final AfterSaleLogService afterSaleLogService;
+    @Autowired
+    private AfterSaleLogService afterSaleLogService;
 
     @AfterReturning(returning = "rvt", pointcut = "@annotation(cn.lili.modules.order.order.aop.AfterSaleLogPoint)")
     public void afterReturning(JoinPoint joinPoint, Object rvt) {

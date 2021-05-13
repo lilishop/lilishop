@@ -6,7 +6,6 @@ import cn.lili.modules.message.util.WechatMessageUtil;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.vo.OrderVO;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WechatMessageExecute implements OrderStatusChangeEvent, TradeEvent {
 
     @Autowired

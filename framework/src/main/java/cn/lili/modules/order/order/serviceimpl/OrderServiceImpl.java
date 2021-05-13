@@ -60,7 +60,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,19 +77,20 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
 
     private static final String ORDER_SN_COLUMN = "order_sn";
 
     //订单数据层
-    private final OrderMapper orderMapper;
-
+    @Autowired
+    private OrderMapper orderMapper;
     //延时任务
-    private final TimeTrigger timeTrigger;
-
+    @Autowired
+    private TimeTrigger timeTrigger;
     //订单货物数据层
-    private final OrderItemMapper orderItemMapper;
+    @Autowired
+    private OrderItemMapper orderItemMapper;
     //发票
     @Autowired
     private ReceiptService receiptService;
@@ -692,21 +692,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 this.sendUpdateStatusMessage(orderMessage);
             }
         }
-    }
-
-    @Autowired
-    public void setStoreFlowService(StoreFlowService storeFlowService) {
-        this.storeFlowService = storeFlowService;
-    }
-
-    @Autowired
-    public void setPintuanService(PintuanService pintuanService) {
-        this.pintuanService = pintuanService;
-    }
-
-    @Autowired
-    private void setGoodsSkuService(GoodsSkuService goodsSkuService) {
-        this.goodsSkuService = goodsSkuService;
     }
 
 }

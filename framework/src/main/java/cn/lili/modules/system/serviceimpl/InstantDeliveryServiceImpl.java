@@ -13,7 +13,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
-import lombok.RequiredArgsConstructor;
 import org.elasticsearch.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +31,6 @@ import java.util.Map;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class InstantDeliveryServiceImpl extends ServiceImpl<InstantDeliveryMapper, InstantDelivery> implements InstantDeliveryService {
 
     @Autowired

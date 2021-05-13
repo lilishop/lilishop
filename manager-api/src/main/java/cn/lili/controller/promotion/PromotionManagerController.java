@@ -27,12 +27,12 @@ import java.util.Map;
 @RestController
 @Api(tags = "管理端,促销接口")
 @RequestMapping("/manager/promotion")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PromotionManagerController {
 
-    private final PromotionService promotionService;
-
-    private final PromotionGoodsService promotionGoodsService;
+    @Autowired
+    private PromotionService promotionService;
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
 
     @GetMapping("/current")
     @ApiOperation(value = "获取当前进行中的促销活动")

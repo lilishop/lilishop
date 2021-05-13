@@ -26,10 +26,10 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMapper, StoreGoodsLabel> implements StoreGoodsLabelService {
 
-    private final StoreGoodsLabelMapper storeGoodsLabelMapper;
+    @Autowired
+    private StoreGoodsLabelMapper storeGoodsLabelMapper;
 
     @Override
     public List<StoreGoodsLabelVO> listByStoreId(String storeId) {

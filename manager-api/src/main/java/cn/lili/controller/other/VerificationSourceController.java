@@ -11,7 +11,6 @@ import cn.lili.modules.base.service.VerificationSourceService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -29,10 +28,10 @@ import java.util.List;
 @Api(tags = "管理端,验证码资源维护接口")
 @RequestMapping("/manager/verificationSource")
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class VerificationSourceController {
 
-    private final VerificationSourceService verificationSourceService;
+    @Autowired
+    private VerificationSourceService verificationSourceService;
 
     @GetMapping(value = "/{id}")
     @ApiOperation(value = "查看验证码资源维护详情")

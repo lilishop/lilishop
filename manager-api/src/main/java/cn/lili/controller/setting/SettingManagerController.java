@@ -18,7 +18,6 @@ import cn.lili.modules.system.service.SettingService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,10 +32,9 @@ import java.util.Collections;
 @RestController
 @Api(tags = "管理端,系统设置接口")
 @RequestMapping("/manager/system/setting")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SettingManagerController {
-
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
 
 
     @DemoSite

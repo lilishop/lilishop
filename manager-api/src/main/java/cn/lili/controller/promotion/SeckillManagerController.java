@@ -16,7 +16,6 @@ import cn.lili.modules.promotion.service.SeckillService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,11 +28,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Api(tags = "管理端,限时抢购接口")
 @RequestMapping("/manager/promotion/seckill")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SeckillManagerController {
-
-    private final SeckillService seckillService;
-    private final SeckillApplyService seckillApplyService;
+    @Autowired
+    private SeckillService seckillService;
+    @Autowired
+    private SeckillApplyService seckillApplyService;
 
     @PostMapping
     @ApiOperation(value = "添加限时抢购")

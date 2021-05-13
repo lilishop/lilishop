@@ -29,10 +29,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,积分商品接口")
 @RequestMapping("/manager/promotion/pointsGoods")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PointsGoodsManagerController {
-
-    private final PointsGoodsService pointsGoodsService;
+    @Autowired
+    private PointsGoodsService pointsGoodsService;
 
     @PostMapping(consumes = "application/json", produces = "application/json")
     @ApiOperation(value = "添加积分商品")

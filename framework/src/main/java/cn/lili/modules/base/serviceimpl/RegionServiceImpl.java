@@ -27,13 +27,12 @@ import java.util.*;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> implements RegionService {
 
     /**
      * 同步请求地址
      */
-    private final String syncUrl = "https://restapi.amap.com/v3/config/district?subdistrict=4&key=e456d77800e2084a326f7b777278f89d";
+    private String syncUrl = "https://restapi.amap.com/v3/config/district?subdistrict=4&key=e456d77800e2084a326f7b777278f89d";
 
     @Override
     public void synchronizationData(String url) {

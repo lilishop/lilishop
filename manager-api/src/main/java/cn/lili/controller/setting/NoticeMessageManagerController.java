@@ -36,10 +36,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,会员站内信管理接口")
 @RequestMapping("/manager/noticeMessage")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NoticeMessageManagerController {
-
-    private final NoticeMessageService noticeMessageService;
+    @Autowired
+    private NoticeMessageService noticeMessageService;
 
     @ApiOperation(value = "消息模板分页")
     @GetMapping

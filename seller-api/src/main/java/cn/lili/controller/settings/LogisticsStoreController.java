@@ -26,13 +26,13 @@ import java.util.List;
 @RestController
 @Api(tags = "店铺端,物流公司接口")
 @RequestMapping("/store/logistics")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LogisticsStoreController {
 
     /**
      * 物流公司
      */
-    private final StoreLogisticsService storeLogisticsService;
+    @Autowired
+    private StoreLogisticsService storeLogisticsService;
 
     @ApiOperation(value = "获取商家物流公司列表，如果已选择则checked有值")
     @GetMapping

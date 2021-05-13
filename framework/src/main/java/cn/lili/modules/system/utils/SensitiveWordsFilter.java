@@ -2,7 +2,6 @@ package cn.lili.modules.system.utils;
 
 import cn.lili.modules.system.entity.dos.SensitiveWords;
 import cn.lili.modules.system.service.SensitiveWordsService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -22,7 +21,6 @@ import java.util.NavigableSet;
  * 2020-02-25 14:10:16
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
 
 
@@ -39,8 +37,8 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
      * 使用2个字符的hash定位。
      */
     protected static SensitiveWordsNode[] nodes;
-
-    private final SensitiveWordsService sensitiveWordsService;
+    @Autowired
+    private SensitiveWordsService sensitiveWordsService;
 
 
     /**

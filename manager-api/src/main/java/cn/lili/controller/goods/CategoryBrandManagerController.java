@@ -26,13 +26,13 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,分类品牌接口")
 @RequestMapping("/manager/category/brand")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategoryBrandManagerController {
 
     /**
      * 规格品牌管理
      */
-    private final CategoryBrandService categoryBrandService;
+    @Autowired
+    private CategoryBrandService categoryBrandService;
 
     @ApiOperation(value = "查询某分类下绑定的品牌信息")
     @ApiImplicitParam(name = "categoryId", value = "分类id", required = true, dataType = "String", paramType = "path")

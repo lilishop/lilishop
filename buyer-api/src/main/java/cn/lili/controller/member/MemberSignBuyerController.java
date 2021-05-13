@@ -24,10 +24,9 @@ import java.util.List;
 @RestController
 @Api(tags = "买家端，会员签到API")
 @RequestMapping("/buyer/members/sign")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberSignBuyerController {
-
-    private final MemberSignService memberSignService;
+    @Autowired
+    private MemberSignService memberSignService;
 
     @PostMapping
     @ApiOperation(value = "会员签到")

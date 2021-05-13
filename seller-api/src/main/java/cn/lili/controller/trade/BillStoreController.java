@@ -27,10 +27,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Api(tags = "店铺端,结算单接口")
 @RequestMapping("/store/bill")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BillStoreController {
 
-    private final BillService billService;
+    @Autowired
+    private BillService billService;
 
     @ApiOperation(value = "获取结算单分页")
     @GetMapping(value = "/getByPage")

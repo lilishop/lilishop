@@ -27,23 +27,14 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Department> implements DepartmentService {
 
     //管理员
+    @Autowired
     private AdminUserService adminUserService;
     //部门角色
+    @Autowired
     private DepartmentRoleService departmentRoleService;
-
-    @Autowired
-    public void setDepartmentRoleService(DepartmentRoleService departmentRoleService) {
-        this.departmentRoleService = departmentRoleService;
-    }
-
-    @Autowired
-    public void setAdminUserService(AdminUserService adminUserService) {
-        this.adminUserService = adminUserService;
-    }
 
     @Override
     public void deleteByIds(List<String> ids) {

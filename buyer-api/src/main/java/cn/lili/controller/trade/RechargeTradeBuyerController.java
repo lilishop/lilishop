@@ -8,7 +8,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,10 +27,10 @@ import javax.validation.constraints.Min;
 @Api(tags = "买家端,预存款充值记录接口")
 @RequestMapping("/buyer/trade/recharge")
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RechargeTradeBuyerController {
 
-    private final RechargeService rechargeService;
+    @Autowired
+    private RechargeService rechargeService;
 
     @PostMapping
     @ApiOperation(value = "创建余额充值订单")

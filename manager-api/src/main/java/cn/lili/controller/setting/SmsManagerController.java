@@ -11,7 +11,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,10 +25,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,短信接口")
 @RequestMapping("/manager/sms")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SmsManagerController {
-
-    private final SmsReachService smsReachService;
+    @Autowired
+    private SmsReachService smsReachService;
 
     @ApiOperation(value = "接口批量发送短信")
     @PostMapping

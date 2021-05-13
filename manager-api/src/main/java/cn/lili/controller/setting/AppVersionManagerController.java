@@ -28,10 +28,9 @@ import javax.validation.Valid;
 @RestController
 @Api("管理端,app版本控制器")
 @RequestMapping("/manager/systems/app/version")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AppVersionManagerController {
-
-    private final AppVersionService appVersionService;
+    @Autowired
+    private AppVersionService appVersionService;
 
 
     @ApiOperation(value = "查询app升级消息", response = AppVersionDO.class)

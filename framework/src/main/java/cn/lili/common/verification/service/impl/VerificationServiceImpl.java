@@ -11,7 +11,6 @@ import cn.lili.common.vo.SerializableStream;
 import cn.lili.modules.base.entity.dos.VerificationSource;
 import cn.lili.modules.base.entity.vo.VerificationVO;
 import cn.lili.modules.base.service.VerificationSourceService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,13 +31,12 @@ import java.util.Random;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class VerificationServiceImpl implements VerificationService {
 
-
-    private final VerificationSourceService verificationSourceService;
-
-    private final Cache cache;
+    @Autowired
+    private VerificationSourceService verificationSourceService;
+    @Autowired
+    private Cache cache;
 
     /**
      * 创建校验

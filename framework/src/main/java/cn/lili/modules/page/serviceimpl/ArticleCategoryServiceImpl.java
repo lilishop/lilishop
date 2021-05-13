@@ -32,12 +32,13 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMapper, ArticleCategory> implements ArticleCategoryService {
 
     //缓存
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
     //文章
+    @Autowired
     private ArticleService articleService;
 
     @Override

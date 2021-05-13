@@ -20,7 +20,6 @@ import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,16 +40,16 @@ import java.io.InputStream;
 @RestController
 @Api(tags = "文件上传接口")
 @RequestMapping("/common/upload")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UploadController {
 
-    private final FileService fileService;
-
-    private final SettingService settingService;
-
-    private final FileManagerPlugin fileManagerPlugin;
-
-    private final Cache cache;
+    @Autowired
+    private FileService fileService;
+    @Autowired
+    private SettingService settingService;
+    @Autowired
+    private FileManagerPlugin fileManagerPlugin;
+    @Autowired
+    private Cache cache;
 
     @ApiOperation(value = "文件上传")
     @PostMapping(value = "/file")

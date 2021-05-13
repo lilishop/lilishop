@@ -31,10 +31,10 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,商品规格接口")
 @RequestMapping("/manager/goods/spec")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SpecificationManagerController {
 
-    private final SpecificationService specificationService;
+    @Autowired
+    private SpecificationService specificationService;
 
     @GetMapping(value = "/{id}")
     @ApiImplicitParam(name = "id", value = "商品规格ID", required = true, dataType = "String", paramType = "path")

@@ -25,10 +25,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Api(tags = "店铺端,商品评价管理接口")
 @RequestMapping("/store/memberEvaluation")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberEvaluationStoreController {
 
-    private final MemberEvaluationService memberEvaluationService;
+    @Autowired
+    private MemberEvaluationService memberEvaluationService;
 
     @ApiOperation(value = "分页获取会员评论列表")
     @GetMapping

@@ -22,10 +22,9 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConnectConfigServiceImpl extends ServiceImpl<ConnectConfigMapper, ConnectConfig> implements ConnectConfigService {
-
-    private final ConnectConfigMapper connectConfigMapper;
+    @Autowired
+    private ConnectConfigMapper connectConfigMapper;
 
     @Override
     public List<ConnectConfigForm> listForms() {

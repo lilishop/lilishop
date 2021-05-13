@@ -26,13 +26,13 @@ import java.util.List;
 @RestController
 @Api(tags = "买家端,浏览历史接口")
 @RequestMapping("/buyer/footprint")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FootprintController {
 
     /**
      * 会员足迹
      */
-    private final FootprintService footprintService;
+    @Autowired
+    private FootprintService footprintService;
 
     @ApiOperation(value = "分页获取")
     @GetMapping

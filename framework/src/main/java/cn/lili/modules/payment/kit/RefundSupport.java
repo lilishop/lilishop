@@ -10,7 +10,6 @@ import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,15 +25,16 @@ import java.util.Date;
  */
 @Component
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RefundSupport {
     //店铺流水
-    private final StoreFlowService storeFlowService;
+    @Autowired
+    private StoreFlowService storeFlowService;
     //售后
     @Autowired
     private AfterSaleService afterSaleService;
-
-    private final OrderService orderService;
+    //订单
+    @Autowired
+    private OrderService orderService;
 
     /**
      * 售后退款

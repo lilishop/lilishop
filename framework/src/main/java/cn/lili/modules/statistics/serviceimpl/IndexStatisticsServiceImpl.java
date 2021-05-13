@@ -13,6 +13,7 @@ import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.service.AfterSaleService;
 import cn.lili.modules.order.order.service.OrderComplaintService;
+import cn.lili.modules.order.trade.entity.enums.AfterSaleTypeEnum;
 import cn.lili.modules.promotion.service.SeckillService;
 import cn.lili.modules.statistics.mapper.StoreStatisticsDataMapper;
 import cn.lili.modules.statistics.model.dto.GoodsStatisticsQueryParam;
@@ -24,11 +25,9 @@ import cn.lili.modules.statistics.service.*;
 import cn.lili.modules.store.entity.enums.BillStatusEnum;
 import cn.lili.modules.store.service.BillService;
 import cn.lili.modules.store.service.StoreService;
-import cn.lili.modules.order.trade.entity.enums.AfterSaleTypeEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,61 +41,73 @@ import java.util.Map;
  * @date 2020/12/15 17:57
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class IndexStatisticsServiceImpl implements IndexStatisticsService {
 
     /**
      * 订单统计
      */
-    private final OrderStatisticsDataService orderStatisticsDataService;
+    @Autowired
+    private OrderStatisticsDataService orderStatisticsDataService;
     /**
      * 会员统计
      */
-    private final MemberStatisticsDataService memberStatisticsDataService;
+    @Autowired
+    private MemberStatisticsDataService memberStatisticsDataService;
     /**
      * 商品统计
      */
-    private final GoodsStatisticsDataService goodsStatisticsDataService;
+    @Autowired
+    private GoodsStatisticsDataService goodsStatisticsDataService;
     /**
      * 店铺统计
      */
-    private final StoreStatisticsDataMapper storeStatisticsDataMapper;
+    @Autowired
+    private StoreStatisticsDataMapper storeStatisticsDataMapper;
     /**
      * 商品
      */
-    private final GoodsService goodsService;
+    @Autowired
+    private GoodsService goodsService;
     /**
      * 店铺
      */
-    private final StoreService storeService;
+    @Autowired
+    private StoreService storeService;
     /**
      * 店铺
      */
-    private final MemberEvaluationService memberEvaluationService;
+    @Autowired
+    private MemberEvaluationService memberEvaluationService;
     /**
      * 售后
      */
-    private final AfterSaleService afterSaleService;
+    @Autowired
+    private AfterSaleService afterSaleService;
     /**
      * 投诉
      */
-    private final OrderComplaintService orderComplaintService;
+    @Autowired
+    private OrderComplaintService orderComplaintService;
     /**
      * 分销员提现
      */
-    private final DistributionCashService distributionCashService;
+    @Autowired
+    private DistributionCashService distributionCashService;
     /**
      * 平台PV统计
      */
-    private final PlatformViewDataService platformViewDataService;
+    @Autowired
+    private PlatformViewDataService platformViewDataService;
     /**
      * 结算单
      */
-    private final BillService billService;
+    @Autowired
+    private BillService billService;
     /**
      * 秒杀活动
      */
-    private final SeckillService seckillService;
+    @Autowired
+    private SeckillService seckillService;
 
     @Override
     public IndexNoticeVO indexNotice() {

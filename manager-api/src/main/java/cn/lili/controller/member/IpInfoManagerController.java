@@ -5,7 +5,6 @@ import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,10 +21,9 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @Api(tags = "管理端,IP接口")
 @RequestMapping("/manager/common/ip")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class IpInfoManagerController {
-
-    private final IpHelper ipHelper;
+    @Autowired
+    private IpHelper ipHelper;
 
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     @ApiOperation(value = "IP及天气相关信息")

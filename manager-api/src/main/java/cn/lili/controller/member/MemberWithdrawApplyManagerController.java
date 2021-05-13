@@ -12,10 +12,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 /**
@@ -28,10 +30,9 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags = "管理端,余额提现记录接口")
 @RequestMapping("/manager/members/withdraw-apply")
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberWithdrawApplyManagerController {
-
-    private final MemberWithdrawApplyService memberWithdrawApplyService;
+    @Autowired
+    private MemberWithdrawApplyService memberWithdrawApplyService;
 
 
     @ApiOperation(value = "分页获取提现记录")

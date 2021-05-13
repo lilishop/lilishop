@@ -28,13 +28,14 @@ import java.util.Objects;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint> implements FootprintService {
 
     //足迹数据层
-    private final FootprintMapper footprintMapper;
+    @Autowired
+    private FootprintMapper footprintMapper;
     //es商品业务层
-    private final EsGoodsSearchService esGoodsSearchService;
+    @Autowired
+    private EsGoodsSearchService esGoodsSearchService;
 
     @Override
     public FootPrint saveFootprint(FootPrint footPrint) {

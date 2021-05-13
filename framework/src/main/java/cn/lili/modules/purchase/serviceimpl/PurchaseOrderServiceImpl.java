@@ -30,10 +30,9 @@ import java.util.Map;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, PurchaseOrder> implements PurchaseOrderService {
-
-    private final PurchaseOrderItemService purchaseOrderItemService;
+    @Autowired
+    private PurchaseOrderItemService purchaseOrderItemService;
 
     @Override
     public PurchaseOrderVO addPurchaseOrder(PurchaseOrderVO purchaseOrderVO) {

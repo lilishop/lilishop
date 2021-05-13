@@ -24,12 +24,13 @@ import java.util.List;
  * @date 2021/3/15 5:30 下午
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreRatingExecute implements EveryDayExecute {
     //店铺
-    private final StoreService storeService;
+    @Autowired
+    private StoreService storeService;
     //会员评价
-    private final MemberEvaluationMapper memberEvaluationMapper;
+    @Autowired
+    private MemberEvaluationMapper memberEvaluationMapper;
 
 
     @Override

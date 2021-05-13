@@ -27,10 +27,9 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "管理端,物流公司接口")
 @RequestMapping("/manager/logistics")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LogisticsManagerController {
-
-    private final LogisticsService logisticsService;
+    @Autowired
+    private LogisticsService logisticsService;
 
     @ApiOperation(value = "通过id获取物流公司")
     @GetMapping(value = "/get/{id}")

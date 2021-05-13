@@ -3,7 +3,6 @@ package cn.lili.security;
 import cn.lili.common.cache.Cache;
 import cn.lili.common.security.CustomAccessDeniedHandler;
 import cn.lili.config.properties.IgnoredUrlsProperties;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -23,24 +22,25 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Slf4j
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ManagerSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     /**
      * 忽略验权配置
      */
-    private final IgnoredUrlsProperties ignoredUrlsProperties;
+    @Autowired
+    private IgnoredUrlsProperties ignoredUrlsProperties;
 
     /**
      * spring security -》 权限不足处理
      */
-    private final CustomAccessDeniedHandler accessDeniedHandler;
+    @Autowired
+    private CustomAccessDeniedHandler accessDeniedHandler;
 
-
-    private final Cache<String> cache;
-
-    private final CorsConfigurationSource corsConfigurationSource;
+    @Autowired
+    private Cache<String> cache;
+    @Autowired
+    private CorsConfigurationSource corsConfigurationSource;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

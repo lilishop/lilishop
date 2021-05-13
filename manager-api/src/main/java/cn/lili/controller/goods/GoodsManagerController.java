@@ -33,12 +33,13 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,商品管理接口")
 @RequestMapping("/manager/goods")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsManagerController {
     //商品
-    private final GoodsService goodsService;
+    @Autowired
+    private GoodsService goodsService;
     //规格商品
-    private final GoodsSkuService goodsSkuService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
 
     @ApiOperation(value = "分页获取")
     @GetMapping(value = "/list")

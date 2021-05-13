@@ -29,21 +29,27 @@ import java.util.List;
  * @date 2021/3/18 3:23 下午
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 public class PromotionEverydayExecute implements EveryDayExecute {
 
     //Mongo
-    private final MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
     //满额活动
-    private final FullDiscountService fullDiscountService;
+    @Autowired
+    private FullDiscountService fullDiscountService;
     //拼团
-    private final PintuanService pintuanService;
+    @Autowired
+    private PintuanService pintuanService;
     //优惠券
-    private final CouponService couponService;
+    @Autowired
+    private CouponService couponService;
     //会员优惠券
-    private final MemberCouponService memberCouponService;
+    @Autowired
+    private MemberCouponService memberCouponService;
     //促销商品
-    private final PromotionGoodsService promotionGoodsService;
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
 
 
     /**

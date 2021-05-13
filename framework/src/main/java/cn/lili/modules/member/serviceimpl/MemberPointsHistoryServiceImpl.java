@@ -20,10 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHistoryMapper, MemberPointsHistory> implements MemberPointsHistoryService {
 
-    private final MemberPointsHistoryMapper memberPointsHistoryMapper;
+    @Autowired
+    private MemberPointsHistoryMapper memberPointsHistoryMapper;
 
     @Override
     public MemberPointsHistoryVO getMemberPointsHistoryVO(String memberId) {

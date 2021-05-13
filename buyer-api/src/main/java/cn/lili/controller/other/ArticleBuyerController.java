@@ -31,18 +31,19 @@ import java.util.List;
 @RestController
 @Api(tags = "买家端,文章接口")
 @RequestMapping("/buyer/article")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ArticleBuyerController {
 
     /**
      * 文章
      */
-    private final ArticleService articleService;
+    @Autowired
+    private ArticleService articleService;
 
     /**
      * 文章分类
      */
-    private final ArticleCategoryService articleCategoryService;
+    @Autowired
+    private ArticleCategoryService articleCategoryService;
 
     @ApiOperation(value = "获取文章分类列表")
     @GetMapping(value = "/articleCategory/list")

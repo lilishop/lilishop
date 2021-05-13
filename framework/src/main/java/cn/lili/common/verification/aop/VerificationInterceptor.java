@@ -24,11 +24,10 @@ import java.lang.reflect.Method;
 @Aspect
 @Configuration
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class VerificationInterceptor {
 
-
-    private final VerificationService verificationService;
+    @Autowired
+    private VerificationService verificationService;
 
     @Before("@annotation(cn.lili.common.verification.aop.annotation.Verification)")
     public void interceptor(JoinPoint pjp) {

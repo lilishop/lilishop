@@ -26,13 +26,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "管理端,意见反馈接口")
 @RequestMapping("/manager/feedback")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FeedbackManagerController {
 
     /**
      * 意见反馈
      */
-    private final FeedbackService feedbackService;
+    @Autowired
+    private FeedbackService feedbackService;
 
     @ApiOperation(value = "查询意见反馈列表")
     @ApiImplicitParam(name = "parentId", value = "父id，顶级为0", required = true, dataType = "String", paramType = "path")

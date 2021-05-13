@@ -24,10 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreAddressServiceImpl extends ServiceImpl<StoreAddressMapper, StoreAddress> implements StoreAddressService {
 
-    private final StoreAddressMapper storeAddressMapper;
+    @Autowired
+    private StoreAddressMapper storeAddressMapper;
 
     @Override
     public IPage<StoreAddress> getStoreAddress(PageVO pageVo) {

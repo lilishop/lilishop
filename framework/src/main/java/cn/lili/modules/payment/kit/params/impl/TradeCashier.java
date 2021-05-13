@@ -9,15 +9,14 @@ import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.TradeService;
-import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
 import cn.lili.modules.payment.kit.dto.PayParam;
+import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
 import cn.lili.modules.payment.kit.enums.CashierEnum;
 import cn.lili.modules.payment.kit.params.CashierExecute;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
 import cn.lili.modules.system.entity.dto.BaseSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,15 +32,17 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TradeCashier implements CashierExecute {
 
     //交易
-    private final TradeService tradeService;
+    @Autowired
+    private TradeService tradeService;
     //订单
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
     //设置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
 
 
     @Override

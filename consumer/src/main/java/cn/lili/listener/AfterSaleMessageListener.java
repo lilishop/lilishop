@@ -4,7 +4,6 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.common.rocketmq.tags.AfterSaleTagsEnum;
 import cn.lili.event.AfterSaleStatusChangeEvent;
 import cn.lili.modules.order.order.entity.dos.AfterSale;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -22,12 +21,12 @@ import java.util.List;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.after-sale-topic}", consumerGroup = "${lili.data.rocketmq.after-sale-group}")
 public class AfterSaleMessageListener implements RocketMQListener<MessageExt> {
 
     //售后订单状态
-    private final List<AfterSaleStatusChangeEvent> afterSaleStatusChangeEvents;
+    @Autowired
+    private List<AfterSaleStatusChangeEvent> afterSaleStatusChangeEvents;
 
     @Override
     public void onMessage(MessageExt messageExt) {

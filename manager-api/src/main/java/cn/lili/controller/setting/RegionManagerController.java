@@ -27,10 +27,9 @@ import java.util.List;
 @Api(tags = "管理端,行政地区管理接口")
 @RequestMapping("/manager/region")
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RegionManagerController {
-
-    private final RegionService regionService;
+    @Autowired
+    private RegionService regionService;
 
     @PostMapping(value = "/sync")
     @ApiOperation(value = "同步高德行政地区数据")

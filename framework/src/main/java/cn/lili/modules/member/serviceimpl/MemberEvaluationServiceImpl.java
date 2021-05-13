@@ -59,23 +59,29 @@ import java.util.Map;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMapper, MemberEvaluation> implements MemberEvaluationService {
 
     //会员评价数据层
-    private final MemberEvaluationMapper memberEvaluationMapper;
+    @Autowired
+    private MemberEvaluationMapper memberEvaluationMapper;
     //订单
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
     //子订单
-    private final OrderItemService orderItemService;
+    @Autowired
+    private OrderItemService orderItemService;
     //会员
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
     //商品
-    private final GoodsSkuService goodsSkuService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
     //rocketMq
-    private final RocketMQTemplate rocketMQTemplate;
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
     //rocketMq配置
-    private final RocketmqCustomProperties rocketmqCustomProperties;
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Override
     public IPage<MemberEvaluation> queryByParams(EvaluationQueryParams queryParams) {

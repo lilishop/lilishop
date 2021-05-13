@@ -27,12 +27,11 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WechatAccessTokenUtil {
-
-    private final Cache cache;
-
-    private final SettingService settingService;
+    @Autowired
+    private Cache cache;
+    @Autowired
+    private SettingService settingService;
 
     /**
      * 获取某一平台等cgi token 用于业务调用，例如发送公众号消息

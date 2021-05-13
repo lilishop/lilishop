@@ -19,13 +19,14 @@ import java.util.List;
  * @date 2021/2/18 3:45 下午
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BillExecute implements EveryDayExecute {
 
     //结算单
-    private final BillService billService;
+    @Autowired
+    private BillService billService;
     //店铺详情
-    private final StoreDetailMapper storeDetailMapper;
+    @Autowired
+    private StoreDetailMapper storeDetailMapper;
 
     /**
      * 1.查询今日待结算的商家

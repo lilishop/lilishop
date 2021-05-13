@@ -10,7 +10,6 @@ import cn.lili.modules.order.order.service.ReceiptService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,10 +24,10 @@ import javax.validation.Valid;
 @RestController
 @Api(tags = "买家端,发票接口")
 @RequestMapping("/buyer/trade/receipt")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReceiptBuyerController {
 
-    private final ReceiptService receiptService;
+    @Autowired
+    private ReceiptService receiptService;
 
     @ApiOperation(value = "获取发票详情")
     @GetMapping("/{id}")

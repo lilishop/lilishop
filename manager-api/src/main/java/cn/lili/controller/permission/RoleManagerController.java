@@ -26,10 +26,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,角色管理接口")
 @RequestMapping("/manager/role")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RoleManagerController {
-
-    private final RoleService roleService;
+    @Autowired
+    private RoleService roleService;
 
     @PostMapping
     @ApiOperation(value = "添加")

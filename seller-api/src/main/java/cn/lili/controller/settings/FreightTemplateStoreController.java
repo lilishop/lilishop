@@ -25,10 +25,9 @@ import java.util.List;
 @RestController
 @Api(tags = "店铺端,运费模板接口")
 @RequestMapping("/store/freightTemplate")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FreightTemplateStoreController {
-
-    private final FreightTemplateService freightTemplateService;
+    @Autowired
+    private FreightTemplateService freightTemplateService;
 
     @ApiOperation(value = "商家运费模板列表")
     @GetMapping

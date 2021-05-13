@@ -1,6 +1,5 @@
 package cn.lili.common.security.context;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -15,13 +14,13 @@ import org.springframework.stereotype.Component;
  * @since 2020/11/14 20:30
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserContextInit implements ApplicationRunner {
 
     /**
      * 用户信息holder，认证信息的获取者
      */
-    private final AuthenticationHandler authenticationHandler;
+    @Autowired
+    private AuthenticationHandler authenticationHandler;
 
     /**
      * 在项目加载时指定认证信息获取者

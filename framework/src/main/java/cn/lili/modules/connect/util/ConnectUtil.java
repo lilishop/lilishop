@@ -42,19 +42,18 @@ import java.io.IOException;
  * 2020-11-25 21:16
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConnectUtil {
 
-
-    private final Cache cache;
-
-    private final ConnectService connectService;
-
-    private final SettingService settingService;
-
-    private final ApiProperties apiProperties;
-
-    private final DomainProperties domainProperties;
+    @Autowired
+    private Cache cache;
+    @Autowired
+    private ConnectService connectService;
+    @Autowired
+    private SettingService settingService;
+    @Autowired
+    private ApiProperties apiProperties;
+    @Autowired
+    private DomainProperties domainProperties;
 
 
     static String prefix = "/buyer/connect/callback/";

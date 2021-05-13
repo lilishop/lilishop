@@ -10,7 +10,6 @@ import cn.lili.modules.order.trade.service.WalletLogService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,10 +24,10 @@ import java.util.Date;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WalletLogServiceImpl extends ServiceImpl<WalletLogMapper, WalletLog> implements WalletLogService {
 
-    private final WalletLogMapper walletLogMapper;
+    @Autowired
+    private WalletLogMapper walletLogMapper;
 
     @Override
     public IPage<WalletLog> depositLogPage(PageVO page, DepositQueryVO depositQueryVO) {

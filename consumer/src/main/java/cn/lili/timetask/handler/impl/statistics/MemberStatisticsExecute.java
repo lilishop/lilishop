@@ -3,7 +3,6 @@ package cn.lili.timetask.handler.impl.statistics;
 import cn.lili.modules.statistics.model.dos.MemberStatisticsData;
 import cn.lili.modules.statistics.service.MemberStatisticsDataService;
 import cn.lili.timetask.handler.EveryDayExecute;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,11 +18,11 @@ import java.util.Date;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberStatisticsExecute implements EveryDayExecute {
 
     //会员统计
-    private final MemberStatisticsDataService memberStatisticsDataService;
+    @Autowired
+    private MemberStatisticsDataService memberStatisticsDataService;
 
     @Override
     public void execute() {

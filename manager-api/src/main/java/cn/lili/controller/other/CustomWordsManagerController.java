@@ -11,7 +11,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,13 +26,13 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "管理端,自定义分词接口")
 @RequestMapping("/manager/manager/custom-words")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CustomWordsManagerController {
 
     /**
      * 分词
      */
-    private final CustomWordsService customWordsService;
+    @Autowired
+    private CustomWordsService customWordsService;
 
     @ApiOperation(value = "添加自定义分词")
     @PostMapping

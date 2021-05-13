@@ -7,7 +7,6 @@ import cn.lili.modules.search.service.CustomWordsService;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.service.SettingService;
 import io.swagger.annotations.Api;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,17 +23,18 @@ import java.nio.charset.StandardCharsets;
 @RestController
 @Api(tags = "管理端,自定义分词接口")
 @RequestMapping("/manager/custom-words")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CustomWordsController {
 
     /**
      * 分词
      */
-    private final CustomWordsService customWordsService;
+    @Autowired
+    private CustomWordsService customWordsService;
     /**
      * 设置
      */
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
 
     @GetMapping
     public String getCustomWords(String secretKey) {

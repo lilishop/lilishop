@@ -10,7 +10,6 @@ import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
 import cn.lili.modules.payment.service.PaymentService;
 import cn.lili.modules.payment.service.RefundLogService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,11 +23,12 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BankTransferPlugin implements Payment {
     //退款日志
-    private final RefundLogService refundLogService;
+    @Autowired
+    private RefundLogService refundLogService;
     //支付日志
+    @Autowired
     private PaymentService paymentService;
 
     @Override
@@ -67,11 +67,6 @@ public class BankTransferPlugin implements Payment {
         //记录支付日志
         paymentService.adminPaySuccess(paymentSuccessParams);
         log.info("支付回调通知：线上支付：{}", payParam);
-    }
-
-    @Autowired
-    private void setPaymentService(PaymentService paymentService) {
-        this.paymentService = paymentService;
     }
 
 }

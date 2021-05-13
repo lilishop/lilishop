@@ -36,15 +36,17 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMapper, FreightTemplate> implements FreightTemplateService {
 
     //配送模板
-    private final FreightTemplateMapper freightTemplateMapper;
+    @Autowired
+    private FreightTemplateMapper freightTemplateMapper;
     //配送子模板
-    private final FreightTemplateChildService freightTemplateChildService;
+    @Autowired
+    private FreightTemplateChildService freightTemplateChildService;
     //缓存
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
 
 
     @Override

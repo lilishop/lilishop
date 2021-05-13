@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
  **/
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PointsGoodsCategoryServiceImpl extends ServiceImpl<PointsGoodsCategoryMapper, PointsGoodsCategory> implements PointsGoodsCategoryService {
 
     /**

@@ -37,12 +37,13 @@ import java.util.stream.Collectors;
  */
 @Service
 @Order(2)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SkuPromotionRender implements CartRenderStep {
     //促销计算
-    private final PromotionPriceService promotionPriceService;
+    @Autowired
+    private PromotionPriceService promotionPriceService;
     //促销商品
-    private final PromotionGoodsService promotionGoodsService;
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
 
     @Override
     public void render(TradeDTO tradeDTO) {

@@ -22,13 +22,14 @@ import org.springframework.stereotype.Service;
  * @date 2021-03-13 16:58
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PaymentExecute implements OrderStatusChangeEvent {
 
     //支付日志
-    private final PaymentService paymentService;
+    @Autowired
+    private PaymentService paymentService;
     //订单
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
 
     @Override
     public void orderChange(OrderMessage orderMessage) {

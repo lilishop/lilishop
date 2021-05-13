@@ -26,12 +26,12 @@ import java.util.Map;
  */
 @Order(5)
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CartPriceRender implements CartRenderStep {
 
 
     //商品分类
-    private final CategoryService categoryService;
+    @Autowired
+    private CategoryService categoryService;
 
     @Override
     public void render(TradeDTO tradeDTO) {

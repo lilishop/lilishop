@@ -9,7 +9,6 @@ import cn.lili.modules.permission.service.RoleService;
 import cn.lili.modules.permission.service.UserRoleService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,23 +23,14 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
 
     //部门角色
+    @Autowired
     private DepartmentRoleService departmentRoleService;
     //用户权限
+    @Autowired
     private UserRoleService userRoleService;
-
-    @Autowired
-    public void setDepartmentRoleService(DepartmentRoleService departmentRoleService) {
-        this.departmentRoleService = departmentRoleService;
-    }
-
-    @Autowired
-    public void setUserRoleService(UserRoleService userRoleService) {
-        this.userRoleService = userRoleService;
-    }
 
     @Override
     public List<Role> findByDefaultRole(Boolean defaultRole) {

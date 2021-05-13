@@ -25,10 +25,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "管理端,满额活动接口")
 @RequestMapping("/manager/promotion/fullDiscount")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FullDiscountManagerController {
-
-    private final FullDiscountService fullDiscountService;
+    @Autowired
+    private FullDiscountService fullDiscountService;
 
     @ApiOperation(value = "获取满优惠列表")
     @GetMapping

@@ -9,7 +9,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,13 +24,13 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "店铺端,商家登录接口 ")
 @RequestMapping("/store/login")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StorePassportController {
 
     /**
      * 会员
      */
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
 
 
     @ApiOperation(value = "登录接口")

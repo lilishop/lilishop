@@ -32,12 +32,13 @@ import java.util.List;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderCashier implements CashierExecute {
     //订单
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
     //设置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
 
     @Override
     public CashierEnum cashierEnum() {

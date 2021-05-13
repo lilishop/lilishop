@@ -23,10 +23,10 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class VerificationSourceServiceImpl extends ServiceImpl<VerificationSourceMapper, VerificationSource> implements VerificationSourceService {
 
-    private final Cache<VerificationVO> cache;
+    @Autowired
+    private Cache<VerificationVO> cache;
 
     @Override
     public VerificationVO initCache() {

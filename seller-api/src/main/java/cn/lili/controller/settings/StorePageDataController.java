@@ -29,10 +29,9 @@ import javax.validation.Valid;
 @RestController
 @Api(tags = "店铺端,页面接口")
 @RequestMapping("/store/pageData")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StorePageDataController {
-
-    private final PageDataService pageDataService;
+    @Autowired
+    private PageDataService pageDataService;
 
     @ApiOperation(value = "页面列表")
     @ApiImplicitParam(name = "pageClientType", value = "客户端类型", required = true, dataType = "String", paramType = "path")

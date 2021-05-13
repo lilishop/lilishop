@@ -27,10 +27,10 @@ import java.util.stream.Collectors;
  */
 @Service
 @Order(1)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FullDiscountRender implements CartRenderStep {
 
-    private final FullDiscountService fullDiscountService;
+    @Autowired
+    private FullDiscountService fullDiscountService;
 
     @Override
     public void render(TradeDTO tradeDTO) {

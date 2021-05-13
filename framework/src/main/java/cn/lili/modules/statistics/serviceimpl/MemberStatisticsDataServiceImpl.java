@@ -10,7 +10,6 @@ import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,13 +23,13 @@ import java.util.List;
  * @date 2020/12/9 18:33
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberStatisticsDataServiceImpl extends ServiceImpl<MemberStatisticsDataMapper, MemberStatisticsData> implements MemberStatisticsDataService {
 
     /**
      * 会员统计
      */
-    private final MemberStatisticsDataMapper memberStatisticsDataMapper;
+    @Autowired
+    private MemberStatisticsDataMapper memberStatisticsDataMapper;
 
     @Override
     public Integer getMemberCount() {

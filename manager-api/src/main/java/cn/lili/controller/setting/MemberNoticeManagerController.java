@@ -13,7 +13,6 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,10 +27,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,会员站内信管理API")
 @RequestMapping("/manager/member/notice")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberNoticeManagerController {
-
-    private final MemberNoticeService memberNoticeService;
+    @Autowired
+    private MemberNoticeService memberNoticeService;
 
     @ApiOperation(value = "获取详情")
     @GetMapping(value = "/{id}")

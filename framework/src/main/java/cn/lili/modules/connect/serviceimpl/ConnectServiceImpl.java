@@ -30,7 +30,6 @@ import cn.lili.modules.system.service.SettingService;
 import cn.lili.modules.system.utils.HttpUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,26 +52,20 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> implements ConnectService {
 
 
     @Autowired
     private SettingService settingService;
-
     @Autowired
     private MemberService memberService;
-
+    @Autowired
     private MemberTokenGenerate memberTokenGenerate;
-
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
 
     static boolean AUTO_REGION = true;
 
-    @Autowired
-    public void setMemberTokenGenerate(MemberTokenGenerate memberTokenGenerate) {
-        this.memberTokenGenerate = memberTokenGenerate;
-    }
 
     @Override
     public Token unionLoginCallback(String type, String unionid, String uuid, boolean longTerm) throws NoPermissionException {

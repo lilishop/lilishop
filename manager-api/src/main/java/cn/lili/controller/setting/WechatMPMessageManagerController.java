@@ -11,7 +11,6 @@ import cn.lili.modules.message.service.WechatMPMessageService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +25,9 @@ import java.util.List;
 @Api(tags = "微信小程序消息订阅接口")
 @RequestMapping("/manager/message/wechatMPMessage")
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WechatMPMessageManagerController {
-
-    private final WechatMPMessageService wechatMPMessageService;
+    @Autowired
+    private WechatMPMessageService wechatMPMessageService;
 
     @GetMapping(value = "/init")
     @ApiOperation(value = "初始化微信小程序消息订阅")

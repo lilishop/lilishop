@@ -30,18 +30,21 @@ import java.util.List;
  * @since 2020/12/9
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.notice-send-topic}", consumerGroup = "${lili.data.rocketmq.notice-send-group}")
 public class NoticeSendMessageListener implements RocketMQListener<MessageExt> {
 
     //会员
-    private final MemberMapper memberMapper;
+    @Autowired
+    private MemberMapper memberMapper;
     //短信
-    private final SmsUtil smsUtil;
+    @Autowired
+    private SmsUtil smsUtil;
     //店铺消息
-    private final StoreMessageService storeMessageService;
+    @Autowired
+    private StoreMessageService storeMessageService;
     //店铺
-    private final StoreService storeService;
+    @Autowired
+    private StoreService storeService;
 
     @Override
     public void onMessage(MessageExt messageExt) {

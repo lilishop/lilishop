@@ -22,11 +22,10 @@ import javax.servlet.http.HttpServletRequest;
 @Api(tags = "买家端,退款回调")
 @RestController
 @RequestMapping("/buyer/cashier/refund")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CashierRefundController {
 
-
-    private final RefundSupport refundSupport;
+    @Autowired
+    private RefundSupport refundSupport;
 
 
     @ApiOperation(value = "退款通知")

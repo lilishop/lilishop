@@ -47,7 +47,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,23 +62,29 @@ import java.util.Date;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale> implements AfterSaleService {
 
     //订单
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
     //订单货物
-    private final OrderItemService orderItemService;
+    @Autowired
+    private OrderItemService orderItemService;
     //物流公司
-    private final LogisticsService logisticsService;
+    @Autowired
+    private LogisticsService logisticsService;
     //店铺详情
-    private final StoreDetailService storeDetailService;
+    @Autowired
+    private StoreDetailService storeDetailService;
     //售后支持，这里用于退款操作
+    @Autowired
     private RefundSupport refundSupport;
     //RocketMQ配置
-    private final RocketmqCustomProperties rocketmqCustomProperties;
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
     //RocketMQ
-    private final RocketMQTemplate rocketMQTemplate;
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
 
     @Override
     public IPage<AfterSaleVO> getAfterSalePages(AfterSaleSearchParams saleSearchParams) {
@@ -481,11 +486,6 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         LambdaUpdateWrapper<AfterSale> queryWrapper = Wrappers.lambdaUpdate();
         queryWrapper.eq(AfterSale::getSn, afterSaleSn);
         this.update(afterSale, queryWrapper);
-    }
-
-    @Autowired
-    public void setRefundSupport(RefundSupport refundSupport) {
-        this.refundSupport = refundSupport;
     }
 
     /**

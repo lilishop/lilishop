@@ -12,7 +12,6 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -28,20 +27,25 @@ import java.util.List;
  * @date 2020-07-03 11:20
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StockUpdateExecute implements OrderStatusChangeEvent {
 
     //Redis
-    private final StringRedisTemplate stringRedisTemplate;
-    private final DefaultRedisScript<Boolean> quantityScript;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private DefaultRedisScript<Boolean> quantityScript;
     //订单
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
     //规格商品
-    private final GoodsSkuService goodsSkuService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
     //促销商品
-    private final PromotionGoodsService promotionGoodsService;
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
     //缓存
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
 
     @Override
     public void orderChange(OrderMessage orderMessage) {

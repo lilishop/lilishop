@@ -19,12 +19,12 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Order(6)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DistributionPriceRender implements CartRenderStep {
     /**
      * 缓存
      */
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
 
     @Override
     public void render(TradeDTO tradeDTO) {

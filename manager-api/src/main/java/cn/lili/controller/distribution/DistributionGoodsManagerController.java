@@ -24,10 +24,10 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,分销商品管理接口")
 @RequestMapping("/manager/distribution/goods")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DistributionGoodsManagerController {
 
-    private final DistributionGoodsService distributionGoodsService;
+    @Autowired
+    private DistributionGoodsService distributionGoodsService;
 
     @GetMapping(value = "/getByPage")
     @ApiOperation(value = "分页获取")

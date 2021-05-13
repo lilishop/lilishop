@@ -23,10 +23,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,角色菜单接口")
 @RequestMapping("/manager/roleMenu")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RoleMenuManagerController {
-
-    private final RoleMenuService roleMenuService;
+    @Autowired
+    private RoleMenuService roleMenuService;
 
     @GetMapping(value = "/{roleId}")
     @ApiOperation(value = "查看某角色拥有到菜单")

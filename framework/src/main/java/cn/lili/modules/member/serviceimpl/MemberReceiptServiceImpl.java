@@ -33,10 +33,9 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberReceiptServiceImpl extends ServiceImpl<MemberReceiptMapper, MemberReceipt> implements MemberReceiptService {
-
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
 
     @Override
     public IPage<MemberReceipt> getPage(MemberReceiptVO memberReceiptVO, PageVO pageVO) {

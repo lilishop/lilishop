@@ -30,12 +30,11 @@ import java.util.List;
 @Api(tags = "店铺端,商品分类规格接口")
 @RequestMapping("/store/goods/category/spec")
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategorySpecificationStoreController {
-
-    private final CategorySpecificationService categorySpecificationService;
-
-    private final SpecificationService specificationService;
+    @Autowired
+    private CategorySpecificationService categorySpecificationService;
+    @Autowired
+    private SpecificationService specificationService;
 
 
     @ApiOperation(value = "查询某分类下绑定的规格信息")

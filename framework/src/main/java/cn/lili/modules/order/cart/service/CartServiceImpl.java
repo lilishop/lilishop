@@ -35,7 +35,6 @@ import cn.lili.modules.store.entity.dos.FreightTemplateChild;
 import cn.lili.modules.store.entity.vos.FreightTemplateVO;
 import cn.lili.modules.store.service.FreightTemplateService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,25 +52,33 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CartServiceImpl implements CartService {
 
     static String errorMessage = "购物车异常，请稍后重试";
+
     //缓存
-    private final Cache<Object> cache;
+    @Autowired
+    private Cache<Object> cache;
     //会员优惠券
-    private final MemberCouponService memberCouponService;
+    @Autowired
+    private MemberCouponService memberCouponService;
     //规格商品
-    private final GoodsSkuService goodsSkuService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
     //促销商品
-    private final PromotionGoodsService promotionGoodsService;
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
     //会员地址
-    private final MemberAddressService memberAddressService;
+    @Autowired
+    private MemberAddressService memberAddressService;
     //ES商品
-    private final EsGoodsSearchService esGoodsSearchService;
+    @Autowired
+    private EsGoodsSearchService esGoodsSearchService;
     //运费模板
-    private final FreightTemplateService freightTemplateService;
+    @Autowired
+    private FreightTemplateService freightTemplateService;
     //交易
+    @Autowired
     private TradeBuilder tradeBuilder;
 
     @Override

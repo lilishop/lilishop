@@ -27,12 +27,13 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RechargeCashier implements CashierExecute {
     //余额
-    private final RechargeService rechargeService;
+    @Autowired
+    private RechargeService rechargeService;
     //设置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
 
 
     @Override

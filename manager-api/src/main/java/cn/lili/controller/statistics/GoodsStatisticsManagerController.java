@@ -25,10 +25,9 @@ import java.util.List;
 @Api(tags = "管理端,商品统计接口")
 @RestController
 @RequestMapping("/manager/statistics/goods")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsStatisticsManagerController {
-
-    private final GoodsStatisticsDataService goodsStatisticsDataService;
+    @Autowired
+    private GoodsStatisticsDataService goodsStatisticsDataService;
 
     @ApiOperation(value = "获取统计列表,排行前一百的数据")
     @GetMapping

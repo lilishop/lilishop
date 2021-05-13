@@ -11,7 +11,6 @@ import cn.lili.modules.message.service.WechatMPMessageService;
 import cn.lili.modules.message.util.WechatMpCodeUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -29,14 +28,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/buyer/mini-program")
 @Api(tags = "买家端,小程序登录接口")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MiniProgramBuyerController {
 
-    public final ConnectService connectService;
-    public final WechatMpCodeUtil wechatMpCodeUtil;
-
-    public final WechatMPMessageService wechatMPMessageService;
-    public final ShortLinkService shortLinkService;
+    @Autowired
+    public ConnectService connectService;
+    @Autowired
+    public WechatMpCodeUtil wechatMpCodeUtil;
+    @Autowired
+    public WechatMPMessageService wechatMPMessageService;
+    @Autowired
+    public ShortLinkService shortLinkService;
 
     @GetMapping("/auto-login")
     @ApiOperation(value = "小程序自动登录")

@@ -14,7 +14,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,10 +29,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,会员接口")
 @RequestMapping("/manager/member")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberManagerController {
-
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
 
     @ApiOperation(value = "会员分页列表")
     @GetMapping

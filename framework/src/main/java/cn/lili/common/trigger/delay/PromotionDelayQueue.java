@@ -4,8 +4,6 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.common.delayqueue.AbstractDelayQueueMachineFactory;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
 import cn.lili.common.trigger.model.TimeTriggerMsg;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,10 +16,9 @@ import org.springframework.stereotype.Component;
  * @since 1
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PromotionDelayQueue extends AbstractDelayQueueMachineFactory {
 
-    private final TimeTrigger timeTrigger;
+    private TimeTrigger timeTrigger;
 
     @Override
     public void invoke(String jobId) {

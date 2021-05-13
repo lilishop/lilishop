@@ -31,10 +31,9 @@ import java.util.List;
 @RestController
 @Api(tags = "店铺端,规格管理接口")
 @RequestMapping("/store/goods/spec")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SpecificationStoreController {
-
-    private final SpecificationService specificationService;
+    @Autowired
+    private SpecificationService specificationService;
 
 
     @GetMapping(value = "/page")

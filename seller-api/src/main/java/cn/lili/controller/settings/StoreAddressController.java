@@ -28,13 +28,13 @@ import javax.validation.Valid;
 @RestController
 @Api(tags = "店铺端,商家地址（自提点）接口")
 @RequestMapping("/store/storeAddress")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreAddressController {
 
     /**
      * 店铺自提点
      */
-    private final StoreAddressService storeAddressService;
+    @Autowired
+    private StoreAddressService storeAddressService;
 
     @ApiOperation(value = "获取商家自提点分页")
     @GetMapping

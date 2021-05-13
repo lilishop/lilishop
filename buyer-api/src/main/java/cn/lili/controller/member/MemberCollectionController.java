@@ -24,17 +24,18 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "买家端,会员收藏接口")
 @RequestMapping("/buyer/member/collection")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberCollectionController {
 
     /**
      * 会员商品收藏
      */
-    private final GoodsCollectionService goodsCollectionService;
+    @Autowired
+    private GoodsCollectionService goodsCollectionService;
     /**
      * 会员店铺
      */
-    private final StoreCollectionService storeCollectionService;
+    @Autowired
+    private StoreCollectionService storeCollectionService;
 
     @ApiOperation(value = "查询会员收藏列表")
     @ApiImplicitParam(name = "type", value = "类型", dataType = "String", paramType = "path", example = "GOODS:商品,STORE:店铺")

@@ -35,7 +35,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -56,18 +55,23 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper, PromotionGoods> implements PromotionGoodsService {
 
     //Mongo
-    private final MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
     //Redis
-    private final StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
     //限时抢购申请
+    @Autowired
     private SeckillApplyService seckillApplyService;
     //规格商品
+    @Autowired
     private GoodsSkuService goodsSkuService;
     //积分商品
+    @Autowired
     private PointsGoodsService pointsGoodsService;
     //分销商品
     @Autowired
@@ -425,26 +429,6 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         promotionGoodsPage.setPages(goodsSkuByPage.getPages());
         promotionGoodsPage.setRecords(promotionGoodsList);
         return promotionGoodsPage;
-    }
-
-    @Autowired
-    public void setGoodsSkuService(GoodsSkuService goodsSkuService) {
-        this.goodsSkuService = goodsSkuService;
-    }
-
-    @Autowired
-    public void setPointsGoodsService(PointsGoodsService pointsGoodsService) {
-        this.pointsGoodsService = pointsGoodsService;
-    }
-
-    @Autowired
-    public void setSeckillApplyService(SeckillApplyService seckillApplyService) {
-        this.seckillApplyService = seckillApplyService;
-    }
-
-    @Autowired
-    public void setDistributionGoodsService(DistributionGoodsService distributionGoodsService) {
-        this.distributionGoodsService = distributionGoodsService;
     }
 
 }

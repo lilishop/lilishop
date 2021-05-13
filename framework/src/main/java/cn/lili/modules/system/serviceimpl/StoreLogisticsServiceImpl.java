@@ -8,7 +8,6 @@ import cn.lili.modules.system.service.StoreLogisticsService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +22,11 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 public class StoreLogisticsServiceImpl extends ServiceImpl<StoreLogisticsMapper, StoreLogistics> implements StoreLogisticsService {
 
-    private final StoreLogisticsMapper storeLogisticsMapper;
+    @Autowired
+    private StoreLogisticsMapper storeLogisticsMapper;
 
     @Override
     public List<StoreLogisticsVO> getStoreLogistics() {

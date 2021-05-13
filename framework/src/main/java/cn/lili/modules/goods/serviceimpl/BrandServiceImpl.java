@@ -31,10 +31,11 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements BrandService {
+
     //分类品牌绑定
-    private final CategoryBrandService categoryBrandService;
+    @Autowired
+    private CategoryBrandService categoryBrandService;
 
     @Override
     public IPage<Brand> getBrandsByPage(BrandPageDTO page) {

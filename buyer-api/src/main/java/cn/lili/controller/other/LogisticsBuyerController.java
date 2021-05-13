@@ -23,10 +23,10 @@ import java.util.List;
 @RestController
 @Api(tags = "买家端,物流公司接口")
 @RequestMapping("/buyer/logistics")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LogisticsBuyerController {
 
-    private final LogisticsService logisticsService;
+    @Autowired
+    private LogisticsService logisticsService;
 
 
     @ApiOperation(value = "分页获取物流公司")

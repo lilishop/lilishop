@@ -33,13 +33,13 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "买家端,订单接口")
 @RequestMapping("/buyer/orders")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderBuyerController {
 
     /**
      * 订单
      */
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
 
     @ApiOperation(value = "查询会员订单列表")
     @GetMapping

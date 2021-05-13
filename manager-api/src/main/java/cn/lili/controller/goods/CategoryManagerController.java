@@ -31,18 +31,19 @@ import java.util.List;
 @Api(tags = "管理端,商品分类接口")
 @RequestMapping("/manager/goods/category")
 @CacheConfig(cacheNames = "category")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategoryManagerController {
 
     /**
      * 分类
      */
-    private final CategoryService categoryService;
+    @Autowired
+    private CategoryService categoryService;
 
     /**
      * 商品
      */
-    private final GoodsService goodsService;
+    @Autowired
+    private GoodsService goodsService;
 
     @ApiOperation(value = "查询某分类下的全部子分类列表")
     @ApiImplicitParam(name = "parentId", value = "父id，顶级为0", required = true, dataType = "String", paramType = "path")

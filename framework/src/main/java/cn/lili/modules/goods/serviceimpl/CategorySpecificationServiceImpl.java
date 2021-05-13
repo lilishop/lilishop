@@ -22,10 +22,9 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategorySpecificationServiceImpl extends ServiceImpl<CategorySpecificationMapper, CategorySpecification> implements CategorySpecificationService {
-
-    private final CategorySpecificationMapper categorySpecificationMapper;
+    @Autowired
+    private CategorySpecificationMapper categorySpecificationMapper;
 
     @Override
     public List<CategorySpecificationVO> getCategorySpecList(String categoryId) {

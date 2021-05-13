@@ -26,15 +26,14 @@ import java.util.List;
 @Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     private List<CashierExecute> cashierExecutes;
     @Autowired
     private CashierSupport cashierSupport;
-
-    private final OrderMapper orderMapper;
+    @Autowired
+    private OrderMapper orderMapper;
 
     @Override
     public void success(PaymentSuccessParams paymentSuccessParams) {

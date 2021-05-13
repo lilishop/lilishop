@@ -38,7 +38,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
@@ -59,22 +58,28 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> implements PintuanService {
 
     //延时任务
-    private final TimeTrigger timeTrigger;
+    @Autowired
+    private TimeTrigger timeTrigger;
     //Mongo
-    private final MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
     //促销商品
-    private final PromotionGoodsService promotionGoodsService;
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
     //规格商品
-    private final GoodsSkuService goodsSkuService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
     //会员
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
     //Rocketmq
-    private final RocketmqCustomProperties rocketmqCustomProperties;
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
     //订单
+    @Autowired
     private OrderService orderService;
 
     @Override
@@ -514,8 +519,4 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
         }
     }
 
-    @Autowired
-    public void setOrderService(OrderService orderService) {
-        this.orderService = orderService;
-    }
 }

@@ -30,18 +30,19 @@ import javax.validation.constraints.NotNull;
 @RestController
 @RequestMapping("/store/orders")
 @Api(tags = "店铺端,订单接口")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderStoreController {
 
     /**
      * 订单
      */
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
 
     /**
      * 订单价格
      */
-    private final OrderPriceService orderPriceService;
+    @Autowired
+    private OrderPriceService orderPriceService;
 
     @ApiOperation(value = "查询订单列表")
     @GetMapping

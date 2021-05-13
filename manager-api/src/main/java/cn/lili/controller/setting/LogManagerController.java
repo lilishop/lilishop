@@ -28,10 +28,9 @@ import java.util.List;
 @RestController
 @Api(tags = "日志管理接口")
 @RequestMapping("/manager/log")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LogManagerController {
-
-    private final SystemLogService systemLogService;
+    @Autowired
+    private SystemLogService systemLogService;
 
     @GetMapping(value = "/getAllByPage")
     @ApiOperation(value = "分页获取全部")

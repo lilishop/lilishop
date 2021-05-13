@@ -9,7 +9,6 @@ import cn.lili.modules.page.service.ArticleCategoryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,13 +24,13 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,文章分类管理接口")
 @RequestMapping("/manager/article-category")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ArticleCategoryManagerController {
 
     /**
      * 文章分类
      */
-    private final ArticleCategoryService articleCategoryService;
+    @Autowired
+    private ArticleCategoryService articleCategoryService;
 
     @ApiOperation(value = "查询分类列表")
     @GetMapping(value = "/all-children")

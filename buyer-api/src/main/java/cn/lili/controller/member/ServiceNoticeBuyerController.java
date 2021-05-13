@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,13 +26,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/service/notice")
 @Api(tags = "买家端,会员站服务消息接口")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ServiceNoticeBuyerController {
 
     /**
      * 服务消息
      */
-    private final ServiceNoticeService serviceNoticeService;
+    @Autowired
+    private ServiceNoticeService serviceNoticeService;
 
     @ApiOperation(value = "获取消息详情")
     @ApiImplicitParam(name = "id", value = "商品ID", required = true, dataType = "Long", paramType = "path")

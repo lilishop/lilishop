@@ -9,7 +9,6 @@ import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,10 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "店铺端,管理员接口")
 @RequestMapping("/store/user")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreUserController {
-
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
 
 
     @GetMapping(value = "/info")

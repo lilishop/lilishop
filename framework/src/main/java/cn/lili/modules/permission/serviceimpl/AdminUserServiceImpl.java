@@ -22,7 +22,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,17 +40,16 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser> implements AdminUserService {
-
+    @Autowired
     private UserRoleService userRoleService;
-
+    @Autowired
     private RoleService roleService;
-
+    @Autowired
     private DepartmentService departmentService;
-
+    @Autowired
     private MenuService menuService;
-
+    @Autowired
     private ManagerTokenGenerate managerTokenGenerate;
 
     @Override
@@ -235,26 +233,4 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
         roles.forEach(id -> userRoles.add(new UserRole(userId, id)));
         userRoleService.updateUserRole(userId, userRoles);
     }
-
-
-    @Autowired
-    public void setUserRoleService(UserRoleService userRoleService) {
-        this.userRoleService = userRoleService;
-    }
-
-    @Autowired
-    public void setRoleService(RoleService roleService) {
-        this.roleService = roleService;
-    }
-
-    @Autowired
-    public void setDepartmentService(DepartmentService departmentService) {
-        this.departmentService = departmentService;
-    }
-
-    @Autowired
-    public void setMenuService(MenuService menuService) {
-        this.menuService = menuService;
-    }
-
 }

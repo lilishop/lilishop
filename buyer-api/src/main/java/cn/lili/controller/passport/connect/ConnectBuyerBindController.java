@@ -23,10 +23,10 @@ import java.util.List;
 @RestController
 @Api(tags = "买家端,app/小程序 联合登录")
 @RequestMapping("/buyer/connect/bind")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConnectBuyerBindController {
 
-    private final ConnectService connectService;
+    @Autowired
+    private ConnectService connectService;
 
     @ApiOperation(value = "unionID 绑定")
     @ApiImplicitParams({

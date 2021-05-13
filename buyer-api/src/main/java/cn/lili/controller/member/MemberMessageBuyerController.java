@@ -24,13 +24,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Api(tags = "买家端,会员站内消息接口")
 @RequestMapping("/buyer/member/message")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberMessageBuyerController {
 
     /**
      * 会员站内消息
      */
-    private final MemberMessageService memberMessageService;
+    @Autowired
+    private MemberMessageService memberMessageService;
 
     @ApiOperation(value = "分页获取会员站内消息")
     @GetMapping

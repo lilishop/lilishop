@@ -9,7 +9,6 @@ import cn.lili.config.context.ThreadContextHolder;
 import cn.lili.modules.base.entity.enums.ClientTypeEnum;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,15 +22,13 @@ import java.util.Date;
  * @Description:
  * @since 2020/11/16 10:50
  */
-
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberTokenGenerate extends AbstractTokenGenerate {
 
-
+    @Autowired
     private MemberService memberService;
-
-    private final TokenUtil tokenUtil;
+    @Autowired
+    private TokenUtil tokenUtil;
 
     @Override
     public Token createToken(String username, Boolean longTerm) {
@@ -66,9 +63,4 @@ public class MemberTokenGenerate extends AbstractTokenGenerate {
         return tokenUtil.refreshToken(refreshToken, UserEnums.MEMBER);
     }
 
-
-    @Autowired
-    public void setMemberService(MemberService memberService) {
-        this.memberService = memberService;
-    }
 }

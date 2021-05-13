@@ -29,10 +29,9 @@ import java.util.Map;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> implements SmsSignService {
-
-    private final AliSmsUtil aliSmsUtil;
+    @Autowired
+    private AliSmsUtil aliSmsUtil;
 
     @Override
     public void addSmsSign(SmsSign smsSign) {

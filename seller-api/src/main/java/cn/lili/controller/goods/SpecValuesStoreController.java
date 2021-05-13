@@ -11,7 +11,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,10 +26,9 @@ import java.util.List;
 @RestController
 @Api(tags = "店铺端,规格项管理接口")
 @RequestMapping("/store/goods/spec-values")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SpecValuesStoreController {
-
-    private final SpecValuesService specValuesService;
+    @Autowired
+    private SpecValuesService specValuesService;
 
     @GetMapping(value = "/values/{id}")
     @ApiImplicitParam(name = "id", value = "规格项ID", required = true, dataType = "String", paramType = "path")

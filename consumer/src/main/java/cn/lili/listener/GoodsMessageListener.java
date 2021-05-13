@@ -36,24 +36,30 @@ import java.util.List;
  **/
 @Component
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.goods-topic}", consumerGroup = "${lili.data.rocketmq.goods-group}")
 public class GoodsMessageListener implements RocketMQListener<MessageExt> {
 
     //ES商品
-    private final EsGoodsIndexService goodsIndexService;
+    @Autowired
+    private EsGoodsIndexService goodsIndexService;
     //店铺
-    private final StoreService storeService;
+    @Autowired
+    private StoreService storeService;
     //商品
-    private final GoodsService goodsService;
+    @Autowired
+    private GoodsService goodsService;
     //商品
-    private final GoodsSkuService goodsSkuService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
     //用户足迹
-    private final FootprintService footprintService;
+    @Autowired
+    private FootprintService footprintService;
     //商品收藏
-    private final GoodsCollectionService goodsCollectionService;
+    @Autowired
+    private GoodsCollectionService goodsCollectionService;
     //商品评价
-    private final List<GoodsCommentCompleteEvent> goodsCommentCompleteEvents;
+    @Autowired
+    private List<GoodsCommentCompleteEvent> goodsCommentCompleteEvents;
     @Override
     public void onMessage(MessageExt messageExt) {
 

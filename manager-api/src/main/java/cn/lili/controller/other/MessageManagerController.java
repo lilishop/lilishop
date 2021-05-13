@@ -24,10 +24,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Api(tags = "管理端,消息发送管理接口")
 @RequestMapping("/manager/message")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MessageManagerController {
-
-    private final MessageService messageService;
+    @Autowired
+    private MessageService messageService;
 
 
     @GetMapping

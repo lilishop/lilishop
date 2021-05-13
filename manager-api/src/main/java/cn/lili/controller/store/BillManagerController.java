@@ -29,10 +29,9 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "管理端,商家结算单接口")
 @RequestMapping("/manager/store/bill")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BillManagerController {
-
-    private final BillService billService;
+    @Autowired
+    private BillService billService;
 
     @ApiOperation(value = "通过id获取结算单")
     @ApiImplicitParam(name = "id", value = "结算单ID", required = true, paramType = "path")

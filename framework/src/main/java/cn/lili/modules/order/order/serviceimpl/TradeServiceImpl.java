@@ -22,7 +22,6 @@ import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,23 +40,29 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements TradeService {
 
     //缓存
-    private final Cache<Object> cache;
+    @Autowired
+    private Cache<Object> cache;
     //订单
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
     //会员
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
     //优惠券
-    private final CouponService couponService;
+    @Autowired
+    private CouponService couponService;
     //会员优惠券
-    private final MemberCouponService memberCouponService;
+    @Autowired
+    private MemberCouponService memberCouponService;
     //RocketMQ
-    private final RocketMQTemplate rocketMQTemplate;
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
     //RocketMQ 配置
-    private final RocketmqCustomProperties rocketmqCustomProperties;
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
 
 
     @Override

@@ -33,13 +33,13 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,品牌接口")
 @RequestMapping("/manager/goods/brand")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BrandManagerController {
 
     /**
      * 品牌
      */
-    private final BrandService brandService;
+    @Autowired
+    private BrandService brandService;
 
     @ApiOperation(value = "通过id获取")
     @ApiImplicitParam(name = "id", value = "品牌ID", required = true, dataType = "String", paramType = "path")

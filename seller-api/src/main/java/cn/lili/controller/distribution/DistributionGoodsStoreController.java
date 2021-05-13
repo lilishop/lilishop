@@ -29,18 +29,19 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "店铺端,分销商品接口")
 @RequestMapping("/store/distributionGoods")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DistributionGoodsStoreController {
 
     /**
      * 分销商品
      */
-    private final DistributionGoodsService distributionGoodsService;
+    @Autowired
+    private DistributionGoodsService distributionGoodsService;
 
     /**
      * 已选择分销商品
      */
-    private final DistributionSelectedGoodsService distributionSelectedGoodsService;
+    @Autowired
+    private DistributionSelectedGoodsService distributionSelectedGoodsService;
 
     @ApiOperation(value = "获取分销商商品列表")
     @GetMapping

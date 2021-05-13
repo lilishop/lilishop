@@ -37,12 +37,12 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, MemberCoupon> implements MemberCouponService {
 
     /**
      * 优惠券
      */
+    @Autowired
     private CouponService couponService;
 
     @Override
@@ -210,8 +210,4 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         this.update(updateWrapper);
     }
 
-    @Autowired
-    public void setCouponService(CouponService couponService) {
-        this.couponService = couponService;
-    }
 }

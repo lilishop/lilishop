@@ -18,7 +18,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +34,12 @@ import java.util.Map;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMapper, WechatMPMessage> implements WechatMPMessageService {
 
-    private final WechatMPMessageMapper wechatMPMessageMapper;
-    private final WechatAccessTokenUtil wechatAccessTokenUtil;
+public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMapper, WechatMPMessage> implements WechatMPMessageService {
+    @Autowired
+    private WechatMPMessageMapper wechatMPMessageMapper;
+    @Autowired
+    private WechatAccessTokenUtil wechatAccessTokenUtil;
 
     //get 获取所有的模版
     private final String allMsgTpl = "https://api.weixin.qq.com/wxaapi/newtmpl/gettemplate?access_token=";

@@ -27,13 +27,13 @@ import javax.validation.constraints.NotNull;
 @RestController
 @RequestMapping("/manager/afterSale")
 @Api(tags = "管理端,售后接口")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AfterSaleManagerController {
 
     /**
      * 售后
      */
-    private final AfterSaleService afterSaleService;
+    @Autowired
+    private AfterSaleService afterSaleService;
 
     @ApiOperation(value = "分页获取售后服务")
     @GetMapping(value = "/page")

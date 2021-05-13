@@ -29,18 +29,19 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Api(tags = "店铺端,交易投诉接口")
 @RequestMapping("/store/complain")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderComplaintStoreController {
 
     /**
      * 交易投诉
      */
-    private final OrderComplaintService orderComplaintService;
+    @Autowired
+    private OrderComplaintService orderComplaintService;
 
     /**
      * 投诉沟通
      */
-    private final OrderComplaintCommunicationService orderComplaintCommunicationService;
+    @Autowired
+    private OrderComplaintCommunicationService orderComplaintCommunicationService;
 
     @ApiOperation(value = "通过id获取")
     @ApiImplicitParam(name = "id", value = "投诉单ID", required = true, paramType = "path")

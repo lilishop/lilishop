@@ -8,7 +8,6 @@ import cn.lili.modules.goods.service.ParametersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,10 +22,10 @@ import javax.validation.Valid;
 @RestController
 @Api(tags = "管理端,分类绑定参数组管理接口")
 @RequestMapping("/manager/goods/parameters")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ParameterManagerController {
 
-    private final ParametersService parametersService;
+    @Autowired
+    private ParametersService parametersService;
 
     @ApiOperation(value = "添加参数")
     @PostMapping

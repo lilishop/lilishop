@@ -12,7 +12,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,10 +27,10 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,敏感词管理接口")
 @RequestMapping("/manager/sensitiveWords")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SensitiveWordsManagerController {
 
-    private final SensitiveWordsService sensitiveWordsService;
+    @Autowired
+    private SensitiveWordsService sensitiveWordsService;
 
     @ApiOperation(value = "通过id获取")
     @ApiImplicitParam(name = "id", value = "敏感词ID", required = true, dataType = "String", paramType = "path")

@@ -10,7 +10,6 @@ import cn.lili.common.utils.ThreadPoolUtil;
 import cn.lili.modules.base.entity.systemlog.SystemLogVO;
 import cn.lili.modules.connect.util.IpUtils;
 import cn.lili.modules.permission.service.SystemLogService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -35,7 +34,6 @@ import java.util.Map;
 @Aspect
 @Component
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SystemLogAspect {
 
     /**
@@ -43,12 +41,12 @@ public class SystemLogAspect {
      */
     private static final ThreadLocal<Date> beginTimeThreadLocal = new NamedThreadLocal<>("SYSTEM-LOG");
 
-
-    private final SystemLogService systemLogService;
-
-    private final HttpServletRequest request;
-
-    private final IpHelper ipHelper;
+    @Autowired
+    private SystemLogService systemLogService;
+    @Autowired
+    private HttpServletRequest request;
+    @Autowired
+    private IpHelper ipHelper;
 
     /**
      * Controller层切点,注解方式
@@ -129,9 +127,10 @@ public class SystemLogAspect {
      * 保存日志
      */
     private static class SaveSystemLogThread implements Runnable {
-
-        private final SystemLogVO systemLogVO;
-        private final SystemLogService systemLogService;
+        @Autowired
+        private SystemLogVO systemLogVO;
+        @Autowired
+        private SystemLogService systemLogService;
 
         public SaveSystemLogThread(SystemLogVO systemLogVO, SystemLogService systemLogService) {
             this.systemLogVO = systemLogVO;

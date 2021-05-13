@@ -27,10 +27,10 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "店铺端,售后管理接口")
 @RequestMapping("/store/afterSale")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AfterSaleStoreController {
 
-    private final AfterSaleService afterSaleService;
+    @Autowired
+    private AfterSaleService afterSaleService;
 
     @ApiOperation(value = "查看售后服务详情")
     @ApiImplicitParam(name = "sn", value = "售后单号", required = true, paramType = "path")

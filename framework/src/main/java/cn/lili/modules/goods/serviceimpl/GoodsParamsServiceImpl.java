@@ -31,10 +31,10 @@ import java.util.Map;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsParamsServiceImpl extends ServiceImpl<GoodsParamsMapper, GoodsParams> implements GoodsParamsService {
     //分类-参数绑定
-    private final CategoryParameterGroupService categoryParameterGroupService;
+    @Autowired
+    private CategoryParameterGroupService categoryParameterGroupService;
 
     @Override
     public void addParams(List<GoodsParams> paramList, String goodsId) {

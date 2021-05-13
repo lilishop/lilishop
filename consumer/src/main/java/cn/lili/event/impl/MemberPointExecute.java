@@ -23,13 +23,15 @@ import org.springframework.stereotype.Service;
  * @date 2020-07-03 11:20
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentCompleteEvent {
 
     //配置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
     //会员
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
 
     @Override
     public void memberRegister(Member member) {

@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 public class ${entity.className}ServiceImpl extends ServiceImpl<${entity.className}Mapper, ${entity.className}> implements ${entity.className}Service {
 
     private final ${entity.className}Mapper ${entity.classNameLowerCase}Mapper;

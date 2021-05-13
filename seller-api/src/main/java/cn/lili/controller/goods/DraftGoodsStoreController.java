@@ -27,10 +27,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Api(tags = "店铺端,草稿商品接口")
 @RequestMapping("/store/draft/goods")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DraftGoodsStoreController {
-
-    private final DraftGoodsService draftGoodsService;
+    @Autowired
+    private DraftGoodsService draftGoodsService;
 
 
     @ApiOperation(value = "分页获取草稿商品列表")

@@ -17,12 +17,12 @@ import org.springframework.stereotype.Component;
  * @since 2020/12/9
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.notice-topic}", consumerGroup = "${lili.data.rocketmq.notice-group}")
 public class NoticeMessageListener implements RocketMQListener<MessageExt> {
 
     //站内信
-    private final NoticeMessageService noticeMessageService;
+    @Autowired
+    private NoticeMessageService noticeMessageService;
 
     @Override
     public void onMessage(MessageExt messageExt) {

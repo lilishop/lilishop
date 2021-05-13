@@ -28,10 +28,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "管理端,订单日志管理接口")
 @RequestMapping("/manager/orderLog")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderLogManagerController {
-
-    private final OrderLogService orderLogService;
+    @Autowired
+    private OrderLogService orderLogService;
 
     @GetMapping(value = "/get/{id}")
     @ApiOperation(value = "通过id获取")

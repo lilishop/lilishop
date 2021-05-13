@@ -9,7 +9,6 @@ import cn.lili.common.trigger.model.TimeTriggerMsg;
 import cn.lili.common.trigger.util.TimeTriggerUtil;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.StringUtils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,19 +22,14 @@ import org.springframework.stereotype.Component;
  **/
 @Component
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RocketmqTimerTrigger implements TimeTrigger {
-
-    private final RocketMQTemplate rocketMQTemplate;
-
-    private final Cache<Integer> cache;
-
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
+    @Autowired
+    private Cache<Integer> cache;
+    @Autowired
     private PromotionDelayQueue promotionDelayQueue;
 
-    @Autowired
-    public void setPromotionDelayQueue(PromotionDelayQueue promotionDelayQueue) {
-        this.promotionDelayQueue = promotionDelayQueue;
-    }
 
     @Override
     public void add(String executorName, Object param, Long triggerTime, String uniqueKey, String topic) {

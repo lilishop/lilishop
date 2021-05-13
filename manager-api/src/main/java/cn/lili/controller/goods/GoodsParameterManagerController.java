@@ -26,10 +26,10 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,商品关联参数管理接口")
 @RequestMapping("/manager/goods/parameters")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsParameterManagerController {
 
-    private final GoodsParamsService goodsParamsService;
+    @Autowired
+    private GoodsParamsService goodsParamsService;
 
     @ApiImplicitParams({
             @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "path", dataType = "String"),

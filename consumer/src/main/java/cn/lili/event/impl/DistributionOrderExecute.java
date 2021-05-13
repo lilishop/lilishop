@@ -12,7 +12,6 @@ import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.timetask.handler.EveryDayExecute;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,13 +22,14 @@ import org.springframework.stereotype.Service;
  * @date 2020-07-03 11:20
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DistributionOrderExecute implements OrderStatusChangeEvent, EveryDayExecute, AfterSaleStatusChangeEvent {
 
     //分销订单
-    private final DistributionOrderService distributionOrderService;
+    @Autowired
+    private DistributionOrderService distributionOrderService;
     //分销订单持久层
-    private final DistributionOrderMapper distributionOrderMapper;
+    @Autowired
+    private DistributionOrderMapper distributionOrderMapper;
 
 
     @Override

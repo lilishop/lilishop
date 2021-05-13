@@ -28,13 +28,13 @@ import java.util.List;
  * @date 2020/12/9 11:30
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsStatisticsDataServiceImpl extends ServiceImpl<GoodsStatisticsDataMapper, StoreFlow> implements GoodsStatisticsDataService {
 
     /**
      * 商品统计
      */
-    private final GoodsStatisticsDataMapper goodsStatisticsDataMapper;
+    @Autowired
+    private GoodsStatisticsDataMapper goodsStatisticsDataMapper;
 
     @Override
     public List<GoodsStatisticsDataVO> getGoodsStatisticsData(GoodsStatisticsQueryParam goodsStatisticsQueryParam, Integer num) {

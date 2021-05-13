@@ -32,12 +32,13 @@ import java.util.Map;
 @Aspect
 @Configuration
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PageViewInterceptor {
 
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
 
-    private final HttpServletRequest request;
+    @Autowired
+    private HttpServletRequest request;
 
 
     @AfterReturning(returning = "rvt", pointcut = "@annotation(cn.lili.modules.statistics.aop.PageViewPoint)")

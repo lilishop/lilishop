@@ -18,11 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DistributionSelectedGoodsServiceImpl extends ServiceImpl<DistributionSelectedGoodsMapper, DistributionSelectedGoods> implements DistributionSelectedGoodsService {
 
     //分销员
-    private final DistributionService distributionService;
+    @Autowired
+    private DistributionService distributionService;
     @Override
     public boolean add(String distributionGoodsId) {
         //检查分销功能开关

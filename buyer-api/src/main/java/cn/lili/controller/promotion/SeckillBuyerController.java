@@ -7,7 +7,6 @@ import cn.lili.modules.promotion.entity.vos.SeckillTimelineVO;
 import cn.lili.modules.promotion.service.SeckillApplyService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,13 +25,13 @@ import java.util.List;
 @Api(tags = "买家端,限时抢购接口")
 @RestController
 @RequestMapping("/buyer/promotion/seckill")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SeckillBuyerController {
 
     /**
      * 限时抢购
      */
-    private final SeckillApplyService seckillApplyService;
+    @Autowired
+    private SeckillApplyService seckillApplyService;
 
     @ApiOperation(value = "获取当天限时抢购信息")
     @GetMapping

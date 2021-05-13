@@ -32,7 +32,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -51,20 +50,25 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> implements SeckillService {
 
     //延时任务
-    private final TimeTrigger timeTrigger;
+    @Autowired
+    private TimeTrigger timeTrigger;
     //Mongo
-    private final MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
     //Rocketmq
-    private final RocketmqCustomProperties rocketmqCustomProperties;
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
     //商品索引
+    @Autowired
     private EsGoodsIndexService goodsIndexService;
     //促销商品
+    @Autowired
     private PromotionGoodsService promotionGoodsService;
     //秒杀申请
+    @Autowired
     private SeckillApplyService seckillApplyService;
 
     @Override
@@ -277,20 +281,4 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
             throw new ServiceException("当前时间内已存在同类活动");
         }
     }
-
-    @Autowired
-    public void setEsGoodsIndexService(EsGoodsIndexService goodsIndexService) {
-        this.goodsIndexService = goodsIndexService;
-    }
-
-    @Autowired
-    public void setPromotionGoodsService(PromotionGoodsService promotionGoodsService) {
-        this.promotionGoodsService = promotionGoodsService;
-    }
-
-    @Autowired
-    public void setSeckillApplyService(SeckillApplyService seckillApplyService) {
-        this.seckillApplyService = seckillApplyService;
-    }
-
 }

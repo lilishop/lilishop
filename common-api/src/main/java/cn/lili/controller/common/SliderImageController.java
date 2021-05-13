@@ -8,7 +8,6 @@ import cn.lili.common.verification.service.VerificationService;
 import cn.lili.common.vo.ResultMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,11 +20,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/common/slider")
 @RestController
 @Api(tags = "滑块验证码接口")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SliderImageController {
 
-
-    private final VerificationService verificationService;
+    @Autowired
+    private VerificationService verificationService;
 
     //一分钟同一个ip请求10次
     @LimitPoint(name = "slider_image", key = "verification")

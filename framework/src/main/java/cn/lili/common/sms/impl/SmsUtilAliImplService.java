@@ -10,11 +10,11 @@ import cn.lili.common.sms.AliSmsUtil;
 import cn.lili.common.sms.SmsUtil;
 import cn.lili.common.utils.CommonUtil;
 import cn.lili.common.verification.enums.VerificationEnums;
-import cn.lili.modules.message.entity.dos.SmsSign;
-import cn.lili.modules.message.entity.dos.SmsTemplate;
 import cn.lili.modules.connect.util.Base64Utils;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
+import cn.lili.modules.message.entity.dos.SmsSign;
+import cn.lili.modules.message.entity.dos.SmsTemplate;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.SmsSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -23,7 +23,6 @@ import com.aliyun.dysmsapi20170525.models.*;
 import com.aliyun.teaopenapi.models.Config;
 import com.google.gson.Gson;
 import com.xkcoding.http.util.StringUtil;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,14 +42,14 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
 
-    private final Cache cache;
-
-    private final SettingService settingService;
-
-    private final MemberService memberService;
+    @Autowired
+    private Cache cache;
+    @Autowired
+    private SettingService settingService;
+    @Autowired
+    private MemberService memberService;
 
     @Override
     public void sendSmsCode(String mobile, VerificationEnums verificationEnums, String uuid) {

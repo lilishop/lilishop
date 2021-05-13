@@ -30,10 +30,10 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,商品计量单位接口")
 @RequestMapping("/manager/goods/goodsUnit")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsUnitManagerController {
 
-    private final GoodsUnitService goodsUnitService;
+    @Autowired
+    private GoodsUnitService goodsUnitService;
 
 
     @ApiOperation(value = "分页获取商品计量单位")

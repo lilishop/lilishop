@@ -44,7 +44,6 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -61,25 +60,31 @@ import java.util.List;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> implements MemberService {
 
     //会员数据处理层
-    private final MemberMapper memberMapper;
+    @Autowired
+    private MemberMapper memberMapper;
     //会员token
+    @Autowired
     private MemberTokenGenerate memberTokenGenerate;
     //商家token
+    @Autowired
     private StoreTokenGenerate storeTokenGenerate;
     //联合登录
+    @Autowired
     private ConnectService connectService;
     @Autowired
     private StoreService storeService;
     //RocketMQ 配置
-    private final RocketmqCustomProperties rocketmqCustomProperties;
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
     //RocketMQ
-    private final RocketMQTemplate rocketMQTemplate;
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
     //缓存
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
 
     @Override
     public Member findByUsername(String userName) {
@@ -549,20 +554,5 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         if (findByPhone(mobilePhone) != null) {
             throw new ServiceException(ResultCode.USER_PHONE_EXIST);
         }
-    }
-
-    @Autowired
-    public void setConnectService(ConnectService connectService) {
-        this.connectService = connectService;
-    }
-
-    @Autowired
-    public void setMemberTokenGenerate(MemberTokenGenerate memberTokenGenerate) {
-        this.memberTokenGenerate = memberTokenGenerate;
-    }
-
-    @Autowired
-    public void setStoreTokenGenerate(StoreTokenGenerate storeTokenGenerate) {
-        this.storeTokenGenerate = storeTokenGenerate;
     }
 }

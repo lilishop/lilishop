@@ -2,8 +2,6 @@ package cn.lili.modules.order.order.serviceimpl;
 
 import cn.lili.common.utils.*;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.goods.service.CategoryService;
-import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.order.order.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
@@ -15,14 +13,12 @@ import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.payment.entity.RefundLog;
-import cn.lili.modules.payment.service.PaymentService;
 import cn.lili.modules.payment.service.RefundLogService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,21 +37,17 @@ import java.util.List;
 @Slf4j
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow> implements StoreFlowService {
 
-    //商品
-    private final GoodsService goodsService;
-    //商品分类
-    private final CategoryService categoryService;
     //订单
+    @Autowired
     private OrderService orderService;
     //订单货物
+    @Autowired
     private OrderItemService orderItemService;
     //退款日志
+    @Autowired
     private RefundLogService refundLogService;
-    //支付日志
-    private PaymentService paymentService;
 
     @Override
     public void payOrder(String orderSn) {
@@ -158,25 +150,5 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         }
 
         return this.page(PageUtil.initPage(pageVO), lambdaQueryWrapper);
-    }
-
-    @Autowired
-    public void setOrderItemService(OrderItemService orderItemService) {
-        this.orderItemService = orderItemService;
-    }
-
-    @Autowired
-    public void setOrderService(OrderService orderService) {
-        this.orderService = orderService;
-    }
-
-    @Autowired
-    public void setRefundLogService(RefundLogService refundLogService) {
-        this.refundLogService = refundLogService;
-    }
-
-    @Autowired
-    public void setPaymentService(PaymentService paymentService) {
-        this.paymentService = paymentService;
     }
 }

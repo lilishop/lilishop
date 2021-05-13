@@ -19,7 +19,6 @@ import cn.lili.modules.system.service.SettingService;
 import cn.lili.timetask.handler.EveryDayExecute;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,17 +33,21 @@ import java.util.stream.Collectors;
  **/
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
     //订单
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
     //订单货物
-    private final OrderItemService orderItemService;
+    @Autowired
+    private OrderItemService orderItemService;
     //设置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
     //会员评价
-    private final MemberEvaluationService memberEvaluationService;
+    @Autowired
+    private MemberEvaluationService memberEvaluationService;
 
     /**
      * 执行每日任务

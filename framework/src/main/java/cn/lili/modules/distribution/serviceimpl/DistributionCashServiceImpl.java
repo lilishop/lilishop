@@ -43,16 +43,17 @@ import java.util.Date;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMapper, DistributionCash> implements DistributionCashService {
     //分销员
-    private final DistributionService distributionService;
+    @Autowired
+    private DistributionService distributionService;
     //会员余额
-    private final MemberWalletService memberWalletService;
-
-    private final RocketMQTemplate rocketMQTemplate;
-
-    private final RocketmqCustomProperties rocketmqCustomProperties;
+    @Autowired
+    private MemberWalletService memberWalletService;
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Override
     public Boolean cash(Double applyMoney) {

@@ -22,7 +22,6 @@ import cn.lili.modules.system.service.SettingService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,18 +37,23 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Distribution> implements DistributionService {
 
     //会员
     @Autowired
     private MemberService memberService;
+
     //分销员
-    private final DistributionMapper distributionMapper;
+    @Autowired
+    private DistributionMapper distributionMapper;
+
     //缓存
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
+
     //设置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
 
     @Override
     public IPage<Distribution> distributionPage(DistributionSearchParams distributionSearchParams, PageVO page) {

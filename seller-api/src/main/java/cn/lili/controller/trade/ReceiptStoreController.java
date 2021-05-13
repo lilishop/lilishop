@@ -12,7 +12,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,10 +24,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Api(tags = "店铺端,发票接口")
 @RequestMapping("/store/receipt")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReceiptStoreController {
 
-    private final ReceiptService receiptService;
+    @Autowired
+    private ReceiptService receiptService;
 
     @ApiOperation(value = "分页获取")
     @GetMapping

@@ -11,7 +11,6 @@ import cn.lili.modules.system.service.ServiceNoticeService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,10 +26,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,服务订阅消息接口")
 @RequestMapping("/manager/admin/notice")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ServiceNoticeManagerController {
-
-    private final ServiceNoticeService serviceNoticeService;
+    @Autowired
+    private ServiceNoticeService serviceNoticeService;
 
     @ApiOperation(value = "查看服务订阅消息详情")
     @GetMapping(value = "/{id}")

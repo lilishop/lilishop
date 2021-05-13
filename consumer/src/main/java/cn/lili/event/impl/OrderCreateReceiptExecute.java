@@ -22,10 +22,10 @@ import java.util.List;
  * @date 2020-07-03 11:20
  **/
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderCreateReceiptExecute implements TradeEvent {
 
-    private final ReceiptService receiptService;
+    @Autowired
+    private ReceiptService receiptService;
 
     @Override
     public void orderCreate(TradeDTO tradeDTO) {

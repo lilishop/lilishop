@@ -34,11 +34,11 @@ import java.util.Map;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, WechatMessage> implements WechatMessageService {
-
-    private final WechatMessageMapper wechatMessageMapper;
-    private final WechatAccessTokenUtil wechatAccessTokenUtil;
+    @Autowired
+    private WechatMessageMapper wechatMessageMapper;
+    @Autowired
+    private WechatAccessTokenUtil wechatAccessTokenUtil;
 
     //get 获取所有的模版
     private final String allMsgTpl = "https://api.weixin.qq.com/cgi-bin/template/get_all_private_template?access_token=";

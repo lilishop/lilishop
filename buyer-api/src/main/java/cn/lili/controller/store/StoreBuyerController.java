@@ -19,7 +19,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,21 +35,23 @@ import java.util.List;
 @RestController
 @RequestMapping("/buyer/store")
 @Api(tags = "买家端,店铺接口")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreBuyerController {
 
     /**
      * 店铺
      */
-    private final StoreService storeService;
+    @Autowired
+    private StoreService storeService;
     /**
      * 店铺商品分类
      */
-    private final StoreGoodsLabelService storeGoodsLabelService;
+    @Autowired
+    private StoreGoodsLabelService storeGoodsLabelService;
     /**
      * 店铺详情
      */
-    private final StoreDetailService storeDetailService;
+    @Autowired
+    private StoreDetailService storeDetailService;
 
     @ApiOperation(value = "获取店铺列表分页")
     @GetMapping

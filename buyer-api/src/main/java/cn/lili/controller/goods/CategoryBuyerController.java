@@ -27,12 +27,12 @@ import java.util.List;
 @RestController
 @Api(tags = "买家端,商品分类接口")
 @RequestMapping("/buyer/category")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategoryBuyerController {
     /**
      * 商品分类
      */
-    private final CategoryService categoryService;
+    @Autowired
+    private CategoryService categoryService;
 
     @ApiOperation(value = "获取商品分类列表")
     @ApiImplicitParam(name = "parentId", value = "上级分类ID，全部分类为：0", required = true, dataType = "Long", paramType = "path")

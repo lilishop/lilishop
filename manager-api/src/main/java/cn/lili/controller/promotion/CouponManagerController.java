@@ -19,7 +19,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,11 +34,11 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,优惠券接口")
 @RequestMapping("/manager/promotion/coupon")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CouponManagerController {
-
-    private final CouponService couponService;
-    private final MemberCouponService memberCouponService;
+    @Autowired
+    private CouponService couponService;
+    @Autowired
+    private MemberCouponService memberCouponService;
 
     @ApiOperation(value = "获取优惠券列表")
     @GetMapping

@@ -35,15 +35,17 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, StoreDetail> implements StoreDetailService {
 
     //店铺详情数据层
-    private final StoreDetailMapper storeDetailMapper;
+    @Autowired
+    private StoreDetailMapper storeDetailMapper;
     //店铺
-    private final StoreService storeService;
+    @Autowired
+    private StoreService storeService;
     //分类
-    private final CategoryService categoryService;
+    @Autowired
+    private CategoryService categoryService;
 
     @Override
     public StoreDetailVO getStoreDetailVO(String storeId) {

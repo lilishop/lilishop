@@ -10,7 +10,6 @@ import cn.lili.modules.promotion.service.PointsGoodsCategoryService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,10 +22,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Api(tags = "管理端,积分商品分类接口")
 @RequestMapping("/manager/promotion/pointsGoodsCategory")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PointsGoodsCategoryManagerController {
-
-    private final PointsGoodsCategoryService pointsGoodsCategoryService;
+    @Autowired
+    private PointsGoodsCategoryService pointsGoodsCategoryService;
 
     @PostMapping
     @ApiOperation(value = "添加积分商品分类")

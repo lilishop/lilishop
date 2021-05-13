@@ -27,10 +27,10 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "管理端,分销员管理接口")
 @RequestMapping("/manager/distribution")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DistributionManagerController {
 
-    private final DistributionService distributionService;
+    @Autowired
+    private DistributionService distributionService;
 
     @ApiOperation(value = "分页获取")
     @GetMapping(value = "/getByPage")

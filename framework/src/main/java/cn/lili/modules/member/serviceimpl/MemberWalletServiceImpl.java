@@ -27,7 +27,6 @@ import cn.lili.modules.system.service.SettingService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,18 +43,22 @@ import java.util.Date;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, MemberWallet> implements MemberWalletService {
 
     //预存款数据层
-    private final MemberWalletMapper walletMapper;
+    @Autowired
+    private MemberWalletMapper walletMapper;
     //预存款日志
-    private final WalletLogService walletLogService;
+    @Autowired
+    private WalletLogService walletLogService;
     //设置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
     //会员
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
     //会员提现申请
+    @Autowired
     private MemberWithdrawApplyService memberWithdrawApplyService;
 
     @Override
@@ -270,8 +273,4 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         return result;
     }
 
-    @Autowired
-    public void setMemberWithdrawApplyService(MemberWithdrawApplyService memberWithdrawApplyService) {
-        this.memberWithdrawApplyService = memberWithdrawApplyService;
-    }
 }

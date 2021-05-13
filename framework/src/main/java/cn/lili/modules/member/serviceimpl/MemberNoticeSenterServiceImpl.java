@@ -28,13 +28,14 @@ import java.util.List;
  */
 @Service
 @Transactional(propagation = Propagation.REQUIRED, rollbackFor = java.lang.Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberNoticeSenterServiceImpl extends ServiceImpl<MemberNoticeSenterMapper, MemberNoticeSenter> implements MemberNoticeSenterService {
 
     //会员
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
     //会员站内信
-    private final MemberNoticeService memberNoticeService;
+    @Autowired
+    private MemberNoticeService memberNoticeService;
 
     @Override
     public boolean customSave(MemberNoticeSenter memberNoticeSenter) {

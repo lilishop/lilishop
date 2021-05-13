@@ -13,6 +13,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -45,7 +46,8 @@ public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
     /**
      * 缓存
      */
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
 
     /**
      * 自定义构造器

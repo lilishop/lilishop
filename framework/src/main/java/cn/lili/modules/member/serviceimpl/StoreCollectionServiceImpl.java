@@ -28,10 +28,9 @@ import java.util.Optional;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreCollectionServiceImpl extends ServiceImpl<StoreCollectionMapper, StoreCollection> implements StoreCollectionService {
-
-    private final StoreCollectionMapper storeCollectionMapper;
+    @Autowired
+    private StoreCollectionMapper storeCollectionMapper;
 
     @Override
     public IPage<StoreCollectionVO> storeCollection(PageVO pageVo) {

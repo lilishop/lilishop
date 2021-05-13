@@ -29,13 +29,13 @@ import java.util.Map;
 @RestController
 @Api(tags = "店铺端,消息接口")
 @RequestMapping("/store/message")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreMessageController {
 
     /**
      * 商家消息
      */
-    private final StoreMessageService storeMessageService;
+    @Autowired
+    private StoreMessageService storeMessageService;
 
     @ApiOperation(value = "获取商家消息")
     @ApiImplicitParam(name = "status", value = "状态", required = true, paramType = "query")

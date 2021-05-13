@@ -8,17 +8,16 @@ import cn.lili.modules.order.order.entity.dto.AfterSaleDTO;
 import cn.lili.modules.order.order.entity.vo.AfterSaleApplyVO;
 import cn.lili.modules.order.order.entity.vo.AfterSaleSearchParams;
 import cn.lili.modules.order.order.entity.vo.AfterSaleVO;
+import cn.lili.modules.order.order.service.AfterSaleLogService;
 import cn.lili.modules.order.order.service.AfterSaleReasonService;
 import cn.lili.modules.order.order.service.AfterSaleService;
-import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.order.trade.entity.dos.AfterSaleLog;
-import cn.lili.modules.order.order.service.AfterSaleLogService;
+import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -36,23 +35,23 @@ import java.util.List;
 @RestController
 @Api(tags = "买家端,售后管理接口")
 @RequestMapping("/buyer/afterSale")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AfterSaleBuyerController {
 
     /**
      * 售后
      */
-    private final AfterSaleService afterSaleService;
-
+    @Autowired
+    private AfterSaleService afterSaleService;
     /**
      * 售后原因
      */
-    private final AfterSaleReasonService afterSaleReasonService;
-
+    @Autowired
+    private AfterSaleReasonService afterSaleReasonService;
     /**
      * 售后日志
      */
-    private final AfterSaleLogService afterSaleLogService;
+    @Autowired
+    private AfterSaleLogService afterSaleLogService;
 
     @ApiOperation(value = "查看售后服务详情")
     @ApiImplicitParam(name = "sn", value = "售后单号", required = true, paramType = "path")

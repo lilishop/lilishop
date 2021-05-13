@@ -27,10 +27,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Api(tags = "店铺端,满额活动接口")
 @RequestMapping("/store/promotion/fullDiscount")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FullDiscountStoreController {
 
-    private final FullDiscountService fullDiscountService;
+    @Autowired
+    private FullDiscountService fullDiscountService;
 
     @ApiOperation(value = "新增满优惠活动")
     @PostMapping(consumes = "application/json", produces = "application/json")

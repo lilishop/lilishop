@@ -7,7 +7,6 @@ import cn.lili.modules.permission.entity.dos.UserRole;
 import cn.lili.modules.permission.service.UserRoleService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,10 +22,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,管理员角色接口")
 @RequestMapping("/manager/userRole")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserRoleManagerController {
-
-    private final UserRoleService userRoleService;
+    @Autowired
+    private UserRoleService userRoleService;
 
     @GetMapping(value = "/{userId}")
     @ApiOperation(value = "查看管理员角色")

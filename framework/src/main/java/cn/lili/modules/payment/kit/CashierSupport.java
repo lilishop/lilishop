@@ -19,7 +19,6 @@ import cn.lili.modules.system.entity.dto.payment.PaymentSupportSetting;
 import cn.lili.modules.system.entity.dto.payment.dto.PaymentSupportItem;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,14 +35,16 @@ import java.util.List;
  */
 @Component
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CashierSupport {
     //收银台
-    private final List<CashierExecute> cashierExecuteList;
+    @Autowired
+    private List<CashierExecute> cashierExecuteList;
     //预存款
-    private final MemberWalletService memberWalletService;
+    @Autowired
+    private MemberWalletService memberWalletService;
     //配置
-    private final SettingService settingService;
+    @Autowired
+    private SettingService settingService;
 
     /**
      * 支付

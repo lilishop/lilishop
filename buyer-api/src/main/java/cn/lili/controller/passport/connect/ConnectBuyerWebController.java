@@ -32,14 +32,16 @@ import java.io.IOException;
 @RestController
 @Api(tags = "买家端,web联合登录")
 @RequestMapping("/buyer/connect")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConnectBuyerWebController {
 
-    private final ConnectService connectService;
+    @Autowired
+    private ConnectService connectService;
 
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
 
-    private final ConnectUtil connectUtil;
+    @Autowired
+    private ConnectUtil connectUtil;
 
 
     @GetMapping("/login/web/{type}")

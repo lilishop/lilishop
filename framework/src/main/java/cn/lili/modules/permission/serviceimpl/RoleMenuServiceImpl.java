@@ -22,13 +22,14 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> implements RoleMenuService {
 
     //菜单
-    private final MenuMapper menuMapper;
+    @Autowired
+    private MenuMapper menuMapper;
     //角色菜单
-    private final RoleMenuMapper roleMenuMapper;
+    @Autowired
+    private RoleMenuMapper roleMenuMapper;
 
     @Override
     public List<RoleMenu> findByRoleId(String roleId) {

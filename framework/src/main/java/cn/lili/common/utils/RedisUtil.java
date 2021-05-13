@@ -1,6 +1,5 @@
 package cn.lili.common.utils;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,10 +18,9 @@ import java.util.concurrent.TimeUnit;
  * @since 2020/11/7
  **/
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RedisUtil {
-
-    private final RedisTemplate redisTemplate;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     //=============================common============================
 

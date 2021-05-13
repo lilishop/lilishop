@@ -31,14 +31,16 @@ import java.util.*;
  **/
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DraftGoodsServiceImpl extends ServiceImpl<DraftGoodsMapper, DraftGoods> implements DraftGoodsService {
     //分类
-    private final CategoryService categoryService;
+    @Autowired
+    private CategoryService categoryService;
     //商品相册
-    private final GoodsGalleryService goodsGalleryService;
+    @Autowired
+    private GoodsGalleryService goodsGalleryService;
     //规格商品
-    private final GoodsSkuService goodsSkuService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
 
     @Override
     public boolean addGoodsDraft(DraftGoodsDTO draftGoods) {

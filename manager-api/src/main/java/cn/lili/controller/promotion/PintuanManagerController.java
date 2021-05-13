@@ -30,11 +30,11 @@ import java.util.Date;
 @RestController
 @Api(tags = "管理端,平台拼团接口")
 @RequestMapping("/manager/promotion/pintuan")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PintuanManagerController {
-
-    private final PintuanService pintuanService;
-    private final PromotionGoodsService promotionGoodsService;
+    @Autowired
+    private PintuanService pintuanService;
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
 
     @GetMapping(value = "/{id}")
     @ApiOperation(value = "通过id获取")

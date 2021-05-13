@@ -30,10 +30,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,即时配送接口")
 @RequestMapping("/manager/instant-delivery")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class InstantDeliveryManagerController {
-
-    private final InstantDeliveryService instantDeliveryService;
+    @Autowired
+    private InstantDeliveryService instantDeliveryService;
 
     @GetMapping(value = "/getByPage")
     @ApiOperation(value = "分页获取")

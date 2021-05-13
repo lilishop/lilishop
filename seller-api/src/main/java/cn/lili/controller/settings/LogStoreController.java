@@ -27,10 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "店铺端,日志管理接口")
 @RequestMapping("/store/log")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LogStoreController {
-
-    private final SystemLogService systemLogService;
+    @Autowired
+    private SystemLogService systemLogService;
 
     @GetMapping(value = "/getAllByPage")
     @ApiOperation(value = "分页获取全部")

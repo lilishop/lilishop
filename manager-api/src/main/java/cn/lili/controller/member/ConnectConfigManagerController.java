@@ -7,7 +7,6 @@ import cn.lili.modules.connect.entity.vo.ConnectConfigForm;
 import cn.lili.modules.connect.service.ConnectConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,10 +22,10 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,联合登陆配置接口")
 @RequestMapping("/manager/connectConfig")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConnectConfigManagerController {
 
-    private final ConnectConfigService connectConfigService;
+    @Autowired
+    private ConnectConfigService connectConfigService;
 
     @GetMapping(value = "/list")
     @ApiOperation(value = "获取所有联合配置")

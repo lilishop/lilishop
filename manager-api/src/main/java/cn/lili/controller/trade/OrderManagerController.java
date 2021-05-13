@@ -32,13 +32,15 @@ import javax.validation.constraints.NotNull;
 @RestController
 @RequestMapping("/manager/orders")
 @Api(tags = "管理端,订单API")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 public class OrderManagerController {
 
     //订单
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
     //订单价格
-    private final OrderPriceService orderPriceService;
+    @Autowired
+    private OrderPriceService orderPriceService;
 
 
     @ApiOperation(value = "查询订单列表分页")

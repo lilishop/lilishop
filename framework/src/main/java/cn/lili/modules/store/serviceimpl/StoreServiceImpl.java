@@ -50,23 +50,29 @@ import java.util.Optional;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements StoreService {
 
     //店铺
-    private final StoreMapper storeMapper;
+    @Autowired
+    private StoreMapper storeMapper;
     //会员
+    @Autowired
     private MemberService memberService;
     //商品
+    @Autowired
     private GoodsService goodsService;
     //商品SKU
+    @Autowired
     private GoodsSkuService goodsSkuService;
     //店铺详情
+    @Autowired
     private StoreDetailService storeDetailService;
     //页面
+    @Autowired
     private PageDataService pageDataService;
     //店铺收藏
-    private final StoreCollectionService storeCollectionService;
+    @Autowired
+    private StoreCollectionService storeCollectionService;
 
     @Override
     public IPage<StoreVO> findByConditionPage(StoreSearchParams storeSearchParams, PageVO page) {
@@ -310,27 +316,6 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         LambdaQueryWrapper<Store> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(Store::getMemberId, UserContext.getCurrentUser().getId());
         return this.getOne(lambdaQueryWrapper);
-    }
-
-    @Autowired
-    public void setGoodsService(GoodsService goodsService) {
-        this.goodsService = goodsService;
-    }
-    @Autowired
-    public void setGoodsSkuService(GoodsSkuService goodsSkuService) {
-        this.goodsSkuService = goodsSkuService;
-    }
-    @Autowired
-    public void setPageDataService(PageDataService pageDataService) {
-        this.pageDataService = pageDataService;
-    }
-    @Autowired
-    public void setMemberService(MemberService memberService) {
-        this.memberService = memberService;
-    }
-    @Autowired
-    public void setStoreDetailService(StoreDetailService storeDetailService) {
-        this.storeDetailService = storeDetailService;
     }
 
 }

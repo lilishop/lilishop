@@ -29,10 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "管理端,收款日志接口")
 @RequestMapping("/manager/paymentLog")
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PaymentLogManagerController {
 
-    private final PaymentService paymentService;
+    @Autowired
+    private PaymentService paymentService;
 
 
     @GetMapping

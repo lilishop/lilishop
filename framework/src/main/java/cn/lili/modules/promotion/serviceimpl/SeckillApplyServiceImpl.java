@@ -51,20 +51,25 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, SeckillApply> implements SeckillApplyService {
 
     //缓存
-    private final Cache<Object> cache;
+    @Autowired
+    private Cache<Object> cache;
     //Mongo
-    private final MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
     //规格商品
+    @Autowired
     private GoodsSkuService goodsSkuService;
     //ES商品
+    @Autowired
     private EsGoodsIndexService esGoodsIndexService;
     //促销商品
+    @Autowired
     private PromotionGoodsService promotionGoodsService;
     //秒杀
+    @Autowired
     private SeckillService seckillService;
 
     @Override
@@ -533,25 +538,5 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             }
         }
         return seckillGoodsVoS;
-    }
-
-    @Autowired
-    public void setSeckillService(SeckillService seckillService) {
-        this.seckillService = seckillService;
-    }
-
-    @Autowired
-    public void setPromotionGoodsService(PromotionGoodsService promotionGoodsService) {
-        this.promotionGoodsService = promotionGoodsService;
-    }
-
-    @Autowired
-    public void setGoodsSkuService(GoodsSkuService goodsSkuService) {
-        this.goodsSkuService = goodsSkuService;
-    }
-
-    @Autowired
-    public void setEsGoodsIndexService(EsGoodsIndexService esGoodsIndexService) {
-        this.esGoodsIndexService = esGoodsIndexService;
     }
 }

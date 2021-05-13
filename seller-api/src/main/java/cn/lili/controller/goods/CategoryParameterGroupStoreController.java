@@ -29,11 +29,11 @@ import java.util.List;
 @Api(tags = "店铺端,分类绑定参数组管理接口")
 @RequestMapping("/store/goods/category/parameters")
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategoryParameterGroupStoreController {
-
-    private final ParametersService parametersService;
-    private final CategoryParameterGroupService categoryParameterGroupService;
+    @Autowired
+    private ParametersService parametersService;
+    @Autowired
+    private CategoryParameterGroupService categoryParameterGroupService;
 
     @ApiOperation(value = "查询某分类下绑定的参数信息")
     @GetMapping(value = "/{category_id}")

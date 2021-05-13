@@ -31,11 +31,11 @@ import java.util.List;
 @RestController
 @Api(tags = "店铺端,限时抢购接口")
 @RequestMapping("/store/promotion/seckill")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SeckillStoreController {
-
-    private final SeckillService seckillService;
-    private final SeckillApplyService seckillApplyService;
+    @Autowired
+    private SeckillService seckillService;
+    @Autowired
+    private SeckillApplyService seckillApplyService;
 
     @GetMapping
     @ApiOperation(value = "获取限时抢购列表")

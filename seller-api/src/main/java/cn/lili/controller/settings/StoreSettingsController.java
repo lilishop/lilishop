@@ -13,7 +13,6 @@ import cn.lili.modules.store.service.StoreService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -31,17 +30,18 @@ import javax.validation.Valid;
 @RestController
 @Api(tags = "店铺端,店铺设置接口")
 @RequestMapping("/store/settings")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreSettingsController {
 
     /**
      * 店铺
      */
-    private final StoreService storeService;
+    @Autowired
+    private StoreService storeService;
     /**
      * 店铺详情
      */
-    private final StoreDetailService storeDetailService;
+    @Autowired
+    private StoreDetailService storeDetailService;
 
     @ApiOperation(value = "获取商家设置")
     @GetMapping

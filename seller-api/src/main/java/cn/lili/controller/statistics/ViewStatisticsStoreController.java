@@ -8,7 +8,6 @@ import cn.lili.modules.statistics.model.vo.PlatformViewVO;
 import cn.lili.modules.statistics.service.PlatformViewDataService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,10 +24,9 @@ import java.util.List;
 @Api(tags = "店铺端,流量统计接口")
 @RestController
 @RequestMapping("/store/statistics/view")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ViewStatisticsStoreController {
-
-    private final PlatformViewDataService platformViewDataService;
+    @Autowired
+    private PlatformViewDataService platformViewDataService;
 
     @ApiOperation(value = "流量数据 表单获取")
     @GetMapping("/list")

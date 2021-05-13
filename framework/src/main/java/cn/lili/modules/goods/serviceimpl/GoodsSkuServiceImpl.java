@@ -33,7 +33,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -51,25 +50,32 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> implements GoodsSkuService {
 
     //缓存
-    private final Cache<GoodsSku> cache;
+    @Autowired
+    private Cache<GoodsSku> cache;
     //分类
-    private final CategoryService categoryService;
+    @Autowired
+    private CategoryService categoryService;
     //商品相册
-    private final GoodsGalleryService goodsGalleryService;
+    @Autowired
+    private GoodsGalleryService goodsGalleryService;
     //规格
-    private final SpecificationService specificationService;
+    @Autowired
+    private SpecificationService specificationService;
     //规格项
-    private final SpecValuesService specValuesService;
+    @Autowired
+    private SpecValuesService specValuesService;
     //缓存
-    private final StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
     //rocketMq
-    private final RocketMQTemplate rocketMQTemplate;
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
     //rocketMq配置
-    private final RocketmqCustomProperties rocketmqCustomProperties;
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
     //会员评价
     @Autowired
     private MemberEvaluationService memberEvaluationService;

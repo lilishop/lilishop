@@ -26,7 +26,7 @@ import java.util.List;
 @Api(tags = "${entity.description}接口")
 @RequestMapping("/lili/${entity.classNameLowerCase}")
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 public class ${entity.className}Controller {
 
     private final ${entity.className}Service ${entity.classNameLowerCase}Service;

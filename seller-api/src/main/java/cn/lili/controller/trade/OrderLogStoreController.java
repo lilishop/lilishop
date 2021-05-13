@@ -25,10 +25,10 @@ import java.util.List;
 @RestController
 @Api(tags = "店铺端,订单日志接口")
 @RequestMapping("/store/orderLog")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderLogStoreController {
 
-    private final OrderLogService orderLogService;
+    @Autowired
+    private OrderLogService orderLogService;
 
     @ApiOperation(value = "通过订单编号获取订单日志")
     @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, paramType = "path")

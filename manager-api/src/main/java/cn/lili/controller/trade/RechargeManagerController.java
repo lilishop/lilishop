@@ -25,10 +25,9 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags = "管理端,预存款充值记录接口")
 @RequestMapping("/manager/recharge")
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RechargeManagerController {
-
-    private final RechargeService rechargeService;
+    @Autowired
+    private RechargeService rechargeService;
 
     @ApiOperation(value = "分页获取预存款充值记录")
     @GetMapping

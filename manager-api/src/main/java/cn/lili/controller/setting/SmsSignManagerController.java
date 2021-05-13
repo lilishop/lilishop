@@ -25,9 +25,9 @@ import javax.validation.Valid;
 @RestController
 @Api(tags = "管理端,短信签名接口")
 @RequestMapping("/manager/sms/sign")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SmsSignManagerController {
-    private final SmsSignService smsSignService;
+    @Autowired
+    private SmsSignService smsSignService;
 
 
     @ApiOperation(value = "新增短信签名")

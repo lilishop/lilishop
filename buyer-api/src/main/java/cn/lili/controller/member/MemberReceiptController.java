@@ -25,10 +25,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Api(tags = "买家端,会员发票接口")
 @RequestMapping("/buyer/member/receipt")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberReceiptController {
 
-    private final MemberReceiptService memberReceiptService;
+    @Autowired
+    private MemberReceiptService memberReceiptService;
 
     @ApiOperation(value = "查询会员发票列表")
     @GetMapping

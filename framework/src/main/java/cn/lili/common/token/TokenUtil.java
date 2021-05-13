@@ -11,7 +11,6 @@ import cn.lili.config.properties.JWTTokenProperties;
 import com.google.gson.Gson;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,12 +25,11 @@ import java.util.concurrent.TimeUnit;
  * 2020-11-12 18:44
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TokenUtil {
-
-    private final JWTTokenProperties tokenProperties;
-
-    private final Cache cache;
+    @Autowired
+    private JWTTokenProperties tokenProperties;
+    @Autowired
+    private Cache cache;
 
     /**
      * 构建token

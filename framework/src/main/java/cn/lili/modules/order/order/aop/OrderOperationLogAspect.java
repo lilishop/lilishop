@@ -25,10 +25,10 @@ import java.util.Map;
  */
 @Aspect
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderOperationLogAspect {
 
-    private final OrderLogService orderLogService;
+    @Autowired
+    private OrderLogService orderLogService;
 
     @After("@annotation(cn.lili.modules.order.order.aop.OrderLogPoint)")
     public void doAfter(JoinPoint joinPoint) {

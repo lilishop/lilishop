@@ -21,7 +21,6 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.plugin.bankTransfer.BankTransferPlugin;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,20 +35,23 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderPriceServiceImpl implements OrderPriceService {
 
     //线下收款
-    private final BankTransferPlugin bankTransferPlugin;
-
-    private final OrderItemService orderItemService;
-
+    @Autowired
+    private BankTransferPlugin bankTransferPlugin;
+    //订单货物
+    @Autowired
+    private OrderItemService orderItemService;
     //交易数据层
-    private final TradeMapper tradeMapper;
+    @Autowired
+    private TradeMapper tradeMapper;
     //订单
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
     //商品分类
-    private final CategoryService categoryService;
+    @Autowired
+    private CategoryService categoryService;
 
     @Override
     @SystemLogPoint(description = "修改订单价格", customerLog = "'订单编号:'+#orderSn +'，价格修改为：'+#orderPrice")

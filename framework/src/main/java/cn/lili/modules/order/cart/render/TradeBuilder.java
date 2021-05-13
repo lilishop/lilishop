@@ -1,13 +1,12 @@
 package cn.lili.modules.order.cart.render;
 
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
+import cn.lili.modules.order.cart.service.CartService;
 import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.service.TradeService;
-import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
-import cn.lili.modules.order.cart.service.CartService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,12 +23,13 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TradeBuilder {
     //购物车渲染
-    private final List<CartRenderStep> cartRenderSteps;
+    @Autowired
+    private List<CartRenderStep> cartRenderSteps;
     //交易
-    private final TradeService tradeService;
+    @Autowired
+    private TradeService tradeService;
 
     /**
      * 渲染整比交易
@@ -44,12 +44,8 @@ public class TradeBuilder {
     /**
      * 0-> 校验商品 1-》 满优惠渲染 2->渲染优惠 3->优惠券渲染 4->计算运费 5->计算价格 6->分销渲染 7->扩展操作
      */
-    private CartService cartService;
-
     @Autowired
-    public void setCartService(CartService cartService) {
-        this.cartService = cartService;
-    }
+    private CartService cartService;
 
     /**
      * 构造购物车

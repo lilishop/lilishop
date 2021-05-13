@@ -8,7 +8,6 @@ import cn.lili.modules.purchase.service.PurchaseQuotedService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,13 +23,13 @@ import java.util.List;
 @Api(tags = "买家端,采购报价接口")
 @RestController
 @RequestMapping("/buyer/purchaseQuoted")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PurchaseQuotedController {
 
     /**
      * 采购单报价
      */
-    private final PurchaseQuotedService purchaseQuotedService;
+    @Autowired
+    private PurchaseQuotedService purchaseQuotedService;
 
     @ApiOperation(value = "添加采购单报价")
     @PostMapping

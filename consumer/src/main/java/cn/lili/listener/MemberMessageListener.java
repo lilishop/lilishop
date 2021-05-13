@@ -10,7 +10,6 @@ import cn.lili.modules.member.entity.dos.MemberSign;
 import cn.lili.modules.member.entity.dto.MemberPointMessage;
 import cn.lili.modules.member.entity.dto.MemberWithdrawalMessage;
 import cn.lili.modules.member.service.MemberSignService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -28,18 +27,21 @@ import java.util.List;
  **/
 @Component
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.member-topic}", consumerGroup = "${lili.data.rocketmq.member-group}")
 public class MemberMessageListener implements RocketMQListener<MessageExt> {
 
     //会员签到
-    private final MemberSignService memberSignService;
+    @Autowired
+    private MemberSignService memberSignService;
     //会员积分变化
-    private final List<MemberPointChangeEvent> memberPointChangeEvents;
+    @Autowired
+    private List<MemberPointChangeEvent> memberPointChangeEvents;
     //会员提现
-    private final List<MemberWithdrawalEvent> memberWithdrawalEvents;
+    @Autowired
+    private List<MemberWithdrawalEvent> memberWithdrawalEvents;
     //会员注册
-    private final List<MemberRegisterEvent> memberSignEvents;
+    @Autowired
+    private List<MemberRegisterEvent> memberSignEvents;
 
 
     @Override

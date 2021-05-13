@@ -26,11 +26,9 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,菜单管理接口")
 @RequestMapping("/manager/menu")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MenuManagerController {
-
-    private final MenuService menuService;
-
+    @Autowired
+    private MenuService menuService;
 
     @ApiOperation(value = "搜索菜单")
     @GetMapping

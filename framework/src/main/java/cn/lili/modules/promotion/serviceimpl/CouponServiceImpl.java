@@ -34,7 +34,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -54,22 +53,29 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> implements CouponService {
 
     //延时任务
-    private final TimeTrigger timeTrigger;
+    @Autowired
+    private TimeTrigger timeTrigger;
     //Mongo
-    private final MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
     //规格商品
+    @Autowired
     private GoodsSkuService goodsSkuService;
     //Rocketmq
+    @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
     //促销商品
+    @Autowired
     private PromotionGoodsService promotionGoodsService;
     //会员优惠券
+    @Autowired
     private MemberCouponService memberCouponService;
     //满额活动
+    @Autowired
     private FullDiscountService fullDiscountService;
 
     @Override
@@ -366,31 +372,6 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         if (CouponScopeTypeEnum.PORTION_GOODS.name().equals(couponVO.getScopeType()) && !couponVO.getPromotionGoodsList().isEmpty()) {
             PromotionTools.promotionGoodsInit(couponVO.getPromotionGoodsList(), couponVO, PromotionTypeEnum.COUPON);
         }
-    }
-
-    @Autowired
-    public void setGoodsSkuService(GoodsSkuService goodsSkuService) {
-        this.goodsSkuService = goodsSkuService;
-    }
-
-    @Autowired
-    public void setRocketmqCustomProperties(RocketmqCustomProperties rocketmqCustomProperties) {
-        this.rocketmqCustomProperties = rocketmqCustomProperties;
-    }
-
-    @Autowired
-    public void setPromotionGoodsService(PromotionGoodsService promotionGoodsService) {
-        this.promotionGoodsService = promotionGoodsService;
-    }
-
-    @Autowired
-    public void setMemberCouponService(MemberCouponService memberCouponService) {
-        this.memberCouponService = memberCouponService;
-    }
-
-    @Autowired
-    public void setFullDiscountService(FullDiscountService fullDiscountService) {
-        this.fullDiscountService = fullDiscountService;
     }
 
 }

@@ -27,13 +27,13 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/manager/afterSaleReason")
 @Api(tags = "管理端,售后原因接口")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AfterSaleReasonManagerController {
 
     /**
      * 售后原因
      */
-    private final AfterSaleReasonService afterSaleReasonService;
+    @Autowired
+    private AfterSaleReasonService afterSaleReasonService;
 
     @ApiOperation(value = "查看售后原因")
     @ApiImplicitParam(name = "id", value = "售后原因ID", required = true, dataType = "String", paramType = "path")

@@ -28,10 +28,10 @@ import java.util.Map;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategoryParameterGroupServiceImpl extends ServiceImpl<CategoryParameterGroupMapper, CategoryParameterGroup> implements CategoryParameterGroupService {
     //商品参数
-    private final ParametersService parametersService;
+    @Autowired
+    private ParametersService parametersService;
 
     @Override
     public List<ParameterGroupVO> getCategoryParams(String categoryId) {
