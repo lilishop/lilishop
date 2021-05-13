@@ -1,0 +1,5 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Sat Apr 04 19:56:05 CST 2020
+http\://central.maven.org/maven2/.error=Could not transfer artifact com.xuxueli\:xxl-rpc-core\:jar\:sources\:1.2.1 from/to maven-central (http\://central.maven.org/maven2/)\: central.maven.org
+@default-maven-central-http\://central.maven.org/maven2/.lastUpdated=1586001364931
+http\://maven.aliyun.com/nexus/content/groups/public/.lastUpdated=1586001365245

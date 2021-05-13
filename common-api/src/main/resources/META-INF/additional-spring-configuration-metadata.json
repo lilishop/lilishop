@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "spring.http.multipart.location",
+      "type": "java.lang.String",
+      "description": "Description for spring.http.multipart.location."
+  }
+] }

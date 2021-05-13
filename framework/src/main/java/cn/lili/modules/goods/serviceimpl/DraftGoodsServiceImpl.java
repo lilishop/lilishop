@@ -1,0 +1,150 @@
+package cn.lili.modules.goods.serviceimpl;
+
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONUtil;
+import cn.lili.common.utils.PageUtil;
+import cn.lili.common.utils.StringUtils;
+import cn.lili.modules.goods.entity.dos.*;
+import cn.lili.modules.goods.entity.dto.DraftGoodsDTO;
+import cn.lili.modules.goods.entity.dto.DraftGoodsSearchParams;
+import cn.lili.modules.goods.entity.vos.DraftGoodsVO;
+import cn.lili.modules.goods.mapper.DraftGoodsMapper;
+import cn.lili.modules.goods.service.CategoryService;
+import cn.lili.modules.goods.service.DraftGoodsService;
+import cn.lili.modules.goods.service.GoodsGalleryService;
+import cn.lili.modules.goods.service.GoodsSkuService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+
+/**
+ * 草稿商品业务层实现
+ *
+ * @author paulG
+ * @since 2020/12/19
+ **/
+@Service
+@Transactional
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class DraftGoodsServiceImpl extends ServiceImpl<DraftGoodsMapper, DraftGoods> implements DraftGoodsService {
+    //分类
+    private final CategoryService categoryService;
+    //商品相册
+    private final GoodsGalleryService goodsGalleryService;
+    //规格商品
+    private final GoodsSkuService goodsSkuService;
+
+    @Override
+    public boolean addGoodsDraft(DraftGoodsDTO draftGoods) {
+        draftGoods.setGoodsGalleryListJson(JSONUtil.toJsonStr(draftGoods.getGoodsGalleryList()));
+        draftGoods.setSkuListJson(JSONUtil.toJsonStr(draftGoods.getSkuList()));
+        draftGoods.setGoodsParamsListJson(JSONUtil.toJsonStr(draftGoods.getGoodsParamsList()));
+        return this.save(draftGoods);
+    }
+
+    @Override
+    public boolean updateGoodsDraft(DraftGoodsDTO draftGoods) {
+        draftGoods.setGoodsGalleryListJson(JSONUtil.toJsonStr(draftGoods.getGoodsGalleryList()));
+        draftGoods.setSkuListJson(JSONUtil.toJsonStr(draftGoods.getSkuList()));
+        draftGoods.setGoodsParamsListJson(JSONUtil.toJsonStr(draftGoods.getGoodsParamsList()));
+        return this.updateById(draftGoods);
+    }
+
+    @Override
+    public void saveGoodsDraft(DraftGoodsDTO draftGoods) {
+
+        if (draftGoods.getGoodsGalleryList() != null && !draftGoods.getGoodsGalleryList().isEmpty()) {
+            GoodsGallery goodsGallery = goodsGalleryService.getGoodsGallery(draftGoods.getGoodsGalleryList().get(0));
+            draftGoods.setOriginal(goodsGallery.getOriginal());
+            draftGoods.setSmall(goodsGallery.getSmall());
+            draftGoods.setThumbnail(goodsGallery.getThumbnail());
+        }
+        draftGoods.setGoodsGalleryListJson(JSONUtil.toJsonStr(draftGoods.getGoodsGalleryList()));
+        draftGoods.setSkuListJson(JSONUtil.toJsonStr(this.getGoodsSkuList(draftGoods.getSkuList())));
+        draftGoods.setGoodsParamsListJson(JSONUtil.toJsonStr(draftGoods.getGoodsParamsList()));
+        this.saveOrUpdate(draftGoods);
+    }
+
+    @Override
+    public void deleteGoodsDraft(String id) {
+        this.removeById(id);
+    }
+
+    @Override
+    public DraftGoodsVO getDraftGoods(String id) {
+
+        DraftGoods draftGoods = this.getById(id);
+        DraftGoodsVO draftGoodsVO = new DraftGoodsVO();
+        BeanUtil.copyProperties(draftGoods, draftGoodsVO);
+        //商品分类名称赋值
+        List<String> categoryName = new ArrayList<>();
+        String[] strArray = draftGoods.getCategoryPath().split(",");
+        List<Category> categories = categoryService.listByIds(Arrays.asList(strArray));
+        for (Category category : categories) {
+            categoryName.add(category.getName());
+        }
+        draftGoodsVO.setCategoryName(categoryName);
+        draftGoodsVO.setGoodsParamsList(JSONUtil.toList(JSONUtil.parseArray(draftGoods.getGoodsParamsListJson()), GoodsParams.class));
+        draftGoodsVO.setGoodsGalleryList(JSONUtil.toList(JSONUtil.parseArray(draftGoods.getGoodsGalleryListJson()), String.class));
+        JSONArray jsonArray = JSONUtil.parseArray(draftGoods.getSkuListJson());
+        List<GoodsSku> list = JSONUtil.toList(jsonArray, GoodsSku.class);
+        draftGoodsVO.setSkuList(goodsSkuService.getGoodsSkuVOList(list));
+        return draftGoodsVO;
+    }
+
+    @Override
+    public IPage<DraftGoods> getDraftGoods(DraftGoodsSearchParams searchParams) {
+        return this.page(PageUtil.initPage(searchParams), searchParams.queryWrapper());
+    }
+
+    /**
+     * 获取sku集合
+     *
+     * @param skuList sku列表
+     * @return sku集合
+     */
+    private List<GoodsSku> getGoodsSkuList(List<Map<String, Object>> skuList) {
+        List<GoodsSku> skus = new ArrayList<>();
+        for (Map<String, Object> skuVO : skuList) {
+            GoodsSku add = this.add(skuVO);
+            skus.add(add);
+        }
+        return skus;
+    }
+
+    private GoodsSku add(Map<String, Object> map) {
+        Map<String, Object> specMap = new HashMap<>();
+        GoodsSku sku = new GoodsSku();
+        for (Map.Entry<String, Object> m : map.entrySet()) {
+            switch (m.getKey()) {
+                case "sn":
+                    sku.setSn(m.getValue() != null ? m.getValue().toString() : "");
+                    break;
+                case "cost":
+                    sku.setCost(StringUtils.toDouble(m.getValue(), false));
+                    break;
+                case "price":
+                    sku.setPrice(StringUtils.toDouble(m.getValue(), false));
+                    break;
+                case "quantity":
+                    sku.setQuantity(StringUtils.toInt(m.getValue(), false));
+                    break;
+                case "weight":
+                    sku.setWeight(StringUtils.toDouble(m.getValue(), false));
+                    break;
+                default:
+                    specMap.put(m.getKey(), m.getValue());
+                    break;
+            }
+        }
+        sku.setSpecs(JSONUtil.toJsonStr(specMap));
+        return sku;
+    }
+
+}

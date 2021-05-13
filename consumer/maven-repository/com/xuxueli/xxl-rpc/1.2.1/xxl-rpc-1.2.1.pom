@@ -1,0 +1,151 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.xuxueli</groupId>
+	<artifactId>xxl-rpc</artifactId>
+	<version>1.2.1</version>
+	<packaging>pom</packaging>
+
+	<name>${project.artifactId}</name>
+	<description>A high performance, distributed RPC framework.</description>
+	<url>http://www.xuxueli.com/</url>
+
+	<modules>
+		<module>xxl-rpc-core</module>
+		<!--<module>xxl-rpc-samples</module>-->
+	</modules>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+
+		<maven.test.skip>true</maven.test.skip>
+
+
+		<javax.servlet-api.version>3.1.0</javax.servlet-api.version>
+		<javax.servlet.jsp-api.version>2.3.3</javax.servlet.jsp-api.version>
+
+		<slf4j-api.version>1.7.25</slf4j-api.version>
+		<junit.version>4.12</junit.version>
+
+
+		<netty.version>4.1.29.Final</netty.version>
+		<mina.version>2.0.19</mina.version>
+		<jetty-server.version>9.2.26.v20180806</jetty-server.version>
+
+		<commons-pool2.version>2.6.0</commons-pool2.version>
+
+
+		<hessian.version>4.0.51</hessian.version>
+
+		<protostuff.version>1.6.0</protostuff.version>
+		<objenesis.version>2.6</objenesis.version>
+
+		<jackson.version>2.9.6</jackson.version>
+
+
+		<zookeeper.version>3.4.13</zookeeper.version>
+
+
+		<spring.version>4.3.19.RELEASE</spring.version>
+		<spring-boot.version>1.5.16.RELEASE</spring-boot.version>
+
+	</properties>
+
+	<build>
+		<plugins>
+		</plugins>
+	</build>
+
+	<licenses>
+		<license>
+			<name>GNU General Public License version 3</name>
+			<url>https://opensource.org/licenses/GPL-3.0</url>
+		</license>
+	</licenses>
+
+	<scm>
+		<tag>master</tag>
+		<url>https://github.com/xuxueli/xxl-rpc.git</url>
+		<connection>scm:git:https://github.com/xuxueli/xxl-rpc.git</connection>
+		<developerConnection>scm:git:git@github.com:xuxueli/xxl-rpc.git</developerConnection>
+	</scm>
+	<developers>
+		<developer>
+			<id>XXL</id>
+			<name>xuxueli</name>
+			<email>931591021@qq.com</email>
+			<url>https://github.com/xuxueli</url>
+		</developer>
+	</developers>
+
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<!-- Source -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>3.0.1</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- Javadoc -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>3.0.0</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- GPG -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<configuration>
+							<useAgent>false</useAgent>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+			<distributionManagement>
+				<snapshotRepository>
+					<id>oss</id>
+					<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+				</snapshotRepository>
+				<repository>
+					<id>oss</id>
+					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+	</profiles>
+
+</project>

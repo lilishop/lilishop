@@ -1,0 +1,100 @@
+package cn.lili.modules.message.serviceimpl;
+
+import cn.lili.common.enums.MessageCode;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
+import cn.lili.common.sms.AliSmsUtil;
+import cn.lili.common.utils.PageUtil;
+import cn.lili.common.vo.PageVO;
+import cn.lili.modules.message.entity.dos.SmsSign;
+import cn.lili.modules.message.mapper.SmsSignMapper;
+import cn.lili.modules.message.service.SmsSignService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 短信签名业务层实现
+ * @author Chopper
+ * @date 2021/1/30 4:27 下午
+ */
+@Service
+@Transactional
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> implements SmsSignService {
+
+    private final AliSmsUtil aliSmsUtil;
+
+    @Override
+    public void addSmsSign(SmsSign smsSign) {
+        try {
+            //如果短信签名已存在，不能重复申请
+            if (this.getOne(new QueryWrapper<SmsSign>().eq("sign_name", smsSign.getSignName())) != null) {
+                throw new ServiceException(ResultCode.SMS_SIGN_EXIST_ERROR);
+            }
+            aliSmsUtil.addSmsSign(smsSign);
+            smsSign.setSignStatus(0);
+            this.save(smsSign);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void deleteSmsSign(String id) {
+        try {
+            SmsSign smsSign = this.getById(id);
+            if (smsSign != null) {
+                aliSmsUtil.deleteSmsSign(smsSign.getSignName());
+                this.removeById(id);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void querySmsSign() {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            //获取未审核通过的签名列表
+            List<SmsSign> list = list(new LambdaQueryWrapper<SmsSign>().eq(SmsSign::getSignStatus, 0));
+            //查询签名状态
+            for (SmsSign smsSign : list) {
+                map = aliSmsUtil.querySmsSign(smsSign.getSignName());
+
+                smsSign.setSignStatus((Integer) map.get("SignStatus"));
+                smsSign.setReason(map.get("Reason").toString());
+                this.updateById(smsSign);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void modifySmsSign(SmsSign smsSign) {
+        try {
+            aliSmsUtil.modifySmsSign(smsSign);
+            this.updateById(smsSign);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public IPage<SmsSign> page(PageVO pageVO, Integer signStatus) {
+        return this.page(PageUtil.initPage(pageVO), new QueryWrapper<SmsSign>()
+                .eq(signStatus != null, "sign_status", signStatus));
+    }
+}

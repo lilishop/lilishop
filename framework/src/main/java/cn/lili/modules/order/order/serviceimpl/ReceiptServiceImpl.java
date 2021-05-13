@@ -1,0 +1,81 @@
+package cn.lili.modules.order.order.serviceimpl;
+
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.context.UserContext;
+import cn.lili.common.utils.PageUtil;
+import cn.lili.common.vo.PageVO;
+import cn.lili.modules.order.order.entity.dos.Receipt;
+import cn.lili.modules.order.order.entity.dto.OrderReceiptDTO;
+import cn.lili.modules.order.order.entity.dto.ReceiptSearchParams;
+import cn.lili.modules.order.order.mapper.OrderItemMapper;
+import cn.lili.modules.order.order.mapper.ReceiptMapper;
+import cn.lili.modules.order.order.service.ReceiptService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * 发票业务层实现
+ *
+ * @author Bulbasaur
+ * @date 2020/11/17 7:38 下午
+ */
+@Service
+@Transactional
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> implements ReceiptService {
+
+    //发票mapper
+    private final ReceiptMapper receiptMapper;
+
+
+    @Override
+    public IPage<OrderReceiptDTO> getReceiptData(ReceiptSearchParams searchParams, PageVO pageVO) {
+        return receiptMapper.getReceipt(PageUtil.initPage(pageVO), searchParams.wrapper());
+    }
+
+    @Override
+    public Receipt getByOrderSn(String orderSn) {
+        LambdaQueryWrapper<Receipt> lambdaQueryWrapper = Wrappers.lambdaQuery();
+        lambdaQueryWrapper.eq(Receipt::getOrderSn, orderSn);
+        return this.getOne(lambdaQueryWrapper);
+    }
+
+    @Override
+    public Receipt getDetail(String id) {
+        return this.getById(id);
+    }
+
+    @Override
+    public Receipt saveReceipt(Receipt receipt) {
+        LambdaQueryWrapper<Receipt> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Receipt::getReceiptTitle, receipt.getReceiptTitle());
+        queryWrapper.eq(Receipt::getMemberId, receipt.getMemberId());
+        if (receipt.getId() != null) {
+            queryWrapper.ne(Receipt::getId, receipt.getId());
+        }
+        if (this.getOne(queryWrapper) == null) {
+            this.save(receipt);
+            return receipt;
+        }
+        throw new ServiceException(ResultCode.ERROR);
+    }
+
+    @Override
+    public Receipt invoicing(String receiptId) {
+        //根据id查询发票信息
+        Receipt receipt = this.getById(receiptId);
+        if (receipt != null) {
+            receipt.setReceiptStatus(1);
+            this.saveOrUpdate(receipt);
+            return receipt;
+        }
+        throw new ServiceException(ResultCode.ERROR);
+    }
+}

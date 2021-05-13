@@ -1,0 +1,105 @@
+package cn.lili.modules.goods.service;
+
+
+import cn.lili.modules.goods.entity.dos.Category;
+import cn.lili.modules.goods.entity.vos.CategoryVO;
+import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
+
+/**
+ * 商品分类业务层
+ *
+ * @author pikachu
+ * @date 2020-03-02 16:44:56
+ */
+public interface CategoryService extends IService<Category> {
+
+
+    /**
+     * 管理端获取所有分类
+     * 即获取的对象不管是否删除，都要展示，而且不从缓存获取，保证内容是最新的
+     *
+     * @return 商品分类列表
+     */
+    List<Category> dbList(String parentId);
+
+    /**
+     * 获取分类树
+     *
+     * @return 分类树
+     */
+    List<CategoryVO> categoryTree();
+
+    /**
+     * 查询所有的分类，父子关系
+     *
+     * @return 所有的分类，父子关系
+     */
+    List<CategoryVO> listAllChildren(String parentId);
+
+    /**
+     * 查询所有的分类，父子关系 数据库获取
+     *
+     * @return 所有的分类，父子关系
+     */
+    List<CategoryVO> listAllChildrenDB();
+
+    /**
+     * 获取指定分类的分类名称
+     *
+     * @param ids 指定分类id集合
+     * @return 分类名称集合
+     */
+    List<String> getCategoryNameByIds(List<String> ids);
+
+    /**
+     * 获取商品分类list
+     *
+     * @return 商品分类list
+     */
+    List<Category> findByAllBySortOrder(Category category);
+
+    /**
+     * 添加商品分类
+     *
+     * @param category 商品分类信息
+     * @return 添加结果
+     */
+    boolean saveCategory(Category category);
+
+    /**
+     * 修改商品分类
+     *
+     * @param category 商品分类信息
+     * @return 修改结果
+     */
+    void updateCategory(Category category);
+
+    /**
+     * 批量删除分类
+     *
+     * @param id 分类ID
+     */
+    void delete(String id);
+
+    /**
+     * 分类状态的更改
+     *
+     * @param categoryId       商品分类ID
+     * @param enableOperations 是否可用
+     */
+    void updateCategoryStatus(String categoryId, Boolean enableOperations);
+
+    /**
+     * 获取商家经营类目
+     */
+    List<CategoryVO> getStoreCategory(String[] categories);
+
+    /**
+     * 获取一级分类列表
+     * 用于商家入驻选择
+     */
+    List<Category> firstCategory();
+
+}
