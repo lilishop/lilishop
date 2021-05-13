@@ -142,7 +142,7 @@ public class AdminUserManagerController {
     public ResultMessage<Object> register(AdminUserDTO adminUser,
                                           @RequestParam(required = false) List<String> roles) {
         try {
-            if (roles != null & roles.size() >= 10) {
+            if (roles != null && roles.size() >= 10) {
                 return ResultUtil.error(ResultCode.PERMISSION_BEYOND_TEN);
             }
             adminUserService.saveAdminUser(adminUser, roles);

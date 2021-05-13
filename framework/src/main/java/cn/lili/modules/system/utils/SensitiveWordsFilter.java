@@ -99,7 +99,7 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
      * @param word
      * @return
      */
-    public static boolean remove(String word) {
+    public static void remove(String word) {
 
         StringPointer sp = new StringPointer(word.trim());
         // 计算头两个字符的hash
@@ -114,12 +114,9 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
             // 匹配节点
             if (node.headTwoCharMix == mix) {
                 node.words.remove(sp);
-                return true;
             }
 
         }
-        return true;
-
     }
 
     /**

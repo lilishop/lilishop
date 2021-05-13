@@ -22,11 +22,11 @@ Lilishop 是一款Java开发，基于SpringBoot的B2B2C多用户商城，前端�
 
 ### 项目链接
 
-**Java后台**：https://gitee.com/beijing_hongye_huicheng/lili-shop.git
+**Java后台**：https://gitee.com/beijing_hongye_huicheng/lilishop.git
 
-**Vue后台前端**： https://gitee.com/beijing_hongye_huicheng/lili-shop-ui.git
+**Vue后台前端**： https://gitee.com/beijing_hongye_huicheng/lilishop-ui.git
 
-**Uni-app**：https://gitee.com/beijing_hongye_huicheng/lili-shop-uniapp.git
+**Uni-app**：https://gitee.com/beijing_hongye_huicheng/lilishop-uniapp.git
 
 **docker一键部署**：https://gitee.com/beijing_hongye_huicheng/docker.git
 

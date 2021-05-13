@@ -227,7 +227,7 @@ public class WechatPlugin implements Payment {
             //过期时间
             String timeExpire = DateTimeZoneUtil.dateToTimeZone(System.currentTimeMillis() + 1000 * 60 * 3);
 
-            String attach =URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
+            String attach = URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
 
             WechatPaymentSetting setting = wechatPaymentSetting();
             UnifiedOrderModel unifiedOrderModel = new UnifiedOrderModel()
@@ -361,7 +361,11 @@ public class WechatPlugin implements Payment {
 
             //微信小程序，appid 需要单独获取，这里读取了联合登陆配置的appid ，实际场景小程序自动登录，所以这个appid是最为保险的做法
             //如果有2开需求，这里需要调整，修改这个appid的获取途径即可
-            String appid = getWechatMPSetting().getAppId();
+            WechatConnectSettingItem wechatConnectSettingItem = getWechatMPSetting();
+            String appid = null;
+            if (wechatConnectSettingItem != null) {
+                appid = getWechatMPSetting().getAppId();
+            }
 
             String attach = URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
 
@@ -456,8 +460,8 @@ public class WechatPlugin implements Payment {
         JSONObject jsonObject = JSONUtil.parseObj(plainText);
 
         String payParamStr = jsonObject.getStr("attach");
-        String payParamJson = URLDecoder.decode(payParamStr,StandardCharsets.UTF_8);
-        PayParam payParam = JSONUtil.toBean(payParamJson,PayParam.class);
+        String payParamJson = URLDecoder.decode(payParamStr, StandardCharsets.UTF_8);
+        PayParam payParam = JSONUtil.toBean(payParamJson, PayParam.class);
 
 
         String tradeNo = jsonObject.getStr("transaction_id");
@@ -660,7 +664,7 @@ public class WechatPlugin implements Payment {
         WechatConnectSetting wechatConnectSetting = JSONUtil.toBean(setting.getSettingValue(), WechatConnectSetting.class);
 
         if (wechatConnectSetting == null) {
-            return null;
+            throw new ServiceException(ResultCode.WECHAT_CONNECT_NOT_EXIST);
         }
         //寻找对应对微信小程序登录配置
         for (WechatConnectSettingItem wechatConnectSettingItem : wechatConnectSetting.getWechatConnectSettingItems()) {
@@ -669,6 +673,6 @@ public class WechatPlugin implements Payment {
             }
         }
 
-        return null;
+        throw new ServiceException(ResultCode.WECHAT_CONNECT_NOT_EXIST);
     }
 }

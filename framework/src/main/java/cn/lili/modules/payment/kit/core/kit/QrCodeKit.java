@@ -127,15 +127,4 @@ public class QrCodeKit {
         }
         return bool;
     }
-
-    public static void main(String[] args) {
-        String saveImgFilePath = "/Users//Documents/dev/IJPay/qrCode.png";
-        boolean encode = encode("https://gitee.com/205/IJPay", BarcodeFormat.QR_CODE, 3,
-                ErrorCorrectionLevel.H, "png", 200, 200, saveImgFilePath);
-        if (encode) {
-            Result result = decode(saveImgFilePath);
-            String text = result.getText();
-            System.out.println(text);
-        }
-    }
 }

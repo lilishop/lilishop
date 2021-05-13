@@ -23,6 +23,11 @@ public enum ResultCode {
     DEMO_SITE_EXCEPTION(400,"演示站点禁止使用"),
 
     /**
+     * 系统异常
+     */
+
+    WECHAT_CONNECT_NOT_EXIST(1001,"微信联合登录未配置"),
+    /**
      * 分类
      */
     CATEGORY_NOT_EXIST(10001,"商品分类不存在"),

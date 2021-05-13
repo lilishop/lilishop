@@ -48,6 +48,7 @@ public class WechatMessageExecute implements OrderStatusChangeEvent, TradeEvent 
                 } catch (Exception e) {
                     log.error("微信消息发送失败", e);
                 }
+                break;
             default:
                 break;
         }
