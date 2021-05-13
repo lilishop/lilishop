@@ -44,12 +44,18 @@ Lilishop 是一款Java开发，基于SpringBoot的B2B2C多用户商城，前端�
 
 ### 3行命令搭建本地环境
 
+温馨提示：由于服务较多，如果笔记本环境启动内存没有32g可能无法启动成功（macbookpro 2020 16g内存启动无法成功），台式机在16g内存、AMD 3700x 的unbutton系统成功运行。
+
 ##### 下载docker脚本
 `git clone https://gitee.com/beijing_hongye_huicheng/docker.git `
 ##### 部署基础环境
 `docker-compose up -d`
 ##### 部署应用
 `docker-compose -f docker-compose-application.yml up -d`
+
+
+
+##### 各个地址
 
 | API           | 地址            |
 | -------------- | --------------- |
