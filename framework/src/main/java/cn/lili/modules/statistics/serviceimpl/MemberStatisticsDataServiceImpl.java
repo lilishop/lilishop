@@ -34,7 +34,7 @@ public class MemberStatisticsDataServiceImpl extends ServiceImpl<MemberStatistic
     @Override
     public Integer getMemberCount() {
         QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.eq("disabled", SwitchEnum.OPEN.name());
+        queryWrapper.eq("disabled", true);
         return memberStatisticsDataMapper.customSqlQuery(queryWrapper);
     }
 
