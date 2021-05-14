@@ -1,7 +1,6 @@
 package cn.lili.modules.statistics.serviceimpl;
 
 import cn.hutool.core.date.DateUtil;
-import cn.lili.common.enums.SwitchEnum;
 import cn.lili.modules.statistics.mapper.MemberStatisticsDataMapper;
 import cn.lili.modules.statistics.model.dos.MemberStatisticsData;
 import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
