@@ -20,7 +20,7 @@ Lilishop 是一款Java开发，基于SpringBoot的B2B2C多用户商城，前端�
 **产品文档**（需求、架构、使用、部署、开发）：https://docs.pickmall.cn
 
 
-### 项目链接
+### 项目链接(gitee)
 
 **Java后台**：https://gitee.com/beijing_hongye_huicheng/lilishop.git
 
@@ -29,6 +29,16 @@ Lilishop 是一款Java开发，基于SpringBoot的B2B2C多用户商城，前端�
 **Uni-app**：https://gitee.com/beijing_hongye_huicheng/lilishop-uniapp.git
 
 **docker一键部署**：https://gitee.com/beijing_hongye_huicheng/docker.git
+
+### 项目链接(github)
+
+**Java后台**：https://github.com/hongyehuicheng/lilishop.git
+
+**Vue后台前端**： https://github.com/hongyehuicheng/lilishop-ui.git
+
+**Uni-app**：https://github.com/hongyehuicheng/lilishop-uniapp.git
+
+**docker一键部署**：https://github.com/hongyehuicheng/docker.git
 
 ### 演示地址
 
