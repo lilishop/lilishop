@@ -8,13 +8,11 @@ import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.message.entity.dos.Message;
 import cn.lili.modules.message.entity.vos.MessageVO;
 import cn.lili.modules.message.mapper.MessageMapper;
-import cn.lili.modules.message.mapper.StoreMessageMapper;
 import cn.lili.modules.message.service.MessageService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,12 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> implements MessageService {
-    @Autowired
-    private MessageMapper messageMapper;
-    @Autowired
-    private StoreMessageMapper storeMessageMapper;
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
+
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
     @Autowired
