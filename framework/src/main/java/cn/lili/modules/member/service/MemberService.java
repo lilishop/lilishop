@@ -184,6 +184,17 @@ public interface MemberService extends IService<Member> {
     Boolean updateMemberPoint(Long point, Integer type, String memberId, String content);
 
     /**
+     * 会员积分变动
+     *
+     * @param experience    变动经验值
+     * @param type          变动类型 1为增加 0为消费
+     * @param memberId      会员id
+     * @param content       变动详细
+     * @return 操作结果
+     */
+    Boolean updateMemberExperience(Long experience, Integer type, String memberId, String content);
+
+    /**
      * 修改会员状态
      *
      * @param memberIds 会员id集合

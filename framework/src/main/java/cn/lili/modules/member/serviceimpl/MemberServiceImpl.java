@@ -383,6 +383,24 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         throw new ServiceException(ResultCode.USER_NOT_EXIST);
     }
 
+    @Override
+    public Boolean updateMemberExperience(Long experience, Integer type, String memberId, String content) {
+        //获取当前会员信息
+        Member member = this.getById(memberId);
+        if (member != null) {
+            //积分变动后的会员积分
+            long currentExperience;
+            if (type == 1) {
+                currentExperience = CurrencyUtil.add(member.getPoint(), experience).longValue();
+            } else {
+                currentExperience = CurrencyUtil.sub(member.getPoint(), experience) < 0 ? 0 : new Double(CurrencyUtil.sub(member.getExperience(), experience)).longValue();
+            }
+            member.setExperience(currentExperience);
+            return this.updateById(member);
+        }
+        throw new ServiceException(ResultCode.USER_NOT_EXIST);
+    }
+
 
     @Override
     public Boolean updateMemberStatus(List<String> memberIds, Boolean status) {

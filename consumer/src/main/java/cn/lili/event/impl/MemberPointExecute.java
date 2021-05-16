@@ -6,13 +6,11 @@ import cn.lili.event.MemberRegisterEvent;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.member.service.MemberWalletService;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.PointSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import com.google.gson.Gson;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +33,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
 
     @Override
     public void memberRegister(Member member) {
-        //获取签到积分赠送设置
+        //获取积分设置
         Setting setting = settingService.get(SettingEnum.POINT_SETTING.name());
         PointSetting pointSetting = new Gson().fromJson(setting.getSettingValue(), PointSetting.class);
         //赠送会员积分

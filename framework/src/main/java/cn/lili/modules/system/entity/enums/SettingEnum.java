@@ -27,6 +27,8 @@ public enum SettingEnum {
     SMS_SETTING,
     //积分设置
     POINT_SETTING,
+    //经验值设置
+    EXPERIENCE_SETTING,
 
     //微信 联合登陆设置
     WECHAT_CONNECT,
