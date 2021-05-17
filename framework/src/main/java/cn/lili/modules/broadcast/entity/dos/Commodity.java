@@ -44,7 +44,7 @@ public class Commodity extends BaseEntity {
     private String url;
 
     @ApiModelProperty(value = "微信程序直播商品ID")
-    private String liveGoodsId;
+    private Integer liveGoodsId;
 
     @ApiModelProperty(value = "审核单ID")
     private String auditId;

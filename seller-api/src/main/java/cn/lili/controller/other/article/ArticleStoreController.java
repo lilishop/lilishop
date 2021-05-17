@@ -1,4 +1,4 @@
-package cn.lili.controller.other;
+package cn.lili.controller.other.article;
 
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;

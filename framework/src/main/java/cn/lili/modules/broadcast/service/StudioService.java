@@ -1,6 +1,7 @@
 package cn.lili.modules.broadcast.service;
 
 import cn.lili.modules.broadcast.entity.dos.Studio;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * 直播间业务层
@@ -8,7 +9,7 @@ import cn.lili.modules.broadcast.entity.dos.Studio;
  * @author Bulbasaur
  * @date: 2021/5/17 10:02 上午
  */
-public interface StudioService {
+public interface StudioService extends IService<Studio> {
 
     /**
      * 创建直播间
@@ -26,5 +27,19 @@ public interface StudioService {
      */
     String getLiveInfo(String roomId);
 
+    /**
+     * 推送商品
+     * @param roomId 店铺ID
+     * @param goodsId 商品ID
+     * @return 操作结果
+     */
+    Boolean push(Integer roomId,Integer goodsId);
 
+    /**
+     * 删除商品
+     * @param roomId 店铺ID
+     * @param goodsId 商品ID
+     * @return 操作结果
+     */
+    Boolean goodsDeleteInRoom(Integer roomId,Integer goodsId);
 }

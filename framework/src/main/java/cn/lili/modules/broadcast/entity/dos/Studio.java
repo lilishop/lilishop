@@ -78,7 +78,7 @@ public class Studio extends BaseEntity {
 
 
     @ApiModelProperty(value = "房间ID")
-    private String roomId;
+    private Integer roomId;
 
     @ApiModelProperty(value = "店铺ID")
     private String storeId;

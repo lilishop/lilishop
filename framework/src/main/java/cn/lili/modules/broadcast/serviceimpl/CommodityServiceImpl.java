@@ -1,5 +1,6 @@
 package cn.lili.modules.broadcast.serviceimpl;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONObject;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.modules.broadcast.entity.dos.Commodity;
@@ -8,6 +9,7 @@ import cn.lili.modules.broadcast.service.CommodityService;
 import cn.lili.modules.broadcast.util.WechatLivePlayerUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ import java.util.Map;
  * @author Bulbasaur
  * @date: 2021/5/17 11:16 上午
  */
+@Service
 public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity> implements CommodityService {
 
     @Autowired
@@ -26,7 +29,7 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
     @Override
     public boolean addCommodity(Commodity commodity) {
         JSONObject json =wechatLivePlayerUtil.addGoods(commodity);
-        commodity.setLiveGoodsId(json.getStr("goodsId"));
+        commodity.setLiveGoodsId(Convert.toInt(json.getStr("goodsId")));
         commodity.setAuditId(json.getStr("auditId"));
         commodity.setStoreId(UserContext.getCurrentUser().getStoreId());
         return this.save(commodity);

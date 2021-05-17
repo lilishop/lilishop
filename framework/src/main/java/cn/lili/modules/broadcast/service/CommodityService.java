@@ -1,6 +1,7 @@
 package cn.lili.modules.broadcast.service;
 
 import cn.lili.modules.broadcast.entity.dos.Commodity;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * 直播商品业务层
@@ -8,7 +9,7 @@ import cn.lili.modules.broadcast.entity.dos.Commodity;
  * @author Bulbasaur
  * @date: 2021/5/17 10:39 上午
  */
-public interface CommodityService {
+public interface CommodityService extends IService<Commodity> {
 
     /**
      * 添加直播商品
