@@ -11,7 +11,6 @@ import cn.lili.modules.promotion.service.*;
 import cn.lili.timetask.handler.EveryDayExecute;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -59,11 +58,14 @@ public class PromotionEverydayExecute implements EveryDayExecute {
     public void execute() {
 
         Query query = new Query();
-        query.addCriteria(Criteria.where("promotionStatus").ne(PromotionStatusEnum.END.name()).orOperator(Criteria.where("promotionStatus").ne(PromotionStatusEnum.CLOSE.name())));
+//        结束条件 活动关闭/活动结束
+        query.addCriteria(Criteria.where("promotionStatus").ne(PromotionStatusEnum.END.name())
+                .orOperator(Criteria.where("promotionStatus").ne(PromotionStatusEnum.CLOSE.name())));
         query.addCriteria(Criteria.where("endTime").lt(new Date()));
 
         List<String> promotionIds = new ArrayList<>();
 
+        //关闭满减活动
         List<FullDiscountVO> fullDiscountVOS = mongoTemplate.find(query, FullDiscountVO.class);
         if (!fullDiscountVOS.isEmpty()) {
             List<String> ids = new ArrayList<>();
@@ -80,9 +82,10 @@ public class PromotionEverydayExecute implements EveryDayExecute {
             fullDiscountService.update(this.getUpdatePromotionWrapper(ids));
             promotionIds.addAll(ids);
         }
-
+        //关闭拼团活动
         List<PintuanVO> pintuanVOS = mongoTemplate.find(query, PintuanVO.class);
         if (!pintuanVOS.isEmpty()) {
+            //准备修改活动的id
             List<String> ids = new ArrayList<>();
             for (PintuanVO vo : pintuanVOS) {
                 vo.setPromotionStatus(PromotionStatusEnum.END.name());
@@ -98,6 +101,7 @@ public class PromotionEverydayExecute implements EveryDayExecute {
             promotionIds.addAll(ids);
         }
 
+        //关闭优惠券活动
         List<CouponVO> couponVOS = mongoTemplate.find(query, CouponVO.class);
         if (!couponVOS.isEmpty()) {
             List<String> ids = new ArrayList<>();
