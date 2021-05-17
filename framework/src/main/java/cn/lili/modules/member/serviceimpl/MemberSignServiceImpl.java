@@ -40,9 +40,6 @@ import java.util.Map;
 @Transactional
 public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberSign> implements MemberSignService {
 
-    //会员签到
-    @Autowired
-    private MemberSignMapper memberSignMapper;
     //RocketMQ
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
@@ -66,12 +63,12 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
             queryWrapper.eq("member_id",authUser.getId());
             queryWrapper.between("create_time",new Date(DateUtil.startOfTodDay()*1000),DateUtil.getCurrentDayEndTime());
             //校验今天是否已经签到
-            List<MemberSign> todaySigns = memberSignMapper.getTodayMemberSign(queryWrapper);
+            List<MemberSign> todaySigns = this.baseMapper.getTodayMemberSign(queryWrapper);
             if (todaySigns.size() > 0) {
                 throw new ServiceException(ResultCode.MEMBER_SIGN_REPEAT);
             }
             //当前签到天数的前一天日期
-            List<MemberSign> signs = memberSignMapper.getBeforeMemberSign(authUser.getId());
+            List<MemberSign> signs = this.baseMapper.getBeforeMemberSign(authUser.getId());
             //构建参数
             MemberSign memberSign = new MemberSign();
             memberSign.setMemberId(authUser.getId());
@@ -84,7 +81,7 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
             } else {
                 memberSign.setSignDay(1);
             }
-            Integer result = memberSignMapper.insert(memberSign);
+            Integer result = this.baseMapper.insert(memberSign);
             //签到成功后发送消息赠送积分
             if (result > 0) {
                 String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_SING.name();
@@ -101,7 +98,7 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
         //获取当前会员
         AuthUser authUser = UserContext.getCurrentUser();
         if (authUser != null) {
-            return memberSignMapper.getMonthMemberSign(authUser.getId(), time);
+            return this.baseMapper.getMonthMemberSign(authUser.getId(), time);
         }
         throw new ServiceException(ResultCode.USER_NOT_LOGIN);
     }

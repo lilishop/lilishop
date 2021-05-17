@@ -17,7 +17,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,9 +36,6 @@ import java.util.Optional;
 
 public class GoodsCollectionServiceImpl extends ServiceImpl<GoodsCollectionMapper, GoodsCollection> implements GoodsCollectionService {
 
-    //商品收藏
-    @Autowired
-    private GoodsCollectionMapper goodsCollectionMapper;
     //rocketMq
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
@@ -53,7 +49,7 @@ public class GoodsCollectionServiceImpl extends ServiceImpl<GoodsCollectionMappe
         queryWrapper.eq("gc.member_id", UserContext.getCurrentUser().getId());
         queryWrapper.groupBy("gc.id");
         queryWrapper.orderByDesc("gc.create_time");
-        return goodsCollectionMapper.goodsCollectionVOList(PageUtil.initPage(pageVo), queryWrapper);
+        return this.baseMapper.goodsCollectionVOList(PageUtil.initPage(pageVo), queryWrapper);
     }
 
     @Override

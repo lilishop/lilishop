@@ -8,7 +8,6 @@ import cn.lili.modules.system.service.StoreLogisticsService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,17 +24,14 @@ import java.util.List;
 
 public class StoreLogisticsServiceImpl extends ServiceImpl<StoreLogisticsMapper, StoreLogistics> implements StoreLogisticsService {
 
-    @Autowired
-    private StoreLogisticsMapper storeLogisticsMapper;
-
     @Override
     public List<StoreLogisticsVO> getStoreLogistics() {
-        return storeLogisticsMapper.getStoreLogistics(UserContext.getCurrentUser().getStoreId());
+        return this.baseMapper.getStoreLogistics(UserContext.getCurrentUser().getStoreId());
     }
 
     @Override
     public List<StoreLogisticsVO> getStoreSelectedLogistics() {
-        return storeLogisticsMapper.getSelectedStoreLogistics(UserContext.getCurrentUser().getStoreId());
+        return this.baseMapper.getSelectedStoreLogistics(UserContext.getCurrentUser().getStoreId());
 
     }
 

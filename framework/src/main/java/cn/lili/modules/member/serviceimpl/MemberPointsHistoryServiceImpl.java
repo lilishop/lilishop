@@ -22,8 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHistoryMapper, MemberPointsHistory> implements MemberPointsHistoryService {
 
-    @Autowired
-    private MemberPointsHistoryMapper memberPointsHistoryMapper;
 
     @Override
     public MemberPointsHistoryVO getMemberPointsHistoryVO(String memberId) {
@@ -32,12 +30,12 @@ public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHist
         Long variablePoint = 0L;
 
         if (StringUtils.isNotEmpty(memberId)) {
-            point = memberPointsHistoryMapper.getMemberPointsHistoryVO(1, memberId);
-            variablePoint = memberPointsHistoryMapper.getMemberPointsHistoryVO(0, memberId);
+            point = this.baseMapper.getMemberPointsHistoryVO(1, memberId);
+            variablePoint = this.baseMapper.getMemberPointsHistoryVO(0, memberId);
 
         } else {
-            point = memberPointsHistoryMapper.getALLMemberPointsHistoryVO(0);
-            variablePoint = memberPointsHistoryMapper.getALLMemberPointsHistoryVO(1);
+            point = this.baseMapper.getALLMemberPointsHistoryVO(0);
+            variablePoint = this.baseMapper.getALLMemberPointsHistoryVO(1);
         }
         memberPointsHistoryVO.setPoint(point == null ? 0 : point);
         memberPointsHistoryVO.setVariablePoint(variablePoint == null ? 0 : variablePoint);

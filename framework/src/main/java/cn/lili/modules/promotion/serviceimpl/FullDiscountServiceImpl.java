@@ -27,7 +27,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -57,9 +56,6 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
     //Mongo
     @Autowired
     private MongoTemplate mongoTemplate;
-    //满额活动
-    @Autowired
-    private FullDiscountMapper fullDiscountMapper;
     //Rocketmq
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
@@ -251,7 +247,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
     private void checkSameActiveExist(Date statTime, Date endTime, String storeId, String id) {
         // 同一时间段内相同的活动
         QueryWrapper<FullDiscount> queryWrapper = PromotionTools.checkActiveTime(statTime, endTime, PromotionTypeEnum.FULL_DISCOUNT, storeId, id);
-        Integer sameNum = this.fullDiscountMapper.selectCount(queryWrapper);
+        Integer sameNum = this.count(queryWrapper);
         if (sameNum > 0) {
             throw new ServiceException("当前时间内已存在同类活动");
         }

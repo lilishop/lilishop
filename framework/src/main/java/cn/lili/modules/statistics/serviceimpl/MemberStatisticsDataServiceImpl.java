@@ -9,7 +9,6 @@ import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -24,31 +23,25 @@ import java.util.List;
 @Service
 public class MemberStatisticsDataServiceImpl extends ServiceImpl<MemberStatisticsDataMapper, MemberStatisticsData> implements MemberStatisticsDataService {
 
-    /**
-     * 会员统计
-     */
-    @Autowired
-    private MemberStatisticsDataMapper memberStatisticsDataMapper;
-
     @Override
     public Integer getMemberCount() {
         QueryWrapper queryWrapper = new QueryWrapper();
         queryWrapper.eq("disabled", true);
-        return memberStatisticsDataMapper.customSqlQuery(queryWrapper);
+        return this.baseMapper.customSqlQuery(queryWrapper);
     }
 
     @Override
     public Integer todayMemberNum() {
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.gt("create_time", DateUtil.beginOfDay(new Date()));
-        return memberStatisticsDataMapper.customSqlQuery(queryWrapper);
+        return this.baseMapper.customSqlQuery(queryWrapper);
     }
 
     @Override
     public Integer memberCount(Date endTime) {
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.lt("create_time", endTime);
-        return memberStatisticsDataMapper.customSqlQuery(queryWrapper);
+        return this.baseMapper.customSqlQuery(queryWrapper);
     }
 
     @Override
@@ -56,14 +49,14 @@ public class MemberStatisticsDataServiceImpl extends ServiceImpl<MemberStatistic
 
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.ge("last_login_date", startTime);
-        return memberStatisticsDataMapper.customSqlQuery(queryWrapper);
+        return this.baseMapper.customSqlQuery(queryWrapper);
     }
 
     @Override
     public Integer newlyAdded(Date startTime, Date endTime) {
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.between("create_time", startTime, endTime);
-        return memberStatisticsDataMapper.customSqlQuery(queryWrapper);
+        return this.baseMapper.customSqlQuery(queryWrapper);
     }
 
     @Override

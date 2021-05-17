@@ -36,10 +36,6 @@ import java.util.*;
  */
 @Service
 public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsDataMapper, StoreFlow> implements OrderStatisticsDataService {
-
-    //订单统计
-    @Autowired
-    private OrderStatisticsDataMapper orderStatisticsDataMapper;
     //平台PV统计
     @Autowired
     private PlatformViewDataService platformViewDataService;
@@ -215,7 +211,7 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
         queryWrapper.between("create_time", dates[0], dates[1]);
 //        格式化时间
         queryWrapper.groupBy("DATE_FORMAT(create_time,'%Y-%m-%d')");
-        List<OrderStatisticsDataVO> orderStatisticsDataVOS = orderStatisticsDataMapper.getOrderStatisticsData(queryWrapper);
+        List<OrderStatisticsDataVO> orderStatisticsDataVOS = this.baseMapper.getOrderStatisticsData(queryWrapper);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(dates[0]);
 

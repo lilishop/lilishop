@@ -21,7 +21,6 @@ import cn.lili.modules.statistics.util.StatisticsSuffix;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +48,6 @@ public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMap
     //会员
     @Autowired
     private MemberService memberService;
-    //平台流量统计
-    @Autowired
-    private PlatformViewDataMapper platformViewDataMapper;
     //缓存
     @Autowired
     private Cache cache;
@@ -242,7 +238,7 @@ public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMap
             } else {
                 queryWrapper.eq("store_id", -1);
             }
-            return platformViewDataMapper.count(queryWrapper);
+            return this.count(queryWrapper);
         }
     }
 

@@ -37,8 +37,6 @@ import java.util.Map;
 
 public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMapper, WechatMPMessage> implements WechatMPMessageService {
     @Autowired
-    private WechatMPMessageMapper wechatMPMessageMapper;
-    @Autowired
     private WechatAccessTokenUtil wechatAccessTokenUtil;
 
     //get 获取所有的模版
@@ -53,7 +51,7 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
 
     @Override
     public void init() {
-        wechatMPMessageMapper.deleteAll();
+        this.baseMapper.deleteAll();
         try {
             String accessToken = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
             //获取已有模版，删除

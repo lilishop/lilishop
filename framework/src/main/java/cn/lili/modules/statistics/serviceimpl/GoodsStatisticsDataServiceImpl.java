@@ -30,12 +30,6 @@ import java.util.List;
 @Service
 public class GoodsStatisticsDataServiceImpl extends ServiceImpl<GoodsStatisticsDataMapper, StoreFlow> implements GoodsStatisticsDataService {
 
-    /**
-     * 商品统计
-     */
-    @Autowired
-    private GoodsStatisticsDataMapper goodsStatisticsDataMapper;
-
     @Override
     public List<GoodsStatisticsDataVO> getGoodsStatisticsData(GoodsStatisticsQueryParam goodsStatisticsQueryParam, Integer num) {
         //获取查询条件
@@ -47,7 +41,7 @@ public class GoodsStatisticsDataServiceImpl extends ServiceImpl<GoodsStatisticsD
         queryWrapper.eq(!StringUtils.isEmpty(goodsStatisticsQueryParam.getStoreId()), "store_id", goodsStatisticsQueryParam.getStoreId());
         //查询前一百条记录
         Page page = new Page<GoodsStatisticsDataVO>(1, num);
-        return goodsStatisticsDataMapper.getGoodsStatisticsData(page, queryWrapper);
+        return this.baseMapper.getGoodsStatisticsData(page, queryWrapper);
     }
 
     @Override
@@ -56,7 +50,7 @@ public class GoodsStatisticsDataServiceImpl extends ServiceImpl<GoodsStatisticsD
         QueryWrapper queryWrapper = getQueryWrapper(goodsStatisticsQueryParam);
         //根据分类分组
         queryWrapper.groupBy("category_id");
-        return goodsStatisticsDataMapper.getCateGoryStatisticsData(queryWrapper);
+        return this.baseMapper.getCateGoryStatisticsData(queryWrapper);
     }
 
 

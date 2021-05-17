@@ -34,9 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class DistributionGoodsServiceImpl extends ServiceImpl<DistributionGoodsMapper, DistributionGoods> implements DistributionGoodsService {
 
-    //分销商品
-    @Autowired
-    private DistributionGoodsMapper distributionGoodsMapper;
     //分销员
     @Autowired
     private DistributionService distributionService;
@@ -48,22 +45,22 @@ public class DistributionGoodsServiceImpl extends ServiceImpl<DistributionGoodsM
     public IPage<DistributionGoodsVO> goodsPage(DistributionGoodsSearchParams searchParams) {
         //获取商家的分销商品列表
         if (UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
-            return distributionGoodsMapper.getDistributionGoodsVO(PageUtil.initPage(searchParams), searchParams.storeQueryWrapper());
+            return this.baseMapper.getDistributionGoodsVO(PageUtil.initPage(searchParams), searchParams.storeQueryWrapper());
         } else if (UserContext.getCurrentUser().getRole().equals(UserEnums.MEMBER)) {
             //判断当前登录用户是否为分销员
             Distribution distribution = distributionService.getDistribution();
             if (distribution != null) {
                 //判断查看已选择的分销商品列表
                 if (searchParams.isChecked()) {
-                    return distributionGoodsMapper.selectGoods(PageUtil.initPage(searchParams), searchParams.distributionQueryWrapper(), distribution.getId());
+                    return this.baseMapper.selectGoods(PageUtil.initPage(searchParams), searchParams.distributionQueryWrapper(), distribution.getId());
                 } else {
-                    return distributionGoodsMapper.notSelectGoods(PageUtil.initPage(searchParams), searchParams.distributionQueryWrapper(), distribution.getId());
+                    return this.baseMapper.notSelectGoods(PageUtil.initPage(searchParams), searchParams.distributionQueryWrapper(), distribution.getId());
                 }
             }
             throw new ServiceException(ResultCode.DISTRIBUTION_NOT_EXIST);
         }
         //如果是平台则直接进行查询
-        return distributionGoodsMapper.getDistributionGoodsVO(PageUtil.initPage(searchParams), searchParams.distributionQueryWrapper());
+        return this.baseMapper.getDistributionGoodsVO(PageUtil.initPage(searchParams), searchParams.distributionQueryWrapper());
     }
 
     @Override

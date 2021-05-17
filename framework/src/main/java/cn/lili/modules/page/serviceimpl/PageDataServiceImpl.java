@@ -1,7 +1,7 @@
 package cn.lili.modules.page.serviceimpl;
 
-import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
@@ -18,8 +18,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -30,8 +28,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> implements PageDataService {
-    @Autowired
-    private PageDataMapper pageDataMapper;
 
     @Override
     public void addStorePageData(String storeId) {
@@ -116,7 +112,7 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
             queryWrapper.eq(pageData.getNum() != null, "num", pageData.getNum());
         }
         //判断是否为唯一的页面
-        if (pageDataMapper.getPageDataNum(queryWrapper) == 1) {
+        if (this.baseMapper.getPageDataNum(queryWrapper) == 1) {
             throw new ServiceException(ResultCode.PAGE_DELETE_ERROR);
         }
         return this.removeById(id);
@@ -136,7 +132,7 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
 
         queryWrapper.eq("page_client_type", pageDataDTO.getPageClientType());
 
-        return pageDataMapper.getPageData(queryWrapper);
+        return this.baseMapper.getPageData(queryWrapper);
     }
 
     @Override
@@ -146,7 +142,7 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
         queryWrapper.eq(pageDataDTO.getNum() != null, "num", pageDataDTO.getNum());
         queryWrapper.eq(pageDataDTO.getPageClientType() != null, "page_client_type", pageDataDTO.getPageClientType());
 
-        return pageDataMapper.getPageDataList(PageUtil.initPage(pageVO), queryWrapper);
+        return this.baseMapper.getPageDataList(PageUtil.initPage(pageVO), queryWrapper);
 
     }
 }

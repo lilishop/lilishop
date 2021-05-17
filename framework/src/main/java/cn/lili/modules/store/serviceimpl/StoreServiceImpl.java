@@ -2,8 +2,8 @@ package cn.lili.modules.store.serviceimpl;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
@@ -35,7 +35,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,9 +51,6 @@ import java.util.Optional;
 @Transactional(rollbackFor = Exception.class)
 public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements StoreService {
 
-    //店铺
-    @Autowired
-    private StoreMapper storeMapper;
     //会员
     @Autowired
     private MemberService memberService;
@@ -76,12 +72,12 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
 
     @Override
     public IPage<StoreVO> findByConditionPage(StoreSearchParams storeSearchParams, PageVO page) {
-        return storeMapper.getStoreList(PageUtil.initPage(page), storeSearchParams.queryWrapper());
+        return this.baseMapper.getStoreList(PageUtil.initPage(page), storeSearchParams.queryWrapper());
     }
 
     @Override
     public StoreVO getStoreDetail() {
-        StoreVO storeVO = storeMapper.getStoreDetail(UserContext.getCurrentUser().getStoreId());
+        StoreVO storeVO = this.baseMapper.getStoreDetail(UserContext.getCurrentUser().getStoreId());
         storeVO.setNickName(UserContext.getCurrentUser().getNickName());
         return storeVO;
     }
@@ -169,7 +165,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
 
     @Override
     public boolean audit(String id, Integer passed) {
-        Store store = storeMapper.selectById(id);
+        Store store = this.getById(id);
         if (store == null) {
             throw new ServiceException(ResultCode.STORE_NOT_EXIST);
         }

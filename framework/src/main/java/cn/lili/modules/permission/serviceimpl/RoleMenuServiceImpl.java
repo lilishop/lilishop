@@ -7,7 +7,6 @@ import cn.lili.modules.permission.mapper.RoleMenuMapper;
 import cn.lili.modules.permission.service.RoleMenuService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,15 +26,12 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> i
     //菜单
     @Autowired
     private MenuMapper menuMapper;
-    //角色菜单
-    @Autowired
-    private RoleMenuMapper roleMenuMapper;
 
     @Override
     public List<RoleMenu> findByRoleId(String roleId) {
         QueryWrapper<RoleMenu> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("role_id", roleId);
-        return roleMenuMapper.selectList(queryWrapper);
+        return this.baseMapper.selectList(queryWrapper);
     }
 
     @Override
@@ -61,13 +57,13 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> i
         //删除
         QueryWrapper<RoleMenu> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("role_id", roleId);
-        roleMenuMapper.delete(queryWrapper);
+        this.remove(queryWrapper);
     }
     @Override
     public void deleteRoleMenu(List<String> roleId) {
         //删除
         QueryWrapper<RoleMenu> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("role_id", roleId);
-        roleMenuMapper.delete(queryWrapper);
+        this.remove(queryWrapper);
     }
 }

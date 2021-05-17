@@ -18,7 +18,6 @@ import cn.lili.modules.order.trade.service.RechargeService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,9 +34,6 @@ import java.util.Date;
 @Transactional
 public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> implements RechargeService {
 
-    //预存款
-    @Autowired
-    private RechargeMapper rechargeMapper;
     //会员预存款
     @Autowired
     private MemberWalletService memberWalletService;
@@ -51,7 +47,7 @@ public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> i
         //整合充值订单数据
         Recharge recharge = new Recharge(sn, authUser.getId(), authUser.getUsername(), price);
         //添加预存款充值账单
-        this.rechargeMapper.insert(recharge);
+        this.save(recharge);
         //返回预存款
         return recharge;
     }
@@ -75,20 +71,20 @@ public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> i
             queryWrapper.between("pay_time", start, end);
         }
         //查询返回数据
-        return this.rechargeMapper.selectPage(PageUtil.initPage(page), queryWrapper);
+        return this.page(PageUtil.initPage(page), queryWrapper);
     }
 
     @Override
     public void paySuccess(String sn, String receivableNo) {
         //根据sn获取支付账单
-        Recharge recharge = this.rechargeMapper.selectOne(new QueryWrapper<Recharge>().eq("recharge_sn", sn));
+        Recharge recharge = this.getOne(new QueryWrapper<Recharge>().eq("recharge_sn", sn));
         //如果支付账单不为空则进行一下逻辑
         if (recharge != null) {
             //将此账单支付状态更改为已支付
             recharge.setPayStatus(PayStatusEnum.PAID.name());
             recharge.setReceivableNo(receivableNo);
             //执行保存操作
-            this.rechargeMapper.updateById(recharge);
+            this.updateById(recharge);
             //增加预存款余额
             memberWalletService.increase(recharge.getRechargeMoney(), recharge.getMemberId(), "会员余额充值，充值单号为：" + recharge.getRechargeSn(), DepositServiceTypeEnum.WALLET_RECHARGE.name());
         }
@@ -96,7 +92,7 @@ public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> i
 
     @Override
     public Recharge getRecharge(String sn) {
-        Recharge recharge = this.rechargeMapper.selectOne(new QueryWrapper<Recharge>().eq("recharge_sn", sn));
+        Recharge recharge = this.getOne(new QueryWrapper<Recharge>().eq("recharge_sn", sn));
         if (recharge != null) {
             return recharge;
         }

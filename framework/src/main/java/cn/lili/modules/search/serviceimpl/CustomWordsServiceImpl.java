@@ -24,7 +24,6 @@ import java.util.List;
 @Service
 public class CustomWordsServiceImpl extends ServiceImpl<CustomWordsMapper, CustomWords> implements CustomWordsService {
 
-
     @Override
     public String deploy() {
         LambdaQueryWrapper<CustomWords> queryWrapper = new LambdaQueryWrapper<CustomWords>().eq(CustomWords::getDisabled, 1);

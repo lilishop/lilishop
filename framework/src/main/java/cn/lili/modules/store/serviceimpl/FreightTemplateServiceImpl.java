@@ -19,7 +19,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,10 +36,6 @@ import java.util.List;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMapper, FreightTemplate> implements FreightTemplateService {
-
-    //配送模板
-    @Autowired
-    private FreightTemplateMapper freightTemplateMapper;
     //配送子模板
     @Autowired
     private FreightTemplateChildService freightTemplateChildService;
@@ -60,7 +55,7 @@ public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMappe
         //查询运费模板
         LambdaQueryWrapper<FreightTemplate> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(FreightTemplate::getStoreId, UserContext.getCurrentUser().getId());
-        List<FreightTemplate> freightTemplates = freightTemplateMapper.selectList(lambdaQueryWrapper);
+        List<FreightTemplate> freightTemplates = this.baseMapper.selectList(lambdaQueryWrapper);
         if (!freightTemplates.isEmpty()) {
             //如果模板不为空则查询子模板信息
             for (FreightTemplate freightTemplate : freightTemplates) {
@@ -80,18 +75,16 @@ public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMappe
 
     @Override
     public IPage<FreightTemplate> getFreightTemplate(PageVO pageVo) {
-        //获取当前登录商家账号
-        AuthUser tokenUser = UserContext.getCurrentUser();
         LambdaQueryWrapper<FreightTemplate> lambdaQueryWrapper = Wrappers.lambdaQuery();
-        lambdaQueryWrapper.eq(FreightTemplate::getStoreId, UserContext.getCurrentUser().getId());
-        return freightTemplateMapper.selectPage(PageUtil.initPage(pageVo), lambdaQueryWrapper);
+        lambdaQueryWrapper.eq(FreightTemplate::getStoreId, UserContext.getCurrentUser().getStoreId());
+        return this.baseMapper.selectPage(PageUtil.initPage(pageVo), lambdaQueryWrapper);
     }
 
     @Override
     public FreightTemplateVO getFreightTemplate(String id) {
         FreightTemplateVO freightTemplateVO = new FreightTemplateVO();
         //获取运费模板
-        FreightTemplate freightTemplate = freightTemplateMapper.selectById(id);
+        FreightTemplate freightTemplate = this.getById(id);
         if (freightTemplate != null) {
             //复制属性
             BeanUtils.copyProperties(freightTemplate, freightTemplateVO);
@@ -112,7 +105,7 @@ public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMappe
         //复制属性
         BeanUtils.copyProperties(freightTemplateVO, freightTemplate);
         //添加运费模板
-        freightTemplateMapper.insert(freightTemplate);
+        this.save(freightTemplate);
         //给子模板赋父模板的id
         List<FreightTemplateChild> list = new ArrayList<>();
         for (FreightTemplateChild freightTemplateChild : freightTemplateVO.getFreightTemplateChildList()) {
@@ -138,7 +131,7 @@ public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMappe
         //复制属性
         BeanUtils.copyProperties(freightTemplateVO, freightTemplate);
         //修改运费模板
-        freightTemplateMapper.updateById(freightTemplate);
+        this.updateById(freightTemplate);
         //删除模板子内容
         freightTemplateChildService.removeFreightTemplate(freightTemplateVO.getId());
         //给子模板赋父模板的id

@@ -14,7 +14,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.elasticsearch.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,15 +28,12 @@ import java.util.List;
 @Service
 @Transactional
 public class StoreMessageServiceImpl extends ServiceImpl<StoreMessageMapper, StoreMessage> implements StoreMessageService {
-    @Autowired
-    private StoreMessageMapper storeMessageMapper;
 
     @Override
     public boolean deleteByMessageId(String messageId) {
         StoreMessage storeMessage = this.getById(messageId);
         if (storeMessage != null) {
-            int result = storeMessageMapper.deleteById(messageId);
-            return result > 0;
+            return this.removeById(messageId);
         }
         return false;
 
@@ -60,7 +56,7 @@ public class StoreMessageServiceImpl extends ServiceImpl<StoreMessageMapper, Sto
             queryWrapper.eq("status", storeMessageQueryVO.getStatus());
         }
         queryWrapper.orderByDesc("status");
-        return storeMessageMapper.queryByParams(PageUtil.initPage(pageVO), queryWrapper);
+        return this.baseMapper.queryByParams(PageUtil.initPage(pageVO), queryWrapper);
 
     }
 
@@ -78,8 +74,7 @@ public class StoreMessageServiceImpl extends ServiceImpl<StoreMessageMapper, Sto
                 throw new ResourceNotFoundException(ResultCode.USER_AUTHORITY_ERROR.message());
             }
             storeMessage.setStatus(status);
-            int result = this.storeMessageMapper.updateById(storeMessage);
-            return result > 0;
+            return this.updateById(storeMessage);
         }
         return false;
     }

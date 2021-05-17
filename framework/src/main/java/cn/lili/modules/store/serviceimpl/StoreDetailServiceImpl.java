@@ -19,7 +19,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,9 +36,6 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, StoreDetail> implements StoreDetailService {
 
-    //店铺详情数据层
-    @Autowired
-    private StoreDetailMapper storeDetailMapper;
     //店铺
     @Autowired
     private StoreService storeService;
@@ -49,12 +45,12 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
 
     @Override
     public StoreDetailVO getStoreDetailVO(String storeId) {
-        return storeDetailMapper.getStoreDetail(storeId);
+        return this.baseMapper.getStoreDetail(storeId);
     }
 
     @Override
     public StoreDetailVO getStoreDetailVOByMemberId(String memberId) {
-        return storeDetailMapper.getStoreDetailByMemberId(memberId);
+        return this.baseMapper.getStoreDetailByMemberId(memberId);
     }
 
     @Override
@@ -75,17 +71,17 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
 
     @Override
     public StoreBasicInfoVO getStoreBasicInfoDTO(String storeId) {
-        return storeDetailMapper.getStoreBasicInfoDTO(storeId);
+        return this.baseMapper.getStoreBasicInfoDTO(storeId);
     }
 
     @Override
     public StoreAfterSaleAddressDTO getStoreAfterSaleAddressDTO() {
-        return storeDetailMapper.getStoreAfterSaleAddressDTO(UserContext.getCurrentUser().getStoreId());
+        return this.baseMapper.getStoreAfterSaleAddressDTO(UserContext.getCurrentUser().getStoreId());
     }
 
     @Override
     public StoreAfterSaleAddressDTO getStoreAfterSaleAddressDTO(String id) {
-        StoreAfterSaleAddressDTO storeAfterSaleAddressDTO = storeDetailMapper.getStoreAfterSaleAddressDTO(id);
+        StoreAfterSaleAddressDTO storeAfterSaleAddressDTO = this.baseMapper.getStoreAfterSaleAddressDTO(id);
         if (storeAfterSaleAddressDTO == null) {
             storeAfterSaleAddressDTO = new StoreAfterSaleAddressDTO();
         }

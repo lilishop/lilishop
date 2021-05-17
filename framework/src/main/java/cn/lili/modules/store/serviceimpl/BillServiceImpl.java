@@ -49,9 +49,6 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     //商家流水
     @Autowired
     private StoreFlowService storeFlowService;
-    //结算单
-    @Autowired
-    private BillMapper billMapper;
 
     @Override
     public void createBill(String storeId, Date startTime) {
@@ -77,7 +74,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         bill.setSn(SnowFlake.createStr("B"));
 
         //入账结算信息
-        Bill orderBill = billMapper.getOrderBill(storeId, FlowTypeEnum.PAY.name());
+        Bill orderBill = this.baseMapper.getOrderBill(storeId, FlowTypeEnum.PAY.name());
         Double orderPrice = 0D;
         if (orderBill != null) {
             bill.setOrderPrice(orderBill.getOrderPrice());
@@ -89,7 +86,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
 
 
         //退款结算信息
-        Bill refundBill = billMapper.getRefundBill(storeId, FlowTypeEnum.REFUND.name());
+        Bill refundBill = this.baseMapper.getRefundBill(storeId, FlowTypeEnum.REFUND.name());
         Double refundPrice = 0D;
         if(refundBill!=null){
             bill.setRefundPrice(refundBill.getRefundPrice());
@@ -152,7 +149,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     @Override
     public IPage<BillListVO> billPage(BillSearchParams billSearchParams) {
         QueryWrapper<BillListVO> queryWrapper = billSearchParams.queryWrapper();
-        return billMapper.queryBillPage(PageUtil.initPage(billSearchParams), queryWrapper);
+        return this.baseMapper.queryBillPage(PageUtil.initPage(billSearchParams), queryWrapper);
     }
 
     @Override

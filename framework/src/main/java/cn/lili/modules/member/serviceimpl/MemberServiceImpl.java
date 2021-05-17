@@ -62,9 +62,6 @@ import java.util.List;
 @Transactional
 public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> implements MemberService {
 
-    //会员数据处理层
-    @Autowired
-    private MemberMapper memberMapper;
     //会员token
     @Autowired
     private MemberTokenGenerate memberTokenGenerate;
@@ -90,7 +87,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public Member findByUsername(String userName) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper();
         queryWrapper.eq("username", userName);
-        return memberMapper.selectOne(queryWrapper);
+        return this.baseMapper.selectOne(queryWrapper);
     }
 
 
@@ -107,7 +104,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public boolean findByMobile(String uuid, String mobile) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper();
         queryWrapper.eq("mobile", mobile);
-        Member member = memberMapper.selectOne(queryWrapper);
+        Member member = this.baseMapper.selectOne(queryWrapper);
         if (member == null) {
             throw new ServiceException(ResultCode.USER_NOT_PHONE);
         }
@@ -204,7 +201,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public Token mobilePhoneLogin(String mobilePhone) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper();
         queryWrapper.eq("mobile", mobilePhone);
-        Member member = memberMapper.selectOne(queryWrapper);
+        Member member = this.baseMapper.selectOne(queryWrapper);
         //如果手机号不存在则自动注册用户
         if (member == null) {
             member = new Member(mobilePhone, UuidUtils.getUUID(), mobilePhone);
@@ -413,7 +410,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public List<MemberDistributionVO> distribution() {
-        List<MemberDistributionVO> memberDistributionVOS = memberMapper.distribution();
+        List<MemberDistributionVO> memberDistributionVOS = this.baseMapper.distribution();
         return memberDistributionVOS;
     }
 
@@ -426,7 +423,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     private Member findByPhone(String mobilePhone) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper();
         queryWrapper.eq("mobile", mobilePhone);
-        return memberMapper.selectOne(queryWrapper);
+        return this.baseMapper.selectOne(queryWrapper);
     }
 
     /**

@@ -82,9 +82,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     private static final String ORDER_SN_COLUMN = "order_sn";
 
-    //订单数据层
-    @Autowired
-    private OrderMapper orderMapper;
     //延时任务
     @Autowired
     private TimeTrigger timeTrigger;
@@ -479,7 +476,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         queryWrapper.eq("o.delete_flag", false);
         queryWrapper.groupBy("o.id");
         queryWrapper.orderByDesc("o.id");
-        return orderMapper.queryByParams(PageUtil.initPage(pageVO), queryWrapper);
+        return this.baseMapper.queryByParams(PageUtil.initPage(pageVO), queryWrapper);
     }
 
     @Override

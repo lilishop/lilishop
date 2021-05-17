@@ -61,9 +61,6 @@ import java.util.Map;
 @Transactional
 public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMapper, MemberEvaluation> implements MemberEvaluationService {
 
-    //会员评价数据层
-    @Autowired
-    private MemberEvaluationMapper memberEvaluationMapper;
     //订单
     @Autowired
     private OrderService orderService;
@@ -91,12 +88,12 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
 
     @Override
     public IPage<MemberEvaluationListVO> queryByParams(StoreEvaluationQueryParams storeEvaluationQueryParams) {
-        return memberEvaluationMapper.getMemberEvaluationList(PageUtil.initPage(storeEvaluationQueryParams), storeEvaluationQueryParams.queryWrapper());
+        return this.baseMapper.getMemberEvaluationList(PageUtil.initPage(storeEvaluationQueryParams), storeEvaluationQueryParams.queryWrapper());
     }
 
     @Override
     public IPage<MemberEvaluationListVO> queryPage(EvaluationQueryParams evaluationQueryParams, PageVO page) {
-        return memberEvaluationMapper.getMemberEvaluationList(PageUtil.initPage(page), evaluationQueryParams.queryWrapper());
+        return this.baseMapper.getMemberEvaluationList(PageUtil.initPage(page), evaluationQueryParams.queryWrapper());
     }
 
     @Override
@@ -163,7 +160,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
     @Override
     public EvaluationNumberVO getEvaluationNumber(String goodsId) {
         EvaluationNumberVO evaluationNumberVO = new EvaluationNumberVO();
-        List<Map<String, Object>> list = memberEvaluationMapper.getEvaluationNumber(goodsId);
+        List<Map<String, Object>> list = this.baseMapper.getEvaluationNumber(goodsId);
 
         Integer good = 0;
         Integer moderate = 0;
