@@ -52,7 +52,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
         //获取积分设置
         PointSetting pointSetting=getPointSetting();
         //赠送会员积分
-        memberService.updateMemberPoint(Long.valueOf(pointSetting.getRegister().longValue()), 1, member.getId(), "会员注册，赠送积分" + pointSetting.getRegister() + "分");
+        memberService.updateMemberPoint(Long.valueOf(pointSetting.getRegister().longValue()), true, member.getId(), "会员注册，赠送积分" + pointSetting.getRegister() + "分");
     }
 
     /**
@@ -64,7 +64,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
         //获取积分设置
         PointSetting pointSetting=getPointSetting();
         //赠送会员积分
-        memberService.updateMemberPoint(Long.valueOf(pointSetting.getComment().longValue()), 1, memberEvaluation.getMemberId(), "会员评价，赠送积分" + pointSetting.getComment() + "分");
+        memberService.updateMemberPoint(Long.valueOf(pointSetting.getComment().longValue()), true, memberEvaluation.getMemberId(), "会员评价，赠送积分" + pointSetting.getComment() + "分");
     }
 
     /**
@@ -85,7 +85,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
             //计算赠送积分数量
             Double point=CurrencyUtil.mul(pointSetting.getMoney(),order.getFlowPrice(),0);
             //赠送会员积分
-            memberService.updateMemberPoint(point.longValue(), 1, order.getMemberId(), "会员下单，赠送积分" + point + "分");
+            memberService.updateMemberPoint(point.longValue(), true, order.getMemberId(), "会员下单，赠送积分" + point + "分");
 
         }
     }
@@ -102,7 +102,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
             //计算扣除积分数量
             Double point=CurrencyUtil.mul(pointSetting.getMoney(), afterSale.getActualRefundPrice(),0);
             //扣除会员积分
-            memberService.updateMemberPoint(point.longValue(), 1, afterSale.getMemberId(), "会员退款，扣除积分" + point + "分");
+            memberService.updateMemberPoint(point.longValue(), false, afterSale.getMemberId(), "会员退款，扣除积分" + point + "分");
 
         }
     }

@@ -123,7 +123,7 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
                 throw new ServiceException(ResultCode.PAY_POINT_ENOUGH);
             }
             boolean result = memberService.updateMemberPoint(tradeDTO.getPriceDetailDTO().
-                            getPayPoint().longValue(), 0, tradeDTO.getMemberId(),
+                            getPayPoint().longValue(), false, tradeDTO.getMemberId(),
                     "订单【" + orderSns + "】创建，积分扣减");
 
             if (!result) {

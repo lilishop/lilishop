@@ -21,7 +21,6 @@ import cn.lili.modules.system.service.SettingService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
-import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -137,7 +136,7 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
                     content = "会员签到第" + day + "天，赠送积分" + point + "分";
                 }
                 //赠送会员积分
-                memberService.updateMemberPoint(point, 1, memberId, content);
+                memberService.updateMemberPoint(point, true, memberId, content);
             }
         } catch (Exception e) {
             e.printStackTrace();

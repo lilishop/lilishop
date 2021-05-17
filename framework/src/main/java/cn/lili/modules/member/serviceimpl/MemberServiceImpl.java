@@ -354,13 +354,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     @PointLogPoint
-    public Boolean updateMemberPoint(Long point, Integer type, String memberId, String content) {
+    public Boolean updateMemberPoint(Long point, Boolean type, String memberId, String content) {
         //获取当前会员信息
         Member member = this.getById(memberId);
         if (member != null) {
             //积分变动后的会员积分
             long currentPoint;
-            if (type == 1) {
+            if (type) {
                 currentPoint = CurrencyUtil.add(member.getPoint(), point).longValue();
             } else {
                 currentPoint = CurrencyUtil.sub(member.getPoint(), point) < 0 ? 0 : new Double(CurrencyUtil.sub(member.getPoint(), point)).longValue();
@@ -384,13 +384,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @Override
-    public Boolean updateMemberExperience(Long experience, Integer type, String memberId, String content) {
+    public Boolean updateMemberExperience(Long experience, Boolean type, String memberId, String content) {
         //获取当前会员信息
         Member member = this.getById(memberId);
         if (member != null) {
             //积分变动后的会员积分
             long currentExperience;
-            if (type == 1) {
+            if (type) {
                 currentExperience = CurrencyUtil.add(member.getPoint(), experience).longValue();
             } else {
                 currentExperience = CurrencyUtil.sub(member.getPoint(), experience) < 0 ? 0 : new Double(CurrencyUtil.sub(member.getExperience(), experience)).longValue();
