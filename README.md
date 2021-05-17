@@ -90,13 +90,15 @@ PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_
 
 ### 功能列表
 
+
+
 #### 平台功能
 
 ![平台功能](https://pickmall.cn/assets/imgs/other/managerList.jpg)
 
 
 
-####商家端功能
+#### 商家端功能
 
 ![商家端功能](https://pickmall.cn/assets/imgs/other/storeList.jpg)
 
@@ -106,7 +108,9 @@ PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_
 
 ### 功能展示
 
-####移动端
+
+
+#### 移动端
 
 <img src="https://pickmall.cn/assets/imgs/other/app.gif" alt="移动端功能展示" style="zoom:100;" />
 
