@@ -66,6 +66,8 @@ Lilishop 是一款Java开发，基于SpringBoot的B2B2C多用户商城，前端�
 
 
 
+PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql
+
 ##### 各个地址
 
 | API           | 地址            |
@@ -92,9 +94,13 @@ Lilishop 是一款Java开发，基于SpringBoot的B2B2C多用户商城，前端�
 
 ![平台功能](https://pickmall.cn/assets/imgs/other/managerList.jpg)
 
+
+
 ####商家端功能
 
 ![商家端功能](https://pickmall.cn/assets/imgs/other/storeList.jpg)
+
+
 
 
 
@@ -106,9 +112,13 @@ Lilishop 是一款Java开发，基于SpringBoot的B2B2C多用户商城，前端�
 
 
 
+
+
 #### 管理端
 
 <img src="https://pickmall.cn/assets/imgs/other/manager.gif" alt="移动端功能展示" />
+
+
 
 ### 技术选型
 
