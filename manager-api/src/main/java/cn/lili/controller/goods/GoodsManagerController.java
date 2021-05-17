@@ -16,7 +16,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,7 +57,6 @@ public class GoodsManagerController {
     public IPage<Goods> getAuthPage(GoodsSearchParams goodsSearchParams) {
 
         goodsSearchParams.setIsAuth(GoodsAuthEnum.TOBEAUDITED.name());
-        goodsSearchParams.setMarketEnable(GoodsStatusEnum.UPPER.name());
         return goodsService.queryByParams(goodsSearchParams);
     }
 

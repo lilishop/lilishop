@@ -35,7 +35,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -263,8 +262,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         updateWrapper.set(Goods::getMarketEnable, goodsStatusEnum.name());
         updateWrapper.set(Goods::getUnderMessage, underReason);
         updateWrapper.in(Goods::getId, goodsIds);
-        //商品审核通过的才可以上架
-        updateWrapper.eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name());
         this.update(updateWrapper);
 
         //修改规格商品
