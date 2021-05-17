@@ -46,11 +46,14 @@ public class ElasticsearchController {
 
     @GetMapping
     public void init() {
+        //查询商品信息
         LambdaQueryWrapper<GoodsSku> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(GoodsSku::getIsAuth, GoodsAuthEnum.PASS.name());
         queryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
+
         List<GoodsSku> list = goodsSkuService.list(queryWrapper);
         List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
+        //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
         for (GoodsSku goodsSku : list) {
             EsGoodsIndex index = new EsGoodsIndex(goodsSku);
             Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
@@ -58,6 +61,7 @@ public class ElasticsearchController {
             esGoodsIndices.add(index);
             stringRedisTemplate.opsForValue().set(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity().toString());
         }
+        //初始化商品索引
         esGoodsIndexService.initIndex(esGoodsIndices);
         Assertions.assertTrue(true);
     }

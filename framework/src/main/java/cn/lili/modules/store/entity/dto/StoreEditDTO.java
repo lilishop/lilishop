@@ -20,7 +20,7 @@ public class StoreEditDTO extends StoreDetail {
     private String storeDisable;
 
     @ApiModelProperty(value = "是否自营", required = true)
-    private Integer selfOperated;
+    private Boolean selfOperated;
 
     @ApiModelProperty(value = "经纬度")
     private String storeCenter;

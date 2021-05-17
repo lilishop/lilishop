@@ -24,7 +24,6 @@ import cn.lili.modules.search.repository.EsGoodsIndexRepository;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.IterableUtil;
 import org.elasticsearch.action.search.SearchResponse;
@@ -44,6 +43,7 @@ import java.util.stream.Collectors;
 
 /**
  * 商品索引业务层实现
+ *
  * @author paulG
  * @since 2020/10/14
  **/
@@ -64,19 +64,26 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
     @Override
     public void addIndex(EsGoodsIndex goods) {
+        //索引名称拼接
         String indexName = elasticsearchProperties.getIndexPrefix() + "_" + EsSuffix.GOODS_INDEX_NAME;
         try {
+            //分词器分词
             AnalyzeRequest analyzeRequest = AnalyzeRequest.withIndexAnalyzer(indexName, "ik_max_word", goods.getGoodsName());
             AnalyzeResponse analyze = client.indices().analyze(analyzeRequest, RequestOptions.DEFAULT);
             List<AnalyzeResponse.AnalyzeToken> tokens = analyze.getTokens();
+
             if (goods.getAttrList() != null && !goods.getAttrList().isEmpty()) {
+                //保存分词
                 for (EsGoodsAttribute esGoodsAttribute : goods.getAttrList()) {
                     wordsToDb(esGoodsAttribute.getValue());
                 }
             }
+            //分析词条
             for (AnalyzeResponse.AnalyzeToken token : tokens) {
+                //保存词条进入数据库
                 wordsToDb(token.getTerm());
             }
+            //生成索引
             goodsIndexRepository.save(goods);
         } catch (IOException e) {
             log.error("为商品[" + goods.getGoodsName() + "]生成索引异常", e);
@@ -112,6 +119,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Override
     public void updateIndexCommentNum(String id, Integer commentNum, Integer highPraiseNum, Double grade) {
         EsGoodsIndex goodsIndex = this.findById(id);
+        //写入新的商品数据
         goodsIndex.setCommentNum(commentNum);
         goodsIndex.setHighPraiseNum(highPraiseNum);
         goodsIndex.setGrade(grade);
@@ -139,8 +147,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
     @Override
     public void initIndex(List<EsGoodsIndex> goodsIndexList) {
+        //索引名称拼接
         String indexName = elasticsearchProperties.getIndexPrefix() + "_" + EsSuffix.GOODS_INDEX_NAME;
         // deleteIndexRequest(indexName);
+        //如果索引不存在，则创建索引
         if (!indexExist(indexName)) {
             createIndexRequest(indexName);
         }
@@ -156,11 +166,14 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     public void updateEsGoodsIndex(String id, BasePromotion promotion, String key, Double price) {
         EsGoodsIndex goodsIndex = findById(id);
         if (goodsIndex != null) {
+            //如果有促销活动开始，则将促销金额写入
             if (promotion.getPromotionStatus().equals(PromotionStatusEnum.START.name()) && price != null) {
                 goodsIndex.setPromotionPrice(price);
             } else {
+                //否则促销金额为商品原价
                 goodsIndex.setPromotionPrice(goodsIndex.getPrice());
             }
+            //更新索引
             this.updateGoodsIndexPromotion(goodsIndex, key, promotion);
         } else {
             log.error("更新索引商品促销信息失败！skuId 为 【{}】的索引不存在！", id);
@@ -170,6 +183,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Override
     public void updateEsGoodsIndexByList(List<PromotionGoods> promotionGoodsList, BasePromotion promotion, String key) {
         if (promotionGoodsList != null) {
+            //循环更新 促销商品索引
             for (PromotionGoods promotionGoods : promotionGoodsList) {
                 updateEsGoodsIndex(promotionGoods.getSkuId(), promotion, key, promotionGoods.getPrice());
             }
@@ -186,15 +200,20 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Override
     public void updateEsGoodsIndexAllByList(BasePromotion promotion, String key) {
         List<EsGoodsIndex> goodsIndices;
+        //如果storeid不为空，则表示是店铺活动
         if (promotion.getStoreId() != null) {
             EsGoodsSearchDTO searchDTO = new EsGoodsSearchDTO();
             searchDTO.setStoreId(promotion.getStoreId());
+            //查询出店铺商品
             Page<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(searchDTO, null);
             goodsIndices = esGoodsIndices.getContent();
         } else {
+            //否则是平台活动
             Iterable<EsGoodsIndex> all = goodsIndexRepository.findAll();
+//            查询出全部商品
             goodsIndices = new ArrayList<>(IterableUtil.toCollection(all));
         }
+        //更新商品索引
         for (EsGoodsIndex goodsIndex : goodsIndices) {
             this.updateGoodsIndexPromotion(goodsIndex, key, promotion);
         }
@@ -202,8 +221,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
     @Override
     public void deleteEsGoodsPromotionIndexByList(List<String> skuIds, PromotionTypeEnum promotionType) {
+        //批量删除活动索引
         for (String skuId : skuIds) {
             EsGoodsIndex goodsIndex = findById(skuId);
+            //商品索引不为空
             if (goodsIndex != null) {
                 Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
                 if (promotionMap != null && !promotionMap.isEmpty()) {
@@ -220,16 +241,19 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     }
 
     /**
-     * 清除所以商品索引的无效促销活动
+     * 清除所有商品索引的无效促销活动
      */
     @Override
     public void cleanInvalidPromotion() {
         Iterable<EsGoodsIndex> all = goodsIndexRepository.findAll();
         for (EsGoodsIndex goodsIndex : all) {
             Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
+            //获取商品索引
             if (promotionMap != null && !promotionMap.isEmpty()) {
+                //促销不为空则进行清洗
                 for (Map.Entry<String, Object> entry : promotionMap.entrySet()) {
                     BasePromotion promotion = (BasePromotion) entry.getValue();
+                    //判定条件为活动已结束
                     if (promotion.getEndTime().getTime() > DateUtil.date().getTime()) {
                         promotionMap.remove(entry.getKey());
                     }
@@ -258,6 +282,8 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Override
     public Map<String, Object> getPromotionMap(String id) {
         EsGoodsIndex goodsIndex = this.findById(id);
+
+        // 如果商品索引不为空，返回促销信息，否则返回空
         if (goodsIndex != null) {
             Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
             if (promotionMap == null || promotionMap.isEmpty()) {
@@ -278,11 +304,14 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Override
     public List<String> getPromotionIdByPromotionType(String id, PromotionTypeEnum promotionTypeEnum) {
         Map<String, Object> promotionMap = this.getPromotionMap(id);
+        //如果没有促销信息，则返回新的
         if (promotionMap == null || promotionMap.isEmpty()) {
             return new ArrayList<>();
         }
+        //对促销进行过滤
         List<String> keyCollect = promotionMap.keySet().stream().filter(i -> i.contains(promotionTypeEnum.name())).collect(Collectors.toList());
         List<String> promotionIds = new ArrayList<>();
+        //写入促销id
         for (String key : keyCollect) {
             BasePromotion promotion = (BasePromotion) promotionMap.get(key);
             promotionIds.add(promotion.getId());
@@ -299,25 +328,37 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Override
     public EsGoodsIndex resetEsGoodsIndex(GoodsSku goodsSku) {
         EsGoodsIndex index = new EsGoodsIndex(goodsSku);
+        //获取活动信息
         Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
+        //写入促销信息
         index.setPromotionMap(goodsCurrentPromotionMap);
         this.addIndex(index);
         return index;
     }
 
+    /**
+     * 修改商品活动索引
+     *
+     * @param goodsIndex 商品索引
+     * @param key        关键字
+     * @param promotion  活动
+     */
     private void updateGoodsIndexPromotion(EsGoodsIndex goodsIndex, String key, BasePromotion promotion) {
         Map<String, Object> promotionMap;
+        //数据非空处理，如果空给一个新的信息
         if (goodsIndex.getPromotionMap() == null || goodsIndex.getPromotionMap().isEmpty()) {
             promotionMap = new HashMap<>(1);
         } else {
             promotionMap = goodsIndex.getPromotionMap();
         }
-
-
+        //如果活动已结束
         if (promotion.getPromotionStatus().equals(PromotionStatusEnum.END.name()) || promotion.getPromotionStatus().equals(PromotionStatusEnum.CLOSE.name())) {
+            //如果存在活动
             if (promotionMap.containsKey(key)) {
+                //删除活动
                 promotionMap.remove(key);
             } else {
+                //不存在则说明是秒杀活动，尝试删除秒杀信息
                 this.removePromotionKey(key, promotionMap, PromotionTypeEnum.SECKILL.name());
             }
         } else {
@@ -337,9 +378,13 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      * @param needRemoveKeys 需移除的促销活动
      */
     private void removePromotionKey(String currentKey, Map<String, Object> promotionMap, String... needRemoveKeys) {
+        //判定是否需要移除
         if (CharSequenceUtil.containsAny(currentKey, needRemoveKeys)) {
+
             List<String> removeKeys = new ArrayList<>();
+            //促销循环
             for (String entry : promotionMap.keySet()) {
+                //需要移除则进行移除处理
                 for (String needRemoveKey : needRemoveKeys) {
                     if (entry.contains(needRemoveKey) && currentKey.contains(needRemoveKey)) {
                         removeKeys.add(entry);
@@ -347,6 +392,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                     }
                 }
             }
+            //移除促销信息
             promotionMap.keySet().removeAll(removeKeys);
         }
     }
