@@ -1,5 +1,9 @@
 ## Lilishop B2B2C商城系统
 
+##### 开源不易，如有帮助请点Star 
+[![star](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop/stargazers)
+
+
 ### 介绍
 **官网**：https://pickmall.cn
 
