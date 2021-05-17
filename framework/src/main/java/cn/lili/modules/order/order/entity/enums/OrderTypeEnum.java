@@ -25,6 +25,10 @@ public enum OrderTypeEnum {
     /**
      * 拼团订单
      */
-    PINTUAN
+    PINTUAN,
+    /**
+     * 积分订单
+     */
+    POINT
 
 }

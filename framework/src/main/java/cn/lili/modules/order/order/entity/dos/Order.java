@@ -201,35 +201,46 @@ public class Order extends BaseEntity {
 
     public Order(CartVO cartVO, TradeDTO tradeDTO) {
         String oldId = this.getId();
-        if (tradeDTO.getMemberAddress() != null) {
-            BeanUtil.copyProperties(tradeDTO.getMemberAddress(), this);
-        }
         BeanUtil.copyProperties(tradeDTO, this);
         BeanUtil.copyProperties(cartVO.getPriceDetailDTO(), this);
         BeanUtil.copyProperties(cartVO, this);
         this.setId(oldId);
-        this.setOrderType(OrderTypeEnum.NORMAL.name());
+        //循环购物车列表判断是否为促销订单
         if (cartVO.getSkuList().get(0).getPromotions() != null) {
+            //判断是否为拼团订单
             Optional<String> pintuanId = cartVO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
             if (pintuanId.isPresent()) {
-                promotionId = pintuanId.get();
                 this.setOrderType(OrderTypeEnum.PINTUAN.name());
                 if (tradeDTO.getParentOrderSn() == null) {
                     this.setParentOrderSn("");
                 }
             }
+            //判断是否为积分订单
+            Optional<String> pointGoodsId = cartVO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.POINTS_GOODS.name())).map(PromotionGoods::getPromotionId).findFirst();
+            if (pointGoodsId.isPresent()) {
+                this.setOrderType(OrderTypeEnum.POINT.name());
+                if (tradeDTO.getParentOrderSn() == null) {
+                    this.setParentOrderSn("");
+                }
+            }
+        }else{
+            this.setOrderType(OrderTypeEnum.NORMAL.name());
         }
+        //设定订单默认状态
         this.setOrderStatus(OrderStatusEnum.UNPAID.name());
         this.setPayStatus(PayStatusEnum.UNPAID.name());
         this.setDeliverStatus(DeliverStatusEnum.UNDELIVERED.name());
+        //填充订单收件人信息
         this.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());
         this.setConsigneeAddressPath(tradeDTO.getMemberAddress().getConsigneeAddressPath());
         this.setConsigneeDetail(tradeDTO.getMemberAddress().getDetail());
         this.setConsigneeMobile(tradeDTO.getMemberAddress().getMobile());
         this.setConsigneeName(tradeDTO.getMemberAddress().getName());
+        //判断是否使用平台优惠券
         if (tradeDTO.getPlatformCoupon() != null) {
             this.setUsePlatformMemberCouponId(tradeDTO.getPlatformCoupon().getMemberCoupon().getId());
         }
+        //判断是否使用店铺优惠券
         if (tradeDTO.getStoreCoupons() != null && !tradeDTO.getStoreCoupons().isEmpty()) {
             StringBuilder storeCouponIds = new StringBuilder();
             for (String s : tradeDTO.getStoreCoupons().keySet()) {
