@@ -6,13 +6,11 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.token.Token;
 import cn.lili.common.token.TokenUtil;
 import cn.lili.common.token.base.AbstractTokenGenerate;
-import cn.lili.common.enums.SwitchEnum;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.service.StoreService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,10 +35,10 @@ public class StoreTokenGenerate extends AbstractTokenGenerate {
     public Token createToken(String username, Boolean longTerm) {
         // 生成token
         Member member = memberService.findByUsername(username);
-        if (member.getHaveStore().equals(SwitchEnum.CLOSE.name())) {
+        if (!member.getHaveStore()) {
             throw new ServiceException("该会员未开通店铺");
         }
-        AuthUser user = new AuthUser(member.getUsername(), member.getId(),member.getNickName(), UserEnums.STORE);
+        AuthUser user = new AuthUser(member.getUsername(), member.getId(), member.getNickName(), UserEnums.STORE);
         LambdaQueryWrapper<Store> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Store::getMemberId, member.getId());
         Store store = storeService.getOne(queryWrapper);

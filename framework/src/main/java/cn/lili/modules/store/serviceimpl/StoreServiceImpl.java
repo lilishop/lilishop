@@ -2,7 +2,6 @@ package cn.lili.modules.store.serviceimpl;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
@@ -35,7 +34,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,7 +100,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             throw new ServiceException(ResultCode.USER_NOT_EXIST);
         }
         //判断是否拥有店铺
-        if (SwitchEnum.OPEN.name().equals(member.getHaveStore())) {
+        if (member.getHaveStore()) {
             throw new ServiceException(ResultCode.STORE_APPLY_DOUBLE_ERROR);
         }
 
@@ -118,7 +116,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         //设置会员-店铺信息
         memberService.update(new LambdaUpdateWrapper<Member>()
                 .eq(Member::getId,member.getId())
-                .set(Member::getHaveStore,SwitchEnum.OPEN.name())
+                .set(Member::getHaveStore,true)
                 .set(Member::getStoreId,store.getId()));
         return store;
 
@@ -177,6 +175,11 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             store.setStoreDisable(StoreStatusEnum.OPEN.value());
             //添加店铺页面
             pageDataService.addStorePageData(store.getId());
+            //修改会员 表示已有店铺
+            Member member = memberService.getById(store.getMemberId());
+            member.setHaveStore(true);
+            memberService.updateById(member);
+
         } else {
             store.setStoreDisable(StoreStatusEnum.REFUSED.value());
         }
