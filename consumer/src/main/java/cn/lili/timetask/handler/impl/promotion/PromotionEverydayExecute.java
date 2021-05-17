@@ -125,13 +125,22 @@ public class PromotionEverydayExecute implements EveryDayExecute {
 
     }
 
+    /**
+     * 获取促销修改查询条件 修改活动状态
+     * @param ids
+     * @return
+     */
     private UpdateWrapper getUpdatePromotionWrapper(List<String> ids) {
         UpdateWrapper updateWrapper = new UpdateWrapper<>();
         updateWrapper.in("id", ids);
         updateWrapper.set("promotion_status", PromotionStatusEnum.END.name());
         return updateWrapper;
     }
-
+    /**
+     * 获取商品的促销修改查询条件 修改商品状态
+     * @param ids
+     * @return
+     */
     private UpdateWrapper getUpdatePromotionGoodsWrapper(List<String> ids) {
         UpdateWrapper updateWrapper = new UpdateWrapper<>();
         updateWrapper.in("promotion_id", ids);

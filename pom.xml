@@ -23,7 +23,6 @@
         <module>buyer-api</module>
         <module>manager-api</module>
         <module>seller-api</module>
-        <module>socket-api</module>
         <module>common-api</module>
         <module>consumer</module>
     </modules>
