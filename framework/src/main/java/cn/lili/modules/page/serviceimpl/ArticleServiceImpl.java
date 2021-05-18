@@ -3,6 +3,7 @@ package cn.lili.modules.page.serviceimpl;
 
 import cn.hutool.core.util.StrUtil;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.PageUtil;
@@ -81,5 +82,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             return this.getOne(new LambdaUpdateWrapper<Article>().eq(Article::getType,type));
         }
         return null;
+    }
+
+    @Override
+    public Boolean updateArticleStatus(String id, boolean status) {
+        Article article=this.getById(id);
+        article.setOpenStatus(status? SwitchEnum.OPEN.name():SwitchEnum.CLOSE.name());
+        return this.updateById(article);
     }
 }

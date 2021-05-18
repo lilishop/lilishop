@@ -25,6 +25,10 @@ public enum ArticleEnum {
      */
     LICENSE_INFORMATION,
     /**
+     * 店铺入驻
+     */
+    STORE_REGISTER,
+    /**
      * 其他文章
      */
     OTHER;

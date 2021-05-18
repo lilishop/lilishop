@@ -69,4 +69,12 @@ public interface ArticleService extends IService<Article> {
      */
     @Cacheable(key = "#type")
     Article customGetByType(String type);
+
+    /**
+     * 修改文章状态
+     * @param id 文章ID
+     * @param status 显示状态
+     */
+    @CacheEvict(key = "#id")
+    Boolean updateArticleStatus(String id,boolean status);
 }
