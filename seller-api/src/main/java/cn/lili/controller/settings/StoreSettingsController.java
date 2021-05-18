@@ -2,6 +2,7 @@ package cn.lili.controller.settings;
 
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.store.entity.dos.StoreDetail;
@@ -57,7 +58,7 @@ public class StoreSettingsController {
         if (storeDetailService.editStoreSetting(storeSettingDTO)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "修改店铺库存预警数量")
@@ -68,7 +69,7 @@ public class StoreSettingsController {
         if (storeDetailService.updateStockWarning(stockWarning)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "获取商家退货收件地址")
@@ -85,6 +86,6 @@ public class StoreSettingsController {
         if (storeDetailService.editStoreAfterSaleAddressDTO(storeAfterSaleAddressDTO)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 }

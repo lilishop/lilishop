@@ -2,6 +2,7 @@ package cn.lili.controller.common;
 
 import cn.lili.common.aop.limiter.annotation.LimitPoint;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.sms.SmsUtil;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.verification.enums.VerificationEnums;
@@ -46,7 +47,7 @@ public class SmsController {
             smsUtil.sendSmsCode(mobile, verificationEnums, uuid);
             return ResultUtil.success(ResultCode.VERIFICATION_SEND_SUCCESS);
         } else {
-            return ResultUtil.error(ResultCode.VERIFICATION_SMS_EXPIRED_ERROR);
+            throw new ServiceException(ResultCode.VERIFICATION_SMS_EXPIRED_ERROR);
         }
     }
 }

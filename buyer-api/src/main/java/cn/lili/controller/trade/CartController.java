@@ -155,7 +155,7 @@ public class CartController {
             throw e;
         } catch (Exception e) {
             log.error(ResultCode.CART_ERROR.message(), e);
-            return ResultUtil.error(ResultCode.CART_ERROR);
+            throw new ServiceException(ResultCode.CART_ERROR);
         }
     }
 
@@ -172,10 +172,10 @@ public class CartController {
             return ResultUtil.success(ResultCode.SUCCESS);
         } catch (ServiceException se) {
             log.error(ResultCode.SHIPPING_NOT_APPLY.message(), se);
-            return ResultUtil.error(ResultCode.SHIPPING_NOT_APPLY);
+            throw new ServiceException(ResultCode.SHIPPING_NOT_APPLY);
         } catch (Exception e) {
             log.error(ResultCode.CART_ERROR.message(), e);
-            return ResultUtil.error(ResultCode.CART_ERROR);
+            throw new ServiceException(ResultCode.CART_ERROR);
         }
     }
 
@@ -196,7 +196,7 @@ public class CartController {
             return ResultUtil.success(ResultCode.SUCCESS);
         } catch (Exception e) {
             log.error(ResultCode.CART_ERROR.message(), e);
-            return ResultUtil.error(ResultCode.CART_ERROR);
+            throw new ServiceException(ResultCode.CART_ERROR);
         }
     }
 
@@ -232,9 +232,9 @@ public class CartController {
         } catch (Exception e) {
             log.error(ResultCode.ORDER_ERROR.message(), e);
             if (e.getMessage().equals(ResultCode.SHIPPING_NOT_APPLY.message())) {
-                return ResultUtil.error(ResultCode.SHIPPING_NOT_APPLY);
+                throw new ServiceException(ResultCode.SHIPPING_NOT_APPLY);
             }
-            return ResultUtil.error(ResultCode.ORDER_ERROR);
+            throw new ServiceException(ResultCode.ORDER_ERROR);
         }
     }
 }

@@ -1,6 +1,7 @@
 package cn.lili.controller.distribution;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -12,7 +13,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,7 +48,7 @@ public class DistributionManagerController {
         if (distributionService.retreat(id)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         } else {
-            return ResultUtil.error(ResultCode.DISTRIBUTION_RETREAT_ERROR);
+            throw new ServiceException(ResultCode.DISTRIBUTION_RETREAT_ERROR);
         }
 
     }
@@ -62,7 +62,7 @@ public class DistributionManagerController {
         if (distributionService.resume(id)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         } else {
-            return ResultUtil.error(ResultCode.DISTRIBUTION_RETREAT_ERROR);
+            throw new ServiceException(ResultCode.DISTRIBUTION_RETREAT_ERROR);
         }
 
     }
@@ -77,7 +77,7 @@ public class DistributionManagerController {
         if (distributionService.audit(id, status)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         } else {
-            return ResultUtil.error(ResultCode.DISTRIBUTION_AUDIT_ERROR);
+            throw new ServiceException(ResultCode.DISTRIBUTION_AUDIT_ERROR);
         }
 
     }

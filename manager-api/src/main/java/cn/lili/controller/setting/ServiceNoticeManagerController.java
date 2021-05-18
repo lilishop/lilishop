@@ -1,6 +1,7 @@
 package cn.lili.controller.setting;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
@@ -54,7 +55,7 @@ public class ServiceNoticeManagerController {
         if (serviceNoticeService.saveOrUpdate(serviceNotice)) {
             return ResultUtil.data(serviceNotice);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "更新服务订阅消息")
@@ -63,7 +64,7 @@ public class ServiceNoticeManagerController {
         if (serviceNoticeService.saveOrUpdate(serviceNotice)) {
             return ResultUtil.data(serviceNotice);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "删除服务订阅消息")

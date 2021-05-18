@@ -1,6 +1,7 @@
 package cn.lili.controller.member;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
@@ -10,7 +11,6 @@ import cn.lili.modules.member.service.MemberNoticeLogService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,7 +56,7 @@ public class MemberNoticeLogManagerController {
         if (memberNoticeLogService.saveOrUpdate(memberNoticeLog)) {
             return ResultUtil.data(memberNoticeLog);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "批量删除")

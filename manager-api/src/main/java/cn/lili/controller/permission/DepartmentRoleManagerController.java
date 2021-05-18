@@ -1,13 +1,13 @@
 package cn.lili.controller.permission;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.permission.entity.dos.DepartmentRole;
 import cn.lili.modules.permission.service.DepartmentRoleService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,7 +40,7 @@ public class DepartmentRoleManagerController {
             departmentRoleService.updateByDepartmentId(departmentId, departmentRole);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResultUtil.error(ResultCode.ERROR);
+            throw new ServiceException(ResultCode.ERROR);
         }
         return ResultUtil.success(ResultCode.SUCCESS);
     }

@@ -1,6 +1,7 @@
 package cn.lili.controller.passport;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.token.Token;
@@ -74,7 +75,7 @@ public class AdminUserManagerController {
             adminUser.setPassword(null);
             return ResultUtil.data(adminUser);
         }
-        return ResultUtil.error(ResultCode.USER_NOT_LOGIN);
+        throw new ServiceException(ResultCode.USER_NOT_LOGIN);
     }
 
     @PutMapping(value = "/edit")
@@ -88,11 +89,11 @@ public class AdminUserManagerController {
             adminUserDB.setAvatar(adminUser.getAvatar());
             adminUserDB.setNickName(adminUser.getNickName());
             if (!adminUserService.updateById(adminUserDB)) {
-                return ResultUtil.error(ResultCode.USER_EDIT_ERROR);
+                throw new ServiceException(ResultCode.USER_EDIT_ERROR);
             }
             return ResultUtil.success(ResultCode.USER_EDIT_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.USER_NOT_LOGIN);
+        throw new ServiceException(ResultCode.USER_NOT_LOGIN);
     }
 
     @PutMapping(value = "/admin/edit")
@@ -100,7 +101,7 @@ public class AdminUserManagerController {
     public ResultMessage<Object> edit(AdminUser adminUser,
                                       @RequestParam(required = false) List<String> roles) {
         if (!adminUserService.updateAdminUser(adminUser, roles)) {
-            return ResultUtil.error(ResultCode.USER_EDIT_ERROR);
+            throw new ServiceException(ResultCode.USER_EDIT_ERROR);
         }
         return ResultUtil.success(ResultCode.USER_EDIT_SUCCESS);
     }
@@ -143,7 +144,7 @@ public class AdminUserManagerController {
                                           @RequestParam(required = false) List<String> roles) {
         try {
             if (roles != null && roles.size() >= 10) {
-                return ResultUtil.error(ResultCode.PERMISSION_BEYOND_TEN);
+                throw new ServiceException(ResultCode.PERMISSION_BEYOND_TEN);
             }
             adminUserService.saveAdminUser(adminUser, roles);
         } catch (Exception e) {
@@ -157,7 +158,7 @@ public class AdminUserManagerController {
     public ResultMessage<Object> disable(@ApiParam("用户唯一id标识") @PathVariable String userId, Boolean status) {
         AdminUser user = adminUserService.getById(userId);
         if (user == null) {
-            return ResultUtil.error(ResultCode.USER_NOT_EXIST);
+            throw new ServiceException(ResultCode.USER_NOT_EXIST);
         }
         user.setStatus(status);
         adminUserService.updateById(user);

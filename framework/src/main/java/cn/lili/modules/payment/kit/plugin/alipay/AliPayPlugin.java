@@ -71,7 +71,7 @@ public class AliPayPlugin implements Payment {
         CashierParam cashierParam = cashierSupport.cashierParam(payParam);
         //请求订单编号
         String outTradeNo = SnowFlake.getIdStr();
-
+        //准备支付参数
         AlipayTradeWapPayModel payModel = new AlipayTradeWapPayModel();
         payModel.setBody(cashierParam.getTitle());
         payModel.setSubject(cashierParam.getDetail());
@@ -86,7 +86,8 @@ public class AliPayPlugin implements Payment {
             AliPayRequest.wapPay(response, payModel, callbackUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY),
                     notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("H5支付异常", e);
+            throw new ServiceException(ResultCode.ALIPAY_EXCEPTION);
         }
         return null;
     }
@@ -121,8 +122,11 @@ public class AliPayPlugin implements Payment {
             String orderInfo = AliPayRequest.appPayToResponse(payModel, notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY)).getBody();
             return ResultUtil.data(orderInfo);
         } catch (AlipayApiException e) {
-            e.printStackTrace();
-            return ResultUtil.error(ResultCode.PAY_ERROR);
+            log.error("支付宝支付异常：", e);
+            throw new ServiceException(ResultCode.ALIPAY_EXCEPTION);
+        } catch (Exception e) {
+            log.error("支付业务异常：", e);
+            throw new ServiceException(ResultCode.PAY_ERROR);
         }
     }
 
@@ -151,9 +155,9 @@ public class AliPayPlugin implements Payment {
             JSONObject jsonObject = JSONObject.parseObject(resultStr);
             return ResultUtil.data(jsonObject.getJSONObject("alipay_trade_precreate_response").getString("qr_code"));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("支付业务异常：", e);
+            throw new ServiceException(ResultCode.PAY_ERROR);
         }
-        return null;
     }
 
 
@@ -169,6 +173,7 @@ public class AliPayPlugin implements Payment {
         model.setRefundAmount(refundLog.getTotalAmount() + "");
         model.setRefundReason(refundLog.getRefundReason());
         model.setOutRequestNo(refundLog.getOutOrderNo());
+        //交互退款
         try {
             AlipayTradeRefundResponse alipayTradeRefundResponse = AliPayApi.tradeRefundToResponse(model);
             log.error("支付宝退款，参数：{},支付宝响应：{}", JSONUtil.toJsonStr(model), JSONUtil.toJsonStr(alipayTradeRefundResponse));
@@ -180,7 +185,8 @@ public class AliPayPlugin implements Payment {
             }
             refundLogService.save(refundLog);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("支付退款异常：", e);
+            throw new ServiceException(ResultCode.PAY_ERROR);
         }
 
     }
@@ -192,9 +198,11 @@ public class AliPayPlugin implements Payment {
         if (StringUtils.isNotEmpty(refundLog.getPaymentReceivableNo())) {
             model.setTradeNo(refundLog.getPaymentReceivableNo());
         } else {
-            throw new ServiceException(ResultCode.ERROR);
+            log.error("退款时，支付参数为空导致异常：{}", refundLog);
+            throw new ServiceException(ResultCode.ALIPAY_PARAMS_EXCEPTION);
         }
         try {
+            //与阿里进行交互
             AlipayTradeCancelResponse alipayTradeCancelResponse = AliPayApi.tradeCancelToResponse(model);
             if (alipayTradeCancelResponse.isSuccess()) {
                 refundLog.setIsRefund(true);
@@ -204,7 +212,7 @@ public class AliPayPlugin implements Payment {
             }
             refundLogService.save(refundLog);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("支付宝退款异常",e);
         }
     }
 
@@ -256,8 +264,7 @@ public class AliPayPlugin implements Payment {
                 log.info("支付回调通知：支付失败-参数：{}", map);
             }
         } catch (AlipayApiException e) {
-            e.printStackTrace();
-            throw new ServiceException("支付回调通知异常");
+            log.error("支付回调通知异常", e);
         }
 
     }
@@ -272,7 +279,7 @@ public class AliPayPlugin implements Payment {
         if (setting != null) {
             return JSONUtil.toBean(setting.getSettingValue(), AlipayPaymentSetting.class);
         }
-        throw new ServiceException("支付未配置");
+        throw new ServiceException(ResultCode.ALIPAY_NOT_SETTING);
     }
 
 

@@ -1,6 +1,7 @@
 package cn.lili.controller.settings;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
@@ -9,7 +10,6 @@ import cn.lili.modules.store.service.FreightTemplateService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,6 +61,6 @@ public class FreightTemplateStoreController {
         if (freightTemplateService.removeFreightTemplate(id)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 }

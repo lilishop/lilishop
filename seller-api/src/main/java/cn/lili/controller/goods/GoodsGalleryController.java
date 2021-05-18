@@ -1,6 +1,7 @@
 package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
@@ -61,7 +62,7 @@ public class GoodsGalleryController {
         if (goodsGalleryService.save(goodsGallery)) {
             return ResultUtil.data(goodsGallery);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "修改商品相册")
@@ -71,7 +72,7 @@ public class GoodsGalleryController {
         if (goodsGalleryService.updateById(goodsGallery)) {
             return ResultUtil.data(goodsGallery);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "批量删除")

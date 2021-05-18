@@ -1,6 +1,7 @@
 package cn.lili.controller.promotion;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.ResultUtil;
@@ -12,7 +13,6 @@ import cn.lili.modules.promotion.service.PointsGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,7 +46,7 @@ public class PointsGoodsManagerController {
         if (pointsGoodsService.addPointsGoods(collect)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @PutMapping(consumes = "application/json", produces = "application/json")
@@ -58,7 +58,7 @@ public class PointsGoodsManagerController {
         if (pointsGoodsService.updatePointsGoods(pointsGoods)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @PutMapping("/{ids}")
@@ -67,7 +67,7 @@ public class PointsGoodsManagerController {
         if (pointsGoodsService.updatePointsGoodsPromotionStatus(Arrays.asList(ids.split(",")), promotionStatus)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @DeleteMapping("/{ids}")
@@ -76,7 +76,7 @@ public class PointsGoodsManagerController {
         if (pointsGoodsService.deletePointsGoods(Arrays.asList(ids.split(",")))) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @GetMapping

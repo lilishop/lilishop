@@ -3,6 +3,7 @@ package cn.lili.modules.connect.util;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.token.Token;
 import cn.lili.common.utils.ResultUtil;
@@ -27,7 +28,6 @@ import cn.lili.modules.system.entity.dto.connect.dto.QQConnectSettingItem;
 import cn.lili.modules.system.entity.dto.connect.dto.WechatConnectSettingItem;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -83,12 +83,12 @@ public class ConnectUtil {
                 token = connectService.unionLoginCallback(type, authUser, callback.getState());
                 resultMessage = ResultUtil.data(token);
             } catch (ServiceException e) {
-                resultMessage = ResultUtil.error(400,e.getMessage());
+                throw new ServiceException(ResultCode.ERROR, e.getMessage());
             }
         }
         //否则录入响应结果，等待前端获取信息
         else {
-            resultMessage = ResultUtil.error(400,response.getMsg());
+            throw new ServiceException(ResultCode.ERROR, response.getMsg());
         }
         //缓存写入登录结果，300秒有效
         cache.put(CachePrefix.CONNECT_RESULT.getPrefix() + callback.getCode(), resultMessage, 300L);

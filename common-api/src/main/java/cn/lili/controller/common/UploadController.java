@@ -88,7 +88,7 @@ public class UploadController {
             newFile.setCreateBy(authUser.getUsername());
             newFile.setUserEnums(authUser.getRole().name());
             //如果是店铺，则记录店铺id
-            if (authUser.getRole().equals(UserEnums.STORE.name())) {
+            if (authUser.getRole().equals(UserEnums.STORE)) {
                 newFile.setOwnerId(authUser.getStoreId());
             } else {
                 newFile.setOwnerId(authUser.getId());
@@ -96,7 +96,7 @@ public class UploadController {
             fileService.save(newFile);
         } catch (Exception e) {
             log.error("文件上传失败", e);
-            return ResultUtil.error(400, e.toString());
+            throw new ServiceException(ResultCode.OSS_EXCEPTION);
         }
         return ResultUtil.data(result);
     }

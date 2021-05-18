@@ -60,7 +60,7 @@ public class VueCodeGenerator {
         try {
             result = generateClassData(path);
         } catch (Exception e) {
-            return ResultUtil.error(ResultCode.ERROR);
+            throw new ServiceException(ResultCode.ERROR);
         }
         return ResultUtil.data(result);
     }

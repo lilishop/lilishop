@@ -1,6 +1,7 @@
 package cn.lili.controller.permission;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
@@ -10,7 +11,6 @@ import cn.lili.modules.permission.entity.vo.DepartmentVO;
 import cn.lili.modules.permission.service.DepartmentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,7 +51,7 @@ public class DepartmentManagerController {
         if (departmentService.save(department)) {
             return ResultUtil.data(department);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @PutMapping("/{id}")
@@ -60,7 +60,7 @@ public class DepartmentManagerController {
         if (departmentService.updateById(department)) {
             return ResultUtil.data(department);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @DeleteMapping(value = "/{ids}")

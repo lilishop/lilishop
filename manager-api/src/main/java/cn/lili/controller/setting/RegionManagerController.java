@@ -1,6 +1,7 @@
 package cn.lili.controller.setting;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.base.service.RegionService;
@@ -8,7 +9,6 @@ import cn.lili.modules.system.entity.dos.Region;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -59,7 +59,7 @@ public class RegionManagerController {
         if (regionService.updateById(region)) {
             return ResultUtil.data(region);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
 
@@ -69,7 +69,7 @@ public class RegionManagerController {
         if (regionService.save(region)) {
             return ResultUtil.data(region);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @DeleteMapping(value = "{ids}")

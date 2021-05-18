@@ -118,7 +118,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public Token usernameLogin(String username, String password) {
-        Member member = this.findByUsername(username);
+        Member member = this.findMember(username);
         //判断用户是否存在
         if (member == null || !member.getDisabled()) {
             throw new ServiceException(ResultCode.USER_NOT_EXIST);
@@ -134,7 +134,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Override
     public Token usernameStoreLogin(String username, String password) {
 
-        Member member = this.findByUsername(username);
+        Member member = this.findMember(username);
         //判断用户是否存在
         if (member == null || !member.getDisabled()) {
             throw new ServiceException(ResultCode.USER_NOT_EXIST);
@@ -154,6 +154,18 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         }
 
         return storeTokenGenerate.createToken(member.getUsername(), false);
+    }
+
+    /**
+     * 传递手机号或者用户名
+     *
+     * @param userName
+     * @return
+     */
+    private Member findMember(String userName) {
+        QueryWrapper<Member> queryWrapper = new QueryWrapper();
+        queryWrapper.eq("username", userName).or().eq("mobile", userName);
+        return memberMapper.selectOne(queryWrapper);
     }
 
     @Override
@@ -347,7 +359,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         queryWrapper.like(StringUtils.isNotBlank(memberSearchVO.getMobile()), "mobile", memberSearchVO.getMobile());
         //按照会员状态查询
         queryWrapper.eq(StringUtils.isNotBlank(memberSearchVO.getDisabled()), "disabled",
-                memberSearchVO.getDisabled().equals(SwitchEnum.OPEN.name())?1:0);
+                memberSearchVO.getDisabled().equals(SwitchEnum.OPEN.name()) ? 1 : 0);
         queryWrapper.orderByDesc("create_time");
         return this.page(PageUtil.initPage(page), queryWrapper);
     }

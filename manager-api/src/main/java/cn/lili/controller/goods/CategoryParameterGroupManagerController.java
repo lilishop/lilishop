@@ -1,6 +1,7 @@
 package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.CategoryParameterGroup;
@@ -12,7 +13,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,7 +55,7 @@ public class CategoryParameterGroupManagerController {
         if (categoryParameterGroupService.save(categoryParameterGroup)) {
             return ResultUtil.data(categoryParameterGroup);
         }
-        return ResultUtil.error(ResultCode.CATEGORY_PARAMETER_SAVE_ERROR);
+        throw new ServiceException(ResultCode.CATEGORY_PARAMETER_SAVE_ERROR);
     }
 
     @ApiOperation(value = "更新数据")
@@ -65,7 +65,7 @@ public class CategoryParameterGroupManagerController {
         if (categoryParameterGroupService.updateById(categoryParameterGroup)) {
             return ResultUtil.data(categoryParameterGroup);
         }
-        return ResultUtil.error(ResultCode.CATEGORY_PARAMETER_UPDATE_ERROR);
+        throw new ServiceException(ResultCode.CATEGORY_PARAMETER_UPDATE_ERROR);
     }
 
     @ApiOperation(value = "通过id删除参数组")

@@ -1,6 +1,7 @@
 package cn.lili.controller.member;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.ResultUtil;
@@ -38,7 +39,7 @@ public class StoreUserController {
             member.setPassword(null);
             return ResultUtil.data(member);
         }
-        return ResultUtil.error(ResultCode.USER_NOT_LOGIN);
+        throw new ServiceException(ResultCode.USER_NOT_LOGIN);
     }
 
 

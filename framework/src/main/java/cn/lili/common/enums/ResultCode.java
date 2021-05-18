@@ -259,6 +259,7 @@ public enum ResultCode {
      * OSS
      */
     OSS_NOT_EXIST(80201,"OSS未配置"),
+    OSS_EXCEPTION(80202,"文件上传失败，请稍后重试"),
 
     /**
      * 验证码
@@ -266,7 +267,17 @@ public enum ResultCode {
     VERIFICATION_SEND_SUCCESS(80301,"短信验证码,发送成功"),
     VERIFICATION_ERROR(80302,"验证失败"),
     VERIFICATION_SMS_ERROR(80303,"短信验证码错误，请重新校验"),
-    VERIFICATION_SMS_EXPIRED_ERROR(80304,"验证码已失效，请重新校验")
+    VERIFICATION_SMS_EXPIRED_ERROR(80304,"验证码已失效，请重新校验"),
+
+    /**
+     * 配置错误
+     */
+    ALIPAY_NOT_SETTING(80401,"支付宝支付未配置"),
+    ALIPAY_EXCEPTION(80402,"支付宝支付错误，请稍后重试"),
+    ALIPAY_PARAMS_EXCEPTION(80403,"支付宝参数异常"),
+    WECHAT_PAY_NOT_SETTING(80402,"微信支付未配置"),
+
+
 
     ;
     private final Integer code;

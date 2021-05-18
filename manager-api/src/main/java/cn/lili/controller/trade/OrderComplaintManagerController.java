@@ -1,6 +1,7 @@
 package cn.lili.controller.trade;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.ResultUtil;
@@ -20,7 +21,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,7 +66,7 @@ public class OrderComplaintManagerController {
         if (orderComplaintService.updateOrderComplain(orderComplainVO)) {
             return ResultUtil.data(orderComplainVO);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "添加交易投诉对话")
@@ -81,7 +81,7 @@ public class OrderComplaintManagerController {
         if (orderComplaintCommunicationService.addCommunication(communicationVO)) {
             return ResultUtil.data(communicationVO);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "修改状态")
@@ -90,7 +90,7 @@ public class OrderComplaintManagerController {
         if (orderComplaintService.updateOrderComplainByStatus(orderComplainVO) != null) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
 
@@ -111,6 +111,6 @@ public class OrderComplaintManagerController {
         if (orderComplaintService.updateOrderComplainByStatus(orderComplaintOperationParams) != null) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 }

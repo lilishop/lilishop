@@ -1,6 +1,7 @@
 package cn.lili.controller.trade;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.ResultUtil;
@@ -16,7 +17,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,7 +69,7 @@ public class OrderComplaintStoreController {
         if (orderComplaintCommunicationService.addCommunication(communicationVO)) {
             return ResultUtil.data(communicationVO);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "修改申诉信息")
@@ -79,7 +79,7 @@ public class OrderComplaintStoreController {
         if (orderComplaintService.updateOrderComplain(orderComplainVO)) {
             return ResultUtil.data(orderComplainVO);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
 
     }
 
@@ -90,7 +90,7 @@ public class OrderComplaintStoreController {
         if (orderComplaintService.appeal(storeAppealVO)) {
             return ResultUtil.data(orderComplaintService.getOrderComplainById(storeAppealVO.getOrderComplaintId()));
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "修改状态")
@@ -99,7 +99,7 @@ public class OrderComplaintStoreController {
         if (orderComplaintService.updateOrderComplainByStatus(orderComplainVO) != null) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
 }

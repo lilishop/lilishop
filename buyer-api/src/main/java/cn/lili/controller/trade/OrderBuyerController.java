@@ -1,6 +1,7 @@
 package cn.lili.controller.trade;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.ResultUtil;
@@ -16,7 +17,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -66,11 +66,11 @@ public class OrderBuyerController {
     public ResultMessage<Object> receiving(@NotNull(message = "订单编号不能为空") @PathVariable("orderSn") String orderSn) {
         Order order = orderService.getBySn(orderSn);
         if (order == null) {
-            return ResultUtil.error(ResultCode.ORDER_NOT_EXIST);
+            throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
         }
         //判定是否是待收货状态
         if (!order.getOrderStatus().equals(OrderStatusEnum.DELIVERED.name())) {
-            return ResultUtil.error(ResultCode.ORDER_DELIVERED_ERROR);
+            throw new ServiceException(ResultCode.ORDER_DELIVERED_ERROR);
         }
         orderService.complete(orderSn);
         return ResultUtil.success(ResultCode.SUCCESS);

@@ -1,6 +1,7 @@
 package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.ResultUtil;
@@ -13,7 +14,6 @@ import cn.lili.modules.goods.service.DraftGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,7 +44,7 @@ public class DraftGoodsStoreController {
     public ResultMessage<DraftGoodsVO> getDraftGoods(@PathVariable String id) {
         DraftGoodsVO draftGoods = draftGoodsService.getDraftGoods(id);
         if (!UserContext.getCurrentUser().getStoreId().equals(draftGoods.getStoreId())) {
-            return ResultUtil.error(ResultCode.USER_AUTHORITY_ERROR);
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
         return ResultUtil.data(draftGoods);
     }
@@ -56,7 +56,7 @@ public class DraftGoodsStoreController {
             AuthUser currentUser = UserContext.getCurrentUser();
             draftGoodsVO.setStoreId(currentUser.getStoreId());
         } else if (draftGoodsVO.getStoreId() != null && !UserContext.getCurrentUser().getStoreId().equals(draftGoodsVO.getStoreId())) {
-            return ResultUtil.error(ResultCode.USER_AUTHORITY_ERROR);
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
         draftGoodsService.saveGoodsDraft(draftGoodsVO);
         return ResultUtil.success(ResultCode.SUCCESS);
@@ -67,7 +67,7 @@ public class DraftGoodsStoreController {
     public ResultMessage<String> deleteDraftGoods(@PathVariable String id) {
         DraftGoods draftGoods = draftGoodsService.getById(id);
         if (!draftGoods.getStoreId().equals(UserContext.getCurrentUser().getStoreId())) {
-            return ResultUtil.error(ResultCode.USER_AUTHORITY_ERROR);
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
         draftGoodsService.deleteGoodsDraft(id);
         return ResultUtil.success(ResultCode.SUCCESS);

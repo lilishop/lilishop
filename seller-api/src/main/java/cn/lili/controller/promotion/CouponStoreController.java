@@ -51,7 +51,7 @@ public class CouponStoreController {
         AuthUser currentUser = UserContext.getCurrentUser();
         Coupon coupon = couponService.getCouponDetailFromMongo(couponId);
         if (coupon == null || !coupon.getStoreId().equals(currentUser.getStoreId())) {
-            return ResultUtil.error(ResultCode.USER_AUTHORITY_ERROR);
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
         return ResultUtil.data(coupon);
     }
@@ -65,7 +65,7 @@ public class CouponStoreController {
         if (couponService.add(couponVO) != null) {
             return ResultUtil.data(couponVO);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @PutMapping(consumes = "application/json", produces = "application/json")
@@ -84,7 +84,7 @@ public class CouponStoreController {
 
             return ResultUtil.data(coupon);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @DeleteMapping(value = "/{ids}")
@@ -108,6 +108,6 @@ public class CouponStoreController {
         if (couponService.updateCouponStatus(Arrays.asList(split), PromotionStatusEnum.valueOf(promotionStatus))) {
             return ResultUtil.success(ResultCode.COUPON_EDIT_STATUS_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.COUPON_EDIT_STATUS_ERROR);
+        throw new ServiceException(ResultCode.COUPON_EDIT_STATUS_ERROR);
     }
 }
