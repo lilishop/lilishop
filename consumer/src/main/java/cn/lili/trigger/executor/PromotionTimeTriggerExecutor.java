@@ -12,7 +12,6 @@ import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.service.PromotionService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -65,6 +64,7 @@ public class PromotionTimeTriggerExecutor implements TimeTriggerExecutor {
             }
             return;
         }
+        //拼团订单消息
         PintuanOrderMessage pintuanOrderMessage = JSONUtil.toBean(JSONUtil.parseObj(object), PintuanOrderMessage.class);
         if (pintuanOrderMessage != null && pintuanOrderMessage.getPintuanId() != null) {
             log.info("拼团订单信息消费：{}", pintuanOrderMessage);
