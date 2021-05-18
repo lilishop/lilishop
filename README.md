@@ -116,7 +116,7 @@ PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_
 
 #### 移动端
 
-<img src="https://pickmall.cn/assets/imgs/other/app.gif" alt="移动端功能展示" style="width:300px;" />
+<img src="https://pickmall.cn/assets/imgs/other/app.gif" alt="移动端功能展示" style="zoom:20%;" />
 
 
 
