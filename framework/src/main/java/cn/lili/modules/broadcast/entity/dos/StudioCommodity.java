@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,10 +14,10 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * @author liushuai(liushuai711 @ gmail.com)
- * @version v4.1
- * @Description:
- * @since 2021/5/17 3:10 下午
+ * 直播商品
+ *
+ * @author Bulbasaur
+ * @date: 2021/5/18 5:42 下午
  */
 @Data
 @Entity
@@ -41,8 +40,8 @@ public class StudioCommodity {
     @ApiModelProperty(value = "商品ID")
     private Integer goodsId;
 
-    public StudioCommodity(Integer roomId,Integer goodsId){
-        this.roomId=roomId;
-        this.goodsId=goodsId;
+    public StudioCommodity(Integer roomId, Integer goodsId) {
+        this.roomId = roomId;
+        this.goodsId = goodsId;
     }
 }

@@ -162,7 +162,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     private Member findMember(String userName) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper();
         queryWrapper.eq("username", userName).or().eq("mobile", userName);
-        return memberMapper.selectOne(queryWrapper);
+        return this.getOne(queryWrapper);
     }
 
     @Override

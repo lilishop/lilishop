@@ -1,9 +1,6 @@
 package cn.lili.modules.broadcast.util;
 
 import cn.hutool.core.convert.Convert;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.Method;
 import cn.hutool.json.JSONObject;
 import cn.lili.modules.base.entity.enums.ClientTypeEnum;
 import cn.lili.modules.broadcast.entity.dos.Commodity;
@@ -15,16 +12,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * 微信小程序直播工具类
+ *
  * @author Bulbasaur
  * @date: 2021/5/17 10:16 上午
- *
  */
 @Slf4j
 @Component
@@ -33,31 +29,19 @@ public class WechatLivePlayerUtil {
     @Autowired
     private WechatAccessTokenUtil wechatAccessTokenUtil;
 
-    private void test(Studio studio){
-        HttpRequest httpRequest = new HttpRequest("https://api.weixin.qq.com/cgi-bin/media/upload");
-        httpRequest.setMethod(Method.POST);
-        File logoFile = new File(studio.getMediaUrl());
-        httpRequest.setConnectionTimeout(30000);
-        httpRequest.form("access_token",wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP));
-        httpRequest.form("type", "image");
-        httpRequest.form("media", logoFile);
-        HttpResponse reqResult = httpRequest.execute();
-        System.out.println(reqResult.body());
-    }
-
     /**
      * 创建小程序直播间
+     *
      * @param studio 小程序直播
      * @return 房间ID
      */
-    public Integer create(Studio studio){
-        test(studio);
+    public Integer create(Studio studio) {
         //获取token
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url
-        String url = "https://api.weixin.qq.com/wxaapi/broadcast/room/create?access_token="+ token;
-        Map<String, String> map = new HashMap<>();
+        String url = "https://api.weixin.qq.com/wxaapi/broadcast/room/create?access_token=" + token;
 
+        Map<String, String> map = new HashMap<>();
         // 背景图
         map.put("coverImg", studio.getCoverImg());
         // 分享图
@@ -82,7 +66,7 @@ public class WechatLivePlayerUtil {
         // 是否关闭货架
         map.put("closeGoods", "0");
         // 是否关闭评论
-        map.put("closeComment","0");
+        map.put("closeComment", "0");
         // 直播间名字
         map.put("closeReplay", "0");
 
@@ -94,14 +78,15 @@ public class WechatLivePlayerUtil {
 
     /**
      * 获取直播间回放
+     *
      * @param roomId 房间ID
      * @return 回放地址
      */
-    public String getLiveInfo(String roomId){
+    public String getLiveInfo(String roomId) {
         //获取token
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url
-        String url = "https://api.weixin.qq.com/wxa/business/getliveinfo?access_token="+ token;
+        String url = "https://api.weixin.qq.com/wxa/business/getliveinfo?access_token=" + token;
         Map<String, String> map = new HashMap<>();
         // 获取回放
         map.put("action", "get_replay");
@@ -121,15 +106,16 @@ public class WechatLivePlayerUtil {
 
     /**
      * 推送直播间商品
-     * @param roomId 房间ID
+     *
+     * @param roomId  房间ID
      * @param goodsId 商品ID
      * @return 操作结果
      */
-    public Boolean pushGoods(Integer roomId,Integer goodsId){
+    public Boolean pushGoods(Integer roomId, Integer goodsId) {
         //获取token
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url
-        String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/push?access_token="+ token;
+        String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/push?access_token=" + token;
         Map<String, Integer> map = new HashMap<>();
         // 直播间回放
         map.put("goodsId", goodsId);
@@ -143,15 +129,16 @@ public class WechatLivePlayerUtil {
 
     /**
      * 删除直播间商品
-     * @param roomId 房间ID
+     *
+     * @param roomId  房间ID
      * @param goodsId 商品ID
      * @return 操作结果
      */
-    public Boolean goodsDeleteInRoom(Integer roomId,Integer goodsId){
+    public Boolean goodsDeleteInRoom(Integer roomId, Integer goodsId) {
         //获取token
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url
-        String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/deleteInRoom?access_token="+ token;
+        String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/deleteInRoom?access_token=" + token;
         Map<String, Integer> map = new HashMap<>();
         // 直播间回放
         map.put("goodsId", goodsId);
@@ -165,15 +152,16 @@ public class WechatLivePlayerUtil {
 
     /**
      * 添加直播商品
+     *
      * @param commodity 直播商品
      * @return 添加结果
      */
-    public JSONObject addGoods(Commodity commodity){
+    public JSONObject addGoods(Commodity commodity) {
         //获取token
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url
-        String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/add?access_token="+ token;
-        GoodsInfo goodsInfo=new GoodsInfo(commodity);
+        String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/add?access_token=" + token;
+        GoodsInfo goodsInfo = new GoodsInfo(commodity);
         String content = HttpUtils.doPostWithJson(url, goodsInfo);
         JSONObject json = new JSONObject(content);
         log.info("微信小程序添加直播商品结果：" + content);
@@ -182,14 +170,15 @@ public class WechatLivePlayerUtil {
 
     /**
      * 删除直播商品
+     *
      * @param goodsId 商品ID
      * @return 删除结果
      */
-    public JSONObject deleteGoods(String goodsId){
+    public JSONObject deleteGoods(String goodsId) {
         //获取token
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url
-        String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/delete?access_token="+ token;
+        String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/delete?access_token=" + token;
         String content = HttpUtils.doPostWithJson(url, goodsId);
         JSONObject json = new JSONObject(content);
         log.info("微信小程序删除直播商品结果：" + content);
@@ -198,14 +187,15 @@ public class WechatLivePlayerUtil {
 
     /**
      * 查询直播商品状态
+     *
      * @param goodsIdList 商品ID列表
      * @return 删除结果
      */
-    public JSONObject deleteGoods(List<String> goodsIdList){
+    public JSONObject deleteGoods(List<String> goodsIdList) {
         //获取token
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url
-        String url = "https://api.weixin.qq.com/wxa/business/getgoodswarehouse?access_token="+ token;
+        String url = "https://api.weixin.qq.com/wxa/business/getgoodswarehouse?access_token=" + token;
         String content = HttpUtils.doPostWithJson(url, goodsIdList);
         JSONObject json = new JSONObject(content);
         log.info("微信小程序查询直播商品结果：" + content);

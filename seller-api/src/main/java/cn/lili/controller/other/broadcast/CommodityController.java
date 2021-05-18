@@ -1,6 +1,7 @@
 package cn.lili.controller.other.broadcast;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
@@ -16,9 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 店铺端,直播商品接口
+ *
  * @author Bulbasaur
  * @date: 2021/5/17 2:05 下午
- *
  */
 @RestController
 @Api(tags = "店铺端,直播商品接口")
@@ -37,18 +38,18 @@ public class CommodityController {
     @ApiOperation(value = "添加店铺直播商品")
     @PostMapping
     public ResultMessage<Object> addCommodity(@Validated Commodity commodity) {
-        if(commodityService.addCommodity(commodity)){
+        if (commodityService.addCommodity(commodity)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "删除店铺直播商品")
     @DeleteMapping
     public ResultMessage<Object> delete(String goodsId) {
-        if(commodityService.deleteCommodity(goodsId)){
+        if (commodityService.deleteCommodity(goodsId)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 }

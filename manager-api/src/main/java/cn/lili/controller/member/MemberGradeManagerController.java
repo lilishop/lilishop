@@ -1,6 +1,7 @@
 package cn.lili.controller.member;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
@@ -53,7 +54,7 @@ public class MemberGradeManagerController {
         if (memberGradeService.updateById(memberGrade)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "删除会员等级")
@@ -61,10 +62,10 @@ public class MemberGradeManagerController {
     @PutMapping(value = "/delete/{id}")
     public ResultMessage<IPage<Object>> delete(@PathVariable String id) {
         if(memberGradeService.getById(id).getIsDefault()){
-            return ResultUtil.error(ResultCode.USER_GRADE_IS_DEFAULT);
+            throw new ServiceException(ResultCode.USER_GRADE_IS_DEFAULT);
         }else if(memberGradeService.removeById(id)){
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 }
