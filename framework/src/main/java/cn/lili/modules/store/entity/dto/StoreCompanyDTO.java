@@ -21,15 +21,17 @@ public class StoreCompanyDTO {
     @ApiModelProperty(value = "公司名称")
     private String companyName;
 
-    @Size(min = 2, max = 100)
     @NotBlank(message = "地址不能为空")
     @ApiModelProperty(value = "地址名称， '，'分割")
-    private String addressPath;
+    private String storeAddressPath;
 
-    @Size(min = 2, max = 100)
     @NotBlank(message = "地址ID不能为空")
     @ApiModelProperty(value = "地址id，'，'分割 ")
-    private String addressIdPath;
+    private String storeAddressIdPath;
+
+    @NotBlank(message = "地址详情")
+    @ApiModelProperty(value = "地址详情")
+    private String storeAddressDetail;
 
     @Size(min = 1, max = 200)
     @NotBlank(message = "公司地址不能为空")
