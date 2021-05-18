@@ -601,7 +601,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         sku.setThumbnail(thumbnail);
 
         //规格信息
-        sku.setId(map.getOrDefault("id", "").toString());
+        sku.setId(Convert.toStr(map.get("id"),"").toString());
         sku.setSn(Convert.toStr(map.get("sn")));
         sku.setWeight(Convert.toDouble(map.get("weight"), 0D));
         sku.setPrice(Convert.toDouble(map.get("price"), 0D));

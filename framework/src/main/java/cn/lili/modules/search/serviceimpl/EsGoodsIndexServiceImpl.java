@@ -34,6 +34,7 @@ import org.elasticsearch.search.SearchHit;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -61,6 +62,8 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     private GoodsWordsService goodsWordsService;
     @Autowired
     private PromotionService promotionService;
+    @Autowired
+    private ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     @Override
     public void addIndex(EsGoodsIndex goods) {
@@ -149,7 +152,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     public void initIndex(List<EsGoodsIndex> goodsIndexList) {
         //索引名称拼接
         String indexName = elasticsearchProperties.getIndexPrefix() + "_" + EsSuffix.GOODS_INDEX_NAME;
-        // deleteIndexRequest(indexName);
+
         //如果索引不存在，则创建索引
         if (!indexExist(indexName)) {
             createIndexRequest(indexName);
