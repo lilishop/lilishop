@@ -112,7 +112,6 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 .setTemplateParam(JSONUtil.toJsonStr(param));
         try {
             SendSmsResponse response = client.sendSms(sendSmsRequest);
-            System.out.println(response.getBody().getCode());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -123,8 +122,9 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
 
         com.aliyun.dysmsapi20170525.Client client = this.createClient();
 
-        List<String> sign = mobile;
+        List<String> sign = new ArrayList<String>();
 
+        sign.addAll(mobile);
         sign.replaceAll(e -> signName);
 
         //手机号拆成多个小组进行发送
@@ -140,7 +140,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
             signNameList.add(sign.subList((i * 100), endPoint));
         }
 
-        //发送短信
+//        //发送短信
         for (int i = 0; i < mobileList.size(); i++) {
             SendBatchSmsRequest sendBatchSmsRequest = new SendBatchSmsRequest()
                     .setPhoneNumberJson(JSONUtil.toJsonStr(mobileList.get(i)))
