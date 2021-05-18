@@ -2,6 +2,7 @@ package cn.lili.controller.passport.connect;
 
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.token.Token;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
@@ -16,7 +17,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,7 +68,7 @@ public class ConnectBuyerWebController {
     @GetMapping("/result")
     public ResultMessage<Object> callBackResult(String state) {
         if (state == null) {
-            return ResultUtil.error(ResultCode.USER_CONNECT_LOGIN_ERROR);
+            throw new ServiceException(ResultCode.USER_CONNECT_LOGIN_ERROR);
         }
         return connectUtil.getResult(state);
     }

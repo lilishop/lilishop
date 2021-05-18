@@ -79,9 +79,9 @@ public class MemberWalletBuyerController {
         //校验验证码
         if (verificationService.check(uuid, VerificationEnums.WALLET_PASSWORD)) {
             memberWalletService.setMemberWalletPassword(member, password);
-            return ResultUtil.error(ResultCode.SUCCESS);
+            throw new ServiceException(ResultCode.SUCCESS);
         } else {
-            return ResultUtil.error(ResultCode.VERIFICATION_ERROR);
+            throw new ServiceException(ResultCode.VERIFICATION_ERROR);
         }
 
     }

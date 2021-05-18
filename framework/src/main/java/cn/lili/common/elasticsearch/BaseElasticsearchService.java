@@ -3,12 +3,15 @@ package cn.lili.common.elasticsearch;
 import cn.hutool.core.bean.BeanUtil;
 import cn.lili.config.elasticsearch.ElasticsearchProperties;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.HttpAsyncResponseConsumerFactory;
 import org.elasticsearch.client.RequestOptions;
@@ -16,6 +19,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.indices.PutMappingRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -24,6 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author paulG
@@ -84,13 +91,249 @@ public abstract class BaseElasticsearchService {
             // Settings for this index
             request.settings(Settings.builder().put("index.number_of_shards", elasticsearchProperties.getIndex().getNumberOfShards()).put("index.number_of_replicas", elasticsearchProperties.getIndex().getNumberOfReplicas()));
 
+            //创建索引
             CreateIndexResponse createIndexResponse = client.indices().create(request, COMMON_OPTIONS);
-
+            createMapping(index);
             log.info(" whether all of the nodes have acknowledged the request : {}", createIndexResponse.isAcknowledged());
             log.info(" Indicates whether the requisite number of shard copies were started for each shard in the index before timing out :{}", createIndexResponse.isShardsAcknowledged());
+            return;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new ElasticsearchException("创建索引 {" + index + "} 失败：" + e.getMessage());
         }
+    }
+
+    public void createMapping(String index) throws Exception {
+        String source =
+                " {\n" +
+                        "    \"properties\": {\n" +
+                        "      \"_class\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"attrList\": {\n" +
+                        "        \"type\": \"nested\",\n" +
+                        "        \"properties\": {\n" +
+                        "          \"name\": {\n" +
+                        "            \"type\": \"keyword\"\n" +
+                        "          },\n" +
+                        "          \"type\": {\n" +
+                        "            \"type\": \"long\"\n" +
+                        "          },\n" +
+                        "          \"value\": {\n" +
+                        "            \"type\": \"keyword\"\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"brandId\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fielddata\": true,\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"buyCount\": {\n" +
+                        "        \"type\": \"long\"\n" +
+                        "      },\n" +
+                        "      \"releaseTime\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fielddata\": true, \n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"categoryPath\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fielddata\": true,\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"commentNum\": {\n" +
+                        "        \"type\": \"long\"\n" +
+                        "      },\n" +
+                        "      \"goodsId\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"goodsName\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fielddata\": true, \n" +
+                        "        \"analyzer\": \"ik_max_word\",\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"grade\": {\n" +
+                        "        \"type\": \"float\"\n" +
+                        "      },\n" +
+                        "      \"highPraiseNum\": {\n" +
+                        "        \"type\": \"long\"\n" +
+                        "      },\n" +
+                        "      \"id\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"intro\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"isAuth\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"marketEnable\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fielddata\": true, \n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"mobileIntro\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"point\": {\n" +
+                        "        \"type\": \"long\"\n" +
+                        "      },\n" +
+                        "      \"price\": {\n" +
+                        "        \"type\": \"float\"\n" +
+                        "      },\n" +
+                        "      \"salesModel\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"selfOperated\": {\n" +
+                        "        \"type\": \"boolean\"\n" +
+                        "      },\n" +
+                        "      \"sellerId\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"sellerName\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fielddata\": true, \n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"shopCategoryPath\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fielddata\": true, \n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"sn\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"thumbnail\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      }\n" +
+                        "    }\n" +
+                        "  }\n";
+
+        PutMappingRequest request = new PutMappingRequest(index)
+                        .source(source, XContentType.JSON);
+//        AcknowledgedResponse putMappingResponse = client.indices().putMapping(request,
+//                RequestOptions.DEFAULT);
+//
+//        boolean acknowledged = putMappingResponse.isAcknowledged();
+//        if (acknowledged) {
+//            log.error("Succeed to put mapping");
+//        }
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference response = new AtomicReference<AcknowledgedResponse>();
+        client.indices().putMappingAsync(
+                request,
+                RequestOptions.DEFAULT,
+                new ActionListener<AcknowledgedResponse>() {
+                    @Override
+                    public void onResponse(AcknowledgedResponse r) {
+                        response.set(r);
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        latch.countDown();
+                    }
+                });
+        latch.await(10, TimeUnit.SECONDS);
+        Assertions.assertThat(((AcknowledgedResponse) response.get()).isAcknowledged()).isTrue();
     }
 
     /**

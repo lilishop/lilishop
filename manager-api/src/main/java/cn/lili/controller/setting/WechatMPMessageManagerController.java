@@ -1,6 +1,7 @@
 package cn.lili.controller.setting;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
@@ -59,7 +60,7 @@ public class WechatMPMessageManagerController {
         if (wechatMPMessageService.save(wechatMPMessage)) {
             return new ResultUtil<WechatMPMessage>().setData(wechatMPMessage);
         }
-        return new ResultUtil<WechatMPMessage>().setErrorMsg(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @PutMapping("/{id}")
@@ -68,7 +69,7 @@ public class WechatMPMessageManagerController {
         if (wechatMPMessageService.updateById(wechatMPMessage)) {
             return new ResultUtil<WechatMPMessage>().setData(wechatMPMessage);
         }
-        return new ResultUtil<WechatMPMessage>().setErrorMsg(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @DeleteMapping(value = "/{ids}")

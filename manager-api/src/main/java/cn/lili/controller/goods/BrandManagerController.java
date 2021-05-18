@@ -1,8 +1,8 @@
 package cn.lili.controller.goods;
 
 
-import cn.lili.common.enums.MessageCode;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Brand;
@@ -15,7 +15,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,7 +66,7 @@ public class BrandManagerController {
         if (brandService.addBrand(brand)) {
             return ResultUtil.data(brand);
         }
-        return ResultUtil.error(ResultCode.BRAND_SAVE_ERROR);
+        throw new ServiceException(ResultCode.BRAND_SAVE_ERROR);
     }
 
     @ApiOperation(value = "更新数据")
@@ -78,7 +77,7 @@ public class BrandManagerController {
         if (brandService.updateBrand(brand)) {
             return ResultUtil.data(brand);
         }
-        return ResultUtil.error(ResultCode.BRAND_UPDATE_ERROR);
+        throw new ServiceException(ResultCode.BRAND_UPDATE_ERROR);
     }
 
     @ApiOperation(value = "后台禁用品牌")
@@ -91,7 +90,7 @@ public class BrandManagerController {
         if (brandService.brandDisable(brandId, disable)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.BRAND_DISABLE_ERROR);
+        throw new ServiceException(ResultCode.BRAND_DISABLE_ERROR);
     }
 
     @ApiOperation(value = "批量删除")

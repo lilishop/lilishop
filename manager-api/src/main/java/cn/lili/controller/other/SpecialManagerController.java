@@ -1,7 +1,7 @@
 package cn.lili.controller.other;
 
-import cn.lili.common.enums.MessageCode;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
@@ -12,7 +12,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,7 +46,7 @@ public class SpecialManagerController {
         if (specialService.updateById(special)) {
             return ResultUtil.data(special);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "删除专题活动")
@@ -57,8 +56,7 @@ public class SpecialManagerController {
         if(specialService.removeSpecial(id)){
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return  ResultUtil.error(ResultCode.ERROR);
-
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "分页获取专题活动")

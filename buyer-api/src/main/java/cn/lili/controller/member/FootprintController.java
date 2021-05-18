@@ -1,6 +1,7 @@
 package cn.lili.controller.member;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -9,7 +10,6 @@ import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,7 +47,7 @@ public class FootprintController {
         if (footprintService.deleteByIds(ids)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "清空足迹")
@@ -56,7 +56,7 @@ public class FootprintController {
         if (footprintService.clean()) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "获取当前会员足迹数量")

@@ -1,6 +1,7 @@
 package cn.lili.controller.promotion;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -15,7 +16,6 @@ import cn.lili.modules.promotion.service.PromotionGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,7 +66,7 @@ public class PintuanManagerController {
         if (pintuanService.openPintuan(pintuanId, new Date(startTime), new Date(endTime))) {
             return ResultUtil.success(ResultCode.PINTUAN_MANUAL_OPEN_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.PINTUAN_MANUAL_OPEN_ERROR);
+        throw new ServiceException(ResultCode.PINTUAN_MANUAL_OPEN_ERROR);
 
     }
 
@@ -76,7 +76,7 @@ public class PintuanManagerController {
         if (pintuanService.closePintuan(pintuanId)) {
             return ResultUtil.success(ResultCode.PINTUAN_MANUAL_CLOSE_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.PINTUAN_MANUAL_CLOSE_ERROR);
+        throw new ServiceException(ResultCode.PINTUAN_MANUAL_CLOSE_ERROR);
     }
 
 

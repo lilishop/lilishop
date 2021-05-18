@@ -1,6 +1,7 @@
 package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.page.entity.dos.ArticleCategory;
@@ -75,6 +76,6 @@ public class ArticleCategoryManagerController {
         if (articleCategoryService.deleteById(id)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 }

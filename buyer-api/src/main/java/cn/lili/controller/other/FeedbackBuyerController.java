@@ -1,6 +1,7 @@
 package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
@@ -8,7 +9,6 @@ import cn.lili.modules.page.entity.dos.Feedback;
 import cn.lili.modules.page.service.FeedbackService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +38,7 @@ public class FeedbackBuyerController {
         if (feedbackService.save(feedback)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
 }

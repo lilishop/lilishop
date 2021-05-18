@@ -2,6 +2,7 @@ package cn.lili.controller.goods;
 
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -14,7 +15,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,7 +68,7 @@ public class SpecificationManagerController {
         if (specificationService.updateSpecification(parameters)) {
             return ResultUtil.data(parameters);
         }
-        return ResultUtil.error(ResultCode.SPEC_UPDATE_ERROR);
+        throw new ServiceException(ResultCode.SPEC_UPDATE_ERROR);
     }
 
     @PostMapping
@@ -80,7 +80,7 @@ public class SpecificationManagerController {
         if (specificationService.addSpecification(parameters) != null) {
             return ResultUtil.data(parameters);
         }
-        return ResultUtil.error(ResultCode.SPEC_SAVE_ERROR);
+        throw new ServiceException(ResultCode.SPEC_SAVE_ERROR);
     }
 
     @DeleteMapping(value = "/{ids}")

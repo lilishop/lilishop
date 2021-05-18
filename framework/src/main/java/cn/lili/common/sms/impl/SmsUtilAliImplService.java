@@ -66,7 +66,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 Map<String, String> params = new HashMap<>();
                 params.put("code", code);
                 cache.put(cacheKey(verificationEnums, mobile, uuid), code, 300L);
-                this.sendSmsCode("北京宏业汇成科技有限公司",mobile, params, "SMS_205755300");
+                this.sendSmsCode("北京宏业汇成科技有限公司", mobile, params, "SMS_205755300");
                 break;
             }
             case UPDATE_PASSWORD: {
@@ -79,7 +79,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 Map<String, String> params = new HashMap<>();
                 params.put("code", code);
                 cache.put(cacheKey(verificationEnums, memberMobile, uuid), code, 300L);
-                this.sendSmsCode("北京宏业汇成科技有限公司",mobile, params, "SMS_205755297");
+                this.sendSmsCode("北京宏业汇成科技有限公司", mobile, params, "SMS_205755297");
                 break;
             }
             //如果不是有效的验证码手段，则此处不进行短信操作
@@ -112,7 +112,6 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 .setTemplateParam(JSONUtil.toJsonStr(param));
         try {
             SendSmsResponse response = client.sendSms(sendSmsRequest);
-            System.out.println(response.getBody().getCode());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -123,8 +122,9 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
 
         com.aliyun.dysmsapi20170525.Client client = this.createClient();
 
-        List<String> sign = mobile;
+        List<String> sign = new ArrayList<String>();
 
+        sign.addAll(mobile);
         sign.replaceAll(e -> signName);
 
         //手机号拆成多个小组进行发送
@@ -140,7 +140,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
             signNameList.add(sign.subList((i * 100), endPoint));
         }
 
-        //发送短信
+//        //发送短信
         for (int i = 0; i < mobileList.size(); i++) {
             SendBatchSmsRequest sendBatchSmsRequest = new SendBatchSmsRequest()
                     .setPhoneNumberJson(JSONUtil.toJsonStr(mobileList.get(i)))
@@ -160,23 +160,24 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
     public void addSmsSign(SmsSign smsSign) throws Exception {
         //设置参数添加短信签名
         com.aliyun.dysmsapi20170525.Client client = this.createClient();
-
         System.out.println(smsSign.getBusinessLicense().substring(smsSign.getBusinessLicense().lastIndexOf(".") + 1));
+        System.out.println(smsSign.getLicense().substring(smsSign.getLicense().lastIndexOf(".")));
         //营业执照
         AddSmsSignRequest.AddSmsSignRequestSignFileList signFileList0 = new AddSmsSignRequest.AddSmsSignRequestSignFileList()
                 .setFileContents(Base64Utils.encode(smsSign.getBusinessLicense()))
                 .setFileSuffix(smsSign.getBusinessLicense().substring(smsSign.getBusinessLicense().lastIndexOf(".") + 1));
         //授权委托书
-//        AddSmsSignRequest.AddSmsSignRequestSignFileList signFileList1 = new AddSmsSignRequest.AddSmsSignRequestSignFileList()
-//                .setFileContents(Base64Utils.encode(smsSign.getLicense()))
-//                .setFileSuffix(smsSign.getLicense().substring(smsSign.getLicense().lastIndexOf(".") + 1));
+        AddSmsSignRequest.AddSmsSignRequestSignFileList signFileList1 = new AddSmsSignRequest.AddSmsSignRequestSignFileList()
+                .setFileContents(Base64Utils.encode(smsSign.getLicense()))
+                .setFileSuffix(smsSign.getLicense().substring(smsSign.getLicense().lastIndexOf(".")) + 1);
         //添加短信签名
         AddSmsSignRequest addSmsSignRequest = new AddSmsSignRequest()
                 .setSignName(smsSign.getSignName())
                 .setSignSource(smsSign.getSignSource())
                 .setRemark(smsSign.getRemark())
                 .setSignFileList(java.util.Arrays.asList(
-                        signFileList0
+                        signFileList0,
+                        signFileList1
                 ));
         AddSmsSignResponse response = client.addSmsSign(addSmsSignRequest);
         if (!response.getBody().getCode().equals("OK")) {

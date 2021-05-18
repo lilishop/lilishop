@@ -1,6 +1,7 @@
 package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
@@ -12,7 +13,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.web.bind.annotation.*;
@@ -67,22 +67,22 @@ public class CategoryManagerController {
         category1.setName(category.getName());
         List<Category> list = categoryService.findByAllBySortOrder(category1);
         if (StringUtils.isNotEmpty(list)) {
-            return ResultUtil.error(ResultCode.CATEGORY_NOT_EXIST);
+            throw new ServiceException(ResultCode.CATEGORY_NOT_EXIST);
         }
         // 非顶级分类
         if (category.getParentId() != null && !category.getParentId().equals("0")) {
             Category parent = categoryService.getById(category.getParentId());
             if (parent == null) {
-                return ResultUtil.error(ResultCode.CATEGORY_PARENT_NOT_EXIST);
+                throw new ServiceException(ResultCode.CATEGORY_PARENT_NOT_EXIST);
             }
             if (category.getLevel() >= 4) {
-                return ResultUtil.error(ResultCode.CATEGORY_BEYOND_THREE);
+                throw new ServiceException(ResultCode.CATEGORY_BEYOND_THREE);
             }
         }
         if (categoryService.saveCategory(category)) {
             return ResultUtil.data(category);
         }
-        return ResultUtil.error(ResultCode.CATEGORY_SAVE_ERROR);
+        throw new ServiceException(ResultCode.CATEGORY_SAVE_ERROR);
     }
 
     @PutMapping
@@ -90,7 +90,7 @@ public class CategoryManagerController {
     public ResultMessage<Category> updateCategory(CategoryVO category) {
         Category catTemp = categoryService.getById(category.getId());
         if (catTemp == null) {
-            return ResultUtil.error(ResultCode.CATEGORY_PARENT_NOT_EXIST);
+            throw new ServiceException(ResultCode.CATEGORY_PARENT_NOT_EXIST);
         }
         //不能添加重复的分类名称
         Category category1 = new Category();
@@ -98,7 +98,7 @@ public class CategoryManagerController {
         category1.setId(category.getId());
         List<Category> list = categoryService.findByAllBySortOrder(category1);
         if (StringUtils.isNotEmpty(list)) {
-            return ResultUtil.error(ResultCode.CATEGORY_NAME_IS_EXIST);
+            throw new ServiceException(ResultCode.CATEGORY_NAME_IS_EXIST);
         }
 
         categoryService.updateCategory(category);
@@ -113,13 +113,13 @@ public class CategoryManagerController {
         category.setParentId(id);
         List<Category> list = categoryService.findByAllBySortOrder(category);
         if (list != null && !list.isEmpty()) {
-            return ResultUtil.error(ResultCode.CATEGORY_HAS_CHILDREN);
+            throw new ServiceException(ResultCode.CATEGORY_HAS_CHILDREN);
 
         }
         // 查询某商品分类的商品数量
         Integer count = goodsService.getGoodsCountByCategory(id);
         if (count > 0) {
-            return ResultUtil.error(ResultCode.CATEGORY_HAS_GOODS);
+            throw new ServiceException(ResultCode.CATEGORY_HAS_GOODS);
         }
         categoryService.delete(id);
         return ResultUtil.success(ResultCode.SUCCESS);
@@ -134,7 +134,7 @@ public class CategoryManagerController {
 
         Category category = categoryService.getById(id);
         if (category == null) {
-            return ResultUtil.error(ResultCode.CATEGORY_NOT_EXIST);
+            throw new ServiceException(ResultCode.CATEGORY_NOT_EXIST);
         }
         categoryService.updateCategoryStatus(id, enableOperations);
         return ResultUtil.success(ResultCode.SUCCESS);

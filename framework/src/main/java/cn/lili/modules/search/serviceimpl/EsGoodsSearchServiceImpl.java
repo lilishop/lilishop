@@ -82,7 +82,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         if (CharSequenceUtil.isNotEmpty(searchDTO.getKeyword())) {
             cache.incrementScore(HotWordsRedisKeyEnum.SEARCH_HOT_WORD.name(), searchDTO.getKeyword());
         }
-        NativeSearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(searchDTO, pageVo, false);
+        NativeSearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(searchDTO, pageVo, true);
         NativeSearchQuery searchQuery = searchQueryBuilder.build();
         log.info("searchGoods DSL:{}", searchQuery.getQuery());
 
@@ -260,10 +260,14 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             //分页
             nativeSearchQueryBuilder.withPageable(pageable);
         }
+        //查询参数非空判定
         if (searchDTO != null) {
+            //过滤条件
             BoolQueryBuilder filterBuilder = QueryBuilders.boolQuery();
+            //查询条件
             BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 
+            //对查询条件进行处理
             this.commonSearch(filterBuilder, queryBuilder, searchDTO, isAggregation);
 
             // 未上架的商品不显示
@@ -279,6 +283,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
                 this.keywordSearch(filterBuilder, queryBuilder, searchDTO.getKeyword(), isAggregation);
             }
 
+            //如果是聚合查询
             if (isAggregation) {
                 nativeSearchQueryBuilder.withQuery(filterBuilder);
             } else {
@@ -297,23 +302,36 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         return nativeSearchQueryBuilder;
     }
 
+    /**
+     * 查询属性处理
+     * @param filterBuilder
+     * @param queryBuilder
+     * @param searchDTO
+     * @param isAggregation
+     */
     private void commonSearch(BoolQueryBuilder filterBuilder, BoolQueryBuilder queryBuilder, EsGoodsSearchDTO searchDTO, boolean isAggregation) {
+        //品牌判定
         if (CharSequenceUtil.isNotEmpty(searchDTO.getBrandId())) {
             String[] brands = searchDTO.getBrandId().split("@");
             filterBuilder.must(QueryBuilders.termsQuery("brandId", brands));
         }
+        //规格项判定
         if (searchDTO.getNameIds() != null && !searchDTO.getNameIds().isEmpty()) {
             filterBuilder.must(QueryBuilders.nestedQuery(ATTR_PATH, QueryBuilders.termsQuery("attrList.nameId", searchDTO.getNameIds()), ScoreMode.None));
         }
+        //分类判定
         if (CharSequenceUtil.isNotEmpty(searchDTO.getCategoryId())) {
             filterBuilder.must(QueryBuilders.wildcardQuery("categoryPath", "*" + searchDTO.getCategoryId() + "*"));
         }
+        //店铺分类判定
         if (CharSequenceUtil.isNotEmpty(searchDTO.getStoreCatId())) {
             filterBuilder.must(QueryBuilders.wildcardQuery("storeCategoryPath", "*" + searchDTO.getStoreCatId() + "*"));
         }
+        //店铺判定
         if (CharSequenceUtil.isNotEmpty(searchDTO.getStoreId())) {
             filterBuilder.filter(QueryBuilders.termQuery("storeId", searchDTO.getStoreId()));
         }
+        //属性判定
         if (CharSequenceUtil.isNotEmpty(searchDTO.getProp())) {
             String[] props = searchDTO.getProp().split("@");
             List<String> nameList = new ArrayList<>();
@@ -340,6 +358,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             searchDTO.getNotShowCol().put(ATTR_NAME_KEY, nameList);
             searchDTO.getNotShowCol().put(ATTR_VALUE_KEY, valueList);
         }
+        //价格区间判定
         if (CharSequenceUtil.isNotEmpty(searchDTO.getPrice())) {
             String[] prices = searchDTO.getPrice().split("_");
             if(prices.length==0){
@@ -355,20 +374,33 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         }
     }
 
+    /**
+     * 关键字查询处理
+     * @param filterBuilder
+     * @param queryBuilder
+     * @param keyword
+     * @param isAggregation
+     */
     private void keywordSearch(BoolQueryBuilder filterBuilder, BoolQueryBuilder queryBuilder, String keyword, boolean isAggregation) {
         List<FunctionScoreQueryBuilder.FilterFunctionBuilder> filterFunctionBuilders = new ArrayList<>();
+        //商品名字匹配
         filterFunctionBuilders.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(QueryBuilders.wildcardQuery("goodsName", "*" + keyword + "*"),
                 ScoreFunctionBuilders.weightFactorFunction(10)));
+        //属性匹配
         filterFunctionBuilders.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(QueryBuilders.nestedQuery(ATTR_PATH, QueryBuilders.wildcardQuery(ATTR_VALUE, "*" + keyword + "*"), ScoreMode.None),
                 ScoreFunctionBuilders.weightFactorFunction(8)));
+
         FunctionScoreQueryBuilder.FilterFunctionBuilder[] builders = new FunctionScoreQueryBuilder.FilterFunctionBuilder[filterFunctionBuilders.size()];
         filterFunctionBuilders.toArray(builders);
         FunctionScoreQueryBuilder functionScoreQueryBuilder = QueryBuilders.functionScoreQuery(builders)
                 .scoreMode(FunctionScoreQuery.ScoreMode.SUM)
                 .setMinScore(2);
+        //聚合搜索则将结果放入过滤条件
         if (isAggregation) {
             filterBuilder.must(functionScoreQueryBuilder);
-        } else {
+        }
+        //否则放入查询条件
+        else {
             queryBuilder.must(functionScoreQueryBuilder);
         }
     }

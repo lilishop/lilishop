@@ -138,7 +138,7 @@ public class WechatPlugin implements Payment {
             return ResultUtil.data(JSONUtil.toJsonStr(response.getBody()));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResultUtil.error(ResultCode.PAY_ERROR);
+            throw new ServiceException(ResultCode.PAY_ERROR);
         }
     }
 
@@ -206,10 +206,10 @@ public class WechatPlugin implements Payment {
                 return ResultUtil.data(map);
             }
             log.error("微信支付参数验证错误，请及时处理");
-            return ResultUtil.error(ResultCode.PAY_ERROR);
+            throw new ServiceException(ResultCode.PAY_ERROR);
         } catch (Exception e) {
             log.error("支付异常", e);
-            return ResultUtil.error(ResultCode.PAY_ERROR);
+            throw new ServiceException(ResultCode.PAY_ERROR);
         }
     }
 
@@ -269,10 +269,10 @@ public class WechatPlugin implements Payment {
                 return ResultUtil.data(map);
             }
             log.error("微信支付参数验证错误，请及时处理");
-            return ResultUtil.error(ResultCode.PAY_ERROR);
+            throw new ServiceException(ResultCode.PAY_ERROR);
         } catch (Exception e) {
             log.error("支付异常", e);
-            return ResultUtil.error(ResultCode.PAY_ERROR);
+            throw new ServiceException(ResultCode.PAY_ERROR);
         }
     }
 
@@ -324,14 +324,14 @@ public class WechatPlugin implements Payment {
                 return ResultUtil.data(new JSONObject(response.getBody()).getStr("code_url"));
             } else {
                 log.error("微信支付参数验证错误，请及时处理");
-                return ResultUtil.error(ResultCode.PAY_ERROR);
+                throw new ServiceException(ResultCode.PAY_ERROR);
             }
         } catch (ServiceException e) {
             log.error("支付异常", e);
-            return ResultUtil.error(ResultCode.PAY_ERROR);
+            throw new ServiceException(ResultCode.PAY_ERROR);
         } catch (Exception e) {
             log.error("支付异常", e);
-            return ResultUtil.error(ResultCode.PAY_ERROR);
+            throw new ServiceException(ResultCode.PAY_ERROR);
         }
     }
 
@@ -407,10 +407,10 @@ public class WechatPlugin implements Payment {
                 return ResultUtil.data(map);
             }
             log.error("微信支付参数验证错误，请及时处理");
-            return ResultUtil.error(ResultCode.PAY_ERROR);
+            throw new ServiceException(ResultCode.PAY_ERROR);
         } catch (Exception e) {
             log.error("支付异常", e);
-            return ResultUtil.error(ResultCode.PAY_ERROR);
+            throw new ServiceException(ResultCode.PAY_ERROR);
         }
 
     }

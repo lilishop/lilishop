@@ -1,6 +1,7 @@
 package cn.lili.controller.purchase;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
@@ -68,7 +69,7 @@ public class PurchaseBuyerController {
         if (purchaseOrderService.close(id)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
 }

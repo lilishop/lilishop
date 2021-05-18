@@ -1,6 +1,7 @@
 package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Parameters;
@@ -34,7 +35,7 @@ public class ParameterManagerController {
         if (parametersService.save(parameters)) {
             return ResultUtil.data(parameters);
         }
-        return ResultUtil.error(ResultCode.PARAMETER_SAVE_ERROR);
+        throw new ServiceException(ResultCode.PARAMETER_SAVE_ERROR);
 
     }
 
@@ -45,7 +46,7 @@ public class ParameterManagerController {
         if (parametersService.updateById(parameters)) {
             return ResultUtil.data(parameters);
         }
-        return ResultUtil.error(ResultCode.PARAMETER_UPDATE_ERROR);
+        throw new ServiceException(ResultCode.PARAMETER_UPDATE_ERROR);
     }
 
     @ApiOperation(value = "通过id删除参数")

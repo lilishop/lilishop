@@ -1,6 +1,7 @@
 package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Goods;
@@ -71,7 +72,7 @@ public class GoodsManagerController {
         if (Boolean.TRUE.equals(goodsService.updateGoodsMarketAble(goodsIds, GoodsStatusEnum.DOWN, reason))) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.GOODS_UNDER_ERROR);
+        throw new ServiceException(ResultCode.GOODS_UNDER_ERROR);
     }
 
     @ApiOperation(value = "管理员审核商品", notes = "管理员审核商品")
@@ -85,7 +86,7 @@ public class GoodsManagerController {
         if (goodsService.auditGoods(goodsIds, GoodsAuthEnum.valueOf(isAuth))) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.GOODS_AUTH_ERROR);
+        throw new ServiceException(ResultCode.GOODS_AUTH_ERROR);
     }
 
 
@@ -98,7 +99,7 @@ public class GoodsManagerController {
         if (goodsService.updateGoodsMarketAble(goodsId, GoodsStatusEnum.UPPER, "")) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.GOODS_UPPER_ERROR);
+        throw new ServiceException(ResultCode.GOODS_UPPER_ERROR);
     }
 
 

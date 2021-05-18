@@ -1,6 +1,7 @@
 package cn.lili.controller.promotion;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.ResultUtil;
@@ -44,7 +45,7 @@ public class SeckillManagerController {
         if (seckillService.saveSeckill(seckillVO)) {
             return ResultUtil.data(seckillVO);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @PutMapping
@@ -56,7 +57,7 @@ public class SeckillManagerController {
         if (seckillService.modifySeckill(seckillVO)) {
             return ResultUtil.data(seckillVO);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @GetMapping(value = "/{id}")

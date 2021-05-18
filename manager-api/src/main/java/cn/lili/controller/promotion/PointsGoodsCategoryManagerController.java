@@ -1,6 +1,7 @@
 package cn.lili.controller.promotion;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -32,7 +33,7 @@ public class PointsGoodsCategoryManagerController {
         if (pointsGoodsCategoryService.addCategory(pointsGoodsCategory)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @PutMapping
@@ -41,7 +42,7 @@ public class PointsGoodsCategoryManagerController {
         if (pointsGoodsCategoryService.updateCategory(pointsGoodsCategory)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @DeleteMapping("/{id}")
@@ -50,7 +51,7 @@ public class PointsGoodsCategoryManagerController {
         if (pointsGoodsCategoryService.deleteCategory(id)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @GetMapping

@@ -1,6 +1,7 @@
 package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.ResultUtil;
@@ -22,7 +23,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -92,7 +92,7 @@ public class GoodsStoreController {
         if (tokenUser.getStoreId().equals(goods.getStoreId())) {
             return ResultUtil.data(goods);
         }
-        return ResultUtil.error(ResultCode.USER_AUTHORITY_ERROR);
+        throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
     }
 
     @ApiOperation(value = "新增商品")
@@ -118,7 +118,7 @@ public class GoodsStoreController {
         if (goodsService.updateGoodsMarketAble(goodsId, GoodsStatusEnum.DOWN, "商家下架")) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "上架商品", notes = "上架商品时使用")
@@ -128,7 +128,7 @@ public class GoodsStoreController {
         if (goodsService.updateGoodsMarketAble(goodsId, GoodsStatusEnum.UPPER, "")) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "删除商品")
@@ -138,7 +138,7 @@ public class GoodsStoreController {
         if (goodsService.deleteGoods(goodsId)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "设置商品运费模板")
@@ -152,7 +152,7 @@ public class GoodsStoreController {
         if (goodsService.freight(goodsId, freightPayer, templateId)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "根据goodsId分页获取商品规格列表")

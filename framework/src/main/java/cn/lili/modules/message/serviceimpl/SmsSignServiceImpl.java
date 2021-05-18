@@ -1,6 +1,5 @@
 package cn.lili.modules.message.serviceimpl;
 
-import cn.lili.common.enums.MessageCode;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.sms.AliSmsUtil;
@@ -13,7 +12,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,7 +69,6 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
             //查询签名状态
             for (SmsSign smsSign : list) {
                 map = aliSmsUtil.querySmsSign(smsSign.getSignName());
-
                 smsSign.setSignStatus((Integer) map.get("SignStatus"));
                 smsSign.setReason(map.get("Reason").toString());
                 this.updateById(smsSign);

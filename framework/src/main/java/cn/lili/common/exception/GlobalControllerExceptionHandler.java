@@ -1,7 +1,6 @@
 package cn.lili.common.exception;
 
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,7 +22,7 @@ import java.util.List;
  */
 @RestControllerAdvice
 @Slf4j
-public class GlobalControllerExceptionHandler  {
+public class GlobalControllerExceptionHandler {
 
     /**
      * 如果超过长度，则前后段交互体验不佳，使用默认错误消息
@@ -44,9 +43,9 @@ public class GlobalControllerExceptionHandler  {
 
         //如果是自定义异常，则获取异常，返回自定义错误消息
         if (e instanceof ServiceException) {
-            ResultCode resultCode=((ServiceException) e).getResultCode();
+            ResultCode resultCode = ((ServiceException) e).getResultCode();
             if (resultCode != null) {
-                return ResultUtil.error(resultCode.code(), resultCode.message());
+                throw new ServiceException(resultCode);
             }
         }
 
@@ -55,7 +54,7 @@ public class GlobalControllerExceptionHandler  {
         if (e != null && e.getMessage() != null && e.getMessage().length() < MAX_LENGTH) {
             errorMsg = e.getMessage();
         }
-        return ResultUtil.error(400, errorMsg);
+        throw new ServiceException(ResultCode.ERROR, errorMsg);
     }
 
     @ExceptionHandler(RuntimeException.class)
@@ -64,7 +63,7 @@ public class GlobalControllerExceptionHandler  {
 
         log.error("全局异常[RuntimeException]:", e);
 
-        return ResultUtil.error(400, "服务器异常，请稍后重试");
+        throw new ServiceException(ResultCode.ERROR, "服务器异常，请稍后重试");
     }
 
 //    /**
@@ -101,9 +100,9 @@ public class GlobalControllerExceptionHandler  {
         BindException exception = (BindException) e;
         List<FieldError> fieldErrors = exception.getBindingResult().getFieldErrors();
         for (FieldError error : fieldErrors) {
-            return ResultUtil.error(400,error.getDefaultMessage());
+            throw new ServiceException(ResultCode.ERROR, error.getDefaultMessage());
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
 }

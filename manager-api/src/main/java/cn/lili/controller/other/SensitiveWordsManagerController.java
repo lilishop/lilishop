@@ -1,6 +1,7 @@
 package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
@@ -52,7 +53,7 @@ public class SensitiveWordsManagerController {
             SensitiveWordsFilter.put(sensitiveWords.getSensitiveWord());
             return ResultUtil.data(sensitiveWords);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "修改敏感词")
@@ -64,7 +65,7 @@ public class SensitiveWordsManagerController {
             SensitiveWordsFilter.put(sensitiveWords.getSensitiveWord());
             return ResultUtil.data(sensitiveWords);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "批量删除")

@@ -1,6 +1,7 @@
 package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -40,7 +41,7 @@ public class CustomWordsManagerController {
         if (customWordsService.addCustomWords(customWords)) {
             return ResultUtil.data(customWords);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "修改自定义分词")
@@ -49,7 +50,7 @@ public class CustomWordsManagerController {
         if (customWordsService.updateCustomWords(customWords)) {
             return ResultUtil.data(customWords);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "删除自定义分词")
@@ -59,7 +60,7 @@ public class CustomWordsManagerController {
         if (customWordsService.deleteCustomWords(id)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "分页获取自定义分词")

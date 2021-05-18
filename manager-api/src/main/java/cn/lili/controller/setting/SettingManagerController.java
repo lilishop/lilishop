@@ -2,6 +2,7 @@ package cn.lili.controller.setting;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.base.aspect.DemoSite;
@@ -98,7 +99,7 @@ public class SettingManagerController {
             return createSetting(key);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResultUtil.error(ResultCode.ERROR);
+            throw new ServiceException(ResultCode.ERROR);
         }
     }
 
@@ -187,7 +188,7 @@ public class SettingManagerController {
                         ResultUtil.data(new WechatPaymentSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), WechatPaymentSetting.class));
             default:
-                return ResultUtil.error(ResultCode.SETTING_NOT_TO_SET);
+                throw new ServiceException(ResultCode.SETTING_NOT_TO_SET);
         }
     }
 }

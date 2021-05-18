@@ -1,6 +1,7 @@
 package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
@@ -58,7 +59,7 @@ public class VerificationSourceController {
             verificationSourceService.initCache();
             return ResultUtil.data(verificationSource);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @PutMapping("/{id}")
@@ -69,7 +70,7 @@ public class VerificationSourceController {
             verificationSourceService.initCache();
             return ResultUtil.data(verificationSource);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @DeleteMapping(value = "/{ids}")

@@ -1,6 +1,7 @@
 package cn.lili.controller.passport;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.sms.SmsUtil;
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.verification.enums.VerificationEnums;
@@ -13,7 +14,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,7 +50,7 @@ public class MemberBuyerController {
         if (verificationService.check(uuid, VerificationEnums.LOGIN)) {
             return ResultUtil.data(this.memberService.usernameLogin(username, password));
         } else {
-            return ResultUtil.error(ResultCode.VERIFICATION_ERROR);
+            throw new ServiceException(ResultCode.VERIFICATION_ERROR);
         }
     }
 
@@ -66,7 +66,7 @@ public class MemberBuyerController {
 //        if(smsUtil.verifyCode(mobile,VerificationEnums.LOGIN,uuid,code)){
         return ResultUtil.data(memberService.mobilePhoneLogin(mobile));
 //        }else {
-//            return ResultUtil.error("验证码错误");
+//            throw new ServiceException("验证码错误");
 //        }
     }
 
@@ -88,7 +88,7 @@ public class MemberBuyerController {
         if (result) {
             return ResultUtil.data(memberService.register(username, password, mobilePhone));
         } else {
-            return ResultUtil.error(ResultCode.VERIFICATION_SMS_ERROR);
+            throw new ServiceException(ResultCode.VERIFICATION_SMS_ERROR);
         }
     }
 
@@ -115,7 +115,7 @@ public class MemberBuyerController {
                 return ResultUtil.success(ResultCode.SUCCESS);
             }
         }
-        return ResultUtil.error(ResultCode.VERIFICATION_ERROR);
+        throw new ServiceException(ResultCode.VERIFICATION_ERROR);
     }
 
     @ApiOperation(value = "修改密码")

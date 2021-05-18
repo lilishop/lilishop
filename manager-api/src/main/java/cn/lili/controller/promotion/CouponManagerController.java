@@ -63,7 +63,7 @@ public class CouponManagerController {
         if (couponService.add(couponVO) != null) {
             return ResultUtil.data(couponVO);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "修改优惠券")
@@ -74,7 +74,7 @@ public class CouponManagerController {
         if (couponService.updateCoupon(couponVO) != null) {
             return ResultUtil.data(coupon);
         }
-        return ResultUtil.error(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "修改优惠券状态")
@@ -84,7 +84,7 @@ public class CouponManagerController {
         if (couponService.updateCouponStatus(Arrays.asList(split), PromotionStatusEnum.valueOf(promotionStatus))) {
             return ResultUtil.success(ResultCode.COUPON_EDIT_STATUS_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.COUPON_EDIT_STATUS_ERROR);
+        throw new ServiceException(ResultCode.COUPON_EDIT_STATUS_ERROR);
     }
 
     @ApiOperation(value = "批量删除")

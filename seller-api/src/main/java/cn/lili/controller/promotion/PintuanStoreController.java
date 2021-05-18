@@ -1,6 +1,7 @@
 package cn.lili.controller.promotion;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.ResultUtil;
@@ -72,7 +73,7 @@ public class PintuanStoreController {
         if (pintuanService.addPintuan(pintuan)) {
             return ResultUtil.success(ResultCode.PINTUAN_ADD_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.PINTUAN_ADD_ERROR);
+        throw new ServiceException(ResultCode.PINTUAN_ADD_ERROR);
     }
 
     @PutMapping(consumes = "application/json", produces = "application/json")
@@ -84,7 +85,7 @@ public class PintuanStoreController {
         if (pintuanService.modifyPintuan(pintuan)) {
             return ResultUtil.success(ResultCode.PINTUAN_EDIT_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.PINTUAN_EDIT_ERROR);
+        throw new ServiceException(ResultCode.PINTUAN_EDIT_ERROR);
     }
 
     @PutMapping("/open/{pintuanId}")
@@ -93,7 +94,7 @@ public class PintuanStoreController {
         if (pintuanService.openPintuan(pintuanId, new Date(startTime), new Date(endTime))) {
             return ResultUtil.success(ResultCode.PINTUAN_MANUAL_OPEN_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.PINTUAN_MANUAL_OPEN_ERROR);
+        throw new ServiceException(ResultCode.PINTUAN_MANUAL_OPEN_ERROR);
 
     }
 
@@ -103,7 +104,7 @@ public class PintuanStoreController {
         if (pintuanService.closePintuan(pintuanId)) {
             return ResultUtil.success(ResultCode.PINTUAN_MANUAL_CLOSE_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.PINTUAN_MANUAL_CLOSE_ERROR);
+        throw new ServiceException(ResultCode.PINTUAN_MANUAL_CLOSE_ERROR);
     }
 
     @DeleteMapping("/{pintuanId}")
@@ -112,7 +113,7 @@ public class PintuanStoreController {
         if (pintuanService.deletePintuan(pintuanId)) {
             return ResultUtil.success(ResultCode.PINTUAN_DELETE_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.PINTUAN_DELETE_ERROR);
+        throw new ServiceException(ResultCode.PINTUAN_DELETE_ERROR);
     }
 
 }
