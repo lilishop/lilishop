@@ -18,9 +18,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class SpecialServiceImpl extends ServiceImpl<SpecialMapper, Special> implements SpecialService {
 
-    //专题
-    @Autowired
-    private SpecialMapper specialMapper;
     //页面数据
     @Autowired
     private PageDataService pageDataService;

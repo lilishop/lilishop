@@ -13,7 +13,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,8 +45,8 @@ public class ArticleManagerController {
 
     @ApiOperation(value = "分页获取")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "categoryId", value = "文章分类ID", dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "title", value = "标题", dataType = "String", paramType = "query")
+            @ApiImplicitParam(name = "categoryId", value = "文章分类ID", paramType = "query"),
+            @ApiImplicitParam(name = "title", value = "标题", paramType = "query")
     })
     @GetMapping(value = "/getByPage")
     public ResultMessage<IPage<ArticleVO>> getByPage(ArticleSearchParams articleSearchParams) {
@@ -63,12 +62,26 @@ public class ArticleManagerController {
     }
 
     @ApiOperation(value = "修改文章")
-    @ApiImplicitParam(name = "id", value = "文章ID", required = true, dataType = "String", paramType = "path")
+    @ApiImplicitParam(name = "id", value = "文章ID", required = true, paramType = "path")
     @PutMapping("update/{id}")
     public ResultMessage<Article> update(@Valid Article article, @PathVariable("id") String id) {
         article.setId(id);
         return ResultUtil.data(articleService.updateArticle(article));
     }
+
+    @ApiOperation(value = "修改文章状态")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "文章ID", required = true, paramType = "path"),
+            @ApiImplicitParam(name = "status", value = "操作状态", required = true, paramType = "query")
+    })
+    @PutMapping("update/status/{id}")
+    public ResultMessage<Article> updateStatus(@PathVariable("id") String id,boolean status) {
+        if(articleService.updateArticleStatus(id,status)){
+            return ResultUtil.success(ResultCode.SUCCESS);
+        }
+        return ResultUtil.error(ResultCode.ERROR);
+    }
+
 
     @ApiOperation(value = "批量删除")
     @ApiImplicitParam(name = "id", value = "文章ID", required = true, dataType = "String", paramType = "path")

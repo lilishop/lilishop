@@ -55,7 +55,6 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
     public void sendSmsCode(String mobile, VerificationEnums verificationEnums, String uuid) {
 
         String code = CommonUtil.getRandomNum();
-        code = "111111";
 
         switch (verificationEnums) {
             //如果某个模版需要自定义，则在此处进行调整
@@ -67,7 +66,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 Map<String, String> params = new HashMap<>();
                 params.put("code", code);
                 cache.put(cacheKey(verificationEnums, mobile, uuid), code, 300L);
-                //this.sendSmsCode("北京宏业汇成科技有限公司",mobile, params, verificationEnums.getSmsTemplate());
+                this.sendSmsCode("北京宏业汇成科技有限公司", mobile, params, "SMS_205755300");
                 break;
             }
             case UPDATE_PASSWORD: {
@@ -80,7 +79,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 Map<String, String> params = new HashMap<>();
                 params.put("code", code);
                 cache.put(cacheKey(verificationEnums, memberMobile, uuid), code, 300L);
-                //this.sendSmsCode("北京宏业汇成科技有限公司",mobile, params, verificationEnums.getSmsTemplate());
+                this.sendSmsCode("北京宏业汇成科技有限公司", mobile, params, "SMS_205755297");
                 break;
             }
             //如果不是有效的验证码手段，则此处不进行短信操作
@@ -161,13 +160,17 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
     public void addSmsSign(SmsSign smsSign) throws Exception {
         //设置参数添加短信签名
         com.aliyun.dysmsapi20170525.Client client = this.createClient();
-
+        System.out.println(smsSign.getBusinessLicense().substring(smsSign.getBusinessLicense().lastIndexOf(".") + 1));
+        System.out.println(smsSign.getLicense().substring(smsSign.getLicense().lastIndexOf(".")));
+        //营业执照
         AddSmsSignRequest.AddSmsSignRequestSignFileList signFileList0 = new AddSmsSignRequest.AddSmsSignRequestSignFileList()
                 .setFileContents(Base64Utils.encode(smsSign.getBusinessLicense()))
                 .setFileSuffix(smsSign.getBusinessLicense().substring(smsSign.getBusinessLicense().lastIndexOf(".") + 1));
+        //授权委托书
         AddSmsSignRequest.AddSmsSignRequestSignFileList signFileList1 = new AddSmsSignRequest.AddSmsSignRequestSignFileList()
                 .setFileContents(Base64Utils.encode(smsSign.getLicense()))
-                .setFileSuffix(smsSign.getLicense().substring(smsSign.getBusinessLicense().lastIndexOf(".") + 1));
+                .setFileSuffix(smsSign.getLicense().substring(smsSign.getLicense().lastIndexOf(".")) + 1);
+        //添加短信签名
         AddSmsSignRequest addSmsSignRequest = new AddSmsSignRequest()
                 .setSignName(smsSign.getSignName())
                 .setSignSource(smsSign.getSignSource())
