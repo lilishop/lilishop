@@ -171,10 +171,6 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
     }
 
     @Override
-<<<<<<< HEAD
-    public void updateCanRebate(Double canRebate, String distributionId) {
-        this.baseMapper.updateCanRebate(canRebate,distributionId);
-=======
     public void subCanRebate(Double canRebate, String distributionId) {
         this.baseMapper.subCanRebate(canRebate,distributionId);
     }
@@ -182,7 +178,6 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
     @Override
     public void addRebate(Double rebate, String distributionId) {
         this.baseMapper.addCanRebate(rebate,distributionId);
->>>>>>> master
     }
 
 }

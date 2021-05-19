@@ -97,13 +97,9 @@ public enum ResultCode {
     USER_RECEIPT_NOT_EXIST(20014, "会员发票信息不存在"),
     USER_EDIT_ERROR(20015, "用户修改失败"),
     USER_OLD_PASSWORD_ERROR(20016, "旧密码不正确"),
-<<<<<<< HEAD
     USER_COLLECTION_EXIST(20017,"无法重复收藏"),
     USER_GRADE_IS_DEFAULT(20018,"会员等级为默认会员等级"),
-=======
-    USER_COLLECTION_EXIST(2001, "无法重复收藏"),
     DELETE_EXIST(2001, "无法重复收藏"),
->>>>>>> master
 
     /**
      * 权限
