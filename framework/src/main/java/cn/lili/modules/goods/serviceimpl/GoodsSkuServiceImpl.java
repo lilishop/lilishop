@@ -438,8 +438,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                     goodsIndexService.addIndex(goodsIndex);
                 } else if (goodsSku.getQuantity() > 0 && esGoodsOld != null) {
                     goodsIndexService.updateIndex(goodsIndex);
-                } else if (goodsSku.getQuantity() <= 0 && esGoodsOld != null) {
-                    goodsIndexService.deleteIndexById(goodsSku.getId());
                 }
                 //删除sku缓存
                 cache.remove(GoodsSkuService.getCacheKeys(goodsSku.getId()));

@@ -203,7 +203,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Override
     public void updateEsGoodsIndexAllByList(BasePromotion promotion, String key) {
         List<EsGoodsIndex> goodsIndices;
-        //如果storeid不为空，则表示是店铺活动
+        //如果storeId不为空，则表示是店铺活动
         if (promotion.getStoreId() != null) {
             EsGoodsSearchDTO searchDTO = new EsGoodsSearchDTO();
             searchDTO.setStoreId(promotion.getStoreId());
@@ -240,6 +240,41 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             } else {
                 log.error("更新索引商品促销信息失败！skuId 为 【{}】的索引不存在！", skuId);
             }
+        }
+    }
+
+    @Override
+    public void deleteEsGoodsPromotionByPromotionId(String skuId, String promotionId) {
+        if (skuId != null) {
+            EsGoodsIndex goodsIndex = findById(skuId);
+            //商品索引不为空
+            if (goodsIndex != null) {
+                this.removePromotionByPromotionId(goodsIndex, promotionId);
+            } else {
+                log.error("更新索引商品促销信息失败！skuId 为 【{}】的索引不存在！", skuId);
+            }
+        } else {
+            for (EsGoodsIndex goodsIndex : this.goodsIndexRepository.findAll()) {
+                this.removePromotionByPromotionId(goodsIndex, promotionId);
+            }
+        }
+
+    }
+
+    /**
+     * 从索引中删除指定促销活动id的促销活动
+     *
+     * @param goodsIndex  索引
+     * @param promotionId 促销活动id
+     */
+    private void removePromotionByPromotionId(EsGoodsIndex goodsIndex, String promotionId) {
+        Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
+        if (promotionMap != null && !promotionMap.isEmpty()) {
+            // 如果存在同类型促销活动删除
+            List<String> collect = promotionMap.keySet().stream().filter(i -> i.split("-")[1].equals(promotionId)).collect(Collectors.toList());
+            collect.forEach(promotionMap::remove);
+            goodsIndex.setPromotionMap(promotionMap);
+            updateIndex(goodsIndex);
         }
     }
 
