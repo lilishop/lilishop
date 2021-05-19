@@ -1,14 +1,16 @@
 package cn.lili.modules.member.serviceimpl;
 
 
+import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.StringUtils;
+import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.MemberPointsHistory;
 import cn.lili.modules.member.entity.vo.MemberPointsHistoryVO;
 import cn.lili.modules.member.mapper.MemberPointsHistoryMapper;
 import cn.lili.modules.member.service.MemberPointsHistoryService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,5 +43,13 @@ public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHist
         memberPointsHistoryVO.setVariablePoint(variablePoint == null ? 0 : variablePoint);
         memberPointsHistoryVO.setVariablePoint(memberPointsHistoryVO.getPoint() - memberPointsHistoryVO.getVariablePoint());
         return memberPointsHistoryVO;
+    }
+
+    @Override
+    public IPage<MemberPointsHistory> MemberPointsHistoryList(PageVO page, String memberId, String memberName) {
+        LambdaQueryWrapper<MemberPointsHistory> lambdaQueryWrapper=new LambdaQueryWrapper<MemberPointsHistory>()
+                .eq(memberId != null, MemberPointsHistory::getMemberId, memberId)
+                .like(memberName != null, MemberPointsHistory::getMemberName, memberName);
+        return this.page(PageUtil.initPage(page), lambdaQueryWrapper);
     }
 }
