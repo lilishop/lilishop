@@ -1,4 +1,4 @@
-package cn.lili.controller.distribution;
+package cn.lili.controller.other.distribution;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;

@@ -43,10 +43,6 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
     @Autowired
     private MemberService memberService;
 
-    //分销员
-    @Autowired
-    private DistributionMapper distributionMapper;
-
     //缓存
     @Autowired
     private Cache cache;
@@ -175,8 +171,13 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
     }
 
     @Override
-    public void updateCanRebate(Double canRebate, String distributionId) {
-        this.distributionMapper.updateCanRebate(canRebate,distributionId);
+    public void subCanRebate(Double canRebate, String distributionId) {
+        this.baseMapper.subCanRebate(canRebate,distributionId);
+    }
+
+    @Override
+    public void addRebate(Double rebate, String distributionId) {
+        this.baseMapper.addCanRebate(rebate,distributionId);
     }
 
 }

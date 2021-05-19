@@ -24,7 +24,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,15 +68,17 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
 
         //判断是否为分销订单，如果为分销订单则获取分销佣金
         if (order.getDistributionId() != null) {
-
             //根据订单编号获取有分销金额的店铺流水记录
             List<StoreFlow> storeFlowList = storeFlowService.list(new LambdaQueryWrapper<StoreFlow>()
                     .eq(StoreFlow::getOrderSn, orderSn)
                     .isNotNull(StoreFlow::getDistributionRebate));
+            Double rebate=0.0;
+            //循环店铺流水记录判断是否包含分销商品
+            //包含分销商品则进行记录分销订单、计算分销总额
             for (StoreFlow storeFlow : storeFlowList) {
+                rebate=CurrencyUtil.add(rebate,storeFlow.getDistributionRebate());
                 DistributionOrder distributionOrder = new DistributionOrder(storeFlow);
                 distributionOrder.setDistributionId(order.getDistributionId());
-
                 //分销员信息
                 Distribution distribution = distributionService.getById(order.getDistributionId());
                 distributionOrder.setDistributionName(distribution.getMemberName());
@@ -86,12 +87,56 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
                 Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
                 DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
                 DateTime dateTime = new DateTime();
-                // dateTime.offsetNew(DateField.DAY_OF_MONTH,distributionSetting.getCashDay());
-                dateTime.offsetNew(DateField.DAY_OF_MONTH, 1);
+                dateTime.offsetNew(DateField.DAY_OF_MONTH,distributionSetting.getCashDay());
                 distributionOrder.setSettleCycle(dateTime);
                 this.save(distributionOrder);
             }
+            //如果包含分销商品则记录会员的分销总额
+            if(rebate!=0.0){
+                distributionService.addRebate(rebate,order.getDistributionId());
+            }
         }
+
+    }
+    @Override
+    public void test(String orderSn) {
+
+        //根据订单编号获取订单数据
+        Order order = orderService.getBySn(orderSn);
+
+        //判断是否为分销订单，如果为分销订单则获取分销佣金
+        if (order.getDistributionId() != null) {
+            //根据订单编号获取有分销金额的店铺流水记录
+            List<StoreFlow> storeFlowList = storeFlowService.list(new LambdaQueryWrapper<StoreFlow>()
+                    .eq(StoreFlow::getOrderSn, orderSn)
+                    .isNotNull(StoreFlow::getDistributionRebate));
+            Double rebate=0.0;
+            //循环店铺流水记录判断是否包含分销商品
+            //包含分销商品则进行记录分销订单、计算分销总额
+            for (StoreFlow storeFlow : storeFlowList) {
+                rebate=CurrencyUtil.add(rebate,storeFlow.getDistributionRebate());
+                DistributionOrder distributionOrder = new DistributionOrder(storeFlow);
+                distributionOrder.setDistributionId(order.getDistributionId());
+                //分销员信息
+                Distribution distribution = distributionService.getById(order.getDistributionId());
+                distributionOrder.setDistributionName(distribution.getMemberName());
+
+                //设置结算天数(解冻日期)
+                Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
+                DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
+                DateTime dateTime = new DateTime();
+                //默认提现周期一天
+                dateTime.offsetNew(DateField.DAY_OF_MONTH,1);
+                //dateTime.offsetNew(DateField.DAY_OF_MONTH,distributionSetting.getCashDay());
+                distributionOrder.setSettleCycle(dateTime);
+                this.save(distributionOrder);
+            }
+            //如果包含分销商品则记录会员的分销总额
+            if(rebate!=0.0){
+                distributionService.addRebate(rebate,order.getDistributionId());
+            }
+        }
+
     }
 
     @Override
@@ -126,7 +171,7 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
 
                 this.save(backDistributionOrder);
                 //修改分销员提成金额
-                distributionService.updateCanRebate(CurrencyUtil.sub(0,storeFlow.getDistributionRebate()),distributionOrder.getDistributionId());
+                distributionService.subCanRebate(CurrencyUtil.sub(0,storeFlow.getDistributionRebate()),distributionOrder.getDistributionId());
             }
         }
     }

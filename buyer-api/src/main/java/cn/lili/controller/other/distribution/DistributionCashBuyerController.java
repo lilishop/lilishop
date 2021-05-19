@@ -1,4 +1,4 @@
-package cn.lili.controller.distribution;
+package cn.lili.controller.other.distribution;
 
 import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
