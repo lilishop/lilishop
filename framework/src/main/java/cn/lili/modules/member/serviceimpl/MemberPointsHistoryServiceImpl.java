@@ -1,14 +1,16 @@
 package cn.lili.modules.member.serviceimpl;
 
 
+import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.StringUtils;
+import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.MemberPointsHistory;
 import cn.lili.modules.member.entity.vo.MemberPointsHistoryVO;
 import cn.lili.modules.member.mapper.MemberPointsHistoryMapper;
 import cn.lili.modules.member.service.MemberPointsHistoryService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,9 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHistoryMapper, MemberPointsHistory> implements MemberPointsHistoryService {
 
-    @Autowired
-    private MemberPointsHistoryMapper memberPointsHistoryMapper;
-
     @Override
     public MemberPointsHistoryVO getMemberPointsHistoryVO(String memberId) {
         MemberPointsHistoryVO memberPointsHistoryVO = new MemberPointsHistoryVO();
@@ -32,16 +31,24 @@ public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHist
         Long variablePoint = 0L;
 
         if (StringUtils.isNotEmpty(memberId)) {
-            point = memberPointsHistoryMapper.getMemberPointsHistoryVO(1, memberId);
-            variablePoint = memberPointsHistoryMapper.getMemberPointsHistoryVO(0, memberId);
+            point = this.baseMapper.getMemberPointsHistoryVO(1, memberId);
+            variablePoint = this.baseMapper.getMemberPointsHistoryVO(0, memberId);
 
         } else {
-            point = memberPointsHistoryMapper.getALLMemberPointsHistoryVO(0);
-            variablePoint = memberPointsHistoryMapper.getALLMemberPointsHistoryVO(1);
+            point = this.baseMapper.getALLMemberPointsHistoryVO(0);
+            variablePoint = this.baseMapper.getALLMemberPointsHistoryVO(1);
         }
         memberPointsHistoryVO.setPoint(point == null ? 0 : point);
         memberPointsHistoryVO.setVariablePoint(variablePoint == null ? 0 : variablePoint);
         memberPointsHistoryVO.setVariablePoint(memberPointsHistoryVO.getPoint() - memberPointsHistoryVO.getVariablePoint());
         return memberPointsHistoryVO;
+    }
+
+    @Override
+    public IPage<MemberPointsHistory> MemberPointsHistoryList(PageVO page, String memberId, String memberName) {
+        LambdaQueryWrapper<MemberPointsHistory> lambdaQueryWrapper=new LambdaQueryWrapper<MemberPointsHistory>()
+                .eq(memberId != null, MemberPointsHistory::getMemberId, memberId)
+                .like(memberName != null, MemberPointsHistory::getMemberName, memberName);
+        return this.page(PageUtil.initPage(page), lambdaQueryWrapper);
     }
 }
