@@ -1,7 +1,7 @@
 package cn.lili.controller.trade;
 
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
@@ -15,7 +15,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -62,7 +61,7 @@ public class OrderManagerController {
     @PostMapping(value = "/{orderSn}/pay")
     public ResultMessage<Object> payOrder(@PathVariable String orderSn) {
         orderPriceService.adminPayOrder(orderSn);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "修改收货人信息")

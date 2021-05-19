@@ -1,9 +1,7 @@
 package cn.lili.controller.setting;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.message.entity.dos.WechatMessage;
@@ -35,7 +33,7 @@ public class WechatMessageManageController {
     @ApiOperation(value = "初始化微信消息")
     public ResultMessage init() {
         wechatMessageService.init();
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @GetMapping(value = "/{id}")
@@ -57,25 +55,21 @@ public class WechatMessageManageController {
     @ApiOperation(value = "新增微信消息")
     public ResultMessage<WechatMessage> save(WechatMessage wechatMessage) {
 
-        if (wechatMessageService.save(wechatMessage)) {
-            return ResultUtil.data(wechatMessage);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        wechatMessageService.save(wechatMessage);
+        return ResultUtil.data(wechatMessage);
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "更新微信消息")
     public ResultMessage<WechatMessage> update(@PathVariable String id, WechatMessage wechatMessage) {
-        if (wechatMessageService.updateById(wechatMessage)) {
-            return ResultUtil.data(wechatMessage);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        wechatMessageService.updateById(wechatMessage);
+        return ResultUtil.data(wechatMessage);
     }
 
     @DeleteMapping(value = "/{ids}")
     @ApiOperation(value = "删除微信消息")
     public ResultMessage<Object> delAllByIds(@PathVariable List ids) {
         wechatMessageService.removeByIds(ids);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 }

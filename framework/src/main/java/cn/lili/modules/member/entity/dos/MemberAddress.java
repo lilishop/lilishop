@@ -11,7 +11,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 /**
  * 会员地址
@@ -51,7 +50,6 @@ public class MemberAddress extends BaseEntity {
     @ApiModelProperty(value = "详细地址")
     private String detail;
 
-    @NotNull(message = "是否默认不能为空")
     @ApiModelProperty(value = "是否为默认收货地址")
     private Boolean isDefault;
 

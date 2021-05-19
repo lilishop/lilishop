@@ -1,9 +1,7 @@
 package cn.lili.controller.settings;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.store.entity.vos.FreightTemplateVO;
 import cn.lili.modules.store.service.FreightTemplateService;
@@ -58,9 +56,7 @@ public class FreightTemplateStoreController {
     @ApiImplicitParam(name = "id", value = "商家模板ID", required = true, paramType = "path")
     @DeleteMapping("/{id}")
     public ResultMessage<Object> edit(@PathVariable String id) {
-        if (freightTemplateService.removeFreightTemplate(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        freightTemplateService.removeFreightTemplate(id);
+        return ResultUtil.success();
     }
 }

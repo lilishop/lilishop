@@ -1,10 +1,8 @@
 package cn.lili.controller.trade;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.order.entity.dos.OrderComplaint;
@@ -66,40 +64,31 @@ public class OrderComplaintStoreController {
     public ResultMessage<OrderComplaintCommunicationVO> addCommunication(@RequestParam String complainId, @RequestParam String content) {
         AuthUser currentUser = UserContext.getCurrentUser();
         OrderComplaintCommunicationVO communicationVO = new OrderComplaintCommunicationVO(complainId, content, CommunicationOwnerEnum.STORE.name(), currentUser.getStoreId(), currentUser.getUsername());
-        if (orderComplaintCommunicationService.addCommunication(communicationVO)) {
-            return ResultUtil.data(communicationVO);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        orderComplaintCommunicationService.addCommunication(communicationVO);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "修改申诉信息")
     @PutMapping
     public ResultMessage<OrderComplaintVO> update(OrderComplaintVO orderComplainVO) {
         orderComplainVO.setStoreId(UserContext.getCurrentUser().getId());
-        if (orderComplaintService.updateOrderComplain(orderComplainVO)) {
-            return ResultUtil.data(orderComplainVO);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        orderComplaintService.updateOrderComplain(orderComplainVO);
+        return ResultUtil.data(orderComplainVO);
 
     }
 
     @ApiOperation(value = "申诉")
     @PutMapping("/appeal")
     public ResultMessage<OrderComplaintVO> appeal(StoreAppealVO storeAppealVO) {
-        //申诉接口
-        if (orderComplaintService.appeal(storeAppealVO)) {
-            return ResultUtil.data(orderComplaintService.getOrderComplainById(storeAppealVO.getOrderComplaintId()));
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        orderComplaintService.appeal(storeAppealVO);
+        return ResultUtil.data(orderComplaintService.getOrderComplainById(storeAppealVO.getOrderComplaintId()));
     }
 
     @ApiOperation(value = "修改状态")
     @PutMapping(value = "/status")
     public ResultMessage<Object> updateStatus(OrderComplaintOperationParams orderComplainVO) {
-        if (orderComplaintService.updateOrderComplainByStatus(orderComplainVO) != null) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        orderComplaintService.updateOrderComplainByStatus(orderComplainVO);
+        return ResultUtil.success();
     }
 
 }

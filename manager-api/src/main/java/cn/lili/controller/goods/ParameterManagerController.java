@@ -2,7 +2,7 @@ package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Parameters;
 import cn.lili.modules.goods.service.ParametersService;
@@ -54,7 +54,7 @@ public class ParameterManagerController {
     @DeleteMapping(value = "/{id}")
     public ResultMessage<Object> delById(@PathVariable String id) {
         parametersService.removeById(id);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
 
     }
 

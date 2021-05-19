@@ -1,9 +1,7 @@
 package cn.lili.controller.setting;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.vo.SearchVO;
@@ -34,8 +32,9 @@ public class WechatMPMessageManagerController {
     @ApiOperation(value = "初始化微信小程序消息订阅")
     public ResultMessage init() {
         wechatMPMessageService.init();
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
+
     @GetMapping(value = "/{id}")
     @ApiOperation(value = "查看微信小程序消息订阅详情")
     public ResultMessage<WechatMPMessage> get(@PathVariable String id) {
@@ -57,19 +56,15 @@ public class WechatMPMessageManagerController {
     @ApiOperation(value = "新增微信小程序消息订阅")
     public ResultMessage<WechatMPMessage> save(WechatMPMessage wechatMPMessage) {
 
-        if (wechatMPMessageService.save(wechatMPMessage)) {
-            return new ResultUtil<WechatMPMessage>().setData(wechatMPMessage);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        wechatMPMessageService.save(wechatMPMessage);
+        return new ResultUtil<WechatMPMessage>().setData(wechatMPMessage);
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "更新微信小程序消息订阅")
     public ResultMessage<WechatMPMessage> update(@PathVariable String id, WechatMPMessage wechatMPMessage) {
-        if (wechatMPMessageService.updateById(wechatMPMessage)) {
-            return new ResultUtil<WechatMPMessage>().setData(wechatMPMessage);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        wechatMPMessageService.updateById(wechatMPMessage);
+        return new ResultUtil<WechatMPMessage>().setData(wechatMPMessage);
     }
 
     @DeleteMapping(value = "/{ids}")
@@ -77,6 +72,6 @@ public class WechatMPMessageManagerController {
     public ResultMessage<Object> delAllByIds(@PathVariable List ids) {
 
         wechatMPMessageService.removeByIds(ids);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 }

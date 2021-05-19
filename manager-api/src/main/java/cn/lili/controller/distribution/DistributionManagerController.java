@@ -2,7 +2,7 @@ package cn.lili.controller.distribution;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.distribution.entity.dos.Distribution;
@@ -46,7 +46,7 @@ public class DistributionManagerController {
     })
     public ResultMessage<Object> retreat(@PathVariable String id) {
         if (distributionService.retreat(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
+            return ResultUtil.success();
         } else {
             throw new ServiceException(ResultCode.DISTRIBUTION_RETREAT_ERROR);
         }
@@ -60,7 +60,7 @@ public class DistributionManagerController {
     })
     public ResultMessage<Object> resume(@PathVariable String id) {
         if (distributionService.resume(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
+            return ResultUtil.success();
         } else {
             throw new ServiceException(ResultCode.DISTRIBUTION_RETREAT_ERROR);
         }
@@ -75,7 +75,7 @@ public class DistributionManagerController {
     })
     public ResultMessage<Object> audit(@NotNull @PathVariable String id, @NotNull String status) {
         if (distributionService.audit(id, status)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
+            return ResultUtil.success();
         } else {
             throw new ServiceException(ResultCode.DISTRIBUTION_AUDIT_ERROR);
         }

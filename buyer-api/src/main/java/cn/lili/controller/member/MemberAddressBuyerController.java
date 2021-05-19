@@ -1,12 +1,9 @@
 package cn.lili.controller.member;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.base.service.RegionService;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.promotion.service.MemberAddressService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -36,9 +33,6 @@ public class MemberAddressBuyerController {
     @Autowired
     private MemberAddressService memberAddressService;
 
-    @Autowired
-    private RegionService regionService;
-
     @ApiOperation(value = "获取会员收件地址分页列表")
     @GetMapping
     public ResultMessage<IPage<MemberAddress>> page(PageVO page) {
@@ -63,6 +57,9 @@ public class MemberAddressBuyerController {
     public ResultMessage<MemberAddress> addShippingAddress(@Valid MemberAddress shippingAddress) {
         //添加会员地址
         shippingAddress.setMemberId(UserContext.getCurrentUser().getId());
+        if(shippingAddress.getIsDefault()==null){
+            shippingAddress.setIsDefault(false);
+        }
         return ResultUtil.data(memberAddressService.saveMemberAddress(shippingAddress));
     }
 
@@ -71,6 +68,9 @@ public class MemberAddressBuyerController {
     public ResultMessage<MemberAddress> editShippingAddress(@Valid MemberAddress shippingAddress) {
         //修改会员地址
         shippingAddress.setMemberId(UserContext.getCurrentUser().getId());
+        if(shippingAddress.getIsDefault()==null){
+            shippingAddress.setIsDefault(false);
+        }
         return ResultUtil.data(memberAddressService.updateMemberAddress(shippingAddress));
     }
 
@@ -78,10 +78,8 @@ public class MemberAddressBuyerController {
     @ApiImplicitParam(name = "id", value = "会员地址ID", dataType = "String", paramType = "path")
     @DeleteMapping(value = "/delById/{id}")
     public ResultMessage<Object> delShippingAddressById(@PathVariable String id) {
-        if (memberAddressService.removeMemberAddress(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        memberAddressService.removeMemberAddress(id);
+        return ResultUtil.success();
     }
 
 }

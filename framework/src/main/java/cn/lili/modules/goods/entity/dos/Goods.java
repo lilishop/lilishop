@@ -145,7 +145,7 @@ public class Goods extends BaseEntity {
     /**
      * 谁承担运费 BUYER：买家承担，STORE：卖家承担
      */
-    @ApiModelProperty(value = "运费承担者 BUYER：买家承担，STORE：卖家承担")
+    @ApiModelProperty(value = " 谁承担运费 BUYER：买家承担，STORE：卖家承担")
     private String freightPayer;
     /**
      * 审核状态

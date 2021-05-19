@@ -2,7 +2,7 @@ package cn.lili.controller.common;
 
 import cn.lili.common.aop.limiter.annotation.LimitPoint;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.verification.enums.VerificationEnums;
 import cn.lili.common.verification.service.VerificationService;
 import cn.lili.common.vo.ResultMessage;

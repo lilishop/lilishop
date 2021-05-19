@@ -6,7 +6,7 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.token.Token;
 import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -150,7 +150,7 @@ public class AdminUserManagerController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @PutMapping(value = "/enable/{userId}")
@@ -162,14 +162,14 @@ public class AdminUserManagerController {
         }
         user.setStatus(status);
         adminUserService.updateById(user);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @DeleteMapping(value = "/{ids}")
     @ApiOperation(value = "批量通过ids删除")
     public ResultMessage<Object> delAllByIds(@PathVariable List<String> ids) {
         adminUserService.deleteCompletely(ids);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 }

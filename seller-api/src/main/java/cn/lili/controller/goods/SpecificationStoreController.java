@@ -1,10 +1,8 @@
 package cn.lili.controller.goods;
 
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Specification;
@@ -49,10 +47,8 @@ public class SpecificationStoreController {
         if (parameters.getStoreId() == null) {
             parameters.setStoreId(UserContext.getCurrentUser().getId());
         }
-        if (specificationService.addSpecification(parameters) != null) {
-            return ResultUtil.data(parameters);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        specificationService.addSpecification(parameters);
+        return ResultUtil.data(parameters);
     }
 
     @DeleteMapping(value = "/{ids}")
@@ -60,6 +56,6 @@ public class SpecificationStoreController {
     @ApiOperation(value = "批量删除")
     public ResultMessage<Object> delAllByIds(@PathVariable List<String> ids) {
         specificationService.deleteSpecification(ids);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 }

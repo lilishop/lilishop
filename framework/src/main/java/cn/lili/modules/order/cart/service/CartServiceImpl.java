@@ -2,6 +2,7 @@ package cn.lili.modules.order.cart.service;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.cache.Cache;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
@@ -100,7 +101,7 @@ public class CartServiceImpl implements CartService {
                     int newNum = oldNum + num;
                     this.checkSetGoodsQuantity(cartSkuVO, skuId, newNum);
                     //计算购物车小计
-                    cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(),cartSkuVO.getNum()));
+                    cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
                 } else {
                     //先清理一下 如果商品无效的话
                     cartSkuVOS.remove(cartSkuVO);
@@ -112,7 +113,7 @@ public class CartServiceImpl implements CartService {
                     //再设置加入购物车的数量
                     this.checkSetGoodsQuantity(cartSkuVO, skuId, num);
                     //计算购物车小计
-                    cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(),cartSkuVO.getNum()));
+                    cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
                     cartSkuVOS.add(cartSkuVO);
                 }
 
@@ -132,13 +133,13 @@ public class CartServiceImpl implements CartService {
                 //再设置加入购物车的数量
                 this.checkSetGoodsQuantity(cartSkuVO, skuId, num);
                 //计算购物车小计
-                cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(),cartSkuVO.getNum()));
+                cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
                 cartSkuVOS.add(cartSkuVO);
             }
             tradeDTO.setCartTypeEnum(cartTypeEnum);
             this.resetTradeDTO(tradeDTO);
         } catch (Exception e) {
-            log.error("购物车渲染异常",e);
+            log.error("购物车渲染异常", e);
             throw new ServiceException(errorMessage);
         }
     }
@@ -160,10 +161,10 @@ public class CartServiceImpl implements CartService {
             }
             String originKey = this.getOriginKey(CartTypeEnum.CART);
             cache.put(originKey, tradeDTO);
-        }catch (ServiceException se){
+        } catch (ServiceException se) {
             log.error("购物车渲染异常", se);
         } catch (Exception e) {
-            log.error("购物车渲染异常",e);
+            log.error("购物车渲染异常", e);
             throw new ServiceException(errorMessage);
         }
     }
@@ -478,10 +479,13 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Trade createTrade(TradeParams tradeParams) {
+        //获取购物车
         CartTypeEnum cartTypeEnum = getCartType(tradeParams.getWay());
         TradeDTO tradeDTO = this.readDTO(cartTypeEnum);
+        //设置基础属性
         tradeDTO.setClientType(tradeParams.getClient());
         tradeDTO.setStoreRemark(tradeParams.getRemark());
+        //过滤勾选商品
         List<CartSkuVO> collect = tradeDTO.getSkuList().parallelStream().filter(i -> Boolean.TRUE.equals(i.getChecked())).collect(Collectors.toList());
         MemberAddress memberAddress = tradeDTO.getMemberAddress();
         this.checkAddressScope(collect, memberAddress);
@@ -499,17 +503,21 @@ public class CartServiceImpl implements CartService {
      */
     @Override
     public void checkAddressScope(List<CartSkuVO> skuList, MemberAddress memberAddress) {
+        //如果收货地址为空，则抛出异常
         if (memberAddress == null) {
-            return;
+            throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
         }
         for (CartSkuVO cartSkuVO : skuList) {
-            if (Boolean.TRUE.equals(cartSkuVO.getIsFreeFreight())) {
+            //店铺支付运费则跳过
+            if (cartSkuVO.getFreightPayer().equals("STORE")) {
                 break;
             }
             String freightTemplateId = cartSkuVO.getGoodsSku().getFreightTemplateId();
             FreightTemplateVO freightTemplate = freightTemplateService.getFreightTemplate(freightTemplateId);
             String[] addressId = memberAddress.getConsigneeAddressIdPath().split(",");
+            //收货地址判定
             if (freightTemplate != null && freightTemplate.getFreightTemplateChildList() != null && !freightTemplate.getFreightTemplateChildList().isEmpty()) {
+
                 FreightTemplateChild freightTemplateChild = freightTemplate.getFreightTemplateChildList().get(0);
                 // 检查当前配送地址的城市id是否存在与配送模版的城市id里面
                 if (!freightTemplateChild.getAreaId().contains(addressId[1])) {

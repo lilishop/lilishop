@@ -201,7 +201,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
 
         //判断为已审核通过，待邮寄的售后服务
         if (!afterSale.getServiceStatus().equals(AfterSaleStatusEnum.PASS.name())) {
-            throw new ServiceException(ResultCode.ERROR);
+            throw new ServiceException(ResultCode.AFTER_STATUS_ERROR);
         }
 
         //查询会员回寄的物流公司信息
@@ -209,7 +209,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
 
         //判断物流公司是否为空
         if (logistics == null) {
-            throw new ServiceException(ResultCode.AFTER_SALES_LOGISTICS_ERROR);
+            throw new ServiceException(ResultCode.AFTER_STATUS_ERROR);
         }
 
         afterSale.setMLogisticsCode(logistics.getId());
@@ -244,7 +244,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
 
         //判断是否为已邮寄售后单
         if (!afterSale.getServiceStatus().equals(AfterSaleStatusEnum.BUYER_RETURN.name())) {
-            throw new ServiceException(ResultCode.ERROR);
+            throw new ServiceException(ResultCode.AFTER_STATUS_ERROR);
         }
         AfterSaleStatusEnum afterSaleStatusEnum = null;
         //判断审核状态

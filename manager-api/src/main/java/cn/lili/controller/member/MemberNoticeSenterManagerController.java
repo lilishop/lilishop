@@ -1,9 +1,7 @@
 package cn.lili.controller.member;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.vo.SearchVO;
@@ -58,16 +56,14 @@ public class MemberNoticeSenterManagerController {
     @PostMapping(value = "/insertOrUpdate")
     public ResultMessage<MemberNoticeSenter> saveOrUpdate(MemberNoticeSenter memberNoticeSenter) {
 
-        if (memberNoticeSenterService.customSave(memberNoticeSenter)) {
-            return ResultUtil.data(memberNoticeSenter);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        memberNoticeSenterService.customSave(memberNoticeSenter);
+        return ResultUtil.data(memberNoticeSenter);
     }
 
     @ApiOperation(value = "批量删除")
     @DeleteMapping(value = "/delByIds/{ids}")
     public ResultMessage<Object> delAllByIds(@PathVariable List ids) {
         memberNoticeSenterService.removeByIds(ids);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 }

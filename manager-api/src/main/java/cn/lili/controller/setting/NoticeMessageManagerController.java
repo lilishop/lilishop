@@ -4,7 +4,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.message.entity.dos.NoticeMessage;
@@ -95,11 +95,8 @@ public class NoticeMessageManagerController {
         if (noticeMessage != null) {
             noticeMessage.setNoticeContent(noticeContent);
             noticeMessage.setNoticeTitle(noticeTitle);
-            boolean result = noticeMessageService.updateById(noticeMessage);
-            if (result) {
-                return ResultUtil.data(noticeMessage);
-            }
-            throw new ServiceException(ResultCode.ERROR);
+            noticeMessageService.updateById(noticeMessage);
+            ResultUtil.data(noticeMessage);
         }
         throw new ResourceNotFoundException(ResultCode.NOTICE_NOT_EXIST.message());
     }
@@ -120,12 +117,10 @@ public class NoticeMessageManagerController {
             if (b) {
                 //赋值执行修改操作
                 messageTemplate.setNoticeStatus(status);
-                boolean result = noticeMessageService.updateById(messageTemplate);
-                if (result) {
-                    return ResultUtil.data(messageTemplate);
-                }
+                noticeMessageService.updateById(messageTemplate);
+                return ResultUtil.data(messageTemplate);
             }
-            throw new ServiceException(ResultCode.ERROR);
+            throw new ServiceException(ResultCode.NOTICE_ERROR);
         }
         throw new ResourceNotFoundException(ResultCode.NOTICE_NOT_EXIST.message());
     }
