@@ -1,13 +1,11 @@
 package cn.lili.controller.member;
-
-import cn.lili.common.utils.PageUtil;
+ 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.MemberPointsHistory;
 import cn.lili.modules.member.entity.vo.MemberPointsHistoryVO;
 import cn.lili.modules.member.service.MemberPointsHistoryService;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -38,12 +36,7 @@ public class MemberPointsHistoryManagerController {
     })
     @GetMapping(value = "/getByPage")
     public ResultMessage<IPage<MemberPointsHistory>> getByPage(PageVO page, String memberId, String memberName) {
-
-        QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.eq(memberId != null, "member_id", memberId);
-        queryWrapper.like(memberName != null, "member_name", memberName);
-
-        return ResultUtil.data(memberPointsHistoryService.page(PageUtil.initPage(page), queryWrapper));
+        return ResultUtil.data(memberPointsHistoryService.MemberPointsHistoryList(page, memberId, memberName));
     }
 
     @ApiOperation(value = "获取会员积分VO")

@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,7 +64,7 @@ public class SmsTemplateServiceImpl extends ServiceImpl<SmsTemplateMapper, SmsTe
             List<SmsTemplate> list = list(new LambdaQueryWrapper<SmsTemplate>().eq(SmsTemplate::getTemplateStatus, 0));
             //查询签名状态
             for (SmsTemplate smsTemplate : list) {
-                map = aliSmsUtil.querySmsTemplate(smsTemplate.getTemplateName());
+                map = aliSmsUtil.querySmsTemplate(smsTemplate.getTemplateCode());
                 smsTemplate.setTemplateStatus((Integer) map.get("TemplateStatus"));
                 smsTemplate.setReason(map.get("Reason").toString());
                 smsTemplate.setTemplateCode(map.get("TemplateCode").toString());

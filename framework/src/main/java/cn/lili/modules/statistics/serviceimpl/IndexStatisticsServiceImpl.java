@@ -114,7 +114,7 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
 
         IndexNoticeVO indexNoticeVO = new IndexNoticeVO();
         //商品审核
-        indexNoticeVO.setGoods(goodsService.goodsNum(GoodsStatusEnum.UPPER, GoodsAuthEnum.TOBEAUDITED));
+        indexNoticeVO.setGoods(goodsService.goodsNum(null, GoodsAuthEnum.TOBEAUDITED));
         //店铺入驻审核
         indexNoticeVO.setStore(storeService.auditNum());
         //售后申请

@@ -13,7 +13,6 @@ import cn.lili.modules.message.service.StoreMessageService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.service.StoreService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
@@ -59,7 +58,7 @@ public class NoticeSendMessageListener implements RocketMQListener<MessageExt> {
                     List<String> list = memberMapper.getAllMemberMobile();
                     smsUtil.sendBatchSms(smsReachDTO.getSignName(), list, smsReachDTO.getMessageCode());
                     //判断为发送部分用户
-                } else if (smsReachDTO.getSmsRange().equals(RangeEnum.APPOINT.name())) {
+                } else {
                     smsUtil.sendBatchSms(smsReachDTO.getSignName(), smsReachDTO.getMobile(), smsReachDTO.getMessageCode());
                 }
                 break;
