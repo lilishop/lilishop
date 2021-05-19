@@ -3,7 +3,7 @@ package cn.lili.controller.setting;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.base.aspect.DemoSite;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -60,7 +60,7 @@ public class SettingManagerController {
 
         setting.setSettingValue(configValue);
         settingService.saveUpdate(setting);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     /**
@@ -95,12 +95,7 @@ public class SettingManagerController {
             "PAYMENT_SUPPORT,ALIPAY_PAYMENT,WECHAT_PAYMENT"
     )
     public ResultMessage settingGet(@PathVariable String key) {
-        try {
-            return createSetting(key);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ServiceException(ResultCode.ERROR);
-        }
+        return createSetting(key);
     }
 
     /**
@@ -114,7 +109,6 @@ public class SettingManagerController {
      */
     private ResultMessage createSetting(String key) {
         SettingEnum settingEnum = SettingEnum.valueOf(key);
-
         Setting setting = settingService.get(key);
         switch (settingEnum) {
             case BASE_SETTING:

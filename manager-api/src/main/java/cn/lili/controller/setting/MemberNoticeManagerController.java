@@ -3,7 +3,7 @@ package cn.lili.controller.setting;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.MemberNotice;
@@ -53,7 +53,7 @@ public class MemberNoticeManagerController {
         updateWrapper.in("id", ids);
         updateWrapper.set("is_read", true);
         memberNoticeService.update(updateWrapper);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "阅读全部")
@@ -63,14 +63,14 @@ public class MemberNoticeManagerController {
         updateWrapper.in("member_id", UserContext.getCurrentUser().getId());
         updateWrapper.set("is_read", true);
         memberNoticeService.update(updateWrapper);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "批量删除")
     @DeleteMapping(value = "/{ids}")
     public ResultMessage<Object> delAllByIds(@PathVariable List ids) {
         memberNoticeService.removeByIds(ids);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "删除所有")
@@ -79,7 +79,7 @@ public class MemberNoticeManagerController {
         QueryWrapper queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("member_id", UserContext.getCurrentUser().getId());
         memberNoticeService.remove(queryWrapper);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 }

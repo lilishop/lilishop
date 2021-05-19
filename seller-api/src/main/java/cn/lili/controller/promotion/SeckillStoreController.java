@@ -2,7 +2,7 @@ package cn.lili.controller.promotion;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.Seckill;
@@ -15,7 +15,6 @@ import cn.lili.modules.promotion.service.SeckillService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,7 +69,7 @@ public class SeckillStoreController {
     public ResultMessage<String> addSeckillApply(@PathVariable String seckillId, @RequestBody List<SeckillApplyVO> applyVos) {
         String storeId = UserContext.getCurrentUser().getStoreId();
         seckillApplyService.addSeckillApply(seckillId, storeId, applyVos);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @DeleteMapping("/apply/{seckillId}/{ids}")
@@ -78,7 +77,7 @@ public class SeckillStoreController {
     public ResultMessage<String> deleteSeckillApply(@PathVariable("seckillId") String seckillId, @PathVariable("ids") String ids) {
         String[] idsSplit = ids.split(",");
         seckillApplyService.removeSeckillApplyByIds(seckillId, Arrays.asList(idsSplit));
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 

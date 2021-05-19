@@ -1,8 +1,6 @@
 package cn.lili.controller.other;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.page.entity.dos.Article;
 import cn.lili.modules.page.entity.dto.ArticleSearchParams;
@@ -76,11 +74,9 @@ public class ArticleManagerController {
             @ApiImplicitParam(name = "status", value = "操作状态", required = true, paramType = "query")
     })
     @PutMapping("update/status/{id}")
-    public ResultMessage<Article> updateStatus(@PathVariable("id") String id,boolean status) {
-        if(articleService.updateArticleStatus(id,status)){
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+    public ResultMessage<Article> updateStatus(@PathVariable("id") String id, boolean status) {
+        articleService.updateArticleStatus(id, status);
+        return ResultUtil.success();
     }
 
 
@@ -89,7 +85,7 @@ public class ArticleManagerController {
     @DeleteMapping(value = "/delByIds/{id}")
     public ResultMessage<Object> delAllByIds(@PathVariable String id) {
         articleService.customRemove(id);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 

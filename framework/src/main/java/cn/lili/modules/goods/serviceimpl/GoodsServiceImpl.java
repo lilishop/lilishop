@@ -334,8 +334,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         GoodsSetting goodsSetting = JSONUtil.toBean(setting.getSettingValue(), GoodsSetting.class);
         //是否需要审核
         goods.setIsAuth(Boolean.TRUE.equals(goodsSetting.getGoodsCheck()) ? GoodsAuthEnum.TOBEAUDITED.name() : GoodsAuthEnum.PASS.name());
-        //自动下架
-        goods.setMarketEnable(Boolean.TRUE.equals(goodsSetting.getGoodsCheck()) ? GoodsStatusEnum.DOWN.name() : GoodsStatusEnum.UPPER.name());
     }
 
     /**

@@ -80,6 +80,11 @@ public interface DistributionService extends IService<Distribution> {
      * @param canRebate 修改金额
      * @param distributionId 分销员ID
      */
-    void updateCanRebate(Double canRebate,String distributionId);
+    void subCanRebate(Double canRebate,String distributionId);
 
+    /**
+     * 添加分销金额
+     * @param rebate
+     */
+    void addRebate(Double rebate,String distributionId);
 }

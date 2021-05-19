@@ -33,6 +33,7 @@ public class Distribution extends BaseEntity {
         this.memberName = memberName;
         this.name = name;
         this.idNumber = idNumber;
+        distributionOrderCount=0;
         this.distributionStatus = DistributionStatusEnum.APPLY.name();
     }
 
@@ -57,6 +58,8 @@ public class Distribution extends BaseEntity {
     @ApiModelProperty(value = "冻结金额")
     private Double commissionFrozen = 0D;
 
+    @ApiModelProperty(value = "分销订单数")
+    private Integer distributionOrderCount;
 
     /**
      * @see DistributionStatusEnum

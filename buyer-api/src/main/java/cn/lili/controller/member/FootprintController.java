@@ -1,8 +1,6 @@
 package cn.lili.controller.member;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.service.FootprintService;
@@ -44,19 +42,16 @@ public class FootprintController {
     @ApiImplicitParam(name = "ids", value = "商品ID", required = true, allowMultiple = true, dataType = "String", paramType = "path")
     @DeleteMapping(value = "/delByIds/{ids}")
     public ResultMessage<Object> delAllByIds(@NotNull(message = "商品ID不能为空") @PathVariable("ids") List ids) {
-        if (footprintService.deleteByIds(ids)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        footprintService.deleteByIds(ids);
+        return ResultUtil.success();
+
     }
 
     @ApiOperation(value = "清空足迹")
     @DeleteMapping
     public ResultMessage<Object> deleteAll() {
-        if (footprintService.clean()) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        footprintService.clean();
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "获取当前会员足迹数量")

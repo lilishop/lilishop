@@ -1,8 +1,6 @@
 package cn.lili.controller.goods;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.CategoryParameterGroup;
 import cn.lili.modules.goods.entity.dos.Parameters;
@@ -46,10 +44,8 @@ public class CategoryParameterGroupStoreController {
     @PostMapping(value = "/save")
     public ResultMessage<CategoryParameterGroup> saveOrUpdate(CategoryParameterGroup categoryParameterGroup) {
 
-        if (categoryParameterGroupService.save(categoryParameterGroup)) {
-            return ResultUtil.data(categoryParameterGroup);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        categoryParameterGroupService.save(categoryParameterGroup);
+        return ResultUtil.data(categoryParameterGroup);
     }
 
     @ApiOperation(value = "通过id删除参数组")
@@ -59,7 +55,7 @@ public class CategoryParameterGroupStoreController {
         parametersService.remove(new QueryWrapper<Parameters>().eq("group_id", id));
         //删除参数组
         categoryParameterGroupService.removeById(id);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 }

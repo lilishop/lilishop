@@ -1,8 +1,6 @@
 package cn.lili.controller.store;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.vos.CategoryVO;
@@ -89,27 +87,23 @@ public class StoreManagerController {
     @PutMapping(value = "/audit/{id}/{passed}")
     public ResultMessage<Object> audit(@PathVariable String id, @PathVariable Integer passed) {
         storeService.audit(id, passed);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "关闭店铺")
     @ApiImplicitParam(name = "id", value = "店铺id", required = true, dataType = "String", paramType = "path")
     @PutMapping(value = "/disable/{id}")
     public ResultMessage<Store> disable(@PathVariable String id) {
-        if (storeService.disable(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        storeService.disable(id);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "开启店铺")
     @ApiImplicitParam(name = "id", value = "店铺id", required = true, dataType = "String", paramType = "path")
     @PutMapping(value = "/enable/{id}")
     public ResultMessage<Store> enable(@PathVariable String id) {
-        if (storeService.enable(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        storeService.enable(id);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "查询一级分类列表")

@@ -205,7 +205,12 @@ public class Order extends BaseEntity {
         BeanUtil.copyProperties(cartVO.getPriceDetailDTO(), this);
         BeanUtil.copyProperties(cartVO, this);
         this.setId(oldId);
+<<<<<<< HEAD
         //循环购物车列表判断是否为促销订单
+=======
+        this.setOrderType(OrderTypeEnum.NORMAL.name());
+        //促销信息填充
+>>>>>>> master
         if (cartVO.getSkuList().get(0).getPromotions() != null) {
             //判断是否为拼团订单
             Optional<String> pintuanId = cartVO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
@@ -230,6 +235,7 @@ public class Order extends BaseEntity {
         this.setOrderStatus(OrderStatusEnum.UNPAID.name());
         this.setPayStatus(PayStatusEnum.UNPAID.name());
         this.setDeliverStatus(DeliverStatusEnum.UNDELIVERED.name());
+<<<<<<< HEAD
         //填充订单收件人信息
         this.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());
         this.setConsigneeAddressPath(tradeDTO.getMemberAddress().getConsigneeAddressPath());
@@ -241,6 +247,21 @@ public class Order extends BaseEntity {
             this.setUsePlatformMemberCouponId(tradeDTO.getPlatformCoupon().getMemberCoupon().getId());
         }
         //判断是否使用店铺优惠券
+=======
+        //如果有收货地址，才记录收货地址
+        if (tradeDTO.getMemberAddress() != null) {
+            this.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());
+            this.setConsigneeAddressPath(tradeDTO.getMemberAddress().getConsigneeAddressPath());
+            this.setConsigneeDetail(tradeDTO.getMemberAddress().getDetail());
+            this.setConsigneeMobile(tradeDTO.getMemberAddress().getMobile());
+            this.setConsigneeName(tradeDTO.getMemberAddress().getName());
+        }
+        //平台优惠券判定
+        if (tradeDTO.getPlatformCoupon() != null) {
+            this.setUsePlatformMemberCouponId(tradeDTO.getPlatformCoupon().getMemberCoupon().getId());
+        }
+        //店铺优惠券判定
+>>>>>>> master
         if (tradeDTO.getStoreCoupons() != null && !tradeDTO.getStoreCoupons().isEmpty()) {
             StringBuilder storeCouponIds = new StringBuilder();
             for (String s : tradeDTO.getStoreCoupons().keySet()) {

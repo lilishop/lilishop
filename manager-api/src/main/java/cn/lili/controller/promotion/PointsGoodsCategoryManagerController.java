@@ -1,8 +1,6 @@
 package cn.lili.controller.promotion;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.PointsGoodsCategory;
@@ -30,28 +28,22 @@ public class PointsGoodsCategoryManagerController {
     @PostMapping
     @ApiOperation(value = "添加积分商品分类")
     public ResultMessage<Object> add(PointsGoodsCategoryVO pointsGoodsCategory) {
-        if (pointsGoodsCategoryService.addCategory(pointsGoodsCategory)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        pointsGoodsCategoryService.addCategory(pointsGoodsCategory);
+        return ResultUtil.success();
     }
 
     @PutMapping
     @ApiOperation(value = "修改积分商品分类")
     public ResultMessage<Object> update(PointsGoodsCategoryVO pointsGoodsCategory) {
-        if (pointsGoodsCategoryService.updateCategory(pointsGoodsCategory)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        pointsGoodsCategoryService.updateCategory(pointsGoodsCategory);
+        return ResultUtil.success();
     }
 
     @DeleteMapping("/{id}")
     @ApiOperation(value = "删除积分商品分类")
     public ResultMessage<Object> delete(@PathVariable String id) {
-        if (pointsGoodsCategoryService.deleteCategory(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        pointsGoodsCategoryService.deleteCategory(id);
+        return ResultUtil.success();
     }
 
     @GetMapping

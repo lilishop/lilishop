@@ -1,8 +1,6 @@
 package cn.lili.controller.member;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.Member;
@@ -65,14 +63,12 @@ public class MemberManagerController {
     @ApiOperation(value = "修改会员状态,开启关闭会员")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "memberIds", value = "会员ID", required = true, dataType = "String", allowMultiple = true, paramType = "query"),
-            @ApiImplicitParam(name = "disabled",   required = true, dataType = "boolean", paramType = "query")
+            @ApiImplicitParam(name = "disabled", required = true, dataType = "boolean", paramType = "query")
     })
     @PutMapping("/updateMemberStatus")
     public ResultMessage<Object> updateMemberStatus(@RequestParam List<String> memberIds, @RequestParam Boolean disabled) {
-        if (memberService.updateMemberStatus(memberIds, disabled)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        memberService.updateMemberStatus(memberIds, disabled);
+        return ResultUtil.success();
     }
 
 

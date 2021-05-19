@@ -1,9 +1,7 @@
 package cn.lili.controller.goods;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.vo.SearchVO;
@@ -59,20 +57,16 @@ public class GoodsGalleryController {
     @PostMapping(value = "/save")
     public ResultMessage<GoodsGallery> save(GoodsGallery goodsGallery) {
 
-        if (goodsGalleryService.save(goodsGallery)) {
-            return ResultUtil.data(goodsGallery);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        goodsGalleryService.save(goodsGallery);
+        return ResultUtil.data(goodsGallery);
     }
 
     @ApiOperation(value = "修改商品相册")
     @PostMapping(value = "/update")
     public ResultMessage<GoodsGallery> update(GoodsGallery goodsGallery) {
 
-        if (goodsGalleryService.updateById(goodsGallery)) {
-            return ResultUtil.data(goodsGallery);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        goodsGalleryService.updateById(goodsGallery);
+        return ResultUtil.data(goodsGallery);
     }
 
     @ApiOperation(value = "批量删除")
@@ -80,6 +74,6 @@ public class GoodsGalleryController {
     public ResultMessage<Object> delAllByIds(@PathVariable List ids) {
 
         goodsGalleryService.removeByIds(ids);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 }

@@ -4,7 +4,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.vos.PointsGoodsSearchParams;
@@ -43,10 +43,8 @@ public class PointsGoodsManagerController {
             i.setStoreId(currentUser.getId());
             collect.add(i);
         }
-        if (pointsGoodsService.addPointsGoods(collect)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        pointsGoodsService.addPointsGoods(collect);
+        return ResultUtil.success();
     }
 
     @PutMapping(consumes = "application/json", produces = "application/json")
@@ -55,28 +53,26 @@ public class PointsGoodsManagerController {
         AuthUser currentUser = UserContext.getCurrentUser();
         pointsGoods.setStoreId(currentUser.getId());
         pointsGoods.setStoreName("platform");
-        if (pointsGoodsService.updatePointsGoods(pointsGoods)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        pointsGoodsService.updatePointsGoods(pointsGoods);
+        return ResultUtil.success();
     }
 
     @PutMapping("/{ids}")
     @ApiOperation(value = "修改积分商品状态")
     public ResultMessage<Object> updatePointsGoodsStatus(@PathVariable String ids, String promotionStatus) {
         if (pointsGoodsService.updatePointsGoodsPromotionStatus(Arrays.asList(ids.split(",")), promotionStatus)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
+            return ResultUtil.success();
         }
-        throw new ServiceException(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.POINT_GOODS_ERROR);
     }
 
     @DeleteMapping("/{ids}")
     @ApiOperation(value = "删除积分商品")
     public ResultMessage<Object> delete(@PathVariable String ids) {
         if (pointsGoodsService.deletePointsGoods(Arrays.asList(ids.split(",")))) {
-            return ResultUtil.success(ResultCode.SUCCESS);
+            return ResultUtil.success();
         }
-        throw new ServiceException(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.POINT_GOODS_ERROR);
     }
 
     @GetMapping

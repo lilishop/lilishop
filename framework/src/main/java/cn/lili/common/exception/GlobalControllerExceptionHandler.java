@@ -1,6 +1,7 @@
 package cn.lili.common.exception;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -45,7 +46,7 @@ public class GlobalControllerExceptionHandler {
         if (e instanceof ServiceException) {
             ResultCode resultCode = ((ServiceException) e).getResultCode();
             if (resultCode != null) {
-                throw new ServiceException(resultCode);
+                return ResultUtil.error(resultCode.code(), resultCode.message());
             }
         }
 
@@ -54,7 +55,7 @@ public class GlobalControllerExceptionHandler {
         if (e != null && e.getMessage() != null && e.getMessage().length() < MAX_LENGTH) {
             errorMsg = e.getMessage();
         }
-        throw new ServiceException(ResultCode.ERROR, errorMsg);
+        return ResultUtil.error(ResultCode.ERROR.code(), errorMsg);
     }
 
     @ExceptionHandler(RuntimeException.class)
@@ -63,7 +64,7 @@ public class GlobalControllerExceptionHandler {
 
         log.error("全局异常[RuntimeException]:", e);
 
-        throw new ServiceException(ResultCode.ERROR, "服务器异常，请稍后重试");
+        return ResultUtil.error(ResultCode.ERROR);
     }
 
 //    /**
@@ -100,9 +101,9 @@ public class GlobalControllerExceptionHandler {
         BindException exception = (BindException) e;
         List<FieldError> fieldErrors = exception.getBindingResult().getFieldErrors();
         for (FieldError error : fieldErrors) {
-            throw new ServiceException(ResultCode.ERROR, error.getDefaultMessage());
+            return ResultUtil.error(ResultCode.PARAMS_ERROR.code(), error.getDefaultMessage());
         }
-        throw new ServiceException(ResultCode.ERROR);
+        return ResultUtil.error(ResultCode.PARAMS_ERROR);
     }
 
 }

@@ -1,9 +1,7 @@
 package cn.lili.controller.settings;
 
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
@@ -55,10 +53,8 @@ public class StoreSettingsController {
     @PutMapping
     public ResultMessage<StoreDetail> edit(@Valid StoreSettingDTO storeSettingDTO) {
         //修改商家设置
-        if (storeDetailService.editStoreSetting(storeSettingDTO)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        storeDetailService.editStoreSetting(storeSettingDTO);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "修改店铺库存预警数量")
@@ -66,10 +62,8 @@ public class StoreSettingsController {
     @PutMapping("/updateStockWarning")
     public ResultMessage<StoreDetail> updateStockWarning(Integer stockWarning) {
         //修改商家设置
-        if (storeDetailService.updateStockWarning(stockWarning)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        storeDetailService.updateStockWarning(stockWarning);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "获取商家退货收件地址")
@@ -83,9 +77,7 @@ public class StoreSettingsController {
     @PutMapping("/storeAfterSaleAddress")
     public ResultMessage<StoreDetail> editStoreAfterSaleAddress(@Valid StoreAfterSaleAddressDTO storeAfterSaleAddressDTO) {
         //修改商家退货收件地址
-        if (storeDetailService.editStoreAfterSaleAddressDTO(storeAfterSaleAddressDTO)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        storeDetailService.editStoreAfterSaleAddressDTO(storeAfterSaleAddressDTO);
+        return ResultUtil.success();
     }
 }

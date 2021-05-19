@@ -5,7 +5,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.Coupon;
@@ -60,10 +60,8 @@ public class CouponManagerController {
     @PostMapping(consumes = "application/json", produces = "application/json")
     public ResultMessage<CouponVO> addCoupon(@RequestBody CouponVO couponVO) {
         this.setStoreInfo(couponVO);
-        if (couponService.add(couponVO) != null) {
-            return ResultUtil.data(couponVO);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        couponService.add(couponVO);
+        return ResultUtil.data(couponVO);
     }
 
     @ApiOperation(value = "修改优惠券")
@@ -71,10 +69,8 @@ public class CouponManagerController {
     public ResultMessage<Coupon> updateCoupon(@RequestBody CouponVO couponVO) {
         Coupon coupon = couponService.getById(couponVO.getId());
         couponVO.setPromotionStatus(PromotionStatusEnum.NEW.name());
-        if (couponService.updateCoupon(couponVO) != null) {
-            return ResultUtil.data(coupon);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        couponService.updateCoupon(couponVO);
+        return ResultUtil.data(coupon);
     }
 
     @ApiOperation(value = "修改优惠券状态")
@@ -93,7 +89,7 @@ public class CouponManagerController {
         for (String id : ids) {
             couponService.deleteCoupon(id);
         }
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "会员优惠券作废")

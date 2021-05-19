@@ -2,7 +2,7 @@ package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -70,7 +70,7 @@ public class GoodsManagerController {
     public ResultMessage<Object> underGoods(@PathVariable String goodsId, @NotEmpty(message = "下架原因不能为空") @RequestParam String reason) {
         List<String> goodsIds = Arrays.asList(goodsId.split(","));
         if (Boolean.TRUE.equals(goodsService.updateGoodsMarketAble(goodsIds, GoodsStatusEnum.DOWN, reason))) {
-            return ResultUtil.success(ResultCode.SUCCESS);
+            return ResultUtil.success();
         }
         throw new ServiceException(ResultCode.GOODS_UNDER_ERROR);
     }
@@ -84,7 +84,7 @@ public class GoodsManagerController {
     public ResultMessage<Object> auth(@PathVariable List<String> goodsIds, @RequestParam String isAuth) {
         //校验商品是否存在
         if (goodsService.auditGoods(goodsIds, GoodsAuthEnum.valueOf(isAuth))) {
-            return ResultUtil.success(ResultCode.SUCCESS);
+            return ResultUtil.success();
         }
         throw new ServiceException(ResultCode.GOODS_AUTH_ERROR);
     }
@@ -97,7 +97,7 @@ public class GoodsManagerController {
     })
     public ResultMessage<Object> unpGoods(@PathVariable List<String> goodsId) {
         if (goodsService.updateGoodsMarketAble(goodsId, GoodsStatusEnum.UPPER, "")) {
-            return ResultUtil.success(ResultCode.SUCCESS);
+            return ResultUtil.success();
         }
         throw new ServiceException(ResultCode.GOODS_UPPER_ERROR);
     }

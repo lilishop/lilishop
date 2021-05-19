@@ -14,5 +14,8 @@ import org.apache.ibatis.annotations.Update;
 public interface DistributionMapper extends BaseMapper<Distribution> {
 
     @Update("UPDATE li_distribution set can_rebate = can_rebate+#{canRebate} WHERE id = #{distributionId}")
-    void updateCanRebate(Double canRebate,String distributionId);
+    void subCanRebate(Double canRebate,String distributionId);
+
+    @Update("UPDATE li_distribution set can_rebate = (can_rebate+#{canRebate}) AND rebate_total=(rebate_total+#{canRebate}) AND distribution_order_count=(distribution_order_count+1) WHERE id = #{distributionId}")
+    void addCanRebate(Double canRebate,String distributionId);
 }

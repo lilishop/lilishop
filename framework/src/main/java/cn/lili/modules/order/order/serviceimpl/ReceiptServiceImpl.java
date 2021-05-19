@@ -13,6 +13,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+<<<<<<< HEAD
+=======
+import org.springframework.beans.factory.annotation.Autowired;
+>>>>>>> master
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,7 +59,7 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
             this.save(receipt);
             return receipt;
         }
-        throw new ServiceException(ResultCode.ERROR);
+        return null;
     }
 
     @Override
@@ -67,6 +71,6 @@ public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> impl
             this.saveOrUpdate(receipt);
             return receipt;
         }
-        throw new ServiceException(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.USER_RECEIPT_NOT_EXIST);
     }
 }

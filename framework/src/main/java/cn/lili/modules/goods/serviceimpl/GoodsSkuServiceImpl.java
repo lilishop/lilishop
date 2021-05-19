@@ -110,6 +110,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         if (Boolean.TRUE.equals(regeneratorSkuFlag)) {
             List<GoodsSkuVO> goodsListByGoodsId = getGoodsListByGoodsId(goods.getId());
             List<String> oldSkuIds = new ArrayList<>();
+            //删除旧索引
             for (GoodsSkuVO goodsSkuVO : goodsListByGoodsId) {
                 oldSkuIds.add(goodsSkuVO.getId());
                 goodsIndexService.deleteIndexById(goodsSkuVO.getId());
@@ -133,11 +134,13 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 //设置商品规格信息
                 skuInfo(sku, goods, map, null);
                 newSkuList.add(sku);
+                //如果商品状态值不对，则es索引移除
+                if (goods.getIsAuth().equals(GoodsAuthEnum.PASS.name()) && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())) {
+                    goodsIndexService.deleteIndexById(sku.getId());
+                }
             }
             this.updateBatchById(newSkuList);
         }
-
-
         this.updateStock(newSkuList);
         generateEsCheck(goods);
     }
@@ -428,16 +431,28 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         if (goods.getIsAuth().equals(GoodsAuthEnum.PASS.name()) && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())) {
             List<GoodsSku> goodsSkuList = this.list(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goods.getId()));
             for (GoodsSku goodsSku : goodsSkuList) {
-                EsGoodsIndex byId = goodsIndexService.findById(goodsSku.getId());
+                EsGoodsIndex esGoodsOld = goodsIndexService.findById(goodsSku.getId());
                 EsGoodsIndex goodsIndex = new EsGoodsIndex(goodsSku);
-                if (goodsSku.getQuantity() > 0 && byId == null) {
+                //如果商品库存不为0，并且es中有数据
+                if (goodsSku.getQuantity() > 0 && esGoodsOld == null) {
                     goodsIndexService.addIndex(goodsIndex);
-                } else if (goodsSku.getQuantity() > 0 && byId != null) {
+                } else if (goodsSku.getQuantity() > 0 && esGoodsOld != null) {
                     goodsIndexService.updateIndex(goodsIndex);
-                } else if (goodsSku.getQuantity() <= 0 && byId != null) {
+                } else if (goodsSku.getQuantity() <= 0 && esGoodsOld != null) {
                     goodsIndexService.deleteIndexById(goodsSku.getId());
                 }
+                //删除sku缓存
                 cache.remove(GoodsSkuService.getCacheKeys(goodsSku.getId()));
+            }
+        }
+        //如果商品状态值不支持es搜索，那么将商品信息做下架处理
+        else {
+            List<GoodsSku> goodsSkuList = this.list(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goods.getId()));
+            for (GoodsSku goodsSku : goodsSkuList) {
+                EsGoodsIndex esGoodsOld = goodsIndexService.findById(goodsSku.getId());
+                if (esGoodsOld != null) {
+                    goodsIndexService.deleteIndexById(goodsSku.getId());
+                }
             }
         }
     }
@@ -601,7 +616,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         sku.setThumbnail(thumbnail);
 
         //规格信息
-        sku.setId(Convert.toStr(map.get("id"),"").toString());
+        sku.setId(Convert.toStr(map.get("id"), "").toString());
         sku.setSn(Convert.toStr(map.get("sn")));
         sku.setWeight(Convert.toDouble(map.get("weight"), 0D));
         sku.setPrice(Convert.toDouble(map.get("price"), 0D));

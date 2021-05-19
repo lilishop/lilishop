@@ -1,9 +1,7 @@
 package cn.lili.controller.store;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.statistics.aop.PageViewPoint;
@@ -80,28 +78,22 @@ public class StoreBuyerController {
     @ApiOperation(value = "申请店铺第一步-填写企业信息")
     @PutMapping(value = "/apply/first")
     public ResultMessage<Object> applyFirstStep(StoreCompanyDTO storeCompanyDTO) {
-        if (storeService.applyFirstStep(storeCompanyDTO)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        storeService.applyFirstStep(storeCompanyDTO);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "申请店铺第二步-填写银行信息")
     @PutMapping(value = "/apply/second")
     public ResultMessage<Object> applyFirstStep(StoreBankDTO storeBankDTO) {
-        if (storeService.applySecondStep(storeBankDTO)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        storeService.applySecondStep(storeBankDTO);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "申请店铺第三步-填写其他信息")
     @PutMapping(value = "/apply/third")
     public ResultMessage<Object> applyFirstStep(StoreOtherInfoDTO storeOtherInfoDTO) {
-        if (storeService.applyThirdStep(storeOtherInfoDTO)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        storeService.applyThirdStep(storeOtherInfoDTO);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "获取当前登录会员的店铺信息-入驻店铺")

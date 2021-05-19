@@ -83,7 +83,7 @@ public class WechatMpCodeUtil {
             return Base64.getEncoder().encodeToString(bytes);
         } catch (Exception e) {
             log.error("生成二维码错误：", e);
-            throw new ServiceException(ResultCode.ERROR);
+            throw new ServiceException(ResultCode.WECHAT_QRCODE_ERROR);
         }
 
     }
@@ -140,7 +140,7 @@ public class WechatMpCodeUtil {
             return Base64.getEncoder().encodeToString(bytes);
         } catch (Exception e) {
             log.error("生成二维码错误：", e);
-            throw new ServiceException(ResultCode.ERROR);
+            throw new ServiceException(ResultCode.WECHAT_QRCODE_ERROR);
         }
 
     }

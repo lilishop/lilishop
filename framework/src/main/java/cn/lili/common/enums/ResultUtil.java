@@ -1,7 +1,6 @@
-package cn.lili.common.utils;
+package cn.lili.common.enums;
 
 
-import cn.lili.common.enums.ResultCode;
 import cn.lili.common.vo.ResultMessage;
 
 /**
@@ -62,9 +61,57 @@ public class ResultUtil<T> {
 
     /**
      * 返回成功
+     *
      * @param resultCode 返回状态码
      */
     public static <T> ResultMessage<T> success(ResultCode resultCode) {
         return new ResultUtil<T>().setSuccessMsg(resultCode);
     }
+
+    /**
+     * 返回成功
+     */
+    public static <T> ResultMessage<T> success() {
+        return new ResultUtil<T>().setSuccessMsg(ResultCode.SUCCESS);
+    }
+    /**
+     * 返回失败
+     * @param resultCode 返回状态码
+     */
+    public static <T> ResultMessage<T> error(ResultCode resultCode) {
+        return new ResultUtil<T>().setErrorMsg(resultCode);
+    }
+    /**
+     * 返回失败
+     * @param code 状态码
+     * @param msg 返回消息
+     */
+    public static <T> ResultMessage<T> error(Integer code, String msg) {
+        return new ResultUtil<T>().setErrorMsg(code, msg);
+    }
+
+    /**
+     * 服务器异常 追加状态码
+     *
+     * @param resultCode 返回码
+     */
+    public ResultMessage<T> setErrorMsg(ResultCode resultCode) {
+        this.resultMessage.setSuccess(false);
+        this.resultMessage.setMessage(resultCode.message());
+        this.resultMessage.setCode(resultCode.code());
+        return this.resultMessage;
+    }
+
+    /**
+     * 服务器异常 追加状态码
+     * @param code 状态码
+     * @param msg 返回消息
+     */
+    public ResultMessage<T> setErrorMsg(Integer code, String msg) {
+        this.resultMessage.setSuccess(false);
+        this.resultMessage.setMessage(msg);
+        this.resultMessage.setCode(code);
+        return this.resultMessage;
+    }
+
 }
