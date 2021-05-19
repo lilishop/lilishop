@@ -31,5 +31,4 @@ public interface MemberPointsHistoryService extends IService<MemberPointsHistory
      */
     IPage<MemberPointsHistory>  MemberPointsHistoryList(PageVO page, String memberId, String memberName);
 
-
 }

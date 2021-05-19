@@ -15,9 +15,8 @@ import javax.validation.constraints.Size;
  */
 @Data
 public class MemberAddDTO {
-
     @NotEmpty(message = "会员用户名必填")
-    @Size(min = 6, max = 30)
+    @Size(max = 30,message = "会员用户名最长30位")
     @ApiModelProperty(value = "会员用户名")
     private String username;
 

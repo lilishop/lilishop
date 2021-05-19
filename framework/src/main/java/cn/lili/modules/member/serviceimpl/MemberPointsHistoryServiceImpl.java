@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHistoryMapper, MemberPointsHistory> implements MemberPointsHistoryService {
 
-
     @Override
     public MemberPointsHistoryVO getMemberPointsHistoryVO(String memberId) {
         MemberPointsHistoryVO memberPointsHistoryVO = new MemberPointsHistoryVO();
