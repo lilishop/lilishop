@@ -81,6 +81,7 @@ public class TradeBuilder {
      */
     public TradeDTO buildTrade(CartTypeEnum checkedWay) {
         TradeDTO tradeDTO = cartService.readDTO(checkedWay);
+        tradeDTO.setNotSupportFreight(null);
         List<CartSkuVO> collect = tradeDTO.getSkuList().parallelStream().filter(i -> Boolean.TRUE.equals(i.getChecked())).collect(Collectors.toList());
         //拼团类型订单预处理
         if (checkedWay.equals(CartTypeEnum.PINTUAN)) {

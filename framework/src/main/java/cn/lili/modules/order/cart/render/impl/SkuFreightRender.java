@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,10 +36,11 @@ public class SkuFreightRender implements CartRenderStep {
         List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
         //会员收货地址问题处理
         MemberAddress memberAddress = tradeDTO.getMemberAddress();
-        if(memberAddress==null){
+        if (memberAddress == null) {
             return;
         }
         //循环渲染购物车商品运费价格
+        forSku:
         for (CartSkuVO cartSkuVO : cartSkuVOS) {
             String freightTemplateId = cartSkuVO.getGoodsSku().getFreightTemplateId();
             //如果商品设置卖家承担运费，则跳出计算
@@ -62,10 +64,18 @@ public class SkuFreightRender implements CartRenderStep {
                 //获取匹配的收货地址
                 for (FreightTemplateChild templateChild : freightTemplate.getFreightTemplateChildList()) {
                     //如果当前模版包含，则返回
-                    if (templateChild.getAreaId().indexOf(addressId) > 0) {
+                    if (templateChild.getAreaId().contains(addressId)) {
                         freightTemplateChild = templateChild;
                         break;
                     }
+                }
+
+                if (freightTemplateChild == null) {
+                    if (tradeDTO.getNotSupportFreight() == null) {
+                        tradeDTO.setNotSupportFreight(new ArrayList<>());
+                    }
+                    tradeDTO.getNotSupportFreight().add(cartSkuVO);
+                    continue forSku;
                 }
 
                 FreightTemplateChildDTO freightTemplateChildDTO = new FreightTemplateChildDTO(freightTemplateChild);

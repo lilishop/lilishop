@@ -388,7 +388,6 @@ public class CartServiceImpl implements CartService {
 
         TradeDTO tradeDTO = this.readDTO(cartTypeEnum);
         MemberAddress memberAddress = memberAddressService.getById(shippingAddressId);
-        this.checkAddressScope(tradeDTO.getSkuList(), memberAddress);
         tradeDTO.setMemberAddress(memberAddress);
         this.resetTradeDTO(tradeDTO);
     }
@@ -487,9 +486,11 @@ public class CartServiceImpl implements CartService {
         tradeDTO.setStoreRemark(tradeParams.getRemark());
         //过滤勾选商品
         List<CartSkuVO> collect = tradeDTO.getSkuList().parallelStream().filter(i -> Boolean.TRUE.equals(i.getChecked())).collect(Collectors.toList());
+        //校验收获地址
         MemberAddress memberAddress = tradeDTO.getMemberAddress();
         this.checkAddressScope(collect, memberAddress);
         this.resetTradeDTO(tradeDTO);
+        //构建交易
         Trade trade = tradeBuilder.createTrade(cartTypeEnum, tradeParams.getParentOrderSn());
         this.cleanChecked(tradeDTO);
         return trade;
@@ -514,15 +515,21 @@ public class CartServiceImpl implements CartService {
             }
             String freightTemplateId = cartSkuVO.getGoodsSku().getFreightTemplateId();
             FreightTemplateVO freightTemplate = freightTemplateService.getFreightTemplate(freightTemplateId);
-            String[] addressId = memberAddress.getConsigneeAddressIdPath().split(",");
             //收货地址判定
+            forTemplates:
             if (freightTemplate != null && freightTemplate.getFreightTemplateChildList() != null && !freightTemplate.getFreightTemplateChildList().isEmpty()) {
 
-                FreightTemplateChild freightTemplateChild = freightTemplate.getFreightTemplateChildList().get(0);
-                // 检查当前配送地址的城市id是否存在与配送模版的城市id里面
-                if (!freightTemplateChild.getAreaId().contains(addressId[1])) {
-                    throw new ServiceException("当前选择地址暂不支持配送！");
+                //获取市级别id
+                String addressId = memberAddress.getConsigneeAddressIdPath().split(",")[1];
+                //获取匹配的收货地址
+                for (FreightTemplateChild templateChild : freightTemplate.getFreightTemplateChildList()) {
+                    //如果当前模版包含，则返回
+                    if (templateChild.getAreaId().contains(addressId)) {
+                        break forTemplates;
+                    }
                 }
+                throw new ServiceException(ResultCode.GOODS_NOT_SUPPORT, cartSkuVO.getGoodsSku().getGoodsName());
+
             }
         }
     }
