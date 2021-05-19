@@ -3,7 +3,7 @@ package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Brand;
 import cn.lili.modules.goods.entity.dto.BrandPageDTO;
@@ -88,7 +88,7 @@ public class BrandManagerController {
     @PutMapping(value = "/disable/{brandId}")
     public ResultMessage<Object> disable(@PathVariable String brandId, @RequestParam Boolean disable) {
         if (brandService.brandDisable(brandId, disable)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
+            return ResultUtil.success();
         }
         throw new ServiceException(ResultCode.BRAND_DISABLE_ERROR);
     }

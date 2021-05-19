@@ -15,7 +15,6 @@ import cn.lili.modules.page.service.ArticleCategoryService;
 import cn.lili.modules.page.service.ArticleService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,12 +59,10 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
             }
         }
         articleCategory.setType(ArticleCategoryEnum.OTHER.name());
-        if (this.save(articleCategory)) {
-            //清除文章分类缓存
-            this.clearCache();
-            return articleCategory;
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        this.save(articleCategory);
+        //清除文章分类缓存
+        this.clearCache();
+        return articleCategory;
     }
 
 
@@ -93,7 +90,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
             this.clearCache();
             return category;
         }
-        throw new ServiceException(ResultCode.ERROR);
+        return null;
     }
 
     @Override
@@ -114,7 +111,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
             throw new ServiceException(ResultCode.ARTICLE_CATEGORY_HAS_ARTICLE);
         }
         //判断是否为默认的分类
-        if(!this.getById(id).getType().equals(ArticleEnum.OTHER.name())){
+        if (!this.getById(id).getType().equals(ArticleEnum.OTHER.name())) {
             throw new ServiceException(ResultCode.ARTICLE_CATEGORY_NO_DELETION);
         }
 

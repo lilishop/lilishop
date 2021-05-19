@@ -1,9 +1,7 @@
 package cn.lili.controller.permission;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.vo.SearchVO;
 import cn.lili.modules.permission.entity.dos.Department;
@@ -48,25 +46,22 @@ public class DepartmentManagerController {
     @PostMapping
     @ApiOperation(value = "新增部门")
     public ResultMessage<Department> save(Department department) {
-        if (departmentService.save(department)) {
-            return ResultUtil.data(department);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        departmentService.save(department);
+        return ResultUtil.data(department);
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "更新部门")
     public ResultMessage<Department> update(@PathVariable String id, Department department) {
-        if (departmentService.updateById(department)) {
-            return ResultUtil.data(department);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        departmentService.updateById(department);
+        departmentService.updateById(department);
+        return ResultUtil.data(department);
     }
 
     @DeleteMapping(value = "/{ids}")
     @ApiOperation(value = "删除部门")
     public ResultMessage<Object> delAllByIds(@PathVariable List<String> ids) {
         departmentService.deleteByIds(ids);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 }

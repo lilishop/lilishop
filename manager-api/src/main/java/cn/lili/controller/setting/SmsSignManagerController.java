@@ -1,7 +1,7 @@
 package cn.lili.controller.setting;
 
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.message.entity.dos.SmsSign;
@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +33,7 @@ public class SmsSignManagerController {
     @PostMapping
     public ResultMessage<SmsSign> save(@Valid SmsSign smsSign) {
         smsSignService.addSmsSign(smsSign);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "删除短信签名")
@@ -42,7 +41,7 @@ public class SmsSignManagerController {
     @ApiImplicitParam(name = "id", value = "短信签名id", required = true, dataType = "String", allowMultiple = true, paramType = "path")
     public ResultMessage<SmsSign> delete(@PathVariable String id) {
         smsSignService.deleteSmsSign(id);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 
@@ -57,14 +56,14 @@ public class SmsSignManagerController {
     @PutMapping("/querySmsSign")
     public ResultMessage<SmsSign> querySmsSign() {
         smsSignService.querySmsSign();
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "修改短信签名")
     @PutMapping("/modifySmsSign")
     public ResultMessage<SmsSign> modifySmsSign(@Valid SmsSign smsSign) {
         smsSignService.modifySmsSign(smsSign);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "查询短信签名分页")

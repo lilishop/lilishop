@@ -52,6 +52,9 @@ public class CartSkuVO extends CartBase implements Serializable {
     private Boolean checked;
 
 
+    @ApiModelProperty(value = " 谁承担运费 BUYER：买家承担，STORE：卖家承担")
+    private String freightPayer;
+
     @ApiModelProperty(value = "是否免运费")
     private Boolean isFreeFreight;
 
@@ -97,6 +100,7 @@ public class CartSkuVO extends CartBase implements Serializable {
         this.isShip = true;
         this.purchasePrice = goodsSku.getIsPromotion() != null && goodsSku.getIsPromotion() ? goodsSku.getPromotionPrice() : goodsSku.getPrice();
         this.isFreeFreight = false;
+        this.freightPayer = goodsSku.getFreightPayer();
         this.setStoreId(goodsSku.getStoreId());
         this.setStoreName(goodsSku.getStoreName());
     }

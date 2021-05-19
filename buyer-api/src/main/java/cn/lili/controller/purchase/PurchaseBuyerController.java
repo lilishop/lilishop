@@ -1,9 +1,7 @@
 package cn.lili.controller.purchase;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.purchase.entity.dos.PurchaseOrder;
 import cn.lili.modules.purchase.entity.params.PurchaseOrderSearchParams;
@@ -65,11 +63,8 @@ public class PurchaseBuyerController {
     @ApiImplicitParam(name = "id", value = "采购单ID", required = true, dataType = "Long", paramType = "path")
     @PutMapping("/{id}")
     public ResultMessage<Object> close(@NotNull @PathVariable String id) {
-
-        if (purchaseOrderService.close(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        purchaseOrderService.close(id);
+        return ResultUtil.success();
     }
 
 }

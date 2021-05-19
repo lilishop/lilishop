@@ -2,7 +2,7 @@ package cn.lili.controller.trade;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
@@ -13,7 +13,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -52,7 +51,7 @@ public class CartController {
                                      @NotNull(message = "购买数量不能为空") @Min(value = 1, message = "加入购物车数量必须大于0") Integer num,
                                      String cartType) {
         cartService.add(skuId, num, cartType);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 
@@ -86,7 +85,7 @@ public class CartController {
     public ResultMessage<Object> update(@NotNull(message = "产品id不能为空") @PathVariable(name = "skuId") String skuId,
                                         Integer num) {
         cartService.updateNum(skuId, num);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 
@@ -98,7 +97,7 @@ public class CartController {
     public ResultMessage<Object> updateChecked(@NotNull(message = "产品id不能为空") @PathVariable(name = "skuId") String skuId,
                                                boolean checked) {
         cartService.checked(skuId, checked);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 
@@ -106,7 +105,7 @@ public class CartController {
     @PostMapping(value = "/sku/checked", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResultMessage<Object> updateAll(boolean checked) {
         cartService.checkedAll(checked);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 
@@ -119,7 +118,7 @@ public class CartController {
     @PostMapping(value = "/store/{storeId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResultMessage<Object> updateStoreAll(@NotNull(message = "卖家id不能为空") @PathVariable(name = "storeId") String storeId, boolean checked) {
         cartService.checkedStore(storeId, checked);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 
@@ -127,7 +126,7 @@ public class CartController {
     @DeleteMapping()
     public ResultMessage<Object> clean() {
         cartService.clean();
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 
@@ -138,7 +137,7 @@ public class CartController {
     @DeleteMapping(value = "/sku/remove")
     public ResultMessage<Object> delete(String[] skuIds) {
         cartService.delete(skuIds);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 
@@ -169,7 +168,7 @@ public class CartController {
                                                  String way) {
         try {
             cartService.shippingAddress(shippingAddressId, way);
-            return ResultUtil.success(ResultCode.SUCCESS);
+            return ResultUtil.success();
         } catch (ServiceException se) {
             log.error(ResultCode.SHIPPING_NOT_APPLY.message(), se);
             throw new ServiceException(ResultCode.SHIPPING_NOT_APPLY);
@@ -193,7 +192,7 @@ public class CartController {
                                                 String way) {
         try {
             cartService.shippingMethod(selleId, shippingMethod, way);
-            return ResultUtil.success(ResultCode.SUCCESS);
+            return ResultUtil.success();
         } catch (Exception e) {
             log.error(ResultCode.CART_ERROR.message(), e);
             throw new ServiceException(ResultCode.CART_ERROR);
@@ -207,7 +206,7 @@ public class CartController {
     @GetMapping("/select/receipt")
     public ResultMessage<Object> selectReceipt(String way, ReceiptVO receiptVO) {
         this.cartService.shippingReceipt(receiptVO, way);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "选择优惠券")
@@ -219,7 +218,7 @@ public class CartController {
     @GetMapping("/select/coupon")
     public ResultMessage<Object> selectCoupon(String way, @NotNull(message = "优惠券id不能为空") String memberCouponId, boolean used) {
         this.cartService.selectCoupon(memberCouponId, way, used);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 
@@ -229,11 +228,10 @@ public class CartController {
         try {
             // 读取选中的列表
             return ResultUtil.data(this.cartService.createTrade(tradeParams));
+        } catch (ServiceException e) {
+            throw e;
         } catch (Exception e) {
             log.error(ResultCode.ORDER_ERROR.message(), e);
-            if (e.getMessage().equals(ResultCode.SHIPPING_NOT_APPLY.message())) {
-                throw new ServiceException(ResultCode.SHIPPING_NOT_APPLY);
-            }
             throw new ServiceException(ResultCode.ORDER_ERROR);
         }
     }

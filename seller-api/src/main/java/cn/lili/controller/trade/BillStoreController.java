@@ -1,8 +1,6 @@
 package cn.lili.controller.trade;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
@@ -68,9 +66,7 @@ public class BillStoreController {
     @ApiImplicitParam(name = "id", value = "结算单ID", required = true, paramType = "path", dataType = "String")
     @PutMapping(value = "/check/{id}")
     public ResultMessage<Object> examine(@PathVariable String id) {
-        if (billService.check(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        billService.check(id);
+        return ResultUtil.success();
     }
 }

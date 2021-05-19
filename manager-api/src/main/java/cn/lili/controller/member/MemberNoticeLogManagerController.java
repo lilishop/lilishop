@@ -1,9 +1,7 @@
 package cn.lili.controller.member;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.MemberNoticeLog;
@@ -53,16 +51,14 @@ public class MemberNoticeLogManagerController {
     @ApiOperation(value = "编辑或更新数据")
     @PostMapping(value = "/insertOrUpdate")
     public ResultMessage<MemberNoticeLog> saveOrUpdate(MemberNoticeLog memberNoticeLog) {
-        if (memberNoticeLogService.saveOrUpdate(memberNoticeLog)) {
-            return ResultUtil.data(memberNoticeLog);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        memberNoticeLogService.saveOrUpdate(memberNoticeLog);
+        return ResultUtil.data(memberNoticeLog);
     }
 
     @ApiOperation(value = "批量删除")
     @DeleteMapping(value = "/delByIds/{ids}")
     public ResultMessage<Object> delAllByIds(@PathVariable List ids) {
         memberNoticeLogService.removeByIds(ids);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 }

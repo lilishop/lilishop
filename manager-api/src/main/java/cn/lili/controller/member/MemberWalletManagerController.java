@@ -1,6 +1,6 @@
 package cn.lili.controller.member;
 
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.vo.MemberWalletVO;
 import cn.lili.modules.member.service.MemberWalletService;

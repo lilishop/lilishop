@@ -1,10 +1,8 @@
 package cn.lili.controller.trade;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.order.entity.dos.OrderComplaint;
@@ -79,21 +77,16 @@ public class OrderComplaintBuyerController {
     public ResultMessage<OrderComplaintCommunicationVO> addCommunication(@RequestParam String complainId, @RequestParam String content) {
         AuthUser currentUser = UserContext.getCurrentUser();
         OrderComplaintCommunicationVO communicationVO = new OrderComplaintCommunicationVO(complainId, content, CommunicationOwnerEnum.BUYER.name(), currentUser.getId(), currentUser.getNickName());
-        if (orderComplaintCommunicationService.addCommunication(communicationVO)) {
-            return ResultUtil.data(communicationVO);
-
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        orderComplaintCommunicationService.addCommunication(communicationVO);
+        return ResultUtil.data(communicationVO);
     }
 
     @ApiOperation(value = "取消售后")
     @ApiImplicitParam(name = "id", value = "投诉单ID", required = true, paramType = "path")
     @PutMapping(value = "/status/{id}")
     public ResultMessage<Object> cancel(@PathVariable String id) {
-        if (orderComplaintService.cancel(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        orderComplaintService.cancel(id);
+        return ResultUtil.success();
     }
 
 

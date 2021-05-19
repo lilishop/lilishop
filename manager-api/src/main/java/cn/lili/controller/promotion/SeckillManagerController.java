@@ -1,10 +1,8 @@
 package cn.lili.controller.promotion;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.Seckill;
@@ -42,10 +40,8 @@ public class SeckillManagerController {
         seckillVO.setStoreId(currentUser.getId());
         seckillVO.setStoreName(currentUser.getUsername());
         seckillVO.setSeckillApplyStatus(SeckillApplyStatusEnum.NOT_APPLY.name());
-        if (seckillService.saveSeckill(seckillVO)) {
-            return ResultUtil.data(seckillVO);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        seckillService.saveSeckill(seckillVO);
+        return ResultUtil.data(seckillVO);
     }
 
     @PutMapping
@@ -54,10 +50,8 @@ public class SeckillManagerController {
         AuthUser currentUser = UserContext.getCurrentUser();
         seckillVO.setStoreId(currentUser.getId());
         seckillVO.setStoreName(currentUser.getUsername());
-        if (seckillService.modifySeckill(seckillVO)) {
-            return ResultUtil.data(seckillVO);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        seckillService.modifySeckill(seckillVO);
+        return ResultUtil.data(seckillVO);
     }
 
     @GetMapping(value = "/{id}")
@@ -79,21 +73,21 @@ public class SeckillManagerController {
     @ApiOperation(value = "删除一个限时抢购")
     public ResultMessage<Object> deleteSeckill(@PathVariable String id) {
         seckillService.deleteSeckill(id);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @PutMapping("/close/{id}")
     @ApiOperation(value = "关闭一个限时抢购")
     public ResultMessage<Object> closeSeckill(@PathVariable String id) {
         seckillService.closeSeckill(id);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @PutMapping("/open/{id}")
     @ApiOperation(value = "一个限时抢购")
     public ResultMessage<Object> openSeckill(@PathVariable String id) {
         seckillService.openSeckill(id);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @GetMapping("/apply")
@@ -107,7 +101,7 @@ public class SeckillManagerController {
     @ApiOperation(value = "审核多个限时抢购申请")
     public ResultMessage<Object> auditSeckillApply(@PathVariable String[] ids, String seckillId, String applyStatus, String failReason) {
         seckillApplyService.auditBatchApply(ids, seckillId, applyStatus, failReason);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 }

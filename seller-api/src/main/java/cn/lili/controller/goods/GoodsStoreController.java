@@ -4,7 +4,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -100,14 +100,14 @@ public class GoodsStoreController {
     public ResultMessage<GoodsOperationDTO> save(@RequestBody GoodsOperationDTO goodsOperationDTO) {
 
         goodsService.addGoods(goodsOperationDTO);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "修改商品")
     @PutMapping(value = "/update/{goodsId}", consumes = "application/json", produces = "application/json")
     public ResultMessage<GoodsOperationDTO> update(@RequestBody GoodsOperationDTO goodsOperationDTO, @PathVariable String goodsId) {
         goodsService.editGoods(goodsOperationDTO, goodsId);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "下架商品", notes = "下架商品时使用")
@@ -115,30 +115,24 @@ public class GoodsStoreController {
     @PutMapping(value = "/under")
     public ResultMessage<Object> underGoods(@RequestParam List<String> goodsId) {
 
-        if (goodsService.updateGoodsMarketAble(goodsId, GoodsStatusEnum.DOWN, "商家下架")) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        goodsService.updateGoodsMarketAble(goodsId, GoodsStatusEnum.DOWN, "商家下架");
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "上架商品", notes = "上架商品时使用")
     @PutMapping(value = "/up")
     @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "query", allowMultiple = true)
     public ResultMessage<Object> unpGoods(@RequestParam List<String> goodsId) {
-        if (goodsService.updateGoodsMarketAble(goodsId, GoodsStatusEnum.UPPER, "")) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        goodsService.updateGoodsMarketAble(goodsId, GoodsStatusEnum.UPPER, "");
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "删除商品")
     @PutMapping(value = "/delete")
     @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "query", allowMultiple = true)
     public ResultMessage<Object> deleteGoods(@RequestParam List<String> goodsId) {
-        if (goodsService.deleteGoods(goodsId)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        goodsService.deleteGoods(goodsId);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "设置商品运费模板")
@@ -149,10 +143,8 @@ public class GoodsStoreController {
             @ApiImplicitParam(name = "templateId", value = "运费模板ID", required = true, paramType = "query")
     })
     public ResultMessage<Object> freight(@RequestParam List<String> goodsId, @RequestParam String freightPayer, @RequestParam String templateId) {
-        if (goodsService.freight(goodsId, freightPayer, templateId)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        goodsService.freight(goodsId, freightPayer, templateId);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "根据goodsId分页获取商品规格列表")
@@ -166,7 +158,7 @@ public class GoodsStoreController {
     @PutMapping(value = "/update/stocks", consumes = "application/json")
     public ResultMessage<Object> updateStocks(@RequestBody List<GoodsSkuStockDTO> updateStockList) {
         goodsSkuService.updateStocks(updateStockList);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 }

@@ -1,9 +1,7 @@
 package cn.lili.controller.other;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.system.entity.dos.SensitiveWords;
@@ -49,11 +47,9 @@ public class SensitiveWordsManagerController {
     @ApiOperation(value = "添加敏感词")
     @PostMapping
     public ResultMessage<SensitiveWords> add(@Valid SensitiveWords sensitiveWords) {
-        if (sensitiveWordsService.save(sensitiveWords)) {
-            SensitiveWordsFilter.put(sensitiveWords.getSensitiveWord());
-            return ResultUtil.data(sensitiveWords);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        sensitiveWordsService.save(sensitiveWords);
+        SensitiveWordsFilter.put(sensitiveWords.getSensitiveWord());
+        return ResultUtil.data(sensitiveWords);
     }
 
     @ApiOperation(value = "修改敏感词")
@@ -61,11 +57,9 @@ public class SensitiveWordsManagerController {
     @PutMapping("/{id}")
     public ResultMessage<SensitiveWords> edit(@PathVariable String id, SensitiveWords sensitiveWords) {
         sensitiveWords.setId(id);
-        if (sensitiveWordsService.updateById(sensitiveWords)) {
-            SensitiveWordsFilter.put(sensitiveWords.getSensitiveWord());
-            return ResultUtil.data(sensitiveWords);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        sensitiveWordsService.updateById(sensitiveWords);
+        SensitiveWordsFilter.put(sensitiveWords.getSensitiveWord());
+        return ResultUtil.data(sensitiveWords);
     }
 
     @ApiOperation(value = "批量删除")
@@ -77,7 +71,7 @@ public class SensitiveWordsManagerController {
             SensitiveWordsFilter.remove(name);
             sensitiveWordsService.removeById(id);
         }
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
 
     }
 }

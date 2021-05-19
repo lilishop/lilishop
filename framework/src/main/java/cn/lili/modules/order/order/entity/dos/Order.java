@@ -209,6 +209,7 @@ public class Order extends BaseEntity {
         BeanUtil.copyProperties(cartVO, this);
         this.setId(oldId);
         this.setOrderType(OrderTypeEnum.NORMAL.name());
+        //促销信息填充
         if (cartVO.getSkuList().get(0).getPromotions() != null) {
             Optional<String> pintuanId = cartVO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
             if (pintuanId.isPresent()) {
@@ -222,14 +223,19 @@ public class Order extends BaseEntity {
         this.setOrderStatus(OrderStatusEnum.UNPAID.name());
         this.setPayStatus(PayStatusEnum.UNPAID.name());
         this.setDeliverStatus(DeliverStatusEnum.UNDELIVERED.name());
-        this.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());
-        this.setConsigneeAddressPath(tradeDTO.getMemberAddress().getConsigneeAddressPath());
-        this.setConsigneeDetail(tradeDTO.getMemberAddress().getDetail());
-        this.setConsigneeMobile(tradeDTO.getMemberAddress().getMobile());
-        this.setConsigneeName(tradeDTO.getMemberAddress().getName());
+        //如果有收货地址，才记录收货地址
+        if (tradeDTO.getMemberAddress() != null) {
+            this.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());
+            this.setConsigneeAddressPath(tradeDTO.getMemberAddress().getConsigneeAddressPath());
+            this.setConsigneeDetail(tradeDTO.getMemberAddress().getDetail());
+            this.setConsigneeMobile(tradeDTO.getMemberAddress().getMobile());
+            this.setConsigneeName(tradeDTO.getMemberAddress().getName());
+        }
+        //平台优惠券判定
         if (tradeDTO.getPlatformCoupon() != null) {
             this.setUsePlatformMemberCouponId(tradeDTO.getPlatformCoupon().getMemberCoupon().getId());
         }
+        //店铺优惠券判定
         if (tradeDTO.getStoreCoupons() != null && !tradeDTO.getStoreCoupons().isEmpty()) {
             StringBuilder storeCouponIds = new StringBuilder();
             for (String s : tradeDTO.getStoreCoupons().keySet()) {

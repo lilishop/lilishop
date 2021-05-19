@@ -2,7 +2,7 @@ package cn.lili.controller.member;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
@@ -15,7 +15,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -82,7 +81,7 @@ public class CouponBuyerController {
     public ResultMessage<Object> receiveCoupon(@NotNull(message = "优惠券ID不能为空") @PathVariable("couponId") String couponId) {
         memberCouponService.checkCouponLimit(couponId, UserContext.getCurrentUser().getId());
         memberCouponService.receiveCoupon(couponId, UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getNickName());
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "通过id获取")

@@ -1,9 +1,7 @@
 package cn.lili.controller.other;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.vo.SearchVO;
@@ -55,22 +53,18 @@ public class VerificationSourceController {
     @ApiOperation(value = "新增验证码资源维护")
     public ResultMessage<VerificationSource> save(VerificationSource verificationSource) {
 
-        if (verificationSourceService.save(verificationSource)) {
-            verificationSourceService.initCache();
-            return ResultUtil.data(verificationSource);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        verificationSourceService.save(verificationSource);
+        verificationSourceService.initCache();
+        return ResultUtil.data(verificationSource);
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "更新验证码资源维护")
     public ResultMessage<VerificationSource> update(@PathVariable String id, VerificationSource verificationSource) {
         verificationSource.setId(id);
-        if (verificationSourceService.updateById(verificationSource)) {
-            verificationSourceService.initCache();
-            return ResultUtil.data(verificationSource);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        verificationSourceService.updateById(verificationSource);
+        verificationSourceService.initCache();
+        return ResultUtil.data(verificationSource);
     }
 
     @DeleteMapping(value = "/{ids}")
@@ -79,6 +73,6 @@ public class VerificationSourceController {
 
         verificationSourceService.removeByIds(ids);
         verificationSourceService.initCache();
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 }

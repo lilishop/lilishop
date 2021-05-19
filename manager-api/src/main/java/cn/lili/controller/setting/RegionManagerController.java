@@ -1,8 +1,6 @@
 package cn.lili.controller.setting;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.base.service.RegionService;
 import cn.lili.modules.system.entity.dos.Region;
@@ -56,20 +54,16 @@ public class RegionManagerController {
     @ApiOperation(value = "更新地区")
     public ResultMessage<Region> update(@PathVariable String id, @Valid Region region) {
         region.setId(id);
-        if (regionService.updateById(region)) {
-            return ResultUtil.data(region);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        regionService.updateById(region);
+        return ResultUtil.data(region);
     }
 
 
     @PostMapping
     @ApiOperation(value = "增加地区")
     public ResultMessage<Region> save(@Valid Region region) {
-        if (regionService.save(region)) {
-            return ResultUtil.data(region);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        regionService.save(region);
+        return ResultUtil.data(region);
     }
 
     @DeleteMapping(value = "{ids}")
@@ -77,6 +71,6 @@ public class RegionManagerController {
     @ApiOperation(value = "批量通过id删除")
     public ResultMessage<Object> delAllByIds(@PathVariable List<String> ids) {
         regionService.removeByIds(ids);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 }

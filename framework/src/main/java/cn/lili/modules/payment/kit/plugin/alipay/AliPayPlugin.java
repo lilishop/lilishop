@@ -5,7 +5,7 @@ import cn.hutool.core.net.URLEncoder;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
@@ -168,7 +168,7 @@ public class AliPayPlugin implements Payment {
         if (StringUtils.isNotEmpty(refundLog.getPaymentReceivableNo())) {
             model.setTradeNo(refundLog.getPaymentReceivableNo());
         } else {
-            throw new ServiceException(ResultCode.ERROR);
+            throw new ServiceException(ResultCode.ALIPAY_PARAMS_EXCEPTION);
         }
         model.setRefundAmount(refundLog.getTotalAmount() + "");
         model.setRefundReason(refundLog.getRefundReason());

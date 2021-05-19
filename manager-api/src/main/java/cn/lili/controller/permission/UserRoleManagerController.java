@@ -1,7 +1,7 @@
 package cn.lili.controller.permission;
 
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.permission.entity.dos.UserRole;
 import cn.lili.modules.permission.service.UserRoleService;
@@ -37,7 +37,7 @@ public class UserRoleManagerController {
     @ApiOperation(value = "更新角色菜单")
     public ResultMessage<UserRole> update(@PathVariable String userId, List<UserRole> userRole) {
         userRoleService.updateUserRole(userId, userRole);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 }

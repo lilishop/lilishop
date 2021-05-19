@@ -1,8 +1,6 @@
 package cn.lili.controller.member;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.MemberAddress;
@@ -39,10 +37,8 @@ public class MemberAddressManagerController {
     @ApiImplicitParam(name = "id", value = "会员地址ID", dataType = "String", paramType = "path")
     @DeleteMapping(value = "/delById/{id}")
     public ResultMessage<Object> delShippingAddressById(@PathVariable String id) {
-        if (memberAddressService.removeMemberAddress(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        memberAddressService.removeMemberAddress(id);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "修改会员收件地址")

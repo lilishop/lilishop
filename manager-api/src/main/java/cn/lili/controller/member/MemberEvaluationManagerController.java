@@ -1,8 +1,6 @@
 package cn.lili.controller.member;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
@@ -54,20 +52,16 @@ public class MemberEvaluationManagerController {
     })
     @GetMapping(value = "/updateStatus/{id}")
     public ResultMessage<Object> updateStatus(@PathVariable String id, @NotNull String status) {
-        if (memberEvaluationService.updateStatus(id, status)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        memberEvaluationService.updateStatus(id, status);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "删除评论")
     @ApiImplicitParam(name = "id", value = "评价ID", required = true, dataType = "String", paramType = "path")
     @PutMapping(value = "/delete/{id}")
     public ResultMessage<IPage<Object>> delete(@PathVariable String id) {
-        if (memberEvaluationService.delete(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        memberEvaluationService.delete(id);
+        return ResultUtil.success();
     }
 
 }

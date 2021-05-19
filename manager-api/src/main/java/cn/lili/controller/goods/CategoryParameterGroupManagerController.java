@@ -2,7 +2,7 @@ package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.CategoryParameterGroup;
 import cn.lili.modules.goods.entity.dos.Parameters;
@@ -76,7 +76,7 @@ public class CategoryParameterGroupManagerController {
         parametersService.remove(new QueryWrapper<Parameters>().eq("group_id", id));
         //删除参数组
         categoryParameterGroupService.removeById(id);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 }

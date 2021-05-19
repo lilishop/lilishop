@@ -143,11 +143,8 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
                 //分销员金额相关处理
                 distributionService.updateById(distribution);
                 //修改分销提现申请
-                Boolean bool = this.updateById(distributorCash);
-                if (bool) {
-                    return distributorCash;
-                }
-                throw new ServiceException(ResultCode.ERROR);
+                this.updateById(distributorCash);
+                return distributorCash;
             }
             throw new ServiceException(ResultCode.DISTRIBUTION_NOT_EXIST);
         }

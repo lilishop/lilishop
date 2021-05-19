@@ -315,12 +315,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
         //添加会员
         Member member = new Member(memberAddDTO.getUsername(), memberAddDTO.getPassword(), memberAddDTO.getMobile());
-        if (this.save(member)) {
-            String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_REGISTER.name();
-            rocketMQTemplate.asyncSend(destination, member, RocketmqSendCallbackBuilder.commonCallback());
-            return member;
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        this.save(member);
+        String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_REGISTER.name();
+        rocketMQTemplate.asyncSend(destination, member, RocketmqSendCallbackBuilder.commonCallback());
+        return member;
     }
 
     @Override
@@ -342,10 +340,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         Member member = this.findByUsername(managerMemberEditDTO.getUsername());
         //传递修改会员信息
         BeanUtil.copyProperties(managerMemberEditDTO, member);
-        if (this.updateById(member)) {
-            return member;
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        this.updateById(member);
+        return member;
     }
 
     @Override

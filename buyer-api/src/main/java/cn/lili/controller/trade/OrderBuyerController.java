@@ -4,7 +4,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
@@ -73,7 +73,7 @@ public class OrderBuyerController {
             throw new ServiceException(ResultCode.ORDER_DELIVERED_ERROR);
         }
         orderService.complete(orderSn);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "取消订单")
@@ -84,7 +84,7 @@ public class OrderBuyerController {
     @PostMapping(value = "/{orderSn}/cancel")
     public ResultMessage<Object> cancel(@ApiIgnore @PathVariable String orderSn, @RequestParam String reason) {
         orderService.cancel(orderSn, reason);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "删除订单")
@@ -94,7 +94,7 @@ public class OrderBuyerController {
     @DeleteMapping(value = "/{orderSn}")
     public ResultMessage<Object> deleteOrder(@PathVariable String orderSn) {
         orderService.deleteOrder(orderSn);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "查询物流踪迹")

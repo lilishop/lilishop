@@ -1,8 +1,6 @@
 package cn.lili.controller.trade;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dto.StoreEvaluationQueryParams;
 import cn.lili.modules.member.entity.vo.MemberEvaluationListVO;
@@ -52,9 +50,7 @@ public class MemberEvaluationStoreController {
     })
     @PutMapping(value = "/reply/{id}")
     public ResultMessage<MemberEvaluationVO> reply(@PathVariable String id, @RequestParam String reply, @RequestParam String replyImage) {
-        if (memberEvaluationService.reply(id, reply, replyImage)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        memberEvaluationService.reply(id, reply, replyImage);
+        return ResultUtil.success();
     }
 }

@@ -1,8 +1,6 @@
 package cn.lili.controller.purchase;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.purchase.entity.dos.PurchaseOrder;
 import cn.lili.modules.purchase.entity.dos.PurchaseQuoted;
@@ -62,10 +60,8 @@ public class PurchaseManagerController {
     @PutMapping("/{id}")
     public ResultMessage<Object> close(@NotNull @PathVariable String id) {
 
-        if (purchaseOrderService.close(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        purchaseOrderService.close(id);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "报价列表")

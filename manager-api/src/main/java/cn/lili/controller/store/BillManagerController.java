@@ -1,8 +1,6 @@
 package cn.lili.controller.store;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
@@ -60,10 +58,8 @@ public class BillManagerController {
     @ApiImplicitParam(name = "id", value = "结算单ID", required = true, paramType = "path")
     @PutMapping(value = "/pay/{id}")
     public ResultMessage<Object> pay(@PathVariable String id) {
-        if (billService.complete(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        billService.complete(id);
+        return ResultUtil.success();
     }
 
 }

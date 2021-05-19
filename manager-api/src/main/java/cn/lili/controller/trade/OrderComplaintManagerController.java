@@ -1,10 +1,8 @@
 package cn.lili.controller.trade;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.order.entity.dos.OrderComplaint;
@@ -63,10 +61,9 @@ public class OrderComplaintManagerController {
     @ApiOperation(value = "更新数据")
     @PutMapping
     public ResultMessage<OrderComplaintVO> update(OrderComplaintVO orderComplainVO) {
-        if (orderComplaintService.updateOrderComplain(orderComplainVO)) {
-            return ResultUtil.data(orderComplainVO);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        orderComplaintService.updateOrderComplain(orderComplainVO);
+        return ResultUtil.data(orderComplainVO);
+
     }
 
     @ApiOperation(value = "添加交易投诉对话")
@@ -75,22 +72,18 @@ public class OrderComplaintManagerController {
             @ApiImplicitParam(name = "content", value = "内容", required = true, paramType = "query")
     })
     @PostMapping("/communication")
-    public ResultMessage<OrderComplaintCommunicationVO> addCommunication(@RequestParam String complainId,@RequestParam String content) {
+    public ResultMessage<OrderComplaintCommunicationVO> addCommunication(@RequestParam String complainId, @RequestParam String content) {
         AuthUser currentUser = UserContext.getCurrentUser();
         OrderComplaintCommunicationVO communicationVO = new OrderComplaintCommunicationVO(complainId, content, CommunicationOwnerEnum.PLATFORM.name(), currentUser.getId(), currentUser.getUsername());
-        if (orderComplaintCommunicationService.addCommunication(communicationVO)) {
-            return ResultUtil.data(communicationVO);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        orderComplaintCommunicationService.addCommunication(communicationVO);
+        return ResultUtil.data(communicationVO);
     }
 
     @ApiOperation(value = "修改状态")
     @PutMapping(value = "/status")
     public ResultMessage<Object> updateStatus(OrderComplaintOperationParams orderComplainVO) {
-        if (orderComplaintService.updateOrderComplainByStatus(orderComplainVO) != null) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        orderComplaintService.updateOrderComplainByStatus(orderComplainVO);
+        return ResultUtil.success();
     }
 
 
@@ -100,17 +93,15 @@ public class OrderComplaintManagerController {
             @ApiImplicitParam(name = "arbitrationResult", value = "仲裁结果", required = true, paramType = "query")
     })
     @PutMapping(value = "/complete/{id}")
-    public ResultMessage<Object> complete(@PathVariable String id,String arbitrationResult) {
+    public ResultMessage<Object> complete(@PathVariable String id, String arbitrationResult) {
         //新建对象
-        OrderComplaintOperationParams orderComplaintOperationParams =new OrderComplaintOperationParams();
+        OrderComplaintOperationParams orderComplaintOperationParams = new OrderComplaintOperationParams();
         orderComplaintOperationParams.setComplainId(id);
         orderComplaintOperationParams.setArbitrationResult(arbitrationResult);
         orderComplaintOperationParams.setComplainStatus(OrderComplaintStatusEnum.COMPLETE.name());
 
         //修改状态
-        if (orderComplaintService.updateOrderComplainByStatus(orderComplaintOperationParams) != null) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        orderComplaintService.updateOrderComplainByStatus(orderComplaintOperationParams);
+        return ResultUtil.success();
     }
 }
