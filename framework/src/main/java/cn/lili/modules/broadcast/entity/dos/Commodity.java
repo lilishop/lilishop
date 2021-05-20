@@ -22,8 +22,8 @@ import javax.persistence.Table;
 @Table(name = "li_commodity")
 public class Commodity extends BaseEntity {
 
-    @ApiModelProperty(value = "图片mediaID")
-    private String coverImgUrl;
+    @ApiModelProperty(value = "图片")
+    private String goodsImage;
 
     @ApiModelProperty(value = "商品名称")
     private String name;

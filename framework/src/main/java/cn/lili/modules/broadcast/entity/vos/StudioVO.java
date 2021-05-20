@@ -18,4 +18,5 @@ public class StudioVO extends Studio {
 
     @ApiModelProperty(value = "直播间商品列表")
     private List<Commodity> CommodityList;
+
 }

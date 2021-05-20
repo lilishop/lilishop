@@ -70,16 +70,19 @@ public class Studio extends BaseEntity {
     @ApiModelProperty(value = "封面图")
     private String feedsImg;
 
-    /**
-     * 回放视频链接
-     */
+
     @ApiModelProperty(value = "回放视频链接")
     private String mediaUrl;
-
 
     @ApiModelProperty(value = "房间ID")
     private Integer roomId;
 
     @ApiModelProperty(value = "店铺ID")
     private String storeId;
+
+    @ApiModelProperty(value = "直播间商品数量")
+    private Integer roomGoodsNum;
+
+    @ApiModelProperty(value = "直播间商品(最多展示两个商品：name/goodsImage)")
+    private String roomGoodsList;
 }

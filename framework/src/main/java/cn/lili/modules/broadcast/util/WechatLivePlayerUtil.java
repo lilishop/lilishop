@@ -83,12 +83,12 @@ public class WechatLivePlayerUtil {
      * @param roomId 房间ID
      * @return 回放地址
      */
-    public String getLiveInfo(String roomId) {
+    public String getLiveInfo(Integer roomId) {
         //获取token
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url
         String url = "https://api.weixin.qq.com/wxa/business/getliveinfo?access_token=" + token;
-        Map<String, String> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         // 获取回放
         map.put("action", "get_replay");
         // 直播间ID
@@ -162,7 +162,9 @@ public class WechatLivePlayerUtil {
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url
         String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/add?access_token=" + token;
+        //新建微信商品DTO
         GoodsInfo goodsInfo = new GoodsInfo(commodity);
+        goodsInfo.setCoverImgUrl(wechatMediaUtil.uploadMedia(token,"image",commodity.getGoodsImage()));
         String content = HttpUtils.doPostWithJson(url, goodsInfo);
         JSONObject json = new JSONObject(content);
         log.info("微信小程序添加直播商品结果：" + content);
@@ -192,7 +194,7 @@ public class WechatLivePlayerUtil {
      * @param goodsIdList 商品ID列表
      * @return 删除结果
      */
-    public JSONObject deleteGoods(List<String> goodsIdList) {
+    public JSONObject getGoodsWareHouse(List<String> goodsIdList) {
         //获取token
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url

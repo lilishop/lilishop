@@ -1,6 +1,7 @@
 package cn.lili.modules.broadcast.service;
 
 import cn.lili.modules.broadcast.entity.dos.Studio;
+import cn.lili.modules.broadcast.entity.vos.StudioVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -21,11 +22,18 @@ public interface StudioService extends IService<Studio> {
     Boolean create(Studio studio);
 
     /**
+     * 获取直播间信息
+     * @param id 直播间ID
+     * @return 直播间VO
+     */
+    StudioVO getStudioVO(String id);
+
+    /**
      * 获取直播间回放
      * @param roomId 房间ID
      * @return 直播间回放地址
      */
-    String getLiveInfo(String roomId);
+    String getLiveInfo(Integer roomId);
 
     /**
      * 推送商品

@@ -28,7 +28,7 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
 
     @Override
     public boolean addCommodity(Commodity commodity) {
-        JSONObject json =wechatLivePlayerUtil.addGoods(commodity);
+        JSONObject json = wechatLivePlayerUtil.addGoods(commodity);
         commodity.setLiveGoodsId(Convert.toInt(json.getStr("goodsId")));
         commodity.setAuditId(json.getStr("auditId"));
         commodity.setStoreId(UserContext.getCurrentUser().getStoreId());
@@ -37,26 +37,26 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
 
     @Override
     public boolean deleteCommodity(String goodsId) {
-        JSONObject json =wechatLivePlayerUtil.deleteGoods(goodsId);
-        if(json.getStr("errcode").equals("0")){
-            return this.remove(this.lambdaQuery().eq(Commodity::getLiveGoodsId,goodsId));
+        JSONObject json = wechatLivePlayerUtil.deleteGoods(goodsId);
+        if (json.getStr("errcode").equals("0")) {
+            return this.remove(this.lambdaQuery().eq(Commodity::getLiveGoodsId, goodsId));
         }
         return false;
     }
 
     @Override
-    public void getGoodsWarehouse() {
+    public void getGoodsWareHouse() {
         //查询审核中的商品
-        List<String> goodsIdList=this.baseMapper.getAuditCommodity();
+        List<String> goodsIdList = this.baseMapper.getAuditCommodity(UserContext.getCurrentUser().getStoreId());
         //同步状态
-        JSONObject json =wechatLivePlayerUtil.deleteGoods(goodsIdList);
+        JSONObject json = wechatLivePlayerUtil.getGoodsWareHouse(goodsIdList);
         //修改状态
-        List<Map<String,String>> list=(List)json.get("goods");
-        for (Map<String,String> map:list){
+        List<Map<String, String>> list = (List) json.get("goods");
+        for (Map<String, String> map : list) {
             //修改审核状态
             this.update(this.lambdaUpdate()
-                    .eq(Commodity::getLiveGoodsId,map.get("goods_id"))
-                    .set(Commodity::getAuditStatus,map.get("audit_status")));
+                    .eq(Commodity::getLiveGoodsId, map.get("goods_id"))
+                    .set(Commodity::getAuditStatus, map.get("audit_status")));
         }
     }
 

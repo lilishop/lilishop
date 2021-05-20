@@ -6,7 +6,6 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
 import cn.lili.modules.broadcast.entity.dos.Studio;
 import cn.lili.modules.broadcast.service.StudioService;
 import cn.lili.modules.message.util.WechatAccessTokenUtil;
@@ -82,11 +81,5 @@ public class StudioController {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
         throw new ServiceException(ResultCode.ERROR);
-    }
-
-    @ApiOperation(value = "获取素材，调用接口凭证")
-    @PutMapping(value = "/getCgiAccessToken")
-    public ResultMessage<Object> getCgiAccessToken() {
-        return ResultUtil.data(wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP));
     }
 }

@@ -1,10 +1,14 @@
 package cn.lili.modules.broadcast.serviceimpl;
 
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.broadcast.entity.dos.Studio;
 import cn.lili.modules.broadcast.entity.dos.StudioCommodity;
+import cn.lili.modules.broadcast.entity.vos.StudioVO;
+import cn.lili.modules.broadcast.mapper.CommodityMapper;
 import cn.lili.modules.broadcast.mapper.StudioMapper;
 import cn.lili.modules.broadcast.service.StudioCommodityService;
 import cn.lili.modules.broadcast.service.StudioService;
@@ -14,6 +18,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+
 /**
  * 小程序直播间业务层实现
  *
@@ -21,22 +27,24 @@ import org.springframework.stereotype.Service;
  * @date: 2021/5/17 10:04 上午
  */
 @Service
-public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio>  implements StudioService {
+public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> implements StudioService {
 
     @Autowired
     private WechatLivePlayerUtil wechatLivePlayerUtil;
     @Autowired
     private StudioCommodityService studioCommodityService;
+    @Resource
+    private CommodityMapper commodityMapper;
 
     @Override
     public Boolean create(Studio studio) {
         try {
             //创建小程序直播
-            Integer roomId=wechatLivePlayerUtil.create(studio);
+            Integer roomId = wechatLivePlayerUtil.create(studio);
             studio.setRoomId(roomId);
             studio.setStoreId(UserContext.getCurrentUser().getStoreId());
             return this.save(studio);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             throw new ServiceException(ResultCode.ERROR);
         }
@@ -44,13 +52,23 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio>  implem
     }
 
     @Override
-    public String getLiveInfo(String roomId) {
-        Studio studio=this.getByRoomId(roomId);
+    public StudioVO getStudioVO(String id) {
+        StudioVO studioVO = new StudioVO();
+        //获取直播间信息
+        BeanUtil.copyProperties(this.getById(id), studioVO);
+        //获取直播间商品信息
+        studioVO.setCommodityList(commodityMapper.getCommodityByRoomId(studioVO.getRoomId()));
+        return studioVO;
+    }
+
+    @Override
+    public String getLiveInfo(Integer roomId) {
+        Studio studio = this.getByRoomId(roomId);
         //获取直播间并判断回放内容是否为空，如果为空则获取直播间回放并保存
-        if(studio.getMediaUrl()!=null){
+        if (studio.getMediaUrl() != null) {
             return studio.getMediaUrl();
-        }else{
-            String mediaUrl= wechatLivePlayerUtil.getLiveInfo(roomId);
+        } else {
+            String mediaUrl = wechatLivePlayerUtil.getLiveInfo(roomId);
             studio.setMediaUrl(mediaUrl);
             this.save(studio);
             return mediaUrl;
@@ -60,8 +78,16 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio>  implem
     @Override
     public Boolean push(Integer roomId, Integer goodsId) {
         //调用微信接口添加直播间商品并进行记录
-        if(wechatLivePlayerUtil.pushGoods(roomId,goodsId)){
-            return studioCommodityService.save(new StudioCommodity(roomId,goodsId));
+        if (wechatLivePlayerUtil.pushGoods(roomId, goodsId)) {
+            studioCommodityService.save(new StudioCommodity(roomId, goodsId));
+            //添加直播间商品数量
+            Studio studio = this.getByRoomId(roomId);
+            studio.setRoomGoodsNum(studio.getRoomGoodsNum() != null ? studio.getRoomGoodsNum() + 1 : 1);
+            //设置直播间默认的商品（前台展示）只展示两个
+            if(studio.getRoomGoodsNum()<3){
+                studio.setRoomGoodsList(JSONUtil.toJsonStr(commodityMapper.getSimpleCommodityByRoomId(roomId)));;
+            }
+            return this.updateById(studio);
         }
         return false;
     }
@@ -69,18 +95,27 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio>  implem
     @Override
     public Boolean goodsDeleteInRoom(Integer roomId, Integer goodsId) {
         //调用微信接口删除直播间商品并进行记录
-        if(wechatLivePlayerUtil.goodsDeleteInRoom(roomId,goodsId)){
-            return studioCommodityService.remove(new QueryWrapper<StudioCommodity>().eq("room_id",roomId).eq("goods_id",goodsId));
+        if (wechatLivePlayerUtil.goodsDeleteInRoom(roomId, goodsId)) {
+            studioCommodityService.remove(new QueryWrapper<StudioCommodity>().eq("room_id", roomId).eq("goods_id", goodsId));
+            //减少直播间商品数量
+            Studio studio = this.getByRoomId(roomId);
+            studio.setRoomGoodsNum(studio.getRoomGoodsNum() - 1);
+            //设置直播间默认的商品（前台展示）只展示两个
+            if(studio.getRoomGoodsNum()<3){
+                studio.setRoomGoodsList(JSONUtil.toJsonStr(commodityMapper.getSimpleCommodityByRoomId(roomId)));;
+            }
+            return this.updateById(studio);
         }
         return false;
     }
 
     /**
      * 根据直播间ID获取直播间
+     *
      * @param roomId 直播间ID
      * @return 直播间
      */
-    private Studio getByRoomId(String roomId){
-        return this.getOne(this.lambdaQuery().eq(Studio::getRoomId,roomId)) ;
+    private Studio getByRoomId(Integer roomId) {
+        return this.getOne(this.lambdaQuery().eq(Studio::getRoomId, roomId));
     }
 }

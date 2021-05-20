@@ -27,5 +27,5 @@ public interface CommodityService extends IService<Commodity> {
     /**
      * 查询微信小程序直播商品审核状态
      */
-    void getGoodsWarehouse();
+    void getGoodsWareHouse();
 }
