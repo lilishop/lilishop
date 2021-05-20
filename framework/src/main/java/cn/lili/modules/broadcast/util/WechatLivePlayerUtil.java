@@ -28,6 +28,8 @@ public class WechatLivePlayerUtil {
 
     @Autowired
     private WechatAccessTokenUtil wechatAccessTokenUtil;
+    @Autowired
+    private WechatMediaUtil wechatMediaUtil;
 
     /**
      * 创建小程序直播间
@@ -35,7 +37,7 @@ public class WechatLivePlayerUtil {
      * @param studio 小程序直播
      * @return 房间ID
      */
-    public Integer create(Studio studio) {
+    public Integer create(Studio studio) throws Exception{
         //获取token
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url
@@ -43,12 +45,11 @@ public class WechatLivePlayerUtil {
 
         Map<String, String> map = new HashMap<>();
         // 背景图
-        map.put("coverImg", studio.getCoverImg());
+        map.put("coverImg", wechatMediaUtil.uploadMedia(token,"image",studio.getCoverImg()));
         // 分享图
-        map.put("shareImg", studio.getShareImg());
+        map.put("shareImg", wechatMediaUtil.uploadMedia(token,"image",studio.getShareImg()));
         // 购物直播频道封面图
-        map.put("feedsImg", studio.getFeedsImg());
-
+        map.put("feedsImg", wechatMediaUtil.uploadMedia(token,"image",studio.getFeedsImg()));
         // 直播间名字
         map.put("name", studio.getName());
         // 直播计划开始时间

@@ -1,5 +1,7 @@
 package cn.lili.modules.broadcast.serviceimpl;
 
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.modules.broadcast.entity.dos.Studio;
 import cn.lili.modules.broadcast.entity.dos.StudioCommodity;
@@ -28,11 +30,17 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio>  implem
 
     @Override
     public Boolean create(Studio studio) {
-        //创建小程序直播
-        Integer roomId=wechatLivePlayerUtil.create(studio);
-        studio.setRoomId(roomId);
-        studio.setStoreId(UserContext.getCurrentUser().getStoreId());
-        return this.save(studio);
+        try {
+            //创建小程序直播
+            Integer roomId=wechatLivePlayerUtil.create(studio);
+            studio.setRoomId(roomId);
+            studio.setStoreId(UserContext.getCurrentUser().getStoreId());
+            return this.save(studio);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new ServiceException(ResultCode.ERROR);
+        }
+
     }
 
     @Override
