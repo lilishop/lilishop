@@ -58,7 +58,7 @@ public class RocketmqTimerTrigger implements TimeTrigger {
             log.info("add Redis key {} --------------------------", generateKey);
             log.info("定时执行在【" + DateUtil.toString(timeTriggerMsg.getTriggerTime(), "yyyy-MM-dd HH:mm:ss") + "】，消费【" + timeTriggerMsg.getParam().toString() + "】");
         } else {
-            log.info("延时任务添加失败！");
+            log.error("延时任务添加失败！");
         }
     }
 

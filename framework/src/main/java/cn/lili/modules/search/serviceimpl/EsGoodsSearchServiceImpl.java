@@ -257,7 +257,11 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     private NativeSearchQueryBuilder createSearchQueryBuilder(EsGoodsSearchDTO searchDTO, PageVO pageVo, boolean isAggregation) {
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
         if (pageVo != null) {
-            Pageable pageable = PageRequest.of(pageVo.getPageNumber(), pageVo.getPageSize());
+            Integer pageNumber = pageVo.getPageNumber() - 1;
+            if (pageNumber < 0) {
+                pageNumber = 0;
+            }
+            Pageable pageable = PageRequest.of(pageNumber, pageVo.getPageSize());
             //分页
             nativeSearchQueryBuilder.withPageable(pageable);
         }
