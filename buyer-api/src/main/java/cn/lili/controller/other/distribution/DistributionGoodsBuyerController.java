@@ -1,6 +1,8 @@
 package cn.lili.controller.other.distribution;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.distribution.entity.dto.DistributionGoodsSearchParams;
 import cn.lili.modules.distribution.entity.vos.DistributionGoodsVO;
@@ -50,9 +52,11 @@ public class DistributionGoodsBuyerController {
     @ApiOperation(value = "选择分销商品")
     @ApiImplicitParam(name = "distributionGoodsId", value = "分销ID", required = true, dataType = "String", paramType = "path")
     @GetMapping(value = "/checked/{distributionGoodsId}")
-    public ResultMessage<IPage<DistributionGoodsVO>> distributionCheckGoods(
+    public ResultMessage<Object> distributionCheckGoods(
             @NotNull(message = "分销商品不能为空") @PathVariable("distributionGoodsId") String distributionGoodsId) {
-        distributionSelectedGoodsService.add(distributionGoodsId);
-        return ResultUtil.success();
+        if(distributionSelectedGoodsService.add(distributionGoodsId)){
+            return ResultUtil.success();
+        }
+        throw new ServiceException(ResultCode.ERROR);
     }
 }

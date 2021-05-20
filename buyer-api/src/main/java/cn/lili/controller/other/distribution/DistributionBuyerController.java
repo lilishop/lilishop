@@ -70,7 +70,8 @@ public class DistributionBuyerController {
     @ApiOperation(value = "绑定分销员")
     @ApiImplicitParam(name = "distributionId", value = "分销员ID", required = true, paramType = "path")
     @GetMapping("/bindingDistribution/{distributionId}")
-    public void bindingDistribution(@PathVariable String distributionId){
+    public ResultMessage<Object> bindingDistribution(@PathVariable String distributionId){
         distributionService.bindingDistribution(distributionId);
+        return ResultUtil.success();
     }
 }
