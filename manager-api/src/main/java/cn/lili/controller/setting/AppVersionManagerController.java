@@ -1,5 +1,7 @@
 package cn.lili.controller.setting;
 
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.StringUtils;
@@ -45,8 +47,11 @@ public class AppVersionManagerController {
 
     @ApiOperation(value = "添加app版本信息", response = AppVersionDO.class)
     @PostMapping
-    public ResultMessage<Boolean> add(@Valid AppVersionDO appVersionDO) {
-        return ResultUtil.data(this.appVersionService.save(appVersionDO));
+    public ResultMessage<Object> add(@Valid AppVersionDO appVersionDO) {
+        if(this.appVersionService.save(appVersionDO)){
+            return ResultUtil.success();
+        }
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @PutMapping(value = "/{id}")
@@ -55,10 +60,10 @@ public class AppVersionManagerController {
             @ApiImplicitParam(name = "id", value = "主键", required = true, dataType = "String", paramType = "path")
     })
     public ResultMessage<Boolean> edit(@Valid AppVersionDO appVersionDO, @PathVariable String id) {
-        if (appVersionService.getById(id) != null) {
-            return ResultUtil.data(this.appVersionService.updateById(appVersionDO));
+        if(this.appVersionService.updateById(appVersionDO)){
+            return ResultUtil.success();
         }
-        return ResultUtil.data(false);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @DeleteMapping(value = "/{id}")
@@ -67,10 +72,10 @@ public class AppVersionManagerController {
             @ApiImplicitParam(name = "id", value = "要删除的app版本主键", required = true, dataType = "String", paramType = "path")
     })
     public ResultMessage<Boolean> delete(@PathVariable String id) {
-        if (appVersionService.getById(id) != null) {
-            return ResultUtil.data(this.appVersionService.removeById(id));
+        if(this.appVersionService.removeById(id)){
+            return ResultUtil.success();
         }
-        return ResultUtil.data(true);
+        throw new ServiceException(ResultCode.ERROR);
     }
 
 }
