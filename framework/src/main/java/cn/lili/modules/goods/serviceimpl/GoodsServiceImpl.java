@@ -55,9 +55,6 @@ import java.util.List;
 @Transactional
 public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements GoodsService {
 
-    //商品
-    @Autowired
-    private GoodsMapper goodsMapper;
     //商品属性
     @Autowired
     private GoodsParamsService goodsParamsService;
@@ -85,7 +82,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     public void underStoreGoods(String storeId) {
-        this.goodsMapper.underStoreGoods(storeId);
+        this.baseMapper.underStoreGoods(storeId);
     }
 
     @Override
