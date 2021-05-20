@@ -55,9 +55,6 @@ import java.util.List;
 @Transactional
 public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements GoodsService {
 
-    //商品
-    @Autowired
-    private GoodsMapper goodsMapper;
     //商品属性
     @Autowired
     private GoodsParamsService goodsParamsService;
@@ -85,7 +82,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     public void underStoreGoods(String storeId) {
-        this.goodsMapper.underStoreGoods(storeId);
+        this.baseMapper.underStoreGoods(storeId);
     }
 
     @Override
@@ -237,15 +234,10 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     public Integer goodsNum(GoodsStatusEnum goodsStatusEnum, GoodsAuthEnum goodsAuthEnum) {
         LambdaQueryWrapper<Goods> queryWrapper = Wrappers.lambdaQuery();
 
-        queryWrapper.eq(Goods::getDeleteFlag,false);
-
-        if (goodsStatusEnum != null) {
-            queryWrapper.eq(Goods::getMarketEnable, goodsStatusEnum.name());
-        }
-        if (goodsAuthEnum != null) {
-            queryWrapper.eq(Goods::getIsAuth, goodsAuthEnum.name());
-        }
-        queryWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
+        queryWrapper.eq(Goods::getDeleteFlag,false)
+                .eq(goodsStatusEnum != null,Goods::getMarketEnable, goodsStatusEnum.name())
+                .eq(goodsAuthEnum != null,Goods::getIsAuth, goodsAuthEnum.name())
+                .eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
                 Goods::getStoreId, UserContext.getCurrentUser().getStoreId());
 
         return this.count(queryWrapper);
