@@ -407,10 +407,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         goodEvaluationQueryWrapper.eq(MemberEvaluation::getGrade, EvaluationGradeEnum.GOOD.name());
 
         // 好评数量
-        double highPraiseNum = memberEvaluationService.count(goodEvaluationQueryWrapper);
+        int highPraiseNum = memberEvaluationService.count(goodEvaluationQueryWrapper);
 
         // 更新商品评价数量
-        goodsSku.setCommentNum(goodsSku.getCommentNum() + 1);
+        goodsSku.setCommentNum(goodsSku.getCommentNum() != null ? goodsSku.getCommentNum() + 1 : 1);
 
         // 好评率
         double grade = NumberUtil.div(highPraiseNum, goodsSku.getCommentNum().doubleValue(), 2) * 100;
@@ -419,6 +419,12 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         this.update(goodsSku);
         //修改规格索引
         goodsIndexService.updateIndexCommentNum(goodsSku.getId(), goodsSku.getCommentNum(), (int) highPraiseNum, grade);
+
+        //修改商品评价数量
+        Goods goods = goodsService.getById(goodsSku.getGoodsId());
+        goods.setCommentNum(goods.getCommentNum() + 1);
+        goodsService.updateById(goods);
+
     }
 
     /**

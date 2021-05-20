@@ -125,8 +125,7 @@ public enum ResultCode {
      * 购物车
      */
     CART_ERROR(30001, "读取结算页的购物车异常"),
-    GOODS_NOT_SUPPORT(30002, "以下商品不支持当前收货地址："),
-    SHIPPING_NOT_APPLY(30005, "当前选择地址暂不支持配送！"),
+    SHIPPING_NOT_APPLY(30005, "购物商品不支持当前收货地址配送"),
     /**
      * 订单
      */

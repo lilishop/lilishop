@@ -258,7 +258,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         this.sendUpdateStatusMessage(orderMessage);
 
         String message = "订单付款，付款方式[" + PaymentMethodEnum.valueOf(paymentMethod).paymentName() + "]";
-        OrderLog orderLog = new OrderLog(orderSn, "-1", UserEnums.SYSTEM.name(), "系统操作", message);
+        OrderLog orderLog = new OrderLog(orderSn, "-1", UserEnums.SYSTEM.getRole(), "系统操作", message);
         orderLogService.save(orderLog);
 
 
