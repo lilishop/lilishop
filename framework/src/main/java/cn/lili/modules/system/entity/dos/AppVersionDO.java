@@ -59,7 +59,6 @@ public class AppVersionDO{
     @ApiModelProperty(value = "版本名称")
     private String versionName;
 
-
     @ApiModelProperty(value = "更新内容")
     private String content;
 

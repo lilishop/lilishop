@@ -1,6 +1,5 @@
 package cn.lili.controller.goods;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -75,21 +74,16 @@ public class GoodsBuyerController {
     @ApiOperation(value = "通过id获取商品信息")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "path"),
-            @ApiImplicitParam(name = "skuId", value = "skuId", required = true, paramType = "path"),
-            @ApiImplicitParam(name = "distributionId", value = "分销员ID", dataType = "String", paramType = "query")
+            @ApiImplicitParam(name = "skuId", value = "skuId", required = true, paramType = "path")
     })
     @GetMapping(value = "/sku/{goodsId}/{skuId}")
     @PageViewPoint(type = PageViewEnum.SKU, id = "#id")
     public ResultMessage<Map<String, Object>> getSku(@NotNull(message = "商品ID不能为空") @PathVariable("goodsId") String goodsId,
-                                                     @NotNull(message = "SKU ID不能为空") @PathVariable("skuId") String skuId,
-                                                     String distributionId) {
+                                                     @NotNull(message = "SKU ID不能为空") @PathVariable("skuId") String skuId) {
 
         Map<String, Object> map = goodsSkuService.getGoodsSkuDetail(goodsId, skuId);
 
-        //判断如果传递分销员则进行记录
-        if (CharSequenceUtil.isNotEmpty(distributionId)) {
-            distributionService.bindingDistribution(distributionId);
-        }
+
 
         return ResultUtil.data(map);
     }

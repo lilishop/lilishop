@@ -4,6 +4,8 @@ package cn.lili.common.enums;
 import cn.lili.common.vo.ResultMessage;
 
 /**
+ * 返回结果工具类
+ *
  * @author lili
  */
 public class ResultUtil<T> {
@@ -74,17 +76,21 @@ public class ResultUtil<T> {
     public static <T> ResultMessage<T> success() {
         return new ResultUtil<T>().setSuccessMsg(ResultCode.SUCCESS);
     }
+
     /**
      * 返回失败
+     *
      * @param resultCode 返回状态码
      */
     public static <T> ResultMessage<T> error(ResultCode resultCode) {
         return new ResultUtil<T>().setErrorMsg(resultCode);
     }
+
     /**
      * 返回失败
+     *
      * @param code 状态码
-     * @param msg 返回消息
+     * @param msg  返回消息
      */
     public static <T> ResultMessage<T> error(Integer code, String msg) {
         return new ResultUtil<T>().setErrorMsg(code, msg);
@@ -104,8 +110,9 @@ public class ResultUtil<T> {
 
     /**
      * 服务器异常 追加状态码
+     *
      * @param code 状态码
-     * @param msg 返回消息
+     * @param msg  返回消息
      */
     public ResultMessage<T> setErrorMsg(Integer code, String msg) {
         this.resultMessage.setSuccess(false);
