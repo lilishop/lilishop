@@ -8,7 +8,6 @@ import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -53,7 +52,7 @@ public class CartPriceRender implements CartRenderStep {
                 if (Boolean.FALSE.equals(sku.getChecked())) {
                     continue;
                 }
-                cart.setGoodsNum(sku.getNum());
+                cart.addGoodsNum(sku.getNum());
                 if (cart.getStoreId().equals(sku.getStoreId()) && !cart.getSkuList().contains(sku)) {
                     cart.getSkuList().add(sku);
                 }
