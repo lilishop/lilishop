@@ -1,7 +1,7 @@
 package cn.lili.controller.other.distribution;
 
-import cn.lili.common.security.context.UserContext;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dos.DistributionOrder;
@@ -64,5 +64,14 @@ public class DistributionBuyerController {
         distributionService.checkDistributionSetting();
 
         return ResultUtil.data(distributionService.getDistribution());
+    }
+
+    //申请分销员
+    @ApiOperation(value = "绑定分销员")
+    @ApiImplicitParam(name = "distributionId", value = "分销员ID", required = true, paramType = "path")
+    @GetMapping("/bindingDistribution/{distributionId}")
+    public ResultMessage<Object> bindingDistribution(@PathVariable String distributionId){
+        distributionService.bindingDistribution(distributionId);
+        return ResultUtil.success();
     }
 }

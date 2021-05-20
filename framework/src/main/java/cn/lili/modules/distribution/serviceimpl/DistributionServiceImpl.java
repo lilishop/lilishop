@@ -146,6 +146,11 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
 
     @Override
     public void bindingDistribution(String distributionId) {
+
+        //判断用户是否登录，未登录不能进行绑定
+        if(UserContext.getCurrentUser()==null){
+            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        }
         //储存分销关系为3天
         Distribution distribution = this.getById(distributionId);
         if (distribution!=null) {

@@ -66,4 +66,20 @@ public class AfterSaleManagerController {
         return ResultUtil.data(afterSaleService.refund(afterSaleSn, remark));
     }
 
+    @ApiOperation(value = "审核售后申请")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "afterSaleSn", value = "售后sn", required = true, paramType = "path"),
+            @ApiImplicitParam(name = "serviceStatus", value = "PASS：审核通过，REFUSE：审核未通过", required = true, paramType = "query"),
+            @ApiImplicitParam(name = "remark", value = "备注", paramType = "query"),
+            @ApiImplicitParam(name = "actualRefundPrice", value = "实际退款金额", paramType = "query")
+    })
+    @PutMapping(value = "/review/{afterSaleSn}")
+    public ResultMessage<AfterSale> review(@NotNull(message = "请选择售后单") @PathVariable String afterSaleSn,
+                                           @NotNull(message = "请审核") String serviceStatus,
+                                           String remark,
+                                           Double actualRefundPrice) {
+
+        return ResultUtil.data(afterSaleService.review(afterSaleSn, serviceStatus, remark,actualRefundPrice));
+    }
+
 }

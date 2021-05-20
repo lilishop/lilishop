@@ -89,7 +89,7 @@ public class CartVO extends CartBase implements Serializable {
         this.remark = "";
     }
 
-    public void add(Integer goodsNum) {
+    public void addGoodsNum(Integer goodsNum) {
         if (this.goodsNum == null) {
             this.goodsNum = goodsNum;
         } else {

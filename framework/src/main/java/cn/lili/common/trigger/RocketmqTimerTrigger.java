@@ -52,13 +52,15 @@ public class RocketmqTimerTrigger implements TimeTrigger {
         if (StringUtils.isEmpty(uniqueKey)) {
             uniqueKey = StringUtils.getRandStr(10);
         }
+        //执行任务key
         String generateKey = TimeTriggerUtil.generateKey(timeTriggerMsg.getTriggerExecutor(), timeTriggerMsg.getTriggerTime(), uniqueKey);
         this.cache.put(generateKey, 1);
+        //设置延时任务
         if (Boolean.TRUE.equals(promotionDelayQueue.addJobId(JSONUtil.toJsonStr(timeTriggerMsg), delayTime))) {
-            log.info("add Redis key {} --------------------------", generateKey);
+            log.info("add Redis key {}", generateKey);
             log.info("定时执行在【" + DateUtil.toString(timeTriggerMsg.getTriggerTime(), "yyyy-MM-dd HH:mm:ss") + "】，消费【" + timeTriggerMsg.getParam().toString() + "】");
         } else {
-            log.error("延时任务添加失败！");
+            log.error("延时任务添加失败:{}", timeTriggerMsg);
         }
     }
 
