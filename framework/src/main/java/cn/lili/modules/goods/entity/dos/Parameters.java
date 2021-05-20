@@ -34,13 +34,8 @@ public class Parameters extends BaseEntity {
     @Length(max = 50, message = "参数名称不能超过50字")
     private String paramName;
 
-    @ApiModelProperty(value = "参数类型1 输入项   2 选择项", required = true)
-    @NotNull(message = "参数类型必选")
-    @Min(value = 1, message = "参数类型传值不正确")
-    @Max(value = 2, message = "参数类型传值不正确")
-    private Integer paramType;
 
-    @ApiModelProperty(value = "选择值，当参数类型是选择项2时，必填，逗号分隔")
+    @ApiModelProperty(value = "选择值")
     private String options;
 
     @ApiModelProperty(value = "是否可索引，0 不显示 1 显示", required = true)

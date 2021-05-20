@@ -528,7 +528,7 @@ public class CartServiceImpl implements CartService {
                         break forTemplates;
                     }
                 }
-                throw new ServiceException(ResultCode.GOODS_NOT_SUPPORT, cartSkuVO.getGoodsSku().getGoodsName());
+                throw new ServiceException(ResultCode.SHIPPING_NOT_APPLY, cartSkuVO.getGoodsSku().getGoodsName());
 
             }
         }

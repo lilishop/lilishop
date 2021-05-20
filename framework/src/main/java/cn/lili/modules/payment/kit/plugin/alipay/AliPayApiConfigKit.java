@@ -2,7 +2,6 @@ package cn.lili.modules.payment.kit.plugin.alipay;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.enums.MessageCode;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.SpringContextUtil;

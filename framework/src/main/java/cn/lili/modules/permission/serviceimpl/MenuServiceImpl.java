@@ -1,6 +1,5 @@
 package cn.lili.modules.permission.serviceimpl;
 
-import cn.lili.common.enums.MessageCode;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
