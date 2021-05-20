@@ -3,14 +3,12 @@ package cn.lili.listener;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.rocketmq.tags.GoodsTagsEnum;
 import cn.lili.event.GoodsCommentCompleteEvent;
-import cn.lili.event.MemberRegisterEvent;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.FootPrint;
-import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.service.FootprintService;
 import cn.lili.modules.member.service.GoodsCollectionService;
@@ -18,7 +16,6 @@ import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.store.service.StoreService;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -96,9 +93,9 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 break;
             //商品评价
             case GOODS_COMMENT_COMPLETE:
+                MemberEvaluation memberEvaluation = JSONUtil.toBean(new String(messageExt.getBody()), MemberEvaluation.class);
                 for (GoodsCommentCompleteEvent goodsCommentCompleteEvent : goodsCommentCompleteEvents) {
                     try {
-                        MemberEvaluation memberEvaluation = JSONUtil.toBean(new String(messageExt.getBody()), MemberEvaluation.class);
                         goodsCommentCompleteEvent.goodsComment(memberEvaluation);
                     } catch (Exception e) {
                         log.error("评价{},在{}业务中，状态修改事件执行异常",
