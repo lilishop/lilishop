@@ -236,6 +236,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Override
     public Integer goodsNum(GoodsStatusEnum goodsStatusEnum, GoodsAuthEnum goodsAuthEnum) {
         LambdaQueryWrapper<Goods> queryWrapper = Wrappers.lambdaQuery();
+
+        queryWrapper.eq(Goods::getDeleteFlag,false);
+
         if (goodsStatusEnum != null) {
             queryWrapper.eq(Goods::getMarketEnable, goodsStatusEnum.name());
         }
