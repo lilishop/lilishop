@@ -234,10 +234,15 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     public Integer goodsNum(GoodsStatusEnum goodsStatusEnum, GoodsAuthEnum goodsAuthEnum) {
         LambdaQueryWrapper<Goods> queryWrapper = Wrappers.lambdaQuery();
 
-        queryWrapper.eq(Goods::getDeleteFlag,false)
-                .eq(goodsStatusEnum != null,Goods::getMarketEnable, goodsStatusEnum.name())
-                .eq(goodsAuthEnum != null,Goods::getIsAuth, goodsAuthEnum.name())
-                .eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
+        queryWrapper.eq(Goods::getDeleteFlag,false);
+
+        if (goodsStatusEnum != null) {
+            queryWrapper.eq(Goods::getMarketEnable, goodsStatusEnum.name());
+        }
+        if (goodsAuthEnum != null) {
+            queryWrapper.eq(Goods::getIsAuth, goodsAuthEnum.name());
+        }
+        queryWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
                 Goods::getStoreId, UserContext.getCurrentUser().getStoreId());
 
         return this.count(queryWrapper);

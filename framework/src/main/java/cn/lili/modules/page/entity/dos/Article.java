@@ -1,7 +1,6 @@
 package cn.lili.modules.page.entity.dos;
 
 import cn.lili.base.BaseEntity;
-import cn.lili.common.enums.SwitchEnum;
 import cn.lili.modules.page.entity.enums.ArticleEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -45,11 +44,8 @@ public class Article extends BaseEntity {
     @NotEmpty(message = "文章内容不能为空")
     private String content;
 
-    /**
-     * @see SwitchEnum
-     */
-    @ApiModelProperty(value = "状态", allowableValues = "OPEN,CLOSE")
-    private String openStatus;
+    @ApiModelProperty(value = "状态")
+    private Boolean openStatus;
     /**
      * @see ArticleEnum
      */
