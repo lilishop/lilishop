@@ -139,7 +139,7 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         //获取总会员数量
         indexStatisticsVO.setMemberNum(memberStatisticsDataService.getMemberCount());
         //获取总上架商品数量
-        indexStatisticsVO.setGoodsNum(goodsService.goodsNum(GoodsStatusEnum.UPPER, null));
+        indexStatisticsVO.setGoodsNum(goodsService.goodsNum(GoodsStatusEnum.UPPER, GoodsAuthEnum.PASS));
         //获取总店铺数量
         indexStatisticsVO.setStoreNum(storeService.storeNum());
 

@@ -10,7 +10,6 @@ import org.springframework.util.CollectionUtils;
 import javax.annotation.PostConstruct;
 import java.util.Calendar;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -40,6 +39,9 @@ public abstract class AbstractDelayQueueMachineFactory {
 
     }
 
+    /**
+     * 延时队列机器开始运作
+     */
     private void startDelayQueueMachine() {
         log.info(String.format("延时队列机器{%s}开始运作", setDelayQueueName()));
 
@@ -64,11 +66,11 @@ public abstract class AbstractDelayQueueMachineFactory {
                 }
 
             } catch (Exception e) {
-//                log.warn(String.format("处理延时任务发生异常,异常原因为{%s}", e.getMessage()), e);
+                log.error(String.format("处理延时任务发生异常,异常原因为{%s}", e.getMessage()), e);
             } finally {
                 // 间隔一秒钟搞一次
                 try {
-                    TimeUnit.SECONDS.sleep(1L);
+                    TimeUnit.SECONDS.sleep(5L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
