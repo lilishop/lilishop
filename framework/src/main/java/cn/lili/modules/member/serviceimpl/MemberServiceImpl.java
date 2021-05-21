@@ -401,6 +401,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 currentExperience = CurrencyUtil.sub(member.getPoint(), experience) < 0 ? 0 : new Double(CurrencyUtil.sub(member.getExperience(), experience)).longValue();
             }
             member.setExperience(currentExperience);
+
             return this.updateById(member);
         }
         throw new ServiceException(ResultCode.USER_NOT_EXIST);

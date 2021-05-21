@@ -78,7 +78,6 @@ public class MemberExperienceExecute implements MemberRegisterEvent, GoodsCommen
             Double point= CurrencyUtil.mul(experienceSetting.getMoney(),order.getFlowPrice(),0);
             //赠送会员经验值
             memberService.updateMemberExperience(point.longValue(), true, order.getMemberId(), "会员下单，赠送经验值" + point + "分");
-
         }
     }
 

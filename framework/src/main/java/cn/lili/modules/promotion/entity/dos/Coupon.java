@@ -20,7 +20,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "li_coupon")
 @TableName("li_coupon")
-@ApiModel(value = "优惠券活动实体类")
+@ApiModel(value = "优惠券实体类")
 public class Coupon extends BasePromotion {
 
 
@@ -35,7 +35,7 @@ public class Coupon extends BasePromotion {
      *
      * @see cn.lili.modules.promotion.entity.enums.CouponTypeEnum
      */
-    @ApiModelProperty(value = "活动类型")
+    @ApiModelProperty(value = "优惠券类型")
     private String couponType;
 
     /**
