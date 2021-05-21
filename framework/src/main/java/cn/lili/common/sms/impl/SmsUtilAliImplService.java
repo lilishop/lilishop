@@ -54,38 +54,54 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
     @Override
     public void sendSmsCode(String mobile, VerificationEnums verificationEnums, String uuid) {
 
+        //验证码
         String code = CommonUtil.getRandomNum();
 
-        switch (verificationEnums) {
-            //如果某个模版需要自定义，则在此处进行调整
-            case LOGIN:
-            case REGISTER:
-            case FIND_USER: {
+        //准备发送短信参数
+        Map<String, String> params = new HashMap<>();
+        // 验证码内容
+        params.put("code", code);
 
-                //准备发送短信参数
-                Map<String, String> params = new HashMap<>();
-                params.put("code", code);
-                cache.put(cacheKey(verificationEnums, mobile, uuid), code, 300L);
-                this.sendSmsCode("北京宏业汇成科技有限公司", mobile, params, "SMS_205755300");
+        //模版 默认为登录验证
+        String templateCode;
+
+        //如果某个模版需要自定义，则在此处进行调整
+        switch (verificationEnums) {
+            //登录
+            case LOGIN: {
+                templateCode = "SMS_205755300";
                 break;
             }
+            //注册
+            case REGISTER: {
+                templateCode = "SMS_205755298";
+                break;
+            }
+            //找回密码
+            case FIND_USER: {
+                templateCode = "SMS_205755301";
+                break;
+            }
+            //修改密码
             case UPDATE_PASSWORD: {
                 Member member = memberService.getById(UserContext.getCurrentUser().getId());
                 if (member == null || StringUtil.isEmpty(member.getMobile())) {
                     return;
                 }
-                String memberMobile = member.getMobile();
-                //准备发送短信参数
-                Map<String, String> params = new HashMap<>();
-                params.put("code", code);
-                cache.put(cacheKey(verificationEnums, memberMobile, uuid), code, 300L);
-                this.sendSmsCode("北京宏业汇成科技有限公司", mobile, params, "SMS_205755297");
+                //更新为用户最新手机号
+                mobile = member.getMobile();
+                templateCode = "SMS_205755297";
                 break;
             }
             //如果不是有效的验证码手段，则此处不进行短信操作
             default:
                 return;
         }
+        //缓存中写入要验证的信息
+        cache.put(cacheKey(verificationEnums, mobile, uuid), code, 300L);
+
+        this.sendSmsCode("北京宏业汇成科技有限公司", mobile, params, templateCode);
+
     }
 
     @Override
