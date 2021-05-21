@@ -269,6 +269,9 @@ public class CartServiceImpl implements CartService {
             }
         }
         cartSkuVOS.removeAll(deleteVos);
+        // 清除选择的优惠券
+        tradeDTO.setPlatformCoupon(null);
+        tradeDTO.setStoreCoupons(null);
         // 清除添加过的备注
         tradeDTO.setStoreRemark(null);
         cache.put(this.getOriginKey(tradeDTO.getCartTypeEnum()), tradeDTO);
@@ -291,7 +294,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public TradeDTO getCheckedTradeDTO(CartTypeEnum way) {
-        return tradeBuilder.buildTrade(way);
+        return this.readDTO(way);
     }
 
     /**
@@ -440,7 +443,9 @@ public class CartServiceImpl implements CartService {
      */
     @Override
     public Long getCartNum(Boolean checked) {
+        //构建购物车
         TradeDTO tradeDTO = this.getCheckedTradeDTO(CartTypeEnum.CART);
+        //过滤sku列表
         List<CartSkuVO> collect = tradeDTO.getSkuList().stream().filter(i -> Boolean.FALSE.equals(i.getInvalid())).collect(Collectors.toList());
         long count = 0L;
         if (!tradeDTO.getSkuList().isEmpty()) {
@@ -455,12 +460,17 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void selectCoupon(String couponId, String way, boolean use) {
+        //获取购物车，然后重新写入优惠券
         CartTypeEnum cartTypeEnum = getCartType(way);
-        TradeDTO tradeDTO = tradeBuilder.buildTrade(cartTypeEnum);
+        TradeDTO tradeDTO = this.readDTO(cartTypeEnum);
 
-        MemberCoupon memberCoupon = memberCouponService.getOne(new LambdaQueryWrapper<MemberCoupon>().eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name()).eq(MemberCoupon::getId, couponId));
+        MemberCoupon memberCoupon =
+                memberCouponService.getOne(
+                        new LambdaQueryWrapper<MemberCoupon>()
+                                .eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name())
+                                .eq(MemberCoupon::getId, couponId));
         if (memberCoupon == null) {
-            throw new ServiceException("当前优惠券可用数量不足");
+            throw new ServiceException(ResultCode.COUPON_EXPIRED);
         }
         //使用优惠券 与否
         if (use && checkCoupon(memberCoupon, tradeDTO)) {
@@ -534,6 +544,12 @@ public class CartServiceImpl implements CartService {
         }
     }
 
+    /**
+     * 获取购物车类型
+     *
+     * @param way
+     * @return
+     */
     private CartTypeEnum getCartType(String way) {
         //默认购物车
         CartTypeEnum cartTypeEnum = CartTypeEnum.CART;

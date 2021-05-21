@@ -117,7 +117,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
                 promotionMessage,
                 coupon.getStartTime().getTime(), couponVO.getStartTime().getTime(),
                 DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                DateUtil.getDelayTime(coupon.getStartTime().getTime()),
+                DateUtil.getDelayTime(couponVO.getStartTime().getTime()),
                 rocketmqCustomProperties.getPromotionTopic());
         return couponVO;
     }

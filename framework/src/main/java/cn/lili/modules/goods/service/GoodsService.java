@@ -122,4 +122,11 @@ public interface GoodsService extends IService<Goods> {
      * @param quantity 库存数量
      */
     void updateStock(String goodsId, Integer quantity);
+
+    /**
+     * 更新SKU评价数量
+     *
+     * @param goodsId  商品ID
+     */
+    void updateGoodsCommentNum(String goodsId);
 }

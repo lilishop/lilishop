@@ -92,7 +92,11 @@ public class TradeBuilder {
         tradeDTO.setSkuList(collect);
         //按照计划进行渲染
         for (int index : defaultRender) {
-            cartRenderSteps.get(index).render(tradeDTO);
+            try {
+                cartRenderSteps.get(index).render(tradeDTO);
+            } catch (Exception e) {
+                log.error("购物车渲染异常：", e);
+            }
         }
         List<CartVO> cartVOList = new ArrayList<>();
         for (CartVO i : tradeDTO.getCartList()) {

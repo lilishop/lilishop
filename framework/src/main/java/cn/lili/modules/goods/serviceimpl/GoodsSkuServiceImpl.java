@@ -413,18 +413,15 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         goodsSku.setCommentNum(goodsSku.getCommentNum() != null ? goodsSku.getCommentNum() + 1 : 1);
 
         // 好评率
-        double grade = NumberUtil.div(highPraiseNum, goodsSku.getCommentNum().doubleValue(), 2) * 100;
+        double grade = NumberUtil.mul(NumberUtil.div(highPraiseNum, goodsSku.getCommentNum().doubleValue(), 2), 100);
         goodsSku.setGrade(grade);
         //修改规格
         this.update(goodsSku);
         //修改规格索引
         goodsIndexService.updateIndexCommentNum(goodsSku.getId(), goodsSku.getCommentNum(), (int) highPraiseNum, grade);
 
-        //修改商品评价数量
-        Goods goods = goodsService.getById(goodsSku.getGoodsId());
-        goods.setCommentNum(goods.getCommentNum() + 1);
-        goodsService.updateById(goods);
-
+        //修改商品的评价数量
+        goodsService.updateGoodsCommentNum(goodsSku.getGoodsId());
     }
 
     /**
@@ -444,8 +441,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                     goodsIndexService.addIndex(goodsIndex);
                 } else if (goodsSku.getQuantity() > 0 && esGoodsOld != null) {
                     goodsIndexService.updateIndex(goodsIndex);
-                } else if (goodsSku.getQuantity() <= 0 && esGoodsOld != null) {
-                    goodsIndexService.deleteIndexById(goodsSku.getId());
                 }
                 //删除sku缓存
                 cache.remove(GoodsSkuService.getCacheKeys(goodsSku.getId()));

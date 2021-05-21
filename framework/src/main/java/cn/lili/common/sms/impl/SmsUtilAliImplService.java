@@ -53,39 +53,61 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
 
     @Override
     public void sendSmsCode(String mobile, VerificationEnums verificationEnums, String uuid) {
+        //获取短信配置
+        Setting setting = settingService.get(SettingEnum.SMS_SETTING.name());
+        if (StrUtil.isBlank(setting.getSettingValue())) {
+            throw new ServiceException("您还未配置阿里云短信");
+        }
+        SmsSetting smsSetting = new Gson().fromJson(setting.getSettingValue(), SmsSetting.class);
 
+        //验证码
         String code = CommonUtil.getRandomNum();
 
-        switch (verificationEnums) {
-            //如果某个模版需要自定义，则在此处进行调整
-            case LOGIN:
-            case REGISTER:
-            case FIND_USER: {
+        //准备发送短信参数
+        Map<String, String> params = new HashMap<>();
+        // 验证码内容
+        params.put("code", code);
 
-                //准备发送短信参数
-                Map<String, String> params = new HashMap<>();
-                params.put("code", code);
-                cache.put(cacheKey(verificationEnums, mobile, uuid), code, 300L);
-                this.sendSmsCode("北京宏业汇成科技有限公司", mobile, params, "SMS_205755300");
+        //模版 默认为登录验证
+        String templateCode;
+
+        //如果某个模版需要自定义，则在此处进行调整
+        switch (verificationEnums) {
+            //登录
+            case LOGIN: {
+                templateCode = "SMS_205755300";
                 break;
             }
+            //注册
+            case REGISTER: {
+                templateCode = "SMS_205755298";
+                break;
+            }
+            //找回密码
+            case FIND_USER: {
+                templateCode = "SMS_205755301";
+                break;
+            }
+            //修改密码
             case UPDATE_PASSWORD: {
                 Member member = memberService.getById(UserContext.getCurrentUser().getId());
                 if (member == null || StringUtil.isEmpty(member.getMobile())) {
                     return;
                 }
-                String memberMobile = member.getMobile();
-                //准备发送短信参数
-                Map<String, String> params = new HashMap<>();
-                params.put("code", code);
-                cache.put(cacheKey(verificationEnums, memberMobile, uuid), code, 300L);
-                this.sendSmsCode("北京宏业汇成科技有限公司", mobile, params, "SMS_205755297");
+                //更新为用户最新手机号
+                mobile = member.getMobile();
+                templateCode = "SMS_205755297";
                 break;
             }
             //如果不是有效的验证码手段，则此处不进行短信操作
             default:
                 return;
         }
+        //缓存中写入要验证的信息
+        cache.put(cacheKey(verificationEnums, mobile, uuid), code, 300L);
+        //发送短信
+        this.sendSmsCode(smsSetting.getSignName(), mobile, params, templateCode);
+
     }
 
     @Override
@@ -309,7 +331,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
      */
     public com.aliyun.dysmsapi20170525.Client createClient() {
         try {
-            Setting setting = settingService.getById(SettingEnum.SMS_SETTING.name());
+            Setting setting = settingService.get(SettingEnum.SMS_SETTING.name());
             if (StrUtil.isBlank(setting.getSettingValue())) {
                 throw new ServiceException("您还未配置阿里云短信");
             }
@@ -317,11 +339,9 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
 
             Config config = new Config();
             // 您的AccessKey ID
-            //config.accessKeyId = smsSetting.getAccessKeyId();
-            config.accessKeyId = "LTAI4G4deX59EyjpEULaJdsU";
+            config.accessKeyId = smsSetting.getAccessKeyId();
             // 您的AccessKey Secret
-            //config.accessKeySecret = smsSetting.getAccessSecret();
-            config.accessKeySecret = "BlRBpl7WBman6GYYwLKMiKqMTXFhWf";
+            config.accessKeySecret = smsSetting.getAccessSecret();
             // 访问的域名
             config.endpoint = "dysmsapi.aliyuncs.com";
             return new com.aliyun.dysmsapi20170525.Client(config);

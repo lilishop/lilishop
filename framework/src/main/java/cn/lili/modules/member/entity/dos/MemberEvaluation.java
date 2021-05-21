@@ -81,7 +81,7 @@ public class MemberEvaluation extends BaseEntity {
     private String content;
 
     @ApiModelProperty(value = "评价图片")
-    private String image;
+    private String images;
 
     @NotNull
     @ApiModelProperty(value = "状态  OPEN 正常 ,CLOSE 关闭 ")

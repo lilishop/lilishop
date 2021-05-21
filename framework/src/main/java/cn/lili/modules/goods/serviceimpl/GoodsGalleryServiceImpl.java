@@ -59,7 +59,7 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
     public GoodsGallery getGoodsGallery(String origin) {
         GoodsGallery goodsGallery = new GoodsGallery();
         //获取商品系统配置决定是否审核
-        Setting setting = settingService.getById(SettingEnum.GOODS_SETTING.name());
+        Setting setting = settingService.get(SettingEnum.GOODS_SETTING.name());
         GoodsSetting goodsSetting = JSONUtil.toBean(setting.getSettingValue(), GoodsSetting.class);
         //缩略图
         String thumbnail = fileManagerPlugin.getUrl(origin, goodsSetting.getAbbreviationPictureWidth(), goodsSetting.getAbbreviationPictureHeight());

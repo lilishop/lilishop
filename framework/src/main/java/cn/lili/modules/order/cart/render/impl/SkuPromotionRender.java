@@ -19,7 +19,6 @@ import cn.lili.modules.promotion.entity.dto.PromotionPriceParamDTO;
 import cn.lili.modules.promotion.entity.dto.StorePromotionPriceDTO;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.service.PromotionPriceService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -27,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -151,29 +151,26 @@ public class SkuPromotionRender implements CartRenderStep {
 
         for (CartVO cartVO : tradeDTO.getCartList()) {
             // 根据店铺分配店铺价格计算结果
-            List<StorePromotionPriceDTO> collect = promotionPrice.getStorePromotionPriceList().parallelStream().map(i -> i.getStoreId().equals(cartVO.getStoreId()) ? i : null).collect(Collectors.toList());
-            if (!collect.isEmpty() && collect.get(0) != null) {
-                StorePromotionPriceDTO storePromotionPriceDTO = collect.get(0);
+            Optional<StorePromotionPriceDTO> storePromotionPriceDTOOptional = promotionPrice.getStorePromotionPriceList().parallelStream().filter(i -> i.getStoreId().equals(cartVO.getStoreId())).findAny();
+            if (storePromotionPriceDTOOptional.isPresent()) {
+                StorePromotionPriceDTO storePromotionPriceDTO = storePromotionPriceDTOOptional.get();
                 // 根据商品分配商品结果计算结果
                 this.distributionSkuPromotionPrice(cartVO.getSkuList(), storePromotionPriceDTO);
 
-                if (storePromotionPriceDTO != null) {
-                    PriceDetailDTO sSpd = new PriceDetailDTO();
-                    PriceDetailVO sPd = new PriceDetailVO();
-                    sSpd.setGoodsPrice(storePromotionPriceDTO.getTotalOriginPrice());
-                    sSpd.setDiscountPrice(storePromotionPriceDTO.getTotalDiscountPrice());
-                    sSpd.setCouponPrice(storePromotionPriceDTO.getTotalCouponPrice());
-                    sSpd.setPayPoint(storePromotionPriceDTO.getTotalPoints().intValue());
+                PriceDetailDTO sSpd = new PriceDetailDTO();
+                PriceDetailVO sPd = new PriceDetailVO();
+                sSpd.setGoodsPrice(storePromotionPriceDTO.getTotalOriginPrice());
+                sSpd.setDiscountPrice(storePromotionPriceDTO.getTotalDiscountPrice());
+                sSpd.setCouponPrice(storePromotionPriceDTO.getTotalCouponPrice());
+                sSpd.setPayPoint(storePromotionPriceDTO.getTotalPoints().intValue());
 
-                    sPd.setOriginalPrice(storePromotionPriceDTO.getTotalOriginPrice());
-                    sPd.setFinalePrice(storePromotionPriceDTO.getTotalFinalePrice());
-                    sPd.setDiscountPrice(storePromotionPriceDTO.getTotalDiscountPrice());
-                    sPd.setPayPoint(storePromotionPriceDTO.getTotalPoints().intValue());
-                    cartVO.setPriceDetailDTO(sSpd);
-                    cartVO.setPriceDetailVO(sPd);
-                    cartVO.setWeight(storePromotionPriceDTO.getTotalWeight());
-                }
-
+                sPd.setOriginalPrice(storePromotionPriceDTO.getTotalOriginPrice());
+                sPd.setFinalePrice(storePromotionPriceDTO.getTotalFinalePrice());
+                sPd.setDiscountPrice(storePromotionPriceDTO.getTotalDiscountPrice());
+                sPd.setPayPoint(storePromotionPriceDTO.getTotalPoints().intValue());
+                cartVO.setPriceDetailDTO(sSpd);
+                cartVO.setPriceDetailVO(sPd);
+                cartVO.setWeight(storePromotionPriceDTO.getTotalWeight());
             }
         }
 

@@ -223,7 +223,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
                     pintuanVO.getStartTime().getTime(),
                     pintuan.getStartTime().getTime(),
                     DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                    DateUtil.getDelayTime(pintuan.getStartTime().getTime()),
+                    DateUtil.getDelayTime(pintuanVO.getStartTime().getTime()),
                     rocketmqCustomProperties.getPromotionTopic());
         }
 
