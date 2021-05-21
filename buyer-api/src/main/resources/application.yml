@@ -152,9 +152,7 @@ ignored:
     - /buyer/promotion/seckill
     - /buyer/memberEvaluation/**/goodsEvaluation
     - /buyer/memberEvaluation/**/evaluationNumber
-    - /store/login/**
-    - /manager/user/login
-    - /manager/user/refresh/**
+    - /buyer/appVersion/**
     - /druid/**
     - /swagger-ui.html
     - /doc.html
