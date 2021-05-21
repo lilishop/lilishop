@@ -74,7 +74,7 @@ public class AliFileManagerPlugin implements FileManagerPlugin {
     private OssSetting getSetting() {
         //如果没有配置，或者没有下次刷新时间，或者下次刷新时间小于当前时间，则从redis 更新一次
         if (ossSetting == null || nextInitSetting == null || nextInitSetting < System.currentTimeMillis()) {
-            Setting setting = settingService.getById(SettingEnum.OSS_SETTING.name());
+            Setting setting = settingService.get(SettingEnum.OSS_SETTING.name());
             if (setting == null || StrUtil.isBlank(setting.getSettingValue())) {
                 throw new ServiceException("您还未配置阿里云OSS存储");
             }

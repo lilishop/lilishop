@@ -54,7 +54,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
     @Override
     public void sendSmsCode(String mobile, VerificationEnums verificationEnums, String uuid) {
         //获取短信配置
-        Setting setting = settingService.getById(SettingEnum.SMS_SETTING.name());
+        Setting setting = settingService.get(SettingEnum.SMS_SETTING.name());
         if (StrUtil.isBlank(setting.getSettingValue())) {
             throw new ServiceException("您还未配置阿里云短信");
         }
@@ -331,7 +331,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
      */
     public com.aliyun.dysmsapi20170525.Client createClient() {
         try {
-            Setting setting = settingService.getById(SettingEnum.SMS_SETTING.name());
+            Setting setting = settingService.get(SettingEnum.SMS_SETTING.name());
             if (StrUtil.isBlank(setting.getSettingValue())) {
                 throw new ServiceException("您还未配置阿里云短信");
             }
