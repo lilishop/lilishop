@@ -66,7 +66,12 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 Map<String, String> params = new HashMap<>();
                 params.put("code", code);
                 cache.put(cacheKey(verificationEnums, mobile, uuid), code, 300L);
-                this.sendSmsCode("北京宏业汇成科技有限公司", mobile, params, "SMS_205755300");
+                Setting setting = settingService.getById(SettingEnum.SMS_SETTING.name());
+                if (StrUtil.isBlank(setting.getSettingValue())) {
+                    throw new ServiceException("您还未配置阿里云短信");
+                }
+                SmsSetting smsSetting = new Gson().fromJson(setting.getSettingValue(), SmsSetting.class);
+                this.sendSmsCode(smsSetting.getSignName(), mobile, params, "SMS_205755300");
                 break;
             }
             case UPDATE_PASSWORD: {
@@ -317,11 +322,9 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
 
             Config config = new Config();
             // 您的AccessKey ID
-            //config.accessKeyId = smsSetting.getAccessKeyId();
-            config.accessKeyId = "LTAI4G4deX59EyjpEULaJdsU";
+            config.accessKeyId = smsSetting.getAccessKeyId();
             // 您的AccessKey Secret
-            //config.accessKeySecret = smsSetting.getAccessSecret();
-            config.accessKeySecret = "BlRBpl7WBman6GYYwLKMiKqMTXFhWf";
+            config.accessKeySecret = smsSetting.getAccessSecret();
             // 访问的域名
             config.endpoint = "dysmsapi.aliyuncs.com";
             return new com.aliyun.dysmsapi20170525.Client(config);
