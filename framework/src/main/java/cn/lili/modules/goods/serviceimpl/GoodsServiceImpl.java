@@ -2,6 +2,7 @@ package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -23,6 +24,9 @@ import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.mapper.GoodsMapper;
 import cn.lili.modules.goods.service.*;
+import cn.lili.modules.member.entity.dos.MemberEvaluation;
+import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
+import cn.lili.modules.member.service.MemberEvaluationService;
 import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.service.StoreService;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -73,12 +77,15 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     //店铺详情
     @Autowired
     private StoreService storeService;
+    @Autowired
+    private MemberEvaluationService memberEvaluationService;
     //rocketMq
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
     //rocketMq配置
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
+
 
     @Override
     public void underStoreGoods(String storeId) {
@@ -234,7 +241,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     public Integer goodsNum(GoodsStatusEnum goodsStatusEnum, GoodsAuthEnum goodsAuthEnum) {
         LambdaQueryWrapper<Goods> queryWrapper = Wrappers.lambdaQuery();
 
-        queryWrapper.eq(Goods::getDeleteFlag,false);
+        queryWrapper.eq(Goods::getDeleteFlag, false);
 
         if (goodsStatusEnum != null) {
             queryWrapper.eq(Goods::getMarketEnable, goodsStatusEnum.name());
@@ -311,6 +318,26 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         lambdaUpdateWrapper.set(Goods::getQuantity, quantity);
         lambdaUpdateWrapper.eq(Goods::getId, goodsId);
         this.update(lambdaUpdateWrapper);
+    }
+
+    @Override
+    public void updateGoodsCommentNum(String goodsId) {
+
+        //获取商品信息
+        Goods goods = this.getById(goodsId);
+        //修改商品评价数量
+        goods.setCommentNum(goods.getCommentNum() + 1);
+
+        //修改商品好评率
+        LambdaQueryWrapper<MemberEvaluation> goodEvaluationQueryWrapper = new LambdaQueryWrapper<>();
+        goodEvaluationQueryWrapper.eq(MemberEvaluation::getId, goodsId);
+        goodEvaluationQueryWrapper.eq(MemberEvaluation::getGrade, EvaluationGradeEnum.GOOD.name());
+        // 好评数量
+        int highPraiseNum = memberEvaluationService.count(goodEvaluationQueryWrapper);
+        // 好评率
+        double grade = NumberUtil.mul(NumberUtil.div(highPraiseNum, goods.getCommentNum().doubleValue(), 2), 100);
+        goods.setGrade(grade);
+        this.updateById(goods);
     }
 
     /**
