@@ -1,6 +1,8 @@
 package cn.lili.controller.other.distribution;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.distribution.entity.dos.DistributionCash;
@@ -48,9 +50,11 @@ public class DistributionCashBuyerController {
             @ApiImplicitParam(name = "price", value = "申请金额", required = true, paramType = "query", dataType = "double")
     })
     @PostMapping
-    public ResultMessage<Boolean> cash(@NotNull @ApiIgnore Double price) {
-        Boolean result = distributionCashService.cash(price);
-        return ResultUtil.data(result);
+    public ResultMessage<Object> cash(@NotNull @ApiIgnore Double price) {
+        if(distributionCashService.cash(price)){
+            return ResultUtil.success();
+        }
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "分销员提现历史")

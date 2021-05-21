@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.lucene.search.function.FunctionScoreQuery;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
@@ -256,7 +257,11 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     private NativeSearchQueryBuilder createSearchQueryBuilder(EsGoodsSearchDTO searchDTO, PageVO pageVo, boolean isAggregation) {
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
         if (pageVo != null) {
-            Pageable pageable = PageRequest.of(pageVo.getPageNumber(), pageVo.getPageSize());
+            Integer pageNumber = pageVo.getPageNumber() - 1;
+            if (pageNumber < 0) {
+                pageNumber = 0;
+            }
+            Pageable pageable = PageRequest.of(pageNumber, pageVo.getPageSize());
             //分页
             nativeSearchQueryBuilder.withPageable(pageable);
         }
@@ -336,6 +341,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             String[] props = searchDTO.getProp().split("@");
             List<String> nameList = new ArrayList<>();
             List<String> valueList = new ArrayList<>();
+            Map<String, List<String>> valueMap = new HashMap<>();
             for (String prop : props) {
                 String[] propValues = prop.split("_");
                 String name = propValues[0];
@@ -346,14 +352,29 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
                 if (!valueList.contains(value)) {
                     valueList.add(value);
                 }
-                if (isAggregation) {
-                    filterBuilder.must(QueryBuilders.nestedQuery(ATTR_PATH, QueryBuilders.termQuery(ATTR_NAME, name), ScoreMode.None));
-                    filterBuilder.should(QueryBuilders.nestedQuery(ATTR_PATH, QueryBuilders.termsQuery(ATTR_VALUE, value), ScoreMode.None));
+                // 将同一规格名下的规格值分组
+                if (!valueMap.containsKey(name)) {
+                    List<String> values = new ArrayList<>();
+                    values.add(value);
+                    valueMap.put(name, values);
                 } else {
-                    queryBuilder.must(QueryBuilders.nestedQuery(ATTR_PATH, QueryBuilders.termQuery(ATTR_NAME, name), ScoreMode.None));
-                    queryBuilder.must(QueryBuilders.nestedQuery(ATTR_PATH, QueryBuilders.wildcardQuery(ATTR_VALUE, "*" + value + "*"), ScoreMode.None));
+                    valueMap.get(name).add(value);
                 }
-
+            }
+            BoolQueryBuilder usedQueryBuilder;
+            if (isAggregation) {
+                usedQueryBuilder = filterBuilder;
+            } else {
+                usedQueryBuilder = queryBuilder;
+            }
+            // 遍历所有的规格
+            for (Map.Entry<String, List<String>> entry : valueMap.entrySet()) {
+                usedQueryBuilder.must(QueryBuilders.nestedQuery(ATTR_PATH, QueryBuilders.wildcardQuery(ATTR_NAME, "*" + entry.getKey() + "*"), ScoreMode.None));
+                BoolQueryBuilder shouldBuilder = QueryBuilders.boolQuery();
+                for (String s : entry.getValue()) {
+                    shouldBuilder.should(QueryBuilders.nestedQuery(ATTR_PATH, QueryBuilders.wildcardQuery(ATTR_VALUE, "*" + s + "*"), ScoreMode.None));
+                }
+                usedQueryBuilder.must(shouldBuilder);
             }
             searchDTO.getNotShowCol().put(ATTR_NAME_KEY, nameList);
             searchDTO.getNotShowCol().put(ATTR_VALUE_KEY, valueList);

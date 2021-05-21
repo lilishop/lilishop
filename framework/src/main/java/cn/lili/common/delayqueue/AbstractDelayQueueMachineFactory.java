@@ -35,7 +35,9 @@ public abstract class AbstractDelayQueueMachineFactory {
         Calendar instance = Calendar.getInstance();
         instance.add(Calendar.SECOND, time);
         long delaySeconds = instance.getTimeInMillis() / 1000;
-        return redisUtil.zadd(setDelayQueueName(), delaySeconds, jobId);
+        boolean result = redisUtil.zadd(setDelayQueueName(), delaySeconds, jobId);
+        log.info("redis add delay, key {}, delay time {}", setDelayQueueName(), delaySeconds);
+        return result;
 
     }
 

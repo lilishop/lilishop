@@ -2,7 +2,6 @@ package cn.lili.modules.distribution.serviceimpl;
 
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
-import cn.hutool.json.JSONUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.modules.distribution.entity.dos.Distribution;
@@ -16,9 +15,6 @@ import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.StoreFlowService;
-import cn.lili.modules.system.entity.dos.Setting;
-import cn.lili.modules.system.entity.dto.DistributionSetting;
-import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -84,50 +80,12 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
                 distributionOrder.setDistributionName(distribution.getMemberName());
 
                 //设置结算天数(解冻日期)
-                Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
-                DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
+//                Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
+//                DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
                 DateTime dateTime = new DateTime();
-                dateTime.offsetNew(DateField.DAY_OF_MONTH,distributionSetting.getCashDay());
-                distributionOrder.setSettleCycle(dateTime);
-                this.save(distributionOrder);
-            }
-            //如果包含分销商品则记录会员的分销总额
-            if(rebate!=0.0){
-                distributionService.addRebate(rebate,order.getDistributionId());
-            }
-        }
-
-    }
-    @Override
-    public void test(String orderSn) {
-
-        //根据订单编号获取订单数据
-        Order order = orderService.getBySn(orderSn);
-
-        //判断是否为分销订单，如果为分销订单则获取分销佣金
-        if (order.getDistributionId() != null) {
-            //根据订单编号获取有分销金额的店铺流水记录
-            List<StoreFlow> storeFlowList = storeFlowService.list(new LambdaQueryWrapper<StoreFlow>()
-                    .eq(StoreFlow::getOrderSn, orderSn)
-                    .isNotNull(StoreFlow::getDistributionRebate));
-            Double rebate=0.0;
-            //循环店铺流水记录判断是否包含分销商品
-            //包含分销商品则进行记录分销订单、计算分销总额
-            for (StoreFlow storeFlow : storeFlowList) {
-                rebate=CurrencyUtil.add(rebate,storeFlow.getDistributionRebate());
-                DistributionOrder distributionOrder = new DistributionOrder(storeFlow);
-                distributionOrder.setDistributionId(order.getDistributionId());
-                //分销员信息
-                Distribution distribution = distributionService.getById(order.getDistributionId());
-                distributionOrder.setDistributionName(distribution.getMemberName());
-
-                //设置结算天数(解冻日期)
-                Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
-                DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
-                DateTime dateTime = new DateTime();
-                //默认提现周期一天
+                //默认解冻1天
+//                dateTime.offsetNew(DateField.DAY_OF_MONTH,distributionSetting.getCashDay());
                 dateTime.offsetNew(DateField.DAY_OF_MONTH,1);
-                //dateTime.offsetNew(DateField.DAY_OF_MONTH,distributionSetting.getCashDay());
                 distributionOrder.setSettleCycle(dateTime);
                 this.save(distributionOrder);
             }
@@ -138,7 +96,6 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
         }
 
     }
-
     @Override
     public void cancelOrder(String orderSn) {
         this.update(new LambdaUpdateWrapper<DistributionOrder>().eq(DistributionOrder::getOrderSn, orderSn)
