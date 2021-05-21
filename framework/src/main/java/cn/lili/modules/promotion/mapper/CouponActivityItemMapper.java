@@ -1,6 +1,6 @@
 package cn.lili.modules.promotion.mapper;
 
-import cn.lili.modules.promotion.entity.dos.CouponActivity;
+import cn.lili.modules.promotion.entity.dos.CouponActivityItem;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @date: 2021/5/20 6:11 下午
  *
  */
-public interface CouponActivityItemMapper extends BaseMapper<CouponActivity> {
+public interface CouponActivityItemMapper extends BaseMapper<CouponActivityItem> {
 
 
 }

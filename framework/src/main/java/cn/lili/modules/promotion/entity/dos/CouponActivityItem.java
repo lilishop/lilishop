@@ -12,7 +12,7 @@ import javax.persistence.Table;
 /**
  * 优惠券活动实体类
  *
- * @author Chopper
+ * @author Bulbasaur
  * @date 2020-03-19 10:44 上午
  */
 @Data

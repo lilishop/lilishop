@@ -8,11 +8,12 @@ import lombok.Data;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 /**
  * 优惠券活动实体类
  *
- * @author Chopper
+ * @author Bulbasaur
  * @date 2020-03-19 10:44 上午
  */
 @Data
@@ -22,13 +23,15 @@ import javax.persistence.Table;
 @ApiModel(value = "优惠券活动实体类")
 public class CouponActivity extends BasePromotion {
 
+    @NotNull(message = "优惠券活动类型不能为空")
     @ApiModelProperty(value = "优惠券活动类型")
     private String couponActivityType;
 
+    @NotNull(message = "请选择活动范围")
     @ApiModelProperty(value = "活动范围", allowableValues = "ALL:全部会员,DESIGNATED：指定会员")
     private String activityScope;
 
-    @ApiModelProperty(value = "活动范围")
+    @ApiModelProperty(value = "活动范围详情")
     private String activityScopeInfo;
 
 }
