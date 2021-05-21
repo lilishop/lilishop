@@ -30,7 +30,7 @@ import java.util.Date;
 @Table(name = "li_app_version")
 @TableName("li_app_version")
 @ApiModel(value = "app版本控制")
-public class AppVersionDO{
+public class AppVersion {
 
     private static final long serialVersionUID = 3034686331756935L;
 
