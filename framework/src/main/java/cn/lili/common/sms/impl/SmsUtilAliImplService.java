@@ -53,6 +53,12 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
 
     @Override
     public void sendSmsCode(String mobile, VerificationEnums verificationEnums, String uuid) {
+        //获取短信配置
+        Setting setting = settingService.getById(SettingEnum.SMS_SETTING.name());
+        if (StrUtil.isBlank(setting.getSettingValue())) {
+            throw new ServiceException("您还未配置阿里云短信");
+        }
+        SmsSetting smsSetting = new Gson().fromJson(setting.getSettingValue(), SmsSetting.class);
 
         //验证码
         String code = CommonUtil.getRandomNum();
@@ -99,8 +105,8 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
         }
         //缓存中写入要验证的信息
         cache.put(cacheKey(verificationEnums, mobile, uuid), code, 300L);
-
-        this.sendSmsCode("北京宏业汇成科技有限公司", mobile, params, templateCode);
+        //发送短信
+        this.sendSmsCode(smsSetting.getSignName(), mobile, params, templateCode);
 
     }
 
@@ -333,11 +339,9 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
 
             Config config = new Config();
             // 您的AccessKey ID
-            //config.accessKeyId = smsSetting.getAccessKeyId();
-            config.accessKeyId = "LTAI4G4deX59EyjpEULaJdsU";
+            config.accessKeyId = smsSetting.getAccessKeyId();
             // 您的AccessKey Secret
-            //config.accessKeySecret = smsSetting.getAccessSecret();
-            config.accessKeySecret = "BlRBpl7WBman6GYYwLKMiKqMTXFhWf";
+            config.accessKeySecret = smsSetting.getAccessSecret();
             // 访问的域名
             config.endpoint = "dysmsapi.aliyuncs.com";
             return new com.aliyun.dysmsapi20170525.Client(config);
