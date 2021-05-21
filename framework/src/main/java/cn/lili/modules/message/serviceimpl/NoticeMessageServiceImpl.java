@@ -51,21 +51,25 @@ public class NoticeMessageServiceImpl extends ServiceImpl<NoticeMessageTemplateM
         if (noticeMessageDTO == null) {
             return;
         }
-        NoticeMessage noticeMessage = this.getOne(new LambdaQueryWrapper<NoticeMessage>().eq(NoticeMessage::getNoticeNode, noticeMessageDTO.getNoticeMessageNodeEnum().getDescription().trim()));
-        //如果通知类站内信开启的情况下
-        if (noticeMessage != null && noticeMessage.getNoticeStatus().equals(SwitchEnum.OPEN.name())) {
-            MemberNotice memberNotice = new MemberNotice();
-            memberNotice.setMemberId(noticeMessageDTO.getMemberId());
-            memberNotice.setTitle(noticeMessage.getNoticeTitle());
-            memberNotice.setContent(noticeMessage.getNoticeContent());
-            //参数不为空，替换内容
-            if (noticeMessageDTO.getParameter() != null) {
-                memberNotice.setContent(replaceNoticeContent(noticeMessage.getNoticeContent(), noticeMessageDTO.getParameter()));
-            } else {
+        try {
+            NoticeMessage noticeMessage = this.getOne(new LambdaQueryWrapper<NoticeMessage>().eq(NoticeMessage::getNoticeNode, noticeMessageDTO.getNoticeMessageNodeEnum().getDescription().trim()));
+            //如果通知类站内信开启的情况下
+            if (noticeMessage != null && noticeMessage.getNoticeStatus().equals(SwitchEnum.OPEN.name())) {
+                MemberNotice memberNotice = new MemberNotice();
+                memberNotice.setMemberId(noticeMessageDTO.getMemberId());
+                memberNotice.setTitle(noticeMessage.getNoticeTitle());
                 memberNotice.setContent(noticeMessage.getNoticeContent());
+                //参数不为空，替换内容
+                if (noticeMessageDTO.getParameter() != null) {
+                    memberNotice.setContent(replaceNoticeContent(noticeMessage.getNoticeContent(), noticeMessageDTO.getParameter()));
+                } else {
+                    memberNotice.setContent(noticeMessage.getNoticeContent());
+                }
+                //添加站内信
+                memberNoticeService.save(memberNotice);
             }
-            //添加站内信
-            memberNoticeService.save(memberNotice);
+        } catch (Exception e) {
+            log.error("站内信发送失败：", e);
         }
 
     }
