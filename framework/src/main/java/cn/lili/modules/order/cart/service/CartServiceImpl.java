@@ -269,6 +269,9 @@ public class CartServiceImpl implements CartService {
             }
         }
         cartSkuVOS.removeAll(deleteVos);
+        // 清除选择的优惠券
+        tradeDTO.setPlatformCoupon(null);
+        tradeDTO.setStoreCoupons(null);
         // 清除添加过的备注
         tradeDTO.setStoreRemark(null);
         cache.put(this.getOriginKey(tradeDTO.getCartTypeEnum()), tradeDTO);
