@@ -68,7 +68,7 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
      * @throws Exception
      */
     private Traces getOrderTracesByJson(String logisticsId, String expNo) throws Exception {
-        Setting setting = settingService.getById(SettingEnum.KUAIDI_SETTING.name());
+        Setting setting = settingService.get(SettingEnum.KUAIDI_SETTING.name());
         if (StrUtil.isBlank(setting.getSettingValue())) {
             throw new ServiceException("您还未配置快递查询");
         }
