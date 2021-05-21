@@ -17,4 +17,11 @@ public interface AppVersionService extends IService<AppVersion> {
      * @return 最新的APP版本号
      */
     AppVersion getAppVersion(String appType);
+
+    /**
+     * 检测APP版本信息
+     * @param appVersion app版本
+     * @return 是否可添加
+     */
+    boolean checkAppVersion(AppVersion appVersion);
 }

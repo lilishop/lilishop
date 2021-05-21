@@ -48,8 +48,11 @@ public class AppVersionManagerController {
     @ApiOperation(value = "添加app版本信息", response = AppVersion.class)
     @PostMapping
     public ResultMessage<Object> add(@Valid AppVersion appVersion) {
-        if(this.appVersionService.save(appVersion)){
-            return ResultUtil.success();
+
+        if(this.appVersionService.checkAppVersion(appVersion)){
+            if(this.appVersionService.save(appVersion)){
+                return ResultUtil.success();
+            }
         }
         throw new ServiceException(ResultCode.ERROR);
     }
@@ -59,9 +62,12 @@ public class AppVersionManagerController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "主键", required = true, dataType = "String", paramType = "path")
     })
-    public ResultMessage<Boolean> edit(@Valid AppVersion appVersion, @PathVariable String id) {
-        if(this.appVersionService.updateById(appVersion)){
-            return ResultUtil.success();
+    public ResultMessage<Object> edit(@Valid AppVersion appVersion, @PathVariable String id) {
+
+        if(this.appVersionService.checkAppVersion(appVersion)){
+            if(this.appVersionService.updateById(appVersion)){
+                return ResultUtil.success();
+            }
         }
         throw new ServiceException(ResultCode.ERROR);
     }

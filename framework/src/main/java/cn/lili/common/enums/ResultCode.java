@@ -296,7 +296,7 @@ public enum ResultCode {
     WECHAT_QRCODE_ERROR(80502, "微信二维码生成异常"),
     WECHAT_MP_MESSAGE_ERROR(80503, "微信小程序小消息订阅异常"),
 
-
+    APP_VERSION_EXIST(80600, "APP版本已存在")
     ;
     private final Integer code;
     private final String message;
