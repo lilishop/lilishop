@@ -126,6 +126,10 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
         if (platformCoupons != null && !platformCoupons.isEmpty()) {
             // 计算平台优惠券活动
             couponTotalPrice = CurrencyUtil.add(couponTotalPrice, this.calculationCoupon(platformCoupons, priceDTOList));
+            for (StorePromotionPriceDTO storePromotionPriceDTO : storePromotionPriceList) {
+                Double couponPrice = storePromotionPriceDTO.getGoodsSkuPromotionPriceList().parallelStream().mapToDouble(GoodsSkuPromotionPriceDTO::getCouponPrice).sum();
+                storePromotionPriceDTO.setTotalCouponPrice(couponPrice);
+            }
         }
         promotionPrice.setStorePromotionPriceList(storePromotionPriceList);
         promotionPrice.setTotalCouponPrice(couponTotalPrice);
@@ -290,17 +294,14 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
         // 合计优惠券范围内的所有商品的原价
         double totalPrice = conformCollect.parallelStream().mapToDouble(GoodsSkuPromotionPriceDTO::getOriginalPrice).sum();
 
-        double discountPrice = 0;
         // 根据优惠券优惠类型，判断是否满足条件
         if (CouponTypeEnum.PRICE.name().equals(coupon.getCouponType()) && coupon.getConsumeThreshold() <= totalPrice) {
             couponTotalPrice = CurrencyUtil.add(couponTotalPrice, coupon.getPrice());
-            discountPrice = coupon.getPrice();
         } else if (CouponTypeEnum.DISCOUNT.name().equals(coupon.getCouponType())) {
             double fullRate = coupon.getDiscount() >= 10 ? coupon.getDiscount() / 100 : coupon.getDiscount() / 10;
             double discountRatePrice = CurrencyUtil.sub(totalPrice, CurrencyUtil.mul(totalPrice, fullRate));
 
             couponTotalPrice = CurrencyUtil.add(couponTotalPrice, discountRatePrice);
-            discountPrice = discountRatePrice;
             // 消费限额判断
 //            if (coupon.getConsumeThreshold() >= discountRatePrice) {
 //                couponTotalPrice = CurrencyUtil.add(couponTotalPrice, discountRatePrice);
@@ -312,14 +313,15 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
         }
 
         // 分配到每个商品的优惠券金额
-        double distributePrice = CurrencyUtil.div(discountPrice, conformCollect.size());
         for (GoodsSkuPromotionPriceDTO goodsSkuPromotionPriceDTO : conformCollect) {
+            double rate = CurrencyUtil.div(goodsSkuPromotionPriceDTO.getFinalePrice(), totalPrice, 5);
+            double distributeCouponPrice = CurrencyUtil.mul(couponTotalPrice, rate);
             if (goodsSkuPromotionPriceDTO.getFinalePrice() != null) {
-                goodsSkuPromotionPriceDTO.setFinalePrice(CurrencyUtil.sub(goodsSkuPromotionPriceDTO.getFinalePrice(), distributePrice));
+                goodsSkuPromotionPriceDTO.setFinalePrice(CurrencyUtil.sub(goodsSkuPromotionPriceDTO.getFinalePrice(), distributeCouponPrice));
             } else {
-                goodsSkuPromotionPriceDTO.setFinalePrice(CurrencyUtil.sub(goodsSkuPromotionPriceDTO.getOriginalPrice(), distributePrice));
+                goodsSkuPromotionPriceDTO.setFinalePrice(CurrencyUtil.sub(goodsSkuPromotionPriceDTO.getOriginalPrice(), distributeCouponPrice));
             }
-            goodsSkuPromotionPriceDTO.setCouponPrice(distributePrice);
+            goodsSkuPromotionPriceDTO.setCouponPrice(distributeCouponPrice);
             goodsSkuPromotionPriceDTO.setTotalFinalePrice(CurrencyUtil.mul(goodsSkuPromotionPriceDTO.getFinalePrice(), goodsSkuPromotionPriceDTO.getNumber()));
             BasePromotion basePromotion = new BasePromotion();
             basePromotion.setId(coupon.getId());

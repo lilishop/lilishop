@@ -8,6 +8,7 @@ import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.entity.vos.PintuanVO;
 import cn.lili.modules.promotion.service.*;
+import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.timetask.handler.EveryDayExecute;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -34,6 +35,9 @@ public class PromotionEverydayExecute implements EveryDayExecute {
     //Mongo
     @Autowired
     private MongoTemplate mongoTemplate;
+    //es
+    @Autowired
+    private EsGoodsIndexService esGoodsIndexService;
     //满额活动
     @Autowired
     private FullDiscountService fullDiscountService;
@@ -74,6 +78,7 @@ public class PromotionEverydayExecute implements EveryDayExecute {
                 if (vo.getPromotionGoodsList() != null && !vo.getPromotionGoodsList().isEmpty()) {
                     for (PromotionGoods promotionGoods : vo.getPromotionGoodsList()) {
                         promotionGoods.setPromotionStatus(PromotionStatusEnum.END.name());
+                        esGoodsIndexService.deleteEsGoodsPromotionByPromotionId(promotionGoods.getSkuId(), vo.getId());
                     }
                 }
                 mongoTemplate.save(vo);
@@ -92,6 +97,7 @@ public class PromotionEverydayExecute implements EveryDayExecute {
                 if (vo.getPromotionGoodsList() != null && !vo.getPromotionGoodsList().isEmpty()) {
                     for (PromotionGoods promotionGoods : vo.getPromotionGoodsList()) {
                         promotionGoods.setPromotionStatus(PromotionStatusEnum.END.name());
+                        esGoodsIndexService.deleteEsGoodsPromotionByPromotionId(promotionGoods.getSkuId(), vo.getId());
                     }
                 }
                 mongoTemplate.save(vo);
@@ -110,6 +116,7 @@ public class PromotionEverydayExecute implements EveryDayExecute {
                 if (vo.getPromotionGoodsList() != null && !vo.getPromotionGoodsList().isEmpty()) {
                     for (PromotionGoods promotionGoods : vo.getPromotionGoodsList()) {
                         promotionGoods.setPromotionStatus(PromotionStatusEnum.END.name());
+                        esGoodsIndexService.deleteEsGoodsPromotionByPromotionId(promotionGoods.getSkuId(), vo.getId());
                     }
                 }
                 mongoTemplate.save(vo);
