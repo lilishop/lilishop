@@ -83,11 +83,4 @@ class SeckillTest {
         Assertions.assertTrue(true);
     }
 
-
-    @Test
-    void audit() {
-        seckillApplyService.auditBatchApply(new String[]{"1327169604003061760"}, "123456", PromotionApplyStatusEnum.PASS.name(), "");
-        Assertions.assertTrue(true);
-    }
-
 }

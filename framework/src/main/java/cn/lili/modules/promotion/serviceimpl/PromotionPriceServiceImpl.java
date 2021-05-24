@@ -33,7 +33,7 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
     //ES商品
     @Autowired
     private EsGoodsSearchService goodsSearchService;
-    //限时抢购申请
+    //秒杀活动申请
     @Autowired
     private SeckillApplyService seckillApplyService;
     //促销商品
@@ -180,7 +180,7 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
     }
 
     /**
-     * 促销计算(限时抢购，拼团)
+     * 促销计算(秒杀活动，拼团)
      *
      * @param promotionMap           当前商品所有参加的促销活动
      * @param goodsSkuPromotionPrice 商品SKU促销计算信息
@@ -189,11 +189,11 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
      */
     private void calculationPromotionMap(Map<String, Object> promotionMap, GoodsSkuPromotionPriceDTO goodsSkuPromotionPrice, EsGoodsIndex esGoodsIndex, String pintuanId) {
         if (promotionMap != null && !promotionMap.isEmpty()) {
-            // 检查当前商品是否存在限时抢购活动
+            // 检查当前商品是否存在秒杀活动活动
             Optional<String> existSeckill = promotionMap.keySet().parallelStream().filter(i -> i.contains(PromotionTypeEnum.SECKILL.name())).findFirst();
             if (existSeckill.isPresent()) {
                 Seckill seckill = (Seckill) promotionMap.get(existSeckill.get());
-                // 计算限时抢购促销
+                // 计算秒杀活动促销
                 this.calculationSeckill(seckill, goodsSkuPromotionPrice);
                 seckill.setPromotionName(PromotionTypeEnum.SECKILL.name());
                 goodsSkuPromotionPrice.getJoinPromotion().add(seckill);
@@ -338,9 +338,9 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
     }
 
     /**
-     * 计算限时抢购
+     * 计算秒杀活动
      *
-     * @param seckill        限时抢购信息
+     * @param seckill        秒杀活动信息
      * @param promotionPrice 商品SKU的计算促销信息
      */
     private void calculationSeckill(Seckill seckill, GoodsSkuPromotionPriceDTO promotionPrice) {
@@ -358,7 +358,7 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
                     promotionPrice.setDiscountPrice(discountPrice);
                     promotionPrice.setFinalePrice(seckillApply.getPrice());
                 } else {
-                    log.error("购买数量超出限时抢购剩余数量");
+                    log.error("购买数量超出秒杀活动剩余数量");
                 }
             }
         }

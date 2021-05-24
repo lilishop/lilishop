@@ -27,8 +27,8 @@ import org.springframework.web.bind.annotation.*;
  * @date: 2021/5/21 7:11 下午
  */
 @RestController
-@Api(tags = "管理端,优惠券接口")
-@RequestMapping("/manager/promotion/coupon")
+@Api(tags = "管理端,优惠券活动接口")
+@RequestMapping("/manager/promotion/couponActivity")
 public class CouponActivityManagerController {
 
     @Autowired

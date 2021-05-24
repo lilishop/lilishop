@@ -4,7 +4,7 @@ import cn.lili.modules.promotion.entity.dos.Seckill;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
- * 限时抢购数据处理层
+ * 秒杀活动数据处理层
  *
  * @author Chopper
  * @date 2020/8/21

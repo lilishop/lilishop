@@ -29,6 +29,8 @@ public enum SettingEnum {
     POINT_SETTING,
     //经验值设置
     EXPERIENCE_SETTING,
+    //经验值设置
+    SECKILL_SETTING,
 
     //微信 联合登陆设置
     WECHAT_CONNECT,

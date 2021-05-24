@@ -1,11 +1,16 @@
 package cn.lili.modules.promotion.entity.dos;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.lili.modules.promotion.entity.dto.BasePromotion;
+import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -13,7 +18,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**
- * 限时抢购实体类
+ * 秒杀活动实体类
  *
  * @author Chopper
  * @date 2020-03-19 10:44 上午
@@ -22,7 +27,8 @@ import java.util.Date;
 @Entity
 @Table(name = "li_seckill")
 @TableName("li_seckill")
-@ApiModel(value = "限时抢购活动")
+@ApiModel(value = "秒杀活动活动")
+@NoArgsConstructor
 public class Seckill extends BasePromotion {
 
     private static final long serialVersionUID = -9116425737163730836L;
@@ -44,4 +50,30 @@ public class Seckill extends BasePromotion {
      */
     @ApiModelProperty(value = "商家id集合以逗号分隔")
     private String storeIds;
+
+    @ApiModelProperty(value = "商品数量")
+    private Integer goodsNum;
+
+    @ApiModelProperty(value = "店铺数量")
+    private Integer storeNum;
+
+    public Seckill(String hours,String seckillRule){
+        //默认创建30天后的秒杀活动
+        DateTime dateTime= DateUtil.beginOfDay(DateUtil.offset(new DateTime(), DateField.DAY_OF_YEAR, 30));
+        this.applyEndTime=dateTime;
+        this.hours=hours;
+        this.seckillRule=seckillRule;
+        this.goodsNum=0;
+        this.storeNum=0;
+
+        //BasePromotion
+        setStoreName("platform");
+        setStoreId("platform");
+        setPromotionName(DateUtil.formatDate(dateTime)+" 秒杀活动");
+        setStartTime(dateTime);
+        setEndTime(DateUtil.endOfDay(dateTime));
+        setPromotionStatus(PromotionStatusEnum.NEW.name());
+
+
+    }
 }

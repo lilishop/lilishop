@@ -22,13 +22,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 店铺端,限时抢购接口
+ * 店铺端,秒杀活动接口
  *
  * @author paulG
  * @date 2020/8/26
  **/
 @RestController
-@Api(tags = "店铺端,限时抢购接口")
+@Api(tags = "店铺端,秒杀活动接口")
 @RequestMapping("/store/promotion/seckill")
 public class SeckillStoreController {
     @Autowired
@@ -37,14 +37,14 @@ public class SeckillStoreController {
     private SeckillApplyService seckillApplyService;
 
     @GetMapping
-    @ApiOperation(value = "获取限时抢购列表")
+    @ApiOperation(value = "获取秒杀活动列表")
     public ResultMessage<IPage<SeckillVO>> getSeckillPage(SeckillSearchParams queryParam, PageVO pageVo) {
         IPage<SeckillVO> seckillPage = seckillService.getSeckillByPageFromMongo(queryParam, pageVo);
         return ResultUtil.data(seckillPage);
     }
 
     @GetMapping("/apply")
-    @ApiOperation(value = "获取限时抢购申请列表")
+    @ApiOperation(value = "获取秒杀活动申请列表")
     public ResultMessage<IPage<SeckillApply>> getSeckillApplyPage(SeckillSearchParams queryParam, PageVO pageVo) {
         String storeId = UserContext.getCurrentUser().getStoreId();
         queryParam.setStoreId(storeId);
@@ -53,19 +53,19 @@ public class SeckillStoreController {
     }
 
     @GetMapping("/{seckillId}")
-    @ApiOperation(value = "获取限时抢购")
+    @ApiOperation(value = "获取秒杀活动")
     public ResultMessage<Seckill> getSeckill(@PathVariable String seckillId) {
         return ResultUtil.data(seckillService.getSeckillByIdFromMongo(seckillId));
     }
 
     @GetMapping("/apply/{seckillApplyId}")
-    @ApiOperation(value = "获取限时抢购申请")
+    @ApiOperation(value = "获取秒杀活动申请")
     public ResultMessage<SeckillApply> getSeckillApply(@PathVariable String seckillApplyId) {
         return ResultUtil.data(seckillApplyService.getById(seckillApplyId));
     }
 
     @PostMapping(path = "/apply/{seckillId}", consumes = "application/json", produces = "application/json")
-    @ApiOperation(value = "添加限时抢购申请")
+    @ApiOperation(value = "添加秒杀活动申请")
     public ResultMessage<String> addSeckillApply(@PathVariable String seckillId, @RequestBody List<SeckillApplyVO> applyVos) {
         String storeId = UserContext.getCurrentUser().getStoreId();
         seckillApplyService.addSeckillApply(seckillId, storeId, applyVos);
@@ -73,7 +73,7 @@ public class SeckillStoreController {
     }
 
     @DeleteMapping("/apply/{seckillId}/{ids}")
-    @ApiOperation(value = "删除限时抢购申请")
+    @ApiOperation(value = "删除秒杀活动申请")
     public ResultMessage<String> deleteSeckillApply(@PathVariable("seckillId") String seckillId, @PathVariable("ids") String ids) {
         String[] idsSplit = ids.split(",");
         seckillApplyService.removeSeckillApplyByIds(seckillId, Arrays.asList(idsSplit));

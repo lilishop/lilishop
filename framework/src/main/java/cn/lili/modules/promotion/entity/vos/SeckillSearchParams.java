@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.regex.Pattern;
 
 /**
- * 限时抢购查询通用类
+ * 秒杀活动查询通用类
  *
  * @author paulG
  * @date 2020/8/21
@@ -27,7 +27,7 @@ public class SeckillSearchParams implements Serializable {
 
     private static final long serialVersionUID = -4052716630253333681L;
 
-    @ApiModelProperty(value = "限时抢购活动编号")
+    @ApiModelProperty(value = "秒杀活动活动编号")
     private String seckillId;
 
     @ApiModelProperty(value = "活动名称")

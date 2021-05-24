@@ -505,11 +505,11 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
                 }
                 // 查询是否在同一时间段参与了拼团活动
                 Integer count = promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.SECKILL.name(), promotionGood.getSkuId(), pintuan.getStartTime(), pintuan.getEndTime());
-                // 查询是否在同一时间段参与了限时抢购活动
+                // 查询是否在同一时间段参与了秒杀活动活动
                 count += promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.PINTUAN.name(), promotionGood.getSkuId(), pintuan.getStartTime(), pintuan.getEndTime());
                 if (count > 0) {
-                    log.error("商品[" + promotionGood.getGoodsName() + "]已经在重叠的时间段参加了限时抢购或拼团活动，不能参加拼团活动");
-                    throw new ServiceException("商品[" + promotionGood.getGoodsName() + "]已经在重叠的时间段参加了限时抢购或拼团活动，不能参加拼团活动");
+                    log.error("商品[" + promotionGood.getGoodsName() + "]已经在重叠的时间段参加了秒杀活动或拼团活动，不能参加拼团活动");
+                    throw new ServiceException("商品[" + promotionGood.getGoodsName() + "]已经在重叠的时间段参加了秒杀活动或拼团活动，不能参加拼团活动");
                 }
             }
             LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();

@@ -121,7 +121,7 @@ public class PromotionServiceImpl implements PromotionService {
         queryWrapper.eq("promotion_status", PromotionStatusEnum.START.name());
         queryWrapper.gt("start_time", new Date());
         queryWrapper.lt("end_time", new Date());
-        // 获取当前进行的限时抢购活动
+        // 获取当前进行的秒杀活动活动
         List<Seckill> seckillList = seckillService.list(queryWrapper);
         if (seckillList != null && !seckillList.isEmpty()) {
             for (Seckill seckill : seckillList) {
@@ -375,7 +375,7 @@ public class PromotionServiceImpl implements PromotionService {
                     parseEndTime = cn.hutool.core.date.DateUtil.parse((format + " " + nextHour + ":59:59"), DateUtil.STANDARD_FORMAT);
                 }
                 seckill1.setStartTime(parseStartTime);
-                // 当时商品的限时抢购活动结束时间为下个时间段的开始
+                // 当时商品的秒杀活动活动结束时间为下个时间段的开始
                 seckill1.setEndTime(parseEndTime);
                 this.goodsIndexService.updateEsGoodsIndex(seckillApply.getSkuId(), seckill1, promotionTypeEnum.name() + "-" + seckillApply.getTimeLine(), seckillApply.getPrice());
             }
