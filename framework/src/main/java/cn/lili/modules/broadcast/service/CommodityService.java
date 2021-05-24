@@ -3,6 +3,8 @@ package cn.lili.modules.broadcast.service;
 import cn.lili.modules.broadcast.entity.dos.Commodity;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * 直播商品业务层
  *
@@ -15,7 +17,7 @@ public interface CommodityService extends IService<Commodity> {
      * 添加直播商品
      * @return 添加结果
      */
-    boolean addCommodity(Commodity commodity);
+    boolean addCommodity(List<Commodity> commodity);
 
     /**
      * 删除直播商品

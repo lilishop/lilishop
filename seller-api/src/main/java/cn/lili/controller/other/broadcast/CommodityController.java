@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 店铺端,直播商品接口
  *
@@ -37,8 +39,8 @@ public class CommodityController {
 
     @ApiOperation(value = "添加店铺直播商品")
     @PostMapping
-    public ResultMessage<Object> addCommodity(@Validated Commodity commodity) {
-        if (commodityService.addCommodity(commodity)) {
+    public ResultMessage<Object> addCommodity(@Validated List<Commodity> commodityList) {
+        if (commodityService.addCommodity(commodityList)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
         throw new ServiceException(ResultCode.ERROR);

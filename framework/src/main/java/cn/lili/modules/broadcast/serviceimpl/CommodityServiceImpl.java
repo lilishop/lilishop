@@ -27,12 +27,14 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
     private WechatLivePlayerUtil wechatLivePlayerUtil;
 
     @Override
-    public boolean addCommodity(Commodity commodity) {
-        JSONObject json = wechatLivePlayerUtil.addGoods(commodity);
-        commodity.setLiveGoodsId(Convert.toInt(json.getStr("goodsId")));
-        commodity.setAuditId(json.getStr("auditId"));
-        commodity.setStoreId(UserContext.getCurrentUser().getStoreId());
-        return this.save(commodity);
+    public boolean addCommodity(List<Commodity> commodityList) {
+        for (Commodity commodity:commodityList) {
+            JSONObject json = wechatLivePlayerUtil.addGoods(commodity);
+            commodity.setLiveGoodsId(Convert.toInt(json.getStr("goodsId")));
+            commodity.setAuditId(json.getStr("auditId"));
+            commodity.setStoreId(UserContext.getCurrentUser().getStoreId());
+        }
+        return this.saveBatch(commodityList);
     }
 
     @Override
