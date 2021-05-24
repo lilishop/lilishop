@@ -132,11 +132,13 @@ public class PromotionServiceImpl implements PromotionService {
                 pintuanVO.setPromotionStatus(promotionMessage.getPromotionStatus());
                 result = this.pintuanService.update(promotionMessage.updateWrapper());
                 this.promotionGoodsService.updateBatchById(pintuanVO.getPromotionGoodsList());
-                List<PromotionGoods> promotionGoodsList = pintuanVO.getPromotionGoodsList();
-                // 更新促销商品索引
-                for (PromotionGoods promotionGoods : promotionGoodsList) {
-                    Pintuan pintuan1 = JSONUtil.toBean(JSONUtil.toJsonStr(pintuanVO), Pintuan.class);
-                    this.goodsIndexService.updateEsGoodsIndex(promotionGoods.getSkuId(), pintuan1, esPromotionKey, promotionGoods.getPrice());
+                if (pintuanVO.getPromotionGoodsList() != null) {
+                    List<PromotionGoods> promotionGoodsList = pintuanVO.getPromotionGoodsList();
+                    // 更新促销商品索引
+                    for (PromotionGoods promotionGoods : promotionGoodsList) {
+                        Pintuan pintuan1 = JSONUtil.toBean(JSONUtil.toJsonStr(pintuanVO), Pintuan.class);
+                        this.goodsIndexService.updateEsGoodsIndex(promotionGoods.getSkuId(), pintuan1, esPromotionKey, promotionGoods.getPrice());
+                    }
                 }
                 this.mongoTemplate.save(pintuanVO);
                 break;

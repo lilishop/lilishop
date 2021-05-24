@@ -32,7 +32,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
@@ -256,9 +255,9 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             String endTimeStr = DateUtil.toString(seckill.getStartTime(), "yyyy-MM-dd") + " 23:59:59";
 
             // 查询是否在同一时间段参与了拼团活动
-            Integer count = promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.PINTUAN.name(), goodsSku.getId(), DateUtil.toDate(startTimeStr, DateUtil.STANDARD_FORMAT), DateUtil.toDate(endTimeStr, DateUtil.STANDARD_FORMAT));
+            Integer count = promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.PINTUAN.name(), goodsSku.getId(), DateUtil.toDate(startTimeStr, DateUtil.STANDARD_FORMAT), DateUtil.toDate(endTimeStr, DateUtil.STANDARD_FORMAT), seckillId);
             // 查询是否在同一时间段参与了限时抢购活动
-            count += promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.SECKILL.name(), goodsSku.getId(), DateUtil.toDate(startTimeStr, DateUtil.STANDARD_FORMAT), DateUtil.toDate(endTimeStr, DateUtil.STANDARD_FORMAT));
+            count += promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.SECKILL.name(), goodsSku.getId(), DateUtil.toDate(startTimeStr, DateUtil.STANDARD_FORMAT), DateUtil.toDate(endTimeStr, DateUtil.STANDARD_FORMAT), seckillId);
             if (count > 0) {
                 throw new ServiceException("商品[" + goodsSku.getGoodsName() + "]已经在重叠的时间段参加了团购或限时抢购活动，不能参加限时抢购活动");
             }
