@@ -9,11 +9,10 @@ echo '推送github完成'
 git remote rm origin
 
 git remote add origin git@gitee.com:beijing_hongye_huicheng/lilishop.git
+
+git pull origin master
+
 echo '切回gitee资源'
 git branch --set-upstream-to=origin/master master
 echo '设置git跟踪资源'
-sleep 1
-echo '更新代码'
-git pull remote master
-
 
