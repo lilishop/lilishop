@@ -1,23 +1,25 @@
 ## Lilishop B2B2C商城系统
 
-##### 开源不易，如有帮助请点Star 
+##### 官方公众号 & 开源不易，如有帮助请点Star
+![image-20210511171611793](https://pickmall.cn/assets/imgs/h5-qrcode.png)
+
 [![star](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop/stargazers)
 
 
 ### 介绍
 **官网**：https://pickmall.cn
 
-Lilishop 是一款Java开发，基于SpringBoot的B2B2C多用户商城，前端使用 Vue、uniapp-app开发 **系统全端全部代码开源**
+Lilishop 是一款Java开发，基于SpringBoot研发的B2B2C多用户商城，前端使用 Vue、uniapp开发 **系统全端全部代码开源**
 
-商城展示端包含 PC、H5、小程序、APP。
+产品前后端分离、支持分布式部署。
+
+商城展示端包含 PC、H5、微信小程序、APP。
 
 商城包含 会员模块、**第三方登录模块**、**第三方支付模块**、**楼层装修模块**、订单模块、分销模块、文章模块、系统设置模块、流量分析模块
 
 系统包含各种中间件、搜索引擎、多级缓存、分布式事务、分布式任务调度等，支持Docker，支持k8s。是一款高性能，支持高并发等商城系统。
 
 开箱即用，简单配置即可部署一套属于您的系统。
-
-完美支持二开、学生毕业设计答辩等各个场景
 
 ### 文档
 
@@ -116,19 +118,22 @@ PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_
 
 #### 移动端
 
+<img src="https://pickmall.cn/assets/imgs/other/app.gif" alt="管理端功能展示" style="zoom:50%;" />
+
 <img src="https://pickmall.cn/assets/imgs/other/app.gif" alt="移动端功能展示" style="zoom:50%;" />
-
-
 
 
 
 #### 管理端
 
-<img src="https://pickmall.cn/assets/imgs/other/manager.gif" alt="管理端功能展示" />
-
+![管理端功能展示](https://pickmall.cn/assets/imgs/other/manager.gif)
 
 
 ### 技术选型
+
+#### 架构图
+
+![架构](https://lili-system.oss-cn-beijing.aliyuncs.com/docs/%E6%9E%B6%E6%9E%84.png)
 
 ##### Java后台
 
@@ -162,6 +167,8 @@ PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_
 | CSS预处理 | scss    | 地图引擎 | amap    |
 
 ### 升级计划
+
+#### 计划每个月发布一个版本，具体时间可能有出入
 
 时间：2021年6月15日
 
@@ -217,7 +224,13 @@ PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_
 增加供应商功能
 ```
 
+### 版本升级
 
+```
+后续会持续版本升级，修复bug，完善功能，覆盖更多业务场景 o2o/b2b/s2b2b2c/跨境电商
+
+后续会考虑推出微服务/中台等 企业级版本
+```
 
 ### 技术亮点
 
@@ -261,3 +274,7 @@ PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_
 ### 交流群
 
 **QQ群**：961316482
+
+
+![商家端功能](https://lili-system.oss-cn-beijing.aliyuncs.com/docs/gif1.gif)
+
