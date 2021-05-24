@@ -1,6 +1,10 @@
 package cn.lili.modules.promotion.entity.dos;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.lili.base.BaseEntity;
+import cn.lili.modules.promotion.entity.enums.CouponRangeDayEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -114,14 +118,13 @@ public class MemberCoupon extends BaseEntity {
         setScopeId(coupon.getScopeId());
         setCouponType(coupon.getCouponType());
         setStartTime(coupon.getStartTime());
-        setEndTime(coupon.getEndTime());
+
         setGetType(coupon.getGetType());
         setStoreCommission(coupon.getStoreCommission());
+        if(coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
+            setEndTime(coupon.getEndTime());
+        }else {
+            setEndTime(DateUtil.offset(new DateTime(), DateField.DAY_OF_YEAR,coupon.getEffectiveDays()));
+        }
     }
-
-    public boolean canUse() {
-        return this.getMemberCouponStatus().equals(MemberCouponStatusEnum.NEW.name());
-    }
-
-
 }

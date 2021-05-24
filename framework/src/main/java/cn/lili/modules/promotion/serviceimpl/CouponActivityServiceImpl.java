@@ -130,8 +130,8 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
             if (coupon != null) {
                 List<MemberCoupon> memberCouponList = new LinkedList<>();
                 //循环会员列表，添加优惠券
+                MemberCoupon memberCoupon = new MemberCoupon(coupon);
                 for (Map<String, Object> map : memberList) {
-                    MemberCoupon memberCoupon = new MemberCoupon(coupon);
                     memberCoupon.setMemberId(map.get("id").toString());
                     memberCoupon.setMemberName(map.get("nick_name").toString());
                     memberCoupon.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());

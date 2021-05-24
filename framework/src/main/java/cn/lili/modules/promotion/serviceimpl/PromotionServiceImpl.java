@@ -285,10 +285,11 @@ public class PromotionServiceImpl implements PromotionService {
         //修改优惠券
         couponVO.setPromotionStatus(promotionMessage.getPromotionStatus());
         result = this.couponService.update(promotionMessage.updateWrapper());
-        //优惠券活动结束，会员已领取的优惠券状态修改为：已过期
+        //优惠券活动结束，会员已领取未使用的优惠券状态修改为：已过期
         if(couponVO.getPromotionStatus().equals(PromotionStatusEnum.END)){
             LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<MemberCoupon>()
                     .eq(MemberCoupon::getCouponId, couponVO.getId())
+                    .eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name())
                     .set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.EXPIRE.name());
             this.memberCouponService.update(updateWrapper);
         }
