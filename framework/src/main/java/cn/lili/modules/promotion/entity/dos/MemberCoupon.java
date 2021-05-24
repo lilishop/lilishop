@@ -121,10 +121,10 @@ public class MemberCoupon extends BaseEntity {
 
         setGetType(coupon.getGetType());
         setStoreCommission(coupon.getStoreCommission());
-        if(coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
+        if (coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
             setEndTime(coupon.getEndTime());
-        }else {
-            setEndTime(DateUtil.offset(new DateTime(), DateField.DAY_OF_YEAR,coupon.getEffectiveDays()));
+        } else {
+            setEndTime(DateUtil.endOfDay(DateUtil.offset(new DateTime(), DateField.DAY_OF_YEAR, (coupon.getEffectiveDays() - 1))));
         }
     }
 }
