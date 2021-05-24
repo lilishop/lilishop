@@ -1,7 +1,9 @@
 package cn.lili.modules.promotion.service;
 
+import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.promotion.entity.dos.CouponActivity;
 import cn.lili.modules.promotion.entity.dto.CouponActivityDTO;
+import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -46,17 +48,16 @@ public interface CouponActivityService extends IService<CouponActivity> {
     /**
      * 注册赠券
      *
-     * @param couponActivityIds 优惠券活动ID
-     * @param memberId
+     * @param couponActivityList 优惠券活动
+     * @param member 会员
      */
-    void registered(List<String> couponActivityIds, String memberId);
+    void registered(List<CouponActivity> couponActivityList, Member member);
 
-    //编辑优惠券活动
 
     //删除优惠券活动
 
     //关闭优惠券活动
-
+    boolean updateCouponActivityStatus(String id, PromotionStatusEnum promotionStatus);
     //开启优惠券活动
 
     //查看优惠券活动

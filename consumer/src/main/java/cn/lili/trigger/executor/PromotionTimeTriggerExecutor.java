@@ -48,19 +48,13 @@ public class PromotionTimeTriggerExecutor implements TimeTriggerExecutor {
             log.info("促销活动信息消费：{}", promotionMessage);
             // 如果为促销活动开始，则需要发布促销活动结束的定时任务
             if (PromotionStatusEnum.START.name().equals(promotionMessage.getPromotionStatus())) {
-                if (!promotionService.updatePromotionStatus(promotionMessage)) {
-                    log.error("开始促销活动失败: {}", promotionMessage);
-                    return;
-                }
-                // 促销活动开始后，设置促销活动结束的定时任务
-                promotionMessage.setPromotionStatus(PromotionStatusEnum.END.name());
-                String uniqueKey = "{TIME_TRIGGER_" + promotionMessage.getPromotionType() + "}_" + promotionMessage.getPromotionId();
-                // 结束时间（延时一分钟）
-                long closeTime = promotionMessage.getEndTime().getTime() + 60000;
-                TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR, closeTime, promotionMessage, uniqueKey, rocketmqCustomProperties.getPromotionTopic());
-                timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(promotionMessage.getEndTime().getTime()));
-            } else {
-                promotionService.updatePromotionStatus(promotionMessage);
+                //设置活动关闭时间
+                setCloseTime(promotionMessage);
+            }
+            //更新促销活动状态
+            if (!promotionService.updatePromotionStatus(promotionMessage)) {
+                log.error("开始促销活动失败: {}", promotionMessage);
+                return;
             }
             return;
         }
@@ -73,5 +67,22 @@ public class PromotionTimeTriggerExecutor implements TimeTriggerExecutor {
         }
     }
 
+    /**
+     * 设置促销活动结束时间
+     *
+     * @param promotionMessage 信息队列传输促销信息实体
+     */
+    private void setCloseTime(PromotionMessage promotionMessage) {
+        //如果设置了活动结束时间则创建促销结束延时任务
+        if(promotionMessage.getEndTime()!=null){
+            // 促销活动开始后，设置促销活动结束的定时任务
+            promotionMessage.setPromotionStatus(PromotionStatusEnum.END.name());
+            String uniqueKey = "{TIME_TRIGGER_" + promotionMessage.getPromotionType() + "}_" + promotionMessage.getPromotionId();
+            // 结束时间（延时一分钟）
+            long closeTime = promotionMessage.getEndTime().getTime() + 60000;
+            TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR, closeTime, promotionMessage, uniqueKey, rocketmqCustomProperties.getPromotionTopic());
+            timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(promotionMessage.getEndTime().getTime()));
+        }
 
+    }
 }

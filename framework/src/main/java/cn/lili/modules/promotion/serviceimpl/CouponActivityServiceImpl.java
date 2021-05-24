@@ -10,6 +10,7 @@ import cn.lili.modules.promotion.entity.dos.CouponActivityItem;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dto.CouponActivityDTO;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
 import cn.lili.modules.promotion.mapper.CouponActivityMapper;
 import cn.lili.modules.promotion.service.CouponActivityItemService;
@@ -53,7 +54,6 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
         this.save(couponActivityDTO);
         //添加优惠券活动优惠券
         this.addCouponActivityItems(couponActivityDTO);
-        //发送促销活动开始的延时任务
         return couponActivityDTO;
     }
 
@@ -68,7 +68,6 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
                 .eq(CouponActivityItem::getActivityId,couponActivityDTO.getId()));
         //重新添加优惠券活动关联优惠券
         this.addCouponActivityItems(couponActivityDTO);
-        //更新促销活动的延时任务
         return couponActivityDTO;
     }
 
@@ -92,15 +91,13 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
     }
 
     @Override
-    public void registered(List<String> couponActivityIds, String memberId) {
-        for (String couponActivityId : couponActivityIds) {
-            //获取优惠券
-            CouponActivity couponActivity = this.getById(couponActivityId);
+    public void registered(List<CouponActivity> couponActivityList, Member member) {
+        for (CouponActivity couponActivity : couponActivityList) {
             //获取会员信息
             List<Map<String, Object>> memberList = new ArrayList<>();
             Map<String, Object> map = new HashMap<>();
-            map.put("id", memberId);
-            map.put("nick_name", memberService.getById(memberId).getNickName());
+            map.put("id", member.getId());
+            map.put("nick_name", member.getNickName());
             memberList.add(map);
 
             //优惠优惠券活动的优惠券列表
@@ -109,6 +106,13 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
             //发送优惠券
             sendCoupon(memberList, couponActivityItems);
         }
+    }
+
+    @Override
+    public boolean updateCouponActivityStatus(String id, PromotionStatusEnum promotionStatus) {
+        CouponActivity couponActivity=this.getById(id);
+        couponActivity.setPromotionStatus(promotionStatus.name());
+        return this.updateById(couponActivity);
     }
 
     /**

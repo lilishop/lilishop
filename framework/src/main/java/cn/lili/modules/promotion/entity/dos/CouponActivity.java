@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.entity.dos;
 
 import cn.lili.modules.promotion.entity.dto.BasePromotion;
+import cn.lili.modules.promotion.entity.enums.CouponActivityTypeEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -23,6 +24,12 @@ import javax.validation.constraints.NotNull;
 @ApiModel(value = "优惠券活动实体类")
 public class CouponActivity extends BasePromotion {
 
+    /**
+     * @see CouponActivityTypeEnum
+     * @author Bulbasaur
+     * @date: 2021/5/24 10:28 上午
+     *
+     */
     @NotNull(message = "优惠券活动类型不能为空")
     @ApiModelProperty(value = "优惠券活动类型")
     private String couponActivityType;

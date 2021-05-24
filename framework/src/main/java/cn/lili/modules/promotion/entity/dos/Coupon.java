@@ -81,4 +81,14 @@ public class Coupon extends BasePromotion {
     @ApiModelProperty(value = "消费门槛")
     private Double consumeThreshold;
 
+    /**
+     * @see cn.lili.modules.promotion.entity.enums.CouponRangeDayEnum
+     *
+     */
+    @ApiModelProperty(value = "时间范围类型")
+    private String rangeDayType;
+
+    @ApiModelProperty(value = "有效期")
+    private Integer effectiveDays;
+
 }
