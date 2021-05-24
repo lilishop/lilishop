@@ -106,9 +106,10 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
      * @param skuId         skuId
      * @param startTime     开始时间
      * @param endTime       结束时间
+     * @param promotionId   促销活动id(是否排除当前活动，如排除，则填写，没有的话，为null)
      * @return 共参加了几种活动
      */
-    Integer findInnerOverlapPromotionGoods(String promotionType, String skuId, Date startTime, Date endTime);
+    Integer findInnerOverlapPromotionGoods(String promotionType, String skuId, Date startTime, Date endTime, String promotionId);
 
 
     /**

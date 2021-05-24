@@ -24,6 +24,7 @@ import cn.lili.modules.order.cart.render.TradeBuilder;
 import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.entity.vo.ReceiptVO;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.enums.CouponScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
@@ -43,6 +44,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -137,6 +139,9 @@ public class CartServiceImpl implements CartService {
                 cartSkuVOS.add(cartSkuVO);
             }
             tradeDTO.setCartTypeEnum(cartTypeEnum);
+            // 如购物车发生更改，则重置优惠券
+            tradeDTO.setStoreCoupons(null);
+            tradeDTO.setPlatformCoupon(null);
             this.resetTradeDTO(tradeDTO);
         } catch (Exception e) {
             log.error("购物车渲染异常", e);
@@ -294,7 +299,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public TradeDTO getCheckedTradeDTO(CartTypeEnum way) {
-        return this.readDTO(way);
+        return tradeBuilder.buildTrade(way);
     }
 
     /**
@@ -474,7 +479,7 @@ public class CartServiceImpl implements CartService {
         }
         //使用优惠券 与否
         if (use && checkCoupon(memberCoupon, tradeDTO)) {
-            this.useCoupon(tradeDTO, memberCoupon);
+            this.useCoupon(tradeDTO, memberCoupon, cartTypeEnum);
         } else if (!use) {
             if (Boolean.TRUE.equals(memberCoupon.getIsPlatform())) {
                 tradeDTO.setPlatformCoupon(null);
@@ -563,10 +568,23 @@ public class CartServiceImpl implements CartService {
         return cartTypeEnum;
     }
 
-    private void useCoupon(TradeDTO tradeDTO, MemberCoupon memberCoupon) {
+    private void useCoupon(TradeDTO tradeDTO, MemberCoupon memberCoupon, CartTypeEnum cartTypeEnum) {
         //如果是平台优惠券
         if (Boolean.TRUE.equals(memberCoupon.getIsPlatform())) {
-            if (memberCoupon.getConsumeThreshold() <= tradeDTO.getPriceDetailDTO().getGoodsPrice()) {
+            // 购物车价格
+            Double cartPrice = 0d;
+            for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
+                // 获取商品的促销信息
+                Optional<PromotionGoods> promotionOptional = cartSkuVO.getPromotions().parallelStream().filter(i -> (i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name()) && cartTypeEnum.equals(CartTypeEnum.PINTUAN))
+                        || i.getPromotionType().equals(PromotionTypeEnum.SECKILL.name())).findAny();
+                if (promotionOptional.isPresent()) {
+                    cartPrice += CurrencyUtil.mul(promotionOptional.get().getPrice(), cartSkuVO.getNum());
+                } else {
+                    cartPrice += CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum());
+                }
+
+            }
+            if (memberCoupon.getConsumeThreshold() <= cartPrice) {
                 tradeDTO.setPlatformCoupon(new MemberCouponDTO(memberCoupon));
                 tradeDTO.setStoreCoupons(new HashMap<>());
             }
