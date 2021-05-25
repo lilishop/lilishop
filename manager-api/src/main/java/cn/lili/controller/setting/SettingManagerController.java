@@ -115,7 +115,6 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new BaseSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), BaseSetting.class));
-
             case WITHDRAWAL_SETTING:
                 return setting == null ?
                         ResultUtil.data(new WithdrawalSetting()) :
@@ -124,7 +123,6 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new DistributionSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class));
-
             case EMAIL_SETTING:
                 return setting == null ?
                         ResultUtil.data(new EmailSetting()) :
@@ -141,46 +139,42 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new OrderSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), OrderSetting.class));
-
             case OSS_SETTING:
                 return setting == null ?
                         ResultUtil.data(new OssSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), OssSetting.class));
-
             case SMS_SETTING:
                 return setting == null ?
                         ResultUtil.data(new SmsSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), SmsSetting.class));
-
             case POINT_SETTING:
                 return setting == null ?
                         ResultUtil.data(new PointSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), PointSetting.class));
-
             case QQ_CONNECT:
                 return setting == null ?
                         ResultUtil.data(new QQConnectSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), QQConnectSetting.class));
-
             case PAYMENT_SUPPORT:
                 return setting == null ?
                         ResultUtil.data(new PaymentSupportSetting(new PaymentSupportForm())) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), PaymentSupportSetting.class));
-
             case ALIPAY_PAYMENT:
                 return setting == null ?
                         ResultUtil.data(new AlipayPaymentSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), AlipayPaymentSetting.class));
-
             case WECHAT_CONNECT:
                 return setting == null ?
                         ResultUtil.data(new WechatConnectSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), WechatConnectSetting.class));
-
             case WECHAT_PAYMENT:
                 return setting == null ?
                         ResultUtil.data(new WechatPaymentSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), WechatPaymentSetting.class));
+            case SECKILL_SETTING:
+                return setting == null ?
+                        ResultUtil.data(new SeckillSetting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), SeckillSetting.class));
             default:
                 throw new ServiceException(ResultCode.SETTING_NOT_TO_SET);
         }
