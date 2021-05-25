@@ -292,7 +292,7 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
     private double calculationSingleCoupon(MemberCoupon coupon, List<GoodsSkuPromotionPriceDTO> conformCollect) {
         double couponTotalPrice = 0;
         // 合计优惠券范围内的所有商品的原价
-        double totalPrice = conformCollect.parallelStream().mapToDouble(GoodsSkuPromotionPriceDTO::getOriginalPrice).sum();
+        double totalPrice = conformCollect.parallelStream().mapToDouble(GoodsSkuPromotionPriceDTO::getTotalFinalePrice).sum();
 
         // 根据优惠券优惠类型，判断是否满足条件
         if (CouponTypeEnum.PRICE.name().equals(coupon.getCouponType()) && coupon.getConsumeThreshold() <= totalPrice) {
@@ -314,14 +314,14 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
 
         // 分配到每个商品的优惠券金额
         for (GoodsSkuPromotionPriceDTO goodsSkuPromotionPriceDTO : conformCollect) {
-            double rate = CurrencyUtil.div(goodsSkuPromotionPriceDTO.getFinalePrice(), totalPrice, 5);
-            double distributeCouponPrice = CurrencyUtil.mul(couponTotalPrice, rate);
+            double rate = CurrencyUtil.div(goodsSkuPromotionPriceDTO.getTotalFinalePrice(), totalPrice, 5);
+            double distributeCouponPrice = CurrencyUtil.div(CurrencyUtil.mul(couponTotalPrice, rate), goodsSkuPromotionPriceDTO.getNumber());
             if (goodsSkuPromotionPriceDTO.getFinalePrice() != null) {
                 goodsSkuPromotionPriceDTO.setFinalePrice(CurrencyUtil.sub(goodsSkuPromotionPriceDTO.getFinalePrice(), distributeCouponPrice));
             } else {
                 goodsSkuPromotionPriceDTO.setFinalePrice(CurrencyUtil.sub(goodsSkuPromotionPriceDTO.getOriginalPrice(), distributeCouponPrice));
             }
-            goodsSkuPromotionPriceDTO.setCouponPrice(distributeCouponPrice);
+            goodsSkuPromotionPriceDTO.setCouponPrice(CurrencyUtil.mul(distributeCouponPrice, goodsSkuPromotionPriceDTO.getNumber()));
             goodsSkuPromotionPriceDTO.setTotalFinalePrice(CurrencyUtil.mul(goodsSkuPromotionPriceDTO.getFinalePrice(), goodsSkuPromotionPriceDTO.getNumber()));
             BasePromotion basePromotion = new BasePromotion();
             basePromotion.setId(coupon.getId());
