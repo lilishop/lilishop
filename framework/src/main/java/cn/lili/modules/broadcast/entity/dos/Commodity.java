@@ -17,7 +17,7 @@ import javax.persistence.Table;
  */
 @Data
 @Entity
-@ApiModel(value = "直播商品")
+@ApiModel(value = "Commodity", description = "直播商品")
 @TableName("li_commodity")
 @Table(name = "li_commodity")
 public class Commodity extends BaseEntity {

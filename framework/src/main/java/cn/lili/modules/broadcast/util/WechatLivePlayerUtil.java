@@ -164,8 +164,12 @@ public class WechatLivePlayerUtil {
         String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/add?access_token=" + token;
         //新建微信商品DTO
         GoodsInfo goodsInfo = new GoodsInfo(commodity);
+        //上传微信临时图片
         goodsInfo.setCoverImgUrl(wechatMediaUtil.uploadMedia(token,"image",commodity.getGoodsImage()));
-        String content = HttpUtils.doPostWithJson(url, goodsInfo);
+        Map<String,GoodsInfo> map=new HashMap<>();
+        //调用新增直播商品接口
+        map.put("goodsInfo",goodsInfo);
+        String content = HttpUtils.doPostWithJson(url, map);
         JSONObject json = new JSONObject(content);
         log.info("微信小程序添加直播商品结果：" + content);
         return json;
@@ -182,6 +186,8 @@ public class WechatLivePlayerUtil {
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url
         String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/delete?access_token=" + token;
+        Map<String,Object> map=new HashMap<>();
+        map.put("goodsId",goodsId);
         String content = HttpUtils.doPostWithJson(url, goodsId);
         JSONObject json = new JSONObject(content);
         log.info("微信小程序删除直播商品结果：" + content);
@@ -199,7 +205,9 @@ public class WechatLivePlayerUtil {
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url
         String url = "https://api.weixin.qq.com/wxa/business/getgoodswarehouse?access_token=" + token;
-        String content = HttpUtils.doPostWithJson(url, goodsIdList);
+        Map<String,Object> map=new HashMap<>();
+        map.put("goods_ids",goodsIdList);
+        String content = HttpUtils.doPostWithJson(url, map);
         JSONObject json = new JSONObject(content);
         log.info("微信小程序查询直播商品结果：" + content);
         return json;
