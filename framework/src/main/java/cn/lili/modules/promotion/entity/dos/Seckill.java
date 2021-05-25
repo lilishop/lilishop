@@ -54,9 +54,6 @@ public class Seckill extends BasePromotion {
     @ApiModelProperty(value = "商品数量")
     private Integer goodsNum;
 
-    @ApiModelProperty(value = "店铺数量")
-    private Integer storeNum;
-
     public Seckill(String hours,String seckillRule){
         //默认创建30天后的秒杀活动
         DateTime dateTime= DateUtil.beginOfDay(DateUtil.offset(new DateTime(), DateField.DAY_OF_YEAR, 30));
@@ -64,7 +61,6 @@ public class Seckill extends BasePromotion {
         this.hours=hours;
         this.seckillRule=seckillRule;
         this.goodsNum=0;
-        this.storeNum=0;
 
         //BasePromotion
         setStoreName("platform");

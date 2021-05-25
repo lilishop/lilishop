@@ -93,4 +93,11 @@ public interface SeckillService extends IService<Seckill> {
      * @return 可参与活动数量
      */
     Integer getApplyNum();
+
+    /**
+     * 更新秒杀活动的商品数量
+     * @param seckillId 秒杀活动ID
+     * @return 更新结果
+     */
+    void updateSeckillGoodsNum(String seckillId);
 }

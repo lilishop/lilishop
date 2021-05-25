@@ -232,6 +232,11 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
         return this.count(queryWrapper);
     }
 
+    @Override
+    public void updateSeckillGoodsNum(String seckillId) {
+        this.baseMapper.updateSeckillGoodsNum(seckillId);
+    }
+
     /**
      * 添加秒杀活动延时任务
      * @param seckill 秒杀活动

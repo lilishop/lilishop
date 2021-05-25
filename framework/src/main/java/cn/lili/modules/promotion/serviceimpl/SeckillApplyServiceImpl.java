@@ -155,14 +155,10 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         for (SeckillApplyVO seckillApply : seckillApplyList) {
             //获取参与活动的商品信息
             GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(seckillApply.getSkuId());
-            //活动库存不能大于商品库存
-            if (goodsSku.getQuantity() < seckillApply.getQuantity()) {
-                throw new ServiceException(seckillApply.getGoodsName() + ",此商品库存不足");
-            }
             //获取秒杀活动时间段
             DateTime startTime = DateUtil.offsetHour(seckill.getStartTime(), seckillApply.getTimeLine());
             //检测是否可以发布促销商品
-            checkSeckillGoodsSKU(seckill, goodsSku, startTime);
+            checkSeckillGoodsSKU(seckill, seckillApply, goodsSku, startTime);
             //设置秒杀申请默认内容
             seckillApply.setOriginalPrice(goodsSku.getPrice());
             seckillApply.setPromotionApplyStatus(PromotionApplyStatusEnum.PASS.name());
@@ -188,7 +184,8 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             PromotionTools.promotionGoodsInit(promotionGoodsList, seckill, PromotionTypeEnum.SECKILL);
             promotionGoodsService.saveBatch(promotionGoodsList);
         }
-
+        //设置秒杀活动的商品数量、店铺数量
+        seckillService.updateSeckillGoodsNum(seckill.getId());
     }
 
 
@@ -370,10 +367,15 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
      * 检测秒杀申请的商品
      *
      * @param seckill   秒杀活动
+     * @param seckillApply 秒杀活动申请
      * @param goodsSku  商品SKU
      * @param startTime 秒杀时段开启时间
      */
-    private void checkSeckillGoodsSKU(SeckillVO seckill, GoodsSku goodsSku, DateTime startTime) {
+    private void checkSeckillGoodsSKU(SeckillVO seckill, SeckillApplyVO seckillApply, GoodsSku goodsSku, DateTime startTime) {
+        //活动库存不能大于商品库存
+        if (goodsSku.getQuantity() < seckillApply.getQuantity()) {
+            throw new ServiceException(seckillApply.getGoodsName() + ",此商品库存不足");
+        }
         // 查询是否在同一时间段参与了拼团活动
         if (promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.PINTUAN.name(), goodsSku.getId(), startTime, seckill.getEndTime()) > 0) {
             throw new ServiceException("商品[" + goodsSku.getGoodsName() + "]已经在重叠的时间段参加了拼团活动，不能参加秒杀活动");
