@@ -20,11 +20,11 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -59,7 +59,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
             throw new ServiceException("优惠券剩余领取数量不足");
         }
         if (haveCoupons >= coupon.getCouponLimitNum()) {
-            throw new ServiceException("此优惠券最多领取" + coupon.getCouponLimitNum()+"张");
+            throw new ServiceException("此优惠券最多领取" + coupon.getCouponLimitNum() + "张");
         }
     }
 
@@ -96,7 +96,9 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     @Override
     public IPage<MemberCoupon> getMemberCouponsByCanUse(CouponSearchParams param, Double totalPrice, PageVO pageVo) {
         LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(MemberCoupon::getStoreId, Arrays.asList(param.getStoreId(), "platform"));
+        List<String> storeIds = new ArrayList<>(Arrays.asList(param.getStoreId().split(",")));
+        storeIds.add("platform");
+        queryWrapper.in(MemberCoupon::getStoreId, storeIds);
         queryWrapper.eq(MemberCoupon::getMemberId, param.getMemberId());
         queryWrapper.and(
                 i -> i.like(MemberCoupon::getScopeId, param.getScopeId())

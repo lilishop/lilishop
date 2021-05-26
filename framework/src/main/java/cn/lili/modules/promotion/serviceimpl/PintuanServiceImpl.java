@@ -504,9 +504,9 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
                     throw new ServiceException();
                 }
                 // 查询是否在同一时间段参与了拼团活动
-                Integer count = promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.SECKILL.name(), promotionGood.getSkuId(), pintuan.getStartTime(), pintuan.getEndTime());
+                Integer count = promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.SECKILL.name(), promotionGood.getSkuId(), pintuan.getStartTime(), pintuan.getEndTime(), pintuan.getId());
                 // 查询是否在同一时间段参与了限时抢购活动
-                count += promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.PINTUAN.name(), promotionGood.getSkuId(), pintuan.getStartTime(), pintuan.getEndTime());
+                count += promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.PINTUAN.name(), promotionGood.getSkuId(), pintuan.getStartTime(), pintuan.getEndTime(), pintuan.getId());
                 if (count > 0) {
                     log.error("商品[" + promotionGood.getGoodsName() + "]已经在重叠的时间段参加了限时抢购或拼团活动，不能参加拼团活动");
                     throw new ServiceException("商品[" + promotionGood.getGoodsName() + "]已经在重叠的时间段参加了限时抢购或拼团活动，不能参加拼团活动");

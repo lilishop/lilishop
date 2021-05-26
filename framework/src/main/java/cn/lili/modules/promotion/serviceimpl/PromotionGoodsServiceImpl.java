@@ -113,7 +113,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         if (pointsGoods != null) {
             cartSkuVO.setPoint(pointsGoods.getPoints().intValue());
         }
-        DistributionGoods distributionGoods=distributionGoodsService.distributionGoodsVOBySkuId(cartSkuVO.getGoodsSku().getId());
+        DistributionGoods distributionGoods = distributionGoodsService.distributionGoodsVOBySkuId(cartSkuVO.getGoodsSku().getId());
         if (distributionGoods != null) {
             cartSkuVO.setDistributionGoods(distributionGoods);
         }
@@ -246,8 +246,12 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
 
 
     @Override
-    public Integer findInnerOverlapPromotionGoods(String promotionType, String skuId, Date startTime, Date endTime) {
-        return this.baseMapper.selectInnerOverlapPromotionGoods(promotionType, skuId, startTime, endTime);
+    public Integer findInnerOverlapPromotionGoods(String promotionType, String skuId, Date startTime, Date endTime, String promotionId) {
+        if (promotionId != null) {
+            return this.baseMapper.selectInnerOverlapPromotionGoodsWithout(promotionType, skuId, startTime, endTime, promotionId);
+        } else {
+            return this.baseMapper.selectInnerOverlapPromotionGoods(promotionType, skuId, startTime, endTime);
+        }
     }
 
     /**
