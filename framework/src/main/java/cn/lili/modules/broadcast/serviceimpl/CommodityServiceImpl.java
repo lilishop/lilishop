@@ -6,10 +6,12 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.broadcast.entity.dos.Commodity;
 import cn.lili.modules.broadcast.entity.dto.CommodityDTO;
+import cn.lili.modules.broadcast.entity.vos.CommodityVO;
 import cn.lili.modules.broadcast.mapper.CommodityMapper;
 import cn.lili.modules.broadcast.service.CommodityService;
 import cn.lili.modules.broadcast.util.WechatLivePlayerUtil;
@@ -17,6 +19,7 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -55,17 +58,19 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
         }
         return true;
     }
-    private void checkCommodity(Commodity commodity){
+
+    private void checkCommodity(Commodity commodity) {
         //商品是否审核通过
-        GoodsSku goodsSku=goodsSkuService.getById(commodity.getSkuId());
-        if(!goodsSku.getIsAuth().equals(GoodsAuthEnum.PASS.name())){
-            throw new ServiceException(goodsSku.getGoodsName()+" 未审核通过，不能添加直播商品");
+        GoodsSku goodsSku = goodsSkuService.getById(commodity.getSkuId());
+        if (!goodsSku.getIsAuth().equals(GoodsAuthEnum.PASS.name())) {
+            throw new ServiceException(goodsSku.getGoodsName() + " 未审核通过，不能添加直播商品");
         }
         //是否已添加规格商品
-        if(this.count(new LambdaQueryWrapper<Commodity>().eq(Commodity::getSkuId,commodity.getSkuId()))>0){
-            throw new ServiceException(goodsSku.getGoodsName()+" 已添加规格商品，无法重复增加");
+        if (this.count(new LambdaQueryWrapper<Commodity>().eq(Commodity::getSkuId, commodity.getSkuId())) > 0) {
+            throw new ServiceException(goodsSku.getGoodsName() + " 已添加规格商品，无法重复增加");
         }
     }
+
     @Override
     public boolean deleteCommodity(String goodsId) {
         JSONObject json = wechatLivePlayerUtil.deleteGoods(goodsId);
@@ -94,11 +99,10 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
     }
 
     @Override
-    public IPage<Commodity> commodityList(PageVO pageVO, String name, String auditStatus) {
-        return this.page(PageUtil.initPage(pageVO),
-                new LambdaQueryWrapper<Commodity>().like(name!=null,Commodity::getName,name)
-                        .eq(auditStatus!=null,Commodity::getAuditStatus,auditStatus));
+    public IPage<CommodityVO> commodityList(PageVO pageVO, String name, String auditStatus) {
+        return this.baseMapper.commodityVOList(PageUtil.initPage(pageVO),
+                new QueryWrapper<CommodityVO>().like(name != null, "c.name", name)
+                        .eq(auditStatus != null, "c.audit_status", auditStatus)
+                        .eq(UserContext.getCurrentUser().getRole().equals(UserEnums.STORE), "c.store_id", UserContext.getCurrentUser().getStoreId()));
     }
-
-
 }

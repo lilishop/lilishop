@@ -2,6 +2,7 @@ package cn.lili.modules.broadcast.service;
 
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.broadcast.entity.dos.Commodity;
+import cn.lili.modules.broadcast.entity.vos.CommodityVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -40,5 +41,5 @@ public interface CommodityService extends IService<Commodity> {
      * @param auditStatus 审核状态
      * @return 直播商品分页
      */
-    IPage<Commodity> commodityList(PageVO pageVO,String name,String auditStatus);
+    IPage<CommodityVO> commodityList(PageVO pageVO, String name, String auditStatus);
 }

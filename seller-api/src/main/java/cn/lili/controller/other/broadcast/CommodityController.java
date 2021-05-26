@@ -6,6 +6,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.broadcast.entity.dos.Commodity;
+import cn.lili.modules.broadcast.entity.vos.CommodityVO;
 import cn.lili.modules.broadcast.service.CommodityService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
@@ -37,7 +38,7 @@ public class CommodityController {
             @ApiImplicitParam(name = "auditStatus", value = "直播商品状态", dataType = "String", paramType = "query")
     })
     @GetMapping
-    public ResultMessage<IPage<Commodity>> page(String auditStatus, String name, PageVO pageVO) {
+    public ResultMessage<IPage<CommodityVO>> page(String auditStatus, String name, PageVO pageVO) {
         return ResultUtil.data(commodityService.commodityList(pageVO, name, auditStatus));
     }
 
