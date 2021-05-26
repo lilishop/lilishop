@@ -65,7 +65,7 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
         this.updateById(couponActivityDTO);
         //删除优惠券活动关联的优惠券
         couponActivityItemService.remove(new LambdaQueryWrapper<CouponActivityItem>()
-                .eq(CouponActivityItem::getActivityId,couponActivityDTO.getId()));
+                .eq(CouponActivityItem::getActivityId, couponActivityDTO.getId()));
         //重新添加优惠券活动关联优惠券
         this.addCouponActivityItems(couponActivityDTO);
         return couponActivityDTO;
@@ -83,11 +83,24 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
         //获取优惠券
         CouponActivity couponActivity = this.getById(couponActivityId);
         //获取活动优惠券发送范围
-        List<Map<String, Object>> memberList = this.getMemberList(couponActivity);
+        List<Map<String, Object>> member = this.getMemberList(couponActivity);
+
+        //会员拆成多个小组进行发送
+        List<List<Map<String, Object>>> memberGroup = new ArrayList<>();
+
+        //循环分组
+        for (int i = 0; i < (member.size() / 100 + (member.size() % 100 == 0 ? 0 : 1)); i++) {
+            int endPoint = Math.min((100 + (i * 100)), member.size());
+            memberGroup.add(member.subList((i * 100), endPoint));
+        }
+
         //优惠优惠券活动的优惠券列表
         List<CouponActivityItem> couponActivityItems = couponActivityItemService.getCouponActivityList(couponActivity.getId());
         //发送优惠券
-        sendCoupon(memberList, couponActivityItems);
+        for (List<Map<String, Object>> memberList : memberGroup) {
+            sendCoupon(memberList, couponActivityItems);
+        }
+
     }
 
     @Override
@@ -110,7 +123,7 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
 
     @Override
     public boolean updateCouponActivityStatus(String id, PromotionStatusEnum promotionStatus) {
-        CouponActivity couponActivity=this.getById(id);
+        CouponActivity couponActivity = this.getById(id);
         couponActivity.setPromotionStatus(promotionStatus.name());
         return this.updateById(couponActivity);
     }
@@ -191,11 +204,12 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
 
     /**
      * 添加优惠券活动关联优惠券
+     *
      * @param couponActivityDTO 优惠券活动DTO
      */
-    private void addCouponActivityItems(CouponActivityDTO couponActivityDTO){
+    private void addCouponActivityItems(CouponActivityDTO couponActivityDTO) {
         //创建优惠券活动子列表
-        for(CouponActivityItem couponActivityItem:couponActivityDTO.getCouponActivityItems()){
+        for (CouponActivityItem couponActivityItem : couponActivityDTO.getCouponActivityItems()) {
             couponActivityItem.setActivityId(couponActivityDTO.getId());
         }
         couponActivityItemService.saveBatch(couponActivityDTO.getCouponActivityItems());

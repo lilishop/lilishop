@@ -46,13 +46,15 @@ public class CouponActivityExecute implements EveryMinuteExecute {
                 .eq(CouponActivity::getPromotionStatus,PromotionStatusEnum.NEW.name()));
         //如果有符合要求的优惠券活动，发送优惠券
         if(couponActivities.size()>0){
-            for (CouponActivity CouponActivity:couponActivities) {
-                couponActivityService.specify(CouponActivity.getId());
-            }
+            for (CouponActivity couponActivity:couponActivities) {
+                couponActivityService.specify(couponActivity.getId());
+
             //修改精准发券优惠券活动状态
             couponActivityService.update(new LambdaUpdateWrapper<CouponActivity>()
                     .eq(CouponActivity::getCouponActivityType, CouponActivityTypeEnum.SPECIFY.name())
+                    .eq(CouponActivity::getId,couponActivity.getId())
                     .set(CouponActivity::getPromotionStatus,PromotionStatusEnum.END.name()));
+            }
         }
 
     }
