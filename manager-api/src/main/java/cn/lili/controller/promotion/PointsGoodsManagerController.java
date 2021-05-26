@@ -39,7 +39,7 @@ public class PointsGoodsManagerController {
         AuthUser currentUser = UserContext.getCurrentUser();
         List<PointsGoodsVO> collect = new ArrayList<>();
         for (PointsGoodsVO i : pointsGoodsList) {
-            i.setStoreName("platform");
+            i.setStoreName(i.getGoodsSku().getStoreName());
             i.setStoreId(currentUser.getId());
             collect.add(i);
         }
