@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * 系统设置
+ *
  * @author Chopper
  */
 @Data
@@ -18,4 +19,9 @@ public class SystemSetting {
      * 是否是演示站点
      */
     private Boolean isDemoSite = false;
+
+    /**
+     * 授权信息
+     */
+    private String licences = "";
 }
