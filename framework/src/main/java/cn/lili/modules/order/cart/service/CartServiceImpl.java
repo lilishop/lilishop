@@ -34,6 +34,7 @@ import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import cn.lili.modules.store.entity.dos.FreightTemplateChild;
+import cn.lili.modules.store.entity.enums.FreightTemplateEnum;
 import cn.lili.modules.store.entity.vos.FreightTemplateVO;
 import cn.lili.modules.store.service.FreightTemplateService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -524,12 +525,12 @@ public class CartServiceImpl implements CartService {
             throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
         }
         for (CartSkuVO cartSkuVO : skuList) {
-            //店铺支付运费则跳过
-            if (cartSkuVO.getFreightPayer().equals("STORE")) {
-                break;
-            }
             String freightTemplateId = cartSkuVO.getGoodsSku().getFreightTemplateId();
             FreightTemplateVO freightTemplate = freightTemplateService.getFreightTemplate(freightTemplateId);
+            //店铺支付运费则跳过
+            if(freightTemplate.getPricingMethod().equals(FreightTemplateEnum.FREE.name())){
+                break;
+            }
             //收货地址判定
             forTemplates:
             if (freightTemplate != null && freightTemplate.getFreightTemplateChildList() != null && !freightTemplate.getFreightTemplateChildList().isEmpty()) {

@@ -544,8 +544,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         sku.setIntro(goods.getIntro());
         sku.setMobileIntro(goods.getMobileIntro());
         sku.setGoodsUnit(goods.getGoodsUnit());
-        //运费
-        sku.setFreightPayer(goods.getFreightPayer());
         //商品状态
         sku.setIsAuth(goods.getIsAuth());
         sku.setSalesModel(goods.getSalesModel());

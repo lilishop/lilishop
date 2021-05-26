@@ -143,11 +143,6 @@ public class Goods extends BaseEntity {
     @ApiModelProperty(value = "运费模板id")
     private String templateId;
     /**
-     * 谁承担运费 BUYER：买家承担，STORE：卖家承担
-     */
-    @ApiModelProperty(value = " 谁承担运费 BUYER：买家承担，STORE：卖家承担")
-    private String freightPayer;
-    /**
      * 审核状态
      *
      * @see GoodsAuthEnum
@@ -198,7 +193,6 @@ public class Goods extends BaseEntity {
         this.sn = goodsOperationDTO.getSn();
         this.price = goodsOperationDTO.getPrice();
         this.weight = goodsOperationDTO.getWeight();
-        this.freightPayer = goodsOperationDTO.getFreightPayer();
         this.templateId = goodsOperationDTO.getTemplateId();
         this.recommend = goodsOperationDTO.isRecommend();
         this.sellingPoint = goodsOperationDTO.getSellingPoint();

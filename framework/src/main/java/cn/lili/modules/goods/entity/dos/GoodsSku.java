@@ -131,8 +131,6 @@ public class GoodsSku extends BaseEntity {
     @ApiModelProperty(value = "运费模板id")
     private String templateId;
 
-    @ApiModelProperty(value = " 谁承担运费 BUYER：买家承担，STORE：卖家承担")
-    private String freightPayer;
     /**
      * @see GoodsAuthEnum
      */

@@ -60,4 +60,7 @@ public class Commodity extends BaseEntity {
 
     @ApiModelProperty(value = "规格ID")
     private String skuId;
+
+    @ApiModelProperty(value = "SKU库存")
+    private Integer quantity;
 }

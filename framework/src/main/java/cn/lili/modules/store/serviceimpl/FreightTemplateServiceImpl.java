@@ -108,12 +108,16 @@ public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMappe
         this.save(freightTemplate);
         //给子模板赋父模板的id
         List<FreightTemplateChild> list = new ArrayList<>();
-        for (FreightTemplateChild freightTemplateChild : freightTemplateVO.getFreightTemplateChildList()) {
-            freightTemplateChild.setFreightTemplateId(freightTemplate.getId());
-            list.add(freightTemplateChild);
+        //如果子运费模板不为空则进行新增
+        if(freightTemplateVO.getFreightTemplateChildList()!=null){
+            for (FreightTemplateChild freightTemplateChild : freightTemplateVO.getFreightTemplateChildList()) {
+                freightTemplateChild.setFreightTemplateId(freightTemplate.getId());
+                list.add(freightTemplateChild);
+            }
+            //添加运费模板子内容
+            freightTemplateChildService.addFreightTemplateChild(list);
         }
-        //添加运费模板子内容
-        freightTemplateChildService.addFreightTemplateChild(list);
+
         //更新缓存
         cache.remove(CachePrefix.SHIP_TEMPLATE.getPrefix() + tokenUser.getStoreId());
         return freightTemplateVO;

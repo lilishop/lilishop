@@ -4,6 +4,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
@@ -12,6 +13,9 @@ import cn.lili.modules.broadcast.entity.dto.CommodityDTO;
 import cn.lili.modules.broadcast.mapper.CommodityMapper;
 import cn.lili.modules.broadcast.service.CommodityService;
 import cn.lili.modules.broadcast.util.WechatLivePlayerUtil;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
+import cn.lili.modules.goods.service.GoodsSkuService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -32,18 +36,36 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
 
     @Autowired
     private WechatLivePlayerUtil wechatLivePlayerUtil;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
 
     @Override
     public boolean addCommodity(List<Commodity> commodityList) {
         for (Commodity commodity : commodityList) {
+            //检测直播商品
+            checkCommodity(commodity);
+            //添加直播商品
             JSONObject json = wechatLivePlayerUtil.addGoods(commodity);
             commodity.setLiveGoodsId(Convert.toInt(json.getStr("goodsId")));
             commodity.setAuditId(json.getStr("auditId"));
             commodity.setStoreId(UserContext.getCurrentUser().getStoreId());
+            //默认为待审核状态
+            commodity.setAuditStatus("0");
+            this.save(commodity);
         }
-        return this.saveBatch(commodityList);
+        return true;
     }
-
+    private void checkCommodity(Commodity commodity){
+        //商品是否审核通过
+        GoodsSku goodsSku=goodsSkuService.getById(commodity.getSkuId());
+        if(!goodsSku.getIsAuth().equals(GoodsAuthEnum.PASS)){
+            throw new ServiceException(goodsSku.getGoodsName()+" 未审核通过，不能添加直播商品");
+        }
+        //是否已添加规格商品
+        if(this.count(new LambdaQueryWrapper<Commodity>().eq(Commodity::getSkuId,commodity.getSkuId()))>0){
+            throw new ServiceException(goodsSku.getGoodsName()+" 已添加规格商品，无法重复增加");
+        }
+    }
     @Override
     public boolean deleteCommodity(String goodsId) {
         JSONObject json = wechatLivePlayerUtil.deleteGoods(goodsId);

@@ -11,7 +11,6 @@ import cn.lili.modules.store.entity.dto.FreightTemplateChildDTO;
 import cn.lili.modules.store.entity.enums.FreightTemplateEnum;
 import cn.lili.modules.store.entity.vos.FreightTemplateVO;
 import cn.lili.modules.store.service.FreightTemplateService;
-import com.xkcoding.http.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -44,10 +43,6 @@ public class SkuFreightRender implements CartRenderStep {
         forSku:
         for (CartSkuVO cartSkuVO : cartSkuVOS) {
             String freightTemplateId = cartSkuVO.getGoodsSku().getFreightTemplateId();
-            //如果商品设置卖家承担运费,或者没设置运费，则跳出此商品运费计算
-            if (StringUtil.isEmpty(cartSkuVO.getFreightPayer())||cartSkuVO.getFreightPayer().equals("STORE")) {
-                continue;
-            }
 
             //免运费则跳出运费计算
             if (Boolean.TRUE.equals(cartSkuVO.getIsFreeFreight()) || freightTemplateId == null) {
@@ -57,7 +52,10 @@ public class SkuFreightRender implements CartRenderStep {
             //寻找对应对商品运费计算模版
             FreightTemplateVO freightTemplate = freightTemplateService.getFreightTemplate(freightTemplateId);
             if (freightTemplate != null && freightTemplate.getFreightTemplateChildList() != null && !freightTemplate.getFreightTemplateChildList().isEmpty()) {
-
+                //店铺支付运费则跳过
+                if(freightTemplate.getPricingMethod().equals(FreightTemplateEnum.FREE.name())){
+                    break;
+                }
                 FreightTemplateChild freightTemplateChild = null;
 
                 //获取市级别id

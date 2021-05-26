@@ -11,8 +11,9 @@ public enum FreightTemplateEnum {
     /**
      * 重量
      * 件数
+     * 包邮
      */
-    WEIGHT, NUM
+    WEIGHT, NUM, FREE
 
 
 }
