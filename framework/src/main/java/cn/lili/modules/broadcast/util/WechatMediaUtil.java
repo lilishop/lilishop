@@ -115,6 +115,9 @@ public class WechatMediaUtil {
                 fileExt = ".png";
                 break;
             case "image/jpeg":
+                fileExt = ".jpeg";
+                break;
+            case "image/jpg":
                 fileExt = ".jpg";
                 break;
         }

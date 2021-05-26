@@ -4,6 +4,7 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
+import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
@@ -13,6 +14,7 @@ import cn.lili.modules.system.entity.vo.Traces;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -175,5 +177,20 @@ public interface OrderService extends IService<Order> {
      * @param parentOrderSn 拼团订单sn
      */
     void agglomeratePintuanOrder(String pintuanId, String parentOrderSn);
+
+    /**
+     * 获取待发货订单编号列表
+     * @param response
+     * @param orderIds 订单ID列表
+     * @param logisticsName 店铺已选择物流公司列表
+     * @return 待发货订单编号列表
+     */
+    void getBatchDeliverList(HttpServletResponse response, List<String> orderIds, List<String> logisticsName);
+
+    /**
+     * 订单批量发货
+     * @param list 批量发货列表
+     */
+    void batchDeliver(List<OrderBatchDeliverDTO> list);
 
 }

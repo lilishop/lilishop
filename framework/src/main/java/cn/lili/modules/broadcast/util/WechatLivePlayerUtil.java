@@ -1,6 +1,5 @@
 package cn.lili.modules.broadcast.util;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONObject;
 import cn.lili.modules.base.entity.enums.ClientTypeEnum;
 import cn.lili.modules.broadcast.entity.dos.Commodity;
@@ -37,7 +36,7 @@ public class WechatLivePlayerUtil {
      * @param studio 小程序直播
      * @return 房间ID
      */
-    public Integer create(Studio studio) throws Exception{
+    public Map<String,String> create(Studio studio) throws Exception{
         //获取token
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url
@@ -74,7 +73,10 @@ public class WechatLivePlayerUtil {
         String content = HttpUtils.doPostWithJson(url, map);
         JSONObject json = new JSONObject(content);
         log.info("微信小程序直播间创建结果：" + content);
-        return Convert.toInt(json.getStr("roomId"));
+        Map<String,String> roomMap=new HashMap<>();
+        roomMap.put("roomId",json.getStr("roomId"));
+        roomMap.put("qrcodeUrl",json.getStr("qrcode_url"));
+        return roomMap;
     }
 
     /**

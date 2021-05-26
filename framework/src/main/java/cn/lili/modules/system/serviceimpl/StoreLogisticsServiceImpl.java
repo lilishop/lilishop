@@ -36,6 +36,11 @@ public class StoreLogisticsServiceImpl extends ServiceImpl<StoreLogisticsMapper,
     }
 
     @Override
+    public List<String> getStoreSelectedLogisticsName() {
+        return this.baseMapper.getSelectedStoreLogisticsName(UserContext.getCurrentUser().getStoreId());
+    }
+
+    @Override
     public StoreLogistics add(String logisticsId) {
         //判断是否已经选择过，如果没有选择则进行添加
         LambdaQueryWrapper<StoreLogistics> lambdaQueryWrapper = Wrappers.lambdaQuery();

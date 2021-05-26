@@ -1,13 +1,18 @@
 package cn.lili.controller.trade;
 
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
+import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.service.OrderPriceService;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.system.service.StoreLogisticsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -15,10 +20,15 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 店铺端,订单接口
@@ -42,6 +52,11 @@ public class OrderStoreController {
      */
     @Autowired
     private OrderPriceService orderPriceService;
+    /**
+     * 物流公司
+     */
+    @Autowired
+    private StoreLogisticsService storeLogisticsService;
 
     @ApiOperation(value = "查询订单列表")
     @GetMapping
@@ -120,5 +135,45 @@ public class OrderStoreController {
     @PostMapping(value = "/getTraces/{orderSn}")
     public ResultMessage<Object> getTraces(@NotBlank(message = "订单编号不能为空") @PathVariable String orderSn) {
         return ResultUtil.data(orderService.getTraces(orderSn));
+    }
+
+    @ApiOperation(value = "下载待发货的订单列表")
+    @GetMapping(value = "/downLoadDeliverExcel")
+    public ResultMessage<Object> downLoadDeliverExcel(HttpServletResponse response, List<String> orderIds) {
+
+        //获取店铺已经选择物流公司列表
+        List<String> logisticsName = storeLogisticsService.getStoreSelectedLogisticsName();
+        //下载订单批量发货Excel
+        this.orderService.getBatchDeliverList(response,orderIds,logisticsName);
+
+        return ResultUtil.success(ResultCode.SUCCESS);
+
+    }
+
+    @ApiOperation(value = "上传文件进行订单批量发货")
+    @ApiImplicitParam(name = "file", value = "订单列表", required = true, dataType = "file", paramType = "query")
+    @PutMapping(value = "/batchDeliver")
+    public void batchDeliver(@RequestParam MultipartFile file) {
+        InputStream inputStream = null;
+        try {
+            inputStream = file.getInputStream();
+            // 2.应用HUtool ExcelUtil获取ExcelReader指定输入流和sheet
+            ExcelReader excelReader = ExcelUtil.getReader(inputStream);
+            // 可以加上表头验证
+            // 3.读取第二行到最后一行数据
+            List<List<Object>> read = excelReader.read(1, excelReader.getRowCount());
+            List<OrderBatchDeliverDTO> orderBatchDeliverDTOList=new ArrayList<>();
+            for (List<Object> objects : read) {
+                OrderBatchDeliverDTO orderBatchDeliverDTO=new OrderBatchDeliverDTO();
+                orderBatchDeliverDTO.setOrderSn(objects.get(0).toString());
+                orderBatchDeliverDTO.setLogisticsName(objects.get(1).toString());
+                orderBatchDeliverDTO.setLogisticsNo(objects.get(2).toString());
+                orderBatchDeliverDTOList.add(orderBatchDeliverDTO);
+            }
+            orderService.batchDeliver(orderBatchDeliverDTOList);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

@@ -77,6 +77,9 @@ public class Studio extends BaseEntity {
     @ApiModelProperty(value = "房间ID")
     private Integer roomId;
 
+    @ApiModelProperty(value = "小程序直播码")
+    private String qrCodeUrl;
+
     @ApiModelProperty(value = "店铺ID")
     private String storeId;
 

@@ -11,6 +11,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 /**
  * 订单数据处理层
  *
@@ -18,9 +20,6 @@ import org.apache.ibatis.annotations.Update;
  * @date 2020/11/17 7:35 下午
  */
 public interface OrderMapper extends BaseMapper<Order> {
-
-    @Update({"update li_order set order_status = #{status} where sn in #{orderSn}"})
-    void batchUpdateStatus(String status, String orderSns);
 
     @Update({"update li_order set order_status = #{status} where sn = #{orderSn}"})
     void updateStatus(String status, String orderSn);
@@ -39,8 +38,9 @@ public interface OrderMapper extends BaseMapper<Order> {
             " FROM li_order o INNER JOIN li_order_item AS oi on o.sn = oi.order_sn ${ew.customSqlSegment} ")
     IPage<OrderSimpleVO> queryByParams(IPage<OrderSimpleVO> page, @Param(Constants.WRAPPER) Wrapper<OrderSimpleVO> queryWrapper);
 
-
     @Select("select * from li_order ${ew.customSqlSegment} ")
     IPage<PaymentLog> queryPaymentLogs(IPage<PaymentLog> page, @Param(Constants.WRAPPER) Wrapper<PaymentLog> queryWrapper);
 
+    @Select("SELECT sn FROM li_order o ${ew.customSqlSegment} ")
+    List<String> deliverSnList(@Param(Constants.WRAPPER) Wrapper<Order> queryWrapper);
 }

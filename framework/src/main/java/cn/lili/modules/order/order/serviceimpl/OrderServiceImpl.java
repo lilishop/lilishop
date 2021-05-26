@@ -2,8 +2,11 @@ package cn.lili.modules.order.order.serviceimpl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import cn.lili.common.aop.syslog.annotation.SystemLogPoint;
 import cn.lili.common.delayqueue.DelayQueueTools;
 import cn.lili.common.delayqueue.DelayQueueType;
@@ -31,6 +34,7 @@ import cn.lili.modules.order.order.aop.OrderLogPoint;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.Receipt;
+import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
@@ -60,12 +64,16 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -78,7 +86,6 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
 
     private static final String ORDER_SN_COLUMN = "order_sn";
@@ -364,8 +371,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             this.updateById(order);
             //修改订单状态为已发送
             this.updateStatus(orderSn, OrderStatusEnum.DELIVERED);
-
-
             //修改订单货物可以进行售后、投诉
             orderItemService.update(new UpdateWrapper<OrderItem>().eq(ORDER_SN_COLUMN, orderSn)
                     .set("after_sale_status", OrderItemAfterSaleStatusEnum.NOT_APPLIED)
@@ -375,8 +380,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderMessage.setNewStatus(OrderStatusEnum.DELIVERED);
             orderMessage.setOrderSn(order.getSn());
             this.sendUpdateStatusMessage(orderMessage);
-
-
         } else {
             throw new ServiceException(ResultCode.ORDER_DELIVER_ERROR);
         }
@@ -512,6 +515,77 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
     }
 
+    @Override
+    public void getBatchDeliverList(HttpServletResponse response, List<String> orderIds, List<String> logisticsName) {
+        //获取待发货订单列表
+        List deliverList = this.baseMapper.deliverSnList(new LambdaQueryWrapper<Order>()
+                .eq(Order::getStoreId, UserContext.getCurrentUser().getStoreId())
+                .eq(Order::getOrderStatus, "'UNDELIVERED'")
+                .in(orderIds.size() > 0, Order::getId, orderIds));
+        //如果没有待发货的订单则返回
+        if (deliverList.size() < 1) {
+            throw new ServiceException(ResultCode.ORDER_DELIVER_NUM_ERROR);
+        }
+        ExcelWriter writer = ExcelUtil.getWriter();
+        writer.addHeaderAlias("sn", "订单号");
+        writer.addHeaderAlias("logisticsName", "物流公司");
+        writer.addHeaderAlias("logisticsNo", "物流单号");
+        //写入待发货的订单列表
+        writer.write(deliverList, true);
+        //存放下拉列表
+        String[] logiList = logisticsName.toArray(new String[]{});
+        CellRangeAddressList cellRangeAddressList = new CellRangeAddressList(2, deliverList.size(), 2, 3);
+        writer.addSelect(cellRangeAddressList, logiList);
+
+        response.setHeader("Content-Disposition", "attachment;filename=批量发货.xls");
+        ServletOutputStream out = null;
+        try {
+            out = response.getOutputStream();
+            writer.flush(out, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            writer.close();
+        }
+        IoUtil.close(out);
+    }
+
+    @Override
+    public void batchDeliver(List<OrderBatchDeliverDTO> list) {
+        //循环检查是否符合规范
+        checkBatchDeliver(list);
+        //订单批量发货
+        for (OrderBatchDeliverDTO orderBatchDeliverDTO : list) {
+            this.delivery(orderBatchDeliverDTO.getOrderSn(), orderBatchDeliverDTO.getLogisticsNo(), orderBatchDeliverDTO.getLogisticsId());
+        }
+    }
+
+    /**
+     * 循环检查批量发货订单列表
+     *
+     * @param list 待发货订单列表
+     */
+    private void checkBatchDeliver(List<OrderBatchDeliverDTO> list) {
+        for (OrderBatchDeliverDTO orderBatchDeliverDTO : list) {
+            //查看订单号是否存在-是否是当前店铺的订单
+            int count = this.count(new LambdaQueryWrapper<Order>()
+                    .eq(Order::getStoreId, UserContext.getCurrentUser().getStoreId())
+                    .eq(Order::getSn, orderBatchDeliverDTO.getOrderSn()));
+            if (count == 0) {
+                throw new ServiceException("订单编号：'" + orderBatchDeliverDTO.getOrderSn() + " '不存在");
+            }
+            //查看物流公司
+            Logistics logistics = logisticsService.getOne(new LambdaQueryWrapper<Logistics>().eq(Logistics::getName, orderBatchDeliverDTO.getLogisticsName()));
+            if (logistics == null) {
+                throw new ServiceException("物流公司：'" + orderBatchDeliverDTO.getLogisticsName() + " '不存在");
+            } else {
+                orderBatchDeliverDTO.setLogisticsId(logistics.getId());
+            }
+        }
+
+
+    }
+
     /**
      * 订单状态变更消息
      *
@@ -605,11 +679,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     private void pintuanOrderFailed(List<Order> list) {
         for (Order order : list) {
-//            LambdaUpdateWrapper<Order> updateWrapper = new LambdaUpdateWrapper<>();
-//            updateWrapper.eq(Order::getId, order.getId());
-//            updateWrapper.set(Order::getOrderStatus, OrderStatusEnum.CANCELLED.name());
-//            updateWrapper.set(Order::getCancelReason, "拼团人数不足，拼团失败！");
-//            this.update(updateWrapper);
             try {
                 this.cancel(order.getSn(), "拼团人数不足，拼团失败！");
             } catch (Exception e) {

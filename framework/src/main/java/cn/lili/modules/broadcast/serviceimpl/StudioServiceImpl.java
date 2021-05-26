@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 /**
  * 小程序直播间业务层实现
@@ -40,8 +41,9 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     public Boolean create(Studio studio) {
         try {
             //创建小程序直播
-            Integer roomId = wechatLivePlayerUtil.create(studio);
-            studio.setRoomId(roomId);
+            Map<String,String> roomMap=wechatLivePlayerUtil.create(studio);
+            studio.setRoomId(Integer.parseInt(roomMap.get("roomId")));
+            studio.setQrCodeUrl(roomMap.get("qrcodeUrl"));
             studio.setStoreId(UserContext.getCurrentUser().getStoreId());
             return this.save(studio);
         } catch (Exception e) {

@@ -58,7 +58,7 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
     private void checkCommodity(Commodity commodity){
         //商品是否审核通过
         GoodsSku goodsSku=goodsSkuService.getById(commodity.getSkuId());
-        if(!goodsSku.getIsAuth().equals(GoodsAuthEnum.PASS)){
+        if(!goodsSku.getIsAuth().equals(GoodsAuthEnum.PASS.name())){
             throw new ServiceException(goodsSku.getGoodsName()+" 未审核通过，不能添加直播商品");
         }
         //是否已添加规格商品

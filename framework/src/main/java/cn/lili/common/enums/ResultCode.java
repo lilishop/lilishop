@@ -138,6 +138,7 @@ public enum ResultCode {
     ORDER_NOT_USER(31007, "非当前会员的订单"),
     ORDER_TAKE_ERROR(31008, "当前订单无法核销"),
     MEMBER_ADDRESS_NOT_EXIST(31009, "订单无收货地址，请先配置收货地址"),
+    ORDER_DELIVER_NUM_ERROR(31010, "没有待发货的订单"),
 
     /**
      * 支付
