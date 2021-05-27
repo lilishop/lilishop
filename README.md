@@ -62,8 +62,32 @@ Lilishop 是一款Java开发，基于SpringBoot研发的B2B2C多用户商城，�
 
 温馨提示：由于服务较多，如果笔记本环境启动内存没有32g可能无法启动成功（macbookpro 2020 16g内存启动无法成功），台式机在16g内存、AMD 3700x 的ubuntu系统成功运行。
 
-##### 下载docker脚本
+
+
+#####  docker环境安装（已安装的用户可跳过）
+```shell
+#安装依赖
+sudo yum install -y yum-utils device-mapper-persistent-data lvm2
+#设置源
+sudo yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+sudo yum makecache fast
+#安装docker
+sudo yum install docker-ce
+#启动服务
+sudo systemctl start docker
+#安装docker-compose
+sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+#授权
+sudo chmod +x /usr/local/bin/docker-compose
+#检测版本号
+docker-compose -v
+```
+
+
+
+##### 下载docker-compose脚本
 `git clone https://gitee.com/beijing_hongye_huicheng/docker.git `
+
 ##### 部署基础环境
 `docker-compose up -d`
 
