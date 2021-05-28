@@ -88,4 +88,10 @@ public class Studio extends BaseEntity {
 
     @ApiModelProperty(value = "直播间商品(最多展示两个商品：name/goodsImage)")
     private String roomGoodsList;
+
+    @ApiModelProperty(value = "推荐直播间")
+    private boolean recommend;
+
+    @ApiModelProperty(value = "直播间状态")
+    private String  status;
 }

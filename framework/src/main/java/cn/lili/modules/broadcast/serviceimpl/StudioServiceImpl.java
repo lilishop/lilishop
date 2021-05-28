@@ -5,6 +5,8 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
+import cn.lili.common.utils.PageUtil;
+import cn.lili.common.vo.PageVO;
 import cn.lili.modules.broadcast.entity.dos.Studio;
 import cn.lili.modules.broadcast.entity.dos.StudioCommodity;
 import cn.lili.modules.broadcast.entity.vos.StudioVO;
@@ -13,7 +15,9 @@ import cn.lili.modules.broadcast.mapper.StudioMapper;
 import cn.lili.modules.broadcast.service.StudioCommodityService;
 import cn.lili.modules.broadcast.service.StudioService;
 import cn.lili.modules.broadcast.util.WechatLivePlayerUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,7 +45,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     public Boolean create(Studio studio) {
         try {
             //创建小程序直播
-            Map<String,String> roomMap=wechatLivePlayerUtil.create(studio);
+            Map<String, String> roomMap = wechatLivePlayerUtil.create(studio);
             studio.setRoomId(Integer.parseInt(roomMap.get("roomId")));
             studio.setQrCodeUrl(roomMap.get("qrcodeUrl"));
             studio.setStoreId(UserContext.getCurrentUser().getStoreId());
@@ -51,6 +55,12 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             throw new ServiceException(ResultCode.ERROR);
         }
 
+    }
+
+    @Override
+    public Boolean edit(Studio studio) {
+        wechatLivePlayerUtil.editRoom(studio);
+        return this.updateById(studio);
     }
 
     @Override
@@ -86,8 +96,9 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             Studio studio = this.getByRoomId(roomId);
             studio.setRoomGoodsNum(studio.getRoomGoodsNum() != null ? studio.getRoomGoodsNum() + 1 : 1);
             //设置直播间默认的商品（前台展示）只展示两个
-            if(studio.getRoomGoodsNum()<3){
-                studio.setRoomGoodsList(JSONUtil.toJsonStr(commodityMapper.getSimpleCommodityByRoomId(roomId)));;
+            if (studio.getRoomGoodsNum() < 3) {
+                studio.setRoomGoodsList(JSONUtil.toJsonStr(commodityMapper.getSimpleCommodityByRoomId(roomId)));
+                ;
             }
             return this.updateById(studio);
         }
@@ -103,12 +114,21 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             Studio studio = this.getByRoomId(roomId);
             studio.setRoomGoodsNum(studio.getRoomGoodsNum() - 1);
             //设置直播间默认的商品（前台展示）只展示两个
-            if(studio.getRoomGoodsNum()<3){
-                studio.setRoomGoodsList(JSONUtil.toJsonStr(commodityMapper.getSimpleCommodityByRoomId(roomId)));;
+            if (studio.getRoomGoodsNum() < 3) {
+                studio.setRoomGoodsList(JSONUtil.toJsonStr(commodityMapper.getSimpleCommodityByRoomId(roomId)));
+                ;
             }
             return this.updateById(studio);
         }
         return false;
+    }
+
+    @Override
+    public IPage<Studio> studioList(PageVO pageVO, Integer recommend, String status) {
+        return this.page(PageUtil.initPage(pageVO), new QueryWrapper<Studio>()
+                .eq(recommend != null, "recommend", true)
+                .eq(status!=null,"status",status));
+
     }
 
     /**
@@ -118,6 +138,6 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
      * @return 直播间
      */
     private Studio getByRoomId(Integer roomId) {
-        return this.getOne(this.lambdaQuery().eq(Studio::getRoomId, roomId));
+        return this.getOne(new LambdaQueryWrapper<Studio>().eq(Studio::getRoomId, roomId));
     }
 }
