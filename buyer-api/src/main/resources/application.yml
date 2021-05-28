@@ -150,6 +150,7 @@ ignored:
     - /buyer/memberEvaluation/**/goodsEvaluation
     - /buyer/memberEvaluation/**/evaluationNumber
     - /buyer/appVersion/**
+    - /buyer/broadcast/studio
     - /druid/**
     - /swagger-ui.html
     - /doc.html

@@ -184,7 +184,7 @@ public class Order extends BaseEntity {
     private Boolean canReturn;
 
     @ApiModelProperty(value = "提货码")
-    private String qrCode;
+    private String verificationCode;
 
     @ApiModelProperty(value = "分销员ID")
     private String distributionId;

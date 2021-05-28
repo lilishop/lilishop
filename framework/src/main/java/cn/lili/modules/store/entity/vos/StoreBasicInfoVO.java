@@ -14,7 +14,7 @@ import lombok.Data;
 public class StoreBasicInfoVO {
 
     @ApiModelProperty(value = "店铺ID")
-    private Long storeId;
+    private String storeId;
 
     @ApiModelProperty(value = "店铺名称")
     private String storeName;

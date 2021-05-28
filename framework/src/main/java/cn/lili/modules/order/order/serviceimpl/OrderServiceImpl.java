@@ -282,7 +282,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             //填写提货码
             String code = CommonUtil.getRandomNum();
             orderLambdaUpdateWrapper.eq(Order::getSn, orderSn);
-            orderLambdaUpdateWrapper.set(Order::getQrCode, code);
+            orderLambdaUpdateWrapper.set(Order::getVerificationCode, code);
             orderLambdaUpdateWrapper.set(Order::getOrderStatus, OrderStatusEnum.TAKE.name());
             orderLambdaUpdateWrapper.set(Order::getCanReturn, !PaymentMethodEnum.BANK_TRANSFER.name().equals(order.getPaymentMethod()));
 
@@ -395,8 +395,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    @OrderLogPoint(description = "'订单['+#orderSn+']核销，核销码['+#qrCode+']'", orderSn = "#orderSn")
-    public Order take(String orderSn, String qrCode) {
+    @OrderLogPoint(description = "'订单['+#orderSn+']核销，核销码['+#verificationCode+']'", orderSn = "#orderSn")
+    public Order take(String orderSn, String verificationCode) {
         //是否可以查询到订单
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
         //判断是否为虚拟订单
@@ -406,7 +406,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //判断虚拟订单状态
         if (order.getOrderStatus().equals(OrderStatusEnum.TAKE.name())) {
             //判断提货码是否正确\修改订单状态
-            if (order.getOrderStatus().equals(OrderStatusEnum.TAKE.name()) && qrCode.equals(order.getQrCode())) {
+            if (order.getOrderStatus().equals(OrderStatusEnum.TAKE.name()) && verificationCode.equals(order.getVerificationCode())) {
                 order.setOrderStatus(OrderStatusEnum.COMPLETED.name());
 
                 this.updateById(order);

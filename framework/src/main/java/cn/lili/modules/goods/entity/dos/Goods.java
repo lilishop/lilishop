@@ -182,6 +182,12 @@ public class Goods extends BaseEntity {
     @ApiModelProperty(value = "销售模式", required = true)
     private String salesModel;
 
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型", required = true)
+    private String goodsType;
+
     public Goods() {
     }
 
@@ -203,6 +209,6 @@ public class Goods extends BaseEntity {
         this.cost = goodsOperationDTO.getCost();
         //如果立即上架则
         this.marketEnable = goodsOperationDTO.isRelease() ? GoodsStatusEnum.UPPER.name() : GoodsStatusEnum.DOWN.name();
-
+        this.goodsType=goodsOperationDTO.getGoodsType();
     }
 }
