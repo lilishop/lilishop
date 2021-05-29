@@ -118,10 +118,16 @@ public interface OrderService extends IService<Order> {
     /**
      * 订单核验
      *
-     * @param orderSn 订单编号
-     * @param qrCode  提货码
+     * @param verificationCode  验证码
      */
-    Order take(String orderSn, String qrCode);
+    Order take(String orderSn,String verificationCode);
+
+    /**
+     * 根据核验码获取订单信息
+     *
+     * @param verificationCode  验证码
+     */
+    Order getOrderByVerificationCode(String verificationCode);
 
     /**
      * 订单完成

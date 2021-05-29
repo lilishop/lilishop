@@ -239,9 +239,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Override
     public Order getBySn(String orderSn) {
-        QueryWrapper<Order> orderWrapper = new QueryWrapper<>();
-        orderWrapper.eq("sn", orderSn);
-        return this.getOne(orderWrapper);
+        return this.getOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
     }
 
     @Override
@@ -357,30 +355,29 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    @OrderLogPoint(description = "'订单['+#orderSn+']核销，核销码['+#verificationCode+']'", orderSn = "#orderSn")
-    public Order take(String orderSn, String verificationCode) {
-        //是否可以查询到订单
-        Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
-        //判断是否为虚拟订单
-        if (!order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
-            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
-        }
-        //判断虚拟订单状态
-        if (order.getOrderStatus().equals(OrderStatusEnum.TAKE.name())) {
-            //判断提货码是否正确\修改订单状态
-            if (order.getOrderStatus().equals(OrderStatusEnum.TAKE.name()) && verificationCode.equals(order.getVerificationCode())) {
-                order.setOrderStatus(OrderStatusEnum.COMPLETED.name());
+    public Order take(String orderSn,String verificationCode) {
 
-                this.updateById(order);
+        //获取订单信息
+        Order order = this.getBySn(orderSn);
+        //检测虚拟订单信息
+        checkVerificationOrder(order,verificationCode);
+        order.setOrderStatus(OrderStatusEnum.COMPLETED.name());
+        //修改订单信息
+        this.updateById(order);
+        //发送订单完成消息
+        OrderMessage orderMessage = new OrderMessage();
+        orderMessage.setNewStatus(OrderStatusEnum.COMPLETED);
+        orderMessage.setOrderSn(order.getSn());
+        this.sendUpdateStatusMessage(orderMessage);
+        return order;
+    }
 
-                OrderMessage orderMessage = new OrderMessage();
-                orderMessage.setNewStatus(OrderStatusEnum.COMPLETED);
-                orderMessage.setOrderSn(order.getSn());
-                this.sendUpdateStatusMessage(orderMessage);
-            }
-            return order;
-        }
-        throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+    @Override
+    public Order getOrderByVerificationCode(String verificationCode) {
+        return this.getOne(new LambdaQueryWrapper<Order>()
+                .eq(Order::getOrderStatus, OrderStatusEnum.TAKE.name())
+                .eq(Order::getStoreId,UserContext.getCurrentUser().getStoreId())
+                .eq(Order::getVerificationCode, verificationCode));
     }
 
     @Override
@@ -817,5 +814,29 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderMessage.setNewStatus(OrderStatusEnum.TAKE);
         orderMessage.setOrderSn(orderSn);
         this.sendUpdateStatusMessage(orderMessage);
+    }
+
+    /**
+     * 检测虚拟订单信息
+     * @param order 订单
+     * @param verificationCode 验证码
+     */
+    private void checkVerificationOrder(Order order,String verificationCode){
+        //判断查询是否可以查询到订单
+        if (order==null) {
+            throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
+        }
+        //判断是否为虚拟订单
+        else if (!order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
+            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+        }
+        //判断虚拟订单状态
+        else if (order.getOrderStatus().equals(OrderStatusEnum.TAKE.name())) {
+            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+        }
+        //判断验证码是否正确
+        else if(!verificationCode.equals(order.getVerificationCode())){
+            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+        }
     }
 }

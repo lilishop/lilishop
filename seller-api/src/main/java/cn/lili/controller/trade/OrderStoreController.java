@@ -117,22 +117,23 @@ public class OrderStoreController {
         return ResultUtil.data(orderService.cancel(orderSn, reason));
     }
 
+    @ApiOperation(value = "根据核验码获取订单信息")
+    @ApiImplicitParam(name = "verificationCode", value = "核验码", required = true, paramType = "path")
+    @GetMapping(value = "/getOrderByVerificationCode/{verificationCode}")
+    public ResultMessage<Object> getOrderByVerificationCode(@PathVariable String verificationCode){
+        return ResultUtil.data(orderService.getOrderByVerificationCode(verificationCode));
+    }
+
     @ApiOperation(value = "订单核验")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "orderSn", value = "订单sn", required = true, dataType = "String", paramType = "path"),
-            @ApiImplicitParam(name = "qrCode", value = "发货单号", required = true, dataType = "String", paramType = "query")
-    })
-    @PostMapping(value = "/{orderSn}/take")
-    public ResultMessage<Object> take(@NotNull(message = "参数非法") @PathVariable String orderSn,
-                                      @NotNull(message = "核验码") String qrCode) {
-        return ResultUtil.data(orderService.take(orderSn, qrCode));
+    @ApiImplicitParam(name = "verificationCode", value = "核验码", required = true, paramType = "path")
+    @PutMapping(value = "/take/${order}/{verificationCode}")
+    public ResultMessage<Object> take(@PathVariable String orderSn,@PathVariable String verificationCode) {
+        return ResultUtil.data(orderService.take(orderSn,verificationCode));
     }
 
     @ApiOperation(value = "查询物流踪迹")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path")
-    })
-    @PostMapping(value = "/getTraces/{orderSn}")
+    @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path")
+    @GetMapping(value = "/getTraces/{orderSn}")
     public ResultMessage<Object> getTraces(@NotBlank(message = "订单编号不能为空") @PathVariable String orderSn) {
         return ResultUtil.data(orderService.getTraces(orderSn));
     }
