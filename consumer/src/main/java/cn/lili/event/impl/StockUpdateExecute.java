@@ -52,7 +52,6 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
 
         switch (orderMessage.getNewStatus()) {
             case PAID: {
-
                 OrderDetailVO order = orderService.queryDetail(orderMessage.getOrderSn());
                 //库存key 和 扣减数量
                 List<String> keys = new ArrayList<>();
@@ -78,7 +77,6 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                 break;
             }
             case CANCELLED: {
-
                 OrderDetailVO order = orderService.queryDetail(orderMessage.getOrderSn());
                 if (order.getOrder().getPayStatus().equals(PayStatusEnum.PAID.name())) {
                     for (OrderItem orderItem : order.getOrderItems()) {

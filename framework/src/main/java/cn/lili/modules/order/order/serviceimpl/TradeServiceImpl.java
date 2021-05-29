@@ -74,7 +74,9 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
         pointPretreatment(tradeDTO);
         //优惠券预处理
         couponPretreatment(tradeDTO);
+        //添加交易
         this.save(trade);
+        //添加订单
         orderService.intoDB(tradeDTO);
         //写入缓存，给消费者调用
         cache.put(key, tradeDTO);

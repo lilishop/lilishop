@@ -5,6 +5,7 @@ import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.List;
  */
 @Data
 @ApiModel(description = "购物车")
+@NoArgsConstructor
 public class CartVO extends CartBase implements Serializable {
 
     private static final long serialVersionUID = -5651775413457562422L;
@@ -43,7 +45,6 @@ public class CartVO extends CartBase implements Serializable {
 
     @ApiModelProperty(value = "使用的优惠券列表")
     private List<MemberCoupon> couponList;
-
 
     @ApiModelProperty(value = "赠品列表")
     private List<String> giftList;
@@ -71,9 +72,6 @@ public class CartVO extends CartBase implements Serializable {
 
     @ApiModelProperty(value = "已参与的的促销活动提示，直接展示给客户")
     private String promotionNotice;
-
-    public CartVO() {
-    }
 
     public CartVO(CartSkuVO cartSkuVO) {
         this.setStoreId(cartSkuVO.getStoreId());

@@ -4,27 +4,23 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.base.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.base.entity.enums.ClientTypeEnum;
-import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
-import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
-import cn.lili.modules.order.order.entity.enums.DeliverStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
-import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
-import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
+import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
+import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
+import cn.lili.modules.order.order.entity.enums.*;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.Date;
-import java.util.Optional;
 
 /**
  * 订单
@@ -37,6 +33,7 @@ import java.util.Optional;
 @Table(name = "li_order")
 @TableName("li_order")
 @ApiModel(value = "订单")
+@NoArgsConstructor
 public class Order extends BaseEntity {
 
 
@@ -176,6 +173,12 @@ public class Order extends BaseEntity {
     @ApiModelProperty(value = "订单类型")
     private String orderType;
 
+    /**
+     * @see OrderPromotionTypeEnum
+     */
+    @ApiModelProperty(value = "订单促销类型")
+    private String orderPromotionType;
+
     @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "价格详情")
     private String priceDetail;
@@ -195,62 +198,38 @@ public class Order extends BaseEntity {
     @ApiModelProperty(value = "使用的平台会员优惠券id")
     private String usePlatformMemberCouponId;
 
-    public Order() {
-
-    }
-
+    /**
+     * 构建订单
+     *
+     * @param cartVO   购物车VO
+     * @param tradeDTO 交易DTO
+     */
     public Order(CartVO cartVO, TradeDTO tradeDTO) {
-        String oldId = this.getId();
+        String orderId = this.getId();
         BeanUtil.copyProperties(tradeDTO, this);
         BeanUtil.copyProperties(cartVO.getPriceDetailDTO(), this);
         BeanUtil.copyProperties(cartVO, this);
-        this.setId(oldId);
-        //循环购物车列表判断是否为促销订单
-        this.setOrderType(OrderTypeEnum.NORMAL.name());
-        //促销信息填充
-        if (cartVO.getSkuList().get(0).getPromotions() != null) {
-            //判断是否为拼团订单
-            Optional<String> pintuanId = cartVO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
-            if (pintuanId.isPresent()) {
-                this.setOrderType(OrderTypeEnum.PINTUAN.name());
-                if (tradeDTO.getParentOrderSn() == null) {
-                    this.setParentOrderSn("");
-                }
-            }
-            //判断是否为积分订单
-            Optional<String> pointGoodsId = cartVO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.POINTS_GOODS.name())).map(PromotionGoods::getPromotionId).findFirst();
-            if (pointGoodsId.isPresent()) {
-                this.setOrderType(OrderTypeEnum.POINT.name());
-                if (tradeDTO.getParentOrderSn() == null) {
-                    this.setParentOrderSn("");
-                }
-            }
-        }else{
+
+        //订单类型判断--普通订单，活动订单。
+        if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.CART) || tradeDTO.getCartTypeEnum().equals(CartTypeEnum.BUY_NOW)) {
             this.setOrderType(OrderTypeEnum.NORMAL.name());
+        } else {
+            this.setOrderType(tradeDTO.getCartTypeEnum().name());
         }
         //设定订单默认状态
+        this.setId(orderId);
         this.setOrderStatus(OrderStatusEnum.UNPAID.name());
         this.setPayStatus(PayStatusEnum.UNPAID.name());
         this.setDeliverStatus(DeliverStatusEnum.UNDELIVERED.name());
-        //填充订单收件人信息
+        this.setTradeSn(tradeDTO.getSn());
+        this.setRemark(cartVO.getRemark());
+        this.setFreightPrice(tradeDTO.getPriceDetailDTO().getFreightPrice());
+        //会员收件信息
         this.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());
         this.setConsigneeAddressPath(tradeDTO.getMemberAddress().getConsigneeAddressPath());
         this.setConsigneeDetail(tradeDTO.getMemberAddress().getDetail());
         this.setConsigneeMobile(tradeDTO.getMemberAddress().getMobile());
         this.setConsigneeName(tradeDTO.getMemberAddress().getName());
-        //判断是否使用平台优惠券
-        if (tradeDTO.getPlatformCoupon() != null) {
-            this.setUsePlatformMemberCouponId(tradeDTO.getPlatformCoupon().getMemberCoupon().getId());
-        }
-        //判断是否使用店铺优惠券
-        //如果有收货地址，才记录收货地址
-        if (tradeDTO.getMemberAddress() != null) {
-            this.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());
-            this.setConsigneeAddressPath(tradeDTO.getMemberAddress().getConsigneeAddressPath());
-            this.setConsigneeDetail(tradeDTO.getMemberAddress().getDetail());
-            this.setConsigneeMobile(tradeDTO.getMemberAddress().getMobile());
-            this.setConsigneeName(tradeDTO.getMemberAddress().getName());
-        }
         //平台优惠券判定
         if (tradeDTO.getPlatformCoupon() != null) {
             this.setUsePlatformMemberCouponId(tradeDTO.getPlatformCoupon().getMemberCoupon().getId());
@@ -263,18 +242,10 @@ public class Order extends BaseEntity {
             }
             this.setUseStoreMemberCouponIds(storeCouponIds.toString());
         }
-        this.setTradeSn(tradeDTO.getSn());
-        this.setRemark(cartVO.getRemark());
-        this.setFreightPrice(tradeDTO.getPriceDetailDTO().getFreightPrice());
     }
 
     public PriceDetailDTO getPriceDetailDTO() {
-
-        try {
-            return JSONUtil.toBean(priceDetail, PriceDetailDTO.class);
-        } catch (Exception e) {
-            return null;
-        }
+        return JSONUtil.toBean(priceDetail, PriceDetailDTO.class);
     }
 
     public void setPriceDetailDTO(PriceDetailDTO priceDetail) {
