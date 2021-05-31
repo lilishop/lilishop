@@ -10,8 +10,6 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.kit.Payment;
 import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
-import cn.lili.modules.payment.service.PaymentService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +22,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class PaymentExecute implements OrderStatusChangeEvent {
 
-    //支付日志
-    @Autowired
-    private PaymentService paymentService;
     //订单
     @Autowired
     private OrderService orderService;

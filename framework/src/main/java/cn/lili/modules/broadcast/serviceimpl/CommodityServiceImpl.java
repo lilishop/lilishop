@@ -49,6 +49,9 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
             checkCommodity(commodity);
             //添加直播商品
             JSONObject json = wechatLivePlayerUtil.addGoods(commodity);
+            if(!json.getStr("errcode").equals("0")){
+                throw new ServiceException(json.getStr("errmsg"));
+            }
             commodity.setLiveGoodsId(Convert.toInt(json.getStr("goodsId")));
             commodity.setAuditId(json.getStr("auditId"));
             commodity.setStoreId(UserContext.getCurrentUser().getStoreId());

@@ -1,7 +1,9 @@
 package cn.lili.modules.broadcast.service;
 
+import cn.lili.common.vo.PageVO;
 import cn.lili.modules.broadcast.entity.dos.Studio;
 import cn.lili.modules.broadcast.entity.vos.StudioVO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -20,6 +22,14 @@ public interface StudioService extends IService<Studio> {
      * @return 开启状态
      */
     Boolean create(Studio studio);
+
+    /**
+     * 修改直播间
+     * 直播间默认手机直播
+     * @param studio 直播间
+     * @return 修改状态
+     */
+    Boolean edit(Studio studio);
 
     /**
      * 获取直播间信息
@@ -50,4 +60,13 @@ public interface StudioService extends IService<Studio> {
      * @return 操作结果
      */
     Boolean goodsDeleteInRoom(Integer roomId,Integer goodsId);
+
+    /**
+     * 获取直播间列表
+     * @param pageVO 分页
+     * @param recommend 是否推荐
+     * @param status 直播间状态
+     * @return 直播间分页
+     */
+    IPage<Studio> studioList(PageVO pageVO, Integer recommend, String status);
 }

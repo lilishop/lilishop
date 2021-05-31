@@ -147,6 +147,7 @@ ignored:
     - /buyer/memberEvaluation/**/goodsEvaluation
     - /buyer/memberEvaluation/**/evaluationNumber
     - /buyer/appVersion/**
+    - /buyer/broadcast/studio/**
     - /store/login/**
     - /manager/user/login
     - /manager/user/refresh/**

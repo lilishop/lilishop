@@ -1,13 +1,14 @@
 package cn.lili.controller.other.broadcast;
 
 import cn.lili.common.enums.ResultUtil;
-import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.broadcast.entity.dos.Studio;
 import cn.lili.modules.broadcast.service.StudioService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,14 +30,18 @@ public class StudioController {
     private StudioService studioService;
 
     @ApiOperation(value = "获取店铺直播间列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "recommend", value = "是否推荐", paramType = "query", dataType = "int"),
+            @ApiImplicitParam(name = "status", value = "直播间状态", paramType = "query", dataType = "String")
+    })
     @GetMapping
-    public ResultMessage<IPage<Studio>> page(PageVO pageVO) {
-        return ResultUtil.data(studioService.page(PageUtil.initPage(pageVO)));
+    public ResultMessage<IPage<Studio>> page(PageVO pageVO, Integer recommend, String status) {
+        return ResultUtil.data(studioService.studioList(pageVO, recommend, status));
     }
 
     @ApiOperation(value = "获取店铺直播间回放地址")
     @GetMapping("/getLiveInfo/{roomId}")
-    public ResultMessage<Object>  getLiveInfo(Integer roomId){
+    public ResultMessage<Object> getLiveInfo(Integer roomId) {
         return ResultUtil.data(studioService.getLiveInfo(roomId));
     }
 

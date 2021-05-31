@@ -65,14 +65,12 @@ public class TradeDTO implements Serializable {
     /**
      * key 为商家id
      * value 为商家优惠券
-     * 商家优惠券
+     * 店铺优惠券
      */
     private Map<String, MemberCouponDTO> storeCoupons;
 
     /**
-     * key 为商家id
-     * value 为商家优惠券
-     * 商家优惠券
+     * 店铺备注
      */
     private List<StoreRemarkDTO> storeRemark;
 

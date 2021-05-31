@@ -67,6 +67,12 @@ public class GoodsSearchParams extends PageVO {
     @ApiModelProperty(value = "是否为推荐商品")
     private Boolean recommend;
 
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型")
+    private String goodsType;
+
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
         if (StringUtils.isNotEmpty(goodsId)) {
@@ -108,6 +114,10 @@ public class GoodsSearchParams extends PageVO {
         if (recommend != null) {
             queryWrapper.le("recommend", recommend);
         }
+        if (goodsType != null) {
+            queryWrapper.eq("goods_type", goodsType);
+        }
+
         queryWrapper.eq("delete_flag", false);
         this.betweenWrapper(queryWrapper);
         return queryWrapper;
