@@ -257,11 +257,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setPayStatus(PayStatusEnum.PAID.name());
         order.setOrderStatus(OrderStatusEnum.PAID.name());
         order.setReceivableNo(receivableNo);
+        order.setCanReturn(!PaymentMethodEnum.BANK_TRANSFER.name().equals(order.getPaymentMethod()));
         this.updateById(order);
 
         //记录订单流水
         storeFlowService.payOrder(orderSn);
 
+        //发送订单已付款消息
         OrderMessage orderMessage = new OrderMessage();
         orderMessage.setOrderSn(order.getSn());
         orderMessage.setPaymentMethod(paymentMethod);
@@ -271,7 +273,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         String message = "订单付款，付款方式[" + PaymentMethodEnum.valueOf(paymentMethod).paymentName() + "]";
         OrderLog orderLog = new OrderLog(orderSn, "-1", UserEnums.SYSTEM.getRole(), "系统操作", message);
         orderLogService.save(orderLog);
-
 
     }
 
@@ -355,6 +356,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
+    @OrderLogPoint(description = "'订单['+#orderSn+']核销，核销码['+#verificationCode+']'", orderSn = "#orderSn")
     public Order take(String orderSn,String verificationCode) {
 
         //获取订单信息

@@ -66,6 +66,8 @@ public interface OrderService extends IService<Order> {
 
     /**
      * 订单付款
+     * 修改订单付款信息
+     * 记录订单流水
      *
      * @param orderSn       订单编号
      * @param paymentMethod 支付方法
@@ -118,14 +120,14 @@ public interface OrderService extends IService<Order> {
     /**
      * 订单核验
      *
-     * @param verificationCode  验证码
+     * @param verificationCode 验证码
      */
-    Order take(String orderSn,String verificationCode);
+    Order take(String orderSn, String verificationCode);
 
     /**
      * 根据核验码获取订单信息
      *
-     * @param verificationCode  验证码
+     * @param verificationCode 验证码
      */
     Order getOrderByVerificationCode(String verificationCode);
 
@@ -186,8 +188,9 @@ public interface OrderService extends IService<Order> {
 
     /**
      * 获取待发货订单编号列表
+     *
      * @param response
-     * @param orderIds 订单ID列表
+     * @param orderIds      订单ID列表
      * @param logisticsName 店铺已选择物流公司列表
      * @return 待发货订单编号列表
      */
@@ -195,6 +198,7 @@ public interface OrderService extends IService<Order> {
 
     /**
      * 订单批量发货
+     *
      * @param list 批量发货列表
      */
     void batchDeliver(List<OrderBatchDeliverDTO> list);
