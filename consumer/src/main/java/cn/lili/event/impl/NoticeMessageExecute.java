@@ -11,12 +11,11 @@ import cn.lili.modules.message.service.NoticeMessageService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
-import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
+import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleTypeEnum;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -83,7 +82,7 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
                     break;
                 //如果是拼团订单，发送拼团成功消息
                 case UNDELIVERED:
-                    if(orderDetailVO.getOrder().getOrderType().equals(OrderTypeEnum.PINTUAN.name())){
+                    if(orderDetailVO.getOrder().getOrderPromotionType().equals(OrderPromotionTypeEnum.PINTUAN.name())){
                         //拼团成功消息
                         noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.PINTUAN_SUCCESS);
                     }

@@ -6,13 +6,13 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.broadcast.entity.dos.Studio;
+import cn.lili.modules.broadcast.entity.vos.StudioVO;
 import cn.lili.modules.broadcast.service.StudioService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -41,8 +41,8 @@ public class StudioStoreController {
     @ApiOperation(value = "获取店铺直播间详情")
     @ApiImplicitParam(name = "studioId", value = "直播间ID", required = true, dataType = "String", paramType = "path")
     @GetMapping("/studioInfo/{studioId}")
-    public ResultMessage<Studio> studioInfo(@PathVariable String studioId) {
-        return ResultUtil.data(studioService.getById(studioId));
+    public ResultMessage<StudioVO> studioInfo(@PathVariable String studioId) {
+        return ResultUtil.data(studioService.getStudioVO(studioId));
     }
 
     @ApiOperation(value = "添加直播间")
@@ -81,7 +81,7 @@ public class StudioStoreController {
             @ApiImplicitParam(name = "roomId", value = "房间ID", required = true, dataType = "Integer", paramType = "path"),
             @ApiImplicitParam(name = "liveGoodsId", value = "直播商品ID", required = true, dataType = "Integer", paramType = "path")
     })
-    @Delete(value = "/deleteInRoom/{roomId}/{liveGoodsId}")
+    @DeleteMapping(value = "/deleteInRoom/{roomId}/{liveGoodsId}")
     public ResultMessage<Studio> deleteInRoom(@PathVariable Integer roomId, @PathVariable Integer liveGoodsId) {
         if (studioService.goodsDeleteInRoom(roomId, liveGoodsId)) {
             return ResultUtil.success(ResultCode.SUCCESS);

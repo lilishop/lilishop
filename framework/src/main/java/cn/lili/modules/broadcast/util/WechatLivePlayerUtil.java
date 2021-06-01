@@ -196,7 +196,7 @@ public class WechatLivePlayerUtil {
         String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/delete?access_token=" + token;
         Map<String, Object> map = new HashMap<>();
         map.put("goodsId", goodsId);
-        String content = HttpUtils.doPostWithJson(url, goodsId);
+        String content = HttpUtils.doPostWithJson(url, map);
         JSONObject json = new JSONObject(content);
         log.info("微信小程序删除直播商品结果：" + content);
         return json;

@@ -12,8 +12,8 @@ import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.order.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
+import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -77,7 +77,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
         if(orderMessage.getNewStatus().equals(OrderStatusEnum.COMPLETED)){
             //根据订单编号获取订单数据,如果为积分订单则跳回
             Order order = orderService.getBySn(orderMessage.getOrderSn());
-            if(order.getOrderType().equals(OrderTypeEnum.POINT)){
+            if(order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINT.name())){
                 return;
             }
             //获取积分设置

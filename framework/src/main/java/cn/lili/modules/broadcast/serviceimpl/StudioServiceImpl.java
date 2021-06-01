@@ -7,6 +7,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.broadcast.entity.StudioStatusEnum;
 import cn.lili.modules.broadcast.entity.dos.Studio;
 import cn.lili.modules.broadcast.entity.dos.StudioCommodity;
 import cn.lili.modules.broadcast.entity.vos.StudioVO;
@@ -49,6 +50,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             studio.setRoomId(Integer.parseInt(roomMap.get("roomId")));
             studio.setQrCodeUrl(roomMap.get("qrcodeUrl"));
             studio.setStoreId(UserContext.getCurrentUser().getStoreId());
+            studio.setStatus(StudioStatusEnum.NEW.name());
             return this.save(studio);
         } catch (Exception e) {
             e.printStackTrace();
@@ -98,7 +100,6 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             //设置直播间默认的商品（前台展示）只展示两个
             if (studio.getRoomGoodsNum() < 3) {
                 studio.setRoomGoodsList(JSONUtil.toJsonStr(commodityMapper.getSimpleCommodityByRoomId(roomId)));
-                ;
             }
             return this.updateById(studio);
         }
@@ -116,7 +117,6 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             //设置直播间默认的商品（前台展示）只展示两个
             if (studio.getRoomGoodsNum() < 3) {
                 studio.setRoomGoodsList(JSONUtil.toJsonStr(commodityMapper.getSimpleCommodityByRoomId(roomId)));
-                ;
             }
             return this.updateById(studio);
         }
@@ -127,7 +127,8 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     public IPage<Studio> studioList(PageVO pageVO, Integer recommend, String status) {
         return this.page(PageUtil.initPage(pageVO), new QueryWrapper<Studio>()
                 .eq(recommend != null, "recommend", true)
-                .eq(status!=null,"status",status));
+                .eq(status!=null,"status",status)
+                .orderByDesc("create_time"));
 
     }
 

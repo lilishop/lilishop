@@ -78,7 +78,7 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
     public boolean deleteCommodity(String goodsId) {
         JSONObject json = wechatLivePlayerUtil.deleteGoods(goodsId);
         if (json.getStr("errcode").equals("0")) {
-            return this.remove(this.lambdaQuery().eq(Commodity::getLiveGoodsId, goodsId));
+            return this.remove(new LambdaQueryWrapper<Commodity>().eq(Commodity::getLiveGoodsId, goodsId));
         }
         return false;
     }
@@ -106,6 +106,7 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
         return this.baseMapper.commodityVOList(PageUtil.initPage(pageVO),
                 new QueryWrapper<CommodityVO>().like(name != null, "c.name", name)
                         .eq(auditStatus != null, "c.audit_status", auditStatus)
-                        .eq(UserContext.getCurrentUser().getRole().equals(UserEnums.STORE), "c.store_id", UserContext.getCurrentUser().getStoreId()));
+                        .eq(UserContext.getCurrentUser().getRole().equals(UserEnums.STORE), "c.store_id", UserContext.getCurrentUser().getStoreId())
+                        .orderByDesc("create_time"));
     }
 }

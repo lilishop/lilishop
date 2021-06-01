@@ -125,8 +125,11 @@ public class OrderStoreController {
     }
 
     @ApiOperation(value = "订单核验")
-    @ApiImplicitParam(name = "verificationCode", value = "核验码", required = true, paramType = "path")
-    @PutMapping(value = "/take/${order}/{verificationCode}")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "orderSn", value = "订单号", required = true, paramType = "path"),
+            @ApiImplicitParam(name = "verificationCode", value = "核验码", required = true, paramType = "path")
+    })
+    @PutMapping(value = "/take/{orderSn}/{verificationCode}")
     public ResultMessage<Object> take(@PathVariable String orderSn,@PathVariable String verificationCode) {
         return ResultUtil.data(orderService.take(orderSn,verificationCode));
     }

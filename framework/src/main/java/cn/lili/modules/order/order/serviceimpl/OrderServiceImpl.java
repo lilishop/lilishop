@@ -201,7 +201,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @OrderLogPoint(description = "'订单['+#orderSn+']取消，原因为：'+#reason", orderSn = "#orderSn")
     public Order cancel(String orderSn, String reason) {
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
-        if (order.getOrderType().equals(OrderTypeEnum.PINTUAN.name()) && !order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())) {
+        if (order.getOrderPromotionType().equals(OrderPromotionTypeEnum.PINTUAN.name()) && !order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())) {
             throw new ServiceException("未成团订单不可取消");
         }
         if (CharSequenceUtil.equalsAny(order.getOrderStatus(),
@@ -635,7 +635,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //寻找拼团的所有订单
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Order::getPromotionId, pintuanId)
-                .eq(Order::getOrderType, OrderTypeEnum.PINTUAN.name())
+                .eq(Order::getOrderPromotionType, OrderPromotionTypeEnum.PINTUAN.name())
                 .eq(Order::getPayStatus, PayStatusEnum.PAID.name());
         // 拼团sn=开团订单sn 或者 参团订单的开团订单sn
         queryWrapper.and(i -> i.eq(Order::getSn, parentOrderSn)
@@ -692,7 +692,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 BeanUtil.copyProperties(priceDetailDTO, order, "id");
                 order.setSn(SnowFlake.createStr("G"));
                 order.setTradeSn(tradeDTO.getSn());
-                order.setOrderType(OrderTypeEnum.GIFT.name());
+                order.setOrderType(OrderPromotionTypeEnum.GIFT.name());
                 order.setOrderStatus(OrderStatusEnum.UNPAID.name());
                 order.setPayStatus(PayStatusEnum.UNPAID.name());
                 order.setDeliverStatus(DeliverStatusEnum.UNDELIVERED.name());
@@ -772,7 +772,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     private void checkOrder(Order order) {
         //订单类型为拼团订单，检测购买数量是否超过了限购数量
-        if (OrderTypeEnum.PINTUAN.name().equals(order.getOrderType())) {
+        if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())) {
             Pintuan pintuan = pintuanService.getPintuanById(order.getPromotionId());
             Integer limitNum = pintuan.getLimitNum();
             if (limitNum != 0 && order.getGoodsNum() > limitNum) {

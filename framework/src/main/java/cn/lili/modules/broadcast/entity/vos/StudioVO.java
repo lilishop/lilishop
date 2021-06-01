@@ -8,15 +8,15 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @author liushuai(liushuai711 @ gmail.com)
- * @version v4.1
- * @Description:
- * @since 2021/5/17 3:04 下午
+ * 直播间VO
+ *
+ * @author Bulbasaur
+ * @date: 2021/5/31 11:58 上午
  */
 @Data
 public class StudioVO extends Studio {
 
     @ApiModelProperty(value = "直播间商品列表")
-    private List<Commodity> CommodityList;
+    private List<Commodity> commodityList;
 
 }
