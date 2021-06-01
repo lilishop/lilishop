@@ -1,5 +1,6 @@
 package cn.lili.modules.broadcast.service;
 
+import cn.lili.common.delayqueue.BroadcastMessage;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.broadcast.entity.dos.Studio;
 import cn.lili.modules.broadcast.entity.vos.StudioVO;
@@ -69,4 +70,10 @@ public interface StudioService extends IService<Studio> {
      * @return 直播间分页
      */
     IPage<Studio> studioList(PageVO pageVO, Integer recommend, String status);
+
+    /**
+     * 修改直播间状态
+     * @param broadcastMessage 直播间消息
+     */
+    void updateStudioStatus(BroadcastMessage broadcastMessage);
 }

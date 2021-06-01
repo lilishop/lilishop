@@ -279,6 +279,8 @@ lili:
       notice-send-group: lili_send_notice_group
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
+      broadcast-topic: lili_broadcast_topic
+      broadcast-group: lili_broadcast_group
 rocketmq:
   name-server: 127.0.0.1:9876
   producer:

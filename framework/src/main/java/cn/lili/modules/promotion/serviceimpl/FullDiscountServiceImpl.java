@@ -97,7 +97,10 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
         }
         // 保存到MONGO中
         this.mongoTemplate.save(fullDiscountVO);
-        PromotionMessage promotionMessage = new PromotionMessage(fullDiscountVO.getId(), PromotionTypeEnum.FULL_DISCOUNT.name(), PromotionStatusEnum.START.name(), fullDiscountVO.getStartTime(), fullDiscountVO.getEndTime());
+        PromotionMessage promotionMessage = new PromotionMessage(fullDiscountVO.getId(), PromotionTypeEnum.FULL_DISCOUNT.name(),
+                PromotionStatusEnum.START.name(),
+                fullDiscountVO.getStartTime(), fullDiscountVO.getEndTime());
+
         TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 fullDiscountVO.getStartTime().getTime(), promotionMessage,
                 DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),

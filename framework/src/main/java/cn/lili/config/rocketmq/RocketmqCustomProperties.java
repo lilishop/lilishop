@@ -61,4 +61,8 @@ public class RocketmqCustomProperties {
 
     private String afterSaleGroup;
 
+    private String broadcastTopic;
+
+    private String broadcastGroup;
+
 }

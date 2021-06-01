@@ -15,7 +15,12 @@ public enum DelayQueueType {
     /**
      * 拼团订单
      */
-    PINTUAN_ORDER("拼团订单");
+    PINTUAN_ORDER("拼团订单"),
+
+    /**
+     * 直播
+     */
+    BROADCAST("直播");
 
     private final String description;
 

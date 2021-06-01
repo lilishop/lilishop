@@ -1,15 +1,23 @@
 package cn.lili.modules.broadcast.serviceimpl;
 
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.delayqueue.BroadcastMessage;
+import cn.lili.common.delayqueue.DelayQueueTools;
+import cn.lili.common.delayqueue.DelayQueueType;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.trigger.interfaces.TimeTrigger;
+import cn.lili.common.trigger.model.TimeExecuteConstant;
+import cn.lili.common.trigger.model.TimeTriggerMsg;
 import cn.lili.common.utils.BeanUtil;
+import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.broadcast.entity.StudioStatusEnum;
+import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.broadcast.entity.dos.Studio;
 import cn.lili.modules.broadcast.entity.dos.StudioCommodity;
+import cn.lili.modules.broadcast.entity.enums.StudioStatusEnum;
 import cn.lili.modules.broadcast.entity.vos.StudioVO;
 import cn.lili.modules.broadcast.mapper.CommodityMapper;
 import cn.lili.modules.broadcast.mapper.StudioMapper;
@@ -18,6 +26,7 @@ import cn.lili.modules.broadcast.service.StudioService;
 import cn.lili.modules.broadcast.util.WechatLivePlayerUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +50,12 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     private StudioCommodityService studioCommodityService;
     @Resource
     private CommodityMapper commodityMapper;
+    //延时任务
+    @Autowired
+    private TimeTrigger timeTrigger;
+    //Rocketmq
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Override
     public Boolean create(Studio studio) {
@@ -51,7 +66,28 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             studio.setQrCodeUrl(roomMap.get("qrcodeUrl"));
             studio.setStoreId(UserContext.getCurrentUser().getStoreId());
             studio.setStatus(StudioStatusEnum.NEW.name());
-            return this.save(studio);
+            //直播间添加成功发送直播间开启、关闭延时任务
+            if(this.save(studio)){
+                //直播开启延时任务
+                BroadcastMessage broadcastMessage = new BroadcastMessage(studio.getId(),StudioStatusEnum.START.name());
+                TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
+                        Long.parseLong(studio.getStartTime()), broadcastMessage,
+                        DelayQueueTools.wrapperUniqueKey(DelayQueueType.BROADCAST, studio.getId()),
+                        rocketmqCustomProperties.getPromotionTopic());
+                // 发送促销活动开始的延时任务
+                this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(Long.parseLong(studio.getStartTime())));
+
+                //直播结束延时任务
+                broadcastMessage = new BroadcastMessage(studio.getId(),StudioStatusEnum.END.name());
+                timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
+                        Long.parseLong(studio.getEndTime()), broadcastMessage,
+                        DelayQueueTools.wrapperUniqueKey(DelayQueueType.BROADCAST, studio.getId()),
+                        rocketmqCustomProperties.getPromotionTopic());
+                // 发送促销活动开始的延时任务
+                this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(Long.parseLong(studio.getEndTime())));
+            }
+            return true;
+
         } catch (Exception e) {
             e.printStackTrace();
             throw new ServiceException(ResultCode.ERROR);
@@ -61,8 +97,33 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
 
     @Override
     public Boolean edit(Studio studio) {
+        Studio oldStudio=this.getById(studio.getId());
         wechatLivePlayerUtil.editRoom(studio);
-        return this.updateById(studio);
+        if(this.updateById(studio)){
+            // 发送更新延时任务
+            //直播间开始
+            BroadcastMessage broadcastMessage = new BroadcastMessage(studio.getId(),StudioStatusEnum.START.name());
+            this.timeTrigger.edit(
+                    TimeExecuteConstant.BROADCAST_EXECUTOR,
+                    broadcastMessage,
+                    Long.parseLong(oldStudio.getStartTime()),
+                    Long.parseLong(studio.getStartTime()),
+                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.BROADCAST,studio.getId()),
+                    DateUtil.getDelayTime(Long.parseLong(studio.getStartTime())),
+                    rocketmqCustomProperties.getPromotionTopic());
+
+            //直播间结束
+            broadcastMessage = new BroadcastMessage(studio.getId(),StudioStatusEnum.START.name());
+            this.timeTrigger.edit(
+                    TimeExecuteConstant.BROADCAST_EXECUTOR,
+                    broadcastMessage,
+                    Long.parseLong(oldStudio.getEndTime()),
+                    Long.parseLong(studio.getEndTime()),
+                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.BROADCAST,studio.getId()),
+                    DateUtil.getDelayTime(Long.parseLong(studio.getEndTime())),
+                    rocketmqCustomProperties.getPromotionTopic());
+        }
+        return true;
     }
 
     @Override
@@ -130,6 +191,13 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                 .eq(status!=null,"status",status)
                 .orderByDesc("create_time"));
 
+    }
+
+    @Override
+    public void updateStudioStatus(BroadcastMessage broadcastMessage) {
+        this.update(new LambdaUpdateWrapper<Studio>()
+                .eq(Studio::getId,broadcastMessage.getStudioId())
+                .set(Studio::getStatus,broadcastMessage.getStatus()));
     }
 
     /**
