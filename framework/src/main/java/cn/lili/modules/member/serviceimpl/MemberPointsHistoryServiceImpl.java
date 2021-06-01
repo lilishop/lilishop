@@ -46,9 +46,14 @@ public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHist
 
     @Override
     public IPage<MemberPointsHistory> MemberPointsHistoryList(PageVO page, String memberId, String memberName) {
-        LambdaQueryWrapper<MemberPointsHistory> lambdaQueryWrapper=new LambdaQueryWrapper<MemberPointsHistory>()
+        LambdaQueryWrapper<MemberPointsHistory> lambdaQueryWrapper = new LambdaQueryWrapper<MemberPointsHistory>()
                 .eq(memberId != null, MemberPointsHistory::getMemberId, memberId)
                 .like(memberName != null, MemberPointsHistory::getMemberName, memberName);
+        //如果排序为空，则默认创建时间倒序
+        if (StringUtils.isEmpty(page.getSort())) {
+            page.setSort("createTime");
+            page.setOrder("desc");
+        }
         return this.page(PageUtil.initPage(page), lambdaQueryWrapper);
     }
 }
