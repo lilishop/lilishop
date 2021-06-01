@@ -233,7 +233,7 @@ public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMap
             QueryWrapper queryWrapper = new QueryWrapper();
             queryWrapper.between("date", dates[0], dates[1]);
             //根据店铺查询判定，如果有，则店铺查询，如果没有，则根据商家查询
-            if (queryParam.getStoreId() != null) {
+            if (StringUtils.isNotEmpty(queryParam.getStoreId())) {
                 queryWrapper.eq("store_id", queryParam.getStoreId());
             } else {
                 queryWrapper.eq("store_id", -1);

@@ -12,6 +12,7 @@ import cn.lili.common.utils.CommonUtil;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.config.properties.SystemSetting;
 import cn.lili.modules.file.entity.File;
 import cn.lili.modules.file.plugin.FileManagerPlugin;
 import cn.lili.modules.file.service.FileService;
@@ -50,6 +51,9 @@ public class UploadController {
     private FileManagerPlugin fileManagerPlugin;
     @Autowired
     private Cache cache;
+
+    @Autowired
+    private SystemSetting systemSetting;
 
     @ApiOperation(value = "文件上传")
     @PostMapping(value = "/file")
@@ -102,4 +106,9 @@ public class UploadController {
     }
 
 
+    @ApiOperation(value = "返回licences")
+    @PostMapping(value = "/licences")
+    public ResultMessage<Object> licences() {
+        return ResultUtil.data(systemSetting.getLicences());
+    }
 }

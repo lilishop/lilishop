@@ -206,7 +206,7 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
         //已支付
         queryWrapper.eq("pay_status", PayStatusEnum.PAID.name());
         //选择商家判定
-        queryWrapper.eq(StringUtils.isNotEmpty(statisticsQueryParam.getStoreId()), "seller_id", statisticsQueryParam.getStoreId());
+        queryWrapper.eq(StringUtils.isNotEmpty(statisticsQueryParam.getStoreId()), "store_id", statisticsQueryParam.getStoreId());
 //       查询时间区间
         queryWrapper.between("create_time", dates[0], dates[1]);
 //        格式化时间
