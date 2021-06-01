@@ -240,7 +240,7 @@ public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMap
             if (queryParam.getStoreId() != null) {
                 queryWrapper.eq("store_id", queryParam.getStoreId());
             } else {
-                queryWrapper.eq("store_id", -1);
+                queryWrapper.eq("store_id", "-1");
             }
             return platformViewDataMapper.count(queryWrapper);
         }
