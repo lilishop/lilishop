@@ -110,7 +110,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
         // 保存到MYSQL中
         boolean result = this.save(seckill);
         // 保存到MONGO中
-        this.mongoTemplate.save(seckill);
+        this.mongoTemplate.save(seckillVO);
         //添加秒杀延时任务
         this.addSeckillStartTask(seckillVO);
         return result;

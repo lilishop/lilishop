@@ -67,10 +67,8 @@ public class SeckillManagerController {
 
     @ApiOperation(value = "分页查询秒杀活动列表")
     @GetMapping
-    public ResultMessage<IPage<SeckillVO>> getAll(SeckillSearchParams param, PageVO pageVo) {
-        pageVo.setNotConvert(true);
-        IPage<SeckillVO> page = seckillService.getSeckillByPageFromMongo(param, pageVo);
-        return ResultUtil.data(page);
+    public ResultMessage<IPage<Seckill>> getAll(SeckillSearchParams param, PageVO pageVo) {
+        return ResultUtil.data(seckillService.getSeckillByPageFromMysql(param, pageVo));
     }
 
     @ApiOperation(value = "删除一个秒杀活动")
