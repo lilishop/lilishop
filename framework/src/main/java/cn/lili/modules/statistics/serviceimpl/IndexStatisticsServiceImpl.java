@@ -19,9 +19,9 @@ import cn.lili.modules.statistics.mapper.StoreStatisticsDataMapper;
 import cn.lili.modules.statistics.model.dto.GoodsStatisticsQueryParam;
 import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.model.enums.SearchTypeEnum;
-import cn.lili.modules.statistics.model.enums.StatisticsQuery;
 import cn.lili.modules.statistics.model.vo.*;
 import cn.lili.modules.statistics.service.*;
+import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import cn.lili.modules.store.entity.enums.BillStatusEnum;
 import cn.lili.modules.store.service.BillService;
 import cn.lili.modules.store.service.StoreService;
@@ -31,6 +31,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -146,7 +147,7 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         //下单统计
         Map<String, Object> map = orderStatisticsDataService.getOrderStatisticsPrice();
         //今日下单数
-        indexStatisticsVO.setTodayOrderNum(map.get("num") == null ? 0L : (Long)map.get("num"));
+        indexStatisticsVO.setTodayOrderNum(map.get("num") == null ? 0L : (Long) map.get("num"));
         //今日下单金额
         indexStatisticsVO.setTodayOrderPrice(map.get("price") == null ? 0D : (Double) map.get("price"));
 
@@ -234,20 +235,19 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
     }
 
     @Override
-    public List<GoodsStatisticsDataVO> goodsStatisticsOfMonth() {
-        //获取查询参数
-        GoodsStatisticsQueryParam goodsStatisticsQueryParam = getGoodsStatisticsQueryParam();
+    public List<GoodsStatisticsDataVO> goodsStatistics(GoodsStatisticsQueryParam statisticsQueryParam) {
         //查询商品
-        return goodsStatisticsDataService.getGoodsStatisticsData(goodsStatisticsQueryParam, 10);
+        return goodsStatisticsDataService.getGoodsStatisticsData(statisticsQueryParam, 10);
     }
 
     @Override
-    public List<StoreStatisticsDataVO> storeStatisticsOfMonth() {
+    public List<StoreStatisticsDataVO> storeStatistics(StatisticsQueryParam statisticsQueryParam) {
 
         QueryWrapper queryWrapper = Wrappers.query();
 
-        queryWrapper.between("create_time", cn.hutool.core.date.DateUtil.beginOfYear(new DateTime()),
-                cn.hutool.core.date.DateUtil.endOfYear(new DateTime()));
+        Date[] dates = StatisticsDateUtil.getDateArray(statisticsQueryParam);
+        Date startTime = dates[0], endTime = dates[1];
+        queryWrapper.between("create_time", startTime, endTime);
 
         queryWrapper.orderByDesc("price");
 
@@ -288,7 +288,6 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         if (UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
             goodsStatisticsQueryParam.setStoreId(UserContext.getCurrentUser().getStoreId());
         }
-        goodsStatisticsQueryParam.setType(StatisticsQuery.PRICE.name());
         DateTime dateTime = new DateTime();
         goodsStatisticsQueryParam.setYear(dateTime.year());
         goodsStatisticsQueryParam.setMonth(dateTime.monthBaseOne());
