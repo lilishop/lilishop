@@ -135,22 +135,22 @@ ignored:
     - /MP_verify_qSyvBPhDsPdxvOhC.txt
     - /weixin/**
     - /source/**
-    - /buyer/store/**
     - /buyer/mini-program/**
     - /buyer/cashier/**
     - /buyer/pageData/**
     - /buyer/article/**
     - /buyer/goods/**
     - /buyer/category/**
-    - /buyer/shop/**
+    - /buyer/store/**
     - /buyer/connect/**
     - /buyer/members/**
-    - /buyer/promotion/pintuan
-    - /buyer/promotion/seckill
+    - /buyer/promotion/pintuan/**
+    - /buyer/promotion/seckill/**
+    - /buyer/promotion/pointsGoods/**
     - /buyer/memberEvaluation/**/goodsEvaluation
     - /buyer/memberEvaluation/**/evaluationNumber
     - /buyer/appVersion/**
-    - /buyer/broadcast/studio
+    - /buyer/broadcast/studio/**
     - /druid/**
     - /swagger-ui.html
     - /doc.html
