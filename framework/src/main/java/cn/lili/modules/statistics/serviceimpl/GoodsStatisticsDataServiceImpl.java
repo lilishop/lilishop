@@ -14,7 +14,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +44,7 @@ public class GoodsStatisticsDataServiceImpl extends ServiceImpl<GoodsStatisticsD
         queryWrapper.groupBy("goods_name");
 
         queryWrapper.eq(!StringUtils.isEmpty(goodsStatisticsQueryParam.getStoreId()), "store_id", goodsStatisticsQueryParam.getStoreId());
-        //查询前一百条记录
+        //查询前X记录
         Page page = new Page<GoodsStatisticsDataVO>(1, num);
         return goodsStatisticsDataMapper.getGoodsStatisticsData(page, queryWrapper);
     }
