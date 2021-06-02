@@ -17,7 +17,7 @@ import java.util.Date;
 public class OnlineMemberVO {
 
     //在线时间
-    @JsonFormat(timezone = "GMT+8", pattern = "dd HH")
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH")
     private Date date;
 
     //在线会员人数
