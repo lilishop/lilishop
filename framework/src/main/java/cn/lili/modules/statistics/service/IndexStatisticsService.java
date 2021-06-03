@@ -1,5 +1,7 @@
 package cn.lili.modules.statistics.service;
 
+import cn.lili.modules.statistics.model.dto.GoodsStatisticsQueryParam;
+import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.model.vo.*;
 
 import java.util.List;
@@ -38,14 +40,14 @@ public interface IndexStatisticsService {
      *
      * @return 热卖商品TOP10
      */
-    List<GoodsStatisticsDataVO> goodsStatisticsOfMonth();
+    List<GoodsStatisticsDataVO> goodsStatistics(GoodsStatisticsQueryParam statisticsQueryParam);
 
     /**
      * 查询热卖店铺TOP10
      *
      * @return 当月的热卖店铺TOP10
      */
-    List<StoreStatisticsDataVO> storeStatisticsOfMonth();
+    List<StoreStatisticsDataVO> storeStatistics(StatisticsQueryParam statisticsQueryParam);
 
 
 }

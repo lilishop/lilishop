@@ -67,29 +67,28 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             studio.setStoreId(UserContext.getCurrentUser().getStoreId());
             studio.setStatus(StudioStatusEnum.NEW.name());
             //直播间添加成功发送直播间开启、关闭延时任务
-            if(this.save(studio)){
+            if (this.save(studio)) {
                 //直播开启延时任务
-                BroadcastMessage broadcastMessage = new BroadcastMessage(studio.getId(),StudioStatusEnum.START.name());
+                BroadcastMessage broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.START.name());
                 TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
-                        Long.parseLong(studio.getStartTime()), broadcastMessage,
+                        Long.parseLong(studio.getStartTime()) * 1000L, broadcastMessage,
                         DelayQueueTools.wrapperUniqueKey(DelayQueueType.BROADCAST, studio.getId()),
                         rocketmqCustomProperties.getPromotionTopic());
                 // 发送促销活动开始的延时任务
-                this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(Long.parseLong(studio.getStartTime())));
+                this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(Long.parseLong(studio.getStartTime()) * 1000L));
 
                 //直播结束延时任务
-                broadcastMessage = new BroadcastMessage(studio.getId(),StudioStatusEnum.END.name());
+                broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.END.name());
                 timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
-                        Long.parseLong(studio.getEndTime()), broadcastMessage,
+                        Long.parseLong(studio.getEndTime()) * 1000L, broadcastMessage,
                         DelayQueueTools.wrapperUniqueKey(DelayQueueType.BROADCAST, studio.getId()),
                         rocketmqCustomProperties.getPromotionTopic());
                 // 发送促销活动开始的延时任务
-                this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(Long.parseLong(studio.getEndTime())));
+                this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(Long.parseLong(studio.getEndTime()) * 1000L));
             }
             return true;
 
         } catch (Exception e) {
-            e.printStackTrace();
             throw new ServiceException(ResultCode.ERROR);
         }
 
@@ -97,29 +96,29 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
 
     @Override
     public Boolean edit(Studio studio) {
-        Studio oldStudio=this.getById(studio.getId());
+        Studio oldStudio = this.getById(studio.getId());
         wechatLivePlayerUtil.editRoom(studio);
-        if(this.updateById(studio)){
+        if (this.updateById(studio)) {
             // 发送更新延时任务
             //直播间开始
-            BroadcastMessage broadcastMessage = new BroadcastMessage(studio.getId(),StudioStatusEnum.START.name());
+            BroadcastMessage broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.START.name());
             this.timeTrigger.edit(
                     TimeExecuteConstant.BROADCAST_EXECUTOR,
                     broadcastMessage,
                     Long.parseLong(oldStudio.getStartTime()),
                     Long.parseLong(studio.getStartTime()),
-                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.BROADCAST,studio.getId()),
+                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.BROADCAST, studio.getId()),
                     DateUtil.getDelayTime(Long.parseLong(studio.getStartTime())),
                     rocketmqCustomProperties.getPromotionTopic());
 
             //直播间结束
-            broadcastMessage = new BroadcastMessage(studio.getId(),StudioStatusEnum.START.name());
+            broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.START.name());
             this.timeTrigger.edit(
                     TimeExecuteConstant.BROADCAST_EXECUTOR,
                     broadcastMessage,
                     Long.parseLong(oldStudio.getEndTime()),
                     Long.parseLong(studio.getEndTime()),
-                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.BROADCAST,studio.getId()),
+                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.BROADCAST, studio.getId()),
                     DateUtil.getDelayTime(Long.parseLong(studio.getEndTime())),
                     rocketmqCustomProperties.getPromotionTopic());
         }
@@ -188,7 +187,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     public IPage<Studio> studioList(PageVO pageVO, Integer recommend, String status) {
         return this.page(PageUtil.initPage(pageVO), new QueryWrapper<Studio>()
                 .eq(recommend != null, "recommend", true)
-                .eq(status!=null,"status",status)
+                .eq(status != null, "status", status)
                 .orderByDesc("create_time"));
 
     }
@@ -196,8 +195,8 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     @Override
     public void updateStudioStatus(BroadcastMessage broadcastMessage) {
         this.update(new LambdaUpdateWrapper<Studio>()
-                .eq(Studio::getId,broadcastMessage.getStudioId())
-                .set(Studio::getStatus,broadcastMessage.getStatus()));
+                .eq(Studio::getId, broadcastMessage.getStudioId())
+                .set(Studio::getStatus, broadcastMessage.getStatus()));
     }
 
     /**
