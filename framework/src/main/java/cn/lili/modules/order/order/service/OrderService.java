@@ -5,6 +5,7 @@ import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
+import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
@@ -48,6 +49,14 @@ public interface OrderService extends IService<Order> {
      * @param orderSearchParams 查询参数
      */
     IPage<OrderSimpleVO> queryByParams(OrderSearchParams orderSearchParams);
+
+    /**
+     * 查询导出订单列表
+     * @param orderSearchParams 查询参数
+     * @return 导出订单列表
+     */
+    List<OrderExportDTO> queryExportOrder(OrderSearchParams orderSearchParams);
+
 
     /**
      * 订单详细

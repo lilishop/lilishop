@@ -87,16 +87,19 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         this.save(coupon);
         // 如果优惠券类型为部分商品则将促销活动商品更新
         this.updateScopePromotionGoods(coupon);
-        // 保存到MONGO中
-        this.mongoTemplate.save(coupon);
-        PromotionMessage promotionMessage = new PromotionMessage(coupon.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), coupon.getStartTime(), coupon.getEndTime());
-        TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                coupon.getStartTime().getTime(),
-                promotionMessage,
-                DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                rocketmqCustomProperties.getPromotionTopic());
-        // 发送促销活动开始的延时任务
-        this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(coupon.getStartTime().getTime()));
+        // 如果是动态时间优惠券不走延时任务
+        if (coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
+            // 保存到MONGO中
+            this.mongoTemplate.save(coupon);
+            PromotionMessage promotionMessage = new PromotionMessage(coupon.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), coupon.getStartTime(), coupon.getEndTime());
+            TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
+                    coupon.getStartTime().getTime(),
+                    promotionMessage,
+                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                    rocketmqCustomProperties.getPromotionTopic());
+            // 发送促销活动开始的延时任务
+            this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(coupon.getStartTime().getTime()));
+        }
         return coupon;
     }
 
@@ -263,31 +266,37 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
      * @param coupon 优惠券信息
      */
     private void checkParam(CouponVO coupon) {
-
+        //判断优惠券领取数量限制
         if (coupon.getCouponLimitNum() < 0) {
             throw new ServiceException("领取限制数量不能为负数");
         }
-
+        //领取数量不能超过发放数量
         if (coupon.getCouponLimitNum() > coupon.getPublishNum()) {
             throw new ServiceException("领取限制数量超出发行数量");
         }
-
+        //判断优惠券面额
         if (coupon.getCouponType().equals(CouponTypeEnum.PRICE.name()) && coupon.getPrice() > coupon.getConsumeThreshold()) {
             throw new ServiceException("优惠券面额必须小于优惠券消费限额");
         } else if (coupon.getCouponType().equals(CouponTypeEnum.DISCOUNT.name()) && (coupon.getCouponDiscount() < 0 && coupon.getCouponDiscount() > 10)) {
             throw new ServiceException("优惠券折扣必须小于10且大于0");
         }
-
+        //判断优惠券时间
         long nowTime = DateUtil.getDateline() * 1000;
-        if (coupon.getStartTime().getTime() < nowTime && coupon.getEndTime().getTime() > nowTime) {
-            throw new ServiceException("活动时间小于当前时间，不能进行编辑删除操作");
+        if (coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
+            if (coupon.getStartTime().getTime() < nowTime && coupon.getEndTime().getTime() > nowTime) {
+                throw new ServiceException("活动时间小于当前时间，不能进行编辑删除操作");
+            }
+
+            PromotionTools.checkPromotionTime(coupon.getStartTime().getTime(), coupon.getEndTime().getTime());
+            //对状态的处理.如果未传递状态则需要 根据当前时间来确认优惠券状态
+            this.promotionStatusEmpty(coupon);
+        } else {
+            //动态时间优惠券需设置有限期并为活动赠送优惠券
+            if (coupon.getEffectiveDays() == null || coupon.getGetType().equals(CouponGetEnum.FREE.name())) {
+                throw new ServiceException("活动赠送优惠券需设置有限期");
+            }
         }
-
-        PromotionTools.checkPromotionTime(coupon.getStartTime().getTime(), coupon.getEndTime().getTime());
-
         this.checkCouponScope(coupon);
-        //对状态的处理.如果未传递状态则需要 根据当前时间来确认优惠券状态
-        this.promotionStatusEmpty(coupon);
     }
 
     /**

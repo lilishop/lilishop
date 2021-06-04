@@ -204,9 +204,6 @@ public class OrderSearchParams extends PageVO {
             wrapper.like("o.client_type", clientType);
         }
         wrapper.eq("o.delete_flag", false);
-        wrapper.groupBy("o.id");
-        wrapper.orderByDesc("o.id");
-
         return wrapper;
     }
 

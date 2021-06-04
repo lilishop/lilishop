@@ -37,10 +37,7 @@ import cn.lili.modules.order.order.aop.OrderLogPoint;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.Receipt;
-import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
-import cn.lili.modules.order.order.entity.dto.OrderMessage;
-import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
-import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
+import cn.lili.modules.order.order.entity.dto.*;
 import cn.lili.modules.order.order.entity.enums.*;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
@@ -176,7 +173,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public IPage<OrderSimpleVO> queryByParams(OrderSearchParams orderSearchParams) {
-        return this.baseMapper.queryByParams(PageUtil.initPage(orderSearchParams), orderSearchParams.queryWrapper());
+        QueryWrapper queryWrapper=orderSearchParams.queryWrapper();
+        queryWrapper.groupBy("o.id");
+        queryWrapper.orderByDesc("o.id");
+        return this.baseMapper.queryByParams(PageUtil.initPage(orderSearchParams), queryWrapper);
+    }
+
+    @Override
+    public List<OrderExportDTO> queryExportOrder(OrderSearchParams orderSearchParams) {
+        return this.baseMapper.queryExportOrder(orderSearchParams.queryWrapper());
     }
 
     @Override

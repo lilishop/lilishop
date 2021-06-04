@@ -26,8 +26,6 @@ public class CouponActivity extends BasePromotion {
 
     /**
      * @see CouponActivityTypeEnum
-     * @author Bulbasaur
-     * @date: 2021/5/24 10:28 上午
      *
      */
     @NotNull(message = "优惠券活动类型不能为空")

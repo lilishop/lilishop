@@ -1,10 +1,10 @@
 package cn.lili.controller.trade;
 
-import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
+import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
@@ -21,6 +21,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * 管理端,订单API
@@ -31,7 +32,6 @@ import javax.validation.constraints.NotNull;
 @RestController
 @RequestMapping("/manager/orders")
 @Api(tags = "管理端,订单API")
-
 public class OrderManagerController {
 
     //订单
@@ -47,6 +47,13 @@ public class OrderManagerController {
     public ResultMessage<IPage<OrderSimpleVO>> queryMineOrder(OrderSearchParams orderSearchParams) {
         return ResultUtil.data(orderService.queryByParams(orderSearchParams));
     }
+
+    @ApiOperation(value = "查询订单导出列表")
+    @GetMapping("/queryExportOrder")
+    public ResultMessage<List<OrderExportDTO>> queryExportOrder(OrderSearchParams orderSearchParams) {
+        return ResultUtil.data(orderService.queryExportOrder(orderSearchParams));
+    }
+
 
     @ApiOperation(value = "订单明细")
     @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path")
