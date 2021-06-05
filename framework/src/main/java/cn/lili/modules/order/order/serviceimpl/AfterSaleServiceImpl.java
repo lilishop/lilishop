@@ -53,6 +53,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 售后业务层实现
@@ -89,6 +90,11 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     @Override
     public IPage<AfterSaleVO> getAfterSalePages(AfterSaleSearchParams saleSearchParams) {
         return baseMapper.queryByParams(PageUtil.initPage(saleSearchParams), saleSearchParams.queryWrapper());
+    }
+
+    @Override
+    public List<AfterSale> exportAfterSaleOrder(AfterSaleSearchParams saleSearchParams) {
+        return this.list(saleSearchParams.queryWrapper());
     }
 
     @Override
