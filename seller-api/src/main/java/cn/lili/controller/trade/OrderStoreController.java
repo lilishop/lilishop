@@ -7,6 +7,7 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
+import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
@@ -178,6 +179,11 @@ public class OrderStoreController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    @ApiOperation(value = "查询订单导出列表")
+    @GetMapping("/queryExportOrder")
+    public ResultMessage<List<OrderExportDTO>> queryExportOrder(OrderSearchParams orderSearchParams) {
+        return ResultUtil.data(orderService.queryExportOrder(orderSearchParams));
     }
 }

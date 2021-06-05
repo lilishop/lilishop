@@ -42,11 +42,9 @@ public class CouponManagerController {
 
     @ApiOperation(value = "获取优惠券列表")
     @GetMapping
-    public ResultMessage<IPage<CouponVO>> getCouponList(CouponSearchParams queryParam, PageVO page) {
-        page.setNotConvert(true);
+    public ResultMessage<IPage<Coupon>> getCouponList(CouponSearchParams queryParam, PageVO page) {
         queryParam.setStoreId("platform");
-        IPage<CouponVO> coupons = couponService.getCouponsByPageFromMongo(queryParam, page);
-        return ResultUtil.data(coupons);
+        return ResultUtil.data(couponService.getCouponsByPage(queryParam, page));
     }
 
     @ApiOperation(value = "获取优惠券详情")

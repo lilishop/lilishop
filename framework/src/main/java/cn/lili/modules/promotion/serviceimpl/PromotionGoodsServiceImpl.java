@@ -335,30 +335,6 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         stringRedisTemplate.opsForValue().set(promotionStockKey, quantity.toString());
     }
 
-    /**
-     * 分页获取根据条件获取促销商品
-     *
-     * @param goodsName     商品名称
-     * @param categoryPath  商品分类
-     * @param promotionType 促销类型
-     * @param pageVo        分页参数
-     * @return 促销商品信息
-     */
-    @Override
-    public IPage<PromotionGoods> getPromotionGoodsPage(String goodsName, String categoryPath, String promotionType, PageVO pageVo) {
-        LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();
-        if (CharSequenceUtil.isNotEmpty(goodsName)) {
-            queryWrapper.like(PromotionGoods::getGoodsName, goodsName);
-        }
-        if (CharSequenceUtil.isNotEmpty(categoryPath)) {
-            queryWrapper.like(PromotionGoods::getCategoryPath, categoryPath);
-        }
-        if (CharSequenceUtil.isNotEmpty(promotionType)) {
-            queryWrapper.eq(PromotionGoods::getPromotionType, promotionType);
-        }
-        return this.page(PageUtil.initPage(pageVo), queryWrapper);
-    }
-
     private void setFullDiscountPromotionGoods(IPage<PromotionGoodsDTO> promotionGoodsPage, List<FullDiscountVO> fullDiscountVOS, PageVO pageVo) {
         List<PromotionGoodsDTO> promotionGoodsDTOList = new ArrayList<>();
         int total = 0;
