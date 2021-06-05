@@ -272,7 +272,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
-    public Boolean freight(List<String> goodsIds, String freightPayer, String templateId) {
+    public Boolean freight(List<String> goodsIds, String templateId) {
         LambdaUpdateWrapper<Goods> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.set(Goods::getTemplateId, templateId);
         lambdaUpdateWrapper.in(Goods::getId, goodsIds);

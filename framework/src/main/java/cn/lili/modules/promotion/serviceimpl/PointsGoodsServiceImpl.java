@@ -237,7 +237,9 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
      * @param pointsGoods 积分商品信息
      */
     private void addPointsGoodsPromotionTask(PointsGoodsVO pointsGoods) {
-        PromotionMessage promotionMessage = new PromotionMessage(pointsGoods.getId(), PromotionTypeEnum.POINTS_GOODS.name(), PromotionStatusEnum.START.name(), pointsGoods.getStartTime(), pointsGoods.getEndTime());
+        PromotionMessage promotionMessage = new PromotionMessage(pointsGoods.getId(), PromotionTypeEnum.POINTS_GOODS.name(),
+                PromotionStatusEnum.START.name(),
+                pointsGoods.getStartTime(), pointsGoods.getEndTime());
         TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 promotionMessage.getStartTime().getTime(),
                 promotionMessage,

@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -45,6 +46,18 @@ public class MemberGradeManagerController {
         return ResultUtil.data(memberGradeService.page(PageUtil.initPage(page)));
     }
 
+    @ApiOperation(value = "添加会员等级")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "会员等级ID", required = true, paramType = "path")
+    })
+    @GetMapping(value = "/add")
+    public ResultMessage<Object> daa(@Validated  MemberGrade memberGrade) {
+        if (memberGradeService.updateById(memberGrade)) {
+            return ResultUtil.success(ResultCode.SUCCESS);
+        }
+        throw new ServiceException(ResultCode.ERROR);
+    }
+
     @ApiOperation(value = "修改会员等级")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "会员等级ID", required = true, paramType = "path")
@@ -57,9 +70,11 @@ public class MemberGradeManagerController {
         throw new ServiceException(ResultCode.ERROR);
     }
 
+
+
     @ApiOperation(value = "删除会员等级")
     @ApiImplicitParam(name = "id", value = "会员等级ID", required = true, dataType = "String", paramType = "path")
-    @PutMapping(value = "/delete/{id}")
+    @DeleteMapping(value = "/delete/{id}")
     public ResultMessage<IPage<Object>> delete(@PathVariable String id) {
         if(memberGradeService.getById(id).getIsDefault()){
             throw new ServiceException(ResultCode.USER_GRADE_IS_DEFAULT);

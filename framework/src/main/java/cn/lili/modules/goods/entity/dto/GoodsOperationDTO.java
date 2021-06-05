@@ -66,9 +66,6 @@ public class GoodsOperationDTO implements Serializable {
     @Max(value = 99999999, message = "重量不能超过99999999")
     private Double weight;
 
-    @ApiModelProperty(value = "谁承担运费 BUYER：买家承担，STORE：卖家承担", required = true)
-    private String freightPayer;
-
     @ApiModelProperty(value = "详情")
     private String intro;
 

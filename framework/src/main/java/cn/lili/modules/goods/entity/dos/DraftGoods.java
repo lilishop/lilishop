@@ -112,9 +112,6 @@ public class DraftGoods extends BaseEntity {
     @ApiModelProperty(value = "运费模板id")
     private String templateId;
 
-    @ApiModelProperty(value = "运费承担者")
-    private String freightPayer;
-
     @ApiModelProperty(value = "是否自营")
     private Boolean selfOperated;
     /**
