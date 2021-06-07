@@ -1,6 +1,7 @@
 package cn.lili.modules.base.serviceimpl;
 
 import cn.lili.common.utils.HttpClientUtils;
+import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.base.mapper.RegionMapper;
 import cn.lili.modules.base.service.RegionService;
@@ -11,9 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -244,6 +243,7 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
         record.setName(name);
         record.setParentId(parentId);
         record.setOrderNum(order);
+        record.setId(String.valueOf(SnowFlake.getId()));
         String megName = ",";
         for (int i = 0; i < ids.length; i++) {
             megName = megName + ids[i];
