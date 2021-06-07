@@ -1,5 +1,6 @@
 package cn.lili.modules.store.serviceimpl;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -51,7 +52,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     private StoreFlowService storeFlowService;
 
     @Override
-    public void createBill(String storeId, Date startTime) {
+    public void createBill(String storeId, Date startTime, DateTime endTime) {
 
         //获取结算店铺
         StoreDetailVO store = storeDetailService.getStoreDetailVO(storeId);
@@ -74,7 +75,11 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         bill.setSn(SnowFlake.createStr("B"));
 
         //入账结算信息
-        Bill orderBill = this.baseMapper.getOrderBill(storeId, FlowTypeEnum.PAY.name());
+        Bill orderBill = this.baseMapper.getOrderBill(new QueryWrapper<Bill>()
+                .eq("store_id",storeId)
+                .eq("flow_type",FlowTypeEnum.PAY.name())
+                .between("create_time",startTime,endTime));
+
         Double orderPrice = 0D;
         if (orderBill != null) {
             bill.setOrderPrice(orderBill.getOrderPrice());
@@ -86,7 +91,10 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
 
 
         //退款结算信息
-        Bill refundBill = this.baseMapper.getRefundBill(storeId, FlowTypeEnum.REFUND.name());
+        Bill refundBill = this.baseMapper.getRefundBill(new QueryWrapper<Bill>()
+                .eq("store_id",storeId)
+                .eq("flow_type",FlowTypeEnum.REFUND.name())
+                .between("create_time",startTime,endTime));
         Double refundPrice = 0D;
         if(refundBill!=null){
             bill.setRefundPrice(refundBill.getRefundPrice());

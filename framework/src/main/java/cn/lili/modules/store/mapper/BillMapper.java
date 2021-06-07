@@ -4,6 +4,7 @@ package cn.lili.modules.store.mapper;
 import cn.lili.modules.store.entity.dos.Bill;
 import cn.lili.modules.store.entity.vos.BillListVO;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
@@ -23,11 +24,11 @@ public interface BillMapper extends BaseMapper<Bill> {
 
     @Select("SELECT SUM( final_price ) AS orderPrice,SUM( commission_price ) AS commissionPrice" +
             ",SUM( distribution_rebate ) AS distributionCommission,SUM( site_coupon_commission ) AS siteCouponCommission" +
-            ",SUM( bill_price ) AS billPrice FROM li_store_flow WHERE store_id=#{storeId} AND flow_type=#{flowType}")
-    Bill getOrderBill(String storeId, String flowType);
+            ",SUM( bill_price ) AS billPrice FROM li_store_flow ${ew.customSqlSegment}")
+    Bill getOrderBill(@Param(Constants.WRAPPER) QueryWrapper<Bill> queryWrapper);
 
     @Select("SELECT SUM( final_price ) AS refundPrice,SUM( commission_price ) AS refundCommissionPrice" +
             ",SUM( distribution_rebate ) AS distributionRefundCommission,SUM( site_coupon_commission ) AS siteCouponRefundCommission" +
-            ",SUM( bill_price ) AS billPrice FROM li_store_flow WHERE store_id=#{storeId} AND flow_type=#{flowType}")
-    Bill getRefundBill(String storeId, String flowType);
+            ",SUM( bill_price ) AS billPrice FROM li_store_flow ${ew.customSqlSegment}")
+    Bill getRefundBill(@Param(Constants.WRAPPER) QueryWrapper<Bill> queryWrapper);
 }

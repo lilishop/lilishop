@@ -1,5 +1,6 @@
 package cn.lili.modules.store.service;
 
+import cn.hutool.core.date.DateTime;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.store.entity.dos.Bill;
@@ -26,8 +27,9 @@ public interface BillService extends IService<Bill> {
      *
      * @param storeId   商家ID
      * @param startTime 开始时间
+     * @param endTime   结束时间
      */
-    void createBill(String storeId, Date startTime);
+    void createBill(String storeId, Date startTime, DateTime endTime);
 
 
     /**
