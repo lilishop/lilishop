@@ -1,13 +1,13 @@
 package cn.lili.modules.system.serviceimpl;
 
 import cn.hutool.core.util.StrUtil;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.enums.SwitchEnum;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.system.entity.dos.Logistics;
 import cn.lili.modules.system.entity.dos.Setting;
-import cn.lili.modules.system.entity.vo.Traces;
 import cn.lili.modules.system.entity.dto.KuaidiSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
+import cn.lili.modules.system.entity.vo.Traces;
 import cn.lili.modules.system.mapper.LogisticsMapper;
 import cn.lili.modules.system.service.LogisticsService;
 import cn.lili.modules.system.service.SettingService;
@@ -15,7 +15,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
-import lombok.RequiredArgsConstructor;
+import groovy.util.logging.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +36,7 @@ import java.util.Map;
  * @author Chopper
  * @date 2020/11/17 8:02 下午
  */
+@Slf4j
 @Service
 @Transactional
 public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics> implements LogisticsService {
@@ -47,7 +48,8 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
         try {
             return getOrderTracesByJson(logisticsId, logisticsNo);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("获取物流公司错误",e);
+
         }
         return null;
     }
@@ -214,7 +216,7 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
                 result.append(line);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("向指定 URL 发送POST方法的请求错误",e);
         }
         //使用finally块来关闭输出流、输入流
         finally {

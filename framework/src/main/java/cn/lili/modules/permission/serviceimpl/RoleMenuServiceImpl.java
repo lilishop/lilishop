@@ -7,10 +7,11 @@ import cn.lili.modules.permission.mapper.RoleMenuMapper;
 import cn.lili.modules.permission.service.RoleMenuService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import groovy.util.logging.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -19,12 +20,13 @@ import java.util.List;
  * @author Chopper
  * @date 2020/11/22 11:43
  */
+@Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> implements RoleMenuService {
 
     //菜单
-    @Autowired
+    @Resource
     private MenuMapper menuMapper;
 
     @Override
@@ -48,7 +50,7 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> i
             //重新保存角色菜单关系
             this.saveBatch(roleMenus);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("修改用户权限错误",e);
         }
     }
 

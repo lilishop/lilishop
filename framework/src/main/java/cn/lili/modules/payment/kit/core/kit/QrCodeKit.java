@@ -7,12 +7,11 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -22,6 +21,7 @@ import java.util.Map;
  *
  * @author
  */
+@Slf4j
 public class QrCodeKit {
     /**
      * 图形码生成工具
@@ -50,38 +50,9 @@ public class QrCodeKit {
             bufImg = MatrixToImageWriter.toBufferedImage(bitMatrix, config);
             bool = writeToFile(bufImg, format, saveImgFilePath);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("图形码生成工具生成错误",e);
         }
         return bool;
-    }
-
-    /**
-     * @param outputStream  可以来自response，也可以来自文件
-     * @param contents      内容
-     * @param barcodeFormat BarcodeFormat对象
-     * @param margin        图片格式，可选[png,jpg,bmp]
-     * @param errorLevel    纠错级别 一般为：ErrorCorrectionLevel.H
-     * @param format        图片格式，可选[png,jpg,bmp]
-     * @param width         宽
-     * @param height        高
-     */
-    public static void encodeOutPutSteam(OutputStream outputStream, String contents, BarcodeFormat barcodeFormat, Integer margin, ErrorCorrectionLevel errorLevel, String format, int width, int height) throws IOException {
-        Map<EncodeHintType, Object> hints = new HashMap<EncodeHintType, Object>(3);
-        hints.put(EncodeHintType.ERROR_CORRECTION, errorLevel);
-        hints.put(EncodeHintType.MARGIN, margin);
-        hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
-
-        try {
-            BitMatrix bitMatrix = (new MultiFormatWriter()).encode(contents, barcodeFormat, width, height, hints);
-            MatrixToImageWriter.writeToStream(bitMatrix, format, outputStream);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (outputStream != null) {
-                outputStream.close();
-            }
-        }
-
     }
 
     /**
@@ -105,7 +76,7 @@ public class QrCodeKit {
                 throw new IllegalArgumentException("Could not decode image.");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("图片解码错误",e);
         }
         return result;
     }
@@ -123,7 +94,7 @@ public class QrCodeKit {
         try {
             bool = ImageIO.write(bufImg, format, new File(saveImgFilePath));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("将BufferedImage对象写入文件错误",e);
         }
         return bool;
     }

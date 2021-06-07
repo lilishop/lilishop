@@ -137,7 +137,7 @@ public class WechatPlugin implements Payment {
 
             return ResultUtil.data(JSONUtil.toJsonStr(response.getBody()));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("微信H5支付错误",e);
             throw new ServiceException(ResultCode.PAY_ERROR);
         }
     }
@@ -558,7 +558,7 @@ public class WechatPlugin implements Payment {
                 refundLogService.save(refundLog);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("微信退款失败",e);
         }
     }
 
@@ -573,7 +573,7 @@ public class WechatPlugin implements Payment {
             WechatPaymentSetting wechatPaymentSetting = JSONUtil.toBean(systemSetting.getSettingValue(), WechatPaymentSetting.class);
             return wechatPaymentSetting;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("微信支付暂不支持",e);
             throw new ServiceException(ResultCode.PAY_NOT_SUPPORT);
         }
     }
@@ -624,7 +624,7 @@ public class WechatPlugin implements Payment {
             }
             return PayKit.getCertificate(publicCert);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("证书获取失败",e);
         }
         return null;
     }

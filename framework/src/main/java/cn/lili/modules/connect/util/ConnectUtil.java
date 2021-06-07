@@ -28,6 +28,7 @@ import cn.lili.modules.system.entity.dto.connect.dto.QQConnectSettingItem;
 import cn.lili.modules.system.entity.dto.connect.dto.WechatConnectSettingItem;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +42,7 @@ import java.io.IOException;
  * @version v1.0
  * 2020-11-25 21:16
  */
+@Slf4j
 @Component
 public class ConnectUtil {
 
@@ -98,7 +100,7 @@ public class ConnectUtil {
         try {
             httpServletResponse.sendRedirect(url);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("登录回调错误",e);
         }
     }
 

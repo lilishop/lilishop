@@ -12,6 +12,7 @@ import cn.lili.modules.statistics.model.vo.StoreStatisticsDataVO;
 import cn.lili.modules.statistics.service.IndexStatisticsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,7 @@ import java.util.List;
  * @author Bulbasaur
  * @date: 2020/12/15 17:53
  */
+@Slf4j
 @Api(tags = "管理端,首页统计数据接口")
 @RestController
 @RequestMapping("/manager/statistics/index")
@@ -42,7 +44,7 @@ public class IndexStatisticsManagerController {
         try {
             return ResultUtil.data(indexStatisticsService.indexStatistics());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("获取首页查询数据错误",e);
         }
         return null;
     }

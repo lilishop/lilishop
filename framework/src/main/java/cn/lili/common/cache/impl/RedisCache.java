@@ -1,6 +1,7 @@
 package cn.lili.common.cache.impl;
 
 import cn.lili.common.cache.Cache;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.*;
@@ -18,6 +19,7 @@ import java.util.function.Consumer;
  *
  * @author Chopepr
  */
+@Slf4j
 @Component
 public class RedisCache implements Cache {
 
@@ -158,7 +160,7 @@ public class RedisCache implements Cache {
                 return null;
 
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("scan错误",e);
                 throw new RuntimeException(e);
             }
         });

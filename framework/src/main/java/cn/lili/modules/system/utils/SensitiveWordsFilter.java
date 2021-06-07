@@ -2,6 +2,7 @@ package cn.lili.modules.system.utils;
 
 import cn.lili.modules.system.entity.dos.SensitiveWords;
 import cn.lili.modules.system.service.SensitiveWordsService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -20,6 +21,7 @@ import java.util.NavigableSet;
  * @since v1.0
  * 2020-02-25 14:10:16
  */
+@Slf4j
 @Component
 public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
 
@@ -240,7 +242,7 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("初始化敏感词错误",e);
         }
 
 

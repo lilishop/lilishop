@@ -6,7 +6,7 @@ import cn.lili.common.utils.SpelUtil;
 import cn.lili.common.utils.ThreadPoolUtil;
 import cn.lili.modules.order.trade.entity.dos.OrderLog;
 import cn.lili.modules.order.trade.service.OrderLogService;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
@@ -23,6 +23,7 @@ import java.util.Map;
  * @author Chopper
  * @date: 2020/11/17 7:22 下午
  */
+@Slf4j
 @Aspect
 @Component
 public class OrderOperationLogAspect {
@@ -48,7 +49,7 @@ public class OrderOperationLogAspect {
             //调用线程保存
             ThreadPoolUtil.getPool().execute(new SaveOrderLogThread(orderLog, orderLogService));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("订单日志错误",e);
         }
     }
 

@@ -40,7 +40,7 @@ public class CustomWordsServiceImpl extends ServiceImpl<CustomWordsMapper, Custo
                         response.setHeader("Last-Modified", customWords.getCreateTime().toString());
                         response.setHeader("ETag", customWords.getUpdateTime().toString());
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("自定义分词错误",e);
                     }
                     builder.append(customWords.getName());
                     flag = false;

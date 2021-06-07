@@ -8,6 +8,7 @@ import cn.lili.modules.page.service.ArticleCategoryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ import java.util.List;
  * @author pikachu
  * @date 2020-05-5 15:10:16
  */
+@Slf4j
 @RestController
 @Api(tags = "管理端,文章分类管理接口")
 @RequestMapping("/manager/article-category")
@@ -37,7 +39,7 @@ public class ArticleCategoryManagerController {
         try {
             return ResultUtil.data(this.articleCategoryService.allChildren());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("查询分类列表错误",e);
         }
         return null;
     }

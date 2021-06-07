@@ -1,6 +1,7 @@
 package cn.lili.modules.system.utils;
 
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -16,6 +17,7 @@ import java.util.Map;
  * @author pikachu
  * @date 2018/3/13
  */
+@Slf4j
 public final class HttpUtils {
 
     public static final int HTTP_CONN_TIMEOUT = 100000;
@@ -73,7 +75,7 @@ public final class HttpUtils {
 
             return res;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("post请求错误",e);
         }
         return "error"; // 自定义错误信息
 
@@ -116,7 +118,7 @@ public final class HttpUtils {
 
             return res;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("post错误",e);
         }
         return "error"; // 自定义错误信息
 

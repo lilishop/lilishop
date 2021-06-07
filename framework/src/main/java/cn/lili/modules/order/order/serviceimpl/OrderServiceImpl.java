@@ -528,7 +528,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             out = response.getOutputStream();
             writer.flush(out, true);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("获取待发货订单编号列表错误",e);
         } finally {
             writer.close();
         }

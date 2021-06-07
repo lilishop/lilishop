@@ -19,6 +19,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +38,7 @@ import java.util.List;
  * @author Chopper
  * @date 2020/11/17 4:35 下午
  **/
+@Slf4j
 @RestController
 @RequestMapping("/store/orders")
 @Api(tags = "店铺端,订单接口")
@@ -177,7 +179,7 @@ public class OrderStoreController {
             }
             orderService.batchDeliver(orderBatchDeliverDTOList);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("上传文件进行订单批量发货错误",e);
         }
     }
 

@@ -15,6 +15,7 @@ import cn.lili.modules.statistics.service.OrderStatisticsDataService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +29,7 @@ import java.util.List;
  * @author Bulbasaur
  * @date: 2020/12/9 19:04
  */
+@Slf4j
 @Api(tags = "店铺端,订单统计接口")
 @RestController
 @RequestMapping("/store/statistics/order")
@@ -56,7 +58,7 @@ public class OrderStatisticsStoreController {
             statisticsQueryParam.setStoreId(UserContext.getCurrentUser().getStoreId());
             return ResultUtil.data(orderStatisticsDataService.overview(statisticsQueryParam));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("订单概览统计错误",e);
         }
         return null;
     }
@@ -68,7 +70,7 @@ public class OrderStatisticsStoreController {
             statisticsQueryParam.setStoreId(UserContext.getCurrentUser().getStoreId());
             return ResultUtil.data(orderStatisticsDataService.statisticsChart(statisticsQueryParam));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("订单图表统计错误",e);
         }
         return null;
     }
@@ -82,7 +84,7 @@ public class OrderStatisticsStoreController {
             statisticsQueryParam.setStoreId(UserContext.getCurrentUser().getStoreId());
             return ResultUtil.data(orderService.getStatistics(statisticsQueryParam, pageVO));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("订单统计错误",e);
         }
         return null;
     }

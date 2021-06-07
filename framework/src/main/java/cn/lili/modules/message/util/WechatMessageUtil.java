@@ -170,7 +170,7 @@ public class WechatMessageUtil {
         try {
             content = HttpUtil.post(url, JSONUtil.toJsonStr(map));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("微信消息发送错误",e);
         }
         JSONObject json = new JSONObject(content);
         log.info("微信消息发送结果：" + content);

@@ -16,6 +16,7 @@ import cn.lili.modules.permission.service.MenuService;
 import cn.lili.modules.permission.service.RoleMenuService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,7 @@ import java.util.List;
  * @author Chopper
  * @date 2020/11/17 3:49 下午
  */
+@Slf4j
 @Service
 @Transactional
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
@@ -96,7 +98,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             List<Menu> menus = this.list();
             return tree(menus);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("菜单树错误",e);
         }
         return null;
     }

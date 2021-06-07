@@ -7,6 +7,7 @@ import cn.lili.modules.search.service.CustomWordsService;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.service.SettingService;
 import io.swagger.annotations.Api;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,7 @@ import java.nio.charset.StandardCharsets;
  * @author paulG
  * @since 2020/10/16
  **/
+@Slf4j
 @RestController
 @Api(tags = "管理端,自定义分词接口")
 @RequestMapping("/manager/custom-words")
@@ -54,7 +56,7 @@ public class CustomWordsController {
         try {
             return new String(res.getBytes(), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("获取分词错误",e);
         }
         return "";
     }

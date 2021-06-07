@@ -135,7 +135,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
         try {
             SendSmsResponse response = client.sendSms(sendSmsRequest);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("发送短信错误",e);
         }
     }
 
@@ -171,7 +171,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
             try {
                 client.sendBatchSms(sendBatchSmsRequest);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("批量发送短信错误",e);
             }
         }
 
@@ -346,7 +346,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
             config.endpoint = "dysmsapi.aliyuncs.com";
             return new com.aliyun.dysmsapi20170525.Client(config);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("短信初始化错误",e);
         }
         return null;
     }

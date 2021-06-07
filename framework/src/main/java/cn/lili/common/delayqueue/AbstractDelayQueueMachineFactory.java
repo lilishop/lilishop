@@ -74,7 +74,7 @@ public abstract class AbstractDelayQueueMachineFactory {
                 try {
                     TimeUnit.SECONDS.sleep(5L);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    log.error("延时队列机器开始运作错误",e);
                 }
 
             }

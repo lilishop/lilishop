@@ -36,7 +36,7 @@ public class BillExecute implements EveryDayExecute {
     @Override
     public void execute() {
 
-        //获取当前时间的前一天
+        //获取当前天数
         int day = DateUtil.date().dayOfMonth();
 
         //获取待结算商家列表

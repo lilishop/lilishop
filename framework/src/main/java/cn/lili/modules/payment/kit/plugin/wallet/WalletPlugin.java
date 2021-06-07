@@ -90,7 +90,7 @@ public class WalletPlugin implements Payment {
             refundLog.setIsRefund(true);
             refundLogService.save(refundLog);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("订单取消错误",e);
         }
     }
 
@@ -114,7 +114,7 @@ public class WalletPlugin implements Payment {
             refundLog.setIsRefund(true);
             refundLogService.save(refundLog);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("退款失败",e);
         }
     }
 

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 
@@ -95,10 +94,8 @@ public class WechatMediaUtil {
             reader.close();
             resultIn.close();
             urlConn.disconnect();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        }  catch (Exception e) {
+            log.error("微信媒体上传失败",e);
         }
         JSONObject jsonObject=new JSONObject(resultStr.toString());
         return jsonObject.get("media_id").toString();

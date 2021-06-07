@@ -49,7 +49,6 @@ public class ManagerSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests();
         // 配置的url 不需要授权
         for (String url : ignoredUrlsProperties.getUrls()) {
-            log.error(url);
             registry.antMatchers(url).permitAll();
         }
         registry

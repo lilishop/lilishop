@@ -17,6 +17,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ import java.io.IOException;
  * @author Chopper
  * @date 2020-11-25 19:29
  */
+@Slf4j
 @RestController
 @Api(tags = "买家端,web联合登录")
 @RequestMapping("/buyer/connect")
@@ -92,7 +94,7 @@ public class ConnectBuyerWebController {
         try {
             return ResultUtil.data(connectService.appLoginCallback(authUser, uuid));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("unionID登录错误",e);
         }
         return null;
     }

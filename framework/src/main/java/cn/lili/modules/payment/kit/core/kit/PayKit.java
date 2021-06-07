@@ -8,6 +8,7 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.HmacAlgorithm;
 import cn.lili.modules.payment.kit.core.XmlHelper;
 import cn.lili.modules.payment.kit.core.enums.RequestMethodEnums;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -33,6 +34,7 @@ import java.util.*;
  * @Description:
  * @since 2020/12/18 15:24
  */
+@Slf4j
 public class PayKit {
 
     /**
@@ -173,7 +175,7 @@ public class PayKit {
         try {
             return URLEncoder.encode(src, CharsetUtil.UTF_8).replace("+", "%20");
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            log.error("URL 编码错误",e);
             return null;
         }
     }

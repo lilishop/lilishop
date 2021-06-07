@@ -136,7 +136,7 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
                 memberService.updateMemberPoint(point, true, memberId, content);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("会员签到错误",e);
         }
     }
 
