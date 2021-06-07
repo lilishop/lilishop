@@ -141,6 +141,7 @@ public enum ResultCode {
     /**
      * 支付
      */
+    PAY_UN_WANTED(32000, "当前订单不需要付款，返回订单列表等待系统订单出库即可"),
     PAY_SUCCESS(32001, "支付成功"),
     PAY_INCONSISTENT_ERROR(32002, "付款金额和应付金额不一致"),
     PAY_DOUBLE_ERROR(32003, "订单已支付，不能再次进行支付"),
