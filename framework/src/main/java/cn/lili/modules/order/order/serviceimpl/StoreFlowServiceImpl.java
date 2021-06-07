@@ -141,14 +141,9 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
 
         LambdaQueryWrapper<StoreFlow> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(StoreFlow::getStoreId, storeId);
-        if (distribution) {
-            lambdaQueryWrapper.isNotNull(StoreFlow::getDistributionRebate);
-        }
+        lambdaQueryWrapper.isNotNull(distribution,StoreFlow::getDistributionRebate);
         lambdaQueryWrapper.between(StoreFlow::getCreateTime, startTime, endTime);
-        if (StringUtils.isNotEmpty(type)) {
-            lambdaQueryWrapper.eq(StoreFlow::getFlowType, type);
-        }
-
+        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(type),StoreFlow::getFlowType, type);
         return this.page(PageUtil.initPage(pageVO), lambdaQueryWrapper);
     }
 }

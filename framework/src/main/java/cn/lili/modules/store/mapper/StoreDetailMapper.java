@@ -6,10 +6,7 @@ import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.store.entity.dto.StoreSettlementDay;
 import cn.lili.modules.store.entity.vos.StoreBasicInfoVO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
-import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
@@ -38,8 +35,11 @@ public interface StoreDetailMapper extends BaseMapper<StoreDetail> {
             "from li_store_detail s  where s.store_id=#{storeId}")
     StoreAfterSaleAddressDTO getStoreAfterSaleAddressDTO(String storeId);
 
-    @Select("SELECT store_id,settlement_day FROM li_store_detail ${ew.customSqlSegment}")
-    List<StoreSettlementDay> getSettlementStore(@Param(Constants.WRAPPER) Wrapper<StoreSettlementDay> queryWrapper);
+    @Select("SELECT store_id,settlement_day FROM li_store_detail " +
+            "WHERE settlement_cycle LIKE concat(#{day},',%')  " +
+            "OR settlement_cycle LIKE concat('%,',#{day},',%') " +
+            "OR settlement_cycle LIKE concat('%,',#{day})")
+    List<StoreSettlementDay> getSettlementStore(int day);
 
     @Update("UPDATE li_store_detail SET settlement_day=#{dateTime} WHERE store_id=#{storeId}")
     void updateSettlementDay(String storeId, DateTime dateTime);

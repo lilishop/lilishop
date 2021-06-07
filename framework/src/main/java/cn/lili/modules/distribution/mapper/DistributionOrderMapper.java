@@ -16,9 +16,9 @@ public interface DistributionOrderMapper extends BaseMapper<DistributionOrder> {
     /**
      * 分销提佣
      */
-    @Select("UPDATE li_distribution AS d SET " +
-            "d.can_rebate =(can_rebate +(SELECT SUM( dorder.rebate ) FROM li_distribution_order AS dorder " +
-            "WHERE dorder.distribution_id = d.id AND dorder.distribution_order_status=#{distributionOrderStatus} AND dorder.settle_cycle<=#{settleCycle}))")
+    @Select("UPDATE li_distribution AS d " +
+            "SET d.can_rebate =(d.can_rebate +(SELECT SUM( dorder.rebate ) FROM li_distribution_order AS dorder WHERE dorder.distribution_id = d.id AND " +
+            "dorder.distribution_order_status=#{distributionOrderStatus} AND dorder.settle_cycle< #{settleCycle} ))")
     void rebate(String distributionOrderStatus, DateTime settleCycle);
 
 }
