@@ -29,7 +29,10 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
             this.setFieldValByName("deleteFlag", false, metaObject);
         }
         if (metaObject.hasGetter("id")) {
-            this.setFieldValByName("id", String.valueOf(SnowFlake.getId()), metaObject);
+            //如果已经配置id，则不再写入
+            if (metaObject.getValue("id") == null) {
+                this.setFieldValByName("id", String.valueOf(SnowFlake.getId()), metaObject);
+            }
         }
     }
 
