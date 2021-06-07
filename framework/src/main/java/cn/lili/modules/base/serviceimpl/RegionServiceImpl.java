@@ -1,6 +1,8 @@
 package cn.lili.modules.base.serviceimpl;
 
 import cn.lili.common.cache.Cache;
+import cn.lili.common.utils.StringUtils;
+import cn.lili.common.utils.HttpClientUtils;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.base.mapper.RegionMapper;
 import cn.lili.modules.base.service.RegionService;
@@ -39,20 +41,20 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
     public void synchronizationData(String url) {
         try {
 
-//            //清空数据
-//            QueryWrapper<Region> queryWrapper = new QueryWrapper();
-//            queryWrapper.ne("id", "-1");
-//            this.remove(queryWrapper);
-//
-//            //读取数据
-//            String jsonString = HttpClientUtils.doGet(StringUtils.isEmpty(url) ? syncUrl : url, null);
-//
-//            //构造存储数据库的对象集合
-//            List<Region> regions = this.initData(jsonString);
-//            for (int i = 0; i < (regions.size() / 100 + (regions.size() % 100 == 0 ? 0 : 1)); i++) {
-//                int endPoint = Math.min((100 + (i * 100)), regions.size());
-//                this.saveBatch(regions.subList(i * 100, endPoint));
-//            }
+            //清空数据
+            QueryWrapper<Region> queryWrapper = new QueryWrapper();
+            queryWrapper.ne("id", "-1");
+            this.remove(queryWrapper);
+
+            //读取数据
+            String jsonString = HttpClientUtils.doGet(StringUtils.isEmpty(url) ? syncUrl : url, null);
+
+            //构造存储数据库的对象集合
+            List<Region> regions = this.initData(jsonString);
+            for (int i = 0; i < (regions.size() / 100 + (regions.size() % 100 == 0 ? 0 : 1)); i++) {
+                int endPoint = Math.min((100 + (i * 100)), regions.size());
+                this.saveBatch(regions.subList(i * 100, endPoint));
+            }
             //删除缓存
             cache.vagueDel("{regions}");
         } catch (Exception e) {
