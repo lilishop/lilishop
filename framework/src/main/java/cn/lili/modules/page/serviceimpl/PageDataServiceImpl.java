@@ -72,7 +72,6 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
             lambdaUpdateWrapper.set(PageData::getPageShow, SwitchEnum.CLOSE.name());
             this.update(lambdaUpdateWrapper);
         }
-
         LambdaUpdateWrapper<PageData> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.set(PageData::getPageData, pageData.getPageData());
         lambdaUpdateWrapper.eq(PageData::getId, pageData.getId());

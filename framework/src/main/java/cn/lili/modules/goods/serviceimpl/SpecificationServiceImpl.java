@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.CategorySpecification;
 import cn.lili.modules.goods.entity.dos.SpecValues;
@@ -49,8 +50,13 @@ public class SpecificationServiceImpl extends ServiceImpl<SpecificationMapper, S
     private SpecValuesService specValuesService;
 
     @Override
-    public List<SpecificationVO> getSpecList(Map<String, Object> param) {
-        return this.baseMapper.findSpecList(param);
+    public List<SpecificationVO> getSpecList(String specName) {
+
+        QueryWrapper queryWrapper = new QueryWrapper();
+        queryWrapper.eq(StringUtils.isNotEmpty(specName), "s.spec_name", specName);
+        queryWrapper.orderByDesc("s.create_time");
+        queryWrapper.groupBy("s.id");
+        return this.baseMapper.findSpecList(queryWrapper);
     }
 
     @Override
@@ -96,9 +102,8 @@ public class SpecificationServiceImpl extends ServiceImpl<SpecificationMapper, S
 
     @Override
     public IPage<SpecificationVO> getSpecificationPage(SpecificationSearchParams searchParams, PageVO pageVo) {
-        Map<String, Object> param = new HashMap<>();
-        param.put("specName", searchParams.getSpecName());
-        List<SpecificationVO> specList = this.getSpecList(param);
+
+        List<SpecificationVO> specList = this.getSpecList(searchParams.getSpecName());
         IPage<SpecificationVO> page = new Page<>(pageVo.getPageNumber(), pageVo.getPageSize(), specList.size());
         page.setRecords(PageUtil.listToPage(pageVo, specList));
         return page;

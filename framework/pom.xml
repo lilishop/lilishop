@@ -45,14 +45,17 @@
         <de.codecentric>2.3.1</de.codecentric>
         <userAgentUtils>1.21</userAgentUtils>
         <interceptor-api>1.2</interceptor-api>
+<<<<<<< HEAD
         <poi-version>5.0.0</poi-version>
         <poi-ooxml-version>5.0.0</poi-ooxml-version>
         <logstash-logback-encoder>6.6</logstash-logback-encoder>
         <zxing>3.4.1</zxing>
         <slf4j-api>1.7.28</slf4j-api>
         <xk-time>2.2.0</xk-time>
+=======
+        <commons-text>1.4</commons-text>
+>>>>>>> master
     </properties>
-
 
     <dependencies>
         <dependency>
@@ -342,6 +345,7 @@
             <artifactId>UserAgentUtils</artifactId>
             <version>${userAgentUtils}</version>
         </dependency>
+<<<<<<< HEAD
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
@@ -389,6 +393,14 @@
             <groupId>com.github.xkzhangsan</groupId>
             <artifactId>xk-time</artifactId>
             <version>${xk-time}</version>
+=======
+
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>${commons-text}</version>
+>>>>>>> master
         </dependency>
     </dependencies>
 

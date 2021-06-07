@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 规格业务层
@@ -23,10 +22,10 @@ public interface SpecificationService extends IService<Specification> {
     /**
      * 查询规格信息列表
      *
-     * @param param 查询参数
+     * @param specName 规格名
      * @return 规格列表
      */
-    List<SpecificationVO> getSpecList(Map<String, Object> param);
+    List<SpecificationVO> getSpecList(String specName);
 
     /**
      * 根据分类id获取规格信息
