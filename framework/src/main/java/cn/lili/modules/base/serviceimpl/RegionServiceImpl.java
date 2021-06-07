@@ -1,8 +1,9 @@
 package cn.lili.modules.base.serviceimpl;
 
+import cn.lili.common.cache.Cache;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.common.utils.HttpClientUtils;
 import cn.lili.common.utils.SnowFlake;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.base.mapper.RegionMapper;
 import cn.lili.modules.base.service.RegionService;
 import cn.lili.modules.system.entity.dos.Region;
@@ -13,6 +14,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,8 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
      */
     private String syncUrl = "https://restapi.amap.com/v3/config/district?subdistrict=4&key=e456d77800e2084a326f7b777278f89d";
 
+    @Autowired
+    private Cache cache;
     @Override
     public void synchronizationData(String url) {
         try {
@@ -51,6 +55,8 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
                 int endPoint = Math.min((100 + (i * 100)), regions.size());
                 this.saveBatch(regions.subList(i * 100, endPoint));
             }
+            //删除缓存
+            cache.vagueDel("{regions}");
         } catch (Exception e) {
             e.printStackTrace();
         }
