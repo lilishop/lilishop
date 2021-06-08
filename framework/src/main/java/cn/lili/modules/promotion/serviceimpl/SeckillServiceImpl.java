@@ -1,8 +1,8 @@
 package cn.lili.modules.promotion.serviceimpl;
 
-import cn.lili.common.delayqueue.DelayQueueTools;
-import cn.lili.common.delayqueue.DelayQueueType;
-import cn.lili.common.delayqueue.PromotionMessage;
+import cn.lili.common.trigger.util.DelayQueueTools;
+import cn.lili.common.trigger.enums.DelayQueueType;
+import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
 import cn.lili.common.trigger.model.TimeExecuteConstant;

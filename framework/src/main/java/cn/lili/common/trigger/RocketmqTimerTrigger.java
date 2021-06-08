@@ -17,6 +17,8 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 /**
+ * 延时任务实现
+ *
  * @author paulG
  * @since 2020/11/5
  **/
@@ -32,8 +34,23 @@ public class RocketmqTimerTrigger implements TimeTrigger {
 
 
     @Override
-    public void add(String executorName, Object param, Long triggerTime, String uniqueKey, String topic) {
+    public void add(TimeTriggerMsg timeTriggerMsg) {
+        this.addExecute(timeTriggerMsg.getTriggerExecutor(), timeTriggerMsg.getParam(), timeTriggerMsg.getTriggerTime(), timeTriggerMsg.getUniqueKey(), timeTriggerMsg.getTopic());
+    }
 
+    /**
+     * 添加延时任务
+     *
+     * @param executorName 执行器beanId
+     * @param param        执行参数
+     * @param triggerTime  执行时间 时间戳 秒为单位
+     * @param uniqueKey    如果是一个 需要有 修改/取消 延时任务功能的延时任务，<br/>
+     *                     请填写此参数，作为后续删除，修改做为唯一凭证 <br/>
+     *                     建议参数为：COUPON_{ACTIVITY_ID} 例如 coupon_123<br/>
+     *                     业务内全局唯一
+     * @param topic        rocketmq topic
+     */
+    public void addExecute(String executorName, Object param, Long triggerTime, String uniqueKey, String topic) {
 
         TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(executorName, triggerTime, param, uniqueKey, topic);
         Message<TimeTriggerMsg> message = MessageBuilder.withPayload(timeTriggerMsg).build();
@@ -42,12 +59,8 @@ public class RocketmqTimerTrigger implements TimeTrigger {
     }
 
     @Override
-    public void add(TimeTriggerMsg timeTriggerMsg) {
-        this.add(timeTriggerMsg.getTriggerExecutor(), timeTriggerMsg.getParam(), timeTriggerMsg.getTriggerTime(), timeTriggerMsg.getUniqueKey(), timeTriggerMsg.getTopic());
-    }
-
-    @Override
     public void addDelay(TimeTriggerMsg timeTriggerMsg, int delayTime) {
+        //执行器唯一key
         String uniqueKey = timeTriggerMsg.getUniqueKey();
         if (StringUtils.isEmpty(uniqueKey)) {
             uniqueKey = StringUtils.getRandStr(10);
@@ -73,7 +86,7 @@ public class RocketmqTimerTrigger implements TimeTrigger {
     @Override
     public void delete(String executorName, Long triggerTime, String uniqueKey, String topic) {
         String generateKey = TimeTriggerUtil.generateKey(executorName, triggerTime, uniqueKey);
-        log.info("delete redis key {} -----------------------", generateKey);
+        log.info("删除延时任务{}", generateKey);
         this.cache.remove(generateKey);
     }
 }

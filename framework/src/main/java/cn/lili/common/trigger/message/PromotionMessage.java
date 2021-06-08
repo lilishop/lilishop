@@ -1,4 +1,4 @@
-package cn.lili.common.delayqueue;
+package cn.lili.common.trigger.message;
 
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;

@@ -1,4 +1,4 @@
-package cn.lili.common.delayqueue;
+package cn.lili.common.trigger.enums;
 
 /**
  * 延时任务类型

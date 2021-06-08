@@ -232,4 +232,35 @@ public interface Cache<T> {
      * @return
      */
     Set<ZSetOperations.TypedTuple<Object>> reverseRangeWithScores(String sortedSetName, Integer start, Integer end);
+
+
+    /**
+     * 向Zset里添加成员
+     *
+     * @param key   key值
+     * @param score 分数
+     * @param value 值
+     * @return 增加状态
+     */
+    boolean zAdd(String key, long score, String value);
+
+
+    /**
+     * 获取 某key 下 某一分值区间的队列
+     *
+     * @param key  缓存key
+     * @param from 开始时间
+     * @param to   结束时间
+     * @return 数据
+     */
+    Set<ZSetOperations.TypedTuple<Object>> zRangeByScore(String key, int from, long to);
+
+    /**
+     * 移除 Zset队列值
+     *
+     * @param key   key值
+     * @param value 删除的集合
+     * @return 删除数量
+     */
+    Long zRemove(String key, String... value);
 }

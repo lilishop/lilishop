@@ -1,8 +1,8 @@
 package cn.lili.trigger.executor;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.delayqueue.PintuanOrderMessage;
-import cn.lili.common.delayqueue.PromotionMessage;
+import cn.lili.common.trigger.message.PintuanOrderMessage;
+import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
 import cn.lili.common.trigger.interfaces.TimeTriggerExecutor;
 import cn.lili.common.trigger.model.TimeExecuteConstant;

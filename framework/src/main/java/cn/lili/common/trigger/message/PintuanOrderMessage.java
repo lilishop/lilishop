@@ -1,4 +1,4 @@
-package cn.lili.common.delayqueue;
+package cn.lili.common.trigger.message;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

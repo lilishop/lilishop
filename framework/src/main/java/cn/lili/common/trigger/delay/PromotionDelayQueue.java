@@ -1,7 +1,6 @@
 package cn.lili.common.trigger.delay;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.delayqueue.AbstractDelayQueueMachineFactory;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
 import cn.lili.common.trigger.model.TimeTriggerMsg;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,7 @@
-package cn.lili.common.delayqueue;
+package cn.lili.common.trigger.delay;
 
-import cn.lili.common.utils.RedisUtil;
+import cn.hutool.json.JSONUtil;
+import cn.lili.common.cache.Cache;
 import cn.lili.common.utils.ThreadPoolUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractDelayQueueMachineFactory {
 
     @Autowired
-    private RedisUtil redisUtil;
+    private Cache cache;
 
     /**
      * 插入任务id
@@ -35,8 +36,8 @@ public abstract class AbstractDelayQueueMachineFactory {
         Calendar instance = Calendar.getInstance();
         instance.add(Calendar.SECOND, time);
         long delaySeconds = instance.getTimeInMillis() / 1000;
-        boolean result = redisUtil.zadd(setDelayQueueName(), delaySeconds, jobId);
-        log.info("redis add delay, key {}, delay time {}", setDelayQueueName(), time);
+        boolean result = cache.zAdd(setDelayQueueName(), delaySeconds, jobId);
+        log.info("增加延时任务, 缓存key {}, 等待时间 {}", setDelayQueueName(), time);
         return result;
 
     }
@@ -45,21 +46,24 @@ public abstract class AbstractDelayQueueMachineFactory {
      * 延时队列机器开始运作
      */
     private void startDelayQueueMachine() {
-        log.info(String.format("延时队列机器{%s}开始运作", setDelayQueueName()));
+        log.info("延时队列机器{}开始运作", setDelayQueueName());
 
-        // 发生异常捕获并且继续不能让战斗停下来
+        // 监听redis队列
         while (true) {
             try {
                 // 获取当前时间的时间戳
                 long now = System.currentTimeMillis() / 1000;
                 // 获取当前时间前的任务列表
-                Set<DefaultTypedTuple> tuples = redisUtil.zrangeByScoreWithScores(setDelayQueueName(), 0, now);
-                // 如果不为空则遍历判断其是否满足取消要求
-                if (!CollectionUtils.isEmpty(tuples)) {
-                    for (DefaultTypedTuple tuple : tuples) {
+                Set<DefaultTypedTuple> tuples = cache.zRangeByScore(setDelayQueueName(), 0, now);
 
+                // 如果任务不为空
+                if (!CollectionUtils.isEmpty(tuples)) {
+                    log.info("执行任务:{}", JSONUtil.toJsonStr(tuples));
+
+                    for (DefaultTypedTuple tuple : tuples) {
                         String jobId = (String) tuple.getValue();
-                        Long num = redisUtil.zremove(setDelayQueueName(), jobId);
+                        // 移除缓存，如果移除成功则表示当前线程处理了延时任务，则执行延时任务
+                        Long num = cache.zRemove(setDelayQueueName(), jobId);
                         // 如果移除成功, 则执行
                         if (num > 0) {
                             ThreadPoolUtil.execute(() -> invoke(jobId));
@@ -68,7 +72,7 @@ public abstract class AbstractDelayQueueMachineFactory {
                 }
 
             } catch (Exception e) {
-                log.error(String.format("处理延时任务发生异常,异常原因为{%s}", e.getMessage()), e);
+                log.error("处理延时任务发生异常,异常原因为{}", e.getMessage(), e);
             } finally {
                 // 间隔一秒钟搞一次
                 try {

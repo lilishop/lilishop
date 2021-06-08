@@ -4,26 +4,22 @@ import cn.lili.base.BaseEntity;
 import cn.lili.modules.base.entity.enums.ClientTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
- * 订单
+ * 订单支付日志：实际为订单部分字段提取过来的一个vo
  *
  * @author Chopper
  * @date 2020/11/17 7:30 下午
  */
 @Data
 @Entity
-@Table(name = "li_order")
-@TableName("li_order")
 @ApiModel(value = "订单")
 public class PaymentLog extends BaseEntity {
 
