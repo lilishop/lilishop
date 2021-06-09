@@ -158,6 +158,11 @@ public class GoodsSku extends BaseEntity {
 
     @ApiModelProperty(value = "销售模式", required = true)
     private String salesModel;
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型", required = true)
+    private String goodsType;
 
     @Override
     public Date getUpdateTime() {

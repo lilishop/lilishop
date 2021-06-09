@@ -490,6 +490,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             if (goods.getSelfOperated() != null) {
                 goodsSku.setSelfOperated(goods.getSelfOperated());
             }
+            goodsSku.setGoodsType(goods.getGoodsType());
             EsGoodsIndex goodsIndex = (EsGoodsIndex) resultMap.get("goodsIndex");
             skus.add(goodsSku);
             goodsIndices.add(goodsIndex);
