@@ -32,10 +32,12 @@ public abstract class AbstractDelayQueueMachineFactory {
      * @param time  延时时间(单位 :秒)
      * @return 是否插入成功
      */
-    public boolean addJobId(String jobId, Integer time) {
+    public boolean addJob(String jobId, Integer time) {
+        //获取时间
         Calendar instance = Calendar.getInstance();
         instance.add(Calendar.SECOND, time);
         long delaySeconds = instance.getTimeInMillis() / 1000;
+        //增加延时任务 参数依次为：队列名称、执行时间、任务id
         boolean result = cache.zAdd(setDelayQueueName(), delaySeconds, jobId);
         log.info("增加延时任务, 缓存key {}, 等待时间 {}", setDelayQueueName(), time);
         return result;
