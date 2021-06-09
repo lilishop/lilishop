@@ -151,4 +151,10 @@ public class DraftGoods extends BaseEntity {
     @ApiModelProperty(value = "sku列表JSON")
     private String skuListJson;
 
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型", required = true)
+    private String goodsType;
+
 }

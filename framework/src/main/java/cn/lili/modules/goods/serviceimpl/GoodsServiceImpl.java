@@ -334,12 +334,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         //判断商品类型
         switch (goods.getGoodsType()) {
             case "PHYSICAL_GOODS":
-                if (goods.getTemplateId() == null) {
+                if (goods.getTemplateId().equals("0")) {
                     throw new ServiceException("实物商品需选择配送模板");
                 }
                 break;
             case "VIRTUAL_GOODS":
-                if (goods.getTemplateId() != null) {
+                if (!goods.getTemplateId().equals("0")) {
                     throw new ServiceException("虚拟商品不需要选择配送模板");
                 }
                 break;

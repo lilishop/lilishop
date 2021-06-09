@@ -51,12 +51,9 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     //商家流水
     @Autowired
     private StoreFlowService storeFlowService;
-<<<<<<< HEAD
-=======
     //结算单
     @Resource
     private BillMapper billMapper;
->>>>>>> master
 
     @Override
     public void createBill(String storeId, Date startTime, DateTime endTime) {
@@ -86,10 +83,6 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
                 .eq("store_id",storeId)
                 .eq("flow_type",FlowTypeEnum.PAY.name())
                 .between("create_time",startTime,endTime));
-<<<<<<< HEAD
-
-=======
->>>>>>> master
         Double orderPrice = 0D;
         if (orderBill != null) {
             bill.setOrderPrice(orderBill.getOrderPrice());
