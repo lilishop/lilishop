@@ -153,10 +153,16 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         //索引名称拼接
         String indexName = elasticsearchProperties.getIndexPrefix() + "_" + EsSuffix.GOODS_INDEX_NAME;
 
-        //如果索引不存在，则创建索引
-        if (!indexExist(indexName)) {
-            createIndexRequest(indexName);
+        //索引初始化，因为mapping结构问题：
+        //但是如果索引已经自动生成过，这里就不会创建索引，设置mapping，所以这里决定在初始化索引的同时，将已有索引删除，重新创建
+
+        //如果索引存在，则删除，重新生成。 这里应该有更优解。
+        if (this.indexExist(indexName)) {
+            deleteIndexRequest(indexName);
         }
+
+        //如果索引不存在，则创建索引
+        createIndexRequest(indexName);
         if (goodsIndexList != null && !goodsIndexList.isEmpty()) {
             goodsIndexRepository.deleteAll();
             for (EsGoodsIndex goodsIndex : goodsIndexList) {
