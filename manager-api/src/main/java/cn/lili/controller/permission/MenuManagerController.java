@@ -1,8 +1,8 @@
 package cn.lili.controller.permission;
 
-import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.base.aspect.DemoSite;
 import cn.lili.modules.permission.entity.dos.Menu;
 import cn.lili.modules.permission.entity.dto.MenuSearchParams;
 import cn.lili.modules.permission.entity.vo.MenuVO;
@@ -37,6 +37,7 @@ public class MenuManagerController {
 
     @ApiOperation(value = "添加")
     @PostMapping
+    @DemoSite
     public ResultMessage<Menu> add(Menu menu) {
         try {
             menuService.save(menu);
@@ -49,6 +50,8 @@ public class MenuManagerController {
     @ApiImplicitParam(name = "id", value = "菜单ID", required = true, paramType = "path", dataType = "String")
     @ApiOperation(value = "编辑")
     @PutMapping(value = "/{id}")
+
+    @DemoSite
     public ResultMessage<Menu> edit(@PathVariable String id, Menu menu) {
         menu.setId(id);
         menuService.updateById(menu);
@@ -57,6 +60,7 @@ public class MenuManagerController {
 
     @ApiOperation(value = "批量删除")
     @DeleteMapping(value = "/{ids}")
+    @DemoSite
     public ResultMessage<Menu> delByIds(@PathVariable List<String> ids) {
         menuService.deleteIds(ids);
         return ResultUtil.success();

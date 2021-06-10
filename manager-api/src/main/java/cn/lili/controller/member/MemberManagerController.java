@@ -3,6 +3,7 @@ package cn.lili.controller.member;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.base.aspect.DemoSite;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dto.ManagerMemberEditDTO;
 import cn.lili.modules.member.entity.dto.MemberAddDTO;
@@ -56,6 +57,7 @@ public class MemberManagerController {
 
     @ApiOperation(value = "修改会员基本信息")
     @PutMapping
+    @DemoSite
     public ResultMessage<Member> update(@Valid ManagerMemberEditDTO managerMemberEditDTO) {
         return ResultUtil.data(memberService.updateMember(managerMemberEditDTO));
     }
@@ -66,6 +68,7 @@ public class MemberManagerController {
             @ApiImplicitParam(name = "disabled", required = true, dataType = "boolean", paramType = "query")
     })
     @PutMapping("/updateMemberStatus")
+    @DemoSite
     public ResultMessage<Object> updateMemberStatus(@RequestParam List<String> memberIds, @RequestParam Boolean disabled) {
         memberService.updateMemberStatus(memberIds, disabled);
         return ResultUtil.success();

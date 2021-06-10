@@ -3,6 +3,7 @@ package cn.lili.controller.other;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.base.aspect.DemoSite;
 import cn.lili.modules.page.entity.dos.PageData;
 import cn.lili.modules.page.entity.dto.PageDataDTO;
 import cn.lili.modules.page.entity.vos.PageDataListVO;
@@ -49,6 +50,7 @@ public class PageDataManagerController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "页面ID", required = true, dataType = "String", paramType = "path")
     })
+    @DemoSite
     @PutMapping("/update/{id}")
     public ResultMessage<PageData> updatePageData(@Valid PageData pageData, @NotNull @PathVariable String id) {
         pageData.setId(id);
@@ -64,11 +66,13 @@ public class PageDataManagerController {
     @ApiOperation(value = "发布页面")
     @ApiImplicitParam(name = "id", value = "页面ID", required = true, dataType = "String", paramType = "path")
     @PutMapping("/release/{id}")
+    @DemoSite
     public ResultMessage<PageData> release(@PathVariable String id) {
         return ResultUtil.data(pageDataService.releasePageData(id));
     }
 
     @ApiOperation(value = "删除页面")
+    @DemoSite
     @ApiImplicitParam(name = "id", value = "页面ID", required = true, dataType = "String", paramType = "path")
     @DeleteMapping("/remove/{id}")
     public ResultMessage<Object> remove(@PathVariable String id) {
