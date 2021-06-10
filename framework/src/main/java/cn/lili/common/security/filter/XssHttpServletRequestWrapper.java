@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import java.util.regex.Pattern;
 
 /**
- * 防止Xss sql注入
+ * 防止Xss
  *
  * @author Chopper
  * @version v1.0
