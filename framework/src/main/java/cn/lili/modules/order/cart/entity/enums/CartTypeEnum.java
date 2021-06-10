@@ -27,6 +27,6 @@ public enum CartTypeEnum {
     /**
      * 虚拟商品
      */
-    FICTITIOUS;
+    VIRTUAL;
 
 }

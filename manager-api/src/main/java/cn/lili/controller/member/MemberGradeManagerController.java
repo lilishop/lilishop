@@ -50,9 +50,9 @@ public class MemberGradeManagerController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "会员等级ID", required = true, paramType = "path")
     })
-    @GetMapping(value = "/add")
+    @PostMapping(value = "/add")
     public ResultMessage<Object> daa(@Validated  MemberGrade memberGrade) {
-        if (memberGradeService.updateById(memberGrade)) {
+        if (memberGradeService.save(memberGrade)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
         throw new ServiceException(ResultCode.ERROR);
@@ -62,7 +62,7 @@ public class MemberGradeManagerController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "会员等级ID", required = true, paramType = "path")
     })
-    @GetMapping(value = "/update/{id}")
+    @PutMapping(value = "/update/{id}")
     public ResultMessage<Object> update(@PathVariable String id,MemberGrade memberGrade) {
         if (memberGradeService.updateById(memberGrade)) {
             return ResultUtil.success(ResultCode.SUCCESS);
