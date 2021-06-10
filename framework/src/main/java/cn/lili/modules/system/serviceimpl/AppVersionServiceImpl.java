@@ -29,7 +29,7 @@ public class AppVersionServiceImpl extends ServiceImpl<AppVersionMapper, AppVers
     @Override
     public boolean checkAppVersion(AppVersion appVersion) {
         //检测版本是否存在
-        if(null!=this.getOne(new LambdaQueryWrapper<AppVersion>().eq(AppVersion::getVersion,appVersion))){
+        if(null!=this.getOne(new LambdaQueryWrapper<AppVersion>().eq(AppVersion::getVersion,appVersion.getVersion()))){
             throw new ServiceException(ResultCode.APP_VERSION_EXIST);
         }
         return true;
