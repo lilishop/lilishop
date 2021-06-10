@@ -10,6 +10,7 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.order.cart.entity.dto.MemberCouponDTO;
@@ -524,17 +525,23 @@ public class CartServiceImpl implements CartService {
         if (memberAddress == null) {
             throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
         }
+        //循环购物车列表计算运费
         for (CartSkuVO cartSkuVO : skuList) {
+            GoodsSku goodsSku = cartSkuVO.getGoodsSku();
+            //如果是虚拟商品无需运费
+            if (goodsSku.getGoodsType() != null && goodsSku.getGoodsType().equals(GoodsTypeEnum.VIRTUAL_GOODS.name())) {
+                break;
+            }
+            //获取运费模板ID
             String freightTemplateId = cartSkuVO.getGoodsSku().getFreightTemplateId();
             FreightTemplateVO freightTemplate = freightTemplateService.getFreightTemplate(freightTemplateId);
             //店铺支付运费则跳过
-            if(freightTemplate.getPricingMethod().equals(FreightTemplateEnum.FREE.name())){
+            if (freightTemplate.getPricingMethod().equals(FreightTemplateEnum.FREE.name())) {
                 break;
             }
             //收货地址判定
             forTemplates:
             if (freightTemplate != null && freightTemplate.getFreightTemplateChildList() != null && !freightTemplate.getFreightTemplateChildList().isEmpty()) {
-
                 //获取市级别id
                 String addressId = memberAddress.getConsigneeAddressIdPath().split(",")[1];
                 //获取匹配的收货地址

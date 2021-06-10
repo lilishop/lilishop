@@ -213,7 +213,7 @@ public class Order extends BaseEntity {
         //订单类型判断--普通订单，活动订单。
         if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.CART) || tradeDTO.getCartTypeEnum().equals(CartTypeEnum.BUY_NOW)) {
             this.setOrderType(OrderTypeEnum.NORMAL.name());
-        } else {
+        }  else {
             this.setOrderType(tradeDTO.getCartTypeEnum().name());
         }
         //设定订单默认状态

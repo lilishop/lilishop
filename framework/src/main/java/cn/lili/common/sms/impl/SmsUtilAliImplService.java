@@ -103,6 +103,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
             default:
                 return;
         }
+        log.info("短信验证码："+code);
         //缓存中写入要验证的信息
         cache.put(cacheKey(verificationEnums, mobile, uuid), code, 300L);
         //发送短信

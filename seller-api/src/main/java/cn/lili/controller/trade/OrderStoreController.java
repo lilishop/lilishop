@@ -5,6 +5,7 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.config.context.ThreadContextHolder;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
 import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
@@ -55,11 +56,7 @@ public class OrderStoreController {
      */
     @Autowired
     private OrderPriceService orderPriceService;
-    /**
-     * 物流公司
-     */
-    @Autowired
-    private StoreLogisticsService storeLogisticsService;
+
 
     @ApiOperation(value = "查询订单列表")
     @GetMapping
@@ -142,19 +139,6 @@ public class OrderStoreController {
     @GetMapping(value = "/getTraces/{orderSn}")
     public ResultMessage<Object> getTraces(@NotBlank(message = "订单编号不能为空") @PathVariable String orderSn) {
         return ResultUtil.data(orderService.getTraces(orderSn));
-    }
-
-    @ApiOperation(value = "下载待发货的订单列表")
-    @GetMapping(value = "/downLoadDeliverExcel")
-    public ResultMessage<Object> downLoadDeliverExcel(HttpServletResponse response, List<String> orderIds) {
-
-        //获取店铺已经选择物流公司列表
-        List<String> logisticsName = storeLogisticsService.getStoreSelectedLogisticsName();
-        //下载订单批量发货Excel
-        this.orderService.getBatchDeliverList(response,orderIds,logisticsName);
-
-        return ResultUtil.success(ResultCode.SUCCESS);
-
     }
 
     @ApiOperation(value = "上传文件进行订单批量发货")

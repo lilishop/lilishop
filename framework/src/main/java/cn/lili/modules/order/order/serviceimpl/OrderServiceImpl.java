@@ -173,7 +173,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public IPage<OrderSimpleVO> queryByParams(OrderSearchParams orderSearchParams) {
-        QueryWrapper queryWrapper=orderSearchParams.queryWrapper();
+        QueryWrapper queryWrapper = orderSearchParams.queryWrapper();
         queryWrapper.groupBy("o.id");
         queryWrapper.orderByDesc("o.id");
         return this.baseMapper.queryByParams(PageUtil.initPage(orderSearchParams), queryWrapper);
@@ -287,7 +287,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Order order = this.getBySn(orderSn);
         //判断是否为拼团订单，进行特殊处理
         //判断订单类型进行不同的订单确认操作
-        if (order.getOrderPromotionType().equals(OrderPromotionTypeEnum.PINTUAN.name())) {
+        if (order.getOrderPromotionType() != null && order.getOrderPromotionType().equals(OrderPromotionTypeEnum.PINTUAN.name())) {
             this.checkPintuanOrder(order.getPromotionId(), order.getParentOrderSn());
         } else {
             //判断订单类型
@@ -362,12 +362,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     @OrderLogPoint(description = "'订单['+#orderSn+']核销，核销码['+#verificationCode+']'", orderSn = "#orderSn")
-    public Order take(String orderSn,String verificationCode) {
+    public Order take(String orderSn, String verificationCode) {
 
         //获取订单信息
         Order order = this.getBySn(orderSn);
         //检测虚拟订单信息
-        checkVerificationOrder(order,verificationCode);
+        checkVerificationOrder(order, verificationCode);
         order.setOrderStatus(OrderStatusEnum.COMPLETED.name());
         //修改订单信息
         this.updateById(order);
@@ -383,7 +383,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public Order getOrderByVerificationCode(String verificationCode) {
         return this.getOne(new LambdaQueryWrapper<Order>()
                 .eq(Order::getOrderStatus, OrderStatusEnum.TAKE.name())
-                .eq(Order::getStoreId,UserContext.getCurrentUser().getStoreId())
+                .eq(Order::getStoreId, UserContext.getCurrentUser().getStoreId())
                 .eq(Order::getVerificationCode, verificationCode));
     }
 
@@ -501,41 +501,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    public void getBatchDeliverList(HttpServletResponse response, List<String> orderIds, List<String> logisticsName) {
-        //获取待发货订单列表
-        List deliverList = this.baseMapper.deliverSnList(new LambdaQueryWrapper<Order>()
-                .eq(Order::getStoreId, UserContext.getCurrentUser().getStoreId())
-                .eq(Order::getOrderStatus, "'UNDELIVERED'")
-                .in(orderIds.size() > 0, Order::getId, orderIds));
-        //如果没有待发货的订单则返回
-        if (deliverList.size() < 1) {
-            throw new ServiceException(ResultCode.ORDER_DELIVER_NUM_ERROR);
-        }
-        ExcelWriter writer = ExcelUtil.getWriter();
-        writer.addHeaderAlias("sn", "订单号");
-        writer.addHeaderAlias("logisticsName", "物流公司");
-        writer.addHeaderAlias("logisticsNo", "物流单号");
-        //写入待发货的订单列表
-        writer.write(deliverList, true);
-        //存放下拉列表
-        String[] logiList = logisticsName.toArray(new String[]{});
-        CellRangeAddressList cellRangeAddressList = new CellRangeAddressList(2, deliverList.size(), 2, 3);
-        writer.addSelect(cellRangeAddressList, logiList);
-
-        response.setHeader("Content-Disposition", "attachment;filename=批量发货.xls");
-        ServletOutputStream out = null;
-        try {
-            out = response.getOutputStream();
-            writer.flush(out, true);
-        } catch (IOException e) {
-            log.error("获取待发货订单编号列表错误",e);
-        } finally {
-            writer.close();
-        }
-        IoUtil.close(out);
-    }
-
-    @Override
     public void batchDeliver(List<OrderBatchDeliverDTO> list) {
         //循环检查是否符合规范
         checkBatchDeliver(list);
@@ -553,11 +518,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private void checkBatchDeliver(List<OrderBatchDeliverDTO> list) {
         for (OrderBatchDeliverDTO orderBatchDeliverDTO : list) {
             //查看订单号是否存在-是否是当前店铺的订单
-            int count = this.count(new LambdaQueryWrapper<Order>()
+            Order order = this.getOne(new LambdaQueryWrapper<Order>()
                     .eq(Order::getStoreId, UserContext.getCurrentUser().getStoreId())
                     .eq(Order::getSn, orderBatchDeliverDTO.getOrderSn()));
-            if (count == 0) {
+            if (order==null) {
                 throw new ServiceException("订单编号：'" + orderBatchDeliverDTO.getOrderSn() + " '不存在");
+            }else if(order.getOrderStatus().equals(OrderStatusEnum.DELIVERED.name())){
+                throw new ServiceException("订单编号：'" + orderBatchDeliverDTO.getOrderSn() + " '不能发货");
             }
             //查看物流公司
             Logistics logistics = logisticsService.getOne(new LambdaQueryWrapper<Logistics>().eq(Logistics::getName, orderBatchDeliverDTO.getLogisticsName()));
@@ -825,12 +792,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     /**
      * 检测虚拟订单信息
-     * @param order 订单
+     *
+     * @param order            订单
      * @param verificationCode 验证码
      */
-    private void checkVerificationOrder(Order order,String verificationCode){
+    private void checkVerificationOrder(Order order, String verificationCode) {
         //判断查询是否可以查询到订单
-        if (order==null) {
+        if (order == null) {
             throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
         }
         //判断是否为虚拟订单
@@ -838,11 +806,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
         }
         //判断虚拟订单状态
-        else if (order.getOrderStatus().equals(OrderStatusEnum.TAKE.name())) {
+        else if (!order.getOrderStatus().equals(OrderStatusEnum.TAKE.name())) {
             throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
         }
         //判断验证码是否正确
-        else if(!verificationCode.equals(order.getVerificationCode())){
+        else if (!verificationCode.equals(order.getVerificationCode())) {
             throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
         }
     }
