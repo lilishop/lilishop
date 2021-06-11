@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -60,8 +61,8 @@ public class ConnectBuyerWebController {
 
     @ApiOperation(value = "信任登录统一回调地址", hidden = true)
     @GetMapping("/callback/{type}")
-    public void callBack(@PathVariable String type, AuthCallback callback, HttpServletResponse httpServletResponse) throws IOException {
-        connectUtil.callback(type, callback, httpServletResponse);
+    public void callBack(@PathVariable String type, AuthCallback callback, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
+        connectUtil.callback(type, callback,httpServletRequest, httpServletResponse);
     }
 
     @ApiOperation(value = "信任登录响应结果获取")
