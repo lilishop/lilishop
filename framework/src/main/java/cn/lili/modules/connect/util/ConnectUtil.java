@@ -17,6 +17,7 @@ import cn.lili.modules.connect.entity.dto.AuthCallback;
 import cn.lili.modules.connect.entity.dto.AuthResponse;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.exception.AuthException;
+import cn.lili.modules.connect.request.AuthQQRequest;
 import cn.lili.modules.connect.request.AuthRequest;
 import cn.lili.modules.connect.request.AuthWeChatPCRequest;
 import cn.lili.modules.connect.request.AuthWeChatRequest;
@@ -170,7 +171,7 @@ public class ConnectUtil {
                 QQConnectSetting qqConnectSetting = JSONUtil.toBean(setting.getSettingValue(), QQConnectSetting.class);
                 for (QQConnectSettingItem qqConnectSettingItem : qqConnectSetting.getQqConnectSettingItemList()) {
                     if (qqConnectSettingItem.getClientType().equals(ClientTypeEnum.PC.name())) {
-                        authRequest = new AuthWeChatPCRequest(AuthConfig.builder()
+                        authRequest = new AuthQQRequest(AuthConfig.builder()
                                 .clientId(qqConnectSettingItem.getAppId())
                                 .clientSecret(qqConnectSettingItem.getAppKey())
                                 .redirectUri(getRedirectUri(authInterface))
