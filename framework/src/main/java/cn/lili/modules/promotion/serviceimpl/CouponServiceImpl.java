@@ -2,7 +2,7 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.DelayQueueType;
+import cn.lili.common.trigger.enums.PromotionDelayTypeEnums;
 import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
@@ -53,7 +53,6 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-
 public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> implements CouponService {
 
     //延时任务
@@ -94,10 +93,10 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 coupon.getStartTime().getTime(),
                 promotionMessage,
-                DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                 rocketmqCustomProperties.getPromotionTopic());
         // 发送促销活动开始的延时任务
-        this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(coupon.getStartTime().getTime()));
+        this.timeTrigger.addDelay(timeTriggerMsg);
         return coupon;
     }
 
@@ -117,7 +116,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 promotionMessage,
                 coupon.getStartTime().getTime(), couponVO.getStartTime().getTime(),
-                DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                 DateUtil.getDelayTime(couponVO.getStartTime().getTime()),
                 rocketmqCustomProperties.getPromotionTopic());
         return couponVO;
@@ -145,7 +144,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
                 this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
                         promotionMessage,
                         couponVO.getStartTime().getTime(), couponVO.getStartTime().getTime(),
-                        DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                        DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                         DateUtil.getDelayTime(couponVO.getStartTime().getTime()),
                         rocketmqCustomProperties.getPromotionTopic());
             }
@@ -167,7 +166,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         this.mongoTemplate.remove(new Query().addCriteria(Criteria.where("id").is(id)), CouponVO.class);
         this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 couponVO.getStartTime().getTime(),
-                DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (PromotionTypeEnum.COUPON.name() + couponVO.getId())),
+                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (PromotionTypeEnum.COUPON.name() + couponVO.getId())),
                 rocketmqCustomProperties.getPromotionTopic());
         return result;
     }

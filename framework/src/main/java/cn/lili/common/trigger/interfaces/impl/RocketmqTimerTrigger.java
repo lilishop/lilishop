@@ -1,12 +1,12 @@
-package cn.lili.common.trigger;
+package cn.lili.common.trigger.interfaces.impl;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.cache.Cache;
 import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.common.trigger.delay.PromotionDelayQueue;
+import cn.lili.common.trigger.delay.queue.PromotionDelayQueue;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
 import cn.lili.common.trigger.model.TimeTriggerMsg;
-import cn.lili.common.trigger.util.TimeTriggerUtil;
+import cn.lili.common.trigger.util.DelayQueueTools;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -34,12 +34,38 @@ public class RocketmqTimerTrigger implements TimeTrigger {
 
 
     @Override
-    public void add(TimeTriggerMsg timeTriggerMsg) {
-        this.addExecute(timeTriggerMsg.getTriggerExecutor(), timeTriggerMsg.getParam(), timeTriggerMsg.getTriggerTime(), timeTriggerMsg.getUniqueKey(), timeTriggerMsg.getTopic());
+    public void addDelay(TimeTriggerMsg timeTriggerMsg) {
+        //执行器唯一key
+        String uniqueKey = timeTriggerMsg.getUniqueKey();
+        if (StringUtils.isEmpty(uniqueKey)) {
+            uniqueKey = StringUtils.getRandStr(10);
+        }
+        //执行任务key
+        String generateKey = DelayQueueTools.generateKey(timeTriggerMsg.getTriggerExecutor(), timeTriggerMsg.getTriggerTime(), uniqueKey);
+        this.cache.put(generateKey, 1);
+        //设置延时任务
+        if (Boolean.TRUE.equals(promotionDelayQueue.addJob(JSONUtil.toJsonStr(timeTriggerMsg), timeTriggerMsg.getTriggerTime()))) {
+            log.info("延时任务标识： {}", generateKey);
+            log.info("定时执行在【" + DateUtil.toString(timeTriggerMsg.getTriggerTime(), "yyyy-MM-dd HH:mm:ss") + "】，消费【" + timeTriggerMsg.getParam().toString() + "】");
+        } else {
+            log.error("延时任务添加失败:{}", timeTriggerMsg);
+        }
+    }
+
+    @Override
+    public void execute(TimeTriggerMsg timeTriggerMsg) {
+        this.addExecute(timeTriggerMsg.getTriggerExecutor(),
+                timeTriggerMsg.getParam(),
+                timeTriggerMsg.getTriggerTime(),
+                timeTriggerMsg.getUniqueKey(),
+                timeTriggerMsg.getTopic()
+        );
     }
 
     /**
-     * 添加延时任务
+     * 将任务添加到mq，mq异步队列执行。
+     * <p>
+     * 本系统中redis相当于延时任务吊起机制，而mq才是实际的业务消费，执行任务的存在
      *
      * @param executorName 执行器beanId
      * @param param        执行参数
@@ -50,7 +76,7 @@ public class RocketmqTimerTrigger implements TimeTrigger {
      *                     业务内全局唯一
      * @param topic        rocketmq topic
      */
-    public void addExecute(String executorName, Object param, Long triggerTime, String uniqueKey, String topic) {
+    private void addExecute(String executorName, Object param, Long triggerTime, String uniqueKey, String topic) {
 
         TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(executorName, triggerTime, param, uniqueKey, topic);
         Message<TimeTriggerMsg> message = MessageBuilder.withPayload(timeTriggerMsg).build();
@@ -59,33 +85,14 @@ public class RocketmqTimerTrigger implements TimeTrigger {
     }
 
     @Override
-    public void addDelay(TimeTriggerMsg timeTriggerMsg, int delayTime) {
-        //执行器唯一key
-        String uniqueKey = timeTriggerMsg.getUniqueKey();
-        if (StringUtils.isEmpty(uniqueKey)) {
-            uniqueKey = StringUtils.getRandStr(10);
-        }
-        //执行任务key
-        String generateKey = TimeTriggerUtil.generateKey(timeTriggerMsg.getTriggerExecutor(), timeTriggerMsg.getTriggerTime(), uniqueKey);
-        this.cache.put(generateKey, 1);
-        //设置延时任务
-        if (Boolean.TRUE.equals(promotionDelayQueue.addJob(JSONUtil.toJsonStr(timeTriggerMsg), delayTime))) {
-            log.info("add Redis key {}", generateKey);
-            log.info("定时执行在【" + DateUtil.toString(timeTriggerMsg.getTriggerTime(), "yyyy-MM-dd HH:mm:ss") + "】，消费【" + timeTriggerMsg.getParam().toString() + "】");
-        } else {
-            log.error("延时任务添加失败:{}", timeTriggerMsg);
-        }
-    }
-
-    @Override
     public void edit(String executorName, Object param, Long oldTriggerTime, Long triggerTime, String uniqueKey, int delayTime, String topic) {
         this.delete(executorName, oldTriggerTime, uniqueKey, topic);
-        this.addDelay(new TimeTriggerMsg(executorName, triggerTime, param, uniqueKey, topic), delayTime);
+        this.addDelay(new TimeTriggerMsg(executorName, triggerTime, param, uniqueKey, topic));
     }
 
     @Override
     public void delete(String executorName, Long triggerTime, String uniqueKey, String topic) {
-        String generateKey = TimeTriggerUtil.generateKey(executorName, triggerTime, uniqueKey);
+        String generateKey = DelayQueueTools.generateKey(executorName, triggerTime, uniqueKey);
         log.info("删除延时任务{}", generateKey);
         this.cache.remove(generateKey);
     }

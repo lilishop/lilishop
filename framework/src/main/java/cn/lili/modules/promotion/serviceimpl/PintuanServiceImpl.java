@@ -2,7 +2,7 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.DelayQueueType;
+import cn.lili.common.trigger.enums.PromotionDelayTypeEnums;
 import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
@@ -222,11 +222,10 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
                     promotionMessage,
                     pintuanVO.getStartTime().getTime(),
                     pintuan.getStartTime().getTime(),
-                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                    DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                     DateUtil.getDelayTime(pintuanVO.getStartTime().getTime()),
                     rocketmqCustomProperties.getPromotionTopic());
         }
-
         return result;
     }
 
@@ -390,10 +389,10 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
         TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 pintuan.getStartTime().getTime(),
                 promotionMessage,
-                DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                 rocketmqCustomProperties.getPromotionTopic());
         // 发送促销活动开始的延时任务
-        this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(pintuan.getStartTime().getTime()));
+        this.timeTrigger.addDelay(timeTriggerMsg);
     }
 
     /**
@@ -405,7 +404,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
     private void removePintuanGoodsFromEs(String id, Long originStartTime) {
         this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 originStartTime,
-                DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (PromotionTypeEnum.PINTUAN.name() + id)),
+                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (PromotionTypeEnum.PINTUAN.name() + id)),
                 rocketmqCustomProperties.getPromotionTopic());
     }
 

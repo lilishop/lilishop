@@ -9,22 +9,20 @@ import cn.lili.common.trigger.model.TimeTriggerMsg;
  */
 public interface TimeTrigger {
 
-
     /**
      * 添加延时任务
      *
      * @param timeTriggerMsg 延时任务信息
      */
-    void add(TimeTriggerMsg timeTriggerMsg);
+    void addDelay(TimeTriggerMsg timeTriggerMsg);
 
 
     /**
-     * 添加延时任务
+     * 执行延时任务
      *
      * @param timeTriggerMsg 延时任务信息
-     * @param delayTime      延时时间（秒）
      */
-    void addDelay(TimeTriggerMsg timeTriggerMsg, int delayTime);
+    void execute(TimeTriggerMsg timeTriggerMsg);
 
     /**
      * 修改延时任务

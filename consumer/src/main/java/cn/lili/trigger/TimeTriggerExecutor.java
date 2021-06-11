@@ -1,4 +1,4 @@
-package cn.lili.common.trigger.interfaces;
+package cn.lili.trigger;
 
 /**
  * 延时任务执行器接口

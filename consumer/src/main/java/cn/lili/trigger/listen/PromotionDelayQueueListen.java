@@ -1,33 +1,34 @@
-package cn.lili.common.trigger.delay;
+package cn.lili.trigger.listen;
 
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.trigger.enums.DelayQueueEnums;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
 import cn.lili.common.trigger.model.TimeTriggerMsg;
+import cn.lili.trigger.AbstractDelayQueueListen;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 促销延迟队列
+ * PromotionTimeTriggerListen
  *
- * @author paulG
- * @version v4.1
- * @date 2020/11/17 7:19 下午
- * @description
- * @since 1
+ * @author Chopper
+ * @version v1.0
+ * 2021-06-11 10:47
  */
 @Component
-public class PromotionDelayQueue extends AbstractDelayQueueMachineFactory {
+public class PromotionDelayQueueListen extends AbstractDelayQueueListen {
 
     @Autowired
     private TimeTrigger timeTrigger;
 
     @Override
     public void invoke(String jobId) {
-        timeTrigger.add(JSONUtil.toBean(jobId, TimeTriggerMsg.class));
+        timeTrigger.execute(JSONUtil.toBean(jobId, TimeTriggerMsg.class));
     }
+
 
     @Override
     public String setDelayQueueName() {
-        return "promotion_delay";
+        return DelayQueueEnums.PROMOTION_QUEUE.name();
     }
 }

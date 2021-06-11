@@ -1,13 +1,12 @@
 package cn.lili.trigger.executor;
 
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.TimeTriggerExecutor;
 import cn.lili.common.trigger.message.PintuanOrderMessage;
 import cn.lili.common.trigger.message.PromotionMessage;
-import cn.lili.common.trigger.interfaces.TimeTrigger;
-import cn.lili.common.trigger.interfaces.TimeTriggerExecutor;
 import cn.lili.common.trigger.model.TimeExecuteConstant;
 import cn.lili.common.trigger.model.TimeTriggerMsg;
-import cn.lili.common.utils.DateUtil;
 import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
@@ -58,8 +57,10 @@ public class PromotionTimeTriggerExecutor implements TimeTriggerExecutor {
                 // 结束时间（延时一分钟）
                 long closeTime = promotionMessage.getEndTime().getTime() + 60000;
                 TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR, closeTime, promotionMessage, uniqueKey, rocketmqCustomProperties.getPromotionTopic());
-                timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(promotionMessage.getEndTime().getTime()));
+                //添加延时任务
+                timeTrigger.addDelay(timeTriggerMsg);
             } else {
+                //不是开始，则修改活动状态
                 promotionService.updatePromotionStatus(promotionMessage);
             }
             return;
