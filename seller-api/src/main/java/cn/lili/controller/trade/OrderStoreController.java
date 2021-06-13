@@ -146,16 +146,16 @@ public class OrderStoreController {
         return ResultUtil.data(orderService.getTraces(orderSn));
     }
 
-    @ApiOperation(value = "下载待发货的订单列表")
+    @ApiOperation(value = "下载待发货的订单列表",produces="application/octet-stream")
     @GetMapping(value = "/downLoadDeliverExcel")
-    public ResultMessage<Object> downLoadDeliverExcel() {
+    public void downLoadDeliverExcel() {
         HttpServletResponse response = ThreadContextHolder.getHttpResponse();
         //获取店铺已经选择物流公司列表
         List<String> logisticsName = storeLogisticsService.getStoreSelectedLogisticsName();
         //下载订单批量发货Excel
         this.orderService.getBatchDeliverList(response,logisticsName);
 
-        return ResultUtil.success(ResultCode.SUCCESS);
+        //return ResultUtil.success(ResultCode.SUCCESS);
 
     }
 

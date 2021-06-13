@@ -1,6 +1,7 @@
 package cn.lili.modules.order.order.serviceimpl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -77,9 +78,9 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * 子订单业务层实现
@@ -506,31 +507,32 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public void getBatchDeliverList(HttpServletResponse response, List<String> logisticsName) {
         ExcelWriter writer = ExcelUtil.getWriter();
-        writer.addHeaderAlias("sn", "订单号");
-        writer.addHeaderAlias("logisticsName", "物流公司");
-        writer.addHeaderAlias("logisticsNo", "物流单号");
+        //Excel 头部
+        ArrayList<String> rows = new ArrayList<>();
+        rows.add("订单编号");
+        rows.add("物流公司");
+        rows.add("物流编号");
+        writer.writeHeadRow(rows);
 
-        ExcelDTO excelDTO=new ExcelDTO("asd","2","3");
-        List<ExcelDTO> list = new ArrayList<>();
-        list.add(excelDTO);
-        writer.write(list,true);
-        //存放下拉列表
+        //存放下拉列表  ----店铺已选择物流公司列表
         String[] logiList = logisticsName.toArray(new String[]{});
-        CellRangeAddressList cellRangeAddressList = new CellRangeAddressList(2, 2, 2, 3);
-//        writer.addSelect(cellRangeAddressList, logiList);
-        response.setContentType("application/vnd.ms-excel;charset=utf-8");
-        String name = "XXX国际贸易公司";
-        response.setHeader("Content-Disposition", "attachment;filename="+name+".xls");
+        CellRangeAddressList cellRangeAddressList = new CellRangeAddressList(1, 200, 1, 1);
+        writer.addSelect(cellRangeAddressList, logiList);
+
         ServletOutputStream out = null;
         try {
+            //设置公共属性，列表名称
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("批量发货导入模板", "UTF8") + ".xls");
             out = response.getOutputStream();
             writer.flush(out, true);
-        } catch (IOException e) {
-            log.error("获取待发货订单编号列表错误",e);
+        } catch (Exception e) {
+            log.error("获取待发货订单编号列表错误", e);
         } finally {
             writer.close();
+            IoUtil.close(out);
         }
-        IoUtil.close(out);
+
     }
 
     @Override
@@ -552,7 +554,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 orderBatchDeliverDTO.setLogisticsNo(objects.get(2).toString());
                 orderBatchDeliverDTOList.add(orderBatchDeliverDTO);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new ServiceException("文件读取失败");
         }
         //循环检查是否符合规范
@@ -574,9 +576,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             Order order = this.getOne(new LambdaQueryWrapper<Order>()
                     .eq(Order::getStoreId, UserContext.getCurrentUser().getStoreId())
                     .eq(Order::getSn, orderBatchDeliverDTO.getOrderSn()));
-            if (order==null) {
+            if (order == null) {
                 throw new ServiceException("订单编号：'" + orderBatchDeliverDTO.getOrderSn() + " '不存在");
-            }else if(order.getOrderStatus().equals(OrderStatusEnum.DELIVERED.name())){
+            } else if (order.getOrderStatus().equals(OrderStatusEnum.DELIVERED.name())) {
                 throw new ServiceException("订单编号：'" + orderBatchDeliverDTO.getOrderSn() + " '不能发货");
             }
             //查看物流公司
