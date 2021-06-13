@@ -242,4 +242,47 @@ public class RedisCache implements Cache {
     public Set<ZSetOperations.TypedTuple<Object>> reverseRangeWithScores(String sortedSetName, Integer start, Integer end) {
         return this.redisTemplate.opsForZSet().reverseRangeWithScores(sortedSetName, start, end);
     }
+
+
+    /**
+     * 向Zset里添加成员
+     *
+     * @param key   key值
+     * @param score 分数，通常用于排序
+     * @param value 值
+     * @return 增加状态
+     */
+    @Override
+    public boolean zAdd(String key, long score, String value) {
+        Boolean result = redisTemplate.opsForZSet().add(key, value, score);
+        return result;
+
+    }
+
+
+    /**
+     * 获取 某key 下 某一分值区间的队列
+     *
+     * @param key  缓存key
+     * @param from 开始时间
+     * @param to   结束时间
+     * @return 数据
+     */
+    @Override
+    public Set<ZSetOperations.TypedTuple<Object>> zRangeByScore(String key, int from, long to) {
+        Set<ZSetOperations.TypedTuple<Object>> set = redisTemplate.opsForZSet().rangeByScoreWithScores(key, from, to);
+        return set;
+    }
+
+    /**
+     * 移除 Zset队列值
+     *
+     * @param key   key值
+     * @param value 删除的集合
+     * @return 删除数量
+     */
+    @Override
+    public Long zRemove(String key, String... value) {
+        return redisTemplate.opsForZSet().remove(key, value);
+    }
 }

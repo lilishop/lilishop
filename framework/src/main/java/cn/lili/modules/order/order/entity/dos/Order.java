@@ -216,8 +216,8 @@ public class Order extends BaseEntity {
         }  else {
             this.setOrderType(tradeDTO.getCartTypeEnum().name());
         }
-        //设定订单默认状态
-        this.setId(orderId);
+
+        //设置默认支付状态
         this.setOrderStatus(OrderStatusEnum.UNPAID.name());
         this.setPayStatus(PayStatusEnum.UNPAID.name());
         this.setDeliverStatus(DeliverStatusEnum.UNDELIVERED.name());

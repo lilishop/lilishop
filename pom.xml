@@ -25,6 +25,7 @@
         <module>seller-api</module>
         <module>common-api</module>
         <module>consumer</module>
+        <module>admin</module>
     </modules>
 
 

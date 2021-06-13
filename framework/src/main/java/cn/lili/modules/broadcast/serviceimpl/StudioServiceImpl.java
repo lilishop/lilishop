@@ -2,14 +2,14 @@ package cn.lili.modules.broadcast.serviceimpl;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.delayqueue.BroadcastMessage;
-import cn.lili.common.delayqueue.DelayQueueTools;
-import cn.lili.common.delayqueue.DelayQueueType;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.trigger.enums.DelayQueueType;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
 import cn.lili.common.trigger.model.TimeExecuteConstant;
 import cn.lili.common.trigger.model.TimeTriggerMsg;
+import cn.lili.common.trigger.util.DelayQueueTools;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.PageUtil;

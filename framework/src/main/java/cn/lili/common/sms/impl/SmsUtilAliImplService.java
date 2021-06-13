@@ -10,6 +10,7 @@ import cn.lili.common.sms.AliSmsUtil;
 import cn.lili.common.sms.SmsUtil;
 import cn.lili.common.utils.CommonUtil;
 import cn.lili.common.verification.enums.VerificationEnums;
+import cn.lili.config.properties.SmsTemplateSetting;
 import cn.lili.modules.connect.util.Base64Utils;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
@@ -51,6 +52,9 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private SmsTemplateSetting smsTemplateSetting;
+
     @Override
     public void sendSmsCode(String mobile, VerificationEnums verificationEnums, String uuid) {
         //获取短信配置
@@ -75,17 +79,17 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
         switch (verificationEnums) {
             //登录
             case LOGIN: {
-                templateCode = "SMS_205755300";
+                templateCode = smsTemplateSetting.getLOGIN();
                 break;
             }
             //注册
             case REGISTER: {
-                templateCode = "SMS_205755298";
+                templateCode = smsTemplateSetting.getREGISTER();
                 break;
             }
             //找回密码
             case FIND_USER: {
-                templateCode = "SMS_205755301";
+                templateCode = smsTemplateSetting.getFIND_USER();
                 break;
             }
             //修改密码
@@ -96,7 +100,15 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 }
                 //更新为用户最新手机号
                 mobile = member.getMobile();
-                templateCode = "SMS_205755297";
+                templateCode = smsTemplateSetting.getUPDATE_PASSWORD();
+                break;
+            }
+            //设置支付密码
+            case WALLET_PASSWORD: {
+                Member member = memberService.getById(UserContext.getCurrentUser().getId());
+                //更新为用户最新手机号
+                mobile = member.getMobile();
+                templateCode = smsTemplateSetting.getWALLET_PASSWORD();
                 break;
             }
             //如果不是有效的验证码手段，则此处不进行短信操作

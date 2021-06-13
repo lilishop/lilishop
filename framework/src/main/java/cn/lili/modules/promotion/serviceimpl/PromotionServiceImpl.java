@@ -3,7 +3,7 @@ package cn.lili.modules.promotion.serviceimpl;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.delayqueue.PromotionMessage;
+import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;

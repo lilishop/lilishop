@@ -145,20 +145,32 @@ public class CashierSupport {
     public CashierParam cashierParam(PayParam payParam) {
         for (CashierExecute paramInterface : cashierExecuteList) {
             CashierParam cashierParam = paramInterface.getPaymentParams(payParam);
-            if (cashierParam != null) {
-                cashierParam.setSupport(support(payParam.getClientType()));
-                cashierParam.setWalletValue(memberWalletService.getMemberWallet(UserContext.getCurrentUser().getId()).getMemberWallet());
-                OrderSetting orderSetting = JSONUtil.toBean(settingService.get(SettingEnum.ORDER_SETTING.name()).getSettingValue(), OrderSetting.class);
-                Integer minute = orderSetting.getAutoCancel();
-                cashierParam.setAutoCancel(cashierParam.getCreateTime().getTime() + minute * 1000 * 60);
-                return cashierParam;
+            //如果为空，则表示收银台参数初始化不匹配，继续匹配下一条
+            if (cashierParam == null) {
+                continue;
             }
+            //如果订单不需要付款，则抛出异常，直接返回
+            if (cashierParam.getPrice() <= 0) {
+                throw new ServiceException(ResultCode.PAY_UN_WANTED);
+            }
+            cashierParam.setSupport(support(payParam.getClientType()));
+            cashierParam.setWalletValue(memberWalletService.getMemberWallet(UserContext.getCurrentUser().getId()).getMemberWallet());
+            OrderSetting orderSetting = JSONUtil.toBean(settingService.get(SettingEnum.ORDER_SETTING.name()).getSettingValue(), OrderSetting.class);
+            Integer minute = orderSetting.getAutoCancel();
+            cashierParam.setAutoCancel(cashierParam.getCreateTime().getTime() + minute * 1000 * 60);
+            return cashierParam;
         }
-
         log.error("错误的支付请求:{}", payParam.toString());
         throw new ServiceException(ResultCode.PAY_CASHIER_ERROR);
     }
 
+
+    /**
+     * 支付结果
+     *
+     * @param payParam
+     * @return
+     */
     public Boolean paymentResult(PayParam payParam) {
         for (CashierExecute cashierExecute : cashierExecuteList) {
             if (cashierExecute.cashierEnum().name().equals(payParam.getOrderType())) {

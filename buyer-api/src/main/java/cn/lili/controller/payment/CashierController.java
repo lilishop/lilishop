@@ -8,7 +8,6 @@ import cn.lili.modules.payment.kit.dto.PayParam;
 import cn.lili.modules.payment.kit.enums.PaymentClientEnum;
 import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
-import cn.lili.modules.payment.service.PaymentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -35,8 +34,6 @@ public class CashierController {
 
     @Autowired
     private CashierSupport cashierSupport;
-    @Autowired
-    private PaymentService paymentService;
 
 
     @ApiImplicitParams({

@@ -143,7 +143,7 @@ public class OrderStoreController {
 
     @ApiOperation(value = "上传文件进行订单批量发货")
     @ApiImplicitParam(name = "file", value = "订单列表", required = true, dataType = "file", paramType = "query")
-    @PutMapping(value = "/batchDeliver")
+    @PostMapping(value = "/batchDeliver")
     public void batchDeliver(@RequestParam MultipartFile file) {
         InputStream inputStream = null;
         try {

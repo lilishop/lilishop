@@ -1,6 +1,6 @@
 package cn.lili.modules.promotion.service;
 
-import cn.lili.common.delayqueue.PromotionMessage;
+import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 
 import java.util.Map;

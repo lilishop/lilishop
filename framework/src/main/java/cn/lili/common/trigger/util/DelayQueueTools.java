@@ -1,4 +1,6 @@
-package cn.lili.common.delayqueue;
+package cn.lili.common.trigger.util;
+
+import cn.lili.common.trigger.enums.DelayQueueType;
 
 /**
  * 延时任务工具类

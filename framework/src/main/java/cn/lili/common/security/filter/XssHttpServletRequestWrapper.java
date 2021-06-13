@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import java.util.regex.Pattern;
 
 /**
- * 防止Xss sql注入
+ * 防止Xss
  *
  * @author Chopper
  * @version v1.0
@@ -93,8 +93,8 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     private String cleanXSS(String value) {
         if (value != null) {
             //推荐使用ESAPI库来避免脚本攻击,value = ESAPI.encoder().canonicalize(value);
-            // 避免空字符串
-            value = value.replaceAll(" ", "");
+//            // 避免空字符串
+//            value = value.replaceAll(" ", "");
             // 避免script 标签
             Pattern scriptPattern = Pattern.compile("<script>(.*?)</script>", Pattern.CASE_INSENSITIVE);
             value = scriptPattern.matcher(value).replaceAll("");
