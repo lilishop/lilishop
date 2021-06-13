@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,12 +51,16 @@ public class OrderStoreController {
      */
     @Autowired
     private OrderService orderService;
-
     /**
      * 订单价格
      */
     @Autowired
     private OrderPriceService orderPriceService;
+    /**
+     * 物流公司
+     */
+    @Autowired
+    private StoreLogisticsService storeLogisticsService;
 
 
     @ApiOperation(value = "查询订单列表")
@@ -141,30 +146,24 @@ public class OrderStoreController {
         return ResultUtil.data(orderService.getTraces(orderSn));
     }
 
+    @ApiOperation(value = "下载待发货的订单列表")
+    @GetMapping(value = "/downLoadDeliverExcel")
+    public ResultMessage<Object> downLoadDeliverExcel() {
+        HttpServletResponse response = ThreadContextHolder.getHttpResponse();
+        //获取店铺已经选择物流公司列表
+        List<String> logisticsName = storeLogisticsService.getStoreSelectedLogisticsName();
+        //下载订单批量发货Excel
+        this.orderService.getBatchDeliverList(response,logisticsName);
+
+        return ResultUtil.success(ResultCode.SUCCESS);
+
+    }
+
+    @PostMapping(value = "/batchDeliver", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiOperation(value = "上传文件进行订单批量发货")
-    @ApiImplicitParam(name = "file", value = "订单列表", required = true, dataType = "file", paramType = "query")
-    @PostMapping(value = "/batchDeliver")
-    public void batchDeliver(@RequestParam MultipartFile file) {
-        InputStream inputStream = null;
-        try {
-            inputStream = file.getInputStream();
-            // 2.应用HUtool ExcelUtil获取ExcelReader指定输入流和sheet
-            ExcelReader excelReader = ExcelUtil.getReader(inputStream);
-            // 可以加上表头验证
-            // 3.读取第二行到最后一行数据
-            List<List<Object>> read = excelReader.read(1, excelReader.getRowCount());
-            List<OrderBatchDeliverDTO> orderBatchDeliverDTOList=new ArrayList<>();
-            for (List<Object> objects : read) {
-                OrderBatchDeliverDTO orderBatchDeliverDTO=new OrderBatchDeliverDTO();
-                orderBatchDeliverDTO.setOrderSn(objects.get(0).toString());
-                orderBatchDeliverDTO.setLogisticsName(objects.get(1).toString());
-                orderBatchDeliverDTO.setLogisticsNo(objects.get(2).toString());
-                orderBatchDeliverDTOList.add(orderBatchDeliverDTO);
-            }
-            orderService.batchDeliver(orderBatchDeliverDTOList);
-        } catch (Exception e) {
-            log.error("上传文件进行订单批量发货错误",e);
-        }
+    public ResultMessage<Object> batchDeliver(@RequestPart("files") MultipartFile files) {
+        orderService.batchDeliver(files);
+        return ResultUtil.success(ResultCode.SUCCESS);
     }
 
     @ApiOperation(value = "查询订单导出列表")

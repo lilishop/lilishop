@@ -45,8 +45,8 @@
         <de.codecentric>2.3.1</de.codecentric>
         <userAgentUtils>1.21</userAgentUtils>
         <interceptor-api>1.2</interceptor-api>
-        <poi-version>5.0.0</poi-version>
-        <poi-ooxml-version>5.0.0</poi-ooxml-version>
+        <poi-version>4.1.2</poi-version>
+        <poi-ooxml-version>4.1.2</poi-ooxml-version>
         <logstash-logback-encoder>6.6</logstash-logback-encoder>
         <zxing>3.4.1</zxing>
         <slf4j-api>1.7.28</slf4j-api>

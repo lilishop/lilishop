@@ -14,6 +14,7 @@ import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
 import cn.lili.modules.system.entity.vo.Traces;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -196,10 +197,19 @@ public interface OrderService extends IService<Order> {
     void agglomeratePintuanOrder(String pintuanId, String parentOrderSn);
 
     /**
+     * 获取待发货订单编号列表
+     *
+     * @param response
+     * @param logisticsName 店铺已选择物流公司列表
+     * @return 待发货订单编号列表
+     */
+    void getBatchDeliverList(HttpServletResponse response, List<String> logisticsName);
+
+    /**
      * 订单批量发货
      *
-     * @param list 批量发货列表
+     * @param files 文件
      */
-    void batchDeliver(List<OrderBatchDeliverDTO> list);
+    void batchDeliver(MultipartFile files);
 
 }

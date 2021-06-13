@@ -249,7 +249,7 @@ lili:
   # jwt 细节设定
   jwt-setting:
     # token过期时间（分钟）
-    tokenExpireTime: 1
+    tokenExpireTime: 30
 
   # 使用Spring @Cacheable注解失效时间
   cache:

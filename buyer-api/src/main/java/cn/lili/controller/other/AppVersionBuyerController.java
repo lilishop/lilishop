@@ -39,7 +39,7 @@ public class AppVersionBuyerController {
         return ResultUtil.data(appVersionService.getAppVersion(appType));
     }
 
-    @ApiOperation(value = "获取版本号")
+    @ApiOperation(value = "获取版本号列表")
     @ApiImplicitParam(name = "appType", value = "app类型", required = true, paramType = "path")
     @GetMapping("/appVersion/{type}")
     public ResultMessage<IPage<AppVersion>> appVersion(PageVO pageVO, @PathVariable String appType) {

@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
+import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import cn.lili.common.aop.syslog.annotation.SystemLogPoint;
@@ -69,11 +70,13 @@ import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -501,11 +504,61 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    public void batchDeliver(List<OrderBatchDeliverDTO> list) {
+    public void getBatchDeliverList(HttpServletResponse response, List<String> logisticsName) {
+        ExcelWriter writer = ExcelUtil.getWriter();
+        writer.addHeaderAlias("sn", "订单号");
+        writer.addHeaderAlias("logisticsName", "物流公司");
+        writer.addHeaderAlias("logisticsNo", "物流单号");
+
+        ExcelDTO excelDTO=new ExcelDTO("asd","2","3");
+        List<ExcelDTO> list = new ArrayList<>();
+        list.add(excelDTO);
+        writer.write(list,true);
+        //存放下拉列表
+        String[] logiList = logisticsName.toArray(new String[]{});
+        CellRangeAddressList cellRangeAddressList = new CellRangeAddressList(2, 2, 2, 3);
+//        writer.addSelect(cellRangeAddressList, logiList);
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+        String name = "XXX国际贸易公司";
+        response.setHeader("Content-Disposition", "attachment;filename="+name+".xls");
+        ServletOutputStream out = null;
+        try {
+            out = response.getOutputStream();
+            writer.flush(out, true);
+        } catch (IOException e) {
+            log.error("获取待发货订单编号列表错误",e);
+        } finally {
+            writer.close();
+        }
+        IoUtil.close(out);
+    }
+
+    @Override
+    public void batchDeliver(MultipartFile files) {
+
+        InputStream inputStream = null;
+        List<OrderBatchDeliverDTO> orderBatchDeliverDTOList = new ArrayList<>();
+        try {
+            inputStream = files.getInputStream();
+            // 2.应用HUtool ExcelUtil获取ExcelReader指定输入流和sheet
+            ExcelReader excelReader = ExcelUtil.getReader(inputStream);
+            // 可以加上表头验证
+            // 3.读取第二行到最后一行数据
+            List<List<Object>> read = excelReader.read(1, excelReader.getRowCount());
+            for (List<Object> objects : read) {
+                OrderBatchDeliverDTO orderBatchDeliverDTO = new OrderBatchDeliverDTO();
+                orderBatchDeliverDTO.setOrderSn(objects.get(0).toString());
+                orderBatchDeliverDTO.setLogisticsName(objects.get(1).toString());
+                orderBatchDeliverDTO.setLogisticsNo(objects.get(2).toString());
+                orderBatchDeliverDTOList.add(orderBatchDeliverDTO);
+            }
+        }catch (Exception e){
+            throw new ServiceException("文件读取失败");
+        }
         //循环检查是否符合规范
-        checkBatchDeliver(list);
+        checkBatchDeliver(orderBatchDeliverDTOList);
         //订单批量发货
-        for (OrderBatchDeliverDTO orderBatchDeliverDTO : list) {
+        for (OrderBatchDeliverDTO orderBatchDeliverDTO : orderBatchDeliverDTOList) {
             this.delivery(orderBatchDeliverDTO.getOrderSn(), orderBatchDeliverDTO.getLogisticsNo(), orderBatchDeliverDTO.getLogisticsId());
         }
     }
