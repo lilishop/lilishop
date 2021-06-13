@@ -43,6 +43,12 @@ public interface SeckillService extends IService<Seckill> {
     SeckillVO getSeckillByIdFromMongo(String id);
 
     /**
+     * 初始化秒杀活动，默认开启三十天的秒杀活动
+     *
+     * @return 是否保存成功
+     */
+    void init();
+    /**
      * 保存秒杀活动
      *
      * @param seckill 秒杀活动

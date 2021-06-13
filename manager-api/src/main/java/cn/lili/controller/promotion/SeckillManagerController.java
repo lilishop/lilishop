@@ -35,15 +35,10 @@ public class SeckillManagerController {
     private SeckillApplyService seckillApplyService;
 
 
-    @ApiOperation(value = "添加秒杀活动")
-    @PostMapping
-    public ResultMessage<Seckill> addSeckill(SeckillVO seckillVO) {
-        AuthUser currentUser = UserContext.getCurrentUser();
-        seckillVO.setStoreId(currentUser.getId());
-        seckillVO.setStoreName(currentUser.getUsername());
-        seckillVO.setSeckillApplyStatus(SeckillApplyStatusEnum.NOT_APPLY.name());
-        seckillService.saveSeckill(seckillVO);
-        return ResultUtil.data(seckillVO);
+    @ApiOperation(value = "添加秒杀活动(初始化方法，默认初始化30天内的活动）")
+    @GetMapping
+    public void addSeckill() {
+        seckillService.init();
     }
 
 

@@ -26,6 +26,10 @@ import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.service.SeckillService;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.modules.search.service.EsGoodsIndexService;
+import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.SeckillSetting;
+import cn.lili.modules.system.entity.enums.SettingEnum;
+import cn.lili.modules.system.service.SettingService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -33,6 +37,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -71,6 +76,9 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
     //秒杀申请
     @Autowired
     private SeckillApplyService seckillApplyService;
+    //设置
+    @Autowired
+    private SettingService settingService;
 
     @Override
     public IPage<Seckill> getSeckillByPageFromMysql(SeckillSearchParams queryParam, PageVO pageVo) {
@@ -98,6 +106,16 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
     @Override
     public SeckillVO getSeckillByIdFromMongo(String id) {
         return this.checkSeckillExist(id);
+    }
+
+    @Override
+    public void init() {
+        Setting setting = settingService.get(SettingEnum.SECKILL_SETTING.name());
+        SeckillSetting seckillSetting = new Gson().fromJson(setting.getSettingValue(), SeckillSetting.class);
+        for (int i=1;i<=30;i++){
+            Seckill seckill = new Seckill(i,seckillSetting.getHours(), seckillSetting.getSeckillRule());
+            this.saveSeckill(seckill);
+        }
     }
 
     @Override
