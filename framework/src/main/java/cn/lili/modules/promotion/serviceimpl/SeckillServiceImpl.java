@@ -1,7 +1,7 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.PromotionDelayTypeEnums;
+import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
@@ -169,7 +169,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
                     promotionMessage,
                     seckill.getStartTime().getTime(),
                     seckillVO.getStartTime().getTime(),
-                    DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                     DateUtil.getDelayTime(seckillVO.getStartTime().getTime()),
                     rocketmqCustomProperties.getPromotionTopic());
         }
@@ -190,7 +190,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
             this.promotionGoodsService.update(promotionGoodsQueryWrapper);
             this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
                     seckill.getStartTime().getTime(),
-                    DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (PromotionTypeEnum.SECKILL.name() + seckill.getId())),
+                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.SECKILL.name() + seckill.getId())),
                     rocketmqCustomProperties.getPromotionTopic());
         } else {
             throw new ServiceException("该秒杀活动活动的状态不能删除");
@@ -233,7 +233,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
                 }
                 this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
                         seckillVO.getStartTime().getTime(),
-                        DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (PromotionTypeEnum.SECKILL.name() + seckillVO.getId())),
+                        DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.SECKILL.name() + seckillVO.getId())),
                         rocketmqCustomProperties.getPromotionTopic());
             }
         } else {
@@ -264,7 +264,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
         TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 seckill.getStartTime().getTime(),
                 promotionMessage,
-                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                 rocketmqCustomProperties.getPromotionTopic());
         // 发送促销活动开始的延时任务
         this.timeTrigger.addDelay(timeTriggerMsg);

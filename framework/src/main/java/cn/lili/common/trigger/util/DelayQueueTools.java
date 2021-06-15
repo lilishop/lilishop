@@ -1,6 +1,6 @@
 package cn.lili.common.trigger.util;
 
-import cn.lili.common.trigger.enums.PromotionDelayTypeEnums;
+import cn.lili.common.trigger.enums.DelayTypeEnums;
 
 /**
  * 延时任务工具类
@@ -22,7 +22,7 @@ public class DelayQueueTools {
      * @param id   id
      * @return 唯一键
      */
-    public static String wrapperUniqueKey(PromotionDelayTypeEnums type, String id) {
+    public static String wrapperUniqueKey(DelayTypeEnums type, String id) {
         return "{TIME_TRIGGER_" + type.name() + "}_" + id;
     }
 

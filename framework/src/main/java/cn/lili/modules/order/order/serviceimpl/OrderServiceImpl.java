@@ -1,7 +1,6 @@
 package cn.lili.modules.order.order.serviceimpl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -11,7 +10,7 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import cn.lili.common.aop.syslog.annotation.SystemLogPoint;
 import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.PromotionDelayTypeEnums;
+import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.message.PintuanOrderMessage;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -76,9 +75,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
 
@@ -642,7 +639,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
                     startTime,
                     pintuanOrderMessage,
-                    DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PINTUAN_ORDER, (pintuanId + parentOrderSn)),
+                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PINTUAN_ORDER, (pintuanId + parentOrderSn)),
                     rocketmqCustomProperties.getPromotionTopic());
 
             this.timeTrigger.addDelay(timeTriggerMsg);

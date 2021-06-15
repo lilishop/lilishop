@@ -5,7 +5,7 @@ import cn.lili.common.delayqueue.BroadcastMessage;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.trigger.enums.DelayQueueType;
+import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
 import cn.lili.common.trigger.model.TimeExecuteConstant;
 import cn.lili.common.trigger.model.TimeTriggerMsg;
@@ -72,19 +72,20 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                 BroadcastMessage broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.START.name());
                 TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
                         Long.parseLong(studio.getStartTime()) * 1000L, broadcastMessage,
-                        DelayQueueTools.wrapperUniqueKey(DelayQueueType.BROADCAST, studio.getId()),
+                        DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                         rocketmqCustomProperties.getPromotionTopic());
+
                 // 发送促销活动开始的延时任务
-                this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(Long.parseLong(studio.getStartTime()) * 1000L));
+                this.timeTrigger.addDelay(timeTriggerMsg);
 
                 //直播结束延时任务
                 broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.END.name());
                 timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
                         Long.parseLong(studio.getEndTime()) * 1000L, broadcastMessage,
-                        DelayQueueTools.wrapperUniqueKey(DelayQueueType.BROADCAST, studio.getId()),
+                        DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                         rocketmqCustomProperties.getPromotionTopic());
                 // 发送促销活动开始的延时任务
-                this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(Long.parseLong(studio.getEndTime()) * 1000L));
+                this.timeTrigger.addDelay(timeTriggerMsg);
             }
             return true;
 
@@ -107,7 +108,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                     broadcastMessage,
                     Long.parseLong(oldStudio.getStartTime()),
                     Long.parseLong(studio.getStartTime()),
-                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.BROADCAST, studio.getId()),
+                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                     DateUtil.getDelayTime(Long.parseLong(studio.getStartTime())),
                     rocketmqCustomProperties.getPromotionTopic());
 
@@ -118,7 +119,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                     broadcastMessage,
                     Long.parseLong(oldStudio.getEndTime()),
                     Long.parseLong(studio.getEndTime()),
-                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.BROADCAST, studio.getId()),
+                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                     DateUtil.getDelayTime(Long.parseLong(studio.getEndTime())),
                     rocketmqCustomProperties.getPromotionTopic());
         }

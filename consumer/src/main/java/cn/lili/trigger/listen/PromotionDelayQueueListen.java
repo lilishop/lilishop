@@ -29,6 +29,6 @@ public class PromotionDelayQueueListen extends AbstractDelayQueueListen {
 
     @Override
     public String setDelayQueueName() {
-        return DelayQueueEnums.PROMOTION_QUEUE.name();
+        return DelayQueueEnums.PROMOTION.name();
     }
 }
