@@ -6,20 +6,17 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.CouponActivity;
 import cn.lili.modules.promotion.entity.dto.CouponActivityDTO;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
 import cn.lili.modules.promotion.service.CouponActivityService;
-import cn.lili.modules.promotion.service.CouponService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -35,8 +32,6 @@ public class CouponActivityManagerController {
 
     @Autowired
     private CouponActivityService couponActivityService;
-    @Autowired
-    private CouponService couponService;
 
     @ApiOperation(value = "获取优惠券活动分页")
     @GetMapping
@@ -53,13 +48,15 @@ public class CouponActivityManagerController {
 
     @ApiOperation(value = "添加优惠券活动")
     @PostMapping
-    public ResultMessage<CouponActivity> addCouponActivity(@Validated CouponActivityDTO couponActivityDTO) {
+    @PutMapping(consumes = "application/json", produces = "application/json")
+    public ResultMessage<CouponActivity> addCouponActivity(@RequestBody CouponActivityDTO couponActivityDTO) {
+        couponActivityDTO.setPromotionStatus(PromotionStatusEnum.NEW.name());
         return ResultUtil.data(couponActivityService.addCouponActivity(couponActivityDTO));
     }
 
     @ApiOperation(value = "修改优惠券活动")
     @PutMapping("/{id}")
-    public ResultMessage<CouponActivity> updateCouponActivity(@PathVariable String id, @Validated CouponActivityDTO couponActivityDTO) {
+    public ResultMessage<CouponActivity> updateCouponActivity(@PathVariable String id, CouponActivityDTO couponActivityDTO) {
         couponActivityDTO.setId(id);
         return ResultUtil.data(couponActivityService.updateCouponActivity(couponActivityDTO));
     }
@@ -77,11 +74,5 @@ public class CouponActivityManagerController {
         throw new ServiceException(ResultCode.ERROR);
     }
 
-
-    @ApiOperation(value = "获取活动优惠券列表")
-    @GetMapping("/activityCoupons")
-    public ResultMessage<IPage<Coupon>> activityCoupons() {
-        return ResultUtil.data(couponService.activityCoupons());
-    }
 
 }

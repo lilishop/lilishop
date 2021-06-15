@@ -26,7 +26,6 @@ public class CouponActivity extends BasePromotion {
 
     /**
      * @see CouponActivityTypeEnum
-     *
      */
     @NotNull(message = "优惠券活动类型不能为空")
     @ApiModelProperty(value = "优惠券活动类型")

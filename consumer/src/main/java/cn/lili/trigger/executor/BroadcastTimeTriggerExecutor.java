@@ -2,9 +2,9 @@ package cn.lili.trigger.executor;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.delayqueue.BroadcastMessage;
-import cn.lili.common.trigger.interfaces.TimeTriggerExecutor;
 import cn.lili.common.trigger.model.TimeExecuteConstant;
 import cn.lili.modules.broadcast.service.StudioService;
+import cn.lili.trigger.TimeTriggerExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
