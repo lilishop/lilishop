@@ -168,6 +168,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             Category parentCategory = this.getById(category.getParentId());
             category.setDeleteFlag(parentCategory.getDeleteFlag());
         }
+        this.save(category);
         removeCache();
         return true;
     }
