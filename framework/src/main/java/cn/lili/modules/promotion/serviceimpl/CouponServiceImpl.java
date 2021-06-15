@@ -2,7 +2,7 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.DelayQueueType;
+import cn.lili.common.trigger.enums.PromotionDelayTypeEnums;
 import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
@@ -89,17 +89,14 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         this.updateScopePromotionGoods(coupon);
         // 保存到MONGO中
         this.mongoTemplate.save(coupon);
-        // 如果是动态时间优惠券不走延时任务
-        if (coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
-            PromotionMessage promotionMessage = new PromotionMessage(coupon.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), coupon.getStartTime(), coupon.getEndTime());
-            TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                    coupon.getStartTime().getTime(),
-                    promotionMessage,
-                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                    rocketmqCustomProperties.getPromotionTopic());
-            // 发送促销活动开始的延时任务
-            this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(coupon.getStartTime().getTime()));
-        }
+        PromotionMessage promotionMessage = new PromotionMessage(coupon.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), coupon.getStartTime(), coupon.getEndTime());
+        TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
+                coupon.getStartTime().getTime(),
+                promotionMessage,
+                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                rocketmqCustomProperties.getPromotionTopic());
+        // 发送促销活动开始的延时任务
+        this.timeTrigger.addDelay(timeTriggerMsg);
         return coupon;
     }
 
@@ -114,17 +111,14 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         this.updateScopePromotionGoods(couponVO);
         // 保存到MONGO中
         this.mongoTemplate.save(couponVO);
-        // 如果是动态时间优惠券不走延时任务
-        if (coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
-            // 更新延时任务
-            PromotionMessage promotionMessage = new PromotionMessage(couponVO.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), coupon.getStartTime(), coupon.getEndTime());
-            this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                    promotionMessage,
-                    coupon.getStartTime().getTime(), couponVO.getStartTime().getTime(),
-                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                    DateUtil.getDelayTime(couponVO.getStartTime().getTime()),
-                    rocketmqCustomProperties.getPromotionTopic());
-        }
+        PromotionMessage promotionMessage = new PromotionMessage(couponVO.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), coupon.getStartTime(), coupon.getEndTime());
+        // 更新延时任务
+        this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
+                promotionMessage,
+                coupon.getStartTime().getTime(), couponVO.getStartTime().getTime(),
+                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                DateUtil.getDelayTime(couponVO.getStartTime().getTime()),
+                rocketmqCustomProperties.getPromotionTopic());
         return couponVO;
     }
 
@@ -144,18 +138,15 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
             couponVO.setPromotionStatus(promotionStatus.name());
             this.updateById(couponVO);
             this.mongoTemplate.save(couponVO);
-            // 如果是动态时间优惠券不走延时任务
-            if (couponVO.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
-                if (promotionStatus.name().equals(PromotionStatusEnum.START.name())) {
-                    PromotionMessage promotionMessage = new PromotionMessage(couponVO.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), couponVO.getStartTime(), couponVO.getEndTime());
-                    // 更新延时任务
-                    this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                            promotionMessage,
-                            couponVO.getStartTime().getTime(), couponVO.getStartTime().getTime(),
-                            DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                            DateUtil.getDelayTime(couponVO.getStartTime().getTime()),
-                            rocketmqCustomProperties.getPromotionTopic());
-                }
+            if (promotionStatus.name().equals(PromotionStatusEnum.START.name())) {
+                PromotionMessage promotionMessage = new PromotionMessage(couponVO.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), couponVO.getStartTime(), couponVO.getEndTime());
+                // 更新延时任务
+                this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
+                        promotionMessage,
+                        couponVO.getStartTime().getTime(), couponVO.getStartTime().getTime(),
+                        DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                        DateUtil.getDelayTime(couponVO.getStartTime().getTime()),
+                        rocketmqCustomProperties.getPromotionTopic());
             }
         }
         return true;
@@ -175,7 +166,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         this.mongoTemplate.remove(new Query().addCriteria(Criteria.where("id").is(id)), CouponVO.class);
         this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 couponVO.getStartTime().getTime(),
-                DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (PromotionTypeEnum.COUPON.name() + couponVO.getId())),
+                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (PromotionTypeEnum.COUPON.name() + couponVO.getId())),
                 rocketmqCustomProperties.getPromotionTopic());
         return result;
     }
@@ -266,53 +257,37 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         this.mongoTemplate.save(couponVO);
     }
 
-    @Override
-    public IPage<Coupon> activityCoupons() {
-        PageVO page = new PageVO();
-        page.setPageSize(9999);
-        page.setPageNumber(1);
-        LambdaQueryWrapper<Coupon> queryWrapper = new LambdaQueryWrapper();
-        queryWrapper.eq(Coupon::getGetType, CouponGetEnum.ACTIVITY.name());
-        return page(PageUtil.initPage(page), queryWrapper);
-    }
-
     /**
      * 检查优惠券信息是否合法
      *
      * @param coupon 优惠券信息
      */
     private void checkParam(CouponVO coupon) {
-        //判断优惠券领取数量限制
+
         if (coupon.getCouponLimitNum() < 0) {
             throw new ServiceException("领取限制数量不能为负数");
         }
-        //领取数量不能超过发放数量
+
         if (coupon.getCouponLimitNum() > coupon.getPublishNum()) {
             throw new ServiceException("领取限制数量超出发行数量");
         }
-        //判断优惠券面额
+
         if (coupon.getCouponType().equals(CouponTypeEnum.PRICE.name()) && coupon.getPrice() > coupon.getConsumeThreshold()) {
             throw new ServiceException("优惠券面额必须小于优惠券消费限额");
         } else if (coupon.getCouponType().equals(CouponTypeEnum.DISCOUNT.name()) && (coupon.getCouponDiscount() < 0 && coupon.getCouponDiscount() > 10)) {
             throw new ServiceException("优惠券折扣必须小于10且大于0");
         }
-        //判断优惠券时间
-        long nowTime = DateUtil.getDateline() * 1000;
-        if (coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
-            if (coupon.getStartTime().getTime() < nowTime && coupon.getEndTime().getTime() > nowTime) {
-                throw new ServiceException("活动时间小于当前时间，不能进行编辑删除操作");
-            }
 
-            PromotionTools.checkPromotionTime(coupon.getStartTime().getTime(), coupon.getEndTime().getTime());
-            //对状态的处理.如果未传递状态则需要 根据当前时间来确认优惠券状态
-            this.promotionStatusEmpty(coupon);
-        } else {
-            //动态时间优惠券需设置有限期并为活动赠送优惠券
-            if (coupon.getEffectiveDays() == null || coupon.getGetType().equals(CouponGetEnum.FREE.name())) {
-                throw new ServiceException("活动赠送优惠券需设置有限期");
-            }
+        long nowTime = DateUtil.getDateline() * 1000;
+        if (coupon.getStartTime().getTime() < nowTime && coupon.getEndTime().getTime() > nowTime) {
+            throw new ServiceException("活动时间小于当前时间，不能进行编辑删除操作");
         }
+
+        PromotionTools.checkPromotionTime(coupon.getStartTime().getTime(), coupon.getEndTime().getTime());
+
         this.checkCouponScope(coupon);
+        //对状态的处理.如果未传递状态则需要 根据当前时间来确认优惠券状态
+        this.promotionStatusEmpty(coupon);
     }
 
     /**

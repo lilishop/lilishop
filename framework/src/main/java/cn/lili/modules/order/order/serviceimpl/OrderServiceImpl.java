@@ -11,7 +11,7 @@ import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import cn.lili.common.aop.syslog.annotation.SystemLogPoint;
 import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.DelayQueueType;
+import cn.lili.common.trigger.enums.PromotionDelayTypeEnums;
 import cn.lili.common.trigger.message.PintuanOrderMessage;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -642,11 +642,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
                     startTime,
                     pintuanOrderMessage,
-                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.PINTUAN_ORDER, (pintuanId + parentOrderSn)),
+                    DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PINTUAN_ORDER, (pintuanId + parentOrderSn)),
                     rocketmqCustomProperties.getPromotionTopic());
-            this.timeTrigger.addDelay(timeTriggerMsg, cn.lili.common.utils.DateUtil.getDelayTime(startTime));
-        } else if (pintuan.getRequiredNum() <= count) {
-            //拼团所需人数，小于等于 参团后的人数，则说明成团，所有订单成团
+
+            this.timeTrigger.addDelay(timeTriggerMsg);
+        }
+        //拼团所需人数，小于等于 参团后的人数，则说明成团，所有订单成团
+        if (pintuan.getRequiredNum() <= count) {
             this.pintuanOrderSuccess(list);
         }
     }

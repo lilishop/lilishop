@@ -194,9 +194,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             if (goodsSku == null) {
                 throw new ServiceException("商品已下架");
             }
-
         }
-
         // 获取当前商品的索引信息
         EsGoodsIndex goodsIndex = goodsIndexService.findById(skuId);
         if (goodsIndex == null) {

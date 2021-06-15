@@ -51,10 +51,10 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
     @Override
     public PageData addPageData(PageData pageData) {
         //如果页面为发布，则关闭其他页面，开启此页面
-        if(pageData.getPageShow().equals(SwitchEnum.OPEN.name())){
+        if (pageData.getPageShow().equals(SwitchEnum.OPEN.name())) {
             LambdaUpdateWrapper<PageData> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-            lambdaUpdateWrapper.eq(PageData::getPageType,pageData.getPageType());
-            lambdaUpdateWrapper.eq(PageData::getPageClientType,pageData.getPageClientType());
+            lambdaUpdateWrapper.eq(PageData::getPageType, pageData.getPageType());
+            lambdaUpdateWrapper.eq(PageData::getPageClientType, pageData.getPageClientType());
             lambdaUpdateWrapper.set(PageData::getPageShow, SwitchEnum.CLOSE.name());
             this.update(lambdaUpdateWrapper);
         }
@@ -65,12 +65,14 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
     @Override
     public PageData updatePageData(PageData pageData) {
         //如果页面为发布，则关闭其他页面，开启此页面
-        if(pageData.getPageShow().equals(SwitchEnum.OPEN.name())){
+        if (pageData.getPageShow() != null && pageData.getPageShow().equals(SwitchEnum.OPEN.name())) {
             LambdaUpdateWrapper<PageData> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-            lambdaUpdateWrapper.eq(PageData::getPageType,pageData.getPageType());
-            lambdaUpdateWrapper.eq(PageData::getPageClientType,pageData.getPageClientType());
+            lambdaUpdateWrapper.eq(PageData::getPageType, pageData.getPageType());
+            lambdaUpdateWrapper.eq(PageData::getPageClientType, pageData.getPageClientType());
             lambdaUpdateWrapper.set(PageData::getPageShow, SwitchEnum.CLOSE.name());
             this.update(lambdaUpdateWrapper);
+        } else {
+            pageData.setPageShow(SwitchEnum.CLOSE.name());
         }
         LambdaUpdateWrapper<PageData> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.set(PageData::getPageData, pageData.getPageData());

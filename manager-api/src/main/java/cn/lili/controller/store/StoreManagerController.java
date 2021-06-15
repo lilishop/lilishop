@@ -3,6 +3,7 @@ package cn.lili.controller.store;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.base.aspect.DemoSite;
 import cn.lili.modules.goods.entity.vos.CategoryVO;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dto.AdminStoreApplyDTO;
@@ -90,6 +91,8 @@ public class StoreManagerController {
         return ResultUtil.success();
     }
 
+
+    @DemoSite
     @ApiOperation(value = "关闭店铺")
     @ApiImplicitParam(name = "id", value = "店铺id", required = true, dataType = "String", paramType = "path")
     @PutMapping(value = "/disable/{id}")

@@ -203,6 +203,15 @@ public class DateUtil {
     /**
      * 把日期转换成字符串型
      *
+     * @param Long    日期
+     * @return
+     */
+    public static String toString(Long date) {
+        return toString(date,STANDARD_FORMAT);
+    }
+    /**
+     * 把日期转换成字符串型
+     *
      * @param date    日期
      * @param pattern 类型
      * @return

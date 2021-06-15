@@ -4,9 +4,9 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.token.Token;
-import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.config.properties.ApiProperties;
 import cn.lili.config.properties.DomainProperties;
@@ -17,6 +17,7 @@ import cn.lili.modules.connect.entity.dto.AuthCallback;
 import cn.lili.modules.connect.entity.dto.AuthResponse;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.exception.AuthException;
+import cn.lili.modules.connect.request.AuthQQRequest;
 import cn.lili.modules.connect.request.AuthRequest;
 import cn.lili.modules.connect.request.AuthWeChatPCRequest;
 import cn.lili.modules.connect.request.AuthWeChatRequest;
@@ -32,8 +33,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 联合登陆工具类
@@ -71,9 +75,10 @@ public class ConnectUtil {
      * @param type
      * @param callback
      * @param httpServletResponse
+     * @param httpServletRequest
      * @throws IOException
      */
-    public void callback(String type, AuthCallback callback, HttpServletResponse httpServletResponse) throws IOException {
+    public void callback(String type, AuthCallback callback, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
         AuthRequest authRequest = this.getAuthRequest(type);
         AuthResponse<ConnectAuthUser> response = authRequest.login(callback);
         ResultMessage<Object> resultMessage;
@@ -95,8 +100,11 @@ public class ConnectUtil {
         //缓存写入登录结果，300秒有效
         cache.put(CachePrefix.CONNECT_RESULT.getPrefix() + callback.getCode(), resultMessage, 300L);
 
-//        String url = buyer + "/login?state=" + callback.getCode();
-        String url = domainProperties.getWap() + "/pages/public/login?state=" + callback.getCode();
+        //跳转地址
+        String url = this.check(httpServletRequest.getHeader("user-agent")) ?
+                domainProperties.getWap() + "/pages/passport/login?state=" + callback.getCode() :
+                domainProperties.getPc() + "/login?state=" + callback.getCode();
+
         try {
             httpServletResponse.sendRedirect(url);
         } catch (Exception e) {
@@ -172,7 +180,7 @@ public class ConnectUtil {
                 QQConnectSetting qqConnectSetting = JSONUtil.toBean(setting.getSettingValue(), QQConnectSetting.class);
                 for (QQConnectSettingItem qqConnectSettingItem : qqConnectSetting.getQqConnectSettingItemList()) {
                     if (qqConnectSettingItem.getClientType().equals(ClientTypeEnum.PC.name())) {
-                        authRequest = new AuthWeChatPCRequest(AuthConfig.builder()
+                        authRequest = new AuthQQRequest(AuthConfig.builder()
                                 .clientId(qqConnectSettingItem.getAppId())
                                 .clientSecret(qqConnectSettingItem.getAppKey())
                                 .redirectUri(getRedirectUri(authInterface))
@@ -223,6 +231,40 @@ public class ConnectUtil {
         return authRequest;
     }
 
+    // \b 是单词边界(连着的两个(字母字符 与 非字母字符) 之间的逻辑上的间隔),
+    // 字符串在编译时会被转码一次,所以是 "\\b"
+    // \B 是单词内部逻辑间隔(连着的两个字母字符之间的逻辑上的间隔)
+    static String phoneReg = "\\b(ip(hone|od)|android|opera m(ob|in)i"
+            + "|windows (phone|ce)|blackberry"
+            + "|s(ymbian|eries60|amsung)|p(laybook|alm|rofile/midp"
+            + "|laystation portable)|nokia|fennec|htc[-_]"
+            + "|mobile|up.browser|[1-4][0-9]{2}x[1-4][0-9]{2})\\b";
+    static String tableReg = "\\b(ipad|tablet|(Nexus 7)|up.browser"
+            + "|[1-4][0-9]{2}x[1-4][0-9]{2})\\b";
 
+    //移动设备正则匹配：手机端、平板
+    static Pattern phonePat = Pattern.compile(phoneReg, Pattern.CASE_INSENSITIVE);
+    static Pattern tablePat = Pattern.compile(tableReg, Pattern.CASE_INSENSITIVE);
+
+    /**
+     * 检测是否是移动设备访问
+     *
+     * @param userAgent 浏览器标识
+     * @return true:移动设备接入，false:pc端接入
+     * @Title: check
+     */
+    private boolean check(String userAgent) {
+        if (null == userAgent) {
+            userAgent = "";
+        }
+        // 匹配
+        Matcher matcherPhone = phonePat.matcher(userAgent);
+        Matcher matcherTable = tablePat.matcher(userAgent);
+        if (matcherPhone.find() || matcherTable.find()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 

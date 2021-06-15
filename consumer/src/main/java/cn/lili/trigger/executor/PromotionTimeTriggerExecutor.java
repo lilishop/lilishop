@@ -1,13 +1,12 @@
 package cn.lili.trigger.executor;
 
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.TimeTriggerExecutor;
 import cn.lili.common.trigger.message.PintuanOrderMessage;
 import cn.lili.common.trigger.message.PromotionMessage;
-import cn.lili.common.trigger.interfaces.TimeTrigger;
-import cn.lili.common.trigger.interfaces.TimeTriggerExecutor;
 import cn.lili.common.trigger.model.TimeExecuteConstant;
 import cn.lili.common.trigger.model.TimeTriggerMsg;
-import cn.lili.common.utils.DateUtil;
 import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
@@ -48,13 +47,21 @@ public class PromotionTimeTriggerExecutor implements TimeTriggerExecutor {
             log.info("促销活动信息消费：{}", promotionMessage);
             // 如果为促销活动开始，则需要发布促销活动结束的定时任务
             if (PromotionStatusEnum.START.name().equals(promotionMessage.getPromotionStatus())) {
-                //设置活动关闭时间
-                setCloseTime(promotionMessage);
-            }
-            //更新促销活动状态
-            if (!promotionService.updatePromotionStatus(promotionMessage)) {
-                log.error("开始促销活动失败: {}", promotionMessage);
-                return;
+                if (!promotionService.updatePromotionStatus(promotionMessage)) {
+                    log.error("开始促销活动失败: {}", promotionMessage);
+                    return;
+                }
+                // 促销活动开始后，设置促销活动结束的定时任务
+                promotionMessage.setPromotionStatus(PromotionStatusEnum.END.name());
+                String uniqueKey = "{TIME_TRIGGER_" + promotionMessage.getPromotionType() + "}_" + promotionMessage.getPromotionId();
+                // 结束时间（延时一分钟）
+                long closeTime = promotionMessage.getEndTime().getTime() + 60000;
+                TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR, closeTime, promotionMessage, uniqueKey, rocketmqCustomProperties.getPromotionTopic());
+                //添加延时任务
+                timeTrigger.addDelay(timeTriggerMsg);
+            } else {
+                //不是开始，则修改活动状态
+                promotionService.updatePromotionStatus(promotionMessage);
             }
             return;
         }
@@ -67,22 +74,5 @@ public class PromotionTimeTriggerExecutor implements TimeTriggerExecutor {
         }
     }
 
-    /**
-     * 设置促销活动结束时间
-     *
-     * @param promotionMessage 信息队列传输促销信息实体
-     */
-    private void setCloseTime(PromotionMessage promotionMessage) {
-        //如果设置了活动结束时间则创建促销结束延时任务
-        if(promotionMessage.getEndTime()!=null){
-            // 促销活动开始后，设置促销活动结束的定时任务
-            promotionMessage.setPromotionStatus(PromotionStatusEnum.END.name());
-            String uniqueKey = "{TIME_TRIGGER_" + promotionMessage.getPromotionType() + "}_" + promotionMessage.getPromotionId();
-            // 结束时间（延时一分钟）
-            long closeTime = promotionMessage.getEndTime().getTime() + 60000;
-            TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR, closeTime, promotionMessage, uniqueKey, rocketmqCustomProperties.getPromotionTopic());
-            timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(promotionMessage.getEndTime().getTime()));
-        }
 
-    }
 }

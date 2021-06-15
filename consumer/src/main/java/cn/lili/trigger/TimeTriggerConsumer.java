@@ -2,9 +2,8 @@ package cn.lili.trigger;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.cache.Cache;
-import cn.lili.common.trigger.interfaces.TimeTriggerExecutor;
 import cn.lili.common.trigger.model.TimeTriggerMsg;
-import cn.lili.common.trigger.util.TimeTriggerUtil;
+import cn.lili.common.trigger.util.DelayQueueTools;
 import cn.lili.common.utils.SpringContextUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -28,7 +27,7 @@ public class TimeTriggerConsumer implements RocketMQListener<TimeTriggerMsg> {
     @Override
     public void onMessage(TimeTriggerMsg timeTriggerMsg) {
         try {
-            String key = TimeTriggerUtil.generateKey(timeTriggerMsg.getTriggerExecutor(), timeTriggerMsg.getTriggerTime(), timeTriggerMsg.getUniqueKey());
+            String key = DelayQueueTools.generateKey(timeTriggerMsg.getTriggerExecutor(), timeTriggerMsg.getTriggerTime(), timeTriggerMsg.getUniqueKey());
 
             if (cache.get(key) == null) {
                 log.info("执行器执行被取消：{} | 任务标识：{}", timeTriggerMsg.getTriggerExecutor(), timeTriggerMsg.getUniqueKey());

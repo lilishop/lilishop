@@ -5,8 +5,8 @@ package cn.lili.common.trigger.enums;
  *
  * @author paulG
  * @since 2021/5/7
- **/
-public enum DelayQueueType {
+ */
+public enum PromotionDelayTypeEnums {
 
     /**
      * 促销活动
@@ -22,14 +22,10 @@ public enum DelayQueueType {
      */
     BROADCAST("直播");
 
-    private final String description;
+    private String description;
 
-    DelayQueueType(String des) {
-        this.description = des;
-    }
-
-    public String description() {
-        return this.description;
+    PromotionDelayTypeEnums(String description) {
+        this.description = description;
     }
 
 }
