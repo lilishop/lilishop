@@ -266,6 +266,16 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         this.mongoTemplate.save(couponVO);
     }
 
+    @Override
+    public IPage<Coupon> activityCoupons() {
+        PageVO page = new PageVO();
+        page.setPageSize(9999);
+        page.setPageNumber(1);
+        LambdaQueryWrapper<Coupon> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(Coupon::getGetType, CouponGetEnum.ACTIVITY.name());
+        return page(PageUtil.initPage(page), queryWrapper);
+    }
+
     /**
      * 检查优惠券信息是否合法
      *

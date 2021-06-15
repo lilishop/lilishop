@@ -41,10 +41,10 @@ public class AppVersionBuyerController {
 
     @ApiOperation(value = "获取版本号列表")
     @ApiImplicitParam(name = "appType", value = "app类型", required = true, paramType = "path")
-    @GetMapping("/appVersion/{type}")
-    public ResultMessage<IPage<AppVersion>> appVersion(PageVO pageVO, @PathVariable String appType) {
+    @GetMapping("/appVersion/{appType}")
+    public ResultMessage<IPage<AppVersion>> appVersion(@PathVariable String appType, PageVO pageVO) {
 
-        IPage<AppVersion> page=appVersionService.page(PageUtil.initPage(pageVO), new LambdaQueryWrapper<AppVersion>().eq(AppVersion::getType, appType));
+        IPage<AppVersion> page = appVersionService.page(PageUtil.initPage(pageVO), new LambdaQueryWrapper<AppVersion>().eq(AppVersion::getType, appType));
         return ResultUtil.data(page);
     }
 }

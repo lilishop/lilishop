@@ -6,11 +6,13 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.CouponActivity;
 import cn.lili.modules.promotion.entity.dto.CouponActivityDTO;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
 import cn.lili.modules.promotion.service.CouponActivityService;
+import cn.lili.modules.promotion.service.CouponService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -33,6 +35,8 @@ public class CouponActivityManagerController {
 
     @Autowired
     private CouponActivityService couponActivityService;
+    @Autowired
+    private CouponService couponService;
 
     @ApiOperation(value = "获取优惠券活动分页")
     @GetMapping
@@ -42,20 +46,21 @@ public class CouponActivityManagerController {
 
     @ApiOperation(value = "获取优惠券活动")
     @ApiImplicitParam(name = "couponActivityId", value = "优惠券活动ID", required = true, paramType = "path")
-    @GetMapping("/getCouponActivity/{couponActivityId}")
+    @GetMapping("/{couponActivityId}")
     public ResultMessage<CouponActivityVO> getCouponActivity(@PathVariable String couponActivityId) {
         return ResultUtil.data(couponActivityService.getCouponActivityVO(couponActivityId));
     }
 
     @ApiOperation(value = "添加优惠券活动")
-    @PostMapping("/addCouponActivity")
+    @PostMapping
     public ResultMessage<CouponActivity> addCouponActivity(@Validated CouponActivityDTO couponActivityDTO) {
         return ResultUtil.data(couponActivityService.addCouponActivity(couponActivityDTO));
     }
 
     @ApiOperation(value = "修改优惠券活动")
-    @PutMapping("/updateCouponActivity")
-    public ResultMessage<CouponActivity> updateCouponActivity(@Validated CouponActivityDTO couponActivityDTO) {
+    @PutMapping("/{id}")
+    public ResultMessage<CouponActivity> updateCouponActivity(@PathVariable String id, @Validated CouponActivityDTO couponActivityDTO) {
+        couponActivityDTO.setId(id);
         return ResultUtil.data(couponActivityService.updateCouponActivity(couponActivityDTO));
     }
 
@@ -65,10 +70,18 @@ public class CouponActivityManagerController {
             @ApiImplicitParam(name = "promotionStatus", value = "活动状态", required = true, dataType = "String", paramType = "path")
     })
     @PutMapping("/updateStatus/{id}/{promotionStatus}")
-    public ResultMessage<CouponActivity> updateStatus(@PathVariable String id,@PathVariable String promotionStatus) {
-        if(couponActivityService.updateCouponActivityStatus(id, PromotionStatusEnum.valueOf(promotionStatus))){
+    public ResultMessage<CouponActivity> updateStatus(@PathVariable String id, @PathVariable String promotionStatus) {
+        if (couponActivityService.updateCouponActivityStatus(id, PromotionStatusEnum.valueOf(promotionStatus))) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
         throw new ServiceException(ResultCode.ERROR);
     }
+
+
+    @ApiOperation(value = "获取活动优惠券列表")
+    @GetMapping("/activityCoupons")
+    public ResultMessage<IPage<Coupon>> activityCoupons() {
+        return ResultUtil.data(couponService.activityCoupons());
+    }
+
 }

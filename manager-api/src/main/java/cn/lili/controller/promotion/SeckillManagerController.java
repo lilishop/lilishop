@@ -7,7 +7,6 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
-import cn.lili.modules.promotion.entity.enums.SeckillApplyStatusEnum;
 import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.service.SeckillApplyService;
@@ -35,8 +34,8 @@ public class SeckillManagerController {
     private SeckillApplyService seckillApplyService;
 
 
-    @ApiOperation(value = "添加秒杀活动(初始化方法，默认初始化30天内的活动）")
-    @GetMapping
+    @ApiOperation(value = "初始化秒杀活动(初始化方法，默认初始化30天内的活动）")
+    @GetMapping("/init")
     public void addSeckill() {
         seckillService.init();
     }

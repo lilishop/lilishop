@@ -104,4 +104,10 @@ public interface CouponService extends IService<Coupon> {
     void usedCoupon(String couponId, Integer usedNum);
 
 
+    /**
+     * 活动优惠券列表
+     */
+    IPage<Coupon> activityCoupons();
+
+
 }
