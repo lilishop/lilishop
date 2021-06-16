@@ -42,7 +42,7 @@ public class StudioManagerController {
 
     @ApiOperation(value = "获取店铺直播间详情")
     @ApiImplicitParam(name = "studioId", value = "直播间ID", required = true, paramType = "path")
-    @GetMapping("/studioInfo/{studioId}")
+    @GetMapping("/{studioId}")
     public ResultMessage<StudioVO> studioInfo(@PathVariable String studioId) {
         return ResultUtil.data(studioService.getStudioVO(studioId));
     }
