@@ -121,16 +121,21 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public void intoDB(TradeDTO tradeDTO) {
+        //存放购物车，即业务中的订单
         List<Order> orders = new ArrayList<>(tradeDTO.getCartList().size());
+        //存放自订单/订单日志
         List<OrderItem> orderItems = new ArrayList<>();
         List<OrderLog> orderLogs = new ArrayList<>();
+        //拼团判定，不能参与自己创建的拼团
         if (tradeDTO.getParentOrderSn() != null) {
             Order parentOrder = this.getBySn(tradeDTO.getParentOrderSn());
             if (parentOrder.getMemberId().equals(UserContext.getCurrentUser().getId())) {
                 throw new ServiceException("不能参与自己发起的拼团活动！");
             }
         }
-        List<OrderVO> list = new ArrayList<>();
+        //订单集合
+        List<OrderVO> orderVOS = new ArrayList<>();
+        //循环购物车商品集合
         tradeDTO.getCartList().forEach(item -> {
             Order order = new Order(item, tradeDTO);
             if (OrderTypeEnum.PINTUAN.name().equals(order.getOrderType())) {
@@ -150,9 +155,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     sku -> orderItems.add(new OrderItem(sku, item, tradeDTO))
             );
             orderVO.setOrderItems(orderItems);
-            list.add(orderVO);
+            orderVOS.add(orderVO);
         });
-        tradeDTO.setOrderVO(list);
+        tradeDTO.setOrderVO(orderVOS);
         //批量保存订单
         this.saveBatch(orders);
         //批量保存 子订单
