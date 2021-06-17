@@ -1,15 +1,18 @@
 package cn.lili.modules.goods.entity.dos;
 
+import cn.hutool.json.JSONUtil;
 import cn.lili.base.BaseEntity;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
@@ -187,6 +190,11 @@ public class Goods extends BaseEntity {
     @ApiModelProperty(value = "销售模式", required = true)
     private String salesModel;
 
+    @ApiModelProperty(value = "商品参数json", hidden = true)
+    @Column(columnDefinition = "TEXT")
+    @JsonIgnore
+    private String params;
+
     public Goods() {
     }
 
@@ -207,6 +215,9 @@ public class Goods extends BaseEntity {
         this.intro = goodsOperationDTO.getIntro();
         this.mobileIntro = goodsOperationDTO.getMobileIntro();
         this.cost = goodsOperationDTO.getCost();
+        if (goodsOperationDTO.getGoodsParamsList() != null && goodsOperationDTO.getGoodsParamsList().isEmpty()) {
+            this.params = JSONUtil.toJsonStr(goodsOperationDTO.getGoodsParamsList());
+        }
         //如果立即上架则
         this.marketEnable = goodsOperationDTO.isRelease() ? GoodsStatusEnum.UPPER.name() : GoodsStatusEnum.DOWN.name();
 
