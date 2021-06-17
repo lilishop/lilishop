@@ -1,9 +1,15 @@
 package cn.lili.controller.other;
 
+import cn.hutool.json.JSONUtil;
+import cn.lili.modules.goods.entity.dos.Goods;
+import cn.lili.modules.goods.entity.dos.GoodsParams;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dos.Parameters;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.service.ParametersService;
 import cn.lili.modules.promotion.service.PromotionService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
@@ -39,10 +45,16 @@ public class ElasticsearchController {
     private GoodsSkuService goodsSkuService;
 
     @Autowired
+    private GoodsService goodsService;
+
+    @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
     private PromotionService promotionService;
+
+    @Autowired
+    private ParametersService parametersService;
 
     @GetMapping
     public void init() {
@@ -53,16 +65,33 @@ public class ElasticsearchController {
 
         List<GoodsSku> list = goodsSkuService.list(queryWrapper);
         List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
+        String goodsId = null;
         //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
         for (GoodsSku goodsSku : list) {
-            EsGoodsIndex index = new EsGoodsIndex(goodsSku);
-            Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
-            index.setPromotionMap(goodsCurrentPromotionMap);
-            esGoodsIndices.add(index);
-            stringRedisTemplate.opsForValue().set(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity().toString());
+            boolean needIndex = false;
+            if (goodsId == null || !goodsId.equals(goodsSku.getGoodsId())) {
+                goodsId = goodsSku.getGoodsId();
+                Goods goods = goodsService.getById(goodsId);
+                if (goods.getParams() != null && !goods.getParams().isEmpty()) {
+                    List<GoodsParams> goodsParams = JSONUtil.toList(goods.getParams(), GoodsParams.class);
+                    for (GoodsParams goodsParam : goodsParams) {
+                        Parameters parameters = parametersService.getById(goodsParam.getParamId());
+                        if (parameters.getIsIndex() == 1) {
+                            needIndex = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (Boolean.TRUE.equals(needIndex)) {
+                EsGoodsIndex index = new EsGoodsIndex(goodsSku);
+                Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
+                index.setPromotionMap(goodsCurrentPromotionMap);
+                esGoodsIndices.add(index);
+                stringRedisTemplate.opsForValue().set(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity().toString());
+            }
         }
         //初始化商品索引
         esGoodsIndexService.initIndex(esGoodsIndices);
-        Assertions.assertTrue(true);
     }
 }

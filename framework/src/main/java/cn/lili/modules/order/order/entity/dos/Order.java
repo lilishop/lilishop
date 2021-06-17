@@ -4,6 +4,7 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.base.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.DeliverStatusEnum;
@@ -210,7 +211,7 @@ public class Order extends BaseEntity {
         this.setId(oldId);
         this.setOrderType(OrderTypeEnum.NORMAL.name());
         //促销信息填充
-        if (cartVO.getSkuList().get(0).getPromotions() != null) {
+        if (cartVO.getSkuList().get(0).getPromotions() != null && tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)) {
             Optional<String> pintuanId = cartVO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
             if (pintuanId.isPresent()) {
                 promotionId = pintuanId.get();
