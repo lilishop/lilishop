@@ -4,8 +4,8 @@ import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.net.URLEncoder;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
@@ -67,7 +67,6 @@ public class AliPayPlugin implements Payment {
     @Override
     public ResultMessage<Object> h5pay(HttpServletRequest request, HttpServletResponse response, PayParam payParam) {
 
-
         CashierParam cashierParam = cashierSupport.cashierParam(payParam);
         //请求订单编号
         String outTradeNo = SnowFlake.getIdStr();
@@ -79,10 +78,11 @@ public class AliPayPlugin implements Payment {
         //回传数据
         payModel.setPassbackParams(URLEncoder.createAll().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8));
         //3分钟超时
-        payModel.setTimeoutExpress("3m");
+        payModel.setTimeoutExpress("30m");
         payModel.setOutTradeNo(outTradeNo);
         payModel.setProductCode("QUICK_WAP_PAY");
         try {
+            log.info("支付宝H5支付：{}", payModel);
             AliPayRequest.wapPay(response, payModel, callbackUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY),
                     notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY));
         } catch (Exception e) {
@@ -119,7 +119,9 @@ public class AliPayPlugin implements Payment {
             payModel.setOutTradeNo(outTradeNo);
             payModel.setProductCode("QUICK_MSECURITY_PAY");
 
+            log.info("支付宝APP支付：{}", payModel);
             String orderInfo = AliPayRequest.appPayToResponse(payModel, notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY)).getBody();
+            log.info("支付宝APP支付返回内容：{}", orderInfo);
             return ResultUtil.data(orderInfo);
         } catch (AlipayApiException e) {
             log.error("支付宝支付异常：", e);
@@ -150,8 +152,10 @@ public class AliPayPlugin implements Payment {
 //        payModel.setStoreId("store_id");
             payModel.setTimeoutExpress("3m");
             payModel.setOutTradeNo(outTradeNo);
-
+            log.info("支付宝扫码：{}", payModel);
             String resultStr = AliPayRequest.tradePrecreatePayToResponse(payModel, notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY)).getBody();
+
+            log.info("支付宝扫码交互返回：{}", resultStr);
             JSONObject jsonObject = JSONObject.parseObject(resultStr);
             return ResultUtil.data(jsonObject.getJSONObject("alipay_trade_precreate_response").getString("qr_code"));
         } catch (Exception e) {
@@ -212,7 +216,7 @@ public class AliPayPlugin implements Payment {
             }
             refundLogService.save(refundLog);
         } catch (Exception e) {
-            log.error("支付宝退款异常",e);
+            log.error("支付宝退款异常", e);
         }
     }
 
