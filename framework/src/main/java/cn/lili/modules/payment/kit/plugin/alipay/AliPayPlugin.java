@@ -78,7 +78,7 @@ public class AliPayPlugin implements Payment {
         //回传数据
         payModel.setPassbackParams(URLEncoder.createAll().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8));
         //3分钟超时
-        payModel.setTimeoutExpress("30m");
+//        payModel.setTimeoutExpress("30m");
         payModel.setOutTradeNo(outTradeNo);
         payModel.setProductCode("QUICK_WAP_PAY");
         try {
