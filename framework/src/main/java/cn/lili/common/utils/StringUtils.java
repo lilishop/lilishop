@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 字串工具类
@@ -249,6 +251,19 @@ public class StringUtils extends StrUtil {
             return str.concat(otherwise);
         }
         return str.concat(appendStr);
+    }
+
+    /**
+     * 过滤特殊字符串
+     *
+     * @param str
+     * @return
+     */
+    public static String filterSpecialChart(String str) {
+        String regEx = "[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+        Pattern p = Pattern.compile(regEx);
+        Matcher m = p.matcher(str);
+        return m.replaceAll("").trim();
     }
 }
 

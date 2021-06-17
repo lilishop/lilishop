@@ -1,10 +1,8 @@
 package cn.lili.modules.member.service;
 
-import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
 import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
-import cn.lili.modules.member.entity.dto.StoreEvaluationQueryParams;
 import cn.lili.modules.member.entity.vo.EvaluationNumberVO;
 import cn.lili.modules.member.entity.vo.MemberEvaluationListVO;
 import cn.lili.modules.member.entity.vo.MemberEvaluationVO;
@@ -25,23 +23,14 @@ public interface MemberEvaluationService extends IService<MemberEvaluation> {
      * @param evaluationQueryParams 评价查询
      * @return 评价分页
      */
-    IPage<MemberEvaluation> queryByParams(EvaluationQueryParams evaluationQueryParams);
-
-    /**
-     * 商家查询会员的评价分页列表
-     *
-     * @param storeEvaluationQueryParams 评价查询
-     * @return 会员的评价分页
-     */
-    IPage<MemberEvaluationListVO> queryByParams(StoreEvaluationQueryParams storeEvaluationQueryParams);
+    IPage<MemberEvaluation> managerQuery(EvaluationQueryParams evaluationQueryParams);
 
     /**
      * 查询评价分页列表
      * @param evaluationQueryParams 评价查询条件
-     * @param page 分页查询参数
      * @return 评价分页列表
      */
-    IPage<MemberEvaluationListVO> queryPage(EvaluationQueryParams evaluationQueryParams, PageVO page);
+    IPage<MemberEvaluationListVO> queryPage(EvaluationQueryParams evaluationQueryParams);
 
     /**
      * 添加会员评价

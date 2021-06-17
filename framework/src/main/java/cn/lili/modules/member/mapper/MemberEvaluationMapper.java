@@ -25,7 +25,7 @@ public interface MemberEvaluationMapper extends BaseMapper<MemberEvaluation> {
     @Select("select me.* from li_member_evaluation as me ${ew.customSqlSegment}")
     IPage<MemberEvaluationListVO> getMemberEvaluationList(IPage<MemberEvaluationListVO> page, @Param(Constants.WRAPPER) Wrapper<MemberEvaluationListVO> queryWrapper);
 
-    @Select("select grade,count(1) as num from li_member_evaluation Where goods_id=#{goodsId} GROUP BY grade")
+    @Select("select grade,count(1) as num from li_member_evaluation Where goods_id=#{goodsId} and status='OPEN' GROUP BY grade")
     List<Map<String, Object>> getEvaluationNumber(String goodsId);
 
     @Select("SELECT round( AVG( delivery_score ), 2 ) AS delivery_score" +
