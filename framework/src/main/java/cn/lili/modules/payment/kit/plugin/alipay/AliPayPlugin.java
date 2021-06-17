@@ -10,6 +10,7 @@ import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.config.properties.ApiProperties;
+import cn.lili.config.properties.DomainProperties;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.kit.CashierSupport;
 import cn.lili.modules.payment.kit.Payment;
@@ -62,7 +63,9 @@ public class AliPayPlugin implements Payment {
     //API域名
     @Autowired
     private ApiProperties apiProperties;
-
+    //域名配置
+    @Autowired
+    private DomainProperties domainProperties;
 
     @Override
     public ResultMessage<Object> h5pay(HttpServletRequest request, HttpServletResponse response, PayParam payParam) {
@@ -78,11 +81,11 @@ public class AliPayPlugin implements Payment {
         //回传数据
         payModel.setPassbackParams(URLEncoder.createAll().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8));
         //3分钟超时
-//        payModel.setTimeoutExpress("30m");
+        payModel.setTimeoutExpress("3m");
         payModel.setOutTradeNo(outTradeNo);
         payModel.setProductCode("QUICK_WAP_PAY");
         try {
-            log.info("支付宝H5支付：{}", payModel);
+            log.info("支付宝H5支付：{}", JSONUtil.toJsonStr(payModel));
             AliPayRequest.wapPay(response, payModel, callbackUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY),
                     notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY));
         } catch (Exception e) {
