@@ -2,6 +2,7 @@ package cn.lili.modules.message.entity.dos;
 
 import cn.lili.base.BaseEntity;
 import cn.lili.modules.message.entity.enums.RangeEnum;
+import cn.lili.modules.message.entity.enums.MessageSendClient;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -37,7 +38,10 @@ public class Message extends BaseEntity {
     @ApiModelProperty(value = "发送范围")
     private String messageRange;
 
-    @ApiModelProperty(value = "发送客户端 商家和会员")
+    /**
+     * @see MessageSendClient
+     */
+    @ApiModelProperty(value = "发送客户端 商家或者会员")
     private String messageClient;
 
     @Transient

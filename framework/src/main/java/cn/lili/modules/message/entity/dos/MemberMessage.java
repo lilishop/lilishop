@@ -1,4 +1,4 @@
-package cn.lili.modules.member.entity.dos;
+package cn.lili.modules.message.entity.dos;
 
 import cn.lili.base.BaseEntity;
 import cn.lili.modules.message.entity.enums.MessageStatusEnum;
@@ -36,6 +36,9 @@ public class MemberMessage extends BaseEntity {
 
     @ApiModelProperty(value = "消息内容")
     private String content;
+
+    @ApiModelProperty(value = "关联消息id")
+    private String messageId;
 
     /**
      * @see MessageStatusEnum

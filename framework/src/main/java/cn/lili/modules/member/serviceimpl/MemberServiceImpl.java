@@ -541,9 +541,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         queryWrapper.like(StringUtils.isNotBlank(memberSearchVO.getUsername()), "username", memberSearchVO.getUsername());
         //按照电话号码查询
         queryWrapper.like(StringUtils.isNotBlank(memberSearchVO.getMobile()), "mobile", memberSearchVO.getMobile());
-        //按照电话号码查询
-        queryWrapper.like(StringUtils.isNotBlank(memberSearchVO.getDisabled()), "disabled", memberSearchVO.getDisabled());
-        queryWrapper.orderByDesc("create_time");
+        //按照状态查询
+        queryWrapper.eq(StringUtils.isNotBlank(memberSearchVO.getDisabled()), "disabled",
+                memberSearchVO.getDisabled().equals(SwitchEnum.OPEN.name()) ? 1 : 0);        queryWrapper.orderByDesc("create_time");
         return this.count(queryWrapper);
     }
 
