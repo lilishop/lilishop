@@ -255,11 +255,12 @@ public class StringUtils extends StrUtil {
 
     /**
      * 过滤特殊字符串
+     *
      * @param str
      * @return
      */
-    public static String filterSpecialChart(String str){
-        String regEx="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+    public static String filterSpecialChart(String str) {
+        String regEx = "[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
         Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher(str);
         return m.replaceAll("").trim();

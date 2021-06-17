@@ -1,10 +1,7 @@
 package cn.lili.common.security.filter;
 
 
-import org.springframework.stereotype.Component;
-
 import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
@@ -15,8 +12,8 @@ import java.io.IOException;
  * @version v1.0
  * 2021-06-04 10:37
  */
-@WebFilter
-@Component
+//@WebFilter
+//@Component
 public class XssFilter implements Filter {
     FilterConfig filterConfig = null;
 

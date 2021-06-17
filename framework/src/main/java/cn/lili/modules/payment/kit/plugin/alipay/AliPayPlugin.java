@@ -6,11 +6,11 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.config.properties.ApiProperties;
-import cn.lili.config.properties.DomainProperties;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.kit.CashierSupport;
 import cn.lili.modules.payment.kit.Payment;
@@ -63,9 +63,6 @@ public class AliPayPlugin implements Payment {
     //API域名
     @Autowired
     private ApiProperties apiProperties;
-    //域名配置
-    @Autowired
-    private DomainProperties domainProperties;
 
     @Override
     public ResultMessage<Object> h5pay(HttpServletRequest request, HttpServletResponse response, PayParam payParam) {
@@ -79,7 +76,7 @@ public class AliPayPlugin implements Payment {
         payModel.setSubject(cashierParam.getDetail());
         payModel.setTotalAmount(cashierParam.getPrice() + "");
         //回传数据
-        payModel.setPassbackParams(URLEncoder.createAll().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8));
+        payModel.setPassbackParams(URLEncoder.createAll().encode(BeanUtil.formatKeyValuePair(payParam), StandardCharsets.UTF_8));
         //3分钟超时
         payModel.setTimeoutExpress("3m");
         payModel.setOutTradeNo(outTradeNo);
@@ -118,7 +115,7 @@ public class AliPayPlugin implements Payment {
             //3分钟超时
             payModel.setTimeoutExpress("3m");
             //回传数据
-            payModel.setPassbackParams(URLEncoder.createAll().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8));
+            payModel.setPassbackParams(URLEncoder.createAll().encode(BeanUtil.formatKeyValuePair(payParam), StandardCharsets.UTF_8));
             payModel.setOutTradeNo(outTradeNo);
             payModel.setProductCode("QUICK_MSECURITY_PAY");
 
@@ -151,7 +148,7 @@ public class AliPayPlugin implements Payment {
             payModel.setTotalAmount(cashierParam.getPrice() + "");
 
             //回传数据
-            payModel.setPassbackParams(URLEncoder.createAll().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8));
+            payModel.setPassbackParams(URLEncoder.createAll().encode(BeanUtil.formatKeyValuePair(payParam), StandardCharsets.UTF_8));
 //        payModel.setStoreId("store_id");
             payModel.setTimeoutExpress("3m");
             payModel.setOutTradeNo(outTradeNo);
@@ -256,7 +253,7 @@ public class AliPayPlugin implements Payment {
 
             String payParamStr = map.get("passback_params");
             String payParamJson = URLDecoder.decode(payParamStr, StandardCharsets.UTF_8);
-            PayParam payParam = JSONUtil.toBean(payParamJson, PayParam.class);
+            PayParam payParam = BeanUtil.formatKeyValuePair(payParamJson, new PayParam());
 
 
             if (verifyResult) {
