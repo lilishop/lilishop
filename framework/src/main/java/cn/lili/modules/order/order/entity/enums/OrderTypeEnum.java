@@ -14,7 +14,16 @@ public enum OrderTypeEnum {
     NORMAL,
 
     /**
+     * 赠品订单
+     */
+    GIFT,
+
+    /**
      * 虚拟订单
      */
-    VIRTUAL;
+    VIRTUAL,
+    /**
+     * 拼团订单
+     */
+    PINTUAN
 }
