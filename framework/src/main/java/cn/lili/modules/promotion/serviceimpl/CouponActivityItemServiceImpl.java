@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.lili.modules.promotion.entity.dos.CouponActivityItem;
+import cn.lili.modules.promotion.entity.vos.CouponActivityItemVO;
 import cn.lili.modules.promotion.mapper.CouponActivityItemMapper;
 import cn.lili.modules.promotion.service.CouponActivityItemService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -16,8 +17,15 @@ import java.util.List;
  */
 @Service
 public class CouponActivityItemServiceImpl extends ServiceImpl<CouponActivityItemMapper, CouponActivityItem> implements CouponActivityItemService {
+
     @Override
     public List<CouponActivityItem> getCouponActivityList(String activityId) {
         return this.list(this.lambdaQuery().eq(CouponActivityItem::getActivityId, activityId));
     }
+
+    @Override
+    public List<CouponActivityItemVO> getCouponActivityItemListVO(String activityId) {
+        return this.baseMapper.getCouponActivityItemListVO(activityId);
+    }
+
 }

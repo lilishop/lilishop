@@ -74,7 +74,7 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
     @Override
     public CouponActivityVO getCouponActivityVO(String couponActivityId) {
         CouponActivity couponActivity = this.getById(couponActivityId);
-        CouponActivityVO couponActivityVO = new CouponActivityVO(couponActivity, couponActivityItemService.getCouponActivityList(couponActivityId));
+        CouponActivityVO couponActivityVO = new CouponActivityVO(couponActivity, couponActivityItemService.getCouponActivityItemListVO(couponActivityId));
         return couponActivityVO;
     }
 

@@ -28,14 +28,14 @@ public class CouponActivity extends BasePromotion {
      * @see CouponActivityTypeEnum
      */
     @NotNull(message = "优惠券活动类型不能为空")
-    @ApiModelProperty(value = "优惠券活动类型")
+    @ApiModelProperty(value = "优惠券活动类型", allowableValues = "REGISTERED:新人赠券,SPECIFY：精确发券")
     private String couponActivityType;
 
     @NotNull(message = "请选择活动范围")
     @ApiModelProperty(value = "活动范围", allowableValues = "ALL:全部会员,DESIGNATED：指定会员")
     private String activityScope;
 
-    @ApiModelProperty(value = "活动范围详情")
+    @ApiModelProperty(value = "活动范围详情,只有精准发券使用")
     private String activityScopeInfo;
 
 }
