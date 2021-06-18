@@ -4,6 +4,18 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.base.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+<<<<<<< HEAD
+=======
+import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
+import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
+import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
+import cn.lili.modules.order.order.entity.enums.DeliverStatusEnum;
+import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
+import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
+import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
+import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+>>>>>>> master
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
@@ -209,12 +221,27 @@ public class Order extends BaseEntity {
         BeanUtil.copyProperties(tradeDTO, this);
         BeanUtil.copyProperties(cartVO.getPriceDetailDTO(), this);
         BeanUtil.copyProperties(cartVO, this);
+<<<<<<< HEAD
 
         //订单类型判断--普通订单，活动订单。
         if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.CART) || tradeDTO.getCartTypeEnum().equals(CartTypeEnum.BUY_NOW)) {
             this.setOrderType(OrderTypeEnum.NORMAL.name());
         }  else {
             this.setOrderType(tradeDTO.getCartTypeEnum().name());
+=======
+        this.setId(oldId);
+        this.setOrderType(OrderTypeEnum.NORMAL.name());
+        //促销信息填充
+        if (cartVO.getSkuList().get(0).getPromotions() != null && tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)) {
+            Optional<String> pintuanId = cartVO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
+            if (pintuanId.isPresent()) {
+                promotionId = pintuanId.get();
+                this.setOrderType(OrderTypeEnum.PINTUAN.name());
+                if (tradeDTO.getParentOrderSn() == null) {
+                    this.setParentOrderSn("");
+                }
+            }
+>>>>>>> master
         }
 
         //设置默认支付状态

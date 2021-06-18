@@ -101,7 +101,7 @@ public class CodeGenerator {
      */
     public static void main(String[] args) throws IOException {
         // 模板路径
-        ClasspathResourceLoader resourceLoader = new ClasspathResourceLoader("/templates/java/");
+        ClasspathResourceLoader resourceLoader = new ClasspathResourceLoader("/templates/");
         Configuration cfg = Configuration.defaultConfiguration();
         GroupTemplate gt = new GroupTemplate(resourceLoader, cfg);
         // 生成代码

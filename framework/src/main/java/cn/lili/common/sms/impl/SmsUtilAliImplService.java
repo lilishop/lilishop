@@ -11,6 +11,7 @@ import cn.lili.common.sms.SmsUtil;
 import cn.lili.common.utils.CommonUtil;
 import cn.lili.common.verification.enums.VerificationEnums;
 import cn.lili.config.properties.SmsTemplateSetting;
+import cn.lili.config.properties.SystemSetting;
 import cn.lili.modules.connect.util.Base64Utils;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
@@ -54,6 +55,9 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
 
     @Autowired
     private SmsTemplateSetting smsTemplateSetting;
+
+    @Autowired
+    private SystemSetting systemSetting;
 
     @Override
     public void sendSmsCode(String mobile, VerificationEnums verificationEnums, String uuid) {
@@ -115,12 +119,20 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
             default:
                 return;
         }
+<<<<<<< HEAD
         log.info("短信验证码："+code);
+=======
+
+        //如果是测试模式 默认验证码 6个1
+        if (systemSetting.getIsTestModel()) {
+            code = "111111";
+        } else {
+            //发送短信
+            this.sendSmsCode(smsSetting.getSignName(), mobile, params, templateCode);
+        }
+>>>>>>> master
         //缓存中写入要验证的信息
         cache.put(cacheKey(verificationEnums, mobile, uuid), code, 300L);
-        //发送短信
-        this.sendSmsCode(smsSetting.getSignName(), mobile, params, templateCode);
-
     }
 
     @Override

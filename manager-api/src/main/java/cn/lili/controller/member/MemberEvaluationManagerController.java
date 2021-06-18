@@ -42,7 +42,7 @@ public class MemberEvaluationManagerController {
     @GetMapping(value = "/getByPage")
     public ResultMessage<IPage<MemberEvaluationListVO>> getByPage(EvaluationQueryParams evaluationQueryParams, PageVO page) {
 
-        return ResultUtil.data(memberEvaluationService.queryPage(evaluationQueryParams, page));
+        return ResultUtil.data(memberEvaluationService.queryPage(evaluationQueryParams));
     }
 
     @ApiOperation(value = "修改评价状态")

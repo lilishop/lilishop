@@ -15,6 +15,10 @@ import lombok.Data;
 @Data
 public class EvaluationQueryParams extends PageVO {
 
+
+    @ApiModelProperty(value = "买家ID")
+    private String memberId;
+
     @ApiModelProperty(value = "会员名称")
     private String memberName;
 
@@ -23,9 +27,6 @@ public class EvaluationQueryParams extends PageVO {
 
     @ApiModelProperty(value = "卖家ID")
     private String storeId;
-
-    @ApiModelProperty(value = "买家ID", hidden = true)
-    private String memberId;
 
     @ApiModelProperty(value = "商品名称")
     private String goodsName;
@@ -44,6 +45,9 @@ public class EvaluationQueryParams extends PageVO {
 
     @ApiModelProperty(value = "评论日期--结束时间")
     private String endTime;
+
+    @ApiModelProperty(value = "状态")
+    private String status;
 
     public EvaluationQueryParams() {
 
@@ -77,6 +81,9 @@ public class EvaluationQueryParams extends PageVO {
         }
         if (StringUtils.isNotEmpty(haveImage)) {
             queryWrapper.eq("have_image", haveImage);
+        }
+        if (StringUtils.isNotEmpty(status)) {
+            queryWrapper.eq("status", status);
         }
         queryWrapper.eq("delete_flag", false);
         queryWrapper.orderByDesc("create_time");

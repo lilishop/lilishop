@@ -24,6 +24,7 @@ import java.util.Map;
 
 /**
  * 商品索引
+ *
  * @author paulG
  * @date 2020/10/13
  **/
@@ -248,35 +249,6 @@ public class EsGoodsIndex implements Serializable {
     private Map<String, Object> promotionMap;
 
 
-    public void setGoodsSku(GoodsSku sku) {
-        if (sku != null) {
-            this.id = sku.getId();
-            this.goodsId = sku.getGoodsId();
-            this.goodsName = sku.getGoodsName();
-            this.price = sku.getPrice();
-            this.storeName = sku.getStoreName();
-            this.storeId = sku.getStoreId();
-            this.thumbnail = sku.getThumbnail();
-            this.categoryPath = sku.getCategoryPath();
-            this.goodsVideo = sku.getGoodsVideo();
-            this.mobileIntro = sku.getMobileIntro();
-            this.buyCount = sku.getBuyCount();
-            this.commentNum = sku.getCommentNum();
-            this.small = sku.getSmall();
-            this.brandId = sku.getBrandId();
-            this.sn = sku.getSn();
-            this.storeCategoryPath = sku.getStoreCategoryPath();
-            this.sellingPoint = sku.getSellingPoint();
-            this.selfOperated = sku.getSelfOperated();
-            this.salesModel = sku.getSalesModel();
-            this.marketEnable = sku.getMarketEnable();
-            this.isAuth = sku.getIsAuth();
-            this.intro = sku.getIntro();
-            this.grade = sku.getGrade();
-            this.releaseTime = new Date();
-        }
-    }
-
     public EsGoodsIndex(GoodsSku sku) {
         if (sku != null) {
             this.id = sku.getId();
@@ -319,5 +291,34 @@ public class EsGoodsIndex implements Serializable {
             }
         }
 
+    }
+
+    public void setGoodsSku(GoodsSku sku) {
+        if (sku != null) {
+            this.id = sku.getId();
+            this.goodsId = sku.getGoodsId();
+            this.goodsName = sku.getGoodsName();
+            this.price = sku.getPrice();
+            this.storeName = sku.getStoreName();
+            this.storeId = sku.getStoreId();
+            this.thumbnail = sku.getThumbnail();
+            this.categoryPath = sku.getCategoryPath();
+            this.goodsVideo = sku.getGoodsVideo();
+            this.mobileIntro = sku.getMobileIntro();
+            this.buyCount = sku.getBuyCount();
+            this.commentNum = sku.getCommentNum();
+            this.small = sku.getSmall();
+            this.brandId = sku.getBrandId();
+            this.sn = sku.getSn();
+            this.storeCategoryPath = sku.getStoreCategoryPath();
+            this.sellingPoint = sku.getSellingPoint();
+            this.selfOperated = sku.getSelfOperated();
+            this.salesModel = sku.getSalesModel();
+            this.marketEnable = sku.getMarketEnable();
+            this.isAuth = sku.getIsAuth();
+            this.intro = sku.getIntro();
+            this.grade = sku.getGrade();
+            this.releaseTime = new Date();
+        }
     }
 }
