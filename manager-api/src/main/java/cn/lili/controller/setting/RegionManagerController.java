@@ -2,6 +2,7 @@ package cn.lili.controller.setting;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.base.aspect.DemoSite;
 import cn.lili.modules.base.service.RegionService;
 import cn.lili.modules.system.entity.dos.Region;
 import io.swagger.annotations.Api;
@@ -29,6 +30,7 @@ public class RegionManagerController {
     @Autowired
     private RegionService regionService;
 
+    @DemoSite
     @PostMapping(value = "/sync")
     @ApiOperation(value = "同步高德行政地区数据")
     public void synchronizationData(String url) {

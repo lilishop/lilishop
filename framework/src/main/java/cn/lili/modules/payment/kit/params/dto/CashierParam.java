@@ -1,5 +1,6 @@
 package cn.lili.modules.payment.kit.params.dto;
 
+import cn.lili.common.utils.StringUtils;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
@@ -41,4 +42,11 @@ public class CashierParam {
 
     @ApiModelProperty(value = "剩余余额")
     private Double walletValue;
+
+    public String getDetail() {
+        if (StringUtils.isEmpty(detail)) {
+            return "清单详细";
+        }
+        return StringUtils.filterSpecialChart(detail);
+    }
 }

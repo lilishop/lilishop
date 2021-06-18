@@ -20,9 +20,9 @@ import java.util.List;
 public class CouponActivityVO extends CouponActivity {
 
     @ApiModelProperty(value = "优惠券活动下的优惠券列表")
-    private List<CouponActivityItem> couponActivityItems;
+    private List<CouponActivityItemVO> couponActivityItems;
 
-    public CouponActivityVO(CouponActivity couponActivity, List<CouponActivityItem> couponActivityItems) {
+    public CouponActivityVO(CouponActivity couponActivity, List<CouponActivityItemVO> couponActivityItemVOS) {
         BeanUtil.copyProperties(couponActivity, this);
         this.couponActivityItems = couponActivityItems;
     }

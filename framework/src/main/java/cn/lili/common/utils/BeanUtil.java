@@ -1,5 +1,7 @@
 package cn.lili.common.utils;
 
+import cn.hutool.json.JSONUtil;
+import cn.lili.modules.payment.kit.dto.PayParam;
 import org.springframework.beans.BeanUtils;
 
 import java.lang.reflect.Field;
@@ -56,4 +58,75 @@ public class BeanUtil {
             return null;
         }
     }
+
+
+    /**
+     * 将对象转换为key value
+     * A=a&B=b&C=c 格式
+     */
+    public static String formatKeyValuePair(Object object) {
+        //准备接受的字符串
+        StringBuilder stringBuffer = new StringBuilder();
+        //获取对象字段
+        String[] fieldNames = BeanUtil.getFiledName(object);
+        //遍历所有属性
+        for (int j = 0; j < fieldNames.length; j++) {
+            //不是第一个并且不是最后一个，拼接&
+            if (j != 0) {
+                stringBuffer.append("&");
+            }
+            //获取属性的名字
+            String key = fieldNames[j];
+            //获取值
+            Object value = BeanUtil.getFieldValueByName(key, object);
+            stringBuffer.append(key).append("=").append(value.toString());
+        }
+        return stringBuffer.toString();
+    }
+
+    /**
+     * key value键值对 转换为 对象
+     * A=a&B=b&C=c 格式 转换为对象
+     */
+    public static <T> T formatKeyValuePair(String str, T t) {
+        //填写对参数键值对
+        String[] params = str.split("&");
+
+        //获取对象字段
+        String[] fieldNames = BeanUtil.getFiledName(t);
+
+        try {
+            //循环每个参数
+            for (String param : params) {
+                String[] keyValues = param.split("=");
+                for (int i = 0; i < fieldNames.length; i++) {
+                    if (fieldNames[i].equals(keyValues[0])) {
+                        Field f = t.getClass().getDeclaredField(fieldNames[i]);
+                        f.setAccessible(true);
+                        //长度为2 才转换，否则不转
+                        if (keyValues.length == 2) {
+                            f.set(t, keyValues[1]);
+                        }
+                    }
+                }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return t;
+    }
+
+    public static void main(String[] args) throws IllegalAccessException {
+        PayParam payParam = new PayParam();
+        payParam.setClientType("client");
+        payParam.setOrderType("");
+        payParam.setSn("sn");
+        String val = formatKeyValuePair(payParam);
+        System.out.println(val);
+
+        PayParam param = formatKeyValuePair(val, new PayParam());
+        System.out.println(JSONUtil.toJsonStr(param));
+    }
+
 }

@@ -1,5 +1,6 @@
 package cn.lili.controller.member;
 
+import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
@@ -55,7 +56,7 @@ public class MemberEvaluationBuyerController {
     public ResultMessage<IPage<MemberEvaluation>> queryMineEvaluation(EvaluationQueryParams evaluationQueryParams) {
         //设置当前登录会员
         evaluationQueryParams.setMemberId(UserContext.getCurrentUser().getId());
-        return ResultUtil.data(memberEvaluationService.queryByParams(evaluationQueryParams));
+        return ResultUtil.data(memberEvaluationService.managerQuery(evaluationQueryParams));
     }
 
     @ApiOperation(value = "查看某一个商品的评价列表")
@@ -65,7 +66,8 @@ public class MemberEvaluationBuyerController {
                                                                        @NotNull @PathVariable("goodsId") String goodsId) {
         //设置查询查询商品
         evaluationQueryParams.setGoodsId(goodsId);
-        return ResultUtil.data(memberEvaluationService.queryByParams(evaluationQueryParams));
+        evaluationQueryParams.setStatus(SwitchEnum.OPEN.name());
+        return ResultUtil.data(memberEvaluationService.managerQuery(evaluationQueryParams));
     }
 
     @ApiOperation(value = "查看某一个商品的评价数量")

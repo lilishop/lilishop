@@ -21,6 +21,12 @@ public class SystemSetting {
     private Boolean isDemoSite = false;
 
     /**
+     * 测试模式
+     * 验证码短信为6个1
+     */
+    private Boolean isTestModel = false;
+
+    /**
      * 授权信息
      */
     private String licences = "";

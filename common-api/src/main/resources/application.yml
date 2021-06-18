@@ -222,8 +222,7 @@ lili:
     #支付密码
     WALLET_PASSWORD: SMS_205755301
   system:
-    isDemoSite: true
-    licences: 'temporary'
+    isTestModel: true
   statistics:
     # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数
     onlineMember: 48

@@ -129,38 +129,43 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public void intoDB(TradeDTO tradeDTO) {
         //检查TradeDTO信息
         checkTradeDTO(tradeDTO);
-        //订单列表
+        //存放购物车，即业务中的订单
         List<Order> orders = new ArrayList<>(tradeDTO.getCartList().size());
-        //订单日志
-        List<OrderLog> orderLogs = new ArrayList<>(tradeDTO.getCartList().size());
-        //订单VO列表
-        List<OrderVO> OrderVOList = new ArrayList<>(tradeDTO.getCartList().size());
-        //订单货物列表
+        //存放自订单/订单日志
         List<OrderItem> orderItems = new ArrayList<>();
-        //循环交易货物列表，新增订单
+        List<OrderLog> orderLogs = new ArrayList<>();
+        //拼团判定，不能参与自己创建的拼团
+        if (tradeDTO.getParentOrderSn() != null) {
+            Order parentOrder = this.getBySn(tradeDTO.getParentOrderSn());
+            if (parentOrder.getMemberId().equals(UserContext.getCurrentUser().getId())) {
+                throw new ServiceException("不能参与自己发起的拼团活动！");
+            }
+        }
+        //订单集合
+        List<OrderVO> orderVOS = new ArrayList<>();
+        //循环购物车商品集合
         tradeDTO.getCartList().forEach(item -> {
-            //构建订单
             Order order = new Order(item, tradeDTO);
-            //检查订单信息
-            checkOrder(order);
-            //新建订单
+            if (OrderTypeEnum.PINTUAN.name().equals(order.getOrderType())) {
+                Pintuan pintuan = pintuanService.getPintuanById(order.getPromotionId());
+                Integer limitNum = pintuan.getLimitNum();
+                if (limitNum != 0 && order.getGoodsNum() > limitNum) {
+                    throw new ServiceException("购买数量超过拼团活动限制数量");
+                }
+            }
+            //构建orderVO对象
+            OrderVO orderVO = new OrderVO();
+            BeanUtil.copyProperties(order, orderVO);
             orders.add(order);
-            //记录订单日志
-            orderLogs.add(new OrderLog(item.getSn(),
-                    UserContext.getCurrentUser().getId(),
-                    UserContext.getCurrentUser().getRole().getRole(),
-                    UserContext.getCurrentUser().getUsername(), "订单[" + item.getSn() + "]创建"));
-
-            //添加订单货物
+            String message = "订单[" + item.getSn() + "]创建";
+            orderLogs.add(new OrderLog(item.getSn(), UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), message));
             item.getSkuList().forEach(
                     sku -> orderItems.add(new OrderItem(sku, item, tradeDTO))
             );
-
-            //构建orderVO对象
-            OrderVO orderVO = new OrderVO(order, orderItems);
-            OrderVOList.add(orderVO);
+            orderVO.setOrderItems(orderItems);
+            orderVOS.add(orderVO);
         });
-        tradeDTO.setOrderVO(OrderVOList);
+        tradeDTO.setOrderVO(orderVOS);
         //批量保存订单
         this.saveBatch(orders);
         //批量保存 子订单
@@ -168,7 +173,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         // 批量记录订单操作日志
         orderLogService.saveBatch(orderLogs);
         // 赠品根据店铺单独生成订单
-        //todo 优化赠品订单代码逻辑
         this.generatorGiftOrder(tradeDTO);
     }
 

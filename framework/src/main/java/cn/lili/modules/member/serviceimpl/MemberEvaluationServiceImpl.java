@@ -3,8 +3,8 @@ package cn.lili.modules.member.serviceimpl;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.common.rocketmq.tags.GoodsTagsEnum;
@@ -12,7 +12,6 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.common.vo.PageVO;
 import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
@@ -20,7 +19,6 @@ import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
 import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
-import cn.lili.modules.member.entity.dto.StoreEvaluationQueryParams;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.entity.vo.EvaluationNumberVO;
 import cn.lili.modules.member.entity.vo.MemberEvaluationListVO;
@@ -42,12 +40,12 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +59,9 @@ import java.util.Map;
 @Transactional
 public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMapper, MemberEvaluation> implements MemberEvaluationService {
 
+    //会员评价数据层
+    @Resource
+    private MemberEvaluationMapper memberEvaluationMapper;
     //订单
     @Autowired
     private OrderService orderService;
@@ -81,19 +82,14 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
     private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Override
-    public IPage<MemberEvaluation> queryByParams(EvaluationQueryParams queryParams) {
+    public IPage<MemberEvaluation> managerQuery(EvaluationQueryParams queryParams) {
         //获取评价分页
         return this.page(PageUtil.initPage(queryParams), queryParams.queryWrapper());
     }
 
     @Override
-    public IPage<MemberEvaluationListVO> queryByParams(StoreEvaluationQueryParams storeEvaluationQueryParams) {
-        return this.baseMapper.getMemberEvaluationList(PageUtil.initPage(storeEvaluationQueryParams), storeEvaluationQueryParams.queryWrapper());
-    }
-
-    @Override
-    public IPage<MemberEvaluationListVO> queryPage(EvaluationQueryParams evaluationQueryParams, PageVO page) {
-        return this.baseMapper.getMemberEvaluationList(PageUtil.initPage(page), evaluationQueryParams.queryWrapper());
+    public IPage<MemberEvaluationListVO> queryPage(EvaluationQueryParams evaluationQueryParams) {
+        return memberEvaluationMapper.getMemberEvaluationList(PageUtil.initPage(evaluationQueryParams), evaluationQueryParams.queryWrapper());
     }
 
     @Override
@@ -103,7 +99,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         //获取订单信息
         Order order = orderService.getBySn(orderItem.getOrderSn());
         //检测是否可以添加会员评价
-        checkMemberEvaluation(orderItem,order);
+        checkMemberEvaluation(orderItem, order);
         //获取用户信息
         Member member = memberService.getUserInfo();
         //获取商品信息
@@ -162,6 +158,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         EvaluationNumberVO evaluationNumberVO = new EvaluationNumberVO();
         List<Map<String, Object>> list = this.baseMapper.getEvaluationNumber(goodsId);
 
+
         Integer good = 0;
         Integer moderate = 0;
         Integer worse = 0;
@@ -201,10 +198,11 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
 
     /**
      * 检测会员评价
+     *
      * @param orderItem 子订单
-     * @param order 订单
+     * @param order     订单
      */
-    public void checkMemberEvaluation(OrderItem orderItem,Order order){
+    public void checkMemberEvaluation(OrderItem orderItem, Order order) {
 
         //根据子订单编号判断是否评价过
         if (orderItem.getCommentStatus().equals(CommentStatusEnum.FINISHED.name())) {
