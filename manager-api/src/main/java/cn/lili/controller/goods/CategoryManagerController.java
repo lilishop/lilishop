@@ -87,7 +87,7 @@ public class CategoryManagerController {
 
     @PutMapping
     @ApiOperation(value = "修改商品分类")
-    public ResultMessage<Category> updateCategory(CategoryVO category) {
+    public ResultMessage<Category> updateCategory(@Valid CategoryVO category) {
         Category catTemp = categoryService.getById(category.getId());
         if (catTemp == null) {
             throw new ServiceException(ResultCode.CATEGORY_PARENT_NOT_EXIST);
