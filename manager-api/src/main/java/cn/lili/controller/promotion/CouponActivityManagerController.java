@@ -49,7 +49,7 @@ public class CouponActivityManagerController {
     @ApiOperation(value = "添加优惠券活动")
     @PostMapping
     @PutMapping(consumes = "application/json", produces = "application/json")
-    public ResultMessage<CouponActivity> addCouponActivity(@RequestBody CouponActivityDTO couponActivityDTO) {
+    public ResultMessage<CouponActivity> addCouponActivity(@RequestBody(required = false) CouponActivityDTO couponActivityDTO) {
         couponActivityDTO.setPromotionStatus(PromotionStatusEnum.NEW.name());
         return ResultUtil.data(couponActivityService.addCouponActivity(couponActivityDTO));
     }

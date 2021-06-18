@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.modules.member.entity.dos.Member;
@@ -50,6 +51,10 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
     public CouponActivityDTO addCouponActivity(CouponActivityDTO couponActivityDTO) {
         //检测优惠券活动是否可以添加
         this.checkParam(couponActivityDTO);
+//        如果有会员，则写入会员信息
+        if (couponActivityDTO.getMemberDTOS() == null || couponActivityDTO.getMemberDTOS().size() == 0) {
+            couponActivityDTO.setActivityScopeInfo(JSONUtil.toJsonStr(couponActivityDTO.getMemberDTOS()));
+        }
         //添加优惠券活动
         this.save(couponActivityDTO);
         //添加优惠券活动优惠券
