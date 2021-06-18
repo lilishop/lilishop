@@ -58,7 +58,7 @@ public class CouponActivityManagerController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "优惠券活动ID", required = true, dataType = "String", paramType = "path")
     })
-    @PutMapping("/close/{id}")
+    @DeleteMapping("/{id}")
     public ResultMessage<CouponActivity> updateStatus(@PathVariable String id) {
         if (couponActivityService.updateCouponActivityStatus(id, PromotionStatusEnum.END)) {
             return ResultUtil.success(ResultCode.SUCCESS);
