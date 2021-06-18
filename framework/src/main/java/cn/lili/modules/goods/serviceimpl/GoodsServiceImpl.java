@@ -96,6 +96,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     public final Integer getGoodsCountByCategory(String categoryId) {
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.like("category_path", categoryId);
+        queryWrapper.eq("delete_flag", false);
         return this.count(queryWrapper);
     }
 
