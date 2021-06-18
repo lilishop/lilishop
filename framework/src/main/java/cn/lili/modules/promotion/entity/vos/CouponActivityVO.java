@@ -2,7 +2,6 @@ package cn.lili.modules.promotion.entity.vos;
 
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.promotion.entity.dos.CouponActivity;
-import cn.lili.modules.promotion.entity.dos.CouponActivityItem;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,6 +23,6 @@ public class CouponActivityVO extends CouponActivity {
 
     public CouponActivityVO(CouponActivity couponActivity, List<CouponActivityItemVO> couponActivityItemVOS) {
         BeanUtil.copyProperties(couponActivity, this);
-        this.couponActivityItems = couponActivityItems;
+        this.couponActivityItems = couponActivityItemVOS;
     }
 }

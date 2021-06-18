@@ -10,6 +10,7 @@ import cn.lili.modules.promotion.entity.dos.CouponActivity;
 import cn.lili.modules.promotion.entity.dos.CouponActivityItem;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dto.CouponActivityDTO;
+import cn.lili.modules.promotion.entity.enums.CouponActivitySendTypeEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
@@ -51,8 +52,8 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
     public CouponActivityDTO addCouponActivity(CouponActivityDTO couponActivityDTO) {
         //检测优惠券活动是否可以添加
         this.checkParam(couponActivityDTO);
-//        如果有会员，则写入会员信息
-        if (couponActivityDTO.getMemberDTOS() == null || couponActivityDTO.getMemberDTOS().size() == 0) {
+        //如果有会员，则写入会员信息
+        if (couponActivityDTO.getMemberDTOS() != null && couponActivityDTO.getMemberDTOS().size() != 0) {
             couponActivityDTO.setActivityScopeInfo(JSONUtil.toJsonStr(couponActivityDTO.getMemberDTOS()));
         }
         //添加优惠券活动
@@ -175,7 +176,7 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
      *
      * @param couponActivity 优惠券活动
      */
-    private void checkParam(CouponActivity couponActivity) {
+    private void checkParam(CouponActivityDTO couponActivity) {
 
         //检测活动时间超过当前时间不能进行操作
         long nowTime = DateUtil.getDateline() * 1000;
@@ -184,6 +185,24 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
         }
         //活动时间需超过当前时间
         PromotionTools.checkPromotionTime(couponActivity.getStartTime().getTime(), couponActivity.getEndTime().getTime());
+        //指定会员判定
+        if (couponActivity.getActivityScope().equals(CouponActivitySendTypeEnum.DESIGNATED.name())) {
+            if (couponActivity.getMemberDTOS().size() == 0) {
+                throw new ServiceException("指定精准发券则必须指定会员，会员不可以为空");
+            }
+        }
+        //优惠券数量判定
+        if (couponActivity.getCouponActivityItems().size() == 0) {
+            throw new ServiceException("优惠券活动必须指定优惠券，不能为空");
+        } else if (couponActivity.getCouponActivityItems().size() > 10) {
+            throw new ServiceException("优惠券活动最多指定10个优惠券");
+        } else {
+            for (CouponActivityItem item : couponActivity.getCouponActivityItems()) {
+                if (item.getNum() == null || item.getNum() <= 0) {
+                    throw new ServiceException("赠券数量必须大于0");
+                }
+            }
+        }
     }
 
     /**

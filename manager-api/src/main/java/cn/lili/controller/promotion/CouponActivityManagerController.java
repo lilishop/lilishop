@@ -54,21 +54,13 @@ public class CouponActivityManagerController {
         return ResultUtil.data(couponActivityService.addCouponActivity(couponActivityDTO));
     }
 
-    @ApiOperation(value = "修改优惠券活动")
-    @PutMapping("/{id}")
-    public ResultMessage<CouponActivity> updateCouponActivity(@PathVariable String id, CouponActivityDTO couponActivityDTO) {
-        couponActivityDTO.setId(id);
-        return ResultUtil.data(couponActivityService.updateCouponActivity(couponActivityDTO));
-    }
-
-    @ApiOperation(value = "关闭、启动优惠券")
+    @ApiOperation(value = "关闭优惠券活动")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "优惠券活动ID", required = true, dataType = "String", paramType = "path"),
-            @ApiImplicitParam(name = "promotionStatus", value = "活动状态", required = true, dataType = "String", paramType = "path")
+            @ApiImplicitParam(name = "id", value = "优惠券活动ID", required = true, dataType = "String", paramType = "path")
     })
-    @PutMapping("/updateStatus/{id}/{promotionStatus}")
-    public ResultMessage<CouponActivity> updateStatus(@PathVariable String id, @PathVariable String promotionStatus) {
-        if (couponActivityService.updateCouponActivityStatus(id, PromotionStatusEnum.valueOf(promotionStatus))) {
+    @PutMapping("/close/{id}")
+    public ResultMessage<CouponActivity> updateStatus(@PathVariable String id) {
+        if (couponActivityService.updateCouponActivityStatus(id, PromotionStatusEnum.END)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
         throw new ServiceException(ResultCode.ERROR);

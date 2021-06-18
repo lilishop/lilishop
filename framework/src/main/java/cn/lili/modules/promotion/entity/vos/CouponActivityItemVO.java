@@ -2,6 +2,7 @@ package cn.lili.modules.promotion.entity.vos;
 
 import cn.lili.modules.promotion.entity.dos.CouponActivityItem;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 /**
  * 优惠券活动的优惠券VO
@@ -9,6 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @author Bulbasaur
  * @date: 2021/6/18 11:00 上午
  */
+@Data
 public class CouponActivityItemVO extends CouponActivityItem {
 
     @ApiModelProperty(value = "优惠券名称")

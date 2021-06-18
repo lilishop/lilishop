@@ -19,12 +19,14 @@ public interface CouponActivityService extends IService<CouponActivity> {
 
     /**
      * 创建优惠券活动--精准发券、新人赠券
+     *
      * @param couponActivityDTO 优惠券活动DTO
      */
     CouponActivityDTO addCouponActivity(CouponActivityDTO couponActivityDTO);
 
     /**
      * 修改优惠券活动--精准发券、新人赠券
+     *
      * @param couponActivityDTO 优惠券活动DTO
      */
     CouponActivityDTO updateCouponActivity(CouponActivityDTO couponActivityDTO);
@@ -49,18 +51,13 @@ public interface CouponActivityService extends IService<CouponActivity> {
      * 注册赠券
      *
      * @param couponActivityList 优惠券活动
-     * @param member 会员
+     * @param member             会员
      */
     void registered(List<CouponActivity> couponActivityList, Member member);
 
 
-    //删除优惠券活动
-
-    //关闭优惠券活动
+    /**
+     * 关闭优惠券活动
+     */
     boolean updateCouponActivityStatus(String id, PromotionStatusEnum promotionStatus);
-    //开启优惠券活动
-
-    //查看优惠券活动
-
-    //查看优惠券活动
 }
