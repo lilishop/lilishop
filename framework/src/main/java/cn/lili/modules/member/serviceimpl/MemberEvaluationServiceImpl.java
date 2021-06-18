@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +59,9 @@ import java.util.Map;
 @Transactional
 public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMapper, MemberEvaluation> implements MemberEvaluationService {
 
+    //会员评价数据层
+    @Resource
+    private MemberEvaluationMapper memberEvaluationMapper;
     //订单
     @Autowired
     private OrderService orderService;
@@ -84,21 +88,9 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
     }
 
     @Override
-<<<<<<< HEAD
-    public IPage<MemberEvaluationListVO> queryByParams(StoreEvaluationQueryParams storeEvaluationQueryParams) {
-        return this.baseMapper.getMemberEvaluationList(PageUtil.initPage(storeEvaluationQueryParams), storeEvaluationQueryParams.queryWrapper());
-    }
-
-    @Override
-    public IPage<MemberEvaluationListVO> queryPage(EvaluationQueryParams evaluationQueryParams, PageVO page) {
-        return this.baseMapper.getMemberEvaluationList(PageUtil.initPage(page), evaluationQueryParams.queryWrapper());
-    }
-=======
     public IPage<MemberEvaluationListVO> queryPage(EvaluationQueryParams evaluationQueryParams) {
         return memberEvaluationMapper.getMemberEvaluationList(PageUtil.initPage(evaluationQueryParams), evaluationQueryParams.queryWrapper());
     }
-
->>>>>>> master
 
     @Override
     public MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO) {

@@ -119,10 +119,6 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
             default:
                 return;
         }
-<<<<<<< HEAD
-        log.info("短信验证码："+code);
-=======
-
         //如果是测试模式 默认验证码 6个1
         if (systemSetting.getIsTestModel()) {
             code = "111111";
@@ -130,7 +126,6 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
             //发送短信
             this.sendSmsCode(smsSetting.getSignName(), mobile, params, templateCode);
         }
->>>>>>> master
         //缓存中写入要验证的信息
         cache.put(cacheKey(verificationEnums, mobile, uuid), code, 300L);
     }

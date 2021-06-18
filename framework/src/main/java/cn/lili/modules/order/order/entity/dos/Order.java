@@ -4,8 +4,6 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.base.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.base.entity.enums.ClientTypeEnum;
-<<<<<<< HEAD
-=======
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
@@ -15,7 +13,6 @@ import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
->>>>>>> master
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
@@ -33,6 +30,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * 订单
@@ -217,18 +215,16 @@ public class Order extends BaseEntity {
      * @param tradeDTO 交易DTO
      */
     public Order(CartVO cartVO, TradeDTO tradeDTO) {
-        String orderId = this.getId();
+        String oldId = this.getId();
         BeanUtil.copyProperties(tradeDTO, this);
         BeanUtil.copyProperties(cartVO.getPriceDetailDTO(), this);
         BeanUtil.copyProperties(cartVO, this);
-<<<<<<< HEAD
-
         //订单类型判断--普通订单，活动订单。
         if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.CART) || tradeDTO.getCartTypeEnum().equals(CartTypeEnum.BUY_NOW)) {
             this.setOrderType(OrderTypeEnum.NORMAL.name());
         }  else {
             this.setOrderType(tradeDTO.getCartTypeEnum().name());
-=======
+        }
         this.setId(oldId);
         this.setOrderType(OrderTypeEnum.NORMAL.name());
         //促销信息填充
@@ -241,7 +237,6 @@ public class Order extends BaseEntity {
                     this.setParentOrderSn("");
                 }
             }
->>>>>>> master
         }
 
         //设置默认支付状态
@@ -272,7 +267,12 @@ public class Order extends BaseEntity {
     }
 
     public PriceDetailDTO getPriceDetailDTO() {
-        return JSONUtil.toBean(priceDetail, PriceDetailDTO.class);
+
+        try {
+            return JSONUtil.toBean(priceDetail, PriceDetailDTO.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public void setPriceDetailDTO(PriceDetailDTO priceDetail) {
