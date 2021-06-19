@@ -222,11 +222,13 @@ public class Order extends BaseEntity {
         //订单类型判断--普通订单，活动订单。
         if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.CART) || tradeDTO.getCartTypeEnum().equals(CartTypeEnum.BUY_NOW)) {
             this.setOrderType(OrderTypeEnum.NORMAL.name());
-        }  else {
+        } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.VIRTUAL)) {
             this.setOrderType(tradeDTO.getCartTypeEnum().name());
+        } else {
+            this.setOrderType(OrderTypeEnum.NORMAL.name());
         }
         this.setId(oldId);
-        this.setOrderType(OrderTypeEnum.NORMAL.name());
+
         //促销信息填充
         if (cartVO.getSkuList().get(0).getPromotions() != null && tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)) {
             Optional<String> pintuanId = cartVO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();

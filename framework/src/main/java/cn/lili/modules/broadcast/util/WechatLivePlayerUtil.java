@@ -170,6 +170,12 @@ public class WechatLivePlayerUtil {
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //发送url
         String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/add?access_token=" + token;
+
+        //商品名称，最长14个汉字
+        if (commodity.getName().length() > 14) {
+            commodity.setName(commodity.getName().substring(0, 13));
+        }
+
         //新建微信商品DTO
         GoodsInfo goodsInfo = new GoodsInfo(commodity);
         //上传微信临时图片
