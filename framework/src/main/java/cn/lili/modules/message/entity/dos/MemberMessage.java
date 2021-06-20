@@ -11,7 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- * 会员消息
+ * 会员接受消息对象
  *
  * @author Chopper
  * @date 2020-02-25 14:10:16

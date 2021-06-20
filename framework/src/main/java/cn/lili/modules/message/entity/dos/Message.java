@@ -14,6 +14,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 /**
+ * 管理段发送消息对象
+ *
  * @author lili
  */
 

@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 消息发送业务层
+ * 会员消息发送业务层
  *
  * @author Chopper
  * @date 2020/11/17 3:44 下午

@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 会员消息业务层实现
+ * 会员接收消息业务层实现
  *
  * @author Chopper
  * @date 2020/11/17 3:48 下午
