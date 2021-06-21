@@ -6,10 +6,14 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 /**
  * 商品关联参数
@@ -17,6 +21,7 @@ import javax.persistence.Table;
  * @author pikachu
  * @date 2020-02-23 9:14:33
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "li_goods_params")
@@ -51,5 +56,12 @@ public class GoodsParams extends BaseEntity {
     @ApiModelProperty(value = "参数值", required = true)
     @Length(max = 100, message = "参数值字符不能大于120")
     private String paramValue;
+
+    @TableField(value = "is_index")
+    @ApiModelProperty(value = "是否可索引，0 不显示 1 显示", required = true)
+    @NotNull(message = "是否可索引必选")
+    @Min(value = 0, message = "是否可索引传值不正确")
+    @Max(value = 1, message = "是否可索引传值不正确")
+    private Integer isIndex = 0;
 
 }

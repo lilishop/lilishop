@@ -89,12 +89,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     public void add(List<Map<String, Object>> skuList, Goods goods) {
         // 检查是否需要生成索引
-        boolean needIndex = checkNeedIndex(goods);
         List<GoodsSku> newSkuList;
         // 如果有规格
         if (skuList != null && !skuList.isEmpty()) {
             // 添加商品sku
-            newSkuList = this.addGoodsSku(skuList, goods, needIndex);
+            newSkuList = this.addGoodsSku(skuList, goods);
         } else {
             throw new ServiceException("规格必须要有一个！");
         }
@@ -103,23 +102,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         generateEsCheck(goods);
     }
 
-    private boolean checkNeedIndex(Goods goods) {
-        if (goods.getParams() != null && !goods.getParams().isEmpty()) {
-            List<GoodsParams> goodsParams = JSONUtil.toList(goods.getParams(), GoodsParams.class);
-            for (GoodsParams goodsParam : goodsParams) {
-                Parameters parameters = parametersService.getById(goodsParam.getParamId());
-                if (parameters.getIsIndex() == 1) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     @Override
     public void update(List<Map<String, Object>> skuList, Goods goods, Boolean regeneratorSkuFlag) {
-        // 检查是否需要生成索引
-        boolean needIndex = checkNeedIndex(goods);
         // 是否存在规格
         if (skuList == null || skuList.isEmpty()) {
             throw new ServiceException("规格必须要有一个！");
@@ -139,7 +123,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             //删除sku相册
             goodsGalleryService.removeByIds(oldSkuIds);
             // 添加商品sku
-            newSkuList = this.addGoodsSku(skuList, goods, needIndex);
+            newSkuList = this.addGoodsSku(skuList, goods);
 
             //发送mq消息
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.SKU_DELETE.name();
@@ -161,9 +145,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             this.updateBatchById(newSkuList);
         }
         this.updateStock(newSkuList);
-        if (Boolean.TRUE.equals(needIndex)) {
-            generateEsCheck(goods);
-        }
+        generateEsCheck(goods);
     }
 
     /**
@@ -206,9 +188,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         Map<String, Object> map = new HashMap<>();
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
 
+        GoodsVO goodsVO = goodsService.getGoodsVO(goodsId);
         //如果规格为空则使用商品ID进行查询
         if (goodsSku == null) {
-            GoodsVO goodsVO = goodsService.getGoodsVO(goodsId);
             skuId = goodsVO.getSkuList().get(0).getId();
             goodsSku = this.getGoodsSkuByIdFromCache(skuId);
             //如果使用商品ID无法查询SKU则返回错误
@@ -219,8 +201,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         // 获取当前商品的索引信息
         EsGoodsIndex goodsIndex = goodsIndexService.findById(skuId);
         if (goodsIndex == null) {
-            goodsIndex = new EsGoodsIndex(goodsSku);
-            goodsIndex.setPromotionMap(promotionService.getGoodsCurrentPromotionMap(goodsIndex));
+            goodsIndex = goodsIndexService.resetEsGoodsIndex(goodsSku, goodsVO.getGoodsParamsList());
         }
         //商品规格
         GoodsSkuVO goodsSkuDetail = this.getGoodsSkuVO(goodsSku);
@@ -456,6 +437,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             for (GoodsSku goodsSku : goodsSkuList) {
                 EsGoodsIndex esGoodsOld = goodsIndexService.findById(goodsSku.getId());
                 EsGoodsIndex goodsIndex = new EsGoodsIndex(goodsSku);
+                if (goods.getParams() != null && !goods.getParams().isEmpty()) {
+                    List<GoodsParams> goodsParams = JSONUtil.toList(goods.getParams(), GoodsParams.class);
+                    goodsIndex = new EsGoodsIndex(goodsSku, goodsParams);
+                }
                 //如果商品库存不为0，并且es中有数据
                 if (goodsSku.getQuantity() > 0 && esGoodsOld == null) {
                     goodsIndexService.addIndex(goodsIndex);
@@ -501,7 +486,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      * @param skuList sku列表
      * @param goods   商品信息
      */
-    private List<GoodsSku> addGoodsSku(List<Map<String, Object>> skuList, Goods goods, Boolean needIndex) {
+    private List<GoodsSku> addGoodsSku(List<Map<String, Object>> skuList, Goods goods) {
         List<GoodsSku> skus = new ArrayList<>();
         List<EsGoodsIndex> goodsIndices = new ArrayList<>();
         for (Map<String, Object> skuVO : skuList) {
@@ -517,11 +502,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             stringRedisTemplate.opsForValue().set(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity().toString());
         }
         this.saveBatch(skus);
-        if (Boolean.TRUE.equals(needIndex)) {
-            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GENERATOR_GOODS_INDEX.name();
-            //发送mq消息
-            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goodsIndices), RocketmqSendCallbackBuilder.commonCallback());
-        }
+        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GENERATOR_GOODS_INDEX.name();
+        //发送mq消息
+        rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goodsIndices), RocketmqSendCallbackBuilder.commonCallback());
         return skus;
     }
 
