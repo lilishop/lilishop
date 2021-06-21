@@ -1,9 +1,11 @@
 package cn.lili.modules.search.entity.dos;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.elasticsearch.EsSuffix;
 import cn.lili.common.utils.StringUtils;
+import cn.lili.modules.goods.entity.dos.GoodsParams;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
@@ -275,22 +277,38 @@ public class EsGoodsIndex implements Serializable {
             this.intro = sku.getIntro();
             this.grade = sku.getGrade();
             this.releaseTime = new Date();
-            if (StringUtils.isNotEmpty(sku.getSpecs())) {
-                List<EsGoodsAttribute> attributes = new ArrayList<>();
-                JSONObject jsonObject = JSONUtil.parseObj(sku.getSpecs());
-                for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-                    if (!entry.getKey().equals("images")) {
-                        EsGoodsAttribute attribute = new EsGoodsAttribute();
-                        attribute.setType(0);
-                        attribute.setName(entry.getKey());
-                        attribute.setValue(entry.getValue().toString());
-                        attributes.add(attribute);
-                    }
-                }
-                this.attrList = attributes;
-            }
+//            if (CharSequenceUtil.isNotEmpty(sku.getSpecs())) {
+//                List<EsGoodsAttribute> attributes = new ArrayList<>();
+//                JSONObject jsonObject = JSONUtil.parseObj(sku.getSpecs());
+//                for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+//                    if (!entry.getKey().equals("images")) {
+//                        EsGoodsAttribute attribute = new EsGoodsAttribute();
+//                        attribute.setType(1);
+//                        attribute.setName(entry.getKey());
+//                        attribute.setValue(entry.getValue().toString());
+//                        attributes.add(attribute);
+//                    }
+//                }
+//                this.attrList = attributes;
+//            }
         }
+    }
 
+    public EsGoodsIndex(GoodsSku sku, List<GoodsParams> goodsParams) {
+        this(sku);
+        if (goodsParams != null && !goodsParams.isEmpty()) {
+            List<EsGoodsAttribute> attributes = new ArrayList<>();
+            for (GoodsParams goodsParam : goodsParams) {
+                EsGoodsAttribute attribute = new EsGoodsAttribute();
+                if (goodsParam.getIsIndex() == 1) {
+                    attribute.setType(1);
+                    attribute.setName(goodsParam.getParamName());
+                    attribute.setValue(goodsParam.getParamValue());
+                    attributes.add(attribute);
+                }
+            }
+            this.attrList = attributes;
+        }
     }
 
     public void setGoodsSku(GoodsSku sku) {
