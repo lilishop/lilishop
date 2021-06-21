@@ -149,6 +149,8 @@ public class CartServiceImpl implements CartService {
             tradeDTO.setStoreCoupons(null);
             tradeDTO.setPlatformCoupon(null);
             this.resetTradeDTO(tradeDTO);
+        } catch (ServiceException se) {
+          throw se;
         } catch (Exception e) {
             log.error("购物车渲染异常", e);
             throw new ServiceException(errorMessage);
@@ -324,14 +326,16 @@ public class CartServiceImpl implements CartService {
             List<String> storeIds = new ArrayList<>();
             List<EsGoodsIndex> esGoodsList = esGoodsSearchService.getEsGoodsBySkuIds(ids);
             for (EsGoodsIndex esGoodsIndex : esGoodsList) {
-                if (esGoodsIndex.getPromotionMap() != null) {
-                    List<String> couponIds = esGoodsIndex.getPromotionMap().keySet().parallelStream().filter(i -> i.contains(PromotionTypeEnum.COUPON.name())).map(i -> i.substring(i.lastIndexOf("-") + 1)).collect(Collectors.toList());
-                    if (!couponIds.isEmpty()) {
-                        List<MemberCoupon> currentGoodsCanUse = memberCouponService.getCurrentGoodsCanUse(tradeDTO.getMemberId(), couponIds, totalPrice);
-                        count = currentGoodsCanUse.size();
+                if (esGoodsIndex != null) {
+                    if (esGoodsIndex.getPromotionMap() != null) {
+                        List<String> couponIds = esGoodsIndex.getPromotionMap().keySet().parallelStream().filter(i -> i.contains(PromotionTypeEnum.COUPON.name())).map(i -> i.substring(i.lastIndexOf("-") + 1)).collect(Collectors.toList());
+                        if (!couponIds.isEmpty()) {
+                            List<MemberCoupon> currentGoodsCanUse = memberCouponService.getCurrentGoodsCanUse(tradeDTO.getMemberId(), couponIds, totalPrice);
+                            count = currentGoodsCanUse.size();
+                        }
                     }
+                    storeIds.add(esGoodsIndex.getStoreId());
                 }
-                storeIds.add(esGoodsIndex.getStoreId());
             }
             List<MemberCoupon> allScopeMemberCoupon = memberCouponService.getAllScopeMemberCoupon(tradeDTO.getMemberId(), storeIds);
             if (allScopeMemberCoupon != null && !allScopeMemberCoupon.isEmpty()) {
@@ -628,7 +632,7 @@ public class CartServiceImpl implements CartService {
                     promotionGoods -> (promotionGoods.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())))
                     .collect(Collectors.toList());
             //拼团活动判定
-            if (currentPromotion.size() > 0) {
+            if (!currentPromotion.isEmpty()) {
                 //写入拼团信息
                 cartSkuVO.setPintuanId(currentPromotion.get(0).getPromotionId());
             } else {
