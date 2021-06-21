@@ -5,6 +5,7 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.cache.Cache;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.common.rocketmq.tags.GoodsTagsEnum;
@@ -603,6 +604,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         for (Map.Entry<String, Object> m : map.entrySet()) {
             //保存规格信息
             if (m.getKey().equals("id") || m.getKey().equals("sn") || m.getKey().equals("cost") || m.getKey().equals("price") || m.getKey().equals("quantity") || m.getKey().equals("weight")) {
+                if (null == m.getValue()) {
+                    throw new ServiceException(ResultCode.GOODS_SKU_ERROR);
+                }
                 continue;
             } else {
                 specMap.put(m.getKey(), m.getValue());
