@@ -1,6 +1,7 @@
 package cn.lili.common.aop.limiter;
 
 import cn.lili.common.aop.limiter.annotation.LimitPoint;
+import cn.lili.common.exception.ServiceException;
 import com.google.common.collect.ImmutableList;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +22,7 @@ import java.lang.reflect.Method;
 
 /**
  * 流量拦截
+ *
  * @author Chopper
  */
 @Aspect
@@ -42,7 +44,7 @@ public class LimitInterceptor {
     }
 
     @Around("execution(public * *(..)) && @annotation(cn.lili.common.aop.limiter.annotation.LimitPoint)")
-    public Object interceptor(ProceedingJoinPoint pjp) {
+    public Object interceptor(ProceedingJoinPoint pjp) throws Throwable {
         MethodSignature signature = (MethodSignature) pjp.getSignature();
         Method method = signature.getMethod();
         LimitPoint limitPointAnnotation = method.getAnnotation(LimitPoint.class);
@@ -65,22 +67,27 @@ public class LimitInterceptor {
         try {
             Number count = redisTemplate.execute(limitScript, keys, limitCount, limitPeriod);
             log.info("Access try count is {} for name={} and key = {}", count, name, key);
-            if (count != null && count.intValue() <= limitCount) {
+            // 如果缓存里没有值，或者他的值小于限制频率
+            if (count.intValue() <= limitCount) {
                 return pjp.proceed();
             } else {
-                throw new RuntimeException("访问过于频繁，请稍后再试");
+                throw new ServiceException("访问过于频繁，请稍后再试");
             }
-        } catch (Throwable e) {
-            if (e instanceof RuntimeException) {
-                throw new RuntimeException(e.getLocalizedMessage());
+        } catch (NullPointerException e) {
+            return pjp.proceed();
+        } catch (Exception e) {
+            if (e instanceof ServiceException) {
+                throw new ServiceException(e.getLocalizedMessage());
             }
             throw new RuntimeException("服务器异常，请稍后再试");
         }
     }
 
 
+    //默认unknown常量值
     private static final String UNKNOWN = "unknown";
 
+    //获取ip
     public String getIpAddress() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String ip = request.getHeader("x-forwarded-for");
