@@ -186,7 +186,6 @@ class PageViewStatistics {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         this.date = calendar.getTime();
-        System.out.println(DateUtil.toString(date,DateUtil.STANDARD_FORMAT));
     }
 
 }

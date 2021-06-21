@@ -136,6 +136,10 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
 
     /**
      * 发送优惠券
+     * 1.循环优惠券列表
+     * 2.判断优惠券每个会员发送数量
+     * 3.循环会员列表，发送优惠券
+     * 4.记录优惠券发送数量
      *
      * @param memberList          用户列表
      * @param couponActivityItems 优惠券列表
@@ -148,15 +152,16 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
             //判断优惠券是否存在
             if (coupon != null) {
                 List<MemberCoupon> memberCouponList = new LinkedList<>();
-                //循环会员列表，添加优惠券
-                MemberCoupon memberCoupon = new MemberCoupon(coupon);
-                for (Map<String, Object> map : memberList) {
-                    memberCoupon.setMemberId(map.get("id").toString());
-                    memberCoupon.setMemberName(map.get("nick_name").toString());
-                    memberCoupon.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
-                    memberCoupon.setIsPlatform(coupon.getStoreId().equals("platform"));
-                    //循环优惠券的领取数量
-                    for (int i = 1; i <= couponActivityItem.getNum(); i++) {
+                //循环优惠券的领取数量
+                int j=couponActivityItem.getNum();
+                for (int i = 1; i <= j; i++) {
+                    //循环会员列表，添加优惠券
+                    for (Map<String, Object> map : memberList) {
+                        MemberCoupon memberCoupon = new MemberCoupon(coupon);
+                        memberCoupon.setMemberId(map.get("id").toString());
+                        memberCoupon.setMemberName(map.get("nick_name").toString());
+                        memberCoupon.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
+                        memberCoupon.setIsPlatform(coupon.getStoreId().equals("platform"));
                         memberCouponList.add(memberCoupon);
                     }
                 }
@@ -216,12 +221,10 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
         //判断优惠券的发送范围，获取会员列表
         if (couponActivity.getActivityScope().equals("ALL")) {
             return memberService.listMaps(new QueryWrapper<Member>()
-                    .select("id")
-                    .select("nick_name"));
+                    .select("id,nick_name"));
         } else {
             return memberService.listMaps(new QueryWrapper<Member>()
-                    .select("id")
-                    .select("nick_name")
+                    .select("id,nick_name")
                     .in("id", couponActivity.getActivityScopeInfo()));
         }
     }
