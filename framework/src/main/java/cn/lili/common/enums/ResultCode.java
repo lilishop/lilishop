@@ -59,77 +59,117 @@ public enum ResultCode {
     POINT_GOODS_ERROR(11006, "积分商品业务异常，请稍后重试"),
     GOODS_SKU_SN_ERROR(11007, "商品SKU编号不能为空"),
     GOODS_SKU_PRICE_ERROR(11008, "商品SKU价格不能小于等于0"),
+    GOODS_SKU_COST_ERROR(11009, "商品SKU成本价不能小于等于0"),
+    GOODS_SKU_WEIGHT_ERROR(11010, "商品重量不能为负数"),
+    GOODS_SKU_QUANTITY_ERROR(11011, "商品库存数量不能为负数"),
 
     /**
      * 参数
      */
     PARAMETER_SAVE_ERROR(12001, "参数添加失败"),
+
     PARAMETER_UPDATE_ERROR(12002, "参数编辑失败"),
 
     /**
      * 规格
      */
     SPEC_SAVE_ERROR(13001, "规格修改失败"),
+
     SPEC_UPDATE_ERROR(13002, "规格修改失败"),
+
     SPEC_DELETE_ERROR(13003, "此规格已绑定分类不允许删除"),
 
     /**
      * 品牌
      */
     BRAND_SAVE_ERROR(14001, "品牌添加失败"),
+
     BRAND_UPDATE_ERROR(14002, "品牌修改失败"),
+
     BRAND_DISABLE_ERROR(14003, "品牌禁用失败"),
+
     BRAND_DELETE_ERROR(14004, "品牌删除失败"),
 
     /**
      * 用户
      */
     USER_EDIT_SUCCESS(20001, "用户修改成功"),
+
     USER_NOT_EXIST(20002, "用户不存在"),
+
     USER_NOT_LOGIN(20003, "用户未登录"),
+
     USER_AUTH_EXPIRED(20004, "用户已退出，请重新登录"),
+
     USER_AUTHORITY_ERROR(20005, "权限不足"),
+
     USER_CONNECT_LOGIN_ERROR(20006, "未找到登录信息"),
+
     USER_NAME_EXIST(20007, "该用户名已被注册"),
+
     USER_PHONE_EXIST(20008, "该手机号已被注册"),
+
     USER_PHONE_NOT_EXIST(20009, "手机号不存在"),
+
     USER_PASSWORD_ERROR(20010, "密码不正确"),
+
     USER_NOT_PHONE(20011, "非当前用户的手机号"),
+
     USER_CONNECT_ERROR(20012, "联合第三方登录，授权信息错误"),
+
     USER_RECEIPT_REPEAT_ERROR(20013, "会员发票信息重复"),
+
     USER_RECEIPT_NOT_EXIST(20014, "会员发票信息不存在"),
+
     USER_EDIT_ERROR(20015, "用户修改失败"),
+
     USER_OLD_PASSWORD_ERROR(20016, "旧密码不正确"),
+
     USER_COLLECTION_EXIST(20017, "无法重复收藏"),
+
     USER_GRADE_IS_DEFAULT(20018, "会员等级为默认会员等级"),
+
     DELETE_EXIST(2001, "无法重复收藏"),
 
     /**
      * 权限
      */
     PERMISSION_DEPARTMENT_ROLE_ERROR(21001, "角色已绑定部门，请逐个删除"),
+
     PERMISSION_USER_ROLE_ERROR(21002, "角色已绑定管理员，请逐个删除"),
+
     PERMISSION_MENU_ROLE_ERROR(21003, "菜单已绑定角色，请先删除或编辑角色"),
+
     PERMISSION_DEPARTMENT_DELETE_ERROR(21004, "部门已经绑定管理员，请先删除或编辑管理员"),
+
     PERMISSION_BEYOND_TEN(21005, "最多可以设置10个角色"),
 
     /**
      * 分销
      */
     DISTRIBUTION_CLOSE(22000, "分销功能关闭"),
+
     DISTRIBUTION_NOT_EXIST(22001, "分销员不存在"),
+
     DISTRIBUTION_IS_APPLY(22002, "分销员已申请，无需重复提交"),
+
     DISTRIBUTION_AUDIT_ERROR(22003, "审核分销员失败"),
+
     DISTRIBUTION_RETREAT_ERROR(22004, "分销员清退失败"),
+
     DISTRIBUTION_CASH_NOT_EXIST(22005, "分销员提现记录不存在"),
+
     DISTRIBUTION_GOODS_DOUBLE(22006, "不能重复添加分销商品"),
 
     /**
      * 购物车
      */
     CART_ERROR(30001, "读取结算页的购物车异常"),
+
     CART_PINTUAN_NOT_EXIST_ERROR(30002, "拼团活动不存在错误"),
+
     CART_PINTUAN_LIMIT_ERROR(30003, "购买数量超过拼团活动限制数量"),
+
     SHIPPING_NOT_APPLY(30005, "购物商品不支持当前收货地址配送"),
 
     /**

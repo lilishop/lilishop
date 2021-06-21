@@ -228,8 +228,6 @@ public class Goods extends BaseEntity {
         this.marketEnable = goodsOperationDTO.isRelease() ? GoodsStatusEnum.UPPER.name() : GoodsStatusEnum.DOWN.name();
         this.goodsType = goodsOperationDTO.getGoodsType();
 
-        // quantity/weight/cost
-
         //循环sku，判定sku是否有效
         for (Map<String, Object> sku : goodsOperationDTO.getSkuList()) {
             //判定参数不能为空
@@ -238,6 +236,15 @@ public class Goods extends BaseEntity {
             }
             if (StringUtil.isEmpty(sku.get("price").toString()) || Integer.parseInt( sku.get("price").toString()) <= 0) {
                 throw new ServiceException(ResultCode.GOODS_SKU_PRICE_ERROR);
+            }
+            if (StringUtil.isEmpty(sku.get("cost").toString()) || Integer.parseInt( sku.get("cost").toString()) <= 0) {
+                throw new ServiceException(ResultCode.GOODS_SKU_COST_ERROR);
+            }
+            if (StringUtil.isEmpty(sku.get("weight").toString()) || Integer.parseInt( sku.get("weight").toString()) < 0) {
+                throw new ServiceException(ResultCode.GOODS_SKU_WEIGHT_ERROR);
+            }
+            if (StringUtil.isEmpty(sku.get("quantity").toString()) || Integer.parseInt( sku.get("quantity").toString()) < 0) {
+                throw new ServiceException(ResultCode.GOODS_SKU_QUANTITY_ERROR);
             }
 
         }
