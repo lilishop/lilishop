@@ -51,7 +51,6 @@ public class CouponActivityExecute implements EveryMinuteExecute {
 
             //修改精准发券优惠券活动状态
             couponActivityService.update(new LambdaUpdateWrapper<CouponActivity>()
-                    .eq(CouponActivity::getCouponActivityType, CouponActivityTypeEnum.SPECIFY.name())
                     .eq(CouponActivity::getId,couponActivity.getId())
                     .set(CouponActivity::getPromotionStatus,PromotionStatusEnum.END.name()));
             }
@@ -67,7 +66,7 @@ public class CouponActivityExecute implements EveryMinuteExecute {
         lambdaUpdateWrapper.eq(CouponActivity::getCouponActivityType, CouponActivityTypeEnum.REGISTERED.name())
                 .eq(CouponActivity::getPromotionStatus, PromotionStatusEnum.NEW.name())
                 .le(CouponActivity::getStartTime, DateUtil.date())
-                .set(CouponActivity::getActivityScope,PromotionStatusEnum.START.name());
+                .set(CouponActivity::getPromotionStatus,PromotionStatusEnum.START.name());
         couponActivityService.update(lambdaUpdateWrapper);
 
         //关闭注册赠券优惠券活动
@@ -75,7 +74,7 @@ public class CouponActivityExecute implements EveryMinuteExecute {
         endWrapper.eq(CouponActivity::getCouponActivityType, CouponActivityTypeEnum.REGISTERED.name())
                 .eq(CouponActivity::getPromotionStatus, PromotionStatusEnum.START.name())
                 .le(CouponActivity::getEndTime, DateUtil.date())
-                .set(CouponActivity::getActivityScope,PromotionStatusEnum.END.name());
+                .set(CouponActivity::getPromotionStatus,PromotionStatusEnum.END.name());
         couponActivityService.update(endWrapper);
     }
 }

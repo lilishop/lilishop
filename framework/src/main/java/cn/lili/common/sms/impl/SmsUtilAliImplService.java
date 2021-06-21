@@ -202,8 +202,6 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
     public void addSmsSign(SmsSign smsSign) throws Exception {
         //设置参数添加短信签名
         com.aliyun.dysmsapi20170525.Client client = this.createClient();
-        System.out.println(smsSign.getBusinessLicense().substring(smsSign.getBusinessLicense().lastIndexOf(".") + 1));
-        System.out.println(smsSign.getLicense().substring(smsSign.getLicense().lastIndexOf(".")));
         //营业执照
         AddSmsSignRequest.AddSmsSignRequestSignFileList signFileList0 = new AddSmsSignRequest.AddSmsSignRequestSignFileList()
                 .setFileContents(Base64Utils.encode(smsSign.getBusinessLicense()))

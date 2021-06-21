@@ -39,7 +39,6 @@ public class GoodsExecute implements EveryDayExecute {
                 new QueryWrapper<MemberEvaluation>()
                         .between("create_time", DateUtil.yesterday(), new DateTime()));
 
-        System.out.println("评论数量" + list.size());
         for (Map<String, Object> map : list) {
             goodsMapper.addGoodsCommentNum(Integer.parseInt(map.get("num").toString()), map.get("goods_id").toString());
         }

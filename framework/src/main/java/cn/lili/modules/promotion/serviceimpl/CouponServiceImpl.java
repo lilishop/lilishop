@@ -89,14 +89,18 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         this.updateScopePromotionGoods(coupon);
         // 保存到MONGO中
         this.mongoTemplate.save(coupon);
-        PromotionMessage promotionMessage = new PromotionMessage(coupon.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), coupon.getStartTime(), coupon.getEndTime());
-        TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                coupon.getStartTime().getTime(),
-                promotionMessage,
-                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                rocketmqCustomProperties.getPromotionTopic());
-        // 发送促销活动开始的延时任务
-        this.timeTrigger.addDelay(timeTriggerMsg);
+        //如果优惠券是固定时间则添加延时任务
+        if (coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
+            PromotionMessage promotionMessage = new PromotionMessage(coupon.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), coupon.getStartTime(), coupon.getEndTime());
+            TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
+                    coupon.getStartTime().getTime(),
+                    promotionMessage,
+                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                    rocketmqCustomProperties.getPromotionTopic());
+            // 发送促销活动开始的延时任务
+            this.timeTrigger.addDelay(timeTriggerMsg);
+        }
+
         return coupon;
     }
 
@@ -278,12 +282,14 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
             throw new ServiceException("优惠券折扣必须小于10且大于0");
         }
 
-        long nowTime = DateUtil.getDateline() * 1000;
-        if (coupon.getStartTime().getTime() < nowTime && coupon.getEndTime().getTime() > nowTime) {
-            throw new ServiceException("活动时间小于当前时间，不能进行编辑删除操作");
-        }
+        if (coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
+            long nowTime = DateUtil.getDateline() * 1000;
+            if (coupon.getStartTime().getTime() < nowTime && coupon.getEndTime().getTime() > nowTime) {
+                throw new ServiceException("活动时间小于当前时间，不能进行编辑删除操作");
+            }
 
-        PromotionTools.checkPromotionTime(coupon.getStartTime().getTime(), coupon.getEndTime().getTime());
+            PromotionTools.checkPromotionTime(coupon.getStartTime().getTime(), coupon.getEndTime().getTime());
+        }
 
         this.checkCouponScope(coupon);
         //对状态的处理.如果未传递状态则需要 根据当前时间来确认优惠券状态
@@ -326,7 +332,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
      * @param coupon 优惠券参数
      */
     private void promotionStatusEmpty(CouponVO coupon) {
-        if (StringUtils.isEmpty(coupon.getPromotionStatus())) {
+        if (StringUtils.isEmpty(coupon.getPromotionStatus()) && coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
             //格式时间
             long startTme = coupon.getStartTime().getTime() / 1000;
             long endTime = coupon.getEndTime().getTime() / 1000;
