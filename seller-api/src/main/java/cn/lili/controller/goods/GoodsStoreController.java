@@ -139,11 +139,10 @@ public class GoodsStoreController {
     @PutMapping(value = "/freight")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "query", allowMultiple = true),
-            @ApiImplicitParam(name = "freightPayer", value = "运费承担者", required = true, paramType = "query"),
             @ApiImplicitParam(name = "templateId", value = "运费模板ID", required = true, paramType = "query")
     })
-    public ResultMessage<Object> freight(@RequestParam List<String> goodsId, @RequestParam String freightPayer, @RequestParam String templateId) {
-        goodsService.freight(goodsId, freightPayer, templateId);
+    public ResultMessage<Object> freight(@RequestParam List<String> goodsId, @RequestParam String templateId) {
+        goodsService.freight(goodsId, templateId);
         return ResultUtil.success();
     }
 

@@ -27,15 +27,15 @@ public class ThreadConfig implements AsyncConfigurer {
     @Override
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-//        核心线程数，默认为5
+//       核心线程数，默认为5
         executor.setCorePoolSize(threadProperties.getCorePoolSize());
-//        最大线程数，默认为10
+//       最大线程数，默认为10
         executor.setMaxPoolSize(threadProperties.getMaxPoolSize());
-//      队列最大长度，一般需要设置值为足够大
+//     队列最大长度，一般需要设置值为足够大
         executor.setQueueCapacity(threadProperties.getQueueCapacity());
-//        线程池维护线程所允许的空闲时间，默认为60s
+//       线程池维护线程所允许的空闲时间，默认为60s
         executor.setKeepAliveSeconds(threadProperties.getKeepAliveSeconds());
-//        允许超时关闭
+//       允许超时关闭
         executor.setAllowCoreThreadTimeOut(threadProperties.getAllowCoreThreadTimeOut());
         executor.initialize();
         return executor;

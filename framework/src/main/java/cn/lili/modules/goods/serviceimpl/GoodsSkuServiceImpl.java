@@ -88,12 +88,12 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     @Override
     public void add(List<Map<String, Object>> skuList, Goods goods) {
-        // 检查是否需要生成索引
+        //检查是否需要生成索引
         boolean needIndex = checkNeedIndex(goods);
         List<GoodsSku> newSkuList;
-        // 如果有规格
+        //如果有规格
         if (skuList != null && !skuList.isEmpty()) {
-            // 添加商品sku
+            //添加商品sku
             newSkuList = this.addGoodsSku(skuList, goods, needIndex);
         } else {
             throw new ServiceException("规格必须要有一个！");
@@ -118,9 +118,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     @Override
     public void update(List<Map<String, Object>> skuList, Goods goods, Boolean regeneratorSkuFlag) {
-        // 检查是否需要生成索引
+        //检查是否需要生成索引
         boolean needIndex = checkNeedIndex(goods);
-        // 是否存在规格
+        //是否存在规格
         if (skuList == null || skuList.isEmpty()) {
             throw new ServiceException("规格必须要有一个！");
         }
@@ -138,7 +138,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             this.removeByIds(oldSkuIds);
             //删除sku相册
             goodsGalleryService.removeByIds(oldSkuIds);
-            // 添加商品sku
+            //添加商品sku
             newSkuList = this.addGoodsSku(skuList, goods, needIndex);
 
             //发送mq消息
@@ -216,7 +216,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 throw new ServiceException("商品已下架");
             }
         }
-        // 获取当前商品的索引信息
+        //获取当前商品的索引信息
         EsGoodsIndex goodsIndex = goodsIndexService.findById(skuId);
         if (goodsIndex == null) {
             goodsIndex = new EsGoodsIndex(goodsSku);
@@ -225,7 +225,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //商品规格
         GoodsSkuVO goodsSkuDetail = this.getGoodsSkuVO(goodsSku);
 
-        // 设置当前商品的促销价格
+        //设置当前商品的促销价格
         if (goodsIndex.getPromotionMap() != null && !goodsIndex.getPromotionMap().isEmpty() && goodsIndex.getPromotionPrice() != null) {
             goodsSkuDetail.setPromotionPrice(goodsIndex.getPromotionPrice());
         }
@@ -426,13 +426,13 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         goodEvaluationQueryWrapper.eq(MemberEvaluation::getSkuId, goodsSku.getId());
         goodEvaluationQueryWrapper.eq(MemberEvaluation::getGrade, EvaluationGradeEnum.GOOD.name());
 
-        // 好评数量
+        //好评数量
         int highPraiseNum = memberEvaluationService.count(goodEvaluationQueryWrapper);
 
-        // 更新商品评价数量
+        //更新商品评价数量
         goodsSku.setCommentNum(goodsSku.getCommentNum() != null ? goodsSku.getCommentNum() + 1 : 1);
 
-        // 好评率
+        //好评率
         double grade = NumberUtil.mul(NumberUtil.div(highPraiseNum, goodsSku.getCommentNum().doubleValue(), 2), 100);
         goodsSku.setGrade(grade);
         //修改规格
@@ -510,6 +510,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             if (goods.getSelfOperated() != null) {
                 goodsSku.setSelfOperated(goods.getSelfOperated());
             }
+            goodsSku.setGoodsType(goods.getGoodsType());
             EsGoodsIndex goodsIndex = (EsGoodsIndex) resultMap.get("goodsIndex");
             skus.add(goodsSku);
             goodsIndices.add(goodsIndex);
@@ -566,8 +567,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         sku.setIntro(goods.getIntro());
         sku.setMobileIntro(goods.getMobileIntro());
         sku.setGoodsUnit(goods.getGoodsUnit());
-        //运费
-        sku.setFreightPayer(goods.getFreightPayer());
         //商品状态
         sku.setIsAuth(goods.getIsAuth());
         sku.setSalesModel(goods.getSalesModel());
@@ -594,6 +593,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         StringBuilder goodsName = new StringBuilder(goods.getGoodsName());
         //规格商品缩略图
         String thumbnail = "";
+        String small = "";
         //规格值
         Map<String, Object> specMap = new HashMap<>();
         //商品属性
@@ -613,6 +613,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                         throw new ServiceException("sku图片至少为一个");
                     }
                     thumbnail = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getThumbnail();
+                    small = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getSmall();
                 } else {
                     //设置商品名称
                     goodsName.append(" ").append(m.getValue());
@@ -637,6 +638,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //设置规格信息
         sku.setGoodsName(goodsName.toString());
         sku.setThumbnail(thumbnail);
+        sku.setSmall(small);
 
         //规格信息
         sku.setId(Convert.toStr(map.get("id"), ""));

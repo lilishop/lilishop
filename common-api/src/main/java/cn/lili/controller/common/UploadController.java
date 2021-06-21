@@ -73,7 +73,7 @@ public class UploadController {
         }
 
         if (StringUtils.isNotBlank(base64)) {
-            // base64上传
+            //base64上传
             file = Base64DecodeMultipartFile.base64Convert(base64);
         }
         String result = "";
@@ -81,9 +81,9 @@ public class UploadController {
         File newFile = new File();
         try {
             InputStream inputStream = file.getInputStream();
-            // 上传至第三方云服务或服务器
+            //上传至第三方云服务或服务器
             result = fileManagerPlugin.inputStreamUpload(inputStream, fileKey);
-            // 保存数据信息至数据库
+            //保存数据信息至数据库
             newFile.setName(file.getOriginalFilename());
             newFile.setFileSize(file.getSize());
             newFile.setFileType(file.getContentType());

@@ -100,7 +100,7 @@ public class WechatMessageUtil {
         String url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=" + token;
 
         Map<String, String> map = new HashMap<>();
-        // 用户id
+        //用户id
         map.put("touser", connect.getUnionId());
         //模版id
         map.put("template_id", wechatMessage.getCode());
@@ -157,7 +157,7 @@ public class WechatMessageUtil {
         String url = "https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=" + token;
 
         Map<String, Object> map = new HashMap<>();
-        // 用户id
+        //用户id
         map.put("touser", connect.getUnionId());
         //模版id
         map.put("template_id", wechatMPMessage.getCode());
@@ -170,7 +170,7 @@ public class WechatMessageUtil {
         try {
             content = HttpUtil.post(url, JSONUtil.toJsonStr(map));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("微信消息发送错误",e);
         }
         JSONObject json = new JSONObject(content);
         log.info("微信消息发送结果：" + content);

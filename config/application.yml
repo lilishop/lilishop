@@ -2,9 +2,6 @@ server:
   servlet:
     context-path: /
 
-  # 正式部署时候，解开此处配置，防止文件夹被清除导致的文件上传失败问题
-  #    multipart:
-  #      location: /Users/lifenlong/Desktop/ceshi
   tomcat:
     uri-encoding: UTF-8
     threads:
@@ -80,7 +77,7 @@ spring:
       default-datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://192.168.0.116:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://192.168.0.116:3306/Bulbasaur?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
         password: lilishop
         maxActive: 20
@@ -150,6 +147,7 @@ ignored:
     - /buyer/memberEvaluation/**/goodsEvaluation
     - /buyer/memberEvaluation/**/evaluationNumber
     - /buyer/appVersion/**
+    - /buyer/broadcast/studio/**
     - /store/login/**
     - /manager/user/login
     - /manager/user/refresh/**
@@ -252,7 +250,7 @@ lili:
   # jwt 细节设定
   jwt-setting:
     # token过期时间（分钟）
-    tokenExpireTime: 60
+    tokenExpireTime: 30
 
   # 使用Spring @Cacheable注解失效时间
   cache:
@@ -276,6 +274,8 @@ lili:
     #        username: elastic
     #        password: LiLiShopES
 
+    logstash:
+      server: 192.168.0.116:4560
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group

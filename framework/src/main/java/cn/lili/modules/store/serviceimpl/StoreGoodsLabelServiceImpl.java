@@ -10,8 +10,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,9 +25,6 @@ import java.util.List;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMapper, StoreGoodsLabel> implements StoreGoodsLabelService {
-
-    @Autowired
-    private StoreGoodsLabelMapper storeGoodsLabelMapper;
 
     @Override
     public List<StoreGoodsLabelVO> listByStoreId(String storeId) {
@@ -68,7 +63,7 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
     private List<StoreGoodsLabel> list(String storeId) {
         LambdaQueryWrapper<StoreGoodsLabel> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(StoreGoodsLabel::getStoreId, storeId);
-        return storeGoodsLabelMapper.selectList(queryWrapper);
+        return this.baseMapper.selectList(queryWrapper);
     }
 
     @Override
@@ -76,7 +71,7 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
         //获取当前登录商家账号
         AuthUser tokenUser = UserContext.getCurrentUser();
         storeGoodsLabel.setStoreId(tokenUser.getStoreId());
-        storeGoodsLabelMapper.insert(storeGoodsLabel);
+        this.save(storeGoodsLabel);
         return storeGoodsLabel;
     }
 
@@ -87,12 +82,12 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
         LambdaUpdateWrapper<StoreGoodsLabel> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.eq(StoreGoodsLabel::getStoreId, tokenUser.getStoreId());
         lambdaUpdateWrapper.eq(StoreGoodsLabel::getId, storeGoodsLabel.getId());
-        storeGoodsLabelMapper.update(storeGoodsLabel, lambdaUpdateWrapper);
+        this.update(storeGoodsLabel, lambdaUpdateWrapper);
         return storeGoodsLabel;
     }
 
     @Override
     public void removeStoreGoodsLabel(String storeLabelId) {
-        storeGoodsLabelMapper.deleteById(storeLabelId);
+        this.removeById(storeLabelId);
     }
 }

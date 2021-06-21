@@ -104,4 +104,6 @@ public interface CouponService extends IService<Coupon> {
     void usedCoupon(String couponId, Integer usedNum);
 
 
+
+
 }

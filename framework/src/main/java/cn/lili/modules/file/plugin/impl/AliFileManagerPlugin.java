@@ -186,8 +186,8 @@ public class AliFileManagerPlugin implements FileManagerPlugin {
 
     @Override
     public String getUrl(String url, Integer width, Integer height) {
-        // 缩略图全路径
-        // 返回缩略图全路径
+        //缩略图全路径
+        //返回缩略图全路径
         return url + "?x-oss-process=style/" + width + "X" + height;
     }
 }

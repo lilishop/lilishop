@@ -82,9 +82,6 @@ public class GoodsBuyerController {
                                                      @NotNull(message = "SKU ID不能为空") @PathVariable("skuId") String skuId) {
 
         Map<String, Object> map = goodsSkuService.getGoodsSkuDetail(goodsId, skuId);
-
-
-
         return ResultUtil.data(map);
     }
 

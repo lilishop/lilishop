@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -35,18 +36,23 @@ public class Category extends BaseEntity {
     @ApiModelProperty(value = "分类名称")
     private String name;
 
+    @NotEmpty(message = "请选择父分类")
     @ApiModelProperty(value = "父id, 根节点为0")
     private String parentId;
 
+    @NotNull(message = "层级不能为空")
     @ApiModelProperty(value = "层级, 从0开始")
     private Integer level;
 
+    @NotNull(message = "排序值不能为空")
     @ApiModelProperty(value = "排序值")
     private BigDecimal sortOrder;
 
+    @NotNull(message = "请填写佣金比例")
     @ApiModelProperty(value = "佣金比例")
     private Double commissionRate;
 
+    @NotEmpty(message = "分类图标不能为空")
     @ApiModelProperty(value = "分类图标")
     private String image;
 

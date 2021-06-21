@@ -73,8 +73,8 @@ public class Swagger2Config {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("商品")
                 .apiInfo(apiInfo()).select()
-                // 扫描所有有注解的api，用这种方式更灵活
-//                .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
+                //扫描所有有注解的api，用这种方式更灵活
+//               .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
                 .apis(RequestHandlerSelectors.basePackage("cn.lili.controller.goods"))
                 .paths(PathSelectors.any())
                 .build()
@@ -87,7 +87,7 @@ public class Swagger2Config {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("会员")
                 .apiInfo(apiInfo()).select()
-                // 扫描所有有注解的api，用这种方式更灵活
+                //扫描所有有注解的api，用这种方式更灵活
                 .apis(RequestHandlerSelectors.basePackage("cn.lili.controller.member"))
                 .paths(PathSelectors.any())
                 .build()
@@ -100,7 +100,7 @@ public class Swagger2Config {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("促销")
                 .apiInfo(apiInfo()).select()
-                // 扫描所有有注解的api，用这种方式更灵活
+                //扫描所有有注解的api，用这种方式更灵活
                 .apis(RequestHandlerSelectors.basePackage("cn.lili.controller.promotion"))
                 .paths(PathSelectors.any())
                 .build()
@@ -113,7 +113,7 @@ public class Swagger2Config {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("店铺")
                 .apiInfo(apiInfo()).select()
-                // 扫描所有有注解的api，用这种方式更灵活
+                //扫描所有有注解的api，用这种方式更灵活
                 .apis(RequestHandlerSelectors.basePackage("cn.lili.controller.store"))
                 .paths(PathSelectors.any())
                 .build()
@@ -126,7 +126,7 @@ public class Swagger2Config {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("交易")
                 .apiInfo(apiInfo()).select()
-                // 扫描所有有注解的api，用这种方式更灵活
+                //扫描所有有注解的api，用这种方式更灵活
                 .apis(RequestHandlerSelectors.basePackage("cn.lili.controller.trade"))
                 .paths(PathSelectors.any())
                 .build()
@@ -140,7 +140,7 @@ public class Swagger2Config {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("设置")
                 .apiInfo(apiInfo()).select()
-                // 扫描所有有注解的api，用这种方式更灵活
+                //扫描所有有注解的api，用这种方式更灵活
                 .apis(RequestHandlerSelectors.basePackage("cn.lili.controller.setting"))
                 .paths(PathSelectors.any())
                 .build()
@@ -153,7 +153,7 @@ public class Swagger2Config {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("权限")
                 .apiInfo(apiInfo()).select()
-                // 扫描所有有注解的api，用这种方式更灵活
+                //扫描所有有注解的api，用这种方式更灵活
                 .apis(RequestHandlerSelectors.basePackage("cn.lili.controller.permission"))
                 .paths(PathSelectors.any())
                 .build()
@@ -166,7 +166,7 @@ public class Swagger2Config {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("其他")
                 .apiInfo(apiInfo()).select()
-                // 扫描所有有注解的api，用这种方式更灵活
+                //扫描所有有注解的api，用这种方式更灵活
                 .apis(RequestHandlerSelectors.basePackage("cn.lili.controller.other"))
                 .paths(PathSelectors.any())
                 .build()
@@ -179,7 +179,7 @@ public class Swagger2Config {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("通用")
                 .apiInfo(apiInfo()).select()
-                // 扫描所有有注解的api，用这种方式更灵活
+                //扫描所有有注解的api，用这种方式更灵活
                 .apis(RequestHandlerSelectors.basePackage("cn.lili.controller.common"))
                 .paths(PathSelectors.any())
                 .build()
@@ -191,7 +191,7 @@ public class Swagger2Config {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("分销")
                 .apiInfo(apiInfo()).select()
-                // 扫描所有有注解的api，用这种方式更灵活
+                //扫描所有有注解的api，用这种方式更灵活
                 .apis(RequestHandlerSelectors.basePackage("cn.lili.controller.distribution"))
                 .paths(PathSelectors.any())
                 .build()
@@ -204,7 +204,7 @@ public class Swagger2Config {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("统计")
                 .apiInfo(apiInfo()).select()
-                // 扫描所有有注解的api，用这种方式更灵活
+                //扫描所有有注解的api，用这种方式更灵活
                 .apis(RequestHandlerSelectors.basePackage("cn.lili.controller.statistics"))
                 .paths(PathSelectors.any())
                 .build()
@@ -217,7 +217,7 @@ public class Swagger2Config {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("支付")
                 .apiInfo(apiInfo()).select()
-                // 扫描所有有注解的api，用这种方式更灵活
+                //扫描所有有注解的api，用这种方式更灵活
                 .apis(RequestHandlerSelectors.basePackage("cn.lili.controller.payment"))
                 .paths(PathSelectors.any())
                 .build()
@@ -230,7 +230,7 @@ public class Swagger2Config {
         return new Docket(DocumentationType.SWAGGER_2)
                 .groupName("登录")
                 .apiInfo(apiInfo()).select()
-                // 扫描所有有注解的api，用这种方式更灵活
+                //扫描所有有注解的api，用这种方式更灵活
                 .apis(RequestHandlerSelectors.basePackage("cn.lili.controller.passport"))
                 .paths(PathSelectors.any())
                 .build()

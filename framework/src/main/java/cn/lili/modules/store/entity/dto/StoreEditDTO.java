@@ -42,4 +42,10 @@ public class StoreEditDTO extends StoreDetail {
     @ApiModelProperty(value = "详细地址")
     private String storeAddressDetail;
 
+    @ApiModelProperty(value = "腾讯云智服唯一标识")
+    private String yzfSign;
+
+    @ApiModelProperty(value = "腾讯云智服小程序唯一标识")
+    private String yzfMpSign;
+
 }

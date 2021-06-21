@@ -8,6 +8,7 @@ import cn.lili.common.verification.service.VerificationService;
 import cn.lili.common.vo.ResultMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +18,9 @@ import org.springframework.web.bind.annotation.*;
  * @author Chopper
  * @date 2020/11/26 15:41
  */
-@RequestMapping("/common/slider")
+@Slf4j
 @RestController
+@RequestMapping("/common/slider")
 @Api(tags = "滑块验证码接口")
 public class SliderImageController {
 
@@ -35,7 +37,7 @@ public class SliderImageController {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("获取校验接口错误",e);
             return null;
         }
     }

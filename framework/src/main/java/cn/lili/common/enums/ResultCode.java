@@ -97,7 +97,8 @@ public enum ResultCode {
     USER_RECEIPT_NOT_EXIST(20014, "会员发票信息不存在"),
     USER_EDIT_ERROR(20015, "用户修改失败"),
     USER_OLD_PASSWORD_ERROR(20016, "旧密码不正确"),
-    USER_COLLECTION_EXIST(2001, "无法重复收藏"),
+    USER_COLLECTION_EXIST(20017, "无法重复收藏"),
+    USER_GRADE_IS_DEFAULT(20018, "会员等级为默认会员等级"),
     DELETE_EXIST(2001, "无法重复收藏"),
 
     /**
@@ -124,61 +125,97 @@ public enum ResultCode {
      * 购物车
      */
     CART_ERROR(30001, "读取结算页的购物车异常"),
+    CART_PINTUAN_NOT_EXIST_ERROR(30002, "拼团活动不存在错误"),
+    CART_PINTUAN_LIMIT_ERROR(30003, "购买数量超过拼团活动限制数量"),
     SHIPPING_NOT_APPLY(30005, "购物商品不支持当前收货地址配送"),
+
     /**
      * 订单
      */
     ORDER_ERROR(31001, "创建订单异常，请稍后重试"),
+
     ORDER_NOT_EXIST(31002, "订单不存在"),
+
     ORDER_DELIVERED_ERROR(31003, "订单状态错误，无法进行确认收货"),
+
     ORDER_UPDATE_PRICE_ERROR(31004, "已支付的订单不能修改金额"),
+
     ORDER_LOGISTICS_ERROR(31005, "物流错误"),
+
     ORDER_DELIVER_ERROR(31006, "物流错误"),
+
     ORDER_NOT_USER(31007, "非当前会员的订单"),
+
     ORDER_TAKE_ERROR(31008, "当前订单无法核销"),
+
     MEMBER_ADDRESS_NOT_EXIST(31009, "订单无收货地址，请先配置收货地址"),
+
+    ORDER_DELIVER_NUM_ERROR(31010, "没有待发货的订单"),
 
     /**
      * 支付
      */
     PAY_UN_WANTED(32000, "当前订单不需要付款，返回订单列表等待系统订单出库即可"),
+
     PAY_SUCCESS(32001, "支付成功"),
+
     PAY_INCONSISTENT_ERROR(32002, "付款金额和应付金额不一致"),
+
     PAY_DOUBLE_ERROR(32003, "订单已支付，不能再次进行支付"),
+
     PAY_CASHIER_ERROR(32004, "收银台信息获取错误"),
+
     PAY_ERROR(32005, "支付业务异常，请稍后重试"),
+
     PAY_BAN(32006, "当前订单不需要付款，请返回订单列表重新操作"),
+
     PAY_PARTIAL_ERROR(32007, "该订单已部分支付，请前往订单中心进行支付"),
+
     PAY_NOT_SUPPORT(32008, "支付暂不支持"),
+
     PAY_CLIENT_TYPE_ERROR(32009, "错误的客户端"),
+
     PAY_POINT_ENOUGH(32010, "积分不足，不能兑换"),
+
     PAY_NOT_EXIST_ORDER(32011, "支付订单不存在"),
 
     /**
      * 售后
      */
     AFTER_SALES_NOT_PAY_ERROR(33001, "当前订单未支付，不能申请售后"),
+
     AFTER_SALES_CANCEL_ERROR(33002, "当前售后单无法取消"),
+
     AFTER_SALES_BAN(33003, "订单状态不允许申请售后，请联系平台或商家"),
+
     AFTER_SALES_DOUBLE_ERROR(33004, "售后已审核，无法重复操作"),
+
     AFTER_SALES_LOGISTICS_ERROR(33005, "物流公司错误，请重新选择"),
+
     AFTER_STATUS_ERROR(33006, "售后状态错误，请刷新页面"),
 
     /**
      * 投诉
      */
     COMPLAINT_ORDER_ITEM_EMPTY_ERROR(33100, "订单不存在"),
+
     COMPLAINT_SKU_EMPTY_ERROR(33101, "商品已下架，如需投诉请联系平台客服"),
+
     COMPLAINT_ERROR(33102, "投诉异常，请稍后重试"),
 
     /**
      * 余额
      */
     WALLET_NOT_EXIT_ERROR(34000, "钱包不存在，请联系管理员"),
+
     WALLET_INSUFFICIENT(34001, "余额不足以支付订单，请充值!"),
+
     WALLET_WITHDRAWAL_INSUFFICIENT(34002, "可提现金额不足！"),
+
     WALLET_ERROR_INSUFFICIENT(34003, "零钱提现失败！"),
+
     WALLET_REMARK_ERROR(34004, "请填写审核备注！"),
+
     WALLET_APPLY_ERROR(34005, "提现申请异常！"),
 
     /**
@@ -195,52 +232,74 @@ public enum ResultCode {
      * 优惠券
      */
     COUPON_EDIT_STATUS_SUCCESS(41001, "修改状态成功！"),
+
     COUPON_CANCELLATION_SUCCESS(41002, "会员优惠券作废成功"),
+
     COUPON_EXPIRED(41003, "优惠券已使用/已过期，不能使用"),
+
     COUPON_EDIT_STATUS_ERROR(41004, "优惠券修改状态失败！"),
 
     /**
      * 拼团
      */
     PINTUAN_MANUAL_OPEN_SUCCESS(42001, "手动开启拼团活动成功"),
+
     PINTUAN_MANUAL_CLOSE_SUCCESS(42002, "手动关闭拼团活动成功"),
+
     PINTUAN_ADD_SUCCESS(42003, "添加拼团活动成功"),
+
     PINTUAN_EDIT_SUCCESS(42004, "修改拼团活动成功"),
+
     PINTUAN_DELETE_SUCCESS(42005, "删除拼团活动成功"),
+
     PINTUAN_MANUAL_OPEN_ERROR(42006, "手动开启拼团活动失败"),
+
     PINTUAN_MANUAL_CLOSE_ERROR(42007, "手动关闭拼团活动失败"),
+
     PINTUAN_ADD_ERROR(42008, "添加拼团活动失败"),
+
     PINTUAN_EDIT_ERROR(42009, "修改拼团活动失败"),
+
     PINTUAN_DELETE_ERROR(42010, "删除拼团活动失败"),
 
     /**
      * 满额活动
      */
     FULL_DISCOUNT_EDIT_SUCCESS(43001, "修改满优惠活动成功"),
+
     FULL_DISCOUNT_EDIT_DELETE(43002, "删除满优惠活动成功"),
 
     /**
      * 店铺
      */
     STORE_NOT_EXIST(50001, "此店铺不存在"),
+
     STORE_NAME_EXIST_ERROR(50002, "店铺名称已存在!"),
+
     STORE_APPLY_DOUBLE_ERROR(50003, "已有店铺，无需重复申请!"),
 
     /**
      * 结算单
      */
     BILL_CHECK_ERROR(51001, "只有已出账结算单可以核对"),
+
     BILL_COMPLETE_ERROR(51002, "只有已审核结算单可以支付"),
 
     /**
      * 文章
      */
     ARTICLE_CATEGORY_NAME_EXIST(60001, "文章分类名称已存在"),
+
     ARTICLE_CATEGORY_PARENT_NOT_EXIST(60002, "文章分类父分类不存在"),
+
     ARTICLE_CATEGORY_BEYOND_TWO(60003, "最多为二级分类,操作失败"),
+
     ARTICLE_CATEGORY_DELETE_ERROR(60004, "该文章分类下存在子分类，不能删除"),
+
     ARTICLE_CATEGORY_HAS_ARTICLE(60005, "该文章分类下存在文章，不能删除"),
+
     ARTICLE_CATEGORY_NO_DELETION(60007, "默认文章分类不能进行删除"),
+
     ARTICLE_NO_DELETION(60008, "默认文章不能进行删除"),
 
 
@@ -248,8 +307,11 @@ public enum ResultCode {
      * 页面
      */
     PAGE_NOT_EXIST(61001, "页面不存在"),
+
     PAGE_OPEN_DELETE_ERROR(61002, "当前页面为开启状态，无法删除"),
+
     PAGE_DELETE_ERROR(61003, "当前页面为唯一页面，无法删除"),
+
     PAGE_RELEASE_ERROR(61004, "页面已发布，无需重复提交"),
 
     /**
@@ -266,39 +328,49 @@ public enum ResultCode {
      * 站内信
      */
     NOTICE_NOT_EXIST(80101, "当前消息模板不存在"),
+
     NOTICE_ERROR(80102, "修改站内信异常，请稍后重试"),
 
     /**
      * OSS
      */
     OSS_NOT_EXIST(80201, "OSS未配置"),
+
     OSS_EXCEPTION(80202, "文件上传失败，请稍后重试"),
 
     /**
      * 验证码
      */
     VERIFICATION_SEND_SUCCESS(80301, "短信验证码,发送成功"),
+
     VERIFICATION_ERROR(80302, "验证失败"),
+
     VERIFICATION_SMS_ERROR(80303, "短信验证码错误，请重新校验"),
+
     VERIFICATION_SMS_EXPIRED_ERROR(80304, "验证码已失效，请重新校验"),
 
     /**
      * 配置错误
      */
     ALIPAY_NOT_SETTING(80401, "支付宝支付未配置"),
+
     ALIPAY_EXCEPTION(80402, "支付宝支付错误，请稍后重试"),
+
     ALIPAY_PARAMS_EXCEPTION(80403, "支付宝参数异常"),
 
     /**
      * 微信相关异常
      */
     WECHAT_CONNECT_NOT_SETTING(80500, "微信联合登陆信息未配置"),
+
     WECHAT_PAYMENT_NOT_SETTING(80501, "微信支付信息未配置"),
+
     WECHAT_QRCODE_ERROR(80502, "微信二维码生成异常"),
+
     WECHAT_MP_MESSAGE_ERROR(80503, "微信小程序小消息订阅异常"),
 
-    APP_VERSION_EXIST(80600, "APP版本已存在")
-    ;
+    APP_VERSION_EXIST(80600, "APP版本已存在");
+
     private final Integer code;
     private final String message;
 

@@ -31,12 +31,7 @@ public class GoodsStatisticsManagerController {
     @ApiOperation(value = "获取统计列表,排行前一百的数据")
     @GetMapping
     public ResultMessage<List<GoodsStatisticsDataVO>> getByPage(GoodsStatisticsQueryParam goodsStatisticsQueryParam) {
-        try {
-            return ResultUtil.data(goodsStatisticsDataService.getGoodsStatisticsData(goodsStatisticsQueryParam, 100));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return ResultUtil.data(goodsStatisticsDataService.getGoodsStatisticsData(goodsStatisticsQueryParam, 100));
     }
 
     @ApiOperation(value = "获取行业统计列表")

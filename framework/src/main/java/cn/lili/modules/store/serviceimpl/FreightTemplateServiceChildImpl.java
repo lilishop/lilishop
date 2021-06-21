@@ -6,8 +6,6 @@ import cn.lili.modules.store.service.FreightTemplateChildService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,15 +21,11 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class FreightTemplateServiceChildImpl extends ServiceImpl<FreightTemplateChildMapper, FreightTemplateChild> implements FreightTemplateChildService {
 
-    //配送子模板数据层
-    @Autowired
-    private FreightTemplateChildMapper freightTemplateChildMapper;
-
     @Override
     public List<FreightTemplateChild> getFreightTemplateChild(String freightTemplateId) {
         LambdaQueryWrapper<FreightTemplateChild> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(FreightTemplateChild::getFreightTemplateId, freightTemplateId);
-        return freightTemplateChildMapper.selectList(lambdaQueryWrapper);
+        return this.baseMapper.selectList(lambdaQueryWrapper);
     }
 
     @Override

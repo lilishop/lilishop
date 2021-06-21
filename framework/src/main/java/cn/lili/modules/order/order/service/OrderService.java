@@ -4,6 +4,8 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
+import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
+import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
@@ -12,7 +14,10 @@ import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
 import cn.lili.modules.system.entity.vo.Traces;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -48,6 +53,15 @@ public interface OrderService extends IService<Order> {
     IPage<OrderSimpleVO> queryByParams(OrderSearchParams orderSearchParams);
 
     /**
+     * 查询导出订单列表
+     *
+     * @param orderSearchParams 查询参数
+     * @return 导出订单列表
+     */
+    List<OrderExportDTO> queryExportOrder(OrderSearchParams orderSearchParams);
+
+
+    /**
      * 订单详细
      *
      * @param orderSn 订单SN
@@ -64,6 +78,8 @@ public interface OrderService extends IService<Order> {
 
     /**
      * 订单付款
+     * 修改订单付款信息
+     * 记录订单流水
      *
      * @param orderSn       订单编号
      * @param paymentMethod 支付方法
@@ -116,10 +132,16 @@ public interface OrderService extends IService<Order> {
     /**
      * 订单核验
      *
-     * @param orderSn 订单编号
-     * @param qrCode  提货码
+     * @param verificationCode 验证码
      */
-    Order take(String orderSn, String qrCode);
+    Order take(String orderSn, String verificationCode);
+
+    /**
+     * 根据核验码获取订单信息
+     *
+     * @param verificationCode 验证码
+     */
+    Order getOrderByVerificationCode(String verificationCode);
 
     /**
      * 订单完成
@@ -175,5 +197,21 @@ public interface OrderService extends IService<Order> {
      * @param parentOrderSn 拼团订单sn
      */
     void agglomeratePintuanOrder(String pintuanId, String parentOrderSn);
+
+    /**
+     * 获取待发货订单编号列表
+     *
+     * @param response
+     * @param logisticsName 店铺已选择物流公司列表
+     * @return 待发货订单编号列表
+     */
+    void getBatchDeliverList(HttpServletResponse response, List<String> logisticsName);
+
+    /**
+     * 订单批量发货
+     *
+     * @param files 文件
+     */
+    void batchDeliver(MultipartFile files);
 
 }

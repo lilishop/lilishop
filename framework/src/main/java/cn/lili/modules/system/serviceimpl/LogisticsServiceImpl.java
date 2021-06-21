@@ -1,13 +1,13 @@
 package cn.lili.modules.system.serviceimpl;
 
 import cn.hutool.core.util.StrUtil;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.enums.SwitchEnum;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.system.entity.dos.Logistics;
 import cn.lili.modules.system.entity.dos.Setting;
-import cn.lili.modules.system.entity.vo.Traces;
 import cn.lili.modules.system.entity.dto.KuaidiSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
+import cn.lili.modules.system.entity.vo.Traces;
 import cn.lili.modules.system.mapper.LogisticsMapper;
 import cn.lili.modules.system.service.LogisticsService;
 import cn.lili.modules.system.service.SettingService;
@@ -15,7 +15,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
-import lombok.RequiredArgsConstructor;
+import groovy.util.logging.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +36,7 @@ import java.util.Map;
  * @author Chopper
  * @date 2020/11/17 8:02 下午
  */
+@Slf4j
 @Service
 @Transactional
 public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics> implements LogisticsService {
@@ -47,7 +48,8 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
         try {
             return getOrderTracesByJson(logisticsId, logisticsNo);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("获取物流公司错误",e);
+
         }
         return null;
     }
@@ -175,21 +177,21 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
         try {
             URL realUrl = new URL(url);
             HttpURLConnection conn = (HttpURLConnection) realUrl.openConnection();
-            // 发送POST请求必须设置如下两行
+            //发送POST请求必须设置如下两行
             conn.setDoOutput(true);
             conn.setDoInput(true);
-            // POST方法
+            //POST方法
             conn.setRequestMethod("POST");
-            // 设置通用的请求属性
+            //设置通用的请求属性
             conn.setRequestProperty("accept", "*/*");
             conn.setRequestProperty("connection", "Keep-Alive");
             conn.setRequestProperty("user-agent",
                     "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             conn.connect();
-            // 获取URLConnection对象对应的输出流
+            //获取URLConnection对象对应的输出流
             out = new OutputStreamWriter(conn.getOutputStream(), StandardCharsets.UTF_8);
-            // 发送请求参数
+            //发送请求参数
             if (params != null) {
                 StringBuilder param = new StringBuilder();
                 for (Map.Entry<String, String> entry : params.entrySet()) {
@@ -204,9 +206,9 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
                 //System.out.println("param:"+param.toString());
                 out.write(param.toString());
             }
-            // flush输出流的缓冲
+            //flush输出流的缓冲
             out.flush();
-            // 定义BufferedReader输入流来读取URL的响应
+            //定义BufferedReader输入流来读取URL的响应
             in = new BufferedReader(
                     new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
             String line;
@@ -214,7 +216,7 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
                 result.append(line);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("向指定 URL 发送POST方法的请求错误",e);
         }
         //使用finally块来关闭输出流、输入流
         finally {

@@ -1,6 +1,7 @@
 package cn.lili.modules.order.order.mapper;
 
 import cn.lili.modules.order.order.entity.dos.Order;
+import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.entity.vo.PaymentLog;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -11,6 +12,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 /**
  * 订单数据处理层
  *
@@ -18,9 +21,6 @@ import org.apache.ibatis.annotations.Update;
  * @date 2020/11/17 7:35 下午
  */
 public interface OrderMapper extends BaseMapper<Order> {
-
-    @Update({"update li_order set order_status = #{status} where sn in #{orderSn}"})
-    void batchUpdateStatus(String status, String orderSns);
 
     @Update({"update li_order set order_status = #{status} where sn = #{orderSn}"})
     void updateStatus(String status, String orderSn);
@@ -39,8 +39,14 @@ public interface OrderMapper extends BaseMapper<Order> {
             " FROM li_order o INNER JOIN li_order_item AS oi on o.sn = oi.order_sn ${ew.customSqlSegment} ")
     IPage<OrderSimpleVO> queryByParams(IPage<OrderSimpleVO> page, @Param(Constants.WRAPPER) Wrapper<OrderSimpleVO> queryWrapper);
 
+    @Select("SELECT o.sn,o.create_time,o.member_name,o.consignee_name,o.consignee_mobile,o.consignee_address_path,o.consignee_detail," +
+            "o.payment_method, o.logistics_name,o.freight_price,o.goods_price,o.discount_price,o.flow_price,oi.goods_name,oi.num," +
+            "o.remark,o.order_status,o.pay_status,o.deliver_status,o.need_receipt,o.store_name FROM li_order_item oi INNER JOIN li_order o ON oi.order_sn=o.sn")
+    List<OrderExportDTO> queryExportOrder(@Param(Constants.WRAPPER) Wrapper<OrderSimpleVO> queryWrapper);
 
     @Select("select * from li_order ${ew.customSqlSegment} ")
     IPage<PaymentLog> queryPaymentLogs(IPage<PaymentLog> page, @Param(Constants.WRAPPER) Wrapper<PaymentLog> queryWrapper);
 
+    @Select("SELECT sn FROM li_order o ${ew.customSqlSegment} ")
+    List<String> deliverSnList(@Param(Constants.WRAPPER) Wrapper<Order> queryWrapper);
 }

@@ -67,8 +67,9 @@ public class OrderSearchParams extends PageVO {
 
     /**
      * @see OrderTypeEnum
+     * @see cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum
      */
-    @ApiModelProperty(value = "订单类型")
+    @ApiModelProperty(value = "订单类型",allowableValues = "NORMAL,VIRTUAL,GIFT,PINTUAN,POINT" )
     private String orderType;
 
     @ApiModelProperty(value = "支付方式")
@@ -100,7 +101,7 @@ public class OrderSearchParams extends PageVO {
             wrapper.like("o.sn", keywords);
             wrapper.like("oi.goods_name", keywords);
         }
-        // 按卖家查询
+        //按卖家查询
         if (StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name())) {
             wrapper.eq("o.store_id", UserContext.getCurrentUser().getStoreId());
         }
@@ -108,43 +109,44 @@ public class OrderSearchParams extends PageVO {
                 && StringUtils.isNotEmpty(storeId)) {
             wrapper.eq("o.store_id", storeId);
         }
-        // 按买家查询
+        //按买家查询
         if (StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.MEMBER.name())) {
             wrapper.eq("o.member_id", UserContext.getCurrentUser().getId());
         }
-        // 按照买家查询
+        //按照买家查询
         if (StringUtils.isNotEmpty(memberId)) {
             wrapper.like("o.member_id", memberId);
         }
 
-        // 按订单编号查询
+        //按订单编号查询
         if (StringUtils.isNotEmpty(orderSn)) {
             wrapper.like("o.sn", orderSn);
         }
 
-        // 按时间查询
+        //按时间查询
         if (startDate != null) {
             wrapper.ge("o.create_time", startDate);
         }
         if (endDate != null) {
             wrapper.le("o.create_time", DateUtil.endOfDate(endDate));
         }
-        // 按购买人用户名
+        //按购买人用户名
         if (StringUtils.isNotEmpty(buyerName)) {
             wrapper.like("o.member_name", buyerName);
         }
 
-        // 按订单类型
+        //按订单类型
         if (StringUtils.isNotEmpty(orderType)) {
-            wrapper.eq("o.order_type", orderType);
+            wrapper.eq("o.order_type", orderType)
+                    .or().eq("o.order_promotion_type", orderType);
         }
 
-        // 按支付方式
+        //按支付方式
         if (StringUtils.isNotEmpty(paymentMethod)) {
             wrapper.eq("o.payment_method", paymentMethod);
         }
 
-        // 按标签查询
+        //按标签查询
         if (StringUtils.isNotEmpty(tag)) {
             String orderStatusColumn = "o.order_status";
             OrderTagEnum tagEnum = OrderTagEnum.valueOf(tag);
@@ -177,7 +179,7 @@ public class OrderSearchParams extends PageVO {
         if (StringUtils.isNotEmpty(shipName)) {
             wrapper.like("o.ship_name", shipName);
         }
-        // 按商品名称查询
+        //按商品名称查询
         if (StringUtils.isNotEmpty(goodsName)) {
             wrapper.like("oi.goods_name", goodsName);
         }
@@ -202,9 +204,6 @@ public class OrderSearchParams extends PageVO {
             wrapper.like("o.client_type", clientType);
         }
         wrapper.eq("o.delete_flag", false);
-        wrapper.groupBy("o.id");
-        wrapper.orderByDesc("o.id");
-
         return wrapper;
     }
 

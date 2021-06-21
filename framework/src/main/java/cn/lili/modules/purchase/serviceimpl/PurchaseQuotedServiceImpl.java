@@ -26,8 +26,6 @@ import java.util.List;
 @Transactional
 public class PurchaseQuotedServiceImpl extends ServiceImpl<PurchaseQuotedMapper, PurchaseQuoted> implements PurchaseQuotedService {
     @Autowired
-    private PurchaseQuotedMapper purchaseQuotedMapper;
-    @Autowired
     private PurchaseQuotedItemService purchaseQuotedItemService;
 
     @Override

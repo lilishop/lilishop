@@ -102,42 +102,20 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     public void addGoods(GoodsOperationDTO goodsOperationDTO) {
-
         Goods goods = new Goods(goodsOperationDTO);
-
-        //判定商品是否需要审核
-        this.checkNeedAuth(goods);
-
-        // 向goods加入图片
+        //检查商品
+        this.checkGoods(goods);
+        //向goods加入图片
         this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
-
-        //商品添加卖家信息
-        StoreVO storeDetail = this.storeService.getStoreDetail();
-        goods.setStoreId(storeDetail.getId());
-        goods.setStoreName(storeDetail.getStoreName());
-        if (storeDetail.getSelfOperated() != null) {
-            goods.setSelfOperated(storeDetail.getSelfOperated());
-        }
-        // 评论次数
-        goods.setCommentNum(0);
-        // 购买次数
-        goods.setBuyCount(0);
-        // 购买次数
-        goods.setQuantity(0);
-        // 商品评分
-        goods.setGrade(100.0);
-
+        //添加商品
         this.save(goods);
-
-        // 添加商品参数
+        //添加商品参数
         if (goodsOperationDTO.getGoodsParamsList() != null && !goodsOperationDTO.getGoodsParamsList().isEmpty()) {
             this.goodsParamsService.addParams(goodsOperationDTO.getGoodsParamsList(), goods.getId());
         }
-
-        // 添加商品sku信息
+        //添加商品sku信息
         this.goodsSkuService.add(goodsOperationDTO.getSkuList(), goods);
-
-        // 添加相册
+        //添加相册
         if (goodsOperationDTO.getGoodsGalleryList() != null && !goodsOperationDTO.getGoodsGalleryList().isEmpty()) {
             this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
         }
@@ -146,35 +124,25 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     public void editGoods(GoodsOperationDTO goodsOperationDTO, String goodsId) {
-        this.checkExist(goodsId);
         Goods goods = new Goods(goodsOperationDTO);
         goods.setId(goodsId);
-
-        //是否需要审核
-        this.checkNeedAuth(goods);
-
-        // 向goods加入图片
+        //检查商品信息
+        this.checkGoods(goods);
+        //向goods加入图片
         this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
-
-        //商品添加卖家信息
-        StoreVO storeDetail = this.storeService.getStoreDetail();
-        if (storeDetail.getSelfOperated() != null) {
-            goods.setSelfOperated(storeDetail.getSelfOperated());
-        }
-        goods.setStoreId(storeDetail.getId());
-        goods.setStoreName(storeDetail.getStoreName());
-
         //修改商品
         this.updateById(goods);
-
-        // 添加商品参数
-        this.goodsParamsService.addParams(goodsOperationDTO.getGoodsParamsList(), goods.getId());
-
-        //修改商品规格
+        //添加商品参数
+        if (goodsOperationDTO.getGoodsParamsList() != null && !goodsOperationDTO.getGoodsParamsList().isEmpty()) {
+            this.goodsParamsService.addParams(goodsOperationDTO.getGoodsParamsList(), goods.getId());
+        }
+        //修改商品sku信息
         this.goodsSkuService.update(goodsOperationDTO.getSkuList(), goods, goodsOperationDTO.getRegeneratorSkuFlag());
+        //添加相册
+        if (goodsOperationDTO.getGoodsGalleryList() != null && !goodsOperationDTO.getGoodsGalleryList().isEmpty()) {
+            this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
+        }
 
-        // 添加相册
-        this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
     }
 
     @Override
@@ -197,7 +165,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             images.add(goodsGallery.getOriginal());
         }
         goodsVO.setGoodsGalleryList(images);
-        // 商品sku赋值
+        //商品sku赋值
         List<GoodsSkuVO> goodsListByGoodsId = goodsSkuService.getGoodsListByGoodsId(goodsId);
         if (goodsListByGoodsId != null && !goodsListByGoodsId.isEmpty()) {
             goodsVO.setSkuList(goodsListByGoodsId);
@@ -305,9 +273,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
-    public Boolean freight(List<String> goodsIds, String freightPayer, String templateId) {
+    public Boolean freight(List<String> goodsIds, String templateId) {
         LambdaUpdateWrapper<Goods> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.set(Goods::getFreightPayer, freightPayer);
         lambdaUpdateWrapper.set(Goods::getTemplateId, templateId);
         lambdaUpdateWrapper.in(Goods::getId, goodsIds);
         return this.update(lambdaUpdateWrapper);
@@ -333,9 +300,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         LambdaQueryWrapper<MemberEvaluation> goodEvaluationQueryWrapper = new LambdaQueryWrapper<>();
         goodEvaluationQueryWrapper.eq(MemberEvaluation::getId, goodsId);
         goodEvaluationQueryWrapper.eq(MemberEvaluation::getGrade, EvaluationGradeEnum.GOOD.name());
-        // 好评数量
+        //好评数量
         int highPraiseNum = memberEvaluationService.count(goodEvaluationQueryWrapper);
-        // 好评率
+        //好评率
         double grade = NumberUtil.mul(NumberUtil.div(highPraiseNum, goods.getCommentNum().doubleValue(), 2), 100);
         goods.setGrade(grade);
         this.updateById(goods);
@@ -355,16 +322,62 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     /**
-     * 商品是否需要审核
+     * 检查商品信息
+     * 如果商品是虚拟商品则无需配置配送模板
+     * 如果商品是实物商品需要配置配送模板
+     * 判断商品是否存在
+     * 判断商品是否需要审核
+     * 判断当前用户是否为店铺
      *
      * @param goods 商品
      */
-    private void checkNeedAuth(Goods goods) {
+    private void checkGoods(Goods goods) {
+        //判断商品类型
+        switch (goods.getGoodsType()) {
+            case "PHYSICAL_GOODS":
+                if (goods.getTemplateId().equals("0")) {
+                    throw new ServiceException("实物商品需选择配送模板");
+                }
+                break;
+            case "VIRTUAL_GOODS":
+                if (!goods.getTemplateId().equals("0")) {
+                    throw new ServiceException("虚拟商品不需要选择配送模板");
+                }
+                break;
+            default:
+                throw new ServiceException("需选择商品类型");
+        }
+        //检查商品是否存在--修改商品时使用
+        if (goods.getId() != null) {
+            this.checkExist(goods.getId());
+        } else {
+            //评论次数
+            goods.setCommentNum(0);
+            //购买次数
+            goods.setBuyCount(0);
+            //购买次数
+            goods.setQuantity(0);
+            //商品评分
+            goods.setGrade(100.0);
+        }
+
         //获取商品系统配置决定是否审核
         Setting setting = settingService.get(SettingEnum.GOODS_SETTING.name());
         GoodsSetting goodsSetting = JSONUtil.toBean(setting.getSettingValue(), GoodsSetting.class);
         //是否需要审核
         goods.setIsAuth(Boolean.TRUE.equals(goodsSetting.getGoodsCheck()) ? GoodsAuthEnum.TOBEAUDITED.name() : GoodsAuthEnum.PASS.name());
+        //判断当前用户是否为店铺
+        if (UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
+            StoreVO storeDetail = this.storeService.getStoreDetail();
+            if (storeDetail.getSelfOperated() != null) {
+                goods.setSelfOperated(storeDetail.getSelfOperated());
+            }
+            goods.setStoreId(storeDetail.getId());
+            goods.setStoreName(storeDetail.getStoreName());
+            goods.setSelfOperated(storeDetail.getSelfOperated());
+        } else {
+            throw new ServiceException("当前未登录店铺");
+        }
     }
 
     /**

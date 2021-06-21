@@ -10,6 +10,7 @@ import cn.lili.modules.permission.service.MenuService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ import java.util.List;
  * @author Chopper
  * @date 2020/11/20 12:07
  */
+@Slf4j
 @RestController
 @Api(tags = "管理端,菜单管理接口")
 @RequestMapping("/manager/menu")
@@ -42,7 +44,7 @@ public class MenuManagerController {
         try {
             menuService.save(menu);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("添加菜单错误",e);
         }
         return ResultUtil.data(menu);
     }

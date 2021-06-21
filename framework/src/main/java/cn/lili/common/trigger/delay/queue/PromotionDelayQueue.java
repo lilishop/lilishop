@@ -2,8 +2,6 @@ package cn.lili.common.trigger.delay.queue;
 
 import cn.lili.common.trigger.delay.AbstractDelayQueueMachineFactory;
 import cn.lili.common.trigger.enums.DelayQueueEnums;
-import cn.lili.common.trigger.interfaces.TimeTrigger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,11 +16,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class PromotionDelayQueue extends AbstractDelayQueueMachineFactory {
 
-    @Autowired
-    private TimeTrigger timeTrigger;
 
     @Override
     public String setDelayQueueName() {
-        return DelayQueueEnums.PROMOTION_QUEUE.name();
+        return DelayQueueEnums.PROMOTION.name();
     }
 }

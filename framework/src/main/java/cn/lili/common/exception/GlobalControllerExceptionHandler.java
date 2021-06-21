@@ -67,24 +67,24 @@ public class GlobalControllerExceptionHandler {
         return ResultUtil.error(ResultCode.ERROR);
     }
 
-//    /**
-//     * 通用的接口映射异常处理方
-//     */
-//    @Override
-//    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
-//        if (ex instanceof MethodArgumentNotValidException) {
-//            MethodArgumentNotValidException exception = (MethodArgumentNotValidException) ex;
-//            return new ResponseEntity<>(new ResultUtil<>().setErrorMsg(exception.getBindingResult().getAllErrors().get(0).getDefaultMessage()), status);
-//        }
-//        if (ex instanceof MethodArgumentTypeMismatchException) {
-//            MethodArgumentTypeMismatchException exception = (MethodArgumentTypeMismatchException) ex;
-//            logger.error("参数转换失败，方法：" + exception.getParameter().getMethod().getName() + "，参数：" + exception.getName()
-//                    + ",信息：" + exception.getLocalizedMessage());
-//            return new ResponseEntity<>(new ResultUtil<>().setErrorMsg("参数转换失败"), status);
-//        }
-//        ex.printStackTrace();
-//        return new ResponseEntity<>(new ResultUtil<>().setErrorMsg("未知异常，请联系管理员"), status);
-//    }
+//   /**
+//    * 通用的接口映射异常处理方
+//    */
+//   @Override
+//   protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+//       if (ex instanceof MethodArgumentNotValidException) {
+//           MethodArgumentNotValidException exception = (MethodArgumentNotValidException) ex;
+//           return new ResponseEntity<>(new ResultUtil<>().setErrorMsg(exception.getBindingResult().getAllErrors().get(0).getDefaultMessage()), status);
+//       }
+//       if (ex instanceof MethodArgumentTypeMismatchException) {
+//           MethodArgumentTypeMismatchException exception = (MethodArgumentTypeMismatchException) ex;
+//           logger.error("参数转换失败，方法：" + exception.getParameter().getMethod().getName() + "，参数：" + exception.getName()
+//                   + ",信息：" + exception.getLocalizedMessage());
+//           return new ResponseEntity<>(new ResultUtil<>().setErrorMsg("参数转换失败"), status);
+//       }
+//       ex.printStackTrace();
+//       return new ResponseEntity<>(new ResultUtil<>().setErrorMsg("未知异常，请联系管理员"), status);
+//   }
 
     /**
      * bean校验未通过异常

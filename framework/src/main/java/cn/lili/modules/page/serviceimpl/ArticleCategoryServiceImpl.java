@@ -48,7 +48,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
         if (StringUtils.isNotEmpty(list)) {
             throw new ServiceException(ResultCode.SUCCESS.ARTICLE_CATEGORY_NAME_EXIST);
         }
-        // 非顶级分类
+        //非顶级分类
         if (articleCategory.getParentId() != null && !articleCategory.getParentId().equals("0")) {
             ArticleCategory parent = this.getById(articleCategory.getParentId());
             if (parent == null) {
@@ -68,13 +68,13 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
 
     @Override
     public ArticleCategory updateArticleCategory(ArticleCategory articleCategory) {
-        // 非顶级分类校验是否存在
+        //非顶级分类校验是否存在
         if (!articleCategory.getParentId().equals("0")) {
             ArticleCategory parent = this.getById(articleCategory.getParentId());
             if (parent == null) {
                 throw new ServiceException(ResultCode.ARTICLE_CATEGORY_PARENT_NOT_EXIST);
             }
-            // 替换catPath 根据path规则来匹配级别
+            //替换catPath 根据path规则来匹配级别
             if (articleCategory.getLevel() >= 2) {
                 throw new ServiceException(ResultCode.ARTICLE_CATEGORY_BEYOND_TWO);
             }
@@ -123,11 +123,11 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
 
     @Override
     public List<ArticleCategoryVO> allChildren() {
-        // 从缓存取所有的分类
+        //从缓存取所有的分类
         Object all = cache.get(CachePrefix.ARTICLE_CATEGORY.getPrefix());
         List<ArticleCategoryVO> articleCategories;
         if (all == null) {
-            // 调用初始化分类缓存方法
+            //调用初始化分类缓存方法
             articleCategories = initCategory();
         } else {
             articleCategories = (List<ArticleCategoryVO>) all;

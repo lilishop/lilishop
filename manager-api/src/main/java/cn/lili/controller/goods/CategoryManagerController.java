@@ -69,7 +69,7 @@ public class CategoryManagerController {
         if (StringUtils.isNotEmpty(list)) {
             throw new ServiceException(ResultCode.CATEGORY_NOT_EXIST);
         }
-        // 非顶级分类
+        //非顶级分类
         if (category.getParentId() != null && !category.getParentId().equals("0")) {
             Category parent = categoryService.getById(category.getParentId());
             if (parent == null) {
@@ -87,7 +87,7 @@ public class CategoryManagerController {
 
     @PutMapping
     @ApiOperation(value = "修改商品分类")
-    public ResultMessage<Category> updateCategory(CategoryVO category) {
+    public ResultMessage<Category> updateCategory(@Valid CategoryVO category) {
         Category catTemp = categoryService.getById(category.getId());
         if (catTemp == null) {
             throw new ServiceException(ResultCode.CATEGORY_PARENT_NOT_EXIST);
@@ -116,7 +116,7 @@ public class CategoryManagerController {
             throw new ServiceException(ResultCode.CATEGORY_HAS_CHILDREN);
 
         }
-        // 查询某商品分类的商品数量
+        //查询某商品分类的商品数量
         Integer count = goodsService.getGoodsCountByCategory(id);
         if (count > 0) {
             throw new ServiceException(ResultCode.CATEGORY_HAS_GOODS);

@@ -149,7 +149,7 @@ public class AliPayPlugin implements Payment {
 
             //回传数据
             payModel.setPassbackParams(URLEncoder.createAll().encode(BeanUtil.formatKeyValuePair(payParam), StandardCharsets.UTF_8));
-//        payModel.setStoreId("store_id");
+//       payModel.setStoreId("store_id");
             payModel.setTimeoutExpress("3m");
             payModel.setOutTradeNo(outTradeNo);
             log.info("支付宝扫码：{}", payModel);
@@ -245,7 +245,7 @@ public class AliPayPlugin implements Payment {
     private void verifyNotify(HttpServletRequest request) {
         try {
             AlipayPaymentSetting alipayPaymentSetting = alipayPaymentSetting();
-            // 获取支付宝反馈信息
+            //获取支付宝反馈信息
             Map<String, String> map = AliPayApi.toMap(request);
             log.info("支付回调响应：{}", JSONUtil.toJsonStr(map));
             boolean verifyResult = AlipaySignature.rsaCertCheckV1(map, alipayPaymentSetting.getAlipayPublicCertPath(), "UTF-8",

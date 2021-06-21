@@ -13,7 +13,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 /**
- * 限时抢购申请实体类
+ * 秒杀活动申请实体类
  *
  * @author Chopper
  * @date 2020-03-19 10:44 上午
@@ -22,7 +22,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "li_seckill_apply")
 @TableName("li_seckill_apply")
-@ApiModel(value = "限时抢购申请")
+@ApiModel(value = "秒杀活动申请")
 public class SeckillApply extends BaseEntity {
 
     private static final long serialVersionUID = 5440164641970820989L;

@@ -36,10 +36,6 @@ import java.util.*;
  */
 @Service
 public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsDataMapper, StoreFlow> implements OrderStatisticsDataService {
-
-    //订单统计
-    @Autowired
-    private OrderStatisticsDataMapper orderStatisticsDataMapper;
     //平台PV统计
     @Autowired
     private PlatformViewDataService platformViewDataService;
@@ -72,7 +68,7 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
         return orderOverviewVO;
     }
 
-    // 运算转换率
+    //运算转换率
     private void conversionRateOperation(OrderOverviewVO orderOverviewVO) {
 
         //下单转换率 订单数/UV
@@ -211,11 +207,11 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
         queryWrapper.eq("pay_status", PayStatusEnum.PAID.name());
         //选择商家判定
         queryWrapper.eq(StringUtils.isNotEmpty(statisticsQueryParam.getStoreId()), "store_id", statisticsQueryParam.getStoreId());
-//       查询时间区间
+//      查询时间区间
         queryWrapper.between("create_time", dates[0], dates[1]);
-//        格式化时间
+//       格式化时间
         queryWrapper.groupBy("DATE_FORMAT(create_time,'%Y-%m-%d')");
-        List<OrderStatisticsDataVO> orderStatisticsDataVOS = orderStatisticsDataMapper.getOrderStatisticsData(queryWrapper);
+        List<OrderStatisticsDataVO> orderStatisticsDataVOS = this.baseMapper.getOrderStatisticsData(queryWrapper);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(dates[0]);
 

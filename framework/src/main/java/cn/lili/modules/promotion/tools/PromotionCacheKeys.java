@@ -28,7 +28,7 @@ public class PromotionCacheKeys {
     }
 
     /**
-     * 读取满优惠redis key
+     * 读取秒杀活动redis key
      * @param timeStr 时间字符串（格式为 yyyyMMdd）
      * @return 满优惠redis key
      */

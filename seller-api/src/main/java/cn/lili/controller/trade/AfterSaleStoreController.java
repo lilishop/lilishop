@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * 店铺端,售后管理接口
@@ -42,6 +43,12 @@ public class AfterSaleStoreController {
     @GetMapping(value = "/page")
     public ResultMessage<IPage<AfterSaleVO>> getByPage(AfterSaleSearchParams searchParams) {
         return ResultUtil.data(afterSaleService.getAfterSalePages(searchParams));
+    }
+
+    @ApiOperation(value = "获取导出售后服务列表列表")
+    @GetMapping(value = "/exportAfterSaleOrder")
+    public ResultMessage<List<AfterSale>> exportAfterSaleOrder(AfterSaleSearchParams searchParams) {
+        return ResultUtil.data(afterSaleService.exportAfterSaleOrder(searchParams));
     }
 
     @ApiOperation(value = "审核售后申请")

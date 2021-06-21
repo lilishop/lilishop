@@ -74,7 +74,9 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
         pointPretreatment(tradeDTO);
         //优惠券预处理
         couponPretreatment(tradeDTO);
+        //添加交易
         this.save(trade);
+        //添加订单
         orderService.intoDB(tradeDTO);
         //写入缓存，给消费者调用
         cache.put(key, tradeDTO);
@@ -123,7 +125,7 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
                 throw new ServiceException(ResultCode.PAY_POINT_ENOUGH);
             }
             boolean result = memberService.updateMemberPoint(tradeDTO.getPriceDetailDTO().
-                            getPayPoint().longValue(), 0, tradeDTO.getMemberId(),
+                            getPayPoint().longValue(), false, tradeDTO.getMemberId(),
                     "订单【" + orderSns + "】创建，积分扣减");
 
             if (!result) {

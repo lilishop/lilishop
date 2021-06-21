@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ import java.util.Map;
  * @author Chopper
  * @date 2021/1/30 4:27 下午
  */
+@Slf4j
 @Service
 @Transactional
 public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> implements SmsSignService {
@@ -42,7 +44,7 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
             smsSign.setSignStatus(0);
             this.save(smsSign);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("添加短信签名错误",e);
         }
     }
 
@@ -55,7 +57,7 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
                 this.removeById(id);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("删除短信签名错误",e);
         }
 
     }
@@ -74,7 +76,7 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
                 this.updateById(smsSign);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("查询短信签名错误",e);
         }
     }
 
@@ -84,7 +86,7 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
             aliSmsUtil.modifySmsSign(smsSign);
             this.updateById(smsSign);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("更新短信签名错误",e);
         }
     }
 

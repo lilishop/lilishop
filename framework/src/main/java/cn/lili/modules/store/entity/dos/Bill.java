@@ -88,9 +88,9 @@ public class Bill  {
 
     ////开始算钱啦
     //billPrice=orderPrice-refundPrice
-    // -commissionPrice+refundCommissionPrice
-    // -distributionCommission+distributionRefundCommission
-    // +siteCouponCommission-siteCouponRefundCommission
+    //-commissionPrice+refundCommissionPrice
+    //-distributionCommission+distributionRefundCommission
+    //+siteCouponCommission-siteCouponRefundCommission
     @ApiModelProperty(value = "结算周期内订单付款总金额")
     private Double orderPrice;
 

@@ -152,7 +152,7 @@ public class AdminUserManagerController {
             }
             adminUserService.saveAdminUser(adminUser, roles);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("添加用户错误",e);
         }
         return ResultUtil.success();
     }

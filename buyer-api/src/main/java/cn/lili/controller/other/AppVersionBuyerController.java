@@ -1,8 +1,13 @@
 package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.utils.PageUtil;
+import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.system.entity.dos.AppVersion;
 import cn.lili.modules.system.service.AppVersionService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -32,5 +37,14 @@ public class AppVersionBuyerController {
     @GetMapping("/{appType}")
     public ResultMessage<Object> getAppVersion(@PathVariable String appType) {
         return ResultUtil.data(appVersionService.getAppVersion(appType));
+    }
+
+    @ApiOperation(value = "获取版本号列表")
+    @ApiImplicitParam(name = "appType", value = "app类型", required = true, paramType = "path")
+    @GetMapping("/appVersion/{appType}")
+    public ResultMessage<IPage<AppVersion>> appVersion(@PathVariable String appType, PageVO pageVO) {
+
+        IPage<AppVersion> page = appVersionService.page(PageUtil.initPage(pageVO), new LambdaQueryWrapper<AppVersion>().eq(AppVersion::getType, appType));
+        return ResultUtil.data(page);
     }
 }

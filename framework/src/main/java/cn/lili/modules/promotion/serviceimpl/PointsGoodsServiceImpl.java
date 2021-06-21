@@ -2,7 +2,7 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.util.StrUtil;
 import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.PromotionDelayTypeEnums;
+import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
@@ -115,12 +115,12 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
             this.mongoTemplate.save(pointsGoods);
             if (pointsGoods.getStartTime().getTime() != pointsGoodsVO.getStartTime().getTime()) {
                 PromotionMessage promotionMessage = new PromotionMessage(pointsGoods.getId(), PromotionTypeEnum.POINTS_GOODS.name(), PromotionStatusEnum.START.name(), pointsGoods.getStartTime(), pointsGoods.getEndTime());
-                // 更新延时任务
+                //更新延时任务
                 this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
                         promotionMessage,
                         pointsGoodsVO.getStartTime().getTime(),
                         pointsGoods.getStartTime().getTime(),
-                        DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                        DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                         DateUtil.getDelayTime(pointsGoods.getStartTime().getTime()),
                         rocketmqCustomProperties.getPromotionTopic());
             }
@@ -149,7 +149,7 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
                 this.goodsIndexService.deleteEsGoodsPromotionIndexByList(Collections.singletonList(pointsGoodsVO.getSkuId()), PromotionTypeEnum.POINTS_GOODS);
                 this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
                         pointsGoodsVO.getStartTime().getTime(),
-                        DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (PromotionTypeEnum.POINTS_GOODS.name() + pointsGoodsVO.getId())),
+                        DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.POINTS_GOODS.name() + pointsGoodsVO.getId())),
                         rocketmqCustomProperties.getPromotionTopic());
             }
         }
@@ -169,7 +169,7 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
             PointsGoodsVO pointsGoodsVO = this.checkExist(id);
             this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
                     pointsGoodsVO.getStartTime().getTime(),
-                    DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (PromotionTypeEnum.POINTS_GOODS.name() + pointsGoodsVO.getId())),
+                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.POINTS_GOODS.name() + pointsGoodsVO.getId())),
                     rocketmqCustomProperties.getPromotionTopic());
             skuIds.add(pointsGoodsVO.getSkuId());
         }
@@ -237,13 +237,15 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
      * @param pointsGoods 积分商品信息
      */
     private void addPointsGoodsPromotionTask(PointsGoodsVO pointsGoods) {
-        PromotionMessage promotionMessage = new PromotionMessage(pointsGoods.getId(), PromotionTypeEnum.POINTS_GOODS.name(), PromotionStatusEnum.START.name(), pointsGoods.getStartTime(), pointsGoods.getEndTime());
+        PromotionMessage promotionMessage = new PromotionMessage(pointsGoods.getId(), PromotionTypeEnum.POINTS_GOODS.name(),
+                PromotionStatusEnum.START.name(),
+                pointsGoods.getStartTime(), pointsGoods.getEndTime());
         TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 promotionMessage.getStartTime().getTime(),
                 promotionMessage,
-                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                 rocketmqCustomProperties.getPromotionTopic());
-        // 发送促销活动开始的延时任务
+        //发送促销活动开始的延时任务
         this.timeTrigger.addDelay(timeTriggerMsg);
     }
 

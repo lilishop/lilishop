@@ -20,7 +20,7 @@ public class PointSetting implements Serializable {
     @ApiModelProperty(value = "注册")
     private Integer register;
 
-    @ApiModelProperty(value = "1积分等于多少元")
+    @ApiModelProperty(value = "1元等级*积分")
     private Integer money;
 
     @ApiModelProperty(value = "每日签到积分")

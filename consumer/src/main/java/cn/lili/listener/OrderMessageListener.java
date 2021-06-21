@@ -44,6 +44,7 @@ public class OrderMessageListener implements RocketMQListener<MessageExt> {
             case ORDER_CREATE:
                 String key = new String(messageExt.getBody());
                 TradeDTO tradeDTO = (TradeDTO) cache.get(key);
+                boolean result = true;
                 for (TradeEvent event : tradeEvent) {
                     try {
                         event.orderCreate(tradeDTO);
@@ -52,7 +53,13 @@ public class OrderMessageListener implements RocketMQListener<MessageExt> {
                                 tradeDTO.getSn(),
                                 event.getClass().getName(),
                                 e);
+                        result = false;
                     }
+                }
+                //如所有步骤顺利完成
+                if (Boolean.TRUE.equals(result)) {
+                    //清除记录信息的trade cache key
+                    cache.remove(key);
                 }
                 break;
             //订单状态变更

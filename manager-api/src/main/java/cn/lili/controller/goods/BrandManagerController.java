@@ -97,13 +97,8 @@ public class BrandManagerController {
     @ApiImplicitParam(name = "ids", value = "品牌ID", required = true, dataType = "String", allowMultiple = true, paramType = "path")
     @DeleteMapping(value = "/delByIds/{ids}")
     public ResultMessage<Object> delAllByIds(@PathVariable List<String> ids) {
-
-        for (String id : ids) {
-            Brand brand = brandService.getById(id);
-            brand.setDeleteFlag(true);
-            brandService.updateById(brand);
-        }
-        return ResultUtil.success(ResultCode.BRAND_DELETE_ERROR);
+        brandService.removeByIds(ids);
+        return ResultUtil.success(ResultCode.SUCCESS);
     }
 
 }

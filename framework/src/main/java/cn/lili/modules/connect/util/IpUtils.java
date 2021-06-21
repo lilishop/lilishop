@@ -1,5 +1,7 @@
 package cn.lili.modules.connect.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -11,6 +13,7 @@ import java.net.UnknownHostException;
  * @version v1.0
  * 2020-12-08 15:32
  */
+@Slf4j
 public class IpUtils {
 
     /**
@@ -22,7 +25,7 @@ public class IpUtils {
         try {
             return InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            log.error("获取本机IP错误",e);
             return null;
         }
     }
@@ -45,7 +48,7 @@ public class IpUtils {
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
-        // 对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
+        //对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
         if (ip != null && ip.length() > 15) {
             if (ip.indexOf(",") > 0) {
                 ip = ip.substring(0, ip.indexOf(","));

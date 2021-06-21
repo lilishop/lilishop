@@ -4,9 +4,6 @@ server:
   servlet:
     context-path: /
 
-  # 正式部署时候，解开此处配置，防止文件夹被清除导致的文件上传失败问题
-  #    multipart:
-  #      location: /Users/lifenlong/Desktop/ceshi
   tomcat:
     uri-encoding: UTF-8
     threads:
@@ -49,7 +46,7 @@ spring:
     open-in-view: false
   # Redis
   redis:
-    host: 127.0.0.1
+    host: 192.168.0.116
     port: 6379
     password: lilishop
     lettuce:
@@ -80,7 +77,7 @@ spring:
       default-datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://127.0.0.1:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://127.0.0.1:3306/Bulbasaur?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
         password: lilishop
         maxActive: 20
@@ -282,6 +279,8 @@ lili:
       notice-send-group: lili_send_notice_group
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
+      broadcast-topic: lili_broadcast_topic
+      broadcast-group: lili_broadcast_group
 rocketmq:
   name-server: 127.0.0.1:9876
   producer:

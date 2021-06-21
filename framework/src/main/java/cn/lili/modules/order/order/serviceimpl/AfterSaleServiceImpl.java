@@ -53,6 +53,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 售后业务层实现
@@ -89,6 +90,11 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     @Override
     public IPage<AfterSaleVO> getAfterSalePages(AfterSaleSearchParams saleSearchParams) {
         return baseMapper.queryByParams(PageUtil.initPage(saleSearchParams), saleSearchParams.queryWrapper());
+    }
+
+    @Override
+    public List<AfterSale> exportAfterSaleOrder(AfterSaleSearchParams saleSearchParams) {
+        return this.list(saleSearchParams.queryWrapper());
     }
 
     @Override
@@ -434,7 +440,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
                 this.checkAfterSaleReturnMoneyParam(afterSaleDTO);
                 break;
             case RETURN_GOODS:
-                // 是否为有效状态
+                //是否为有效状态
                 boolean availableStatus = StrUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.DELIVERED.name(), OrderStatusEnum.COMPLETED.name());
                 if (!PayStatusEnum.PAID.name().equals(order.getPayStatus()) && availableStatus) {
                     throw new ServiceException(ResultCode.AFTER_SALES_BAN);

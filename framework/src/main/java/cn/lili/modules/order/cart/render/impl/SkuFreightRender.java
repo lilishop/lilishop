@@ -1,6 +1,8 @@
 package cn.lili.modules.order.cart.render.impl;
 
 import cn.hutool.core.util.NumberUtil;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -11,7 +13,6 @@ import cn.lili.modules.store.entity.dto.FreightTemplateChildDTO;
 import cn.lili.modules.store.entity.enums.FreightTemplateEnum;
 import cn.lili.modules.store.entity.vos.FreightTemplateVO;
 import cn.lili.modules.store.service.FreightTemplateService;
-import com.xkcoding.http.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -37,27 +38,26 @@ public class SkuFreightRender implements CartRenderStep {
         List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
         //会员收货地址问题处理
         MemberAddress memberAddress = tradeDTO.getMemberAddress();
+        //如果收货地址为空，则抛出异常
         if (memberAddress == null) {
-            return;
+            throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
         }
         //循环渲染购物车商品运费价格
         forSku:
         for (CartSkuVO cartSkuVO : cartSkuVOS) {
+            //获取sku运费模版
             String freightTemplateId = cartSkuVO.getGoodsSku().getFreightTemplateId();
-            //如果商品设置卖家承担运费,或者没设置运费，则跳出此商品运费计算
-            if (StringUtil.isEmpty(cartSkuVO.getFreightPayer())||cartSkuVO.getFreightPayer().equals("STORE")) {
-                continue;
-            }
-
             //免运费则跳出运费计算
             if (Boolean.TRUE.equals(cartSkuVO.getIsFreeFreight()) || freightTemplateId == null) {
                 continue;
             }
-
             //寻找对应对商品运费计算模版
             FreightTemplateVO freightTemplate = freightTemplateService.getFreightTemplate(freightTemplateId);
             if (freightTemplate != null && freightTemplate.getFreightTemplateChildList() != null && !freightTemplate.getFreightTemplateChildList().isEmpty()) {
-
+                //店铺支付运费则跳过
+                if (freightTemplate.getPricingMethod().equals(FreightTemplateEnum.FREE.name())) {
+                    break;
+                }
                 FreightTemplateChild freightTemplateChild = null;
 
                 //获取市级别id
@@ -70,7 +70,7 @@ public class SkuFreightRender implements CartRenderStep {
                         break;
                     }
                 }
-
+                //如果没有匹配到物流规则，则说明不支持配送
                 if (freightTemplateChild == null) {
                     if (tradeDTO.getNotSupportFreight() == null) {
                         tradeDTO.setNotSupportFreight(new ArrayList<>());
@@ -79,6 +79,7 @@ public class SkuFreightRender implements CartRenderStep {
                     continue forSku;
                 }
 
+                //物流规则模型创立
                 FreightTemplateChildDTO freightTemplateChildDTO = new FreightTemplateChildDTO(freightTemplateChild);
 
                 freightTemplateChildDTO.setPricingMethod(freightTemplate.getPricingMethod());
@@ -117,7 +118,7 @@ public class SkuFreightRender implements CartRenderStep {
                 return finalFreight;
             }
             Double continuedCount = count - template.getFirstCompany();
-            // 计算续重价格
+            //计算续重价格
             return CurrencyUtil.add(finalFreight,
                     CurrencyUtil.mul(NumberUtil.parseInt(String.valueOf((continuedCount / template.getContinuedCompany()))), template.getContinuedPrice()));
         } catch (Exception e) {
