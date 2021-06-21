@@ -1,6 +1,7 @@
 package cn.lili.modules.order.cart.render.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.order.cart.entity.dto.MemberCouponDTO;
@@ -13,10 +14,14 @@ import cn.lili.modules.order.cart.entity.vo.PriceDetailVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.dos.Pintuan;
+import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.GoodsSkuPromotionPriceDTO;
 import cn.lili.modules.promotion.entity.dto.PromotionPriceDTO;
 import cn.lili.modules.promotion.entity.dto.PromotionPriceParamDTO;
 import cn.lili.modules.promotion.entity.dto.StorePromotionPriceDTO;
+import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.modules.promotion.service.PintuanService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.service.PromotionPriceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,12 +50,16 @@ public class SkuPromotionRender implements CartRenderStep {
     @Autowired
     private PromotionGoodsService promotionGoodsService;
 
+    @Autowired
+    private PintuanService pintuanService;
+
     @Override
     public void render(TradeDTO tradeDTO) {
 
         //主要渲染各个优惠的价格
         this.renderSkuPromotion(tradeDTO);
 
+        this.checkPromotionLimit(tradeDTO);
     }
 
 
@@ -288,5 +297,21 @@ public class SkuPromotionRender implements CartRenderStep {
             cart.setPromotionNotice("");
         }
         return false;
+    }
+
+    private void checkPromotionLimit(TradeDTO tradeDTO) {
+        if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)) {
+            // 如果为拼团订单，则获取拼团活动ID
+            Optional<String> pintuanId = tradeDTO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
+            if (pintuanId.isPresent()) {
+                Pintuan pintuan = pintuanService.getPintuanById(pintuanId.get());
+                Integer limitNum = pintuan.getLimitNum();
+                for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
+                    if (limitNum != 0 && cartSkuVO.getNum() > limitNum) {
+                        throw new ServiceException("购买数量超过拼团活动限制数量");
+                    }
+                }
+            }
+        }
     }
 }

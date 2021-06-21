@@ -50,8 +50,17 @@ public class CartController {
     public ResultMessage<Object> add(@NotNull(message = "产品id不能为空") String skuId,
                                      @NotNull(message = "购买数量不能为空") @Min(value = 1, message = "加入购物车数量必须大于0") Integer num,
                                      String cartType) {
-        cartService.add(skuId, num, cartType);
-        return ResultUtil.success();
+        try {
+            // 读取选中的列表
+            cartService.add(skuId, num, cartType);
+            return ResultUtil.success();
+        } catch (ServiceException se) {
+            log.error(se.getMsg(), se);
+            return ResultUtil.error(se.getResultCode().code(), se.getResultCode().message());
+        } catch (Exception e) {
+            log.error(ResultCode.CART_ERROR.message(), e);
+            throw new ServiceException(ResultCode.CART_ERROR);
+        }
     }
 
 
@@ -150,8 +159,9 @@ public class CartController {
         try {
             // 读取选中的列表
             return ResultUtil.data(this.cartService.getCheckedTradeDTO(CartTypeEnum.valueOf(way)));
-        } catch (ServiceException e) {
-            throw e;
+        } catch (ServiceException se) {
+            log.error(se.getMsg(), se);
+            return ResultUtil.error(se.getResultCode().code(), se.getResultCode().message());
         } catch (Exception e) {
             log.error(ResultCode.CART_ERROR.message(), e);
             throw new ServiceException(ResultCode.CART_ERROR);
@@ -193,6 +203,9 @@ public class CartController {
         try {
             cartService.shippingMethod(selleId, shippingMethod, way);
             return ResultUtil.success();
+        } catch (ServiceException se) {
+            log.error(se.getMsg(), se);
+            return ResultUtil.error(se.getResultCode().code(), se.getResultCode().message());
         } catch (Exception e) {
             log.error(ResultCode.CART_ERROR.message(), e);
             throw new ServiceException(ResultCode.CART_ERROR);
@@ -228,8 +241,9 @@ public class CartController {
         try {
             // 读取选中的列表
             return ResultUtil.data(this.cartService.createTrade(tradeParams));
-        } catch (ServiceException e) {
-            throw e;
+        } catch (ServiceException se) {
+            log.error(se.getMsg(), se);
+            return ResultUtil.error(se.getResultCode().code(), se.getResultCode().message());
         } catch (Exception e) {
             log.error(ResultCode.ORDER_ERROR.message(), e);
             throw new ServiceException(ResultCode.ORDER_ERROR);

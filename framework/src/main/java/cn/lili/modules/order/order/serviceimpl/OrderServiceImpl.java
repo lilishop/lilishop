@@ -672,10 +672,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @param list 需要更新拼团状态为成功的拼团订单列表
      */
     private void pintuanOrderSuccess(List<Order> list) {
-        list.stream().forEach(order -> {
-            if (order.getOrderType().equals(OrderTypeEnum.VIRTUAL)) {
+        list.forEach(order -> {
+            if (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
                 this.virtualOrderConfirm(order.getSn());
-            } else if (order.getOrderType().equals(OrderTypeEnum.NORMAL)) {
+            } else if (order.getOrderType().equals(OrderTypeEnum.NORMAL.name())) {
                 this.normalOrderConfirm(order.getSn());
             }
         });
@@ -793,7 +793,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     private void checkOrder(Order order) {
         //订单类型为拼团订单，检测购买数量是否超过了限购数量
-        if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())) {
+        if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderType())) {
             Pintuan pintuan = pintuanService.getPintuanById(order.getPromotionId());
             Integer limitNum = pintuan.getLimitNum();
             if (limitNum != 0 && order.getGoodsNum() > limitNum) {
