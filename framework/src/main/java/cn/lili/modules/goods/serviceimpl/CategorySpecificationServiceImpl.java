@@ -23,12 +23,10 @@ import java.util.List;
 @Service
 @Transactional
 public class CategorySpecificationServiceImpl extends ServiceImpl<CategorySpecificationMapper, CategorySpecification> implements CategorySpecificationService {
-    @Autowired
-    private CategorySpecificationMapper categorySpecificationMapper;
 
     @Override
     public List<CategorySpecificationVO> getCategorySpecList(String categoryId) {
-        return categorySpecificationMapper.getCategorySpecList(categoryId);
+        return this.baseMapper.getCategorySpecList(categoryId);
     }
 
     @Override
@@ -38,6 +36,6 @@ public class CategorySpecificationServiceImpl extends ServiceImpl<CategorySpecif
 
     @Override
     public void deleteByCategoryId(String categoryId) {
-        categorySpecificationMapper.delete(new LambdaQueryWrapper<CategorySpecification>().eq(CategorySpecification::getCategoryId,categoryId));
+        this.baseMapper.delete(new LambdaQueryWrapper<CategorySpecification>().eq(CategorySpecification::getCategoryId,categoryId));
     }
 }

@@ -64,7 +64,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     //Redis
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-    //限时抢购申请
+    //秒杀活动申请
     @Autowired
     private SeckillApplyService seckillApplyService;
     //规格商品
@@ -310,7 +310,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
             queryWrapper.eq(SeckillApply::getSeckillId, promotionId).eq(SeckillApply::getSkuId, skuId);
             SeckillApply seckillApply = seckillApplyService.getOne(queryWrapper);
             if (seckillApply == null) {
-                throw new ServiceException("当前限时抢购商品不存在！");
+                throw new ServiceException("当前秒杀活动商品不存在！");
             }
             LambdaUpdateWrapper<SeckillApply> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(SeckillApply::getSeckillId, promotionId).eq(SeckillApply::getSkuId, skuId);
@@ -333,30 +333,6 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         }
 
         stringRedisTemplate.opsForValue().set(promotionStockKey, quantity.toString());
-    }
-
-    /**
-     * 分页获取根据条件获取促销商品
-     *
-     * @param goodsName     商品名称
-     * @param categoryPath  商品分类
-     * @param promotionType 促销类型
-     * @param pageVo        分页参数
-     * @return 促销商品信息
-     */
-    @Override
-    public IPage<PromotionGoods> getPromotionGoodsPage(String goodsName, String categoryPath, String promotionType, PageVO pageVo) {
-        LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();
-        if (CharSequenceUtil.isNotEmpty(goodsName)) {
-            queryWrapper.like(PromotionGoods::getGoodsName, goodsName);
-        }
-        if (CharSequenceUtil.isNotEmpty(categoryPath)) {
-            queryWrapper.like(PromotionGoods::getCategoryPath, categoryPath);
-        }
-        if (CharSequenceUtil.isNotEmpty(promotionType)) {
-            queryWrapper.eq(PromotionGoods::getPromotionType, promotionType);
-        }
-        return this.page(PageUtil.initPage(pageVo), queryWrapper);
     }
 
     private void setFullDiscountPromotionGoods(IPage<PromotionGoodsDTO> promotionGoodsPage, List<FullDiscountVO> fullDiscountVOS, PageVO pageVo) {

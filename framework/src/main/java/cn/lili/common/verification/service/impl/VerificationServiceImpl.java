@@ -82,7 +82,7 @@ public class VerificationServiceImpl implements VerificationService {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("创建校验错误",e);
             return null;
         }
     }

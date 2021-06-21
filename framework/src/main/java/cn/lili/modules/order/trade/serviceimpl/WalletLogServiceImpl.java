@@ -10,7 +10,6 @@ import cn.lili.modules.order.trade.service.WalletLogService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,9 +24,6 @@ import java.util.Date;
 @Service
 @Transactional
 public class WalletLogServiceImpl extends ServiceImpl<WalletLogMapper, WalletLog> implements WalletLogService {
-
-    @Autowired
-    private WalletLogMapper walletLogMapper;
 
     @Override
     public IPage<WalletLog> depositLogPage(PageVO page, DepositQueryVO depositQueryVO) {
@@ -44,6 +40,6 @@ public class WalletLogServiceImpl extends ServiceImpl<WalletLogMapper, WalletLog
             depositLogQueryWrapper.between("create_time", start, end);
         }
         //查询返回数据
-        return this.walletLogMapper.selectPage(PageUtil.initPage(page), depositLogQueryWrapper);
+        return this.page(PageUtil.initPage(page), depositLogQueryWrapper);
     }
 }

@@ -1,6 +1,5 @@
 package cn.lili.controller.setting;
 
-import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -41,7 +40,7 @@ public class LogManagerController {
         try {
             return ResultUtil.data(systemLogService.queryLog(null, operatorName, key, searchVo, pageVo));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("日志获取错误",e);
         }
         return null;
     }

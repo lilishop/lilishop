@@ -28,10 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * @author liushuai(liushuai711 @ gmail.com)
- * @version v4.1
- * @Description:
- * @since 2021/4/28 3:48 下午
+ * 订单价格业务层实现
+ *
+ * @author Chopper
+ * @date 2020/11/17 7:36 下午
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

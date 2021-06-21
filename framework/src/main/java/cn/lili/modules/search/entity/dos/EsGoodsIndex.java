@@ -8,7 +8,6 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
@@ -225,6 +224,12 @@ public class EsGoodsIndex implements Serializable {
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @Field(type = FieldType.Date, format = DateFormat.basic_date_time)
     private Date releaseTime;
+
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型", required = true)
+    private String goodsType;
 
     /**
      * 商品属性（参数和规格）

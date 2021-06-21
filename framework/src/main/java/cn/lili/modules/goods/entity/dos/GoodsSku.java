@@ -131,8 +131,6 @@ public class GoodsSku extends BaseEntity {
     @ApiModelProperty(value = "运费模板id")
     private String templateId;
 
-    @ApiModelProperty(value = " 谁承担运费 BUYER：买家承担，STORE：卖家承担")
-    private String freightPayer;
     /**
      * @see GoodsAuthEnum
      */
@@ -160,6 +158,11 @@ public class GoodsSku extends BaseEntity {
 
     @ApiModelProperty(value = "销售模式", required = true)
     private String salesModel;
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型", required = true)
+    private String goodsType;
 
     @Override
     public Date getUpdateTime() {

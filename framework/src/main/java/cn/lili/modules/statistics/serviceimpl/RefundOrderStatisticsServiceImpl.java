@@ -15,8 +15,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -28,14 +26,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class RefundOrderStatisticsServiceImpl extends ServiceImpl<RefundOrderStatisticsDataMapper, StoreFlow> implements RefundOrderStatisticsService {
 
-    //退款统计
-    @Autowired
-    private RefundOrderStatisticsDataMapper refundOrderStatisticsDataMapper;
-
     @Override
     public IPage<RefundOrderStatisticsDataVO> getRefundOrderStatisticsData(PageVO pageVO, StatisticsQueryParam statisticsQueryParam) {
         QueryWrapper queryWrapper = getQueryWrapper(statisticsQueryParam);
-        return refundOrderStatisticsDataMapper.getRefundStatisticsData(PageUtil.initPage(pageVO), queryWrapper);
+        return this.baseMapper.getRefundStatisticsData(PageUtil.initPage(pageVO), queryWrapper);
     }
 
     @Override

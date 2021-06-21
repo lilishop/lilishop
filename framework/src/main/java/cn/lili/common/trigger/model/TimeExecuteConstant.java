@@ -13,4 +13,9 @@ public abstract class TimeExecuteConstant {
      */
     public static final String PROMOTION_EXECUTOR = "promotionTimeTriggerExecutor";
 
+    /**
+     * 直播间延迟加载执行器
+     */
+    public static final String BROADCAST_EXECUTOR = "broadcastTimeTriggerExecutor";
+
 }

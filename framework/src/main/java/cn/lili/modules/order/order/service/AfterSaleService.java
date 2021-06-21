@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 售后业务层
@@ -30,6 +31,14 @@ public interface AfterSaleService extends IService<AfterSale> {
      * @return 分页售后信息
      */
     IPage<AfterSaleVO> getAfterSalePages(AfterSaleSearchParams saleSearchParams);
+
+    /**
+     * 查询导出售后信息
+     *
+     * @param saleSearchParams 查询参数
+     * @return 分页售后信息
+     */
+    List<AfterSale> exportAfterSaleOrder(AfterSaleSearchParams saleSearchParams);
 
     /**
      * 查询售后信息

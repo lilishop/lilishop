@@ -7,16 +7,16 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.SearchVO;
-import cn.lili.modules.permission.entity.dto.MenuSearchParams;
 import cn.lili.modules.permission.entity.dos.Menu;
 import cn.lili.modules.permission.entity.dos.RoleMenu;
+import cn.lili.modules.permission.entity.dto.MenuSearchParams;
 import cn.lili.modules.permission.entity.vo.MenuVO;
 import cn.lili.modules.permission.mapper.MenuMapper;
 import cn.lili.modules.permission.service.MenuService;
 import cn.lili.modules.permission.service.RoleMenuService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,12 +31,10 @@ import java.util.List;
  * @author Chopper
  * @date 2020/11/17 3:49 下午
  */
+@Slf4j
 @Service
 @Transactional
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
-    //菜单
-    @Autowired
-    private MenuMapper menuMapper;
     //菜单角色
     @Autowired
     private RoleMenuService roleMenuService;
@@ -61,13 +59,13 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         if (authUser.getIsSuper()) {
             return this.tree();
         }
-        List<Menu> userMenus = menuMapper.findByUserId(authUser.getId());
+        List<Menu> userMenus = this.baseMapper.findByUserId(authUser.getId());
         return this.tree(userMenus);
     }
 
     @Override
     public List<Menu> findUserList(String userId) {
-        return menuMapper.findByUserId(userId);
+        return this.baseMapper.findByUserId(userId);
     }
 
     @Override
@@ -90,7 +88,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             queryWrapper.like("title", title);
         }
         queryWrapper.orderByDesc("sort_order");
-        return menuMapper.selectList(queryWrapper);
+        return this.baseMapper.selectList(queryWrapper);
     }
 
 
@@ -100,7 +98,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             List<Menu> menus = this.list();
             return tree(menus);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("菜单树错误",e);
         }
         return null;
     }

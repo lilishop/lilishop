@@ -112,9 +112,6 @@ public class DraftGoods extends BaseEntity {
     @ApiModelProperty(value = "运费模板id")
     private String templateId;
 
-    @ApiModelProperty(value = "运费承担者")
-    private String freightPayer;
-
     @ApiModelProperty(value = "是否自营")
     private Boolean selfOperated;
     /**
@@ -153,5 +150,11 @@ public class DraftGoods extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "sku列表JSON")
     private String skuListJson;
+
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型", required = true)
+    private String goodsType;
 
 }

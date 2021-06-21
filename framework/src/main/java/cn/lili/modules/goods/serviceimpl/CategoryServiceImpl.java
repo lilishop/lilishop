@@ -17,7 +17,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,9 +39,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     //缓存
     @Autowired
     private Cache cache;
-    //分类
-    @Autowired
-    private CategoryMapper categoryMapper;
 
     @Override
     public List<Category> dbList(String parentId) {
@@ -159,7 +155,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                 .ne(category.getId() != null, "id", category.getId())
                 .eq(DELETE_FLAG_COLUMN, false)
                 .orderByAsc("sort_order");
-        return this.categoryMapper.selectList(queryWrapper);
+        return this.baseMapper.selectList(queryWrapper);
     }
 
     @Override
@@ -188,7 +184,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                 .set("sort_order", category.getSortOrder())
                 .set(DELETE_FLAG_COLUMN, category.getDeleteFlag())
                 .set("commission_rate", category.getCommissionRate());
-        categoryMapper.update(category, updateWrapper);
+        this.baseMapper.update(category, updateWrapper);
         removeCache();
     }
 

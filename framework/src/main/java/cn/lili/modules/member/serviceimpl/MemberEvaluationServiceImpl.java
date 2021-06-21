@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +60,7 @@ import java.util.Map;
 public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMapper, MemberEvaluation> implements MemberEvaluationService {
 
     //会员评价数据层
-    @Autowired
+    @Resource
     private MemberEvaluationMapper memberEvaluationMapper;
     //订单
     @Autowired
@@ -90,7 +91,6 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
     public IPage<MemberEvaluationListVO> queryPage(EvaluationQueryParams evaluationQueryParams) {
         return memberEvaluationMapper.getMemberEvaluationList(PageUtil.initPage(evaluationQueryParams), evaluationQueryParams.queryWrapper());
     }
-
 
     @Override
     public MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO) {
@@ -156,7 +156,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
     @Override
     public EvaluationNumberVO getEvaluationNumber(String goodsId) {
         EvaluationNumberVO evaluationNumberVO = new EvaluationNumberVO();
-        List<Map<String, Object>> list = memberEvaluationMapper.getEvaluationNumber(goodsId);
+        List<Map<String, Object>> list = this.baseMapper.getEvaluationNumber(goodsId);
 
 
         Integer good = 0;

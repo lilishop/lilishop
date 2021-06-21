@@ -510,6 +510,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             if (goods.getSelfOperated() != null) {
                 goodsSku.setSelfOperated(goods.getSelfOperated());
             }
+            goodsSku.setGoodsType(goods.getGoodsType());
             EsGoodsIndex goodsIndex = (EsGoodsIndex) resultMap.get("goodsIndex");
             skus.add(goodsSku);
             goodsIndices.add(goodsIndex);
@@ -566,8 +567,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         sku.setIntro(goods.getIntro());
         sku.setMobileIntro(goods.getMobileIntro());
         sku.setGoodsUnit(goods.getGoodsUnit());
-        //运费
-        sku.setFreightPayer(goods.getFreightPayer());
         //商品状态
         sku.setIsAuth(goods.getIsAuth());
         sku.setSalesModel(goods.getSalesModel());
@@ -594,6 +593,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         StringBuilder goodsName = new StringBuilder(goods.getGoodsName());
         //规格商品缩略图
         String thumbnail = "";
+        String small = "";
         //规格值
         Map<String, Object> specMap = new HashMap<>();
         //商品属性
@@ -613,6 +613,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                         throw new ServiceException("sku图片至少为一个");
                     }
                     thumbnail = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getThumbnail();
+                    small = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getSmall();
                 } else {
                     //设置商品名称
                     goodsName.append(" ").append(m.getValue());
@@ -637,6 +638,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //设置规格信息
         sku.setGoodsName(goodsName.toString());
         sku.setThumbnail(thumbnail);
+        sku.setSmall(small);
 
         //规格信息
         sku.setId(Convert.toStr(map.get("id"), ""));

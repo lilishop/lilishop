@@ -13,8 +13,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,15 +27,13 @@ import java.util.Optional;
 @Service
 @Transactional
 public class StoreCollectionServiceImpl extends ServiceImpl<StoreCollectionMapper, StoreCollection> implements StoreCollectionService {
-    @Autowired
-    private StoreCollectionMapper storeCollectionMapper;
 
     @Override
     public IPage<StoreCollectionVO> storeCollection(PageVO pageVo) {
         QueryWrapper<StoreCollectionVO> queryWrapper = new QueryWrapper();
         queryWrapper.eq("sc.member_id", UserContext.getCurrentUser().getId());
         queryWrapper.orderByDesc("sc.create_time");
-        return storeCollectionMapper.storeCollectionVOList(PageUtil.initPage(pageVo), queryWrapper);
+        return this.baseMapper.storeCollectionVOList(PageUtil.initPage(pageVo), queryWrapper);
     }
 
     @Override

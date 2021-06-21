@@ -67,8 +67,9 @@ public class OrderSearchParams extends PageVO {
 
     /**
      * @see OrderTypeEnum
+     * @see cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum
      */
-    @ApiModelProperty(value = "订单类型")
+    @ApiModelProperty(value = "订单类型",allowableValues = "NORMAL,VIRTUAL,GIFT,PINTUAN,POINT" )
     private String orderType;
 
     @ApiModelProperty(value = "支付方式")
@@ -136,7 +137,8 @@ public class OrderSearchParams extends PageVO {
 
         // 按订单类型
         if (StringUtils.isNotEmpty(orderType)) {
-            wrapper.eq("o.order_type", orderType);
+            wrapper.eq("o.order_type", orderType)
+                    .or().eq("o.order_promotion_type", orderType);
         }
 
         // 按支付方式
@@ -202,9 +204,6 @@ public class OrderSearchParams extends PageVO {
             wrapper.like("o.client_type", clientType);
         }
         wrapper.eq("o.delete_flag", false);
-        wrapper.groupBy("o.id");
-        wrapper.orderByDesc("o.id");
-
         return wrapper;
     }
 

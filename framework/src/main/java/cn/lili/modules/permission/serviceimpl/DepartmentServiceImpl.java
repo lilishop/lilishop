@@ -11,7 +11,7 @@ import cn.lili.modules.permission.service.DepartmentRoleService;
 import cn.lili.modules.permission.service.DepartmentService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +25,7 @@ import java.util.List;
  * @author Chopper
  * @date 2020/11/17 3:47 下午
  */
+@Slf4j
 @Service
 @Transactional
 public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Department> implements DepartmentService {
@@ -65,7 +66,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
 
             return tree;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("部门业务错误",e);
             return null;
         }
     }

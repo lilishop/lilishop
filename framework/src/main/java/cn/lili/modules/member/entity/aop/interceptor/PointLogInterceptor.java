@@ -5,6 +5,7 @@ import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberPointsHistory;
 import cn.lili.modules.member.service.MemberPointsHistoryService;
 import cn.lili.modules.member.service.MemberService;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
  * @author Chopper
  * @date 2020/11/17 7:22 下午
  */
+@Slf4j
 @Aspect
 @Component
 public class PointLogInterceptor {
@@ -62,7 +64,7 @@ public class PointLogInterceptor {
                 memberPointsHistoryService.save(memberPointsHistory);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("积分操作错误",e);
         }
 
 

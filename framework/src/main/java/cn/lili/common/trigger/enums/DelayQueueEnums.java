@@ -7,9 +7,9 @@ public enum DelayQueueEnums {
 
 
     /**
-     * 促销任务队列
+     * 促销活动
      */
-    PROMOTION_QUEUE("促销任务队列");
+    PROMOTION("促销活动");
 
     private String description;
 

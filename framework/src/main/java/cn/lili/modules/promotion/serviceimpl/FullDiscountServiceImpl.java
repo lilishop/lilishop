@@ -1,7 +1,7 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.PromotionDelayTypeEnums;
+import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
@@ -56,9 +56,6 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
     //Mongo
     @Autowired
     private MongoTemplate mongoTemplate;
-    //满额活动
-    @Autowired
-    private FullDiscountMapper fullDiscountMapper;
     //Rocketmq
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
@@ -100,10 +97,13 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
         }
         // 保存到MONGO中
         this.mongoTemplate.save(fullDiscountVO);
-        PromotionMessage promotionMessage = new PromotionMessage(fullDiscountVO.getId(), PromotionTypeEnum.FULL_DISCOUNT.name(), PromotionStatusEnum.START.name(), fullDiscountVO.getStartTime(), fullDiscountVO.getEndTime());
+        PromotionMessage promotionMessage = new PromotionMessage(fullDiscountVO.getId(), PromotionTypeEnum.FULL_DISCOUNT.name(),
+                PromotionStatusEnum.START.name(),
+                fullDiscountVO.getStartTime(), fullDiscountVO.getEndTime());
+
         TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 fullDiscountVO.getStartTime().getTime(), promotionMessage,
-                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                 rocketmqCustomProperties.getPromotionTopic());
         // 发送促销活动开始的延时任务
         this.timeTrigger.addDelay(timeTriggerMsg);
@@ -159,7 +159,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
         // 发送更新延时任务
         this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR, promotionMessage,
                 fullDiscount.getStartTime().getTime(), fullDiscountVO.getStartTime().getTime(),
-                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                 DateUtil.getDelayTime(fullDiscountVO.getStartTime().getTime()),
                 rocketmqCustomProperties.getPromotionTopic());
         return fullDiscountVO;
@@ -186,7 +186,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
             this.promotionGoodsService.removePromotionGoods(fullDiscount.getPromotionGoodsList(), PromotionTypeEnum.FULL_DISCOUNT);
         }
         this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR, fullDiscount.getStartTime().getTime(),
-                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (PromotionTypeEnum.FULL_DISCOUNT.name() + fullDiscount.getId())),
+                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.FULL_DISCOUNT.name() + fullDiscount.getId())),
                 rocketmqCustomProperties.getPromotionTopic());
         return result;
     }
@@ -250,7 +250,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
     private void checkSameActiveExist(Date statTime, Date endTime, String storeId, String id) {
         // 同一时间段内相同的活动
         QueryWrapper<FullDiscount> queryWrapper = PromotionTools.checkActiveTime(statTime, endTime, PromotionTypeEnum.FULL_DISCOUNT, storeId, id);
-        Integer sameNum = this.fullDiscountMapper.selectCount(queryWrapper);
+        Integer sameNum = this.count(queryWrapper);
         if (sameNum > 0) {
             throw new ServiceException("当前时间内已存在同类活动");
         }

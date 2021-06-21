@@ -41,6 +41,7 @@ public interface FreightTemplateService extends IService<FreightTemplate> {
 
     /**
      * 添加商家运费模板
+     * 运费模板分为卖家包邮、运费计算两种类型
      *
      * @param freightTemplateVO 运费模板
      * @return 运费模板

@@ -20,15 +20,15 @@ import java.util.List;
  */
 public interface StoreDetailMapper extends BaseMapper<StoreDetail> {
 
-    @Select("select s.store_logo,s.member_name,s.store_name,s.store_disable,s.self_operated,s.store_address_detail,s.store_address_path,s.store_address_id_path,s.store_center,s.store_desc,d.* " +
-            "from li_store s inner join li_store_detail d on s.id=d.store_id where s.id=#{storeId}")
+    @Select("select s.store_logo,s.member_name,s.store_name,s.store_disable,s.self_operated,s.store_address_detail,s.store_address_path,s.store_address_id_path,s.store_center,s.store_desc,s.yzf_sign," +
+            "d.* from li_store s inner join li_store_detail d on s.id=d.store_id where s.id=#{storeId}")
     StoreDetailVO getStoreDetail(String storeId);
 
     @Select("select s.member_name,s.store_name,s.store_disable,s.self_operated,s.store_center,s.store_logo,s.store_desc,d.* " +
             "from li_store s inner join li_store_detail d on s.id=d.store_id where s.member_id=#{memberId}")
     StoreDetailVO getStoreDetailByMemberId(String memberId);
 
-    @Select("SELECT s.id as storeId,s.* FROM li_store s LEFT JOIN li_store_detail sd ON s.id=sd.store_id WHERE s.id=#{storeId}")
+    @Select("SELECT s.id as storeId,s.* FROM li_store s WHERE s.id=#{storeId}")
     StoreBasicInfoVO getStoreBasicInfoDTO(String storeId);
 
     @Select("select s.sales_consignee_name,s.sales_consignee_mobile,s.sales_consignee_address_id,s.sales_consignee_address_path,s.sales_consignee_detail " +

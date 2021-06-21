@@ -1,6 +1,7 @@
 package cn.lili.config.elasticsearch;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -27,6 +28,7 @@ import java.util.List;
  * @author paulG
  * @since 2020/10/13
  **/
+@Slf4j
 @Configuration
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
@@ -96,7 +98,7 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
         try {
             this.client.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("es clientClose错误",e);
         }
     }
 

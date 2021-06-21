@@ -160,7 +160,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     @Override
     public IPage<BillListVO> billPage(BillSearchParams billSearchParams) {
         QueryWrapper<BillListVO> queryWrapper = billSearchParams.queryWrapper();
-        return billMapper.queryBillPage(PageUtil.initPage(billSearchParams), queryWrapper);
+        return this.baseMapper.queryBillPage(PageUtil.initPage(billSearchParams), queryWrapper);
     }
 
     @Override

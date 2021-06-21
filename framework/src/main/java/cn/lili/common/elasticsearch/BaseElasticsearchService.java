@@ -98,7 +98,7 @@ public abstract class BaseElasticsearchService {
             log.info(" Indicates whether the requisite number of shard copies were started for each shard in the index before timing out :{}", createIndexResponse.isShardsAcknowledged());
             return;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("创建索引错误",e);
             throw new ElasticsearchException("创建索引 {" + index + "} 失败：" + e.getMessage());
         }
     }
@@ -420,7 +420,7 @@ public abstract class BaseElasticsearchService {
         try {
             searchResponse = client.search(searchRequest, COMMON_OPTIONS);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("es 搜索错误",e);
         }
         return searchResponse;
     }

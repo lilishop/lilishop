@@ -58,7 +58,7 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
             //删除缓存
             cache.vagueDel("{regions}");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("同步行政数据错误",e);
         }
     }
 

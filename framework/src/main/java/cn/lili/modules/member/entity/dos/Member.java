@@ -85,6 +85,14 @@ public class Member extends BaseEntity {
     @ApiModelProperty(value = "最后一次登录时间")
     private Date lastLoginDate;
 
+    @ApiModelProperty(value = "会员等级ID")
+    private String gradeId;
+
+    @Min(message = "必须为数字", value = 0)
+    @ApiModelProperty(value = "经验值数量")
+    private Long experience;
+
+
     public Member(String username, String password, String mobile) {
         this.username = username;
         this.password = password;

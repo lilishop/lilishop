@@ -1,5 +1,7 @@
 package cn.lili.common.utils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,24 +13,9 @@ import javax.servlet.http.HttpServletResponse;
  * @version v1.0
  * 2020-12-14 09:32
  */
+@Slf4j
 public class CookieUtil {
 
-    /**
-     * 新增cookie
-     *
-     * @param key      key值
-     * @param value    对应值
-     * @param response 响应
-     */
-    public static void addCookie(String key, String value, HttpServletResponse response) {
-        try {
-            Cookie c = new Cookie(key, value);
-            c.setPath("/");
-            response.addCookie(c);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * 新增cookie
@@ -45,7 +32,7 @@ public class CookieUtil {
             c.setPath("/");
             response.addCookie(c);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("新增cookie错误",e);
         }
     }
 
@@ -61,7 +48,7 @@ public class CookieUtil {
             c.setMaxAge(0);
             response.addCookie(c);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("删除cookie错误",e);
         }
     }
 
@@ -83,7 +70,7 @@ public class CookieUtil {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("获取cookie错误",e);
         }
         return null;
     }

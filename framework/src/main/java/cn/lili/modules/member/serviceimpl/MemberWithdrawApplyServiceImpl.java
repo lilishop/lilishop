@@ -33,6 +33,7 @@ import java.util.Date;
 @Service
 @Transactional
 public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawApplyMapper, MemberWithdrawApply> implements MemberWithdrawApplyService {
+
     //提现申请数据层
     //会员余额
     @Autowired
@@ -41,7 +42,8 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
     @Override
     public Boolean audit(String applyId, Boolean result, String remark) {
         //查询申请记录
-        MemberWithdrawApply memberWithdrawApply = baseMapper.selectById(applyId);
+        MemberWithdrawApply memberWithdrawApply = this.getById(applyId);
+        memberWithdrawApply.setInspectRemark(remark);
         if (memberWithdrawApply != null) {
             //写入备注
             memberWithdrawApply.setInspectRemark(remark);
@@ -54,7 +56,7 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
                 }
                 memberWithdrawApply.setApplyStatus(WithdrawStatusEnum.VIA_AUDITING.name());
                 //保存审核记录
-                baseMapper.updateById(memberWithdrawApply);
+                this.updateById(memberWithdrawApply);
                 //提现，微信提现成功后扣减冻结金额
                 Boolean bool = memberWalletService.withdrawal(memberWithdrawApply);
                 if (bool) {
@@ -67,7 +69,7 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
                     throw new ServiceException(ResultCode.WALLET_REMARK_ERROR);
                 }
                 memberWithdrawApply.setApplyStatus(WithdrawStatusEnum.FAIL_AUDITING.name());
-                baseMapper.updateById(memberWithdrawApply);
+                this.updateById(memberWithdrawApply);
                 //需要从冻结金额扣减到余额
                 memberWalletService.increaseWithdrawal(memberWithdrawApply.getApplyMoney(), memberWithdrawApply.getMemberId(), "审核拒绝，提现金额解冻到余额", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name());
                 return true;

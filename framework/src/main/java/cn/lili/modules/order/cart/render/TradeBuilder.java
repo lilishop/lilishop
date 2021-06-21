@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * TradeBuilder
+ * 交易构造&&创建
  *
  * @author Chopper
  * @date2020-04-01 9:47 下午
@@ -24,36 +24,41 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class TradeBuilder {
-    //购物车渲染
+
+    //购物车渲染步骤
     @Autowired
     private List<CartRenderStep> cartRenderSteps;
+
     //交易
     @Autowired
     private TradeService tradeService;
 
+    //购物车业务
+    @Autowired
+    private CartService cartService;
+
+
     /**
      * 渲染整比交易
+     * 0-> 校验商品， 1-》 满优惠渲染， 2->渲染优惠， 3->优惠券渲染， 4->计算运费， 5->计算价格， 6->分销渲染， 7->扩展操作
      */
     int[] defaultRender = {0, 1, 2, 4, 5, 6, 7};
 
     /**
      * 购物车购物车渲染
+     * 0-> 校验商品， 1-》 满优惠渲染， 2->渲染优惠，  5->计算价格
      */
     int[] cartRender = {0, 1, 2, 5};
 
     /**
-     * 0-> 校验商品 1-》 满优惠渲染 2->渲染优惠 3->优惠券渲染 4->计算运费 5->计算价格 6->分销渲染 7->扩展操作
-     */
-    @Autowired
-    private CartService cartService;
-
-    /**
      * 构造购物车
+     * 购物车与结算信息不一致的地方主要是优惠券计算和运费计算，其他规则都是一致都
      *
      * @param checkedWay 购物车类型
      * @return 购物车展示信息
      */
     public TradeDTO buildCart(CartTypeEnum checkedWay) {
+        //读取对应购物车的商品信息
         TradeDTO tradeDTO = cartService.readDTO(checkedWay);
 
         //购物车需要将交易中的优惠券取消掉
@@ -67,7 +72,7 @@ public class TradeBuilder {
             try {
                 cartRenderSteps.get(index).render(tradeDTO);
             } catch (Exception e) {
-                log.error("购物车渲染异常：", e);
+                log.error("购物车{}渲染异常：", cartRenderSteps.get(index).getClass(), e);
             }
         }
         return tradeDTO;
@@ -80,28 +85,26 @@ public class TradeBuilder {
      * @return 购物车展示信息
      */
     public TradeDTO buildTrade(CartTypeEnum checkedWay) {
+        //读取对应购物车的商品信息
         TradeDTO tradeDTO = cartService.readDTO(checkedWay);
-        tradeDTO.setNotSupportFreight(null);
+        //将购物车到sku未选择信息过滤
         List<CartSkuVO> collect = tradeDTO.getSkuList().parallelStream().filter(i -> Boolean.TRUE.equals(i.getChecked())).collect(Collectors.toList());
-        //拼团类型订单预处理
-        if (checkedWay.equals(CartTypeEnum.PINTUAN)) {
-            for (CartSkuVO cartSkuVO : collect) {
-                cartSkuVO.setPintuanId("");
-            }
-        }
         tradeDTO.setSkuList(collect);
         //按照计划进行渲染
         for (int index : defaultRender) {
             try {
                 cartRenderSteps.get(index).render(tradeDTO);
             } catch (Exception e) {
-                log.error("购物车渲染异常：", e);
+                log.error("购物车{}渲染异常：", cartRenderSteps.get(index).getClass(), e);
             }
         }
+        //购物车信息接受
         List<CartVO> cartVOList = new ArrayList<>();
-        for (CartVO i : tradeDTO.getCartList()) {
-            i.setSkuList(i.getSkuList().stream().filter(j -> Boolean.TRUE.equals(j.getChecked())).collect(Collectors.toList()));
-            cartVOList.add(i);
+        //循环购物车信息
+        for (CartVO cartVO : tradeDTO.getCartList()) {
+            //如果商品选中，则加入到对应购物车
+            cartVO.setSkuList(cartVO.getSkuList().stream().filter(j -> Boolean.TRUE.equals(j.getChecked())).collect(Collectors.toList()));
+            cartVOList.add(cartVO);
         }
         tradeDTO.setCartList(cartVOList);
         return tradeDTO;
@@ -111,12 +114,10 @@ public class TradeBuilder {
      * 创建一笔交易
      *
      * @param checkedWay    购物车类型
-     * @param parentOrderSn 是否为其他订单下的订单，如果是则为依赖订单的sn，否则为空
      * @return 交易信息
      */
-    public Trade createTrade(CartTypeEnum checkedWay, String parentOrderSn) {
+    public Trade createTrade(CartTypeEnum checkedWay) {
         TradeDTO tradeDTO = this.buildTrade(checkedWay);
-        tradeDTO.setParentOrderSn(parentOrderSn);
         return tradeService.createTrade(tradeDTO);
     }
 }

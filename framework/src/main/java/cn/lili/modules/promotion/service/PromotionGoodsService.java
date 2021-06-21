@@ -142,15 +142,4 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
      */
     void updatePromotionGoodsStock(PromotionTypeEnum typeEnum, String promotionId, String skuId, Integer quantity);
 
-
-    /**
-     * 分页获取根据条件获取促销商品
-     *
-     * @param goodsName     商品名称
-     * @param categoryPath  商品分类
-     * @param promotionType 促销类型
-     * @param pageVo        分页参数
-     * @return 促销商品信息
-     */
-    IPage<PromotionGoods> getPromotionGoodsPage(String goodsName, String categoryPath, String promotionType, PageVO pageVo);
 }

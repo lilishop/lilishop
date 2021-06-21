@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 商品查询条件
+ * 商品编辑DTO
  *
  * @author pikachu
  * @date 2020-02-24 19:27:20
@@ -65,9 +65,6 @@ public class GoodsOperationDTO implements Serializable {
     @Min(value = 0, message = "重量不能为负数")
     @Max(value = 99999999, message = "重量不能超过99999999")
     private Double weight;
-
-    @ApiModelProperty(value = "谁承担运费 BUYER：买家承担，STORE：卖家承担", required = true)
-    private String freightPayer;
 
     @ApiModelProperty(value = "详情")
     private String intro;
@@ -118,4 +115,10 @@ public class GoodsOperationDTO implements Serializable {
 
     @ApiModelProperty(value = "是否重新生成sku数据")
     private Boolean regeneratorSkuFlag = true;
+
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型")
+    private String goodsType;
 }

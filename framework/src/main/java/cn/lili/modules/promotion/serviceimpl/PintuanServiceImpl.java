@@ -2,7 +2,7 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.PromotionDelayTypeEnums;
+import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
@@ -17,7 +17,6 @@ import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
@@ -103,8 +102,10 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
             return new ArrayList<>();
         }
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Order::getPromotionId, pintuanId).eq(Order::getOrderType, OrderTypeEnum.PINTUAN.name())
-                .eq(Order::getOrderStatus, OrderStatusEnum.PAID.name()).eq(Order::getParentOrderSn, "");
+        queryWrapper.eq(Order::getPromotionId, pintuanId)
+                .eq(Order::getOrderPromotionType, PromotionTypeEnum.PINTUAN.name())
+                .eq(Order::getOrderStatus, OrderStatusEnum.PAID.name())
+                .eq(Order::getParentOrderSn, "");
         List<Order> orders = orderService.list(queryWrapper);
         // 遍历订单状态为已支付，为团长的拼团订单
         for (Order order : orders) {
@@ -222,7 +223,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
                     promotionMessage,
                     pintuanVO.getStartTime().getTime(),
                     pintuan.getStartTime().getTime(),
-                    DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                     DateUtil.getDelayTime(pintuanVO.getStartTime().getTime()),
                     rocketmqCustomProperties.getPromotionTopic());
         }
@@ -265,7 +266,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
         } else {
             pintuan.setPromotionStatus(PromotionStatusEnum.END.name());
             LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(Order::getOrderType, OrderTypeEnum.PINTUAN.name());
+            queryWrapper.eq(Order::getOrderPromotionType, PromotionTypeEnum.PINTUAN.name());
             queryWrapper.eq(Order::getPromotionId, pintuanId);
             queryWrapper.nested(i -> i.eq(Order::getPayStatus, PayStatusEnum.PAID.name()).or().eq(Order::getOrderStatus, OrderStatusEnum.PAID.name()));
             // 过滤父级拼团订单，根据父级拼团订单分组
@@ -322,7 +323,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
         pintuanShareVO.setPintuanMemberVOS(new ArrayList<>());
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
         // 查找团长订单和已和当前拼团订单拼团的订单
-        queryWrapper.eq(Order::getOrderType, OrderTypeEnum.PINTUAN.name())
+        queryWrapper.eq(Order::getOrderPromotionType, PromotionTypeEnum.PINTUAN.name())
                 .eq(Order::getPayStatus, OrderStatusEnum.PAID.name())
                 .and(i -> i.eq(Order::getParentOrderSn, parentOrderSn).or(j -> j.eq(Order::getSn, parentOrderSn)));
         List<Order> orders = orderService.list(queryWrapper);
@@ -331,7 +332,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
         if (!orders.isEmpty() && pintuanShareVO.getPromotionGoods() == null) {
             LambdaQueryWrapper<Order> orderLambdaQueryWrapper = new LambdaQueryWrapper<>();
             // 查找团长订单和已和当前拼团订单拼团的订单
-            orderLambdaQueryWrapper.eq(Order::getOrderType, OrderTypeEnum.PINTUAN.name())
+            orderLambdaQueryWrapper.eq(Order::getOrderPromotionType, PromotionTypeEnum.PINTUAN.name())
                     .eq(Order::getPayStatus, OrderStatusEnum.PAID.name())
                     .ne(Order::getSn, parentOrderSn)
                     .and(i -> i.eq(Order::getParentOrderSn, orders.get(0).getParentOrderSn()).or(j -> j.eq(Order::getSn, orders.get(0).getParentOrderSn())));
@@ -389,7 +390,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
         TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 pintuan.getStartTime().getTime(),
                 promotionMessage,
-                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                 rocketmqCustomProperties.getPromotionTopic());
         // 发送促销活动开始的延时任务
         this.timeTrigger.addDelay(timeTriggerMsg);
@@ -404,7 +405,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
     private void removePintuanGoodsFromEs(String id, Long originStartTime) {
         this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 originStartTime,
-                DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PROMOTION, (PromotionTypeEnum.PINTUAN.name() + id)),
+                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.PINTUAN.name() + id)),
                 rocketmqCustomProperties.getPromotionTopic());
     }
 
@@ -423,7 +424,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
             if (Boolean.FALSE.equals(pintuan.getFictitious()) && entry.getValue().size() < requiredNum) {
                 // 如果未开启虚拟成团且已参团人数小于成团人数，则自动取消订单
                 LambdaUpdateWrapper<Order> updateWrapper = new LambdaUpdateWrapper<>();
-                updateWrapper.eq(Order::getOrderType, OrderTypeEnum.PINTUAN.name());
+                updateWrapper.eq(Order::getOrderPromotionType, PromotionTypeEnum.PINTUAN.name());
                 updateWrapper.eq(Order::getPromotionId, pintuan.getId());
                 updateWrapper.eq(Order::getParentOrderSn, entry.getKey());
                 updateWrapper.set(Order::getOrderStatus, OrderStatusEnum.CANCELLED.name());
@@ -507,8 +508,8 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
                 // 查询是否在同一时间段参与了限时抢购活动
                 count += promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.PINTUAN.name(), promotionGood.getSkuId(), pintuan.getStartTime(), pintuan.getEndTime(), pintuan.getId());
                 if (count > 0) {
-                    log.error("商品[" + promotionGood.getGoodsName() + "]已经在重叠的时间段参加了限时抢购或拼团活动，不能参加拼团活动");
-                    throw new ServiceException("商品[" + promotionGood.getGoodsName() + "]已经在重叠的时间段参加了限时抢购或拼团活动，不能参加拼团活动");
+                    log.error("商品[" + promotionGood.getGoodsName() + "]已经在重叠的时间段参加了秒杀活动或拼团活动，不能参加拼团活动");
+                    throw new ServiceException("商品[" + promotionGood.getGoodsName() + "]已经在重叠的时间段参加了秒杀活动或拼团活动，不能参加拼团活动");
                 }
             }
             LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();

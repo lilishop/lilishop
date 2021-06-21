@@ -15,7 +15,7 @@ public enum OrderOutTypeEnum {
      * 出库类型枚举
      */
     GOODS("商品"),
-    SECKILL_GOODS("限时抢购商品");
+    SECKILL_GOODS("秒杀活动商品");
 
 
     private final String description;

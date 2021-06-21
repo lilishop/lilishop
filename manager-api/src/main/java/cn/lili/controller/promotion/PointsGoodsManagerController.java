@@ -36,11 +36,10 @@ public class PointsGoodsManagerController {
     @PostMapping(consumes = "application/json", produces = "application/json")
     @ApiOperation(value = "添加积分商品")
     public ResultMessage<Object> addPointsGoods(@RequestBody List<PointsGoodsVO> pointsGoodsList) {
-        AuthUser currentUser = UserContext.getCurrentUser();
         List<PointsGoodsVO> collect = new ArrayList<>();
         for (PointsGoodsVO i : pointsGoodsList) {
             i.setStoreName(i.getGoodsSku().getStoreName());
-            i.setStoreId(currentUser.getId());
+            i.setStoreId(UserContext.getCurrentUser().getStoreId());
             collect.add(i);
         }
         pointsGoodsService.addPointsGoods(collect);

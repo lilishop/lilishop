@@ -11,8 +11,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,25 +24,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(rollbackFor = Exception.class)
 public class StoreAddressServiceImpl extends ServiceImpl<StoreAddressMapper, StoreAddress> implements StoreAddressService {
 
-    @Autowired
-    private StoreAddressMapper storeAddressMapper;
-
     @Override
     public IPage<StoreAddress> getStoreAddress(PageVO pageVo) {
         //获取当前登录商家账号
-        AuthUser tokenUser = UserContext.getCurrentUser();
         LambdaQueryWrapper<StoreAddress> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(StoreAddress::getStoreId, UserContext.getCurrentUser().getStoreId());
-        return storeAddressMapper.selectPage(PageUtil.initPage(pageVo), lambdaQueryWrapper);
+        return this.page(PageUtil.initPage(pageVo), lambdaQueryWrapper);
     }
 
     @Override
     public StoreAddress addStoreAddress(StoreAddress storeAddress) {
         //获取当前登录商家账号
-        AuthUser tokenUser = UserContext.getCurrentUser();
-        storeAddress.setStoreId(tokenUser.getId());
+        storeAddress.setStoreId(UserContext.getCurrentUser().getStoreId());
         //添加自提点
-        storeAddressMapper.insert(storeAddress);
+        this.save(storeAddress);
         return storeAddress;
     }
 
@@ -54,13 +47,12 @@ public class StoreAddressServiceImpl extends ServiceImpl<StoreAddressMapper, Sto
         AuthUser tokenUser = UserContext.getCurrentUser();
         storeAddress.setStoreId(tokenUser.getId());
         //添加自提点
-        storeAddressMapper.updateById(storeAddress);
+        this.updateById(storeAddress);
         return storeAddress;
     }
 
     @Override
     public Boolean removeStoreAddress(String id) {
-        storeAddressMapper.deleteById(id);
-        return true;
+        return this.removeById(id);
     }
 }

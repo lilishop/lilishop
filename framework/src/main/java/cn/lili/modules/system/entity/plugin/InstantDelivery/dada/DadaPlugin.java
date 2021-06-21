@@ -20,8 +20,7 @@ import cn.lili.modules.system.entity.vo.InstantDeliveryResultVO;
 import cn.lili.modules.system.service.InstantDeliveryLogService;
 import cn.lili.modules.system.utils.HttpUtils;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,10 +37,9 @@ import java.util.Map;
  * @Description:
  * @since 2020/12/01 15:58
  */
+@Slf4j
 @Component("ddPlugin")
 public class DadaPlugin implements InstantDeliveryPlugin {
-
-    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private StoreDetailService storeDetailService;
@@ -186,7 +184,7 @@ public class DadaPlugin implements InstantDeliveryPlugin {
         //组织返回参数
         InstantDeliveryResultVO instantDeliveryResultVO = JSONUtil.toBean(result, InstantDeliveryResultVO.class);
         if (instantDeliveryResultVO.getStatus().equals("fail")) {
-            logger.error("达达店铺信息修改失败，" + instantDeliveryResultVO.getMsg());
+            log.error("达达店铺信息修改失败",instantDeliveryResultVO.getMsg());
         }
         return instantDeliveryResultVO;
     }
@@ -273,17 +271,17 @@ public class DadaPlugin implements InstantDeliveryPlugin {
         }
         InstantDeliveryResultVO instantDeliveryResultVO = JSONUtil.toBean(result, InstantDeliveryResultVO.class);
         if (instantDeliveryResultVO.getStatus().equals("fail")) {
-            logger.error("达达订单发送失败，订单号为" + order.getSn() + "," + instantDeliveryResultVO.getMsg());
+            log.error("达达订单发送失败，订单号为",order.getSn() + "," + instantDeliveryResultVO.getMsg());
             //如果发送失败择等待一秒重新发送，如果失败择记录日志
             try {
                 Thread.sleep(1000);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("达达订单发布失败",e);
             }
             result = HttpUtils.doPostWithJson(url + InstantDeliveryUrl.DD_RE_ADD_ORDER.getUrl(), requstJson);
             InstantDeliveryResultVO instantDeliveryResResultVO = JSONUtil.toBean(result, InstantDeliveryResultVO.class);
             if (instantDeliveryResResultVO.getStatus().equals("fail")) {
-                logger.error("达达订单重试发送失败，订单号为" + order.getSn() + "," + instantDeliveryResultVO.getMsg());
+                log.error("达达订单重试发送失败，订单号为" + order.getSn() + "," + instantDeliveryResultVO.getMsg());
             }
         }
         return instantDeliveryResultVO;

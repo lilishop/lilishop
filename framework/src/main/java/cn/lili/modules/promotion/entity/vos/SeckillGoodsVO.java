@@ -6,7 +6,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 限时抢购商品视图对象
+ * 秒杀活动商品视图对象
  *
  * @author paulG
  * @date 2020/8/26
