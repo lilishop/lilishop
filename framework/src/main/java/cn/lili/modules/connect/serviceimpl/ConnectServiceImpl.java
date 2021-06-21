@@ -309,14 +309,14 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
      * @return 用户信息
      */
     public JSONObject getUserInfo(String encryptedData, String sessionKey, String iv) {
-        // 被加密的数据
+        //被加密的数据
         byte[] dataByte = Base64.getDecoder().decode(encryptedData);
-        // 加密秘钥
+        //加密秘钥
         byte[] keyByte = Base64.getDecoder().decode(sessionKey);
-        // 偏移量
+        //偏移量
         byte[] ivByte = Base64.getDecoder().decode(iv);
         try {
-            // 如果密钥不足16位，那么就补足.  这个if 中的内容很重要
+            //如果密钥不足16位，那么就补足.  这个if 中的内容很重要
             int base = 16;
             if (keyByte.length % base != 0) {
                 int groups = keyByte.length / base + (keyByte.length % base != 0 ? 1 : 0);
@@ -325,13 +325,13 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
                 System.arraycopy(keyByte, 0, temp, 0, keyByte.length);
                 keyByte = temp;
             }
-            // 初始化
+            //初始化
             Security.addProvider(new BouncyCastleProvider());
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
             SecretKeySpec spec = new SecretKeySpec(keyByte, "AES");
             AlgorithmParameters parameters = AlgorithmParameters.getInstance("AES");
             parameters.init(new IvParameterSpec(ivByte));
-            // 初始化
+            //初始化
             cipher.init(Cipher.DECRYPT_MODE, spec, parameters);
             byte[] resultByte = cipher.doFinal(dataByte);
             if (null != resultByte && resultByte.length > 0) {

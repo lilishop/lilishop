@@ -145,7 +145,7 @@ public class CartServiceImpl implements CartService {
 
 
             tradeDTO.setCartTypeEnum(cartTypeEnum);
-            // 如购物车发生更改，则重置优惠券
+            //如购物车发生更改，则重置优惠券
             tradeDTO.setStoreCoupons(null);
             tradeDTO.setPlatformCoupon(null);
             this.resetTradeDTO(tradeDTO);
@@ -282,10 +282,10 @@ public class CartServiceImpl implements CartService {
             }
         }
         cartSkuVOS.removeAll(deleteVos);
-        // 清除选择的优惠券
+        //清除选择的优惠券
         tradeDTO.setPlatformCoupon(null);
         tradeDTO.setStoreCoupons(null);
-        // 清除添加过的备注
+        //清除添加过的备注
         tradeDTO.setStoreRemark(null);
         cache.put(this.getOriginKey(tradeDTO.getCartTypeEnum()), tradeDTO);
     }
@@ -339,7 +339,7 @@ public class CartServiceImpl implements CartService {
             }
             List<MemberCoupon> allScopeMemberCoupon = memberCouponService.getAllScopeMemberCoupon(tradeDTO.getMemberId(), storeIds);
             if (allScopeMemberCoupon != null && !allScopeMemberCoupon.isEmpty()) {
-                // 过滤满足消费门槛
+                //过滤满足消费门槛
                 count += allScopeMemberCoupon.stream().filter(i -> i.getConsumeThreshold() <= totalPrice).count();
             }
         }
@@ -548,10 +548,10 @@ public class CartServiceImpl implements CartService {
     private void useCoupon(TradeDTO tradeDTO, MemberCoupon memberCoupon, CartTypeEnum cartTypeEnum) {
         //如果是平台优惠券
         if (Boolean.TRUE.equals(memberCoupon.getIsPlatform())) {
-            // 购物车价格
+            //购物车价格
             Double cartPrice = 0d;
             for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
-                // 获取商品的促销信息
+                //获取商品的促销信息
                 Optional<PromotionGoods> promotionOptional =
                         cartSkuVO.getPromotions().parallelStream().filter(promotionGoods ->
                                 (promotionGoods.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name()) &&
@@ -576,7 +576,7 @@ public class CartServiceImpl implements CartService {
         else {
             //过滤对应店铺购物车
             CartSkuVO cartVO = tradeDTO.getSkuList().stream().filter(i -> i.getStoreId().equals(memberCoupon.getStoreId())).findFirst().orElse(null);
-            // 优惠券消费门槛 <= 商品购买时的成交价（单品） * 购买数量
+            //优惠券消费门槛 <= 商品购买时的成交价（单品） * 购买数量
             if (cartVO != null && memberCoupon.getConsumeThreshold() <= CurrencyUtil.mul(cartVO.getPurchasePrice(), cartVO.getNum())) {
                 tradeDTO.getStoreCoupons().put(memberCoupon.getStoreId(), new MemberCouponDTO(memberCoupon));
                 //选择店铺优惠券，则将品台优惠券清空
@@ -603,15 +603,15 @@ public class CartServiceImpl implements CartService {
             cartSkuVOS = tradeDTO.getSkuList();
         }
 
-        // 当初购物车商品中是否存在符合优惠券条件的商品sku
+        //当初购物车商品中是否存在符合优惠券条件的商品sku
         if (memberCoupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS_CATEGORY.name())) {
-            // 分类路径是否包含
+            //分类路径是否包含
             return cartSkuVOS.stream().anyMatch(i -> i.getGoodsSku().getCategoryPath().indexOf("," + memberCoupon.getScopeId() + ",") <= 0);
         } else if (memberCoupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS.name())) {
-            // 范围关联ID是否包含
+            //范围关联ID是否包含
             return cartSkuVOS.stream().anyMatch(i -> memberCoupon.getScopeId().indexOf("," + i.getGoodsSku().getId() + ",") <= 0);
         } else if (memberCoupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_SHOP_CATEGORY.name())) {
-            // 分类路径是否包含
+            //分类路径是否包含
             return cartSkuVOS.stream().anyMatch(i -> i.getGoodsSku().getStoreCategoryPath().indexOf("," + memberCoupon.getScopeId() + ",") <= 0);
         }
         return true;

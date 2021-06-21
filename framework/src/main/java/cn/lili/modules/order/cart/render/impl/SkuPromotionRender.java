@@ -70,7 +70,7 @@ public class SkuPromotionRender implements CartRenderStep {
      */
     private void renderSkuPromotion(TradeDTO tradeDTO) {
 
-        // 渲染促销价格
+        //渲染促销价格
         this.renderPromotionPrice(tradeDTO);
 
         //拼团和积分购买需要特殊处理，这里优先特殊处理
@@ -110,12 +110,12 @@ public class SkuPromotionRender implements CartRenderStep {
         for (CartVO cartVO : cartList) {
             if (Boolean.TRUE.equals(cartVO.getChecked())) {
                 for (CartSkuVO cartSkuVO : cartVO.getSkuList()) {
-                    // 检查当前购物车商品是否有效且为选中
+                    //检查当前购物车商品是否有效且为选中
                     if (Boolean.TRUE.equals(cartSkuVO.getChecked()) && Boolean.FALSE.equals(cartSkuVO.getInvalid())) {
                         PromotionPriceParamDTO param = new PromotionPriceParamDTO();
                         param.setSkuId(cartSkuVO.getGoodsSku().getId());
                         param.setNum(cartSkuVO.getNum());
-                        // 是否为拼团商品计算
+                        //是否为拼团商品计算
                         if (cartSkuVO.getPintuanId() != null) {
                             param.setPintuanId(cartSkuVO.getPintuanId());
                         }
@@ -126,21 +126,21 @@ public class SkuPromotionRender implements CartRenderStep {
         }
         //如果包含促销规则
         if (!promotionPriceParamList.isEmpty()) {
-            // 店铺优惠券集合
+            //店铺优惠券集合
             List<MemberCoupon> memberCoupons = new ArrayList<>();
             if (tradeDTO.getStoreCoupons() != null) {
                 memberCoupons.addAll(tradeDTO.getStoreCoupons().values().parallelStream().map(MemberCouponDTO::getMemberCoupon).collect(Collectors.toList()));
             }
 
-            // 平台优惠券
+            //平台优惠券
             if (tradeDTO.getPlatformCoupon() != null && tradeDTO.getPlatformCoupon().getMemberCoupon() != null) {
                 memberCoupons.add(tradeDTO.getPlatformCoupon().getMemberCoupon());
             }
-            // 检查优惠券集合中是否存在过期优惠券
+            //检查优惠券集合中是否存在过期优惠券
             this.checkMemberCoupons(memberCoupons);
-            // 调用价格计算模块，返回价格计算结果
+            //调用价格计算模块，返回价格计算结果
             PromotionPriceDTO promotionPrice = promotionPriceService.calculationPromotionPrice(promotionPriceParamList, memberCoupons);
-            //  分配计算后的促销
+            // 分配计算后的促销
             this.distributionPromotionPrice(tradeDTO, promotionPrice);
         }
     }
@@ -159,11 +159,11 @@ public class SkuPromotionRender implements CartRenderStep {
     private void distributionPromotionPrice(TradeDTO tradeDTO, PromotionPriceDTO promotionPrice) {
 
         for (CartVO cartVO : tradeDTO.getCartList()) {
-            // 根据店铺分配店铺价格计算结果
+            //根据店铺分配店铺价格计算结果
             Optional<StorePromotionPriceDTO> storePromotionPriceDTOOptional = promotionPrice.getStorePromotionPriceList().parallelStream().filter(i -> i.getStoreId().equals(cartVO.getStoreId())).findAny();
             if (storePromotionPriceDTOOptional.isPresent()) {
                 StorePromotionPriceDTO storePromotionPriceDTO = storePromotionPriceDTOOptional.get();
-                // 根据商品分配商品结果计算结果
+                //根据商品分配商品结果计算结果
                 this.distributionSkuPromotionPrice(cartVO.getSkuList(), storePromotionPriceDTO);
 
                 PriceDetailDTO sSpd = new PriceDetailDTO();
@@ -183,7 +183,7 @@ public class SkuPromotionRender implements CartRenderStep {
             }
         }
 
-        // 根据整个购物车分配价格计算结果
+        //根据整个购物车分配价格计算结果
         PriceDetailDTO priceDetailDTO = new PriceDetailDTO();
 
         priceDetailDTO.setDiscountPrice(promotionPrice.getTotalDiscountPrice());
@@ -203,7 +203,7 @@ public class SkuPromotionRender implements CartRenderStep {
     private void distributionSkuPromotionPrice(List<CartSkuVO> skuList, StorePromotionPriceDTO storePromotionPriceDTO) {
         if (storePromotionPriceDTO != null) {
             for (CartSkuVO cartSkuVO : skuList) {
-                // 获取当前购物车商品的商品计算结果
+                //获取当前购物车商品的商品计算结果
                 List<GoodsSkuPromotionPriceDTO> collect = storePromotionPriceDTO.getGoodsSkuPromotionPriceList().parallelStream().filter(i -> i.getSkuId().equals(cartSkuVO.getGoodsSku().getId())).collect(Collectors.toList());
                 if (!collect.isEmpty()) {
                     GoodsSkuPromotionPriceDTO goodsSkuPromotionPriceDTO = collect.get(0);
@@ -235,11 +235,11 @@ public class SkuPromotionRender implements CartRenderStep {
     private void renderPintuan(List<CartSkuVO> cartSkuList) {
         for (CartSkuVO cartSku : cartSkuList) {
             PriceDetailDTO priceDetailDTO = cartSku.getPriceDetailDTO();
-//            PromotionGoods promotionGoods = cartSku.getPromotion();
+//           PromotionGoods promotionGoods = cartSku.getPromotion();
             //参与平台则以拼团价处理
             if (StringUtils.isNotEmpty(cartSku.getPintuanId())) {
-//                Double discountPrice = CurrencyUtil.sub(cartSku.getGoodsSku().getPrice(), promotionGoods.getPrice());
-//                priceDetailDTO.setDiscountPrice(discountPrice);
+//               Double discountPrice = CurrencyUtil.sub(cartSku.getGoodsSku().getPrice(), promotionGoods.getPrice());
+//               priceDetailDTO.setDiscountPrice(discountPrice);
             } else {
                 //否则代表单独购买，则以原价购买
                 priceDetailDTO.setDiscountPrice(0d);
@@ -301,7 +301,7 @@ public class SkuPromotionRender implements CartRenderStep {
 
     private void checkPromotionLimit(TradeDTO tradeDTO) {
         if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)) {
-            // 如果为拼团订单，则获取拼团活动ID
+            //如果为拼团订单，则获取拼团活动ID
             Optional<String> pintuanId = tradeDTO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
             if (pintuanId.isPresent()) {
                 Pintuan pintuan = pintuanService.getPintuanById(pintuanId.get());

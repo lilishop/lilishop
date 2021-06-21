@@ -101,7 +101,7 @@ public class Base64DecodeMultipartFile implements MultipartFile {
 
     public static String inputStreamToStream(InputStream in) {
         byte[] data = null;
-        // 读取图片字节数组
+        //读取图片字节数组
         try {
             ByteArrayOutputStream swapStream = new ByteArrayOutputStream();
             byte[] buff = new byte[100];

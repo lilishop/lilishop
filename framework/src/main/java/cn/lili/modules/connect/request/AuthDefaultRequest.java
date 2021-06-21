@@ -40,7 +40,7 @@ public abstract class AuthDefaultRequest implements AuthRequest {
         if (!AuthChecker.isSupportedAuth(config, source)) {
             throw new AuthException(AuthResponseStatus.PARAMETER_INCOMPLETE, source);
         }
-        // 校验配置合法性
+        //校验配置合法性
         AuthChecker.checkConfig(config, source);
     }
 
@@ -71,9 +71,9 @@ public abstract class AuthDefaultRequest implements AuthRequest {
     public AuthResponse login(AuthCallback authCallback) {
         try {
             AuthChecker.checkCode(source, authCallback);
-//            if (!config.isIgnoreCheckState()) {
-//                AuthChecker.checkState(authCallback.getState(), source, cache);
-//            }
+//           if (!config.isIgnoreCheckState()) {
+//               AuthChecker.checkState(authCallback.getState(), source, cache);
+//           }
 
             AuthToken authToken = this.getAccessToken(authCallback);
             ConnectAuthUser user = this.getUserInfo(authToken);
@@ -268,7 +268,7 @@ public abstract class AuthDefaultRequest implements AuthRequest {
             scopes = defaultScopes;
         }
         if (null == separator) {
-            // 默认为空格
+            //默认为空格
             separator = " ";
         }
         String scopeStr = String.join(separator, scopes);

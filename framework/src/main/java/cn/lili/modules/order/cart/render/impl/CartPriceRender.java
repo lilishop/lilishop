@@ -34,7 +34,7 @@ public class CartPriceRender implements CartRenderStep {
 
     @Override
     public void render(TradeDTO tradeDTO) {
-        // 构造cartVO
+        //构造cartVO
         this.buildCart(tradeDTO);
         this.buildCartPrice(tradeDTO);
         this.buildTradePrice(tradeDTO);
@@ -70,11 +70,11 @@ public class CartPriceRender implements CartRenderStep {
         //购物车列表
         List<CartVO> cartVOS = tradeDTO.getCartList();
 
-        // key store id
-        // value 商品列表
+        //key store id
+        //value 商品列表
         Map<String, List<CartSkuVO>> map = new HashMap<>();
         for (CartSkuVO cartSkuVO : cartSkuVOList) {
-            // 如果存在商家id
+            //如果存在商家id
             if (map.containsKey(cartSkuVO.getGoodsSku().getStoreId())) {
                 List<CartSkuVO> list = map.get(cartSkuVO.getGoodsSku().getStoreId());
                 list.add(cartSkuVO);
@@ -94,15 +94,15 @@ public class CartPriceRender implements CartRenderStep {
                 for (CartSkuVO cartSkuVO : cartSkuVOS) {
                     if (Boolean.TRUE.equals(cartSkuVO.getChecked())) {
                         PriceDetailDTO priceDetailDTO = cartSkuVO.getPriceDetailDTO();
-                        // 流水金额(入账 出帐金额) = goodsPrice + freight - discountPrice - couponPrice
+                        //流水金额(入账 出帐金额) = goodsPrice + freight - discountPrice - couponPrice
                         double flowPrice = CurrencyUtil.sub(CurrencyUtil.add(priceDetailDTO.getGoodsPrice(), priceDetailDTO.getFreightPrice()), CurrencyUtil.add(priceDetailDTO.getDiscountPrice(), priceDetailDTO.getCouponPrice() != null ? priceDetailDTO.getCouponPrice() : 0));
                         priceDetailDTO.setFlowPrice(flowPrice);
 
-                        // 最终结算金额 = flowPrice - platFormCommission - distributionCommission
+                        //最终结算金额 = flowPrice - platFormCommission - distributionCommission
                         double billPrice = CurrencyUtil.sub(CurrencyUtil.sub(flowPrice, priceDetailDTO.getPlatFormCommission()), priceDetailDTO.getDistributionCommission());
                         priceDetailDTO.setBillPrice(billPrice);
 
-                        // 平台佣金
+                        //平台佣金
                         String categoryId = cartSkuVO.getGoodsSku().getCategoryPath().substring(
                                 cartSkuVO.getGoodsSku().getCategoryPath().lastIndexOf(",") + 1
                         );

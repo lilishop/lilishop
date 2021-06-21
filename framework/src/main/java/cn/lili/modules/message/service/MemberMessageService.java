@@ -1,13 +1,15 @@
-package cn.lili.modules.member.service;
+package cn.lili.modules.message.service;
 
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.member.entity.dos.MemberMessage;
-import cn.lili.modules.member.entity.vo.MemberMessageQueryVO;
+import cn.lili.modules.message.entity.dos.MemberMessage;
+import cn.lili.modules.message.entity.vos.MemberMessageQueryVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
- * 消息发送业务层
+ * 会员消息发送业务层
  *
  * @author Chopper
  * @date 2020/11/17 3:44 下午
@@ -39,6 +41,15 @@ public interface MemberMessageService extends IService<MemberMessage> {
      * @return 操作状态
      */
     Boolean deleteMessage(String messageId);
+
+
+    /**
+     * 保存消息信息
+     *
+     * @param messages 消息
+     * @return
+     */
+    boolean save(List<MemberMessage> messages);
 
 
 }

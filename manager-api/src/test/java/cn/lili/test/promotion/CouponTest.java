@@ -50,14 +50,14 @@ class CouponTest {
         couponVO.setDescription(couponVO.getCouponName() + " are expensive");
         couponVO.setGetType(CouponGetEnum.FREE.name());
         couponVO.setPromotionStatus(PromotionStatusEnum.NEW.name());
-//        couponVO.setStoreId("0");
-//        couponVO.setStoreName("platform");
+//       couponVO.setStoreId("0");
+//       couponVO.setStoreName("platform");
         couponVO.setStoreId("131");
         couponVO.setStoreName("小米自营旗舰店");
         couponVO.setPublishNum(1000);
         couponVO.setCouponLimitNum(0);
         couponVO.setConsumeThreshold(500D);
-//        couponVO.setPrice(200D);
+//       couponVO.setPrice(200D);
         couponVO.setCouponDiscount(0.1D);
 
         couponVO.setScopeType(CouponScopeTypeEnum.PORTION_GOODS.name());
@@ -71,7 +71,7 @@ class CouponTest {
             couponVO.setPromotionName(couponVO.getPrice() + "元券");
         }
         List<PromotionGoods> promotionGoodsList = new ArrayList<>();
-//        GoodsSku sku121 = goodsSkuService.getGoodsSkuByIdFromCache("121");
+//       GoodsSku sku121 = goodsSkuService.getGoodsSkuByIdFromCache("121");
         PromotionGoods promotionGoods = new PromotionGoods();
         promotionGoods.setPrice(0.0);
         promotionGoods.setLimitNum(0);
@@ -85,17 +85,17 @@ class CouponTest {
         promotionGoods.setPromotionType(PromotionTypeEnum.COUPON.name());
         promotionGoodsList.add(promotionGoods);
 //
-//        GoodsSku sku50112 = goodsSkuService.getGoodsSkuByIdFromCache("50112");
-//        promotionGoods = new PromotionGoods(sku50112);
-//        promotionGoods.setPrice(80000d);
-//        promotionGoods.setLimitNum(0);
-//        promotionGoods.setPromotionQuantity(1000);
-//        promotionGoods.setNum(1000);
-//        promotionGoods.setStartTime(couponVO.getStartTime());
-//        promotionGoods.setEndTime(couponVO.getEndTime());
-//        promotionGoods.setTitle(couponVO.getPromotionName());
-//        promotionGoods.setPromotionStatus(couponVO.getPromotionStatus());
-//        promotionGoodsList.add(promotionGoods);
+//       GoodsSku sku50112 = goodsSkuService.getGoodsSkuByIdFromCache("50112");
+//       promotionGoods = new PromotionGoods(sku50112);
+//       promotionGoods.setPrice(80000d);
+//       promotionGoods.setLimitNum(0);
+//       promotionGoods.setPromotionQuantity(1000);
+//       promotionGoods.setNum(1000);
+//       promotionGoods.setStartTime(couponVO.getStartTime());
+//       promotionGoods.setEndTime(couponVO.getEndTime());
+//       promotionGoods.setTitle(couponVO.getPromotionName());
+//       promotionGoods.setPromotionStatus(couponVO.getPromotionStatus());
+//       promotionGoodsList.add(promotionGoods);
 //
         couponVO.setPromotionGoodsList(promotionGoodsList);
         Assertions.assertNotNull(couponService.add(couponVO));
@@ -192,7 +192,7 @@ class CouponTest {
 
     @Test
     void delete() {
-//        Assertions.assertTrue(couponService.deleteCoupon("1326001296591577088"));
+//       Assertions.assertTrue(couponService.deleteCoupon("1326001296591577088"));
         GoodsStatusEnum goodsStatusEnum = GoodsStatusEnum.DOWN;
         System.out.println("name::  " + goodsStatusEnum.name());
         System.out.println("description::  " + goodsStatusEnum.description());

@@ -25,7 +25,7 @@ public class CouponRender implements CartRenderStep {
     public void render(TradeDTO tradeDTO) {
 
         //主要渲染各个优惠的价格
-        // this.renderCoupon(tradeDTO);
+        //this.renderCoupon(tradeDTO);
 
     }
 

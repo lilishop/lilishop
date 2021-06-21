@@ -48,18 +48,18 @@ public class CommonSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests();
         registry
                 .and()
-                // 禁止网页iframe
+                //禁止网页iframe
                 .headers().frameOptions().disable()
                 .and()
                 .authorizeRequests()
-                // 任何请求
+                //任何请求
                 .anyRequest()
-                // 需要身份认证
+                //需要身份认证
                 .permitAll()
                 .and()
-                // 允许跨域
+                //允许跨域
                 .cors().configurationSource(corsConfigurationSource).and()
-                // 关闭跨站请求防护
+                //关闭跨站请求防护
                 .csrf().disable();
     }
 

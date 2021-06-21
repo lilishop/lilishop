@@ -14,9 +14,9 @@ import java.util.regex.Pattern;
 public class CheckMobileUtil {
 
 
-    // \b 是单词边界(连着的两个(字母字符 与 非字母字符) 之间的逻辑上的间隔),
-    // 字符串在编译时会被转码一次,所以是 "\\b"
-    // \B 是单词内部逻辑间隔(连着的两个字母字符之间的逻辑上的间隔)
+    //\b 是单词边界(连着的两个(字母字符 与 非字母字符) 之间的逻辑上的间隔),
+    //字符串在编译时会被转码一次,所以是 "\\b"
+    //\B 是单词内部逻辑间隔(连着的两个字母字符之间的逻辑上的间隔)
     static String phoneReg = "\\b(ip(hone|od)|android|opera m(ob|in)i"
             + "|windows (phone|ce)|blackberry"
             + "|s(ymbian|eries60|amsung)|p(laybook|alm|rofile/midp"
@@ -41,7 +41,7 @@ public class CheckMobileUtil {
         if (null == userAgent) {
             userAgent = "";
         }
-        // 匹配
+        //匹配
         Matcher matcherPhone = phonePat.matcher(userAgent);
         Matcher matcherTable = tablePat.matcher(userAgent);
         if (matcherPhone.find() || matcherTable.find()) {

@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
- * 消息内容业务层
+ * 管理端发送消息内容业务层
  *
  * @author Chopper
  * @date 2020/11/17 3:44 下午

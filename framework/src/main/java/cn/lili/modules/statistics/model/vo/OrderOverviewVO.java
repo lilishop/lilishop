@@ -43,7 +43,7 @@ public class OrderOverviewVO {
     @ApiModelProperty(value = "退单金额")
     private Double refundOrderPrice;
 
-    // 转换率
+    //转换率
     @ApiModelProperty(value = "下单转换率")
     private String orderConversionRate;
 

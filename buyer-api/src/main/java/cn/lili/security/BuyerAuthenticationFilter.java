@@ -67,7 +67,7 @@ public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
         //从header中获取jwt
         String jwt = request.getHeader(SecurityEnum.HEADER_TOKEN.getValue());
         try {
-            // 如果没有token 则return
+            //如果没有token 则return
             if (StrUtil.isBlank(jwt)) {
                 chain.doFilter(request, response);
                 return;
@@ -99,7 +99,7 @@ public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
             String json = claims.get(SecurityEnum.USER_CONTEXT.getValue()).toString();
             AuthUser authUser = new Gson().fromJson(json, AuthUser.class);
 
-            // 校验redis中是否有权限
+            //校验redis中是否有权限
             if (cache.hasKey(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MEMBER) + jwt)) {
                 //构造返回信息
                 List<GrantedAuthority> auths = new ArrayList<>();

@@ -177,21 +177,21 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
         try {
             URL realUrl = new URL(url);
             HttpURLConnection conn = (HttpURLConnection) realUrl.openConnection();
-            // 发送POST请求必须设置如下两行
+            //发送POST请求必须设置如下两行
             conn.setDoOutput(true);
             conn.setDoInput(true);
-            // POST方法
+            //POST方法
             conn.setRequestMethod("POST");
-            // 设置通用的请求属性
+            //设置通用的请求属性
             conn.setRequestProperty("accept", "*/*");
             conn.setRequestProperty("connection", "Keep-Alive");
             conn.setRequestProperty("user-agent",
                     "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             conn.connect();
-            // 获取URLConnection对象对应的输出流
+            //获取URLConnection对象对应的输出流
             out = new OutputStreamWriter(conn.getOutputStream(), StandardCharsets.UTF_8);
-            // 发送请求参数
+            //发送请求参数
             if (params != null) {
                 StringBuilder param = new StringBuilder();
                 for (Map.Entry<String, String> entry : params.entrySet()) {
@@ -206,9 +206,9 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
                 //System.out.println("param:"+param.toString());
                 out.write(param.toString());
             }
-            // flush输出流的缓冲
+            //flush输出流的缓冲
             out.flush();
-            // 定义BufferedReader输入流来读取URL的响应
+            //定义BufferedReader输入流来读取URL的响应
             in = new BufferedReader(
                     new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
             String line;

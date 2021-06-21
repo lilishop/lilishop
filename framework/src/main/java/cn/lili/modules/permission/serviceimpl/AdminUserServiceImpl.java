@@ -138,7 +138,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
             return null;
         }
         AdminUserVO adminUserVO = new AdminUserVO(user);
-        // 关联部门
+        //关联部门
         if (user.getDepartmentId() != null) {
             Department department = departmentService.getById(user.getDepartmentId());
             if (department != null) {

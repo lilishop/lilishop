@@ -88,7 +88,7 @@ class FullDiscountTest {
         Assertions.assertNotNull(fullDiscountByPageFromMongo);
         FullDiscount fullDiscount = JSONUtil.toBean(JSONUtil.parseObj(fullDiscountByPageFromMongo.getPages()), FullDiscount.class);
         System.out.println(fullDiscount);
-//        fullDiscountByPageFromMongo.forEach(System.out::println);
+//       fullDiscountByPageFromMongo.forEach(System.out::println);
     }
 
     @Test

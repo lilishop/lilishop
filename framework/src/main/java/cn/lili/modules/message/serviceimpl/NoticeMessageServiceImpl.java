@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Map;
 
 /**
- * 消息模板业务层实现
+ * 通知类消息模板业务层实现
  *
  * @author Bulbasaur
  * @date 2020/12/8 9:48

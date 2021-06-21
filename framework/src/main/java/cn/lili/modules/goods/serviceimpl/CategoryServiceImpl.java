@@ -51,12 +51,12 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             return (List<CategoryVO>) cache.get(CachePrefix.CATEGORY.getPrefix() + "tree");
         }
 
-        // 获取全部分类
+        //获取全部分类
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Category::getDeleteFlag, false);
         List<Category> list = this.list(queryWrapper);
 
-        // 构造分类树
+        //构造分类树
         List<CategoryVO> categoryVOList = new ArrayList<>();
         for (Category category : list) {
             if (category.getParentId().equals("0")) {
@@ -112,10 +112,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public List<CategoryVO> listAllChildrenDB() {
 
-        // 获取全部分类
+        //获取全部分类
         List<Category> list = this.list();
 
-        // 构造分类树
+        //构造分类树
         List<CategoryVO> categoryVOList = new ArrayList<>();
         for (Category category : list) {
             if (category.getParentId().equals("0")) {
@@ -197,7 +197,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public void updateCategoryStatus(String categoryId, Boolean enableOperations) {
-        // 禁用子分类
+        //禁用子分类
         CategoryVO categoryVO = new CategoryVO(this.getById(categoryId));
         List<String> ids = new ArrayList<>();
         ids.add(categoryVO.getId());

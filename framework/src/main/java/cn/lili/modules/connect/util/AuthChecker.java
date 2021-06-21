@@ -47,9 +47,9 @@ public class AuthChecker {
         if (!GlobalAuthUtils.isHttpProtocol(redirectUri) && !GlobalAuthUtils.isHttpsProtocol(redirectUri)) {
             throw new AuthException(AuthResponseStatus.ILLEGAL_REDIRECT_URI, connectAuth);
         }
-        // 支付宝在创建回调地址时，不允许使用localhost或者127.0.0.1
+        //支付宝在创建回调地址时，不允许使用localhost或者127.0.0.1
         if (ConnectAuthEnum.ALIPAY == connectAuth && GlobalAuthUtils.isLocalHost(redirectUri)) {
-            // The redirect uri of alipay is forbidden to use localhost or 127.0.0.1
+            //The redirect uri of alipay is forbidden to use localhost or 127.0.0.1
             throw new AuthException(AuthResponseStatus.ILLEGAL_REDIRECT_URI, connectAuth);
         }
     }

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 消息内容业务层实现
+ * 管理端发送消息内容业务层实现
  *
  * @author Chopper
  * @date 2020/11/17 3:48 下午
