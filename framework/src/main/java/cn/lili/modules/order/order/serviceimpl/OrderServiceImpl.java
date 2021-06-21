@@ -134,35 +134,26 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //存放自订单/订单日志
         List<OrderItem> orderItems = new ArrayList<>();
         List<OrderLog> orderLogs = new ArrayList<>();
-        //拼团判定，不能参与自己创建的拼团
-        if (tradeDTO.getParentOrderSn() != null) {
-            Order parentOrder = this.getBySn(tradeDTO.getParentOrderSn());
-            if (parentOrder.getMemberId().equals(UserContext.getCurrentUser().getId())) {
-                throw new ServiceException("不能参与自己发起的拼团活动！");
-            }
-        }
+
         //订单集合
         List<OrderVO> orderVOS = new ArrayList<>();
-        //循环购物车商品集合
+        //循环购物车
         tradeDTO.getCartList().forEach(item -> {
             Order order = new Order(item, tradeDTO);
-            if (OrderTypeEnum.PINTUAN.name().equals(order.getOrderType())) {
-                Pintuan pintuan = pintuanService.getPintuanById(order.getPromotionId());
-                Integer limitNum = pintuan.getLimitNum();
-                if (limitNum != 0 && order.getGoodsNum() > limitNum) {
-                    throw new ServiceException("购买数量超过拼团活动限制数量");
-                }
-            }
             //构建orderVO对象
             OrderVO orderVO = new OrderVO();
             BeanUtil.copyProperties(order, orderVO);
+            //持久化DO
             orders.add(order);
             String message = "订单[" + item.getSn() + "]创建";
+            //记录日志
             orderLogs.add(new OrderLog(item.getSn(), UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), message));
             item.getSkuList().forEach(
                     sku -> orderItems.add(new OrderItem(sku, item, tradeDTO))
             );
+            //写入子订单信息
             orderVO.setOrderItems(orderItems);
+            //orderVO 记录
             orderVOS.add(orderVO);
         });
         tradeDTO.setOrderVO(orderVOS);

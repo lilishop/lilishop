@@ -1,15 +1,11 @@
 package cn.lili.modules.order.cart.service;
 
 
-import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
-import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.TradeParams;
 import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.entity.vo.ReceiptVO;
-
-import java.util.List;
 
 /**
  * 购物车业务层
@@ -171,13 +167,4 @@ public interface CartService {
      * @return 交易信息
      */
     Trade createTrade(TradeParams tradeParams);
-
-    /**
-     * 检查商品是否在配送范围
-     *
-     * @param skuList       商品列表
-     * @param memberAddress 配送地址
-     */
-    void checkAddressScope(List<CartSkuVO> skuList, MemberAddress memberAddress);
-
 }

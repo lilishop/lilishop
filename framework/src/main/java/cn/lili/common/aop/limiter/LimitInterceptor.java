@@ -73,12 +73,11 @@ public class LimitInterceptor {
             } else {
                 throw new ServiceException("访问过于频繁，请稍后再试");
             }
-        } catch (NullPointerException e) {
+        }
+        //如果从redis中执行都值判定为空，则这里跳过
+        catch (NullPointerException e) {
             return pjp.proceed();
         } catch (Exception e) {
-            if (e instanceof ServiceException) {
-                throw new ServiceException(e.getLocalizedMessage());
-            }
             throw new RuntimeException("服务器异常，请稍后再试");
         }
     }
