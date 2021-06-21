@@ -123,11 +123,11 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
 
         SeckillVO seckillVO=new SeckillVO();
         BeanUtil.copyProperties(seckill,seckillVO);
-        // 检查秒杀活动参数
+        //检查秒杀活动参数
         checkSeckillParam(seckillVO, seckill.getStoreId());
-        // 保存到MYSQL中
+        //保存到MYSQL中
         boolean result = this.save(seckill);
-        // 保存到MONGO中
+        //保存到MONGO中
         this.mongoTemplate.save(seckillVO);
         //添加秒杀延时任务
         this.addSeckillStartTask(seckillVO);
@@ -150,21 +150,21 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
 
     @Override
     public boolean modifySeckill(SeckillVO seckillVO) {
-        // 检查该秒杀活动是否存在
+        //检查该秒杀活动是否存在
         SeckillVO seckill = checkSeckillExist(seckillVO.getId());
         if (PromotionStatusEnum.START.name().equals(seckillVO.getPromotionStatus())) {
             throw new ServiceException("活动已经开始，不能进行编辑删除操作");
         }
-        // 检查秒杀活动参数
+        //检查秒杀活动参数
         this.checkSeckillParam(seckillVO, seckillVO.getStoreId());
 
-        // 更新到MYSQL中
+        //更新到MYSQL中
         boolean result = this.updateById(seckillVO);
-        // 保存到MONGO中
+        //保存到MONGO中
         this.mongoTemplate.save(seckillVO);
         if (seckill.getStartTime().getTime() != seckillVO.getStartTime().getTime()) {
             PromotionMessage promotionMessage = new PromotionMessage(seckillVO.getId(), PromotionTypeEnum.SECKILL.name(), PromotionStatusEnum.START.name(), seckillVO.getStartTime(), seckillVO.getEndTime());
-            // 更新延时任务
+            //更新延时任务
             this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
                     promotionMessage,
                     seckill.getStartTime().getTime(),
@@ -180,7 +180,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
     public void deleteSeckill(String id) {
         Seckill seckill = checkSeckillExist(id);
         if (PromotionStatusEnum.CLOSE.name().equals(seckill.getPromotionStatus()) || PromotionStatusEnum.END.name().equals(seckill.getPromotionStatus())) {
-            // 更新秒杀活动状态为关闭，标示删除标志
+            //更新秒杀活动状态为关闭，标示删除标志
             LambdaUpdateWrapper<Seckill> updateWrapper = new LambdaUpdateWrapper<Seckill>().eq(Seckill::getId, id).set(Seckill::getDeleteFlag, true).set(Seckill::getPromotionStatus, PromotionStatusEnum.CLOSE.name());
             this.update(updateWrapper);
             LambdaUpdateWrapper<SeckillApply> seckillApplyLambdaUpdateWrapper = new LambdaUpdateWrapper<SeckillApply>().eq(SeckillApply::getSeckillId, id).set(SeckillApply::getDeleteFlag, true);
@@ -266,7 +266,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
                 promotionMessage,
                 DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                 rocketmqCustomProperties.getPromotionTopic());
-        // 发送促销活动开始的延时任务
+        //发送促销活动开始的延时任务
         this.timeTrigger.addDelay(timeTriggerMsg);
     }
 
@@ -291,10 +291,10 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
      * @param storeId 卖家编号
      */
     private void checkSeckillParam(SeckillVO seckill, String storeId) {
-        // 同一时间段内相同的活动
+        //同一时间段内相同的活动
         QueryWrapper<Seckill> queryWrapper = PromotionTools.checkActiveTime(seckill.getStartTime(), seckill.getEndTime(), PromotionTypeEnum.SECKILL, storeId, seckill.getId());
         int sameNum = this.count(queryWrapper);
-        // 当前时间段是否存在同类活动
+        //当前时间段是否存在同类活动
         if (sameNum > 0) {
             throw new ServiceException("当前时间内已存在同类活动");
         }

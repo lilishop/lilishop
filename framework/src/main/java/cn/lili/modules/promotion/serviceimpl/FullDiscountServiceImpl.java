@@ -82,20 +82,20 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
 
     @Override
     public FullDiscount addFullDiscount(FullDiscountVO fullDiscountVO) {
-        // 验证是否是有效参数
+        //验证是否是有效参数
         PromotionTools.paramValid(fullDiscountVO.getStartTime().getTime(), fullDiscountVO.getEndTime().getTime(), fullDiscountVO.getNumber(), fullDiscountVO.getPromotionGoodsList());
-        // 当前时间段是否存在同类活动
+        //当前时间段是否存在同类活动
         this.checkSameActiveExist(fullDiscountVO.getStartTime(), fullDiscountVO.getEndTime(), fullDiscountVO.getStoreId(), null);
-        // 检查满减参数
+        //检查满减参数
         this.checkFullDiscount(fullDiscountVO);
-        // 保存到MYSQL中
+        //保存到MYSQL中
         this.save(fullDiscountVO);
         if (fullDiscountVO.getPromotionGoodsList() != null) {
             List<PromotionGoods> promotionGoodsList = PromotionTools.promotionGoodsInit(fullDiscountVO.getPromotionGoodsList(), fullDiscountVO, PromotionTypeEnum.FULL_DISCOUNT);
-            // 促销活动商品更新
+            //促销活动商品更新
             this.promotionGoodsService.saveOrUpdateBatch(promotionGoodsList);
         }
-        // 保存到MONGO中
+        //保存到MONGO中
         this.mongoTemplate.save(fullDiscountVO);
         PromotionMessage promotionMessage = new PromotionMessage(fullDiscountVO.getId(), PromotionTypeEnum.FULL_DISCOUNT.name(),
                 PromotionStatusEnum.START.name(),
@@ -105,7 +105,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
                 fullDiscountVO.getStartTime().getTime(), promotionMessage,
                 DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                 rocketmqCustomProperties.getPromotionTopic());
-        // 发送促销活动开始的延时任务
+        //发送促销活动开始的延时任务
         this.timeTrigger.addDelay(timeTriggerMsg);
         return fullDiscountVO;
     }
@@ -132,31 +132,31 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
 
     @Override
     public FullDiscountVO modifyFullDiscount(FullDiscountVO fullDiscountVO) {
-        // 检查满优惠活动是否存在
+        //检查满优惠活动是否存在
         FullDiscountVO fullDiscount = this.checkFullDiscountExist(fullDiscountVO.getId());
         if (!fullDiscount.getPromotionStatus().equals(PromotionStatusEnum.NEW.name())) {
             throw new ServiceException("当前编辑的满优惠活动已经开始或者已经结束，无法修改");
         }
-        // 检查活动是否已经开始
+        //检查活动是否已经开始
         PromotionTools.checkPromotionTime(fullDiscountVO.getStartTime().getTime(), fullDiscountVO.getEndTime().getTime());
-        // 检查满减参数
+        //检查满减参数
         this.checkFullDiscount(fullDiscountVO);
-        // 时间发生变化
+        //时间发生变化
         if (!fullDiscount.getStartTime().equals(fullDiscountVO.getStartTime()) && fullDiscount.getEndTime().equals(fullDiscountVO.getEndTime())) {
-            // 检查当前时间段是否存在同类活动
+            //检查当前时间段是否存在同类活动
             this.checkSameActiveExist(fullDiscountVO.getStartTime(), fullDiscountVO.getEndTime(), fullDiscountVO.getStoreId(), fullDiscount.getId());
 
         }
-        // 更新到MYSQL中
+        //更新到MYSQL中
         this.updateById(fullDiscountVO);
         if (fullDiscountVO.getPromotionGoodsList() != null) {
-            // 促销活动商品更新
+            //促销活动商品更新
             this.promotionGoodsService.updateBatchById(PromotionTools.promotionGoodsInit(fullDiscountVO.getPromotionGoodsList(), fullDiscountVO, PromotionTypeEnum.FULL_DISCOUNT));
         }
-        // 保存到MONGO中
+        //保存到MONGO中
         this.mongoTemplate.save(fullDiscountVO);
         PromotionMessage promotionMessage = new PromotionMessage(fullDiscountVO.getId(), PromotionTypeEnum.FULL_DISCOUNT.name(), PromotionStatusEnum.START.name(), fullDiscountVO.getStartTime(), fullDiscountVO.getEndTime());
-        // 发送更新延时任务
+        //发送更新延时任务
         this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR, promotionMessage,
                 fullDiscount.getStartTime().getTime(), fullDiscountVO.getStartTime().getTime(),
                 DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
@@ -179,7 +179,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
     @Override
     public boolean deleteFullDiscount(String id) {
         FullDiscountVO fullDiscount = this.checkFullDiscountExist(id);
-        // 检查活动是否已经开始
+        //检查活动是否已经开始
         boolean result = this.removeById(id);
         this.mongoTemplate.remove(new Query().addCriteria(Criteria.where("id").is(id)), FullDiscountVO.class);
         if (fullDiscount.getPromotionGoodsList() != null && !fullDiscount.getPromotionGoodsList().isEmpty()) {
@@ -214,24 +214,24 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
         if (fullDiscountVO.getIsFullMinus() == null && fullDiscountVO.getIsCoupon() == null && fullDiscountVO.getIsGift() == null && fullDiscountVO.getIsPoint() == null && fullDiscountVO.getIsFullRate() == null) {
             throw new ServiceException("请选择一种优惠方式");
         }
-        // 如果优惠方式是满减
+        //如果优惠方式是满减
         if (Boolean.TRUE.equals(fullDiscountVO.getIsFullMinus())) {
             this.checkFullMinus(fullDiscountVO.getFullMinus(), fullDiscountVO.getFullMoney());
             fullDiscountVO.setTitle("满" + fullDiscountVO.getFullMoney() + " 减" + fullDiscountVO.getFullMinus());
         }
-        // 如果优惠方式是赠品
+        //如果优惠方式是赠品
         if (Boolean.TRUE.equals(fullDiscountVO.getIsGift())) {
-            // 是否没有选择赠品
+            //是否没有选择赠品
             boolean noGiftSelected = fullDiscountVO.getGiftId() == null;
             if (noGiftSelected) {
                 throw new ServiceException("请选择赠品");
             }
         }
-        // 如果优惠方式是赠优惠券
+        //如果优惠方式是赠优惠券
         if (Boolean.TRUE.equals(fullDiscountVO.getIsCoupon())) {
             this.checkCoupon(fullDiscountVO.getCouponId(), fullDiscountVO.getEndTime().getTime());
         }
-        // 如果优惠方式是折扣
+        //如果优惠方式是折扣
         if (Boolean.TRUE.equals(fullDiscountVO.getIsFullRate())) {
             this.checkFullRate(fullDiscountVO.getFullRate());
             fullDiscountVO.setTitle("满" + fullDiscountVO.getFullMoney() + " 打" + fullDiscountVO.getFullRate() + "折");
@@ -248,7 +248,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
      * @param id       满优惠活动ID
      */
     private void checkSameActiveExist(Date statTime, Date endTime, String storeId, String id) {
-        // 同一时间段内相同的活动
+        //同一时间段内相同的活动
         QueryWrapper<FullDiscount> queryWrapper = PromotionTools.checkActiveTime(statTime, endTime, PromotionTypeEnum.FULL_DISCOUNT, storeId, id);
         Integer sameNum = this.count(queryWrapper);
         if (sameNum > 0) {
@@ -263,7 +263,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
      * @param endTime  活动结束时间
      */
     private void checkCoupon(String couponId, long endTime) {
-        // 是否没有选择优惠券
+        //是否没有选择优惠券
         boolean noCouponSelected = couponId == null;
         if (noCouponSelected) {
             throw new ServiceException("请选择优惠券");
@@ -281,7 +281,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
      * @param fullMoney 优惠门槛
      */
     private void checkFullMinus(Double fullMinus, Double fullMoney) {
-        // 是否没有填写满减金额
+        //是否没有填写满减金额
         boolean noFullMinusInput = fullMinus == null || fullMinus == 0;
         if (noFullMinusInput) {
             throw new ServiceException("请填写满减金额");
@@ -297,7 +297,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
      * @param fullRate 打折数值
      */
     private void checkFullRate(Double fullRate) {
-        // 是否没有填写打折数值
+        //是否没有填写打折数值
         boolean noFullRateInput = fullRate == null || fullRate == 0;
         if (noFullRateInput) {
             throw new ServiceException("请填写打折数值");

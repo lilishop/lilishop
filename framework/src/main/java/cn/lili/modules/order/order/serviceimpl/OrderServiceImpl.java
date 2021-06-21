@@ -161,9 +161,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         this.saveBatch(orders);
         //批量保存 子订单
         orderItemService.saveBatch(orderItems);
-        // 批量记录订单操作日志
+        //批量记录订单操作日志
         orderLogService.saveBatch(orderLogs);
-        // 赠品根据店铺单独生成订单
+        //赠品根据店铺单独生成订单
         this.generatorGiftOrder(tradeDTO);
     }
 
@@ -304,7 +304,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //要记录之前的收货地址，所以需要以代码方式进行调用 不采用注解
         String message = "订单[" + orderSn + "]收货信息修改，由[" + order.getConsigneeDetail() + "]修改为[" + memberAddressDTO.getConsigneeDetail() + "]";
 
-        BeanUtil.copyProperties(memberAddressDTO, order);// 记录订单操作日志
+        BeanUtil.copyProperties(memberAddressDTO, order);//记录订单操作日志
         this.updateById(order);
 
         OrderLog orderLog = new OrderLog(orderSn, UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), message);
@@ -401,7 +401,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderMessage.setOrderSn(order.getSn());
         this.sendUpdateStatusMessage(orderMessage);
 
-        // 发送当前商品购买完成的信息（用于更新商品数据）
+        //发送当前商品购买完成的信息（用于更新商品数据）
         List<OrderItem> orderItems = orderItemService.getByOrderSn(orderSn);
         List<GoodsCompleteMessage> goodsCompleteMessageList = new ArrayList<>();
         for (OrderItem orderItem : orderItems) {
@@ -488,10 +488,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Pintuan pintuan = pintuanService.getPintuanById(pintuanId);
         List<Order> list = this.getPintuanOrder(pintuanId, parentOrderSn);
         if (Boolean.TRUE.equals(pintuan.getFictitious()) && pintuan.getRequiredNum() > list.size()) {
-            // 如果开启虚拟成团且当前订单数量不足成团数量，则认为拼团成功
+            //如果开启虚拟成团且当前订单数量不足成团数量，则认为拼团成功
             this.pintuanOrderSuccess(list);
         } else if (Boolean.FALSE.equals(pintuan.getFictitious()) && pintuan.getRequiredNum() > list.size()) {
-            // 如果未开启虚拟成团且当前订单数量不足成团数量，则认为拼团失败
+            //如果未开启虚拟成团且当前订单数量不足成团数量，则认为拼团失败
             this.pintuanOrderFailed(list);
         }
     }
@@ -534,10 +534,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         List<OrderBatchDeliverDTO> orderBatchDeliverDTOList = new ArrayList<>();
         try {
             inputStream = files.getInputStream();
-            // 2.应用HUtool ExcelUtil获取ExcelReader指定输入流和sheet
+            //2.应用HUtool ExcelUtil获取ExcelReader指定输入流和sheet
             ExcelReader excelReader = ExcelUtil.getReader(inputStream);
-            // 可以加上表头验证
-            // 3.读取第二行到最后一行数据
+            //可以加上表头验证
+            //3.读取第二行到最后一行数据
             List<List<Object>> read = excelReader.read(1, excelReader.getRowCount());
             for (List<Object> objects : read) {
                 OrderBatchDeliverDTO orderBatchDeliverDTO = new OrderBatchDeliverDTO();
@@ -626,7 +626,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         List<Order> list = this.getPintuanOrder(pintuanId, parentOrderSn);
         int count = list.size();
         if (count == 1) {
-            // 如果为开团订单，则发布一个一小时的延时任务，时间到达后，如果未成团则自动结束（未开启虚拟成团的情况下）
+            //如果为开团订单，则发布一个一小时的延时任务，时间到达后，如果未成团则自动结束（未开启虚拟成团的情况下）
             PintuanOrderMessage pintuanOrderMessage = new PintuanOrderMessage();
             long startTime = DateUtil.offsetHour(new Date(), 1).getTime();
             pintuanOrderMessage.setOrderSn(parentOrderSn);
@@ -658,7 +658,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         queryWrapper.eq(Order::getPromotionId, pintuanId)
                 .eq(Order::getOrderPromotionType, OrderPromotionTypeEnum.PINTUAN.name())
                 .eq(Order::getPayStatus, PayStatusEnum.PAID.name());
-        // 拼团sn=开团订单sn 或者 参团订单的开团订单sn
+        //拼团sn=开团订单sn 或者 参团订单的开团订单sn
         queryWrapper.and(i -> i.eq(Order::getSn, parentOrderSn)
                 .or(j -> j.eq(Order::getParentOrderSn, parentOrderSn)));
         //参团后的订单数（人数）

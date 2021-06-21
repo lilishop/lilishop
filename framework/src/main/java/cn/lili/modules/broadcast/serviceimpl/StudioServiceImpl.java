@@ -75,7 +75,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                         DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                         rocketmqCustomProperties.getPromotionTopic());
 
-                // 发送促销活动开始的延时任务
+                //发送促销活动开始的延时任务
                 this.timeTrigger.addDelay(timeTriggerMsg);
 
                 //直播结束延时任务
@@ -84,7 +84,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                         Long.parseLong(studio.getEndTime()) * 1000L, broadcastMessage,
                         DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                         rocketmqCustomProperties.getPromotionTopic());
-                // 发送促销活动开始的延时任务
+                //发送促销活动开始的延时任务
                 this.timeTrigger.addDelay(timeTriggerMsg);
             }
             return true;
@@ -100,7 +100,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
         Studio oldStudio = this.getById(studio.getId());
         wechatLivePlayerUtil.editRoom(studio);
         if (this.updateById(studio)) {
-            // 发送更新延时任务
+            //发送更新延时任务
             //直播间开始
             BroadcastMessage broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.START.name());
             this.timeTrigger.edit(

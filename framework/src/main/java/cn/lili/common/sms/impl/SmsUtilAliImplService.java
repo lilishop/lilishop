@@ -73,7 +73,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
 
         //准备发送短信参数
         Map<String, String> params = new HashMap<>();
-        // 验证码内容
+        //验证码内容
         params.put("code", code);
 
         //模版 默认为登录验证
@@ -182,7 +182,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
             signNameList.add(sign.subList((i * 100), endPoint));
         }
 
-//        //发送短信
+//       //发送短信
         for (int i = 0; i < mobileList.size(); i++) {
             SendBatchSmsRequest sendBatchSmsRequest = new SendBatchSmsRequest()
                     .setPhoneNumberJson(JSONUtil.toJsonStr(mobileList.get(i)))
@@ -356,11 +356,11 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
             SmsSetting smsSetting = new Gson().fromJson(setting.getSettingValue(), SmsSetting.class);
 
             Config config = new Config();
-            // 您的AccessKey ID
+            //您的AccessKey ID
             config.accessKeyId = smsSetting.getAccessKeyId();
-            // 您的AccessKey Secret
+            //您的AccessKey Secret
             config.accessKeySecret = smsSetting.getAccessSecret();
-            // 访问的域名
+            //访问的域名
             config.endpoint = "dysmsapi.aliyuncs.com";
             return new com.aliyun.dysmsapi20170525.Client(config);
         } catch (Exception e) {

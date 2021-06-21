@@ -43,7 +43,7 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
 
     @Override
     public Token createToken(String username, Boolean longTerm) {
-        // 生成token
+        //生成token
         AdminUser adminUser = adminUserService.findByUsername(username);
         AuthUser user = new AuthUser(adminUser.getUsername(), adminUser.getId(), UserEnums.MANAGER, adminUser.getNickName(), adminUser.getIsSuper());
 

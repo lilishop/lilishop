@@ -32,17 +32,17 @@ public class FullDiscountRender implements CartRenderStep {
     @Override
     public void render(TradeDTO tradeDTO) {
 
-        // 获取购物车中所有的商品
+        //获取购物车中所有的商品
         List<CartSkuVO> cartSkuList = tradeDTO.getSkuList();
 
-        // 店铺id集合
+        //店铺id集合
         List<String> storeIds = new ArrayList<>();
 
-        // 店铺集合
+        //店铺集合
         List<CartVO> cartList = tradeDTO.getCartList();
 
 
-        // 获取店铺id
+        //获取店铺id
         Map<String, List<CartSkuVO>> storeCollect = tradeDTO.getSkuList().parallelStream().collect(Collectors.groupingBy(CartSkuVO::getStoreId));
         for (Map.Entry<String, List<CartSkuVO>> storeCart : storeCollect.entrySet()) {
             if (!storeCart.getValue().isEmpty()) {
@@ -50,7 +50,7 @@ public class FullDiscountRender implements CartRenderStep {
             }
         }
 
-        // 获取当前店铺进行到满减活动
+        //获取当前店铺进行到满减活动
         List<FullDiscountVO> fullDiscounts = fullDiscountService.currentPromotion(storeIds);
         //循环满减信息
         for (FullDiscountVO fullDiscount : fullDiscounts) {
@@ -63,7 +63,7 @@ public class FullDiscountRender implements CartRenderStep {
                         //写入满减活动
                         cart.setFullDiscount(fullDiscount);
                         List<String> skuIds;
-                        // 参与活动的sku判定
+                        //参与活动的sku判定
                         if (fullDiscount.getNumber() != -1) {
                             skuIds = initFullDiscountGoods(fullDiscount, cartSkuList);
                         } else {

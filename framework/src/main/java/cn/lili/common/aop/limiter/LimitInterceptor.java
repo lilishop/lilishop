@@ -67,7 +67,7 @@ public class LimitInterceptor {
         try {
             Number count = redisTemplate.execute(limitScript, keys, limitCount, limitPeriod);
             log.info("Access try count is {} for name={} and key = {}", count, name, key);
-            // 如果缓存里没有值，或者他的值小于限制频率
+            //如果缓存里没有值，或者他的值小于限制频率
             if (count.intValue() <= limitCount) {
                 return pjp.proceed();
             } else {

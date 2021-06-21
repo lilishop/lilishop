@@ -52,40 +52,40 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
      */
     public static boolean put(String word) {
 
-        // 长度小于2的不加入
+        //长度小于2的不加入
         if (word == null || word.trim().length() < 2) {
             return false;
         }
-        // 两个字符的不考虑
+        //两个字符的不考虑
         if (word.length() == 2 && word.matches("\\w\\w")) {
             return false;
         }
         StringPointer sp = new StringPointer(word.trim());
-        // 计算头两个字符的hash
+        //计算头两个字符的hash
         int hash = sp.nextTwoCharHash(0);
-        // 计算头两个字符的mix表示（mix相同，两个字符相同）
+        //计算头两个字符的mix表示（mix相同，两个字符相同）
         int mix = sp.nextTwoCharMix(0);
-        // 转为在hash桶中的位置
+        //转为在hash桶中的位置
         int index = hash & (nodes.length - 1);
 
-        // 从桶里拿第一个节点
+        //从桶里拿第一个节点
         SensitiveWordsNode node = nodes[index];
         if (node == null) {
-            // 如果没有节点，则放进去一个
+            //如果没有节点，则放进去一个
             node = new SensitiveWordsNode(mix);
-            // 并添加词
+            //并添加词
             node.words.add(sp);
-            // 放入桶里
+            //放入桶里
             nodes[index] = node;
         } else {
-            // 如果已经有节点（1个或多个），找到正确的节点
+            //如果已经有节点（1个或多个），找到正确的节点
             for (; node != null; node = node.next) {
-                // 匹配节点
+                //匹配节点
                 if (node.headTwoCharMix == mix) {
                     node.words.add(sp);
                     return true;
                 }
-                // 如果匹配到最后仍然不成功，则追加一个节点
+                //如果匹配到最后仍然不成功，则追加一个节点
                 if (node.next == null) {
                     new SensitiveWordsNode(mix, node).words.add(sp);
                     return true;
@@ -104,16 +104,16 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
     public static void remove(String word) {
 
         StringPointer sp = new StringPointer(word.trim());
-        // 计算头两个字符的hash
+        //计算头两个字符的hash
         int hash = sp.nextTwoCharHash(0);
-        // 计算头两个字符的mix表示（mix相同，两个字符相同）
+        //计算头两个字符的mix表示（mix相同，两个字符相同）
         int mix = sp.nextTwoCharMix(0);
-        // 转为在hash桶中的位置
+        //转为在hash桶中的位置
         int index = hash & (nodes.length - 1);
         SensitiveWordsNode node = nodes[index];
 
         for (; node != null; node = node.next) {
-            // 匹配节点
+            //匹配节点
             if (node.headTwoCharMix == mix) {
                 node.words.remove(sp);
             }
@@ -126,7 +126,7 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
      * 如果无敏感词返回输入的sentence对象，即可以用下面的方式判断是否有敏感词：<br/><code>
      * String result = filter.filter(sentence, CharacterConstant.WILDCARD_STAR);<br/>
      * if(result != sentence){<br/>
-     * &nbsp;&nbsp;// 有敏感词<br/>
+     * &nbsp;&nbsp;//有敏感词<br/>
      * }
      * </code>
      *
@@ -135,13 +135,13 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
      * @return 过滤后的句子
      */
     public static String filter(String sentence, char replace) {
-        // 先转换为StringPointer
+        //先转换为StringPointer
         StringPointer sp = new StringPointer(sentence + "  ");
 
-        // 标示是否替换
+        //标示是否替换
         boolean replaced = false;
 
-        // 匹配的起始位置
+        //匹配的起始位置
         int i = 0;
         while (i < sp.length - 2) {
             /*
@@ -149,7 +149,7 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
              * 如果未匹配为1，如果匹配是匹配的词长度
              */
             int step = 1;
-            // 计算此位置开始2个字符的hash
+            //计算此位置开始2个字符的hash
             int hash = sp.nextTwoCharHash(i);
             /*
              * 根据hash获取第一个节点，
@@ -195,13 +195,13 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
                                  * 仍然能够取到word为"色情电影"，但是不该匹配。
                                  */
                                 if (sp.nextStartsWith(i, word)) {
-                                    // 匹配成功，将匹配的部分，用replace制定的内容替代
+                                    //匹配成功，将匹配的部分，用replace制定的内容替代
                                     sp.fill(i, i + word.length, replace);
-                                    // 跳过已经替代的部分
+                                    //跳过已经替代的部分
                                     step = word.length;
-                                    // 标示有替换
+                                    //标示有替换
                                     replaced = true;
-                                    // 跳出循环（然后是while循环的下一个位置）
+                                    //跳出循环（然后是while循环的下一个位置）
                                     break outer;
                                 }
                             }
@@ -211,11 +211,11 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
                 }
             }
 
-            // 移动到下一个匹配位置
+            //移动到下一个匹配位置
             i += step;
         }
 
-        // 如果没有替换，直接返回入参（节约String的构造copy）
+        //如果没有替换，直接返回入参（节约String的构造copy）
         if (replaced) {
             String res = sp.toString();
             return res.substring(0, res.length() - 2);

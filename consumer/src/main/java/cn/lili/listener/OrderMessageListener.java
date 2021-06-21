@@ -56,9 +56,9 @@ public class OrderMessageListener implements RocketMQListener<MessageExt> {
                         result = false;
                     }
                 }
-                // 如所有步骤顺利完成
+                //如所有步骤顺利完成
                 if (Boolean.TRUE.equals(result)) {
-                    // 清除记录信息的trade cache key
+                    //清除记录信息的trade cache key
                     cache.remove(key);
                 }
                 break;

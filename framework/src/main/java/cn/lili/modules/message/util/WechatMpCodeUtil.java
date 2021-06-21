@@ -60,26 +60,26 @@ public class WechatMpCodeUtil {
             params.put("path", path);
             params.put("width", "280");
 
-            // ======================================================================//
-            // 执行URL Post调用
-            // ======================================================================//
+            //======================================================================//
+            //执行URL Post调用
+            //======================================================================//
             CloseableHttpClient httpClient = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(CREATE_QR_CODE + accessToken);
             httpPost.addHeader(HTTP.CONTENT_TYPE, "application/json");
-            // 必须是json模式的 post
+            //必须是json模式的 post
             String body = JSON.toJSONString(params);
             StringEntity entity = new StringEntity(body);
             entity.setContentType("image/png");
             httpPost.setEntity(entity);
             HttpResponse httpResponse = httpClient.execute(httpPost);
             HttpEntity httpEntity = httpResponse.getEntity();
-            // ======================================================================//
-            // 处理HTTP返回结果
-            // ======================================================================//
+            //======================================================================//
+            //处理HTTP返回结果
+            //======================================================================//
             InputStream contentStream = httpEntity.getContent();
             byte[] bytes = toByteArray(contentStream);
             contentStream.read(bytes);
-            // 返回内容
+            //返回内容
             return Base64.getEncoder().encodeToString(bytes);
         } catch (Exception e) {
             log.error("生成二维码错误：", e);
@@ -117,26 +117,26 @@ public class WechatMpCodeUtil {
             params.put("scene", shortLink.getId());
             params.put("width", "280");
 
-            // ======================================================================//
-            // 执行URL Post调用
-            // ======================================================================//
+            //======================================================================//
+            //执行URL Post调用
+            //======================================================================//
             CloseableHttpClient httpClient = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(UN_LIMIT_API + accessToken);
             httpPost.addHeader(HTTP.CONTENT_TYPE, "application/json");
-            // 必须是json模式的 post
+            //必须是json模式的 post
             String body = JSON.toJSONString(params);
             StringEntity entity = new StringEntity(body);
             entity.setContentType("image/png");
             httpPost.setEntity(entity);
             HttpResponse httpResponse = httpClient.execute(httpPost);
             HttpEntity httpEntity = httpResponse.getEntity();
-            // ======================================================================//
-            // 处理HTTP返回结果
-            // ======================================================================//
+            //======================================================================//
+            //处理HTTP返回结果
+            //======================================================================//
             InputStream contentStream = httpEntity.getContent();
             byte[] bytes = toByteArray(contentStream);
             contentStream.read(bytes);
-            // 返回内容
+            //返回内容
             return Base64.getEncoder().encodeToString(bytes);
         } catch (Exception e) {
             log.error("生成二维码错误：", e);

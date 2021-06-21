@@ -51,11 +51,11 @@ public class CartController {
                                      @NotNull(message = "购买数量不能为空") @Min(value = 1, message = "加入购物车数量必须大于0") Integer num,
                                      String cartType) {
         try {
-            // 读取选中的列表
+            //读取选中的列表
             cartService.add(skuId, num, cartType);
             return ResultUtil.success();
         } catch (ServiceException se) {
-            log.error(se.getMsg(), se);
+            log.info(se.getMsg(), se);
             return ResultUtil.error(se.getResultCode().code(), se.getResultCode().message());
         } catch (Exception e) {
             log.error(ResultCode.CART_ERROR.message(), e);
@@ -157,7 +157,7 @@ public class CartController {
     @GetMapping("/checked")
     public ResultMessage<TradeDTO> cartChecked(@NotNull(message = "读取选中列表") String way) {
         try {
-            // 读取选中的列表
+            //读取选中的列表
             return ResultUtil.data(this.cartService.getCheckedTradeDTO(CartTypeEnum.valueOf(way)));
         } catch (ServiceException se) {
             log.error(se.getMsg(), se);
@@ -239,7 +239,7 @@ public class CartController {
     @PostMapping(value = "/create/trade", consumes = "application/json", produces = "application/json")
     public ResultMessage<Object> crateTrade(@RequestBody TradeParams tradeParams) {
         try {
-            // 读取选中的列表
+            //读取选中的列表
             return ResultUtil.data(this.cartService.createTrade(tradeParams));
         } catch (ServiceException se) {
             log.error(se.getMsg(), se);

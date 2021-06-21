@@ -61,7 +61,7 @@ public class PromotionEverydayExecute implements EveryDayExecute {
     @Autowired
     private PromotionGoodsService promotionGoodsService;
 
-    // 系统设置
+    //系统设置
     @Autowired
     private SettingService settingService;
 
@@ -108,7 +108,7 @@ public class PromotionEverydayExecute implements EveryDayExecute {
             List<CouponVO> couponVOS = mongoTemplate.find(query, CouponVO.class);
             if (!couponVOS.isEmpty()) {
                 List<String> ids = new ArrayList<>();
-                //          // 关闭的优惠券活动
+                //         //关闭的优惠券活动
                 for (CouponVO vo : couponVOS) {
                     vo.setPromotionStatus(PromotionStatusEnum.END.name());
                     if (vo.getPromotionGoodsList() != null && !vo.getPromotionGoodsList().isEmpty()) {

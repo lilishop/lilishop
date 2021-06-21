@@ -100,14 +100,14 @@ public class CodeGenerator {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        // 模板路径
+        //模板路径
         ClasspathResourceLoader resourceLoader = new ClasspathResourceLoader("/templates/");
         Configuration cfg = Configuration.defaultConfiguration();
         GroupTemplate gt = new GroupTemplate(resourceLoader, cfg);
-        // 生成代码
+        //生成代码
         generateCode(gt);
         //根据类名删除生成的代码
-//        deleteCode(className);
+//       deleteCode(className);
     }
 
     /**
@@ -152,7 +152,7 @@ public class CodeGenerator {
             entityDir.mkdirs();
         }
         if (!entityFile.exists()) {
-            // 若文件存在则不重新生成
+            //若文件存在则不重新生成
             entityFile.createNewFile();
             out = new FileOutputStream(entityFile);
             entityTemplate.renderTo(out);
@@ -170,7 +170,7 @@ public class CodeGenerator {
             daoDir.mkdirs();
         }
         if (!daoFile.exists()) {
-            // 若文件存在则不重新生成
+            //若文件存在则不重新生成
             daoFile.createNewFile();
             out = new FileOutputStream(daoFile);
             daoTemplate.renderTo(out);
@@ -188,7 +188,7 @@ public class CodeGenerator {
             serviceDir.mkdirs();
         }
         if (!serviceFile.exists()) {
-            // 若文件存在则不重新生成
+            //若文件存在则不重新生成
             serviceFile.createNewFile();
             out = new FileOutputStream(serviceFile);
             serviceTemplate.renderTo(out);
@@ -207,7 +207,7 @@ public class CodeGenerator {
             serviceImplDir.mkdirs();
         }
         if (!serviceImplFile.exists()) {
-            // 若文件存在则不重新生成
+            //若文件存在则不重新生成
             serviceImplFile.createNewFile();
             out = new FileOutputStream(serviceImplFile);
             serviceImplTemplate.renderTo(out);
@@ -225,7 +225,7 @@ public class CodeGenerator {
             controllerDir.mkdirs();
         }
         if (!controllerFile.exists()) {
-            // 若文件存在则不重新生成
+            //若文件存在则不重新生成
             controllerFile.createNewFile();
             out = new FileOutputStream(controllerFile);
             controllerTemplate.renderTo(out);
@@ -243,7 +243,7 @@ public class CodeGenerator {
             mapperXmlDir.mkdirs();
         }
         if (!mapperXmlFile.exists()) {
-            // 若文件存在则不重新生成
+            //若文件存在则不重新生成
             mapperXmlFile.createNewFile();
             out = new FileOutputStream(mapperXmlFile);
             mapperXmlTemplate.renderTo(out);

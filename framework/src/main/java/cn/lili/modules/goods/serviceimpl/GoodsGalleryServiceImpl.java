@@ -45,10 +45,10 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
         //确定好图片选择器后进行处理
         int i = 0;
         for (String origin : goodsGalleryList) {
-            // 获取带所有缩略的相册
+            //获取带所有缩略的相册
             GoodsGallery galley = this.getGoodsGallery(origin);
             galley.setGoodsId(goodsId);
-            // 默认第一个为默认图片
+            //默认第一个为默认图片
             galley.setIsDefault(i == 0 ? 1 : 0);
             i++;
             this.baseMapper.insert(galley);

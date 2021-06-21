@@ -37,11 +37,11 @@ public class AdminApplication {
             successHandler.setDefaultTargetUrl(this.adminServer.path("/"));
             http.authorizeRequests().antMatchers("/instances**").permitAll();
             http.authorizeRequests(
-                    (authorizeRequests) -> authorizeRequests.antMatchers(this.adminServer.path("/assets/**")).permitAll() // 授予公众对所有静态资产和登录页面的访问权限。
+                    (authorizeRequests) -> authorizeRequests.antMatchers(this.adminServer.path("/assets/**")).permitAll() //授予公众对所有静态资产和登录页面的访问权限。
                             .antMatchers(this.adminServer.path("/login")).permitAll().anyRequest().authenticated() //其他所有请求都必须经过验证。
             ).formLogin(
-                    (formLogin) -> formLogin.loginPage(this.adminServer.path("/login")).successHandler(successHandler).and() // 	配置登录和注销。
-            ).logout((logout) -> logout.logoutUrl(this.adminServer.path("/logout"))).httpBasic(Customizer.withDefaults()) // 启用HTTP基本支持。这是Spring Boot Admin Client注册所必需的。
+                    (formLogin) -> formLogin.loginPage(this.adminServer.path("/login")).successHandler(successHandler).and() //配置登录和注销。
+            ).logout((logout) -> logout.logoutUrl(this.adminServer.path("/logout"))).httpBasic(Customizer.withDefaults()) //启用HTTP基本支持。这是Spring Boot Admin Client注册所必需的。
                     .csrf().disable()
                     .rememberMe((rememberMe) -> rememberMe.key(UUID.randomUUID().toString()).tokenValiditySeconds(1209600));
         }

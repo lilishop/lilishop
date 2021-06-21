@@ -83,10 +83,10 @@ public class RedisConfig extends CachingConfigurerSupport {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         //使用fastjson序列化
         FastJsonRedisSerializer fastJsonRedisSerializer = new FastJsonRedisSerializer(Object.class);
-        // value值的序列化采用fastJsonRedisSerializer
+        //value值的序列化采用fastJsonRedisSerializer
         template.setValueSerializer(fastJsonRedisSerializer);
         template.setHashValueSerializer(fastJsonRedisSerializer);
-        // key的序列化采用StringRedisSerializer
+        //key的序列化采用StringRedisSerializer
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
         template.setConnectionFactory(lettuceConnectionFactory);
@@ -102,19 +102,19 @@ public class RedisConfig extends CachingConfigurerSupport {
         return (target, method, params) -> {
             Map<String, Object> container = new HashMap<>(3);
             Class<?> targetClassClass = target.getClass();
-            // 类地址
+            //类地址
             container.put("class", targetClassClass.toGenericString());
-            // 方法名称
+            //方法名称
             container.put("methodName", method.getName());
-            // 包名称
+            //包名称
             container.put("package", targetClassClass.getPackage());
-            // 参数列表
+            //参数列表
             for (int i = 0; i < params.length; i++) {
                 container.put(String.valueOf(i), params[i]);
             }
-            // 转为JSON字符串
+            //转为JSON字符串
             String jsonString = JSON.toJSONString(container);
-            // 做SHA256 Hash计算，得到一个SHA256摘要作为Key
+            //做SHA256 Hash计算，得到一个SHA256摘要作为Key
             return DigestUtils.sha256Hex(jsonString);
         };
     }
@@ -122,7 +122,7 @@ public class RedisConfig extends CachingConfigurerSupport {
     @Bean
     @Override
     public CacheErrorHandler errorHandler() {
-        // 异常处理，当Redis发生异常时，打印日志，但是程序正常走
+        //异常处理，当Redis发生异常时，打印日志，但是程序正常走
         log.info("初始化 -> [{}]", "Redis CacheErrorHandler");
         return new CacheErrorHandler() {
             @Override

@@ -50,11 +50,11 @@ public class PasswordUtil {
      * @return Key PBE算法密钥
      */
     private static Key getPBEKey(String password) throws Exception {
-        // 实例化使用的算法
+        //实例化使用的算法
         SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(ALGORITHM);
-        // 设置PBE密钥参数
+        //设置PBE密钥参数
         PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray());
-        // 生成密钥
+        //生成密钥
         SecretKey secretKey = keyFactory.generateSecret(keySpec);
 
         return secretKey;

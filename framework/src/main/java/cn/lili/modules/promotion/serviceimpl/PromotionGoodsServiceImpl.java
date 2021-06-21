@@ -130,14 +130,14 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(PromotionGoods::getSkuId, cartSkuVO.getGoodsSku().getId()).eq(PromotionGoods::getPromotionStatus, PromotionStatusEnum.START.name());
         queryWrapper.le(PromotionGoods::getStartTime, date);
-        // 获取有效的促销活动
+        //获取有效的促销活动
         List<PromotionGoods> promotionGoods = this.list(queryWrapper);
-        // 同步查询缓存中的促销活动商品的库存
+        //同步查询缓存中的促销活动商品的库存
         for (PromotionGoods promotionGood : promotionGoods) {
             Integer goodsStock = this.getPromotionGoodsStock(PromotionTypeEnum.valueOf(promotionGood.getPromotionType()), promotionGood.getPromotionId(), promotionGood.getSkuId());
             promotionGood.setQuantity(goodsStock);
         }
-        // 单独检查，添加适用于全品类的满优惠活动
+        //单独检查，添加适用于全品类的满优惠活动
         Query query = new Query();
         query.addCriteria(Criteria.where("promotionStatus").is(PromotionStatusEnum.START.name()));
         query.addCriteria(Criteria.where("startTime").lte(date));
@@ -154,7 +154,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
                 promotionGoods.add(p);
             }
         }
-        // 单独检查，添加适用于全品类的全平台或属于当前店铺的满优惠活动
+        //单独检查，添加适用于全品类的全平台或属于当前店铺的满优惠活动
         List<CouponVO> couponVOS = mongoTemplate.find(query, CouponVO.class);
         for (CouponVO couponVO : couponVOS) {
             if (couponVO.getPromotionGoodsList() == null && couponVO.getScopeType().equals(CouponScopeTypeEnum.ALL.name()) &&
@@ -214,7 +214,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         query.addCriteria(Criteria.where("endTime").gt(now));
         List<PromotionGoodsDTO> promotionGoodsDTOList = new ArrayList<>();
         int total = 0;
-        // 根据促销活动类型的不同，将满足当前促销活动类型且正在进行的促销商品返回出去
+        //根据促销活动类型的不同，将满足当前促销活动类型且正在进行的促销商品返回出去
         switch (PromotionTypeEnum.valueOf(promotionType)) {
             case FULL_DISCOUNT:
                 List<FullDiscountVO> fullDiscountVOS = this.mongoTemplate.find(query, FullDiscountVO.class);
@@ -395,7 +395,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         searchParams.setSort(pageVo.getSort());
         searchParams.setOrder(pageVo.getOrder());
         IPage<GoodsSku> goodsSkuByPage = goodsSkuService.getGoodsSkuByPage(searchParams);
-        // 将查询到的商品sku转换为促销商品
+        //将查询到的商品sku转换为促销商品
         for (GoodsSku record : goodsSkuByPage.getRecords()) {
             PromotionGoodsDTO promotionGoods = new PromotionGoodsDTO(record);
             promotionGoods.setGoodsImage(record.getThumbnail());
