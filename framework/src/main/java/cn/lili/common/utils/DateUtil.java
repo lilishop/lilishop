@@ -87,6 +87,9 @@ public class DateUtil {
      * @return
      */
     public static Date endOfDate(Date date) {
+        if (date == null) {
+            date = new Date();
+        }
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
@@ -194,21 +197,23 @@ public class DateUtil {
     /**
      * 把日期转换成字符串型
      *
-     * @param date    日期
+     * @param date 日期
      * @return
      */
     public static String toString(Date date) {
-        return toString(date,STANDARD_FORMAT);
+        return toString(date, STANDARD_FORMAT);
     }
+
     /**
      * 把日期转换成字符串型
      *
-     * @param Long    日期
+     * @param Long 日期
      * @return
      */
     public static String toString(Long date) {
-        return toString(date,STANDARD_FORMAT);
+        return toString(date, STANDARD_FORMAT);
     }
+
     /**
      * 把日期转换成字符串型
      *
