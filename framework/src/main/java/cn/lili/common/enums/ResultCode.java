@@ -57,7 +57,8 @@ public enum ResultCode {
     GOODS_UPPER_ERROR(11004, "商品上架失败"),
     GOODS_AUTH_ERROR(11005, "商品审核失败"),
     POINT_GOODS_ERROR(11006, "积分商品业务异常，请稍后重试"),
-    GOODS_SKU_ERROR(11007, "SKU信息均为必填项，不能为空"),
+    GOODS_SKU_SN_ERROR(11007, "商品SKU编号不能为空"),
+    GOODS_SKU_PRICE_ERROR(11008, "商品SKU价格不能小于等于0"),
 
     /**
      * 参数
