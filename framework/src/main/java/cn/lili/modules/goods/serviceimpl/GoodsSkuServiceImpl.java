@@ -658,11 +658,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
     }
 
-    private void updateSkuCache() {
-
-    }
-
-
     @Autowired
     public void setGoodsService(GoodsService goodsService) {
         this.goodsService = goodsService;
