@@ -240,8 +240,11 @@ public class Goods extends BaseEntity {
             if (StringUtil.isEmpty(sku.get("cost").toString()) || Integer.parseInt( sku.get("cost").toString()) <= 0) {
                 throw new ServiceException(ResultCode.GOODS_SKU_COST_ERROR);
             }
-            if (StringUtil.isEmpty(sku.get("weight").toString()) || Integer.parseInt( sku.get("weight").toString()) < 0) {
-                throw new ServiceException(ResultCode.GOODS_SKU_WEIGHT_ERROR);
+            //虚拟商品没有重量字段
+            if(sku.containsKey("weight")) {
+                if (StringUtil.isEmpty(sku.get("weight").toString()) || Integer.parseInt(sku.get("weight").toString()) < 0) {
+                    throw new ServiceException(ResultCode.GOODS_SKU_WEIGHT_ERROR);
+                }
             }
             if (StringUtil.isEmpty(sku.get("quantity").toString()) || Integer.parseInt( sku.get("quantity").toString()) < 0) {
                 throw new ServiceException(ResultCode.GOODS_SKU_QUANTITY_ERROR);
