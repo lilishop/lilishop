@@ -12,3 +12,6 @@ ALTER TABLE li_coupon ADD range_day_type VARCHAR ( 32 );
 ALTER TABLE li_coupon ADD effective_days INT;
 /**秒杀增加显示商品数量**/
 ALTER TABLE li_seckill ADD goods_num INT;
+
+/**商品参数增加字段**/
+ALTER TABLE li_goods_params ADD is_index INT;

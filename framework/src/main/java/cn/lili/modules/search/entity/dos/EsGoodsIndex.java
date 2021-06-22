@@ -1,10 +1,6 @@
 package cn.lili.modules.search.entity.dos;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import cn.lili.common.elasticsearch.EsSuffix;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.GoodsParams;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -300,7 +296,7 @@ public class EsGoodsIndex implements Serializable {
             List<EsGoodsAttribute> attributes = new ArrayList<>();
             for (GoodsParams goodsParam : goodsParams) {
                 EsGoodsAttribute attribute = new EsGoodsAttribute();
-                if (goodsParam.getIsIndex() == 1) {
+                if (goodsParam.getIsIndex() != null && goodsParam.getIsIndex() == 1) {
                     attribute.setType(1);
                     attribute.setName(goodsParam.getParamName());
                     attribute.setValue(goodsParam.getParamValue());
