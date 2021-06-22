@@ -17,7 +17,7 @@ public enum ResultCode {
     /**
      * 失败返回码
      */
-    ERROR(400, "失败"),
+    ERROR(400, "服务器繁忙，请稍后重试"),
 
     /**
      * 失败返回码
