@@ -15,8 +15,8 @@ import lombok.Data;
 public class SpecificationSearchParams {
 
 
-    @ApiModelProperty(value = "规格名")
-    private String specName;
+    @ApiModelProperty(value = "规格id")
+    private String specId;
 
     @ApiModelProperty(value = "绑定分类")
     private String categoryPath;
@@ -26,7 +26,7 @@ public class SpecificationSearchParams {
 
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
-        queryWrapper.like(StringUtils.isNotEmpty(specName), "spec_name", specName);
+        queryWrapper.eq(StringUtils.isNotEmpty(specId), "spec_id", specId);
         queryWrapper.eq(deleteFlag != null, "delete_flag", deleteFlag);
         return queryWrapper;
     }
