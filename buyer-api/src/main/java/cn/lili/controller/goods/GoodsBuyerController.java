@@ -1,6 +1,8 @@
 package cn.lili.controller.goods;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.distribution.service.DistributionService;
@@ -20,6 +22,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +40,7 @@ import java.util.Map;
  * @author Chopper
  * @date 2020/11/16 10:06 下午
  */
+@Slf4j
 @Api(tags = "买家端,商品接口")
 @RestController
 @RequestMapping("/buyer/goods")
@@ -80,9 +84,18 @@ public class GoodsBuyerController {
     @PageViewPoint(type = PageViewEnum.SKU, id = "#id")
     public ResultMessage<Map<String, Object>> getSku(@NotNull(message = "商品ID不能为空") @PathVariable("goodsId") String goodsId,
                                                      @NotNull(message = "SKU ID不能为空") @PathVariable("skuId") String skuId) {
+        try {
+            // 读取选中的列表
+            Map<String, Object> map = goodsSkuService.getGoodsSkuDetail(goodsId, skuId);
+            return ResultUtil.data(map);
+        } catch (ServiceException se) {
+            log.error(se.getMsg(), se);
+            return ResultUtil.error(se.getResultCode().code(), se.getResultCode().message());
+        } catch (Exception e) {
+            log.error(ResultCode.GOODS_ERROR.message(), e);
+            return ResultUtil.error(ResultCode.GOODS_ERROR);
+        }
 
-        Map<String, Object> map = goodsSkuService.getGoodsSkuDetail(goodsId, skuId);
-        return ResultUtil.data(map);
     }
 
     @ApiOperation(value = "获取商品分页列表")
