@@ -50,6 +50,7 @@ public enum ResultCode {
     /**
      * 商品
      */
+    GOODS_ERROR(11010, "读取商品异常"),
     GOODS_NOT_EXIST(11001, "商品已下架"),
     GOODS_NAME_ERROR(11002, "商品名称不正确，名称应为2-50字符"),
     GOODS_UNDER_ERROR(11003, "商品下架失败"),
