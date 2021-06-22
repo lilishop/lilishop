@@ -93,13 +93,13 @@ public class WechatLivePlayerUtil {
         //发送url
         String url = "https://api.weixin.qq.com/wxa/business/getliveinfo?access_token=" + token;
         Map<String, Object> map = new HashMap<>();
-        // 获取回放
+        //获取回放
         map.put("action", "get_replay");
-        // 直播间ID
+        //直播间ID
         map.put("room_id", roomId);
-        // 起始拉取视频，0表示从第一个视频片段开始拉取
+        //起始拉取视频，0表示从第一个视频片段开始拉取
         map.put("start", "0");
-        // 每次拉取的数量，建议100以内
+        //每次拉取的数量，建议100以内
         map.put("limit", "1");
 
         String content = HttpUtils.doPostWithJson(url, map);
@@ -122,10 +122,10 @@ public class WechatLivePlayerUtil {
         //发送url
         String url = "https://api.weixin.qq.com/wxaapi/broadcast/room/addgoods?access_token=" + token;
         Map<String, Object> map = new HashMap<>();
-        // 直播间回放
+        //直播间回放
         Integer[] ids = {goodsId};
         map.put("ids", ids);
-        // 商品ID
+        //商品ID
         map.put("roomId", roomId);
         String content = HttpUtils.doPostWithJson(url, map);
         JSONObject json = new JSONObject(content);
@@ -149,9 +149,9 @@ public class WechatLivePlayerUtil {
         //发送url
         String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/deleteInRoom?access_token=" + token;
         Map<String, Integer> map = new HashMap<>();
-        // 直播间回放
+        //直播间回放
         map.put("goodsId", goodsId);
-        // 商品ID
+        //商品ID
         map.put("roomId", roomId);
         String content = HttpUtils.doPostWithJson(url, map);
         JSONObject json = new JSONObject(content);
@@ -229,31 +229,31 @@ public class WechatLivePlayerUtil {
 
     private Map<String, String> mockRoom(String token, Studio studio) {
         Map<String, String> map = new HashMap<>();
-        // 背景图
+        //背景图
         map.put("coverImg", wechatMediaUtil.uploadMedia(token, "image", studio.getCoverImg()));
-        // 分享图
+        //分享图
         map.put("shareImg", wechatMediaUtil.uploadMedia(token, "image", studio.getShareImg()));
-        // 购物直播频道封面图
+        //购物直播频道封面图
         map.put("feedsImg", wechatMediaUtil.uploadMedia(token, "image", studio.getFeedsImg()));
-        // 直播间名字
+        //直播间名字
         map.put("name", studio.getName());
-        // 直播计划开始时间
+        //直播计划开始时间
         map.put("startTime", studio.getStartTime());
-        // 直播计划结束时间
+        //直播计划结束时间
         map.put("endTime", studio.getEndTime());
-        // 主播昵称
+        //主播昵称
         map.put("anchorName", studio.getAnchorName());
-        // 主播微信号
+        //主播微信号
         map.put("anchorWechat", studio.getAnchorWechat());
-        // 直播间类型
+        //直播间类型
         map.put("type", "0");
-        // 是否关闭点赞
+        //是否关闭点赞
         map.put("closeLike", "0");
-        // 是否关闭货架
+        //是否关闭货架
         map.put("closeGoods", "0");
-        // 是否关闭评论
+        //是否关闭评论
         map.put("closeComment", "0");
-        // 直播间名字
+        //直播间名字
         map.put("closeReplay", "0");
 
         return map;

@@ -80,11 +80,11 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
                 distributionOrder.setDistributionName(distribution.getMemberName());
 
                 //设置结算天数(解冻日期)
-//                Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
-//                DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
+//               Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
+//               DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
                 DateTime dateTime = new DateTime();
                 //默认解冻1天
-//                dateTime.offsetNew(DateField.DAY_OF_MONTH,distributionSetting.getCashDay());
+//               dateTime.offsetNew(DateField.DAY_OF_MONTH,distributionSetting.getCashDay());
                 dateTime.offsetNew(DateField.DAY_OF_MONTH,1);
                 distributionOrder.setSettleCycle(dateTime);
                 this.save(distributionOrder);

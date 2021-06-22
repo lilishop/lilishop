@@ -49,7 +49,7 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
 
         //从header中获取jwt
         String jwt = request.getHeader(SecurityEnum.HEADER_TOKEN.getValue());
-        // 如果没有token 则return
+        //如果没有token 则return
         if (StrUtil.isBlank(jwt)) {
             chain.doFilter(request, response);
             return;
@@ -77,20 +77,20 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
         } else {
             //用户是否拥有权限判定œ
             //获取数据权限
-//            if (request.getMethod().equals(RequestMethod.GET.name())) {
-//                if (!PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER).toArray(new String[0]), request.getRequestURI()) ||
-//                        PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.QUERY).toArray(new String[0]), request.getRequestURI())) {
+//           if (request.getMethod().equals(RequestMethod.GET.name())) {
+//               if (!PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER).toArray(new String[0]), request.getRequestURI()) ||
+//                       PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.QUERY).toArray(new String[0]), request.getRequestURI())) {
 //
-//                    ResponseUtil.output(response, ResponseUtil.resultMap(false, 401, "抱歉，您没有访问权限"));
-//                    throw new NoPermissionException("权限不足");
-//                }
-//            } else {
-//                if (!PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER).toArray(new String[0]), request.getRequestURI())) {
+//                   ResponseUtil.output(response, ResponseUtil.resultMap(false, 401, "抱歉，您没有访问权限"));
+//                   throw new NoPermissionException("权限不足");
+//               }
+//           } else {
+//               if (!PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER).toArray(new String[0]), request.getRequestURI())) {
 //
-//                    ResponseUtil.output(response, ResponseUtil.resultMap(false, 401, "抱歉，您没有访问权限"));
-//                    throw new NoPermissionException("权限不足");
-//                }
-//            }
+//                   ResponseUtil.output(response, ResponseUtil.resultMap(false, 401, "抱歉，您没有访问权限"));
+//                   throw new NoPermissionException("权限不足");
+//               }
+//           }
             return;
         }
     }
@@ -113,7 +113,7 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
             String json = claims.get(SecurityEnum.USER_CONTEXT.getValue()).toString();
             AuthUser authUser = new Gson().fromJson(json, AuthUser.class);
 
-            // 校验redis中是否有权限
+            //校验redis中是否有权限
             if (cache.hasKey(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MANAGER) + jwt)) {
                 //用户角色
                 List<GrantedAuthority> auths = new ArrayList<>();

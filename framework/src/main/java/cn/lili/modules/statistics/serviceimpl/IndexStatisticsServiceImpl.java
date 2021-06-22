@@ -170,15 +170,15 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         queryParam.setSearchType(SearchTypeEnum.TODAY.name());
         indexStatisticsVO.setTodayUV(platformViewDataService.countUv(queryParam));
 
-//        昨日访问数UV
+//       昨日访问数UV
         queryParam.setSearchType(SearchTypeEnum.YESTERDAY.name());
         indexStatisticsVO.setYesterdayUV(platformViewDataService.countUv(queryParam));
 
-//        前七日访问数UV
+//       前七日访问数UV
         queryParam.setSearchType(SearchTypeEnum.LAST_SEVEN.name());
         indexStatisticsVO.setLastSevenUV(platformViewDataService.countUv(queryParam));
 
-//        三十日访问数UV
+//       三十日访问数UV
         queryParam.setSearchType(SearchTypeEnum.LAST_THIRTY.name());
         indexStatisticsVO.setLastThirtyUV(platformViewDataService.countUv(queryParam));
 

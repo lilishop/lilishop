@@ -107,7 +107,7 @@ public class AuthWeiboRequest extends AuthDefaultRequest {
                     .msg(object.getString("error"))
                     .build();
         }
-        // 返回 result = true 表示取消授权成功，否则失败
+        //返回 result = true 表示取消授权成功，否则失败
         AuthResponseStatus status = object.getBooleanValue("result") ? AuthResponseStatus.SUCCESS : AuthResponseStatus.FAILURE;
         return AuthResponse.builder().code(status.getCode()).msg(status.getMsg()).build();
     }

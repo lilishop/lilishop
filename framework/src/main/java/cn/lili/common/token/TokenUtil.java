@@ -121,15 +121,15 @@ public class TokenUtil {
      * @return
      */
     private String createToken(String username, Object claim, Long expirationTime) {
-        // JWT 生成
+        //JWT 生成
         return Jwts.builder()
-                // jwt 私有声明
+                //jwt 私有声明
                 .claim(SecurityEnum.USER_CONTEXT.getValue(), new Gson().toJson(claim))
-                // JWT的主体
+                //JWT的主体
                 .setSubject(username)
-                // 失效时间 当前时间+过期分钟
+                //失效时间 当前时间+过期分钟
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime * 60 * 1000))
-                // 签名算法和密钥
+                //签名算法和密钥
                 .signWith(SecretKeyUtil.generalKey())
                 .compact();
     }

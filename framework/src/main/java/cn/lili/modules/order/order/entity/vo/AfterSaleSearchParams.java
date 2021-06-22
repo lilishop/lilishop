@@ -72,11 +72,11 @@ public class AfterSaleSearchParams extends PageVO {
         if (StringUtils.isNotEmpty(orderSn)) {
             queryWrapper.like("order_sn", orderSn);
         }
-        // 按买家查询
+        //按买家查询
         if (StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.MEMBER.name())) {
             queryWrapper.eq("member_id", UserContext.getCurrentUser().getId());
         }
-        // 按卖家查询
+        //按卖家查询
         if (StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name())) {
             queryWrapper.eq("store_id", UserContext.getCurrentUser().getStoreId());
         }
@@ -96,7 +96,7 @@ public class AfterSaleSearchParams extends PageVO {
         if (StringUtils.isNotEmpty(goodsName)) {
             queryWrapper.like("goods_name", goodsName);
         }
-        // 按时间查询
+        //按时间查询
         if (startDate != null) {
             queryWrapper.ge("create_time", startDate);
         }

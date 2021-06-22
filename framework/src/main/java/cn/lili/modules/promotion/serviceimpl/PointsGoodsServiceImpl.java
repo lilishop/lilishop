@@ -115,7 +115,7 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
             this.mongoTemplate.save(pointsGoods);
             if (pointsGoods.getStartTime().getTime() != pointsGoodsVO.getStartTime().getTime()) {
                 PromotionMessage promotionMessage = new PromotionMessage(pointsGoods.getId(), PromotionTypeEnum.POINTS_GOODS.name(), PromotionStatusEnum.START.name(), pointsGoods.getStartTime(), pointsGoods.getEndTime());
-                // 更新延时任务
+                //更新延时任务
                 this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
                         promotionMessage,
                         pointsGoodsVO.getStartTime().getTime(),
@@ -245,7 +245,7 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
                 promotionMessage,
                 DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                 rocketmqCustomProperties.getPromotionTopic());
-        // 发送促销活动开始的延时任务
+        //发送促销活动开始的延时任务
         this.timeTrigger.addDelay(timeTriggerMsg);
     }
 

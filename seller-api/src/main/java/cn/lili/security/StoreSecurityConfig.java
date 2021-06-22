@@ -46,34 +46,34 @@ public class StoreSecurityConfig extends WebSecurityConfigurerAdapter {
 
         ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry = http
                 .authorizeRequests();
-        // 配置的url 不需要授权
+        //配置的url 不需要授权
         for (String url : ignoredUrlsProperties.getUrls()) {
             registry.antMatchers(url).permitAll();
         }
         registry.and()
-                // 禁止网页iframe
+                //禁止网页iframe
                 .headers().frameOptions().disable()
                 .and()
                 .logout()
                 .permitAll()
                 .and()
                 .authorizeRequests()
-                // 任何请求
+                //任何请求
                 .anyRequest()
-                // 需要身份认证
+                //需要身份认证
                 .authenticated()
                 .and()
-                // 允许跨域
+                //允许跨域
                 .cors().configurationSource((CorsConfigurationSource) SpringContextUtil.getBean("corsConfigurationSource")).and()
-                // 关闭跨站请求防护
+                //关闭跨站请求防护
                 .csrf().disable()
-                // 前后端分离采用JWT 不需要session
+                //前后端分离采用JWT 不需要session
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                // 自定义权限拒绝处理类
+                //自定义权限拒绝处理类
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler)
                 .and()
-                // 添加JWT认证过滤器
+                //添加JWT认证过滤器
                 .addFilter(new StoreAuthenticationFilter(authenticationManager(), cache));
     }
 

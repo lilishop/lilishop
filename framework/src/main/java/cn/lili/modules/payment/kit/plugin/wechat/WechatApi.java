@@ -177,7 +177,7 @@ public class WechatApi {
                                          String mchId, String serialNo, String platSerialNo, String keyPath,
                                          String body, String nonceStr, long timestamp, String authType,
                                          File file) throws Exception {
-        // 构建 Authorization
+        //构建 Authorization
         String authorization = WxPayKit.buildAuthorization(method, urlSuffix, mchId, serialNo,
                 keyPath, body, nonceStr, timestamp, authType);
 
@@ -220,7 +220,7 @@ public class WechatApi {
                                          String mchId, String serialNo, String platSerialNo, PrivateKey privateKey,
                                          String body, String nonceStr, long timestamp, String authType,
                                          File file) throws Exception {
-        // 构建 Authorization
+        //构建 Authorization
         String authorization = WxPayKit.buildAuthorization(method, urlSuffix, mchId, serialNo,
                 privateKey, body, nonceStr, timestamp, authType);
 

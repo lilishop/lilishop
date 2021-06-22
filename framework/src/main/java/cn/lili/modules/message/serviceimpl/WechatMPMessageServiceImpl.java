@@ -180,7 +180,7 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
 class WechatMPMessageData {
 
     /**
-     * 场景描述 //  等于本服务器模版名称
+     * 场景描述 // 等于本服务器模版名称
      */
     String sceneDesc;
 

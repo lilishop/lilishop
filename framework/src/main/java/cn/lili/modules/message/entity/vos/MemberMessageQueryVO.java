@@ -1,17 +1,19 @@
-package cn.lili.modules.member.entity.vo;
+package cn.lili.modules.message.entity.vos;
 
 import cn.lili.modules.message.entity.enums.MessageStatusEnum;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 
 /**
- * 会员消息查询
+ * 会员接收消息查询vo
  *
  * @author Chopper
- * @date 2020-02-25 14:10:16
+ * @date 2020/12/2 17:50
  */
 @Data
+@ApiModel(value = "会员接收消息查询vo")
 public class MemberMessageQueryVO {
 
     private static final long serialVersionUID = 1L;
@@ -21,6 +23,9 @@ public class MemberMessageQueryVO {
      */
     @ApiModelProperty(value = "状态")
     private String status;
+
+    @ApiModelProperty(value = "消息id")
+    private String messageId;
 
     @ApiModelProperty(value = "消息标题")
     private String title;

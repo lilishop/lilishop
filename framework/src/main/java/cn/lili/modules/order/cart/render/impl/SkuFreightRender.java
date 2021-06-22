@@ -118,7 +118,7 @@ public class SkuFreightRender implements CartRenderStep {
                 return finalFreight;
             }
             Double continuedCount = count - template.getFirstCompany();
-            // 计算续重价格
+            //计算续重价格
             return CurrencyUtil.add(finalFreight,
                     CurrencyUtil.mul(NumberUtil.parseInt(String.valueOf((continuedCount / template.getContinuedCompany()))), template.getContinuedPrice()));
         } catch (Exception e) {

@@ -91,7 +91,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     public void add(List<Map<String, Object>> skuList, Goods goods) {
         // 检查是否需要生成索引
         List<GoodsSku> newSkuList;
-        // 如果有规格
+        //如果有规格
         if (skuList != null && !skuList.isEmpty()) {
             // 添加商品sku
             newSkuList = this.addGoodsSku(skuList, goods);
@@ -201,7 +201,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         } else if (!goodsSku.getMarketEnable().equals(GoodsStatusEnum.UPPER.name()) || !goodsVO.getIsAuth().equals(GoodsAuthEnum.PASS.name()) || Boolean.TRUE.equals(goodsSku.getDeleteFlag())) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
-        // 获取当前商品的索引信息
+        //获取当前商品的索引信息
         EsGoodsIndex goodsIndex = goodsIndexService.findById(skuId);
         if (goodsIndex == null) {
             goodsIndex = goodsIndexService.resetEsGoodsIndex(goodsSku, goodsVO.getGoodsParamsList());
@@ -209,7 +209,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //商品规格
         GoodsSkuVO goodsSkuDetail = this.getGoodsSkuVO(goodsSku);
 
-        // 设置当前商品的促销价格
+        //设置当前商品的促销价格
         if (goodsIndex.getPromotionMap() != null && !goodsIndex.getPromotionMap().isEmpty() && goodsIndex.getPromotionPrice() != null) {
             goodsSkuDetail.setPromotionPrice(goodsIndex.getPromotionPrice());
         }
@@ -429,13 +429,13 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         goodEvaluationQueryWrapper.eq(MemberEvaluation::getSkuId, goodsSku.getId());
         goodEvaluationQueryWrapper.eq(MemberEvaluation::getGrade, EvaluationGradeEnum.GOOD.name());
 
-        // 好评数量
+        //好评数量
         int highPraiseNum = memberEvaluationService.count(goodEvaluationQueryWrapper);
 
-        // 更新商品评价数量
+        //更新商品评价数量
         goodsSku.setCommentNum(goodsSku.getCommentNum() != null ? goodsSku.getCommentNum() + 1 : 1);
 
-        // 好评率
+        //好评率
         double grade = NumberUtil.mul(NumberUtil.div(highPraiseNum, goodsSku.getCommentNum().doubleValue(), 2), 100);
         goodsSku.setGrade(grade);
         //修改规格

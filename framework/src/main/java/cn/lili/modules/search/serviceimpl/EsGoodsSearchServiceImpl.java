@@ -135,7 +135,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
      */
     private EsGoodsRelatedInfo convertToEsGoodsRelatedInfo(Map<String, Aggregation> aggregationMap, EsGoodsSearchDTO goodsSearch) {
         EsGoodsRelatedInfo esGoodsRelatedInfo = new EsGoodsRelatedInfo();
-        // 分类
+        //分类
         List<SelectorOptions> categoryOptions = new ArrayList<>();
         ParsedStringTerms categoryTerms = (ParsedStringTerms) aggregationMap.get("categoryAgg");
         List<? extends Terms.Bucket> categoryBuckets = categoryTerms.getBuckets();
@@ -275,13 +275,13 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             //对查询条件进行处理
             this.commonSearch(filterBuilder, queryBuilder, searchDTO, isAggregation);
 
-            // 未上架的商品不显示
+            //未上架的商品不显示
             filterBuilder.must(QueryBuilders.matchQuery("marketEnable", GoodsStatusEnum.UPPER.name()));
-            // 待审核和审核不通过的商品不显示
+            //待审核和审核不通过的商品不显示
             filterBuilder.must(QueryBuilders.matchQuery("isAuth", GoodsAuthEnum.PASS.name()));
 
 
-            // 关键字检索
+            //关键字检索
             if (StringUtils.isEmpty(searchDTO.getKeyword())) {
                 nativeSearchQueryBuilder.withQuery(QueryBuilders.matchAllQuery());
             } else {
@@ -352,7 +352,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
                 if (!valueList.contains(value)) {
                     valueList.add(value);
                 }
-                // 将同一规格名下的规格值分组
+                //将同一规格名下的规格值分组
                 if (!valueMap.containsKey(name)) {
                     List<String> values = new ArrayList<>();
                     values.add(value);
@@ -367,7 +367,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             } else {
                 usedQueryBuilder = queryBuilder;
             }
-            // 遍历所有的规格
+            //遍历所有的规格
             for (Map.Entry<String, List<String>> entry : valueMap.entrySet()) {
                 usedQueryBuilder.must(QueryBuilders.nestedQuery(ATTR_PATH, QueryBuilders.wildcardQuery(ATTR_NAME, "*" + entry.getKey() + "*"), ScoreMode.None));
                 BoolQueryBuilder shouldBuilder = QueryBuilders.boolQuery();

@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 消息发送业务层
+ * 店铺接收消息业务层
  *
  * @author Chopper
  * @date 2020/11/17 3:44 下午
@@ -34,7 +34,7 @@ public interface StoreMessageService extends IService<StoreMessage> {
     IPage<StoreMessage> getPage(StoreMessageQueryVO storeMessageQueryVO, PageVO pageVO);
 
     /**
-     * 保存消息信息
+     * 保存店铺消息信息
      *
      * @param messages 消息
      * @return

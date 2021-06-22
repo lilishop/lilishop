@@ -73,11 +73,11 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
      * @param orderSetting 订单设置
      */
     private void completedOrder(OrderSetting orderSetting) {
-        // 订单自动收货时间 = 当前时间 - 自动收货时间天数
+        //订单自动收货时间 = 当前时间 - 自动收货时间天数
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getAutoEvaluation());
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Order::getOrderStatus, OrderStatusEnum.DELIVERED.name());
-        // 订单发货时间 >= 订单自动收货时间
+        //订单发货时间 >= 订单自动收货时间
         queryWrapper.ge(Order::getLogisticsTime, receiveTime);
         List<Order> list = orderService.list(queryWrapper);
         List<String> receiveSnList = list.stream().map(Order::getSn).collect(Collectors.toList());
@@ -98,9 +98,9 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
      * @param orderSetting 订单设置
      */
     private void memberEvaluation(OrderSetting orderSetting) {
-        // 订单自动收货时间 = 当前时间 - 自动收货时间天数
+        //订单自动收货时间 = 当前时间 - 自动收货时间天数
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getAutoReceive());
-        // 订单完成时间 <= 订单自动好评时间
+        //订单完成时间 <= 订单自动好评时间
         List<OrderItem> orderItems = orderItemService.waitEvaluate(receiveTime);
 
         for (OrderItem orderItem : orderItems) {

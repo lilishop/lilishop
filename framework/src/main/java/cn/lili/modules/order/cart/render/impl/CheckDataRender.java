@@ -70,7 +70,7 @@ public class CheckDataRender implements CartRenderStep {
                 cartSkuVO.setErrorMessage("商品信息发生变化,已失效");
                 continue;
             }
-            // 商品上架状态判定
+            //商品上架状态判定
             if (!GoodsAuthEnum.PASS.name().equals(dataSku.getIsAuth()) || !GoodsStatusEnum.UPPER.name().equals(dataSku.getMarketEnable())) {
                 //设置购物车未选中
                 cartSkuVO.setChecked(false);
@@ -80,7 +80,7 @@ public class CheckDataRender implements CartRenderStep {
                 cartSkuVO.setErrorMessage("商品已下架");
                 continue;
             }
-            // 商品库存判定
+            //商品库存判定
             if (dataSku.getQuantity() < cartSkuVO.getNum()) {
                 //设置购物车未选中
                 cartSkuVO.setChecked(false);
@@ -98,10 +98,10 @@ public class CheckDataRender implements CartRenderStep {
      * @param tradeDTO
      */
     private void groupStore(TradeDTO tradeDTO) {
-        // 渲染的购物车
+        //渲染的购物车
         List<CartVO> cartList = new ArrayList<>();
 
-        // 根据店铺分组
+        //根据店铺分组
         Map<String, List<CartSkuVO>> storeCollect = tradeDTO.getSkuList().parallelStream().collect(Collectors.groupingBy(CartSkuVO::getStoreId));
         for (Map.Entry<String, List<CartSkuVO>> storeCart : storeCollect.entrySet()) {
             if (!storeCart.getValue().isEmpty()) {

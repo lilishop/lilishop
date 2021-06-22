@@ -79,15 +79,15 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
 
     @Override
     public CouponVO add(CouponVO coupon) {
-        // 检查参数
+        //检查参数
         this.checkParam(coupon);
         coupon.setUsedNum(0);
         coupon.setReceivedNum(0);
-        // 保存到MYSQL中
+        //保存到MYSQL中
         this.save(coupon);
-        // 如果优惠券类型为部分商品则将促销活动商品更新
+        //如果优惠券类型为部分商品则将促销活动商品更新
         this.updateScopePromotionGoods(coupon);
-        // 保存到MONGO中
+        //保存到MONGO中
         this.mongoTemplate.save(coupon);
         //如果优惠券是固定时间则添加延时任务
         if (coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
@@ -97,7 +97,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
                     promotionMessage,
                     DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
                     rocketmqCustomProperties.getPromotionTopic());
-            // 发送促销活动开始的延时任务
+            //发送促销活动开始的延时任务
             this.timeTrigger.addDelay(timeTriggerMsg);
         }
 
@@ -107,16 +107,16 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
     @Override
     public CouponVO updateCoupon(CouponVO couponVO) {
         CouponVO coupon = checkStatus(couponVO.getId());
-        // 检查参数
+        //检查参数
         this.checkParam(couponVO);
-        // 更新到MYSQL中
+        //更新到MYSQL中
         this.updateById(couponVO);
-        // 如果优惠券类型为部分商品则将促销活动商品更新
+        //如果优惠券类型为部分商品则将促销活动商品更新
         this.updateScopePromotionGoods(couponVO);
-        // 保存到MONGO中
+        //保存到MONGO中
         this.mongoTemplate.save(couponVO);
         PromotionMessage promotionMessage = new PromotionMessage(couponVO.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), coupon.getStartTime(), coupon.getEndTime());
-        // 更新延时任务
+        //更新延时任务
         this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 promotionMessage,
                 coupon.getStartTime().getTime(), couponVO.getStartTime().getTime(),
@@ -144,7 +144,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
             this.mongoTemplate.save(couponVO);
             if (promotionStatus.name().equals(PromotionStatusEnum.START.name())) {
                 PromotionMessage promotionMessage = new PromotionMessage(couponVO.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), couponVO.getStartTime(), couponVO.getEndTime());
-                // 更新延时任务
+                //更新延时任务
                 this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
                         promotionMessage,
                         couponVO.getStartTime().getTime(), couponVO.getStartTime().getTime(),
@@ -160,10 +160,10 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
     public boolean deleteCoupon(String id) {
         CouponVO couponVO = checkStatus(id);
         LambdaUpdateWrapper<Coupon> couponUpdateWrapper = new LambdaUpdateWrapper<Coupon>().eq(Coupon::getId, id).set(Coupon::getPromotionStatus, PromotionStatusEnum.CLOSE.name()).set(Coupon::getDeleteFlag, true);
-        // 更新优惠券状态为关闭，标示删除标志
+        //更新优惠券状态为关闭，标示删除标志
         boolean result = this.update(couponUpdateWrapper);
         LambdaUpdateWrapper<PromotionGoods> updateWrapper = new LambdaUpdateWrapper<PromotionGoods>().eq(PromotionGoods::getPromotionId, id).set(PromotionGoods::getPromotionStatus, PromotionStatusEnum.CLOSE.name()).set(PromotionGoods::getDeleteFlag, true);
-        // 更新促销商品记录信息为删除
+        //更新促销商品记录信息为删除
         this.promotionGoodsService.update(updateWrapper);
         LambdaUpdateWrapper<MemberCoupon> memberCouponLambdaUpdateWrapper = new LambdaUpdateWrapper<MemberCoupon>().eq(MemberCoupon::getCouponId, id).set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.CLOSED.name());
         memberCouponService.update(memberCouponLambdaUpdateWrapper);
@@ -373,7 +373,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
     }
 
     private void updateScopePromotionGoods(CouponVO couponVO) {
-        // 如果优惠券类型为部分商品则将促销活动更新至ES中
+        //如果优惠券类型为部分商品则将促销活动更新至ES中
         if (CouponScopeTypeEnum.PORTION_GOODS.name().equals(couponVO.getScopeType()) && !couponVO.getPromotionGoodsList().isEmpty()) {
             PromotionTools.promotionGoodsInit(couponVO.getPromotionGoodsList(), couponVO, PromotionTypeEnum.COUPON);
         }

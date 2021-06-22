@@ -112,7 +112,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 for (GoodsCompleteMessage goodsCompleteMessage : goodsCompleteMessageList) {
                     Goods goods = goodsService.getById(goodsCompleteMessage.getGoodsId());
                     if (goods != null) {
-                        // 更新商品购买数量
+                        //更新商品购买数量
                         if (goods.getBuyCount() == null) {
                             goods.setBuyCount(0);
                         }
@@ -126,7 +126,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                     }
                     GoodsSku goodsSku = goodsSkuService.getById(goodsCompleteMessage.getSkuId());
                     if (goodsSku != null) {
-                        // 更新商品购买数量
+                        //更新商品购买数量
                         if (goodsSku.getBuyCount() == null) {
                             goodsSku.setBuyCount(0);
                         }

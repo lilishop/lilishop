@@ -440,7 +440,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
                 this.checkAfterSaleReturnMoneyParam(afterSaleDTO);
                 break;
             case RETURN_GOODS:
-                // 是否为有效状态
+                //是否为有效状态
                 boolean availableStatus = StrUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.DELIVERED.name(), OrderStatusEnum.COMPLETED.name());
                 if (!PayStatusEnum.PAID.name().equals(order.getPayStatus()) && availableStatus) {
                     throw new ServiceException(ResultCode.AFTER_SALES_BAN);

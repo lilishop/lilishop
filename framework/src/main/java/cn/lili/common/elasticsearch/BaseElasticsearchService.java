@@ -44,7 +44,7 @@ public abstract class BaseElasticsearchService {
     static {
         RequestOptions.Builder builder = RequestOptions.DEFAULT.toBuilder();
 
-        // 默认缓冲限制为100MB，此处修改为30MB。
+        //默认缓冲限制为100MB，此处修改为30MB。
         builder.setHttpAsyncResponseConsumerFactory(new HttpAsyncResponseConsumerFactory.HeapBufferedResponseConsumerFactory(30 * 1024 * 1024));
         COMMON_OPTIONS = builder.build();
     }
@@ -88,7 +88,7 @@ public abstract class BaseElasticsearchService {
     protected void createIndexRequest(String index) {
         try {
             CreateIndexRequest request = new CreateIndexRequest(index);
-            // Settings for this index
+            //Settings for this index
             request.settings(Settings.builder().put("index.number_of_shards", elasticsearchProperties.getIndex().getNumberOfShards()).put("index.number_of_replicas", elasticsearchProperties.getIndex().getNumberOfReplicas()));
 
             //创建索引
@@ -308,13 +308,13 @@ public abstract class BaseElasticsearchService {
 
         PutMappingRequest request = new PutMappingRequest(index)
                         .source(source, XContentType.JSON);
-//        AcknowledgedResponse putMappingResponse = client.indices().putMapping(request,
-//                RequestOptions.DEFAULT);
+//       AcknowledgedResponse putMappingResponse = client.indices().putMapping(request,
+//               RequestOptions.DEFAULT);
 //
-//        boolean acknowledged = putMappingResponse.isAcknowledged();
-//        if (acknowledged) {
-//            log.error("Succeed to put mapping");
-//        }
+//       boolean acknowledged = putMappingResponse.isAcknowledged();
+//       if (acknowledged) {
+//           log.error("Succeed to put mapping");
+//       }
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference response = new AtomicReference<AcknowledgedResponse>();
         client.indices().putMappingAsync(

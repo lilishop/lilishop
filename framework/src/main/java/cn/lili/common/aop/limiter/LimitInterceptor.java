@@ -5,10 +5,8 @@ import cn.lili.common.exception.ServiceException;
 import com.google.common.collect.ImmutableList;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.reflect.MethodSignature;
+import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -18,7 +16,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
-import java.lang.reflect.Method;
 
 /**
  * 流量拦截
@@ -43,40 +40,34 @@ public class LimitInterceptor {
         this.limitScript = limitScript;
     }
 
-    @Around("execution(public * *(..)) && @annotation(cn.lili.common.aop.limiter.annotation.LimitPoint)")
-    public Object interceptor(ProceedingJoinPoint pjp) throws Throwable {
-        MethodSignature signature = (MethodSignature) pjp.getSignature();
-        Method method = signature.getMethod();
-        LimitPoint limitPointAnnotation = method.getAnnotation(LimitPoint.class);
+    @Before("@annotation(limitPointAnnotation)")
+    public void interceptor(LimitPoint limitPointAnnotation) {
         LimitType limitType = limitPointAnnotation.limitType();
         String name = limitPointAnnotation.name();
         String key;
         int limitPeriod = limitPointAnnotation.period();
         int limitCount = limitPointAnnotation.limit();
         switch (limitType) {
-            case IP:
-                key = limitPointAnnotation.key() + getIpAddress();
-                break;
             case CUSTOMER:
                 key = limitPointAnnotation.key();
                 break;
             default:
-                key = StringUtils.upperCase(method.getName());
+                key = limitPointAnnotation.key() + getIpAddress();
         }
         ImmutableList<String> keys = ImmutableList.of(StringUtils.join(limitPointAnnotation.prefix(), key));
         try {
             Number count = redisTemplate.execute(limitScript, keys, limitCount, limitPeriod);
-            log.info("Access try count is {} for name={} and key = {}", count, name, key);
-            // 如果缓存里没有值，或者他的值小于限制频率
-            if (count.intValue() <= limitCount) {
-                return pjp.proceed();
-            } else {
+            log.info("限制请求{}, 当前请求{},缓存key{}", limitCount, count.intValue(), key);
+            //如果缓存里没有值，或者他的值小于限制频率
+            if (count.intValue() >= limitCount) {
                 throw new ServiceException("访问过于频繁，请稍后再试");
             }
         }
         //如果从redis中执行都值判定为空，则这里跳过
         catch (NullPointerException e) {
-            return pjp.proceed();
+            return;
+        } catch (ServiceException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("服务器异常，请稍后再试");
         }

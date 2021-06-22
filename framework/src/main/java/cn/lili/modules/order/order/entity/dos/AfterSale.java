@@ -97,7 +97,7 @@ public class AfterSale extends BaseEntity {
     @ApiModelProperty(value = "售后单状态", allowableValues = "APPLY,PASS,REFUSE,BUYER_RETURN,SELLER_RE_DELIVERY,BUYER_CONFIRM,SELLER_CONFIRM,COMPLETE")
     private String serviceStatus;
 
-    // 退款信息
+    //退款信息
 
     /**
      * @see cn.lili.modules.order.trade.entity.enums.AfterSaleRefundWayEnum
@@ -135,7 +135,7 @@ public class AfterSale extends BaseEntity {
     @ApiModelProperty(value = "退款时间")
     private Date refundTime;
 
-    // 买家物流信息
+    //买家物流信息
     @ApiModelProperty(value = "发货单号")
     private String mLogisticsNo;
 

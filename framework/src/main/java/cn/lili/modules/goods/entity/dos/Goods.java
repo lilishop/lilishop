@@ -2,11 +2,14 @@ package cn.lili.modules.goods.entity.dos;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.base.BaseEntity;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.xkcoding.http.util.StringUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -16,6 +19,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
+import java.util.Map;
 
 /**
  * 商品
@@ -222,6 +226,27 @@ public class Goods extends BaseEntity {
         }
         //如果立即上架则
         this.marketEnable = goodsOperationDTO.isRelease() ? GoodsStatusEnum.UPPER.name() : GoodsStatusEnum.DOWN.name();
-        this.goodsType=goodsOperationDTO.getGoodsType();
+        this.goodsType = goodsOperationDTO.getGoodsType();
+
+        //循环sku，判定sku是否有效
+        for (Map<String, Object> sku : goodsOperationDTO.getSkuList()) {
+            //判定参数不能为空
+            if (sku.get("sn") == null) {
+                throw new ServiceException(ResultCode.GOODS_SKU_SN_ERROR);
+            }
+            if (StringUtil.isEmpty(sku.get("price").toString()) || Integer.parseInt( sku.get("price").toString()) <= 0) {
+                throw new ServiceException(ResultCode.GOODS_SKU_PRICE_ERROR);
+            }
+            if (StringUtil.isEmpty(sku.get("cost").toString()) || Integer.parseInt( sku.get("cost").toString()) <= 0) {
+                throw new ServiceException(ResultCode.GOODS_SKU_COST_ERROR);
+            }
+            if (StringUtil.isEmpty(sku.get("weight").toString()) || Integer.parseInt( sku.get("weight").toString()) < 0) {
+                throw new ServiceException(ResultCode.GOODS_SKU_WEIGHT_ERROR);
+            }
+            if (StringUtil.isEmpty(sku.get("quantity").toString()) || Integer.parseInt( sku.get("quantity").toString()) < 0) {
+                throw new ServiceException(ResultCode.GOODS_SKU_QUANTITY_ERROR);
+            }
+
+        }
     }
 }

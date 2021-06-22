@@ -43,7 +43,7 @@ public class Base64Utils {
             '4', '5', '6', '7', '8', '9', '-', '_' //
     };
 
-    // -------------------------------------------------------------------- encode
+    //-------------------------------------------------------------------- encode
 
     /**
      * 编码为Base64，非URL安全的
@@ -174,7 +174,7 @@ public class Base64Utils {
             }
         }
 
-        int left = len - evenlen;// 剩余位数
+        int left = len - evenlen;//剩余位数
         if (left > 0) {
             int i = ((arr[evenlen] & 0xff) << 10) | (left == 2 ? ((arr[len - 1] & 0xff) << 2) : 0);
 
@@ -182,7 +182,7 @@ public class Base64Utils {
             dest[destlen - 3] = encodeTable[(i >>> 6) & 0x3f];
 
             if (isUrlSafe) {
-                // 在URL Safe模式下，=为URL中的关键字符，不需要补充。空余的byte位要去掉。
+                //在URL Safe模式下，=为URL中的关键字符，不需要补充。空余的byte位要去掉。
                 int urlSafeLen = destlen - 2;
                 if (2 == left) {
                     dest[destlen - 2] = encodeTable[i & 0x3f];
