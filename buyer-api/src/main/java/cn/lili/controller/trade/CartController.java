@@ -242,7 +242,7 @@ public class CartController {
             //读取选中的列表
             return ResultUtil.data(this.cartService.createTrade(tradeParams));
         } catch (ServiceException se) {
-            log.error(se.getMsg(), se);
+            log.info(se.getMsg(), se);
             return ResultUtil.error(se.getResultCode().code(), se.getResultCode().message());
         } catch (Exception e) {
             log.error(ResultCode.ORDER_ERROR.message(), e);

@@ -510,6 +510,10 @@ public class CartServiceImpl implements CartService {
         tradeDTO.setClientType(tradeParams.getClient());
         tradeDTO.setStoreRemark(tradeParams.getRemark());
         tradeDTO.setParentOrderSn(tradeParams.getParentOrderSn());
+        //订单无收货地址校验
+        if(tradeDTO.getMemberAddress()==null){
+            throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
+        }
         //将购物车信息写入缓存，后续逻辑调用校验
         this.resetTradeDTO(tradeDTO);
         //构建交易
