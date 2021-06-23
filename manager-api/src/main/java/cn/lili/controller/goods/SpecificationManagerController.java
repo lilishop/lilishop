@@ -53,9 +53,9 @@ public class SpecificationManagerController {
 
     @GetMapping(value = "/page")
     @ApiOperation(value = "分页获取")
-    public ResultMessage<IPage<SpecificationVO>> getByPage(@RequestParam(required = false) String specName, PageVO pageVo) {
+    public ResultMessage<IPage<SpecificationVO>> getByPage(String specId, PageVO pageVo) {
         SpecificationSearchParams searchParams = new SpecificationSearchParams();
-        searchParams.setSpecName(specName);
+        searchParams.setSpecId(specId);
         return ResultUtil.data(specificationService.getSpecificationPage(searchParams, pageVo));
     }
 
