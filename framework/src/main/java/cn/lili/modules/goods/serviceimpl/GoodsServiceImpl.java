@@ -96,6 +96,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     public final Integer getGoodsCountByCategory(String categoryId) {
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.like("category_path", categoryId);
+        queryWrapper.eq("delete_flag", false);
         return this.count(queryWrapper);
     }
 
@@ -104,17 +105,17 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         Goods goods = new Goods(goodsOperationDTO);
         //检查商品
         this.checkGoods(goods);
-        // 向goods加入图片
+        //向goods加入图片
         this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
         //添加商品
         this.save(goods);
-        // 添加商品参数
+        //添加商品参数
         if (goodsOperationDTO.getGoodsParamsList() != null && !goodsOperationDTO.getGoodsParamsList().isEmpty()) {
             this.goodsParamsService.addParams(goodsOperationDTO.getGoodsParamsList(), goods.getId());
         }
-        // 添加商品sku信息
+        //添加商品sku信息
         this.goodsSkuService.add(goodsOperationDTO.getSkuList(), goods);
-        // 添加相册
+        //添加相册
         if (goodsOperationDTO.getGoodsGalleryList() != null && !goodsOperationDTO.getGoodsGalleryList().isEmpty()) {
             this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
         }
@@ -127,17 +128,17 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         goods.setId(goodsId);
         //检查商品信息
         this.checkGoods(goods);
-        // 向goods加入图片
+        //向goods加入图片
         this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
         //修改商品
         this.updateById(goods);
-        // 添加商品参数
+        //添加商品参数
         if (goodsOperationDTO.getGoodsParamsList() != null && !goodsOperationDTO.getGoodsParamsList().isEmpty()) {
             this.goodsParamsService.addParams(goodsOperationDTO.getGoodsParamsList(), goods.getId());
         }
         //修改商品sku信息
         this.goodsSkuService.update(goodsOperationDTO.getSkuList(), goods, goodsOperationDTO.getRegeneratorSkuFlag());
-        // 添加相册
+        //添加相册
         if (goodsOperationDTO.getGoodsGalleryList() != null && !goodsOperationDTO.getGoodsGalleryList().isEmpty()) {
             this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
         }
@@ -164,7 +165,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             images.add(goodsGallery.getOriginal());
         }
         goodsVO.setGoodsGalleryList(images);
-        // 商品sku赋值
+        //商品sku赋值
         List<GoodsSkuVO> goodsListByGoodsId = goodsSkuService.getGoodsListByGoodsId(goodsId);
         if (goodsListByGoodsId != null && !goodsListByGoodsId.isEmpty()) {
             goodsVO.setSkuList(goodsListByGoodsId);
@@ -299,9 +300,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         LambdaQueryWrapper<MemberEvaluation> goodEvaluationQueryWrapper = new LambdaQueryWrapper<>();
         goodEvaluationQueryWrapper.eq(MemberEvaluation::getId, goodsId);
         goodEvaluationQueryWrapper.eq(MemberEvaluation::getGrade, EvaluationGradeEnum.GOOD.name());
-        // 好评数量
+        //好评数量
         int highPraiseNum = memberEvaluationService.count(goodEvaluationQueryWrapper);
-        // 好评率
+        //好评率
         double grade = NumberUtil.mul(NumberUtil.div(highPraiseNum, goods.getCommentNum().doubleValue(), 2), 100);
         goods.setGrade(grade);
         this.updateById(goods);
@@ -350,13 +351,13 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (goods.getId() != null) {
             this.checkExist(goods.getId());
         } else {
-            // 评论次数
+            //评论次数
             goods.setCommentNum(0);
-            // 购买次数
+            //购买次数
             goods.setBuyCount(0);
-            // 购买次数
+            //购买次数
             goods.setQuantity(0);
-            // 商品评分
+            //商品评分
             goods.setGrade(100.0);
         }
 

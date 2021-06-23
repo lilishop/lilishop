@@ -134,35 +134,26 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //存放自订单/订单日志
         List<OrderItem> orderItems = new ArrayList<>();
         List<OrderLog> orderLogs = new ArrayList<>();
-        //拼团判定，不能参与自己创建的拼团
-        if (tradeDTO.getParentOrderSn() != null) {
-            Order parentOrder = this.getBySn(tradeDTO.getParentOrderSn());
-            if (parentOrder.getMemberId().equals(UserContext.getCurrentUser().getId())) {
-                throw new ServiceException("不能参与自己发起的拼团活动！");
-            }
-        }
+
         //订单集合
         List<OrderVO> orderVOS = new ArrayList<>();
-        //循环购物车商品集合
+        //循环购物车
         tradeDTO.getCartList().forEach(item -> {
             Order order = new Order(item, tradeDTO);
-            if (OrderTypeEnum.PINTUAN.name().equals(order.getOrderType())) {
-                Pintuan pintuan = pintuanService.getPintuanById(order.getPromotionId());
-                Integer limitNum = pintuan.getLimitNum();
-                if (limitNum != 0 && order.getGoodsNum() > limitNum) {
-                    throw new ServiceException("购买数量超过拼团活动限制数量");
-                }
-            }
             //构建orderVO对象
             OrderVO orderVO = new OrderVO();
             BeanUtil.copyProperties(order, orderVO);
+            //持久化DO
             orders.add(order);
             String message = "订单[" + item.getSn() + "]创建";
+            //记录日志
             orderLogs.add(new OrderLog(item.getSn(), UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), message));
             item.getSkuList().forEach(
                     sku -> orderItems.add(new OrderItem(sku, item, tradeDTO))
             );
+            //写入子订单信息
             orderVO.setOrderItems(orderItems);
+            //orderVO 记录
             orderVOS.add(orderVO);
         });
         tradeDTO.setOrderVO(orderVOS);
@@ -170,9 +161,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         this.saveBatch(orders);
         //批量保存 子订单
         orderItemService.saveBatch(orderItems);
-        // 批量记录订单操作日志
+        //批量记录订单操作日志
         orderLogService.saveBatch(orderLogs);
-        // 赠品根据店铺单独生成订单
+        //赠品根据店铺单独生成订单
         this.generatorGiftOrder(tradeDTO);
     }
 
@@ -313,7 +304,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //要记录之前的收货地址，所以需要以代码方式进行调用 不采用注解
         String message = "订单[" + orderSn + "]收货信息修改，由[" + order.getConsigneeDetail() + "]修改为[" + memberAddressDTO.getConsigneeDetail() + "]";
 
-        BeanUtil.copyProperties(memberAddressDTO, order);// 记录订单操作日志
+        BeanUtil.copyProperties(memberAddressDTO, order);//记录订单操作日志
         this.updateById(order);
 
         OrderLog orderLog = new OrderLog(orderSn, UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), message);
@@ -410,7 +401,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderMessage.setOrderSn(order.getSn());
         this.sendUpdateStatusMessage(orderMessage);
 
-        // 发送当前商品购买完成的信息（用于更新商品数据）
+        //发送当前商品购买完成的信息（用于更新商品数据）
         List<OrderItem> orderItems = orderItemService.getByOrderSn(orderSn);
         List<GoodsCompleteMessage> goodsCompleteMessageList = new ArrayList<>();
         for (OrderItem orderItem : orderItems) {
@@ -497,10 +488,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Pintuan pintuan = pintuanService.getPintuanById(pintuanId);
         List<Order> list = this.getPintuanOrder(pintuanId, parentOrderSn);
         if (Boolean.TRUE.equals(pintuan.getFictitious()) && pintuan.getRequiredNum() > list.size()) {
-            // 如果开启虚拟成团且当前订单数量不足成团数量，则认为拼团成功
+            //如果开启虚拟成团且当前订单数量不足成团数量，则认为拼团成功
             this.pintuanOrderSuccess(list);
         } else if (Boolean.FALSE.equals(pintuan.getFictitious()) && pintuan.getRequiredNum() > list.size()) {
-            // 如果未开启虚拟成团且当前订单数量不足成团数量，则认为拼团失败
+            //如果未开启虚拟成团且当前订单数量不足成团数量，则认为拼团失败
             this.pintuanOrderFailed(list);
         }
     }
@@ -543,10 +534,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         List<OrderBatchDeliverDTO> orderBatchDeliverDTOList = new ArrayList<>();
         try {
             inputStream = files.getInputStream();
-            // 2.应用HUtool ExcelUtil获取ExcelReader指定输入流和sheet
+            //2.应用HUtool ExcelUtil获取ExcelReader指定输入流和sheet
             ExcelReader excelReader = ExcelUtil.getReader(inputStream);
-            // 可以加上表头验证
-            // 3.读取第二行到最后一行数据
+            //可以加上表头验证
+            //3.读取第二行到最后一行数据
             List<List<Object>> read = excelReader.read(1, excelReader.getRowCount());
             for (List<Object> objects : read) {
                 OrderBatchDeliverDTO orderBatchDeliverDTO = new OrderBatchDeliverDTO();
@@ -635,7 +626,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         List<Order> list = this.getPintuanOrder(pintuanId, parentOrderSn);
         int count = list.size();
         if (count == 1) {
-            // 如果为开团订单，则发布一个一小时的延时任务，时间到达后，如果未成团则自动结束（未开启虚拟成团的情况下）
+            //如果为开团订单，则发布一个一小时的延时任务，时间到达后，如果未成团则自动结束（未开启虚拟成团的情况下）
             PintuanOrderMessage pintuanOrderMessage = new PintuanOrderMessage();
             long startTime = DateUtil.offsetHour(new Date(), 1).getTime();
             pintuanOrderMessage.setOrderSn(parentOrderSn);
@@ -667,7 +658,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         queryWrapper.eq(Order::getPromotionId, pintuanId)
                 .eq(Order::getOrderPromotionType, OrderPromotionTypeEnum.PINTUAN.name())
                 .eq(Order::getPayStatus, PayStatusEnum.PAID.name());
-        // 拼团sn=开团订单sn 或者 参团订单的开团订单sn
+        //拼团sn=开团订单sn 或者 参团订单的开团订单sn
         queryWrapper.and(i -> i.eq(Order::getSn, parentOrderSn)
                 .or(j -> j.eq(Order::getParentOrderSn, parentOrderSn)));
         //参团后的订单数（人数）
@@ -681,10 +672,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @param list 需要更新拼团状态为成功的拼团订单列表
      */
     private void pintuanOrderSuccess(List<Order> list) {
-        list.stream().forEach(order -> {
-            if (order.getOrderType().equals(OrderTypeEnum.VIRTUAL)) {
+        list.forEach(order -> {
+            if (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
                 this.virtualOrderConfirm(order.getSn());
-            } else if (order.getOrderType().equals(OrderTypeEnum.NORMAL)) {
+            } else if (order.getOrderType().equals(OrderTypeEnum.NORMAL.name())) {
                 this.normalOrderConfirm(order.getSn());
             }
         });
@@ -802,7 +793,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     private void checkOrder(Order order) {
         //订单类型为拼团订单，检测购买数量是否超过了限购数量
-        if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())) {
+        if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderType())) {
             Pintuan pintuan = pintuanService.getPintuanById(order.getPromotionId());
             Integer limitNum = pintuan.getLimitNum();
             if (limitNum != 0 && order.getGoodsNum() > limitNum) {

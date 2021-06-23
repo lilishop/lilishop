@@ -155,7 +155,7 @@ public class OrderPriceServiceImpl implements OrderPriceService {
             //计算修改后的订单货物金额
             double flowPrice = CurrencyUtil.mul(order.getFlowPrice(), priceFluctuationRatio);
 
-            // 记录修改金额
+            //记录修改金额
             priceDetailDTO.setUpdatePrice(CurrencyUtil.sub(priceDetailDTO.getOriginalPrice(), flowPrice));
             priceDetailDTO.setFlowPrice(flowPrice);
 
@@ -163,7 +163,7 @@ public class OrderPriceServiceImpl implements OrderPriceService {
             Double platFormCommission = CurrencyUtil.div(CurrencyUtil.mul(flowPrice, categoryService.getById(orderItem.getCategoryId()).getCommissionRate()), 100);
             priceDetailDTO.setPlatFormCommission(platFormCommission);
 
-            // 最终结算金额 = 流水金额-平台佣金-分销提佣
+            //最终结算金额 = 流水金额-平台佣金-分销提佣
             double billPrice = CurrencyUtil.sub(CurrencyUtil.sub(priceDetailDTO.getFlowPrice(),priceDetailDTO.getPlatFormCommission()),
                     priceDetailDTO.getDistributionCommission());
             priceDetailDTO.setBillPrice(billPrice);

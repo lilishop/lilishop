@@ -60,11 +60,11 @@ public class StringPointer implements Serializable, CharSequence, Comparable<Str
      * @return 是否？
      */
     public boolean nextStartsWith(int i, StringPointer word){
-        // 是否长度超出
+        //是否长度超出
         if(word.length > length - i){
             return false;
         }
-        // 从尾开始判断
+        //从尾开始判断
         for(int c =  word.length - 1; c >= 0; c --){
             if(value[offset + i + c] != word.value[word.offset + c]){
                 return false;

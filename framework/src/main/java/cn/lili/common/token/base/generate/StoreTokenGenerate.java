@@ -33,7 +33,7 @@ public class StoreTokenGenerate extends AbstractTokenGenerate {
 
     @Override
     public Token createToken(String username, Boolean longTerm) {
-        // 生成token
+        //生成token
         Member member = memberService.findByUsername(username);
         if (!member.getHaveStore()) {
             throw new ServiceException("该会员未开通店铺");

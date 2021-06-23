@@ -161,7 +161,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         //促销库存key 集合
         List<String> promotionKey = new ArrayList<>();
 
-        // 循环订单
+        //循环订单
         for (OrderItem orderItem : order.getOrderItems()) {
             skuKeys.add(GoodsSkuService.getStockCacheKey(orderItem.getSkuId()));
             GoodsSku goodsSku = new GoodsSku();
@@ -221,7 +221,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         List<GoodsSku> goodsSkus = new ArrayList<>();
         //sku库存key 集合
         List<String> skuKeys = new ArrayList<>();
-        // 循环订单
+        //循环订单
         for (OrderItem orderItem : order.getOrderItems()) {
             skuKeys.add(GoodsSkuService.getStockCacheKey(orderItem.getSkuId()));
             GoodsSku goodsSku = new GoodsSku();

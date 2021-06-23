@@ -148,18 +148,18 @@ public class DateUtil {
      * @return
      */
     public static Long[] getLastMonth() {
-        // 取得系统当前时间
+        //取得系统当前时间
         Calendar cal = Calendar.getInstance();
         int year = cal.get(Calendar.YEAR);
         int month = cal.get(Calendar.MONTH) + 1;
 
-        // 取得系统当前时间所在月第一天时间对象
+        //取得系统当前时间所在月第一天时间对象
         cal.set(Calendar.DAY_OF_MONTH, 1);
 
-        // 日期减一,取得上月最后一天时间对象
+        //日期减一,取得上月最后一天时间对象
         cal.add(Calendar.DAY_OF_MONTH, -1);
 
-        // 输出上月最后一天日期
+        //输出上月最后一天日期
         int day = cal.get(Calendar.DAY_OF_MONTH);
 
         String months = "";
@@ -355,7 +355,7 @@ public class DateUtil {
      */
     public static Integer getDelayTime(Long startTime) {
         int time = Math.toIntExact((startTime - System.currentTimeMillis()) / 1000);
-        // 如果时间为负数则改为一秒后执行
+        //如果时间为负数则改为一秒后执行
         if (time <= 0) {
             time = 1;
         }

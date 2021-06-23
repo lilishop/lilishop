@@ -40,7 +40,7 @@ public class QrCodeKit {
         boolean bool = false;
         BufferedImage bufImg;
         Map<EncodeHintType, Object> hints = new HashMap<EncodeHintType, Object>(3);
-        // 指定纠错等级
+        //指定纠错等级
         hints.put(EncodeHintType.ERROR_CORRECTION, errorLevel);
         hints.put(EncodeHintType.MARGIN, margin);
         hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");

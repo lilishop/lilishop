@@ -126,23 +126,23 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void immediatelyBill(String storeId, Long endTime) {
 
-//        Long now = DateUtil.getDateline();
-//        //TODO 需要获取真实店铺
-//        StoreDetailVO store = new StoreDetailVO();
-//        Long startTime = store.getLastBillTime().getTime();
+//       Long now = DateUtil.getDateline();
+//       //TODO 需要获取真实店铺
+//       StoreDetailVO store = new StoreDetailVO();
+//       Long startTime = store.getLastBillTime().getTime();
 //
-//        store.setLastBillTime(new Date(now));
-////      TODO   store.save 保存新的结束时间
+//       store.setLastBillTime(new Date(now));
+////     TODO   store.save 保存新的结束时间
 //
-//        // TODO 获取结算周期内的结算详情
-//        BillDTO billDTO = new BillDTO();
+//       //TODO 获取结算周期内的结算详情
+//       BillDTO billDTO = new BillDTO();
 //
-//        //如果没有需要结算单，那么就可以直接返回，也不需要保存新的结算单
-//        if (billDTO.getOrderPrice() == 0 && billDTO.getRefundPrice() == 0) {
-//            return;
-//        }
+//       //如果没有需要结算单，那么就可以直接返回，也不需要保存新的结算单
+//       if (billDTO.getOrderPrice() == 0 && billDTO.getRefundPrice() == 0) {
+//           return;
+//       }
 //
-//        this.createBill(storeId, startTime, endTime);
+//       this.createBill(storeId, startTime, endTime);
     }
 
     @Override

@@ -58,7 +58,7 @@ public class BillSearchParams extends PageVO {
         wrapper.eq(StringUtils.isNotEmpty(billStatus), "bill_status", billStatus);
         //店铺名称
         wrapper.eq(StringUtils.isNotEmpty(storeName), "store_name", storeName);
-        // 按卖家查询
+        //按卖家查询
         wrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
                 "store_id", UserContext.getCurrentUser().getStoreId());
         return wrapper;

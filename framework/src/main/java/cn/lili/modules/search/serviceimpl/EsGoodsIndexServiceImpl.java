@@ -132,7 +132,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Override
     public void deleteIndex(EsGoodsIndex goods) {
         if (ObjectUtils.isEmpty(goods)) {
-            // 如果对象为空，则删除全量
+            //如果对象为空，则删除全量
             goodsIndexRepository.deleteAll();
         }
         goodsIndexRepository.delete(goods);
@@ -219,7 +219,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         } else {
             //否则是平台活动
             Iterable<EsGoodsIndex> all = goodsIndexRepository.findAll();
-//            查询出全部商品
+//           查询出全部商品
             goodsIndices = new ArrayList<>(IterableUtil.toCollection(all));
         }
         //更新商品索引
@@ -237,7 +237,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             if (goodsIndex != null) {
                 Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
                 if (promotionMap != null && !promotionMap.isEmpty()) {
-                    // 如果存在同类型促销活动删除
+                    //如果存在同类型促销活动删除
                     List<String> collect = promotionMap.keySet().parallelStream().filter(i -> i.contains(promotionType.name())).collect(Collectors.toList());
                     collect.forEach(promotionMap::remove);
                     goodsIndex.setPromotionMap(promotionMap);
@@ -276,7 +276,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     private void removePromotionByPromotionId(EsGoodsIndex goodsIndex, String promotionId) {
         Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
         if (promotionMap != null && !promotionMap.isEmpty()) {
-            // 如果存在同类型促销活动删除
+            //如果存在同类型促销活动删除
             List<String> collect = promotionMap.keySet().stream().filter(i -> i.split("-")[1].equals(promotionId)).collect(Collectors.toList());
             collect.forEach(promotionMap::remove);
             goodsIndex.setPromotionMap(promotionMap);
@@ -327,7 +327,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     public Map<String, Object> getPromotionMap(String id) {
         EsGoodsIndex goodsIndex = this.findById(id);
 
-        // 如果商品索引不为空，返回促销信息，否则返回空
+        //如果商品索引不为空，返回促销信息，否则返回空
         if (goodsIndex != null) {
             Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
             if (promotionMap == null || promotionMap.isEmpty()) {
@@ -406,7 +406,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 this.removePromotionKey(key, promotionMap, PromotionTypeEnum.SECKILL.name());
             }
         } else {
-            // 添加促销活动前，如果是同一时间只可以有一个的活动，但商品索引的促销活动里存在其他（同一时间只可以有一个）的活动，则清除
+            //添加促销活动前，如果是同一时间只可以有一个的活动，但商品索引的促销活动里存在其他（同一时间只可以有一个）的活动，则清除
             this.removePromotionKey(key, promotionMap, PromotionTypeEnum.PINTUAN.name(), PromotionTypeEnum.SECKILL.name(), PromotionTypeEnum.FULL_DISCOUNT.name());
             promotionMap.put(key, promotion);
         }
@@ -448,7 +448,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      */
     private void wordsToDb(String words) {
         try {
-            // 是否有重复
+            //是否有重复
             GoodsWords entity = goodsWordsService.getOne(new LambdaQueryWrapper<GoodsWords>().eq(GoodsWords::getWords, words));
             if (entity == null) {
                 GoodsWords goodsWords = new GoodsWords();

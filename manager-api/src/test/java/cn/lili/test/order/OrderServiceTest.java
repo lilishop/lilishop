@@ -21,12 +21,12 @@ class OrderServiceTest {
 
     @Test
     void QueryParam() {
-//        OrderSearchParams orderSearchParams = new OrderSearchParams();
-//        orderSearchParams.setPageSize(0);
-//        orderSearchParams.setPageNumber(10);
-//        IPage<OrderSimpleVO> orderVOIPage = orderService.queryByParams(orderSearchParams);
-//        Assertions.assertNotNull(orderVOIPage);
-//        orderVOIPage.getRecords().forEach(System.out::println);
+//       OrderSearchParams orderSearchParams = new OrderSearchParams();
+//       orderSearchParams.setPageSize(0);
+//       orderSearchParams.setPageNumber(10);
+//       IPage<OrderSimpleVO> orderVOIPage = orderService.queryByParams(orderSearchParams);
+//       Assertions.assertNotNull(orderVOIPage);
+//       orderVOIPage.getRecords().forEach(System.out::println);
     }
 
 

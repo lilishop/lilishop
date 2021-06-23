@@ -42,7 +42,7 @@ class FileTest {
                 }
                 URL url = new URL(brand.getLogo());
                 InputStream inputStream = url.openStream();
-                // 上传至第三方云服务或服务器
+                //上传至第三方云服务或服务器
                 brand.setLogo(fileManagerPlugin.inputStreamUpload(inputStream, brand.getId() + ".png"));
             } catch (IOException e) {
                 log.error("上传你文件出错",e);

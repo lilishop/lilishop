@@ -23,11 +23,11 @@ public class UrlConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 注册拦截器
+        //注册拦截器
         InterceptorRegistration ir = registry.addInterceptor(requestInterceptorAdapter);
-        // 配置拦截的路径
+        //配置拦截的路径
         ir.addPathPatterns("/**");
-        // 配置不拦截的路径
+        //配置不拦截的路径
         ir.excludePathPatterns(ignoredUrlsProperties.getUrls());
     }
 
@@ -36,7 +36,7 @@ public class UrlConfiguration implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/statics/**").addResourceLocations("classpath:/statics/");
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
-        // 解决 SWAGGER 404报错
+        //解决 SWAGGER 404报错
         registry.addResourceHandler("/swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
     }
 

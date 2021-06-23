@@ -29,7 +29,7 @@ public class BroadcastTimeTriggerExecutor implements TimeTriggerExecutor {
         BroadcastMessage broadcastMessage = JSONUtil.toBean(JSONUtil.parseObj(object), BroadcastMessage.class);
         if (broadcastMessage != null && broadcastMessage.getStudioId() != null) {
             log.info("直播间消费：{}", broadcastMessage);
-            // 修改直播间状态
+            //修改直播间状态
             studioService.updateStudioStatus(broadcastMessage);
         }
     }

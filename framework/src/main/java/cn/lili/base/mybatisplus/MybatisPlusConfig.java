@@ -20,12 +20,12 @@ public class MybatisPlusConfig {
         return new PaginationInterceptor();
 
         //阻断解析器，测试环境使用
-//        PaginationInterceptor paginationInterceptor = new PaginationInterceptor();
+//       PaginationInterceptor paginationInterceptor = new PaginationInterceptor();
 //
-//        List<ISqlParser> sqlParserList = new ArrayList<>();
-//        // 攻击 SQL 阻断解析器、加入解析链
-//        sqlParserList.add(new BlockAttackSqlParser());
-//        paginationInterceptor.setSqlParserList(sqlParserList);
-//        return paginationInterceptor;
+//       List<ISqlParser> sqlParserList = new ArrayList<>();
+//       //攻击 SQL 阻断解析器、加入解析链
+//       sqlParserList.add(new BlockAttackSqlParser());
+//       paginationInterceptor.setSqlParserList(sqlParserList);
+//       return paginationInterceptor;
     }
 }

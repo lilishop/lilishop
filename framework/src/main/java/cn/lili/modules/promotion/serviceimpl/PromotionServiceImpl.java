@@ -121,21 +121,21 @@ public class PromotionServiceImpl implements PromotionService {
         queryWrapper.eq("promotion_status", PromotionStatusEnum.START.name());
         queryWrapper.gt("start_time", new Date());
         queryWrapper.lt("end_time", new Date());
-        // 获取当前进行的秒杀活动活动
+        //获取当前进行的秒杀活动活动
         List<Seckill> seckillList = seckillService.list(queryWrapper);
         if (seckillList != null && !seckillList.isEmpty()) {
             for (Seckill seckill : seckillList) {
                 resultMap.put(PromotionTypeEnum.SECKILL.name(), seckill);
             }
         }
-        // 获取当前进行的满优惠活动
+        //获取当前进行的满优惠活动
         List<FullDiscount> fullDiscountList = fullDiscountService.list(queryWrapper);
         if (fullDiscountList != null && !fullDiscountList.isEmpty()) {
             for (FullDiscount fullDiscount : fullDiscountList) {
                 resultMap.put(PromotionTypeEnum.FULL_DISCOUNT.name(), fullDiscount);
             }
         }
-        // 获取当前进行的拼团活动
+        //获取当前进行的拼团活动
         List<Pintuan> pintuanList = pintuanService.list(queryWrapper);
         if (pintuanList != null && !pintuanList.isEmpty()) {
             for (Pintuan pintuan : pintuanList) {
@@ -249,14 +249,14 @@ public class PromotionServiceImpl implements PromotionService {
         fullDiscountVO.setPromotionStatus(promotionMessage.getPromotionStatus());
         //修改促销数据
         result = this.fullDiscountService.update(promotionMessage.updateWrapper());
-        // clone一个活动信息，用于存放与索引中
+        //clone一个活动信息，用于存放与索引中
         FullDiscountVO clone = ObjectUtil.clone(fullDiscountVO);
         clone.setPromotionGoodsList(null);
         if (fullDiscountVO.getPromotionGoodsList() == null && fullDiscountVO.getNumber() == -1) {
-            // 如果为全品类则更新全部索引
+            //如果为全品类则更新全部索引
             this.goodsIndexService.updateEsGoodsIndexAllByList(clone, esPromotionKey);
         } else {
-            // 如不为全品类，更新指定索引
+            //如不为全品类，更新指定索引
             for (PromotionGoods promotionGoods : fullDiscountVO.getPromotionGoodsList()) {
                 promotionGoods.setPromotionStatus(promotionMessage.getPromotionStatus());
             }
@@ -293,15 +293,15 @@ public class PromotionServiceImpl implements PromotionService {
                     .set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.EXPIRE.name());
             this.memberCouponService.update(updateWrapper);
         }
-        // clone一个活动信息，用于存放与索引中
+        //clone一个活动信息，用于存放与索引中
         CouponVO clone = ObjectUtil.clone(couponVO);
         clone.setPromotionGoodsList(null);
         if (CouponScopeTypeEnum.PORTION_GOODS.name().equals(couponVO.getScopeType())) {
-            // 如为部分商品，则更新部分商品索引
+            //如为部分商品，则更新部分商品索引
             this.promotionGoodsService.updateBatchById(couponVO.getPromotionGoodsList());
             this.goodsIndexService.updateEsGoodsIndexByList(couponVO.getPromotionGoodsList(), clone, esPromotionKey);
         } else if (CouponScopeTypeEnum.ALL.name().equals(couponVO.getScopeType())) {
-            // 如为全部，则更新全部商品索引
+            //如为全部，则更新全部商品索引
             this.goodsIndexService.updateEsGoodsIndexAllByList(clone, esPromotionKey);
         }
         this.mongoTemplate.save(couponVO);
@@ -327,7 +327,7 @@ public class PromotionServiceImpl implements PromotionService {
         this.promotionGoodsService.updateBatchById(pintuanVO.getPromotionGoodsList());
         if (pintuanVO.getPromotionGoodsList() != null) {
             List<PromotionGoods> promotionGoodsList = pintuanVO.getPromotionGoodsList();
-            // 更新促销商品索引
+            //更新促销商品索引
             for (PromotionGoods promotionGoods : promotionGoodsList) {
                 Pintuan pintuan1 = JSONUtil.toBean(JSONUtil.toJsonStr(pintuanVO), Pintuan.class);
                 this.goodsIndexService.updateEsGoodsIndex(promotionGoods.getSkuId(), pintuan1, esPromotionKey, promotionGoods.getPrice());
@@ -357,14 +357,14 @@ public class PromotionServiceImpl implements PromotionService {
         result = this.seckillService.update(promotionMessage.updateWrapper());
         for (SeckillApply seckillApply : seckill.getSeckillApplyList()) {
             if (seckillApply.getPromotionApplyStatus().equals(PromotionApplyStatusEnum.PASS.name())) {
-                // 下一个时间，默认为当天结束时间
+                //下一个时间，默认为当天结束时间
                 int nextHour = 23;
                 String[] split = seckill.getHours().split(",");
                 int[] hoursSored = Arrays.stream(split).mapToInt(Integer::parseInt).toArray();
-                // 排序时间段
+                //排序时间段
                 Arrays.sort(hoursSored);
                 for (int i : hoursSored) {
-                    // 如果当前时间段大于排序后的时间段的某个，当前时间段的下个时间段即为排序后的时间段的某个
+                    //如果当前时间段大于排序后的时间段的某个，当前时间段的下个时间段即为排序后的时间段的某个
                     if (seckillApply.getTimeLine() < i) {
                         nextHour = i;
                         break;
@@ -374,12 +374,12 @@ public class PromotionServiceImpl implements PromotionService {
                 String format = cn.hutool.core.date.DateUtil.format(seckill.getStartTime(), DateUtil.STANDARD_DATE_FORMAT);
                 DateTime parseStartTime = cn.hutool.core.date.DateUtil.parse((format + " " + seckillApply.getTimeLine()), "yyyy-MM-dd HH");
                 DateTime parseEndTime = cn.hutool.core.date.DateUtil.parse((format + " " + nextHour), "yyyy-MM-dd HH");
-                // 如果是当天最后的时间段则设置到当天结束时间的59分59秒
+                //如果是当天最后的时间段则设置到当天结束时间的59分59秒
                 if (nextHour == seckillApply.getTimeLine()) {
                     parseEndTime = cn.hutool.core.date.DateUtil.parse((format + " " + nextHour + ":59:59"), DateUtil.STANDARD_FORMAT);
                 }
                 seckill1.setStartTime(parseStartTime);
-                // 当时商品的秒杀活动活动结束时间为下个时间段的开始
+                //当时商品的秒杀活动活动结束时间为下个时间段的开始
                 seckill1.setEndTime(parseEndTime);
                 this.goodsIndexService.updateEsGoodsIndex(seckillApply.getSkuId(), seckill1, promotionTypeEnum.name() + "-" + seckillApply.getTimeLine(), seckillApply.getPrice());
             }

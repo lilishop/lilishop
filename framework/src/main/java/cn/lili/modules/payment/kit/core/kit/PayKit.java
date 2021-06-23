@@ -146,7 +146,7 @@ public class PayKit {
         for (int i = 0; i < keys.size(); i++) {
             String key = keys.get(i);
             String value = params.get(key);
-            // 拼接时，不包括最后一个&字符
+            //拼接时，不包括最后一个&字符
             if (i == keys.size() - 1) {
                 if (quotes) {
                     content.append(key).append("=").append('"').append(encode ? urlEncode(value) : value).append('"');
@@ -196,7 +196,7 @@ public class PayKit {
         for (Map.Entry<String, String> entry : params.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            // 略过空值
+            //略过空值
             if (StrUtil.isEmpty(value)) {
                 continue;
             }
@@ -322,9 +322,9 @@ public class PayKit {
         if (StrUtil.isEmpty(signMessage)) {
             return null;
         }
-        // 获取商户私钥
+        //获取商户私钥
         PrivateKey privateKey = PayKit.getPrivateKey(keyPath);
-        // 生成签名
+        //生成签名
         return RsaKit.encryptByPrivateKey(signMessage, privateKey);
     }
 
@@ -340,7 +340,7 @@ public class PayKit {
         if (StrUtil.isEmpty(signMessage)) {
             return null;
         }
-        // 生成签名
+        //生成签名
         return RsaKit.encryptByPrivateKey(signMessage, privateKey);
     }
 
