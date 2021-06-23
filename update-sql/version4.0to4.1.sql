@@ -115,3 +115,5 @@ CREATE TABLE `li_coupon_activity_item` (
     `num` int DEFAULT NULL COMMENT '优惠券数量',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/** 修改商品模板详情字段类型**/
+ALTER TABLE `li_draft_goods` MODIFY COLUMN `intro` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
