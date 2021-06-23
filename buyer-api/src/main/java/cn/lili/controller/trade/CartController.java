@@ -56,7 +56,7 @@ public class CartController {
             return ResultUtil.success();
         } catch (ServiceException se) {
             log.info(se.getMsg(), se);
-            return ResultUtil.error(se.getResultCode().code(), se.getResultCode().message());
+            throw se;
         } catch (Exception e) {
             log.error(ResultCode.CART_ERROR.message(), e);
             throw new ServiceException(ResultCode.CART_ERROR);
@@ -161,7 +161,7 @@ public class CartController {
             return ResultUtil.data(this.cartService.getCheckedTradeDTO(CartTypeEnum.valueOf(way)));
         } catch (ServiceException se) {
             log.error(se.getMsg(), se);
-            return ResultUtil.error(se.getResultCode().code(), se.getResultCode().message());
+            throw se;
         } catch (Exception e) {
             log.error(ResultCode.CART_ERROR.message(), e);
             throw new ServiceException(ResultCode.CART_ERROR);
@@ -205,7 +205,7 @@ public class CartController {
             return ResultUtil.success();
         } catch (ServiceException se) {
             log.error(se.getMsg(), se);
-            return ResultUtil.error(se.getResultCode().code(), se.getResultCode().message());
+            throw se;
         } catch (Exception e) {
             log.error(ResultCode.CART_ERROR.message(), e);
             throw new ServiceException(ResultCode.CART_ERROR);
@@ -243,7 +243,7 @@ public class CartController {
             return ResultUtil.data(this.cartService.createTrade(tradeParams));
         } catch (ServiceException se) {
             log.info(se.getMsg(), se);
-            return ResultUtil.error(se.getResultCode().code(), se.getResultCode().message());
+            throw se;
         } catch (Exception e) {
             log.error(ResultCode.ORDER_ERROR.message(), e);
             throw new ServiceException(ResultCode.ORDER_ERROR);
