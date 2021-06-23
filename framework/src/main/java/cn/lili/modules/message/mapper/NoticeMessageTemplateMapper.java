@@ -4,7 +4,7 @@ import cn.lili.modules.message.entity.dos.NoticeMessage;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
- * 消息模板数据处理层
+ * 通知类消息模板数据处理层
  *
  * @author Bulbasaur
  * @date 2020/12/8 9:46

@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 /**
- * 消息发送数据处理层
+ * 店铺接收到消息发送数据处理层
  *
  * @author Chopper
  * @date 2021/1/30 4:17 下午

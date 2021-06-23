@@ -1,6 +1,5 @@
 package cn.lili.controller.goods;
 
-import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.CategorySpecification;
@@ -16,6 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -68,9 +68,12 @@ public class CategorySpecificationManagerController {
         //删除分类规格绑定信息
         this.categorySpecificationService.remove(new QueryWrapper<CategorySpecification>().eq("category_id", categoryId));
         //绑定规格信息
-        for (String specId : categorySpecs) {
-            CategorySpecification categoryBrand = new CategorySpecification(categoryId, specId);
-            categorySpecificationService.save(categoryBrand);
+        if (categorySpecs != null && categorySpecs.length > 0) {
+            List<CategorySpecification> categorySpecifications = new ArrayList<>();
+            for (String categorySpec : categorySpecs) {
+                categorySpecifications.add( new CategorySpecification(categoryId, categorySpec));
+            }
+            categorySpecificationService.saveBatch(categorySpecifications);
         }
         return ResultUtil.success();
     }

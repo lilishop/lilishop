@@ -10,7 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- * 站内消息模板设置
+ * 通知类站内信模版对象
  *
  * @author Bulbasaur
  * @version v4.1
@@ -20,7 +20,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "li_notice_message")
 @TableName("li_notice_message")
-@ApiModel(value = "站内消息模板")
+@ApiModel(value = "通知类消息模板")
 public class NoticeMessage extends BaseEntity {
 
     private static final long serialVersionUID = 1L;

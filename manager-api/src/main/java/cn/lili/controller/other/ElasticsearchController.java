@@ -68,23 +68,14 @@ public class ElasticsearchController {
         String goodsId = null;
         //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
         for (GoodsSku goodsSku : list) {
-            boolean needIndex = false;
             if (goodsId == null || !goodsId.equals(goodsSku.getGoodsId())) {
                 goodsId = goodsSku.getGoodsId();
                 Goods goods = goodsService.getById(goodsId);
+                EsGoodsIndex index = new EsGoodsIndex(goodsSku);
                 if (goods.getParams() != null && !goods.getParams().isEmpty()) {
                     List<GoodsParams> goodsParams = JSONUtil.toList(goods.getParams(), GoodsParams.class);
-                    for (GoodsParams goodsParam : goodsParams) {
-                        Parameters parameters = parametersService.getById(goodsParam.getParamId());
-                        if (parameters.getIsIndex() == 1) {
-                            needIndex = true;
-                            break;
-                        }
-                    }
+                    index = new EsGoodsIndex(goodsSku, goodsParams);
                 }
-            }
-            if (Boolean.TRUE.equals(needIndex)) {
-                EsGoodsIndex index = new EsGoodsIndex(goodsSku);
                 Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
                 index.setPromotionMap(goodsCurrentPromotionMap);
                 esGoodsIndices.add(index);

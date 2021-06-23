@@ -1,6 +1,7 @@
 package cn.lili.controller.common;
 
 import cn.lili.common.aop.limiter.annotation.LimitPoint;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.verification.enums.VerificationEnums;
@@ -37,8 +38,8 @@ public class SliderImageController {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            log.error("获取校验接口错误",e);
-            return null;
+            log.error("获取校验接口错误", e);
+            throw new ServiceException(ResultCode.VERIFICATION_EXIST);
         }
     }
 

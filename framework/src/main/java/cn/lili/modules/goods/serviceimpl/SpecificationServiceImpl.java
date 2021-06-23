@@ -50,12 +50,11 @@ public class SpecificationServiceImpl extends ServiceImpl<SpecificationMapper, S
     private SpecValuesService specValuesService;
 
     @Override
-    public List<SpecificationVO> getSpecList(String specName) {
+    public List<SpecificationVO> getSpecList(String specId) {
 
         QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.eq(StringUtils.isNotEmpty(specName), "s.spec_name", specName);
+        queryWrapper.eq(StringUtils.isNotEmpty(specId), "s.spec_id", specId);
         queryWrapper.orderByDesc("s.create_time");
-        queryWrapper.groupBy("s.id");
         return this.baseMapper.findSpecList(queryWrapper);
     }
 
@@ -103,7 +102,7 @@ public class SpecificationServiceImpl extends ServiceImpl<SpecificationMapper, S
     @Override
     public IPage<SpecificationVO> getSpecificationPage(SpecificationSearchParams searchParams, PageVO pageVo) {
 
-        List<SpecificationVO> specList = this.getSpecList(searchParams.getSpecName());
+        List<SpecificationVO> specList = this.getSpecList(searchParams.getSpecId());
         IPage<SpecificationVO> page = new Page<>(pageVo.getPageNumber(), pageVo.getPageSize(), specList.size());
         page.setRecords(PageUtil.listToPage(pageVo, specList));
         return page;

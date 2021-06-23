@@ -1,21 +1,23 @@
-package cn.lili.modules.member.serviceimpl;
+package cn.lili.modules.message.serviceimpl;
 
 
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.member.entity.dos.MemberMessage;
-import cn.lili.modules.member.entity.vo.MemberMessageQueryVO;
-import cn.lili.modules.member.mapper.MemberMessageMapper;
-import cn.lili.modules.member.service.MemberMessageService;
+import cn.lili.modules.message.entity.dos.MemberMessage;
+import cn.lili.modules.message.mapper.MemberMessageMapper;
+import cn.lili.modules.message.service.MemberMessageService;
+import cn.lili.modules.message.entity.vos.MemberMessageQueryVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
- * 会员消息业务层实现
+ * 会员接收消息业务层实现
  *
  * @author Chopper
  * @date 2020/11/17 3:48 下午
@@ -28,6 +30,8 @@ public class MemberMessageServiceImpl extends ServiceImpl<MemberMessageMapper, M
     @Override
     public IPage<MemberMessage> getPage(MemberMessageQueryVO memberMessageQueryVO, PageVO pageVO) {
         QueryWrapper<MemberMessage> queryWrapper = new QueryWrapper<>();
+        //消息id
+        queryWrapper.like(StringUtils.isNotEmpty(memberMessageQueryVO.getMessageId()), "message_id", memberMessageQueryVO.getMessageId());
         //消息标题
         queryWrapper.like(StringUtils.isNotEmpty(memberMessageQueryVO.getTitle()), "title", memberMessageQueryVO.getTitle());
         //会员id
@@ -60,5 +64,10 @@ public class MemberMessageServiceImpl extends ServiceImpl<MemberMessageMapper, M
             return this.removeById(memberMessage);
         }
         return false;
+    }
+
+    @Override
+    public boolean save(List<MemberMessage> messages) {
+        return saveBatch(messages);
     }
 }

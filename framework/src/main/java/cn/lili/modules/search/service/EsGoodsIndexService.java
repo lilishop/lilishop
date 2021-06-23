@@ -1,5 +1,6 @@
 package cn.lili.modules.search.service;
 
+import cn.lili.modules.goods.entity.dos.GoodsParams;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.BasePromotion;
@@ -145,7 +146,8 @@ public interface EsGoodsIndexService {
      * 重置当前商品索引
      *
      * @param goodsSku 商品sku信息
+     * @param goodsParams 商品参数
      * @return 商品索引
      */
-    EsGoodsIndex resetEsGoodsIndex(GoodsSku goodsSku);
+    EsGoodsIndex resetEsGoodsIndex(GoodsSku goodsSku, List<GoodsParams> goodsParams);
 }

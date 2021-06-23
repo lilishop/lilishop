@@ -2,11 +2,13 @@ package cn.lili.modules.goods.serviceimpl;
 
 import cn.lili.modules.goods.entity.dos.CategoryParameterGroup;
 import cn.lili.modules.goods.entity.dos.GoodsParams;
+import cn.lili.modules.goods.entity.dos.Parameters;
 import cn.lili.modules.goods.entity.vos.GoodsParamsGroupVO;
 import cn.lili.modules.goods.entity.vos.GoodsParamsVO;
 import cn.lili.modules.goods.mapper.GoodsParamsMapper;
 import cn.lili.modules.goods.service.CategoryParameterGroupService;
 import cn.lili.modules.goods.service.GoodsParamsService;
+import cn.lili.modules.goods.service.ParametersService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -36,6 +38,9 @@ public class GoodsParamsServiceImpl extends ServiceImpl<GoodsParamsMapper, Goods
     @Autowired
     private CategoryParameterGroupService categoryParameterGroupService;
 
+    @Autowired
+    private ParametersService parametersService;
+
     @Override
     public void addParams(List<GoodsParams> paramList, String goodsId) {
         //先删除现有商品参数
@@ -43,10 +48,12 @@ public class GoodsParamsServiceImpl extends ServiceImpl<GoodsParamsMapper, Goods
         //循环添加参数
         if (paramList != null) {
             for (GoodsParams param : paramList) {
+                Parameters parameters = parametersService.getById(param.getParamId());
                 GoodsParams goodsParams = new GoodsParams();
                 goodsParams.setGoodsId(goodsId);
                 goodsParams.setParamName(param.getParamName());
                 goodsParams.setParamValue(param.getParamValue());
+                goodsParams.setIsIndex(parameters.getIsIndex());
                 goodsParams.setParamId(param.getId());
                 this.save(goodsParams);
             }

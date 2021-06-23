@@ -164,6 +164,13 @@ public class GoodsSku extends BaseEntity {
     @ApiModelProperty(value = "商品类型", required = true)
     private String goodsType;
 
+    public Double getWeight() {
+        if (weight == null) {
+            return 0d;
+        }
+        return weight;
+    }
+
     @Override
     public Date getUpdateTime() {
         if (super.getUpdateTime() == null) {
