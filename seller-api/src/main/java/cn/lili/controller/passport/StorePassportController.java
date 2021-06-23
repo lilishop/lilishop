@@ -1,7 +1,11 @@
 package cn.lili.controller.passport;
 
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
+import cn.lili.common.verification.enums.VerificationEnums;
+import cn.lili.common.verification.service.VerificationService;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
@@ -32,6 +36,8 @@ public class StorePassportController {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private VerificationService verificationService;
 
     @ApiOperation(value = "登录接口")
     @ApiImplicitParams({
@@ -40,8 +46,12 @@ public class StorePassportController {
     })
     @PostMapping("/userLogin")
     public ResultMessage<Object> userLogin(@NotNull(message = "用户名不能为空") @RequestParam String username,
-                                           @NotNull(message = "密码不能为空") @RequestParam String password) {
-        return ResultUtil.data(this.memberService.usernameStoreLogin(username, password));
+                                           @NotNull(message = "密码不能为空") @RequestParam String password, @RequestHeader String uuid) {
+        if (verificationService.check(uuid, VerificationEnums.LOGIN)) {
+            return ResultUtil.data(this.memberService.usernameStoreLogin(username, password));
+        } else {
+            throw new ServiceException(ResultCode.VERIFICATION_ERROR);
+        }
     }
 
     @ApiOperation(value = "修改密码")
