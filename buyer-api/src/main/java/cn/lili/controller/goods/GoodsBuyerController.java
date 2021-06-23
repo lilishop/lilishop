@@ -89,8 +89,8 @@ public class GoodsBuyerController {
             Map<String, Object> map = goodsSkuService.getGoodsSkuDetail(goodsId, skuId);
             return ResultUtil.data(map);
         } catch (ServiceException se) {
-            log.error(se.getMsg(), se);
-            return ResultUtil.error(se.getResultCode().code(), se.getResultCode().message());
+            log.info(se.getMsg(), se);
+            throw se;
         } catch (Exception e) {
             log.error(ResultCode.GOODS_ERROR.message(), e);
             return ResultUtil.error(ResultCode.GOODS_ERROR);

@@ -1,24 +1,21 @@
 package cn.lili.controller.goods;
 
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.utils.PageUtil;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Specification;
-import cn.lili.modules.goods.entity.dto.SpecificationSearchParams;
-import cn.lili.modules.goods.entity.vos.SpecificationVO;
 import cn.lili.modules.goods.service.SpecificationService;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 
@@ -36,54 +33,39 @@ public class SpecificationManagerController {
     @Autowired
     private SpecificationService specificationService;
 
-    @GetMapping(value = "/{id}")
-    @ApiImplicitParam(name = "id", value = "商品规格ID", required = true, dataType = "String", paramType = "path")
-    @ApiOperation(value = "通过id获取商品规格")
-    public ResultMessage<Specification> get(@PathVariable String id) {
-        return ResultUtil.data(specificationService.getSpecification(id));
-    }
 
-    @RequestMapping(value = "/all", method = RequestMethod.GET)
+    @GetMapping("/all")
     @ApiOperation(value = "获取所有可用规格")
     public List<Specification> getAll() {
-        List<Specification> list = specificationService.list(new QueryWrapper<Specification>().eq("delete_flag", 0));
+        List<Specification> list = specificationService.list();
         return list;
     }
 
-
-    @GetMapping(value = "/page")
-    @ApiOperation(value = "分页获取")
-    public ResultMessage<IPage<SpecificationVO>> getByPage(String specId, PageVO pageVo) {
-        SpecificationSearchParams searchParams = new SpecificationSearchParams();
-        searchParams.setSpecId(specId);
-        return ResultUtil.data(specificationService.getSpecificationPage(searchParams, pageVo));
-    }
-
-    @PutMapping
-    @ApiOperation(value = "编辑规格")
-    public ResultMessage<Specification> update(@Valid SpecificationVO parameters) {
-        if (parameters.getStoreId() == null) {
-            parameters.setStoreId("0");
-        }
-        if (specificationService.updateSpecification(parameters)) {
-            return ResultUtil.data(parameters);
-        }
-        throw new ServiceException(ResultCode.SPEC_UPDATE_ERROR);
+    @GetMapping
+    @ApiOperation(value = "搜索规格")
+    public Page<Specification> page(String specName, PageVO page) {
+        LambdaQueryWrapper<Specification> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.like(StringUtils.isNotEmpty(specName), Specification::getSpecName, specName);
+        lambdaQueryWrapper.orderByDesc(Specification::getCreateTime);
+        return specificationService.page(PageUtil.initPage(page), lambdaQueryWrapper);
     }
 
     @PostMapping
-    @ApiOperation(value = "添加规格")
-    public ResultMessage<Specification> save(@Valid SpecificationVO parameters) {
-        if (parameters.getStoreId() == null) {
-            parameters.setStoreId("0");
-        }
-        if (specificationService.addSpecification(parameters) != null) {
-            return ResultUtil.data(parameters);
-        }
-        throw new ServiceException(ResultCode.SPEC_SAVE_ERROR);
+    @ApiOperation(value = "保存规格")
+    public ResultMessage<Object> save(Specification specification) {
+        specificationService.save(specification);
+        return ResultUtil.success();
     }
 
-    @DeleteMapping(value = "/{ids}")
+    @PutMapping("/{id}")
+    @ApiOperation(value = "更改规格")
+    public ResultMessage<Object> update(Specification specification, @PathVariable String id) {
+        specification.setId(id);
+        specificationService.saveOrUpdate(specification);
+        return ResultUtil.success();
+    }
+
+    @DeleteMapping("/{ids}")
     @ApiImplicitParam(name = "ids", value = "规格ID", required = true, dataType = "String", allowMultiple = true, paramType = "path")
     @ApiOperation(value = "批量删除")
     public ResultMessage<Object> delAllByIds(@PathVariable List<String> ids) {

@@ -1,7 +1,7 @@
 package cn.lili.modules.goods.mapper;
 
 import cn.lili.modules.goods.entity.dos.CategorySpecification;
-import cn.lili.modules.goods.entity.vos.CategorySpecificationVO;
+import cn.lili.modules.goods.entity.dos.Specification;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -20,8 +20,8 @@ public interface CategorySpecificationMapper extends BaseMapper<CategorySpecific
      * @param categoryId 分类id
      * @return 分类绑定规格列表
      */
-    @Select("select s.id, s.spec_name as `name` from " +
+    @Select("select s.* from " +
             "li_specification s INNER join li_category_specification cs on s.id = cs.specification_id and cs.category_id = #{categoryId} " +
             "where s.delete_flag = 0")
-    List<CategorySpecificationVO> getCategorySpecList(String categoryId);
+    List<Specification> getCategorySpecList(String categoryId);
 }

@@ -12,12 +12,17 @@ import cn.lili.common.rocketmq.tags.GoodsTagsEnum;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.config.rocketmq.RocketmqCustomProperties;
-import cn.lili.modules.goods.entity.dos.*;
+import cn.lili.modules.goods.entity.dos.Goods;
+import cn.lili.modules.goods.entity.dos.GoodsParams;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
-import cn.lili.modules.goods.entity.vos.*;
+import cn.lili.modules.goods.entity.vos.GoodsSkuSpecVO;
+import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
+import cn.lili.modules.goods.entity.vos.GoodsVO;
+import cn.lili.modules.goods.entity.vos.SpecValueVO;
 import cn.lili.modules.goods.mapper.GoodsSkuMapper;
 import cn.lili.modules.goods.service.*;
 import cn.lili.modules.member.entity.dos.FootPrint;
@@ -39,7 +44,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 商品sku业务层实现
@@ -63,9 +67,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     //规格
     @Autowired
     private SpecificationService specificationService;
-    //规格项
-    @Autowired
-    private SpecValuesService specValuesService;
     //缓存
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -320,29 +321,29 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         JSONObject jsonObject = JSONUtil.parseObj(goodsSku.getSpecs());
         List<SpecValueVO> specValueVOS = new ArrayList<>();
         List<String> goodsGalleryList = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-            SpecValueVO s = new SpecValueVO();
-            if (entry.getKey().equals("images")) {
-                s.setSpecName(entry.getKey());
-                if (entry.getValue().toString().contains("url")) {
-                    List<SpecValueVO.SpecImages> specImages = JSONUtil.toList(JSONUtil.parseArray(entry.getValue()), SpecValueVO.SpecImages.class);
-                    s.setSpecImage(specImages);
-                    goodsGalleryList = specImages.stream().map(SpecValueVO.SpecImages::getUrl).collect(Collectors.toList());
-                }
-            } else {
-                SpecificationVO specificationVO = new SpecificationVO();
-                specificationVO.setSpecName(entry.getKey());
-                specificationVO.setStoreId(goodsSku.getStoreId());
-                specificationVO.setCategoryPath(goodsSku.getCategoryPath());
-                Specification specification = specificationService.addSpecification(specificationVO);
-                s.setSpecNameId(specification.getId());
-                SpecValues specValues = specValuesService.getSpecValues(entry.getValue().toString(), specification.getId());
-                s.setSpecValueId(specValues.getId());
-                s.setSpecName(entry.getKey());
-                s.setSpecValue(entry.getValue().toString());
-            }
-            specValueVOS.add(s);
-        }
+//        for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+//            SpecValueVO s = new SpecValueVO();
+//            if (entry.getKey().equals("images")) {
+//                s.setSpecName(entry.getKey());
+//                if (entry.getValue().toString().contains("url")) {
+//                    List<SpecValueVO.SpecImages> specImages = JSONUtil.toList(JSONUtil.parseArray(entry.getValue()), SpecValueVO.SpecImages.class);
+//                    s.setSpecImage(specImages);
+//                    goodsGalleryList = specImages.stream().map(SpecValueVO.SpecImages::getUrl).collect(Collectors.toList());
+//                }
+//            } else {
+//                SpecificationVO specificationVO = new SpecificationVO();
+//                specificationVO.setSpecName(entry.getKey());
+//                specificationVO.setStoreId(goodsSku.getStoreId());
+//                specificationVO.setCategoryPath(goodsSku.getCategoryPath());
+//                Specification specification = specificationService.addSpecification(specificationVO);
+//                s.setSpecNameId(specification.getId());
+//                SpecValues specValues = specValuesService.getSpecValues(entry.getValue().toString(), specification.getId());
+//                s.setSpecValueId(specValues.getId());
+//                s.setSpecName(entry.getKey());
+//                s.setSpecValue(entry.getValue().toString());
+//            }
+//            specValueVOS.add(s);
+//        }
         goodsSkuVO.setGoodsGalleryList(goodsGalleryList);
         goodsSkuVO.setSpecList(specValueVOS);
         return goodsSkuVO;
@@ -619,20 +620,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 } else {
                     //设置商品名称
                     goodsName.append(" ").append(m.getValue());
-
                     //规格简短信息
                     simpleSpecs.append(" ").append(m.getValue());
-
-                    //保存规格项
-                    SpecificationVO specificationVO = new SpecificationVO(m.getKey(), goods.getStoreId(), goods.getCategoryPath());
-                    Specification specification = specificationService.addSpecification(specificationVO);
-
-                    //保存规格值
-                    SpecValues specValues = specValuesService.getSpecValues(m.getValue().toString(), specification.getId());
-
-                    //添加属性索引
-                    EsGoodsAttribute attribute = new EsGoodsAttribute(0, specification.getId(), m.getKey(), specValues.getId(), m.getValue().toString());
-                    attributes.add(attribute);
                 }
             }
         }

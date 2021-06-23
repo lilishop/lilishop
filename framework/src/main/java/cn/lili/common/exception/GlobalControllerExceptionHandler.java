@@ -44,10 +44,21 @@ public class GlobalControllerExceptionHandler {
 
         //如果是自定义异常，则获取异常，返回自定义错误消息
         if (e instanceof ServiceException) {
-            ResultCode resultCode = ((ServiceException) e).getResultCode();
+            ServiceException serviceException = ((ServiceException) e);
+            ResultCode resultCode = serviceException.getResultCode();
+
+            Integer code = null;
+            String message = null;
+
             if (resultCode != null) {
-                return ResultUtil.error(resultCode.code(), resultCode.message());
+                code = resultCode.code();
+                message = resultCode.message();
             }
+            //如果有扩展消息，则输出异常中，跟随补充异常
+            if (!serviceException.getMsg().equals(ServiceException.DEFAULT_MESSAGE)) {
+                message += ":" + serviceException.getMsg();
+            }
+            return ResultUtil.error(code, message);
         }
 
         //默认错误消息
