@@ -156,7 +156,11 @@ public class WechatLivePlayerUtil {
         String content = HttpUtils.doPostWithJson(url, map);
         JSONObject json = new JSONObject(content);
         log.info("微信小程序直播间删除商品：" + content);
-        return json.getStr("errcode").equals("0");
+        if(json.getStr("errcode").equals("0")){
+            return true;
+        }
+        throw new ServiceException(json.getStr("errmsg"));
+
     }
 
     /**
