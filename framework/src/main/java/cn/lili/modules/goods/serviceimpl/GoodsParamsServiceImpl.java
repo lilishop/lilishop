@@ -9,6 +9,8 @@ import cn.lili.modules.goods.service.CategoryParameterGroupService;
 import cn.lili.modules.goods.service.GoodsParamsService;
 import cn.lili.modules.goods.service.ParametersService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,30 @@ public class GoodsParamsServiceImpl extends ServiceImpl<GoodsParamsMapper, Goods
                 this.save(goodsParams);
             }
         }
+    }
+
+    /**
+     * 更新商品参数是否索引
+     *
+     * @param paramId 参数id
+     * @param isIndex 是否索引
+     */
+    @Override
+    public void updateParametersIsIndex(String paramId, Integer isIndex) {
+        LambdaUpdateWrapper<GoodsParams> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(GoodsParams::getParamId, paramId);
+        updateWrapper.set(GoodsParams::getIsIndex, isIndex);
+        this.update(updateWrapper);
+    }
+
+    /**
+     * 根据参数id删除已经设置的商品参数
+     *
+     * @param paramId 参数id
+     */
+    @Override
+    public void deleteByParamId(String paramId) {
+        this.remove(new QueryWrapper<GoodsParams>().eq("param_id", paramId));
     }
 
     @Override
