@@ -1,10 +1,11 @@
 package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Parameters;
+import cn.lili.modules.goods.service.GoodsParamsService;
 import cn.lili.modules.goods.service.ParametersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -28,6 +29,9 @@ public class ParameterManagerController {
     @Autowired
     private ParametersService parametersService;
 
+    @Autowired
+    private GoodsParamsService goodsParamsService;
+
     @ApiOperation(value = "添加参数")
     @PostMapping
     public ResultMessage<Parameters> save(@Valid Parameters parameters) {
@@ -44,6 +48,9 @@ public class ParameterManagerController {
     public ResultMessage<Parameters> update(@Valid Parameters parameters) {
 
         if (parametersService.updateById(parameters)) {
+            if (parameters.getIsIndex() != null) {
+                goodsParamsService.updateParametersIsIndex(parameters.getId(), parameters.getIsIndex());
+            }
             return ResultUtil.data(parameters);
         }
         throw new ServiceException(ResultCode.PARAMETER_UPDATE_ERROR);
@@ -54,6 +61,7 @@ public class ParameterManagerController {
     @DeleteMapping(value = "/{id}")
     public ResultMessage<Object> delById(@PathVariable String id) {
         parametersService.removeById(id);
+        goodsParamsService.deleteByParamId(id);
         return ResultUtil.success();
 
     }
