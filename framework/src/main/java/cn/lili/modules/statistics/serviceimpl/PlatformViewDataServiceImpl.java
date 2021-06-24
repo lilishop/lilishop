@@ -51,6 +51,9 @@ public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMap
     @Autowired
     private Cache cache;
 
+    //平台流量统计
+    @Autowired
+    private PlatformViewDataMapper platformViewDataMapper;
 
     @Override
     public Long online() {
@@ -235,7 +238,7 @@ public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMap
             } else {
                 queryWrapper.eq("store_id", -1);
             }
-            return this.count(queryWrapper);
+            return platformViewDataMapper.count(queryWrapper);
         }
     }
 
