@@ -1,7 +1,11 @@
 package cn.lili.modules.broadcast.util;
 
 import cn.hutool.json.JSONObject;
+import cn.lili.common.exception.ServiceException;
+import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+import cn.lili.modules.message.util.WechatAccessTokenUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -18,14 +22,18 @@ import java.util.Date;
 @Slf4j
 @Component
 public class WechatMediaUtil {
+    @Autowired
+    private WechatAccessTokenUtil wechatAccessTokenUtil;
 
     /**
      * 上传多媒体数据到微信服务器
-     * @param accessToken 从微信获取到的access_token
+     *
      * @param mediaFileUrl 来自网络上面的媒体文件地址
      * @return
      */
-    public String uploadMedia(String accessToken, String type, String mediaFileUrl) {
+    public String uploadMedia(String type, String mediaFileUrl) {
+        //获取token
+        String accessToken = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         /*
          * 上传媒体文件到微信服务器需要请求的地址
          */
@@ -38,21 +46,21 @@ public class WechatMediaUtil {
         try {
             String boundary = "----WebKitFormBoundaryOYXo8heIv9pgpGjT";
             URL url = new URL(mediaStr);
-            HttpURLConnection urlConn = (HttpURLConnection)url.openConnection();
+            HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
             //让输入输出流开启
             urlConn.setDoInput(true);
             urlConn.setDoOutput(true);
             //使用post方式请求的时候必须关闭缓存
             urlConn.setUseCaches(false);
             //设置请求头的Content-Type属性
-            urlConn.setRequestProperty("Content-Type", "multipart/form-data; boundary="+boundary);
+            urlConn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
             urlConn.setRequestMethod("POST");
             //获取输出流，使用输出流拼接请求体
             OutputStream out = urlConn.getOutputStream();
 
             //读取文件的数据,构建一个GET请求，然后读取指定地址中的数据
             mediaUrl = new URL(mediaFileUrl);
-            HttpURLConnection mediaConn = (HttpURLConnection)mediaUrl.openConnection();
+            HttpURLConnection mediaConn = (HttpURLConnection) mediaUrl.openConnection();
             //设置请求方式
             mediaConn.setRequestMethod("GET");
             //设置可以打开输入流
@@ -68,15 +76,15 @@ public class WechatMediaUtil {
             byte[] bytes = new byte[1024];
             int size = 0;
             //使用outputStream流输出信息到请求体当中去
-            out.write(("--"+boundary+"\r\n").getBytes());
+            out.write(("--" + boundary + "\r\n").getBytes());
             out.write(("Content-Disposition: form-data; name=\"media\";\r\n"
-                    + "filename=\""+(new Date().getTime())+fileExt+"\"\r\n"
-                    + "Content-Type: "+contentType+"\r\n\r\n").getBytes());
-            while( (size = bufferedIn.read(bytes)) != -1) {
+                    + "filename=\"" + (new Date().getTime()) + fileExt + "\"\r\n"
+                    + "Content-Type: " + contentType + "\r\n\r\n").getBytes());
+            while ((size = bufferedIn.read(bytes)) != -1) {
                 out.write(bytes, 0, size);
             }
             //切记，这里的换行符不能少，否则将会报41005错误
-            out.write(("\r\n--"+boundary+"--\r\n").getBytes());
+            out.write(("\r\n--" + boundary + "--\r\n").getBytes());
 
             bufferedIn.close();
             in.close();
@@ -87,28 +95,39 @@ public class WechatMediaUtil {
             BufferedReader bufferedReader = new BufferedReader(reader);
             String tempStr = null;
             resultStr = new StringBuffer();
-            while((tempStr = bufferedReader.readLine()) != null) {
+            while ((tempStr = bufferedReader.readLine()) != null) {
                 resultStr.append(tempStr);
             }
             bufferedReader.close();
             reader.close();
             resultIn.close();
             urlConn.disconnect();
-        }  catch (Exception e) {
-            log.error("微信媒体上传失败",e);
+        } catch (Exception e) {
+            log.error("微信媒体上传失败", e);
         }
-        JSONObject jsonObject=new JSONObject(resultStr.toString());
-        log.info("微信媒体上传:"+jsonObject.toString());
-        return jsonObject.get("media_id").toString();
+        JSONObject jsonObject = new JSONObject(resultStr.toString());
+        log.info("微信媒体上传:" + jsonObject.toString());
+        //判断是否传递成功，如果token过期则重新获取
+        if (jsonObject.get("errcode").equals("0")) {
+            return jsonObject.get("media_id").toString();
+        } else if (jsonObject.get("errcode").equals("40001")) {
+            wechatAccessTokenUtil.removeAccessToken(ClientTypeEnum.WECHAT_MP);
+            return this.uploadMedia(type, mediaFileUrl);
+        } else {
+            throw new ServiceException(jsonObject.get("errmsg").toString());
+        }
+
     }
+
     /**
      * 通过传过来的contentType判断是哪一种类型
+     *
      * @param contentType 获取来自连接的contentType
      * @return
      */
     public String judgeType(String contentType) {
         String fileExt = "";
-        switch (contentType){
+        switch (contentType) {
             case "image/png":
                 fileExt = ".png";
                 break;
