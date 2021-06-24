@@ -2,7 +2,6 @@ package cn.lili.modules.goods.serviceimpl;
 
 import cn.lili.modules.goods.entity.dos.CategoryParameterGroup;
 import cn.lili.modules.goods.entity.dos.GoodsParams;
-import cn.lili.modules.goods.entity.dos.Parameters;
 import cn.lili.modules.goods.entity.vos.GoodsParamsGroupVO;
 import cn.lili.modules.goods.entity.vos.GoodsParamsVO;
 import cn.lili.modules.goods.mapper.GoodsParamsMapper;
@@ -10,9 +9,10 @@ import cn.lili.modules.goods.service.CategoryParameterGroupService;
 import cn.lili.modules.goods.service.GoodsParamsService;
 import cn.lili.modules.goods.service.ParametersService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,8 +38,6 @@ public class GoodsParamsServiceImpl extends ServiceImpl<GoodsParamsMapper, Goods
     @Autowired
     private CategoryParameterGroupService categoryParameterGroupService;
 
-    @Autowired
-    private ParametersService parametersService;
 
     @Override
     public void addParams(List<GoodsParams> paramList, String goodsId) {
@@ -48,16 +46,39 @@ public class GoodsParamsServiceImpl extends ServiceImpl<GoodsParamsMapper, Goods
         //循环添加参数
         if (paramList != null) {
             for (GoodsParams param : paramList) {
-                Parameters parameters = parametersService.getById(param.getParamId());
                 GoodsParams goodsParams = new GoodsParams();
                 goodsParams.setGoodsId(goodsId);
                 goodsParams.setParamName(param.getParamName());
                 goodsParams.setParamValue(param.getParamValue());
-                goodsParams.setIsIndex(parameters.getIsIndex());
+                goodsParams.setIsIndex(param.getIsIndex());
                 goodsParams.setParamId(param.getId());
                 this.save(goodsParams);
             }
         }
+    }
+
+    /**
+     * 更新商品参数是否索引
+     *
+     * @param paramId 参数id
+     * @param isIndex 是否索引
+     */
+    @Override
+    public void updateParametersIsIndex(String paramId, Integer isIndex) {
+        LambdaUpdateWrapper<GoodsParams> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(GoodsParams::getParamId, paramId);
+        updateWrapper.set(GoodsParams::getIsIndex, isIndex);
+        this.update(updateWrapper);
+    }
+
+    /**
+     * 根据参数id删除已经设置的商品参数
+     *
+     * @param paramId 参数id
+     */
+    @Override
+    public void deleteByParamId(String paramId) {
+        this.remove(new QueryWrapper<GoodsParams>().eq("param_id", paramId));
     }
 
     @Override

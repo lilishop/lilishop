@@ -64,6 +64,10 @@ public class DraftGoods extends BaseEntity {
     @ApiModelProperty(value = "详情")
     private String intro;
 
+
+    @ApiModelProperty(value = "商品移动端详情")
+    private String mobileIntro;
+
     @Max(value = 99999999, message = "价格不能超过99999999")
     @ApiModelProperty(value = "商品价格")
     private Double price;
@@ -114,11 +118,6 @@ public class DraftGoods extends BaseEntity {
 
     @ApiModelProperty(value = "是否自营")
     private Boolean selfOperated;
-    /**
-     * 商品移动端详情
-     */
-    @ApiModelProperty(value = "商品移动端详情")
-    private String mobileIntro;
 
     @ApiModelProperty(value = "商品视频")
     private String goodsVideo;

@@ -24,6 +24,21 @@ public interface GoodsParamsService extends IService<GoodsParams> {
     void addParams(List<GoodsParams> paramList, String goodsId);
 
     /**
+     * 更新商品参数是否索引
+     *
+     * @param paramId 参数id
+     * @param isIndex 是否索引
+     */
+    void updateParametersIsIndex(String paramId, Integer isIndex);
+
+    /**
+     * 根据参数id删除已经设置的商品参数
+     *
+     * @param paramId 参数id
+     */
+    void deleteByParamId(String paramId);
+
+    /**
      * 获取商品关联参数
      *
      * @param goodsId 商品ID
