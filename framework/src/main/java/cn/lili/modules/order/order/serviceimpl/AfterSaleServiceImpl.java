@@ -20,6 +20,7 @@ import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dto.AfterSaleDTO;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
+import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.entity.vo.AfterSaleApplyVO;
 import cn.lili.modules.order.order.entity.vo.AfterSaleSearchParams;
@@ -127,6 +128,14 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             afterSaleApplyVO.setRefundWay(AfterSaleRefundWayEnum.OFFLINE.name());
         } else {
             afterSaleApplyVO.setRefundWay(AfterSaleRefundWayEnum.ORIGINAL.name());
+        }
+        //判断订单类型，虚拟订单只支持退款
+        if(order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())){
+            afterSaleApplyVO.setReturnMoney(true);
+            afterSaleApplyVO.setReturnGoods(false);
+        }else{
+            afterSaleApplyVO.setReturnMoney(true);
+            afterSaleApplyVO.setReturnGoods(true);
         }
 
         afterSaleApplyVO.setAccountType(order.getPaymentMethod());

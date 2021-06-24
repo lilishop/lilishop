@@ -108,10 +108,10 @@ public class WechatMediaUtil {
         JSONObject jsonObject = new JSONObject(resultStr.toString());
         log.info("微信媒体上传:" + jsonObject.toString());
         //判断是否传递成功，如果token过期则重新获取
-        if (jsonObject.get("errcode").equals("40001")) {
+        if (jsonObject.get("errcode") != null && jsonObject.get("errcode").equals("40001")) {
             wechatAccessTokenUtil.removeAccessToken(ClientTypeEnum.WECHAT_MP);
             return this.uploadMedia(type, mediaFileUrl);
-        } else if (jsonObject.get("errcode")!=null) {
+        } else if (jsonObject.get("errcode") != null) {
             throw new ServiceException(jsonObject.get("errmsg").toString());
         } else {
             return jsonObject.get("media_id").toString();
