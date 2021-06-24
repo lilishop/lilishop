@@ -26,14 +26,24 @@ public class SpecValueVO implements Serializable {
     @ApiModelProperty(value = "规格值")
     private String specValue;
 
-    /**
-     * 规格类型，1图片  0 非图片
-     */
     @ApiModelProperty(value = "该规格是否有图片，1 有 0 没有")
     private Integer specType;
     /**
      * 规格图片
      */
     @ApiModelProperty(value = "规格的图片")
-    private List<String> specImage;
+    private List<SpecImages> specImage;
+
+    @Data
+    public static class SpecImages implements Serializable {
+
+        private static final long serialVersionUID = 1816357809660916086L;
+
+        private String url;
+
+        private String name;
+
+        private String status;
+
+    }
 }

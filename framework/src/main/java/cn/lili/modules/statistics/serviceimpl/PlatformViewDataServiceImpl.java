@@ -4,7 +4,6 @@ import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.common.utils.DateUtil;
 import cn.lili.config.properties.StatisticsProperties;
 import cn.lili.modules.base.entity.enums.ClientTypeEnum;
 import cn.lili.modules.member.entity.vo.MemberDistributionVO;
@@ -221,8 +220,6 @@ public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMap
 
         calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-
-        System.out.println(DateUtil.toString(calendar.getTime().getTime(), DateUtil.STANDARD_FORMAT));
         //如果是今天的统计，则从redis 中拿，否则从数据库中拿
         if (dates[0].equals(calendar.getTime())) {
             if (StringUtils.isNotEmpty(queryParam.getStoreId())) {

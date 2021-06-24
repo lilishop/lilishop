@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,7 +30,7 @@ public class SpecificationStoreController {
 
     @GetMapping(value = "/{categoryId}")
     @ApiOperation(value = "获取分类规格")
-    public List<Specification> getSpecifications(String categoryId) {
+    public List<Specification> getSpecifications(@PathVariable String categoryId) {
         return categorySpecificationService.getCategorySpecList(categoryId);
     }
 
