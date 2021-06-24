@@ -98,6 +98,7 @@ public class WechatMediaUtil {
             log.error("微信媒体上传失败",e);
         }
         JSONObject jsonObject=new JSONObject(resultStr.toString());
+        log.info("微信媒体上传:"+jsonObject.toString());
         return jsonObject.get("media_id").toString();
     }
     /**
