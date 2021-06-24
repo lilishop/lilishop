@@ -66,7 +66,7 @@ public class Coupon extends BasePromotion {
     @ApiModelProperty(value = "活动描述")
     private String description;
 
-    @ApiModelProperty(value = "发行数量")
+    @ApiModelProperty(value = "发行数量,如果是0则是不限制")
     private Integer publishNum;
 
     @ApiModelProperty(value = "领取限制")

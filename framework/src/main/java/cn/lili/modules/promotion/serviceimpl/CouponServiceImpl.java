@@ -271,8 +271,8 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         if (coupon.getCouponLimitNum() < 0) {
             throw new ServiceException("领取限制数量不能为负数");
         }
-
-        if (coupon.getCouponLimitNum() > coupon.getPublishNum()) {
+        //如果发行数量是0则判断领取限制数量
+        if (coupon.getPublishNum() != 0 && coupon.getCouponLimitNum() > coupon.getPublishNum()) {
             throw new ServiceException("领取限制数量超出发行数量");
         }
 
@@ -282,7 +282,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
             throw new ServiceException("优惠券折扣必须小于10且大于0");
         }
 
-        if (coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
+        if (coupon.getRangeDayType() != null && coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
             long nowTime = DateUtil.getDateline() * 1000;
             if (coupon.getStartTime().getTime() < nowTime && coupon.getEndTime().getTime() > nowTime) {
                 throw new ServiceException("活动时间小于当前时间，不能进行编辑删除操作");
