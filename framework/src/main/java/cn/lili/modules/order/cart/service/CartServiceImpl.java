@@ -360,17 +360,17 @@ public class CartServiceImpl implements CartService {
     private GoodsSku checkGoods(String skuId, Integer num) {
         GoodsSku dataSku = this.goodsSkuService.getGoodsSkuByIdFromCache(skuId);
         if (dataSku == null) {
-            throw new ServiceException("商品已失效，请重新选购！");
+            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
         if (!GoodsAuthEnum.PASS.name().equals(dataSku.getIsAuth()) || !GoodsStatusEnum.UPPER.name().equals(dataSku.getMarketEnable())) {
-            throw new ServiceException("商品已下架，请重新选购！");
+            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
         //读取sku的可用库存
         Integer enableQuantity = goodsSkuService.getStock(skuId);
 
         //如果sku的可用库存小于等于0或者小于用户购买的数量，则不允许购买
         if (enableQuantity <= 0 || enableQuantity < num) {
-            throw new ServiceException("商品库存已不足，请选购其他商品。");
+            throw new ServiceException(ResultCode.GOODS_SKU_QUANTITY_NOT_ENOUGH);
         }
         return dataSku;
     }
