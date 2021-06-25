@@ -459,7 +459,7 @@ public class CartServiceImpl implements CartService {
     @Override
     public Long getCartNum(Boolean checked) {
         //构建购物车
-        TradeDTO tradeDTO = this.getCheckedTradeDTO(CartTypeEnum.CART);
+        TradeDTO tradeDTO = this.getAllTradeDTO();
         //过滤sku列表
         List<CartSkuVO> collect = tradeDTO.getSkuList().stream().filter(i -> Boolean.FALSE.equals(i.getInvalid())).collect(Collectors.toList());
         long count = 0L;
