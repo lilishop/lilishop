@@ -201,7 +201,7 @@ public class WechatLivePlayerUtil {
         log.info("微信小程序请求结果：" + content);
         //获取请求内容，如果token过期则重新获取，如果出错则抛出错误
         JSONObject jsonObject = new JSONObject(content);
-        if (jsonObject.get("media_id") != null) {
+        if (jsonObject.get("errcode").equals("0")) {
             return jsonObject;
         } else if (jsonObject.get("errcode").equals("40001")) {
             wechatAccessTokenUtil.removeAccessToken(ClientTypeEnum.WECHAT_MP);
