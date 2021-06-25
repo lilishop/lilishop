@@ -1,13 +1,17 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.base.IdEntity;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -25,7 +29,9 @@ import javax.validation.constraints.NotNull;
 @Table(name = "li_parameters")
 @TableName("li_parameters")
 @ApiModel(value = "商品参数")
-public class Parameters extends BaseEntity {
+public class Parameters extends IdEntity {
+
+
 
     private static final long serialVersionUID = -566510714456317006L;
 
@@ -36,6 +42,7 @@ public class Parameters extends BaseEntity {
 
 
     @ApiModelProperty(value = "选择值")
+    @NotEmpty(message = "参数选项值必填")
     private String options;
 
     @ApiModelProperty(value = "是否可索引，0 不显示 1 显示", required = true)

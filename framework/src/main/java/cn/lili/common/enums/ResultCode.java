@@ -196,6 +196,8 @@ public enum ResultCode {
 
     ORDER_DELIVER_NUM_ERROR(31010, "没有待发货的订单"),
 
+    ORDER_NOT_SUPPORT_DISTRIBUTION(31011, "购物车中包含不支持配送的商品，请重新选择收货地址，或者重新选择商品"),
+
     /**
      * 支付
      */

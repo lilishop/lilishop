@@ -8,7 +8,7 @@ import cn.hutool.extra.pinyin.PinyinUtil;
 import cn.lili.common.elasticsearch.BaseElasticsearchService;
 import cn.lili.common.elasticsearch.EsSuffix;
 import cn.lili.config.elasticsearch.ElasticsearchProperties;
-import cn.lili.modules.goods.entity.dos.GoodsParams;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dos.GoodsWords;
 import cn.lili.modules.goods.entity.enums.GoodsWordsTypeEnum;
@@ -368,12 +368,12 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      * 重置当前商品索引
      *
      * @param goodsSku 商品sku信息
-     * @param goodsParams 商品参数
+     * @param goodsParamDTOS 商品参数
      * @return 商品索引
      */
     @Override
-    public EsGoodsIndex resetEsGoodsIndex(GoodsSku goodsSku, List<GoodsParams> goodsParams) {
-        EsGoodsIndex index = new EsGoodsIndex(goodsSku, goodsParams);
+    public EsGoodsIndex resetEsGoodsIndex(GoodsSku goodsSku, List<GoodsParamsDTO> goodsParamDTOS) {
+        EsGoodsIndex index = new EsGoodsIndex(goodsSku, goodsParamDTOS);
         //获取活动信息
         Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
         //写入促销信息

@@ -2,9 +2,8 @@ package cn.lili.controller.other;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.modules.goods.entity.dos.Goods;
-import cn.lili.modules.goods.entity.dos.GoodsParams;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.goods.entity.dos.Parameters;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsService;
@@ -15,7 +14,6 @@ import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.annotations.Api;
-import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,8 +71,8 @@ public class ElasticsearchController {
                 Goods goods = goodsService.getById(goodsId);
                 EsGoodsIndex index = new EsGoodsIndex(goodsSku);
                 if (goods.getParams() != null && !goods.getParams().isEmpty()) {
-                    List<GoodsParams> goodsParams = JSONUtil.toList(goods.getParams(), GoodsParams.class);
-                    index = new EsGoodsIndex(goodsSku, goodsParams);
+                    List<GoodsParamsDTO> goodsParamDTOS = JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class);
+                    index = new EsGoodsIndex(goodsSku, goodsParamDTOS);
                 }
                 Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
                 index.setPromotionMap(goodsCurrentPromotionMap);

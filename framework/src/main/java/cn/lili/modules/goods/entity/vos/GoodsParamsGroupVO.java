@@ -16,7 +16,7 @@ import java.util.List;
 public class GoodsParamsGroupVO implements Serializable {
     private static final long serialVersionUID = 1450550797436233753L;
     @ApiModelProperty("参数组关联的参数集合")
-    private List<GoodsParamsVO> params;
+    private List<GoodsParamsDTOVO> params;
     @ApiModelProperty("参数组名称")
     private String groupName;
     @ApiModelProperty("参数组id")
