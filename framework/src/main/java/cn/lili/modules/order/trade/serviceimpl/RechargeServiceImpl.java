@@ -62,8 +62,6 @@ public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> i
         queryWrapper.eq(!StringUtils.isEmpty(rechargeQueryVO.getRechargeSn()), "recharge_sn", rechargeQueryVO.getRechargeSn());
         //会员id
         queryWrapper.eq(!StringUtils.isEmpty(rechargeQueryVO.getMemberId()), "member_id", rechargeQueryVO.getMemberId());
-        //已付款的充值订单
-        queryWrapper.eq("pay_status", PayStatusEnum.PAID.name());
         //支付时间 开始时间和结束时间
         if (!StringUtils.isEmpty(rechargeQueryVO.getStartDate()) && !StringUtils.isEmpty(rechargeQueryVO.getEndDate())) {
             Date start = cn.hutool.core.date.DateUtil.parse(rechargeQueryVO.getStartDate());

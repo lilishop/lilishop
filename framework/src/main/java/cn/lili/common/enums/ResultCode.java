@@ -228,6 +228,8 @@ public enum ResultCode {
 
     PAY_NOT_EXIST_ORDER(32011, "支付订单不存在"),
 
+    CAN_NOT_RECHARGE_WALLET(32012, "不能使用余额进行充值"),
+
     /**
      * 售后
      */
