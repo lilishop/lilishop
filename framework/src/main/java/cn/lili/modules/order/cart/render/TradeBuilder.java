@@ -1,7 +1,5 @@
 package cn.lili.modules.order.cart.render;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
@@ -101,13 +99,6 @@ public class TradeBuilder {
             }
         }
 
-        if (tradeDTO.getNotSupportFreight() != null && tradeDTO.getNotSupportFreight().size() > 0) {
-            StringBuilder stringBuilder = new StringBuilder("包含商品有-");
-            tradeDTO.getNotSupportFreight().forEach(sku -> {
-                stringBuilder.append(sku.getGoodsSku().getGoodsName());
-            });
-            throw new ServiceException(ResultCode.ORDER_NOT_SUPPORT_DISTRIBUTION, stringBuilder.toString());
-        }
 
         //购物车信息接受
         List<CartVO> cartVOList = new ArrayList<>();
