@@ -185,6 +185,7 @@ public class WechatLivePlayerUtil {
 
     /**
      * 请求微信接口
+     *
      * @param url 链接
      * @param map 参数
      * @return 返回内容
@@ -193,7 +194,7 @@ public class WechatLivePlayerUtil {
         //获取token
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
         //请求链接添加token
-        url+=token;
+        url += token;
         //发起请求
         String content = HttpUtils.doPostWithJson(url, map);
         //记录请求结果
