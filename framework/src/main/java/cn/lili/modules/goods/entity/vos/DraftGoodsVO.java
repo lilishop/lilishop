@@ -1,10 +1,9 @@
 package cn.lili.modules.goods.entity.vos;
 
 import cn.lili.modules.goods.entity.dos.DraftGoods;
-import cn.lili.modules.goods.entity.dos.GoodsParams;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
@@ -23,7 +22,7 @@ public class DraftGoodsVO extends DraftGoods {
     private List<String> categoryName;
 
     @ApiModelProperty(value = "商品参数")
-    private List<GoodsParams> goodsParamsList;
+    private List<GoodsParamsDTO> goodsParamsDTOList;
 
     @ApiModelProperty(value = "商品图片")
     private List<String> goodsGalleryList;

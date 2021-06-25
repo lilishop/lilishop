@@ -221,8 +221,8 @@ public class Goods extends BaseEntity {
         this.intro = goodsOperationDTO.getIntro();
         this.mobileIntro = goodsOperationDTO.getMobileIntro();
         this.cost = goodsOperationDTO.getCost();
-        if (goodsOperationDTO.getGoodsParamsList() != null && goodsOperationDTO.getGoodsParamsList().isEmpty()) {
-            this.params = JSONUtil.toJsonStr(goodsOperationDTO.getGoodsParamsList());
+        if (goodsOperationDTO.getGoodsParamsDTOList() != null && goodsOperationDTO.getGoodsParamsDTOList().isEmpty()) {
+            this.params = JSONUtil.toJsonStr(goodsOperationDTO.getGoodsParamsDTOList());
         }
         //如果立即上架则
         this.marketEnable = goodsOperationDTO.isRelease() ? GoodsStatusEnum.UPPER.name() : GoodsStatusEnum.DOWN.name();

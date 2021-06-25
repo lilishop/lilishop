@@ -8,6 +8,7 @@ import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.common.rocketmq.tags.MqOrderTagsEnum;
 import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.member.entity.dos.Member;
+import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.cart.entity.dto.MemberCouponDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -68,6 +69,11 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Trade createTrade(TradeDTO tradeDTO) {
+
+        //创建订单预校验
+        createTradeCheck(tradeDTO);
+
+
         Trade trade = new Trade(tradeDTO);
         String key = CachePrefix.TRADE.getPrefix() + trade.getSn();
         //积分预处理
@@ -85,6 +91,31 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
         //发送订单创建消息
         rocketMQTemplate.asyncSend(destination, key, RocketmqSendCallbackBuilder.commonCallback());
         return trade;
+    }
+
+    /**
+     * 创建订单最后一步校验
+     *
+     * @param tradeDTO
+     */
+    private void createTradeCheck(TradeDTO tradeDTO) {
+
+        //创建订单如果没有收获地址，
+        MemberAddress memberAddress = tradeDTO.getMemberAddress();
+        if (memberAddress == null) {
+            throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
+        }
+
+        /**
+         * 订单配送区域校验
+         */
+        if (tradeDTO.getNotSupportFreight() != null && tradeDTO.getNotSupportFreight().size() > 0) {
+            StringBuilder stringBuilder = new StringBuilder("包含商品有-");
+            tradeDTO.getNotSupportFreight().forEach(sku -> {
+                stringBuilder.append(sku.getGoodsSku().getGoodsName());
+            });
+            throw new ServiceException(ResultCode.ORDER_NOT_SUPPORT_DISTRIBUTION, stringBuilder.toString());
+        }
     }
 
     @Override

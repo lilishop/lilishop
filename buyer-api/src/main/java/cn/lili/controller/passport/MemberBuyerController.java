@@ -63,9 +63,9 @@ public class MemberBuyerController {
     public ResultMessage<Object> smsLogin(@NotNull(message = "手机号为空") @RequestParam String mobile,
                                           @NotNull(message = "验证码为空") @RequestParam String code,
                                           @RequestHeader String uuid) {
-        if(smsUtil.verifyCode(mobile,VerificationEnums.LOGIN,uuid,code)){
-        return ResultUtil.data(memberService.mobilePhoneLogin(mobile));
-        }else {
+        if (smsUtil.verifyCode(mobile, VerificationEnums.LOGIN, uuid, code)) {
+            return ResultUtil.data(memberService.mobilePhoneLogin(mobile));
+        } else {
             throw new ServiceException("验证码错误");
         }
     }

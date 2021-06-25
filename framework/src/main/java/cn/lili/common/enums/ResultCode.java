@@ -51,7 +51,7 @@ public enum ResultCode {
     /**
      * 商品
      */
-    GOODS_ERROR(11010, "读取商品异常"),
+    GOODS_ERROR(11001, "商品异常，请稍后重试"),
     GOODS_NOT_EXIST(11001, "商品已下架"),
     GOODS_NAME_ERROR(11002, "商品名称不正确，名称应为2-50字符"),
     GOODS_UNDER_ERROR(11003, "商品下架失败"),
@@ -63,6 +63,7 @@ public enum ResultCode {
     GOODS_SKU_COST_ERROR(11009, "商品SKU成本价不能小于等于0"),
     GOODS_SKU_WEIGHT_ERROR(11010, "商品重量不能为负数"),
     GOODS_SKU_QUANTITY_ERROR(11011, "商品库存数量不能为负数"),
+    GOODS_SKU_QUANTITY_NOT_ENOUGH(11011, "商品库存不足"),
 
     /**
      * 参数
@@ -195,6 +196,10 @@ public enum ResultCode {
     MEMBER_ADDRESS_NOT_EXIST(31009, "订单无收货地址，请先配置收货地址"),
 
     ORDER_DELIVER_NUM_ERROR(31010, "没有待发货的订单"),
+
+    ORDER_NOT_SUPPORT_DISTRIBUTION(31011, "购物车中包含不支持配送的商品，请重新选择收货地址，或者重新选择商品"),
+
+    ORDER_CAN_NOT_CANCEL(31012, "当前订单状态不可取消"),
 
     /**
      * 支付

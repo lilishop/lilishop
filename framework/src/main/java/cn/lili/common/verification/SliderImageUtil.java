@@ -78,7 +78,7 @@ public class SliderImageUtil {
         graphics.dispose();
 
         //添加水印
-        ImageUtil.addWatermark(originalImage, "请滑动拼图");
+        ImageUtil.addWatermark(originalImage, "LILI-SHOP");
         ByteArrayOutputStream newImageOs = new ByteArrayOutputStream();//新建流。
         ImageIO.write(newImage, TEMP_IMG_FILE_TYPE, newImageOs);//利用ImageIO类提供的write方法，将bi以png图片的数据模式写入流。
         byte[] newImagery = newImageOs.toByteArray();

@@ -202,8 +202,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @OrderLogPoint(description = "'订单['+#orderSn+']取消，原因为：'+#reason", orderSn = "#orderSn")
     public Order cancel(String orderSn, String reason) {
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
-        if (order.getOrderPromotionType().equals(OrderPromotionTypeEnum.PINTUAN.name()) && !order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())) {
-            throw new ServiceException("未成团订单不可取消");
+        //如果订单促销类型不为空&&订单是拼团订单，并且订单未成团，则抛出异常
+        if (StringUtils.isNotEmpty(order.getOrderPromotionType())
+                && order.getOrderPromotionType().equals(OrderPromotionTypeEnum.PINTUAN.name())
+                && !order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())) {
+            throw new ServiceException(ResultCode.ORDER_CAN_NOT_CANCEL);
         }
         if (CharSequenceUtil.equalsAny(order.getOrderStatus(),
                 OrderStatusEnum.UNDELIVERED.name(),
@@ -217,7 +220,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderStatusMessage(order);
             return order;
         } else {
-            throw new ServiceException("当前订单状态不可取消");
+            throw new ServiceException(ResultCode.ORDER_CAN_NOT_CANCEL);
         }
     }
 

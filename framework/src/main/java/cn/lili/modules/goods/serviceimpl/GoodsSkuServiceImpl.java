@@ -14,7 +14,7 @@ import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.Goods;
-import cn.lili.modules.goods.entity.dos.GoodsParams;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
@@ -204,7 +204,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //获取当前商品的索引信息
         EsGoodsIndex goodsIndex = goodsIndexService.findById(skuId);
         if (goodsIndex == null) {
-            goodsIndex = goodsIndexService.resetEsGoodsIndex(goodsSku, goodsVO.getGoodsParamsList());
+            goodsIndex = goodsIndexService.resetEsGoodsIndex(goodsSku, goodsVO.getGoodsParamsDTOList());
         }
         //商品规格
         GoodsSkuVO goodsSkuDetail = this.getGoodsSkuVO(goodsSku);
@@ -458,8 +458,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 EsGoodsIndex esGoodsOld = goodsIndexService.findById(goodsSku.getId());
                 EsGoodsIndex goodsIndex = new EsGoodsIndex(goodsSku);
                 if (goods.getParams() != null && !goods.getParams().isEmpty()) {
-                    List<GoodsParams> goodsParams = JSONUtil.toList(goods.getParams(), GoodsParams.class);
-                    goodsIndex = new EsGoodsIndex(goodsSku, goodsParams);
+                    List<GoodsParamsDTO> goodsParamDTOS = JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class);
+                    goodsIndex = new EsGoodsIndex(goodsSku, goodsParamDTOS);
                 }
                 //如果商品库存不为0，并且es中有数据
                 if (goodsSku.getQuantity() > 0 && esGoodsOld == null) {

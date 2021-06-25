@@ -121,7 +121,7 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         //售后申请
         indexNoticeVO.setRefund(afterSaleService.applyNum(null));
         //投诉审核
-        indexNoticeVO.setComplain(orderComplaintService.newComplainNum());
+        indexNoticeVO.setComplain(orderComplaintService.waitComplainNum());
         //分销员提现审核
         indexNoticeVO.setDistributionCash(distributionCashService.newDistributionCash());
         //待处理商家结算
@@ -218,8 +218,8 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         storeIndexStatisticsVO.setReturnMoney(afterSaleService.applyNum(AfterSaleTypeEnum.RETURN_MONEY.name()));
         //待回复评价数量
         storeIndexStatisticsVO.setMemberEvaluation(memberEvaluationService.getWaitReplyNum());
-        //待处理交易投诉数量
-        storeIndexStatisticsVO.setComplaint(orderComplaintService.newComplainNum());
+        //待处理投诉数量
+        storeIndexStatisticsVO.setComplaint(orderComplaintService.waitComplainNum());
 
         //待上架商品数量
         storeIndexStatisticsVO.setWaitUpper(goodsService.goodsNum(GoodsStatusEnum.DOWN, null));

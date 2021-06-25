@@ -17,6 +17,7 @@ import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
@@ -59,9 +60,7 @@ import java.util.List;
 @Transactional
 public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements GoodsService {
 
-    //商品属性
-    @Autowired
-    private GoodsParamsService goodsParamsService;
+
     //分类
     @Autowired
     private CategoryService categoryService;
@@ -107,12 +106,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         this.checkGoods(goods);
         //向goods加入图片
         this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
+        //添加商品参数
+        if (goodsOperationDTO.getGoodsParamsDTOList() != null && !goodsOperationDTO.getGoodsParamsDTOList().isEmpty()) {
+            goods.setParams(JSONUtil.toJsonStr(goodsOperationDTO.getGoodsParamsDTOList()));
+        }
         //添加商品
         this.save(goods);
-        //添加商品参数
-        if (goodsOperationDTO.getGoodsParamsList() != null && !goodsOperationDTO.getGoodsParamsList().isEmpty()) {
-            this.goodsParamsService.addParams(goodsOperationDTO.getGoodsParamsList(), goods.getId());
-        }
         //添加商品sku信息
         this.goodsSkuService.add(goodsOperationDTO.getSkuList(), goods);
         //添加相册
@@ -130,12 +129,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         this.checkGoods(goods);
         //向goods加入图片
         this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
+        //添加商品参数
+        if (goodsOperationDTO.getGoodsParamsDTOList() != null && !goodsOperationDTO.getGoodsParamsDTOList().isEmpty()) {
+            goods.setParams(JSONUtil.toJsonStr(goodsOperationDTO.getGoodsParamsDTOList()));
+        }
         //修改商品
         this.updateById(goods);
-        //添加商品参数
-        if (goodsOperationDTO.getGoodsParamsList() != null && !goodsOperationDTO.getGoodsParamsList().isEmpty()) {
-            this.goodsParamsService.addParams(goodsOperationDTO.getGoodsParamsList(), goods.getId());
-        }
         //修改商品sku信息
         this.goodsSkuService.update(goodsOperationDTO.getSkuList(), goods, goodsOperationDTO.getRegeneratorSkuFlag());
         //添加相册
@@ -180,7 +179,10 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         }
         goodsVO.setCategoryName(categoryName);
 
-        goodsVO.setGoodsParamsList(goodsParamsService.getGoodsParamsByGoodsId(goodsId));
+        //参数非空则填写参数
+        if (StringUtils.isNotEmpty(goods.getParams())) {
+            goodsVO.setGoodsParamsDTOList(JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class));
+        }
 
         return goodsVO;
     }

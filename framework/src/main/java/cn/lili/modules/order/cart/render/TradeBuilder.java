@@ -98,6 +98,8 @@ public class TradeBuilder {
                 log.error("购物车{}渲染异常：", cartRenderSteps.get(index).getClass(), e);
             }
         }
+
+
         //购物车信息接受
         List<CartVO> cartVOList = new ArrayList<>();
         //循环购物车信息
@@ -113,7 +115,7 @@ public class TradeBuilder {
     /**
      * 创建一笔交易
      *
-     * @param checkedWay    购物车类型
+     * @param checkedWay 购物车类型
      * @return 交易信息
      */
     public Trade createTrade(CartTypeEnum checkedWay) {
