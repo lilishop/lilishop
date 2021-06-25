@@ -113,7 +113,7 @@ public class TradeCashier implements CashierExecute {
         if (payParam.getOrderType().equals(CashierEnum.TRADE.name())) {
             Trade trade = tradeService.getBySn(payParam.getSn());
             if (trade != null) {
-                return trade.equals(PayStatusEnum.PAID.name());
+                return trade.getPayStatus().equals(PayStatusEnum.PAID.name());
             } else {
                 throw new ServiceException(ResultCode.PAY_NOT_EXIST_ORDER);
             }
