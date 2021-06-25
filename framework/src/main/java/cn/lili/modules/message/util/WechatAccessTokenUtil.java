@@ -110,5 +110,12 @@ public class WechatAccessTokenUtil {
 
     }
 
+    /**
+     * 清除 token
+     * @param clientTypeEnum
+     */
+    public void removeAccessToken(ClientTypeEnum clientTypeEnum) {
+        cache.remove(CachePrefix.WECHAT_CGI_ACCESS_TOKEN.getPrefix() + clientTypeEnum.name());
+    }
 
 }

@@ -4,11 +4,16 @@ import cn.hutool.core.util.RandomUtil;
 import cn.lili.common.utils.CommonUtil;
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.modules.order.order.entity.dos.Order;
+import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
+import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
+import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
+import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +28,8 @@ public class VerificationOrderExecute implements OrderStatusChangeEvent {
 
     @Autowired
     private OrderService orderService;
-
+    @Autowired
+    private OrderItemService orderItemService;
     @Override
     public void orderChange(OrderMessage orderMessage) {
         //订单状态为待核验，添加订单添加核验码
@@ -36,6 +42,10 @@ public class VerificationOrderExecute implements OrderStatusChangeEvent {
             orderService.update(new LambdaUpdateWrapper<Order>()
                     .set(Order::getVerificationCode, code)
                     .eq(Order::getSn, orderMessage.getOrderSn()));
+            //修改虚拟订单货物可以进行售后、投诉
+            orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn, orderMessage.getOrderSn())
+                    .set(OrderItem::getAfterSaleStatus, OrderItemAfterSaleStatusEnum.NOT_APPLIED)
+                    .set(OrderItem::getCommentStatus, OrderComplaintStatusEnum.NO_APPLY));
         }
     }
 

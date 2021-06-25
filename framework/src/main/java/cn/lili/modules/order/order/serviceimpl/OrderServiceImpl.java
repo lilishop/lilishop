@@ -365,13 +365,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //检测虚拟订单信息
         checkVerificationOrder(order, verificationCode);
         order.setOrderStatus(OrderStatusEnum.COMPLETED.name());
-        //修改订单信息
-        this.updateById(order);
-        //发送订单完成消息
-        OrderMessage orderMessage = new OrderMessage();
-        orderMessage.setNewStatus(OrderStatusEnum.COMPLETED);
-        orderMessage.setOrderSn(order.getSn());
-        this.sendUpdateStatusMessage(orderMessage);
+        //订单完成
+        this.complete(orderSn);
         return order;
     }
 

@@ -55,7 +55,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         if (!PromotionStatusEnum.START.name().equals(coupon.getPromotionStatus())) {
             throw new ServiceException("当前优惠券状态不可领取");
         }
-        if (coupon.getReceivedNum() >= coupon.getPublishNum()) {
+        if (coupon.getPublishNum() != 0 && coupon.getReceivedNum() >= coupon.getPublishNum()) {
             throw new ServiceException("优惠券剩余领取数量不足");
         }
         if (haveCoupons >= coupon.getCouponLimitNum()) {
