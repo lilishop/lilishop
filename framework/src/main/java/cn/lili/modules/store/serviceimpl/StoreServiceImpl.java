@@ -177,7 +177,10 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             member.setHaveStore(true);
             member.setStoreId(id);
             memberService.updateById(member);
-
+            //设定商家的结算日
+            storeDetailService.update(new LambdaUpdateWrapper<StoreDetail>()
+                    .eq(StoreDetail::getStoreId,id)
+                    .set(StoreDetail::getSettlementDay,new DateTime()));
         } else {
             store.setStoreDisable(StoreStatusEnum.REFUSED.value());
         }
