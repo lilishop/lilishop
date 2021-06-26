@@ -1,5 +1,7 @@
 package cn.lili.modules.member.entity.dto;
 
+import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -84,6 +86,9 @@ public class EvaluationQueryParams extends PageVO {
         }
         if (StringUtils.isNotEmpty(status)) {
             queryWrapper.eq("status", status);
+        }
+        if (UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
+            queryWrapper.eq("store_id", UserContext.getCurrentUser().getStoreId());
         }
         queryWrapper.eq("delete_flag", false);
         queryWrapper.orderByDesc("create_time");
