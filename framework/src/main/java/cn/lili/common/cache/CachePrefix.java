@@ -219,7 +219,7 @@ public enum CachePrefix {
     STORE_ID_FULL_DISCOUNT,
 
     /**
-     * 限时抢购活动缓存key前缀
+     * 秒杀活动活动缓存key前缀
      */
     STORE_ID_SECKILL,
 

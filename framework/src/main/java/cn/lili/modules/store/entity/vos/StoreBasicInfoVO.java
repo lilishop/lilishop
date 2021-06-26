@@ -14,7 +14,7 @@ import lombok.Data;
 public class StoreBasicInfoVO {
 
     @ApiModelProperty(value = "店铺ID")
-    private Long storeId;
+    private String storeId;
 
     @ApiModelProperty(value = "店铺名称")
     private String storeName;
@@ -42,4 +42,17 @@ public class StoreBasicInfoVO {
 
     @ApiModelProperty(value = "是否自营")
     private String selfOperated;
+
+    @ApiModelProperty(value = "商品数量")
+    private Integer goodsNum;
+
+    @ApiModelProperty(value = "收藏数量")
+    private Integer collectionNum;
+
+    @ApiModelProperty(value = "腾讯云智服唯一标识")
+    private String yzfSign;
+
+    @ApiModelProperty(value = "腾讯云智服小程序唯一标识")
+    private String yzfMpSign;
+
 }

@@ -29,7 +29,6 @@ public interface MemberPointsHistoryService extends IService<MemberPointsHistory
      * @param memberName 会员名称
      * @return 积分历史分页
      */
-    IPage<MemberPointsHistory> MemberPointsHistoryList(PageVO page, String memberId, String memberName);
-
+    IPage<MemberPointsHistory>  MemberPointsHistoryList(PageVO page, String memberId, String memberName);
 
 }

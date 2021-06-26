@@ -2,6 +2,7 @@ package cn.lili.modules.payment.kit.core.kit;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.Cipher;
 import java.io.ByteArrayOutputStream;
@@ -19,6 +20,7 @@ import java.util.Map;
  *
  * @author
  */
+@Slf4j
 public class RsaKit {
 
     /**
@@ -77,29 +79,7 @@ public class RsaKit {
             RSAPublicKeySpec keySpec = new RSAPublicKeySpec(b1, b2);
             return (RSAPublicKey) keyFactory.generatePublic(keySpec);
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * 使用模和指数生成RSA私钥
-     * 注意：【此代码用了默认补位方式，为RSA/None/PKCS1Padding，不同JDK默认的补位方式可能不同，如Android默认是RSA
-     * /None/NoPadding】
-     *
-     * @param modulus  模
-     * @param exponent 指数
-     * @return {@link RSAPrivateKey}
-     */
-    public static RSAPrivateKey getPrivateKey(String modulus, String exponent) {
-        try {
-            BigInteger b1 = new BigInteger(modulus);
-            BigInteger b2 = new BigInteger(exponent);
-            KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
-            RSAPrivateKeySpec keySpec = new RSAPrivateKeySpec(b1, b2);
-            return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
-        } catch (Exception e) {
-            e.printStackTrace();
+            log.error("使用模和指数生成RSA公钥错误",e);
             return null;
         }
     }
@@ -143,7 +123,7 @@ public class RsaKit {
         X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
         Key key = keyFactory.generatePublic(x509KeySpec);
-        // 对数据加密
+        //对数据加密
         Cipher cipher = Cipher.getInstance(fillMode);
         cipher.init(Cipher.ENCRYPT_MODE, key);
         int inputLen = dataByte.length;
@@ -151,7 +131,7 @@ public class RsaKit {
         int offSet = 0;
         byte[] cache;
         int i = 0;
-        // 对数据分段加密
+        //对数据分段加密
         while (inputLen - offSet > 0) {
             if (inputLen - offSet > MAX_ENCRYPT_BLOCK) {
                 cache = cipher.doFinal(dataByte, offSet, MAX_ENCRYPT_BLOCK);
@@ -285,7 +265,7 @@ public class RsaKit {
         int offSet = 0;
         byte[] cache;
         int i = 0;
-        // 对数据分段解密
+        //对数据分段解密
         while (inputLen - offSet > 0) {
             if (inputLen - offSet > MAX_DECRYPT_BLOCK) {
                 cache = cipher.doFinal(encryptedData, offSet, MAX_DECRYPT_BLOCK);

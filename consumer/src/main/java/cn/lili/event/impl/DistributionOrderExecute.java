@@ -15,6 +15,8 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+
 /**
  * 分销订单入库
  *
@@ -28,7 +30,7 @@ public class DistributionOrderExecute implements OrderStatusChangeEvent, EveryDa
     @Autowired
     private DistributionOrderService distributionOrderService;
     //分销订单持久层
-    @Autowired
+    @Resource
     private DistributionOrderMapper distributionOrderMapper;
 
 

@@ -1,24 +1,38 @@
 package cn.lili.controller.trade;
 
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.config.context.ThreadContextHolder;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
+import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
+import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.service.OrderPriceService;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.system.service.StoreLogisticsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 店铺端,订单接口
@@ -26,6 +40,7 @@ import javax.validation.constraints.NotNull;
  * @author Chopper
  * @date 2020/11/17 4:35 下午
  **/
+@Slf4j
 @RestController
 @RequestMapping("/store/orders")
 @Api(tags = "店铺端,订单接口")
@@ -36,12 +51,17 @@ public class OrderStoreController {
      */
     @Autowired
     private OrderService orderService;
-
     /**
      * 订单价格
      */
     @Autowired
     private OrderPriceService orderPriceService;
+    /**
+     * 物流公司
+     */
+    @Autowired
+    private StoreLogisticsService storeLogisticsService;
+
 
     @ApiOperation(value = "查询订单列表")
     @GetMapping
@@ -102,23 +122,53 @@ public class OrderStoreController {
         return ResultUtil.data(orderService.cancel(orderSn, reason));
     }
 
+    @ApiOperation(value = "根据核验码获取订单信息")
+    @ApiImplicitParam(name = "verificationCode", value = "核验码", required = true, paramType = "path")
+    @GetMapping(value = "/getOrderByVerificationCode/{verificationCode}")
+    public ResultMessage<Object> getOrderByVerificationCode(@PathVariable String verificationCode){
+        return ResultUtil.data(orderService.getOrderByVerificationCode(verificationCode));
+    }
+
     @ApiOperation(value = "订单核验")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "orderSn", value = "订单sn", required = true, dataType = "String", paramType = "path"),
-            @ApiImplicitParam(name = "qrCode", value = "发货单号", required = true, dataType = "String", paramType = "query")
+            @ApiImplicitParam(name = "orderSn", value = "订单号", required = true, paramType = "path"),
+            @ApiImplicitParam(name = "verificationCode", value = "核验码", required = true, paramType = "path")
     })
-    @PostMapping(value = "/{orderSn}/take")
-    public ResultMessage<Object> take(@NotNull(message = "参数非法") @PathVariable String orderSn,
-                                      @NotNull(message = "核验码") String qrCode) {
-        return ResultUtil.data(orderService.take(orderSn, qrCode));
+    @PutMapping(value = "/take/{orderSn}/{verificationCode}")
+    public ResultMessage<Object> take(@PathVariable String orderSn,@PathVariable String verificationCode) {
+        return ResultUtil.data(orderService.take(orderSn,verificationCode));
     }
 
     @ApiOperation(value = "查询物流踪迹")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path")
-    })
-    @PostMapping(value = "/getTraces/{orderSn}")
+    @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path")
+    @GetMapping(value = "/getTraces/{orderSn}")
     public ResultMessage<Object> getTraces(@NotBlank(message = "订单编号不能为空") @PathVariable String orderSn) {
         return ResultUtil.data(orderService.getTraces(orderSn));
+    }
+
+    @ApiOperation(value = "下载待发货的订单列表",produces="application/octet-stream")
+    @GetMapping(value = "/downLoadDeliverExcel")
+    public void downLoadDeliverExcel() {
+        HttpServletResponse response = ThreadContextHolder.getHttpResponse();
+        //获取店铺已经选择物流公司列表
+        List<String> logisticsName = storeLogisticsService.getStoreSelectedLogisticsName();
+        //下载订单批量发货Excel
+        this.orderService.getBatchDeliverList(response,logisticsName);
+
+        //return ResultUtil.success(ResultCode.SUCCESS);
+
+    }
+
+    @PostMapping(value = "/batchDeliver", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ApiOperation(value = "上传文件进行订单批量发货")
+    public ResultMessage<Object> batchDeliver(@RequestPart("files") MultipartFile files) {
+        orderService.batchDeliver(files);
+        return ResultUtil.success(ResultCode.SUCCESS);
+    }
+
+    @ApiOperation(value = "查询订单导出列表")
+    @GetMapping("/queryExportOrder")
+    public ResultMessage<List<OrderExportDTO>> queryExportOrder(OrderSearchParams orderSearchParams) {
+        return ResultUtil.data(orderService.queryExportOrder(orderSearchParams));
     }
 }

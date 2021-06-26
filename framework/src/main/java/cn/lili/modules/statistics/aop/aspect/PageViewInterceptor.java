@@ -9,7 +9,6 @@ import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.statistics.aop.PageViewPoint;
 import cn.lili.modules.statistics.aop.enums.PageViewEnum;
 import cn.lili.modules.statistics.util.StatisticsSuffix;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -67,10 +66,10 @@ public class PageViewInterceptor {
                 storeId = "-1";
         }
         String ip = IpUtils.getIpAddress(request);
-//        //如果用户不为空，则ip后追加用户id，这样一个用户多个ip登录，可以被多次记录访客数
-//        if (UserContext.getCurrentUser() != null) {
-//            ip += UserContext.getCurrentUser().getId();
-//        }
+//       //如果用户不为空，则ip后追加用户id，这样一个用户多个ip登录，可以被多次记录访客数
+//       if (UserContext.getCurrentUser() != null) {
+//           ip += UserContext.getCurrentUser().getId();
+//       }
 
         try {
             //PV 统计48小时过期 留下一定时间予以统计累计数据库
@@ -85,7 +84,7 @@ public class PageViewInterceptor {
             //店铺UV 统计，则需要对id去重复，所以如下处理
             cache.cumulative(CachePrefix.STORE_UV.getPrefix() + StatisticsSuffix.suffix(storeId), ip);
         } catch (Exception e) {
-            e.printStackTrace();
+           log.error("页面出错",e);
         }
 
     }

@@ -45,9 +45,6 @@ import java.util.Date;
 @Transactional
 public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, MemberWallet> implements MemberWalletService {
 
-    //预存款数据层
-    @Autowired
-    private MemberWalletMapper walletMapper;
     //预存款日志
     @Autowired
     private WalletLogService walletLogService;
@@ -67,7 +64,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         QueryWrapper<MemberWallet> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("member_id", memberId);
         //执行查询
-        MemberWallet memberWallet = this.walletMapper.selectOne(queryWrapper);
+        MemberWallet memberWallet = this.baseMapper.selectOne(queryWrapper);
         //如果没有钱包，则创建钱包
         if (memberWallet == null) {
             memberWallet = this.save(memberId, memberService.getById(memberId).getUsername());
@@ -83,7 +80,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         //余额变动
         memberWallet.setMemberWallet(CurrencyUtil.add(memberWallet.getMemberWallet(), money));
         memberWallet.setMemberFrozenWallet(CurrencyUtil.sub(memberWallet.getMemberFrozenWallet(), money));
-        this.walletMapper.updateById(memberWallet);
+        this.updateById(memberWallet);
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberId(), memberWallet.getMemberName(), money, detail, serviceType);
         walletLogService.save(walletLog);
@@ -96,7 +93,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         MemberWallet memberWallet = this.checkMemberWallet(memberId);
         //新增预存款
         memberWallet.setMemberWallet(CurrencyUtil.add(memberWallet.getMemberWallet(), money));
-        this.walletMapper.updateById(memberWallet);
+        this.baseMapper.updateById(memberWallet);
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberId(), memberWallet.getMemberName(), money, detail, serviceType);
         walletLogService.save(walletLog);
@@ -114,7 +111,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         }
         memberWallet.setMemberWallet(CurrencyUtil.sub(memberWallet.getMemberWallet(), money));
         //保存记录
-        this.walletMapper.updateById(memberWallet);
+        this.updateById(memberWallet);
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberId(), memberWallet.getMemberName(), -money, detail, serviceType);
         walletLogService.save(walletLog);
@@ -133,7 +130,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         memberWallet.setMemberWallet(CurrencyUtil.sub(memberWallet.getMemberWallet(), money));
         memberWallet.setMemberFrozenWallet(CurrencyUtil.add(memberWallet.getMemberFrozenWallet(), money));
         //修改余额
-        this.walletMapper.updateById(memberWallet);
+        this.updateById(memberWallet);
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberId(), memberWallet.getMemberName(), -money, detail, serviceType);
         walletLogService.save(walletLog);
@@ -150,7 +147,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
             throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_INSUFFICIENT);
         }
         memberWallet.setMemberWallet(CurrencyUtil.sub(memberWallet.getMemberWallet(), money));
-        this.walletMapper.updateById(memberWallet);
+        this.updateById(memberWallet);
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberId(), memberWallet.getMemberName(), -money, "提现金额已冻结，审核通过提现成功", serviceType);
         walletLogService.save(walletLog);
@@ -164,7 +161,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
      */
     private MemberWallet checkMemberWallet(String memberId) {
         //获取会员预存款信息
-        MemberWallet memberWallet = this.walletMapper.selectOne(new QueryWrapper<MemberWallet>().eq("member_id", memberId));
+        MemberWallet memberWallet = this.getOne(new QueryWrapper<MemberWallet>().eq("member_id", memberId));
         //如果会员预存款信息不存在则同步重新建立预存款信息
         if (memberWallet == null) {
             Member member = memberService.getById(memberId);
@@ -184,11 +181,11 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         //校验会员预存款是否存在
         QueryWrapper<MemberWallet> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("member_id", member.getId());
-        MemberWallet memberWallet = this.walletMapper.selectOne(queryWrapper);
+        MemberWallet memberWallet = this.getOne(queryWrapper);
         //如果 预存款信息不为空 执行设置密码
         if (memberWallet != null) {
             memberWallet.setWalletPassword(pwd);
-            this.walletMapper.updateById(memberWallet);
+            this.updateById(memberWallet);
         }
     }
 
@@ -200,7 +197,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         //构建查询条件
         QueryWrapper<MemberWallet> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("member_id", authUser.getId());
-        MemberWallet wallet = this.walletMapper.selectOne(queryWrapper);
+        MemberWallet wallet = this.getOne(queryWrapper);
         return wallet != null && !StringUtils.isEmpty(wallet.getWalletPassword());
     }
 
@@ -211,7 +208,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         memberWallet.setMemberName(memberName);
         memberWallet.setMemberWallet(0D);
         memberWallet.setMemberFrozenWallet(0D);
-        this.walletMapper.insert(memberWallet);
+        this.save(memberWallet);
         return memberWallet;
     }
 

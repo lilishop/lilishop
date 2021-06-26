@@ -18,25 +18,14 @@ public class SpecValueVO implements Serializable {
 
     private static final long serialVersionUID = -4433579132929428572L;
 
-    @TableField(value = "spec_name_id")
-    @ApiModelProperty(value = "规格项ID")
-    private String specNameId;
-
     @TableField(value = "spec_name")
     @ApiModelProperty(value = "规格项名字")
     private String specName;
-
-    @TableField(value = "spec_value_id")
-    @ApiModelProperty(value = "规格值")
-    private String specValueId;
 
     @TableField(value = "spec_value")
     @ApiModelProperty(value = "规格值")
     private String specValue;
 
-    /**
-     * 规格类型，1图片  0 非图片
-     */
     @ApiModelProperty(value = "该规格是否有图片，1 有 0 没有")
     private Integer specType;
     /**

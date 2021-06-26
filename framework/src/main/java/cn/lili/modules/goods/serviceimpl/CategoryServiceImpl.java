@@ -8,7 +8,7 @@ import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.CategoryParameterGroup;
 import cn.lili.modules.goods.entity.vos.CategoryVO;
 import cn.lili.modules.goods.entity.vos.GoodsParamsGroupVO;
-import cn.lili.modules.goods.entity.vos.GoodsParamsVO;
+import cn.lili.modules.goods.entity.vos.GoodsParamsDTOVO;
 import cn.lili.modules.goods.mapper.CategoryMapper;
 import cn.lili.modules.goods.service.CategoryService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -17,7 +17,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,9 +39,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     //缓存
     @Autowired
     private Cache cache;
-    //分类
-    @Autowired
-    private CategoryMapper categoryMapper;
 
     @Override
     public List<Category> dbList(String parentId) {
@@ -55,12 +51,12 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             return (List<CategoryVO>) cache.get(CachePrefix.CATEGORY.getPrefix() + "tree");
         }
 
-        // 获取全部分类
+        //获取全部分类
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Category::getDeleteFlag, false);
         List<Category> list = this.list(queryWrapper);
 
-        // 构造分类树
+        //构造分类树
         List<CategoryVO> categoryVOList = new ArrayList<>();
         for (Category category : list) {
             if (category.getParentId().equals("0")) {
@@ -116,10 +112,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public List<CategoryVO> listAllChildrenDB() {
 
-        // 获取全部分类
+        //获取全部分类
         List<Category> list = this.list();
 
-        // 构造分类树
+        //构造分类树
         List<CategoryVO> categoryVOList = new ArrayList<>();
         for (Category category : list) {
             if (category.getParentId().equals("0")) {
@@ -159,7 +155,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                 .ne(category.getId() != null, "id", category.getId())
                 .eq(DELETE_FLAG_COLUMN, false)
                 .orderByAsc("sort_order");
-        return this.categoryMapper.selectList(queryWrapper);
+        return this.baseMapper.selectList(queryWrapper);
     }
 
     @Override
@@ -188,7 +184,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                 .set("sort_order", category.getSortOrder())
                 .set(DELETE_FLAG_COLUMN, category.getDeleteFlag())
                 .set("commission_rate", category.getCommissionRate());
-        categoryMapper.update(category, updateWrapper);
+        this.baseMapper.update(category, updateWrapper);
         removeCache();
     }
 
@@ -201,7 +197,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public void updateCategoryStatus(String categoryId, Boolean enableOperations) {
-        // 禁用子分类
+        //禁用子分类
         CategoryVO categoryVO = new CategoryVO(this.getById(categoryId));
         List<String> ids = new ArrayList<>();
         ids.add(categoryVO.getId());
@@ -259,13 +255,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      * @param paramList 参数列表
      * @return 拼装后的返回值
      */
-    private List<GoodsParamsGroupVO> convertParamList(List<CategoryParameterGroup> groupList, List<GoodsParamsVO> paramList) {
-        Map<String, List<GoodsParamsVO>> map = new HashMap<>(16);
-        for (GoodsParamsVO param : paramList) {
+    private List<GoodsParamsGroupVO> convertParamList(List<CategoryParameterGroup> groupList, List<GoodsParamsDTOVO> paramList) {
+        Map<String, List<GoodsParamsDTOVO>> map = new HashMap<>(16);
+        for (GoodsParamsDTOVO param : paramList) {
             if (map.get(param.getGroupId()) != null) {
                 map.get(param.getGroupId()).add(param);
             } else {
-                List<GoodsParamsVO> list = new ArrayList<>();
+                List<GoodsParamsDTOVO> list = new ArrayList<>();
                 list.add(param);
                 map.put(param.getGroupId(), list);
             }

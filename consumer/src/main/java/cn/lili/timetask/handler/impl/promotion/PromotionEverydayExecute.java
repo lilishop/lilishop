@@ -3,15 +3,21 @@ package cn.lili.timetask.handler.impl.promotion;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.entity.vos.PintuanVO;
 import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.search.service.EsGoodsIndexService;
+import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.SeckillSetting;
+import cn.lili.modules.system.entity.enums.SettingEnum;
+import cn.lili.modules.system.service.SettingService;
 import cn.lili.timetask.handler.EveryDayExecute;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -55,6 +61,13 @@ public class PromotionEverydayExecute implements EveryDayExecute {
     @Autowired
     private PromotionGoodsService promotionGoodsService;
 
+    //系统设置
+    @Autowired
+    private SettingService settingService;
+
+    //秒杀活动
+    @Autowired
+    private SeckillService seckillService;
 
     /**
      * 将已过期的促销活动置为结束
@@ -69,13 +82,34 @@ public class PromotionEverydayExecute implements EveryDayExecute {
         //结束条件 活动结束时间大于当前时间
         query.addCriteria(Criteria.where("endTime").lt(new Date()));
 
+        //结束满减活动
+        endFullDiscount(query);
+
+        //关闭拼团活动
+        endPintuan(query);
+
+        //结束优惠券
+        endCoupon(query);
+
+        //定时创建活动
+        addSeckill();
+
+    }
+
+    /**
+     * 结束优惠券活动
+     *
+     * @param query
+     */
+    private void endCoupon(Query query) {
+
         try {
-            //关闭满减活动
-            List<FullDiscountVO> fullDiscountVOS = mongoTemplate.find(query, FullDiscountVO.class);
-            if (!fullDiscountVOS.isEmpty()) {
+            //关闭优惠券活动
+            List<CouponVO> couponVOS = mongoTemplate.find(query, CouponVO.class);
+            if (!couponVOS.isEmpty()) {
                 List<String> ids = new ArrayList<>();
-                //循环活动 关闭活动
-                for (FullDiscountVO vo : fullDiscountVOS) {
+                //         //关闭的优惠券活动
+                for (CouponVO vo : couponVOS) {
                     vo.setPromotionStatus(PromotionStatusEnum.END.name());
                     if (vo.getPromotionGoodsList() != null && !vo.getPromotionGoodsList().isEmpty()) {
                         for (PromotionGoods promotionGoods : vo.getPromotionGoodsList()) {
@@ -86,11 +120,23 @@ public class PromotionEverydayExecute implements EveryDayExecute {
                     mongoTemplate.save(vo);
                     ids.add(vo.getId());
                 }
-                fullDiscountService.update(this.getUpdatePromotionWrapper(ids));
+                couponService.update(this.getUpdatePromotionWrapper(ids));
+                LambdaUpdateWrapper<MemberCoupon> memberCouponLambdaUpdateWrapper = new LambdaUpdateWrapper<MemberCoupon>().in(MemberCoupon::getCouponId, ids).set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.EXPIRE.name());
+                memberCouponService.update(memberCouponLambdaUpdateWrapper);
+                //将活动商品对照表进行结束处理
+                promotionGoodsService.update(this.getUpdatePromotionGoodsWrapper(ids));
             }
         } catch (Exception e) {
-            log.error("满减活动关闭错误", e);
+            log.error("优惠券活动关闭错误", e);
         }
+    }
+
+    /**
+     * 结束拼团活动
+     *
+     * @param query
+     */
+    private void endPintuan(Query query) {
         try {
             //关闭拼团活动
             List<PintuanVO> pintuanVOS = mongoTemplate.find(query, PintuanVO.class);
@@ -115,14 +161,21 @@ public class PromotionEverydayExecute implements EveryDayExecute {
         } catch (Exception e) {
             log.error("拼团活动关闭错误", e);
         }
+    }
 
+    /**
+     * 结束满减活动
+     *
+     * @param query
+     */
+    private void endFullDiscount(Query query) {
         try {
-            //关闭优惠券活动
-            List<CouponVO> couponVOS = mongoTemplate.find(query, CouponVO.class);
-            if (!couponVOS.isEmpty()) {
+            //关闭满减活动
+            List<FullDiscountVO> fullDiscountVOS = mongoTemplate.find(query, FullDiscountVO.class);
+            if (!fullDiscountVOS.isEmpty()) {
                 List<String> ids = new ArrayList<>();
-                //          // 关闭的优惠券活动
-                for (CouponVO vo : couponVOS) {
+                //循环活动 关闭活动
+                for (FullDiscountVO vo : fullDiscountVOS) {
                     vo.setPromotionStatus(PromotionStatusEnum.END.name());
                     if (vo.getPromotionGoodsList() != null && !vo.getPromotionGoodsList().isEmpty()) {
                         for (PromotionGoods promotionGoods : vo.getPromotionGoodsList()) {
@@ -133,24 +186,30 @@ public class PromotionEverydayExecute implements EveryDayExecute {
                     mongoTemplate.save(vo);
                     ids.add(vo.getId());
                 }
-                couponService.update(this.getUpdatePromotionWrapper(ids));
-                LambdaUpdateWrapper<MemberCoupon> memberCouponLambdaUpdateWrapper = new LambdaUpdateWrapper<MemberCoupon>().in(MemberCoupon::getCouponId, ids).set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.EXPIRE.name());
-                memberCouponService.update(memberCouponLambdaUpdateWrapper);
-                //将活动商品对照表进行结束处理
-                promotionGoodsService.update(this.getUpdatePromotionGoodsWrapper(ids));
+                fullDiscountService.update(this.getUpdatePromotionWrapper(ids));
             }
         } catch (Exception e) {
-            log.error("优惠券活动关闭错误", e);
+            log.error("满减活动关闭错误", e);
         }
+    }
 
-
+    /**
+     * 添加秒杀活动
+     * 从系统设置中获取秒杀活动的配置
+     * 添加30天后的秒杀活动
+     */
+    private void addSeckill() {
+        Setting setting = settingService.get(SettingEnum.SECKILL_SETTING.name());
+        SeckillSetting seckillSetting = new Gson().fromJson(setting.getSettingValue(), SeckillSetting.class);
+        Seckill seckill = new Seckill(30, seckillSetting.getHours(), seckillSetting.getSeckillRule());
+        seckillService.saveSeckill(seckill);
     }
 
     /**
      * 获取促销修改查询条件 修改活动状态
      *
-     * @param ids
-     * @return
+     * @param ids 促销活动ID
+     * @return 促销活动商品查询Wrapper
      */
     private UpdateWrapper getUpdatePromotionWrapper(List<String> ids) {
         UpdateWrapper updateWrapper = new UpdateWrapper<>();
@@ -162,8 +221,8 @@ public class PromotionEverydayExecute implements EveryDayExecute {
     /**
      * 获取商品的促销修改查询条件 修改商品状态
      *
-     * @param ids
-     * @return
+     * @param ids 促销活动ID
+     * @return 促销活动商品修改Wrapper
      */
     private UpdateWrapper getUpdatePromotionGoodsWrapper(List<String> ids) {
         UpdateWrapper updateWrapper = new UpdateWrapper<>();

@@ -9,15 +9,14 @@ import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
 import cn.lili.modules.payment.kit.dto.PayParam;
+import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
 import cn.lili.modules.payment.kit.enums.CashierEnum;
 import cn.lili.modules.payment.kit.params.CashierExecute;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
 import cn.lili.modules.system.entity.dto.BaseSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -106,7 +105,7 @@ public class OrderCashier implements CashierExecute {
         if (payParam.getOrderType().equals(CashierEnum.ORDER.name())) {
             Order order = orderService.getBySn(payParam.getSn());
             if (order != null) {
-                return order.getPayStatus().equals(PayStatusEnum.PAID.name());
+                return PayStatusEnum.PAID.name().equals(order.getPayStatus());
             } else {
                 throw new ServiceException(ResultCode.PAY_NOT_EXIST_ORDER);
             }

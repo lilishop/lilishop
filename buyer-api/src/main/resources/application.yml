@@ -4,9 +4,6 @@ server:
   servlet:
     context-path: /
 
-  # 正式部署时候，解开此处配置，防止文件夹被清除导致的文件上传失败问题
-  #    multipart:
-  #      location: /Users/lifenlong/Desktop/ceshi
   tomcat:
     uri-encoding: UTF-8
     threads:
@@ -153,6 +150,7 @@ ignored:
     - /buyer/memberEvaluation/**/goodsEvaluation
     - /buyer/memberEvaluation/**/evaluationNumber
     - /buyer/appVersion/**
+    - /buyer/broadcast/studio/**
     - /druid/**
     - /swagger-ui.html
     - /doc.html
@@ -262,7 +260,8 @@ lili:
     #      account:
     #        username: elastic
     #        password: LiLiShopES
-
+    logstash:
+      server: 192.168.0.116:4560
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group

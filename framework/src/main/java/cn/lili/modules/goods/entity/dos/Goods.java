@@ -2,11 +2,14 @@ package cn.lili.modules.goods.entity.dos;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.base.BaseEntity;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.xkcoding.http.util.StringUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -16,6 +19,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
+import java.util.Map;
 
 /**
  * 商品
@@ -146,11 +150,6 @@ public class Goods extends BaseEntity {
     @ApiModelProperty(value = "运费模板id")
     private String templateId;
     /**
-     * 谁承担运费 BUYER：买家承担，STORE：卖家承担
-     */
-    @ApiModelProperty(value = " 谁承担运费 BUYER：买家承担，STORE：卖家承担")
-    private String freightPayer;
-    /**
      * 审核状态
      *
      * @see GoodsAuthEnum
@@ -190,10 +189,18 @@ public class Goods extends BaseEntity {
     @ApiModelProperty(value = "销售模式", required = true)
     private String salesModel;
 
+
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型", required = true)
+    private String goodsType;
+
     @ApiModelProperty(value = "商品参数json", hidden = true)
     @Column(columnDefinition = "TEXT")
     @JsonIgnore
     private String params;
+
 
     public Goods() {
     }
@@ -206,7 +213,6 @@ public class Goods extends BaseEntity {
         this.sn = goodsOperationDTO.getSn();
         this.price = goodsOperationDTO.getPrice();
         this.weight = goodsOperationDTO.getWeight();
-        this.freightPayer = goodsOperationDTO.getFreightPayer();
         this.templateId = goodsOperationDTO.getTemplateId();
         this.recommend = goodsOperationDTO.isRecommend();
         this.sellingPoint = goodsOperationDTO.getSellingPoint();
@@ -215,11 +221,35 @@ public class Goods extends BaseEntity {
         this.intro = goodsOperationDTO.getIntro();
         this.mobileIntro = goodsOperationDTO.getMobileIntro();
         this.cost = goodsOperationDTO.getCost();
-        if (goodsOperationDTO.getGoodsParamsList() != null && goodsOperationDTO.getGoodsParamsList().isEmpty()) {
-            this.params = JSONUtil.toJsonStr(goodsOperationDTO.getGoodsParamsList());
+        if (goodsOperationDTO.getGoodsParamsDTOList() != null && goodsOperationDTO.getGoodsParamsDTOList().isEmpty()) {
+            this.params = JSONUtil.toJsonStr(goodsOperationDTO.getGoodsParamsDTOList());
         }
         //如果立即上架则
         this.marketEnable = goodsOperationDTO.isRelease() ? GoodsStatusEnum.UPPER.name() : GoodsStatusEnum.DOWN.name();
+        this.goodsType = goodsOperationDTO.getGoodsType();
 
+        //循环sku，判定sku是否有效
+        for (Map<String, Object> sku : goodsOperationDTO.getSkuList()) {
+            //判定参数不能为空
+            if (sku.get("sn") == null) {
+                throw new ServiceException(ResultCode.GOODS_SKU_SN_ERROR);
+            }
+            if (StringUtil.isEmpty(sku.get("price").toString()) || Integer.parseInt( sku.get("price").toString()) <= 0) {
+                throw new ServiceException(ResultCode.GOODS_SKU_PRICE_ERROR);
+            }
+            if (StringUtil.isEmpty(sku.get("cost").toString()) || Integer.parseInt( sku.get("cost").toString()) <= 0) {
+                throw new ServiceException(ResultCode.GOODS_SKU_COST_ERROR);
+            }
+            //虚拟商品没有重量字段
+            if(sku.containsKey("weight")) {
+                if (StringUtil.isEmpty(sku.get("weight").toString()) || Integer.parseInt(sku.get("weight").toString()) < 0) {
+                    throw new ServiceException(ResultCode.GOODS_SKU_WEIGHT_ERROR);
+                }
+            }
+            if (StringUtil.isEmpty(sku.get("quantity").toString()) || Integer.parseInt( sku.get("quantity").toString()) < 0) {
+                throw new ServiceException(ResultCode.GOODS_SKU_QUANTITY_ERROR);
+            }
+
+        }
     }
 }

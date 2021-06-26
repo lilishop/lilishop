@@ -2,11 +2,15 @@ package cn.lili.modules.order.order.serviceimpl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import cn.lili.common.aop.syslog.annotation.SystemLogPoint;
 import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.PromotionDelayTypeEnums;
+import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.message.PintuanOrderMessage;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -18,7 +22,10 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
 import cn.lili.common.trigger.model.TimeExecuteConstant;
 import cn.lili.common.trigger.model.TimeTriggerMsg;
-import cn.lili.common.utils.*;
+import cn.lili.common.utils.OperationalJudgment;
+import cn.lili.common.utils.PageUtil;
+import cn.lili.common.utils.SnowFlake;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -31,9 +38,7 @@ import cn.lili.modules.order.order.aop.OrderLogPoint;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.Receipt;
-import cn.lili.modules.order.order.entity.dto.OrderMessage;
-import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
-import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
+import cn.lili.modules.order.order.entity.dto.*;
 import cn.lili.modules.order.order.entity.enums.*;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
@@ -60,14 +65,19 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * 子订单业务层实现
@@ -77,19 +87,15 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
 
     private static final String ORDER_SN_COLUMN = "order_sn";
 
-    //订单数据层
-    @Autowired
-    private OrderMapper orderMapper;
     //延时任务
     @Autowired
     private TimeTrigger timeTrigger;
     //订单货物数据层
-    @Autowired
+    @Resource
     private OrderItemMapper orderItemMapper;
     //发票
     @Autowired
@@ -121,40 +127,33 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public void intoDB(TradeDTO tradeDTO) {
+        //检查TradeDTO信息
+        checkTradeDTO(tradeDTO);
         //存放购物车，即业务中的订单
         List<Order> orders = new ArrayList<>(tradeDTO.getCartList().size());
         //存放自订单/订单日志
         List<OrderItem> orderItems = new ArrayList<>();
         List<OrderLog> orderLogs = new ArrayList<>();
-        //拼团判定，不能参与自己创建的拼团
-        if (tradeDTO.getParentOrderSn() != null) {
-            Order parentOrder = this.getBySn(tradeDTO.getParentOrderSn());
-            if (parentOrder.getMemberId().equals(UserContext.getCurrentUser().getId())) {
-                throw new ServiceException("不能参与自己发起的拼团活动！");
-            }
-        }
+
         //订单集合
         List<OrderVO> orderVOS = new ArrayList<>();
-        //循环购物车商品集合
+        //循环购物车
         tradeDTO.getCartList().forEach(item -> {
             Order order = new Order(item, tradeDTO);
-            if (OrderTypeEnum.PINTUAN.name().equals(order.getOrderType())) {
-                Pintuan pintuan = pintuanService.getPintuanById(order.getPromotionId());
-                Integer limitNum = pintuan.getLimitNum();
-                if (limitNum != 0 && order.getGoodsNum() > limitNum) {
-                    throw new ServiceException("购买数量超过拼团活动限制数量");
-                }
-            }
             //构建orderVO对象
             OrderVO orderVO = new OrderVO();
             BeanUtil.copyProperties(order, orderVO);
+            //持久化DO
             orders.add(order);
             String message = "订单[" + item.getSn() + "]创建";
+            //记录日志
             orderLogs.add(new OrderLog(item.getSn(), UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), message));
             item.getSkuList().forEach(
                     sku -> orderItems.add(new OrderItem(sku, item, tradeDTO))
             );
+            //写入子订单信息
             orderVO.setOrderItems(orderItems);
+            //orderVO 记录
             orderVOS.add(orderVO);
         });
         tradeDTO.setOrderVO(orderVOS);
@@ -162,15 +161,23 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         this.saveBatch(orders);
         //批量保存 子订单
         orderItemService.saveBatch(orderItems);
-        // 批量记录订单操作日志
+        //批量记录订单操作日志
         orderLogService.saveBatch(orderLogs);
-        // 赠品根据店铺单独生成订单
+        //赠品根据店铺单独生成订单
         this.generatorGiftOrder(tradeDTO);
     }
 
     @Override
     public IPage<OrderSimpleVO> queryByParams(OrderSearchParams orderSearchParams) {
-        return this.baseMapper.queryByParams(PageUtil.initPage(orderSearchParams), orderSearchParams.queryWrapper());
+        QueryWrapper queryWrapper = orderSearchParams.queryWrapper();
+        queryWrapper.groupBy("o.id");
+        queryWrapper.orderByDesc("o.id");
+        return this.baseMapper.queryByParams(PageUtil.initPage(orderSearchParams), queryWrapper);
+    }
+
+    @Override
+    public List<OrderExportDTO> queryExportOrder(OrderSearchParams orderSearchParams) {
+        return this.baseMapper.queryExportOrder(orderSearchParams.queryWrapper());
     }
 
     @Override
@@ -195,8 +202,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @OrderLogPoint(description = "'订单['+#orderSn+']取消，原因为：'+#reason", orderSn = "#orderSn")
     public Order cancel(String orderSn, String reason) {
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
-        if (order.getOrderType().equals(OrderTypeEnum.PINTUAN.name()) && !order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())) {
-            throw new ServiceException("未成团订单不可取消");
+        //如果订单促销类型不为空&&订单是拼团订单，并且订单未成团，则抛出异常
+        if (StringUtils.isNotEmpty(order.getOrderPromotionType())
+                && order.getOrderPromotionType().equals(OrderPromotionTypeEnum.PINTUAN.name())
+                && !order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())) {
+            throw new ServiceException(ResultCode.ORDER_CAN_NOT_CANCEL);
         }
         if (CharSequenceUtil.equalsAny(order.getOrderStatus(),
                 OrderStatusEnum.UNDELIVERED.name(),
@@ -210,7 +220,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderStatusMessage(order);
             return order;
         } else {
-            throw new ServiceException("当前订单状态不可取消");
+            throw new ServiceException(ResultCode.ORDER_CAN_NOT_CANCEL);
         }
     }
 
@@ -233,9 +243,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Override
     public Order getBySn(String orderSn) {
-        QueryWrapper<Order> orderWrapper = new QueryWrapper<>();
-        orderWrapper.eq("sn", orderSn);
-        return this.getOne(orderWrapper);
+        return this.getOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
     }
 
     @Override
@@ -253,11 +261,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setPayStatus(PayStatusEnum.PAID.name());
         order.setOrderStatus(OrderStatusEnum.PAID.name());
         order.setReceivableNo(receivableNo);
+        order.setCanReturn(!PaymentMethodEnum.BANK_TRANSFER.name().equals(order.getPaymentMethod()));
         this.updateById(order);
 
         //记录订单流水
         storeFlowService.payOrder(orderSn);
 
+        //发送订单已付款消息
         OrderMessage orderMessage = new OrderMessage();
         orderMessage.setOrderSn(order.getSn());
         orderMessage.setPaymentMethod(paymentMethod);
@@ -268,69 +278,24 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         OrderLog orderLog = new OrderLog(orderSn, "-1", UserEnums.SYSTEM.getRole(), "系统操作", message);
         orderLogService.save(orderLog);
 
-
     }
 
     @Override
     @OrderLogPoint(description = "'库存确认'", orderSn = "#orderSn")
     public void afterOrderConfirm(String orderSn) {
         Order order = this.getBySn(orderSn);
-        LambdaUpdateWrapper<Order> orderLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-
-        //如果为虚拟订单-修改订单状态为待核验
-        if (order.getOrderType().equals(OrderTypeEnum.FICTITIOUS.name())) {
-            //填写提货码
-            String code = CommonUtil.getRandomNum();
-            orderLambdaUpdateWrapper.eq(Order::getSn, orderSn);
-            orderLambdaUpdateWrapper.set(Order::getQrCode, code);
-            orderLambdaUpdateWrapper.set(Order::getOrderStatus, OrderStatusEnum.TAKE.name());
-            orderLambdaUpdateWrapper.set(Order::getCanReturn, !PaymentMethodEnum.BANK_TRANSFER.name().equals(order.getPaymentMethod()));
-
-            this.update(orderLambdaUpdateWrapper);
-
-            OrderMessage orderMessage = new OrderMessage();
-            orderMessage.setNewStatus(OrderStatusEnum.TAKE);
-            orderMessage.setOrderSn(order.getSn());
-            this.sendUpdateStatusMessage(orderMessage);
-        }
-        //如果为商品订单-修改订单状态为待发货
-        else {
-            orderLambdaUpdateWrapper.eq(Order::getSn, orderSn);
-            //拼团订单
-            if (order.getOrderType().equals(OrderTypeEnum.PINTUAN.name()) && order.getPromotionId() != null) {
-                //校验拼团是否成团 对拼团结果进行处理
-                this.checkPintuanOrder(order.getPromotionId(), order.getParentOrderSn());
+        //判断是否为拼团订单，进行特殊处理
+        //判断订单类型进行不同的订单确认操作
+        if (order.getOrderPromotionType() != null && order.getOrderPromotionType().equals(OrderPromotionTypeEnum.PINTUAN.name())) {
+            this.checkPintuanOrder(order.getPromotionId(), order.getParentOrderSn());
+        } else {
+            //判断订单类型
+            if (order.getOrderType().equals(OrderTypeEnum.NORMAL.name())) {
+                normalOrderConfirm(orderSn);
             } else {
-                //普通订单直接修改为代发货状态
-                orderLambdaUpdateWrapper.set(Order::getOrderStatus, OrderStatusEnum.UNDELIVERED.name());
-                orderLambdaUpdateWrapper.set(Order::getCanReturn, !PaymentMethodEnum.BANK_TRANSFER.name().equals(order.getPaymentMethod()));
-                this.update(orderLambdaUpdateWrapper);
-
-                OrderMessage orderMessage = new OrderMessage();
-                orderMessage.setNewStatus(OrderStatusEnum.UNDELIVERED);
-                orderMessage.setOrderSn(order.getSn());
-                this.sendUpdateStatusMessage(orderMessage);
+                virtualOrderConfirm(orderSn);
             }
         }
-
-        // 发送当前商品购买完成的信息（用于更新商品数据）
-        List<OrderItem> orderItems = orderItemService.getByOrderSn(orderSn);
-        List<GoodsCompleteMessage> goodsCompleteMessageList = new ArrayList<>();
-        for (OrderItem orderItem : orderItems) {
-            GoodsCompleteMessage goodsCompleteMessage = new GoodsCompleteMessage();
-            goodsCompleteMessage.setGoodsId(orderItem.getGoodsId());
-            goodsCompleteMessage.setSkuId(orderItem.getSkuId());
-            goodsCompleteMessage.setBuyNum(orderItem.getNum());
-            goodsCompleteMessage.setMemberId(order.getMemberId());
-            goodsCompleteMessageList.add(goodsCompleteMessage);
-        }
-        if (!goodsCompleteMessageList.isEmpty()) {
-            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.BUY_GOODS_COMPLETE.name();
-            //发送订单变更mq消息
-            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goodsCompleteMessageList), RocketmqSendCallbackBuilder.commonCallback());
-        }
-
-
     }
 
 
@@ -342,7 +307,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //要记录之前的收货地址，所以需要以代码方式进行调用 不采用注解
         String message = "订单[" + orderSn + "]收货信息修改，由[" + order.getConsigneeDetail() + "]修改为[" + memberAddressDTO.getConsigneeDetail() + "]";
 
-        BeanUtil.copyProperties(memberAddressDTO, order);// 记录订单操作日志
+        BeanUtil.copyProperties(memberAddressDTO, order);//记录订单操作日志
         this.updateById(order);
 
         OrderLog orderLog = new OrderLog(orderSn, UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), message);
@@ -371,8 +336,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             this.updateById(order);
             //修改订单状态为已发送
             this.updateStatus(orderSn, OrderStatusEnum.DELIVERED);
-
-
             //修改订单货物可以进行售后、投诉
             orderItemService.update(new UpdateWrapper<OrderItem>().eq(ORDER_SN_COLUMN, orderSn)
                     .set("after_sale_status", OrderItemAfterSaleStatusEnum.NOT_APPLIED)
@@ -382,8 +345,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderMessage.setNewStatus(OrderStatusEnum.DELIVERED);
             orderMessage.setOrderSn(order.getSn());
             this.sendUpdateStatusMessage(orderMessage);
-
-
         } else {
             throw new ServiceException(ResultCode.ORDER_DELIVER_ERROR);
         }
@@ -399,30 +360,25 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    @OrderLogPoint(description = "'订单['+#orderSn+']核销，核销码['+#qrCode+']'", orderSn = "#orderSn")
-    public Order take(String orderSn, String qrCode) {
-        //是否可以查询到订单
-        Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
-        //判断是否为虚拟订单
-        if (!order.getOrderType().equals(OrderTypeEnum.FICTITIOUS.name())) {
-            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
-        }
-        //判断虚拟订单状态
-        if (order.getOrderStatus().equals(OrderStatusEnum.TAKE.name())) {
-            //判断提货码是否正确\修改订单状态
-            if (order.getOrderStatus().equals(OrderStatusEnum.TAKE.name()) && qrCode.equals(order.getQrCode())) {
-                order.setOrderStatus(OrderStatusEnum.COMPLETED.name());
+    @OrderLogPoint(description = "'订单['+#orderSn+']核销，核销码['+#verificationCode+']'", orderSn = "#orderSn")
+    public Order take(String orderSn, String verificationCode) {
 
-                this.updateById(order);
+        //获取订单信息
+        Order order = this.getBySn(orderSn);
+        //检测虚拟订单信息
+        checkVerificationOrder(order, verificationCode);
+        order.setOrderStatus(OrderStatusEnum.COMPLETED.name());
+        //订单完成
+        this.complete(orderSn);
+        return order;
+    }
 
-                OrderMessage orderMessage = new OrderMessage();
-                orderMessage.setNewStatus(OrderStatusEnum.COMPLETED);
-                orderMessage.setOrderSn(order.getSn());
-                this.sendUpdateStatusMessage(orderMessage);
-            }
-            return order;
-        }
-        throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+    @Override
+    public Order getOrderByVerificationCode(String verificationCode) {
+        return this.getOne(new LambdaQueryWrapper<Order>()
+                .eq(Order::getOrderStatus, OrderStatusEnum.TAKE.name())
+                .eq(Order::getStoreId, UserContext.getCurrentUser().getStoreId())
+                .eq(Order::getVerificationCode, verificationCode));
     }
 
     @Override
@@ -442,6 +398,25 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderMessage.setNewStatus(OrderStatusEnum.COMPLETED);
         orderMessage.setOrderSn(order.getSn());
         this.sendUpdateStatusMessage(orderMessage);
+
+        //发送当前商品购买完成的信息（用于更新商品数据）
+        List<OrderItem> orderItems = orderItemService.getByOrderSn(orderSn);
+        List<GoodsCompleteMessage> goodsCompleteMessageList = new ArrayList<>();
+        for (OrderItem orderItem : orderItems) {
+            GoodsCompleteMessage goodsCompleteMessage = new GoodsCompleteMessage();
+            goodsCompleteMessage.setGoodsId(orderItem.getGoodsId());
+            goodsCompleteMessage.setSkuId(orderItem.getSkuId());
+            goodsCompleteMessage.setBuyNum(orderItem.getNum());
+            goodsCompleteMessage.setMemberId(order.getMemberId());
+            goodsCompleteMessageList.add(goodsCompleteMessage);
+        }
+        //发送商品购买消息
+        if (!goodsCompleteMessageList.isEmpty()) {
+            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.BUY_GOODS_COMPLETE.name();
+            //发送订单变更mq消息
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goodsCompleteMessageList), RocketmqSendCallbackBuilder.commonCallback());
+        }
+
     }
 
     @Override
@@ -484,7 +459,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         queryWrapper.eq("o.delete_flag", false);
         queryWrapper.groupBy("o.id");
         queryWrapper.orderByDesc("o.id");
-        return orderMapper.queryByParams(PageUtil.initPage(pageVO), queryWrapper);
+        return this.baseMapper.queryByParams(PageUtil.initPage(pageVO), queryWrapper);
     }
 
     @Override
@@ -511,12 +486,101 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Pintuan pintuan = pintuanService.getPintuanById(pintuanId);
         List<Order> list = this.getPintuanOrder(pintuanId, parentOrderSn);
         if (Boolean.TRUE.equals(pintuan.getFictitious()) && pintuan.getRequiredNum() > list.size()) {
-            // 如果开启虚拟成团且当前订单数量不足成团数量，则认为拼团成功
+            //如果开启虚拟成团且当前订单数量不足成团数量，则认为拼团成功
             this.pintuanOrderSuccess(list);
         } else if (Boolean.FALSE.equals(pintuan.getFictitious()) && pintuan.getRequiredNum() > list.size()) {
-            // 如果未开启虚拟成团且当前订单数量不足成团数量，则认为拼团失败
+            //如果未开启虚拟成团且当前订单数量不足成团数量，则认为拼团失败
             this.pintuanOrderFailed(list);
         }
+    }
+
+    @Override
+    public void getBatchDeliverList(HttpServletResponse response, List<String> logisticsName) {
+        ExcelWriter writer = ExcelUtil.getWriter();
+        //Excel 头部
+        ArrayList<String> rows = new ArrayList<>();
+        rows.add("订单编号");
+        rows.add("物流公司");
+        rows.add("物流编号");
+        writer.writeHeadRow(rows);
+
+        //存放下拉列表  ----店铺已选择物流公司列表
+        String[] logiList = logisticsName.toArray(new String[]{});
+        CellRangeAddressList cellRangeAddressList = new CellRangeAddressList(1, 200, 1, 1);
+        writer.addSelect(cellRangeAddressList, logiList);
+
+        ServletOutputStream out = null;
+        try {
+            //设置公共属性，列表名称
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("批量发货导入模板", "UTF8") + ".xls");
+            out = response.getOutputStream();
+            writer.flush(out, true);
+        } catch (Exception e) {
+            log.error("获取待发货订单编号列表错误", e);
+        } finally {
+            writer.close();
+            IoUtil.close(out);
+        }
+
+    }
+
+    @Override
+    public void batchDeliver(MultipartFile files) {
+
+        InputStream inputStream = null;
+        List<OrderBatchDeliverDTO> orderBatchDeliverDTOList = new ArrayList<>();
+        try {
+            inputStream = files.getInputStream();
+            //2.应用HUtool ExcelUtil获取ExcelReader指定输入流和sheet
+            ExcelReader excelReader = ExcelUtil.getReader(inputStream);
+            //可以加上表头验证
+            //3.读取第二行到最后一行数据
+            List<List<Object>> read = excelReader.read(1, excelReader.getRowCount());
+            for (List<Object> objects : read) {
+                OrderBatchDeliverDTO orderBatchDeliverDTO = new OrderBatchDeliverDTO();
+                orderBatchDeliverDTO.setOrderSn(objects.get(0).toString());
+                orderBatchDeliverDTO.setLogisticsName(objects.get(1).toString());
+                orderBatchDeliverDTO.setLogisticsNo(objects.get(2).toString());
+                orderBatchDeliverDTOList.add(orderBatchDeliverDTO);
+            }
+        } catch (Exception e) {
+            throw new ServiceException("文件读取失败");
+        }
+        //循环检查是否符合规范
+        checkBatchDeliver(orderBatchDeliverDTOList);
+        //订单批量发货
+        for (OrderBatchDeliverDTO orderBatchDeliverDTO : orderBatchDeliverDTOList) {
+            this.delivery(orderBatchDeliverDTO.getOrderSn(), orderBatchDeliverDTO.getLogisticsNo(), orderBatchDeliverDTO.getLogisticsId());
+        }
+    }
+
+    /**
+     * 循环检查批量发货订单列表
+     *
+     * @param list 待发货订单列表
+     */
+    private void checkBatchDeliver(List<OrderBatchDeliverDTO> list) {
+        for (OrderBatchDeliverDTO orderBatchDeliverDTO : list) {
+            //查看订单号是否存在-是否是当前店铺的订单
+            Order order = this.getOne(new LambdaQueryWrapper<Order>()
+                    .eq(Order::getStoreId, UserContext.getCurrentUser().getStoreId())
+                    .eq(Order::getSn, orderBatchDeliverDTO.getOrderSn()));
+            if (order == null) {
+                throw new ServiceException("订单编号：'" + orderBatchDeliverDTO.getOrderSn() + " '不存在");
+            } else if (order.getOrderStatus().equals(OrderStatusEnum.DELIVERED.name())) {
+                throw new ServiceException("订单编号：'" + orderBatchDeliverDTO.getOrderSn() + " '不能发货");
+            }
+            //查看物流公司
+            Logistics logistics = logisticsService.getOne(new LambdaQueryWrapper<Logistics>().eq(Logistics::getName, orderBatchDeliverDTO.getLogisticsName()));
+            if (logistics == null) {
+                throw new ServiceException("物流公司：'" + orderBatchDeliverDTO.getLogisticsName() + " '不存在");
+            } else {
+                orderBatchDeliverDTO.setLogisticsId(logistics.getId());
+            }
+        }
+
+
     }
 
     /**
@@ -542,6 +606,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         this.baseMapper.updateStatus(orderStatus.name(), orderSn);
     }
 
+    /**
+     * 检测拼团订单内容
+     * 此方法用与订单确认
+     * 判断拼团是否达到人数进行下一步处理
+     *
+     * @param pintuanId     拼团活动ID
+     * @param parentOrderSn 拼团父订单编号
+     */
     private void checkPintuanOrder(String pintuanId, String parentOrderSn) {
         //拼团有效参数判定
         if (CharSequenceUtil.isEmpty(parentOrderSn)) {
@@ -552,7 +624,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         List<Order> list = this.getPintuanOrder(pintuanId, parentOrderSn);
         int count = list.size();
         if (count == 1) {
-            // 如果为开团订单，则发布一个一小时的延时任务，时间到达后，如果未成团则自动结束（未开启虚拟成团的情况下）
+            //如果为开团订单，则发布一个一小时的延时任务，时间到达后，如果未成团则自动结束（未开启虚拟成团的情况下）
             PintuanOrderMessage pintuanOrderMessage = new PintuanOrderMessage();
             long startTime = DateUtil.offsetHour(new Date(), 1).getTime();
             pintuanOrderMessage.setOrderSn(parentOrderSn);
@@ -560,8 +632,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
                     startTime,
                     pintuanOrderMessage,
-                    DelayQueueTools.wrapperUniqueKey(PromotionDelayTypeEnums.PINTUAN_ORDER, (pintuanId + parentOrderSn)),
+                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PINTUAN_ORDER, (pintuanId + parentOrderSn)),
                     rocketmqCustomProperties.getPromotionTopic());
+
             this.timeTrigger.addDelay(timeTriggerMsg);
         }
         //拼团所需人数，小于等于 参团后的人数，则说明成团，所有订单成团
@@ -581,9 +654,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //寻找拼团的所有订单
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Order::getPromotionId, pintuanId)
-                .eq(Order::getOrderType, OrderTypeEnum.PINTUAN.name())
+                .eq(Order::getOrderPromotionType, OrderPromotionTypeEnum.PINTUAN.name())
                 .eq(Order::getPayStatus, PayStatusEnum.PAID.name());
-        // 拼团sn=开团订单sn 或者 参团订单的开团订单sn
+        //拼团sn=开团订单sn 或者 参团订单的开团订单sn
         queryWrapper.and(i -> i.eq(Order::getSn, parentOrderSn)
                 .or(j -> j.eq(Order::getParentOrderSn, parentOrderSn)));
         //参团后的订单数（人数）
@@ -592,17 +665,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     /**
      * 根据提供的拼团订单列表更新拼团状态为拼团成功
+     * 循环订单列表根据不同的订单类型进行确认订单
      *
      * @param list 需要更新拼团状态为成功的拼团订单列表
      */
     private void pintuanOrderSuccess(List<Order> list) {
-        for (Order order : list) {
-            LambdaUpdateWrapper<Order> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(Order::getId, order.getId());
-            updateWrapper.set(Order::getOrderStatus, OrderStatusEnum.UNDELIVERED.name());
-            updateWrapper.set(Order::getCanReturn, !PaymentMethodEnum.BANK_TRANSFER.name().equals(order.getPaymentMethod()));
-            this.update(updateWrapper);
-        }
+        list.forEach(order -> {
+            if (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
+                this.virtualOrderConfirm(order.getSn());
+            } else if (order.getOrderType().equals(OrderTypeEnum.NORMAL.name())) {
+                this.normalOrderConfirm(order.getSn());
+            }
+        });
     }
 
     /**
@@ -612,11 +686,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     private void pintuanOrderFailed(List<Order> list) {
         for (Order order : list) {
-//            LambdaUpdateWrapper<Order> updateWrapper = new LambdaUpdateWrapper<>();
-//            updateWrapper.eq(Order::getId, order.getId());
-//            updateWrapper.set(Order::getOrderStatus, OrderStatusEnum.CANCELLED.name());
-//            updateWrapper.set(Order::getCancelReason, "拼团人数不足，拼团失败！");
-//            this.update(updateWrapper);
             try {
                 this.cancel(order.getSn(), "拼团人数不足，拼团失败！");
             } catch (Exception e) {
@@ -642,7 +711,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 BeanUtil.copyProperties(priceDetailDTO, order, "id");
                 order.setSn(SnowFlake.createStr("G"));
                 order.setTradeSn(tradeDTO.getSn());
-                order.setOrderType(OrderTypeEnum.GIFT.name());
+                order.setOrderType(OrderPromotionTypeEnum.GIFT.name());
                 order.setOrderStatus(OrderStatusEnum.UNPAID.name());
                 order.setPayStatus(PayStatusEnum.UNPAID.name());
                 order.setDeliverStatus(DeliverStatusEnum.UNDELIVERED.name());
@@ -699,4 +768,97 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
     }
 
+    /**
+     * 检查交易信息
+     *
+     * @param tradeDTO 交易DTO
+     */
+    private void checkTradeDTO(TradeDTO tradeDTO) {
+        //检测是否为拼团订单
+        if (tradeDTO.getParentOrderSn() != null) {
+            //判断用户不能参与自己发起的拼团活动
+            Order parentOrder = this.getBySn(tradeDTO.getParentOrderSn());
+            if (parentOrder.getMemberId().equals(UserContext.getCurrentUser().getId())) {
+                throw new ServiceException("不能参与自己发起的拼团活动！");
+            }
+        }
+    }
+
+    /**
+     * 检查交易信息
+     *
+     * @param order 订单
+     */
+    private void checkOrder(Order order) {
+        //订单类型为拼团订单，检测购买数量是否超过了限购数量
+        if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderType())) {
+            Pintuan pintuan = pintuanService.getPintuanById(order.getPromotionId());
+            Integer limitNum = pintuan.getLimitNum();
+            if (limitNum != 0 && order.getGoodsNum() > limitNum) {
+                throw new ServiceException("购买数量超过拼团活动限制数量");
+            }
+        }
+    }
+
+    /**
+     * 普通商品订单确认
+     * 修改订单状态为待发货
+     * 发送订单状态变更消息
+     *
+     * @param orderSn 订单编号
+     */
+    private void normalOrderConfirm(String orderSn) {
+        //修改订单
+        this.update(new LambdaUpdateWrapper<Order>()
+                .eq(Order::getSn, orderSn)
+                .set(Order::getOrderStatus, OrderStatusEnum.UNDELIVERED.name()));
+        //修改订单
+        OrderMessage orderMessage = new OrderMessage();
+        orderMessage.setNewStatus(OrderStatusEnum.UNDELIVERED);
+        orderMessage.setOrderSn(orderSn);
+        this.sendUpdateStatusMessage(orderMessage);
+    }
+
+    /**
+     * 虚拟商品订单确认
+     * 修改订单状态为待核验
+     * 发送订单状态变更消息
+     *
+     * @param orderSn 订单编号
+     */
+    private void virtualOrderConfirm(String orderSn) {
+        //修改订单
+        this.update(new LambdaUpdateWrapper<Order>()
+                .eq(Order::getSn, orderSn)
+                .set(Order::getOrderStatus, OrderStatusEnum.TAKE.name()));
+        OrderMessage orderMessage = new OrderMessage();
+        orderMessage.setNewStatus(OrderStatusEnum.TAKE);
+        orderMessage.setOrderSn(orderSn);
+        this.sendUpdateStatusMessage(orderMessage);
+    }
+
+    /**
+     * 检测虚拟订单信息
+     *
+     * @param order            订单
+     * @param verificationCode 验证码
+     */
+    private void checkVerificationOrder(Order order, String verificationCode) {
+        //判断查询是否可以查询到订单
+        if (order == null) {
+            throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
+        }
+        //判断是否为虚拟订单
+        else if (!order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
+            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+        }
+        //判断虚拟订单状态
+        else if (!order.getOrderStatus().equals(OrderStatusEnum.TAKE.name())) {
+            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+        }
+        //判断验证码是否正确
+        else if (!verificationCode.equals(order.getVerificationCode())) {
+            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+        }
+    }
 }

@@ -22,7 +22,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,10 +35,6 @@ import java.util.*;
  */
 @Service
 public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsDataMapper, StoreFlow> implements OrderStatisticsDataService {
-
-    //订单统计
-    @Autowired
-    private OrderStatisticsDataMapper orderStatisticsDataMapper;
     //平台PV统计
     @Autowired
     private PlatformViewDataService platformViewDataService;
@@ -54,25 +49,22 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
         OrderOverviewVO orderOverviewVO = new OrderOverviewVO();
         //访客数
         orderOverviewVO.setUvNum(platformViewDataService.countUv(statisticsQueryParam));
-        if (orderOverviewVO.getUvNum() == null) {
-            orderOverviewVO.setUvNum(0);
-        }
 
         //下单统计
-        initOrder(dates, orderOverviewVO);
+        initOrder(dates, orderOverviewVO, statisticsQueryParam);
 
         //付款统计
-        initPayment(dates, orderOverviewVO);
+        initPayment(dates, orderOverviewVO, statisticsQueryParam);
 
         //退单统计
-        initAfterSale(dates, orderOverviewVO);
+        initAfterSale(dates, orderOverviewVO, statisticsQueryParam);
 
         //数据运算（转换率，比例相关）
         conversionRateOperation(orderOverviewVO);
         return orderOverviewVO;
     }
 
-    // 运算转换率
+    //运算转换率
     private void conversionRateOperation(OrderOverviewVO orderOverviewVO) {
 
         //下单转换率 订单数/UV
@@ -101,24 +93,37 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
      * @param dates
      * @param orderOverviewVO
      */
-    private void initOrder(Date[] dates, OrderOverviewVO orderOverviewVO) {
+    private void initOrder(Date[] dates, OrderOverviewVO orderOverviewVO, StatisticsQueryParam statisticsQueryParam) {
+        //构建查询条件
         QueryWrapper queryWrapper = Wrappers.query();
+        //时间区间
         queryWrapper.between("create_time", dates[0], dates[1]);
+        //如果有店铺id传入，则查询店铺
+        if (StringUtils.isNotEmpty(statisticsQueryParam.getStoreId())) {
+            queryWrapper.eq("store_id", statisticsQueryParam.getStoreId());
+        }
+        //查询流水金额和订单数量
         queryWrapper.select("SUM(flow_price) AS price , COUNT(0) AS num");
+        //获取查询结果
         Map order = orderService.getMap(queryWrapper);
+        //赋予订单数和流水金额
         orderOverviewVO.setOrderNum(order != null && order.containsKey("num") ? (Long) order.get("num") : 0L);
         orderOverviewVO.setOrderAmount(order != null && order.containsKey("price") ? (double) order.get("price") : 0L);
 
+        //查询下单人数
         queryWrapper = Wrappers.query();
+        //时间区间
         queryWrapper.between("create_time", dates[0], dates[1]);
-        queryWrapper.select("count(DISTINCT member_id) AS num");
-        Map memberNum = orderService.getMap(queryWrapper);
-
-        orderOverviewVO.setOrderMemberNum(memberNum != null && memberNum.containsKey("num") ? (Long) memberNum.get("num") : 0L);
-
-        if (orderOverviewVO.getOrderAmount() == null) {
-            orderOverviewVO.setOrderAmount(0D);
+        //如果有店铺id传入，则查询店铺
+        if (StringUtils.isNotEmpty(statisticsQueryParam.getStoreId())) {
+            queryWrapper.eq("store_id", statisticsQueryParam.getStoreId());
         }
+        //查询下单人数的sql
+        queryWrapper.select("count(DISTINCT member_id) AS num");
+        //获取查询结果
+        Map memberNum = orderService.getMap(queryWrapper);
+        //写入下单人数
+        orderOverviewVO.setOrderMemberNum(memberNum != null && memberNum.containsKey("num") ? (Long) memberNum.get("num") : 0L);
     }
 
     /**
@@ -127,10 +132,14 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
      * @param dates
      * @param orderOverviewVO
      */
-    private void initPayment(Date[] dates, OrderOverviewVO orderOverviewVO) {
+    private void initPayment(Date[] dates, OrderOverviewVO orderOverviewVO, StatisticsQueryParam statisticsQueryParam) {
         //付款订单数，付款金额
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.between("create_time", dates[0], dates[1]);
+        //如果有店铺id传入，则查询店铺
+        if (StringUtils.isNotEmpty(statisticsQueryParam.getStoreId())) {
+            queryWrapper.eq("store_id", statisticsQueryParam.getStoreId());
+        }
         queryWrapper.select("SUM(final_price) AS price , COUNT(0) AS num");
         queryWrapper.eq("flow_type", FlowTypeEnum.PAY.name());
         Map payment = this.getMap(queryWrapper);
@@ -141,6 +150,10 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
         //付款人数
         queryWrapper = Wrappers.query();
         queryWrapper.between("create_time", dates[0], dates[1]);
+        //如果有店铺id传入，则查询店铺
+        if (StringUtils.isNotEmpty(statisticsQueryParam.getStoreId())) {
+            queryWrapper.eq("store_id", statisticsQueryParam.getStoreId());
+        }
         queryWrapper.select("COUNT(0) AS num");
         queryWrapper.groupBy("member_id");
         Map paymentMemberNum = this.getMap(queryWrapper);
@@ -154,11 +167,15 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
      * @param dates
      * @param orderOverviewVO
      */
-    private void initAfterSale(Date[] dates, OrderOverviewVO orderOverviewVO) {
+    private void initAfterSale(Date[] dates, OrderOverviewVO orderOverviewVO, StatisticsQueryParam statisticsQueryParam) {
         //付款订单数，付款金额
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.between("create_time", dates[0], dates[1]);
         queryWrapper.select("SUM(final_price) AS price , COUNT(0) AS num");
+        //如果有店铺id传入，则查询店铺
+        if (StringUtils.isNotEmpty(statisticsQueryParam.getStoreId())) {
+            queryWrapper.eq("store_id", statisticsQueryParam.getStoreId());
+        }
         queryWrapper.eq("flow_type", FlowTypeEnum.REFUND.name());
         Map payment = this.getMap(queryWrapper);
         orderOverviewVO.setRefundOrderNum(payment != null && payment.containsKey("num") ? (Long) payment.get("num") : 0L);
@@ -197,7 +214,7 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
     public Integer orderNum(String orderStatus) {
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper();
         //queryWrapper.eq("flow_type", FlowTypeEnum.PAY.name());
-        queryWrapper.eq(StringUtils.isNotEmpty(orderStatus),Order::getOrderStatus,orderStatus);
+        queryWrapper.eq(StringUtils.isNotEmpty(orderStatus), Order::getOrderStatus, orderStatus);
         queryWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
                 Order::getStoreId, UserContext.getCurrentUser().getStoreId());
         return orderService.count(queryWrapper);
@@ -211,11 +228,11 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
         queryWrapper.eq("pay_status", PayStatusEnum.PAID.name());
         //选择商家判定
         queryWrapper.eq(StringUtils.isNotEmpty(statisticsQueryParam.getStoreId()), "store_id", statisticsQueryParam.getStoreId());
-//       查询时间区间
+//      查询时间区间
         queryWrapper.between("create_time", dates[0], dates[1]);
-//        格式化时间
+//       格式化时间
         queryWrapper.groupBy("DATE_FORMAT(create_time,'%Y-%m-%d')");
-        List<OrderStatisticsDataVO> orderStatisticsDataVOS = orderStatisticsDataMapper.getOrderStatisticsData(queryWrapper);
+        List<OrderStatisticsDataVO> orderStatisticsDataVOS = this.baseMapper.getOrderStatisticsData(queryWrapper);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(dates[0]);
 

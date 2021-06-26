@@ -244,7 +244,7 @@ public class AliPayApi {
      */
     public static AlipayTradePayResponse tradePayToResponse(AlipayTradePayModel model, String notifyUrl) throws AlipayApiException {
         AlipayTradePayRequest request = new AlipayTradePayRequest();
-        // 填充业务参数
+        //填充业务参数
         request.setBizModel(model);
         request.setNotifyUrl(notifyUrl);
         return doExecute(request);
@@ -316,7 +316,7 @@ public class AliPayApi {
         if (response.isSuccess()) {
             return true;
         } else {
-            // 调用查询接口查询数据
+            //调用查询接口查询数据
             JSONObject jsonObject = JSONObject.parseObject(result);
             String outBizNo = jsonObject.getJSONObject("alipay_fund_trans_toaccount_transfer_response").getString("out_biz_no");
             AlipayFundTransOrderQueryModel queryModel = new AlipayFundTransOrderQueryModel();

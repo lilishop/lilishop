@@ -1,5 +1,6 @@
 package cn.lili.common.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Base64;
@@ -12,6 +13,7 @@ import java.io.*;
  *
  * @author Chopper
  */
+@Slf4j
 public class Base64DecodeMultipartFile implements MultipartFile {
 
     private final byte[] imgContent;
@@ -64,7 +66,7 @@ public class Base64DecodeMultipartFile implements MultipartFile {
             stream = new FileOutputStream(dest);
             stream.write(imgContent);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("transferTo错误",e);
         }finally {
             stream.close();
         }
@@ -92,14 +94,14 @@ public class Base64DecodeMultipartFile implements MultipartFile {
             byte[] bytes = Base64.getDecoder().decode(base64);
             stream = new ByteArrayInputStream(bytes);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("base64ToInputStream错误",e);
         }
         return stream;
     }
 
     public static String inputStreamToStream(InputStream in) {
         byte[] data = null;
-        // 读取图片字节数组
+        //读取图片字节数组
         try {
             ByteArrayOutputStream swapStream = new ByteArrayOutputStream();
             byte[] buff = new byte[100];
@@ -109,13 +111,13 @@ public class Base64DecodeMultipartFile implements MultipartFile {
             }
             data = swapStream.toByteArray();
         } catch (IOException e) {
-            e.printStackTrace();
+           log.error("转码错误",e);
         } finally {
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("inputStreamToStream错误",e);
                 }
             }
         }

@@ -1,6 +1,7 @@
 package cn.lili.config.elasticsearch;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -27,6 +28,7 @@ import java.util.List;
  * @author paulG
  * @since 2020/10/13
  **/
+@Slf4j
 @Configuration
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
@@ -60,9 +62,9 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
         }
 
         restBuilder.setRequestConfigCallback(requestConfigBuilder ->
-                requestConfigBuilder.setConnectTimeout(1000) // time until a connection with the server is established.
-                        .setSocketTimeout(12 * 1000) // time of inactivity to wait for packets[data] to receive.
-                        .setConnectionRequestTimeout(2 * 1000)); // time to fetch a connection from the connection pool 0 for infinite.
+                requestConfigBuilder.setConnectTimeout(1000) //time until a connection with the server is established.
+                        .setSocketTimeout(12 * 1000) //time of inactivity to wait for packets[data] to receive.
+                        .setConnectionRequestTimeout(2 * 1000)); //time to fetch a connection from the connection pool 0 for infinite.
 
         client = new RestHighLevelClient(restBuilder);
         return client;
@@ -96,7 +98,7 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
         try {
             this.client.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("es clientClose错误",e);
         }
     }
 

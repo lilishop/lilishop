@@ -102,7 +102,7 @@ public class SystemLogAspect {
             //请求参数
             systemLogVO.setMapToParams(logParams);
             //响应参数 此处数据太大了，所以先注释掉
-//            systemLogVO.setResponseBody(JSONUtil.toJsonStr(rvt));
+//           systemLogVO.setResponseBody(JSONUtil.toJsonStr(rvt));
             //请求IP
             systemLogVO.setIp(IpUtils.getIpAddress(request));
             //IP地址

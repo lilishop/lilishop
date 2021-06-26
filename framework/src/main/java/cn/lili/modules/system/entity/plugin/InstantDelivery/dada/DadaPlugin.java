@@ -20,8 +20,7 @@ import cn.lili.modules.system.entity.vo.InstantDeliveryResultVO;
 import cn.lili.modules.system.service.InstantDeliveryLogService;
 import cn.lili.modules.system.utils.HttpUtils;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,10 +37,9 @@ import java.util.Map;
  * @Description:
  * @since 2020/12/01 15:58
  */
+@Slf4j
 @Component("ddPlugin")
 public class DadaPlugin implements InstantDeliveryPlugin {
-
-    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private StoreDetailService storeDetailService;
@@ -98,20 +96,20 @@ public class DadaPlugin implements InstantDeliveryPlugin {
     public InstantDeliveryResultVO addStore(StoreDetailVO storeDetailVO, Map config) {
         JSONArray jsonArray = new JSONArray();
         JSONObject jsonObject = new JSONObject();
-//        //门店名称
-//        jsonObject.put("station_name", storeDetailVO.getStoreName());
+//       //门店名称
+//       jsonObject.put("station_name", storeDetailVO.getStoreName());
         //业务类型(食品小吃-1,饮料-2,鲜花-3,文印票务-8,便利店-9,水果生鲜-13,同城电商-19, 医药-20,蛋糕-21,酒品-24,小商品市场-25,服装-26,汽修零配-27,数码-28,小龙虾-29,火锅-51,其他-5)
         jsonObject.set("business", 19);
         //城市名称(如,上海)
-//        jsonObject.put("city_name", storeDetailVO.getCompanyCity());
+//       jsonObject.put("city_name", storeDetailVO.getCompanyCity());
         //区域名称(如,浦东新区)
-//        jsonObject.put("area_name", storeDetailVO.getCompanyCounty());
+//       jsonObject.put("area_name", storeDetailVO.getCompanyCounty());
         //门店地址
         jsonObject.set("station_address", storeDetailVO.getCompanyAddress());
-//        //门店经度
-//        jsonObject.put("lng", storeDetailVO.getStoreLongitude());
-//        //门店纬度
-//        jsonObject.put("lat", storeDetailVO.getStoreLatitude());
+//       //门店经度
+//       jsonObject.put("lng", storeDetailVO.getStoreLongitude());
+//       //门店纬度
+//       jsonObject.put("lat", storeDetailVO.getStoreLatitude());
         //联系人姓名
         jsonObject.set("contact_name", storeDetailVO.getLinkName());
         //联系人电话
@@ -157,19 +155,19 @@ public class DadaPlugin implements InstantDeliveryPlugin {
         //门店编号
         jsonObject.set("origin_store_id", storeDetailVO.getDdCode());
         //门店名称
-//        jsonObject.put("station_name", storeDetailVO.getStoreName());
+//       jsonObject.put("station_name", storeDetailVO.getStoreName());
         //业务类型(食品小吃-1,饮料-2,鲜花-3,文印票务-8,便利店-9,水果生鲜-13,同城电商-19, 医药-20,蛋糕-21,酒品-24,小商品市场-25,服装-26,汽修零配-27,数码-28,小龙虾-29,火锅-51,其他-5)
         jsonObject.set("business", 19);
         //城市名称(如,上海)
-//        jsonObject.put("city_name", storeDetailVO.getCompanyCity());
+//       jsonObject.put("city_name", storeDetailVO.getCompanyCity());
         //区域名称(如,浦东新区)
-//        jsonObject.put("area_name", storeDetailVO.getCompanyCounty());
+//       jsonObject.put("area_name", storeDetailVO.getCompanyCounty());
         //门店地址
         jsonObject.set("station_address", storeDetailVO.getCompanyAddress());
-//        //门店经度
-//        jsonObject.put("lng", storeDetailVO.getStoreLongitude());
-//        //门店纬度
-//        jsonObject.put("lat", storeDetailVO.getStoreLatitude());
+//       //门店经度
+//       jsonObject.put("lng", storeDetailVO.getStoreLongitude());
+//       //门店纬度
+//       jsonObject.put("lat", storeDetailVO.getStoreLatitude());
         //联系人姓名
         jsonObject.set("contact_name", storeDetailVO.getLinkName());
         //联系人电话
@@ -186,7 +184,7 @@ public class DadaPlugin implements InstantDeliveryPlugin {
         //组织返回参数
         InstantDeliveryResultVO instantDeliveryResultVO = JSONUtil.toBean(result, InstantDeliveryResultVO.class);
         if (instantDeliveryResultVO.getStatus().equals("fail")) {
-            logger.error("达达店铺信息修改失败，" + instantDeliveryResultVO.getMsg());
+            log.error("达达店铺信息修改失败",instantDeliveryResultVO.getMsg());
         }
         return instantDeliveryResultVO;
     }
@@ -273,17 +271,17 @@ public class DadaPlugin implements InstantDeliveryPlugin {
         }
         InstantDeliveryResultVO instantDeliveryResultVO = JSONUtil.toBean(result, InstantDeliveryResultVO.class);
         if (instantDeliveryResultVO.getStatus().equals("fail")) {
-            logger.error("达达订单发送失败，订单号为" + order.getSn() + "," + instantDeliveryResultVO.getMsg());
+            log.error("达达订单发送失败，订单号为",order.getSn() + "," + instantDeliveryResultVO.getMsg());
             //如果发送失败择等待一秒重新发送，如果失败择记录日志
             try {
                 Thread.sleep(1000);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("达达订单发布失败",e);
             }
             result = HttpUtils.doPostWithJson(url + InstantDeliveryUrl.DD_RE_ADD_ORDER.getUrl(), requstJson);
             InstantDeliveryResultVO instantDeliveryResResultVO = JSONUtil.toBean(result, InstantDeliveryResultVO.class);
             if (instantDeliveryResResultVO.getStatus().equals("fail")) {
-                logger.error("达达订单重试发送失败，订单号为" + order.getSn() + "," + instantDeliveryResultVO.getMsg());
+                log.error("达达订单重试发送失败，订单号为" + order.getSn() + "," + instantDeliveryResultVO.getMsg());
             }
         }
         return instantDeliveryResultVO;

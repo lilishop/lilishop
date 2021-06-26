@@ -73,7 +73,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
 
         //准备发送短信参数
         Map<String, String> params = new HashMap<>();
-        // 验证码内容
+        //验证码内容
         params.put("code", code);
 
         //模版 默认为登录验证
@@ -119,7 +119,6 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
             default:
                 return;
         }
-
         //如果是测试模式 默认验证码 6个1
         if (systemSetting.getIsTestModel()) {
             code = "111111";
@@ -156,7 +155,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
         try {
             SendSmsResponse response = client.sendSms(sendSmsRequest);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("发送短信错误",e);
         }
     }
 
@@ -183,7 +182,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
             signNameList.add(sign.subList((i * 100), endPoint));
         }
 
-//        //发送短信
+//       //发送短信
         for (int i = 0; i < mobileList.size(); i++) {
             SendBatchSmsRequest sendBatchSmsRequest = new SendBatchSmsRequest()
                     .setPhoneNumberJson(JSONUtil.toJsonStr(mobileList.get(i)))
@@ -192,7 +191,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
             try {
                 client.sendBatchSms(sendBatchSmsRequest);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("批量发送短信错误",e);
             }
         }
 
@@ -203,8 +202,6 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
     public void addSmsSign(SmsSign smsSign) throws Exception {
         //设置参数添加短信签名
         com.aliyun.dysmsapi20170525.Client client = this.createClient();
-        System.out.println(smsSign.getBusinessLicense().substring(smsSign.getBusinessLicense().lastIndexOf(".") + 1));
-        System.out.println(smsSign.getLicense().substring(smsSign.getLicense().lastIndexOf(".")));
         //营业执照
         AddSmsSignRequest.AddSmsSignRequestSignFileList signFileList0 = new AddSmsSignRequest.AddSmsSignRequestSignFileList()
                 .setFileContents(Base64Utils.encode(smsSign.getBusinessLicense()))
@@ -359,15 +356,15 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
             SmsSetting smsSetting = new Gson().fromJson(setting.getSettingValue(), SmsSetting.class);
 
             Config config = new Config();
-            // 您的AccessKey ID
+            //您的AccessKey ID
             config.accessKeyId = smsSetting.getAccessKeyId();
-            // 您的AccessKey Secret
+            //您的AccessKey Secret
             config.accessKeySecret = smsSetting.getAccessSecret();
-            // 访问的域名
+            //访问的域名
             config.endpoint = "dysmsapi.aliyuncs.com";
             return new com.aliyun.dysmsapi20170525.Client(config);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("短信初始化错误",e);
         }
         return null;
     }

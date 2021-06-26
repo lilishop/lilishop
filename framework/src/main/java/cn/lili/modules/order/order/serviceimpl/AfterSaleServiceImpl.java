@@ -20,6 +20,7 @@ import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dto.AfterSaleDTO;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
+import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.entity.vo.AfterSaleApplyVO;
 import cn.lili.modules.order.order.entity.vo.AfterSaleSearchParams;
@@ -53,6 +54,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 售后业务层实现
@@ -92,6 +94,11 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     }
 
     @Override
+    public List<AfterSale> exportAfterSaleOrder(AfterSaleSearchParams saleSearchParams) {
+        return this.list(saleSearchParams.queryWrapper());
+    }
+
+    @Override
     public AfterSaleVO getAfterSale(String sn) {
         return this.baseMapper.getAfterSaleVO(sn);
     }
@@ -121,6 +128,14 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             afterSaleApplyVO.setRefundWay(AfterSaleRefundWayEnum.OFFLINE.name());
         } else {
             afterSaleApplyVO.setRefundWay(AfterSaleRefundWayEnum.ORIGINAL.name());
+        }
+        //判断订单类型，虚拟订单只支持退款
+        if(order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())){
+            afterSaleApplyVO.setReturnMoney(true);
+            afterSaleApplyVO.setReturnGoods(false);
+        }else{
+            afterSaleApplyVO.setReturnMoney(true);
+            afterSaleApplyVO.setReturnGoods(true);
         }
 
         afterSaleApplyVO.setAccountType(order.getPaymentMethod());
@@ -434,7 +449,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
                 this.checkAfterSaleReturnMoneyParam(afterSaleDTO);
                 break;
             case RETURN_GOODS:
-                // 是否为有效状态
+                //是否为有效状态
                 boolean availableStatus = StrUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.DELIVERED.name(), OrderStatusEnum.COMPLETED.name());
                 if (!PayStatusEnum.PAID.name().equals(order.getPayStatus()) && availableStatus) {
                     throw new ServiceException(ResultCode.AFTER_SALES_BAN);

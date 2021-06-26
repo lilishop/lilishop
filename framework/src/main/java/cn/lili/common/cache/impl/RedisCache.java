@@ -1,6 +1,7 @@
 package cn.lili.common.cache.impl;
 
 import cn.lili.common.cache.Cache;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.*;
@@ -18,6 +19,7 @@ import java.util.function.Consumer;
  *
  * @author Chopepr
  */
+@Slf4j
 @Component
 public class RedisCache implements Cache {
 
@@ -158,7 +160,7 @@ public class RedisCache implements Cache {
                 return null;
 
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("scan错误",e);
                 throw new RuntimeException(e);
             }
         });
@@ -168,7 +170,7 @@ public class RedisCache implements Cache {
     @Override
     public Long cumulative(Object key, Object value) {
         HyperLogLogOperations<Object, Object> operations = redisTemplate.opsForHyperLogLog();
-        // add 方法对应 PFADD 命令
+        //add 方法对应 PFADD 命令
         return operations.add(key, value);
 
     }
@@ -177,7 +179,7 @@ public class RedisCache implements Cache {
     public Long counter(Object key) {
         HyperLogLogOperations<Object, Object> operations = redisTemplate.opsForHyperLogLog();
 
-        // add 方法对应 PFADD 命令
+        //add 方法对应 PFADD 命令
         return operations.size(key);
     }
 
@@ -196,7 +198,7 @@ public class RedisCache implements Cache {
     @Override
     public Long mergeCounter(Object... key) {
         HyperLogLogOperations<Object, Object> operations = redisTemplate.opsForHyperLogLog();
-        // 计数器合并累加
+        //计数器合并累加
         return operations.union(key[0], key);
     }
 
@@ -221,7 +223,7 @@ public class RedisCache implements Cache {
      */
     @Override
     public void incrementScore(String sortedSetName, String keyword) {
-        // x 的含义请见本方法的注释
+        //x 的含义请见本方法的注释
         double x = 1.0;
         this.redisTemplate.opsForZSet().incrementScore(sortedSetName, keyword, x);
     }

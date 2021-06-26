@@ -62,9 +62,6 @@ import java.util.List;
 @Transactional
 public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> implements MemberService {
 
-    //会员数据处理层
-    @Autowired
-    private MemberMapper memberMapper;
     //会员token
     @Autowired
     private MemberTokenGenerate memberTokenGenerate;
@@ -90,7 +87,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public Member findByUsername(String userName) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper();
         queryWrapper.eq("username", userName);
-        return memberMapper.selectOne(queryWrapper);
+        return this.baseMapper.selectOne(queryWrapper);
     }
 
 
@@ -107,7 +104,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public boolean findByMobile(String uuid, String mobile) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper();
         queryWrapper.eq("mobile", mobile);
-        Member member = memberMapper.selectOne(queryWrapper);
+        Member member = this.baseMapper.selectOne(queryWrapper);
         if (member == null) {
             throw new ServiceException(ResultCode.USER_NOT_PHONE);
         }
@@ -165,7 +162,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     private Member findMember(String userName) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper();
         queryWrapper.eq("username", userName).or().eq("mobile", userName);
-        return memberMapper.selectOne(queryWrapper);
+        return this.getOne(queryWrapper);
     }
 
     @Override
@@ -216,7 +213,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public Token mobilePhoneLogin(String mobilePhone) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper();
         queryWrapper.eq("mobile", mobilePhone);
-        Member member = memberMapper.selectOne(queryWrapper);
+        Member member = this.baseMapper.selectOne(queryWrapper);
         //如果手机号不存在则自动注册用户
         if (member == null) {
             member = new Member(mobilePhone, UuidUtils.getUUID(), mobilePhone);
@@ -362,13 +359,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     @PointLogPoint
-    public Boolean updateMemberPoint(Long point, Integer type, String memberId, String content) {
+    public Boolean updateMemberPoint(Long point, Boolean type, String memberId, String content) {
         //获取当前会员信息
         Member member = this.getById(memberId);
         if (member != null) {
             //积分变动后的会员积分
             long currentPoint;
-            if (type == 1) {
+            if (type) {
                 currentPoint = CurrencyUtil.add(member.getPoint(), point).longValue();
             } else {
                 currentPoint = CurrencyUtil.sub(member.getPoint(), point) < 0 ? 0 : new Double(CurrencyUtil.sub(member.getPoint(), point)).longValue();
@@ -391,6 +388,25 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         throw new ServiceException(ResultCode.USER_NOT_EXIST);
     }
 
+    @Override
+    public Boolean updateMemberExperience(Long experience, Boolean type, String memberId, String content) {
+        //获取当前会员信息
+        Member member = this.getById(memberId);
+        if (member != null) {
+            //积分变动后的会员积分
+            long currentExperience;
+            if (type) {
+                currentExperience = CurrencyUtil.add(member.getPoint(), experience).longValue();
+            } else {
+                currentExperience = CurrencyUtil.sub(member.getPoint(), experience) < 0 ? 0 : new Double(CurrencyUtil.sub(member.getExperience(), experience)).longValue();
+            }
+            member.setExperience(currentExperience);
+
+            return this.updateById(member);
+        }
+        throw new ServiceException(ResultCode.USER_NOT_EXIST);
+    }
+
 
     @Override
     public Boolean updateMemberStatus(List<String> memberIds, Boolean status) {
@@ -403,7 +419,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public List<MemberDistributionVO> distribution() {
-        List<MemberDistributionVO> memberDistributionVOS = memberMapper.distribution();
+        List<MemberDistributionVO> memberDistributionVOS = this.baseMapper.distribution();
         return memberDistributionVOS;
     }
 
@@ -416,7 +432,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     private Member findByPhone(String mobilePhone) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper();
         queryWrapper.eq("mobile", mobilePhone);
-        return memberMapper.selectOne(queryWrapper);
+        return this.baseMapper.selectOne(queryWrapper);
     }
 
     /**

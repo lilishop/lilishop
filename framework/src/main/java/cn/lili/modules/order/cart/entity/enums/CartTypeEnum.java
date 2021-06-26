@@ -24,5 +24,9 @@ public enum CartTypeEnum {
      * 积分
      */
     POINTS,
+    /**
+     * 虚拟商品
+     */
+    VIRTUAL;
 
 }

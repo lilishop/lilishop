@@ -11,7 +11,6 @@ import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,9 +29,6 @@ import java.util.Objects;
 @Transactional
 public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint> implements FootprintService {
 
-    //足迹数据层
-    @Autowired
-    private FootprintMapper footprintMapper;
     //es商品业务层
     @Autowired
     private EsGoodsSearchService esGoodsSearchService;
@@ -54,7 +50,7 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
             footPrint.setCreateTime(new Date());
             this.save(footPrint);
             //删除超过100条后的记录
-            footprintMapper.deleteLastFootPrint(footPrint.getMemberId());
+            this.baseMapper.deleteLastFootPrint(footPrint.getMemberId());
             return footPrint;
         }
     }
@@ -82,7 +78,7 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
         lambdaQueryWrapper.eq(FootPrint::getMemberId, UserContext.getCurrentUser().getId());
         lambdaQueryWrapper.eq(FootPrint::getDeleteFlag,false);
         lambdaQueryWrapper.orderByDesc(FootPrint::getUpdateTime);
-        List<String> skuIdList = footprintMapper.footprintSkuIdList(PageUtil.initPage(pageVO), lambdaQueryWrapper);
+        List<String> skuIdList = this.baseMapper.footprintSkuIdList(PageUtil.initPage(pageVO), lambdaQueryWrapper);
         if (skuIdList.size() > 0) {
             List<EsGoodsIndex> list = esGoodsSearchService.getEsGoodsBySkuIds(skuIdList);
             //去除为空的商品数据

@@ -56,27 +56,38 @@ public class OrderItem extends BaseEntity {
 
     @ApiModelProperty(value = "商品ID")
     private String goodsId;
+
     @ApiModelProperty(value = "货品ID")
     private String skuId;
+
     @ApiModelProperty(value = "销售量")
     private Integer num;
+
     @ApiModelProperty(value = "交易编号")
     private String tradeSn;
+
     @ApiModelProperty(value = "图片")
     private String image;
+
     @ApiModelProperty(value = "商品名称")
     private String goodsName;
+
     @ApiModelProperty(value = "分类ID")
     private String categoryId;
+
     @ApiModelProperty(value = "快照id")
     private String snapshotId;
+
     @ApiModelProperty(value = "规格json")
     @Column(columnDefinition = "TEXT")
     private String specs;
+
     @ApiModelProperty(value = "促销类型")
     private String promotionType;
+
     @ApiModelProperty(value = "促销id")
     private String promotionId;
+
     @ApiModelProperty(value = "销售金额")
     private Double goodsPrice;
 

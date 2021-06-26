@@ -137,7 +137,7 @@ public class WechatPlugin implements Payment {
 
             return ResultUtil.data(JSONUtil.toJsonStr(response.getBody()));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("微信H5支付错误",e);
             throw new ServiceException(ResultCode.PAY_ERROR);
         }
     }
@@ -191,7 +191,7 @@ public class WechatPlugin implements Payment {
                     setting.getApiclient_key(),
                     JSONUtil.toJsonStr(unifiedOrderModel)
             );
-            // 根据证书序列号查询对应的证书来验证签名结果
+            //根据证书序列号查询对应的证书来验证签名结果
             boolean verifySignature = WxPayKit.verifySignature(response, getPlatformCert());
             log.info("verifySignature: {}", verifySignature);
             log.info("统一下单响应 {}", response);
@@ -252,7 +252,7 @@ public class WechatPlugin implements Payment {
                     setting.getApiclient_key(),
                     JSONUtil.toJsonStr(unifiedOrderModel)
             );
-            // 根据证书序列号查询对应的证书来验证签名结果
+            //根据证书序列号查询对应的证书来验证签名结果
             boolean verifySignature = WxPayKit.verifySignature(response, getPlatformCert());
             log.info("verifySignature: {}", verifySignature);
             log.info("统一下单响应 {}", response);
@@ -316,7 +316,7 @@ public class WechatPlugin implements Payment {
                     JSONUtil.toJsonStr(unifiedOrderModel)
             );
             log.info("统一下单响应 {}", response);
-            // 根据证书序列号查询对应的证书来验证签名结果
+            //根据证书序列号查询对应的证书来验证签名结果
             boolean verifySignature = WxPayKit.verifySignature(response, getPlatformCert());
             log.info("verifySignature: {}", verifySignature);
 
@@ -392,7 +392,7 @@ public class WechatPlugin implements Payment {
                     setting.getApiclient_key(),
                     JSONUtil.toJsonStr(unifiedOrderModel)
             );
-            // 根据证书序列号查询对应的证书来验证签名结果
+            //根据证书序列号查询对应的证书来验证签名结果
             boolean verifySignature = WxPayKit.verifySignature(response, getPlatformCert());
             log.info("verifySignature: {}", verifySignature);
             log.info("统一下单响应 {}", response);
@@ -451,7 +451,7 @@ public class WechatPlugin implements Payment {
         log.info("微信支付通知密文 {}", result);
 
         WechatPaymentSetting setting = wechatPaymentSetting();
-        // 校验服务器端响应¬
+        //校验服务器端响应¬
         String plainText = WxPayKit.verifyNotify(serialNo, result, signature, nonce, timestamp,
                 setting.getApiKey3(), Objects.requireNonNull(getPlatformCert()));
 
@@ -486,7 +486,7 @@ public class WechatPlugin implements Payment {
             Amount amount = new Amount().setRefund(CurrencyUtil.fen(refundLog.getTotalAmount()))
                     .setTotal(CurrencyUtil.fen(refundLog.getPayPrice()));
 
-            // 退款参数准备
+            //退款参数准备
             RefundModel refundModel = new RefundModel()
                     .setTransaction_id(refundLog.getPaymentReceivableNo())
                     .setOut_refund_no(refundLog.getOutOrderNo())
@@ -508,11 +508,11 @@ public class WechatPlugin implements Payment {
                     JSONUtil.toJsonStr(refundModel)
             );
             log.info("微信退款响应 {}", response);
-            // 退款申请成功
+            //退款申请成功
             if (response.getStatus() == 200) {
                 refundLogService.save(refundLog);
             } else {
-                // 退款申请失败
+                //退款申请失败
                 refundLog.setErrorMessage(response.getBody());
                 refundLogService.save(refundLog);
             }
@@ -543,7 +543,7 @@ public class WechatPlugin implements Payment {
             return;
         }
         try {
-            // 校验服务器端响应¬
+            //校验服务器端响应¬
             String plainText = WxPayKit.verifyNotify(serialNo, result, signature, nonce, timestamp,
                     wechatPaymentSetting().getApiKey3(), Objects.requireNonNull(getPlatformCert()));
             log.info("微信退款通知明文 {}", plainText);
@@ -555,10 +555,10 @@ public class WechatPlugin implements Payment {
             if (refundLog != null) {
                 refundLog.setIsRefund(true);
                 refundLog.setReceivableNo(refundId);
-                refundLogService.save(refundLog);
+                refundLogService.saveOrUpdate(refundLog);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("微信退款失败",e);
         }
     }
 
@@ -573,7 +573,7 @@ public class WechatPlugin implements Payment {
             WechatPaymentSetting wechatPaymentSetting = JSONUtil.toBean(systemSetting.getSettingValue(), WechatPaymentSetting.class);
             return wechatPaymentSetting;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("微信支付暂不支持",e);
             throw new ServiceException(ResultCode.PAY_NOT_SUPPORT);
         }
     }
@@ -589,7 +589,7 @@ public class WechatPlugin implements Payment {
         if (!StringUtils.isEmpty(publicCert)) {
             return PayKit.getCertificate(publicCert);
         }
-        // 获取平台证书列表
+        //获取平台证书列表
         try {
 
             WechatPaymentSetting setting = wechatPaymentSetting();
@@ -609,7 +609,7 @@ public class WechatPlugin implements Payment {
             if (response.getStatus() == 200) {
                 JSONObject jsonObject = JSONUtil.parseObj(body);
                 JSONArray dataArray = jsonObject.getJSONArray("data");
-                // 默认认为只有一个平台证书
+                //默认认为只有一个平台证书
                 JSONObject encryptObject = dataArray.getJSONObject(0);
                 JSONObject encryptCertificate = encryptObject.getJSONObject("encrypt_certificate");
                 String associatedData = encryptCertificate.getStr("associated_data");
@@ -624,7 +624,7 @@ public class WechatPlugin implements Payment {
             }
             return PayKit.getCertificate(publicCert);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("证书获取失败",e);
         }
         return null;
     }
@@ -643,8 +643,8 @@ public class WechatPlugin implements Payment {
 
 
         AesUtil aesUtil = new AesUtil(wechatPaymentSetting().getApiKey3().getBytes(StandardCharsets.UTF_8));
-        // 平台证书密文解密
-        // encrypt_certificate 中的  associated_data nonce  ciphertext
+        //平台证书密文解密
+        //encrypt_certificate 中的  associated_data nonce  ciphertext
         return aesUtil.decryptToString(
                 associatedData.getBytes(StandardCharsets.UTF_8),
                 nonce.getBytes(StandardCharsets.UTF_8),

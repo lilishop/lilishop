@@ -44,7 +44,6 @@ public class BillExecute implements EveryDayExecute {
 
         //获取当前时间
         DateTime endTime =DateUtil.date();
-
         //批量商家结算
         for (StoreSettlementDay storeSettlementDay : storeList) {
 

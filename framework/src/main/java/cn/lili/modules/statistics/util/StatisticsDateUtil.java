@@ -26,7 +26,7 @@ public class StatisticsDateUtil {
         Date[] dateArray = new Date[2];
 
         Calendar calendar = Calendar.getInstance();
-        // 时间归到今天凌晨0点
+        //时间归到今天凌晨0点
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);

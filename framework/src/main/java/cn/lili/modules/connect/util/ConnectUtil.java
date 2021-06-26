@@ -29,6 +29,7 @@ import cn.lili.modules.system.entity.dto.connect.dto.QQConnectSettingItem;
 import cn.lili.modules.system.entity.dto.connect.dto.WechatConnectSettingItem;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,6 +46,7 @@ import java.util.regex.Pattern;
  * @version v1.0
  * 2020-11-25 21:16
  */
+@Slf4j
 @Component
 public class ConnectUtil {
 
@@ -106,7 +108,7 @@ public class ConnectUtil {
         try {
             httpServletResponse.sendRedirect(url);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("登录回调错误",e);
         }
     }
 
@@ -187,39 +189,39 @@ public class ConnectUtil {
                 }
 
                 break;
-//            case ALIPAY:
-//                // 支付宝在创建回调地址时，不允许使用localhost或者127.0.0.1，所以这儿的回调地址使用的局域网内的ip
-//                authRequest = new AuthAlipayRequest(AuthConfig.builder()
-//                        .clientId("")
-//                        .clientSecret("")
-//                        .alipayPublicKey("")
-//                        .redirectUri(getRedirectUri(authInterface))
-//                        .build(), cache);
-//                break;
-//            case WEIBO:
-//                List<String> scopes = new ArrayList<>();
-//                scopes.add("all");
-//                authRequest = new AuthWeiboRequest(AuthConfig.builder()
-//                        .clientId("")
-//                        .clientSecret("")
-//                        .redirectUri(getRedirectUri(authInterface))
-//                        .scopes(scopes)
-//                        .build(), cache);
-//                break;
-//            case "wechat_open":
-//                authRequest = new AuthWeChatOpenRequest(AuthConfig.builder()
-//                        .clientId("")
-//                        .clientSecret("")
-//                        .redirectUri("https://z171l91606.51mypc.cn/callback/wechat")
-//                        .build());
-//                break;
-//            case "wechat_mp":
-//                authRequest = new AuthWeChatMpRequest(AuthConfig.builder()
-//                        .clientId("")
-//                        .clientSecret("")
-//                        .redirectUri("")
-//                        .build());
-//                break;
+//           case ALIPAY:
+//               //支付宝在创建回调地址时，不允许使用localhost或者127.0.0.1，所以这儿的回调地址使用的局域网内的ip
+//               authRequest = new AuthAlipayRequest(AuthConfig.builder()
+//                       .clientId("")
+//                       .clientSecret("")
+//                       .alipayPublicKey("")
+//                       .redirectUri(getRedirectUri(authInterface))
+//                       .build(), cache);
+//               break;
+//           case WEIBO:
+//               List<String> scopes = new ArrayList<>();
+//               scopes.add("all");
+//               authRequest = new AuthWeiboRequest(AuthConfig.builder()
+//                       .clientId("")
+//                       .clientSecret("")
+//                       .redirectUri(getRedirectUri(authInterface))
+//                       .scopes(scopes)
+//                       .build(), cache);
+//               break;
+//           case "wechat_open":
+//               authRequest = new AuthWeChatOpenRequest(AuthConfig.builder()
+//                       .clientId("")
+//                       .clientSecret("")
+//                       .redirectUri("https://z171l91606.51mypc.cn/callback/wechat")
+//                       .build());
+//               break;
+//           case "wechat_mp":
+//               authRequest = new AuthWeChatMpRequest(AuthConfig.builder()
+//                       .clientId("")
+//                       .clientSecret("")
+//                       .redirectUri("")
+//                       .build());
+//               break;
             default:
                 break;
         }
@@ -229,9 +231,9 @@ public class ConnectUtil {
         return authRequest;
     }
 
-    // \b 是单词边界(连着的两个(字母字符 与 非字母字符) 之间的逻辑上的间隔),
-    // 字符串在编译时会被转码一次,所以是 "\\b"
-    // \B 是单词内部逻辑间隔(连着的两个字母字符之间的逻辑上的间隔)
+    //\b 是单词边界(连着的两个(字母字符 与 非字母字符) 之间的逻辑上的间隔),
+    //字符串在编译时会被转码一次,所以是 "\\b"
+    //\B 是单词内部逻辑间隔(连着的两个字母字符之间的逻辑上的间隔)
     static String phoneReg = "\\b(ip(hone|od)|android|opera m(ob|in)i"
             + "|windows (phone|ce)|blackberry"
             + "|s(ymbian|eries60|amsung)|p(laybook|alm|rofile/midp"
@@ -255,7 +257,7 @@ public class ConnectUtil {
         if (null == userAgent) {
             userAgent = "";
         }
-        // 匹配
+        //匹配
         Matcher matcherPhone = phonePat.matcher(userAgent);
         Matcher matcherTable = tablePat.matcher(userAgent);
         if (matcherPhone.find() || matcherTable.find()) {

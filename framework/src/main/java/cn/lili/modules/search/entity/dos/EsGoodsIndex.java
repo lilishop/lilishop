@@ -1,14 +1,11 @@
 package cn.lili.modules.search.entity.dos;
 
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import cn.lili.common.elasticsearch.EsSuffix;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
@@ -227,6 +224,12 @@ public class EsGoodsIndex implements Serializable {
     private Date releaseTime;
 
     /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型", required = true)
+    private String goodsType;
+
+    /**
      * 商品属性（参数和规格）
      */
     @Field(type = FieldType.Nested)
@@ -270,22 +273,39 @@ public class EsGoodsIndex implements Serializable {
             this.intro = sku.getIntro();
             this.grade = sku.getGrade();
             this.releaseTime = new Date();
-            if (StringUtils.isNotEmpty(sku.getSpecs())) {
-                List<EsGoodsAttribute> attributes = new ArrayList<>();
-                JSONObject jsonObject = JSONUtil.parseObj(sku.getSpecs());
-                for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-                    if (!entry.getKey().equals("images")) {
-                        EsGoodsAttribute attribute = new EsGoodsAttribute();
-                        attribute.setType(0);
-                        attribute.setName(entry.getKey());
-                        attribute.setValue(entry.getValue().toString());
-                        attributes.add(attribute);
-                    }
-                }
-                this.attrList = attributes;
-            }
         }
+    }
 
+    /**
+     * 参数索引增加
+     *
+     * @param sku
+     * @param goodsParamDTOS
+     */
+    public EsGoodsIndex(GoodsSku sku, List<GoodsParamsDTO> goodsParamDTOS) {
+        this(sku);
+        //如果参数不为空
+        if (goodsParamDTOS != null && !goodsParamDTOS.isEmpty()) {
+            //接受不了参数索引
+            List<EsGoodsAttribute> attributes = new ArrayList<>();
+            //循环参数分组
+            goodsParamDTOS.forEach(goodsParamGroup -> {
+                //循环分组的内容
+                goodsParamGroup.getGoodsParamsItemDTOList().forEach(goodsParam -> {
+                            //如果字段需要索引，则增加索引字段
+                            if (goodsParam.getIsIndex() != null && goodsParam.getIsIndex() == 1) {
+                                EsGoodsAttribute attribute = new EsGoodsAttribute();
+                                attribute.setType(1);
+                                attribute.setName(goodsParam.getParamName());
+                                attribute.setValue(goodsParam.getParamValue());
+                                attributes.add(attribute);
+                            }
+                        }
+                );
+
+            });
+            this.attrList = attributes;
+        }
     }
 
     public void setGoodsSku(GoodsSku sku) {

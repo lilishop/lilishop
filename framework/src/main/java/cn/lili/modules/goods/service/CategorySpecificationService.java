@@ -1,7 +1,7 @@
 package cn.lili.modules.goods.service;
 
 import cn.lili.modules.goods.entity.dos.CategorySpecification;
-import cn.lili.modules.goods.entity.vos.CategorySpecificationVO;
+import cn.lili.modules.goods.entity.dos.Specification;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -19,15 +19,8 @@ public interface CategorySpecificationService extends IService<CategorySpecifica
      * @param categoryId 分类id
      * @return 分类规格关联信息
      */
-    List<CategorySpecificationVO> getCategorySpecList(String categoryId);
+    List<Specification> getCategorySpecList(String categoryId);
 
-    /***
-     * 根据分类id查询规格信息
-     *
-     * @param categoryId 分类id
-     * @return 分类规格关联信息
-     */
-    List<CategorySpecification> getCategorySpecList(String[] categoryId);
 
     /**
      * 通过分类ID删除关联规格

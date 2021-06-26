@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import java.util.Map;
  * @author Chopper
  * @date 2021/1/30 4:27 下午
  */
+@Slf4j
 @Service
 @Transactional
 public class SmsTemplateServiceImpl extends ServiceImpl<SmsTemplateMapper, SmsTemplate> implements SmsTemplateService {
@@ -38,7 +40,7 @@ public class SmsTemplateServiceImpl extends ServiceImpl<SmsTemplateMapper, SmsTe
             smsTemplate.setTemplateType(1);
             this.save(smsTemplate);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("添加短信模板错误",e);
         }
     }
 
@@ -51,7 +53,7 @@ public class SmsTemplateServiceImpl extends ServiceImpl<SmsTemplateMapper, SmsTe
             }
             this.removeById(id);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("删除短信模板错误",e);
         }
 
     }
@@ -71,7 +73,7 @@ public class SmsTemplateServiceImpl extends ServiceImpl<SmsTemplateMapper, SmsTe
                 this.updateById(smsTemplate);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("查询短信模板错误",e);
         }
     }
 
@@ -82,7 +84,7 @@ public class SmsTemplateServiceImpl extends ServiceImpl<SmsTemplateMapper, SmsTe
             smsTemplate.setTemplateStatus(0);
             this.updateById(smsTemplate);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("重新提交短信模板错误",e);
         }
     }
 

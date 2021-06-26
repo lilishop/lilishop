@@ -1,8 +1,8 @@
 package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Parameters;
 import cn.lili.modules.goods.service.ParametersService;
@@ -27,6 +27,7 @@ public class ParameterManagerController {
 
     @Autowired
     private ParametersService parametersService;
+
 
     @ApiOperation(value = "添加参数")
     @PostMapping

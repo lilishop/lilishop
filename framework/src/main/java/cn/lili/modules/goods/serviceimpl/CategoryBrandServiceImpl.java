@@ -24,18 +24,14 @@ import java.util.List;
 @Transactional
 public class CategoryBrandServiceImpl extends ServiceImpl<CategoryBrandMapper, CategoryBrand> implements CategoryBrandService {
 
-    //分类品牌绑定
-    @Autowired
-    private CategoryBrandMapper categoryBrandMapper;
-
     @Override
     public List<CategoryBrandVO> getCategoryBrandList(String categoryId) {
-        return categoryBrandMapper.getCategoryBrandList(categoryId);
+        return this.baseMapper.getCategoryBrandList(categoryId);
     }
 
     @Override
     public void deleteByCategoryId(String categoryId) {
-        categoryBrandMapper.delete(new LambdaUpdateWrapper<CategoryBrand>().eq(CategoryBrand::getCategoryId, categoryId));
+        this.baseMapper.delete(new LambdaUpdateWrapper<CategoryBrand>().eq(CategoryBrand::getCategoryId, categoryId));
     }
 
     @Override

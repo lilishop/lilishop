@@ -1,6 +1,5 @@
 package cn.lili.modules.goods.entity.dto;
 
-import cn.lili.modules.goods.entity.dos.GoodsParams;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
@@ -16,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 商品查询条件
+ * 商品编辑DTO
  *
  * @author pikachu
  * @date 2020-02-24 19:27:20
@@ -66,9 +65,6 @@ public class GoodsOperationDTO implements Serializable {
     @Max(value = 99999999, message = "重量不能超过99999999")
     private Double weight;
 
-    @ApiModelProperty(value = "谁承担运费 BUYER：买家承担，STORE：卖家承担", required = true)
-    private String freightPayer;
-
     @ApiModelProperty(value = "详情")
     private String intro;
 
@@ -86,8 +82,7 @@ public class GoodsOperationDTO implements Serializable {
     private boolean recommend;
 
     @ApiModelProperty(value = "商品参数")
-    @Valid
-    private List<GoodsParams> goodsParamsList;
+    private List<GoodsParamsDTO> goodsParamsDTOList;
 
     @ApiModelProperty(value = "商品图片")
     private List<String> goodsGalleryList;
@@ -118,4 +113,13 @@ public class GoodsOperationDTO implements Serializable {
 
     @ApiModelProperty(value = "是否重新生成sku数据")
     private Boolean regeneratorSkuFlag = true;
+
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型")
+    private String goodsType;
+
+
+
 }

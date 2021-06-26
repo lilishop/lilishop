@@ -32,9 +32,7 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
     //文件
     @Autowired
     private FileManagerPlugin fileManagerPlugin;
-    //商品相册数据层
-    @Autowired
-    private GoodsGalleryMapper goodsGalleryMapper;
+
     //设置
     @Autowired
     private SettingService settingService;
@@ -43,17 +41,17 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
     @Override
     public void add(List<String> goodsGalleryList, String goodsId) {
         //删除原来商品相册信息
-        this.goodsGalleryMapper.delete(new UpdateWrapper<GoodsGallery>().eq("goods_id", goodsId));
+        this.baseMapper.delete(new UpdateWrapper<GoodsGallery>().eq("goods_id", goodsId));
         //确定好图片选择器后进行处理
         int i = 0;
         for (String origin : goodsGalleryList) {
-            // 获取带所有缩略的相册
+            //获取带所有缩略的相册
             GoodsGallery galley = this.getGoodsGallery(origin);
             galley.setGoodsId(goodsId);
-            // 默认第一个为默认图片
+            //默认第一个为默认图片
             galley.setIsDefault(i == 0 ? 1 : 0);
             i++;
-            this.goodsGalleryMapper.insert(galley);
+            this.baseMapper.insert(galley);
         }
     }
 
@@ -77,6 +75,6 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
     @Override
     public List<GoodsGallery> goodsGalleryList(String goodsId) {
         //根据商品id查询商品相册
-        return goodsGalleryMapper.selectList(new QueryWrapper<GoodsGallery>().eq("goods_id", goodsId));
+        return this.baseMapper.selectList(new QueryWrapper<GoodsGallery>().eq("goods_id", goodsId));
     }
 }

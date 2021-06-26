@@ -58,14 +58,14 @@ public class VerificationServiceImpl implements VerificationService {
 
 
         Random random = new Random();
-        // 随机选择需要切的图下标
+        //随机选择需要切的图下标
         int resourceNum = random.nextInt(verificationResources.size());
-        // 随机选择剪切模版下标
+        //随机选择剪切模版下标
         int sliderNum = random.nextInt(verificationSlider.size());
 
-        // 随机选择需要切的图片地址
+        //随机选择需要切的图片地址
         String originalResource = verificationResources.get(resourceNum).getResource();
-        // 随机选择剪切模版图片地址
+        //随机选择剪切模版图片地址
         String sliderResource = verificationSlider.get(sliderNum).getResource();
 
         try {
@@ -73,16 +73,16 @@ public class VerificationServiceImpl implements VerificationService {
             SerializableStream originalFile = getInputStream(originalResource);
             SerializableStream sliderFile = getInputStream(sliderResource);
             Map<String, Object> resultMap = SliderImageUtil.pictureTemplatesCut(sliderFile, originalFile);
-            // 生成验证参数 120可以验证 无需手动清除，120秒有效时间自动清除
+            //生成验证参数 120可以验证 无需手动清除，120秒有效时间自动清除
             cache.put(cacheKey(verificationEnums, uuid), resultMap.get("randomX"), 120L);
             resultMap.put("key", cacheKey(verificationEnums, uuid));
-            // 移除横坐标移动距离
+            //移除横坐标移动距离
             resultMap.remove("randomX");
             return resultMap;
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("创建校验错误",e);
             return null;
         }
     }

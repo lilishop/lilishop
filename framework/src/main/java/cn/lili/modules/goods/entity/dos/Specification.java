@@ -1,11 +1,13 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.base.IdEntity;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
@@ -21,7 +23,7 @@ import javax.validation.constraints.NotEmpty;
 @Table(name = "li_specification")
 @TableName("li_specification")
 @ApiModel(value = "规格项")
-public class Specification extends BaseEntity {
+public class Specification extends IdEntity {
 
     private static final long serialVersionUID = 147792597901239486L;
 
@@ -34,9 +36,19 @@ public class Specification extends BaseEntity {
 
     /**
      * 所属卖家 0属于平台
+     * <p>
+     * 店铺自定义规格暂时废弃 2021-06-23 后续推出新配置方式
      */
     @ApiModelProperty(hidden = true)
     private String storeId;
+
+    /**
+     * 规格值名字
+     */
+    @TableField(value = "spec_value")
+    @Column(columnDefinition = "TEXT")
+    @ApiModelProperty(value = "规格值名字, 《,》分割")
+    private String specValue;
 
 
 }

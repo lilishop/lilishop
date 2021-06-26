@@ -12,8 +12,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -29,9 +27,6 @@ import java.util.List;
 @Service
 @Transactional
 public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem> implements OrderItemService {
-
-    @Autowired
-    private OrderItemMapper orderItemMapper;
 
     @Override
     public void updateCommentStatus(String orderItemSn, CommentStatusEnum commentStatusEnum) {
@@ -89,6 +84,6 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         QueryWrapper queryWrapper = new QueryWrapper();
         queryWrapper.ge("o.complete_time", date);
         queryWrapper.eq("oi.comment_status", CommentStatusEnum.UNFINISHED.name());
-        return orderItemMapper.waitEvaluate(queryWrapper);
+        return this.baseMapper.waitEvaluate(queryWrapper);
     }
 }

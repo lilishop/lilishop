@@ -109,11 +109,10 @@ public interface GoodsService extends IService<Goods> {
      * 设置商品运费模板
      *
      * @param goodsIds     商品列表
-     * @param freightPayer 承担运费者
      * @param templateId   运费模板ID
      * @return 操作结果
      */
-    Boolean freight(List<String> goodsIds, String freightPayer, String templateId);
+    Boolean freight(List<String> goodsIds, String templateId);
 
     /**
      * 修改商品库存数量

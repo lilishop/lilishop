@@ -59,7 +59,7 @@ public class MemberNoticeSenterServiceImpl extends ServiceImpl<MemberNoticeSente
                 } else {
                     return true;
                 }
-            } // 否则是全部会员发送
+            } //否则是全部会员发送
             else {
                 List<Member> members = memberService.list();
                 MemberNotice memberNotice;

@@ -21,10 +21,9 @@ public enum OrderTypeEnum {
     /**
      * 虚拟订单
      */
-    FICTITIOUS,
+    VIRTUAL,
     /**
      * 拼团订单
      */
     PINTUAN
-
 }

@@ -18,6 +18,9 @@ public interface StoreLogisticsMapper extends BaseMapper<StoreLogistics> {
     @Select("SELECT l.* FROM li_logistics l RIGHT JOIN  li_store_logistics sl ON l.id=sl.logistics_id WHERE sl.store_id=#{storeId}")
     List<StoreLogisticsVO> getSelectedStoreLogistics(String storeId);
 
+    @Select("SELECT l.name FROM li_logistics l RIGHT JOIN  li_store_logistics sl ON l.id=sl.logistics_id WHERE sl.store_id=#{storeId}")
+    List<String> getSelectedStoreLogisticsName(String storeId);
+
     @Select("SELECT *, ( SELECT sl.id FROM li_store_logistics sl WHERE l.id = sl.logistics_id AND sl.store_id=#{storeId} ) AS selected FROM li_logistics l;")
     List<StoreLogisticsVO> getStoreLogistics(String storeId);
 

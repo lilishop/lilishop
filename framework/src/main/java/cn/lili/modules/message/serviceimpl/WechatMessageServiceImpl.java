@@ -17,7 +17,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,8 +34,7 @@ import java.util.Map;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, WechatMessage> implements WechatMessageService {
-    @Autowired
-    private WechatMessageMapper wechatMessageMapper;
+
     @Autowired
     private WechatAccessTokenUtil wechatAccessTokenUtil;
 
@@ -50,7 +48,7 @@ public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, W
     @Override
     public void init() {
         try {
-            wechatMessageMapper.deleteAll();
+            this.baseMapper.deleteAll();
 
             String accessToken = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.H5);
             //获取已有模版，删除

@@ -20,7 +20,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "li_coupon")
 @TableName("li_coupon")
-@ApiModel(value = "优惠券活动实体类")
+@ApiModel(value = "优惠券实体类")
 public class Coupon extends BasePromotion {
 
 
@@ -35,7 +35,7 @@ public class Coupon extends BasePromotion {
      *
      * @see cn.lili.modules.promotion.entity.enums.CouponTypeEnum
      */
-    @ApiModelProperty(value = "活动类型")
+    @ApiModelProperty(value = "优惠券类型")
     private String couponType;
 
     /**
@@ -66,7 +66,7 @@ public class Coupon extends BasePromotion {
     @ApiModelProperty(value = "活动描述")
     private String description;
 
-    @ApiModelProperty(value = "发行数量")
+    @ApiModelProperty(value = "发行数量,如果是0则是不限制")
     private Integer publishNum;
 
     @ApiModelProperty(value = "领取限制")
@@ -80,5 +80,15 @@ public class Coupon extends BasePromotion {
 
     @ApiModelProperty(value = "消费门槛")
     private Double consumeThreshold;
+
+    /**
+     * @see cn.lili.modules.promotion.entity.enums.CouponRangeDayEnum
+     *
+     */
+    @ApiModelProperty(value = "时间范围类型")
+    private String rangeDayType;
+
+    @ApiModelProperty(value = "有效期")
+    private Integer effectiveDays;
 
 }

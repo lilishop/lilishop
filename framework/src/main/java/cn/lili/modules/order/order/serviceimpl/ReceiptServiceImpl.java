@@ -13,7 +13,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,14 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> implements ReceiptService {
 
-    //发票mapper
-    @Autowired
-    private ReceiptMapper receiptMapper;
-
-
     @Override
     public IPage<OrderReceiptDTO> getReceiptData(ReceiptSearchParams searchParams, PageVO pageVO) {
-        return receiptMapper.getReceipt(PageUtil.initPage(pageVO), searchParams.wrapper());
+        return this.baseMapper.getReceipt(PageUtil.initPage(pageVO), searchParams.wrapper());
     }
 
     @Override

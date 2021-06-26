@@ -8,6 +8,8 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.token.Token;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.StringUtils;
+import cn.lili.common.verification.enums.VerificationEnums;
+import cn.lili.common.verification.service.VerificationService;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.vo.SearchVO;
@@ -49,11 +51,19 @@ public class AdminUserManagerController {
     @Autowired
     private DepartmentService departmentService;
 
+    @Autowired
+    private VerificationService verificationService;
 
     @GetMapping(value = "/login")
     @ApiOperation(value = "登录管理员")
-    public ResultMessage<Token> login(String username, String password) {
-        return ResultUtil.data(adminUserService.login(username, password));
+    public ResultMessage<Token> login(@NotNull(message = "用户名不能为空") @RequestParam String username,
+                                      @NotNull(message = "密码不能为空") @RequestParam String password,
+                                      @RequestHeader String uuid) {
+        if (verificationService.check(uuid, VerificationEnums.LOGIN)) {
+            return ResultUtil.data(adminUserService.login(username, password));
+        } else {
+            throw new ServiceException(ResultCode.VERIFICATION_ERROR);
+        }
     }
 
 
@@ -152,7 +162,7 @@ public class AdminUserManagerController {
             }
             adminUserService.saveAdminUser(adminUser, roles);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("添加用户错误", e);
         }
         return ResultUtil.success();
     }

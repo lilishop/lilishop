@@ -37,7 +37,7 @@ public class BankTransferPlugin implements Payment {
             refundLog.setIsRefund(true);
             refundLogService.save(refundLog);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("线下收款错误",e);
         }
     }
 

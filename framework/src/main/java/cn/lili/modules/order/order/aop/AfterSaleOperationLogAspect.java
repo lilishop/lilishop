@@ -5,9 +5,8 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.SpelUtil;
 import cn.lili.common.utils.ThreadPoolUtil;
-import cn.lili.modules.order.trade.entity.dos.AfterSaleLog;
 import cn.lili.modules.order.order.service.AfterSaleLogService;
-import lombok.RequiredArgsConstructor;
+import cn.lili.modules.order.trade.entity.dos.AfterSaleLog;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -51,7 +50,7 @@ public class AfterSaleOperationLogAspect {
             //调用线程保存
             ThreadPoolUtil.getPool().execute(new SaveAfterSaleLogThread(afterSaleLog, afterSaleLogService));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("售后日志错误",e);
         }
     }
 

@@ -58,7 +58,7 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
             //删除缓存
             cache.vagueDel("{regions}");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("同步行政数据错误",e);
         }
     }
 
@@ -141,25 +141,25 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
      */
     private List<Region> initData(String jsonString) {
 
-        // 最终数据承载对象
+        //最终数据承载对象
         List<Region> regions = new ArrayList<>();
         JSONObject jsonObject = JSONObject.parseObject(jsonString);
         //获取到国家及下面所有的信息 开始循环插入，这里可以写成递归调用，但是不如这样方便查看、理解
         JSONArray countryAll = jsonObject.getJSONArray("districts");
         for (int i = 0; i < countryAll.size(); i++) {
             JSONObject contry = countryAll.getJSONObject(i);
-//            String citycode0 = contry.getString("citycode");
-//            String adcode0 = contry.getString("adcode");
-//            String name0 = contry.getString("name");
-//            String center0 = contry.getString("center");
-//            String country = contry.getString("level");
-//            int level = 0;
-//            if (country.equals("country")) {
-//                level = 0;
-//            }
-//            插入国家
-//            Integer id1 = insert(0, adcode0, citycode0, name0, center0, level, name0);
-//            Integer id1 = insert(0, adcode0, citycode0, name0, center0, level);
+//           String citycode0 = contry.getString("citycode");
+//           String adcode0 = contry.getString("adcode");
+//           String name0 = contry.getString("name");
+//           String center0 = contry.getString("center");
+//           String country = contry.getString("level");
+//           int level = 0;
+//           if (country.equals("country")) {
+//               level = 0;
+//           }
+//           插入国家
+//           Integer id1 = insert(0, adcode0, citycode0, name0, center0, level, name0);
+//           Integer id1 = insert(0, adcode0, citycode0, name0, center0, level);
             String id1 = "0";
             JSONArray provinceAll = contry.getJSONArray("districts");
             for (int j = 0; j < provinceAll.size(); j++) {
@@ -192,7 +192,7 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
                         String level3 = district.getString("level");
                         //插入区县
                         String id4 = insert(regions, id3, citycode3, adcode3, name3, center3, level3, w, id1, id2, id3);
-                        //  JSONArray street = street3.getJSONArray("districts");
+                        // JSONArray street = street3.getJSONArray("districts");
                         //有需要可以继续向下遍历
                         JSONArray streetAll = district.getJSONArray("districts");
                         for (int r = 0; r < streetAll.size(); r++) {
@@ -232,11 +232,11 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
      * @return
      */
     public String insert(List<Region> regions, String parentId, String cityCode, String adCode, String name, String center, String level, Integer order, String... ids) {
-//         \"citycode\": [],\n" +
-//                "        \"adcode\": \"100000\",\n" +
-//                "        \"name\": \"中华人民共和国\",\n" +
-//                "        \"center\": \"116.3683244,39.915085\",\n" +
-//                "        \"level\": \"country\",\n" +
+//        \"citycode\": [],\n" +
+//               "        \"adcode\": \"100000\",\n" +
+//               "        \"name\": \"中华人民共和国\",\n" +
+//               "        \"center\": \"116.3683244,39.915085\",\n" +
+//               "        \"level\": \"country\",\n" +
         Region record = new Region();
         if (!adCode.equals("[]")) {
             record.setAdCode(adCode);

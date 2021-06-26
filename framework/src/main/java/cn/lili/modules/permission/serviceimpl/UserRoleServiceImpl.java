@@ -22,14 +22,12 @@ import java.util.List;
 @Service
 @Transactional
 public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> implements UserRoleService {
-    @Autowired
-    private UserRoleMapper userRoleMapper;
 
     @Override
     public List<UserRole> listByUserId(String userId) {
         QueryWrapper<UserRole> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
-        return userRoleMapper.selectList(queryWrapper);
+        return this.baseMapper.selectList(queryWrapper);
     }
 
     @Override
@@ -46,7 +44,7 @@ public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> i
         //删除
         QueryWrapper<UserRole> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
-        userRoleMapper.delete(queryWrapper);
+        this.remove(queryWrapper);
 
         //保存
         this.saveBatch(userRoles);

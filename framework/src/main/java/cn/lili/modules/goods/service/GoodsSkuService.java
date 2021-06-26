@@ -95,6 +95,14 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     List<GoodsSkuVO> getGoodsListByGoodsId(String goodsId);
 
     /**
+     * 获取goodsId下所有的goodsSku
+     *
+     * @param goodsId 商品id
+     * @return goodsSku列表
+     */
+    List<GoodsSku> getGoodsSkuListByGoodsId(String goodsId);
+
+    /**
      * 根据goodsSku组装goodsSkuVO
      *
      * @param list 商品id

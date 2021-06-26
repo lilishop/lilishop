@@ -25,7 +25,6 @@ import java.util.List;
 @Service
 public class MemberStatisticsDataServiceImpl extends ServiceImpl<MemberStatisticsDataMapper, MemberStatisticsData> implements MemberStatisticsDataService {
 
-
     @Override
     public Integer getMemberCount() {
         QueryWrapper queryWrapper = new QueryWrapper();

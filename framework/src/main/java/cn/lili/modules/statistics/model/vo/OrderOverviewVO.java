@@ -13,37 +13,37 @@ import lombok.Data;
 public class OrderOverviewVO {
 
     @ApiModelProperty(value = "UV人次")
-    private Integer uvNum;
+    private Integer uvNum = 0;
 
     //下单统计
     @ApiModelProperty(value = "下单数量")
-    private Long orderNum;
+    private Long orderNum = 0L;
 
     @ApiModelProperty(value = "下单人数")
-    private Long orderMemberNum;
+    private Long orderMemberNum = 0L;
 
     @ApiModelProperty(value = "下单金额")
-    private Double orderAmount;
+    private Double orderAmount = 0D;
 
     //付款统计
     @ApiModelProperty(value = "付款订单数量")
-    private Long paymentOrderNum;
+    private Long paymentOrderNum = 0L;
 
     @ApiModelProperty(value = "付款人数")
-    private Long paymentsNum;
+    private Long paymentsNum = 0L;
 
     @ApiModelProperty(value = "付款金额")
-    private Double paymentAmount;
+    private Double paymentAmount = 0D;
 
 
     //退单统计
     @ApiModelProperty(value = "退单笔数")
-    private Long refundOrderNum;
+    private Long refundOrderNum = 0L;
 
     @ApiModelProperty(value = "退单金额")
-    private Double refundOrderPrice;
+    private Double refundOrderPrice = 0D;
 
-    // 转换率
+    //转换率
     @ApiModelProperty(value = "下单转换率")
     private String orderConversionRate;
 

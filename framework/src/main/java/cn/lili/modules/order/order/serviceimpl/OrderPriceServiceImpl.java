@@ -28,10 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * @author liushuai(liushuai711 @ gmail.com)
- * @version v4.1
- * @Description:
- * @since 2021/4/28 3:48 下午
+ * 订单价格业务层实现
+ *
+ * @author Chopper
+ * @date 2020/11/17 7:36 下午
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -155,7 +155,7 @@ public class OrderPriceServiceImpl implements OrderPriceService {
             //计算修改后的订单货物金额
             double flowPrice = CurrencyUtil.mul(order.getFlowPrice(), priceFluctuationRatio);
 
-            // 记录修改金额
+            //记录修改金额
             priceDetailDTO.setUpdatePrice(CurrencyUtil.sub(priceDetailDTO.getOriginalPrice(), flowPrice));
             priceDetailDTO.setFlowPrice(flowPrice);
 
@@ -163,7 +163,7 @@ public class OrderPriceServiceImpl implements OrderPriceService {
             Double platFormCommission = CurrencyUtil.div(CurrencyUtil.mul(flowPrice, categoryService.getById(orderItem.getCategoryId()).getCommissionRate()), 100);
             priceDetailDTO.setPlatFormCommission(platFormCommission);
 
-            // 最终结算金额 = 流水金额-平台佣金-分销提佣
+            //最终结算金额 = 流水金额-平台佣金-分销提佣
             double billPrice = CurrencyUtil.sub(CurrencyUtil.sub(priceDetailDTO.getFlowPrice(),priceDetailDTO.getPlatFormCommission()),
                     priceDetailDTO.getDistributionCommission());
             priceDetailDTO.setBillPrice(billPrice);

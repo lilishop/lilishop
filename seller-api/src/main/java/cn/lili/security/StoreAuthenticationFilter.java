@@ -81,7 +81,7 @@ public class StoreAuthenticationFilter extends BasicAuthenticationFilter {
             String json = claims.get(SecurityEnum.USER_CONTEXT.getValue()).toString();
             AuthUser authUser = new Gson().fromJson(json, AuthUser.class);
 
-            // 校验redis中是否有权限
+            //校验redis中是否有权限
             if (cache.hasKey(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.STORE) + jwt)) {
                 //用户角色
                 List<GrantedAuthority> auths = new ArrayList<>();

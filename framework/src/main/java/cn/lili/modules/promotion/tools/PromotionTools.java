@@ -39,7 +39,7 @@ public class PromotionTools {
 
         checkPromotionTime(startTime, endTime);
 
-        // 如果促销活动选择的是部分商品参加活动
+        //如果促销活动选择的是部分商品参加活动
         if (num != -1 && goodsList == null) {
             throw new ServiceException("请选择要参与活动的商品");
         }
@@ -62,7 +62,7 @@ public class PromotionTools {
             throw new ServiceException("活动起始时间必须大于当前时间");
         }
 
-        // 开始时间不能大于结束时间
+        //开始时间不能大于结束时间
         if (startTime > endTime) {
             throw new ServiceException("活动起始时间不能大于活动结束时间");
         }
@@ -85,13 +85,13 @@ public class PromotionTools {
         String endTimeColumn = "end_time";
         if (PromotionTypeEnum.SECKILL != typeEnum) {
             queryWrapper.nested(i -> {
-                // 新活动起始时间 大于 之前活动的起始时间 小于 之前活动的截止时间
+                //新活动起始时间 大于 之前活动的起始时间 小于 之前活动的截止时间
                 i.nested(i2 -> i2.le(startTimeColumn, startTime).ge(endTimeColumn, startTime));
-                // 新活动结束时间 大于 之前活动的起始时间 小于 之前活动的截止时间
+                //新活动结束时间 大于 之前活动的起始时间 小于 之前活动的截止时间
                 i.or(i1 -> i1.le(startTimeColumn, endTime).ge(endTimeColumn, endTime));
             });
         } else {
-            // queryWrapper.le(startTimeColumn, startTime).ge(endTimeColumn, startTime);
+            //queryWrapper.le(startTimeColumn, startTime).ge(endTimeColumn, startTime);
             queryWrapper.ge(startTimeColumn, cn.hutool.core.date.DateUtil.beginOfDay(startTime)).le(endTimeColumn, cn.hutool.core.date.DateUtil.endOfDay(endTime));
         }
         if (storeId != null) {
@@ -100,7 +100,7 @@ public class PromotionTools {
         if (activityId != null) {
             queryWrapper.ne("id", activityId);
         }
-        // 忽略已作废和已关闭的活动
+        //忽略已作废和已关闭的活动
         queryWrapper.ne("promotion_status", PromotionStatusEnum.END.name());
         queryWrapper.ne("promotion_status", PromotionStatusEnum.CLOSE.name());
         queryWrapper.eq("delete_flag", false);
@@ -115,7 +115,7 @@ public class PromotionTools {
      * @return 促销商品列表
      */
     public static List<PromotionGoods> promotionGoodsInit(List<PromotionGoods> originList, BasePromotion promotion, PromotionTypeEnum promotionTypeEnum) {
-        // 本次促销商品入库
+        //本次促销商品入库
         for (PromotionGoods promotionGoods : originList) {
             promotionGoods.setPromotionId(promotion.getId());
             promotionGoods.setStoreName(promotion.getStoreName());

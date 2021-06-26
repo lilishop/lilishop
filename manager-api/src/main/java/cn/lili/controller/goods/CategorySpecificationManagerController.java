@@ -1,11 +1,9 @@
 package cn.lili.controller.goods;
 
-import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.CategorySpecification;
-import cn.lili.modules.goods.entity.vos.CategorySpecificationVO;
-import cn.lili.modules.goods.entity.vos.GoodsSpecValueVO;
+import cn.lili.modules.goods.entity.dos.Specification;
 import cn.lili.modules.goods.service.CategorySpecificationService;
 import cn.lili.modules.goods.service.SpecificationService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -16,6 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,15 +44,15 @@ public class CategorySpecificationManagerController {
     @ApiOperation(value = "查询某分类下绑定的规格信息")
     @GetMapping(value = "/{categoryId}")
     @ApiImplicitParam(name = "categoryId", value = "分类id", required = true, dataType = "String", paramType = "path")
-    public List<CategorySpecificationVO> getCategorySpec(@PathVariable String categoryId) {
+    public List<Specification> getCategorySpec(@PathVariable String categoryId) {
         return categorySpecificationService.getCategorySpecList(categoryId);
     }
 
     @ApiOperation(value = "查询某分类下绑定的规格信息,商品操作使用")
     @GetMapping(value = "/goods/{categoryId}")
     @ApiImplicitParam(name = "categoryId", value = "分类id", required = true, dataType = "String", paramType = "path")
-    public List<GoodsSpecValueVO> getSpec(@PathVariable String categoryId) {
-        return specificationService.getGoodsSpecValue(categoryId);
+    public List<Specification> getSpec(@PathVariable String categoryId) {
+        return specificationService.list();
     }
 
 
@@ -68,9 +67,12 @@ public class CategorySpecificationManagerController {
         //删除分类规格绑定信息
         this.categorySpecificationService.remove(new QueryWrapper<CategorySpecification>().eq("category_id", categoryId));
         //绑定规格信息
-        for (String specId : categorySpecs) {
-            CategorySpecification categoryBrand = new CategorySpecification(categoryId, specId);
-            categorySpecificationService.save(categoryBrand);
+        if (categorySpecs != null && categorySpecs.length > 0) {
+            List<CategorySpecification> categorySpecifications = new ArrayList<>();
+            for (String categorySpec : categorySpecs) {
+                categorySpecifications.add(new CategorySpecification(categoryId, categorySpec));
+            }
+            categorySpecificationService.saveBatch(categorySpecifications);
         }
         return ResultUtil.success();
     }

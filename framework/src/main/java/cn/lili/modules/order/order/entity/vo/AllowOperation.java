@@ -69,8 +69,9 @@ public class AllowOperation implements Serializable {
         //新订单，允许支付
         this.pay = status.equals(OrderStatusEnum.UNPAID.name()) && payStatus.equals(PayStatusEnum.UNPAID.name());
 
-        //订单未发货，就可以编辑收货人信息
-        this.editConsignee = order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name()) && !status.equals(OrderStatusEnum.CANCELLED.name());
+        //订单未发货，就可以编辑收货人信息（实物订单）
+        this.editConsignee = order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name()) &&
+                order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name()) && !status.equals(OrderStatusEnum.CANCELLED.name());
 
         //是否允许被发货
         this.ship = editConsignee && status.equals(OrderStatusEnum.UNDELIVERED.name());
@@ -81,7 +82,7 @@ public class AllowOperation implements Serializable {
         //是否允许查看物流信息
         this.showLogistics = order.getDeliverStatus().equals(DeliverStatusEnum.DELIVERED.name()) && status.equals(OrderStatusEnum.DELIVERED.name());
 
-        this.take = order.getOrderType().equals(OrderTypeEnum.FICTITIOUS.name()) && order.getOrderStatus().equals(OrderStatusEnum.TAKE.name());
+        this.take = order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name()) && order.getOrderStatus().equals(OrderStatusEnum.TAKE.name());
     }
 
     /**
@@ -119,7 +120,7 @@ public class AllowOperation implements Serializable {
         //是否允许查看物流信息
         this.showLogistics = order.getDeliverStatus().equals(DeliverStatusEnum.DELIVERED.name()) && status.equals(OrderStatusEnum.DELIVERED.name());
 
-        this.take = order.getOrderType().equals(OrderTypeEnum.FICTITIOUS.name()) && order.getOrderStatus().equals(OrderStatusEnum.TAKE.name());
+        this.take = order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name()) && order.getOrderStatus().equals(OrderStatusEnum.TAKE.name());
     }
 
 

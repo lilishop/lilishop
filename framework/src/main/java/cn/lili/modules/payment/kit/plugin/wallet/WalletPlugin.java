@@ -1,9 +1,9 @@
 package cn.lili.modules.payment.kit.plugin.wallet;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.service.MemberWalletService;
 import cn.lili.modules.order.trade.entity.enums.DepositServiceTypeEnum;
@@ -12,6 +12,7 @@ import cn.lili.modules.payment.kit.CashierSupport;
 import cn.lili.modules.payment.kit.Payment;
 import cn.lili.modules.payment.kit.dto.PayParam;
 import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
+import cn.lili.modules.payment.kit.enums.CashierEnum;
 import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
 import cn.lili.modules.payment.service.PaymentService;
@@ -68,6 +69,9 @@ public class WalletPlugin implements Payment {
 
     @Override
     public ResultMessage<Object> nativePay(HttpServletRequest request, PayParam payParam) {
+        if(payParam.getOrderType().equals(CashierEnum.RECHARGE.name())){
+            throw new ServiceException(ResultCode.CAN_NOT_RECHARGE_WALLET);
+        }
         savePaymentLog(payParam);
         return ResultUtil.success(ResultCode.PAY_SUCCESS);
     }
@@ -90,7 +94,7 @@ public class WalletPlugin implements Payment {
             refundLog.setIsRefund(true);
             refundLogService.save(refundLog);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("订单取消错误",e);
         }
     }
 
@@ -114,7 +118,7 @@ public class WalletPlugin implements Payment {
             refundLog.setIsRefund(true);
             refundLogService.save(refundLog);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("退款失败",e);
         }
     }
 
