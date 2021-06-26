@@ -5,6 +5,7 @@ import cn.lili.common.delayqueue.BroadcastMessage;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
 import cn.lili.common.trigger.model.TimeExecuteConstant;
@@ -155,9 +156,9 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     public Boolean push(Integer roomId, Integer goodsId) {
 
         //判断直播间是否已添加商品
-        if(studioCommodityService.getOne(
-                new LambdaQueryWrapper<StudioCommodity>().eq(StudioCommodity::getRoomId,roomId)
-                        .eq(StudioCommodity::getGoodsId,goodsId))!=null){
+        if (studioCommodityService.getOne(
+                new LambdaQueryWrapper<StudioCommodity>().eq(StudioCommodity::getRoomId, roomId)
+                        .eq(StudioCommodity::getGoodsId, goodsId)) != null) {
             throw new ServiceException(ResultCode.STODIO_GOODS_EXIST_ERROR);
         }
 
@@ -195,10 +196,14 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
 
     @Override
     public IPage<Studio> studioList(PageVO pageVO, Integer recommend, String status) {
-        return this.page(PageUtil.initPage(pageVO), new QueryWrapper<Studio>()
+        QueryWrapper queryWrapper = new QueryWrapper<Studio>()
                 .eq(recommend != null, "recommend", true)
                 .eq(status != null, "status", status)
-                .orderByDesc("create_time"));
+                .orderByDesc("create_time");
+        if (UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
+            queryWrapper.eq("store_id", UserContext.getCurrentUser().getStoreId());
+        }
+        return this.page(PageUtil.initPage(pageVO), queryWrapper);
 
     }
 
