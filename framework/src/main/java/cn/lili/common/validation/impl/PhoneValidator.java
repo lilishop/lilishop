@@ -1,6 +1,6 @@
 package cn.lili.common.validation.impl;
 
-import cn.lili.common.validation.Mobile;
+import cn.lili.common.validation.Phone;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -8,7 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class MobileValidator implements ConstraintValidator<Mobile, String> {
+public class PhoneValidator implements ConstraintValidator<Phone, String> {
 
     private static Pattern pattern = Pattern.compile("^0?(13[0-9]|14[0-9]|15[0-9]|16[0-9]|17[0-9]|18[0-9]|19[0-9])[0-9]{8}$");
 
@@ -19,7 +19,7 @@ public class MobileValidator implements ConstraintValidator<Mobile, String> {
     }
 
     @Override
-    public void initialize(Mobile constraintAnnotation) {
+    public void initialize(Phone constraintAnnotation) {
 
     }
 }

@@ -1,5 +1,6 @@
 package cn.lili.modules.store.entity.dto;
 
+import cn.lili.common.validation.Mobile;
 import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -57,6 +58,7 @@ public class AdminStoreApplyDTO {
     @ApiModelProperty(value = "公司名称")
     private String companyName;
 
+    @Mobile
     @ApiModelProperty(value = "公司电话")
     private String companyPhone;
 

@@ -1,6 +1,6 @@
 package cn.lili.modules.member.entity.dto;
 
-import cn.lili.common.validation.Mobile;
+import cn.lili.common.validation.Phone;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -20,7 +20,7 @@ public class MemberAddressDTO {
     @ApiModelProperty(value = "收货人姓名")
     private String consigneeName;
 
-    @Mobile
+    @Phone
     @ApiModelProperty(value = "手机号码")
     private String consigneeMobile;
 

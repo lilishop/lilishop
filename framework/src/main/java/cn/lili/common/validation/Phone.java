@@ -1,6 +1,6 @@
 package cn.lili.common.validation;
 
-import cn.lili.common.validation.impl.MobileValidator;
+import cn.lili.common.validation.impl.PhoneValidator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -19,8 +19,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER})
 @Retention(RUNTIME)
 @Documented
-@Constraint(validatedBy = {MobileValidator.class})
-public @interface Mobile {
+@Constraint(validatedBy = {PhoneValidator.class})
+public @interface Phone {
 
     String regexp() default "1[3|4|5|7|8]\\d{9}";
 
