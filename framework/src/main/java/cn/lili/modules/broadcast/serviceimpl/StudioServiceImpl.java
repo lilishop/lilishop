@@ -152,6 +152,14 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
 
     @Override
     public Boolean push(Integer roomId, Integer goodsId) {
+
+        //判断直播间是否已添加商品
+        if(studioCommodityService.getOne(
+                new LambdaQueryWrapper<StudioCommodity>().eq(StudioCommodity::getRoomId,roomId)
+                        .eq(StudioCommodity::getGoodsId,goodsId))!=null){
+            throw new ServiceException(ResultCode.STODIO_GOODS_EXIST_ERROR);
+        }
+
         //调用微信接口添加直播间商品并进行记录
         if (wechatLivePlayerUtil.pushGoods(roomId, goodsId)) {
             studioCommodityService.save(new StudioCommodity(roomId, goodsId));
