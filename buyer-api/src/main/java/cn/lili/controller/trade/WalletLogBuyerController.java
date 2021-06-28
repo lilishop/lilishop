@@ -37,7 +37,8 @@ public class WalletLogBuyerController {
         //获取当前登录用户
         AuthUser authUser = UserContext.getCurrentUser();
         //构建查询 返回数据
-        IPage<WalletLog> depositLogPage = walletLogService.page(PageUtil.initPage(page), new QueryWrapper<WalletLog>().eq("member_id", authUser.getId()));
+        IPage<WalletLog> depositLogPage = walletLogService.page(PageUtil.initPage(page),
+                new QueryWrapper<WalletLog>().eq("member_id", authUser.getId()).orderByDesc("create_time"));
         return ResultUtil.data(depositLogPage);
     }
 }
