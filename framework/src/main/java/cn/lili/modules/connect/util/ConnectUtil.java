@@ -184,6 +184,8 @@ public class ConnectUtil {
                                 .clientId(qqConnectSettingItem.getAppId())
                                 .clientSecret(qqConnectSettingItem.getAppKey())
                                 .redirectUri(getRedirectUri(authInterface))
+                                //这里qq获取unionid 需要配置为true，详情可以查阅属性说明，内部有帮助文档
+                                .unionId(true)
                                 .build(), cache);
                     }
                 }
