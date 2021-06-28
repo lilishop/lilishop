@@ -41,7 +41,7 @@ public class CategoryParameterGroup extends BaseEntity {
     @NotNull(message = "关联的分类不能为空")
     private String categoryId;
     /**
-     *
+     * 排序
      */
     @ApiModelProperty(value = "排序", hidden = true)
     private Integer sort;

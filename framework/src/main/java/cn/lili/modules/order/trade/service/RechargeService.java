@@ -37,8 +37,9 @@ public interface RechargeService extends IService<Recharge> {
      *
      * @param sn    充值订单编号
      * @param receivableNo 流水no
+     * @param paymentMethod 支付方式
      */
-    void paySuccess(String sn, String receivableNo);
+    void paySuccess(String sn, String receivableNo,String paymentMethod);
 
     /**
      * 根据充值订单号查询充值信息
