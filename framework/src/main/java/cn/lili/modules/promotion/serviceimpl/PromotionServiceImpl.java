@@ -16,6 +16,7 @@ import cn.lili.modules.search.service.EsGoodsIndexService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -416,16 +417,17 @@ public class PromotionServiceImpl implements PromotionService {
      * @return 修改结果
      */
     private boolean updateCouponActivity(PromotionMessage promotionMessage, PromotionTypeEnum promotionTypeEnum){
-        boolean result;
-        CouponActivityVO couponActivityVO = this.mongoTemplate.findById(promotionMessage.getPromotionId(), CouponActivityVO.class);
-        if (couponActivityVO == null) {
-            this.throwPromotionException(promotionTypeEnum, promotionMessage.getPromotionId(), promotionMessage.getPromotionStatus());
-            return false;
+
+        //如果是精准发券，进行发送优惠券
+        CouponActivity couponActivity=couponActivityService.getById(promotionMessage.getPromotionId());
+        if(couponActivity.getCouponActivityType().equals(CouponActivityTypeEnum.SPECIFY.name())){
+            couponActivityService.specify(couponActivity.getId());
         }
-        couponActivityVO.setPromotionStatus(promotionMessage.getPromotionStatus());
-        result = this.couponActivityService.update(promotionMessage.updateWrapper());
-        this.mongoTemplate.save(couponActivityVO);
-        return result;
+
+        //修改活动状态
+        return couponActivityService.update(new LambdaUpdateWrapper<CouponActivity>()
+                        .eq(CouponActivity::getId,promotionMessage.getPromotionId())
+                        .set(CouponActivity::getPromotionStatus,promotionMessage.getPromotionStatus()));
     }
 
     /**
