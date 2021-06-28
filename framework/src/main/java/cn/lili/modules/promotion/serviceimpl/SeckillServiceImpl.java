@@ -126,7 +126,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
         //检查秒杀活动参数
         checkSeckillParam(seckillVO, seckill.getStoreId());
         //保存到MYSQL中
-        boolean result = this.save(seckill);
+        boolean result = this.save(seckillVO);
         //保存到MONGO中
         this.mongoTemplate.save(seckillVO);
         //添加秒杀延时任务
@@ -245,7 +245,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
     public Integer getApplyNum() {
         LambdaQueryWrapper<Seckill> queryWrapper = Wrappers.lambdaQuery();
         //秒杀申请时间未超过当前时间
-        queryWrapper.le(Seckill::getApplyEndTime, cn.hutool.core.date.DateUtil.date());
+        queryWrapper.ge(Seckill::getApplyEndTime, cn.hutool.core.date.DateUtil.date());
         queryWrapper.eq(Seckill::getPromotionStatus, PromotionStatusEnum.NEW.name());
         return this.count(queryWrapper);
     }
@@ -296,7 +296,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
         int sameNum = this.count(queryWrapper);
         //当前时间段是否存在同类活动
         if (sameNum > 0) {
-            throw new ServiceException("当前时间内已存在同类活动");
+            throw new ServiceException("当前时间内已存在同类活动:"+seckill.getStartTime());
         }
     }
 }
