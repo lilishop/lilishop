@@ -87,9 +87,6 @@ public class EvaluationQueryParams extends PageVO {
         if (StringUtils.isNotEmpty(status)) {
             queryWrapper.eq("status", status);
         }
-        if (UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
-            queryWrapper.eq("store_id", UserContext.getCurrentUser().getStoreId());
-        }
         queryWrapper.eq("delete_flag", false);
         queryWrapper.orderByDesc("create_time");
         return queryWrapper;
