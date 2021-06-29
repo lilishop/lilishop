@@ -72,7 +72,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                 //直播开启延时任务
                 BroadcastMessage broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.START.name());
                 TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
-                        Long.parseLong(studio.getStartTime()),
+                        Long.parseLong(studio.getStartTime()) * 1000L,
                         broadcastMessage,
                         DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                         rocketmqCustomProperties.getPromotionTopic());
@@ -83,7 +83,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                 //直播结束延时任务
                 broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.END.name());
                 timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
-                        Long.parseLong(studio.getEndTime()), broadcastMessage,
+                        Long.parseLong(studio.getEndTime()) * 1000L, broadcastMessage,
                         DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                         rocketmqCustomProperties.getPromotionTopic());
                 //发送促销活动开始的延时任务
@@ -108,8 +108,8 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             this.timeTrigger.edit(
                     TimeExecuteConstant.BROADCAST_EXECUTOR,
                     broadcastMessage,
-                    Long.parseLong(oldStudio.getStartTime()),
-                    Long.parseLong(studio.getStartTime()),
+                    Long.parseLong(oldStudio.getStartTime()) * 1000L,
+                    Long.parseLong(studio.getStartTime()) * 1000L,
                     DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                     DateUtil.getDelayTime(Long.parseLong(studio.getStartTime())),
                     rocketmqCustomProperties.getPromotionTopic());
@@ -119,8 +119,8 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             this.timeTrigger.edit(
                     TimeExecuteConstant.BROADCAST_EXECUTOR,
                     broadcastMessage,
-                    Long.parseLong(oldStudio.getEndTime()),
-                    Long.parseLong(studio.getEndTime()),
+                    Long.parseLong(oldStudio.getEndTime()) * 1000L,
+                    Long.parseLong(studio.getEndTime()) * 1000L,
                     DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                     DateUtil.getDelayTime(Long.parseLong(studio.getEndTime())),
                     rocketmqCustomProperties.getPromotionTopic());
