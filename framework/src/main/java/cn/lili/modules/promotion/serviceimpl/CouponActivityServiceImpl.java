@@ -2,7 +2,14 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.trigger.enums.DelayTypeEnums;
+import cn.lili.common.trigger.interfaces.TimeTrigger;
+import cn.lili.common.trigger.message.PromotionMessage;
+import cn.lili.common.trigger.model.TimeExecuteConstant;
+import cn.lili.common.trigger.model.TimeTriggerMsg;
+import cn.lili.common.trigger.util.DelayQueueTools;
 import cn.lili.common.utils.DateUtil;
+import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.promotion.entity.dos.Coupon;
@@ -10,9 +17,7 @@ import cn.lili.modules.promotion.entity.dos.CouponActivity;
 import cn.lili.modules.promotion.entity.dos.CouponActivityItem;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dto.CouponActivityDTO;
-import cn.lili.modules.promotion.entity.enums.CouponActivitySendTypeEnum;
-import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.modules.promotion.entity.enums.*;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
 import cn.lili.modules.promotion.mapper.CouponActivityMapper;
 import cn.lili.modules.promotion.service.CouponActivityItemService;
@@ -47,6 +52,12 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
     private CouponActivityItemService couponActivityItemService;
     @Autowired
     private MemberService memberService;
+    //Rocketmq
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
+    //延时任务
+    @Autowired
+    private TimeTrigger timeTrigger;
 
     @Override
     public CouponActivityDTO addCouponActivity(CouponActivityDTO couponActivityDTO) {
@@ -60,6 +71,17 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
         this.save(couponActivityDTO);
         //添加优惠券活动优惠券
         this.addCouponActivityItems(couponActivityDTO);
+
+        //创建优惠券活动延时任务
+        PromotionMessage promotionMessage = new PromotionMessage(couponActivityDTO.getId(), PromotionTypeEnum.COUPON_ACTIVITY.name(), PromotionStatusEnum.START.name(), couponActivityDTO.getStartTime(), couponActivityDTO.getEndTime());
+        TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
+                couponActivityDTO.getStartTime().getTime(),
+                promotionMessage,
+                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                rocketmqCustomProperties.getPromotionTopic());
+        //发送促销活动开始的延时任务
+        this.timeTrigger.addDelay(timeTriggerMsg);
+
         return couponActivityDTO;
     }
 

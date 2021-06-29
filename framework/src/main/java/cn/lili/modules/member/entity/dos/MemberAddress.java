@@ -1,7 +1,7 @@
 package cn.lili.modules.member.entity.dos;
 
 import cn.lili.base.BaseEntity;
-import cn.lili.common.validation.Mobile;
+import cn.lili.common.validation.Phone;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -34,7 +34,7 @@ public class MemberAddress extends BaseEntity {
     @ApiModelProperty(value = "收货人姓名")
     private String name;
 
-    @Mobile
+    @Phone
     @ApiModelProperty(value = "手机号码")
     private String mobile;
 

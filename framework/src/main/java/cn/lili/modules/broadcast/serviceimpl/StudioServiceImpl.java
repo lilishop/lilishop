@@ -5,6 +5,7 @@ import cn.lili.common.delayqueue.BroadcastMessage;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
 import cn.lili.common.trigger.model.TimeExecuteConstant;
@@ -61,9 +62,9 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     public Boolean create(Studio studio) {
         try {
             //创建小程序直播
-            Map<String, String> roomMap = wechatLivePlayerUtil.create(studio);
-            studio.setRoomId(Integer.parseInt(roomMap.get("roomId")));
-            studio.setQrCodeUrl(roomMap.get("qrcodeUrl"));
+//            Map<String, String> roomMap = wechatLivePlayerUtil.create(studio);
+//            studio.setRoomId(Integer.parseInt(roomMap.get("roomId")));
+//            studio.setQrCodeUrl(roomMap.get("qrcodeUrl"));
             studio.setStoreId(UserContext.getCurrentUser().getStoreId());
             studio.setStatus(StudioStatusEnum.NEW.name());
             //直播间添加成功发送直播间开启、关闭延时任务
@@ -71,7 +72,8 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                 //直播开启延时任务
                 BroadcastMessage broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.START.name());
                 TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
-                        Long.parseLong(studio.getStartTime()) * 1000L, broadcastMessage,
+                        Long.parseLong(studio.getStartTime()),
+                        broadcastMessage,
                         DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                         rocketmqCustomProperties.getPromotionTopic());
 
@@ -81,7 +83,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                 //直播结束延时任务
                 broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.END.name());
                 timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
-                        Long.parseLong(studio.getEndTime()) * 1000L, broadcastMessage,
+                        Long.parseLong(studio.getEndTime()), broadcastMessage,
                         DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                         rocketmqCustomProperties.getPromotionTopic());
                 //发送促销活动开始的延时任务
@@ -152,6 +154,14 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
 
     @Override
     public Boolean push(Integer roomId, Integer goodsId) {
+
+        //判断直播间是否已添加商品
+        if (studioCommodityService.getOne(
+                new LambdaQueryWrapper<StudioCommodity>().eq(StudioCommodity::getRoomId, roomId)
+                        .eq(StudioCommodity::getGoodsId, goodsId)) != null) {
+            throw new ServiceException(ResultCode.STODIO_GOODS_EXIST_ERROR);
+        }
+
         //调用微信接口添加直播间商品并进行记录
         if (wechatLivePlayerUtil.pushGoods(roomId, goodsId)) {
             studioCommodityService.save(new StudioCommodity(roomId, goodsId));
@@ -186,10 +196,14 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
 
     @Override
     public IPage<Studio> studioList(PageVO pageVO, Integer recommend, String status) {
-        return this.page(PageUtil.initPage(pageVO), new QueryWrapper<Studio>()
+        QueryWrapper queryWrapper = new QueryWrapper<Studio>()
                 .eq(recommend != null, "recommend", true)
                 .eq(status != null, "status", status)
-                .orderByDesc("create_time"));
+                .orderByDesc("create_time");
+        if (UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
+            queryWrapper.eq("store_id", UserContext.getCurrentUser().getStoreId());
+        }
+        return this.page(PageUtil.initPage(pageVO), queryWrapper);
 
     }
 

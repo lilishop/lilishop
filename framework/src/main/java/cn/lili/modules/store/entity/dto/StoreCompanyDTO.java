@@ -1,5 +1,6 @@
 package cn.lili.modules.store.entity.dto;
 
+import cn.lili.common.validation.Mobile;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
@@ -37,6 +38,10 @@ public class StoreCompanyDTO {
     @NotBlank(message = "公司地址不能为空")
     @ApiModelProperty(value = "公司地址")
     private String companyAddress;
+
+    @Mobile
+    @ApiModelProperty(value = "公司电话")
+    private String companyPhone;
 
     @Email
     @ApiModelProperty(value = "电子邮箱")

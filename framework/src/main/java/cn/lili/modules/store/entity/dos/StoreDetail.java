@@ -4,6 +4,7 @@ package cn.lili.modules.store.entity.dos;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.lili.common.validation.Mobile;
+import cn.lili.common.validation.Phone;
 import cn.lili.modules.store.entity.dto.AdminStoreApplyDTO;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -93,7 +94,7 @@ public class StoreDetail {
     private String linkName;
 
     @NotBlank(message = "手机号不能为空")
-    @Pattern(regexp = "^[1][3,4,5,6,7,8,9][0-9]{9}$", message = "手机号格式有误")
+    @Phone
     @ApiModelProperty(value = "联系人电话")
     private String linkPhone;
 

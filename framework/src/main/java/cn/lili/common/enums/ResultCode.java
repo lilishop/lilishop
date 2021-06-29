@@ -321,6 +321,11 @@ public enum ResultCode {
     FULL_DISCOUNT_EDIT_DELETE(43002, "删除满优惠活动成功"),
 
     /**
+     * 直播
+     */
+    STODIO_GOODS_EXIST_ERROR(44001,"直播商品已存在"),
+
+    /**
      * 店铺
      */
     STORE_NOT_EXIST(50001, "此店铺不存在"),

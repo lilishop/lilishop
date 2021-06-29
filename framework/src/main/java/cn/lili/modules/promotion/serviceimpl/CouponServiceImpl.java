@@ -15,18 +15,12 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
-import cn.lili.modules.promotion.entity.dos.Coupon;
-import cn.lili.modules.promotion.entity.dos.FullDiscount;
-import cn.lili.modules.promotion.entity.dos.MemberCoupon;
-import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.dos.*;
 import cn.lili.modules.promotion.entity.enums.*;
 import cn.lili.modules.promotion.entity.vos.CouponSearchParams;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.mapper.CouponMapper;
-import cn.lili.modules.promotion.service.CouponService;
-import cn.lili.modules.promotion.service.FullDiscountService;
-import cn.lili.modules.promotion.service.MemberCouponService;
-import cn.lili.modules.promotion.service.PromotionGoodsService;
+import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -76,6 +70,9 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
     //满额活动
     @Autowired
     private FullDiscountService fullDiscountService;
+    //优惠券活动-优惠券关联
+    @Autowired
+    private CouponActivityItemService couponActivityItemService;
 
     @Override
     public CouponVO add(CouponVO coupon) {
@@ -159,15 +156,31 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
     @Override
     public boolean deleteCoupon(String id) {
         CouponVO couponVO = checkStatus(id);
-        LambdaUpdateWrapper<Coupon> couponUpdateWrapper = new LambdaUpdateWrapper<Coupon>().eq(Coupon::getId, id).set(Coupon::getPromotionStatus, PromotionStatusEnum.CLOSE.name()).set(Coupon::getDeleteFlag, true);
+
         //更新优惠券状态为关闭，标示删除标志
+        LambdaUpdateWrapper<Coupon> couponUpdateWrapper = new LambdaUpdateWrapper<Coupon>().eq(Coupon::getId, id)
+                .set(Coupon::getPromotionStatus, PromotionStatusEnum.CLOSE.name()).set(Coupon::getDeleteFlag, true);
         boolean result = this.update(couponUpdateWrapper);
-        LambdaUpdateWrapper<PromotionGoods> updateWrapper = new LambdaUpdateWrapper<PromotionGoods>().eq(PromotionGoods::getPromotionId, id).set(PromotionGoods::getPromotionStatus, PromotionStatusEnum.CLOSE.name()).set(PromotionGoods::getDeleteFlag, true);
+
         //更新促销商品记录信息为删除
+        LambdaUpdateWrapper<PromotionGoods> updateWrapper = new LambdaUpdateWrapper<PromotionGoods>()
+                .eq(PromotionGoods::getPromotionId, id)
+                .set(PromotionGoods::getPromotionStatus, PromotionStatusEnum.CLOSE.name())
+                .set(PromotionGoods::getDeleteFlag, true);
         this.promotionGoodsService.update(updateWrapper);
-        LambdaUpdateWrapper<MemberCoupon> memberCouponLambdaUpdateWrapper = new LambdaUpdateWrapper<MemberCoupon>().eq(MemberCoupon::getCouponId, id).set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.CLOSED.name());
+
+        //删除mongo优惠券信息
+        LambdaUpdateWrapper<MemberCoupon> memberCouponLambdaUpdateWrapper = new LambdaUpdateWrapper<MemberCoupon>()
+                .eq(MemberCoupon::getCouponId, id)
+                .set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.CLOSED.name());
         memberCouponService.update(memberCouponLambdaUpdateWrapper);
         this.mongoTemplate.remove(new Query().addCriteria(Criteria.where("id").is(id)), CouponVO.class);
+
+        //删除优惠券活动关联优惠券
+        couponActivityItemService.remove(new LambdaQueryWrapper<CouponActivityItem>()
+                .eq(CouponActivityItem::getCouponId,id));
+
+        //删除延时任务
         this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 couponVO.getStartTime().getTime(),
                 DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.COUPON.name() + couponVO.getId())),
