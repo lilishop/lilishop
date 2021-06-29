@@ -47,7 +47,7 @@ public class MemberWithdrawApplyManagerController {
     @ApiOperation(value = "提现申请审核")
     @PostMapping
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "apply_id", value = "审核记录id", required = true, paramType = "query"),
+            @ApiImplicitParam(name = "applyId", value = "审核记录id", required = true, paramType = "query"),
             @ApiImplicitParam(name = "result", value = "审核结果", required = true, paramType = "query", dataType = "boolean"),
             @ApiImplicitParam(name = "remark", value = "审核备注", paramType = "query")
     })
