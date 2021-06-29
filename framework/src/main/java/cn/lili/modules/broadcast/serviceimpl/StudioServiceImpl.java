@@ -200,7 +200,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                 .eq(recommend != null, "recommend", true)
                 .eq(status != null, "status", status)
                 .orderByDesc("create_time");
-        if (UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
+        if (UserContext.getCurrentUser()!=null&&UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
             queryWrapper.eq("store_id", UserContext.getCurrentUser().getStoreId());
         }
         return this.page(PageUtil.initPage(pageVO), queryWrapper);
