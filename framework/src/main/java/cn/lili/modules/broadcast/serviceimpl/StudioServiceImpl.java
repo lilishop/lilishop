@@ -62,9 +62,9 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     public Boolean create(Studio studio) {
         try {
             //创建小程序直播
-//            Map<String, String> roomMap = wechatLivePlayerUtil.create(studio);
-//            studio.setRoomId(Integer.parseInt(roomMap.get("roomId")));
-//            studio.setQrCodeUrl(roomMap.get("qrcodeUrl"));
+            Map<String, String> roomMap = wechatLivePlayerUtil.create(studio);
+            studio.setRoomId(Integer.parseInt(roomMap.get("roomId")));
+            studio.setQrCodeUrl(roomMap.get("qrcodeUrl"));
             studio.setStoreId(UserContext.getCurrentUser().getStoreId());
             studio.setStatus(StudioStatusEnum.NEW.name());
             //直播间添加成功发送直播间开启、关闭延时任务

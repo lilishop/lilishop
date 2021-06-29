@@ -70,7 +70,9 @@ public interface OrderService extends IService<Order> {
     OrderDetailVO queryDetail(String orderSn);
 
     /**
-     * 创建交易
+     * 创建订单
+     * 1.检查交易信息
+     * 2.循环交易购物车列表，创建订单以及相关信息
      *
      * @param tradeDTO 交易DTO
      */
