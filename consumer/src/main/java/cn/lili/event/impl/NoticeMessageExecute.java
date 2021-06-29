@@ -148,11 +148,14 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
 
     @Override
     public void memberPointChange(MemberPointMessage memberPointMessage) {
+        if (memberPointMessage == null) {
+            return;
+        }
         //组织站内信参数
         NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
         noticeMessageDTO.setMemberId(memberPointMessage.getMemberId());
         Map<String, String> params = new HashMap<>();
-        if (memberPointMessage.getType().equals(1)) {
+        if (memberPointMessage.getType()) {
             params.put("expenditure_points", "0");
             params.put("income_points", memberPointMessage.getPoint().toString());
         } else {
