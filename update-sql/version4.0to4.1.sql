@@ -10,6 +10,7 @@ ALTER TABLE li_goods DROP COLUMN freight_payer;
 /**添加商品类型**/
 ALTER TABLE li_goods ADD goods_type VARCHAR ( 32 );
 ALTER TABLE li_goods_sku ADD goods_type VARCHAR ( 32 );
+ALTER TABLE li_specification ADD spec_value text;
 UPDATE li_goods SET goods_type = "PHYSICAL_GOODS";
 UPDATE li_goods_sku SET goods_type = "PHYSICAL_GOODS";
 /**增加优惠券有效期类型**/
