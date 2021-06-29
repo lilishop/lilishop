@@ -40,9 +40,9 @@ public class PointLogInterceptor {
                 point = Long.valueOf(obj[0].toString());
             }
             //变动类型
-            Integer type = 0;
+            Boolean type = false;
             if (obj[1] != null) {
-                type = Integer.valueOf(obj[1].toString());
+                type = Boolean.valueOf(obj[1].toString());
             }
             //会员ID
             String memberId = "";
@@ -55,7 +55,7 @@ public class PointLogInterceptor {
                 MemberPointsHistory memberPointsHistory = new MemberPointsHistory();
                 memberPointsHistory.setMemberId(member.getId());
                 memberPointsHistory.setMemberName(member.getUsername());
-                memberPointsHistory.setPointType(type);
+                memberPointsHistory.setPointType(type ? 1 : 0);
                 memberPointsHistory.setVariablePoint(point);
                 memberPointsHistory.setBeforePoint(new Double(CurrencyUtil.sub(member.getPoint(), point)).longValue());
                 memberPointsHistory.setPoint(member.getPoint());
@@ -64,7 +64,7 @@ public class PointLogInterceptor {
                 memberPointsHistoryService.save(memberPointsHistory);
             }
         } catch (Exception e) {
-            log.error("积分操作错误",e);
+            log.error("积分操作错误", e);
         }
 
 
