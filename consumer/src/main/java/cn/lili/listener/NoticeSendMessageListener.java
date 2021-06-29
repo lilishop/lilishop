@@ -148,7 +148,7 @@ public class NoticeSendMessageListener implements RocketMQListener<MessageExt> {
             Integer memberNum = memberService.getMemberNum(memberSearchVO);
             //构建分页查询参数
             //100条查一次
-            Integer pageSize = 200;
+            Integer pageSize = 100;
             Integer pageCount = 0;
             pageCount = memberNum / pageSize;
             pageCount = memberNum % pageSize > 0 ? pageCount + 1 : pageCount;
