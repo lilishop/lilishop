@@ -1,6 +1,7 @@
 package cn.lili.controller.member;
 
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.message.entity.enums.MessageStatusEnum;
@@ -34,21 +35,23 @@ public class MemberMessageBuyerController {
     @ApiOperation(value = "分页获取会员站内消息")
     @GetMapping
     public ResultMessage<IPage<MemberMessage>> page(MemberMessageQueryVO memberMessageQueryVO, PageVO page) {
+        memberMessageQueryVO.setMemberId(UserContext.getCurrentUser().getId());
         return ResultUtil.data(memberMessageService.getPage(memberMessageQueryVO, page));
     }
 
     @ApiOperation(value = "消息已读")
     @ApiImplicitParam(name = "messageId", value = "会员消息id", required = true, paramType = "path")
-    @PutMapping
-    public ResultMessage<Boolean> read(@PathVariable String messageId) {
+    @PutMapping("/{message_id}")
+    public ResultMessage<Boolean> read(@PathVariable("message_id") String messageId) {
         return ResultUtil.data(memberMessageService.editStatus(MessageStatusEnum.ALREADY_READY.name(), messageId));
     }
 
-    @ApiOperation(value = "消息删除")
+    @ApiOperation(value = "消息放入回收站")
     @ApiImplicitParam(name = "messageId", value = "会员消息id", required = true, paramType = "path")
-    @DeleteMapping
-    public ResultMessage<Boolean> deleteMessage(@PathVariable String messageId) {
-        return ResultUtil.data(memberMessageService.deleteMessage(messageId));
+    @DeleteMapping("/{message_id}")
+    public ResultMessage<Boolean> deleteMessage(@PathVariable("message_id") String messageId) {
+        return ResultUtil.data(memberMessageService.editStatus(MessageStatusEnum.ALREADY_REMOVE.name(), messageId));
+
     }
 
 

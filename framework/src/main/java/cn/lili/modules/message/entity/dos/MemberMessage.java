@@ -43,7 +43,7 @@ public class MemberMessage extends BaseEntity {
     /**
      * @see MessageStatusEnum
      */
-    @ApiModelProperty(value = "状态 0默认未读 1已读 2回收站")
+    @ApiModelProperty(value = "状态")
     private String status = MessageStatusEnum.UN_READY.name();
 
 }
