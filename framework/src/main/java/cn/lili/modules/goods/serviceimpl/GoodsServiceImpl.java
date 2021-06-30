@@ -93,7 +93,10 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     public void underStoreGoods(String storeId) {
-        this.baseMapper.underStoreGoods(storeId);
+        //获取商品ID列表
+        List<String> list= this.baseMapper.getGoodsIdByStoreId(storeId);
+        //下架店铺下的商品
+        updateGoodsMarketAble(list,GoodsStatusEnum.DOWN,"店铺关闭");
     }
 
     @Override
