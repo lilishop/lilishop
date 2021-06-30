@@ -234,15 +234,15 @@ public class Goods extends BaseEntity {
             if (sku.get("sn") == null) {
                 throw new ServiceException(ResultCode.GOODS_SKU_SN_ERROR);
             }
-            if (StringUtil.isEmpty(sku.get("price").toString()) || Integer.parseInt( sku.get("price").toString()) <= 0) {
+            if (StringUtil.isEmpty(sku.get("price").toString()) || Double.parseDouble( sku.get("price").toString()) <= 0) {
                 throw new ServiceException(ResultCode.GOODS_SKU_PRICE_ERROR);
             }
-            if (StringUtil.isEmpty(sku.get("cost").toString()) || Integer.parseInt( sku.get("cost").toString()) <= 0) {
+            if (StringUtil.isEmpty(sku.get("cost").toString()) || Double.parseDouble( sku.get("cost").toString()) <= 0) {
                 throw new ServiceException(ResultCode.GOODS_SKU_COST_ERROR);
             }
             //虚拟商品没有重量字段
             if(sku.containsKey("weight")) {
-                if (StringUtil.isEmpty(sku.get("weight").toString()) || Integer.parseInt(sku.get("weight").toString()) < 0) {
+                if (StringUtil.isEmpty(sku.get("weight").toString()) || Double.parseDouble(sku.get("weight").toString()) < 0) {
                     throw new ServiceException(ResultCode.GOODS_SKU_WEIGHT_ERROR);
                 }
             }
