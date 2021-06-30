@@ -57,7 +57,7 @@ public class CashierSupport {
                                          HttpServletRequest request, HttpServletResponse response,
                                          PayParam payParam) {
         if (paymentClientEnum == null || paymentMethodEnum == null) {
-            throw new ServiceException("未知的支付方式");
+            throw new ServiceException(ResultCode.PAY_NOT_SUPPORT);
         }
         //获取支付插件
         Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());

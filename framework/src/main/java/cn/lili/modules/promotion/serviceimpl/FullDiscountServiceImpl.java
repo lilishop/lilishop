@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.trigger.util.DelayQueueTools;
 import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.message.PromotionMessage;
@@ -135,7 +136,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
         //检查满优惠活动是否存在
         FullDiscountVO fullDiscount = this.checkFullDiscountExist(fullDiscountVO.getId());
         if (!fullDiscount.getPromotionStatus().equals(PromotionStatusEnum.NEW.name())) {
-            throw new ServiceException("当前编辑的满优惠活动已经开始或者已经结束，无法修改");
+            throw new ServiceException(ResultCode.FULL_DISCOUNT_MODIFY_ERROR);
         }
         //检查活动是否已经开始
         PromotionTools.checkPromotionTime(fullDiscountVO.getStartTime().getTime(), fullDiscountVO.getEndTime().getTime());

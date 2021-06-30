@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.sms.AliSmsUtil;
@@ -64,7 +65,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
         //获取短信配置
         Setting setting = settingService.get(SettingEnum.SMS_SETTING.name());
         if (StrUtil.isBlank(setting.getSettingValue())) {
-            throw new ServiceException("您还未配置阿里云短信");
+            throw new ServiceException(ResultCode.ALI_SMS_SETTING_ERROR);
         }
         SmsSetting smsSetting = new Gson().fromJson(setting.getSettingValue(), SmsSetting.class);
 
@@ -351,7 +352,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
         try {
             Setting setting = settingService.get(SettingEnum.SMS_SETTING.name());
             if (StrUtil.isBlank(setting.getSettingValue())) {
-                throw new ServiceException("您还未配置阿里云短信");
+                throw new ServiceException(ResultCode.ALI_SMS_SETTING_ERROR);
             }
             SmsSetting smsSetting = new Gson().fromJson(setting.getSettingValue(), SmsSetting.class);
 

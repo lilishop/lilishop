@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
@@ -208,7 +209,7 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
         //检测活动时间超过当前时间不能进行操作
         long nowTime = DateUtil.getDateline() * 1000;
         if (couponActivity.getStartTime().getTime() < nowTime && couponActivity.getEndTime().getTime() > nowTime) {
-            throw new ServiceException("活动时间小于当前时间，不能进行编辑删除操作");
+            throw new ServiceException(ResultCode.COUPON_ACTIVITY_START_TIME_ERROR);
         }
         //活动时间需超过当前时间
         PromotionTools.checkPromotionTime(couponActivity.getStartTime().getTime(), couponActivity.getEndTime().getTime());

@@ -95,7 +95,7 @@ public class AliPayPlugin implements Payment {
 
     @Override
     public ResultMessage<Object> JSApiPay(HttpServletRequest request, PayParam payParam) {
-        throw new ServiceException("当前支付通道暂不支持");
+        throw new ServiceException(ResultCode.PAY_NOT_SUPPORT);
     }
 
     @Override

@@ -96,7 +96,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             // 添加商品sku
             newSkuList = this.addGoodsSku(skuList, goods);
         } else {
-            throw new ServiceException("规格必须要有一个！");
+            throw new ServiceException(ResultCode.MUST_HAVE_GOODS_SKU);
         }
 
         this.updateStock(newSkuList);
@@ -107,7 +107,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     public void update(List<Map<String, Object>> skuList, Goods goods, Boolean regeneratorSkuFlag) {
         // 是否存在规格
         if (skuList == null || skuList.isEmpty()) {
-            throw new ServiceException("规格必须要有一个！");
+            throw new ServiceException(ResultCode.MUST_HAVE_GOODS_SKU);
         }
         List<GoodsSku> newSkuList;
         //删除旧的sku信息

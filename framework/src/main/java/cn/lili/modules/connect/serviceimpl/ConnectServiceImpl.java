@@ -108,11 +108,11 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
                 CookieUtil.addCookie(CONNECT_TYPE, type, 1800, ThreadContextHolder.getHttpResponse());
                 //自动登录失败，则把信息缓存起来
                 cache.put(ConnectService.cacheKey(type, uuid), authUser, 30L, TimeUnit.MINUTES);
-                throw new ServiceException("未绑定用户");
+                throw new ServiceException(ResultCode.NOT_BINDING_USER);
             }
         } catch (Exception e) {
             log.error("联合登陆异常：", e);
-            throw new ServiceException("未知错误，请稍后重试");
+            throw new ServiceException(ResultCode.ERROR);
         }
         return token;
     }

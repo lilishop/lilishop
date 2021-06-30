@@ -53,10 +53,10 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
                 .eq(MemberCoupon::getMemberId, memberId);
         int haveCoupons = this.count(queryWrapper);
         if (!PromotionStatusEnum.START.name().equals(coupon.getPromotionStatus())) {
-            throw new ServiceException("当前优惠券状态不可领取");
+            throw new ServiceException(ResultCode.COUPON_RECEIVE_ERROR);
         }
         if (coupon.getPublishNum() != 0 && coupon.getReceivedNum() >= coupon.getPublishNum()) {
-            throw new ServiceException("优惠券剩余领取数量不足");
+            throw new ServiceException(ResultCode.COUPON_NUM_INSUFFICIENT_ERROR);
         }
         if (haveCoupons >= coupon.getCouponLimitNum()) {
             throw new ServiceException("此优惠券最多领取" + coupon.getCouponLimitNum() + "张");
@@ -76,7 +76,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
             this.save(memberCoupon);
             couponService.receiveCoupon(couponId, 1);
         } else {
-            throw new ServiceException("当前优惠券不存在");
+            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
         }
     }
 

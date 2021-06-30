@@ -1,5 +1,6 @@
 package cn.lili.modules.goods.serviceimpl;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.modules.goods.entity.dos.Brand;
@@ -62,7 +63,7 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
     public boolean addBrand(BrandVO brandVO) {
 
         if (getOne(new LambdaQueryWrapper<Brand>().eq(Brand::getName, brandVO.getName())) != null) {
-            throw new ServiceException("品牌名称重复！");
+            throw new ServiceException(ResultCode.BRAND_NAME_EXIST_ERROR);
         }
         return this.save(brandVO);
     }
@@ -71,7 +72,7 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
     public boolean updateBrand(BrandVO brandVO) {
         this.checkExist(brandVO.getId());
         if (getOne(new LambdaQueryWrapper<Brand>().eq(Brand::getName, brandVO.getName()).ne(Brand::getId, brandVO.getId())) != null) {
-            throw new ServiceException("品牌名称重复！");
+            throw new ServiceException(ResultCode.BRAND_NAME_EXIST_ERROR);
         }
         return this.updateById(brandVO);
     }
@@ -80,7 +81,7 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
     public boolean brandDisable(String brandId, boolean disable) {
         Brand brand = this.checkExist(brandId);
         if (Boolean.TRUE.equals(disable) && !categoryBrandService.getCategoryBrandListByBrandId(brandId).isEmpty()) {
-            throw new ServiceException("当前品牌下存在分类不可禁用");
+            throw new ServiceException(ResultCode.BRAND_USE_DISABLE_ERROR);
         }
         brand.setDeleteFlag(disable);
         return updateById(brand);
@@ -90,7 +91,7 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
         Brand brand = getById(brandId);
         if (brand == null) {
             log.error("品牌ID为" + brandId + "的品牌不存在");
-            throw new ServiceException();
+            throw new ServiceException(ResultCode.BRAND_NOT_EXIST);
         }
         return brand;
     }

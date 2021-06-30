@@ -64,6 +64,7 @@ public enum ResultCode {
     GOODS_SKU_WEIGHT_ERROR(11010, "商品重量不能为负数"),
     GOODS_SKU_QUANTITY_ERROR(11011, "商品库存数量不能为负数"),
     GOODS_SKU_QUANTITY_NOT_ENOUGH(11011, "商品库存不足"),
+    MUST_HAVE_GOODS_SKU(11012,"规格必须要有一个！"),
 
     /**
      * 参数
@@ -91,6 +92,12 @@ public enum ResultCode {
     BRAND_DISABLE_ERROR(14003, "品牌禁用失败"),
 
     BRAND_DELETE_ERROR(14004, "品牌删除失败"),
+
+    BRAND_NAME_EXIST_ERROR(20002, "品牌名称重复！"),
+
+    BRAND_USE_DISABLE_ERROR(20003, "当前品牌下存在分类不可禁用"),
+
+    BRAND_NOT_EXIST(20004, "品牌不存在"),
 
     /**
      * 用户
@@ -131,7 +138,9 @@ public enum ResultCode {
 
     USER_GRADE_IS_DEFAULT(20018, "会员等级为默认会员等级"),
 
-    DELETE_EXIST(2001, "无法重复收藏"),
+    DELETE_EXIST(20019, "无法重复收藏"),
+
+    NOT_BINDING_USER(20020,"未绑定用户"),
 
     /**
      * 权限
@@ -201,6 +210,9 @@ public enum ResultCode {
 
     ORDER_CAN_NOT_CANCEL(31012, "当前订单状态不可取消"),
 
+    BATCH_DELIVER_ERROR(31013, "批量发货,文件读取失败"),
+
+
     /**
      * 支付
      */
@@ -229,6 +241,7 @@ public enum ResultCode {
     PAY_NOT_EXIST_ORDER(32011, "支付订单不存在"),
 
     CAN_NOT_RECHARGE_WALLET(32012, "不能使用余额进行充值"),
+
 
     /**
      * 售后
@@ -290,6 +303,12 @@ public enum ResultCode {
 
     COUPON_EDIT_STATUS_ERROR(41004, "优惠券修改状态失败！"),
 
+    COUPON_RECEIVE_ERROR(41005, "当前优惠券状态不可领取"),
+
+    COUPON_NUM_INSUFFICIENT_ERROR(41006, "优惠券剩余领取数量不足"),
+
+    COUPON_NOT_EXIST(41007, "当前优惠券不存在"),
+
     /**
      * 拼团
      */
@@ -313,6 +332,10 @@ public enum ResultCode {
 
     PINTUAN_DELETE_ERROR(42010, "删除拼团活动失败"),
 
+    PINTUAN_JOIN_ERROR(42011, "不能参与自己发起的拼团活动！"),
+
+    PINTUAN_LIMIT_NUM_ERROR(42012, "购买数量超过拼团活动限制数量！"),
+
     /**
      * 满额活动
      */
@@ -320,19 +343,34 @@ public enum ResultCode {
 
     FULL_DISCOUNT_EDIT_DELETE(43002, "删除满优惠活动成功"),
 
+    FULL_DISCOUNT_MODIFY_ERROR(43003,"当前编辑的满优惠活动已经开始或者已经结束，无法修改"),
+
     /**
      * 直播
      */
     STODIO_GOODS_EXIST_ERROR(44001,"直播商品已存在"),
 
     /**
+     * 秒杀
+     */
+    SECKILL_NOT_EXIST(45001,"当前参与的秒杀活动不存在！"),
+
+    /**
+     * 优惠券活动
+     */
+    COUPON_ACTIVITY_START_TIME_ERROR(46001,"活动时间小于当前时间，不能进行编辑删除操作"),
+
+    /**
      * 店铺
      */
+
     STORE_NOT_EXIST(50001, "此店铺不存在"),
 
     STORE_NAME_EXIST_ERROR(50002, "店铺名称已存在!"),
 
     STORE_APPLY_DOUBLE_ERROR(50003, "已有店铺，无需重复申请!"),
+
+    STORE_NOT_OPEN(50004, "该会员未开通店铺"),
 
     /**
      * 结算单
@@ -380,6 +418,7 @@ public enum ResultCode {
      */
     SMS_SIGN_EXIST_ERROR(80001, "短信签名已存在"),
 
+
     /**
      * 站内信
      */
@@ -414,6 +453,13 @@ public enum ResultCode {
 
     ALIPAY_PARAMS_EXCEPTION(80403, "支付宝参数异常"),
 
+    LOGISTICS_NOT_SETTING(80404,"您还未配置快递查询"),
+
+    ORDER_SETTING_ERROR(80405,"系统订单配置异常"),
+
+    ALI_SMS_SETTING_ERROR(80406,"您还未配置阿里云短信"),
+
+
     /**
      * 微信相关异常
      */
@@ -424,6 +470,10 @@ public enum ResultCode {
     WECHAT_QRCODE_ERROR(80502, "微信二维码生成异常"),
 
     WECHAT_MP_MESSAGE_ERROR(80503, "微信小程序小消息订阅异常"),
+
+    WECHAT_JSAPI_SIGN_ERROR(80504,"微信JsApi签名异常"),
+
+    WECHAT_CERT_ERROR(80505,"证书获取失败"),
 
     APP_VERSION_EXIST(80600, "APP版本已存在");
 

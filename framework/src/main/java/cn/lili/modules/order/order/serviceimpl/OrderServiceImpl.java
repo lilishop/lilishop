@@ -544,7 +544,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 orderBatchDeliverDTOList.add(orderBatchDeliverDTO);
             }
         } catch (Exception e) {
-            throw new ServiceException("文件读取失败");
+            throw new ServiceException(ResultCode.BATCH_DELIVER_ERROR);
         }
         //循环检查是否符合规范
         checkBatchDeliver(orderBatchDeliverDTOList);
@@ -778,7 +778,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             //判断用户不能参与自己发起的拼团活动
             Order parentOrder = this.getBySn(tradeDTO.getParentOrderSn());
             if (parentOrder.getMemberId().equals(UserContext.getCurrentUser().getId())) {
-                throw new ServiceException("不能参与自己发起的拼团活动！");
+                throw new ServiceException(ResultCode.PINTUAN_JOIN_ERROR);
             }
         }
     }
@@ -794,7 +794,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             Pintuan pintuan = pintuanService.getPintuanById(order.getPromotionId());
             Integer limitNum = pintuan.getLimitNum();
             if (limitNum != 0 && order.getGoodsNum() > limitNum) {
-                throw new ServiceException("购买数量超过拼团活动限制数量");
+                throw new ServiceException(ResultCode.PINTUAN_LIMIT_NUM_ERROR);
             }
         }
     }

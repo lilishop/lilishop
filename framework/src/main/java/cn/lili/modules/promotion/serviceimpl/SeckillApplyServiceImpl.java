@@ -6,6 +6,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.cache.Cache;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -145,7 +146,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     public void addSeckillApply(String seckillId, String storeId, List<SeckillApplyVO> seckillApplyList) {
         SeckillVO seckill = mongoTemplate.findById(seckillId, SeckillVO.class);
         if (seckill == null) {
-            throw new ServiceException("当前参与的秒杀活动不存在！");
+            throw new ServiceException(ResultCode.SECKILL_NOT_EXIST);
         }
         //检查秒杀活动申请是否合法
         checkSeckillApplyList(seckill.getHours(), seckillApplyList, storeId);

@@ -1,6 +1,7 @@
 package cn.lili.modules.system.serviceimpl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.system.entity.dos.Logistics;
@@ -72,7 +73,7 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
     private Traces getOrderTracesByJson(String logisticsId, String expNo) throws Exception {
         Setting setting = settingService.get(SettingEnum.KUAIDI_SETTING.name());
         if (StrUtil.isBlank(setting.getSettingValue())) {
-            throw new ServiceException("您还未配置快递查询");
+            throw new ServiceException(ResultCode.LOGISTICS_NOT_SETTING);
         }
         KuaidiSetting kuaidiSetting = new Gson().fromJson(setting.getSettingValue(), KuaidiSetting.class);
 
