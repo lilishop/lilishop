@@ -5,6 +5,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dos.DistributionOrder;
+import cn.lili.modules.distribution.entity.dto.DistributionApplyDTO;
 import cn.lili.modules.distribution.entity.vos.DistributionOrderSearchParams;
 import cn.lili.modules.distribution.service.DistributionOrderService;
 import cn.lili.modules.distribution.service.DistributionService;
@@ -41,13 +42,9 @@ public class DistributionBuyerController {
 
     //申请分销员
     @ApiOperation(value = "申请分销员")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "name", value = "姓名", required = true, paramType = "query", dataType = "String"),
-            @ApiImplicitParam(name = "idNumber", value = "身份证号", required = true, paramType = "query", dataType = "String")
-    })
     @PostMapping
-    public ResultMessage<Object> applyDistribution(@RequestParam String name, @RequestParam String idNumber) {
-        return ResultUtil.data(distributionService.applyDistribution(name, idNumber));
+    public ResultMessage<Object> applyDistribution(DistributionApplyDTO distributionApplyDTO) {
+        return ResultUtil.data(distributionService.applyDistribution(distributionApplyDTO));
     }
 
     @ApiOperation(value = "获取分销员分页订单列表")
