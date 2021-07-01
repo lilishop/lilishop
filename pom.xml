@@ -12,11 +12,11 @@
 
     <groupId>cn.lili</groupId>
     <artifactId>lili-shop-parent</artifactId>
-    <version>1.0.1</version>
+    <version>4.2.0</version>
 
     <properties>
         <docker-registry>registry.cn-beijing.aliyuncs.com/lili-images</docker-registry>
-        <images-version>0.0.5</images-version>
+        <images-version>0.0.1</images-version>
     </properties>
     <modules>
         <module>framework</module>
