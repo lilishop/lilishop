@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.trigger.util.DelayQueueTools;
 import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.message.PromotionMessage;
@@ -108,7 +109,7 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
         pointsGoods.setGoodsSku(goodsSku);
         if (this.checkSkuDuplicate(pointsGoods.getSkuId(), pointsGoods.getId()) == null) {
             if (PromotionStatusEnum.START.name().equals(pointsGoods.getPromotionStatus()) || PromotionStatusEnum.END.name().equals(pointsGoods.getPromotionStatus())) {
-                throw new ServiceException("当前活动已开始/结束，无法编辑！");
+                throw new ServiceException(ResultCode.PROMOTION_UPDATE_ERROR);
             }
             PromotionTools.checkPromotionTime(pointsGoods.getStartTime().getTime(), pointsGoods.getEndTime().getTime());
             result = this.updateById(pointsGoods);
@@ -304,7 +305,7 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
      */
     private void checkParam(PointsGoods pointsGoods, GoodsSku goodsSku) {
         if (pointsGoods.getActiveStock() > goodsSku.getQuantity()) {
-            throw new ServiceException("活动库存数量不能高于商品库存");
+            throw new ServiceException(ResultCode.POINT_GOODS_ACTIVE_STOCK_ERROR);
         }
     }
 }

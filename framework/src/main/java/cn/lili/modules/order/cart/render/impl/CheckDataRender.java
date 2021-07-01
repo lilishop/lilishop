@@ -1,6 +1,7 @@
 package cn.lili.modules.order.cart.render.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
@@ -130,7 +131,7 @@ public class CheckDataRender implements CartRenderStep {
             cn.lili.modules.order.order.entity.dos.Order parentOrder = orderService.getBySn(tradeDTO.getParentOrderSn());
             //参与活动判定
             if (parentOrder.getMemberId().equals(UserContext.getCurrentUser().getId())) {
-                throw new ServiceException("不能参与自己发起的拼团活动！");
+                throw new ServiceException(ResultCode.PINTUAN_JOIN_ERROR);
             }
         }
     }

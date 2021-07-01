@@ -544,7 +544,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 orderBatchDeliverDTOList.add(orderBatchDeliverDTO);
             }
         } catch (Exception e) {
-            throw new ServiceException(ResultCode.BATCH_DELIVER_ERROR);
+            throw new ServiceException(ResultCode.ORDER_BATCH_DELIVER_ERROR);
         }
         //循环检查是否符合规范
         checkBatchDeliver(orderBatchDeliverDTOList);

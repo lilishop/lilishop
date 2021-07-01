@@ -100,7 +100,7 @@ public class UploadController {
             fileService.save(newFile);
         } catch (Exception e) {
             log.error("文件上传失败", e);
-            throw new ServiceException(ResultCode.OSS_EXCEPTION);
+            throw new ServiceException(ResultCode.OSS_EXCEPTION_ERROR);
         }
         return ResultUtil.data(result);
     }

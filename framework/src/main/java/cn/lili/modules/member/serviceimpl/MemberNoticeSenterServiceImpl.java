@@ -1,5 +1,6 @@
 package cn.lili.modules.member.serviceimpl;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.member.entity.dos.MemberNoticeSenter;
@@ -78,7 +79,7 @@ public class MemberNoticeSenterServiceImpl extends ServiceImpl<MemberNoticeSente
                 if (memberNoticeService.saveBatch(memberNotices)) {
                     return true;
                 } else {
-                    throw new ServiceException("发送站内信异常，请检查系统日志");
+                    throw new ServiceException(ResultCode.NOTICE_SEND_ERROR);
                 }
             }
         }

@@ -395,16 +395,16 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         switch (goods.getGoodsType()) {
             case "PHYSICAL_GOODS":
                 if (goods.getTemplateId().equals("0")) {
-                    throw new ServiceException("实物商品需选择配送模板");
+                    throw new ServiceException(ResultCode.PHYSICAL_GOODS_NEED_TEMP);
                 }
                 break;
             case "VIRTUAL_GOODS":
                 if (!goods.getTemplateId().equals("0")) {
-                    throw new ServiceException("虚拟商品不需要选择配送模板");
+                    throw new ServiceException(ResultCode.VIRTUAL_GOODS_NOT_NEED_TEMP);
                 }
                 break;
             default:
-                throw new ServiceException("需选择商品类型");
+                throw new ServiceException(ResultCode.GOODS_TYPE_ERROR);
         }
         //检查商品是否存在--修改商品时使用
         if (goods.getId() != null) {
@@ -435,7 +435,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             goods.setStoreName(storeDetail.getStoreName());
             goods.setSelfOperated(storeDetail.getSelfOperated());
         } else {
-            throw new ServiceException("当前未登录店铺");
+            throw new ServiceException(ResultCode.STORE_NOT_LOGIN_ERROR);
         }
     }
 

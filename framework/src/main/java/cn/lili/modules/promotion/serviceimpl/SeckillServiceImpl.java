@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.trigger.util.DelayQueueTools;
 import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.message.PromotionMessage;
@@ -153,7 +154,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
         //检查该秒杀活动是否存在
         SeckillVO seckill = checkSeckillExist(seckillVO.getId());
         if (PromotionStatusEnum.START.name().equals(seckillVO.getPromotionStatus())) {
-            throw new ServiceException("活动已经开始，不能进行编辑删除操作");
+            throw new ServiceException(ResultCode.PROMOTION_UPDATE_ERROR);
         }
         //检查秒杀活动参数
         this.checkSeckillParam(seckillVO, seckillVO.getStoreId());
@@ -193,7 +194,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
                     DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.SECKILL.name() + seckill.getId())),
                     rocketmqCustomProperties.getPromotionTopic());
         } else {
-            throw new ServiceException("该秒杀活动活动的状态不能删除");
+            throw new ServiceException(ResultCode.SECKILL_DELETE_ERROR);
         }
     }
 
@@ -237,7 +238,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
                         rocketmqCustomProperties.getPromotionTopic());
             }
         } else {
-            throw new ServiceException("该秒杀活动活动的状态不能关闭");
+            throw new ServiceException(ResultCode.SECKILL_CLOSE_ERROR);
         }
     }
 
@@ -279,7 +280,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
     private SeckillVO checkSeckillExist(String id) {
         SeckillVO seckill = this.mongoTemplate.findById(id, SeckillVO.class);
         if (seckill == null) {
-            throw new ServiceException("当前秒杀活动活动不存在");
+            throw new ServiceException(ResultCode.SECKILL_NOT_EXIST_ERROR);
         }
         return seckill;
     }

@@ -190,7 +190,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             throw e;
         } catch (Exception e) {
             log.error("自动注册异常：", e);
-            throw new ServiceException("自动注册失败,请稍后重试");
+            throw new ServiceException(ResultCode.USER_AUTO_REGISTER_ERROR);
         }
     }
 
@@ -529,7 +529,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
                 ConnectAuthUser connectAuthUser = getConnectAuthUser(uuid, connectType);
                 if (connectAuthUser == null) {
-                    throw new ServiceException("授权信息已过期，请从新授权/登录");
+                    throw new ServiceException(ResultCode.USER_OVERDUE_CONNECT_ERROR);
                 }
                 //检测是否已经绑定过用户
                 LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
@@ -541,13 +541,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                     connectAuthUser.setConnectEnum(authInterface);
                     return connectAuthUser;
                 } else {
-                    throw new ServiceException("当前联合登陆方式，已绑定其他账号，需进行解绑操作");
+                    throw new ServiceException(ResultCode.USER_CONNECT_BANDING_ERROR);
                 }
             } catch (Exception e) {
                 throw e;
             }
         } else {
-            throw new ServiceException("暂无联合登陆信息，无法实现一键注册功能，请点击第三方登录进行授权");
+            throw new ServiceException(ResultCode.USER_CONNECT_NOT_EXIST_ERROR);
         }
     }
 

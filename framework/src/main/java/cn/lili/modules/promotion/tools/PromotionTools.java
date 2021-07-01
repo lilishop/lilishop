@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.tools;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.vo.PageVO;
@@ -41,7 +42,7 @@ public class PromotionTools {
 
         //如果促销活动选择的是部分商品参加活动
         if (num != -1 && goodsList == null) {
-            throw new ServiceException("请选择要参与活动的商品");
+            throw new ServiceException(ResultCode.PROMOTION_GOODS_ERROR);
         }
     }
 
@@ -59,12 +60,12 @@ public class PromotionTools {
 
         //如果活动起始时间小于现在时间
         if (startTime < nowTime) {
-            throw new ServiceException("活动起始时间必须大于当前时间");
+            throw new ServiceException(ResultCode.PROMOTION_START_TIME_ERROR);
         }
 
         //开始时间不能大于结束时间
         if (startTime > endTime) {
-            throw new ServiceException("活动起始时间不能大于活动结束时间");
+            throw new ServiceException(ResultCode.PROMOTION_TIME_ERROR);
         }
     }
 

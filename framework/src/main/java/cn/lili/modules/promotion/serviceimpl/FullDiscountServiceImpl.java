@@ -201,7 +201,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
     private FullDiscountVO checkFullDiscountExist(String id) {
         FullDiscountVO fullDiscountVO = mongoTemplate.findById(id, FullDiscountVO.class);
         if (fullDiscountVO == null) {
-            throw new ServiceException("当前要操作的满优惠活动不存在");
+            throw new ServiceException(ResultCode.FULL_DISCOUNT_NOT_EXIST_ERROR);
         }
         return fullDiscountVO;
     }
@@ -213,7 +213,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
      */
     private void checkFullDiscount(FullDiscountVO fullDiscountVO) {
         if (fullDiscountVO.getIsFullMinus() == null && fullDiscountVO.getIsCoupon() == null && fullDiscountVO.getIsGift() == null && fullDiscountVO.getIsPoint() == null && fullDiscountVO.getIsFullRate() == null) {
-            throw new ServiceException("请选择一种优惠方式");
+            throw new ServiceException(ResultCode.FULL_DISCOUNT_WAY_ERROR);
         }
         //如果优惠方式是满减
         if (Boolean.TRUE.equals(fullDiscountVO.getIsFullMinus())) {
@@ -225,7 +225,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
             //是否没有选择赠品
             boolean noGiftSelected = fullDiscountVO.getGiftId() == null;
             if (noGiftSelected) {
-                throw new ServiceException("请选择赠品");
+                throw new ServiceException(ResultCode.FULL_DISCOUNT_GIFT_ERROR);
             }
         }
         //如果优惠方式是赠优惠券
@@ -253,7 +253,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
         QueryWrapper<FullDiscount> queryWrapper = PromotionTools.checkActiveTime(statTime, endTime, PromotionTypeEnum.FULL_DISCOUNT, storeId, id);
         Integer sameNum = this.count(queryWrapper);
         if (sameNum > 0) {
-            throw new ServiceException("当前时间内已存在同类活动");
+            throw new ServiceException(ResultCode.PROMOTION_SAME_ACTIVE_EXIST);
         }
     }
 
@@ -267,11 +267,11 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
         //是否没有选择优惠券
         boolean noCouponSelected = couponId == null;
         if (noCouponSelected) {
-            throw new ServiceException("请选择优惠券");
+            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
         }
         Coupon coupon = this.couponService.getById(couponId);
         if (coupon.getEndTime().getTime() < endTime) {
-            throw new ServiceException("赠送的优惠券有效时间必须大于活动时间");
+            throw new ServiceException(ResultCode.FULL_DISCOUNT_COUPON_TIME_ERROR);
         }
     }
 
@@ -285,10 +285,10 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
         //是否没有填写满减金额
         boolean noFullMinusInput = fullMinus == null || fullMinus == 0;
         if (noFullMinusInput) {
-            throw new ServiceException("请填写满减金额");
+            throw new ServiceException(ResultCode.FULL_DISCOUNT_MONEY_ERROR);
         }
         if (fullMinus > fullMoney) {
-            throw new ServiceException("满减金额不能大于优惠门槛");
+            throw new ServiceException(ResultCode.FULL_DISCOUNT_MONEY_GREATER_THAN_MINUS);
         }
     }
 
@@ -301,11 +301,11 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
         //是否没有填写打折数值
         boolean noFullRateInput = fullRate == null || fullRate == 0;
         if (noFullRateInput) {
-            throw new ServiceException("请填写打折数值");
+            throw new ServiceException(ResultCode.FULL_RATE_NUM_ERROR);
         }
         int rateLimit = 10;
         if (fullRate >= rateLimit || fullRate <= 0) {
-            throw new ServiceException("请填写打折数值");
+            throw new ServiceException(ResultCode.FULL_RATE_NUM_ERROR);
         }
     }
 

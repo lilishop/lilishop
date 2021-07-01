@@ -1,5 +1,6 @@
 package cn.lili.controller.other;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.permission.SettingKeys;
@@ -49,7 +50,7 @@ public class CustomWordsController {
         }
 
         if (!setting.getSettingValue().equals(secretKey)) {
-            throw new ServiceException("秘钥验证失败！");
+            throw new ServiceException(ResultCode.CUSTOM_WORDS_SECRET_KEY_ERROR);
         }
 
         String res = customWordsService.deploy();

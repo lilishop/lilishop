@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.trigger.util.DelayQueueTools;
 import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.message.PromotionMessage;
@@ -154,7 +155,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
         PintuanVO pintuanVO = mongoTemplate.findById(id, PintuanVO.class);
         if (pintuanVO == null) {
             log.error("拼团活动id[" + id + "]的拼团活动不存在！");
-            throw new ServiceException("网络出现异常！");
+            throw new ServiceException(ResultCode.ERROR);
         }
         return pintuanVO;
     }
@@ -170,7 +171,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
         Pintuan pintuan = this.getById(id);
         if (pintuan == null) {
             log.error("拼团活动id[" + id + "]的拼团活动不存在！");
-            throw new ServiceException("网络出现异常！");
+            throw new ServiceException(ResultCode.ERROR);
         }
         return pintuan;
     }
@@ -204,7 +205,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
     public boolean modifyPintuan(PintuanVO pintuan) {
         PintuanVO pintuanVO = this.checkExist(pintuan.getId());
         if (!pintuan.getPromotionStatus().equals(PromotionStatusEnum.NEW.name())) {
-            throw new ServiceException("只有活动状态为新活动时（活动未开始）才可编辑！");
+            throw new ServiceException(ResultCode.PINTUAN_EDIT_ERROR);
         }
         //检查促销时间
         PromotionTools.checkPromotionTime(pintuan.getStartTime().getTime(), pintuan.getEndTime().getTime());
@@ -358,7 +359,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
                 memberVO.setOrderSn("");
                 PromotionGoods promotionGoods = promotionGoodsService.getPromotionGoods(PromotionTypeEnum.PINTUAN, order.getPromotionId(), skuId);
                 if (promotionGoods == null) {
-                    throw new ServiceException("当前拼团商品不存在！");
+                    throw new ServiceException(ResultCode.PINTUAN_NOT_EXIST_ERROR);
                 }
                 pintuanShareVO.setPromotionGoods(promotionGoods);
                 Pintuan pintuanById = this.getPintuanById(order.getPromotionId());
@@ -381,7 +382,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
         QueryWrapper<Pintuan> queryWrapper = PromotionTools.checkActiveTime(startTime, endTime, PromotionTypeEnum.PINTUAN, storeId, pintuanId);
         List<Pintuan> list = this.list(queryWrapper);
         if (!list.isEmpty()) {
-            throw new ServiceException("当前时间段已存在相同活动！");
+            throw new ServiceException(ResultCode.PROMOTION_SAME_ERROR);
         }
     }
 
@@ -484,7 +485,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
     private PintuanVO checkExist(String pintuanId) {
         PintuanVO pintuan = mongoTemplate.findById(pintuanId, PintuanVO.class);
         if (pintuan == null) {
-            throw new ServiceException("当前拼团活动不存在！");
+            throw new ServiceException(ResultCode.PINTUAN_NOT_EXIST_ERROR);
         }
         return pintuan;
     }

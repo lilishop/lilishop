@@ -112,7 +112,7 @@ public class CouponManagerController {
     private void setStoreInfo(CouponVO couponVO) {
         AuthUser currentUser = UserContext.getCurrentUser();
         if (currentUser == null) {
-            throw new ServiceException("获取当前用户信息不存在");
+            throw new ServiceException(ResultCode.USER_NOT_EXIST);
         }
         couponVO.setStoreId("platform");
         couponVO.setStoreName("platform");

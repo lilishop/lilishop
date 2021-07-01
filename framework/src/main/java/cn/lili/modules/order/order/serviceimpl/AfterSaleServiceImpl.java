@@ -473,7 +473,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
                     || StringUtils.isEmpty(afterSaleDTO.getBankAccountName())
                     || StringUtils.isEmpty(afterSaleDTO.getBankAccountNumber());
             if (emptyBankParam) {
-                throw new ServiceException("当账号类型为银行转账时，银行信息不能为空");
+                throw new ServiceException(ResultCode.RETURN_MONEY_OFFLINE_BANK_ERROR);
             }
 
         }

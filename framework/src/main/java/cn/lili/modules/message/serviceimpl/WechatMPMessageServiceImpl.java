@@ -4,6 +4,7 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.base.entity.enums.ClientTypeEnum;
 import cn.lili.modules.message.entity.dos.WechatMPMessage;
@@ -114,7 +115,7 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
                 if (tplContent.containsKey("priTmplId")) {
                     wechatMPMessage.setCode(tplContent.getStr("priTmplId"));
                 } else {
-                    throw new ServiceException("未能获取到微信模版消息id");
+                    throw new ServiceException(ResultCode.WECHAT_MP_MESSAGE_TMPL_ERROR);
                 }
 
                 wechatMPMessage.setName(tplData.getSceneDesc());
