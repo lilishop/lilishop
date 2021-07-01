@@ -226,6 +226,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         map.put("specs", this.groupBySkuAndSpec(goodsSkuDetail.getGoodsId()));
         map.put("promotionMap", goodsIndex.getPromotionMap());
 
+        //获取参数信息
+        if(goodsVO.getGoodsParamsDTOList().size()>0){
+            map.put("goodsParamsDTOList",goodsVO.getGoodsParamsDTOList());
+        }
+
         //记录用户足迹
         if (UserContext.getCurrentUser() != null) {
             FootPrint footPrint = new FootPrint(UserContext.getCurrentUser().getId(), goodsId, skuId);
