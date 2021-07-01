@@ -1,5 +1,6 @@
 package cn.lili.common.utils;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 
 import java.beans.BeanInfo;
@@ -61,7 +62,7 @@ public class StringUtils extends StrUtil {
             return 0;
         }
         try {
-            value = Integer.parseInt(obj.toString());
+            value = Convert.toInt(obj.toString());
         } catch (Exception ex) {
             if (checked) {
                 throw new RuntimeException("整型数字格式不正确");

@@ -367,11 +367,11 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
                     if(parameters.getId().equals(goodsParamsItemDTO.getParamId())){
                         //校验是否可以索引参数是否正确
                         if(!parameters.getIsIndex().equals(goodsParamsItemDTO.getIsIndex())){
-                            throw new ServiceException("商品参数错误，刷新后重试");
+                            throw new ServiceException(ResultCode.GOODS_PARAMS_ERROR);
                         }
                         //校验是否必填参数是否正确
                         if(!parameters.getRequired().equals(goodsParamsItemDTO.getRequired())){
-                            throw new ServiceException("商品参数错误，刷新后重试");
+                            throw new ServiceException(ResultCode.GOODS_PARAMS_ERROR);
                         }
                     }
                 }

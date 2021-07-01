@@ -1,5 +1,6 @@
 package cn.lili.timetask.handler.impl.goods;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.lili.modules.goods.mapper.GoodsMapper;
@@ -40,7 +41,7 @@ public class GoodsExecute implements EveryDayExecute {
                         .between("create_time", DateUtil.yesterday(), new DateTime()));
 
         for (Map<String, Object> map : list) {
-            goodsMapper.addGoodsCommentNum(Integer.parseInt(map.get("num").toString()), map.get("goods_id").toString());
+            goodsMapper.addGoodsCommentNum(Convert.toInt(map.get("num").toString()), map.get("goods_id").toString());
         }
 
     }

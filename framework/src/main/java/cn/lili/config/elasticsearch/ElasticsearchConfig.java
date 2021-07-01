@@ -1,5 +1,6 @@
 package cn.lili.config.elasticsearch;
 
+import cn.hutool.core.convert.Convert;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
@@ -75,7 +76,7 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
         HttpHost[] httpHosts = new HttpHost[clusterNodes.size()];
         for (int i = 0; i < clusterNodes.size(); i++) {
             String[] node = clusterNodes.get(i).split(":");
-            httpHosts[i] = new HttpHost(node[0], Integer.parseInt(node[1]), elasticsearchProperties.getSchema());
+            httpHosts[i] = new HttpHost(node[0], Convert.toInt(node[1]), elasticsearchProperties.getSchema());
         }
         return httpHosts;
     }

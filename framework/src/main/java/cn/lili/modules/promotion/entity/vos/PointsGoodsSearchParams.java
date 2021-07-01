@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.entity.vos;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -85,9 +86,9 @@ public class PointsGoodsSearchParams {
         if (CharSequenceUtil.isNotEmpty(points)) {
             String[] s = points.split("_");
             if (s.length > 1) {
-                query.addCriteria(Criteria.where("points").gte(Integer.parseInt(s[0])).lte(Integer.parseInt(s[1])));
+                query.addCriteria(Criteria.where("points").gte(Convert.toInt(s[0])).lte(Convert.toInt(s[1])));
             } else {
-                query.addCriteria(Criteria.where("points").gte(Integer.parseInt(s[0])));
+                query.addCriteria(Criteria.where("points").gte(Convert.toInt(s[0])));
             }
         }
         if (recommend != null) {

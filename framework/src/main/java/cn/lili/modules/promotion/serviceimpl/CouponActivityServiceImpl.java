@@ -35,6 +35,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static cn.lili.common.enums.ResultCode.COUPON_ACTIVITY_ITEM_ERROR;
+
 /**
  * 优惠券活动业务层实现
  *
@@ -216,18 +218,18 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
         //指定会员判定
         if (couponActivity.getActivityScope().equals(CouponActivitySendTypeEnum.DESIGNATED.name())) {
             if (couponActivity.getMemberDTOS().size() == 0) {
-                throw new ServiceException("指定精准发券则必须指定会员，会员不可以为空");
+                throw new ServiceException(ResultCode.COUPON_ACTIVITY_MEMBER_ERROR);
             }
         }
         //优惠券数量判定
         if (couponActivity.getCouponActivityItems().size() == 0) {
-            throw new ServiceException("优惠券活动必须指定优惠券，不能为空");
+            throw new ServiceException(ResultCode.COUPON_ACTIVITY_ITEM_ERROR);
         } else if (couponActivity.getCouponActivityItems().size() > 10) {
-            throw new ServiceException("优惠券活动最多指定10个优惠券");
+            throw new ServiceException(ResultCode.COUPON_ACTIVITY_ITEM_MUST_NUM_ERROR);
         } else {
             for (CouponActivityItem item : couponActivity.getCouponActivityItems()) {
                 if (item.getNum() == null || item.getNum() <= 0) {
-                    throw new ServiceException("赠券数量必须大于0");
+                    throw new ServiceException(ResultCode.COUPON_ACTIVITY_ITEM_NUM_ERROR);
                 }
             }
         }

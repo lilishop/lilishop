@@ -1,5 +1,6 @@
 package cn.lili.modules.search.serviceimpl;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
@@ -63,7 +64,7 @@ public class CustomWordsServiceImpl extends ServiceImpl<CustomWordsMapper, Custo
     @Override
     public boolean addCustomWords(CustomWordsVO customWordsVO) {
         if (this.existWords(customWordsVO.getName())) {
-            throw new ServiceException("当前自定义分词已存在！");
+            throw new ServiceException(ResultCode.CUSTOM_WORDS_EXIST_ERROR);
         }
         return this.save(customWordsVO);
     }
@@ -77,7 +78,7 @@ public class CustomWordsServiceImpl extends ServiceImpl<CustomWordsMapper, Custo
     @Override
     public boolean deleteCustomWords(String id) {
         if (this.getById(id) == null) {
-            throw new ServiceException("当前自定义分词不存在！");
+            throw new ServiceException(ResultCode.CUSTOM_WORDS_NOT_EXIST_ERROR);
         }
         return this.removeById(id);
     }
@@ -91,7 +92,7 @@ public class CustomWordsServiceImpl extends ServiceImpl<CustomWordsMapper, Custo
     @Override
     public boolean updateCustomWords(CustomWordsVO customWordsVO) {
         if (this.getById(customWordsVO.getId()) == null) {
-            throw new ServiceException("当前自定义分词不存在！");
+            throw new ServiceException(ResultCode.CUSTOM_WORDS_NOT_EXIST_ERROR);
         }
         return this.updateById(customWordsVO);
     }

@@ -1,5 +1,6 @@
 package cn.lili.event.impl;
 
+import cn.hutool.core.convert.Convert;
 import cn.lili.common.cache.Cache;
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -188,7 +189,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         List skuStocks = cache.multiGet(skuKeys);
         //循环写入商品库存
         for (int i = 0; i < skuStocks.size(); i++) {
-            goodsSkus.get(i).setQuantity(Integer.parseInt(skuStocks.get(i).toString()));
+            goodsSkus.get(i).setQuantity(Convert.toInt(skuStocks.get(i).toString()));
         }
         //批量修改商品库存
         goodsSkuService.updateBatchById(goodsSkus);
@@ -197,7 +198,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         if (!promotionKey.isEmpty()) {
             List promotionStocks = cache.multiGet(promotionKey);
             for (int i = 0; i < promotionKey.size(); i++) {
-                promotionGoods.get(i).setQuantity(Integer.parseInt(promotionStocks.get(i).toString()));
+                promotionGoods.get(i).setQuantity(Convert.toInt(promotionStocks.get(i).toString()));
                 Integer num = promotionGoods.get(i).getNum();
                 promotionGoods.get(i).setNum((num != null ? num : 0) + order.getOrder().getGoodsNum());
             }
@@ -232,7 +233,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         List skuStocks = cache.multiGet(skuKeys);
         //循环写入商品SKU库存
         for (int i = 0; i < skuStocks.size(); i++) {
-            goodsSkus.get(i).setQuantity(Integer.parseInt(skuStocks.get(i).toString()));
+            goodsSkus.get(i).setQuantity(Convert.toInt(skuStocks.get(i).toString()));
         }
         log.info("订单取消，库存还原：{}", goodsSkus);
         //批量修改商品库存

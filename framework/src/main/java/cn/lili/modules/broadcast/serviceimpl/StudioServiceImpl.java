@@ -1,5 +1,6 @@
 package cn.lili.modules.broadcast.serviceimpl;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.delayqueue.BroadcastMessage;
 import cn.lili.common.enums.ResultCode;
@@ -63,7 +64,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
         try {
             //创建小程序直播
             Map<String, String> roomMap = wechatLivePlayerUtil.create(studio);
-            studio.setRoomId(Integer.parseInt(roomMap.get("roomId")));
+            studio.setRoomId(Convert.toInt(roomMap.get("roomId")));
             studio.setQrCodeUrl(roomMap.get("qrcodeUrl"));
             studio.setStoreId(UserContext.getCurrentUser().getStoreId());
             studio.setStatus(StudioStatusEnum.NEW.name());

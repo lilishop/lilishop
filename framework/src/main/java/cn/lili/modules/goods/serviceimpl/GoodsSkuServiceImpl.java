@@ -173,8 +173,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
         String quantity = stringRedisTemplate.opsForValue().get(GoodsSkuService.getStockCacheKey(id));
         if (quantity != null) {
-            if (goodsSku.getQuantity() != Integer.parseInt(quantity)) {
-                goodsSku.setQuantity(Integer.parseInt(quantity));
+            if (goodsSku.getQuantity() != Convert.toInt(quantity)) {
+                goodsSku.setQuantity(Convert.toInt(quantity));
                 this.updateById(goodsSku);
             }
         } else {
@@ -381,7 +381,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         String cacheKeys = GoodsSkuService.getStockCacheKey(skuId);
         String stockStr = stringRedisTemplate.opsForValue().get(cacheKeys);
         if (stockStr != null) {
-            return Integer.parseInt(stockStr);
+            return Convert.toInt(stockStr);
         } else {
             GoodsSku goodsSku = getGoodsSkuByIdFromCache(skuId);
             stringRedisTemplate.opsForValue().set(cacheKeys, goodsSku.getQuantity().toString());

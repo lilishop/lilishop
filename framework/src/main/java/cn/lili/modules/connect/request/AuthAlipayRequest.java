@@ -1,5 +1,6 @@
 package cn.lili.modules.connect.request;
 
+import cn.hutool.core.convert.Convert;
 import cn.lili.common.cache.Cache;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.utils.UrlBuilder;
@@ -56,7 +57,7 @@ public class AuthAlipayRequest extends AuthDefaultRequest {
         return AuthToken.builder()
                 .accessToken(response.getAccessToken())
                 .uid(response.getUserId())
-                .expireIn(Integer.parseInt(response.getExpiresIn()))
+                .expireIn(Convert.toInt(response.getExpiresIn()))
                 .refreshToken(response.getRefreshToken())
                 .build();
     }
@@ -86,7 +87,7 @@ public class AuthAlipayRequest extends AuthDefaultRequest {
                 .data(AuthToken.builder()
                         .accessToken(response.getAccessToken())
                         .uid(response.getUserId())
-                        .expireIn(Integer.parseInt(response.getExpiresIn()))
+                        .expireIn(Convert.toInt(response.getExpiresIn()))
                         .refreshToken(response.getRefreshToken())
                         .build())
                 .build();

@@ -1,6 +1,7 @@
 package cn.lili.common.aop.limiter;
 
 import cn.lili.common.aop.limiter.annotation.LimitPoint;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import com.google.common.collect.ImmutableList;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +61,7 @@ public class LimitInterceptor {
             log.info("限制请求{}, 当前请求{},缓存key{}", limitCount, count.intValue(), key);
             //如果缓存里没有值，或者他的值小于限制频率
             if (count.intValue() >= limitCount) {
-                throw new ServiceException("访问过于频繁，请稍后再试");
+                throw new ServiceException(ResultCode.LIMIT_ERROR);
             }
         }
         //如果从redis中执行都值判定为空，则这里跳过

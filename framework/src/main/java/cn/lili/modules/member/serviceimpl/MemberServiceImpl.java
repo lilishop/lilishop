@@ -1,6 +1,7 @@
 package cn.lili.modules.member.serviceimpl;
 
 
+import cn.hutool.core.convert.Convert;
 import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
@@ -177,7 +178,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         try {
             String username = UuidUtils.getUUID();
             Member member = new Member(username, UuidUtils.getUUID(), authUser.getAvatar(), authUser.getNickname(),
-                    authUser.getGender() != null ? Integer.parseInt(authUser.getGender().getCode()) : 0);
+                    authUser.getGender() != null ? Convert.toInt(authUser.getGender().getCode()) : 0);
             //保存会员
             this.save(member);
             Member loadMember = this.findByUsername(username);

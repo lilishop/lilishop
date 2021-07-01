@@ -27,6 +27,17 @@ public enum ResultCode {
      * 参数异常
      */
     PARAMS_ERROR(4002, "参数异常"),
+    /**
+     * 非法请求
+     */
+    ILLEGAL_REQUEST_ERROR(4003, "非法请求，请重新刷新页面操作"),
+
+    /**
+     * 高频访问错误
+     */
+    LIMIT_ERROR(4004,"访问过于频繁，请稍后再试"),
+
+
 
 
     /**
@@ -65,6 +76,7 @@ public enum ResultCode {
     GOODS_SKU_QUANTITY_ERROR(11011, "商品库存数量不能为负数"),
     GOODS_SKU_QUANTITY_NOT_ENOUGH(11011, "商品库存不足"),
     MUST_HAVE_GOODS_SKU(11012,"规格必须要有一个！"),
+    GOODS_PARAMS_ERROR(11013,"商品参数错误，刷新后重试"),
 
     /**
      * 参数
@@ -349,16 +361,25 @@ public enum ResultCode {
      * 直播
      */
     STODIO_GOODS_EXIST_ERROR(44001,"直播商品已存在"),
+    COMMODITY_ERROR(44002,"添加直播商品失败"),
 
     /**
      * 秒杀
      */
-    SECKILL_NOT_EXIST(45001,"当前参与的秒杀活动不存在！"),
+    SECKILL_NOT_EXIST_ERROR(45001,"当前参与的秒杀活动不存在！"),
+    SECKILL_UPDATE_ERROR(45002,"当前秒杀活动活动已经开始，无法修改！"),
+    SECKILL_PRICE_ERROR(45003,"活动价格不能大于商品原价"),
+    SECKILL_TIME_ERROR(45004,"时刻参数异常"),
+
 
     /**
      * 优惠券活动
      */
     COUPON_ACTIVITY_START_TIME_ERROR(46001,"活动时间小于当前时间，不能进行编辑删除操作"),
+    COUPON_ACTIVITY_MEMBER_ERROR(46002,"指定精准发券则必须指定会员，会员不可以为空"),
+    COUPON_ACTIVITY_ITEM_ERROR(46003,"优惠券活动必须指定优惠券，不能为空"),
+    COUPON_ACTIVITY_ITEM_MUST_NUM_ERROR(46004,"优惠券活动最多指定10个优惠券"),
+    COUPON_ACTIVITY_ITEM_NUM_ERROR(46005,"赠券数量必须大于0"),
 
     /**
      * 店铺
@@ -413,69 +434,68 @@ public enum ResultCode {
      */
     SETTING_NOT_TO_SET(70001, "该参数不需要设置"),
 
-    /**
-     * 短信
-     */
-    SMS_SIGN_EXIST_ERROR(80001, "短信签名已存在"),
+    ALIPAY_NOT_SETTING(70002, "支付宝支付未配置"),
 
+    ALIPAY_EXCEPTION(70003, "支付宝支付错误，请稍后重试"),
+
+    ALIPAY_PARAMS_EXCEPTION(70004, "支付宝参数异常"),
+
+    LOGISTICS_NOT_SETTING(70005,"您还未配置快递查询"),
+
+    ORDER_SETTING_ERROR(70006,"系统订单配置异常"),
+
+    ALI_SMS_SETTING_ERROR(70007,"您还未配置阿里云短信"),
+
+    SMS_SIGN_EXIST_ERROR(70008, "短信签名已存在"),
 
     /**
      * 站内信
      */
-    NOTICE_NOT_EXIST(80101, "当前消息模板不存在"),
+    NOTICE_NOT_EXIST(80001, "当前消息模板不存在"),
 
-    NOTICE_ERROR(80102, "修改站内信异常，请稍后重试"),
+    NOTICE_ERROR(80002, "修改站内信异常，请稍后重试"),
 
     /**
      * OSS
      */
-    OSS_NOT_EXIST(80201, "OSS未配置"),
+    OSS_NOT_EXIST(80101, "OSS未配置"),
 
-    OSS_EXCEPTION(80202, "文件上传失败，请稍后重试"),
+    OSS_EXCEPTION(80102, "文件上传失败，请稍后重试"),
 
     /**
      * 验证码
      */
-    VERIFICATION_SEND_SUCCESS(80301, "短信验证码,发送成功"),
+    VERIFICATION_SEND_SUCCESS(80201, "短信验证码,发送成功"),
 
-    VERIFICATION_ERROR(80302, "验证失败"),
+    VERIFICATION_ERROR(80202, "验证失败"),
 
-    VERIFICATION_SMS_ERROR(80303, "短信验证码错误，请重新校验"),
+    VERIFICATION_SMS_ERROR(80203, "短信验证码错误，请重新校验"),
 
-    VERIFICATION_SMS_EXPIRED_ERROR(80304, "验证码已失效，请重新校验"),
-
-    /**
-     * 配置错误
-     */
-    ALIPAY_NOT_SETTING(80401, "支付宝支付未配置"),
-
-    ALIPAY_EXCEPTION(80402, "支付宝支付错误，请稍后重试"),
-
-    ALIPAY_PARAMS_EXCEPTION(80403, "支付宝参数异常"),
-
-    LOGISTICS_NOT_SETTING(80404,"您还未配置快递查询"),
-
-    ORDER_SETTING_ERROR(80405,"系统订单配置异常"),
-
-    ALI_SMS_SETTING_ERROR(80406,"您还未配置阿里云短信"),
-
+    VERIFICATION_SMS_EXPIRED_ERROR(80204, "验证码已失效，请重新校验"),
 
     /**
      * 微信相关异常
      */
-    WECHAT_CONNECT_NOT_SETTING(80500, "微信联合登陆信息未配置"),
+    WECHAT_CONNECT_NOT_SETTING(80300, "微信联合登陆信息未配置"),
 
-    WECHAT_PAYMENT_NOT_SETTING(80501, "微信支付信息未配置"),
+    WECHAT_PAYMENT_NOT_SETTING(80301, "微信支付信息未配置"),
 
-    WECHAT_QRCODE_ERROR(80502, "微信二维码生成异常"),
+    WECHAT_QRCODE_ERROR(80302, "微信二维码生成异常"),
 
-    WECHAT_MP_MESSAGE_ERROR(80503, "微信小程序小消息订阅异常"),
+    WECHAT_MP_MESSAGE_ERROR(80303, "微信小程序小消息订阅异常"),
 
-    WECHAT_JSAPI_SIGN_ERROR(80504,"微信JsApi签名异常"),
+    WECHAT_JSAPI_SIGN_ERROR(80304,"微信JsApi签名异常"),
 
     WECHAT_CERT_ERROR(80505,"证书获取失败"),
 
-    APP_VERSION_EXIST(80600, "APP版本已存在");
+    APP_VERSION_EXIST(80600, "APP版本已存在"),
+
+    CUSTOM_WORDS_EXIST_ERROR(90000, "当前自定义分词已存在！"),
+    CUSTOM_WORDS_NOT_EXIST_ERROR(90000, "当前自定义分词不存在！"),
+    CONNECT_NOT_EXIST(90000,"登录方式不存在"),
+
+
+    ;
 
     private final Integer code;
     private final String message;

@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.BeanUtil;
@@ -271,8 +272,8 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         if (promotionGoods == null) {
             throw new ServiceException("当前促销商品不存在！");
         }
-        if (promotionGoodsStock != null && CharSequenceUtil.isNotEmpty(promotionGoodsStock) && promotionGoods.getQuantity() == Integer.parseInt(promotionGoodsStock)) {
-            return Integer.parseInt(promotionGoodsStock);
+        if (promotionGoodsStock != null && CharSequenceUtil.isNotEmpty(promotionGoodsStock) && promotionGoods.getQuantity() == Convert.toInt(promotionGoodsStock)) {
+            return Convert.toInt(promotionGoodsStock);
         } else {
             stringRedisTemplate.opsForValue().set(promotionStockKey, promotionGoods.getQuantity().toString());
             return promotionGoods.getQuantity();
