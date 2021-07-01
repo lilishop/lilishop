@@ -69,8 +69,10 @@ public class AllowOperation implements Serializable {
         //新订单，允许支付
         this.pay = status.equals(OrderStatusEnum.UNPAID.name()) && payStatus.equals(PayStatusEnum.UNPAID.name());
 
-        //订单未发货，就可以编辑收货人信息
-        this.editConsignee = order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name()) && !status.equals(OrderStatusEnum.CANCELLED.name());
+        //可编辑订单收件人信息=实物订单 && 订单未发货 && 订单未取消
+        this.editConsignee = order.getOrderType().equals(OrderTypeEnum.NORMAL.name())
+                && order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name())
+                && !status.equals(OrderStatusEnum.CANCELLED.name());
 
         //是否允许被发货
         this.ship = editConsignee && status.equals(OrderStatusEnum.UNDELIVERED.name());

@@ -40,7 +40,7 @@ public class SkuFreightRender implements CartRenderStep {
         MemberAddress memberAddress = tradeDTO.getMemberAddress();
         //如果收货地址为空，则抛出异常
         if (memberAddress == null) {
-            throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
+            return;
         }
         //循环渲染购物车商品运费价格
         forSku:

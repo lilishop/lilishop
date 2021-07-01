@@ -177,7 +177,10 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             member.setHaveStore(true);
             member.setStoreId(id);
             memberService.updateById(member);
-
+            //设定商家的结算日
+            storeDetailService.update(new LambdaUpdateWrapper<StoreDetail>()
+                    .eq(StoreDetail::getStoreId, id)
+                    .set(StoreDetail::getSettlementDay, new DateTime()));
         } else {
             store.setStoreDisable(StoreStatusEnum.REFUSED.value());
         }
@@ -217,11 +220,17 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         if (!Optional.ofNullable(store).isPresent()) {
             Member member = memberService.getById(UserContext.getCurrentUser().getId());
             store = new Store(member);
+            BeanUtil.copyProperties(storeCompanyDTO, store);
             this.save(store);
             StoreDetail storeDetail = new StoreDetail();
             storeDetail.setStoreId(store.getId());
             BeanUtil.copyProperties(storeCompanyDTO, storeDetail);
             return storeDetailService.save(storeDetail);
+        } else {
+            store.setStoreAddressDetail(storeCompanyDTO.getStoreAddressDetail());
+            store.setStoreAddressIdPath(storeCompanyDTO.getStoreAddressIdPath());
+            store.setStoreAddressPath(storeCompanyDTO.getStoreAddressPath());
+            this.saveOrUpdate(store);
         }
         //判断是否存在店铺详情，如果没有则进行新建，如果存在则进行修改
         StoreDetail storeDetail = storeDetailService.getStoreDetail(store.getId());

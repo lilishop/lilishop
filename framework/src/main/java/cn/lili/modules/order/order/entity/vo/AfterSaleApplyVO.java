@@ -47,4 +47,12 @@ public class AfterSaleApplyVO {
      */
     @ApiModelProperty(value = "账号类型", allowableValues = "ALIPAY,WECHATPAY,MEMBERWALLET,BANKTRANSFER")
     private String accountType;
+
+    @ApiModelProperty(value = "是否支持退货")
+    private boolean returnGoods;
+
+    @ApiModelProperty(value = "是否支持退款")
+    private boolean returnMoney;
+
+
 }

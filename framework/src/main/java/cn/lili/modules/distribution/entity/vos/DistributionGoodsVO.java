@@ -39,6 +39,9 @@ public class DistributionGoodsVO {
     @ApiModelProperty(value = "商品编号")
     private String sn;
 
+    @ApiModelProperty(value = "商品ID")
+    private String goodsId;
+
     @ApiModelProperty(value = "规格ID")
     private String skuId;
 

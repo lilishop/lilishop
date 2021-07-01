@@ -555,7 +555,7 @@ public class WechatPlugin implements Payment {
             if (refundLog != null) {
                 refundLog.setIsRefund(true);
                 refundLog.setReceivableNo(refundId);
-                refundLogService.save(refundLog);
+                refundLogService.saveOrUpdate(refundLog);
             }
         } catch (Exception e) {
             log.error("微信退款失败",e);

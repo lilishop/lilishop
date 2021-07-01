@@ -53,7 +53,7 @@ public class DistributionBuyerController {
     @ApiOperation(value = "获取分销员分页订单列表")
     @GetMapping("/distributionOrder")
     public ResultMessage<IPage<DistributionOrder>> distributionOrderPage(DistributionOrderSearchParams distributionOrderSearchParams) {
-        distributionOrderSearchParams.setDistributionId(UserContext.getCurrentUser().getId());
+        distributionOrderSearchParams.setDistributionId(distributionService.getDistribution().getId());
         return ResultUtil.data(distributionOrderService.getDistributionOrderPage(distributionOrderSearchParams));
     }
 

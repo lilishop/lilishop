@@ -1,6 +1,8 @@
 package cn.lili.controller.trade;
 
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
 import cn.lili.modules.member.entity.vo.MemberEvaluationListVO;
@@ -31,6 +33,7 @@ public class MemberEvaluationStoreController {
     @ApiOperation(value = "分页获取会员评论列表")
     @GetMapping
     public ResultMessage<IPage<MemberEvaluationListVO>> getByPage(EvaluationQueryParams evaluationQueryParams) {
+        evaluationQueryParams.setStoreId(UserContext.getCurrentUser().getStoreId());
         return ResultUtil.data(memberEvaluationService.queryPage(evaluationQueryParams));
     }
 

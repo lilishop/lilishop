@@ -80,6 +80,10 @@ public class TradeBuilder {
 
     /**
      * 构造一笔交易
+     * 1.从缓存中读取交易数据
+     * 2.从购物车列表中筛选出已选择的SKU列表存入交易中
+     * 3.渲染整个交易（0-> 校验商品 1-》 满优惠渲染 2->渲染优惠 3->优惠券渲染 4->计算运费 5->计算价格 6->分销渲染 7->其他渲染）
+     * 4.将已选择的购物车列表存入交易中
      *
      * @param checkedWay 购物车类型
      * @return 购物车展示信息
@@ -98,6 +102,8 @@ public class TradeBuilder {
                 log.error("购物车{}渲染异常：", cartRenderSteps.get(index).getClass(), e);
             }
         }
+
+
         //购物车信息接受
         List<CartVO> cartVOList = new ArrayList<>();
         //循环购物车信息
@@ -112,8 +118,10 @@ public class TradeBuilder {
 
     /**
      * 创建一笔交易
+     * 1.构造交易
+     * 2.创建交易
      *
-     * @param checkedWay    购物车类型
+     * @param checkedWay 购物车类型
      * @return 交易信息
      */
     public Trade createTrade(CartTypeEnum checkedWay) {

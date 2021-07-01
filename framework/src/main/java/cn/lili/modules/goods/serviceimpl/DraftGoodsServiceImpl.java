@@ -8,6 +8,7 @@ import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.*;
 import cn.lili.modules.goods.entity.dto.DraftGoodsDTO;
 import cn.lili.modules.goods.entity.dto.DraftGoodsSearchParams;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.vos.DraftGoodsVO;
 import cn.lili.modules.goods.mapper.DraftGoodsMapper;
 import cn.lili.modules.goods.service.CategoryService;
@@ -45,7 +46,7 @@ public class DraftGoodsServiceImpl extends ServiceImpl<DraftGoodsMapper, DraftGo
     public boolean addGoodsDraft(DraftGoodsDTO draftGoods) {
         draftGoods.setGoodsGalleryListJson(JSONUtil.toJsonStr(draftGoods.getGoodsGalleryList()));
         draftGoods.setSkuListJson(JSONUtil.toJsonStr(draftGoods.getSkuList()));
-        draftGoods.setGoodsParamsListJson(JSONUtil.toJsonStr(draftGoods.getGoodsParamsList()));
+        draftGoods.setGoodsParamsListJson(JSONUtil.toJsonStr(draftGoods.getGoodsParamsDTOList()));
         return this.save(draftGoods);
     }
 
@@ -53,7 +54,7 @@ public class DraftGoodsServiceImpl extends ServiceImpl<DraftGoodsMapper, DraftGo
     public boolean updateGoodsDraft(DraftGoodsDTO draftGoods) {
         draftGoods.setGoodsGalleryListJson(JSONUtil.toJsonStr(draftGoods.getGoodsGalleryList()));
         draftGoods.setSkuListJson(JSONUtil.toJsonStr(draftGoods.getSkuList()));
-        draftGoods.setGoodsParamsListJson(JSONUtil.toJsonStr(draftGoods.getGoodsParamsList()));
+        draftGoods.setGoodsParamsListJson(JSONUtil.toJsonStr(draftGoods.getGoodsParamsDTOList()));
         return this.updateById(draftGoods);
     }
 
@@ -68,7 +69,7 @@ public class DraftGoodsServiceImpl extends ServiceImpl<DraftGoodsMapper, DraftGo
         }
         draftGoods.setGoodsGalleryListJson(JSONUtil.toJsonStr(draftGoods.getGoodsGalleryList()));
         draftGoods.setSkuListJson(JSONUtil.toJsonStr(this.getGoodsSkuList(draftGoods.getSkuList())));
-        draftGoods.setGoodsParamsListJson(JSONUtil.toJsonStr(draftGoods.getGoodsParamsList()));
+        draftGoods.setGoodsParamsListJson(JSONUtil.toJsonStr(draftGoods.getGoodsParamsDTOList()));
         this.saveOrUpdate(draftGoods);
     }
 
@@ -91,7 +92,7 @@ public class DraftGoodsServiceImpl extends ServiceImpl<DraftGoodsMapper, DraftGo
             categoryName.add(category.getName());
         }
         draftGoodsVO.setCategoryName(categoryName);
-        draftGoodsVO.setGoodsParamsList(JSONUtil.toList(JSONUtil.parseArray(draftGoods.getGoodsParamsListJson()), GoodsParams.class));
+        draftGoodsVO.setGoodsParamsDTOList(JSONUtil.toList(JSONUtil.parseArray(draftGoods.getGoodsParamsListJson()), GoodsParamsDTO.class));
         draftGoodsVO.setGoodsGalleryList(JSONUtil.toList(JSONUtil.parseArray(draftGoods.getGoodsGalleryListJson()), String.class));
         JSONArray jsonArray = JSONUtil.parseArray(draftGoods.getSkuListJson());
         List<GoodsSku> list = JSONUtil.toList(jsonArray, GoodsSku.class);

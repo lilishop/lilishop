@@ -10,6 +10,7 @@ ALTER TABLE li_goods DROP COLUMN freight_payer;
 /**添加商品类型**/
 ALTER TABLE li_goods ADD goods_type VARCHAR ( 32 );
 ALTER TABLE li_goods_sku ADD goods_type VARCHAR ( 32 );
+ALTER TABLE li_specification ADD spec_value text;
 UPDATE li_goods SET goods_type = "PHYSICAL_GOODS";
 UPDATE li_goods_sku SET goods_type = "PHYSICAL_GOODS";
 /**增加优惠券有效期类型**/
@@ -117,3 +118,7 @@ CREATE TABLE `li_coupon_activity_item` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /** 修改商品模板详情字段类型**/
 ALTER TABLE `li_draft_goods` MODIFY COLUMN `intro` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
+/** 添加秒杀设置**/
+INSERT INTO `li_setting` ( `id`, `create_by`, `create_time`, `delete_flag`, `update_by`, `update_time`, `setting_value` ) VALUES ( 'SECKILL_SETTING', NULL, NULL, NULL, 'admin', '2021-06-04 09:58:39.384000', '{\"seckillRule\":\"秒杀规则\",\"hours\":\"9,10,11,12,13,14,15,21,22,23\"}' );
+/** 添加直播间商品默认数量**/
+alter table li_studio alter column room_goods_num set default 0;

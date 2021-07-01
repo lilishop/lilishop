@@ -16,12 +16,16 @@ import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
+import cn.lili.modules.goods.entity.dos.Parameters;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
+import cn.lili.modules.goods.entity.dto.GoodsParamsItemDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
+import cn.lili.modules.goods.entity.vos.ParameterGroupVO;
 import cn.lili.modules.goods.mapper.GoodsMapper;
 import cn.lili.modules.goods.service.*;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
@@ -59,9 +63,7 @@ import java.util.List;
 @Transactional
 public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements GoodsService {
 
-    //商品属性
-    @Autowired
-    private GoodsParamsService goodsParamsService;
+
     //分类
     @Autowired
     private CategoryService categoryService;
@@ -85,11 +87,16 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     //rocketMq配置
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
+    @Autowired
+    private CategoryParameterGroupService categoryParameterGroupService;
 
 
     @Override
     public void underStoreGoods(String storeId) {
-        this.baseMapper.underStoreGoods(storeId);
+        //获取商品ID列表
+        List<String> list= this.baseMapper.getGoodsIdByStoreId(storeId);
+        //下架店铺下的商品
+        updateGoodsMarketAble(list,GoodsStatusEnum.DOWN,"店铺关闭");
     }
 
     @Override
@@ -107,12 +114,15 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         this.checkGoods(goods);
         //向goods加入图片
         this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
+        //添加商品参数
+        if (goodsOperationDTO.getGoodsParamsDTOList() != null && !goodsOperationDTO.getGoodsParamsDTOList().isEmpty()) {
+            //检测商品参数是否合法
+            //this.checkGoodsParams(goodsOperationDTO.getGoodsParamsDTOList(), goodsOperationDTO.getCategoryPath().substring(goodsOperationDTO.getCategoryPath().lastIndexOf(",") + 1));
+            //给商品参数填充值
+            goods.setParams(JSONUtil.toJsonStr(goodsOperationDTO.getGoodsParamsDTOList()));
+        }
         //添加商品
         this.save(goods);
-        //添加商品参数
-        if (goodsOperationDTO.getGoodsParamsList() != null && !goodsOperationDTO.getGoodsParamsList().isEmpty()) {
-            this.goodsParamsService.addParams(goodsOperationDTO.getGoodsParamsList(), goods.getId());
-        }
         //添加商品sku信息
         this.goodsSkuService.add(goodsOperationDTO.getSkuList(), goods);
         //添加相册
@@ -130,12 +140,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         this.checkGoods(goods);
         //向goods加入图片
         this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
+        //添加商品参数
+        if (goodsOperationDTO.getGoodsParamsDTOList() != null && !goodsOperationDTO.getGoodsParamsDTOList().isEmpty()) {
+            goods.setParams(JSONUtil.toJsonStr(goodsOperationDTO.getGoodsParamsDTOList()));
+        }
         //修改商品
         this.updateById(goods);
-        //添加商品参数
-        if (goodsOperationDTO.getGoodsParamsList() != null && !goodsOperationDTO.getGoodsParamsList().isEmpty()) {
-            this.goodsParamsService.addParams(goodsOperationDTO.getGoodsParamsList(), goods.getId());
-        }
         //修改商品sku信息
         this.goodsSkuService.update(goodsOperationDTO.getSkuList(), goods, goodsOperationDTO.getRegeneratorSkuFlag());
         //添加相册
@@ -180,7 +190,10 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         }
         goodsVO.setCategoryName(categoryName);
 
-        goodsVO.setGoodsParamsList(goodsParamsService.getGoodsParamsByGoodsId(goodsId));
+        //参数非空则填写参数
+        if (StringUtils.isNotEmpty(goods.getParams())) {
+            goodsVO.setGoodsParamsDTOList(JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class));
+        }
 
         return goodsVO;
     }
@@ -319,6 +332,52 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         goods.setOriginal(goodsGallery.getOriginal());
         goods.setSmall(goodsGallery.getSmall());
         goods.setThumbnail(goodsGallery.getThumbnail());
+    }
+
+    /**
+     * 检测商品参数是否非法传递
+     *
+     * @param goodsParamsDTOS 商品参数
+     * @param categoryId      分类id
+     */
+    private void checkGoodsParams(List<GoodsParamsDTO> goodsParamsDTOS, String categoryId) {
+        //根据绑定的分了id查询出参数信息
+        List<ParameterGroupVO> parameterGroupVOS = categoryParameterGroupService.getCategoryParams(categoryId);
+        if (parameterGroupVOS.size() > 0) {
+            //绑定分类的参数集合
+            List<Parameters> parametersList = new ArrayList<>();
+            //循环分类绑定的参数信息 把它整理到新的分类参数集合中 用于最后的参数信息对比
+            for (ParameterGroupVO parameterGroupVO : parameterGroupVOS) {
+                List<Parameters> parameters = parameterGroupVO.getParams();
+                for (Parameters param : parameters) {
+                    parametersList.add(param);
+                }
+            }
+            List<GoodsParamsItemDTO> goodsOperationParamList = new ArrayList<>();
+            //循环添加商品传递的参数信息 把它整理到新的分类参数集合中 用于最后的参数信息对比
+            for (GoodsParamsDTO goodsParamsDTO : goodsParamsDTOS) {
+                List<GoodsParamsItemDTO> goodsParamsItemDTOS = goodsParamsDTO.getGoodsParamsItemDTOList();
+                for (GoodsParamsItemDTO goodsParamsItemDTO : goodsParamsItemDTOS) {
+                    goodsOperationParamList.add(goodsParamsItemDTO);
+                }
+            }
+            //两个参数集合进行对比
+            for (Parameters parameters :parametersList){
+                for (GoodsParamsItemDTO goodsParamsItemDTO :goodsOperationParamList){
+                    if(parameters.getId().equals(goodsParamsItemDTO.getParamId())){
+                        //校验是否可以索引参数是否正确
+                        if(!parameters.getIsIndex().equals(goodsParamsItemDTO.getIsIndex())){
+                            throw new ServiceException("商品参数错误，刷新后重试");
+                        }
+                        //校验是否必填参数是否正确
+                        if(!parameters.getRequired().equals(goodsParamsItemDTO.getRequired())){
+                            throw new ServiceException("商品参数错误，刷新后重试");
+                        }
+                    }
+                }
+            }
+
+        }
     }
 
     /**

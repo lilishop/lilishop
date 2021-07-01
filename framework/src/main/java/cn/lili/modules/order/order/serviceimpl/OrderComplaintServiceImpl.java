@@ -198,9 +198,9 @@ public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper,
     }
 
     @Override
-    public Integer newComplainNum() {
+    public Integer waitComplainNum() {
         QueryWrapper queryWrapper = Wrappers.query();
-        queryWrapper.eq("complain_status", ComplaintStatusEnum.NEW.name());
+        queryWrapper.ne("complain_status", ComplaintStatusEnum.COMPLETE.name());
         queryWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
                 "store_id", UserContext.getCurrentUser().getStoreId());
         return this.count(queryWrapper);

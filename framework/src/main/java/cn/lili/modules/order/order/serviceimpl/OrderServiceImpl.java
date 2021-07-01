@@ -202,8 +202,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @OrderLogPoint(description = "'订单['+#orderSn+']取消，原因为：'+#reason", orderSn = "#orderSn")
     public Order cancel(String orderSn, String reason) {
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
-        if (order.getOrderPromotionType().equals(OrderPromotionTypeEnum.PINTUAN.name()) && !order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())) {
-            throw new ServiceException("未成团订单不可取消");
+        //如果订单促销类型不为空&&订单是拼团订单，并且订单未成团，则抛出异常
+        if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())
+                && !order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())) {
+            throw new ServiceException(ResultCode.ORDER_CAN_NOT_CANCEL);
         }
         if (CharSequenceUtil.equalsAny(order.getOrderStatus(),
                 OrderStatusEnum.UNDELIVERED.name(),
@@ -217,7 +219,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderStatusMessage(order);
             return order;
         } else {
-            throw new ServiceException("当前订单状态不可取消");
+            throw new ServiceException(ResultCode.ORDER_CAN_NOT_CANCEL);
         }
     }
 
@@ -283,7 +285,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Order order = this.getBySn(orderSn);
         //判断是否为拼团订单，进行特殊处理
         //判断订单类型进行不同的订单确认操作
-        if (order.getOrderPromotionType() != null && order.getOrderPromotionType().equals(OrderPromotionTypeEnum.PINTUAN.name())) {
+        if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())) {
             this.checkPintuanOrder(order.getPromotionId(), order.getParentOrderSn());
         } else {
             //判断订单类型
@@ -365,13 +367,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //检测虚拟订单信息
         checkVerificationOrder(order, verificationCode);
         order.setOrderStatus(OrderStatusEnum.COMPLETED.name());
-        //修改订单信息
-        this.updateById(order);
-        //发送订单完成消息
-        OrderMessage orderMessage = new OrderMessage();
-        orderMessage.setNewStatus(OrderStatusEnum.COMPLETED);
-        orderMessage.setOrderSn(order.getSn());
-        this.sendUpdateStatusMessage(orderMessage);
+        //订单完成
+        this.complete(orderSn);
         return order;
     }
 

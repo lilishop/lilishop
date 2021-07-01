@@ -46,7 +46,6 @@ public class SpecificationManagerController {
     public Page<Specification> page(String specName, PageVO page) {
         LambdaQueryWrapper<Specification> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.like(StringUtils.isNotEmpty(specName), Specification::getSpecName, specName);
-        lambdaQueryWrapper.orderByDesc(Specification::getCreateTime);
         return specificationService.page(PageUtil.initPage(page), lambdaQueryWrapper);
     }
 

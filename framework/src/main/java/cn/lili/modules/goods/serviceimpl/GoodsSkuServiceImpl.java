@@ -11,9 +11,10 @@ import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.common.rocketmq.tags.GoodsTagsEnum;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.PageUtil;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.Goods;
-import cn.lili.modules.goods.entity.dos.GoodsParams;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
@@ -44,6 +45,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 商品sku业务层实现
@@ -64,9 +66,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     //商品相册
     @Autowired
     private GoodsGalleryService goodsGalleryService;
-    //规格
-    @Autowired
-    private SpecificationService specificationService;
     //缓存
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -208,7 +207,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //获取当前商品的索引信息
         EsGoodsIndex goodsIndex = goodsIndexService.findById(skuId);
         if (goodsIndex == null) {
-            goodsIndex = goodsIndexService.resetEsGoodsIndex(goodsSku, goodsVO.getGoodsParamsList());
+            goodsIndex = goodsIndexService.resetEsGoodsIndex(goodsSku, goodsVO.getGoodsParamsDTOList());
         }
         //商品规格
         GoodsSkuVO goodsSkuDetail = this.getGoodsSkuVO(goodsSku);
@@ -320,33 +319,30 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     @Override
     public GoodsSkuVO getGoodsSkuVO(GoodsSku goodsSku) {
+        //厨师还商品
         GoodsSkuVO goodsSkuVO = new GoodsSkuVO(goodsSku);
+        //获取sku信息
         JSONObject jsonObject = JSONUtil.parseObj(goodsSku.getSpecs());
+        //用于接受sku信息
         List<SpecValueVO> specValueVOS = new ArrayList<>();
+        //用于接受sku相册
         List<String> goodsGalleryList = new ArrayList<>();
-//        for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-//            SpecValueVO s = new SpecValueVO();
-//            if (entry.getKey().equals("images")) {
-//                s.setSpecName(entry.getKey());
-//                if (entry.getValue().toString().contains("url")) {
-//                    List<SpecValueVO.SpecImages> specImages = JSONUtil.toList(JSONUtil.parseArray(entry.getValue()), SpecValueVO.SpecImages.class);
-//                    s.setSpecImage(specImages);
-//                    goodsGalleryList = specImages.stream().map(SpecValueVO.SpecImages::getUrl).collect(Collectors.toList());
-//                }
-//            } else {
-//                SpecificationVO specificationVO = new SpecificationVO();
-//                specificationVO.setSpecName(entry.getKey());
-//                specificationVO.setStoreId(goodsSku.getStoreId());
-//                specificationVO.setCategoryPath(goodsSku.getCategoryPath());
-//                Specification specification = specificationService.addSpecification(specificationVO);
-//                s.setSpecNameId(specification.getId());
-//                SpecValues specValues = specValuesService.getSpecValues(entry.getValue().toString(), specification.getId());
-//                s.setSpecValueId(specValues.getId());
-//                s.setSpecName(entry.getKey());
-//                s.setSpecValue(entry.getValue().toString());
-//            }
-//            specValueVOS.add(s);
-//        }
+        //循环提交的sku表单
+        for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+            SpecValueVO specValueVO = new SpecValueVO();
+            if (entry.getKey().equals("images")) {
+                specValueVO.setSpecName(entry.getKey());
+                if (entry.getValue().toString().contains("url")) {
+                    List<SpecValueVO.SpecImages> specImages = JSONUtil.toList(JSONUtil.parseArray(entry.getValue()), SpecValueVO.SpecImages.class);
+                    specValueVO.setSpecImage(specImages);
+                    goodsGalleryList = specImages.stream().map(SpecValueVO.SpecImages::getUrl).collect(Collectors.toList());
+                }
+            } else {
+                specValueVO.setSpecName(entry.getKey());
+                specValueVO.setSpecValue(entry.getValue().toString());
+            }
+            specValueVOS.add(specValueVO);
+        }
         goodsSkuVO.setGoodsGalleryList(goodsGalleryList);
         goodsSkuVO.setSpecList(specValueVOS);
         return goodsSkuVO;
@@ -465,8 +461,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 EsGoodsIndex esGoodsOld = goodsIndexService.findById(goodsSku.getId());
                 EsGoodsIndex goodsIndex = new EsGoodsIndex(goodsSku);
                 if (goods.getParams() != null && !goods.getParams().isEmpty()) {
-                    List<GoodsParams> goodsParams = JSONUtil.toList(goods.getParams(), GoodsParams.class);
-                    goodsIndex = new EsGoodsIndex(goodsSku, goodsParams);
+                    List<GoodsParamsDTO> goodsParamDTOS = JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class);
+                    goodsIndex = new EsGoodsIndex(goodsSku, goodsParamDTOS);
                 }
                 //如果商品库存不为0，并且es中有数据
                 if (goodsSku.getQuantity() > 0 && esGoodsOld == null) {
@@ -606,29 +602,34 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         List<EsGoodsAttribute> attributes = new ArrayList<>();
 
         //获取规格信息
-        for (Map.Entry<String, Object> m : map.entrySet()) {
+        for (Map.Entry<String, Object> spec : map.entrySet()) {
             //保存规格信息
-            if (m.getKey().equals("id") || m.getKey().equals("sn") || m.getKey().equals("cost") || m.getKey().equals("price") || m.getKey().equals("quantity") || m.getKey().equals("weight")) {
+            if (spec.getKey().equals("id") || spec.getKey().equals("sn") || spec.getKey().equals("cost")
+                    || spec.getKey().equals("price") || spec.getKey().equals("quantity")
+                    || spec.getKey().equals("weight")) {
                 continue;
             } else {
-                specMap.put(m.getKey(), m.getValue());
-                if (m.getKey().equals("images")) {
+                specMap.put(spec.getKey(), spec.getValue());
+                if (spec.getKey().equals("images")) {
                     //设置规格商品缩略图
-                    List<Map<String, String>> images = (List<Map<String, String>>) m.getValue();
+                    List<Map<String, String>> images = (List<Map<String, String>>) spec.getValue();
                     if (images == null || images.isEmpty()) {
-                        throw new ServiceException("sku图片至少为一个");
+                        continue;
                     }
-                    thumbnail = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getThumbnail();
-                    small = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getSmall();
-                } else {
-                    //设置商品名称
-                    goodsName.append(" ").append(m.getValue());
-                    //规格简短信息
-                    simpleSpecs.append(" ").append(m.getValue());
+                    //设置规格商品缩略图
+                    //如果规格没有图片，则用商品图片复盖。有则增加规格图片，放在商品图片集合之前
+                    if (spec.getValue() != null && StringUtils.isNotEmpty(spec.getValue().toString())) {
+                        thumbnail = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getThumbnail();
+                        small = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getSmall();
+                    } else {
+                        //设置商品名称
+                        goodsName.append(" ").append(spec.getValue());
+                        //规格简短信息
+                        simpleSpecs.append(" ").append(spec.getValue());
+                    }
                 }
             }
         }
-
         //设置规格信息
         sku.setGoodsName(goodsName.toString());
         sku.setThumbnail(thumbnail);

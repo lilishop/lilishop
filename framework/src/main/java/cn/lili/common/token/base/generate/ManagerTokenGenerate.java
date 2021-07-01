@@ -84,7 +84,7 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
                 //for循环路径集合
                 for (String path : paths) {
                     //如果是超级权限 则计入超级权限
-                    if (menu.getIsSupper()) {
+                    if (menu.getIsSupper() != null && menu.getIsSupper()) {
                         //如果已有超级权限，则这里就不做权限的累加
                         if (!superPermissions.contains(path)) {
                             superPermissions.add(path);

@@ -2,6 +2,7 @@ package cn.lili.controller.payment;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.payment.kit.CashierSupport;
 import cn.lili.modules.payment.kit.dto.PayParam;
@@ -64,8 +65,11 @@ public class CashierController {
 
         try {
             return cashierSupport.payment(paymentMethodEnum, paymentClientEnum, request, response, payParam);
+        } catch (ServiceException se) {
+            log.info("支付异常", se);
+            throw se;
         } catch (Exception e) {
-            log.error("收银台支付错误",e);
+            log.error("收银台支付错误", e);
         }
         return null;
 

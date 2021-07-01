@@ -219,27 +219,25 @@ public class Order extends BaseEntity {
         BeanUtil.copyProperties(tradeDTO, this);
         BeanUtil.copyProperties(cartVO.getPriceDetailDTO(), this);
         BeanUtil.copyProperties(cartVO, this);
-        //订单类型判断--普通订单，活动订单。
+        //订单类型判断--普通订单，虚拟订单。
         if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.CART) || tradeDTO.getCartTypeEnum().equals(CartTypeEnum.BUY_NOW)) {
             this.setOrderType(OrderTypeEnum.NORMAL.name());
         } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.VIRTUAL)) {
             this.setOrderType(tradeDTO.getCartTypeEnum().name());
-        } else {
-            this.setOrderType(OrderTypeEnum.NORMAL.name());
         }
         this.setId(oldId);
 
         //促销信息填充
-        if (cartVO.getSkuList().get(0).getPromotions() != null && tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)) {
-            Optional<String> pintuanId = cartVO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
-            if (pintuanId.isPresent()) {
-                promotionId = pintuanId.get();
-                this.setOrderType(OrderTypeEnum.PINTUAN.name());
-                if (tradeDTO.getParentOrderSn() == null) {
-                    this.setParentOrderSn("");
-                }
-            }
-        }
+//        if (cartVO.getSkuList().get(0).getPromotions() != null && tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)) {
+//            Optional<String> pintuanId = cartVO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
+//            if (pintuanId.isPresent()) {
+//                promotionId = pintuanId.get();
+//                this.setOrderType(OrderTypeEnum.PINTUAN.name());
+//                if (tradeDTO.getParentOrderSn() == null) {
+//                    this.setParentOrderSn("");
+//                }
+//            }
+//        }
 
         //设置默认支付状态
         this.setOrderStatus(OrderStatusEnum.UNPAID.name());

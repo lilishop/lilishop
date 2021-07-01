@@ -59,7 +59,7 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
         //如果订单状态不为空
         if (orderDetailVO != null) {
             Map<String, String> params = new HashMap<>();
-            switch (orderMessage.getNewStatus()){
+            switch (orderMessage.getNewStatus()) {
                 //如果订单新的状态为已取消 则发送取消订单站内信
                 case CANCELLED:
                     params.put(NoticeMessageParameterEnum.CANCEL_REASON.getType(), orderDetailVO.getOrder().getCancelReason());
@@ -82,7 +82,7 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
                     break;
                 //如果是拼团订单，发送拼团成功消息
                 case UNDELIVERED:
-                    if(orderDetailVO.getOrder().getOrderPromotionType().equals(OrderPromotionTypeEnum.PINTUAN.name())){
+                    if (OrderPromotionTypeEnum.PINTUAN.name().equals(orderDetailVO.getOrder().getOrderPromotionType())) {
                         //拼团成功消息
                         noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.PINTUAN_SUCCESS);
                     }
@@ -148,11 +148,14 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
 
     @Override
     public void memberPointChange(MemberPointMessage memberPointMessage) {
+        if (memberPointMessage == null) {
+            return;
+        }
         //组织站内信参数
         NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
         noticeMessageDTO.setMemberId(memberPointMessage.getMemberId());
         Map<String, String> params = new HashMap<>();
-        if (memberPointMessage.getType().equals(1)) {
+        if (memberPointMessage.getType()) {
             params.put("expenditure_points", "0");
             params.put("income_points", memberPointMessage.getPoint().toString());
         } else {

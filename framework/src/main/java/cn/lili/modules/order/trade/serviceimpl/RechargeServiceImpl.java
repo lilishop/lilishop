@@ -1,9 +1,11 @@
 package cn.lili.modules.order.trade.serviceimpl;
 
+import cn.hutool.core.date.DateTime;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
@@ -62,27 +64,28 @@ public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> i
         queryWrapper.eq(!StringUtils.isEmpty(rechargeQueryVO.getRechargeSn()), "recharge_sn", rechargeQueryVO.getRechargeSn());
         //会员id
         queryWrapper.eq(!StringUtils.isEmpty(rechargeQueryVO.getMemberId()), "member_id", rechargeQueryVO.getMemberId());
-        //已付款的充值订单
-        queryWrapper.eq("pay_status", PayStatusEnum.PAID.name());
         //支付时间 开始时间和结束时间
         if (!StringUtils.isEmpty(rechargeQueryVO.getStartDate()) && !StringUtils.isEmpty(rechargeQueryVO.getEndDate())) {
             Date start = cn.hutool.core.date.DateUtil.parse(rechargeQueryVO.getStartDate());
             Date end = cn.hutool.core.date.DateUtil.parse(rechargeQueryVO.getEndDate());
             queryWrapper.between("pay_time", start, end);
         }
+        queryWrapper.orderByDesc("create_time");
         //查询返回数据
         return this.page(PageUtil.initPage(page), queryWrapper);
     }
 
     @Override
-    public void paySuccess(String sn, String receivableNo) {
+    public void paySuccess(String sn, String receivableNo,String paymentMethod) {
         //根据sn获取支付账单
         Recharge recharge = this.getOne(new QueryWrapper<Recharge>().eq("recharge_sn", sn));
         //如果支付账单不为空则进行一下逻辑
-        if (recharge != null) {
+        if (recharge != null && !recharge.getPayStatus().equals(PayStatusEnum.PAID.name())) {
             //将此账单支付状态更改为已支付
             recharge.setPayStatus(PayStatusEnum.PAID.name());
             recharge.setReceivableNo(receivableNo);
+            recharge.setPayTime(new DateTime());
+            recharge.setRechargeWay(paymentMethod);
             //执行保存操作
             this.updateById(recharge);
             //增加预存款余额

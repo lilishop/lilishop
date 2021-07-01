@@ -10,6 +10,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 /**
  * 规格项数据处理层
  *
@@ -19,12 +21,12 @@ import org.apache.ibatis.annotations.Update;
 public interface GoodsMapper extends BaseMapper<Goods> {
 
     /**
-     * 下架所有商家商品
+     * 根据店铺ID获取商品ID列表
      *
-     * @param storeId
+     * @param storeId 店铺ID
      */
-    @Update("update li_goods set market_enable = 0 WHERE store_id = #{storeId}")
-    void underStoreGoods(String storeId);
+    @Select("SELECT id FROM li_goods WHERE store_id = #{storeId}")
+    List<String> getGoodsIdByStoreId(String storeId);
 
     @Update("UPDATE li_goods SET comment_num = comment_num + #{commentNum} WHERE id = #{goodsId}")
     void addGoodsCommentNum(Integer commentNum, String goodsId);

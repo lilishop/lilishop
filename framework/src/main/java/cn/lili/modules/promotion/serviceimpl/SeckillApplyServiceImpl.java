@@ -185,7 +185,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             promotionGoodsService.saveBatch(promotionGoodsList);
         }
         //设置秒杀活动的商品数量、店铺数量
-        seckillService.updateSeckillGoodsNum(seckill.getId());
+        seckillService.updateSeckillGoodsNum(seckillId);
     }
 
 

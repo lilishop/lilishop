@@ -5,6 +5,7 @@ import cn.lili.common.delayqueue.BroadcastMessage;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
 import cn.lili.common.trigger.model.TimeExecuteConstant;
@@ -71,7 +72,8 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                 //直播开启延时任务
                 BroadcastMessage broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.START.name());
                 TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
-                        Long.parseLong(studio.getStartTime()) * 1000L, broadcastMessage,
+                        Long.parseLong(studio.getStartTime()) * 1000L,
+                        broadcastMessage,
                         DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                         rocketmqCustomProperties.getPromotionTopic());
 
@@ -106,8 +108,8 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             this.timeTrigger.edit(
                     TimeExecuteConstant.BROADCAST_EXECUTOR,
                     broadcastMessage,
-                    Long.parseLong(oldStudio.getStartTime()),
-                    Long.parseLong(studio.getStartTime()),
+                    Long.parseLong(oldStudio.getStartTime()) * 1000L,
+                    Long.parseLong(studio.getStartTime()) * 1000L,
                     DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                     DateUtil.getDelayTime(Long.parseLong(studio.getStartTime())),
                     rocketmqCustomProperties.getPromotionTopic());
@@ -117,8 +119,8 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             this.timeTrigger.edit(
                     TimeExecuteConstant.BROADCAST_EXECUTOR,
                     broadcastMessage,
-                    Long.parseLong(oldStudio.getEndTime()),
-                    Long.parseLong(studio.getEndTime()),
+                    Long.parseLong(oldStudio.getEndTime()) * 1000L,
+                    Long.parseLong(studio.getEndTime()) * 1000L,
                     DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                     DateUtil.getDelayTime(Long.parseLong(studio.getEndTime())),
                     rocketmqCustomProperties.getPromotionTopic());
@@ -152,6 +154,14 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
 
     @Override
     public Boolean push(Integer roomId, Integer goodsId) {
+
+        //判断直播间是否已添加商品
+        if (studioCommodityService.getOne(
+                new LambdaQueryWrapper<StudioCommodity>().eq(StudioCommodity::getRoomId, roomId)
+                        .eq(StudioCommodity::getGoodsId, goodsId)) != null) {
+            throw new ServiceException(ResultCode.STODIO_GOODS_EXIST_ERROR);
+        }
+
         //调用微信接口添加直播间商品并进行记录
         if (wechatLivePlayerUtil.pushGoods(roomId, goodsId)) {
             studioCommodityService.save(new StudioCommodity(roomId, goodsId));
@@ -186,10 +196,14 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
 
     @Override
     public IPage<Studio> studioList(PageVO pageVO, Integer recommend, String status) {
-        return this.page(PageUtil.initPage(pageVO), new QueryWrapper<Studio>()
+        QueryWrapper queryWrapper = new QueryWrapper<Studio>()
                 .eq(recommend != null, "recommend", true)
                 .eq(status != null, "status", status)
-                .orderByDesc("create_time"));
+                .orderByDesc("create_time");
+        if (UserContext.getCurrentUser() != null && UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
+            queryWrapper.eq("store_id", UserContext.getCurrentUser().getStoreId());
+        }
+        return this.page(PageUtil.initPage(pageVO), queryWrapper);
 
     }
 
