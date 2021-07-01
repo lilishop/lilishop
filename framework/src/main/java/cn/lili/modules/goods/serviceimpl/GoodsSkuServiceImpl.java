@@ -191,6 +191,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
 
         GoodsVO goodsVO = goodsService.getGoodsVO(goodsId);
+        if (goodsVO == null || !goodsVO.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())
+                || !goodsVO.getIsAuth().equals(GoodsAuthEnum.PASS.name())
+                || Boolean.TRUE.equals(goodsVO.getDeleteFlag())) {
+            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+        }
         //如果规格为空则使用商品ID进行查询
         if (goodsSku == null) {
             skuId = goodsVO.getSkuList().get(0).getId();
@@ -199,8 +204,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             if (goodsSku == null) {
                 throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
             }
-        } else if (!goodsSku.getMarketEnable().equals(GoodsStatusEnum.UPPER.name()) || !goodsVO.getIsAuth().equals(GoodsAuthEnum.PASS.name()) || Boolean.TRUE.equals(goodsSku.getDeleteFlag())) {
-            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
         //获取当前商品的索引信息
         EsGoodsIndex goodsIndex = goodsIndexService.findById(skuId);
