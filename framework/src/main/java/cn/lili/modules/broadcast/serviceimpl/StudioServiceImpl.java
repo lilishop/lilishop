@@ -1,5 +1,6 @@
 package cn.lili.modules.broadcast.serviceimpl;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.delayqueue.BroadcastMessage;
 import cn.lili.common.enums.ResultCode;
@@ -62,9 +63,9 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     public Boolean create(Studio studio) {
         try {
             //创建小程序直播
-//            Map<String, String> roomMap = wechatLivePlayerUtil.create(studio);
-//            studio.setRoomId(Integer.parseInt(roomMap.get("roomId")));
-//            studio.setQrCodeUrl(roomMap.get("qrcodeUrl"));
+            Map<String, String> roomMap = wechatLivePlayerUtil.create(studio);
+            studio.setRoomId(Convert.toInt(roomMap.get("roomId")));
+            studio.setQrCodeUrl(roomMap.get("qrcodeUrl"));
             studio.setStoreId(UserContext.getCurrentUser().getStoreId());
             studio.setStatus(StudioStatusEnum.NEW.name());
             //直播间添加成功发送直播间开启、关闭延时任务
@@ -72,7 +73,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                 //直播开启延时任务
                 BroadcastMessage broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.START.name());
                 TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
-                        Long.parseLong(studio.getStartTime()),
+                        Long.parseLong(studio.getStartTime()) * 1000L,
                         broadcastMessage,
                         DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                         rocketmqCustomProperties.getPromotionTopic());
@@ -83,7 +84,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                 //直播结束延时任务
                 broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.END.name());
                 timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
-                        Long.parseLong(studio.getEndTime()), broadcastMessage,
+                        Long.parseLong(studio.getEndTime()) * 1000L, broadcastMessage,
                         DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                         rocketmqCustomProperties.getPromotionTopic());
                 //发送促销活动开始的延时任务
@@ -108,8 +109,8 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             this.timeTrigger.edit(
                     TimeExecuteConstant.BROADCAST_EXECUTOR,
                     broadcastMessage,
-                    Long.parseLong(oldStudio.getStartTime()),
-                    Long.parseLong(studio.getStartTime()),
+                    Long.parseLong(oldStudio.getStartTime()) * 1000L,
+                    Long.parseLong(studio.getStartTime()) * 1000L,
                     DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                     DateUtil.getDelayTime(Long.parseLong(studio.getStartTime())),
                     rocketmqCustomProperties.getPromotionTopic());
@@ -119,8 +120,8 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             this.timeTrigger.edit(
                     TimeExecuteConstant.BROADCAST_EXECUTOR,
                     broadcastMessage,
-                    Long.parseLong(oldStudio.getEndTime()),
-                    Long.parseLong(studio.getEndTime()),
+                    Long.parseLong(oldStudio.getEndTime()) * 1000L,
+                    Long.parseLong(studio.getEndTime()) * 1000L,
                     DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
                     DateUtil.getDelayTime(Long.parseLong(studio.getEndTime())),
                     rocketmqCustomProperties.getPromotionTopic());
@@ -200,7 +201,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                 .eq(recommend != null, "recommend", true)
                 .eq(status != null, "status", status)
                 .orderByDesc("create_time");
-        if (UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
+        if (UserContext.getCurrentUser() != null && UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
             queryWrapper.eq("store_id", UserContext.getCurrentUser().getStoreId());
         }
         return this.page(PageUtil.initPage(pageVO), queryWrapper);

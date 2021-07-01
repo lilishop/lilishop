@@ -96,7 +96,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             // 添加商品sku
             newSkuList = this.addGoodsSku(skuList, goods);
         } else {
-            throw new ServiceException("规格必须要有一个！");
+            throw new ServiceException(ResultCode.MUST_HAVE_GOODS_SKU);
         }
 
         this.updateStock(newSkuList);
@@ -107,7 +107,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     public void update(List<Map<String, Object>> skuList, Goods goods, Boolean regeneratorSkuFlag) {
         // 是否存在规格
         if (skuList == null || skuList.isEmpty()) {
-            throw new ServiceException("规格必须要有一个！");
+            throw new ServiceException(ResultCode.MUST_HAVE_GOODS_SKU);
         }
         List<GoodsSku> newSkuList;
         //删除旧的sku信息
@@ -173,8 +173,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
         String quantity = stringRedisTemplate.opsForValue().get(GoodsSkuService.getStockCacheKey(id));
         if (quantity != null) {
-            if (goodsSku.getQuantity() != Integer.parseInt(quantity)) {
-                goodsSku.setQuantity(Integer.parseInt(quantity));
+            if (goodsSku.getQuantity() != Convert.toInt(quantity)) {
+                goodsSku.setQuantity(Convert.toInt(quantity));
                 this.updateById(goodsSku);
             }
         } else {
@@ -190,6 +190,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
 
         GoodsVO goodsVO = goodsService.getGoodsVO(goodsId);
+        if (goodsVO == null || !goodsVO.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())
+                || !goodsVO.getIsAuth().equals(GoodsAuthEnum.PASS.name())
+                || Boolean.TRUE.equals(goodsVO.getDeleteFlag())) {
+            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+        }
         //如果规格为空则使用商品ID进行查询
         if (goodsSku == null) {
             skuId = goodsVO.getSkuList().get(0).getId();
@@ -198,8 +203,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             if (goodsSku == null) {
                 throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
             }
-        } else if (!goodsSku.getMarketEnable().equals(GoodsStatusEnum.UPPER.name()) || !goodsVO.getIsAuth().equals(GoodsAuthEnum.PASS.name()) || Boolean.TRUE.equals(goodsSku.getDeleteFlag())) {
-            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
         //获取当前商品的索引信息
         EsGoodsIndex goodsIndex = goodsIndexService.findById(skuId);
@@ -222,6 +225,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //获取规格信息
         map.put("specs", this.groupBySkuAndSpec(goodsSkuDetail.getGoodsId()));
         map.put("promotionMap", goodsIndex.getPromotionMap());
+
+        //获取参数信息
+        if(goodsVO.getGoodsParamsDTOList().size()>0){
+            map.put("goodsParamsDTOList",goodsVO.getGoodsParamsDTOList());
+        }
 
         //记录用户足迹
         if (UserContext.getCurrentUser() != null) {
@@ -381,7 +389,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         String cacheKeys = GoodsSkuService.getStockCacheKey(skuId);
         String stockStr = stringRedisTemplate.opsForValue().get(cacheKeys);
         if (stockStr != null) {
-            return Integer.parseInt(stockStr);
+            return Convert.toInt(stockStr);
         } else {
             GoodsSku goodsSku = getGoodsSkuByIdFromCache(skuId);
             stringRedisTemplate.opsForValue().set(cacheKeys, goodsSku.getQuantity().toString());
@@ -452,7 +460,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     private void generateEsCheck(Goods goods) {
         //如果商品通过审核&&并且已上架
         List<GoodsSku> goodsSkuList = this.list(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goods.getId()));
-        if (goods.getIsAuth().equals(GoodsAuthEnum.PASS.name()) && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name()) && Boolean.FALSE.equals(goods.getDeleteFlag())) {
+        if (goods.getIsAuth().equals(GoodsAuthEnum.PASS.name())
+                && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())
+                && Boolean.FALSE.equals(goods.getDeleteFlag())) {
             List<EsGoodsIndex> goodsIndices = new ArrayList<>();
             for (GoodsSku goodsSku : goodsSkuList) {
                 EsGoodsIndex esGoodsOld = goodsIndexService.findById(goodsSku.getId());

@@ -16,4 +16,11 @@ public interface DistributionSelectedGoodsService extends IService<DistributionS
      * @return
      */
     boolean add(String distributionGoodsId);
+
+    /**
+     * 分销员添加分销商品
+     * @param distributionGoodsId 分销商品ID
+     * @return
+     */
+    boolean delete(String distributionGoodsId);
 }

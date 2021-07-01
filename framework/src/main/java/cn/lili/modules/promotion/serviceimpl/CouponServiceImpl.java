@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.trigger.util.DelayQueueTools;
 import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.message.PromotionMessage;
@@ -130,7 +131,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         List<CouponVO> couponVOS = this.mongoTemplate.find(query, CouponVO.class);
         couponVOS = couponVOS.parallelStream().filter(i -> Boolean.FALSE.equals(i.getDeleteFlag())).collect(Collectors.toList());
         if (couponVOS.isEmpty()) {
-            throw new ServiceException("优惠券不存在");
+            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
         }
         for (CouponVO couponVO : couponVOS) {
             if (promotionStatus.name().equals(PromotionStatusEnum.START.name())) {
@@ -282,23 +283,21 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
     private void checkParam(CouponVO coupon) {
 
         if (coupon.getCouponLimitNum() < 0) {
-            throw new ServiceException("领取限制数量不能为负数");
+            throw new ServiceException(ResultCode.COUPON_LIMIT_NUM_LESS_THAN_0);
         }
         //如果发行数量是0则判断领取限制数量
         if (coupon.getPublishNum() != 0 && coupon.getCouponLimitNum() > coupon.getPublishNum()) {
-            throw new ServiceException("领取限制数量超出发行数量");
+            throw new ServiceException(ResultCode.COUPON_LIMIT_GREATER_THAN_PUBLISH);
         }
 
-        if (coupon.getCouponType().equals(CouponTypeEnum.PRICE.name()) && coupon.getPrice() > coupon.getConsumeThreshold()) {
-            throw new ServiceException("优惠券面额必须小于优惠券消费限额");
-        } else if (coupon.getCouponType().equals(CouponTypeEnum.DISCOUNT.name()) && (coupon.getCouponDiscount() < 0 && coupon.getCouponDiscount() > 10)) {
-            throw new ServiceException("优惠券折扣必须小于10且大于0");
+        if (coupon.getCouponType().equals(CouponTypeEnum.DISCOUNT.name()) && (coupon.getCouponDiscount() < 0 && coupon.getCouponDiscount() > 10)) {
+            throw new ServiceException(ResultCode.COUPON_DISCOUNT_ERROR);
         }
 
         if (coupon.getRangeDayType() != null && coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
             long nowTime = DateUtil.getDateline() * 1000;
             if (coupon.getStartTime().getTime() < nowTime && coupon.getEndTime().getTime() > nowTime) {
-                throw new ServiceException("活动时间小于当前时间，不能进行编辑删除操作");
+                throw new ServiceException(ResultCode.PROMOTION_TIME_ERROR);
             }
 
             PromotionTools.checkPromotionTime(coupon.getStartTime().getTime(), coupon.getEndTime().getTime());
@@ -316,24 +315,24 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
      */
     private void checkCouponScope(CouponVO coupon) {
         if (coupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS.name()) && (coupon.getPromotionGoodsList() == null || coupon.getPromotionGoodsList().isEmpty())) {
-            throw new ServiceException("当前关联范围类型为指定商品时，商品列表不能为空");
+            throw new ServiceException(ResultCode.COUPON_SCOPE_TYPE_GOODS_ERROR);
         } else if (coupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS.name()) && CharSequenceUtil.isEmpty(coupon.getScopeId())) {
-            throw new ServiceException("当前关联范围类型为指定商品时，范围关联的id不能为空");
+            throw new ServiceException(ResultCode.COUPON_SCOPE_TYPE_GOODS_ERROR);
         } else if (coupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS_CATEGORY.name()) && CharSequenceUtil.isEmpty(coupon.getScopeId())) {
-            throw new ServiceException("当前关联范围类型为部分商品分类时，范围关联的id不能为空");
+            throw new ServiceException(ResultCode.COUPON_SCOPE_TYPE_CATEGORY_ERROR);
         } else if (coupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_SHOP_CATEGORY.name()) && CharSequenceUtil.isEmpty(coupon.getScopeId())) {
-            throw new ServiceException("当前关联范围类型为部分店铺分类时，范围关联的id不能为空");
+            throw new ServiceException(ResultCode.COUPON_SCOPE_TYPE_STORE_ERROR);
         }
 
         if (coupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS.name())) {
             String[] split = coupon.getScopeId().split(",");
             if (split.length <= 0) {
-                throw new ServiceException("指定商品范围关联id无效！");
+                throw new ServiceException(ResultCode.COUPON_SCOPE_ERROR);
             }
             for (String id : split) {
                 GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(id);
                 if (goodsSku == null) {
-                    throw new ServiceException("商品已下架");
+                    throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
                 }
             }
         }
@@ -375,7 +374,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
     private CouponVO checkStatus(String id) {
         CouponVO coupon = this.mongoTemplate.findById(id, CouponVO.class);
         if (coupon == null) {
-            throw new ServiceException("当前优惠券活动不存在");
+            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
         }
         LambdaQueryWrapper<FullDiscount> queryWrapper = new LambdaQueryWrapper<FullDiscount>().eq(FullDiscount::getIsCoupon, true).eq(FullDiscount::getCouponId, id);
         FullDiscount fullDiscount = fullDiscountService.getOne(queryWrapper);

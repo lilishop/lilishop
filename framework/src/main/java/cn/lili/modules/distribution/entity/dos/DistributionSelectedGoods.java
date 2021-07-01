@@ -38,7 +38,7 @@ public class DistributionSelectedGoods {
     @ApiModelProperty(value = "分销员ID")
     private String distributionId;
 
-    @ApiModelProperty(value = "分销员品ID")
+    @ApiModelProperty(value = "分销商品ID")
     private String distributionGoodsId;
 
     public DistributionSelectedGoods(String distributionId, String distributionGoodsId) {

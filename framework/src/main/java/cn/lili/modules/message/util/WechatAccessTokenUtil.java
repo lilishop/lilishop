@@ -4,6 +4,7 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.base.entity.enums.ClientTypeEnum;
 import cn.lili.modules.connect.util.HttpUtils;
@@ -105,7 +106,7 @@ public class WechatAccessTokenUtil {
             return ticket;
         } catch (Exception e) {
             log.error("微信JsApi签名异常", e);
-            throw new ServiceException("微信JsApi签名异常");
+            throw new ServiceException(ResultCode.WECHAT_JSAPI_SIGN_ERROR);
         }
 
     }

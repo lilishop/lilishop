@@ -3,6 +3,7 @@ package cn.lili.modules.message.serviceimpl;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.base.entity.enums.ClientTypeEnum;
 import cn.lili.modules.message.entity.dos.WechatMessage;
@@ -83,7 +84,7 @@ public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, W
                 if (tplContent.containsKey("template_id")) {
                     wechatMessage.setCode(tplContent.getStr("template_id"));
                 } else {
-                    throw new ServiceException("未能获取到微信模版消息id");
+                    throw new ServiceException(ResultCode.WECHAT_MP_MESSAGE_TMPL_ERROR);
                 }
 
                 wechatMessage.setName(tplData.getName());

@@ -1,5 +1,6 @@
 package cn.lili.config.sharding;
 
+import cn.hutool.core.convert.Convert;
 import cn.lili.common.utils.DateUtil;
 import com.google.common.collect.Range;
 import org.apache.shardingsphere.api.sharding.standard.PreciseShardingAlgorithm;
@@ -34,10 +35,10 @@ public class CreateTimeShardingTableAlgorithm implements PreciseShardingAlgorith
         Collection<String> collect = new ArrayList<>();
         Range<Integer> valueRange = rangeShardingValue.getValueRange();
 
-        Integer startMonth = Integer.parseInt(DateUtil.toString(valueRange.lowerEndpoint().longValue(), "MM"));
-        Integer endMonth = Integer.parseInt(DateUtil.toString(valueRange.upperEndpoint().longValue(), "MM"));
-        Integer startYear = Integer.parseInt(DateUtil.toString(valueRange.lowerEndpoint().longValue(), "yyyy"));
-        Integer endYear = Integer.parseInt(DateUtil.toString(valueRange.upperEndpoint().longValue(), "yyyy"));
+        Integer startMonth = Convert.toInt(DateUtil.toString(valueRange.lowerEndpoint().longValue(), "MM"));
+        Integer endMonth = Convert.toInt(DateUtil.toString(valueRange.upperEndpoint().longValue(), "MM"));
+        Integer startYear = Convert.toInt(DateUtil.toString(valueRange.lowerEndpoint().longValue(), "yyyy"));
+        Integer endYear = Convert.toInt(DateUtil.toString(valueRange.upperEndpoint().longValue(), "yyyy"));
 
         //如果是同一年查询
         //2020-1~2020-2

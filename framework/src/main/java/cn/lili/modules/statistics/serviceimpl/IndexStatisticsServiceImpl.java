@@ -1,5 +1,6 @@
 package cn.lili.modules.statistics.serviceimpl;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
@@ -195,7 +196,7 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         storeIndexStatisticsVO.setGoodsNum(goodsService.goodsNum(GoodsStatusEnum.UPPER, null));
         //订单总数量、订单总金额
         Map<String, Object> map = orderStatisticsDataService.getStoreOrderStatisticsPrice();
-        storeIndexStatisticsVO.setOrderNum(Integer.parseInt(map.get("num").toString()));
+        storeIndexStatisticsVO.setOrderNum(Convert.toInt(map.get("num").toString()));
         storeIndexStatisticsVO.setOrderPrice(map.get("price") != null ? Double.parseDouble(map.get("price").toString()) : 0.0);
 
         //访问量

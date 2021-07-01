@@ -1,6 +1,7 @@
 package cn.lili.modules.file.plugin.impl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.file.plugin.FileManagerPlugin;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -76,7 +77,7 @@ public class AliFileManagerPlugin implements FileManagerPlugin {
         if (ossSetting == null || nextInitSetting == null || nextInitSetting < System.currentTimeMillis()) {
             Setting setting = settingService.get(SettingEnum.OSS_SETTING.name());
             if (setting == null || StrUtil.isBlank(setting.getSettingValue())) {
-                throw new ServiceException("您还未配置阿里云OSS存储");
+                throw new ServiceException(ResultCode.OSS_NOT_EXIST);
             }
             nextInitSetting = System.currentTimeMillis() + interval;
             ossSetting = new Gson().fromJson(setting.getSettingValue(), OssSetting.class);
@@ -107,13 +108,13 @@ public class AliFileManagerPlugin implements FileManagerPlugin {
             log.error("Error Code:       " + oe.getErrorCode());
             log.error("Request ID:      " + oe.getRequestId());
             log.error("Host ID:           " + oe.getHostId());
-            throw new ServiceException("图片上传失败" + oe.getErrorMessage());
+            throw new ServiceException(ResultCode.OSS_EXCEPTION_ERROR);
         } catch (ClientException ce) {
             log.error("Caught an ClientException, which means the client encountered "
                     + "a serious internal problem while trying to communicate with OSS, "
                     + "such as not being able to access the network.");
             log.error("Error Message: " + ce.getMessage());
-            throw new ServiceException("图片上传失败" + ce.getErrorMessage());
+            throw new ServiceException(ResultCode.OSS_EXCEPTION_ERROR);
         } finally {
             /*
              * Do not forget to shut down the client finally to release all allocated resources.
@@ -138,13 +139,13 @@ public class AliFileManagerPlugin implements FileManagerPlugin {
             log.error("Error Code:       " + oe.getErrorCode());
             log.error("Request ID:      " + oe.getRequestId());
             log.error("Host ID:           " + oe.getHostId());
-            throw new ServiceException("图片上传失败" + oe.getErrorMessage());
+            throw new ServiceException(ResultCode.OSS_EXCEPTION_ERROR);
         } catch (ClientException ce) {
             log.error("Caught an ClientException, which means the client encountered "
                     + "a serious internal problem while trying to communicate with OSS, "
                     + "such as not being able to access the network.");
             log.error("Error Message: " + ce.getMessage());
-            throw new ServiceException("图片上传失败" + ce.getErrorMessage());
+            throw new ServiceException(ResultCode.OSS_EXCEPTION_ERROR);
         } finally {
             /*
              * Do not forget to shut down the client finally to release all allocated resources.
@@ -169,13 +170,13 @@ public class AliFileManagerPlugin implements FileManagerPlugin {
             log.error("Error Code:       " + oe.getErrorCode());
             log.error("Request ID:      " + oe.getRequestId());
             log.error("Host ID:           " + oe.getHostId());
-            throw new ServiceException("图片删除失败" + oe.getErrorMessage());
+            throw new ServiceException(ResultCode.OSS_DELETE_ERROR);
         } catch (ClientException ce) {
             log.error("Caught an ClientException, which means the client encountered "
                     + "a serious internal problem while trying to communicate with OSS, "
                     + "such as not being able to access the network.");
             log.error("Error Message: " + ce.getMessage());
-            throw new ServiceException("图片删除失败" + ce.getErrorMessage());
+            throw new ServiceException(ResultCode.OSS_DELETE_ERROR);
         } finally {
             /*
              * Do not forget to shut down the client finally to release all allocated resources.

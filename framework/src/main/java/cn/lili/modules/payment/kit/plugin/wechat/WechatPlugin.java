@@ -620,7 +620,7 @@ public class WechatPlugin implements Payment {
                 cache.put(CachePrefix.WECHAT_PLAT_FORM_CERT.getPrefix(), publicCert, second);
             } else {
                 log.error("证书获取失败：{}" + body);
-                throw new ServiceException("证书获取失败：" + body);
+                throw new ServiceException(ResultCode.WECHAT_CERT_ERROR);
             }
             return PayKit.getCertificate(publicCert);
         } catch (Exception e) {

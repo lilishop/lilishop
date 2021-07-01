@@ -1,5 +1,6 @@
 package cn.lili.modules.order.order.serviceimpl;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
@@ -58,7 +59,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         queryWrapper.eq(OrderItem::getOrderSn, orderSn).eq(OrderItem::getSkuId, skuId);
         OrderItem orderItem = getOne(queryWrapper);
         if (orderItem == null) {
-            throw new ServiceException("当前订单项不存在！");
+            throw new ServiceException(ResultCode.ORDER_ITEM_NOT_EXIST);
         }
         orderItem.setComplainId(complainId);
         orderItem.setComplainStatus(complainStatusEnum.name());

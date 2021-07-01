@@ -3,6 +3,7 @@ package cn.lili.modules.message.util;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.StringUtils;
@@ -276,12 +277,13 @@ public class WechatMessageUtil {
             if (jsonObject.getStr("errmsg").equals("ok")) {
                 return;
             }
-            throw new ServiceException("微信接口异常，请联系管理员：错误码" + jsonObject.get("errcode") + "，" + jsonObject.getStr("errmsg"));
+            log.error("微信接口异常，错误码" + jsonObject.get("errcode") + "，" + jsonObject.getStr("errmsg"));
+            throw new ServiceException(ResultCode.WECHAT_ERROR);
         }
     }
 
     /**
-     * 如果返回信息有错误
+     * 如果返回信息有错误....................................................................................................................................................................................333333333333333333
      *
      * @param string
      */

@@ -3,6 +3,7 @@ package cn.lili.modules.goods.serviceimpl;
 import cn.hutool.core.util.StrUtil;
 import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.CategoryParameterGroup;
@@ -174,7 +175,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         if (category.getParentId() != null && !category.getParentId().equals("0")) {
             Category parentCategory = this.getById(category.getParentId());
             if (!parentCategory.getDeleteFlag().equals(category.getDeleteFlag())) {
-                throw new ServiceException("子类状态不能与父类不一致！");
+                throw new ServiceException(ResultCode.CATEGORY_DELETE_FLAG_ERROR);
             }
         }
         UpdateWrapper<Category> updateWrapper = new UpdateWrapper<>();

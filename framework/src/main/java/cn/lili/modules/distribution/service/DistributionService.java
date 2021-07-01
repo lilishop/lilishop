@@ -2,6 +2,7 @@ package cn.lili.modules.distribution.service;
 
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.distribution.entity.dos.Distribution;
+import cn.lili.modules.distribution.entity.dto.DistributionApplyDTO;
 import cn.lili.modules.distribution.entity.dto.DistributionSearchParams;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -36,7 +37,7 @@ public interface DistributionService extends IService<Distribution> {
      *
      * @return
      */
-    Distribution applyDistribution(String name, String idNumber);
+    Distribution applyDistribution(DistributionApplyDTO distributionApplyDTO);
 
     /**
      * 审核分销申请

@@ -3,6 +3,7 @@ package cn.lili.timetask.handler.impl.order;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
@@ -58,7 +59,7 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         //自动确认收货
         OrderSetting orderSetting = JSONUtil.toBean(setting.getSettingValue(), OrderSetting.class);
         if (orderSetting == null) {
-            throw new ServiceException("系统配置异常");
+            throw new ServiceException(ResultCode.ORDER_SETTING_ERROR);
         }
 
         //自动确认收货

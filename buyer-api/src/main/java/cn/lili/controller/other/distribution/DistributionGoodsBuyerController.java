@@ -11,6 +11,7 @@ import cn.lili.modules.distribution.service.DistributionSelectedGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,13 +51,25 @@ public class DistributionGoodsBuyerController {
     }
 
     @ApiOperation(value = "选择分销商品")
-    @ApiImplicitParam(name = "distributionGoodsId", value = "分销ID", required = true, dataType = "String", paramType = "path")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "distributionGoodsId", value = "分销ID", required = true, dataType = "String", paramType = "path"),
+            @ApiImplicitParam(name = "checked", value = "是否选择", required = true, dataType = "boolean", paramType = "query")
+    })
     @GetMapping(value = "/checked/{distributionGoodsId}")
     public ResultMessage<Object> distributionCheckGoods(
-            @NotNull(message = "分销商品不能为空") @PathVariable("distributionGoodsId") String distributionGoodsId) {
-        if(distributionSelectedGoodsService.add(distributionGoodsId)){
-            return ResultUtil.success();
+            @NotNull(message = "分销商品不能为空") @PathVariable("distributionGoodsId") String distributionGoodsId,Boolean checked) {
+        Boolean result=false;
+        if(checked){
+            result=distributionSelectedGoodsService.add(distributionGoodsId);
+        }else {
+            result=distributionSelectedGoodsService.delete(distributionGoodsId);
         }
-        throw new ServiceException(ResultCode.ERROR);
+        //判断操作结果
+        if(result){
+            return ResultUtil.success(ResultCode.SUCCESS);
+        }else{
+            throw new ServiceException(ResultCode.ERROR);
+        }
+
     }
 }

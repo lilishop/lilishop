@@ -66,7 +66,7 @@ public class MemberBuyerController {
         if (smsUtil.verifyCode(mobile, VerificationEnums.LOGIN, uuid, code)) {
             return ResultUtil.data(memberService.mobilePhoneLogin(mobile));
         } else {
-            throw new ServiceException("验证码错误");
+            throw new ServiceException(ResultCode.VERIFICATION_SMS_ERROR);
         }
     }
 

@@ -1,5 +1,6 @@
 package cn.lili.common.token.base.generate;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.enums.UserEnums;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Component;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/11/16 10:51
  */
 @Component
@@ -36,7 +36,7 @@ public class StoreTokenGenerate extends AbstractTokenGenerate {
         //生成token
         Member member = memberService.findByUsername(username);
         if (!member.getHaveStore()) {
-            throw new ServiceException("该会员未开通店铺");
+            throw new ServiceException(ResultCode.STORE_NOT_OPEN);
         }
         AuthUser user = new AuthUser(member.getUsername(), member.getId(), member.getNickName(), UserEnums.STORE);
         LambdaQueryWrapper<Store> queryWrapper = new LambdaQueryWrapper<>();

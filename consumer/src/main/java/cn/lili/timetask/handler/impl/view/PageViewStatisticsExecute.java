@@ -1,5 +1,6 @@
 package cn.lili.timetask.handler.impl.view;
 
+import cn.hutool.core.convert.Convert;
 import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
 import cn.lili.common.utils.BeanUtil;
@@ -167,15 +168,15 @@ class PageViewStatistics {
         //将字符串解析成需要的对象
         str = str.substring(str.indexOf("}") + 2);
         String[] dateStr = str.split("-");
-        Integer year = Integer.parseInt(dateStr[0]);
-        Integer month = Integer.parseInt(dateStr[1]);
+        Integer year = Convert.toInt(dateStr[0]);
+        Integer month = Convert.toInt(dateStr[1]);
         Integer day;
         //是否有店铺id
         if (dateStr.length > 3) {
-            day = Integer.parseInt(dateStr[2]);
+            day = Convert.toInt(dateStr[2]);
             this.storeId = dateStr[3];
         } else {
-            day = Integer.parseInt(dateStr[2]);
+            day = Convert.toInt(dateStr[2]);
         }
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, year);

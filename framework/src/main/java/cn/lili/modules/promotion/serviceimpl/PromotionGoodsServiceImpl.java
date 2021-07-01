@@ -1,6 +1,8 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.DateUtil;
@@ -269,10 +271,10 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
 
         PromotionGoods promotionGoods = this.getPromotionGoods(typeEnum, promotionId, skuId);
         if (promotionGoods == null) {
-            throw new ServiceException("当前促销商品不存在！");
+            throw new ServiceException(ResultCode.PROMOTION_GOODS_NOT_EXIT);
         }
-        if (promotionGoodsStock != null && CharSequenceUtil.isNotEmpty(promotionGoodsStock) && promotionGoods.getQuantity() == Integer.parseInt(promotionGoodsStock)) {
-            return Integer.parseInt(promotionGoodsStock);
+        if (promotionGoodsStock != null && CharSequenceUtil.isNotEmpty(promotionGoodsStock) && promotionGoods.getQuantity() == Convert.toInt(promotionGoodsStock)) {
+            return Convert.toInt(promotionGoodsStock);
         } else {
             stringRedisTemplate.opsForValue().set(promotionStockKey, promotionGoods.getQuantity().toString());
             return promotionGoods.getQuantity();
@@ -310,7 +312,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
             queryWrapper.eq(SeckillApply::getSeckillId, promotionId).eq(SeckillApply::getSkuId, skuId);
             SeckillApply seckillApply = seckillApplyService.getOne(queryWrapper);
             if (seckillApply == null) {
-                throw new ServiceException("当前秒杀活动商品不存在！");
+                throw new ServiceException(ResultCode.SECKILL_NOT_EXIST_ERROR);
             }
             LambdaUpdateWrapper<SeckillApply> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(SeckillApply::getSeckillId, promotionId).eq(SeckillApply::getSkuId, skuId);

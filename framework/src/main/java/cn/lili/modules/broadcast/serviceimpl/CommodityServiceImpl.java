@@ -4,6 +4,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
@@ -50,7 +51,8 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
             //添加直播商品
             JSONObject json = wechatLivePlayerUtil.addGoods(commodity);
             if(!json.getStr("errcode").equals("0")){
-                throw new ServiceException(json.getStr("errmsg"));
+                log.error(json.getStr("errmsg"));
+                 throw new ServiceException(ResultCode.COMMODITY_ERROR);
             }
             commodity.setLiveGoodsId(Convert.toInt(json.getStr("goodsId")));
             commodity.setAuditId(json.getStr("auditId"));

@@ -3,6 +3,7 @@ package cn.lili.modules.promotion.serviceimpl;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.DateUtil;
@@ -452,6 +453,6 @@ public class PromotionServiceImpl implements PromotionService {
      */
     private void throwPromotionException(PromotionTypeEnum type, String id, String status) {
         log.error("当前" + type.name() + "活动ID为[" + id + "] 不存在，更改活动状态至[ " + status + " ]失败！");
-        throw new ServiceException("当前活动已停止");
+        throw new ServiceException(ResultCode.PROMOTION_STATUS_END);
     }
 }

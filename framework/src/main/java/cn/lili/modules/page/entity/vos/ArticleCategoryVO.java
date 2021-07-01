@@ -34,6 +34,7 @@ public class ArticleCategoryVO extends ArticleCategory {
             children.sort(new Comparator<ArticleCategoryVO>() {
                 @Override
                 public int compare(ArticleCategoryVO o1, ArticleCategoryVO o2) {
+                    System.out.println(o1.getArticleCategoryName()+":"+o2.getArticleCategoryName());
                     return o1.getSort().compareTo(o2.getSort());
                 }
             });

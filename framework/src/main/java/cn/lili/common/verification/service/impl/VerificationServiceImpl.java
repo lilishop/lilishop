@@ -2,6 +2,7 @@ package cn.lili.common.verification.service.impl;
 
 import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.verification.SliderImageUtil;
@@ -47,7 +48,7 @@ public class VerificationServiceImpl implements VerificationService {
     public Map<String, Object> createVerification(VerificationEnums verificationEnums, String uuid) throws IOException {
 
         if (uuid == null) {
-            throw new ServiceException("非法请求，请重新刷新页面操作");
+            throw new ServiceException(ResultCode.ILLEGAL_REQUEST_ERROR);
         }
 
         //获取验证码配置

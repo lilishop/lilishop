@@ -1,6 +1,7 @@
 package cn.lili.modules.order.cart.render.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.StringUtils;
@@ -308,7 +309,7 @@ public class SkuPromotionRender implements CartRenderStep {
                 Integer limitNum = pintuan.getLimitNum();
                 for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
                     if (limitNum != 0 && cartSkuVO.getNum() > limitNum) {
-                        throw new ServiceException("购买数量超过拼团活动限制数量");
+                        throw new ServiceException(ResultCode.PINTUAN_LIMIT_NUM_ERROR);
                     }
                 }
             }

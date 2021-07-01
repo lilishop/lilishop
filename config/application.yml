@@ -77,7 +77,7 @@ spring:
       default-datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://192.168.0.116:3306/Bulbasaur?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://192.168.0.116:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
         password: lilishop
         maxActive: 20
@@ -194,9 +194,9 @@ logging:
   # 输出级别
   level:
     cn.lili: info
-  #    org.hibernate: debug
-  #    org.springframework: debug
-  #    org.springframework.data.mongodb.core: debug
+    org.hibernate: debug
+    org.springframework: debug
+    org.springframework.data.mongodb.core: debug
   file:
     # 指定路径
     path: lili-logs

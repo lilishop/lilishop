@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
@@ -33,6 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+
+import static cn.lili.common.enums.ResultCode.COUPON_ACTIVITY_ITEM_ERROR;
 
 /**
  * 优惠券活动业务层实现
@@ -208,25 +211,25 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
         //检测活动时间超过当前时间不能进行操作
         long nowTime = DateUtil.getDateline() * 1000;
         if (couponActivity.getStartTime().getTime() < nowTime && couponActivity.getEndTime().getTime() > nowTime) {
-            throw new ServiceException("活动时间小于当前时间，不能进行编辑删除操作");
+            throw new ServiceException(ResultCode.COUPON_ACTIVITY_START_TIME_ERROR);
         }
         //活动时间需超过当前时间
         PromotionTools.checkPromotionTime(couponActivity.getStartTime().getTime(), couponActivity.getEndTime().getTime());
         //指定会员判定
         if (couponActivity.getActivityScope().equals(CouponActivitySendTypeEnum.DESIGNATED.name())) {
             if (couponActivity.getMemberDTOS().size() == 0) {
-                throw new ServiceException("指定精准发券则必须指定会员，会员不可以为空");
+                throw new ServiceException(ResultCode.COUPON_ACTIVITY_MEMBER_ERROR);
             }
         }
         //优惠券数量判定
         if (couponActivity.getCouponActivityItems().size() == 0) {
-            throw new ServiceException("优惠券活动必须指定优惠券，不能为空");
+            throw new ServiceException(ResultCode.COUPON_ACTIVITY_ITEM_ERROR);
         } else if (couponActivity.getCouponActivityItems().size() > 10) {
-            throw new ServiceException("优惠券活动最多指定10个优惠券");
+            throw new ServiceException(ResultCode.COUPON_ACTIVITY_ITEM_MUST_NUM_ERROR);
         } else {
             for (CouponActivityItem item : couponActivity.getCouponActivityItems()) {
                 if (item.getNum() == null || item.getNum() <= 0) {
-                    throw new ServiceException("赠券数量必须大于0");
+                    throw new ServiceException(ResultCode.COUPON_ACTIVITY_ITEM_NUM_ERROR);
                 }
             }
         }

@@ -230,7 +230,7 @@ public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper,
     private OrderComplaint checkOrderComplainExist(String id) {
         OrderComplaint orderComplaint = this.getById(id);
         if (orderComplaint == null) {
-            throw new ServiceException("当前投诉记录不存在");
+            throw new ServiceException(ResultCode.COMPLAINT_NOT_EXIT);
         }
         return orderComplaint;
     }
@@ -239,12 +239,12 @@ public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper,
         ComplaintStatusEnum complaintStatusEnum = ComplaintStatusEnum.valueOf(operationParam.getComplainStatus());
         if (complaintStatusEnum == ComplaintStatusEnum.COMPLETE) {
             if (StrUtil.isEmpty(operationParam.getArbitrationResult())) {
-                throw new ServiceException("结束订单投诉时，仲裁结果不能为空");
+                throw new ServiceException(ResultCode.COMPLAINT_ARBITRATION_RESULT_ERROR);
             }
             orderComplaint.setArbitrationResult(operationParam.getArbitrationResult());
         } else if (complaintStatusEnum == ComplaintStatusEnum.COMMUNICATION) {
             if (StrUtil.isEmpty(operationParam.getAppealContent()) || operationParam.getImages() == null) {
-                throw new ServiceException("商家申诉时，申诉内容不能为空");
+                throw new ServiceException(ResultCode.COMPLAINT_APPEAL_CONTENT_ERROR);
             }
             orderComplaint.setContent(operationParam.getAppealContent());
             orderComplaint.setImages(operationParam.getImages().get(0));

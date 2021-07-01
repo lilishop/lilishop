@@ -55,8 +55,8 @@ public class DistributionOrderSearchParams extends PageVO {
         queryWrapper.like(StringUtils.isNotBlank(distributionName), "distribution_name", distributionName);
         queryWrapper.eq(StringUtils.isNotBlank(distributionOrderStatus), "distribution_order_status", distributionOrderStatus);
         queryWrapper.eq(StringUtils.isNotBlank(orderSn), "order_sn", orderSn);
-        queryWrapper.eq(StringUtils.isNotBlank(StringUtils.toString(distributionId)), "distribution_id", distributionId);
-        queryWrapper.eq(StringUtils.isNotBlank(StringUtils.toString(storeId)), "store_id", storeId);
+        queryWrapper.eq(StringUtils.isNotBlank(distributionId), "distribution_id", distributionId);
+        queryWrapper.eq(StringUtils.isNotBlank(storeId), "store_id", storeId);
         if (endTime != null && startTime != null) {
             queryWrapper.between("create_time", startTime, endTime);
         }

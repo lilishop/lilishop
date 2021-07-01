@@ -199,13 +199,12 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
         if (roles.size() > 10) {
             throw new ServiceException(ResultCode.PERMISSION_BEYOND_TEN);
         }
-        if (roles != null && roles.size() > 0) {
+        if (roles.size() > 0) {
             dbUser.setRoleIds(StringUtils.join(",", roles));
         }
-
-
         this.save(dbUser);
-        updateRole(adminUser.getId(), roles);
+        dbUser = this.findByUsername(dbUser.getUsername());
+        updateRole(dbUser.getId(), roles);
     }
 
 

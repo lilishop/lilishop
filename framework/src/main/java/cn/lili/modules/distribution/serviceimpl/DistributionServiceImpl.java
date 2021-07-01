@@ -6,9 +6,11 @@ import cn.lili.common.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.distribution.entity.dos.Distribution;
+import cn.lili.modules.distribution.entity.dto.DistributionApplyDTO;
 import cn.lili.modules.distribution.entity.dto.DistributionSearchParams;
 import cn.lili.modules.distribution.entity.enums.DistributionStatusEnum;
 import cn.lili.modules.distribution.mapper.DistributionMapper;
@@ -64,7 +66,7 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
     }
 
     @Override
-    public Distribution applyDistribution(String name, String idNumber) {
+    public Distribution applyDistribution(DistributionApplyDTO distributionApplyDTO) {
 
         //检查分销开关
         checkDistributionSetting();
@@ -78,8 +80,7 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
                 throw new ServiceException(ResultCode.DISTRIBUTION_IS_APPLY);
             }else if(distribution.getDistributionStatus().equals(DistributionStatusEnum.REFUSE.name())){
                 distribution.setDistributionStatus(DistributionStatusEnum.APPLY.name());
-                distribution.setName(name);
-                distribution.setIdNumber(idNumber);
+                BeanUtil.copyProperties(distributionApplyDTO,distribution);
                 this.updateById(distribution);
                 return distribution;
             }
@@ -88,7 +89,7 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
         //获取当前登录用户
         Member member = memberService.getUserInfo();
         //新建分销员
-        distribution = new Distribution(member.getId(), member.getUsername(), name, idNumber);
+        distribution = new Distribution(member.getId(), member.getNickName(), distributionApplyDTO);
         //添加分销员
         this.save(distribution);
 

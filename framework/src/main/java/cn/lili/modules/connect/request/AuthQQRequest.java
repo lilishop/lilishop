@@ -1,5 +1,6 @@
 package cn.lili.modules.connect.request;
 
+import cn.hutool.core.convert.Convert;
 import cn.lili.common.cache.Cache;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.utils.UrlBuilder;
@@ -118,7 +119,7 @@ public class AuthQQRequest extends AuthDefaultRequest {
         }
         return AuthToken.builder()
                 .accessToken(accessTokenObject.get("access_token"))
-                .expireIn(Integer.parseInt(accessTokenObject.getOrDefault("expires_in", "0")))
+                .expireIn(Convert.toInt(accessTokenObject.getOrDefault("expires_in", "0")))
                 .refreshToken(accessTokenObject.get("refresh_token"))
                 .build();
     }

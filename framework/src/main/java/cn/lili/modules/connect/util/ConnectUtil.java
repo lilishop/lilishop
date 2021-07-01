@@ -137,7 +137,7 @@ public class ConnectUtil {
     public AuthRequest getAuthRequest(String type) {
         ConnectAuthEnum authInterface = ConnectAuthEnum.valueOf(type);
         if (authInterface == null) {
-            throw new ServiceException("错误的登录方式");
+            throw new ServiceException(ResultCode.CONNECT_NOT_EXIST);
         }
         AuthRequest authRequest = null;
         switch (authInterface) {

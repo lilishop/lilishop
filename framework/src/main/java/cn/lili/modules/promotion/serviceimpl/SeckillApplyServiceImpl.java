@@ -2,10 +2,12 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.cache.Cache;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -102,7 +104,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         } else {
             //如缓存中存在，则取缓存中转为展示的信息
             for (Map.Entry<Object, Object> entry : cacheSeckill.entrySet()) {
-                Integer timelineKey = Integer.parseInt(entry.getKey().toString());
+                Integer timelineKey = Convert.toInt(entry.getKey().toString());
                 if (timelineKey.equals(timeline)) {
                     seckillGoodsVoS = (List<SeckillGoodsVO>) entry.getValue();
                 }
@@ -145,7 +147,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     public void addSeckillApply(String seckillId, String storeId, List<SeckillApplyVO> seckillApplyList) {
         SeckillVO seckill = mongoTemplate.findById(seckillId, SeckillVO.class);
         if (seckill == null) {
-            throw new ServiceException("当前参与的秒杀活动不存在！");
+            throw new ServiceException(ResultCode.SECKILL_NOT_EXIST_ERROR);
         }
         //检查秒杀活动申请是否合法
         checkSeckillApplyList(seckill.getHours(), seckillApplyList, storeId);
@@ -199,10 +201,10 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     public void removeSeckillApplyByIds(String seckillId, List<String> ids) {
         SeckillVO seckillVO = this.mongoTemplate.findById(seckillId, SeckillVO.class);
         if (seckillVO == null) {
-            throw new ServiceException("当前秒杀活动活动不存在！");
+            throw new ServiceException(ResultCode.SECKILL_NOT_EXIST_ERROR);
         }
         if (seckillVO.getPromotionStatus().equals(PromotionStatusEnum.START.name())) {
-            throw new ServiceException("当前秒杀活动活动已经开始，无法修改！");
+            throw new ServiceException(ResultCode.SECKILL_UPDATE_ERROR);
         }
         seckillVO.getSeckillApplyList().removeIf(seckillApply -> ids.contains(seckillApply.getId()));
         this.mongoTemplate.save(seckillVO);
@@ -221,13 +223,13 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         for (SeckillApplyVO seckillApply : seckillApplyList) {
             seckillApply.setStoreId(storeId);
             if (seckillApply.getPrice() > seckillApply.getOriginalPrice()) {
-                throw new ServiceException("活动价格不能大于商品原价");
+                throw new ServiceException(ResultCode.SECKILL_PRICE_ERROR);
             }
             //检查秒杀活动申请的时刻，是否存在在秒杀活动的时间段内
             String[] rangeHours = hours.split(",");
             boolean containsSame = Arrays.stream(rangeHours).anyMatch(i -> i.equals(seckillApply.getTimeLine().toString()));
             if (!containsSame) {
-                throw new ServiceException("时刻参数异常");
+                throw new ServiceException(ResultCode.SECKILL_TIME_ERROR);
             }
             //检查商品是否参加多个时间段的活动
             if (existSku.contains(seckillApply.getSkuId())) {

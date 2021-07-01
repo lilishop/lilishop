@@ -203,8 +203,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public Order cancel(String orderSn, String reason) {
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
         //如果订单促销类型不为空&&订单是拼团订单，并且订单未成团，则抛出异常
-        if (StringUtils.isNotEmpty(order.getOrderPromotionType())
-                && order.getOrderPromotionType().equals(OrderPromotionTypeEnum.PINTUAN.name())
+        if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())
                 && !order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())) {
             throw new ServiceException(ResultCode.ORDER_CAN_NOT_CANCEL);
         }
@@ -286,7 +285,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Order order = this.getBySn(orderSn);
         //判断是否为拼团订单，进行特殊处理
         //判断订单类型进行不同的订单确认操作
-        if (order.getOrderPromotionType() != null && order.getOrderPromotionType().equals(OrderPromotionTypeEnum.PINTUAN.name())) {
+        if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())) {
             this.checkPintuanOrder(order.getPromotionId(), order.getParentOrderSn());
         } else {
             //判断订单类型
@@ -545,7 +544,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 orderBatchDeliverDTOList.add(orderBatchDeliverDTO);
             }
         } catch (Exception e) {
-            throw new ServiceException("文件读取失败");
+            throw new ServiceException(ResultCode.ORDER_BATCH_DELIVER_ERROR);
         }
         //循环检查是否符合规范
         checkBatchDeliver(orderBatchDeliverDTOList);
@@ -779,7 +778,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             //判断用户不能参与自己发起的拼团活动
             Order parentOrder = this.getBySn(tradeDTO.getParentOrderSn());
             if (parentOrder.getMemberId().equals(UserContext.getCurrentUser().getId())) {
-                throw new ServiceException("不能参与自己发起的拼团活动！");
+                throw new ServiceException(ResultCode.PINTUAN_JOIN_ERROR);
             }
         }
     }
@@ -795,7 +794,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             Pintuan pintuan = pintuanService.getPintuanById(order.getPromotionId());
             Integer limitNum = pintuan.getLimitNum();
             if (limitNum != 0 && order.getGoodsNum() > limitNum) {
-                throw new ServiceException("购买数量超过拼团活动限制数量");
+                throw new ServiceException(ResultCode.PINTUAN_LIMIT_NUM_ERROR);
             }
         }
     }
