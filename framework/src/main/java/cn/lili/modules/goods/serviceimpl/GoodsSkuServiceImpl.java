@@ -455,7 +455,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     private void generateEsCheck(Goods goods) {
         //如果商品通过审核&&并且已上架
         List<GoodsSku> goodsSkuList = this.list(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goods.getId()));
-        if (goods.getIsAuth().equals(GoodsAuthEnum.PASS.name()) && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name()) && Boolean.FALSE.equals(goods.getDeleteFlag())) {
+        if (goods.getIsAuth().equals(GoodsAuthEnum.PASS.name())
+                && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())
+                && Boolean.FALSE.equals(goods.getDeleteFlag())) {
             List<EsGoodsIndex> goodsIndices = new ArrayList<>();
             for (GoodsSku goodsSku : goodsSkuList) {
                 EsGoodsIndex esGoodsOld = goodsIndexService.findById(goodsSku.getId());
