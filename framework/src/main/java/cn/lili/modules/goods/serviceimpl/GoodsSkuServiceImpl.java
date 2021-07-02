@@ -227,8 +227,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         map.put("promotionMap", goodsIndex.getPromotionMap());
 
         //获取参数信息
-        if(goodsVO.getGoodsParamsDTOList().size()>0){
-            map.put("goodsParamsDTOList",goodsVO.getGoodsParamsDTOList());
+        if (goodsVO.getGoodsParamsDTOList() != null && goodsVO.getGoodsParamsDTOList().size() > 0) {
+            map.put("goodsParamsDTOList", goodsVO.getGoodsParamsDTOList());
         }
 
         //记录用户足迹
