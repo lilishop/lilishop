@@ -145,7 +145,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         if (member.getHaveStore()) {
             Store store = storeService.getById(member.getStoreId());
             if (!store.getStoreDisable().equals(StoreStatusEnum.OPEN.name())) {
-                throw new ServiceException(ResultCode.USER_NOT_EXIST);
+                throw new ServiceException(ResultCode.STORE_CLOSE_ERROR);
             }
         } else {
             throw new ServiceException(ResultCode.USER_NOT_EXIST);

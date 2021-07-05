@@ -330,6 +330,7 @@ public enum ResultCode {
     STORE_APPLY_DOUBLE_ERROR(50003, "已有店铺，无需重复申请!"),
     STORE_NOT_OPEN(50004, "该会员未开通店铺"),
     STORE_NOT_LOGIN_ERROR(50005, "未登录店铺"),
+    STORE_CLOSE_ERROR(50006, "店铺关闭，请联系管理员"),
 
     /**
      * 结算单
