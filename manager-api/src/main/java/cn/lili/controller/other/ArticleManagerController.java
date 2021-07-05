@@ -53,8 +53,8 @@ public class ArticleManagerController {
     }
 
     @ApiOperation(value = "添加文章")
-    @PostMapping
-    public ResultMessage<Article> save(@Valid Article article) {
+    @PostMapping(consumes = "application/json", produces = "application/json")
+    public ResultMessage<Article> save(@RequestBody Article article) {
         article.setType(ArticleEnum.OTHER.name());
         articleService.save(article);
         return ResultUtil.data(article);
@@ -62,8 +62,8 @@ public class ArticleManagerController {
 
     @ApiOperation(value = "修改文章")
     @ApiImplicitParam(name = "id", value = "文章ID", required = true, paramType = "path")
-    @PutMapping("update/{id}")
-    public ResultMessage<Article> update(@Valid Article article, @PathVariable("id") String id) {
+    @PutMapping(value = "update/{id}", consumes = "application/json", produces = "application/json")
+    public ResultMessage<Article> update(@RequestBody Article article, @PathVariable("id") String id) {
         article.setId(id);
         return ResultUtil.data(articleService.updateArticle(article));
     }
