@@ -625,15 +625,17 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                     }
                     //设置规格商品缩略图
                     //如果规格没有图片，则用商品图片复盖。有则增加规格图片，放在商品图片集合之前
-                    if (StringUtils.isNotEmpty(spec.getValue().toString())) {
+                    if (spec.getValue() != null && StringUtils.isNotEmpty(spec.getValue().toString())) {
                         thumbnail = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getThumbnail();
                         small = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getSmall();
                     }
                 } else {
-                    //设置商品名称
-                    goodsName.append(" ").append(spec.getValue());
-                    //规格简短信息
-                    simpleSpecs.append(" ").append(spec.getValue());
+                    if (spec.getValue() != null) {
+                        //设置商品名称
+                        goodsName.append(" ").append(spec.getValue());
+                        //规格简短信息
+                        simpleSpecs.append(" ").append(spec.getValue());
+                    }
                 }
             }
         }
