@@ -235,7 +235,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         if (UserContext.getCurrentUser() != null) {
             FootPrint footPrint = new FootPrint(UserContext.getCurrentUser().getId(), goodsId, skuId);
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.VIEW_GOODS.name();
-            rocketMQTemplate.asyncSend(destination, footPrint, RocketmqSendCallbackBuilder.commonCallback());
+            rocketMQTemplate.sendOneWay(destination, footPrint);
         }
         return map;
     }
