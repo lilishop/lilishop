@@ -19,6 +19,7 @@ import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.modules.promotion.entity.enums.SeckillApplyStatusEnum;
 import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.mapper.SeckillMapper;
@@ -111,6 +112,17 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
 
     @Override
     public void init() {
+        //清除演示数据
+
+        List<Seckill> seckillList=list();
+        for (Seckill seckill: seckillList) {
+            this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
+                    seckill.getStartTime().getTime(),
+                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.SECKILL.name() + seckill.getId())),
+                    rocketmqCustomProperties.getPromotionTopic());
+            this.removeById(seckill.getId());
+        }
+
         Setting setting = settingService.get(SettingEnum.SECKILL_SETTING.name());
         SeckillSetting seckillSetting = new Gson().fromJson(setting.getSettingValue(), SeckillSetting.class);
         for (int i=1;i<=30;i++){
@@ -124,6 +136,9 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
 
         SeckillVO seckillVO=new SeckillVO();
         BeanUtil.copyProperties(seckill,seckillVO);
+
+        seckillVO.setSeckillApplyStatus(SeckillApplyStatusEnum.NOT_APPLY.name());
+        seckillVO.setSeckillApplyList(null);
         //检查秒杀活动参数
         checkSeckillParam(seckillVO, seckill.getStoreId());
         //保存到MYSQL中
