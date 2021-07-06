@@ -1,12 +1,12 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.DateUtil;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.promotion.entity.dos.*;
 import cn.lili.modules.promotion.entity.enums.*;
@@ -17,7 +17,6 @@ import cn.lili.modules.search.service.EsGoodsIndexService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -365,8 +364,17 @@ public class PromotionServiceImpl implements PromotionService {
             this.throwPromotionException(promotionTypeEnum, promotionMessage.getPromotionId(), promotionMessage.getPromotionStatus());
             return false;
         }
+
+        //修改活动状态
         seckill.setPromotionStatus(promotionMessage.getPromotionStatus());
         result = this.seckillService.update(promotionMessage.updateWrapper());
+
+        //判断参与活动的商品是否为空，如果为空则返回
+        if(seckill.getSeckillApplyList()==null){
+            return result;
+        }
+
+        //循环秒杀商品数据，将数据按照时间段进行存储
         for (SeckillApply seckillApply : seckill.getSeckillApplyList()) {
             if (seckillApply.getPromotionApplyStatus().equals(PromotionApplyStatusEnum.PASS.name())) {
                 //下一个时间，默认为当天结束时间
@@ -383,12 +391,12 @@ public class PromotionServiceImpl implements PromotionService {
                     }
                 }
                 Seckill seckill1 = JSONUtil.toBean(JSONUtil.toJsonStr(seckill), Seckill.class);
-                String format = cn.hutool.core.date.DateUtil.format(seckill.getStartTime(), DateUtil.STANDARD_DATE_FORMAT);
-                DateTime parseStartTime = cn.hutool.core.date.DateUtil.parse((format + " " + seckillApply.getTimeLine()), "yyyy-MM-dd HH");
-                DateTime parseEndTime = cn.hutool.core.date.DateUtil.parse((format + " " + nextHour), "yyyy-MM-dd HH");
+                String format = DateUtil.format(seckill.getStartTime(), cn.lili.common.utils.DateUtil.STANDARD_DATE_FORMAT);
+                DateTime parseStartTime = DateUtil.parse((format + " " + seckillApply.getTimeLine()), "yyyy-MM-dd HH");
+                DateTime parseEndTime = DateUtil.parse((format + " " + nextHour), "yyyy-MM-dd HH");
                 //如果是当天最后的时间段则设置到当天结束时间的59分59秒
                 if (nextHour == seckillApply.getTimeLine()) {
-                    parseEndTime = cn.hutool.core.date.DateUtil.parse((format + " " + nextHour + ":59:59"), DateUtil.STANDARD_FORMAT);
+                    parseEndTime = DateUtil.parse((format + " " + nextHour + ":59:59"), cn.lili.common.utils.DateUtil.STANDARD_FORMAT);
                 }
                 seckill1.setStartTime(parseStartTime);
                 //当时商品的秒杀活动活动结束时间为下个时间段的开始

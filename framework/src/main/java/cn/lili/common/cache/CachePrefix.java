@@ -177,7 +177,7 @@ public enum CachePrefix {
     /**
      * 店铺管理员角色权限对照表
      */
-    SHOP_URL_ROLE,
+    STORE_URL_ROLE,
 
     /**
      * 手机验证标识
@@ -449,7 +449,12 @@ public enum CachePrefix {
     /**
      * 文章
      */
-    ARTICLE_CACHE
+    ARTICLE_CACHE,
+
+    /**
+     * 店铺分类
+     */
+    STORE_CATEGORY
     ;
 
 

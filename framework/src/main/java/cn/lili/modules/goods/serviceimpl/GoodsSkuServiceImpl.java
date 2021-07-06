@@ -227,8 +227,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         map.put("promotionMap", goodsIndex.getPromotionMap());
 
         //获取参数信息
-        if(goodsVO.getGoodsParamsDTOList().size()>0){
-            map.put("goodsParamsDTOList",goodsVO.getGoodsParamsDTOList());
+        if (goodsVO.getGoodsParamsDTOList() != null && goodsVO.getGoodsParamsDTOList().size() > 0) {
+            map.put("goodsParamsDTOList", goodsVO.getGoodsParamsDTOList());
         }
 
         //记录用户足迹
@@ -628,7 +628,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                     if (spec.getValue() != null && StringUtils.isNotEmpty(spec.getValue().toString())) {
                         thumbnail = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getThumbnail();
                         small = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getSmall();
-                    } else {
+                    }
+                } else {
+                    if (spec.getValue() != null) {
                         //设置商品名称
                         goodsName.append(" ").append(spec.getValue());
                         //规格简短信息
