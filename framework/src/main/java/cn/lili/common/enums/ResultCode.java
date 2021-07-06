@@ -237,6 +237,8 @@ public enum ResultCode {
     PROMOTION_GOODS_ERROR(40006,"请选择要参与活动的商品"),
     PROMOTION_STATUS_END(40007,"当前活动已停止"),
     PROMOTION_UPDATE_ERROR(40008,"当前活动已开始/结束，无法编辑！"),
+    PROMOTION_ACTIVITY_GOODS_ERROR(40009,"当前活动已经开始无法添加商品"),
+    PROMOTION_ACTIVITY_ERROR(40009,"当前促销活动不存在"),
 
     /**
      * 优惠券
@@ -320,7 +322,13 @@ public enum ResultCode {
      * 其他促销
      */
     MEMBER_SIGN_REPEAT(47001, "请勿重复签到"),
-    POINT_GOODS_ACTIVE_STOCK_ERROR(47002, "活动库存数量不能高于商品库存"),
+    POINT_GOODS_ACTIVE_STOCK_ERROR(47002, "最低金额不能高于商品金额"),
+
+    /**
+     * 砍价活动
+     */
+    KANJIIA_GOODS_ACTIVE_STOCK_ERROR(48001, "活动库存数量不能高于商品库存"),
+    KANJIIA_GOODS_ACTIVE_PRICE_ERROR(48001, "活动库存数量不能高于商品库存"),
     /**
      * 店铺
      */

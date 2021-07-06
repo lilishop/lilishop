@@ -71,6 +71,8 @@ public class PromotionServiceImpl implements PromotionService {
     //Mongo
     @Autowired
     private MongoTemplate mongoTemplate;
+    @Autowired
+    private KanJiaActivityGoodsService kanJiaActivityGoodsService;
 
 
     @Override
@@ -99,6 +101,10 @@ public class PromotionServiceImpl implements PromotionService {
             //积分商品
             case POINTS_GOODS:
                 result = this.updatePointsGoods(promotionMessage, esPromotionKey, promotionTypeEnum);
+                break;
+            //砍价商品商品
+            case KAN_JIA:
+                result = this.updateKanJiaGoods(promotionMessage, promotionTypeEnum);
                 break;
             //优惠券活动
             case COUPON_ACTIVITY:
@@ -234,8 +240,9 @@ public class PromotionServiceImpl implements PromotionService {
 
     /**
      * 修改满额活动状态
-     * @param promotionMessage 信息队列传输促销信息实体
-     * @param esPromotionKey es Key
+     *
+     * @param promotionMessage  信息队列传输促销信息实体
+     * @param esPromotionKey    es Key
      * @param promotionTypeEnum 促销分类枚举
      * @return 修改结果
      */
@@ -271,8 +278,9 @@ public class PromotionServiceImpl implements PromotionService {
 
     /**
      * 修改优惠券状态
-     * @param promotionMessage 信息队列传输促销信息实体
-     * @param esPromotionKey es Key
+     *
+     * @param promotionMessage  信息队列传输促销信息实体
+     * @param esPromotionKey    es Key
      * @param promotionTypeEnum 促销分类枚举
      * @return 修改结果
      */
@@ -288,7 +296,7 @@ public class PromotionServiceImpl implements PromotionService {
         couponVO.setPromotionStatus(promotionMessage.getPromotionStatus());
         result = this.couponService.update(promotionMessage.updateWrapper());
         //优惠券活动结束，会员已领取未使用的优惠券状态修改为：已过期
-        if(couponVO.getPromotionStatus().equals(PromotionStatusEnum.END)){
+        if (couponVO.getPromotionStatus().equals(PromotionStatusEnum.END)) {
             LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<MemberCoupon>()
                     .eq(MemberCoupon::getCouponId, couponVO.getId())
                     .eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name())
@@ -312,12 +320,13 @@ public class PromotionServiceImpl implements PromotionService {
 
     /**
      * 修改拼团状态
-     * @param promotionMessage 信息队列传输促销信息实体
-     * @param esPromotionKey es Key
+     *
+     * @param promotionMessage  信息队列传输促销信息实体
+     * @param esPromotionKey    es Key
      * @param promotionTypeEnum 促销分类枚举
      * @return 修改结果
      */
-    private boolean updatePintuan(PromotionMessage promotionMessage, String esPromotionKey, PromotionTypeEnum promotionTypeEnum){
+    private boolean updatePintuan(PromotionMessage promotionMessage, String esPromotionKey, PromotionTypeEnum promotionTypeEnum) {
         boolean result;
         PintuanVO pintuanVO = this.mongoTemplate.findById(promotionMessage.getPromotionId(), PintuanVO.class);
         if (pintuanVO == null) {
@@ -343,12 +352,13 @@ public class PromotionServiceImpl implements PromotionService {
 
     /**
      * 修改秒杀状态
-     * @param promotionMessage 信息队列传输促销信息实体
-     * @param esPromotionKey es Key
+     *
+     * @param promotionMessage  信息队列传输促销信息实体
+     * @param esPromotionKey    es Key
      * @param promotionTypeEnum 促销分类枚举
      * @return 修改结果
      */
-    private boolean updateSeckill(PromotionMessage promotionMessage, String esPromotionKey, PromotionTypeEnum promotionTypeEnum){
+    private boolean updateSeckill(PromotionMessage promotionMessage, String esPromotionKey, PromotionTypeEnum promotionTypeEnum) {
         boolean result;
         SeckillVO seckill = this.mongoTemplate.findById(promotionMessage.getPromotionId(), SeckillVO.class);
         if (seckill == null) {
@@ -391,12 +401,13 @@ public class PromotionServiceImpl implements PromotionService {
 
     /**
      * 修改积分商品状态
-     * @param promotionMessage 信息队列传输促销信息实体
-     * @param esPromotionKey es Key
+     *
+     * @param promotionMessage  信息队列传输促销信息实体
+     * @param esPromotionKey    es Key
      * @param promotionTypeEnum 促销分类枚举
      * @return 修改结果
      */
-    private boolean updatePointsGoods(PromotionMessage promotionMessage, String esPromotionKey, PromotionTypeEnum promotionTypeEnum){
+    private boolean updatePointsGoods(PromotionMessage promotionMessage, String esPromotionKey, PromotionTypeEnum promotionTypeEnum) {
         boolean result;
         PointsGoodsVO pointsGoodsVO = this.mongoTemplate.findById(promotionMessage.getPromotionId(), PointsGoodsVO.class);
         if (pointsGoodsVO == null) {
@@ -412,29 +423,49 @@ public class PromotionServiceImpl implements PromotionService {
     }
 
     /**
-     * 修改优惠券活动状态
-     * @param promotionMessage 信息队列传输促销信息实体
+     * 修改砍价商品状态
+     *
+     * @param promotionMessage  信息队列传输促销信息实体
      * @param promotionTypeEnum 促销分类枚举
      * @return 修改结果
      */
-    private boolean updateCouponActivity(PromotionMessage promotionMessage, PromotionTypeEnum promotionTypeEnum){
+    private boolean updateKanJiaGoods(PromotionMessage promotionMessage, PromotionTypeEnum promotionTypeEnum) {
+        boolean result;
+        KanJiaActivityGoods kanJiaActivityGoods = JSONUtil.toBean(JSONUtil.toJsonStr(promotionMessage), KanJiaActivityGoods.class);
+        if (kanJiaActivityGoods == null) {
+            this.throwPromotionException(promotionTypeEnum, promotionMessage.getPromotionId(), promotionMessage.getPromotionStatus());
+            return false;
+        }
+        kanJiaActivityGoods.setPromotionStatus(promotionMessage.getPromotionStatus());
+        result = this.kanJiaActivityGoodsService.updateById(kanJiaActivityGoods);
+        return result;
+    }
+
+    /**
+     * 修改优惠券活动状态
+     *
+     * @param promotionMessage  信息队列传输促销信息实体
+     * @param promotionTypeEnum 促销分类枚举
+     * @return 修改结果
+     */
+    private boolean updateCouponActivity(PromotionMessage promotionMessage, PromotionTypeEnum promotionTypeEnum) {
 
         //如果是精准发券，进行发送优惠券
-        CouponActivity couponActivity=couponActivityService.getById(promotionMessage.getPromotionId());
-        if(couponActivity.getCouponActivityType().equals(CouponActivityTypeEnum.SPECIFY.name())){
+        CouponActivity couponActivity = couponActivityService.getById(promotionMessage.getPromotionId());
+        if (couponActivity.getCouponActivityType().equals(CouponActivityTypeEnum.SPECIFY.name())) {
             couponActivityService.specify(couponActivity.getId());
         }
 
         //修改活动状态
         return couponActivityService.update(new LambdaUpdateWrapper<CouponActivity>()
-                        .eq(CouponActivity::getId,promotionMessage.getPromotionId())
-                        .set(CouponActivity::getPromotionStatus,promotionMessage.getPromotionStatus()));
+                .eq(CouponActivity::getId, promotionMessage.getPromotionId())
+                .set(CouponActivity::getPromotionStatus, promotionMessage.getPromotionStatus()));
     }
 
     /**
      * 更新促销商品信息
      *
-     * @param promotionId 促销活动ID
+     * @param promotionId     促销活动ID
      * @param promotionStatus 活动状态
      */
     private void updatePromotionGoods(String promotionId, String promotionStatus) {
