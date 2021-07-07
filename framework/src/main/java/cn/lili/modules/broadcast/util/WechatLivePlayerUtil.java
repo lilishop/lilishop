@@ -37,7 +37,7 @@ public class WechatLivePlayerUtil {
      * @param studio 小程序直播
      * @return 房间ID
      */
-    public Map<String, String> create(Studio studio) throws Exception {
+    public Map<String, String> create(Studio studio) {
         //发送url
         String url = "https://api.weixin.qq.com/wxaapi/broadcast/room/create?access_token=";
         //添加直播间

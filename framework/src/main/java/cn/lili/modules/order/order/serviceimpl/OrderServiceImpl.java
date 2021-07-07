@@ -666,16 +666,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * 根据提供的拼团订单列表更新拼团状态为拼团成功
      * 循环订单列表根据不同的订单类型进行确认订单
      *
-     * @param list 需要更新拼团状态为成功的拼团订单列表
+     * @param orderList 需要更新拼团状态为成功的拼团订单列表
      */
-    private void pintuanOrderSuccess(List<Order> list) {
-        list.forEach(order -> {
+    private void pintuanOrderSuccess(List<Order> orderList) {
+        for (Order order:orderList) {
             if (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
                 this.virtualOrderConfirm(order.getSn());
             } else if (order.getOrderType().equals(OrderTypeEnum.NORMAL.name())) {
                 this.normalOrderConfirm(order.getSn());
             }
-        });
+        }
     }
 
     /**
