@@ -73,7 +73,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
         String code = CommonUtil.getRandomNum();
 
         //准备发送短信参数
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>(2);
         //验证码内容
         params.put("code", code);
 
@@ -221,7 +221,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                         signFileList1
                 ));
         AddSmsSignResponse response = client.addSmsSign(addSmsSignRequest);
-        if (!response.getBody().getCode().equals("OK")) {
+        if (!("OK").equals(response.getBody().getCode())) {
             throw new ServiceException(response.getBody().getMessage());
         }
     }
@@ -233,7 +233,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 .setSignName(signName);
 
         DeleteSmsSignResponse response = client.deleteSmsSign(deleteSmsSignRequest);
-        if (!response.getBody().getCode().equals("OK")) {
+        if (!("OK").equals(response.getBody().getCode())) {
             throw new ServiceException(response.getBody().getMessage());
         }
 
@@ -246,10 +246,10 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
         QuerySmsSignRequest querySmsSignRequest = new QuerySmsSignRequest().setSignName(signName);
 
         QuerySmsSignResponse response = client.querySmsSign(querySmsSignRequest);
-        if (!response.getBody().getCode().equals("OK")) {
+        if (!("OK").equals(response.getBody().getCode())) {
             throw new ServiceException(response.getBody().getMessage());
         }
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(2);
         map.put("SignStatus", response.getBody().getSignStatus());
         map.put("Reason", response.getBody().getReason());
         return map;
@@ -275,7 +275,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                         signFileList1
                 ));
         ModifySmsSignResponse response = client.modifySmsSign(modifySmsSign);
-        if (!response.getBody().getCode().equals("OK")) {
+        if (!("OK").equals(response.getBody().getCode())) {
             throw new ServiceException(response.getBody().getMessage());
         }
     }
@@ -291,7 +291,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 .setTemplateCode(smsTemplate.getTemplateCode());
 
         ModifySmsTemplateResponse response = client.modifySmsTemplate(modifySmsTemplateRequest);
-        if (!response.getBody().getCode().equals("OK")) {
+        if (!("OK").equals(response.getBody().getCode())) {
             throw new ServiceException(response.getBody().getMessage());
         }
     }
@@ -303,10 +303,10 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 .setTemplateCode(templateCode);
         QuerySmsTemplateResponse response = client.querySmsTemplate(querySmsTemplateRequest);
 
-        if (!response.getBody().getCode().equals("OK")) {
+        if (!("OK").equals(response.getBody().getCode())) {
             throw new ServiceException(response.getBody().getMessage());
         }
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(4);
         map.put("TemplateStatus", response.getBody().getTemplateStatus());
         map.put("Reason", response.getBody().getReason());
         map.put("TemplateCode", response.getBody().getTemplateCode());
@@ -323,7 +323,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 .setRemark(smsTemplate.getRemark());
 
         AddSmsTemplateResponse response = client.addSmsTemplate(addSmsTemplateRequest);
-        if (!response.getBody().getCode().equals("OK")) {
+        if (!("OK").equals(response.getBody().getCode())) {
             throw new ServiceException(response.getBody().getMessage());
         }
         return response.getBody().getTemplateCode();
@@ -336,7 +336,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 .setTemplateCode(templateCode);
 
         DeleteSmsTemplateResponse response = client.deleteSmsTemplate(deleteSmsTemplateRequest);
-        if (!response.getBody().getCode().equals("OK")) {
+        if (!("OK").equals(response.getBody().getCode())) {
             throw new ServiceException(response.getBody().getMessage());
         }
     }

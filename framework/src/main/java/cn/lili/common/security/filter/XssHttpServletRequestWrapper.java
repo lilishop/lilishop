@@ -15,6 +15,10 @@ import java.util.regex.Pattern;
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     private HttpServletRequest request;
 
+
+
+
+
     public XssHttpServletRequestWrapper(HttpServletRequest request) {
         super(request);
         this.request = request;
@@ -90,46 +94,38 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         return value;
     }
 
+
+    private static final Pattern SCRIPT_PATTERN1 = Pattern.compile("<script>(.*?)</script>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SCRIPT_PATTERN2 = Pattern.compile("</script>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SCRIPT_PATTERN3 = Pattern.compile("<script(.*?)>", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+    private static final Pattern SCRIPT_PATTERN4 = Pattern.compile("javascript:", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SRC_PATTERN = Pattern.compile("src[\r\n]*=[\r\n]*\\\'(.*?)\\\'", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+    private static final Pattern EVAL_PATTERN = Pattern.compile("eval\\((.*?)\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+    private static final Pattern E_­_XPRESSION_PATTERN = Pattern.compile("e­xpression\\((.*?)\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+    private static final Pattern VB_SCRIPT_PATTERN = Pattern.compile("vbscript:", Pattern.CASE_INSENSITIVE);
+    private static final Pattern ONLOAD_PATTERN = Pattern.compile("onload(.*?)=", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+
     private String cleanXSS(String value) {
         if (value != null) {
             //推荐使用ESAPI库来避免脚本攻击,value = ESAPI.encoder().canonicalize(value);
-//           //避免空字符串
-//           value = value.replaceAll(" ", "");
             //避免script 标签
-            Pattern scriptPattern = Pattern.compile("<script>(.*?)</script>", Pattern.CASE_INSENSITIVE);
-            value = scriptPattern.matcher(value).replaceAll("");
-            //避免src形式的表达式
-            scriptPattern = Pattern.compile("src[\r\n]*=[\r\n]*\\\'(.*?)\\\'",
-                    Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-            value = scriptPattern.matcher(value).replaceAll("");
-            scriptPattern = Pattern.compile("src[\r\n]*=[\r\n]*\\\"(.*?)\\\"",
-                    Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-            value = scriptPattern.matcher(value).replaceAll("");
+            value = SCRIPT_PATTERN1.matcher(value).replaceAll("");
             //删除单个的 </script> 标签
-            scriptPattern = Pattern.compile("</script>", Pattern.CASE_INSENSITIVE);
-            value = scriptPattern.matcher(value).replaceAll("");
+            value = SCRIPT_PATTERN2.matcher(value).replaceAll("");
             //删除单个的<script ...> 标签
-            scriptPattern = Pattern.compile("<script(.*?)>",
-                    Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-            value = scriptPattern.matcher(value).replaceAll("");
-            //避免 eval(...) 形式表达式
-            scriptPattern = Pattern.compile("eval\\((.*?)\\)",
-                    Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-            value = scriptPattern.matcher(value).replaceAll("");
-            //避免 e­xpression(...) 表达式
-            scriptPattern = Pattern.compile("e­xpression\\((.*?)\\)",
-                    Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-            value = scriptPattern.matcher(value).replaceAll("");
+            value = SCRIPT_PATTERN3.matcher(value).replaceAll("");
             //避免 javascript: 表达式
-            scriptPattern = Pattern.compile("javascript:", Pattern.CASE_INSENSITIVE);
-            value = scriptPattern.matcher(value).replaceAll("");
+            value = SCRIPT_PATTERN4.matcher(value).replaceAll("");
+            //避免src形式的表达式
+            value = SRC_PATTERN.matcher(value).replaceAll("");
+            //避免 eval(...) 形式表达式
+            value = EVAL_PATTERN.matcher(value).replaceAll("");
+            //避免 e­xpression(...) 表达式
+            value = E_­_XPRESSION_PATTERN.matcher(value).replaceAll("");
             //避免 vbscript:表达式
-            scriptPattern = Pattern.compile("vbscript:", Pattern.CASE_INSENSITIVE);
-            value = scriptPattern.matcher(value).replaceAll("");
+            value = VB_SCRIPT_PATTERN.matcher(value).replaceAll("");
             //避免 onload= 表达式
-            scriptPattern = Pattern.compile("onload(.*?)=",
-                    Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-            value = scriptPattern.matcher(value).replaceAll("");
+            value = ONLOAD_PATTERN.matcher(value).replaceAll("");
         }
         return value;
     }

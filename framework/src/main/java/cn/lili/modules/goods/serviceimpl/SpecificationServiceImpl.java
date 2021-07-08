@@ -13,7 +13,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,13 +24,16 @@ import java.util.List;
  * @date 2020-02-18 16:18:56
  */
 @Service
-@Transactional
 public class SpecificationServiceImpl extends ServiceImpl<SpecificationMapper, Specification> implements SpecificationService {
 
-    //分类-规格绑定
+    /**
+     * 分类-规格绑定
+     */
     @Autowired
     private CategorySpecificationService categorySpecificationService;
-
+    /**
+     * 分类
+     */
     @Autowired
     private CategoryServiceImpl categoryService;
 

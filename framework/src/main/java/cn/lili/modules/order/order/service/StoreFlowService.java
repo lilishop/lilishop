@@ -33,7 +33,7 @@ public interface StoreFlowService extends IService<StoreFlow> {
     /**
      * 获取商家流水
      *
-     * @param StoreId      商家ID
+     * @param storeId      商家ID
      * @param type         收入、退款
      * @param distribution 是否查看分销相关数据
      * @param pageVO       分页
@@ -41,6 +41,6 @@ public interface StoreFlowService extends IService<StoreFlow> {
      * @param endTime      结束时间
      * @return
      */
-    IPage<StoreFlow> getStoreFlow(String StoreId, String type, boolean distribution, PageVO pageVO, Date startTime, Date endTime);
+    IPage<StoreFlow> getStoreFlow(String storeId, String type, boolean distribution, PageVO pageVO, Date startTime, Date endTime);
 
 }

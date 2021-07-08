@@ -36,16 +36,22 @@ import java.util.List;
  */
 @Slf4j
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow> implements StoreFlowService {
 
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
-    //订单货物
+    /**
+     * 订单货物
+     */
     @Autowired
     private OrderItemService orderItemService;
-    //退款日志
+    /**
+     * 退款日志
+     */
     @Autowired
     private RefundLogService refundLogService;
 

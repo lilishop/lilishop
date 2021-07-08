@@ -40,13 +40,17 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
     @Autowired
     private WechatAccessTokenUtil wechatAccessTokenUtil;
 
-    //get 获取所有的模版
+    /**
+     * get 获取所有的模版
+     */
     private final String allMsgTpl = "https://api.weixin.qq.com/wxaapi/newtmpl/gettemplate?access_token=";
-
-    //获取keyid
+    /**
+     * 获取keyid
+     */
     private final String keywords = "https://api.weixin.qq.com/wxaapi/newtmpl/getpubtemplatekeywords?access_token=";
-
-    //post 删除模版 添加模版 获取模版id
+    /**
+     * post 删除模版 添加模版 获取模版id
+     */
     private final String delMsgTpl = "https://api.weixin.qq.com/wxaapi/newtmpl/deltemplate?access_token=";
     private final String addTpl = "https://api.weixin.qq.com/wxaapi/newtmpl/addtemplate?access_token=";
 
@@ -78,7 +82,7 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
             tmpList.forEach(tplData -> {
                 WechatMPMessage wechatMPMessage = new WechatMPMessage();
 
-                Map params = new HashMap<>();
+                Map params = new HashMap<>(16);
                 params.put("tid", tplData.getTid());
                 //获取微信消息订阅keys
                 String keywordsItems = WechatMessageUtil.wechatHandler(HttpUtil.get(keywords + accessToken, params));
@@ -102,7 +106,7 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
                         }
                     }
                 }
-                params = new HashMap<>();
+                params = new HashMap<>(4);
                 params.put("tid", tplData.getTid());
                 params.put("kidList", kids);
                 params.put("sceneDesc", tplData.getSceneDesc());
@@ -203,12 +207,20 @@ class WechatMPMessageData {
 
 @Data
 class WechatMessageKeyword {
-    //id字段
+    /**
+     * id字段
+     */
     private String kid;
-    //名称
+    /**
+     * 名称
+     */
     private String name;
-    //示例值
+    /**
+     * 示例值
+     */
     private String example;
-    //示例值
+    /**
+     * 示例值
+     */
     private String rule;
 }

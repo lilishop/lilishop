@@ -6,6 +6,9 @@ package cn.lili.modules.search.entity.enums;
  **/
 public enum HotWordsRedisKeyEnum {
 
+    /**
+     * "搜索热词"
+     */
     SEARCH_HOT_WORD("搜索热词");
 
 

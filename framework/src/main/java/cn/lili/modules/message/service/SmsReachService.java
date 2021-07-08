@@ -17,6 +17,7 @@ public interface SmsReachService extends IService<SmsReach> {
      * 添加短信任务
      *
      * @param smsReach 短信签名
+     * @param mobile   手机号
      */
     void addSmsReach(SmsReach smsReach, List<String> mobile);
 

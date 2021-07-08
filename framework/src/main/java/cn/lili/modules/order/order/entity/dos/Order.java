@@ -124,7 +124,6 @@ public class Order extends BaseEntity {
     @ApiModelProperty(value = "优惠的金额")
     private Double discountPrice;
 
-    //修改金额
     @ApiModelProperty(value = "修改价格")
     private Double updatePrice;
 

@@ -50,22 +50,34 @@ import java.util.Optional;
 @Transactional(rollbackFor = Exception.class)
 public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements StoreService {
 
-    //会员
+    /**
+     * 会员
+     */
     @Autowired
     private MemberService memberService;
-    //商品
+    /**
+     * 商品
+     */
     @Autowired
     private GoodsService goodsService;
-    //商品SKU
+    /**
+     * 商品SKU
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    //店铺详情
+    /**
+     * 店铺详情
+     */
     @Autowired
     private StoreDetailService storeDetailService;
-    //页面
+    /**
+     * 页面
+     */
     @Autowired
     private PageDataService pageDataService;
-    //店铺收藏
+    /**
+     * 店铺收藏
+     */
     @Autowired
     private StoreCollectionService storeCollectionService;
 

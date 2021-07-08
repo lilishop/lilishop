@@ -85,11 +85,9 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
         return (response, context) -> 2 * 60 * 1000;
     }
 
-    /*
+    /**
      * it gets called when bean instance is getting removed from the context if
      * scope is not a prototype
-     */
-    /*
      * If there is a method named shutdown or close then spring container will try
      * to automatically configure them as callback methods when bean is being
      * destroyed
@@ -99,7 +97,7 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
         try {
             this.client.close();
         } catch (IOException e) {
-            log.error("es clientClose错误",e);
+            log.error("es clientClose错误", e);
         }
     }
 

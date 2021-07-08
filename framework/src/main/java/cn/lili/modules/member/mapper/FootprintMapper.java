@@ -19,11 +19,19 @@ import java.util.List;
  */
 public interface FootprintMapper extends BaseMapper<FootPrint> {
 
+    /**
+     * 获取用户足迹的SkuId分页
+     *
+     * @param page         分页
+     * @param queryWrapper 查询条件
+     * @return 用户足迹的SkuId分页
+     */
     @Select("select sku_id from li_foot_print  ${ew.customSqlSegment} ")
     List<String> footprintSkuIdList(IPage<String> page, @Param(Constants.WRAPPER) Wrapper<FootPrint> queryWrapper);
 
     /**
      * 删除超过100条后的记录
+     *
      * @param memberId 会员ID
      */
     @Delete("DELETE FROM li_foot_print WHERE (SELECT COUNT(b.id) FROM ( SELECT * FROM li_foot_print WHERE member_id = #{memberId} ) b) >100 " +

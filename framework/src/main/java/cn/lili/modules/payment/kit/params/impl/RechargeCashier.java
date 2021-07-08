@@ -6,15 +6,14 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.trade.entity.dos.Recharge;
 import cn.lili.modules.order.trade.service.RechargeService;
-import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
 import cn.lili.modules.payment.kit.dto.PayParam;
+import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
 import cn.lili.modules.payment.kit.enums.CashierEnum;
 import cn.lili.modules.payment.kit.params.CashierExecute;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
 import cn.lili.modules.system.entity.dto.BaseSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,10 +27,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class RechargeCashier implements CashierExecute {
-    //余额
+    /**
+     * 余额
+     */
     @Autowired
     private RechargeService rechargeService;
-    //设置
+    /**
+     * 设置
+     */
     @Autowired
     private SettingService settingService;
 

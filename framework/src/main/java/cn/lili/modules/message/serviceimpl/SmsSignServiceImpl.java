@@ -15,7 +15,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +27,6 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-@Transactional
 public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> implements SmsSignService {
     @Autowired
     private AliSmsUtil aliSmsUtil;
@@ -65,7 +63,7 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
     @Override
     public void querySmsSign() {
         try {
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(16);
             //获取未审核通过的签名列表
             List<SmsSign> list = list(new LambdaQueryWrapper<SmsSign>().eq(SmsSign::getSignStatus, 0));
             //查询签名状态

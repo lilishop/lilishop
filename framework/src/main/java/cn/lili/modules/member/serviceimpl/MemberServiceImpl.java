@@ -60,27 +60,42 @@ import java.util.List;
  * @date 2021-03-29 14:10:16
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> implements MemberService {
 
-    //会员token
+    /**
+     * 会员token
+     */
     @Autowired
     private MemberTokenGenerate memberTokenGenerate;
-    //商家token
+    /**
+     * 商家token
+     */
     @Autowired
     private StoreTokenGenerate storeTokenGenerate;
-    //联合登录
+    /**
+     * 联合登录
+     */
     @Autowired
     private ConnectService connectService;
+    /**
+     * 店铺
+     */
     @Autowired
     private StoreService storeService;
-    //RocketMQ 配置
+    /**
+     * RocketMQ 配置
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    //RocketMQ
+    /**
+     * RocketMQ
+     */
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache cache;
 

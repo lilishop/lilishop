@@ -18,7 +18,7 @@ import java.util.List;
  * @date 2020-02-23 15:18:56
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class CategorySpecificationServiceImpl extends ServiceImpl<CategorySpecificationMapper, CategorySpecification> implements CategorySpecificationService {
 
     @Override

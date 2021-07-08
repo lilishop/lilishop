@@ -71,10 +71,6 @@ public abstract class AuthDefaultRequest implements AuthRequest {
     public AuthResponse login(AuthCallback authCallback) {
         try {
             AuthChecker.checkCode(source, authCallback);
-//           if (!config.isIgnoreCheckState()) {
-//               AuthChecker.checkState(authCallback.getState(), source, cache);
-//           }
-
             AuthToken authToken = this.getAccessToken(authCallback);
             ConnectAuthUser user = this.getUserInfo(authToken);
             return AuthResponse.builder().code(AuthResponseStatus.SUCCESS.getCode()).data(user).build();

@@ -1,7 +1,6 @@
 package cn.lili.modules.store.entity.dto;
 
 import cn.lili.common.validation.Mobile;
-import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
@@ -41,7 +40,7 @@ public class AdminStoreApplyDTO {
     private String goodsManagementCategory;
 
     @ApiModelProperty(value = "是否自营")
-    private boolean selfOperated;
+    private Boolean selfOperated;
 
     @ApiModelProperty(value = "地址名称， '，'分割")
     private String storeAddressPath;

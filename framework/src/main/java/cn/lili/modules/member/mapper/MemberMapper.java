@@ -16,9 +16,17 @@ import java.util.List;
  */
 public interface MemberMapper extends BaseMapper<Member> {
 
+    /**
+     * 获取所有的会员手机号
+     * @return 会员手机号
+     */
     @Select("select m.mobile from li_member m")
     List<String> getAllMemberMobile();
 
+    /**
+     * 获取会员分布列表
+     * @return 会员分布列表
+     */
     @Select("select client_enum,count(0) as num from li_member group by client_enum")
     List<MemberDistributionVO> distribution();
 }

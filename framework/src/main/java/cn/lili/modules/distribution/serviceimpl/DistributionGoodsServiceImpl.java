@@ -31,13 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2020-03-24 23:04:56
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class DistributionGoodsServiceImpl extends ServiceImpl<DistributionGoodsMapper, DistributionGoods> implements DistributionGoodsService {
 
-    //分销员
+    /**
+     * 分销员
+     */
     @Autowired
     private DistributionService distributionService;
-    //规格商品
+    /**
+     * 规格商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
 
@@ -71,7 +75,7 @@ public class DistributionGoodsServiceImpl extends ServiceImpl<DistributionGoodsM
 
     @Override
     public DistributionGoods distributionGoodsVOBySkuId(String skuId) {
-        return this.getOne(new LambdaUpdateWrapper<DistributionGoods>().eq(DistributionGoods::getSkuId,skuId));
+        return this.getOne(new LambdaUpdateWrapper<DistributionGoods>().eq(DistributionGoods::getSkuId, skuId));
     }
 
     @Override

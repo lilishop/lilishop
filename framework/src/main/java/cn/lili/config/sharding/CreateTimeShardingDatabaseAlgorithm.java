@@ -20,8 +20,8 @@ public class CreateTimeShardingDatabaseAlgorithm implements PreciseShardingAlgor
 
     @Override
     public String doSharding(Collection<String> collection, PreciseShardingValue<Long> preciseShardingValue) {
-        Long create_time = preciseShardingValue.getValue();
-        String value = DateUtil.toString(create_time, "yyyy");
+        Long createTime = preciseShardingValue.getValue();
+        String value = DateUtil.toString(createTime, "yyyy");
         //data2019,data2020
         return "data" + value;
     }

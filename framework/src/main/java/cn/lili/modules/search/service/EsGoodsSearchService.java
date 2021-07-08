@@ -10,6 +10,7 @@ import java.util.List;
 
 /**
  * ES商品搜索业务层
+ *
  * @author paulG
  * @date 2020/10/15
  **/
@@ -38,9 +39,15 @@ public interface EsGoodsSearchService {
      *
      * @param goodsSearch 搜索条件
      * @param pageVo      分页参数
-     * @return Map
+     * @return ES商品关联
      */
     EsGoodsRelatedInfo getSelector(EsGoodsSearchDTO goodsSearch, PageVO pageVo);
 
+    /**
+     * 根据SkuID列表获取ES商品
+     *
+     * @param skuIds SkuId列表
+     * @return ES商品列表
+     */
     List<EsGoodsIndex> getEsGoodsBySkuIds(List<String> skuIds);
 }

@@ -31,14 +31,13 @@ public class SmsController {
     @Autowired
     private VerificationService verificationService;
 
-    //一分钟同一个ip请求1次
     @LimitPoint(name = "sms_send", key = "sms")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "path", dataType = "String", name = "mobile", value = "手机号"),
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "uuid", value = "uuid"),
     })
     @GetMapping("/{verificationEnums}/{mobile}")
-    @ApiOperation(value = "发送短信验证码")
+    @ApiOperation(value = "发送短信验证码,一分钟同一个ip请求1次")
     public ResultMessage getSmsCode(
             @RequestHeader String uuid,
             @PathVariable String mobile,

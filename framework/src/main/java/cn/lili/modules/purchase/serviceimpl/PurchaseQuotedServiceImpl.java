@@ -23,7 +23,6 @@ import java.util.List;
  * @date 2020/11/26 16:13
  */
 @Service
-@Transactional
 public class PurchaseQuotedServiceImpl extends ServiceImpl<PurchaseQuotedMapper, PurchaseQuoted> implements PurchaseQuotedService {
     @Autowired
     private PurchaseQuotedItemService purchaseQuotedItemService;

@@ -38,9 +38,12 @@ public interface SystemLogService {
     /**
      * 分页搜索获取日志
      *
-     * @param key
-     * @param searchVo
-     * @return
+     * @param key          关键字
+     * @param searchVo     查询VO
+     * @param pageVO       分页
+     * @param operatorName 操作人
+     * @param storeId      店铺ID
+     * @return 日志分页
      */
     IPage<SystemLogVO> queryLog(String storeId, String operatorName, String key, SearchVO searchVo, PageVO pageVO);
 }

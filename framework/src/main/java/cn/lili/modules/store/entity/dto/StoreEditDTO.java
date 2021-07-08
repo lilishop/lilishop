@@ -2,14 +2,11 @@ package cn.lili.modules.store.entity.dto;
 
 import cn.lili.common.validation.Mobile;
 import cn.lili.common.validation.Phone;
-import cn.lili.modules.store.entity.dos.StoreDetail;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -17,7 +14,6 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.util.Date;
 
 /**
  * 店铺修改DTO
@@ -153,6 +149,7 @@ public class StoreEditDTO {
     private String ddCode;
 
     //店铺退货收件地址
+
     @ApiModelProperty(value = "收货人姓名")
     private String salesConsigneeName;
 

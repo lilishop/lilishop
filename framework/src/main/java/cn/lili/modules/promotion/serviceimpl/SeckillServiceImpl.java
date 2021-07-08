@@ -60,25 +60,39 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> implements SeckillService {
 
-    //延时任务
+    /**
+     * 延时任务
+     */
     @Autowired
     private TimeTrigger timeTrigger;
-    //Mongo
+    /**
+     * Mongo
+     */
     @Autowired
     private MongoTemplate mongoTemplate;
-    //Rocketmq
+    /**
+     * RocketMQ
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    //商品索引
+    /**
+     * 商品索引
+     */
     @Autowired
     private EsGoodsIndexService goodsIndexService;
-    //促销商品
+    /**
+     * 促销商品
+     */
     @Autowired
     private PromotionGoodsService promotionGoodsService;
-    //秒杀申请
+    /**
+     * 秒杀申请
+     */
     @Autowired
     private SeckillApplyService seckillApplyService;
-    //设置
+    /**
+     * 设置
+     */
     @Autowired
     private SettingService settingService;
 
@@ -114,8 +128,8 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
     public void init() {
         //清除演示数据
 
-        List<Seckill> seckillList=list();
-        for (Seckill seckill: seckillList) {
+        List<Seckill> seckillList = list();
+        for (Seckill seckill : seckillList) {
             this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
                     seckill.getStartTime().getTime(),
                     DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.SECKILL.name() + seckill.getId())),
@@ -125,8 +139,8 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
 
         Setting setting = settingService.get(SettingEnum.SECKILL_SETTING.name());
         SeckillSetting seckillSetting = new Gson().fromJson(setting.getSettingValue(), SeckillSetting.class);
-        for (int i=1;i<=30;i++){
-            Seckill seckill = new Seckill(i,seckillSetting.getHours(), seckillSetting.getSeckillRule());
+        for (int i = 1; i <= 30; i++) {
+            Seckill seckill = new Seckill(i, seckillSetting.getHours(), seckillSetting.getSeckillRule());
             this.saveSeckill(seckill);
         }
     }
@@ -134,8 +148,8 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
     @Override
     public boolean saveSeckill(Seckill seckill) {
 
-        SeckillVO seckillVO=new SeckillVO();
-        BeanUtil.copyProperties(seckill,seckillVO);
+        SeckillVO seckillVO = new SeckillVO();
+        BeanUtil.copyProperties(seckill, seckillVO);
 
         seckillVO.setSeckillApplyStatus(SeckillApplyStatusEnum.NOT_APPLY.name());
         seckillVO.setSeckillApplyList(null);
@@ -273,6 +287,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
 
     /**
      * 添加秒杀活动延时任务
+     *
      * @param seckill 秒杀活动
      */
     private void addSeckillStartTask(SeckillVO seckill) {
@@ -312,7 +327,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
         int sameNum = this.count(queryWrapper);
         //当前时间段是否存在同类活动
         if (sameNum > 0) {
-            throw new ServiceException("当前时间内已存在同类活动:"+seckill.getStartTime());
+            throw new ServiceException("当前时间内已存在同类活动:" + seckill.getStartTime());
         }
     }
 }

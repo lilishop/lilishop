@@ -33,7 +33,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 
@@ -44,20 +43,26 @@ import java.util.List;
  * @since 2020/12/5
  **/
 @Service
-@Transactional
-
 public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper, OrderComplaint> implements OrderComplaintService {
 
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
-    //订单货物
+    /**
+     * 订单货物
+     */
     @Autowired
     private OrderItemService orderItemService;
-    //商品规格
+    /**
+     * 商品规格
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    //交易投诉沟通
+    /**
+     * 交易投诉沟通
+     */
     @Autowired
     private OrderComplaintCommunicationService orderComplaintCommunicationService;
 

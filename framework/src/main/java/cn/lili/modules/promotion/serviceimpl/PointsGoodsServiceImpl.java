@@ -48,19 +48,29 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, PointsGoods> implements PointsGoodsService {
 
-    //延时任务
+    /**
+     * 延时任务
+     */
     @Autowired
     private TimeTrigger timeTrigger;
-    //Mongo
+    /**
+     * Mongo
+     */
     @Autowired
     private MongoTemplate mongoTemplate;
-    //Rocketmq
+    /**
+     * RocketMQ
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    //规格商品
+    /**
+     * 规格商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    //Es商品
+    /**
+     * Es商品
+     */
     @Autowired
     private EsGoodsIndexService goodsIndexService;
 

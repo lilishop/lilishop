@@ -24,7 +24,9 @@ import java.util.List;
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.after-sale-topic}", consumerGroup = "${lili.data.rocketmq.after-sale-group}")
 public class AfterSaleMessageListener implements RocketMQListener<MessageExt> {
 
-    //售后订单状态
+    /**
+     * 售后订单状态
+     */
     @Autowired
     private List<AfterSaleStatusChangeEvent> afterSaleStatusChangeEvents;
 
@@ -43,6 +45,8 @@ public class AfterSaleMessageListener implements RocketMQListener<MessageExt> {
                                 e);
                     }
                 }
+            default:
+                log.error("售后状态修改事件执行异常：", new String(messageExt.getBody()));
                 break;
         }
 

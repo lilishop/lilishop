@@ -52,7 +52,7 @@ public class StoreMessageController {
     @GetMapping("/all")
     public ResultMessage<Map<String, Object>> getPage(PageVO pageVo) {
         //返回值定义
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(4);
         StoreMessageQueryVO storeMessageQueryVO = new StoreMessageQueryVO();
         storeMessageQueryVO.setStoreId(UserContext.getCurrentUser().getStoreId());
         //未读消息

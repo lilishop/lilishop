@@ -15,7 +15,12 @@ import org.apache.ibatis.annotations.Select;
  */
 public interface MemberStatisticsDataMapper extends BaseMapper<MemberStatisticsData> {
 
-
+    /**
+     * 获取会员统计数量
+     *
+     * @param queryWrapper 查询条件
+     * @return 会员统计数量
+     */
     @Select("SELECT  COUNT(0)  FROM li_member  ${ew.customSqlSegment}")
     Integer customSqlQuery(@Param(Constants.WRAPPER) Wrapper queryWrapper);
 

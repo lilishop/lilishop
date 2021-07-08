@@ -66,11 +66,6 @@ public class PageViewInterceptor {
                 storeId = "-1";
         }
         String ip = IpUtils.getIpAddress(request);
-//       //如果用户不为空，则ip后追加用户id，这样一个用户多个ip登录，可以被多次记录访客数
-//       if (UserContext.getCurrentUser() != null) {
-//           ip += UserContext.getCurrentUser().getId();
-//       }
-
         try {
             //PV 统计48小时过期 留下一定时间予以统计累计数据库
             cache.incr(CachePrefix.PV.getPrefix() + StatisticsSuffix.suffix(), 60 * 60 * 48);
@@ -98,7 +93,7 @@ public class PageViewInterceptor {
      */
     private static Map<String, String> spelFormat(JoinPoint joinPoint) {
 
-        Map<String, String> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>(2);
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         PageViewPoint pageViewPoint = signature.getMethod().getAnnotation(PageViewPoint.class);
         String id = SpelUtil.compileParams(joinPoint, pageViewPoint.id());

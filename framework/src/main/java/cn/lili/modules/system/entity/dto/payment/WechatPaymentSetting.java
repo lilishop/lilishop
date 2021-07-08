@@ -13,19 +13,32 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class WechatPaymentSetting {
 
-
-    //应用id
+    /**
+     * 应用id
+     */
     private String appId;
-    //商户号
+    /**
+     * 商户号
+     */
     private String mchId;
-    //私钥
+    /**
+     * 私钥
+     */
     private String apiclient_key;
-    //pem 证书
+    /**
+     * pem 证书
+     */
     private String apiclient_cert_pem;
-    //p12 证书
+    /**
+     * p12 证书
+     */
     private String apiclient_cert_p12;
-    //商户证书序列号
+    /**
+     * 商户证书序列号
+     */
     private String serialNumber;
-    //apiv3私钥
+    /**
+     * apiv3私钥
+     */
     private String apiKey3;
 }

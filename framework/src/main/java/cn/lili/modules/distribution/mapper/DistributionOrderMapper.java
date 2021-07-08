@@ -14,7 +14,10 @@ import org.apache.ibatis.annotations.Update;
 public interface DistributionOrderMapper extends BaseMapper<DistributionOrder> {
 
     /**
-     * 分销提佣
+     * 修改分销员提现金额
+     *
+     * @param distributionOrderStatus 分销订单状态
+     * @param settleCycle             时间
      */
     @Update("UPDATE li_distribution AS d " +
             "SET d.can_rebate =(d.can_rebate +(SELECT SUM( dorder.rebate ) FROM li_distribution_order AS dorder WHERE dorder.distribution_id = d.id AND dorder.distribution_order_status=#{distributionOrderStatus} AND dorder.settle_cycle< #{settleCycle} ))")

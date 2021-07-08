@@ -160,7 +160,7 @@ public class RedisCache implements Cache {
                 return null;
 
             } catch (IOException e) {
-                log.error("scan错误",e);
+                log.error("scan错误", e);
                 throw new RuntimeException(e);
             }
         });
@@ -206,8 +206,8 @@ public class RedisCache implements Cache {
     public Long incr(String key, long liveTime) {
         RedisAtomicLong entityIdCounter = new RedisAtomicLong(key, redisTemplate.getConnectionFactory());
         Long increment = entityIdCounter.getAndIncrement();
-
-        if ((null == increment || increment.longValue() == 0) && liveTime > 0) {//初始设置过期时间
+        //初始设置过期时间
+        if ((null == increment || increment.longValue() == 0) && liveTime > 0) {
             entityIdCounter.expire(liveTime, TimeUnit.SECONDS);
         }
 
@@ -254,8 +254,7 @@ public class RedisCache implements Cache {
      */
     @Override
     public boolean zAdd(String key, long score, String value) {
-        Boolean result = redisTemplate.opsForZSet().add(key, value, score);
-        return result;
+        return redisTemplate.opsForZSet().add(key, value, score);
 
     }
 

@@ -21,10 +21,14 @@ import java.util.List;
 @Component
 public class BillExecute implements EveryDayExecute {
 
-    //结算单
+    /**
+     * 结算单
+     */
     @Autowired
     private BillService billService;
-    //店铺详情
+    /**
+     * 店铺详情
+     */
     @Resource
     private StoreDetailMapper storeDetailMapper;
 

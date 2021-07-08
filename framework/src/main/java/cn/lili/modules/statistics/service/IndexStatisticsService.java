@@ -38,12 +38,14 @@ public interface IndexStatisticsService {
     /**
      * 查询热卖商品TOP10
      *
+     * @param statisticsQueryParam 商品统计查询参数
      * @return 热卖商品TOP10
      */
     List<GoodsStatisticsDataVO> goodsStatistics(GoodsStatisticsQueryParam statisticsQueryParam);
 
     /**
      * 查询热卖店铺TOP10
+     * @param statisticsQueryParam 统计查询参数
      *
      * @return 当月的热卖店铺TOP10
      */

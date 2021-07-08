@@ -169,6 +169,7 @@ public class StoreDetail {
     private String ddCode;
 
     //店铺退货收件地址
+
     @ApiModelProperty(value = "收货人姓名")
     private String salesConsigneeName;
 

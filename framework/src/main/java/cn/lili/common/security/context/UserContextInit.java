@@ -31,6 +31,6 @@ public class UserContextInit implements ApplicationRunner {
      */
     @Override
     public void run(ApplicationArguments args) {
-        UserContext.setHolder(authenticationHandler);
+        //UserContext.setHolder(authenticationHandler);
     }
 }

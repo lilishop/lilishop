@@ -75,10 +75,15 @@ public class LimitInterceptor {
     }
 
 
-    //默认unknown常量值
+    /**
+     * 默认unknown常量值
+     */
     private static final String UNKNOWN = "unknown";
 
-    //获取ip
+    /**
+     * 获取ip
+     * @return ip
+     */
     public String getIpAddress() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String ip = request.getHeader("x-forwarded-for");

@@ -20,6 +20,13 @@ import java.util.List;
  */
 public interface StoreStatisticsDataMapper extends BaseMapper<StoreFlow> {
 
+    /**
+     * 店铺统计列表
+     *
+     * @param page         分页
+     * @param queryWrapper 查询参数
+     * @return 店铺统计列表
+     */
     @Select("SELECT store_id AS storeId,store_name AS storeName,SUM(final_price) AS price,SUM(num) AS num FROM li_store_flow ${ew.customSqlSegment}")
     List<StoreStatisticsDataVO> getStoreStatisticsData(IPage<GoodsStatisticsDataVO> page, @Param(Constants.WRAPPER) Wrapper<GoodsStatisticsDataVO> queryWrapper);
 

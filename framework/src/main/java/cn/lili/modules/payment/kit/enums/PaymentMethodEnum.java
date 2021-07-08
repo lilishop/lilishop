@@ -8,9 +8,21 @@ package cn.lili.modules.payment.kit.enums;
  */
 public enum PaymentMethodEnum {
 
+    /**
+     * 微信
+     */
     WECHAT("wechatPlugin", "微信"),
+    /**
+     * 支付宝
+     */
     ALIPAY("aliPayPlugin", "支付宝"),
+    /**
+     * 余额支付
+     */
     WALLET("walletPlugin", "余额支付"),
+    /**
+     * 线下转账
+     */
     BANK_TRANSFER("bankTransferPlugin", "线下转账");
 
     /**

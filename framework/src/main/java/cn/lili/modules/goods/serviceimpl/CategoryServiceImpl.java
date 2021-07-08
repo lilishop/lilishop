@@ -33,11 +33,13 @@ import java.util.stream.Collectors;
  * @date 2020-02-23 15:18:56
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryService {
 
     private static final String DELETE_FLAG_COLUMN = "delete_flag";
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache cache;
 
@@ -60,7 +62,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         //构造分类树
         List<CategoryVO> categoryVOList = new ArrayList<>();
         for (Category category : list) {
-            if (category.getParentId().equals("0")) {
+            if ("0".equals(category.getParentId())) {
                 CategoryVO categoryVO = new CategoryVO(category);
                 categoryVO.setChildren(findChildren(list, categoryVO));
                 categoryVOList.add(categoryVO);
@@ -96,7 +98,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public List<CategoryVO> listAllChildren(String parentId) {
-        if (parentId.equals("0")) {
+        if ("0".equals(parentId)) {
             return categoryTree();
         }
         //循环代码，找到对象，把他的子分类返回
@@ -119,7 +121,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         //构造分类树
         List<CategoryVO> categoryVOList = new ArrayList<>();
         for (Category category : list) {
-            if (category.getParentId().equals("0")) {
+            if (("0").equals(category.getParentId())) {
                 CategoryVO categoryVO = new CategoryVO(category);
                 categoryVO.setChildren(findChildren(list, categoryVO));
                 categoryVOList.add(categoryVO);
@@ -161,7 +163,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public boolean saveCategory(Category category) {
-        if (category.getParentId() != null && !category.getParentId().equals("0")) {
+        if (category.getParentId() != null && !("0").equals(category.getParentId())) {
             Category parentCategory = this.getById(category.getParentId());
             category.setDeleteFlag(parentCategory.getDeleteFlag());
         }
@@ -172,7 +174,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public void updateCategory(Category category) {
-        if (category.getParentId() != null && !category.getParentId().equals("0")) {
+        if (category.getParentId() != null && !"0".equals(category.getParentId())) {
             Category parentCategory = this.getById(category.getParentId());
             if (!parentCategory.getDeleteFlag().equals(category.getDeleteFlag())) {
                 throw new ServiceException(ResultCode.CATEGORY_DELETE_FLAG_ERROR);

@@ -66,7 +66,7 @@ public class AuthChecker {
     public static void checkCode(ConnectAuth connectAuth, AuthCallback callback) {
         String code = callback.getCode();
         if (connectAuth == ConnectAuthEnum.ALIPAY) {
-            code = callback.getAuth_code();
+            code = callback.getAuthCode();
         }
         if (StringUtils.isEmpty(code)) {
             throw new AuthException(AuthResponseStatus.ILLEGAL_CODE, connectAuth);

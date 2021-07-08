@@ -28,7 +28,7 @@ import java.util.Date;
 @Table(name = "li_bill")
 @TableName("li_bill")
 @ApiModel(value = "结算单")
-public class Bill  {
+public class Bill {
 
     private static final long serialVersionUID = 1L;
 
@@ -36,7 +36,7 @@ public class Bill  {
     @TableId
     @TableField
     @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id ;
+    private String id;
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd")
@@ -86,11 +86,13 @@ public class Bill  {
     @ApiModelProperty(value = "支行联行号")
     private String bankCode;
 
-    ////开始算钱啦
-    //billPrice=orderPrice-refundPrice
-    //-commissionPrice+refundCommissionPrice
-    //-distributionCommission+distributionRefundCommission
-    //+siteCouponCommission-siteCouponRefundCommission
+    /**
+     * 开始算钱啦
+     * billPrice=orderPrice-refundPrice
+     * -commissionPrice+refundCommissionPrice
+     * -distributionCommission+distributionRefundCommission
+     * +siteCouponCommission-siteCouponRefundCommission
+     */
     @ApiModelProperty(value = "结算周期内订单付款总金额")
     private Double orderPrice;
 

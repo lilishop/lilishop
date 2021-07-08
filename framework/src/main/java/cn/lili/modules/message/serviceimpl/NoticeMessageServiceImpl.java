@@ -28,7 +28,6 @@ import java.util.Map;
  * @date 2020/12/8 9:48
  */
 @Service
-@Transactional
 public class NoticeMessageServiceImpl extends ServiceImpl<NoticeMessageTemplateMapper, NoticeMessage> implements NoticeMessageService {
 
     @Autowired

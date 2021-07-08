@@ -9,16 +9,18 @@ import java.lang.reflect.Method;
 
 /**
  * 对象属性复制
+ *
  * @author Chopper
  */
 public class BeanUtil {
 
     /**
      * 复制属性
+     *
      * @param objectFrom
      * @param objectTo
      */
-    public static void copyProperties(Object objectFrom,Object objectTo){
+    public static void copyProperties(Object objectFrom, Object objectTo) {
         BeanUtils.copyProperties(objectFrom, objectTo);
     }
 
@@ -36,7 +38,7 @@ public class BeanUtil {
             index++;
         }
         for (int i = 0; i < superFields.length; i++) {
-            if (superFields[i].getName().equals("id")) {
+            if ("id".equals(superFields[i].getName())) {
                 continue;
             }
             fieldNames[index] = superFields[i].getName();
@@ -45,8 +47,12 @@ public class BeanUtil {
         return fieldNames;
     }
 
-    /* 根据属性名获取属性值
-     * */
+    /**
+     * 根据属性名获取属性值
+     * @param fieldName 属性名
+     * @param o 对象
+     * @return 属性值
+     */
     public static Object getFieldValueByName(String fieldName, Object o) {
         try {
             String firstLetter = fieldName.substring(0, 1).toUpperCase();

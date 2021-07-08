@@ -44,7 +44,7 @@ public class AuthAlipayRequest extends AuthDefaultRequest {
     protected AuthToken getAccessToken(AuthCallback authCallback) {
         AlipaySystemOauthTokenRequest request = new AlipaySystemOauthTokenRequest();
         request.setGrantType("authorization_code");
-        request.setCode(authCallback.getAuth_code());
+        request.setCode(authCallback.getAuthCode());
         AlipaySystemOauthTokenResponse response = null;
         try {
             response = this.alipayClient.execute(request);

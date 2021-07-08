@@ -35,11 +35,14 @@ public interface OrderStatisticsDataService extends IService<StoreFlow> {
 
     /**
      * 查询今日付款统计
+     *
+     * @return 订单统计金额
      */
     Map<String, Object> getOrderStatisticsPrice();
 
     /**
      * 获取订单总数量
+     *
      * @param orderStatus 订单状态
      * @return 订单总数量
      */
@@ -48,6 +51,7 @@ public interface OrderStatisticsDataService extends IService<StoreFlow> {
     /**
      * 图表统计
      *
+     * @param statisticsQueryParam 统计查询参数
      * @return 订单总数量
      */
     List<OrderStatisticsDataVO> statisticsChart(StatisticsQueryParam statisticsQueryParam);

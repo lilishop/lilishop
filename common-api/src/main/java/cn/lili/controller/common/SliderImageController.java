@@ -28,10 +28,9 @@ public class SliderImageController {
     @Autowired
     private VerificationService verificationService;
 
-    //一分钟同一个ip请求10次
     @LimitPoint(name = "slider_image", key = "verification")
     @GetMapping("/{verificationEnums}")
-    @ApiOperation(value = "获取校验接口")
+    @ApiOperation(value = "获取校验接口,一分钟同一个ip请求10次")
     public ResultMessage getSliderImage(@RequestHeader String uuid, @PathVariable VerificationEnums verificationEnums) {
         try {
             return ResultUtil.data(verificationService.createVerification(verificationEnums, uuid));

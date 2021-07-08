@@ -15,18 +15,24 @@ import java.io.Serializable;
 public class OssSetting implements Serializable {
 
     private static final long serialVersionUID = 2975271656230801861L;
-    //域名
+    /**
+     * 域名
+     */
     private String endPoint = "oss-cn-beijing.aliyuncs.com";
-
-    //储存空间
+    /**
+     * 储存空间
+     */
     private String bucketName = "lilishop-oss";
-
-    //存放路径路径
+    /**
+     * 存放路径路径
+     */
     private String picLocation = "/template";
-
-    //密钥id
+    /**
+     * 密钥id
+     */
     private String accessKeyId = "LTAI4G4deX59EyjpEULaJdsU";
-
-    //密钥
+    /**
+     * 密钥
+     */
     private String accessKeySecret = "BlRBpl7WBman6GYYwLKMiKqMTXFhWf";
 }

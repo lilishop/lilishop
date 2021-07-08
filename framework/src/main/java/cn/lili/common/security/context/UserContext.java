@@ -9,6 +9,10 @@ import cn.lili.common.token.SecretKeyUtil;
 import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 用户上下文
@@ -20,15 +24,16 @@ import io.jsonwebtoken.Jwts;
  */
 public class UserContext {
 
-    private static AuthenticationHandler authenticationHandler;
+    private static RequestContextHolder requestContextHolder;
 
-    public static void setHolder(AuthenticationHandler authenticationHandler) {
-        UserContext.authenticationHandler = authenticationHandler;
+    public static void setRequestContextHolder(RequestContextHolder requestContextHolder) {
+        UserContext.requestContextHolder = requestContextHolder;
     }
 
-
     public static AuthUser getCurrentUser() {
-        return authenticationHandler.getAuthUser();
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        String accessToken = request.getHeader("accessToken");
+        return getAuthUser(accessToken);
     }
 
 
@@ -44,6 +49,18 @@ public class UserContext {
             if (cache.keys("*" + accessToken).size() == 0) {
                 throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
             }
+            return getAuthUser(accessToken);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    /**
+     * 根据jwt获取token重的用户信息
+     * @param accessToken token
+     * @return
+     */
+    public static AuthUser getAuthUser(String accessToken) {
+        try {
             //获取token的信息
             Claims claims
                     = Jwts.parser()

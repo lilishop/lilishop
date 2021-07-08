@@ -52,10 +52,8 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     private StudioCommodityService studioCommodityService;
     @Resource
     private CommodityMapper commodityMapper;
-    //延时任务
     @Autowired
     private TimeTrigger timeTrigger;
-    //Rocketmq
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
 

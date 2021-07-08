@@ -56,7 +56,7 @@ public class WechatMpCodeUtil {
     public String createQrCode(String path) {
         try {
             String accessToken = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
-            Map<String, String> params = new HashMap<>();
+            Map<String, String> params = new HashMap<>(2);
             params.put("path", path);
             params.put("width", "280");
 
@@ -112,7 +112,7 @@ public class WechatMpCodeUtil {
                 shortLink = shortLinkService.getOne(queryWrapper);
             }
             String accessToken = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
-            Map<String, String> params = new HashMap<>();
+            Map<String, String> params = new HashMap<>(4);
             params.put("page", page);
             params.put("scene", shortLink.getId());
             params.put("width", "280");

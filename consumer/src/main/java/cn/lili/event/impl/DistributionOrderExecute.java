@@ -12,6 +12,7 @@ import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.timetask.handler.EveryDayExecute;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,13 +24,18 @@ import javax.annotation.Resource;
  * @author Chopper
  * @date 2020-07-03 11:20
  */
+@Slf4j
 @Service
 public class DistributionOrderExecute implements OrderStatusChangeEvent, EveryDayExecute, AfterSaleStatusChangeEvent {
 
-    //分销订单
+    /**
+     * 分销订单
+     */
     @Autowired
     private DistributionOrderService distributionOrderService;
-    //分销订单持久层
+    /**
+     * 分销订单持久层
+     */
     @Resource
     private DistributionOrderMapper distributionOrderMapper;
 
@@ -48,6 +54,9 @@ public class DistributionOrderExecute implements OrderStatusChangeEvent, EveryDa
                 distributionOrderService.cancelOrder(orderMessage.getOrderSn());
                 break;
             }
+            default:
+                log.error("分销订单执行异常：", orderMessage.getOrderSn());
+                break;
         }
     }
 

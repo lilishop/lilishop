@@ -23,14 +23,18 @@ import javax.servlet.http.HttpServletRequest;
 @Component
 public class IpHelper {
 
-    //qq lbs 地区查询key
+    /**
+     * qq lbs 地区查询key
+     */
     @Value("${lili.lbs.key}")
     private String key;
-    //qq lbs 地区查询key
+    /**
+     * qq lbs 地区查询key
+     */
     @Value("${lili.lbs.sk}")
     private String sk;
 
-    private static final String api = "https://apis.map.qq.com";
+    private static final String API = "https://apis.map.qq.com";
 
 
     /**
@@ -43,7 +47,7 @@ public class IpHelper {
 
         String url = "/ws/location/v1/ip?key=" + key + "&ip=" + IpUtils.getIpAddress(request);
         String sign = SecureUtil.md5(url + sk);
-        url = api + url + "&sign=" + sign;
+        url = API + url + "&sign=" + sign;
         String result = "未知";
         try {
             String json = HttpUtil.get(url, 3000);

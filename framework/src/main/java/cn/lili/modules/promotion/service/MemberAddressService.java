@@ -16,7 +16,8 @@ public interface MemberAddressService extends IService<MemberAddress> {
     /**
      * 根据会员获取会员地址分页列表
      *
-     * @param page 分页条件
+     * @param page     分页条件
+     * @param memberId 会员ID
      * @return 会员地址分页列表
      */
     IPage<MemberAddress> getAddressByMember(PageVO page, String memberId);

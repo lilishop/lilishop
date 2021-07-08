@@ -43,7 +43,7 @@ public class SliderImageUtil {
     public static Map<String, Object> pictureTemplatesCut(SerializableStream sliderFile, SerializableStream originalFile) throws Exception {
 
         Random random = new Random();
-        Map<String, Object> pictureMap = new HashMap<>();
+        Map<String, Object> pictureMap = new HashMap<>(16);
         //拼图
         BufferedImage sliderImage = ImageIO.read(Base64DecodeMultipartFile.base64ToInputStream(sliderFile.getBase64()));
         int sliderWidth = sliderImage.getWidth();
@@ -79,12 +79,15 @@ public class SliderImageUtil {
 
         //添加水印
         ImageUtil.addWatermark(originalImage, "LILI-SHOP");
-        ByteArrayOutputStream newImageOs = new ByteArrayOutputStream();//新建流。
-        ImageIO.write(newImage, TEMP_IMG_FILE_TYPE, newImageOs);//利用ImageIO类提供的write方法，将bi以png图片的数据模式写入流。
+        //新建流
+        ByteArrayOutputStream newImageOs = new ByteArrayOutputStream();
+        //利用ImageIO类提供的write方法，将bi以png图片的数据模式写入流。
+        ImageIO.write(newImage, TEMP_IMG_FILE_TYPE, newImageOs);
         byte[] newImagery = newImageOs.toByteArray();
-
-        ByteArrayOutputStream oriImagesOs = new ByteArrayOutputStream();//新建流。
-        ImageIO.write(originalImage, IMG_FILE_TYPE, oriImagesOs);//利用ImageIO类提供的write方法，将bi以jpg图片的数据模式写入流。
+        //新建流
+        ByteArrayOutputStream oriImagesOs = new ByteArrayOutputStream();
+        //利用ImageIO类提供的write方法，将bi以jpg图片的数据模式写入流
+        ImageIO.write(originalImage, IMG_FILE_TYPE, oriImagesOs);
         byte[] oriImageByte = oriImagesOs.toByteArray();
 
         pictureMap.put("slidingImage", "data:image/png;base64," + Base64Utils.encodeToString(newImagery));

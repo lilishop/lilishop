@@ -43,7 +43,7 @@ public class WechatLivePlayerUtil {
         //添加直播间
         Map<String, String> map = this.mockRoom(studio);
         JSONObject json = this.doPostWithJson(url, map);
-        Map<String, String> roomMap = new HashMap<>();
+        Map<String, String> roomMap = new HashMap<>(2);
         roomMap.put("roomId", json.getStr("roomId"));
         roomMap.put("qrcodeUrl", json.getStr("qrcode_url"));
         return roomMap;
@@ -76,7 +76,7 @@ public class WechatLivePlayerUtil {
     public String getLiveInfo(Integer roomId) {
         //发送url
         String url = "https://api.weixin.qq.com/wxa/business/getliveinfo?access_token=";
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(16);
         //获取回放
         map.put("action", "get_replay");
         //直播间ID
@@ -100,7 +100,7 @@ public class WechatLivePlayerUtil {
     public Boolean pushGoods(Integer roomId, Integer goodsId) {
         //发送url
         String url = "https://api.weixin.qq.com/wxaapi/broadcast/room/addgoods?access_token=";
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(16);
         //直播间回放
         Integer[] ids = {goodsId};
         map.put("ids", ids);
@@ -120,7 +120,7 @@ public class WechatLivePlayerUtil {
     public Boolean goodsDeleteInRoom(Integer roomId, Integer goodsId) {
         //发送url
         String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/deleteInRoom?access_token=";
-        Map<String, Integer> map = new HashMap<>();
+        Map<String, Integer> map = new HashMap<>(2);
         //直播间回放
         map.put("goodsId", goodsId);
         //商品ID
@@ -149,7 +149,7 @@ public class WechatLivePlayerUtil {
         GoodsInfo goodsInfo = new GoodsInfo(commodity);
         //上传微信临时图片
         goodsInfo.setCoverImgUrl(wechatMediaUtil.uploadMedia("image", commodity.getGoodsImage()));
-        Map<String, GoodsInfo> map = new HashMap<>();
+        Map<String, GoodsInfo> map = new HashMap<>(2);
         //调用新增直播商品接口
         map.put("goodsInfo", goodsInfo);
         return this.doPostWithJson(url, map);
@@ -164,7 +164,7 @@ public class WechatLivePlayerUtil {
     public JSONObject deleteGoods(String goodsId) {
         //发送url
         String url = "https://api.weixin.qq.com/wxaapi/broadcast/goods/delete?access_token=";
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(2);
         map.put("goodsId", goodsId);
         return this.doPostWithJson(url, map);
     }
@@ -178,7 +178,7 @@ public class WechatLivePlayerUtil {
     public JSONObject getGoodsWareHouse(List<String> goodsIdList) {
         //发送url
         String url = "https://api.weixin.qq.com/wxa/business/getgoodswarehouse?access_token=";
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(2);
         map.put("goods_ids", goodsIdList);
         return this.doPostWithJson(url, map);
     }
@@ -201,9 +201,9 @@ public class WechatLivePlayerUtil {
         log.info("微信小程序请求结果：" + content);
         //获取请求内容，如果token过期则重新获取，如果出错则抛出错误
         JSONObject jsonObject = new JSONObject(content);
-        if (jsonObject.get("errcode").toString().equals("0")) {
+        if (("0").equals(jsonObject.get("errcode").toString())) {
             return jsonObject;
-        } else if (jsonObject.get("errcode").equals("40001")) {
+        } else if (("40001").equals(jsonObject.get("errcode"))) {
             wechatAccessTokenUtil.removeAccessToken(ClientTypeEnum.WECHAT_MP);
             return this.doPostWithJson(url, map);
         } else {
@@ -212,7 +212,7 @@ public class WechatLivePlayerUtil {
     }
 
     private Map<String, String> mockRoom(Studio studio) {
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(16);
         //背景图
         map.put("coverImg", wechatMediaUtil.uploadMedia("image", studio.getCoverImg()));
         //分享图

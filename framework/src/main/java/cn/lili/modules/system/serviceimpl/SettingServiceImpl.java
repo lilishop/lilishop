@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2020/11/17 3:52 下午
  */
 @Service
-@Transactional
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting> implements SettingService {
 
     @Override

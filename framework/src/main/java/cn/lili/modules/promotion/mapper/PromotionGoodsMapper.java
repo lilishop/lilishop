@@ -41,6 +41,7 @@ public interface PromotionGoodsMapper extends BaseMapper<PromotionGoods> {
      * @param skuId         skuId
      * @param startTime     开始时间
      * @param endTime       结束时间
+     * @param promotionId   促销活动ID
      * @return 共参加了几种活动
      */
     @Select("select count(0) from li_promotion_goods where promotion_type = #{promotionType} and sku_id = #{skuId} and (" +
@@ -48,8 +49,8 @@ public interface PromotionGoodsMapper extends BaseMapper<PromotionGoods> {
             "( start_time < #{startTime}  && end_time > #{endTime} ) || ( start_time > #{startTime}  && end_time < #{endTime} )" +
             " || promotion_status = 'START' ) and promotion_id != #{promotionId}")
     Integer selectInnerOverlapPromotionGoodsWithout(@Param("promotionType") String promotionType,
-                                             @Param("skuId") String skuId,
-                                             @Param("startTime") Date startTime,
-                                             @Param("endTime") Date endTime,
-                                             @Param("promotionId") String promotionId);
+                                                    @Param("skuId") String skuId,
+                                                    @Param("startTime") Date startTime,
+                                                    @Param("endTime") Date endTime,
+                                                    @Param("promotionId") String promotionId);
 }

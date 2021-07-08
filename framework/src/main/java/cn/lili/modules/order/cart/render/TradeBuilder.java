@@ -25,15 +25,19 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TradeBuilder {
 
-    //购物车渲染步骤
+    /**
+     * 购物车渲染步骤
+     */
     @Autowired
     private List<CartRenderStep> cartRenderSteps;
-
-    //交易
+    /**
+     * 交易
+     */
     @Autowired
     private TradeService tradeService;
-
-    //购物车业务
+    /**
+     * 购物车业务
+     */
     @Autowired
     private CartService cartService;
 

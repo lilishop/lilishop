@@ -107,7 +107,7 @@ public class DistributionGoods {
         this.specs = "";
         JSONObject jsonObject = JSONUtil.parseObj(goodsSku.getSpecs());
         for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-            if (!entry.getKey().equals("images")) {
+            if (!"images".equals(entry.getKey())) {
                 this.specs = this.specs + entry.getKey() + ":" + entry.getValue() + " ";
             }
         }

@@ -1,6 +1,7 @@
 package cn.lili.modules.broadcast.util;
 
 import cn.hutool.json.JSONObject;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.base.entity.enums.ClientTypeEnum;
 import cn.lili.modules.message.util.WechatAccessTokenUtil;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Date;
 
 /**
  * 微信媒体工具
@@ -78,7 +78,7 @@ public class WechatMediaUtil {
             //使用outputStream流输出信息到请求体当中去
             out.write(("--" + boundary + "\r\n").getBytes());
             out.write(("Content-Disposition: form-data; name=\"media\";\r\n"
-                    + "filename=\"" + (new Date().getTime()) + fileExt + "\"\r\n"
+                    + "filename=\"" + (System.currentTimeMillis()) + fileExt + "\"\r\n"
                     + "Content-Type: " + contentType + "\r\n\r\n").getBytes());
             while ((size = bufferedIn.read(bytes)) != -1) {
                 out.write(bytes, 0, size);
@@ -108,7 +108,7 @@ public class WechatMediaUtil {
         JSONObject jsonObject = new JSONObject(resultStr.toString());
         log.info("微信媒体上传:" + jsonObject.toString());
         //判断是否传递成功，如果token过期则重新获取
-        if (jsonObject.get("errcode") != null && jsonObject.get("errcode").equals("40001")) {
+        if (jsonObject.get("errcode") != null && ("40001").equals(jsonObject.get("errcode"))) {
             wechatAccessTokenUtil.removeAccessToken(ClientTypeEnum.WECHAT_MP);
             return this.uploadMedia(type, mediaFileUrl);
         } else if (jsonObject.get("errcode") != null) {
@@ -137,6 +137,8 @@ public class WechatMediaUtil {
             case "image/jpg":
                 fileExt = ".jpg";
                 break;
+            default:
+                throw new ServiceException(ResultCode.IMAGE_FILE_EXT_ERROR);
         }
         return fileExt;
     }

@@ -20,7 +20,6 @@ import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.store.service.StoreService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
@@ -122,6 +121,9 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
             //购买商品完成
             case BUY_GOODS_COMPLETE:
                 this.goodsBuyComplete(messageExt);
+                break;
+            default:
+                log.error("商品执行异常：", new String(messageExt.getBody()));
                 break;
         }
     }

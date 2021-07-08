@@ -13,7 +13,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface VerificationSourceService extends IService<VerificationSource> {
 
-    //缓存
+    /**
+     * 缓存
+     */
     String VERIFICATION_CACHE = CachePrefix.VERIFICATION.getPrefix();
 
 
@@ -26,6 +28,8 @@ public interface VerificationSourceService extends IService<VerificationSource> 
 
     /**
      * 获取验证缓存
+     *
+     * @return 验证码
      */
     VerificationVO getVerificationCache();
 }

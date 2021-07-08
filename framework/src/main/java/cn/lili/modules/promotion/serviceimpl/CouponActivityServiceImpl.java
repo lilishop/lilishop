@@ -18,7 +18,10 @@ import cn.lili.modules.promotion.entity.dos.CouponActivity;
 import cn.lili.modules.promotion.entity.dos.CouponActivityItem;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dto.CouponActivityDTO;
-import cn.lili.modules.promotion.entity.enums.*;
+import cn.lili.modules.promotion.entity.enums.CouponActivitySendTypeEnum;
+import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
 import cn.lili.modules.promotion.mapper.CouponActivityMapper;
 import cn.lili.modules.promotion.service.CouponActivityItemService;
@@ -34,8 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-
-import static cn.lili.common.enums.ResultCode.COUPON_ACTIVITY_ITEM_ERROR;
 
 /**
  * 优惠券活动业务层实现
@@ -55,10 +56,8 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
     private CouponActivityItemService couponActivityItemService;
     @Autowired
     private MemberService memberService;
-    //Rocketmq
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    //延时任务
     @Autowired
     private TimeTrigger timeTrigger;
 
@@ -139,7 +138,7 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
         for (CouponActivity couponActivity : couponActivityList) {
             //获取会员信息
             List<Map<String, Object>> memberList = new ArrayList<>();
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(2);
             map.put("id", member.getId());
             map.put("nick_name", member.getNickName());
             memberList.add(map);
@@ -178,7 +177,7 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
             if (coupon != null) {
                 List<MemberCoupon> memberCouponList = new LinkedList<>();
                 //循环优惠券的领取数量
-                int j=couponActivityItem.getNum();
+                int j = couponActivityItem.getNum();
                 for (int i = 1; i <= j; i++) {
                     //循环会员列表，添加优惠券
                     for (Map<String, Object> map : memberList) {
@@ -186,7 +185,7 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
                         memberCoupon.setMemberId(map.get("id").toString());
                         memberCoupon.setMemberName(map.get("nick_name").toString());
                         memberCoupon.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
-                        memberCoupon.setIsPlatform(coupon.getStoreId().equals("platform"));
+                        memberCoupon.setIsPlatform("platform".equals(coupon.getStoreId()));
                         memberCouponList.add(memberCoupon);
                     }
                 }
@@ -244,7 +243,7 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
      */
     private List<Map<String, Object>> getMemberList(CouponActivity couponActivity) {
         //判断优惠券的发送范围，获取会员列表
-        if (couponActivity.getActivityScope().equals("ALL")) {
+        if ("ALL".equals(couponActivity.getActivityScope())) {
             return memberService.listMaps(new QueryWrapper<Member>()
                     .select("id,nick_name"));
         } else {

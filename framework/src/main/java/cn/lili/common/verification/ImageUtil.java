@@ -72,12 +72,13 @@ public class ImageUtil {
                 int rightRgb = templateImage.getRGB(i + 1, j);
                 int downRgb = templateImage.getRGB(i, j + 1);
                 //描边处理，,取带像素和无像素的界点，判断该点是不是临界轮廓点,如果是设置该坐标像素是白色
-                if ((rgb >= 0 && rightRgb < 0) || (rgb < 0 && rightRgb >= 0) || (rgb >= 0 && downRgb < 0)
-                        || (rgb < 0 && downRgb >= 0)) {
+                boolean rgbImage = ((rgb >= 0 && rightRgb < 0)
+                        || (rgb < 0 && rightRgb >= 0)
+                        || (rgb >= 0 && downRgb < 0)
+                        || (rgb < 0 && downRgb >= 0));
 
+                if (rgbImage) {
                     newImage.setRGB(i, j, Color.GRAY.getRGB());
-
-//                   oriImage.setRGB(x + i, y + j, Color.white.getRGB());
                 }
             }
         }
@@ -87,7 +88,7 @@ public class ImageUtil {
         int xStart = x - 1;
         int yStart = y - 1;
         int current = 0;
-        for (int i = xStart; i < 3 + xStart; i++)
+        for (int i = xStart; i < 3 + xStart; i++) {
             for (int j = yStart; j < 3 + yStart; j++) {
                 int tx = i;
                 if (tx < 0) {
@@ -105,6 +106,7 @@ public class ImageUtil {
                 pixels[current++] = img.getRGB(tx, ty);
 
             }
+        }
     }
 
     public static void fillMatrix(int[][] matrix, int[] values) {

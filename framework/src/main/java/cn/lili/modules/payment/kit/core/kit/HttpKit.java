@@ -59,7 +59,7 @@ public class HttpKit {
      * @return 转化后的 Map
      */
     public static Map<String, String> toMap(HttpServletRequest request) {
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>(16);
         Map<String, String[]> requestParams = request.getParameterMap();
         for (String name : requestParams.keySet()) {
             String[] values = requestParams.get(name);

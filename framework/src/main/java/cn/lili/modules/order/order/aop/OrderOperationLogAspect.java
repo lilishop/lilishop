@@ -62,7 +62,7 @@ public class OrderOperationLogAspect {
      */
     private static Map<String, String> spelFormat(JoinPoint joinPoint) throws Exception {
 
-        Map<String, String> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>(2);
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         OrderLogPoint orderLogPoint = signature.getMethod().getAnnotation(OrderLogPoint.class);
         String description = SpelUtil.compileParams(joinPoint, orderLogPoint.description());

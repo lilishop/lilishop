@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class StoreManagementCategoryVO extends Category {
 
     @ApiModelProperty(value = "已选择")
-    private boolean selected;
+    private Boolean selected;
 
     public StoreManagementCategoryVO(Category category) {
         BeanUtil.copyProperties(this, category);

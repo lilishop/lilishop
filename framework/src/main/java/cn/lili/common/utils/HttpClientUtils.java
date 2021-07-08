@@ -9,7 +9,6 @@ import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.config.Registry;
@@ -19,8 +18,6 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -34,29 +31,60 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.Map;
 
+/**
+ * HttpClientUtils
+ *
+ * @author Bulbasaur
+ * @date: 2021/7/9 1:40 上午
+ */
 @Slf4j
 public class HttpClientUtils {
 
-    //org.apache.http.impl.client.CloseableHttpClient
+    /**
+     * org.apache.http.impl.client.CloseableHttpClient
+     */
     private static CloseableHttpClient httpClient = null;
 
     //这里就直接默认固定了,因为以下三个参数在新建的method中仍然可以重新配置并被覆盖.
-    static final int connectionRequestTimeout = 30000;//ms毫秒,从池中获取链接超时时间
-    static final int connectTimeout = 60000;//ms毫秒,建立链接超时时间
-    static final int socketTimeout = 60000;//ms毫秒,读取超时时间
+    /**
+     * ms毫秒,从池中获取链接超时时间
+     */
+    static final int CONNECTION_REQUEST_TIMEOUT = 30000;
+    /**
+     * ms毫秒,建立链接超时时间
+     */
+    static final int CONNECT_TIMEOUT = 60000;
+    /**
+     * ms毫秒,读取超时时间
+     */
+    static final int SOCKET_TIMEOUT = 60000;
 
-    //总配置,主要涉及是以下两个参数,如果要作调整没有用到properties会比较后麻烦,但鉴于一经粘贴,随处可用的特点,就不再做依赖性配置化处理了.
-    //而且这个参数同一家公司基本不会变动.
-    static final int maxTotal = 500;//最大总并发,很重要的参数
-    static final int maxPerRoute = 100;//每路并发,很重要的参数
+    /**
+     * 总配置,主要涉及是以下两个参数,如果要作调整没有用到properties会比较后麻烦,但鉴于一经粘贴,随处可用的特点,就不再做依赖性配置化处理了.
+     * 而且这个参数同一家公司基本不会变动.
+     * 最大总并发,很重要的参数
+     */
+    static final int MAX_TOTAL = 500;
+    /**
+     * 每路并发,很重要的参数
+     */
+    static final int MAX_PER_ROUTE = 100;
 
-    //正常情况这里应该配成MAP或LIST
-    //细化配置参数,用来对每路参数做精细化处理,可以管控各ip的流量,比如默认配置请求baidu:80端口最大100个并发链接,
-    static final String detailHostName = "http://www.baidu.com";//每个细化配置之ip(不重要,在特殊场景很有用)
-    //每个细化配置之port(不重要,在特殊场景很有用)
-    static final int detailPort = 80;
-    //每个细化配置之最大并发数(不重要,在特殊场景很有用)
-    static final int detailMaxPerRoute = 100;
+    /**
+     * 正常情况这里应该配成MAP或LIST
+     * 细化配置参数,用来对每路参数做精细化处理,可以管控各ip的流量,比如默认配置请求baidu:80端口最大100个并发链接,
+     * 每个细化配置之ip(不重要,在特殊场景很有用)
+     */
+    static final String DETAIL_HOST_NAME = "http://www.baidu.com";
+
+    /**
+     * 每个细化配置之port(不重要,在特殊场景很有用)
+     */
+    static final int DETAIL_PORT = 80;
+    /**
+     * 每个细化配置之最大并发数(不重要,在特殊场景很有用)
+     */
+    static final int DETAIL_MAX_PER_ROUTE = 100;
 
     private synchronized static CloseableHttpClient getHttpClient() {
         if (null == httpClient) {
@@ -78,15 +106,15 @@ public class HttpClientUtils {
         Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create().register("http", plainsf).register("https", sslsf).build();
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry);
         //将最大连接数增加
-        cm.setMaxTotal(maxTotal);
+        cm.setMaxTotal(MAX_TOTAL);
         //将每个路由基础的连接增加
-        cm.setDefaultMaxPerRoute(maxPerRoute);
+        cm.setDefaultMaxPerRoute(MAX_PER_ROUTE);
 
         //细化配置开始,其实这里用Map或List的for循环来配置每个链接,在特殊场景很有用.
         //将每个路由基础的连接做特殊化配置,一般用不着
-        HttpHost httpHost = new HttpHost(detailHostName, detailPort);
+        HttpHost httpHost = new HttpHost(DETAIL_HOST_NAME, DETAIL_PORT);
         //将目标主机的最大连接数增加
-        cm.setMaxPerRoute(new HttpRoute(httpHost), detailMaxPerRoute);
+        cm.setMaxPerRoute(new HttpRoute(httpHost), DETAIL_MAX_PER_ROUTE);
         //细化配置结束
 
         //请求重试处理
@@ -117,7 +145,7 @@ public class HttpClientUtils {
         };
 
         //配置请求的超时设置
-        RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(connectionRequestTimeout).setConnectTimeout(connectTimeout).setSocketTimeout(socketTimeout).build();
+        RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(CONNECTION_REQUEST_TIMEOUT).setConnectTimeout(CONNECT_TIMEOUT).setSocketTimeout(SOCKET_TIMEOUT).build();
         newHotpoint = HttpClients.custom().setConnectionManager(cm).setDefaultRequestConfig(requestConfig).setRetryHandler(httpRequestRetryHandler).build();
         return newHotpoint;
     }
@@ -149,7 +177,7 @@ public class HttpClientUtils {
                 resultString = EntityUtils.toString(response.getEntity(), "UTF-8");
             }
         } catch (Exception e) {
-            log.error("get请求错误",e);
+            log.error("get请求错误", e);
         } finally {
             try {
                 if (response != null) {
@@ -157,7 +185,7 @@ public class HttpClientUtils {
                 }
                 httpClient.close();
             } catch (IOException e) {
-                log.error("Get错误",e);
+                log.error("Get错误", e);
             }
         }
         return resultString;
