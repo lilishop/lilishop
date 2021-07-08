@@ -111,8 +111,6 @@ public class AfterSaleSearchParams extends PageVO {
         }
         this.betweenWrapper(queryWrapper);
         queryWrapper.eq("delete_flag", false);
-
-        queryWrapper.orderByDesc("create_time");
         return queryWrapper;
     }
 

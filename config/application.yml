@@ -121,7 +121,7 @@ spring:
     props:
       #是否打印逻辑SQL语句和实际SQL语句，建议调试时打印，在生产环境关闭
       sql:
-        show: false
+        show: true
 
 # 忽略鉴权url
 ignored:
@@ -196,9 +196,9 @@ logging:
   # 输出级别
   level:
     cn.lili: info
-    org.hibernate: debug
-    org.springframework: debug
-    org.springframework.data.mongodb.core: debug
+#    org.hibernate: debug
+#    org.springframework: debug
+#    org.springframework.data.mongodb.core: debug
   file:
     # 指定路径
     path: lili-logs
