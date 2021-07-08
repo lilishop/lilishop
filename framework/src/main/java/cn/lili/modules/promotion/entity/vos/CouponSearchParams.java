@@ -113,6 +113,7 @@ public class CouponSearchParams implements Serializable {
         }
         this.betweenWrapper(queryWrapper);
         queryWrapper.eq("delete_flag", false);
+        queryWrapper.orderByDesc("create_time");
         return queryWrapper;
     }
 
