@@ -163,6 +163,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public boolean saveCategory(Category category) {
+        //判断分类佣金是否正确
+        if (category.getCommissionRate() < 0) {
+            throw new ServiceException(ResultCode.CATEGORY_COMMISSION_RATE_ERROR);
+        }
+        //子分类与父分类的状态一致
         if (category.getParentId() != null && !("0").equals(category.getParentId())) {
             Category parentCategory = this.getById(category.getParentId());
             category.setDeleteFlag(parentCategory.getDeleteFlag());
@@ -174,6 +179,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public void updateCategory(Category category) {
+        //判断分类佣金是否正确
+        if (category.getCommissionRate() < 0) {
+            throw new ServiceException(ResultCode.CATEGORY_COMMISSION_RATE_ERROR);
+        }
+        //判断父分类与子分类的状态是否一致
         if (category.getParentId() != null && !"0".equals(category.getParentId())) {
             Category parentCategory = this.getById(category.getParentId());
             if (!parentCategory.getDeleteFlag().equals(category.getDeleteFlag())) {
