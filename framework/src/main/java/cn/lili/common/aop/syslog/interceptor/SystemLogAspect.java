@@ -7,7 +7,7 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.IpHelper;
 import cn.lili.common.utils.SpelUtil;
 import cn.lili.common.utils.ThreadPoolUtil;
-import cn.lili.modules.base.entity.systemlog.SystemLogVO;
+import cn.lili.modules.permission.entity.vo.SystemLogVO;
 import cn.lili.modules.connect.util.IpUtils;
 import cn.lili.modules.permission.service.SystemLogService;
 import lombok.extern.slf4j.Slf4j;

@@ -2,7 +2,7 @@ package cn.lili.modules.permission.service;
 
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
-import cn.lili.modules.base.entity.systemlog.SystemLogVO;
+import cn.lili.modules.permission.entity.vo.SystemLogVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package cn.lili.modules.base.entity.systemlog;
+package cn.lili.modules.permission.entity.vo;
 
 import cn.lili.common.utils.ObjectUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
