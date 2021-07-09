@@ -24,15 +24,14 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class UserContext {
 
-    private static RequestContextHolder requestContextHolder;
-
-    public static void setRequestContextHolder(RequestContextHolder requestContextHolder) {
-        UserContext.requestContextHolder = requestContextHolder;
-    }
-
+    /**
+     * 根据request获取用户信息
+     *
+     * @return
+     */
     public static AuthUser getCurrentUser() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        String accessToken = request.getHeader("accessToken");
+        String accessToken = request.getHeader(SecurityEnum.HEADER_TOKEN.getValue());
         return getAuthUser(accessToken);
     }
 
@@ -54,8 +53,10 @@ public class UserContext {
             return null;
         }
     }
+
     /**
      * 根据jwt获取token重的用户信息
+     *
      * @param accessToken token
      * @return
      */

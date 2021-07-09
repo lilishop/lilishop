@@ -5,18 +5,22 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.promotion.entity.dos.*;
 import cn.lili.modules.promotion.entity.enums.*;
-import cn.lili.modules.promotion.entity.vos.*;
+import cn.lili.modules.promotion.entity.vos.CouponVO;
+import cn.lili.modules.promotion.entity.vos.PintuanVO;
+import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
+import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -272,7 +276,7 @@ public class PromotionServiceImpl implements PromotionService {
         //写入促销状态
         fullDiscountVO.setPromotionStatus(promotionMessage.getPromotionStatus());
         //修改促销数据
-        result = this.fullDiscountService.update(promotionMessage.updateWrapper());
+        result = this.fullDiscountService.update(updateWrapper(promotionMessage));
         //clone一个活动信息，用于存放与索引中
         FullDiscountVO clone = ObjectUtil.clone(fullDiscountVO);
         clone.setPromotionGoodsList(null);
@@ -309,7 +313,7 @@ public class PromotionServiceImpl implements PromotionService {
         }
         //修改优惠券
         couponVO.setPromotionStatus(promotionMessage.getPromotionStatus());
-        result = this.couponService.update(promotionMessage.updateWrapper());
+        result = this.couponService.update(updateWrapper(promotionMessage));
         //优惠券活动结束，会员已领取未使用的优惠券状态修改为：已过期
         if (couponVO.getPromotionStatus().equals(PromotionStatusEnum.END)) {
             LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<MemberCoupon>()
@@ -349,7 +353,7 @@ public class PromotionServiceImpl implements PromotionService {
             return false;
         }
         pintuanVO.setPromotionStatus(promotionMessage.getPromotionStatus());
-        result = this.pintuanService.update(promotionMessage.updateWrapper());
+        result = this.pintuanService.update(updateWrapper(promotionMessage));
         this.promotionGoodsService.updateBatchById(pintuanVO.getPromotionGoodsList());
         if (pintuanVO.getPromotionGoodsList() != null) {
             List<PromotionGoods> promotionGoodsList = pintuanVO.getPromotionGoodsList();
@@ -383,7 +387,7 @@ public class PromotionServiceImpl implements PromotionService {
 
         //修改活动状态
         seckill.setPromotionStatus(promotionMessage.getPromotionStatus());
-        result = this.seckillService.update(promotionMessage.updateWrapper());
+        result = this.seckillService.update(updateWrapper(promotionMessage));
 
         //判断参与活动的商品是否为空，如果为空则返回
         if (seckill.getSeckillApplyList() == null) {
@@ -439,7 +443,7 @@ public class PromotionServiceImpl implements PromotionService {
             return false;
         }
         pointsGoodsVO.setPromotionStatus(promotionMessage.getPromotionStatus());
-        result = this.pointsGoodsService.update(promotionMessage.updateWrapper());
+        result = this.pointsGoodsService.update(updateWrapper(promotionMessage));
         PointsGoods pointsGoods = JSONUtil.toBean(JSONUtil.toJsonStr(pointsGoodsVO), PointsGoods.class);
         this.goodsIndexService.updateEsGoodsIndex(pointsGoodsVO.getSkuId(), pointsGoods, esPromotionKey, null);
         this.mongoTemplate.save(pointsGoodsVO);
@@ -490,5 +494,18 @@ public class PromotionServiceImpl implements PromotionService {
     private void throwPromotionException(PromotionTypeEnum type, String id, String status) {
         log.error("当前" + type.name() + "活动ID为[" + id + "] 不存在，更改活动状态至[ " + status + " ]失败！");
         throw new ServiceException(ResultCode.PROMOTION_STATUS_END);
+    }
+
+
+    /**
+     * 根据消息，获取update wrapper
+     * @param <T>
+     * @return
+     */
+    private <T> UpdateWrapper<T> updateWrapper(PromotionMessage promotionMessage) {
+        UpdateWrapper<T> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", promotionMessage.getPromotionId());
+        updateWrapper.set("promotion_status", PromotionStatusEnum.valueOf(promotionMessage.getPromotionStatus()));
+        return updateWrapper;
     }
 }
