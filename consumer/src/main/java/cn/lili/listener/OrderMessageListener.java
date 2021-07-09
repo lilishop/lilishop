@@ -27,13 +27,19 @@ import java.util.List;
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.order-topic}", consumerGroup = "${lili.data.rocketmq.order-group}")
 public class OrderMessageListener implements RocketMQListener<MessageExt> {
 
-    //交易
+    /**
+     * 交易
+     */
     @Autowired
     private List<TradeEvent> tradeEvent;
-    //订单状态
+    /**
+     * 订单状态
+     */
     @Autowired
     private List<OrderStatusChangeEvent> orderStatusChangeEvents;
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache<Object> cache;
 

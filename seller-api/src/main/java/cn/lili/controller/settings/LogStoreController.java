@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Chopper
  * @date: 2020/11/22 14:23
  */
-@Transactional
 @RestController
+@Transactional(rollbackFor = Exception.class)
 @Api(tags = "店铺端,日志管理接口")
 @RequestMapping("/store/log")
 public class LogStoreController {

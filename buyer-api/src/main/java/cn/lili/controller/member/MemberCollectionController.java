@@ -36,11 +36,16 @@ public class MemberCollectionController {
     @Autowired
     private StoreCollectionService storeCollectionService;
 
+    /**
+     * 商品收藏关键字
+     */
+    private String goods="GOODS";
+
     @ApiOperation(value = "查询会员收藏列表")
     @ApiImplicitParam(name = "type", value = "类型", dataType = "String", paramType = "path", example = "GOODS:商品,STORE:店铺")
     @GetMapping("/{type}")
     public ResultMessage<Object> goodsList(@PathVariable String type, PageVO page) {
-        if (type.equals("GOODS")) {
+        if (goods.equals(type)) {
             return ResultUtil.data(goodsCollectionService.goodsCollection(page));
         }
         return ResultUtil.data(storeCollectionService.storeCollection(page));
@@ -54,7 +59,7 @@ public class MemberCollectionController {
     @PostMapping("/add/{type}/{id}")
     public ResultMessage<Object> addGoodsCollection(@PathVariable String type,
                                                     @NotNull(message = "值不能为空") @PathVariable String id) {
-        if (type.equals("GOODS")) {
+        if (goods.equals(type)) {
             return ResultUtil.data(goodsCollectionService.addGoodsCollection(id));
         }
         return ResultUtil.data(storeCollectionService.addStoreCollection(id));
@@ -69,7 +74,7 @@ public class MemberCollectionController {
     @DeleteMapping(value = "/delete/{type}/{id}")
     public ResultMessage<Object> deleteGoodsCollection(@PathVariable String type,
                                                        @NotNull(message = "值不能为空") @PathVariable String id) {
-        if (type.equals("GOODS")) {
+        if (goods.equals(type)) {
             return ResultUtil.data(goodsCollectionService.deleteGoodsCollection(id));
         }
         return ResultUtil.data(storeCollectionService.deleteStoreCollection(id));
@@ -83,7 +88,7 @@ public class MemberCollectionController {
     @GetMapping(value = "/isCollection/{type}/{id}")
     public ResultMessage<Boolean> isCollection(@PathVariable String type,
                                                @NotNull(message = "值不能为空") @PathVariable String id) {
-        if (type.equals("GOODS")) {
+        if (goods.equals(type)) {
             return ResultUtil.data(this.goodsCollectionService.isCollection(id));
         }
         return ResultUtil.data(this.storeCollectionService.isCollection(id));

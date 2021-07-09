@@ -24,7 +24,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class PaymentExecute implements OrderStatusChangeEvent {
 
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
 

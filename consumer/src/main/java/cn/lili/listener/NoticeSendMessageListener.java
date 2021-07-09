@@ -28,6 +28,7 @@ import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,22 +42,34 @@ import java.util.List;
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.notice-send-topic}", consumerGroup = "${lili.data.rocketmq.notice-send-group}")
 public class NoticeSendMessageListener implements RocketMQListener<MessageExt> {
 
-    //会员
-    @Autowired
+    /**
+     * 会员
+     */
+    @Resource
     private MemberMapper memberMapper;
-    //短信
+    /**
+     * 短信
+     */
     @Autowired
     private SmsUtil smsUtil;
-    //店铺消息
+    /**
+     * 店铺消息
+     */
     @Autowired
     private StoreMessageService storeMessageService;
-    //会员消息
+    /**
+     * 会员消息
+     */
     @Autowired
     private MemberMessageService memberMessageService;
-    //店铺
+    /**
+     * 店铺
+     */
     @Autowired
     private StoreService storeService;
-    //会员
+    /**
+     * 会员
+     */
     @Autowired
     private MemberService memberService;
 
@@ -100,7 +113,7 @@ public class NoticeSendMessageListener implements RocketMQListener<MessageExt> {
     private void saveStoreMessage(Message message) {
         List<StoreMessage> list = new ArrayList<>();
         //发送全部商家情况
-        if (message.getMessageRange().equals("ALL")) {
+        if ("ALL".equals(message.getMessageRange())) {
             List<Store> storeList = storeService.list(new QueryWrapper<Store>().eq("store_disable", "OPEN"));
             storeList.forEach(item -> {
                 StoreMessage storeMessage = new StoreMessage();
@@ -141,7 +154,7 @@ public class NoticeSendMessageListener implements RocketMQListener<MessageExt> {
     private void saveMemberMessage(Message message) {
         List<MemberMessage> list = new ArrayList<>();
         //如果是给所有会员发送消息
-        if (message.getMessageRange().equals("ALL")) {
+        if ("ALL".equals(message.getMessageRange())) {
             //查询所有会员总数，因为会员总数比较大 如果一次性查出来会占用数据库资源，所以要分页查询
             MemberSearchVO memberSearchVO = new MemberSearchVO();
             memberSearchVO.setDisabled(SwitchEnum.OPEN.name());

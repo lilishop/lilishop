@@ -4,7 +4,6 @@ import cn.hutool.core.convert.Convert;
 import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.common.utils.DateUtil;
 import cn.lili.modules.statistics.model.dos.PlatformViewData;
 import cn.lili.modules.statistics.service.PlatformViewDataService;
 import cn.lili.timetask.handler.EveryDayExecute;
@@ -29,10 +28,14 @@ import java.util.List;
 @Slf4j
 @Component
 public class PageViewStatisticsExecute implements EveryDayExecute {
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache cache;
-    //平台PV统计
+    /**
+     * 平台PV统计
+     */
     @Autowired
     private PlatformViewDataService platformViewDataService;
 

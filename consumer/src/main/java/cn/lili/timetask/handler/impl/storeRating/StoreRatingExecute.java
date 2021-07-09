@@ -25,10 +25,14 @@ import java.util.List;
  */
 @Component
 public class StoreRatingExecute implements EveryDayExecute {
-    //店铺
+    /**
+     * 店铺
+     */
     @Autowired
     private StoreService storeService;
-    //会员评价
+    /**
+     * 会员评价
+     */
     @Resource
     private MemberEvaluationMapper memberEvaluationMapper;
 

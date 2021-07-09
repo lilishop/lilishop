@@ -29,18 +29,25 @@ import org.springframework.stereotype.Service;
 @Service
 public class MemberExperienceExecute implements MemberRegisterEvent, GoodsCommentCompleteEvent, OrderStatusChangeEvent {
 
-    //配置
+    /**
+     * 配置
+     */
     @Autowired
     private SettingService settingService;
-    //会员
+    /**
+     * 会员
+     */
     @Autowired
     private MemberService memberService;
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
 
     /**
      * 会员注册赠送经验值
+     *
      * @param member 会员
      */
     @Override
@@ -53,6 +60,7 @@ public class MemberExperienceExecute implements MemberRegisterEvent, GoodsCommen
 
     /**
      * 商品评价赠送经验值
+     *
      * @param memberEvaluation 会员评价
      */
     @Override
@@ -65,17 +73,18 @@ public class MemberExperienceExecute implements MemberRegisterEvent, GoodsCommen
 
     /**
      * 完成订单赠送经验值
+     *
      * @param orderMessage 订单消息
      */
     @Override
     public void orderChange(OrderMessage orderMessage) {
-        if(orderMessage.getNewStatus().equals(OrderStatusEnum.COMPLETED)){
+        if (orderMessage.getNewStatus().equals(OrderStatusEnum.COMPLETED)) {
             //获取经验值设置
             ExperienceSetting experienceSetting = getExperienceSetting();
             //获取订单信息
             Order order = orderService.getBySn(orderMessage.getOrderSn());
             //计算赠送经验值数量
-            Double point= CurrencyUtil.mul(experienceSetting.getMoney(),order.getFlowPrice(),0);
+            Double point = CurrencyUtil.mul(experienceSetting.getMoney(), order.getFlowPrice(), 0);
             //赠送会员经验值
             memberService.updateMemberExperience(point.longValue(), true, order.getMemberId(), "会员下单，赠送经验值" + point + "分");
         }
@@ -83,9 +92,10 @@ public class MemberExperienceExecute implements MemberRegisterEvent, GoodsCommen
 
     /**
      * 获取经验值设置
+     *
      * @return 经验值设置
      */
-    private ExperienceSetting getExperienceSetting(){
+    private ExperienceSetting getExperienceSetting() {
         Setting setting = settingService.get(SettingEnum.EXPERIENCE_SETTING.name());
         return new Gson().fromJson(setting.getSettingValue(), ExperienceSetting.class);
     }

@@ -1,9 +1,8 @@
 package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.enums.ResultUtil;
-import cn.lili.common.utils.StringUtils;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.vos.CategoryVO;
@@ -62,7 +61,7 @@ public class CategoryManagerController {
     @ApiOperation(value = "添加商品分类")
     public ResultMessage<Category> saveCategory(@Valid Category category) {
         //非顶级分类
-        if (category.getParentId() != null && !category.getParentId().equals("0")) {
+        if (category.getParentId() != null && !"0".equals(category.getParentId())) {
             Category parent = categoryService.getById(category.getParentId());
             if (parent == null) {
                 throw new ServiceException(ResultCode.CATEGORY_PARENT_NOT_EXIST);
