@@ -1,7 +1,5 @@
 package cn.lili.common.utils;
 
-import cn.hutool.json.JSONUtil;
-import cn.lili.modules.payment.kit.dto.PayParam;
 import org.springframework.beans.BeanUtils;
 
 import java.lang.reflect.Field;
@@ -115,18 +113,6 @@ public class BeanUtil {
             e.printStackTrace();
         }
         return t;
-    }
-
-    public static void main(String[] args) throws IllegalAccessException {
-        PayParam payParam = new PayParam();
-        payParam.setClientType("client");
-        payParam.setOrderType("");
-        payParam.setSn("sn");
-        String val = formatKeyValuePair(payParam);
-        System.out.println(val);
-
-        PayParam param = formatKeyValuePair(val, new PayParam());
-        System.out.println(JSONUtil.toJsonStr(param));
     }
 
 }

@@ -54,10 +54,12 @@ public class PageViewInterceptor {
         switch (pageViewEnum) {
             case SKU:
                 ResultMessage<Map<String, Object>> skuRvt = (ResultMessage<Map<String, Object>>) rvt;
-                GoodsSkuVO goodsSkuDetail = (GoodsSkuVO) skuRvt.getResult().get("data");
-                storeId = goodsSkuDetail.getStoreId();
-                goodsId = goodsSkuDetail.getGoodsId();
-                break;
+                if (skuRvt != null && skuRvt.getResult() != null && skuRvt.getResult().containsKey("data")) {
+                    GoodsSkuVO goodsSkuDetail = (GoodsSkuVO) skuRvt.getResult().get("data");
+                    storeId = goodsSkuDetail.getStoreId();
+                    goodsId = goodsSkuDetail.getGoodsId();
+                    break;
+                }
             case STORE:
                 Map<String, String> map = spelFormat(point);
                 storeId = map.get("id");
@@ -84,7 +86,7 @@ public class PageViewInterceptor {
             //店铺UV 统计，则需要对id去重复，所以如下处理
             cache.cumulative(CachePrefix.STORE_UV.getPrefix() + StatisticsSuffix.suffix(storeId), ip);
         } catch (Exception e) {
-           log.error("页面出错",e);
+            log.error("页面出错", e);
         }
 
     }

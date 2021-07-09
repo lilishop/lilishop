@@ -1,7 +1,5 @@
 package cn.lili.common.trigger.message;
 
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -43,10 +41,4 @@ public class PromotionMessage {
      */
     private Date endTime;
 
-    public <T> UpdateWrapper<T> updateWrapper() {
-        UpdateWrapper<T> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("id", promotionId);
-        updateWrapper.set("promotion_status", PromotionStatusEnum.valueOf(promotionStatus));
-        return updateWrapper;
-    }
 }
