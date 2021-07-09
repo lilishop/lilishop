@@ -26,13 +26,19 @@ import java.util.Date;
 @Component
 @Slf4j
 public class RefundSupport {
-    //店铺流水
+    /**
+     * 店铺流水
+     */
     @Autowired
     private StoreFlowService storeFlowService;
-    //售后
+    /**
+     * 售后
+     */
     @Autowired
     private AfterSaleService afterSaleService;
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
 

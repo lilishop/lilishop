@@ -21,9 +21,9 @@ public class CreateTimeShardingTableAlgorithm implements PreciseShardingAlgorith
 
     @Override
     public String doSharding(Collection<String> collection, PreciseShardingValue<Long> preciseShardingValue) {
-        Long create_time = preciseShardingValue.getValue();
-        String monthValue = DateUtil.toString(create_time, "MM");
-        String yearValue = DateUtil.toString(create_time, "yyyy");
+        Long createTime = preciseShardingValue.getValue();
+        String monthValue = DateUtil.toString(createTime, "MM");
+        String yearValue = DateUtil.toString(createTime, "yyyy");
         Integer month = Integer.valueOf(monthValue);
         Integer year = Integer.valueOf(yearValue);
         //li_order_1,li_order_2~

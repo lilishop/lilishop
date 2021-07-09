@@ -30,7 +30,7 @@ import java.util.Map;
  * @date 2020/11/17 8:02 下午
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class InstantDeliveryServiceImpl extends ServiceImpl<InstantDeliveryMapper, InstantDelivery> implements InstantDeliveryService {
 
     @Autowired
@@ -43,7 +43,7 @@ public class InstantDeliveryServiceImpl extends ServiceImpl<InstantDeliveryMappe
         //循环数据，对未入库的数据进行入库操作
         for (InstantDeliveryVO instantDeliveryVO : resultList) {
             //根据id是否为0校验 如果为0则不在数据中，进行入库操作
-            if (instantDeliveryVO.getId().equals("0")) {
+            if (("0").equals(instantDeliveryVO.getId())) {
                 //入库
                 InstantDelivery instantDelivery = new InstantDelivery(instantDeliveryVO);
                 this.baseMapper.insert(instantDelivery);

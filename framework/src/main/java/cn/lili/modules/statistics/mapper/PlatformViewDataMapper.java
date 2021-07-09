@@ -14,7 +14,12 @@ import org.apache.ibatis.annotations.Select;
  * @date 2020/11/17 7:34 下午
  */
 public interface PlatformViewDataMapper extends BaseMapper<PlatformViewData> {
-    //UV流量统计
+    /**
+     * UV流量统计
+     *
+     * @param queryWrapper 查询条件
+     * @return UV流量统计数量
+     */
     @Select("SELECT sum(uv_num) FROM li_s_platform_view_data ${ew.customSqlSegment}")
     Integer count(@Param(Constants.WRAPPER) QueryWrapper queryWrapper);
 }

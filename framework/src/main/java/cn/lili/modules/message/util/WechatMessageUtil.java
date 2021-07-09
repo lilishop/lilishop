@@ -100,7 +100,7 @@ public class WechatMessageUtil {
         //发送url
         String url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=" + token;
 
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(4);
         //用户id
         map.put("touser", connect.getUnionId());
         //模版id
@@ -157,7 +157,7 @@ public class WechatMessageUtil {
         //发送url
         String url = "https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=" + token;
 
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(4);
         //用户id
         map.put("touser", connect.getUnionId());
         //模版id
@@ -165,13 +165,13 @@ public class WechatMessageUtil {
         //模版中所需数据
         Map<String, Map<String, String>> postParams = createData(order, wechatMPMessage);
         map.put("data", postParams);
-        map.put("page", "pages/order/orderDetail?sn="+order.getSn());
+        map.put("page", "pages/order/orderDetail?sn=" + order.getSn());
         log.info("参数内容：" + JSONUtil.toJsonStr(map));
         String content = null;
         try {
             content = HttpUtil.post(url, JSONUtil.toJsonStr(map));
         } catch (Exception e) {
-            log.error("微信消息发送错误",e);
+            log.error("微信消息发送错误", e);
         }
         JSONObject json = new JSONObject(content);
         log.info("微信消息发送结果：" + content);
@@ -262,9 +262,9 @@ public class WechatMessageUtil {
                 return order.getLogisticsName();
             case LOGISTICS_TIME:
                 return DateUtil.toString(order.getLogisticsTime(), DateUtil.STANDARD_FORMAT);
-
+            default:
+                return "";
         }
-        return "";
     }
 
     /**
@@ -274,7 +274,7 @@ public class WechatMessageUtil {
      */
     public static void wechatHandler(JSONObject jsonObject) {
         if (jsonObject.containsKey("errmsg")) {
-            if (jsonObject.getStr("errmsg").equals("ok")) {
+            if (("ok").equals(jsonObject.getStr("errmsg"))) {
                 return;
             }
             log.error("微信接口异常，错误码" + jsonObject.get("errcode") + "，" + jsonObject.getStr("errmsg"));

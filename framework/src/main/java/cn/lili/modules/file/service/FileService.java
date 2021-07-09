@@ -29,7 +29,8 @@ public interface FileService extends IService<File> {
     /**
      * 所有者批量删除
      *
-     * @param ids
+     * @param ids      ID
+     * @param authUser 操作者
      */
     void batchDelete(List<String> ids, AuthUser authUser);
 
@@ -50,6 +51,7 @@ public interface FileService extends IService<File> {
      * @param file
      * @param searchVO
      * @param pageVo
+     * @param ownerDTO
      * @return
      */
     IPage<File> customerPageOwner(FileOwnerDTO ownerDTO, File file, SearchVO searchVO, PageVO pageVo);

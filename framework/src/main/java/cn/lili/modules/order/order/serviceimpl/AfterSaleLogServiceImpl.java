@@ -18,7 +18,7 @@ import java.util.List;
  * @date 2020/11/17 7:37 下午
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class AfterSaleLogServiceImpl extends ServiceImpl<AfterSaleLogMapper, AfterSaleLog> implements AfterSaleLogService {
 
     @Override

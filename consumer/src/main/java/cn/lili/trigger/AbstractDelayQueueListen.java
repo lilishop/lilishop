@@ -79,6 +79,7 @@ public abstract class AbstractDelayQueueListen {
 
     /**
      * 要实现延时队列的名字
+     * @return 促销延时队列名称
      */
     public abstract String setDelayQueueName();
 
@@ -88,7 +89,7 @@ public abstract class AbstractDelayQueueListen {
      */
     @PostConstruct
     public void init() {
-        new Thread(this::startDelayQueueMachine).start();
+        ThreadPoolUtil.getPool().execute(this::startDelayQueueMachine);
     }
 
 }

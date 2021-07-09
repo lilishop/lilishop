@@ -332,7 +332,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         if (goodsIndex != null) {
             Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
             if (promotionMap == null || promotionMap.isEmpty()) {
-                return new HashMap<>();
+                return new HashMap<>(16);
             }
             return promotionMap;
         }

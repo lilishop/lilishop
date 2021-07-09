@@ -32,7 +32,6 @@ import java.util.List;
  * @date 2021-03-29 14:10:16
  */
 @Service
-@Transactional
 public class MemberReceiptServiceImpl extends ServiceImpl<MemberReceiptMapper, MemberReceipt> implements MemberReceiptService {
     @Autowired
     private MemberService memberService;

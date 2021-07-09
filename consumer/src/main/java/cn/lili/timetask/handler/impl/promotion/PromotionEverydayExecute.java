@@ -39,33 +39,49 @@ import java.util.List;
 @Component
 public class PromotionEverydayExecute implements EveryDayExecute {
 
-    //Mongo
+    /**
+     * Mongo
+     */
     @Autowired
     private MongoTemplate mongoTemplate;
-    //es
+    /**
+     * ES商品索引
+     */
     @Autowired
     private EsGoodsIndexService esGoodsIndexService;
-    //满额活动
+    /**
+     * 满额活动
+     */
     @Autowired
     private FullDiscountService fullDiscountService;
-    //拼团
+    /**
+     * 拼团
+     */
     @Autowired
     private PintuanService pintuanService;
-    //优惠券
+    /**
+     * 优惠券
+     */
     @Autowired
     private CouponService couponService;
-    //会员优惠券
+    /**
+     * 会员优惠券
+     */
     @Autowired
     private MemberCouponService memberCouponService;
-    //促销商品
+    /**
+     * 促销商品
+     */
     @Autowired
     private PromotionGoodsService promotionGoodsService;
-
-    //系统设置
+    /**
+     * 系统设置
+     */
     @Autowired
     private SettingService settingService;
-
-    //秒杀活动
+    /**
+     * 秒杀活动
+     */
     @Autowired
     private SeckillService seckillService;
 

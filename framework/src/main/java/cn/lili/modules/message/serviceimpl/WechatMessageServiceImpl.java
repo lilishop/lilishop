@@ -39,10 +39,13 @@ public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, W
     @Autowired
     private WechatAccessTokenUtil wechatAccessTokenUtil;
 
-    //get 获取所有的模版
+    /**
+     * get 获取所有的模版
+     */
     private final String allMsgTpl = "https://api.weixin.qq.com/cgi-bin/template/get_all_private_template?access_token=";
-
-    //post 删除模版 添加模版 获取模版id
+    /**
+     * post 删除模版 添加模版 获取模版id
+     */
     private final String delMsgTpl = "https://api.weixin.qq.com/cgi-bin/template/del_private_template?access_token=";
     private final String addTpl = "https://api.weixin.qq.com/cgi-bin/template/api_add_template?access_token=";
 

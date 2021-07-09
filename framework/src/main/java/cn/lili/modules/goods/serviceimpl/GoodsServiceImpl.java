@@ -60,33 +60,53 @@ import java.util.List;
  * @date 2020-02-23 15:18:56
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements GoodsService {
 
 
-    //分类
+    /**
+     * 分类
+     */
     @Autowired
     private CategoryService categoryService;
-    //设置
+    /**
+     * 设置
+     */
     @Autowired
     private SettingService settingService;
-    //商品相册
+    /**
+     * 商品相册
+     */
     @Autowired
     private GoodsGalleryService goodsGalleryService;
-    //商品规格
+    /**
+     * 商品规格
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    //店铺详情
+    /**
+     * 店铺详情
+     */
     @Autowired
     private StoreService storeService;
+    /**
+     * 会员评价
+     */
     @Autowired
     private MemberEvaluationService memberEvaluationService;
-    //rocketMq
+    /**
+     * rocketMq
+     */
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
-    //rocketMq配置
+    /**
+     * rocketMq配置
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
+    /**
+     * 分类-参数
+     */
     @Autowired
     private CategoryParameterGroupService categoryParameterGroupService;
 
@@ -94,9 +114,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Override
     public void underStoreGoods(String storeId) {
         //获取商品ID列表
-        List<String> list= this.baseMapper.getGoodsIdByStoreId(storeId);
+        List<String> list = this.baseMapper.getGoodsIdByStoreId(storeId);
         //下架店铺下的商品
-        updateGoodsMarketAble(list,GoodsStatusEnum.DOWN,"店铺关闭");
+        updateGoodsMarketAble(list, GoodsStatusEnum.DOWN, "店铺关闭");
     }
 
     @Override
@@ -362,15 +382,15 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
                 }
             }
             //两个参数集合进行对比
-            for (Parameters parameters :parametersList){
-                for (GoodsParamsItemDTO goodsParamsItemDTO :goodsOperationParamList){
-                    if(parameters.getId().equals(goodsParamsItemDTO.getParamId())){
+            for (Parameters parameters : parametersList) {
+                for (GoodsParamsItemDTO goodsParamsItemDTO : goodsOperationParamList) {
+                    if (parameters.getId().equals(goodsParamsItemDTO.getParamId())) {
                         //校验是否可以索引参数是否正确
-                        if(!parameters.getIsIndex().equals(goodsParamsItemDTO.getIsIndex())){
+                        if (!parameters.getIsIndex().equals(goodsParamsItemDTO.getIsIndex())) {
                             throw new ServiceException(ResultCode.GOODS_PARAMS_ERROR);
                         }
                         //校验是否必填参数是否正确
-                        if(!parameters.getRequired().equals(goodsParamsItemDTO.getRequired())){
+                        if (!parameters.getRequired().equals(goodsParamsItemDTO.getRequired())) {
                             throw new ServiceException(ResultCode.GOODS_PARAMS_ERROR);
                         }
                     }
@@ -394,12 +414,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         //判断商品类型
         switch (goods.getGoodsType()) {
             case "PHYSICAL_GOODS":
-                if (goods.getTemplateId().equals("0")) {
+                if ("0".equals(goods.getTemplateId())) {
                     throw new ServiceException(ResultCode.PHYSICAL_GOODS_NEED_TEMP);
                 }
                 break;
             case "VIRTUAL_GOODS":
-                if (!goods.getTemplateId().equals("0")) {
+                if (!"0".equals(goods.getTemplateId())) {
                     throw new ServiceException(ResultCode.VIRTUAL_GOODS_NOT_NEED_TEMP);
                 }
                 break;

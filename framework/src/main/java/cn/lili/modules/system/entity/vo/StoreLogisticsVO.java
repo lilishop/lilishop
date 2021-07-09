@@ -17,7 +17,7 @@ import lombok.Data;
 public class StoreLogisticsVO extends BaseEntity {
 
     @ApiModelProperty(value = "物流公司ID")
-    private String LogisticsId;
+    private String logisticsId;
 
     @ApiModelProperty(value = "物流公司名称")
     private String name;

@@ -27,7 +27,12 @@ public interface RegionService extends IService<Region> {
     @CacheEvict
     void synchronizationData(String url);
 
-
+    /**
+     * 获取地区列表
+     *
+     * @param id 地区ID
+     * @return 地区列表
+     */
     @Cacheable(key = "#id")
     List<Region> getItem(String id);
 

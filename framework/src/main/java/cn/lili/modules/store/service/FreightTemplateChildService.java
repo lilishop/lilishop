@@ -14,9 +14,10 @@ import java.util.List;
 public interface FreightTemplateChildService extends IService<FreightTemplateChild> {
 
     /**
-     * 获取当前商家的运费模板列表
+     * 获取当前商家的运费模板子内容列表
      *
-     * @return 运费模板列表
+     * @param freightTemplateId 运费模板ID
+     * @return 运费模板子内容列表
      */
     List<FreightTemplateChild> getFreightTemplateChild(String freightTemplateId);
 

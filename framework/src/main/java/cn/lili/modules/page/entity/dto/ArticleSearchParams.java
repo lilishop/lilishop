@@ -28,7 +28,6 @@ public class ArticleSearchParams extends PageVO {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq(StringUtils.isNotBlank(categoryId), "category_id", categoryId);
         queryWrapper.like(StringUtils.isNotBlank(title), "title", title);
-        //queryWrapper.orderByAsc("a.sort");
         return queryWrapper;
     }
 }

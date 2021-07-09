@@ -42,19 +42,27 @@ import java.util.Date;
  * @date 2020-02-25 14:10:16
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, MemberWallet> implements MemberWalletService {
 
-    //预存款日志
+    /**
+     * 预存款日志
+     */
     @Autowired
     private WalletLogService walletLogService;
-    //设置
+    /**
+     * 设置
+     */
     @Autowired
     private SettingService settingService;
-    //会员
+    /**
+     * 会员
+     */
     @Autowired
     private MemberService memberService;
-    //会员提现申请
+    /**
+     * 会员提现申请
+     */
     @Autowired
     private MemberWithdrawApplyService memberWithdrawApplyService;
 

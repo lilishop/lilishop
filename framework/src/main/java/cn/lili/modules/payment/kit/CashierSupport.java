@@ -36,13 +36,19 @@ import java.util.List;
 @Component
 @Slf4j
 public class CashierSupport {
-    //收银台
+    /**
+     * 收银台
+     */
     @Autowired
     private List<CashierExecute> cashierExecuteList;
-    //预存款
+    /**
+     * 预存款
+     */
     @Autowired
     private MemberWalletService memberWalletService;
-    //配置
+    /**
+     * 配置
+     */
     @Autowired
     private SettingService settingService;
 

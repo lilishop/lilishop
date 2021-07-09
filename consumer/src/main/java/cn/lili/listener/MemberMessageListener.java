@@ -30,16 +30,24 @@ import java.util.List;
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.member-topic}", consumerGroup = "${lili.data.rocketmq.member-group}")
 public class MemberMessageListener implements RocketMQListener<MessageExt> {
 
-    //会员签到
+    /**
+     * 会员签到
+     */
     @Autowired
     private MemberSignService memberSignService;
-    //会员积分变化
+    /**
+     * 会员积分变化
+     */
     @Autowired
     private List<MemberPointChangeEvent> memberPointChangeEvents;
-    //会员提现
+    /**
+     * 会员提现
+     */
     @Autowired
     private List<MemberWithdrawalEvent> memberWithdrawalEvents;
-    //会员注册
+    /**
+     * 会员注册
+     */
     @Autowired
     private List<MemberRegisterEvent> memberSignEvents;
 

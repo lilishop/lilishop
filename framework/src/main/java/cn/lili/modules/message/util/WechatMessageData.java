@@ -89,7 +89,7 @@ public class WechatMessageData {
      * @return
      */
     private Map<String, String> createValue(String msg) {
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(2);
         map.put("value", msg);
         return map;
     }

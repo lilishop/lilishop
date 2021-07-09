@@ -26,10 +26,12 @@ import java.util.Objects;
  * @date 2020/11/18 10:46 上午
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint> implements FootprintService {
 
-    //es商品业务层
+    /**
+     * es商品业务层
+     */
     @Autowired
     private EsGoodsSearchService esGoodsSearchService;
 
@@ -76,7 +78,7 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
 
         LambdaQueryWrapper<FootPrint> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(FootPrint::getMemberId, UserContext.getCurrentUser().getId());
-        lambdaQueryWrapper.eq(FootPrint::getDeleteFlag,false);
+        lambdaQueryWrapper.eq(FootPrint::getDeleteFlag, false);
         lambdaQueryWrapper.orderByDesc(FootPrint::getUpdateTime);
         List<String> skuIdList = this.baseMapper.footprintSkuIdList(PageUtil.initPage(pageVO), lambdaQueryWrapper);
         if (skuIdList.size() > 0) {
@@ -92,7 +94,7 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
     public Integer getFootprintNum() {
         LambdaQueryWrapper<FootPrint> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(FootPrint::getMemberId, UserContext.getCurrentUser().getId());
-        lambdaQueryWrapper.eq(FootPrint::getDeleteFlag,false);
+        lambdaQueryWrapper.eq(FootPrint::getDeleteFlag, false);
         return this.count(lambdaQueryWrapper);
     }
 }

@@ -36,10 +36,14 @@ import java.util.Optional;
 
 public class GoodsCollectionServiceImpl extends ServiceImpl<GoodsCollectionMapper, GoodsCollection> implements GoodsCollectionService {
 
-    //rocketMq
+    /**
+     * rocketMq
+     */
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
-    //rocketMq配置
+    /**
+     * rocketMq配置
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
 

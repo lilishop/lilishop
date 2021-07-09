@@ -62,7 +62,7 @@ public class AfterSaleOperationLogAspect {
      */
     public static Map<String, String> spelFormat(JoinPoint joinPoint, Object rvt) {
 
-        Map<String, String> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>(2);
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         AfterSaleLogPoint afterSaleLogPoint = signature.getMethod().getAnnotation(AfterSaleLogPoint.class);
         String description = SpelUtil.compileParams(joinPoint, rvt, afterSaleLogPoint.description());

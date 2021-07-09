@@ -8,9 +8,9 @@ import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.mapper.MemberEvaluationMapper;
 import cn.lili.timetask.handler.EveryDayExecute;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -22,11 +22,15 @@ import java.util.Map;
  */
 @Component
 public class GoodsExecute implements EveryDayExecute {
-    //会员评价
-    @Autowired
+    /**
+     * 会员评价
+     */
+    @Resource
     private MemberEvaluationMapper memberEvaluationMapper;
-    //商品
-    @Autowired
+    /**
+     * 商品
+     */
+    @Resource
     private GoodsMapper goodsMapper;
 
     /**

@@ -27,7 +27,9 @@ public class PaymentSupportForm {
     public List<ClientTypeEnum> getClients() {
         List<ClientTypeEnum> keys = new ArrayList<>();
         for (ClientTypeEnum clientTypeEnum : ClientTypeEnum.values()) {
-            if (clientTypeEnum.equals(ClientTypeEnum.UNKNOWN)) continue;
+            if (clientTypeEnum.equals(ClientTypeEnum.UNKNOWN)){
+                continue;
+            }
             keys.add(clientTypeEnum);
         }
         return keys;
@@ -42,7 +44,9 @@ public class PaymentSupportForm {
 
         List<PaymentMethodEnum> keys = new ArrayList<>();
         for (PaymentMethodEnum paymentMethodEnum : PaymentMethodEnum.values()) {
-            if (paymentMethodEnum.equals(PaymentMethodEnum.BANK_TRANSFER)) continue;
+            if (paymentMethodEnum.equals(PaymentMethodEnum.BANK_TRANSFER)){
+                continue;
+            }
             keys.add(paymentMethodEnum);
         }
         return keys;

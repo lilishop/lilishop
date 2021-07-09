@@ -91,37 +91,59 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     private static final String ORDER_SN_COLUMN = "order_sn";
 
-    //延时任务
+    /**
+     * 延时任务
+     */
     @Autowired
     private TimeTrigger timeTrigger;
-    //订单货物数据层
+    /**
+     * 订单货物数据层
+     */
     @Resource
     private OrderItemMapper orderItemMapper;
-    //发票
+    /**
+     * 发票
+     */
     @Autowired
     private ReceiptService receiptService;
-    //订单货物
+    /**
+     * 订单货物
+     */
     @Autowired
     private OrderItemService orderItemService;
-    //物流公司
+    /**
+     * 物流公司
+     */
     @Autowired
     private LogisticsService logisticsService;
-    //订单日志
+    /**
+     * 订单日志
+     */
     @Autowired
     private OrderLogService orderLogService;
-    //RocketMQ
+    /**
+     * RocketMQ
+     */
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
-    //RocketMQ配置
+    /**
+     * RocketMQ配置
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    //订单流水
+    /**
+     * 订单流水
+     */
     @Autowired
     private StoreFlowService storeFlowService;
-    //拼团
+    /**
+     * 拼团
+     */
     @Autowired
     private PintuanService pintuanService;
-    //规格商品
+    /**
+     * 规格商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
 
@@ -305,8 +327,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
         //要记录之前的收货地址，所以需要以代码方式进行调用 不采用注解
         String message = "订单[" + orderSn + "]收货信息修改，由[" + order.getConsigneeDetail() + "]修改为[" + memberAddressDTO.getConsigneeDetail() + "]";
-
-        BeanUtil.copyProperties(memberAddressDTO, order);//记录订单操作日志
+        //记录订单操作日志
+        BeanUtil.copyProperties(memberAddressDTO, order);
         this.updateById(order);
 
         OrderLog orderLog = new OrderLog(orderSn, UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), message);
@@ -666,16 +688,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * 根据提供的拼团订单列表更新拼团状态为拼团成功
      * 循环订单列表根据不同的订单类型进行确认订单
      *
-     * @param list 需要更新拼团状态为成功的拼团订单列表
+     * @param orderList 需要更新拼团状态为成功的拼团订单列表
      */
-    private void pintuanOrderSuccess(List<Order> list) {
-        list.forEach(order -> {
+    private void pintuanOrderSuccess(List<Order> orderList) {
+        for (Order order : orderList) {
             if (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
                 this.virtualOrderConfirm(order.getSn());
             } else if (order.getOrderType().equals(OrderTypeEnum.NORMAL.name())) {
                 this.normalOrderConfirm(order.getSn());
             }
-        });
+        }
     }
 
     /**

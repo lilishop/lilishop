@@ -1,7 +1,6 @@
 package cn.lili.config.interceptor;
 
 import cn.lili.config.properties.IgnoredUrlsProperties;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
@@ -31,7 +30,10 @@ public class UrlConfiguration implements WebMvcConfigurer {
         ir.excludePathPatterns(ignoredUrlsProperties.getUrls());
     }
 
-    //开放资源 这里配置swagger可以在前端访问
+    /**
+     * 开放资源 这里配置swagger可以在前端访问
+     * @param registry
+     */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/statics/**").addResourceLocations("classpath:/statics/");

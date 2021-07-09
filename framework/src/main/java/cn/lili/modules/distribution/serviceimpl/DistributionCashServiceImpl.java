@@ -4,7 +4,6 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.common.rocketmq.tags.MemberTagsEnum;
-import cn.lili.common.rocketmq.tags.OtherTagsEnum;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.SnowFlake;
@@ -26,7 +25,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,12 +40,16 @@ import java.util.Date;
  * @date 2020-03-126 18:04:56
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMapper, DistributionCash> implements DistributionCashService {
-    //分销员
+    /**
+     * 分销员
+     */
     @Autowired
     private DistributionService distributionService;
-    //会员余额
+    /**
+     * 会员余额
+     */
     @Autowired
     private MemberWalletService memberWalletService;
     @Autowired

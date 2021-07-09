@@ -30,11 +30,14 @@ public interface ConnectService extends IService<Connect> {
     /**
      * 联合登陆
      *
-     * @param type
-     * @param unionid
-     * @return
+     * @param type     类型
+     * @param unionid  unionid
+     * @param longTerm 是否长时间有效
+     * @param uuid     UUID
+     * @return token
+     * @throws NoPermissionException 不允许操作
      */
-    Token unionLoginCallback(String type, String unionid, String uuid,boolean longTerm) throws NoPermissionException;
+    Token unionLoginCallback(String type, String unionid, String uuid, boolean longTerm) throws NoPermissionException;
 
     /**
      * 联合登陆对象直接登录
@@ -42,6 +45,7 @@ public interface ConnectService extends IService<Connect> {
      * @param type     第三方登录类型
      * @param authUser 第三方登录返回封装类
      * @param uuid     用户uuid
+     * @return token
      */
     Token unionLoginCallback(String type, ConnectAuthUser authUser, String uuid);
 
@@ -86,7 +90,7 @@ public interface ConnectService extends IService<Connect> {
      *
      * @param authUser 登录对象
      * @param uuid     uuid
-     * @return
+     * @return token
      */
     Token appLoginCallback(ConnectAuthUser authUser, String uuid);
 
@@ -95,7 +99,8 @@ public interface ConnectService extends IService<Connect> {
      * 微信一键登录
      * 小程序自动登录 没有账户自动注册
      *
-     * @return
+     * @param params 微信小程序登录参数
+     * @return token
      */
     Token miniProgramAutoLogin(WechatMPLoginParams params);
 }

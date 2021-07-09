@@ -13,14 +13,24 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "lili.sms")
 public class SmsTemplateSetting {
-    //登录
-    private String LOGIN = "SMS_205755300";
-    //注册
+    /**
+     * 登录
+     */
+    private String lOGIN = "SMS_205755300";
+    /**
+     * 注册
+     */
     private String REGISTER = "SMS_205755298";
-    //找回密码
+    /**
+     * 找回密码
+     */
     private String FIND_USER = "SMS_205755301";
-    //设置密码
+    /**
+     * 设置密码
+     */
     private String UPDATE_PASSWORD = "SMS_205755297";
-    //设置支付密码
+    /**
+     * 设置支付密码
+     */
     private String WALLET_PASSWORD = "SMS_205755297";
 }

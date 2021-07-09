@@ -29,7 +29,7 @@ import java.util.List;
  * @date 2020/11/26 17:50
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements FileService {
 
     @Autowired

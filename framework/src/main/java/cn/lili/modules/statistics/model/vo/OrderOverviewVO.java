@@ -15,7 +15,9 @@ public class OrderOverviewVO {
     @ApiModelProperty(value = "UV人次")
     private Integer uvNum = 0;
 
-    //下单统计
+    /**
+     * 下单统计
+     */
     @ApiModelProperty(value = "下单数量")
     private Long orderNum = 0L;
 
@@ -25,7 +27,9 @@ public class OrderOverviewVO {
     @ApiModelProperty(value = "下单金额")
     private Double orderAmount = 0D;
 
-    //付款统计
+    /**
+     * 付款统计
+     */
     @ApiModelProperty(value = "付款订单数量")
     private Long paymentOrderNum = 0L;
 
@@ -36,14 +40,18 @@ public class OrderOverviewVO {
     private Double paymentAmount = 0D;
 
 
-    //退单统计
+    /**
+     * 退单统计
+     */
     @ApiModelProperty(value = "退单笔数")
     private Long refundOrderNum = 0L;
 
     @ApiModelProperty(value = "退单金额")
     private Double refundOrderPrice = 0D;
 
-    //转换率
+    /**
+     * 转换率
+     */
     @ApiModelProperty(value = "下单转换率")
     private String orderConversionRate;
 

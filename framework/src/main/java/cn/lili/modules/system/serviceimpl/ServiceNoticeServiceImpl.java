@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2020/11/17 8:02 下午
  */
 @Service
-@Transactional
 public class ServiceNoticeServiceImpl extends ServiceImpl<ServiceNoticeMapper, ServiceNotice> implements ServiceNoticeService {
 
 }

@@ -37,16 +37,24 @@ import java.util.stream.Collectors;
 
 public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
-    //订单货物
+    /**
+     * 订单货物
+     */
     @Autowired
     private OrderItemService orderItemService;
-    //设置
+    /**
+     * 设置
+     */
     @Autowired
     private SettingService settingService;
-    //会员评价
+    /**
+     * 会员评价
+     */
     @Autowired
     private MemberEvaluationService memberEvaluationService;
 

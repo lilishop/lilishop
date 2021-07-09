@@ -20,13 +20,12 @@ import java.util.List;
  * @date 2020-02-25 14:10:16
  */
 @Service
-@Transactional
 public class OrderLogServiceImpl extends ServiceImpl<OrderLogMapper, OrderLog> implements OrderLogService {
 
     @Override
     public List<OrderLog> getOrderLog(String orderSn) {
-        LambdaQueryWrapper<OrderLog> lambdaQueryWrapper= Wrappers.lambdaQuery();
-        lambdaQueryWrapper.eq(OrderLog::getOrderSn,orderSn);
+        LambdaQueryWrapper<OrderLog> lambdaQueryWrapper = Wrappers.lambdaQuery();
+        lambdaQueryWrapper.eq(OrderLog::getOrderSn, orderSn);
         return this.list(lambdaQueryWrapper);
     }
 }

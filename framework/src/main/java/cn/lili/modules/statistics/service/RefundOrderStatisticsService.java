@@ -20,6 +20,7 @@ public interface RefundOrderStatisticsService extends IService<StoreFlow> {
      * 查询订单统计分页
      *
      * @param statisticsQueryParam 查询参数
+     * @param pageVO               分页
      * @return 退款统计
      */
     IPage<RefundOrderStatisticsDataVO> getRefundOrderStatisticsData(PageVO pageVO, StatisticsQueryParam statisticsQueryParam);

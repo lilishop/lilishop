@@ -46,6 +46,7 @@ public interface BillService extends IService<Bill> {
      *
      * @param pageVO 分页
      * @param id     结算单ID
+     * @param type   类型
      * @return 商家流水
      */
     IPage<StoreFlow> getStoreFlow(String id, String type, PageVO pageVO);
@@ -86,6 +87,7 @@ public interface BillService extends IService<Bill> {
     /**
      * 商家待结算数量
      *
+     * @param billStatusEnum 结算单类型
      * @return 待结算商家数量
      */
     Integer billNum(BillStatusEnum billStatusEnum);

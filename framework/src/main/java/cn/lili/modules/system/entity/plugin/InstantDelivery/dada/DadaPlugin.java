@@ -183,7 +183,7 @@ public class DadaPlugin implements InstantDeliveryPlugin {
         String result = HttpUtils.doPostWithJson(url + InstantDeliveryUrl.DD_UPDATE_SHOP.getUrl(), requestJson);
         //组织返回参数
         InstantDeliveryResultVO instantDeliveryResultVO = JSONUtil.toBean(result, InstantDeliveryResultVO.class);
-        if (instantDeliveryResultVO.getStatus().equals("fail")) {
+        if ("fail".equals(instantDeliveryResultVO.getStatus())) {
             log.error("达达店铺信息修改失败",instantDeliveryResultVO.getMsg());
         }
         return instantDeliveryResultVO;
@@ -270,7 +270,7 @@ public class DadaPlugin implements InstantDeliveryPlugin {
             result = HttpUtils.doPostWithJson(url + InstantDeliveryUrl.DD_RE_ADD_ORDER.getUrl(), requstJson);
         }
         InstantDeliveryResultVO instantDeliveryResultVO = JSONUtil.toBean(result, InstantDeliveryResultVO.class);
-        if (instantDeliveryResultVO.getStatus().equals("fail")) {
+        if ("fail".equals(instantDeliveryResultVO.getStatus())) {
             log.error("达达订单发送失败，订单号为",order.getSn() + "," + instantDeliveryResultVO.getMsg());
             //如果发送失败择等待一秒重新发送，如果失败择记录日志
             try {
@@ -280,7 +280,7 @@ public class DadaPlugin implements InstantDeliveryPlugin {
             }
             result = HttpUtils.doPostWithJson(url + InstantDeliveryUrl.DD_RE_ADD_ORDER.getUrl(), requstJson);
             InstantDeliveryResultVO instantDeliveryResResultVO = JSONUtil.toBean(result, InstantDeliveryResultVO.class);
-            if (instantDeliveryResResultVO.getStatus().equals("fail")) {
+            if ("fail".equals(instantDeliveryResResultVO.getStatus())) {
                 log.error("达达订单重试发送失败，订单号为" + order.getSn() + "," + instantDeliveryResultVO.getMsg());
             }
         }
@@ -307,7 +307,7 @@ public class DadaPlugin implements InstantDeliveryPlugin {
         //签名发送请求
         String mysing = appSecret + "app_key" + appKey + "body" + json + "formatjsonsource_id" + merchantsId + "timestamp" + DateUtil.getDateline() + "v1.0" + appSecret;
         String signature = StringUtils.md5(mysing).toUpperCase();
-        Map<String, String> requstJson = new HashMap<>();
+        Map<String, String> requstJson = new HashMap<>(8);
         requstJson.put("source_id", merchantsId);
         requstJson.put("app_key", appKey);
         requstJson.put("format", "json");

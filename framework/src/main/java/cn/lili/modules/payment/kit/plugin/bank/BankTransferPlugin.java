@@ -1,4 +1,4 @@
-package cn.lili.modules.payment.kit.plugin.bankTransfer;
+package cn.lili.modules.payment.kit.plugin.bank;
 
 import cn.lili.modules.base.entity.enums.ClientTypeEnum;
 import cn.lili.modules.order.order.entity.dos.Order;
@@ -24,10 +24,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class BankTransferPlugin implements Payment {
-    //退款日志
+    /**
+     * 退款日志
+     */
     @Autowired
     private RefundLogService refundLogService;
-    //支付日志
+    /**
+     * 支付日志
+     */
     @Autowired
     private PaymentService paymentService;
 

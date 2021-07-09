@@ -36,10 +36,14 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, StoreDetail> implements StoreDetailService {
 
-    //店铺
+    /**
+     * 店铺
+     */
     @Autowired
     private StoreService storeService;
-    //分类
+    /**
+     * 分类
+     */
     @Autowired
     private CategoryService categoryService;
 

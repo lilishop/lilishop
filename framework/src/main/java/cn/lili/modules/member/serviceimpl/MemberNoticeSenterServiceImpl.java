@@ -3,16 +3,15 @@ package cn.lili.modules.member.serviceimpl;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.modules.member.entity.dos.MemberNoticeSenter;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberNotice;
+import cn.lili.modules.member.entity.dos.MemberNoticeSenter;
 import cn.lili.modules.member.entity.enums.SendTypeEnum;
 import cn.lili.modules.member.mapper.MemberNoticeSenterMapper;
 import cn.lili.modules.member.service.MemberNoticeSenterService;
 import cn.lili.modules.member.service.MemberNoticeService;
 import cn.lili.modules.member.service.MemberService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,10 +30,14 @@ import java.util.List;
 @Transactional(propagation = Propagation.REQUIRED, rollbackFor = java.lang.Exception.class)
 public class MemberNoticeSenterServiceImpl extends ServiceImpl<MemberNoticeSenterMapper, MemberNoticeSenter> implements MemberNoticeSenterService {
 
-    //会员
+    /**
+     * 会员
+     */
     @Autowired
     private MemberService memberService;
-    //会员站内信
+    /**
+     * 会员站内信
+     */
     @Autowired
     private MemberNoticeService memberNoticeService;
 

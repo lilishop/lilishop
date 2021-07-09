@@ -32,8 +32,8 @@ public interface UserRoleService extends IService<UserRole> {
     /**
      * 更新用户拥有的角色
      *
-     * @param userId
-     * @return
+     * @param userId    角色
+     * @param userRoles 角色权限
      */
     void updateUserRole(String userId, List<UserRole> userRoles);
 

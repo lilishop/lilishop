@@ -16,6 +16,7 @@ public interface StoreAddressService extends IService<StoreAddress> {
     /**
      * 获取当前商家的自提点列表
      *
+     * @param pageVo 分页
      * @return 自提点列表
      */
     IPage<StoreAddress> getStoreAddress(PageVO pageVo);

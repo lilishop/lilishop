@@ -19,7 +19,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -33,9 +32,10 @@ import java.util.List;
  */
 @Slf4j
 @Service
-@Transactional
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
-    //菜单角色
+    /**
+     * 菜单角色
+     */
     @Autowired
     private RoleMenuService roleMenuService;
 
@@ -98,7 +98,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             List<Menu> menus = this.list();
             return tree(menus);
         } catch (Exception e) {
-            log.error("菜单树错误",e);
+            log.error("菜单树错误", e);
         }
         return null;
     }

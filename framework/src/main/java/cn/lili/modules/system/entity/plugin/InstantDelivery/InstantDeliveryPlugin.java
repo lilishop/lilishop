@@ -106,7 +106,8 @@ public interface InstantDeliveryPlugin {
      * @param memberAddress 会员地址
      * @param type          类型
      * @param config        配置
-     * @return
+     * @param storeDetailVO 店铺详情VO
+     * @return 配送订单返回
      */
     InstantDeliveryResultVO sendReOrder(Order order, StoreDetailVO storeDetailVO, MemberAddress memberAddress, Integer type, Map config);
 

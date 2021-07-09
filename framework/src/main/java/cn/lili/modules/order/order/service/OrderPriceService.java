@@ -16,6 +16,7 @@ public interface OrderPriceService {
      *
      * @param orderSn    订单编号
      * @param orderPrice 订单价格
+     * @return 订单
      */
     Order updatePrice(String orderSn, Double orderPrice);
 

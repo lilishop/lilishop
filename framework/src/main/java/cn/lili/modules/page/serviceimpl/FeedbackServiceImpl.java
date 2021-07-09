@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2020/11/18 11:40 上午
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class FeedbackServiceImpl extends ServiceImpl<FeedbackMapper, Feedback> implements FeedbackService {
 
 }

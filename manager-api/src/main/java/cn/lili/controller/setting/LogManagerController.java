@@ -22,8 +22,8 @@ import java.util.List;
  * @date: 2020/11/17 7:56 下午
  */
 @Slf4j
-@Transactional
 @RestController
+@Transactional(rollbackFor = Exception.class)
 @Api(tags = "日志管理接口")
 @RequestMapping("/manager/log")
 public class LogManagerController {

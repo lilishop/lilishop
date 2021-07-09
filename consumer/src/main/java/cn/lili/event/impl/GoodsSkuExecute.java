@@ -14,9 +14,11 @@ import org.springframework.stereotype.Service;
  * @date 2020-07-03 11:20
  */
 @Service
-public class GoodsSkuExecute implements  GoodsCommentCompleteEvent {
+public class GoodsSkuExecute implements GoodsCommentCompleteEvent {
 
-    //商品
+    /**
+     * 商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
 

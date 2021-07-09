@@ -27,13 +27,17 @@ import java.util.List;
  */
 @Slf4j
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Department> implements DepartmentService {
 
-    //管理员
+    /**
+     * 管理员
+     */
     @Autowired
     private AdminUserService adminUserService;
-    //部门角色
+    /**
+     * 部门角色
+     */
     @Autowired
     private DepartmentRoleService departmentRoleService;
 
@@ -58,7 +62,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
 
             List<DepartmentVO> tree = new ArrayList<>();
             all.forEach(item -> {
-                if (item.getParentId().equals("0")) {
+                if ("0".equals(item.getParentId())) {
                     initChild(item, all);
                     tree.add(item);
                 }
@@ -66,7 +70,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
 
             return tree;
         } catch (Exception e) {
-            log.error("部门业务错误",e);
+            log.error("部门业务错误", e);
             return null;
         }
     }

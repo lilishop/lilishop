@@ -43,7 +43,7 @@ import java.util.List;
 @RestController
 @Api(tags = "管理员")
 @RequestMapping("/manager/user")
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 @Validated
 public class AdminUserManagerController {
     @Autowired
@@ -156,8 +156,9 @@ public class AdminUserManagerController {
     @ApiOperation(value = "添加用户")
     public ResultMessage<Object> register(AdminUserDTO adminUser,
                                           @RequestParam(required = false) List<String> roles) {
+        int rolesMaxSize=10;
         try {
-            if (roles != null && roles.size() >= 10) {
+            if (roles != null && roles.size() >= rolesMaxSize) {
                 throw new ServiceException(ResultCode.PERMISSION_BEYOND_TEN);
             }
             adminUserService.saveAdminUser(adminUser, roles);

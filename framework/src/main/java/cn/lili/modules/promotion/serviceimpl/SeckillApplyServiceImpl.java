@@ -25,7 +25,6 @@ import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.service.SeckillService;
 import cn.lili.modules.promotion.tools.PromotionCacheKeys;
 import cn.lili.modules.promotion.tools.PromotionTools;
-import cn.lili.modules.search.service.EsGoodsIndexService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -50,22 +49,29 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, SeckillApply> implements SeckillApplyService {
 
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache<Object> cache;
-    //Mongo
+    /**
+     * Mongo
+     */
     @Autowired
     private MongoTemplate mongoTemplate;
-    //规格商品
+    /**
+     * 规格商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    //ES商品
-    @Autowired
-    private EsGoodsIndexService esGoodsIndexService;
-    //促销商品
+    /**
+     * 促销商品
+     */
     @Autowired
     private PromotionGoodsService promotionGoodsService;
-    //秒杀
+    /**
+     * 秒杀
+     */
     @Autowired
     private SeckillService seckillService;
 
@@ -115,13 +121,13 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
 
     @Override
     public IPage<SeckillApply> getSeckillApplyFromMongo(SeckillSearchParams queryParam, PageVO pageVo) {
-        IPage<SeckillApply> seckillApplyIPage = new Page<>();
+        IPage<SeckillApply> seckillApplyPage = new Page<>();
         Query query = queryParam.mongoQuery();
 
         SeckillVO seckillVO = this.mongoTemplate.findOne(query, SeckillVO.class);
         if (seckillVO != null && pageVo != null) {
-            seckillApplyIPage.setCurrent(pageVo.getMongoPageNumber());
-            seckillApplyIPage.setSize(pageVo.getPageSize());
+            seckillApplyPage.setCurrent(pageVo.getMongoPageNumber());
+            seckillApplyPage.setSize(pageVo.getPageSize());
             List<SeckillApply> seckillApplyList = seckillVO.getSeckillApplyList() != null ? seckillVO.getSeckillApplyList() : new ArrayList<>();
             for (SeckillApply seckillApply : seckillApplyList) {
                 if (CharSequenceUtil.isNotEmpty(queryParam.getStoreId()) && !seckillApply.getStoreId().equals(queryParam.getStoreId())) {
@@ -134,10 +140,10 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
                     log.error("获取促销商品促销失败！", e);
                 }
             }
-            seckillApplyIPage.setTotal(seckillApplyList.size());
+            seckillApplyPage.setTotal(seckillApplyList.size());
             List<SeckillApply> page = CollUtil.page(pageVo.getMongoPageNumber(), pageVo.getPageSize(), seckillApplyList);
-            seckillApplyIPage.setRecords(page);
-            return seckillApplyIPage;
+            seckillApplyPage.setRecords(page);
+            return seckillApplyPage;
         } else {
             return null;
         }
@@ -160,7 +166,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             //获取秒杀活动时间段
             DateTime startTime = DateUtil.offsetHour(seckill.getStartTime(), seckillApply.getTimeLine());
             //检测是否可以发布促销商品
-            checkSeckillGoodsSKU(seckill, seckillApply, goodsSku, startTime);
+            checkSeckillGoodsSku(seckill, seckillApply, goodsSku, startTime);
             //设置秒杀申请默认内容
             seckillApply.setOriginalPrice(goodsSku.getPrice());
             seckillApply.setPromotionApplyStatus(PromotionApplyStatusEnum.PASS.name());
@@ -307,7 +313,8 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
                 Arrays.sort(hoursSored);
                 for (int i = 0; i < hoursSored.length; i++) {
                     SeckillTimelineVO tempTimeline = new SeckillTimelineVO();
-                    if (hoursSored[i] >= hour || ((i + 1) < hoursSored.length && hoursSored[i + 1] > hour)) {
+                    boolean hoursSoredHour = (hoursSored[i] >= hour || ((i + 1) < hoursSored.length && hoursSored[i + 1] > hour));
+                    if (hoursSoredHour) {
                         SimpleDateFormat format = new SimpleDateFormat(cn.lili.common.utils.DateUtil.STANDARD_DATE_FORMAT);
                         String date = format.format(new Date());
                         //当前时间的秒数
@@ -373,7 +380,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
      * @param goodsSku     商品SKU
      * @param startTime    秒杀时段开启时间
      */
-    private void checkSeckillGoodsSKU(SeckillVO seckill, SeckillApplyVO seckillApply, GoodsSku goodsSku, DateTime startTime) {
+    private void checkSeckillGoodsSku(SeckillVO seckill, SeckillApplyVO seckillApply, GoodsSku goodsSku, DateTime startTime) {
         //活动库存不能大于商品库存
         if (goodsSku.getQuantity() < seckillApply.getQuantity()) {
             throw new ServiceException(seckillApply.getGoodsName() + ",此商品库存不足");

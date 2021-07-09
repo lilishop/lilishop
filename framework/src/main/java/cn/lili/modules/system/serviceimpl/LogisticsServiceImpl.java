@@ -19,7 +19,6 @@ import com.google.gson.Gson;
 import groovy.util.logging.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -39,7 +38,6 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-@Transactional
 public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics> implements LogisticsService {
     @Autowired
     private SettingService settingService;
@@ -90,7 +88,7 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
 
         if (logistics != null) {
             String requestData = "{'OrderCode':'','ShipperCode':'" + logistics.getCode() + "','LogisticCode':'" + expNo + "'}";
-            Map<String, String> params = new HashMap<String, String>();
+            Map<String, String> params = new HashMap<String, String>(8);
             params.put("RequestData", urlEncoder(requestData, "UTF-8"));
             params.put("EBusinessID", EBusinessID);
             params.put("RequestType", "8001");
@@ -202,9 +200,7 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
                     param.append(entry.getKey());
                     param.append("=");
                     param.append(entry.getValue());
-                    //System.out.println(entry.getKey()+":"+entry.getValue());
                 }
-                //System.out.println("param:"+param.toString());
                 out.write(param.toString());
             }
             //flush输出流的缓冲
@@ -236,7 +232,7 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
     }
 
 
-    private static final char[] base64EncodeChars = new char[]{
+    private static final char[] BASE64_ENCODE_CHARS = new char[]{
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
             'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
             'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
@@ -254,24 +250,24 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
         while (i < len) {
             b1 = data[i++] & 0xff;
             if (i == len) {
-                sb.append(base64EncodeChars[b1 >>> 2]);
-                sb.append(base64EncodeChars[(b1 & 0x3) << 4]);
+                sb.append(BASE64_ENCODE_CHARS[b1 >>> 2]);
+                sb.append(BASE64_ENCODE_CHARS[(b1 & 0x3) << 4]);
                 sb.append("==");
                 break;
             }
             b2 = data[i++] & 0xff;
             if (i == len) {
-                sb.append(base64EncodeChars[b1 >>> 2]);
-                sb.append(base64EncodeChars[((b1 & 0x03) << 4) | ((b2 & 0xf0) >>> 4)]);
-                sb.append(base64EncodeChars[(b2 & 0x0f) << 2]);
+                sb.append(BASE64_ENCODE_CHARS[b1 >>> 2]);
+                sb.append(BASE64_ENCODE_CHARS[((b1 & 0x03) << 4) | ((b2 & 0xf0) >>> 4)]);
+                sb.append(BASE64_ENCODE_CHARS[(b2 & 0x0f) << 2]);
                 sb.append("=");
                 break;
             }
             b3 = data[i++] & 0xff;
-            sb.append(base64EncodeChars[b1 >>> 2]);
-            sb.append(base64EncodeChars[((b1 & 0x03) << 4) | ((b2 & 0xf0) >>> 4)]);
-            sb.append(base64EncodeChars[((b2 & 0x0f) << 2) | ((b3 & 0xc0) >>> 6)]);
-            sb.append(base64EncodeChars[b3 & 0x3f]);
+            sb.append(BASE64_ENCODE_CHARS[b1 >>> 2]);
+            sb.append(BASE64_ENCODE_CHARS[((b1 & 0x03) << 4) | ((b2 & 0xf0) >>> 4)]);
+            sb.append(BASE64_ENCODE_CHARS[((b2 & 0x0f) << 2) | ((b3 & 0xc0) >>> 6)]);
+            sb.append(BASE64_ENCODE_CHARS[b3 & 0x3f]);
         }
         return sb.toString();
     }

@@ -36,6 +36,7 @@ public enum ResultCode {
     VERIFICATION_EXIST(1002, "验证码服务异常"),
     LIMIT_ERROR(1003,"访问过于频繁，请稍后再试"),
     ILLEGAL_REQUEST_ERROR(1004, "非法请求，请重新刷新页面操作"),
+    IMAGE_FILE_EXT_ERROR(1005, "不支持图片格式"),
     /**
      * 分类
      */

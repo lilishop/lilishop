@@ -35,7 +35,8 @@ public interface DistributionService extends IService<Distribution> {
     /**
      * 提交分销申请
      *
-     * @return
+     * @param distributionApplyDTO 分销申请DTO
+     * @return 分销员
      */
     Distribution applyDistribution(DistributionApplyDTO distributionApplyDTO);
 
@@ -67,7 +68,7 @@ public interface DistributionService extends IService<Distribution> {
     /**
      * 绑定会员的分销员关系
      *
-     * @return
+     * @param distributionId 分销员ID
      */
     void bindingDistribution(String distributionId);
 
@@ -78,14 +79,17 @@ public interface DistributionService extends IService<Distribution> {
 
     /**
      * 修改可提现金额
-     * @param canRebate 修改金额
+     *
+     * @param canRebate      修改金额
      * @param distributionId 分销员ID
      */
-    void subCanRebate(Double canRebate,String distributionId);
+    void subCanRebate(Double canRebate, String distributionId);
 
     /**
      * 添加分销金额
-     * @param rebate
+     *
+     * @param rebate         金额
+     * @param distributionId 分销员ID
      */
-    void addRebate(Double rebate,String distributionId);
+    void addRebate(Double rebate, String distributionId);
 }

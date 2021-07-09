@@ -21,10 +21,22 @@ import java.util.Map;
  */
 public interface GoodsSkuService extends IService<GoodsSku> {
 
+    /**
+     * 获取商品SKU缓存ID
+     *
+     * @param id SkuId
+     * @return 商品SKU缓存ID
+     */
     static String getCacheKeys(String id) {
         return CachePrefix.GOODS_SKU.getPrefix() + id;
     }
 
+    /**
+     * 获取商品SKU库存缓存ID
+     *
+     * @param id SkuId
+     * @return 商品SKU缓存ID
+     */
     static String getStockCacheKey(String id) {
         return CachePrefix.SKU_STOCK.getPrefix() + id;
     }
@@ -166,7 +178,7 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     /**
      * 更新SKU评价数量
      *
-     * @param skuId    SKUId
+     * @param skuId SKUId
      */
     void updateGoodsSkuCommentNum(String skuId);
 }

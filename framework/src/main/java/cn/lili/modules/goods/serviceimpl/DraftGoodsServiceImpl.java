@@ -30,15 +30,21 @@ import java.util.*;
  * @since 2020/12/19
  **/
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class DraftGoodsServiceImpl extends ServiceImpl<DraftGoodsMapper, DraftGoods> implements DraftGoodsService {
-    //分类
+    /**
+     * 分类
+     */
     @Autowired
     private CategoryService categoryService;
-    //商品相册
+    /**
+     * 商品相册
+     */
     @Autowired
     private GoodsGalleryService goodsGalleryService;
-    //规格商品
+    /**
+     * 规格商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
 
@@ -121,7 +127,7 @@ public class DraftGoodsServiceImpl extends ServiceImpl<DraftGoodsMapper, DraftGo
     }
 
     private GoodsSku add(Map<String, Object> map) {
-        Map<String, Object> specMap = new HashMap<>();
+        Map<String, Object> specMap = new HashMap<>(2);
         GoodsSku sku = new GoodsSku();
         for (Map.Entry<String, Object> m : map.entrySet()) {
             switch (m.getKey()) {

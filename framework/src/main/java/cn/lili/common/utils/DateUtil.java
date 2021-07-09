@@ -174,12 +174,12 @@ public class DateUtil {
             year--;
             month = 12;
         }
-        if (!(String.valueOf(month).length() > 1)) {
+        if (String.valueOf(month).length() <= 1) {
             months = "0" + month;
         } else {
             months = String.valueOf(month);
         }
-        if (!(String.valueOf(day).length() > 1)) {
+        if (String.valueOf(day).length() <= 1) {
             days = "0" + day;
         } else {
             days = String.valueOf(day);

@@ -35,16 +35,24 @@ import javax.servlet.http.HttpServletResponse;
 @Component
 public class WalletPlugin implements Payment {
 
-    //支付日志
+    /**
+     * 支付日志
+     */
     @Autowired
     private PaymentService paymentService;
-    //退款日志
+    /**
+     * 退款日志
+     */
     @Autowired
     private RefundLogService refundLogService;
-    //会员余额
+    /**
+     * 会员余额
+     */
     @Autowired
     private MemberWalletService memberWalletService;
-    //收银台
+    /**
+     * 收银台
+     */
     @Autowired
     private CashierSupport cashierSupport;
 

@@ -63,6 +63,12 @@ public class PromotionGoods extends BaseEntity {
     @ApiModelProperty(value = "促销工具类型")
     private String promotionType;
 
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型")
+    private String goodsType;
+
     @ApiModelProperty(value = "活动标题")
     private String title;
 

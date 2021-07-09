@@ -18,14 +18,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class SpecialServiceImpl extends ServiceImpl<SpecialMapper, Special> implements SpecialService {
 
-    //页面数据
+    /**
+     * 页面数据
+     */
     @Autowired
     private PageDataService pageDataService;
 
     @Override
     public Special addSpecial(Special special) {
         //新建页面
-        PageData pageData=new PageData();
+        PageData pageData = new PageData();
         pageDataService.save(pageData);
 
         //设置专题页面
@@ -38,7 +40,7 @@ public class SpecialServiceImpl extends ServiceImpl<SpecialMapper, Special> impl
     public boolean removeSpecial(String id) {
 
         //删除页面内容
-        Special special=this.getById(id);
+        Special special = this.getById(id);
         pageDataService.removeById(special.getPageDataId());
 
         //删除专题

@@ -34,13 +34,19 @@ import java.util.stream.Collectors;
 @Component
 public class TradeCashier implements CashierExecute {
 
-    //交易
+    /**
+     * 交易
+     */
     @Autowired
     private TradeService tradeService;
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
-    //设置
+    /**
+     * 设置
+     */
     @Autowired
     private SettingService settingService;
 

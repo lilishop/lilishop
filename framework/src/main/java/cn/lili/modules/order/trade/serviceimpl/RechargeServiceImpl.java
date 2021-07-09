@@ -33,10 +33,12 @@ import java.util.Date;
  * @date 2020-02-25 14:10:16
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> implements RechargeService {
 
-    //会员预存款
+    /**
+     * 会员预存款
+     */
     @Autowired
     private MemberWalletService memberWalletService;
 

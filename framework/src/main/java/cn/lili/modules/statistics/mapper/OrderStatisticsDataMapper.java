@@ -18,10 +18,20 @@ import java.util.List;
  */
 public interface OrderStatisticsDataMapper extends BaseMapper<StoreFlow> {
 
+    /**
+     * 获取订单统计数据
+     * @param queryWrapper 查询条件
+     * @return 订单统计列表
+     */
     @Select("SELECT DATE_FORMAT(create_time,'%Y-%m-%d') AS create_time,sum(flow_price) AS price FROM li_order " +
             " ${ew.customSqlSegment}")
     List<OrderStatisticsDataVO> getOrderStatisticsData(@Param(Constants.WRAPPER) Wrapper queryWrapper);
 
+    /**
+     * 订单数量
+     * @param queryWrapper 查询条件
+     * @return 订单数量
+     */
     @Select("SELECT count(0) FROM li_order ${ew.customSqlSegment}")
     Integer count(@Param(Constants.WRAPPER) Wrapper queryWrapper);
 

@@ -18,6 +18,12 @@ import java.util.List;
  */
 public interface OrderItemMapper extends BaseMapper<OrderItem> {
 
+    /**
+     * 获取等待评价的订单子项列表
+     *
+     * @param queryWrapper 查询条件
+     * @return 订单子项列表
+     */
     @Select("SELECT * FROM li_order_item AS oi INNER JOIN li_order AS o ON oi.order_sn=o.sn ${ew.customSqlSegment}")
     List<OrderItem> waitEvaluate(@Param(Constants.WRAPPER) Wrapper<OrderSimpleVO> queryWrapper);
 

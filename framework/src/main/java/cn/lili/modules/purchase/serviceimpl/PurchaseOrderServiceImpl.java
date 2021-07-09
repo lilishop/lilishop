@@ -2,8 +2,8 @@ package cn.lili.modules.purchase.serviceimpl;
 
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.purchase.entity.dos.PurchaseOrder;
-import cn.lili.modules.purchase.entity.vos.PurchaseOrderVO;
 import cn.lili.modules.purchase.entity.params.PurchaseOrderSearchParams;
+import cn.lili.modules.purchase.entity.vos.PurchaseOrderVO;
 import cn.lili.modules.purchase.mapper.PurchaseOrderMapper;
 import cn.lili.modules.purchase.service.PurchaseOrderItemService;
 import cn.lili.modules.purchase.service.PurchaseOrderService;
@@ -13,10 +13,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +27,6 @@ import java.util.Map;
  * @date 2020/11/26 16:13
  */
 @Service
-@Transactional
 public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, PurchaseOrder> implements PurchaseOrderService {
     @Autowired
     private PurchaseOrderItemService purchaseOrderItemService;
@@ -54,7 +51,7 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
         BeanUtil.copyProperties(purchaseOrder, purchaseOrderVO);
 
         //获取采购单子内容
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(2);
         map.put("purchaseOrderId", id);
         purchaseOrderVO.setPurchaseOrderItems(purchaseOrderItemService.listByMap(map));
         return purchaseOrderVO;

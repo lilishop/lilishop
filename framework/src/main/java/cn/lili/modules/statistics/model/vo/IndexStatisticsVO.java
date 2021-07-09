@@ -48,8 +48,6 @@ public class IndexStatisticsVO {
     private Integer todayStoreNum;
     @ApiModelProperty(value = "今日新增评论数量")
     private Integer todayMemberEvaluation;
-
-    //当前在线人数
     @ApiModelProperty(value = "当前在线人数")
     private Long currentNumberPeopleOnline;
 }

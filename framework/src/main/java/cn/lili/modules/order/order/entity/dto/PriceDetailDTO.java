@@ -19,8 +19,11 @@ import java.util.List;
 @Data
 public class PriceDetailDTO implements Serializable {
 
-    //用于订单价格修改金额计算使用
-    @ApiModelProperty(value = "订单原始总价格" )
+    /**
+     * 订单原始总价格
+     * 用于订单价格修改金额计算使用
+     */
+    @ApiModelProperty(value = "订单原始总价格")
     private Double originalPrice;
 
     private static final long serialVersionUID = 8808470688518188146L;
@@ -69,10 +72,12 @@ public class PriceDetailDTO implements Serializable {
     //=========end platform coupon==========
 
     //========= update price ==========
+
     @ApiModelProperty(value = "订单修改金额")
     private Double updatePrice;
 
     //=========end update price==========
+
     @ApiModelProperty(value = "流水金额(入账 出帐金额) = goodsPrice + freight - discountPrice - couponPrice + updatePrice")
     private Double flowPrice;
 

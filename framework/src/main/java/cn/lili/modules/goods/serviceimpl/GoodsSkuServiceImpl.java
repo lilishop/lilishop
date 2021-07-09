@@ -14,8 +14,8 @@ import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.Goods;
-import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
@@ -25,12 +25,14 @@ import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.entity.vos.SpecValueVO;
 import cn.lili.modules.goods.mapper.GoodsSkuMapper;
-import cn.lili.modules.goods.service.*;
+import cn.lili.modules.goods.service.CategoryService;
+import cn.lili.modules.goods.service.GoodsGalleryService;
+import cn.lili.modules.goods.service.GoodsService;
+import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
-import cn.lili.modules.promotion.service.PromotionService;
 import cn.lili.modules.search.entity.dos.EsGoodsAttribute;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
@@ -54,38 +56,52 @@ import java.util.stream.Collectors;
  * @date 2020-02-23 15:18:56
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> implements GoodsSkuService {
 
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache<GoodsSku> cache;
-    //分类
+    /**
+     * 分类
+     */
     @Autowired
     private CategoryService categoryService;
-    //商品相册
+    /**
+     * 商品相册
+     */
     @Autowired
     private GoodsGalleryService goodsGalleryService;
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-    //rocketMq
+    /**
+     * rocketMq
+     */
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
-    //rocketMq配置
+    /**
+     * rocketMq配置
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    //会员评价
+    /**
+     * 会员评价
+     */
     @Autowired
     private MemberEvaluationService memberEvaluationService;
-    //商品
+    /**
+     * 商品
+     */
     private GoodsService goodsService;
-    //商品索引
+    /**
+     * 商品索引
+     */
     private EsGoodsIndexService goodsIndexService;
-    @Autowired
-    private ParametersService parametersService;
-    @Autowired
-    private PromotionService promotionService;
 
     @Override
     public void add(List<Map<String, Object>> skuList, Goods goods) {
@@ -173,7 +189,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
         String quantity = stringRedisTemplate.opsForValue().get(GoodsSkuService.getStockCacheKey(id));
         if (quantity != null) {
-            if (goodsSku.getQuantity() != Convert.toInt(quantity)) {
+            if (goodsSku.getQuantity().equals(Convert.toInt(quantity))) {
                 goodsSku.setQuantity(Convert.toInt(quantity));
                 this.updateById(goodsSku);
             }
@@ -186,7 +202,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     @Override
     public Map<String, Object> getGoodsSkuDetail(String goodsId, String skuId) {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(16);
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
 
         GoodsVO goodsVO = goodsService.getGoodsVO(goodsId);
@@ -335,7 +351,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //循环提交的sku表单
         for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
             SpecValueVO specValueVO = new SpecValueVO();
-            if (entry.getKey().equals("images")) {
+            if ("images".equals(entry.getKey())) {
                 specValueVO.setSpecName(entry.getKey());
                 if (entry.getValue().toString().contains("url")) {
                     List<SpecValueVO.SpecImages> specImages = JSONUtil.toList(JSONUtil.parseArray(entry.getValue()), SpecValueVO.SpecImages.class);
@@ -542,7 +558,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      * @return 规格商品
      */
     private Map<String, Object> add(Map<String, Object> map, Goods goods) {
-        Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>(2);
         GoodsSku sku = new GoodsSku();
 
         //商品索引
@@ -604,20 +620,20 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         String thumbnail = "";
         String small = "";
         //规格值
-        Map<String, Object> specMap = new HashMap<>();
+        Map<String, Object> specMap = new HashMap<>(16);
         //商品属性
         List<EsGoodsAttribute> attributes = new ArrayList<>();
 
         //获取规格信息
         for (Map.Entry<String, Object> spec : map.entrySet()) {
             //保存规格信息
-            if (spec.getKey().equals("id") || spec.getKey().equals("sn") || spec.getKey().equals("cost")
-                    || spec.getKey().equals("price") || spec.getKey().equals("quantity")
-                    || spec.getKey().equals("weight")) {
+            if (("id").equals(spec.getKey()) || ("sn").equals(spec.getKey()) || ("cost").equals(spec.getKey())
+                    || ("price").equals(spec.getKey()) || ("quantity").equals(spec.getKey())
+                    || ("weight").equals(spec.getKey())) {
                 continue;
             } else {
                 specMap.put(spec.getKey(), spec.getValue());
-                if (spec.getKey().equals("images")) {
+                if (("images").equals(spec.getKey())) {
                     //设置规格商品缩略图
                     List<Map<String, String>> images = (List<Map<String, String>>) spec.getValue();
                     if (images == null || images.isEmpty()) {

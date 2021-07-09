@@ -17,6 +17,7 @@ import javax.validation.constraints.*;
 public class StoreCompanyDTO {
 
     //公司基本信息
+
     @Size(min = 2, max = 100)
     @NotBlank(message = "公司名称不能为空")
     @ApiModelProperty(value = "公司名称")
@@ -66,6 +67,7 @@ public class StoreCompanyDTO {
     private String linkPhone;
 
     //营业执照信息
+
     @Size(min = 18, max = 18)
     @ApiModelProperty(value = "营业执照号")
     private String licenseNum;
@@ -79,6 +81,7 @@ public class StoreCompanyDTO {
     private String licencePhoto;
 
     //法人信息
+
     @Size(min = 2, max = 20)
     @NotBlank(message = "法人姓名不能为空")
     @ApiModelProperty(value = "法人姓名")

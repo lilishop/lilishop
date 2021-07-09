@@ -67,6 +67,7 @@ public interface StoreDetailService extends IService<StoreDetail> {
     /**
      * 获取某一个店铺的退货收件地址信息
      *
+     * @param id 店铺ID
      * @return 店铺售后收件地址
      */
     StoreAfterSaleAddressDTO getStoreAfterSaleAddressDTO(String id);
@@ -74,16 +75,24 @@ public interface StoreDetailService extends IService<StoreDetail> {
     /**
      * 修改当前登录店铺售后收件地址
      *
+     * @param storeAfterSaleAddressDTO 店铺售后DTO
      * @return 店铺售后收件地址
      */
     boolean editStoreAfterSaleAddressDTO(StoreAfterSaleAddressDTO storeAfterSaleAddressDTO);
 
     /**
      * 修改店铺库存预警数量
+     *
      * @param stockWarning 库存预警数量
      * @return 操作状态
      */
     boolean updateStockWarning(Integer stockWarning);
 
+    /**
+     * 获取店铺经营范围
+     *
+     * @param storeId 店铺ID
+     * @return 店铺经营范围
+     */
     List goodsManagementCategory(String storeId);
 }

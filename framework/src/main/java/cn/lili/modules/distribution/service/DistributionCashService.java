@@ -19,14 +19,16 @@ public interface DistributionCashService extends IService<DistributionCash> {
     /**
      * 提交分销提现申请
      *
-     * @param applyMoney
+     * @param applyMoney 申请金额
+     * @return 操作状态
      */
     Boolean cash(Double applyMoney);
 
     /**
      * 获取当前会员的分销提现分页列表
      *
-     * @return
+     * @param page 分页
+     * @return 申请提现分页
      */
     IPage<DistributionCash> getDistributionCash(PageVO page);
 

@@ -49,7 +49,7 @@ public class StoreManagerController {
 
     @ApiOperation(value = "获取店铺分页列表")
     @GetMapping("/all")
-    public ResultMessage<List<Store>> getALL() {
+    public ResultMessage<List<Store>> getAll() {
         return ResultUtil.data(storeService.list(new QueryWrapper<Store>().eq("store_disable", "OPEN")));
     }
 

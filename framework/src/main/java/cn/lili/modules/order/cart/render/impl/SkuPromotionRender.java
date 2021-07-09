@@ -4,7 +4,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.order.cart.entity.dto.MemberCouponDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
@@ -44,13 +43,19 @@ import java.util.stream.Collectors;
 @Service
 @Order(2)
 public class SkuPromotionRender implements CartRenderStep {
-    //促销计算
+    /**
+     * 促销计算
+     */
     @Autowired
     private PromotionPriceService promotionPriceService;
-    //促销商品
+    /**
+     * 促销商品
+     */
     @Autowired
     private PromotionGoodsService promotionGoodsService;
-
+    /**
+     * 拼团
+     */
     @Autowired
     private PintuanService pintuanService;
 
@@ -229,26 +234,6 @@ public class SkuPromotionRender implements CartRenderStep {
     }
 
     /**
-     * 渲染拼团
-     *
-     * @param cartSkuList 购物车sku集合
-     */
-    private void renderPintuan(List<CartSkuVO> cartSkuList) {
-        for (CartSkuVO cartSku : cartSkuList) {
-            PriceDetailDTO priceDetailDTO = cartSku.getPriceDetailDTO();
-//           PromotionGoods promotionGoods = cartSku.getPromotion();
-            //参与平台则以拼团价处理
-            if (StringUtils.isNotEmpty(cartSku.getPintuanId())) {
-//               Double discountPrice = CurrencyUtil.sub(cartSku.getGoodsSku().getPrice(), promotionGoods.getPrice());
-//               priceDetailDTO.setDiscountPrice(discountPrice);
-            } else {
-                //否则代表单独购买，则以原价购买
-                priceDetailDTO.setDiscountPrice(0d);
-            }
-        }
-    }
-
-    /**
      * 渲染满减优惠
      *
      * @param cartVO 购物车展示信息
@@ -257,7 +242,6 @@ public class SkuPromotionRender implements CartRenderStep {
 
         //获取参与活动的商品总价
         FullDiscountVO fullDiscount = cartVO.getFullDiscount();
-
 
         if (Boolean.TRUE.equals(fullDiscount.getIsCoupon())) {
             cartVO.getGiftCouponList().add(fullDiscount.getCouponId());

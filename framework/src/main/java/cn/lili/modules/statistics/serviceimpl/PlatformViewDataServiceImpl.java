@@ -2,6 +2,8 @@ package cn.lili.modules.statistics.serviceimpl;
 
 import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.config.properties.StatisticsProperties;
@@ -25,6 +27,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -41,18 +44,25 @@ import java.util.List;
  */
 @Service
 public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMapper, PlatformViewData> implements PlatformViewDataService {
-    //在线人数统计
+    /**
+     * 在线人数统计
+     */
     @Autowired
     private StatisticsProperties statisticsProperties;
-    //会员
+    /**
+     * 会员
+     */
     @Autowired
     private MemberService memberService;
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache cache;
-
-    //平台流量统计
-    @Autowired
+    /**
+     * 平台流量统计
+     */
+    @Resource
     private PlatformViewDataMapper platformViewDataMapper;
 
     @Override
@@ -185,6 +195,8 @@ public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMap
                     startTime = dates[0];
                     break;
                 }
+                default:
+                    throw new ServiceException(ResultCode.ERROR);
             }
         } else {
             //根据查询时间来确定查询参数

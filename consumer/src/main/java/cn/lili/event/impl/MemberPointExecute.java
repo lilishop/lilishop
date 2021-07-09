@@ -33,57 +33,66 @@ import org.springframework.stereotype.Service;
 @Service
 public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentCompleteEvent, OrderStatusChangeEvent, AfterSaleStatusChangeEvent {
 
-    //配置
+    /**
+     * 配置
+     */
     @Autowired
     private SettingService settingService;
-    //会员
+    /**
+     * 会员
+     */
     @Autowired
     private MemberService memberService;
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
 
     /**
      * 会员注册赠送积分
+     *
      * @param member 会员
      */
     @Override
     public void memberRegister(Member member) {
         //获取积分设置
-        PointSetting pointSetting=getPointSetting();
+        PointSetting pointSetting = getPointSetting();
         //赠送会员积分
         memberService.updateMemberPoint(Long.valueOf(pointSetting.getRegister().longValue()), true, member.getId(), "会员注册，赠送积分" + pointSetting.getRegister() + "分");
     }
 
     /**
      * 会员评价赠送积分
+     *
      * @param memberEvaluation 会员评价
      */
     @Override
     public void goodsComment(MemberEvaluation memberEvaluation) {
         //获取积分设置
-        PointSetting pointSetting=getPointSetting();
+        PointSetting pointSetting = getPointSetting();
         //赠送会员积分
         memberService.updateMemberPoint(Long.valueOf(pointSetting.getComment().longValue()), true, memberEvaluation.getMemberId(), "会员评价，赠送积分" + pointSetting.getComment() + "分");
     }
 
     /**
      * 非积分订单订单完成后赠送积分
+     *
      * @param orderMessage 订单消息
      */
     @Override
     public void orderChange(OrderMessage orderMessage) {
 
-        if(orderMessage.getNewStatus().equals(OrderStatusEnum.COMPLETED)){
+        if (orderMessage.getNewStatus().equals(OrderStatusEnum.COMPLETED)) {
             //根据订单编号获取订单数据,如果为积分订单则跳回
             Order order = orderService.getBySn(orderMessage.getOrderSn());
-            if(order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINT.name())){
+            if (order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINT.name())) {
                 return;
             }
             //获取积分设置
-            PointSetting pointSetting=getPointSetting();
+            PointSetting pointSetting = getPointSetting();
             //计算赠送积分数量
-            Double point=CurrencyUtil.mul(pointSetting.getMoney(),order.getFlowPrice(),0);
+            Double point = CurrencyUtil.mul(pointSetting.getMoney(), order.getFlowPrice(), 0);
             //赠送会员积分
             memberService.updateMemberPoint(point.longValue(), true, order.getMemberId(), "会员下单，赠送积分" + point + "分");
 
@@ -92,15 +101,16 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
 
     /**
      * 提交售后后扣除积分
+     *
      * @param afterSale 售后
      */
     @Override
     public void afterSaleStatusChange(AfterSale afterSale) {
         if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.COMPLETE.name())) {
             //获取积分设置
-            PointSetting pointSetting=getPointSetting();
+            PointSetting pointSetting = getPointSetting();
             //计算扣除积分数量
-            Double point=CurrencyUtil.mul(pointSetting.getMoney(), afterSale.getActualRefundPrice(),0);
+            Double point = CurrencyUtil.mul(pointSetting.getMoney(), afterSale.getActualRefundPrice(), 0);
             //扣除会员积分
             memberService.updateMemberPoint(point.longValue(), false, afterSale.getMemberId(), "会员退款，扣除积分" + point + "分");
 
@@ -109,9 +119,10 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
 
     /**
      * 获取积分设置
+     *
      * @return 积分设置
      */
-    private PointSetting getPointSetting(){
+    private PointSetting getPointSetting() {
         Setting setting = settingService.get(SettingEnum.POINT_SETTING.name());
         return new Gson().fromJson(setting.getSettingValue(), PointSetting.class);
     }

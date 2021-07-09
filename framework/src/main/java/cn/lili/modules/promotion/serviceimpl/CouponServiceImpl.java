@@ -2,13 +2,13 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.DelayTypeEnums;
-import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
+import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.trigger.model.TimeExecuteConstant;
 import cn.lili.common.trigger.model.TimeTriggerMsg;
+import cn.lili.common.trigger.util.DelayQueueTools;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.StringUtils;
@@ -50,28 +50,44 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> implements CouponService {
 
-    //延时任务
+    /**
+     * 延时任务
+     */
     @Autowired
     private TimeTrigger timeTrigger;
-    //Mongo
+    /**
+     * Mongo
+     */
     @Autowired
     private MongoTemplate mongoTemplate;
-    //规格商品
+    /**
+     * 规格商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    //Rocketmq
+    /**
+     * Rocketmq
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    //促销商品
+    /**
+     * 促销商品
+     */
     @Autowired
     private PromotionGoodsService promotionGoodsService;
-    //会员优惠券
+    /**
+     * 会员优惠券
+     */
     @Autowired
     private MemberCouponService memberCouponService;
-    //满额活动
+    /**
+     * 满额活动
+     */
     @Autowired
     private FullDiscountService fullDiscountService;
-    //优惠券活动-优惠券关联
+    /**
+     * 优惠券活动-优惠券关联
+     */
     @Autowired
     private CouponActivityItemService couponActivityItemService;
 
@@ -179,7 +195,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
 
         //删除优惠券活动关联优惠券
         couponActivityItemService.remove(new LambdaQueryWrapper<CouponActivityItem>()
-                .eq(CouponActivityItem::getCouponId,id));
+                .eq(CouponActivityItem::getCouponId, id));
 
         //删除延时任务
         this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
@@ -289,8 +305,9 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         if (coupon.getPublishNum() != 0 && coupon.getCouponLimitNum() > coupon.getPublishNum()) {
             throw new ServiceException(ResultCode.COUPON_LIMIT_GREATER_THAN_PUBLISH);
         }
-
-        if (coupon.getCouponType().equals(CouponTypeEnum.DISCOUNT.name()) && (coupon.getCouponDiscount() < 0 && coupon.getCouponDiscount() > 10)) {
+        boolean discountCoupon = (coupon.getCouponType().equals(CouponTypeEnum.DISCOUNT.name())
+                && (coupon.getCouponDiscount() < 0 && coupon.getCouponDiscount() > 10));
+        if (discountCoupon) {
             throw new ServiceException(ResultCode.COUPON_DISCOUNT_ERROR);
         }
 
@@ -314,7 +331,9 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
      * @param coupon 检查的优惠券对象
      */
     private void checkCouponScope(CouponVO coupon) {
-        if (coupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS.name()) && (coupon.getPromotionGoodsList() == null || coupon.getPromotionGoodsList().isEmpty())) {
+        boolean portionGoodsScope = (coupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS.name())
+                && (coupon.getPromotionGoodsList() == null || coupon.getPromotionGoodsList().isEmpty()));
+        if (portionGoodsScope) {
             throw new ServiceException(ResultCode.COUPON_SCOPE_TYPE_GOODS_ERROR);
         } else if (coupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS.name()) && CharSequenceUtil.isEmpty(coupon.getScopeId())) {
             throw new ServiceException(ResultCode.COUPON_SCOPE_TYPE_GOODS_ERROR);

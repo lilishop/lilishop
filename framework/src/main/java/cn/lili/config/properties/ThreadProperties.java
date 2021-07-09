@@ -37,7 +37,7 @@ public class ThreadProperties {
     /**
      * 保持存活时间
      */
-    private Integer KeepAliveSeconds = 60;
+    private Integer keepAliveSeconds = 60;
 
 
 }

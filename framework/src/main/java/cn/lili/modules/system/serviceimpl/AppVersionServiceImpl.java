@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2020/11/17 8:02 下午
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class AppVersionServiceImpl extends ServiceImpl<AppVersionMapper, AppVersion> implements AppVersionService {
 
     @Override

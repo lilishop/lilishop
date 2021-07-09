@@ -46,6 +46,7 @@ public interface GoodsService extends IService<Goods> {
      * 修改商品
      *
      * @param goodsOperationDTO 商品查询条件
+     * @param goodsId           商品ID
      */
     void editGoods(GoodsOperationDTO goodsOperationDTO, String goodsId);
 
@@ -61,6 +62,7 @@ public interface GoodsService extends IService<Goods> {
      * 商品查询
      *
      * @param goodsSearchParams 查询参数
+     * @return 商品分页
      */
     IPage<Goods> queryByParams(GoodsSearchParams goodsSearchParams);
 
@@ -76,9 +78,11 @@ public interface GoodsService extends IService<Goods> {
     /**
      * 获取所有的已上架的商品数量
      *
+     * @param goodsAuthEnum   商品审核枚举
+     * @param goodsStatusEnum 商品状态枚举
      * @return 所有的已上架的商品数量
      */
-    Integer goodsNum(GoodsStatusEnum goodsStatusEnum,GoodsAuthEnum goodsAuthEnum);
+    Integer goodsNum(GoodsStatusEnum goodsStatusEnum, GoodsAuthEnum goodsAuthEnum);
 
     /**
      * 获取今天的已上架的商品数量
@@ -87,10 +91,10 @@ public interface GoodsService extends IService<Goods> {
      */
     Integer todayUpperNum();
 
-    /*
+    /**
      * 更新商品上架状态状态
      *
-     * @param goodsIds         商品ID集合
+     * @param goodsIds        商品ID集合
      * @param goodsStatusEnum 更新的商品状态
      * @param underReason     下架原因
      * @return 更新结果
@@ -108,8 +112,8 @@ public interface GoodsService extends IService<Goods> {
     /**
      * 设置商品运费模板
      *
-     * @param goodsIds     商品列表
-     * @param templateId   运费模板ID
+     * @param goodsIds   商品列表
+     * @param templateId 运费模板ID
      * @return 操作结果
      */
     Boolean freight(List<String> goodsIds, String templateId);
@@ -117,7 +121,7 @@ public interface GoodsService extends IService<Goods> {
     /**
      * 修改商品库存数量
      *
-     * @param goodsId 商品ID
+     * @param goodsId  商品ID
      * @param quantity 库存数量
      */
     void updateStock(String goodsId, Integer quantity);
@@ -125,7 +129,7 @@ public interface GoodsService extends IService<Goods> {
     /**
      * 更新SKU评价数量
      *
-     * @param goodsId  商品ID
+     * @param goodsId 商品ID
      */
     void updateGoodsCommentNum(String goodsId);
 }

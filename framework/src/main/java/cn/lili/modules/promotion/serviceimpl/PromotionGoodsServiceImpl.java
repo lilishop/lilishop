@@ -60,22 +60,34 @@ import java.util.List;
 
 public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper, PromotionGoods> implements PromotionGoodsService {
 
-    //Mongo
+    /**
+     * Mongo
+     */
     @Autowired
     private MongoTemplate mongoTemplate;
-    //Redis
+    /**
+     * Redis
+     */
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-    //秒杀活动申请
+    /**
+     * 秒杀活动申请
+     */
     @Autowired
     private SeckillApplyService seckillApplyService;
-    //规格商品
+    /**
+     * 规格商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    //积分商品
+    /**
+     * 积分商品
+     */
     @Autowired
     private PointsGoodsService pointsGoodsService;
-    //分销商品
+    /**
+     * 分销商品
+     */
     @Autowired
     private DistributionGoodsService distributionGoodsService;
 
@@ -159,8 +171,10 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         //单独检查，添加适用于全品类的全平台或属于当前店铺的满优惠活动
         List<CouponVO> couponVOS = mongoTemplate.find(query, CouponVO.class);
         for (CouponVO couponVO : couponVOS) {
-            if (couponVO.getPromotionGoodsList() == null && couponVO.getScopeType().equals(CouponScopeTypeEnum.ALL.name()) &&
-                    (couponVO.getStoreId().equals("0") || cartSkuVO.getStoreId().equals(couponVO.getStoreId()))) {
+            boolean aLLScopeType = (couponVO.getPromotionGoodsList() == null
+                    && couponVO.getScopeType().equals(CouponScopeTypeEnum.ALL.name())
+                    && (("0").equals(couponVO.getStoreId()) || cartSkuVO.getStoreId().equals(couponVO.getStoreId())));
+            if (aLLScopeType) {
                 PromotionGoods p = new PromotionGoods(cartSkuVO.getGoodsSku());
                 p.setPromotionId(couponVO.getId());
                 p.setPromotionStatus(couponVO.getPromotionStatus());
@@ -273,7 +287,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         if (promotionGoods == null) {
             throw new ServiceException(ResultCode.PROMOTION_GOODS_NOT_EXIT);
         }
-        if (promotionGoodsStock != null && CharSequenceUtil.isNotEmpty(promotionGoodsStock) && promotionGoods.getQuantity() == Convert.toInt(promotionGoodsStock)) {
+        if (promotionGoodsStock != null && CharSequenceUtil.isNotEmpty(promotionGoodsStock) && promotionGoods.getQuantity().equals(Convert.toInt(promotionGoodsStock))) {
             return Convert.toInt(promotionGoodsStock);
         } else {
             stringRedisTemplate.opsForValue().set(promotionStockKey, promotionGoods.getQuantity().toString());

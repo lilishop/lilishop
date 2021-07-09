@@ -51,7 +51,8 @@ public class OperationalJudgment<t> {
                 } else {
                     throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
                 }
+            default:
+                throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
-        return object;
     }
 }

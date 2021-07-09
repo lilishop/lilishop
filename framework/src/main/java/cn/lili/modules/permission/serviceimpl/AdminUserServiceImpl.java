@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser> implements AdminUserService {
     @Autowired
     private UserRoleService userRoleService;
@@ -53,6 +53,10 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     private MenuService menuService;
     @Autowired
     private ManagerTokenGenerate managerTokenGenerate;
+    /**
+     * 角色长度
+     */
+    private int rolesMaxSize =10;
 
     @Override
     public IPage<AdminUserVO> adminUserPage(Page initPage, QueryWrapper<AdminUser> initWrapper) {
@@ -124,7 +128,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
 
 
     @Override
-    public Object refreshToken(String refreshToken) {
+    public Token refreshToken(String refreshToken) {
         return managerTokenGenerate.refreshToken(refreshToken);
     }
 
@@ -153,7 +157,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     @Override
     @SystemLogPoint(description = "修改管理员", customerLog = "'修改管理员:'+#adminUser.username")
     public boolean updateAdminUser(AdminUser adminUser, List<String> roles) {
-        if (roles.size() > 10) {
+        if (roles.size() > rolesMaxSize) {
             throw new ServiceException(ResultCode.PERMISSION_BEYOND_TEN);
         }
         if (roles != null && roles.size() > 0) {
@@ -196,7 +200,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
         AdminUser dbUser = new AdminUser();
         BeanUtil.copyProperties(adminUser, dbUser);
         dbUser.setPassword(new BCryptPasswordEncoder().encode(dbUser.getPassword()));
-        if (roles.size() > 10) {
+        if (roles.size() > rolesMaxSize) {
             throw new ServiceException(ResultCode.PERMISSION_BEYOND_TEN);
         }
         if (roles.size() > 0) {

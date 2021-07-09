@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2020/11/17 3:48 下午
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> implements MessageService {
 
     @Autowired

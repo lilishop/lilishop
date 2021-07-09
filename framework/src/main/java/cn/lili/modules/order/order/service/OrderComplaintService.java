@@ -84,7 +84,9 @@ public interface OrderComplaintService extends IService<OrderComplaint> {
 
     /**
      * 店铺申诉
+     *
      * @param storeAppealVO
+     * @return 操作状态
      */
     boolean appeal(StoreAppealVO storeAppealVO);
 }

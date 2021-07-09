@@ -19,9 +19,10 @@ public interface FreightTemplateService extends IService<FreightTemplate> {
     /**
      * 获取当前商家的运费模板列表
      *
+     * @param pageVO 分页
      * @return 运费模板列表
      */
-    IPage<FreightTemplate> getFreightTemplate(PageVO pageVo);
+    IPage<FreightTemplate> getFreightTemplate(PageVO pageVO);
 
     /**
      * 获取商家的运费模板

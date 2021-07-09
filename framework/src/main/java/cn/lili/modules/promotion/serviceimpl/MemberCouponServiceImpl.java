@@ -72,7 +72,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
             memberCoupon.setMemberId(memberId);
             memberCoupon.setMemberName(memberName);
             memberCoupon.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
-            memberCoupon.setIsPlatform(coupon.getStoreId().equals("platform"));
+            memberCoupon.setIsPlatform(("platform").equals(coupon.getStoreId()));
             this.save(memberCoupon);
             couponService.receiveCoupon(couponId, 1);
         } else {

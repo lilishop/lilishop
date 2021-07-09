@@ -8,7 +8,22 @@ package cn.lili.modules.promotion.entity.enums;
  */
 public enum PromotionStatusEnum {
 
-    NEW("新建"), START("开始/上架"), END("结束/下架"), CLOSE("紧急关闭/作废");
+    /**
+     * 新建
+     */
+    NEW("新建"),
+    /**
+     * 开始/上架
+     */
+    START("开始/上架"),
+    /**
+     * 结束/下架
+     */
+    END("结束/下架"),
+    /**
+     * 紧急关闭/作废
+     */
+    CLOSE("紧急关闭/作废");
 
     private final String description;
 

@@ -35,7 +35,7 @@ public class MemberEvaluationListVO {
     private String status;
 
     @ApiModelProperty(value = "回复状态")
-    private boolean replyStatus;
+    private Boolean replyStatus;
 
     @ApiModelProperty(value = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

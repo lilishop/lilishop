@@ -68,7 +68,8 @@ public interface MemberService extends IService<Member> {
     /**
      * 注册：手机号、验证码登录
      *
-     * @return 是否登录成功
+     * @param mobilePhone 手机号
+     * @return token
      */
     Token mobilePhoneLogin(String mobilePhone);
 
@@ -152,6 +153,7 @@ public interface MemberService extends IService<Member> {
     /**
      * 一键注册会员
      *
+     * @param authUser 联合登录用户
      * @return Token
      */
     Token autoRegister(ConnectAuthUser authUser);
@@ -186,10 +188,10 @@ public interface MemberService extends IService<Member> {
     /**
      * 会员积分变动
      *
-     * @param experience    变动经验值
-     * @param type          是否增加经验值
-     * @param memberId      会员id
-     * @param content       变动详细
+     * @param experience 变动经验值
+     * @param type       是否增加经验值
+     * @param memberId   会员id
+     * @param content    变动详细
      * @return 操作结果
      */
     Boolean updateMemberExperience(Long experience, Boolean type, String memberId, String content);

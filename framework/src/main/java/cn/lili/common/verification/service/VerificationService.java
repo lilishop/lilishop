@@ -7,6 +7,9 @@ import java.util.Map;
 
 /**
  * 验证码模块
+ *
+ * @author Bulbasaur
+ * @date: 2021/7/9 1:42 上午
  */
 public interface VerificationService {
     /**
@@ -15,6 +18,7 @@ public interface VerificationService {
      * @param verificationEnums 校验枚举
      * @param uuid              uuid
      * @return 校验对象
+     * @throws IOException 校验错误
      */
     Map<String, Object> createVerification(VerificationEnums verificationEnums, String uuid) throws IOException;
 
@@ -29,9 +33,11 @@ public interface VerificationService {
     boolean preCheck(Integer xPos, String uuid, VerificationEnums verificationEnums);
 
     /**
+     * 验证码校验
+     *
      * @param uuid              用户唯一表示
      * @param verificationEnums 校验枚举
-     * @return
+     * @return 操作结果
      */
     boolean check(String uuid, VerificationEnums verificationEnums);
 }

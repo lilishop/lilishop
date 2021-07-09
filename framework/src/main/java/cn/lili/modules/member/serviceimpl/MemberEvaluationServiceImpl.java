@@ -56,28 +56,42 @@ import java.util.Map;
  * @date 2020-02-25 14:10:16
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMapper, MemberEvaluation> implements MemberEvaluationService {
 
-    //会员评价数据层
+    /**
+     * 会员评价数据层
+     */
     @Resource
     private MemberEvaluationMapper memberEvaluationMapper;
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
-    //子订单
+    /**
+     * 子订单
+     */
     @Autowired
     private OrderItemService orderItemService;
-    //会员
+    /**
+     * 会员
+     */
     @Autowired
     private MemberService memberService;
-    //商品
+    /**
+     * 商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    //rocketMq
+    /**
+     * rocketMq
+     */
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
-    //rocketMq配置
+    /**
+     * rocketMq配置
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
 

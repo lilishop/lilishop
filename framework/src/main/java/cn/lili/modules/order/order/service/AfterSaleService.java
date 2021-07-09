@@ -70,19 +70,25 @@ public interface AfterSaleService extends IService<AfterSale> {
      * @param afterSaleSn   售后编号
      * @param serviceStatus 状态 PASS：审核通过，REFUSE：审核未通过
      * @param remark        商家备注
+     * @param actualRefundPrice 退款金额
+     * @return 售后
      */
-    AfterSale review(String afterSaleSn, String serviceStatus, String remark,Double actualRefundPrice);
+    AfterSale review(String afterSaleSn, String serviceStatus, String remark, Double actualRefundPrice);
 
     /**
      * 买家退货,物流填写
      *
-     * @param afterSaleSn 售后服务单号
-     * @param logisticsNo 物流单号
-     * @param logisticsId 物流公司ID
+     * @param afterSaleSn  售后服务单号
+     * @param logisticsNo  物流单号
+     * @param logisticsId  物流公司ID
+     * @param mDeliverTime 买家退货发货时间
+     * @return 售后
      */
     AfterSale buyerDelivery(String afterSaleSn, String logisticsNo, String logisticsId, Date mDeliverTime);
 
-    /* 获取买家退货物流踪迹
+    /**
+     * 获取买家退货物流踪迹
+     *
      * @param afterSaleSn 售后服务单号
      * @return 物流踪迹
      */
@@ -143,7 +149,7 @@ public interface AfterSaleService extends IService<AfterSale> {
      * 获取统计的售后
      *
      * @param statisticsQueryParam 统计搜索参数
-     * @param pageVO 分页
+     * @param pageVO               分页
      * @return 售后分页列表
      */
     IPage<AfterSale> getStatistics(StatisticsQueryParam statisticsQueryParam, PageVO pageVO);

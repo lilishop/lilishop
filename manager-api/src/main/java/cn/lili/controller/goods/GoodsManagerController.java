@@ -34,10 +34,14 @@ import java.util.List;
 @Api(tags = "管理端,商品管理接口")
 @RequestMapping("/manager/goods")
 public class GoodsManagerController {
-    //商品
+    /**
+     * 商品
+     */
     @Autowired
     private GoodsService goodsService;
-    //规格商品
+    /**
+     * 规格商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
 

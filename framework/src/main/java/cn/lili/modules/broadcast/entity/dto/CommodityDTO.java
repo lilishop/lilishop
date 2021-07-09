@@ -11,12 +11,20 @@ import lombok.Data;
  */
 @Data
 public class CommodityDTO {
-    //商品ID
+    /**
+     * 商品ID
+     */
     private Integer goods_id;
-    //商品名称
+    /**
+     * 商品名称
+     */
     private String name;
-    //地址
+    /**
+     * 地址
+     */
     private String url;
-    //审核状态
+    /**
+     * 审核状态
+     */
     private Integer audit_status;
 }

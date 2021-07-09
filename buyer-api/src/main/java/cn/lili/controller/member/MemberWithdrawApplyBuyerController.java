@@ -38,8 +38,8 @@ public class MemberWithdrawApplyBuyerController {
     public ResultMessage<IPage<MemberWithdrawApply>> getByPage(PageVO page, MemberWithdrawApplyQueryVO memberWithdrawApplyQueryVO) {
         memberWithdrawApplyQueryVO.setMemberId(UserContext.getCurrentUser().getId());
         //构建查询 返回数据
-        IPage<MemberWithdrawApply> memberWithdrawApplyIPage = memberWithdrawApplyService.getMemberWithdrawPage(page, memberWithdrawApplyQueryVO);
-        return ResultUtil.data(memberWithdrawApplyIPage);
+        IPage<MemberWithdrawApply> memberWithdrawApplyPage = memberWithdrawApplyService.getMemberWithdrawPage(page, memberWithdrawApplyQueryVO);
+        return ResultUtil.data(memberWithdrawApplyPage);
     }
 
 }

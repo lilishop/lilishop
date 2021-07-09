@@ -14,7 +14,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,10 +30,12 @@ import java.util.stream.Collectors;
  * @date 2020-02-18 16:18:56
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements BrandService {
 
-    //分类品牌绑定
+    /**
+     * 分类品牌绑定
+     */
     @Autowired
     private CategoryBrandService categoryBrandService;
 
