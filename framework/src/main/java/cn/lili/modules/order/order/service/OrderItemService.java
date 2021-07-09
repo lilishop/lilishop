@@ -6,7 +6,6 @@ import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -59,11 +58,4 @@ public interface OrderItemService extends IService<OrderItem> {
      */
     List<OrderItem> getByOrderSn(String orderSn);
 
-    /**
-     * 获取待评价订单列表
-     *
-     * @param date 结束时间
-     * @return 子订单列表
-     */
-    List<OrderItem> waitEvaluate(Date date);
 }

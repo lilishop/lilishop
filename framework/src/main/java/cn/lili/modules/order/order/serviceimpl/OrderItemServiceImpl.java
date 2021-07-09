@@ -80,11 +80,4 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         return this.list(lambdaQueryWrapper);
     }
 
-    @Override
-    public List<OrderItem> waitEvaluate(Date date) {
-        QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.ge("o.complete_time", date);
-        queryWrapper.eq("oi.comment_status", CommentStatusEnum.UNFINISHED.name());
-        return this.baseMapper.waitEvaluate(queryWrapper);
-    }
 }
