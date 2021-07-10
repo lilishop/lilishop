@@ -1,13 +1,13 @@
-## Lilishop B2B2C商城系统
+## Lilishop B2B2C商城系统🔥
 
-##### 官方公众号 & 开源不易，如有帮助请点Star
+##### 🌹官方公众号 & 开源不易，如有帮助请点Star
 ![image-20210511171611793](https://pickmall.cn/assets/imgs/h5-qrcode.png)
 
 [![star](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop/stargazers)
 &nbsp;&nbsp;![github](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=#181717)
 
 
-### 介绍
+### 🔥介绍
 **官网**：https://pickmall.cn
 
 Lilishop 基于SpringBoot研发的B2B2C多用户商城系统，前端使用 Vue、uniapp开发 **系统全端全部代码开源**
@@ -24,12 +24,12 @@ Lilishop 基于SpringBoot研发的B2B2C多用户商城系统，前端使用 Vue�
 
 
 
-### 文档
+### ☃️文档
 
 **产品文档**（需求、架构、使用、部署、开发）：https://docs.pickmall.cn
 **功能清单** 功能列表：https://docs.qq.com/sheet/DQ1Z2dWJKUnBRZEt5
 
-### 项目链接(gitee)
+### 💧项目链接(gitee)
 
 **Java后台**：https://gitee.com/beijing_hongye_huicheng/lilishop.git
 
@@ -39,7 +39,7 @@ Lilishop 基于SpringBoot研发的B2B2C多用户商城系统，前端使用 Vue�
 
 **docker一键部署**：https://gitee.com/beijing_hongye_huicheng/docker.git
 
-### 项目链接(github)
+### 💧项目链接(github)
 
 **Java后台**：https://github.com/hongyehuicheng/lilishop.git
 
@@ -49,7 +49,7 @@ Lilishop 基于SpringBoot研发的B2B2C多用户商城系统，前端使用 Vue�
 
 **docker一键部署**：https://github.com/hongyehuicheng/docker.git
 
-### 演示地址
+### 💧演示地址
 
 **运营后台**：https://admin-b2b2c.pickmall.cn 账号：admin/123456
 
@@ -61,13 +61,13 @@ Lilishop 基于SpringBoot研发的B2B2C多用户商城系统，前端使用 Vue�
 
 ![image-20210511171611793](https://pickmall.cn/assets/imgs/h5-qrcode.png)
 
-### 3行命令搭建本地环境
+### 🚙3行命令搭建本地环境
 
 温馨提示：由于服务较多，如果笔记本环境启动内存没有32g可能无法启动成功（macbookpro 2020 16g内存启动无法成功），台式机在16g内存、AMD 3700x 的ubuntu系统成功运行。
 
 
 
-#####  docker环境安装（已安装的用户可跳过）
+#####  docker环境安装（已安装docker的用户可跳过）
 ```shell
 #安装依赖
 sudo yum install -y yum-utils device-mapper-persistent-data lvm2
@@ -99,39 +99,39 @@ docker-compose -v
 
 
 
-PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql
+PS:单独部署的话，商城数据库文件访问这里：https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql
 
-##### 各个地址
+##### 商城部署后 API/UI 地址
 
 | API           | 地址            |
 | -------------- | --------------- |
-| 买家API    | http://127.0.0.1:8888     |
-| 商家API     | http://127.0.0.1:8889      |
-| 管理端API       | http://127.0.0.1:8887   |
-| 通用API    | http://127.0.0.1:8890     |
+| 商城买家API  | http://127.0.0.1:8888     |
+| 商城商家API   | http://127.0.0.1:8889      |
+| 商城管理端API     | http://127.0.0.1:8887   |
+| 商城基础API  | http://127.0.0.1:8890     |
 
 | 前端演示         | 地址            |
 | -------------- | --------------- |
-| PC       | http://127.0.0.1:10000     |
-| WAP        | http://127.0.0.1:10001      |
-| 商家       | http://127.0.0.1:10002   |
-| 管理端       | http://127.0.0.1:10003     |
+| 商城PC端    | http://127.0.0.1:10000     |
+| 商城WAP端     | http://127.0.0.1:10001      |
+| 商城卖家端    | http://127.0.0.1:10002   |
+| 商城管理端     | http://127.0.0.1:10003     |
 
 
 
 
 
-### 功能列表
+### ⚾️功能列表
 
 
 
-#### 平台功能
+#### 🥎商城管理端功能
 
 ![平台功能](https://pickmall.cn/assets/imgs/other/managerList.jpg)
 
 
 
-#### 商家端功能
+#### 🥎商城商家端功能
 
 ![商家端功能](https://pickmall.cn/assets/imgs/other/storeList.jpg)
 
@@ -139,28 +139,28 @@ PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_
 
 
 
-### 功能展示
+### 🧩商城前端功能展示
 
 
 
-#### 移动端
+#### ⚽️商城移动端
 
 <img src="https://pickmall.cn/assets/imgs/other/app.gif" alt="移动端功能展示" style="zoom:50%;" />
 
 
 
-#### 管理端
+#### ⚽️商城管理端
 
 ![管理端功能展示](https://pickmall.cn/assets/imgs/other/manager.gif)
 
 
-### 技术选型
+### 商城技术选型
 
-#### 架构图
+#### 🥅架构图
 
 ![架构](https://lili-system.oss-cn-beijing.aliyuncs.com/docs/%E6%9E%B6%E6%9E%84.png)
 
-##### Java后台
+##### 🕹后台技术选型
 
 | 说明           | 框架            | 说明           |               |
 | -------------- | --------------- | -------------- | ------------- |
@@ -174,7 +174,7 @@ PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_
 | 短信           | 阿里云短信      | 认证           | JWT           |
 | 日志处理       | Log4j           | 接口规范       | RESTful       |
 
-##### 前端-运营后台、店铺后台
+##### 🖥前端-运营后台、店铺后台
 
 | 说明       | 框架       | 说明       | 框架    |
 | ---------- | ---------- | ---------- | ------- |
@@ -184,14 +184,14 @@ PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_
 | 基础UI库   | iView      | UI界面基于 | iView   |
 | 网络请求   | axios      |            |         |
 
-##### 前端-移动端
+##### 📱前端-移动端
 
 | 说明      | 架构    | 说明     | 架构    |
 | --------- | ------- | -------- | ------- |
 | 基础UI库  | uViewui | 基础框架 | uni-app |
 | CSS预处理 | scss    | 地图引擎 | amap    |
 
-### 升级计划
+### ✨升级计划
 
 #### 计划每个月发布一个版本，具体时间可能有出入
 
@@ -252,18 +252,18 @@ PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_
 2.店铺支持自定义移动端首页
 ```
 
-### 版本升级
+### 🌟版本升级
 
 ```
-后续会持续版本升级，修复bug，完善功能，覆盖更多业务场景 o2o/b2b/s2b2b2c/跨境电商
+商城后续会持续版本升级，修复bug，完善功能，覆盖更多业务场景 o2o/b2b/s2b2b2c/跨境电商
 
-后续会考虑推出微服务/中台等 企业级版本
+后续会考虑推出微服务商城系统/中台商城等
 ```
 
-### 技术亮点
+### 🙈技术亮点
 
 
-    1.后端框架基于Springboot，构建基于maven，持久层使用MyBatisPlus。使用elasticsearch、redis、mongodb、rocketmq 等各种中间健。都是主流架构，轻松应对各种环境。
+    1.商城后端框架基于Springboot，构建基于maven，持久层使用MyBatisPlus。使用elasticsearch、redis、mongodb、rocketmq 等各种中间健。都是主流架构，轻松应对各种环境。
     
     2.支持集群、分布式，支持docker 轻松部署，解决各种复杂场景！
     
@@ -292,7 +292,7 @@ PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_
     15.已经对接好各种第三方插件，支持各种复杂等联合登陆，联合支付等场景。
 
 
-### 开源须知
+### ⚠️开源须知
 1.仅允许用于个人学习研究使用.
 
 2.禁止将本开源的代码和资源进行任何形式任何名义的出售.
@@ -302,7 +302,7 @@ PS:单独部署的话，数据库文件访问这里：https://gitee.com/beijing_
 4.限制商用，如果需要商业使用请联系我们。QQ3409056806.
 
 
-### 交流群
+### 🐧交流群
 
 **QQ群**：961316482
 
