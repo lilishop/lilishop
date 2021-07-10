@@ -1,6 +1,9 @@
-## Lilishop B2B2C商城系统🔥
+## 🔥Lilishop B2B2C商城系统
 
-##### 🌹官方公众号 & 开源不易，如有帮助请点Star
+##### 🌹官方公众号 & 开源不易，如有帮助请点Star 
+
+##### 官方qq群 961316482，官方公众号/小程序体验，扫描二维码
+
 ![image-20210511171611793](https://pickmall.cn/assets/imgs/h5-qrcode.png)
 
 [![star](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop/stargazers)
@@ -26,8 +29,7 @@ Lilishop 基于SpringBoot研发的B2B2C多用户商城系统，前端使用 Vue�
 
 ### ☃️文档
 
-**产品文档**（需求、架构、使用、部署、开发）：https://docs.pickmall.cn
-**功能清单** 功能列表：https://docs.qq.com/sheet/DQ1Z2dWJKUnBRZEt5
+**产品文档**：https://docs.pickmall.cn
 
 ### 💧项目链接(gitee)
 
@@ -49,21 +51,23 @@ Lilishop 基于SpringBoot研发的B2B2C多用户商城系统，前端使用 Vue�
 
 **docker一键部署**：https://github.com/hongyehuicheng/docker.git
 
-### 💧演示地址
+### 💧演示地址(手机验证码为 ‘111111’)
 
 **运营后台**：https://admin-b2b2c.pickmall.cn 账号：admin/123456
 
 **店铺后台**：https://store-b2b2c.pickmall.cn 账号：13011111111/111111
 
-**用户前台**：https://pc-b2b2c.pickmall.cn
+**PC**：https://pc-b2b2c.pickmall.cn
 
-**移动端**：https://m-b2b2c.pickmall.cn
+**WAP**：https://m-b2b2c.pickmall.cn
+
+**小程序/公众号**：扫描二维码
 
 ![image-20210511171611793](https://pickmall.cn/assets/imgs/h5-qrcode.png)
 
 ### 🚙3行命令搭建本地环境
 
-温馨提示：由于服务较多，如果笔记本环境启动内存没有32g可能无法启动成功（macbookpro 2020 16g内存启动无法成功），台式机在16g内存、AMD 3700x 的ubuntu系统成功运行。
+温馨提示：由于服务中间件较多，如果笔记本环境启动内存没有32g可能无法启动成功（macbookpro 2020 16g内存启动无法成功），台式机在16g内存、AMD 3700x 的ubuntu系统成功运行。
 
 
 
@@ -108,13 +112,13 @@ PS:单独部署的话，商城数据库文件访问这里：https://gitee.com/be
 
 
 
-#### 🥎商城管理端功能
+#### 🥎商城平台功能
 
 ![平台功能](https://pickmall.cn/assets/imgs/other/managerList.jpg)
 
 
 
-#### 🥎商城商家端功能
+#### 🥎商城卖家功能
 
 ![商家端功能](https://pickmall.cn/assets/imgs/other/storeList.jpg)
 
