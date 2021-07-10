@@ -67,24 +67,7 @@ Lilishop 基于SpringBoot研发的B2B2C多用户商城系统，前端使用 Vue�
 
 
 
-#####  docker环境安装（已安装docker的用户可跳过）
-```shell
-#安装依赖
-sudo yum install -y yum-utils device-mapper-persistent-data lvm2
-#设置源
-sudo yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-sudo yum makecache fast
-#安装docker
-sudo yum install docker-ce
-#启动服务
-sudo systemctl start docker
-#安装docker-compose
-sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
-#授权
-sudo chmod +x /usr/local/bin/docker-compose
-#检测版本号
-docker-compose -v
-```
+#####  docker环境安装 [点击跳转](https://docs.pickmall.cn/deploy/%E4%B8%80%E9%94%AE%E9%83%A8%E7%BD%B2.html)
 
 
 
@@ -191,67 +174,6 @@ PS:单独部署的话，商城数据库文件访问这里：https://gitee.com/be
 | 基础UI库  | uViewui | 基础框架 | uni-app |
 | CSS预处理 | scss    | 地图引擎 | amap    |
 
-### ✨升级计划
-
-#### 计划每个月发布一个版本，具体时间可能有出入
-
-时间：2021年7月15日
-
-```
-新增功能：
-1.积分商城
-2.店铺移动端
-3.店铺支持发货单
-4.供求单
-5.店铺自提点
-6.移动端展示附近店铺
-7.开屏广告
-8.会员站内消息
-9.移动端店铺入驻
-功能优化：
-1.用户分享商城、关注店铺、邀请新用户可获取积分、经验值。
-2.隐私管理功能
-2.移动端店铺首页优化
-```
-
-时间：2021年8月16日
-
-```
-新增功能：
-1.微淘功能
-2.相册管理功能
-3.店铺申请品牌
-4.第三方商品导入（淘宝、99api）
-5.用户等级
-6.用户升级会员
-7.会员权益
-8.促销活动：第二件*折
-9.促销活动：商品打包价
-10.促销活动：商品组合购
-11.促销活动：进店赠券
-12.代客退单
-功能优化：
-1.批量上传商品分类
-2.店铺维护开票项目
-3.店铺展示营销中心
-```
-
-时间：2021年9月15日
-
-```
-新增功能：
-1.增加供应商功能
-2.商品预售
-3.商品预约
-4.电子券码
-5.企业会员
-6.企业会员购
-7.商品批发价
-功能优化：
-1.店铺运费模板支持按照体积计算
-2.店铺支持自定义移动端首页
-```
-
 ### 🌟版本升级
 
 ```
@@ -259,37 +181,6 @@ PS:单独部署的话，商城数据库文件访问这里：https://gitee.com/be
 
 后续会考虑推出微服务商城系统/中台商城等
 ```
-
-### 🙈技术亮点
-
-
-    1.商城后端框架基于Springboot，构建基于maven，持久层使用MyBatisPlus。使用elasticsearch、redis、mongodb、rocketmq 等各种中间健。都是主流架构，轻松应对各种环境。
-    
-    2.支持集群、分布式，支持docker 轻松部署，解决各种复杂场景！
-    
-    3.代码模块清晰，主要分为三端api（买家、卖家、管理），各端API互相隔离，自己鉴权，自己操作业务。
-    
-    4.使用阿里开源的RocketMQ，基于mq解决各种并发场景，解决事务一致性，解决搞并发延迟场景问题。
-    
-    5.项目使用多级缓存，应用不同场景，redis缓存业务数据、mongodb缓存关系型多对多关系问题、nginx缓存高频访问低频修改的页面。
-    
-    6.支持各种联合登陆，支持各种客户端的支付问题，灵活配置灵活开启。
-    
-    7.内置完善的楼层装修机制，各种拖拉拽，维护跳转页面或外网，即便是一个什么都不懂的运营也可以轻松掌握。
-    
-    8.内置阿里短信接口，可以在线申请短信模版。内置阿里oss系统，可以对文件执行各种操作。oss商家端资源相互隔离。
-    
-    10.强大的统计报表，统计效果，可以实现各个场景，包含在线人数，历史在线人数，活跃人数等信息。
-    
-    11.标准Api接口、提供swagger文档，快速二开。
-    
-    12.分布式调度任务中心，解决分布式定时任务多次执行问题。
-    
-    13.代码注释完善，快速上手。
-    
-    14.非移动端采用IView框架，各种自定义插件、选择器实现。移动端采用uniapp，一次编写，全端使用
-    
-    15.已经对接好各种第三方插件，支持各种复杂等联合登陆，联合支付等场景。
 
 
 ### ⚠️开源须知
