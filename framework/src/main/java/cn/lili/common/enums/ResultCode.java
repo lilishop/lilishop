@@ -327,8 +327,16 @@ public enum ResultCode {
     /**
      * 砍价活动
      */
-    KANJIIA_GOODS_ACTIVE_STOCK_ERROR(48001, "活动库存数量不能高于商品库存"),
-    KANJIIA_GOODS_ACTIVE_PRICE_ERROR(48001, "活动库存数量不能高于商品库存"),
+    KANJIA_GOODS_ACTIVE_STOCK_ERROR(48001, "活动库存数量不能高于商品库存"),
+    KANJIA_GOODS_ACTIVE_PRICE_ERROR(48002, "最低购买金额不能高于商品金额"),
+    KANJIA_GOODS_ACTIVE_HIGHEST_PRICE_ERROR(48003, "最高砍价金额不能为0且不能超过商品金额"),
+    KANJIA_GOODS_ACTIVE_LOWEST_PRICE_ERROR(48004, "最低砍价金额不能为0且不能超过商品金额"),
+    KANJIA_GOODS_ACTIVE_HIGHEST_LOWEST_PRICE_ERROR(48005, "最低砍价金额不能高于最高砍价金额"),
+    KANJIA_GOODS_ACTIVE_SETTLEMENT_PRICE_ERROR(48006, "结算金额不能高于商品金额"),
+    KANJIA_GOODS_DELETE_ERROR(48007, "删除砍价商品异常"),
+    KANJIA_ACTIVITY_NOT_FOUND_ERROR(48008, "砍价记录不存在"),
+    KANJIA_ACTIVITY_LOG_MEMBER_ERROR(48009, "当前会员已经帮砍"),
+    KANJIA_ACTIVITY_MEMBER_ERROR(48010, "当前会员已经发起此砍价商品活动"),
     /**
      * 店铺
      */

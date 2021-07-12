@@ -9,6 +9,7 @@ import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.promotion.entity.dos.*;
+import cn.lili.modules.promotion.entity.dto.KanJiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.enums.*;
 import cn.lili.modules.promotion.entity.vos.*;
 import cn.lili.modules.promotion.service.*;
@@ -370,7 +371,7 @@ public class PromotionServiceImpl implements PromotionService {
         result = this.seckillService.update(promotionMessage.updateWrapper());
 
         //判断参与活动的商品是否为空，如果为空则返回
-        if(seckill.getSeckillApplyList()==null){
+        if (seckill.getSeckillApplyList() == null) {
             return result;
         }
 
@@ -438,14 +439,16 @@ public class PromotionServiceImpl implements PromotionService {
      * @return 修改结果
      */
     private boolean updateKanJiaGoods(PromotionMessage promotionMessage, PromotionTypeEnum promotionTypeEnum) {
-        boolean result;
-        KanJiaActivityGoods kanJiaActivityGoods = JSONUtil.toBean(JSONUtil.toJsonStr(promotionMessage), KanJiaActivityGoods.class);
-        if (kanJiaActivityGoods == null) {
+        KanJiaActivityGoodsDTO kanJiaActivityGoodsDTO = this.mongoTemplate.findById(promotionMessage.getPromotionId(), KanJiaActivityGoodsDTO.class);
+        if (kanJiaActivityGoodsDTO == null) {
             this.throwPromotionException(promotionTypeEnum, promotionMessage.getPromotionId(), promotionMessage.getPromotionStatus());
             return false;
         }
-        kanJiaActivityGoods.setPromotionStatus(promotionMessage.getPromotionStatus());
-        result = this.kanJiaActivityGoodsService.updateById(kanJiaActivityGoods);
+        kanJiaActivityGoodsDTO.setPromotionStatus(promotionMessage.getPromotionStatus());
+        boolean result = this.kanJiaActivityGoodsService.updateById(kanJiaActivityGoodsDTO);
+        if (result) {
+            this.mongoTemplate.save(kanJiaActivityGoodsDTO);
+        }
         return result;
     }
 
