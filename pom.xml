@@ -8,16 +8,61 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.3.4.RELEASE</version>
+        <relativePath/>
     </parent>
 
     <groupId>cn.lili</groupId>
     <artifactId>lili-shop-parent</artifactId>
-    <version>4.2.0</version>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
 
     <properties>
+        <java.version>1.8</java.version>
+        <revision>4.2.0</revision>
         <docker-registry>registry.cn-beijing.aliyuncs.com/lili-images</docker-registry>
         <images-version>0.0.1</images-version>
+        <swagger-bootstrap-ui-version>1.9.6</swagger-bootstrap-ui-version>
+        <alipay-sdk-version>4.13.40.ALL</alipay-sdk-version>
+        <mysql-connector-version>5.1.48</mysql-connector-version>
+        <mybatis-plus-version>3.3.1.tmp</mybatis-plus-version>
+        <Hutool-version>5.5.8</Hutool-version>
+        <TinyPinyin-verions>2.0.3.RELEASE</TinyPinyin-verions>
+        <jasypt-version>3.0.0</jasypt-version>
+        <neetl-version>2.9.10</neetl-version>
+        <lombok-version>1.18.10</lombok-version>
+        <minio-version>6.0.11</minio-version>
+        <aliyun-version>4.5.18</aliyun-version>
+        <aliyun-sdk-oss-version>3.11.1</aliyun-sdk-oss-version>
+        <aliyun-sdk-dysms-version>2.0.1</aliyun-sdk-dysms-version>
+        <rocketmq-version>2.1.1</rocketmq-version>
+        <jwt-version>0.10.7</jwt-version>
+        <antlr4-runtime-version>4.7.2</antlr4-runtime-version>
+        <sharding-jdbc-version>4.0.0</sharding-jdbc-version>
+        <druid-version>1.1.20</druid-version>
+        <simple-http-version>1.0.3</simple-http-version>
+        <antlr4-version>4.7.2</antlr4-version>
+        <okhttp-version>4.4.1</okhttp-version>
+        <httpclient-version>4.5.12</httpclient-version>
+        <beetl-version>2.9.10</beetl-version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <skipTests>true</skipTests>
+        <knife4j.version>2.0.8</knife4j.version>
+        <de.codecentric>2.3.1</de.codecentric>
+        <userAgentUtils>1.21</userAgentUtils>
+        <interceptor-api>1.2</interceptor-api>
+        <poi-version>4.1.2</poi-version>
+        <poi-ooxml-version>4.1.2</poi-ooxml-version>
+        <logstash-logback-encoder>6.6</logstash-logback-encoder>
+        <zxing>3.4.1</zxing>
+        <slf4j-api>1.7.28</slf4j-api>
+        <xk-time>2.2.0</xk-time>
+        <commons-text>1.4</commons-text>
+        <enjoy.version>4.3</enjoy.version>
+        <xxl-job>2.3.0</xxl-job>
+        <spotify>1.2.2</spotify>
     </properties>
+
     <modules>
         <module>framework</module>
         <module>buyer-api</module>
@@ -28,25 +73,12 @@
         <module>admin</module>
     </modules>
 
-
-    <packaging>pom</packaging>
-
     <build>
         <plugins>
-            <!--版本号统一修改-->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <generateBackupPoms>false</generateBackupPoms>
-                </configuration>
-            </plugin>
-
             <plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>1.2.2</version>
+                <version>${spotify}</version>
                 <configuration>
                     <imageName>${docker-registry}/${project.build.finalName}:${images-version}</imageName>
                     <baseImage>java</baseImage>
