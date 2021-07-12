@@ -35,10 +35,14 @@ import java.util.*;
  */
 @Service
 public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsDataMapper, StoreFlow> implements OrderStatisticsDataService {
-    //平台PV统计
+    /**
+     * 平台PV统计
+     */
     @Autowired
     private PlatformViewDataService platformViewDataService;
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
 
@@ -64,7 +68,11 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
         return orderOverviewVO;
     }
 
-    //运算转换率
+    /**
+     * 运算转换率
+     *
+     * @param orderOverviewVO 订单统计视图
+     */
     private void conversionRateOperation(OrderOverviewVO orderOverviewVO) {
 
         //下单转换率 订单数/UV
@@ -213,7 +221,6 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
     @Override
     public Integer orderNum(String orderStatus) {
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper();
-        //queryWrapper.eq("flow_type", FlowTypeEnum.PAY.name());
         queryWrapper.eq(StringUtils.isNotEmpty(orderStatus), Order::getOrderStatus, orderStatus);
         queryWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
                 Order::getStoreId, UserContext.getCurrentUser().getStoreId());

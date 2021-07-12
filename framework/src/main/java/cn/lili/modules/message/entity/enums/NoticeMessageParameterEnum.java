@@ -8,14 +8,34 @@ package cn.lili.modules.message.entity.enums;
  */
 public enum NoticeMessageParameterEnum {
 
-
+    /**
+     * 商品名称
+     */
     GOODS("goods", "商品名称"),
+    /**
+     * 消费积分
+     */
     EXPENDITURE_POINTS("expenditure_points", "消费积分"),
+    /**
+     * 获得积分
+     */
     INCOME_POINTS("income_points", "获得积分"),
+    /**
+     * 支出金额
+     */
     EXPENDITURE("expenditure", "支出金额"),
+    /**
+     * 收入金额
+     */
     INCOME("income", "收入金额"),
+    /**
+     * 拒绝原因
+     */
     REFUSE("refuse", "拒绝原因"),
-    CANCEL_REASON("cancel_reason","取消原因");
+    /**
+     * 取消原因
+     */
+    CANCEL_REASON("cancel_reason", "取消原因");
 
     private final String type;
     private final String description;

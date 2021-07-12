@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.trigger.util.DelayQueueTools;
 import cn.lili.common.trigger.enums.DelayTypeEnums;
@@ -60,25 +61,39 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> implements PintuanService {
 
-    //延时任务
+    /**
+     * 延时任务
+     */
     @Autowired
     private TimeTrigger timeTrigger;
-    //Mongo
+    /**
+     * Mongo
+     */
     @Autowired
     private MongoTemplate mongoTemplate;
-    //促销商品
+    /**
+     * 促销商品
+     */
     @Autowired
     private PromotionGoodsService promotionGoodsService;
-    //规格商品
+    /**
+     * 规格商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    //会员
+    /**
+     * 会员
+     */
     @Autowired
     private MemberService memberService;
-    //Rocketmq
+    /**
+     * RocketMQ
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
 
@@ -271,7 +286,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
             queryWrapper.eq(Order::getPromotionId, pintuanId);
             queryWrapper.nested(i -> i.eq(Order::getPayStatus, PayStatusEnum.PAID.name()).or().eq(Order::getOrderStatus, OrderStatusEnum.PAID.name()));
             //过滤父级拼团订单，根据父级拼团订单分组
-            Map<String, List<Order>> collect = orderService.list(queryWrapper).stream().filter(i -> !i.getParentOrderSn().equals("")).collect(Collectors.groupingBy(Order::getParentOrderSn));
+            Map<String, List<Order>> collect = orderService.list(queryWrapper).stream().filter(i -> StrUtil.isNotEmpty(i.getParentOrderSn())).collect(Collectors.groupingBy(Order::getParentOrderSn));
             this.isOpenFictitiousPintuan(pintuan, collect);
 
         }
@@ -355,7 +370,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
         for (Order order : orders) {
             Member member = memberService.getById(order.getMemberId());
             PintuanMemberVO memberVO = new PintuanMemberVO(member);
-            if (order.getParentOrderSn().equals("")) {
+            if (StrUtil.isEmpty(order.getParentOrderSn())) {
                 memberVO.setOrderSn("");
                 PromotionGoods promotionGoods = promotionGoodsService.getPromotionGoods(PromotionTypeEnum.PINTUAN, order.getPromotionId(), skuId);
                 if (promotionGoods == null) {

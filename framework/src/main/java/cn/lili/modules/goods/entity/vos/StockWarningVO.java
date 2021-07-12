@@ -22,6 +22,6 @@ public class StockWarningVO {
     private Integer stockWarningNum;
 
     @ApiModelProperty(value = "商品SKU列表")
-    private IPage<GoodsSku> goodsSkuIPage;
+    private IPage<GoodsSku> goodsSkuPage;
 
 }

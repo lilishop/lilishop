@@ -1,6 +1,5 @@
 package cn.lili.modules.payment.kit;
 
-import cn.hutool.core.net.URLEncoder;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
@@ -10,7 +9,6 @@ import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.nio.charset.StandardCharsets;
 
 /**
  * 支付接口
@@ -154,13 +152,6 @@ public interface Payment {
      */
     default String refundNotifyUrl(String api, PaymentMethodEnum paymentMethodEnum) {
         return api + "/buyer/cashier/refund/notify/" + paymentMethodEnum.name();
-    }
-
-    public static void main(String[] args) {
-        String str = "orderType=TRADE&sn=O202104271386961176205721601";
-        System.out.println(str.length());
-        URLEncoder urlEncoder = new URLEncoder();
-        System.out.println(urlEncoder.encode(str, StandardCharsets.UTF_8));
     }
 
 }

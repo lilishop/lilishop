@@ -32,6 +32,7 @@ public interface SmsUtil {
      * @param verificationEnums 验证码场景
      * @param uuid              用户标识uuid
      * @param code              待验证code
+     * @return 操作状态
      */
     boolean verifyCode(String mobile, VerificationEnums verificationEnums, String uuid, String code);
 
@@ -41,6 +42,7 @@ public interface SmsUtil {
      * @param mobile       接收手机号
      * @param param        参数
      * @param templateCode 模版code
+     * @param signName     签名名称
      */
     void sendSmsCode(String signName, String mobile, Map<String, String> param, String templateCode);
 

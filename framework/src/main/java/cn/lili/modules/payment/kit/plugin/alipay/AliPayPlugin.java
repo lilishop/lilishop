@@ -48,19 +48,29 @@ import java.util.Map;
 @Slf4j
 @Component
 public class AliPayPlugin implements Payment {
-    //支付日志
+    /**
+     * 支付日志
+     */
     @Autowired
     private PaymentService paymentService;
-    //退款日志
+    /**
+     * 退款日志
+     */
     @Autowired
     private RefundLogService refundLogService;
-    //收银台
+    /**
+     * 收银台
+     */
     @Autowired
     private CashierSupport cashierSupport;
-    //设置
+    /**
+     * 设置
+     */
     @Autowired
     private SettingService settingService;
-    //API域名
+    /**
+     * API域名
+     */
     @Autowired
     private ApiProperties apiProperties;
 
@@ -149,7 +159,6 @@ public class AliPayPlugin implements Payment {
 
             //回传数据
             payModel.setPassbackParams(URLEncoder.createAll().encode(BeanUtil.formatKeyValuePair(payParam), StandardCharsets.UTF_8));
-//       payModel.setStoreId("store_id");
             payModel.setTimeoutExpress("3m");
             payModel.setOutTradeNo(outTradeNo);
             log.info("支付宝扫码：{}", payModel);

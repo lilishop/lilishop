@@ -34,10 +34,14 @@ import java.util.List;
 @Api(tags = "管理端,订单API")
 public class OrderManagerController {
 
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
-    //订单价格
+    /**
+     * 订单价格
+     */
     @Autowired
     private OrderPriceService orderPriceService;
 

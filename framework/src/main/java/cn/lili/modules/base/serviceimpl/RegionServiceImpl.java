@@ -1,9 +1,9 @@
 package cn.lili.modules.base.serviceimpl;
 
 import cn.lili.common.cache.Cache;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.utils.HttpClientUtils;
 import cn.lili.common.utils.SnowFlake;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.base.mapper.RegionMapper;
 import cn.lili.modules.base.service.RegionService;
 import cn.lili.modules.system.entity.dos.Region;
@@ -27,7 +27,7 @@ import java.util.*;
  * @date 2020/12/2 11:11
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> implements RegionService {
 
     /**
@@ -37,6 +37,7 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
 
     @Autowired
     private Cache cache;
+
     @Override
     public void synchronizationData(String url) {
         try {
@@ -58,7 +59,7 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
             //删除缓存
             cache.vagueDel("{regions}");
         } catch (Exception e) {
-            log.error("同步行政数据错误",e);
+            log.error("同步行政数据错误", e);
         }
     }
 
@@ -89,8 +90,10 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
             //因为有无用数据 所以先删除前两个
             result = ArrayUtils.remove(result, 0);
             result = ArrayUtils.remove(result, 0);
-            String regionIds = "";  //地址id
-            String regionNames = "";//地址名称
+            //地址id
+            String regionIds = "";
+            //地址名称
+            String regionNames = "";
             //循环构建新的数据
             for (String regionId : result) {
                 Region reg = this.baseMapper.selectById(regionId);
@@ -102,7 +105,7 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
             regionIds += region.getId();
             regionNames += region.getName();
             //构建返回数据
-            Map<String, Object> obj = new HashMap<>();
+            Map<String, Object> obj = new HashMap<>(2);
             obj.put("id", regionIds);
             obj.put("name", regionNames);
             return obj;
@@ -120,10 +123,10 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
 
     private List<RegionVO> regionTree(List<Region> regions) {
         List<RegionVO> regionVOS = new ArrayList<>();
-        regions.stream().filter(region -> region.getLevel().equals("province")).forEach(item -> {
+        regions.stream().filter(region -> ("province").equals(region.getLevel())).forEach(item -> {
             regionVOS.add(new RegionVO(item));
         });
-        regions.stream().filter(region -> region.getLevel().equals("city")).forEach(item -> {
+        regions.stream().filter(region -> ("city").equals(region.getLevel())).forEach(item -> {
             for (RegionVO region : regionVOS) {
                 if (region.getId().equals(item.getParentId())) {
                     region.getChildren().add(new RegionVO(item));
@@ -148,18 +151,6 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
         JSONArray countryAll = jsonObject.getJSONArray("districts");
         for (int i = 0; i < countryAll.size(); i++) {
             JSONObject contry = countryAll.getJSONObject(i);
-//           String citycode0 = contry.getString("citycode");
-//           String adcode0 = contry.getString("adcode");
-//           String name0 = contry.getString("name");
-//           String center0 = contry.getString("center");
-//           String country = contry.getString("level");
-//           int level = 0;
-//           if (country.equals("country")) {
-//               level = 0;
-//           }
-//           插入国家
-//           Integer id1 = insert(0, adcode0, citycode0, name0, center0, level, name0);
-//           Integer id1 = insert(0, adcode0, citycode0, name0, center0, level);
             String id1 = "0";
             JSONArray provinceAll = contry.getJSONArray("districts");
             for (int j = 0; j < provinceAll.size(); j++) {
@@ -192,7 +183,6 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
                         String level3 = district.getString("level");
                         //插入区县
                         String id4 = insert(regions, id3, citycode3, adcode3, name3, center3, level3, w, id1, id2, id3);
-                        // JSONArray street = street3.getJSONArray("districts");
                         //有需要可以继续向下遍历
                         JSONArray streetAll = district.getJSONArray("districts");
                         for (int r = 0; r < streetAll.size(); r++) {
@@ -238,10 +228,10 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
 //               "        \"center\": \"116.3683244,39.915085\",\n" +
 //               "        \"level\": \"country\",\n" +
         Region record = new Region();
-        if (!adCode.equals("[]")) {
+        if (!("[]").equals(adCode)) {
             record.setAdCode(adCode);
         }
-        if (!cityCode.equals("[]")) {
+        if (!("[]").equals(cityCode)) {
             record.setCityCode(cityCode);
         }
         record.setCenter(center);
@@ -250,14 +240,14 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
         record.setParentId(parentId);
         record.setOrderNum(order);
         record.setId(String.valueOf(SnowFlake.getId()));
-        String megName = ",";
+        StringBuffer megName = new StringBuffer(",");
         for (int i = 0; i < ids.length; i++) {
-            megName = megName + ids[i];
+            megName = megName.append(ids[i])  ;
             if (i < ids.length - 1) {
-                megName = megName + ",";
+                megName.append(",");
             }
         }
-        record.setPath(megName);
+        record.setPath(megName.toString());
         regions.add(record);
         return record.getId();
     }

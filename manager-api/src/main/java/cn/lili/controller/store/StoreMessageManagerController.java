@@ -22,14 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
  * @author pikachu
  * @date: 2020/12/6 16:09
  */
-@Transactional
 @RestController
+@Transactional(rollbackFor = Exception.class)
 @Api(tags = "管理端,店铺消息消息管理接口")
 @RequestMapping("/manager/message/store")
 public class StoreMessageManagerController {
+
     @Autowired
     private StoreMessageService storeMessageService;
-
 
     @GetMapping
     @ApiOperation(value = "多条件分页获取")

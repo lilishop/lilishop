@@ -46,7 +46,7 @@ public class AliFileManagerPlugin implements FileManagerPlugin {
     /**
      * 暂时设定3分账请求一次设置
      */
-    private static final Long interval = 60 * 3 * 1000L;
+    private static final Long INTERVAL = 60 * 3 * 1000L;
 
     /**
      * 静态设置，最快三分钟更新一次
@@ -79,7 +79,7 @@ public class AliFileManagerPlugin implements FileManagerPlugin {
             if (setting == null || StrUtil.isBlank(setting.getSettingValue())) {
                 throw new ServiceException(ResultCode.OSS_NOT_EXIST);
             }
-            nextInitSetting = System.currentTimeMillis() + interval;
+            nextInitSetting = System.currentTimeMillis() + INTERVAL;
             ossSetting = new Gson().fromJson(setting.getSettingValue(), OssSetting.class);
             return ossSetting;
         }

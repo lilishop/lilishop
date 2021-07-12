@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2020/11/26 16:13
  */
 @Service
-@Transactional
 public class GoodsUnitServiceImpl extends ServiceImpl<GoodsUnitMapper, GoodsUnit> implements GoodsUnitService {
 
 }

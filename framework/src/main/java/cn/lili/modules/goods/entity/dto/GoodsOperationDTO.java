@@ -76,10 +76,10 @@ public class GoodsOperationDTO implements Serializable {
     private Integer quantity;
 
     @ApiModelProperty(value = "是否立即发布")
-    private boolean release;
+    private Boolean release;
 
     @ApiModelProperty(value = "是否是推荐商品")
-    private boolean recommend;
+    private Boolean recommend;
 
     @ApiModelProperty(value = "商品参数")
     private List<GoodsParamsDTO> goodsParamsDTOList;

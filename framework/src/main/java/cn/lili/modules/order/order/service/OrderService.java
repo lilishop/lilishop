@@ -4,7 +4,6 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
-import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
 import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
@@ -17,7 +16,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -49,6 +47,7 @@ public interface OrderService extends IService<Order> {
      * 订单查询
      *
      * @param orderSearchParams 查询参数
+     * @return 简短订单分页
      */
     IPage<OrderSimpleVO> queryByParams(OrderSearchParams orderSearchParams);
 
@@ -101,6 +100,7 @@ public interface OrderService extends IService<Order> {
      *
      * @param orderSn 订单SN
      * @param reason  取消理由
+     * @return 订单
      */
     Order cancel(String orderSn, String reason);
 
@@ -111,6 +111,7 @@ public interface OrderService extends IService<Order> {
      *
      * @param orderSn          订单编号
      * @param memberAddressDTO 收货地址信息
+     * @return 订单
      */
     Order updateConsignee(String orderSn, MemberAddressDTO memberAddressDTO);
 
@@ -120,6 +121,7 @@ public interface OrderService extends IService<Order> {
      * @param orderSn       订单编号
      * @param invoiceNumber 发货单号
      * @param logisticsId   物流公司
+     * @return 订单
      */
     Order delivery(String orderSn, String invoiceNumber, String logisticsId);
 
@@ -135,6 +137,8 @@ public interface OrderService extends IService<Order> {
      * 订单核验
      *
      * @param verificationCode 验证码
+     * @param orderSn          订单编号
+     * @return 订单
      */
     Order take(String orderSn, String verificationCode);
 
@@ -142,6 +146,7 @@ public interface OrderService extends IService<Order> {
      * 根据核验码获取订单信息
      *
      * @param verificationCode 验证码
+     * @return 订单
      */
     Order getOrderByVerificationCode(String verificationCode);
 

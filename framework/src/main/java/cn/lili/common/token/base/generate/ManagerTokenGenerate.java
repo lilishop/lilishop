@@ -67,7 +67,7 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
      * @return
      */
     private Map<String, List<String>> permissionList(List<UserMenuVO> userMenuVOList) {
-        Map<String, List<String>> permission = new HashMap<>();
+        Map<String, List<String>> permission = new HashMap<>(2);
         if (userMenuVOList == null || userMenuVOList.size() == 0) {
             return permission;
         }

@@ -15,7 +15,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.elasticsearch.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,7 +25,6 @@ import java.util.List;
  * @date 2020/11/17 3:48 下午
  */
 @Service
-@Transactional
 public class StoreMessageServiceImpl extends ServiceImpl<StoreMessageMapper, StoreMessage> implements StoreMessageService {
 
     @Override

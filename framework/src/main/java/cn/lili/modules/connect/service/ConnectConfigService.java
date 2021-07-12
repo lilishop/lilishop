@@ -23,14 +23,16 @@ public interface ConnectConfigService extends IService<ConnectConfig> {
     /**
      * 获取配置详情
      *
-     * @return
+     * @param key 配置关键字
+     * @return 配置参数
      */
     ConnectConfig getConfig(String key);
 
     /**
-     * 获取配置详情
+     * 保存配置
      *
-     * @return
+     * @param connectConfig 联合登录配置
+     * @return 联合登录配置
      */
     ConnectConfig saveConfig(ConnectConfig connectConfig);
 }

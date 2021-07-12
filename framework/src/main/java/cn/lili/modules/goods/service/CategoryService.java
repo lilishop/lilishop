@@ -20,6 +20,7 @@ public interface CategoryService extends IService<Category> {
      * 管理端获取所有分类
      * 即获取的对象不管是否删除，都要展示，而且不从缓存获取，保证内容是最新的
      *
+     * @param parentId 分类父ID
      * @return 商品分类列表
      */
     List<Category> dbList(String parentId);
@@ -34,6 +35,7 @@ public interface CategoryService extends IService<Category> {
     /**
      * 查询所有的分类，父子关系
      *
+     * @param parentId 分类父ID
      * @return 所有的分类，父子关系
      */
     List<CategoryVO> listAllChildren(String parentId);
@@ -56,6 +58,7 @@ public interface CategoryService extends IService<Category> {
     /**
      * 获取商品分类list
      *
+     * @param category 分类
      * @return 商品分类list
      */
     List<Category> findByAllBySortOrder(Category category);
@@ -93,12 +96,17 @@ public interface CategoryService extends IService<Category> {
 
     /**
      * 获取商家经营类目
+     *
+     * @param categories 经营范围
+     * @return 分类VO列表
      */
     List<CategoryVO> getStoreCategory(String[] categories);
 
     /**
      * 获取一级分类列表
      * 用于商家入驻选择
+     *
+     * @return 分类列表
      */
     List<Category> firstCategory();
 

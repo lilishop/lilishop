@@ -25,73 +25,73 @@ public class CodeGenerator {
     /**
      * 代码生成在哪个项目
      */
-    private static final String project = "framework";
+    private static final String PROJECT = "framework";
 
     /**
      * 代码生成在哪个包下边
      */
-    private static final String packages = "cn.lili.modules.";
+    private static final String PACKAGES = "cn.lili.modules.";
 
     /**
      * modules
      */
-    private static final String modules = "message";
+    private static final String MODULES = "message";
 
 
     /**
      * 实体类名
      * 建议仅需修改
      */
-    private static final String className = "ShortLink";
+    private static final String CLASS_NAME = "ShortLink";
 
     /**
      * 类说明描述
      * 建议仅需修改
      */
-    private static final String description = "短链接";
+    private static final String DESCRIPTION = "短链接";
 
     /**
      * 作者名
      * 建议仅需修改
      */
-    private static final String author = "Chopper";
+    private static final String AUTHOR = "Chopper";
 
     /**
      * 数据库表名前缀
      * 下方请根据需要修改
      */
-    private static final String tablePre = "li_";
+    private static final String TABLE_PRE = "li_";
 
     /**
      * 主键类型
      */
-    private static final String primaryKeyType = "String";
+    private static final String PRIMARY_KEY_TYPE = "String";
 
 
     /**
      * endity
      */
-    private static final String entityPackage = packages + modules + ".entity";
+    private static final String ENTITY_PACKAGE = PACKAGES + MODULES + ".entity";
 
     /**
      * dao
      */
-    private static final String daoPackage = packages + modules + ".mapper";
+    private static final String DAO_PACKAGE = PACKAGES + MODULES + ".mapper";
 
     /**
      * service
      */
-    private static final String servicePackage = packages + modules + ".service";
+    private static final String SERVICE_PACKAGE = PACKAGES + MODULES + ".service";
 
     /**
      * serviceImpl
      */
-    private static final String serviceImplPackage = packages + modules + ".serviceimpl";
+    private static final String SERVICE_IMPL_PACKAGE = PACKAGES + MODULES + ".serviceimpl";
 
     /**
      * controller
      */
-    private static final String controllerPackage = packages + modules + ".controller";
+    private static final String CONTROLLER_PACKAGE = PACKAGES + MODULES + ".controller";
 
     /**
      * 运行该主函数即可生成代码
@@ -126,17 +126,17 @@ public class CodeGenerator {
         Template mapperXmlTemplate = gt.getTemplate("mapperXml.btl");
 
         Entity entity = new Entity();
-        entity.setEntityPackage(entityPackage);
-        entity.setDaoPackage(daoPackage);
-        entity.setServicePackage(servicePackage);
-        entity.setServiceImplPackage(serviceImplPackage);
-        entity.setControllerPackage(controllerPackage);
-        entity.setAuthor(author);
-        entity.setClassName(className);
-        entity.setTableName(tablePre + StringUtils.camel2Underline(className));
-        entity.setClassNameLowerCase(name(className, false));
-        entity.setDescription(description);
-        entity.setPrimaryKeyType(primaryKeyType);
+        entity.setEntityPackage(ENTITY_PACKAGE);
+        entity.setDaoPackage(DAO_PACKAGE);
+        entity.setServicePackage(SERVICE_PACKAGE);
+        entity.setServiceImplPackage(SERVICE_IMPL_PACKAGE);
+        entity.setControllerPackage(CONTROLLER_PACKAGE);
+        entity.setAuthor(AUTHOR);
+        entity.setClassName(CLASS_NAME);
+        entity.setTableName(TABLE_PRE + StringUtils.camel2Underline(CLASS_NAME));
+        entity.setClassNameLowerCase(name(CLASS_NAME, false));
+        entity.setDescription(DESCRIPTION);
+        entity.setPrimaryKeyType(PRIMARY_KEY_TYPE);
 
         OutputStream out = null;
 
@@ -145,7 +145,7 @@ public class CodeGenerator {
         String entityResult = entityTemplate.render();
         System.out.println(entityResult);
         //创建文件
-        String entityFileUrl = System.getProperty("user.dir") + "/" + project + "/src/main/java/" + dotToLine(entityPackage) + "/" + className + ".java";
+        String entityFileUrl = System.getProperty("user.dir") + "/" + PROJECT + "/src/main/java/" + dotToLine(ENTITY_PACKAGE) + "/" + CLASS_NAME + ".java";
         File entityFile = new File(entityFileUrl);
         File entityDir = entityFile.getParentFile();
         if (!entityDir.exists()) {
@@ -163,7 +163,7 @@ public class CodeGenerator {
         String daoResult = daoTemplate.render();
         System.out.println(daoResult);
         //创建文件
-        String daoFileUrl = System.getProperty("user.dir") + "/" + project + "/src/main/java/" + dotToLine(daoPackage) + "/" + className + "Mapper.java";
+        String daoFileUrl = System.getProperty("user.dir") + "/" + PROJECT + "/src/main/java/" + dotToLine(DAO_PACKAGE) + "/" + CLASS_NAME + "Mapper.java";
         File daoFile = new File(daoFileUrl);
         File daoDir = daoFile.getParentFile();
         if (!daoDir.exists()) {
@@ -181,7 +181,7 @@ public class CodeGenerator {
         String serviceResult = serviceTemplate.render();
         System.out.println(serviceResult);
         //创建文件
-        String serviceFileUrl = System.getProperty("user.dir") + "/" + project + "/src/main/java/" + dotToLine(servicePackage) + "/" + className + "Service.java";
+        String serviceFileUrl = System.getProperty("user.dir") + "/" + PROJECT + "/src/main/java/" + dotToLine(SERVICE_PACKAGE) + "/" + CLASS_NAME + "Service.java";
         File serviceFile = new File(serviceFileUrl);
         File serviceDir = serviceFile.getParentFile();
         if (!serviceDir.exists()) {
@@ -200,7 +200,7 @@ public class CodeGenerator {
         System.out.println(serviceImplResult);
         //创建文件
         System.out.println(System.getProperty("user.dir"));
-        String serviceImplFileUrl = System.getProperty("user.dir") + "/" + project + "/src/main/java/" + dotToLine(serviceImplPackage) + "/" + className + "ServiceImpl.java";
+        String serviceImplFileUrl = System.getProperty("user.dir") + "/" + PROJECT + "/src/main/java/" + dotToLine(SERVICE_IMPL_PACKAGE) + "/" + CLASS_NAME + "ServiceImpl.java";
         File serviceImplFile = new File(serviceImplFileUrl);
         File serviceImplDir = serviceImplFile.getParentFile();
         if (!serviceImplDir.exists()) {
@@ -218,7 +218,7 @@ public class CodeGenerator {
         String controllerResult = controllerTemplate.render();
         System.out.println(controllerResult);
         //创建文件
-        String controllerFileUrl = System.getProperty("user.dir") + "/" + project + "/src/main/java/" + dotToLine(controllerPackage) + "/" + className + "Controller.java";
+        String controllerFileUrl = System.getProperty("user.dir") + "/" + PROJECT + "/src/main/java/" + dotToLine(CONTROLLER_PACKAGE) + "/" + CLASS_NAME + "Controller.java";
         File controllerFile = new File(controllerFileUrl);
         File controllerDir = controllerFile.getParentFile();
         if (!controllerDir.exists()) {
@@ -236,7 +236,7 @@ public class CodeGenerator {
         String mapperXmlResult = mapperXmlTemplate.render();
         System.out.println(mapperXmlResult);
         //创建文件
-        String mapperXmlFileUrl = System.getProperty("user.dir") + "/" + project + "/src/main/resources/mapper/" + className + "Mapper.xml";
+        String mapperXmlFileUrl = System.getProperty("user.dir") + "/" + PROJECT + "/src/main/resources/mapper/" + CLASS_NAME + "Mapper.xml";
         File mapperXmlFile = new File(mapperXmlFileUrl);
         File mapperXmlDir = mapperXmlFile.getParentFile();
         if (!mapperXmlDir.exists()) {
@@ -263,36 +263,36 @@ public class CodeGenerator {
      */
     private static void deleteCode(String className) throws IOException {
 
-        String entityFileUrl = System.getProperty("user.dir") + "/" + project + "/src/main/java/" + dotToLine(entityPackage) + "/" + className + ".java";
+        String entityFileUrl = System.getProperty("user.dir") + "/" + PROJECT + "/src/main/java/" + dotToLine(ENTITY_PACKAGE) + "/" + className + ".java";
         File entityFile = new File(entityFileUrl);
         if (entityFile.exists()) {
             entityFile.delete();
         }
-        String daoFileUrl = System.getProperty("user.dir") + "/" + project + "/src/main/java/" + dotToLine(daoPackage) + "/" + className + "Mapper.java";
+        String daoFileUrl = System.getProperty("user.dir") + "/" + PROJECT + "/src/main/java/" + dotToLine(DAO_PACKAGE) + "/" + className + "Mapper.java";
         File daoFile = new File(daoFileUrl);
         if (daoFile.exists()) {
             daoFile.delete();
         }
 
-        String serviceFileUrl = System.getProperty("user.dir") + "/" + project + "/src/main/java/" + dotToLine(servicePackage) + "/" + className + "Service.java";
+        String serviceFileUrl = System.getProperty("user.dir") + "/" + PROJECT + "/src/main/java/" + dotToLine(SERVICE_PACKAGE) + "/" + className + "Service.java";
         File serviceFile = new File(serviceFileUrl);
         if (serviceFile.exists()) {
             serviceFile.delete();
         }
 
-        String serviceImplFileUrl = System.getProperty("user.dir") + "/" + project + "/src/main/java/" + dotToLine(serviceImplPackage) + "/" + className + "ServiceImpl.java";
+        String serviceImplFileUrl = System.getProperty("user.dir") + "/" + PROJECT + "/src/main/java/" + dotToLine(SERVICE_IMPL_PACKAGE) + "/" + className + "ServiceImpl.java";
         File serviceImplFile = new File(serviceImplFileUrl);
         if (serviceImplFile.exists()) {
             serviceImplFile.delete();
         }
 
-        String controllerFileUrl = System.getProperty("user.dir") + "/" + project + "/src/main/java/" + dotToLine(controllerPackage) + "/" + className + "Controller.java";
+        String controllerFileUrl = System.getProperty("user.dir") + "/" + PROJECT + "/src/main/java/" + dotToLine(CONTROLLER_PACKAGE) + "/" + className + "Controller.java";
         File controllerFile = new File(controllerFileUrl);
         if (controllerFile.exists()) {
             controllerFile.delete();
         }
 
-        String mapperXmlFileUrl = System.getProperty("user.dir") + "/" + project + "/src/main/resources/mapper/" + className + "Mapper.xml";
+        String mapperXmlFileUrl = System.getProperty("user.dir") + "/" + PROJECT + "/src/main/resources/mapper/" + className + "Mapper.xml";
         File mapperXmlFile = new File(mapperXmlFileUrl);
         if (mapperXmlFile.exists()) {
             mapperXmlFile.delete();

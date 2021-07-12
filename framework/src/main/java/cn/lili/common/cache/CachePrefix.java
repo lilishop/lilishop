@@ -454,25 +454,39 @@ public enum CachePrefix {
     /**
      * 店铺分类
      */
-    STORE_CATEGORY
-    ;
+    STORE_CATEGORY;
 
 
     public static String removePrefix(String str) {
         return str.substring(str.lastIndexOf("}_") + 2);
     }
 
-    //通用获取缓存key值
+    /**
+     * 通用获取缓存key值
+     *
+     * @return 缓存key值
+     */
     public String getPrefix() {
         return "{" + this.name() + "}_";
     }
 
-    //通用获取缓存key值
+    /**
+     * 通用获取缓存key值
+     *
+     * @param typeEnum 促销枚举
+     * @return 缓存key值
+     */
     public String getPrefix(PromotionTypeEnum typeEnum) {
         return "{" + this.name() + "_" + typeEnum.name() + "}_";
     }
 
-    //获取缓存key值 + 用户端，例如：三端都有用户体系，需要分别登录，如果用户名一致，则redis中的权限可能会冲突出错
+    /**
+     * 获取缓存key值 + 用户端
+     * 例如：三端都有用户体系，需要分别登录，如果用户名一致，则redis中的权限可能会冲突出错
+     *
+     * @param user 角色
+     * @return 缓存key值 + 用户端
+     */
     public String getPrefix(UserEnums user) {
         return "{" + this.name() + "_" + user.name() + "}_";
     }

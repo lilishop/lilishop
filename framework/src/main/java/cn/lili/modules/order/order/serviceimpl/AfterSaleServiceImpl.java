@@ -51,8 +51,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 
@@ -63,28 +63,42 @@ import java.util.List;
  * @date 2020/11/17 7:38 下午
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale> implements AfterSaleService {
 
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
-    //订单货物
+    /**
+     * 订单货物
+     */
     @Autowired
     private OrderItemService orderItemService;
-    //物流公司
+    /**
+     * 物流公司
+     */
     @Autowired
     private LogisticsService logisticsService;
-    //店铺详情
+    /**
+     * 店铺详情
+     */
     @Autowired
     private StoreDetailService storeDetailService;
-    //售后支持，这里用于退款操作
+    /**
+     * 售后支持，这里用于退款操作
+     */
     @Autowired
     private RefundSupport refundSupport;
-    //RocketMQ配置
+    /**
+     * RocketMQ配置
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    //RocketMQ
+    /**
+     * RocketMQ
+     */
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
 
@@ -130,10 +144,10 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             afterSaleApplyVO.setRefundWay(AfterSaleRefundWayEnum.ORIGINAL.name());
         }
         //判断订单类型，虚拟订单只支持退款
-        if(order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())){
+        if (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
             afterSaleApplyVO.setReturnMoney(true);
             afterSaleApplyVO.setReturnGoods(false);
-        }else{
+        } else {
             afterSaleApplyVO.setReturnMoney(true);
             afterSaleApplyVO.setReturnGoods(true);
         }
@@ -262,13 +276,14 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             throw new ServiceException(ResultCode.AFTER_STATUS_ERROR);
         }
         AfterSaleStatusEnum afterSaleStatusEnum = null;
+        String pass = "PASS";
         //判断审核状态
         //在线支付 则直接进行退款
-        if (serviceStatus.equals("PASS") &&
+        if (pass.equals(serviceStatus) &&
                 afterSale.getRefundWay().equals(AfterSaleRefundWayEnum.ORIGINAL.name())) {
             refundSupport.refund(afterSale);
             afterSaleStatusEnum = AfterSaleStatusEnum.COMPLETE;
-        } else if (serviceStatus.equals("PASS")) {
+        } else if (pass.equals(serviceStatus)) {
             afterSaleStatusEnum = AfterSaleStatusEnum.WAIT_REFUND;
         } else {
             afterSaleStatusEnum = AfterSaleStatusEnum.SELLER_TERMINATION;

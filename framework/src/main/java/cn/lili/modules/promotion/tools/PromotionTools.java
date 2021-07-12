@@ -92,7 +92,6 @@ public class PromotionTools {
                 i.or(i1 -> i1.le(startTimeColumn, endTime).ge(endTimeColumn, endTime));
             });
         } else {
-            //queryWrapper.le(startTimeColumn, startTime).ge(endTimeColumn, startTime);
             queryWrapper.ge(startTimeColumn, cn.hutool.core.date.DateUtil.beginOfDay(startTime)).le(endTimeColumn, cn.hutool.core.date.DateUtil.endOfDay(endTime));
         }
         if (storeId != null) {

@@ -47,7 +47,11 @@ public enum DadaOrderStatusEnum {
         this.text = text;
     }
 
-    //获取配送模版
+    /**
+     * 获取配送模版
+     * @param status 状态
+     * @return 配送模板
+     */
     public static String getText(Integer status) {
         //如果空，则直接返回
         if (status == null) {

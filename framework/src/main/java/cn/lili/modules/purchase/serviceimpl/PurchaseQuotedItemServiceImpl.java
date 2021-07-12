@@ -17,7 +17,6 @@ import java.util.List;
  * @date 2020/11/26 16:13
  */
 @Service
-@Transactional
 public class PurchaseQuotedItemServiceImpl extends ServiceImpl<PurchaseQuotedItemMapper, PurchaseQuotedItem> implements PurchaseQuotedItemService {
 
     @Override

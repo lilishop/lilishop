@@ -7,7 +7,7 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.IpHelper;
 import cn.lili.common.utils.SpelUtil;
 import cn.lili.common.utils.ThreadPoolUtil;
-import cn.lili.modules.base.entity.systemlog.SystemLogVO;
+import cn.lili.modules.permission.entity.vo.SystemLogVO;
 import cn.lili.modules.connect.util.IpUtils;
 import cn.lili.modules.permission.service.SystemLogService;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +39,7 @@ public class SystemLogAspect {
     /**
      * 启动线程异步记录日志
      */
-    private static final ThreadLocal<Date> beginTimeThreadLocal = new NamedThreadLocal<>("SYSTEM-LOG");
+    private static final ThreadLocal<Date> BEGIN_TIME_THREAD_LOCAL = new NamedThreadLocal<>("SYSTEM-LOG");
 
     @Autowired
     private SystemLogService systemLogService;
@@ -61,7 +61,7 @@ public class SystemLogAspect {
      */
     @Before("controllerAspect()")
     public void doBefore() {
-        beginTimeThreadLocal.set(new Date());
+        BEGIN_TIME_THREAD_LOCAL.set(new Date());
     }
 
 
@@ -110,7 +110,7 @@ public class SystemLogAspect {
             //写入自定义日志内容
             systemLogVO.setCustomerLog(customerLog);
             //请求开始时间
-            long beginTime = beginTimeThreadLocal.get().getTime();
+            long beginTime = BEGIN_TIME_THREAD_LOCAL.get().getTime();
             long endTime = System.currentTimeMillis();
             //请求耗时
             Long usedTime = endTime - beginTime;
@@ -157,7 +157,7 @@ public class SystemLogAspect {
      */
     private static Map<String, String> spelFormat(JoinPoint joinPoint, Object rvt) {
 
-        Map<String, String> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>(2);
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         SystemLogPoint systemLogPoint = signature.getMethod().getAnnotation(SystemLogPoint.class);
         String description = systemLogPoint.description();

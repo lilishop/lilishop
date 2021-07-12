@@ -44,5 +44,6 @@ public class AdminUserDTO extends BaseEntity {
     @ApiModelProperty(value = "所属部门id")
     private String departmentId;
 
-    private boolean isSuper;
+    @ApiModelProperty(value = "是否为超级管理员")
+    private Boolean isSuper;
 }

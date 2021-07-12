@@ -39,8 +39,8 @@ public class MemberWithdrawApplyManagerController {
     @GetMapping
     public ResultMessage<IPage<MemberWithdrawApply>> getByPage(PageVO page, MemberWithdrawApplyQueryVO memberWithdrawApplyQueryVO) {
         //构建查询 返回数据
-        IPage<MemberWithdrawApply> memberWithdrawApplyIPage = memberWithdrawApplyService.getMemberWithdrawPage(page, memberWithdrawApplyQueryVO);
-        return ResultUtil.data(memberWithdrawApplyIPage);
+        IPage<MemberWithdrawApply> memberWithdrawApplyPage = memberWithdrawApplyService.getMemberWithdrawPage(page, memberWithdrawApplyQueryVO);
+        return ResultUtil.data(memberWithdrawApplyPage);
     }
 
 

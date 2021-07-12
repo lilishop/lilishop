@@ -8,7 +8,13 @@ package cn.lili.modules.promotion.entity.enums;
  */
 public enum CouponActivityTypeEnum {
 
+    /**
+     * "新人赠券"
+     */
     REGISTERED("新人赠券"),
+    /**
+     * "精确发券"
+     */
     SPECIFY("精确发券");
 
     private final String description;

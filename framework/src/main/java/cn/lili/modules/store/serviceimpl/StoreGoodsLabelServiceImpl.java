@@ -4,7 +4,6 @@ import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.modules.goods.entity.vos.CategoryVO;
 import cn.lili.modules.store.entity.dos.StoreGoodsLabel;
 import cn.lili.modules.store.entity.vos.StoreGoodsLabelVO;
 import cn.lili.modules.store.mapper.StoreGoodsLabelMapper;
@@ -31,7 +30,9 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMapper, StoreGoodsLabel> implements StoreGoodsLabelService {
 
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache cache;
 

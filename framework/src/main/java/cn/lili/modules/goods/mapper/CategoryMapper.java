@@ -18,6 +18,12 @@ import java.util.List;
  */
 public interface CategoryMapper extends BaseMapper<Category> {
 
+    /**
+     * 获取分类名称列表
+     *
+     * @param queryWrapper 查询条件
+     * @return 分类名称列表
+     */
     @Select("SELECT name FROM li_category ${ew.customSqlSegment} ")
     List<String> getNamesByIds(@Param(Constants.WRAPPER) Wrapper<Category> queryWrapper);
 

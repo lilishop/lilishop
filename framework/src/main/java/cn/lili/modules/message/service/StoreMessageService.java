@@ -20,16 +20,17 @@ public interface StoreMessageService extends IService<StoreMessage> {
     /**
      * 通过消息id删除
      *
-     * @param messageId
+     * @param messageId 消息ID
+     * @return 操作结果
      */
     boolean deleteByMessageId(String messageId);
 
     /**
      * 多条件分页获取
      *
-     * @param storeMessageQueryVO
-     * @param pageVO
-     * @return
+     * @param storeMessageQueryVO 店铺消息查询VO
+     * @param pageVO              分页
+     * @return 店铺消息分页
      */
     IPage<StoreMessage> getPage(StoreMessageQueryVO storeMessageQueryVO, PageVO pageVO);
 

@@ -1,7 +1,5 @@
 package cn.lili.common.utils;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,25 +13,25 @@ public class RegularUtil {
     /**
      * 手机号
      */
-    private static final Pattern mobile = Pattern.compile("^1[3|4|5|8][0-9]\\d{8}$");
+    private static final Pattern MOBILE = Pattern.compile("^1[3|4|5|8][0-9]\\d{8}$");
 
     /**
      * 邮箱
      */
-    private static final Pattern email = Pattern.compile("^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*\\.[a-zA-Z0-9]{2,6}$");
+    private static final Pattern EMAIL = Pattern.compile("^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*\\.[a-zA-Z0-9]{2,6}$");
 
-    public static boolean Mobile(String v){
+    public static boolean mobile(String v){
 
-        Matcher m = mobile.matcher(v);
+        Matcher m = MOBILE.matcher(v);
         if(m.matches()){
             return true;
         }
         return false;
     }
 
-    public static boolean Email(String v){
+    public static boolean email(String v){
 
-        Matcher m = email.matcher(v);
+        Matcher m = EMAIL.matcher(v);
         if(m.matches()){
             return true;
         }

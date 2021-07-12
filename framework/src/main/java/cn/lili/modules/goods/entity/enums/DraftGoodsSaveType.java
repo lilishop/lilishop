@@ -8,8 +8,13 @@ package cn.lili.modules.goods.entity.enums;
  **/
 public enum DraftGoodsSaveType {
 
+    /**
+     * "草稿"
+     */
     DRAFT("草稿"),
-
+    /**
+     * "模版"
+     */
     TEMPLATE("模版");
 
     private final String description;

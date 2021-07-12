@@ -24,7 +24,6 @@ import com.google.gson.Gson;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -37,19 +36,26 @@ import java.util.Map;
  * @date 2020-02-25 14:10:16
  */
 @Service
-@Transactional
 public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberSign> implements MemberSignService {
 
-    //RocketMQ
+    /**
+     * RocketMQ
+     */
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
-    //RocketMQ 配置
+    /**
+     * RocketMQ 配置
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    //配置
+    /**
+     * 配置
+     */
     @Autowired
     private SettingService settingService;
-    //会员
+    /**
+     * 会员
+     */
     @Autowired
     private MemberService memberService;
 

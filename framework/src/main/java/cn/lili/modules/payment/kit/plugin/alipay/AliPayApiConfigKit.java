@@ -73,7 +73,7 @@ public class AliPayApiConfigKit {
         certAlipayRequest.setAlipayPublicCertPath(setting.getAlipayPublicCertPath());
         certAlipayRequest.setRootCertPath(setting.getRootCertPath());
         defaultAlipayClient = new DefaultAlipayClient(certAlipayRequest);
-        nextRebuildDate = DateUtil.date(new Date().getTime() + refreshInterval);
+        nextRebuildDate = DateUtil.date(System.currentTimeMillis()+ refreshInterval);
         return defaultAlipayClient;
     }
 }

@@ -164,6 +164,7 @@ public interface Cache<T> {
      * 如需清零，按照普通key 移除即可
      *
      * @param key
+     * @param value
      * @return
      */
     Long cumulative(Object key, Object value);

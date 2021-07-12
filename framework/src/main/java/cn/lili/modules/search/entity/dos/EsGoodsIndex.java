@@ -102,7 +102,7 @@ public class EsGoodsIndex implements Serializable {
     /**
      * 分类path
      */
-    @Field(type = FieldType.Keyword, fielddata = true)
+    @Field(type = FieldType.Keyword)
     @ApiModelProperty("分类path")
     private String categoryPath;
 
@@ -290,18 +290,21 @@ public class EsGoodsIndex implements Serializable {
             List<EsGoodsAttribute> attributes = new ArrayList<>();
             //循环参数分组
             goodsParamDTOS.forEach(goodsParamGroup -> {
-                //循环分组的内容
-                goodsParamGroup.getGoodsParamsItemDTOList().forEach(goodsParam -> {
-                            //如果字段需要索引，则增加索引字段
-                            if (goodsParam.getIsIndex() != null && goodsParam.getIsIndex() == 1) {
-                                EsGoodsAttribute attribute = new EsGoodsAttribute();
-                                attribute.setType(1);
-                                attribute.setName(goodsParam.getParamName());
-                                attribute.setValue(goodsParam.getParamValue());
-                                attributes.add(attribute);
+                //如果参数有配置，则增加索引
+                if (goodsParamGroup.getGoodsParamsItemDTOList() != null && !goodsParamGroup.getGoodsParamsItemDTOList().isEmpty()) {
+                    //循环分组的内容
+                    goodsParamGroup.getGoodsParamsItemDTOList().forEach(goodsParam -> {
+                                //如果字段需要索引，则增加索引字段
+                                if (goodsParam.getIsIndex() != null && goodsParam.getIsIndex() == 1) {
+                                    EsGoodsAttribute attribute = new EsGoodsAttribute();
+                                    attribute.setType(1);
+                                    attribute.setName(goodsParam.getParamName());
+                                    attribute.setValue(goodsParam.getParamValue());
+                                    attributes.add(attribute);
+                                }
                             }
-                        }
-                );
+                    );
+                }
 
             });
             this.attrList = attributes;

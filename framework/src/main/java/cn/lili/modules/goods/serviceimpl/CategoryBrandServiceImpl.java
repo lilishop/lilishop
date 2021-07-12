@@ -21,7 +21,7 @@ import java.util.List;
  * @date 2020-02-18 16:18:56
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class CategoryBrandServiceImpl extends ServiceImpl<CategoryBrandMapper, CategoryBrand> implements CategoryBrandService {
 
     @Override

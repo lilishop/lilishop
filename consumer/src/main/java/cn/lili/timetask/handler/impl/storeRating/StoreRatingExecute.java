@@ -11,10 +11,10 @@ import cn.lili.timetask.handler.EveryDayExecute;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -25,11 +25,15 @@ import java.util.List;
  */
 @Component
 public class StoreRatingExecute implements EveryDayExecute {
-    //店铺
+    /**
+     * 店铺
+     */
     @Autowired
     private StoreService storeService;
-    //会员评价
-    @Autowired
+    /**
+     * 会员评价
+     */
+    @Resource
     private MemberEvaluationMapper memberEvaluationMapper;
 
 
@@ -39,10 +43,10 @@ public class StoreRatingExecute implements EveryDayExecute {
         List<Store> storeList = storeService.list(new LambdaQueryWrapper<Store>().eq(Store::getStoreDisable, StoreStatusEnum.OPEN.name()));
         for (Store store : storeList) {
             //店铺所有开启的评价
-            LambdaQueryWrapper<MemberEvaluation> QueryWrapper = Wrappers.lambdaQuery();
-            QueryWrapper.eq(MemberEvaluation::getStoreId, store.getId());
-            QueryWrapper.eq(MemberEvaluation::getStatus, SwitchEnum.OPEN.name());
-            StoreRatingVO storeRatingVO = memberEvaluationMapper.getStoreRatingVO(QueryWrapper);
+            LambdaQueryWrapper<MemberEvaluation> lambdaQueryWrapper = Wrappers.lambdaQuery();
+            lambdaQueryWrapper.eq(MemberEvaluation::getStoreId, store.getId());
+            lambdaQueryWrapper.eq(MemberEvaluation::getStatus, SwitchEnum.OPEN.name());
+            StoreRatingVO storeRatingVO = memberEvaluationMapper.getStoreRatingVO(lambdaQueryWrapper);
 
             if (storeRatingVO != null) {
                 //保存评分

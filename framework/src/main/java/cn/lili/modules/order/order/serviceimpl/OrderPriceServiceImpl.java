@@ -19,12 +19,13 @@ import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderPriceService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
-import cn.lili.modules.payment.kit.plugin.bankTransfer.BankTransferPlugin;
+import cn.lili.modules.payment.kit.plugin.bank.BankTransferPlugin;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -37,19 +38,29 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class OrderPriceServiceImpl implements OrderPriceService {
 
-    //线下收款
+    /**
+     * 线下收款
+     */
     @Autowired
     private BankTransferPlugin bankTransferPlugin;
-    //订单货物
+    /**
+     * 订单货物
+     */
     @Autowired
     private OrderItemService orderItemService;
-    //交易数据层
-    @Autowired
+    /**
+     * 交易数据层
+     */
+    @Resource
     private TradeMapper tradeMapper;
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
-    //商品分类
+    /**
+     * 商品分类
+     */
     @Autowired
     private CategoryService categoryService;
 
@@ -164,7 +175,7 @@ public class OrderPriceServiceImpl implements OrderPriceService {
             priceDetailDTO.setPlatFormCommission(platFormCommission);
 
             //最终结算金额 = 流水金额-平台佣金-分销提佣
-            double billPrice = CurrencyUtil.sub(CurrencyUtil.sub(priceDetailDTO.getFlowPrice(),priceDetailDTO.getPlatFormCommission()),
+            double billPrice = CurrencyUtil.sub(CurrencyUtil.sub(priceDetailDTO.getFlowPrice(), priceDetailDTO.getPlatFormCommission()),
                     priceDetailDTO.getDistributionCommission());
             priceDetailDTO.setBillPrice(billPrice);
 

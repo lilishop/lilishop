@@ -941,7 +941,7 @@ public class AliPayApi {
      * @return 转化后的Map
      */
     public static Map<String, String> toMap(HttpServletRequest request) {
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<String, String>(16);
         Map<String, String[]> requestParams = request.getParameterMap();
         for (Iterator<String> iter = requestParams.keySet().iterator(); iter.hasNext(); ) {
             String name = iter.next();

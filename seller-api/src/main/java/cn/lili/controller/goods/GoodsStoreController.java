@@ -39,13 +39,19 @@ import java.util.List;
 @RequestMapping("/store/goods")
 public class GoodsStoreController {
 
-    //商品
+    /**
+     * 商品
+     */
     @Autowired
     private GoodsService goodsService;
-    //商品sku
+    /**
+     * 商品sku
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    //店铺详情
+    /**
+     * 店铺详情
+     */
     @Autowired
     private StoreDetailService storeDetailService;
 

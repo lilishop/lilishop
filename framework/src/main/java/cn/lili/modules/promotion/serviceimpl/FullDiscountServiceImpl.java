@@ -51,19 +51,29 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
     private static final String SELLER_ID_COLUMN = "storeId";
     private static final String PROMOTION_STATUS_COLUMN = "promotionStatus";
 
-    //延时任务
+    /**
+     * 延时任务
+     */
     @Autowired
     private TimeTrigger timeTrigger;
-    //Mongo
+    /**
+     * Mongo
+     */
     @Autowired
     private MongoTemplate mongoTemplate;
-    //Rocketmq
+    /**
+     * Rocketmq
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    //优惠券
+    /**
+     * 优惠券
+     */
     @Autowired
     private CouponService couponService;
-    //促销商品
+    /**
+     * 促销商品
+     */
     @Autowired
     private PromotionGoodsService promotionGoodsService;
 
@@ -111,6 +121,7 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
         return fullDiscountVO;
     }
 
+    @Override
     public IPage<FullDiscount> getFullDiscountByPageFromMysql(FullDiscountSearchParams searchParams, PageVO page) {
         QueryWrapper<FullDiscount> queryWrapper = searchParams.wrapper();
         return this.page(PageUtil.initPage(page), queryWrapper);
@@ -118,17 +129,17 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
 
     @Override
     public IPage<FullDiscountVO> getFullDiscountByPageFromMongo(FullDiscountSearchParams searchParams, PageVO page) {
-        IPage<FullDiscountVO> fullDiscountIPage = new Page<>();
+        IPage<FullDiscountVO> fullDiscountPage = new Page<>();
         Query query = searchParams.mongoQuery();
         if (page != null) {
             PromotionTools.mongoQueryPageParam(query, page);
-            fullDiscountIPage.setCurrent(page.getPageNumber());
-            fullDiscountIPage.setSize(page.getPageSize());
+            fullDiscountPage.setCurrent(page.getPageNumber());
+            fullDiscountPage.setSize(page.getPageSize());
         }
         List<FullDiscountVO> fullDiscountVOS = this.mongoTemplate.find(query, FullDiscountVO.class);
-        fullDiscountIPage.setRecords(fullDiscountVOS);
-        fullDiscountIPage.setTotal(this.mongoTemplate.count(query, FullDiscountVO.class));
-        return fullDiscountIPage;
+        fullDiscountPage.setRecords(fullDiscountVOS);
+        fullDiscountPage.setTotal(this.mongoTemplate.count(query, FullDiscountVO.class));
+        return fullDiscountPage;
     }
 
     @Override

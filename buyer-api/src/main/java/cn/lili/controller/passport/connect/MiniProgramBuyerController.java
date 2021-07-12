@@ -34,6 +34,7 @@ public class MiniProgramBuyerController {
     public ConnectService connectService;
     @Autowired
     public WechatMpCodeUtil wechatMpCodeUtil;
+    @SuppressWarnings("AlibabaLowerCamelCaseVariableNaming")
     @Autowired
     public WechatMPMessageService wechatMPMessageService;
     @Autowired

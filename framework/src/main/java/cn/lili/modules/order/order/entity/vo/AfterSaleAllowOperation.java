@@ -18,7 +18,7 @@ public class AfterSaleAllowOperation {
     private Boolean confirm = false;
 
     @ApiModelProperty(value = "可以回寄物流")
-    private Boolean return_goods = false;
+    private Boolean returnGoods = false;
 
     @ApiModelProperty(value = "可以收货")
     private Boolean rog = false;
@@ -27,7 +27,7 @@ public class AfterSaleAllowOperation {
     private Boolean refund = false;
 
     @ApiModelProperty(value = "买家确认收货")
-    private Boolean buyer_confirm;
+    private Boolean buyerConfirm;
 
     @ApiModelProperty(value = "可以取消")
     private Boolean cancel;

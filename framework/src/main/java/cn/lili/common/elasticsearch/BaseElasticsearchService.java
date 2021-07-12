@@ -308,13 +308,6 @@ public abstract class BaseElasticsearchService {
 
         PutMappingRequest request = new PutMappingRequest(index)
                         .source(source, XContentType.JSON);
-//       AcknowledgedResponse putMappingResponse = client.indices().putMapping(request,
-//               RequestOptions.DEFAULT);
-//
-//       boolean acknowledged = putMappingResponse.isAcknowledged();
-//       if (acknowledged) {
-//           log.error("Succeed to put mapping");
-//       }
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference response = new AtomicReference<AcknowledgedResponse>();
         client.indices().putMappingAsync(

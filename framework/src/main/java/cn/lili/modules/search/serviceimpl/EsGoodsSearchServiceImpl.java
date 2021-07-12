@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.lucene.search.function.FunctionScoreQuery;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
@@ -65,16 +64,24 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
     @Autowired
     private EsGoodsIndexRepository goodsIndexRepository;
-    //商品分类
+    /**
+     * 商品分类
+     */
     @Autowired
     private CategoryService categoryService;
-    //品牌
+    /**
+     * 品牌
+     */
     @Autowired
     private BrandService brandService;
-    //ES
+    /**
+     * ES
+     */
     @Autowired
     private ElasticsearchRestTemplate restTemplate;
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache cache;
 
@@ -341,7 +348,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             String[] props = searchDTO.getProp().split("@");
             List<String> nameList = new ArrayList<>();
             List<String> valueList = new ArrayList<>();
-            Map<String, List<String>> valueMap = new HashMap<>();
+            Map<String, List<String>> valueMap = new HashMap<>(16);
             for (String prop : props) {
                 String[] propValues = prop.split("_");
                 String name = propValues[0];

@@ -54,10 +54,12 @@ public class PageViewInterceptor {
         switch (pageViewEnum) {
             case SKU:
                 ResultMessage<Map<String, Object>> skuRvt = (ResultMessage<Map<String, Object>>) rvt;
-                GoodsSkuVO goodsSkuDetail = (GoodsSkuVO) skuRvt.getResult().get("data");
-                storeId = goodsSkuDetail.getStoreId();
-                goodsId = goodsSkuDetail.getGoodsId();
-                break;
+                if (skuRvt != null && skuRvt.getResult() != null && skuRvt.getResult().containsKey("data")) {
+                    GoodsSkuVO goodsSkuDetail = (GoodsSkuVO) skuRvt.getResult().get("data");
+                    storeId = goodsSkuDetail.getStoreId();
+                    goodsId = goodsSkuDetail.getGoodsId();
+                    break;
+                }
             case STORE:
                 Map<String, String> map = spelFormat(point);
                 storeId = map.get("id");
@@ -66,11 +68,6 @@ public class PageViewInterceptor {
                 storeId = "-1";
         }
         String ip = IpUtils.getIpAddress(request);
-//       //如果用户不为空，则ip后追加用户id，这样一个用户多个ip登录，可以被多次记录访客数
-//       if (UserContext.getCurrentUser() != null) {
-//           ip += UserContext.getCurrentUser().getId();
-//       }
-
         try {
             //PV 统计48小时过期 留下一定时间予以统计累计数据库
             cache.incr(CachePrefix.PV.getPrefix() + StatisticsSuffix.suffix(), 60 * 60 * 48);
@@ -84,7 +81,7 @@ public class PageViewInterceptor {
             //店铺UV 统计，则需要对id去重复，所以如下处理
             cache.cumulative(CachePrefix.STORE_UV.getPrefix() + StatisticsSuffix.suffix(storeId), ip);
         } catch (Exception e) {
-           log.error("页面出错",e);
+            log.error("页面出错", e);
         }
 
     }
@@ -98,7 +95,7 @@ public class PageViewInterceptor {
      */
     private static Map<String, String> spelFormat(JoinPoint joinPoint) {
 
-        Map<String, String> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>(2);
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         PageViewPoint pageViewPoint = signature.getMethod().getAnnotation(PageViewPoint.class);
         String id = SpelUtil.compileParams(joinPoint, pageViewPoint.id());

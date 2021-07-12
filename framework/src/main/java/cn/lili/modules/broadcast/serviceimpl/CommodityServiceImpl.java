@@ -50,9 +50,9 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
             checkCommodity(commodity);
             //添加直播商品
             JSONObject json = wechatLivePlayerUtil.addGoods(commodity);
-            if(!json.getStr("errcode").equals("0")){
+            if(!"0".equals(json.getStr("errcode"))){
                 log.error(json.getStr("errmsg"));
-                 throw new ServiceException(ResultCode.COMMODITY_ERROR);
+                throw new ServiceException(ResultCode.COMMODITY_ERROR);
             }
             commodity.setLiveGoodsId(Convert.toInt(json.getStr("goodsId")));
             commodity.setAuditId(json.getStr("auditId"));
@@ -79,7 +79,7 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
     @Override
     public boolean deleteCommodity(String goodsId) {
         JSONObject json = wechatLivePlayerUtil.deleteGoods(goodsId);
-        if (json.getStr("errcode").equals("0")) {
+        if ("0".equals(json.getStr("errcode"))) {
             return this.remove(new LambdaQueryWrapper<Commodity>().eq(Commodity::getLiveGoodsId, goodsId));
         }
         return false;

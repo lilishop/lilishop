@@ -30,16 +30,24 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PromotionPriceServiceImpl implements PromotionPriceService {
 
-    //ES商品
+    /**
+     * ES商品
+     */
     @Autowired
     private EsGoodsSearchService goodsSearchService;
-    //秒杀活动申请
+    /**
+     * 秒杀活动申请
+     */
     @Autowired
     private SeckillApplyService seckillApplyService;
-    //促销商品
+    /**
+     * 促销商品
+     */
     @Autowired
     private PromotionGoodsService promotionGoodsService;
-    //规格商品
+    /**
+     * 规格商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
 
@@ -302,14 +310,6 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
             double discountRatePrice = CurrencyUtil.sub(totalPrice, CurrencyUtil.mul(totalPrice, fullRate));
 
             couponTotalPrice = CurrencyUtil.add(couponTotalPrice, discountRatePrice);
-            //消费限额判断
-//           if (coupon.getConsumeThreshold() >= discountRatePrice) {
-//               couponTotalPrice = CurrencyUtil.add(couponTotalPrice, discountRatePrice);
-//               discountPrice = discountRatePrice;
-//           } else {
-//               couponTotalPrice = CurrencyUtil.add(couponTotalPrice, coupon.getConsumeThreshold());
-//               discountPrice = coupon.getConsumeThreshold();
-//           }
         }
 
         //分配到每个商品的优惠券金额

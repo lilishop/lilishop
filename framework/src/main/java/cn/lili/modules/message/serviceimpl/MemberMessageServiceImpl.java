@@ -23,7 +23,6 @@ import java.util.List;
  * @date 2020/11/17 3:48 下午
  */
 @Service
-@Transactional
 public class MemberMessageServiceImpl extends ServiceImpl<MemberMessageMapper, MemberMessage> implements MemberMessageService {
 
 

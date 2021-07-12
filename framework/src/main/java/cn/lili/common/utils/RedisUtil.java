@@ -217,8 +217,7 @@ public class RedisUtil {
      * @return
      */
     public boolean zadd(String key, long score, String value) {
-        Boolean result = redisTemplate.opsForZSet().add(key, value, score);
-        return result;
+        return redisTemplate.opsForZSet().add(key, value, score);
 
     }
 

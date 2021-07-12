@@ -58,29 +58,44 @@ public class CartServiceImpl implements CartService {
 
     static String errorMessage = "购物车异常，请稍后重试";
 
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache<Object> cache;
-    //会员优惠券
+    /**
+     * 会员优惠券
+     */
     @Autowired
     private MemberCouponService memberCouponService;
-    //规格商品
+    /**
+     * 规格商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    //促销商品
+    /**
+     * 促销商品
+     */
     @Autowired
     private PromotionGoodsService promotionGoodsService;
-    //会员地址
+    /**
+     * 会员地址
+     */
     @Autowired
     private MemberAddressService memberAddressService;
-    //ES商品
+    /**
+     * ES商品
+     */
     @Autowired
     private EsGoodsSearchService esGoodsSearchService;
-
-    //拼团服务
+    /**
+     * 拼团
+     */
     @Autowired
     private PintuanService pintuanService;
-    //交易
+    /**
+     * 交易
+     */
     @Autowired
     private TradeBuilder tradeBuilder;
 
@@ -573,7 +588,7 @@ public class CartServiceImpl implements CartService {
             if (memberCoupon.getConsumeThreshold() <= cartPrice) {
                 tradeDTO.setPlatformCoupon(new MemberCouponDTO(memberCoupon));
                 //选择平台优惠券，则将品台优惠券清空
-                tradeDTO.setStoreCoupons(new HashMap<>());
+                tradeDTO.setStoreCoupons(new HashMap<>(16));
             }
         }
         //否则为店铺优惠券

@@ -34,7 +34,7 @@ public class StoreLogistics extends BaseEntity {
 
     @ApiModelProperty(value = "物流公司ID")
     @NotNull
-    private String LogisticsId;
+    private String logisticsId;
 
 
 }

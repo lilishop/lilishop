@@ -34,8 +34,9 @@ public enum ResultCode {
      */
     WECHAT_CONNECT_NOT_EXIST(1001, "微信联合登录未配置"),
     VERIFICATION_EXIST(1002, "验证码服务异常"),
-    LIMIT_ERROR(1003,"访问过于频繁，请稍后再试"),
+    LIMIT_ERROR(1003, "访问过于频繁，请稍后再试"),
     ILLEGAL_REQUEST_ERROR(1004, "非法请求，请重新刷新页面操作"),
+    IMAGE_FILE_EXT_ERROR(1005, "不支持图片格式"),
     /**
      * 分类
      */
@@ -49,6 +50,7 @@ public enum ResultCode {
     CATEGORY_PARAMETER_SAVE_ERROR(10008, "分类绑定参数组添加失败"),
     CATEGORY_PARAMETER_UPDATE_ERROR(10009, "分类绑定参数组添加失败"),
     CATEGORY_DELETE_FLAG_ERROR(10010, "子类状态不能与父类不一致！"),
+    CATEGORY_COMMISSION_RATE_ERROR(10011, "分类的佣金不正确！"),
 
     /**
      * 商品
@@ -66,10 +68,10 @@ public enum ResultCode {
     GOODS_SKU_WEIGHT_ERROR(11010, "商品重量不能为负数"),
     GOODS_SKU_QUANTITY_ERROR(11011, "商品库存数量不能为负数"),
     GOODS_SKU_QUANTITY_NOT_ENOUGH(11011, "商品库存不足"),
-    MUST_HAVE_GOODS_SKU(11012,"规格必须要有一个！"),
-    GOODS_PARAMS_ERROR(11013,"商品参数错误，刷新后重试"),
-    PHYSICAL_GOODS_NEED_TEMP(11014,"实物商品需选择配送模板"),
-    VIRTUAL_GOODS_NOT_NEED_TEMP(11015,"实物商品需选择配送模板"),
+    MUST_HAVE_GOODS_SKU(11012, "规格必须要有一个！"),
+    GOODS_PARAMS_ERROR(11013, "商品参数错误，刷新后重试"),
+    PHYSICAL_GOODS_NEED_TEMP(11014, "实物商品需选择配送模板"),
+    VIRTUAL_GOODS_NOT_NEED_TEMP(11015, "实物商品需选择配送模板"),
     GOODS_TYPE_ERROR(11016, "需选择商品类型"),
 
     /**
@@ -118,10 +120,10 @@ public enum ResultCode {
     USER_COLLECTION_EXIST(20017, "无法重复收藏"),
     USER_GRADE_IS_DEFAULT(20018, "会员等级为默认会员等级"),
     DELETE_EXIST(20019, "无法重复收藏"),
-    USER_NOT_BINDING(20020,"未绑定用户"),
-    USER_AUTO_REGISTER_ERROR(20021,"自动注册失败,请稍后重试"),
-    USER_OVERDUE_CONNECT_ERROR(20022,"授权信息已过期，请重新授权/登录"),
-    USER_CONNECT_BANDING_ERROR(20023,"当前联合登陆方式，已绑定其他账号，需进行解绑操作"),
+    USER_NOT_BINDING(20020, "未绑定用户"),
+    USER_AUTO_REGISTER_ERROR(20021, "自动注册失败,请稍后重试"),
+    USER_OVERDUE_CONNECT_ERROR(20022, "授权信息已过期，请重新授权/登录"),
+    USER_CONNECT_BANDING_ERROR(20023, "当前联合登陆方式，已绑定其他账号，需进行解绑操作"),
     USER_CONNECT_NOT_EXIST_ERROR(20024, "暂无联合登陆信息，无法实现一键注册功能，请点击第三方登录进行授权"),
 
     /**
@@ -276,47 +278,47 @@ public enum ResultCode {
     PINTUAN_DELETE_ERROR(42010, "删除拼团活动失败"),
     PINTUAN_JOIN_ERROR(42011, "不能参与自己发起的拼团活动！"),
     PINTUAN_LIMIT_NUM_ERROR(42012, "购买数量超过拼团活动限制数量！"),
-    PINTUAN_NOT_EXIST_ERROR(42013,"当前拼团商品不存在！"),
+    PINTUAN_NOT_EXIST_ERROR(42013, "当前拼团商品不存在！"),
 
     /**
      * 满额活动
      */
     FULL_DISCOUNT_EDIT_SUCCESS(43001, "修改满优惠活动成功"),
     FULL_DISCOUNT_EDIT_DELETE(43002, "删除满优惠活动成功"),
-    FULL_DISCOUNT_MODIFY_ERROR(43003,"当前编辑的满优惠活动已经开始或者已经结束，无法修改"),
-    FULL_DISCOUNT_NOT_EXIST_ERROR(43004,"当前要操作的满优惠活动不存在！"),
-    FULL_DISCOUNT_WAY_ERROR(43005,"请选择一种优惠方式！"),
-    FULL_DISCOUNT_GIFT_ERROR(43006,"请选择赠品！"),
-    FULL_DISCOUNT_COUPON_TIME_ERROR(43007,"赠送的优惠券有效时间必须大于活动时间"),
-    FULL_DISCOUNT_MONEY_ERROR(43008,"请填写满减金额"),
-    FULL_DISCOUNT_MONEY_GREATER_THAN_MINUS(43009,"满减金额不能大于优惠门槛"),
-    FULL_RATE_NUM_ERROR(43010,"请填写打折数值"),
+    FULL_DISCOUNT_MODIFY_ERROR(43003, "当前编辑的满优惠活动已经开始或者已经结束，无法修改"),
+    FULL_DISCOUNT_NOT_EXIST_ERROR(43004, "当前要操作的满优惠活动不存在！"),
+    FULL_DISCOUNT_WAY_ERROR(43005, "请选择一种优惠方式！"),
+    FULL_DISCOUNT_GIFT_ERROR(43006, "请选择赠品！"),
+    FULL_DISCOUNT_COUPON_TIME_ERROR(43007, "赠送的优惠券有效时间必须大于活动时间"),
+    FULL_DISCOUNT_MONEY_ERROR(43008, "请填写满减金额"),
+    FULL_DISCOUNT_MONEY_GREATER_THAN_MINUS(43009, "满减金额不能大于优惠门槛"),
+    FULL_RATE_NUM_ERROR(43010, "请填写打折数值"),
 
     /**
      * 直播
      */
-    STODIO_GOODS_EXIST_ERROR(44001,"直播商品已存在"),
-    COMMODITY_ERROR(44002,"添加直播商品失败"),
+    STODIO_GOODS_EXIST_ERROR(44001, "直播商品已存在"),
+    COMMODITY_ERROR(44002, "添加直播商品失败"),
 
     /**
      * 秒杀
      */
-    SECKILL_NOT_EXIST_ERROR(45001,"当前参与的秒杀活动不存在！"),
-    SECKILL_UPDATE_ERROR(45002,"当前秒杀活动活动已经开始，无法修改！"),
-    SECKILL_PRICE_ERROR(45003,"活动价格不能大于商品原价"),
-    SECKILL_TIME_ERROR(45004,"时刻参数异常"),
-    SECKILL_DELETE_ERROR(45005,"该秒杀活动活动的状态不能删除"),
-    SECKILL_CLOSE_ERROR(45006,"该秒杀活动活动的状态不能关闭"),
+    SECKILL_NOT_EXIST_ERROR(45001, "当前参与的秒杀活动不存在！"),
+    SECKILL_UPDATE_ERROR(45002, "当前秒杀活动活动已经开始，无法修改！"),
+    SECKILL_PRICE_ERROR(45003, "活动价格不能大于商品原价"),
+    SECKILL_TIME_ERROR(45004, "时刻参数异常"),
+    SECKILL_DELETE_ERROR(45005, "该秒杀活动活动的状态不能删除"),
+    SECKILL_CLOSE_ERROR(45006, "该秒杀活动活动的状态不能关闭"),
 
 
     /**
      * 优惠券活动
      */
-    COUPON_ACTIVITY_START_TIME_ERROR(46001,"活动时间小于当前时间，不能进行编辑删除操作"),
-    COUPON_ACTIVITY_MEMBER_ERROR(46002,"指定精准发券则必须指定会员，会员不可以为空"),
-    COUPON_ACTIVITY_ITEM_ERROR(46003,"优惠券活动必须指定优惠券，不能为空"),
-    COUPON_ACTIVITY_ITEM_MUST_NUM_ERROR(46004,"优惠券活动最多指定10个优惠券"),
-    COUPON_ACTIVITY_ITEM_NUM_ERROR(46005,"赠券数量必须大于0"),
+    COUPON_ACTIVITY_START_TIME_ERROR(46001, "活动时间小于当前时间，不能进行编辑删除操作"),
+    COUPON_ACTIVITY_MEMBER_ERROR(46002, "指定精准发券则必须指定会员，会员不可以为空"),
+    COUPON_ACTIVITY_ITEM_ERROR(46003, "优惠券活动必须指定优惠券，不能为空"),
+    COUPON_ACTIVITY_ITEM_MUST_NUM_ERROR(46004, "优惠券活动最多指定10个优惠券"),
+    COUPON_ACTIVITY_ITEM_NUM_ERROR(46005, "赠券数量必须大于0"),
 
     /**
      * 其他促销
@@ -381,9 +383,9 @@ public enum ResultCode {
     ALIPAY_NOT_SETTING(70002, "支付宝支付未配置"),
     ALIPAY_EXCEPTION(70003, "支付宝支付错误，请稍后重试"),
     ALIPAY_PARAMS_EXCEPTION(70004, "支付宝参数异常"),
-    LOGISTICS_NOT_SETTING(70005,"您还未配置快递查询"),
-    ORDER_SETTING_ERROR(70006,"系统订单配置异常"),
-    ALI_SMS_SETTING_ERROR(70007,"您还未配置阿里云短信"),
+    LOGISTICS_NOT_SETTING(70005, "您还未配置快递查询"),
+    ORDER_SETTING_ERROR(70006, "系统订单配置异常"),
+    ALI_SMS_SETTING_ERROR(70007, "您还未配置阿里云短信"),
     SMS_SIGN_EXIST_ERROR(70008, "短信签名已存在"),
 
     /**
@@ -416,10 +418,10 @@ public enum ResultCode {
     WECHAT_PAYMENT_NOT_SETTING(80301, "微信支付信息未配置"),
     WECHAT_QRCODE_ERROR(80302, "微信二维码生成异常"),
     WECHAT_MP_MESSAGE_ERROR(80303, "微信小程序小消息订阅异常"),
-    WECHAT_JSAPI_SIGN_ERROR(80304,"微信JsApi签名异常"),
-    WECHAT_CERT_ERROR(80305,"证书获取失败"),
-    WECHAT_MP_MESSAGE_TMPL_ERROR(80306,"未能获取到微信模版消息id"),
-    WECHAT_ERROR(80307,"微信接口异常"),
+    WECHAT_JSAPI_SIGN_ERROR(80304, "微信JsApi签名异常"),
+    WECHAT_CERT_ERROR(80305, "证书获取失败"),
+    WECHAT_MP_MESSAGE_TMPL_ERROR(80306, "未能获取到微信模版消息id"),
+    WECHAT_ERROR(80307, "微信接口异常"),
     APP_VERSION_EXIST(80307, "APP版本已存在"),
 
     /**
@@ -427,8 +429,8 @@ public enum ResultCode {
      */
     CUSTOM_WORDS_EXIST_ERROR(90000, "当前自定义分词已存在！"),
     CUSTOM_WORDS_NOT_EXIST_ERROR(90001, "当前自定义分词不存在！"),
-    CUSTOM_WORDS_SECRET_KEY_ERROR(90002,  "秘钥验证失败！"),
-    CONNECT_NOT_EXIST(90000,"登录方式不存在"),
+    CUSTOM_WORDS_SECRET_KEY_ERROR(90002, "秘钥验证失败！"),
+    CONNECT_NOT_EXIST(90000, "登录方式不存在"),
 
     ;
 

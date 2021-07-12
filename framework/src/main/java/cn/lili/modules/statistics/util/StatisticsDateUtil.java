@@ -1,5 +1,7 @@
 package cn.lili.modules.statistics.util;
 
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.model.enums.SearchTypeEnum;
@@ -72,6 +74,8 @@ public class StatisticsDateUtil {
                 //获取过去七天
                 dateArray[1] = calendar.getTime();
                 break;
+            default:
+                throw new ServiceException(ResultCode.ERROR);
         }
         return dateArray;
     }

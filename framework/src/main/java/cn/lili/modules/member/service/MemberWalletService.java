@@ -70,9 +70,10 @@ public interface MemberWalletService extends IService<MemberWallet> {
     /**
      * 提现扣减冻结金额
      *
-     * @param money    金额
-     * @param memberId 会员id
-     * @param detail   操作描述
+     * @param money       金额
+     * @param memberId    会员id
+     * @param detail      操作描述
+     * @param serviceType 类型
      * @return 操作状态
      */
     Boolean reduceFrozen(Double money, String memberId, String detail, String serviceType);

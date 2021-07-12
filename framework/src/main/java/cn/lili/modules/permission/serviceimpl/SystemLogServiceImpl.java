@@ -1,10 +1,9 @@
 package cn.lili.modules.permission.serviceimpl;
 
-import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
-import cn.lili.modules.base.entity.systemlog.SystemLogVO;
+import cn.lili.modules.permission.entity.vo.SystemLogVO;
 import cn.lili.modules.permission.service.SystemLogService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -27,7 +26,7 @@ import java.util.regex.Pattern;
  * @date 2020/11/17 3:45 下午
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class SystemLogServiceImpl implements SystemLogService {
 
     @Autowired

@@ -36,10 +36,14 @@ import java.util.List;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMapper, FreightTemplate> implements FreightTemplateService {
-    //配送子模板
+    /**
+     * 配送子模板
+     */
     @Autowired
     private FreightTemplateChildService freightTemplateChildService;
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache cache;
 
@@ -109,7 +113,7 @@ public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMappe
         //给子模板赋父模板的id
         List<FreightTemplateChild> list = new ArrayList<>();
         //如果子运费模板不为空则进行新增
-        if(freightTemplateVO.getFreightTemplateChildList()!=null){
+        if (freightTemplateVO.getFreightTemplateChildList() != null) {
             for (FreightTemplateChild freightTemplateChild : freightTemplateVO.getFreightTemplateChildList()) {
                 freightTemplateChild.setFreightTemplateId(freightTemplate.getId());
                 list.add(freightTemplateChild);
@@ -124,7 +128,7 @@ public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMappe
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public FreightTemplateVO editFreightTemplate(FreightTemplateVO freightTemplateVO) {
         //获取当前登录商家账号
         AuthUser tokenUser = UserContext.getCurrentUser();
@@ -153,7 +157,7 @@ public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMappe
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean removeFreightTemplate(String id) {
         //获取当前登录商家账号
         AuthUser tokenUser = UserContext.getCurrentUser();

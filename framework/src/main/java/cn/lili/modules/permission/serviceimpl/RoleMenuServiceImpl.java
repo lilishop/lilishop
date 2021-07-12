@@ -25,7 +25,9 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> implements RoleMenuService {
 
-    //菜单
+    /**
+     * 菜单
+     */
     @Resource
     private MenuMapper menuMapper;
 

@@ -31,11 +31,12 @@ import java.util.Date;
  * @date 2020-02-25 14:10:16
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawApplyMapper, MemberWithdrawApply> implements MemberWithdrawApplyService {
 
-    //提现申请数据层
-    //会员余额
+    /**
+     * 会员余额
+     */
     @Autowired
     private MemberWalletService memberWalletService;
 

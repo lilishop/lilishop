@@ -38,6 +38,7 @@ public abstract class AbstractDelayQueueMachineFactory {
 
     /**
      * 要实现延时队列的名字
+     * @return 延时队列的名字
      */
     public abstract String setDelayQueueName();
 

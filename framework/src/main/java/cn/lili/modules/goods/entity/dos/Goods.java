@@ -215,7 +215,7 @@ public class Goods extends BaseEntity {
         this.price = goodsOperationDTO.getPrice();
         this.weight = goodsOperationDTO.getWeight();
         this.templateId = goodsOperationDTO.getTemplateId();
-        this.recommend = goodsOperationDTO.isRecommend();
+        this.recommend = goodsOperationDTO.getRecommend();
         this.sellingPoint = goodsOperationDTO.getSellingPoint();
         this.salesModel = goodsOperationDTO.getSalesModel();
         this.goodsUnit = goodsOperationDTO.getGoodsUnit();
@@ -226,7 +226,7 @@ public class Goods extends BaseEntity {
             this.params = JSONUtil.toJsonStr(goodsOperationDTO.getGoodsParamsDTOList());
         }
         //如果立即上架则
-        this.marketEnable = goodsOperationDTO.isRelease() ? GoodsStatusEnum.UPPER.name() : GoodsStatusEnum.DOWN.name();
+        this.marketEnable = goodsOperationDTO.getRelease() ? GoodsStatusEnum.UPPER.name() : GoodsStatusEnum.DOWN.name();
         this.goodsType = goodsOperationDTO.getGoodsType();
 
         //循环sku，判定sku是否有效

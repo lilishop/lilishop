@@ -12,7 +12,6 @@ import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.timetask.handler.EveryMinuteExecute;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,12 +27,15 @@ import java.util.stream.Collectors;
  **/
 @Slf4j
 @Component
-
 public class CancelOrderTaskExecute implements EveryMinuteExecute {
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
-    //设置
+    /**
+     * 设置
+     */
     @Autowired
     private SettingService settingService;
 

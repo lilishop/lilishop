@@ -24,10 +24,14 @@ import java.util.stream.Collectors;
 @Component
 public class OnlineMemberStatistics implements EveryHourExecute {
 
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache cache;
-    //统计小时
+    /**
+     * 统计小时
+     */
     @Autowired
     private StatisticsProperties statisticsProperties;
 

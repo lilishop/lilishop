@@ -22,5 +22,5 @@ public class StoreCollectionVO {
     private String logo;
 
     @ApiModelProperty(value = "是否自营")
-    private boolean selfOperated;
+    private Boolean selfOperated;
 }

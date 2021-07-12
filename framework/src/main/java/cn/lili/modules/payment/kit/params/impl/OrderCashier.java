@@ -32,10 +32,14 @@ import java.util.List;
 @Slf4j
 @Component
 public class OrderCashier implements CashierExecute {
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
-    //设置
+    /**
+     * 设置
+     */
     @Autowired
     private SettingService settingService;
 

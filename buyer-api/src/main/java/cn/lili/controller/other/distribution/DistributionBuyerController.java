@@ -40,7 +40,6 @@ public class DistributionBuyerController {
     @Autowired
     private DistributionOrderService distributionOrderService;
 
-    //申请分销员
     @ApiOperation(value = "申请分销员")
     @PostMapping
     public ResultMessage<Object> applyDistribution(DistributionApplyDTO distributionApplyDTO) {
@@ -63,7 +62,6 @@ public class DistributionBuyerController {
         return ResultUtil.data(distributionService.getDistribution());
     }
 
-    //申请分销员
     @ApiOperation(value = "绑定分销员")
     @ApiImplicitParam(name = "distributionId", value = "分销员ID", required = true, paramType = "path")
     @GetMapping("/bindingDistribution/{distributionId}")

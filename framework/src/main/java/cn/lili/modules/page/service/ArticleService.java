@@ -58,6 +58,7 @@ public interface ArticleService extends IService<Article> {
      * 读取文章
      *
      * @param id
+     * @return 文章
      */
     @Cacheable(key = "#id")
     Article customGet(String id);
@@ -66,15 +67,18 @@ public interface ArticleService extends IService<Article> {
      * 读取文章
      *
      * @param type
+     * @return 文章
      */
     @Cacheable(key = "#type")
     Article customGetByType(String type);
 
     /**
      * 修改文章状态
-     * @param id 文章ID
+     *
+     * @param id     文章ID
      * @param status 显示状态
+     * @return 操作状态
      */
     @CacheEvict(key = "#id")
-    Boolean updateArticleStatus(String id,boolean status);
+    Boolean updateArticleStatus(String id, boolean status);
 }

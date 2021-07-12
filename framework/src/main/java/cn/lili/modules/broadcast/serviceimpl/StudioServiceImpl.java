@@ -52,49 +52,42 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     private StudioCommodityService studioCommodityService;
     @Resource
     private CommodityMapper commodityMapper;
-    //延时任务
     @Autowired
     private TimeTrigger timeTrigger;
-    //Rocketmq
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Override
     public Boolean create(Studio studio) {
-        try {
-            //创建小程序直播
-            Map<String, String> roomMap = wechatLivePlayerUtil.create(studio);
-            studio.setRoomId(Convert.toInt(roomMap.get("roomId")));
-            studio.setQrCodeUrl(roomMap.get("qrcodeUrl"));
-            studio.setStoreId(UserContext.getCurrentUser().getStoreId());
-            studio.setStatus(StudioStatusEnum.NEW.name());
-            //直播间添加成功发送直播间开启、关闭延时任务
-            if (this.save(studio)) {
-                //直播开启延时任务
-                BroadcastMessage broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.START.name());
-                TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
-                        Long.parseLong(studio.getStartTime()) * 1000L,
-                        broadcastMessage,
-                        DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
-                        rocketmqCustomProperties.getPromotionTopic());
+    //创建小程序直播
+    Map<String, String> roomMap = wechatLivePlayerUtil.create(studio);
+    studio.setRoomId(Convert.toInt(roomMap.get("roomId")));
+    studio.setQrCodeUrl(roomMap.get("qrcodeUrl"));
+    studio.setStoreId(UserContext.getCurrentUser().getStoreId());
+    studio.setStatus(StudioStatusEnum.NEW.name());
+    //直播间添加成功发送直播间开启、关闭延时任务
+    if (this.save(studio)) {
+        //直播开启延时任务
+        BroadcastMessage broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.START.name());
+        TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
+                Long.parseLong(studio.getStartTime()) * 1000L,
+                broadcastMessage,
+                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
+                rocketmqCustomProperties.getPromotionTopic());
 
-                //发送促销活动开始的延时任务
-                this.timeTrigger.addDelay(timeTriggerMsg);
+        //发送促销活动开始的延时任务
+        this.timeTrigger.addDelay(timeTriggerMsg);
 
-                //直播结束延时任务
-                broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.END.name());
-                timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
-                        Long.parseLong(studio.getEndTime()) * 1000L, broadcastMessage,
-                        DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
-                        rocketmqCustomProperties.getPromotionTopic());
-                //发送促销活动开始的延时任务
-                this.timeTrigger.addDelay(timeTriggerMsg);
-            }
-            return true;
-
-        } catch (Exception e) {
-            throw new ServiceException(ResultCode.ERROR);
-        }
+        //直播结束延时任务
+        broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.END.name());
+        timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.BROADCAST_EXECUTOR,
+                Long.parseLong(studio.getEndTime()) * 1000L, broadcastMessage,
+                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.BROADCAST, studio.getId()),
+                rocketmqCustomProperties.getPromotionTopic());
+        //发送促销活动开始的延时任务
+        this.timeTrigger.addDelay(timeTriggerMsg);
+    }
+    return true;
 
     }
 

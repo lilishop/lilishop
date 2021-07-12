@@ -38,18 +38,22 @@ import java.util.concurrent.TimeUnit;
  * @date 2020-03-14 23:04:56
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Distribution> implements DistributionService {
 
-    //会员
+    /**
+     * 会员
+     */
     @Autowired
     private MemberService memberService;
-
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache cache;
-
-    //设置
+    /**
+     * 设置
+     */
     @Autowired
     private SettingService settingService;
 
@@ -72,15 +76,15 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
         checkDistributionSetting();
 
         //判断用户是否申请过分销
-        Distribution distribution=getDistribution();
+        Distribution distribution = getDistribution();
 
         //如果分销员非空并未审核则提示用户请等待，如果分销员为拒绝状态则重新提交申请
-        if(Optional.ofNullable(distribution).isPresent()){
-            if(distribution.getDistributionStatus().equals(DistributionStatusEnum.APPLY.name())){
+        if (Optional.ofNullable(distribution).isPresent()) {
+            if (distribution.getDistributionStatus().equals(DistributionStatusEnum.APPLY.name())) {
                 throw new ServiceException(ResultCode.DISTRIBUTION_IS_APPLY);
-            }else if(distribution.getDistributionStatus().equals(DistributionStatusEnum.REFUSE.name())){
+            } else if (distribution.getDistributionStatus().equals(DistributionStatusEnum.REFUSE.name())) {
                 distribution.setDistributionStatus(DistributionStatusEnum.APPLY.name());
-                BeanUtil.copyProperties(distributionApplyDTO,distribution);
+                BeanUtil.copyProperties(distributionApplyDTO, distribution);
                 this.updateById(distribution);
                 return distribution;
             }
@@ -149,16 +153,15 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
     public void bindingDistribution(String distributionId) {
 
         //判断用户是否登录，未登录不能进行绑定
-        if(UserContext.getCurrentUser()==null){
+        if (UserContext.getCurrentUser() == null) {
             throw new ServiceException(ResultCode.USER_NOT_LOGIN);
         }
-        //储存分销关系为3天
+        //储存分销关系时间
         Distribution distribution = this.getById(distributionId);
-        if (distribution!=null) {
+        if (distribution != null) {
             Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
             DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
-            //cache.put(CachePrefix.DISTRIBUTION.getPrefix() + "_" + UserContext.getCurrentUser().getId(), distribution.getId(), distributionSetting.getDistributionDay().longValue(), TimeUnit.DAYS);
-            cache.put(CachePrefix.DISTRIBUTION.getPrefix() + "_" + UserContext.getCurrentUser().getId(), distribution.getId(), 3L, TimeUnit.DAYS);
+            cache.put(CachePrefix.DISTRIBUTION.getPrefix() + "_" + UserContext.getCurrentUser().getId(), distribution.getId(), distributionSetting.getDistributionDay().longValue(), TimeUnit.DAYS);
         }
 
     }
@@ -167,23 +170,23 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
      * 检查分销设置开关
      */
     @Override
-    public void checkDistributionSetting(){
+    public void checkDistributionSetting() {
         //获取分销是否开启
         Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
         DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
-        if(!distributionSetting.getIsOpen()){
+        if (!distributionSetting.getIsOpen()) {
             throw new ServiceException(ResultCode.DISTRIBUTION_CLOSE);
         }
     }
 
     @Override
     public void subCanRebate(Double canRebate, String distributionId) {
-        this.baseMapper.subCanRebate(canRebate,distributionId);
+        this.baseMapper.subCanRebate(canRebate, distributionId);
     }
 
     @Override
     public void addRebate(Double rebate, String distributionId) {
-        this.baseMapper.addCanRebate(rebate,distributionId);
+        this.baseMapper.addCanRebate(rebate, distributionId);
     }
 
 }

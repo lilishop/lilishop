@@ -15,7 +15,6 @@ import javax.validation.constraints.Size;
 @Data
 public class StoreBankDTO {
 
-    //结算银行信息
     @Size(min = 1, max = 200)
     @NotBlank(message = "结算银行开户行名称不能为空")
     @ApiModelProperty(value = "结算银行开户行名称")

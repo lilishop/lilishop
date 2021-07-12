@@ -12,6 +12,11 @@ import org.apache.ibatis.annotations.Update;
  */
 public interface TradeMapper extends BaseMapper<Trade> {
 
+    /**
+     * 修改交易金额
+     *
+     * @param tradeSn 交易编号
+     */
     @Update("UPDATE li_trade SET flow_price =(SELECT SUM(flow_price) FROM li_order WHERE trade_sn=#{tradeSn}) WHERE sn=#{tradeSn}")
     void updateTradePrice(String tradeSn);
 }

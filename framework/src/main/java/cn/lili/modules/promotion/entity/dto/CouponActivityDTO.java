@@ -4,8 +4,6 @@ import cn.lili.modules.promotion.entity.dos.CouponActivity;
 import cn.lili.modules.promotion.entity.dos.CouponActivityItem;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Required;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 

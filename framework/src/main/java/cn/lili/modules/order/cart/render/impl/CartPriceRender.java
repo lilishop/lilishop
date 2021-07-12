@@ -28,7 +28,9 @@ import java.util.Map;
 public class CartPriceRender implements CartRenderStep {
 
 
-    //商品分类
+    /**
+     * 商品分类
+     */
     @Autowired
     private CategoryService categoryService;
 
@@ -72,7 +74,7 @@ public class CartPriceRender implements CartRenderStep {
 
         //key store id
         //value 商品列表
-        Map<String, List<CartSkuVO>> map = new HashMap<>();
+        Map<String, List<CartSkuVO>> map = new HashMap<>(2);
         for (CartSkuVO cartSkuVO : cartSkuVOList) {
             //如果存在商家id
             if (map.containsKey(cartSkuVO.getGoodsSku().getStoreId())) {

@@ -38,6 +38,7 @@ public interface StoreService extends IService<Store> {
      * 用于后台添加店铺
      *
      * @param adminStoreApplyDTO 后台添加店铺信息
+     * @return 店铺
      */
     Store add(AdminStoreApplyDTO adminStoreApplyDTO);
 
@@ -45,6 +46,7 @@ public interface StoreService extends IService<Store> {
      * 编辑店铺
      *
      * @param storeEditDTO 店铺修改信息
+     * @return 店铺
      */
     Store edit(StoreEditDTO storeEditDTO);
 
@@ -53,6 +55,7 @@ public interface StoreService extends IService<Store> {
      *
      * @param id     店铺ID
      * @param passed 审核结果
+     * @return 操作结果
      */
     boolean audit(String id, Integer passed);
 
@@ -100,6 +103,7 @@ public interface StoreService extends IService<Store> {
 
     /**
      * 获取待审核店铺数量
+     *
      * @return 待审核店铺数量
      */
     Integer auditNum();
@@ -120,12 +124,14 @@ public interface StoreService extends IService<Store> {
 
     /**
      * 更新店铺商品数量
+     *
      * @param storeId 店铺ID
      */
     void updateStoreGoodsNum(String storeId);
 
     /**
      * 更新店铺收藏数量
+     *
      * @param goodsId 店铺ID
      */
     void updateStoreCollectionNum(String goodsId);

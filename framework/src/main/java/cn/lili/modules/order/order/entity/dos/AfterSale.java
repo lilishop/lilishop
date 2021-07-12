@@ -135,7 +135,9 @@ public class AfterSale extends BaseEntity {
     @ApiModelProperty(value = "退款时间")
     private Date refundTime;
 
-    //买家物流信息
+    /**
+     * 买家物流信息
+     */
     @ApiModelProperty(value = "发货单号")
     private String mLogisticsNo;
 

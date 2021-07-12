@@ -8,10 +8,10 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
@@ -52,7 +52,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
-import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
@@ -66,25 +65,39 @@ import java.util.Objects;
 @Component
 public class WechatPlugin implements Payment {
 
-    //收银台
+    /**
+     * 收银台
+     */
     @Autowired
     private CashierSupport cashierSupport;
-    //支付日志
+    /**
+     * 支付日志
+     */
     @Autowired
     private PaymentService paymentService;
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache<String> cache;
-    //退款日志
+    /**
+     * 退款日志
+     */
     @Autowired
     private RefundLogService refundLogService;
-    //API域名
+    /**
+     * API域名
+     */
     @Autowired
     private ApiProperties apiProperties;
-    //配置
+    /**
+     * 配置
+     */
     @Autowired
     private SettingService settingService;
-    //联合登陆
+    /**
+     * 联合登陆
+     */
     @Autowired
     private ConnectService connectService;
 
@@ -137,7 +150,7 @@ public class WechatPlugin implements Payment {
 
             return ResultUtil.data(JSONUtil.toJsonStr(response.getBody()));
         } catch (Exception e) {
-            log.error("微信H5支付错误",e);
+            log.error("微信H5支付错误", e);
             throw new ServiceException(ResultCode.PAY_ERROR);
         }
     }
@@ -539,7 +552,7 @@ public class WechatPlugin implements Payment {
         String result = HttpKit.readData(request);
         log.info("微信退款通知密文 {}", result);
         JSONObject ciphertext = JSONUtil.parseObj(result);
-        if (!ciphertext.getStr("event_type").equals("REFUND.SUCCESS")) {
+        if (!("REFUND.SUCCESS").equals(ciphertext.getStr("event_type"))) {
             return;
         }
         try {
@@ -558,7 +571,7 @@ public class WechatPlugin implements Payment {
                 refundLogService.saveOrUpdate(refundLog);
             }
         } catch (Exception e) {
-            log.error("微信退款失败",e);
+            log.error("微信退款失败", e);
         }
     }
 
@@ -573,7 +586,7 @@ public class WechatPlugin implements Payment {
             WechatPaymentSetting wechatPaymentSetting = JSONUtil.toBean(systemSetting.getSettingValue(), WechatPaymentSetting.class);
             return wechatPaymentSetting;
         } catch (Exception e) {
-            log.error("微信支付暂不支持",e);
+            log.error("微信支付暂不支持", e);
             throw new ServiceException(ResultCode.PAY_NOT_SUPPORT);
         }
     }
@@ -616,7 +629,7 @@ public class WechatPlugin implements Payment {
                 String cipherText = encryptCertificate.getStr("ciphertext");
                 String nonce = encryptCertificate.getStr("nonce");
                 publicCert = getPlatformCertStr(associatedData, nonce, cipherText);
-                long second = (PayKit.getCertificate(publicCert).getNotAfter().getTime() - new Date().getTime()) / 1000;
+                long second = (PayKit.getCertificate(publicCert).getNotAfter().getTime() - System.currentTimeMillis()) / 1000;
                 cache.put(CachePrefix.WECHAT_PLAT_FORM_CERT.getPrefix(), publicCert, second);
             } else {
                 log.error("证书获取失败：{}" + body);
@@ -624,7 +637,7 @@ public class WechatPlugin implements Payment {
             }
             return PayKit.getCertificate(publicCert);
         } catch (Exception e) {
-            log.error("证书获取失败",e);
+            log.error("证书获取失败", e);
         }
         return null;
     }

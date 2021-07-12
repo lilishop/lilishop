@@ -13,19 +13,29 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class AlipayPaymentSetting {
 
-    //应用id
+    /**
+     * 应用id
+     */
     private String appId;
 
-    //私钥
+    /**
+     * 私钥
+     */
     private String privateKey;
 
-    //应用证书
+    /**
+     * 应用证书
+     */
     private String certPath;
 
-    //支付宝公钥
+    /**
+     * 支付宝公钥
+     */
     private String alipayPublicCertPath;
 
-    //支付宝根证书
+    /**
+     * 支付宝根证书
+     */
     private String rootCertPath;
 
 }

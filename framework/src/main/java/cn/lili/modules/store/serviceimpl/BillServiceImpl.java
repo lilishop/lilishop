@@ -32,7 +32,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.util.Date;
 
 /**
@@ -42,18 +41,19 @@ import java.util.Date;
  * @date 2020/11/17 4:28 下午
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements BillService {
 
-    //店铺详情
+    /**
+     * 店铺详情
+     */
     @Autowired
     private StoreDetailService storeDetailService;
-    //商家流水
+    /**
+     * 商家流水
+     */
     @Autowired
     private StoreFlowService storeFlowService;
-    //结算单
-    @Resource
-    private BillMapper billMapper;
 
     @Override
     public void createBill(String storeId, Date startTime, DateTime endTime) {
@@ -80,31 +80,31 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
 
         //入账结算信息
         Bill orderBill = this.baseMapper.getOrderBill(new QueryWrapper<Bill>()
-                .eq("store_id",storeId)
-                .eq("flow_type",FlowTypeEnum.PAY.name())
-                .between("create_time",startTime,endTime));
+                .eq("store_id", storeId)
+                .eq("flow_type", FlowTypeEnum.PAY.name())
+                .between("create_time", startTime, endTime));
         Double orderPrice = 0D;
         if (orderBill != null) {
             bill.setOrderPrice(orderBill.getOrderPrice());
             bill.setCommissionPrice(orderBill.getCommissionPrice());
             bill.setDistributionCommission(orderBill.getDistributionCommission());
             bill.setSiteCouponCommission(orderBill.getSiteCouponCommission());
-            orderPrice=orderBill.getBillPrice();
+            orderPrice = orderBill.getBillPrice();
         }
 
 
         //退款结算信息
         Bill refundBill = this.baseMapper.getRefundBill(new QueryWrapper<Bill>()
-                .eq("store_id",storeId)
-                .eq("flow_type",FlowTypeEnum.REFUND.name())
-                .between("create_time",startTime,endTime));
+                .eq("store_id", storeId)
+                .eq("flow_type", FlowTypeEnum.REFUND.name())
+                .between("create_time", startTime, endTime));
         Double refundPrice = 0D;
-        if(refundBill!=null){
+        if (refundBill != null) {
             bill.setRefundPrice(refundBill.getRefundPrice());
             bill.setRefundCommissionPrice(refundBill.getRefundCommissionPrice());
             bill.setDistributionRefundCommission(refundBill.getDistributionRefundCommission());
             bill.setSiteCouponRefundCommission(refundBill.getSiteCouponRefundCommission());
-            refundPrice=refundBill.getBillPrice();
+            refundPrice = refundBill.getBillPrice();
         }
 
         //最终结算金额=入款结算金额-退款结算金额
@@ -197,6 +197,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         return this.update(lambdaUpdateWrapper);
     }
 
+    @Override
     public Integer billNum(BillStatusEnum billStatusEnum) {
         LambdaUpdateWrapper<Bill> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.eq(Bill::getBillStatus, billStatusEnum.name());

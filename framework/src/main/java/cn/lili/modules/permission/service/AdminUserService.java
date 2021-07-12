@@ -83,10 +83,11 @@ public interface AdminUserService extends IService<AdminUser> {
 
 
     /**
-     * 登录
+     * 用户登录
      *
-     * @param username
-     * @param password
+     * @param username 用户名
+     * @param password 密码
+     * @return token
      */
     Token login(String username, String password);
 
@@ -94,8 +95,8 @@ public interface AdminUserService extends IService<AdminUser> {
      * 刷新token
      *
      * @param refreshToken
-     * @return
+     * @return token
      */
-    Object refreshToken(String refreshToken);
+    Token refreshToken(String refreshToken);
 
 }

@@ -29,13 +29,13 @@ public class FreightTemplateServiceChildImpl extends ServiceImpl<FreightTemplate
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean addFreightTemplateChild(List<FreightTemplateChild> freightTemplateChildren) {
         return this.saveBatch(freightTemplateChildren);
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean removeFreightTemplate(String freightTemplateId) {
         LambdaQueryWrapper<FreightTemplateChild> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(FreightTemplateChild::getFreightTemplateId, freightTemplateId);

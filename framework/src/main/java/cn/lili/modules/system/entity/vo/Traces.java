@@ -26,7 +26,7 @@ public class Traces {
     /**
      * 物流单号
      */
-    private String LogisticCode;
+    private String logisticCode;
 
     /**
      * 物流详细信息

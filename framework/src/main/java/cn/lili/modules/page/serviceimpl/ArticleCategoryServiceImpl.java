@@ -30,15 +30,27 @@ import java.util.List;
  * @date 2020-05-5 15:10:16
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMapper, ArticleCategory> implements ArticleCategoryService {
 
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache cache;
-    //文章
+    /**
+     * 文章
+     */
     @Autowired
     private ArticleService articleService;
+    /**
+     * 顶级父分类ID
+     */
+    private String parentId = "0";
+    /**
+     * 最大分类等级
+     */
+    private int maxLevel = 2;
 
     @Override
     public ArticleCategory saveArticleCategory(ArticleCategory articleCategory) {
@@ -46,15 +58,15 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
         List<ArticleCategory> list = this.list(
                 new LambdaQueryWrapper<ArticleCategory>().eq(ArticleCategory::getArticleCategoryName, articleCategory.getArticleCategoryName()));
         if (StringUtils.isNotEmpty(list)) {
-            throw new ServiceException(ResultCode.SUCCESS.ARTICLE_CATEGORY_NAME_EXIST);
+            throw new ServiceException(ResultCode.ARTICLE_CATEGORY_NAME_EXIST);
         }
         //非顶级分类
-        if (articleCategory.getParentId() != null && !articleCategory.getParentId().equals("0")) {
+        if (articleCategory.getParentId() != null && !parentId.equals(articleCategory.getParentId())) {
             ArticleCategory parent = this.getById(articleCategory.getParentId());
             if (parent == null) {
                 throw new ServiceException(ResultCode.ARTICLE_CATEGORY_PARENT_NOT_EXIST);
             }
-            if (articleCategory.getLevel() >= 2) {
+            if (articleCategory.getLevel() >= maxLevel) {
                 throw new ServiceException(ResultCode.ARTICLE_CATEGORY_BEYOND_TWO);
             }
         }
@@ -69,13 +81,13 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
     @Override
     public ArticleCategory updateArticleCategory(ArticleCategory articleCategory) {
         //非顶级分类校验是否存在
-        if (!articleCategory.getParentId().equals("0")) {
+        if (!parentId.equals(articleCategory.getParentId())) {
             ArticleCategory parent = this.getById(articleCategory.getParentId());
             if (parent == null) {
                 throw new ServiceException(ResultCode.ARTICLE_CATEGORY_PARENT_NOT_EXIST);
             }
             //替换catPath 根据path规则来匹配级别
-            if (articleCategory.getLevel() >= 2) {
+            if (articleCategory.getLevel() >= maxLevel) {
                 throw new ServiceException(ResultCode.ARTICLE_CATEGORY_BEYOND_TWO);
             }
         }

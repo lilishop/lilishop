@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2020/11/17 7:38 下午
  */
 @Service
-@Transactional
 public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> implements ReceiptService {
 
     @Override

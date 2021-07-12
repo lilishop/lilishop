@@ -24,7 +24,6 @@ import java.util.List;
  * @date 2021/1/30 3:19 下午
  */
 @Service
-@Transactional
 public class SmsReachServiceImpl extends ServiceImpl<SmsReachMapper, SmsReach> implements SmsReachService {
     @Autowired
     private RocketMQTemplate rocketMQTemplate;

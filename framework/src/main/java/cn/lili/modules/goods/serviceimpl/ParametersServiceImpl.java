@@ -16,6 +16,5 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2020-03-02 16:18:56
  */
 @Service
-@Transactional
 public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Parameters> implements ParametersService {
 }

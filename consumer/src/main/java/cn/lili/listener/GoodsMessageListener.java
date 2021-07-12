@@ -20,7 +20,6 @@ import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.store.service.StoreService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
@@ -42,31 +41,49 @@ import java.util.List;
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.goods-topic}", consumerGroup = "${lili.data.rocketmq.goods-group}")
 public class GoodsMessageListener implements RocketMQListener<MessageExt> {
 
-    //ES商品
+    /**
+     * ES商品
+     */
     @Autowired
     private EsGoodsIndexService goodsIndexService;
-    //店铺
+    /**
+     * 店铺
+     */
     @Autowired
     private StoreService storeService;
-    //商品
+    /**
+     * 商品
+     */
     @Autowired
     private GoodsService goodsService;
-    //商品
+    /**
+     * 商品Sku
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    //用户足迹
+    /**
+     * 用户足迹
+     */
     @Autowired
     private FootprintService footprintService;
-    //商品收藏
+    /**
+     * 商品收藏
+     */
     @Autowired
     private GoodsCollectionService goodsCollectionService;
-    //商品评价
+    /**
+     * 商品评价
+     */
     @Autowired
     private List<GoodsCommentCompleteEvent> goodsCommentCompleteEvents;
-    //分销商品
+    /**
+     * 分销商品
+     */
     @Autowired
     private DistributionGoodsService distributionGoodsService;
-    //分销员-商品关联表
+    /**
+     * 分销员-商品关联表
+     */
     @Autowired
     private DistributionSelectedGoodsService distributionSelectedGoodsService;
 
@@ -123,6 +140,9 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
             case BUY_GOODS_COMPLETE:
                 this.goodsBuyComplete(messageExt);
                 break;
+            default:
+                log.error("商品执行异常：", new String(messageExt.getBody()));
+                break;
         }
     }
 
@@ -131,20 +151,21 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
      * 1.更新店铺的商品数量
      * 2.删除分销员-分销商品绑定关系
      * 3.删除分销商品
+     *
      * @param messageExt 消息
      */
-    private void deleteGoods(MessageExt messageExt){
-        Goods goods=JSONUtil.toBean(new String(messageExt.getBody()),Goods.class);
+    private void deleteGoods(MessageExt messageExt) {
+        Goods goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
         //更新店铺商品数量
         storeService.updateStoreGoodsNum(goods.getStoreId());
 
         //删除获取分销商品
-        DistributionGoods distributionGoods=distributionGoodsService.getOne(new LambdaQueryWrapper<DistributionGoods>()
-                .eq(DistributionGoods::getGoodsId,goods.getId()));
+        DistributionGoods distributionGoods = distributionGoodsService.getOne(new LambdaQueryWrapper<DistributionGoods>()
+                .eq(DistributionGoods::getGoodsId, goods.getId()));
 
         //删除分销商品绑定关系
         distributionSelectedGoodsService.remove(new LambdaQueryWrapper<DistributionSelectedGoods>()
-                .eq(DistributionSelectedGoods::getDistributionGoodsId,distributionGoods.getId()));
+                .eq(DistributionSelectedGoods::getDistributionGoodsId, distributionGoods.getId()));
 
         //删除分销商品
         distributionGoodsService.removeById(distributionGoods.getId());
@@ -155,9 +176,10 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
      * 1.更新商品购买数量
      * 2.更新SKU购买数量
      * 3.更新索引购买数量
+     *
      * @param messageExt
      */
-    private void goodsBuyComplete(MessageExt messageExt){
+    private void goodsBuyComplete(MessageExt messageExt) {
         String goodsCompleteMessageStr = new String(messageExt.getBody());
         List<GoodsCompleteMessage> goodsCompleteMessageList = JSONUtil.toList(JSONUtil.parseArray(goodsCompleteMessageStr), GoodsCompleteMessage.class);
         for (GoodsCompleteMessage goodsCompleteMessage : goodsCompleteMessageList) {

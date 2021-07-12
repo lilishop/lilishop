@@ -56,7 +56,12 @@ public class ResultUtil<T> {
 
     }
 
-    //抽象静态方法，返回结果集
+    /**
+     * 抽象静态方法，返回结果集
+     * @param t
+     * @param <T>
+     * @return
+     */
     public static <T> ResultMessage<T> data(T t) {
         return new ResultUtil<T>().setData(t);
     }

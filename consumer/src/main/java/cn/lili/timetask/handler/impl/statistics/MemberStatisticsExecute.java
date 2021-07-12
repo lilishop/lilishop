@@ -20,7 +20,9 @@ import java.util.Date;
 @Component
 public class MemberStatisticsExecute implements EveryDayExecute {
 
-    //会员统计
+    /**
+     * 会员统计
+     */
     @Autowired
     private MemberStatisticsDataService memberStatisticsDataService;
 

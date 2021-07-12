@@ -22,13 +22,17 @@ import java.util.List;
  * @date 2020/11/17 3:50 下午
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
 
-    //部门角色
+    /**
+     * 部门角色
+     */
     @Autowired
     private DepartmentRoleService departmentRoleService;
-    //用户权限
+    /**
+     * 用户权限
+     */
     @Autowired
     private UserRoleService userRoleService;
 

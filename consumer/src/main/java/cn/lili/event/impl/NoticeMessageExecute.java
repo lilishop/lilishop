@@ -44,7 +44,7 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
         NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
         noticeMessageDTO.setMemberId(tradeDTO.getMemberId());
         noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.ORDER_CREATE_SUCCESS);
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>(2);
         params.put("goods", tradeDTO.getSkuList().get(0).getGoodsSku().getGoodsName());
         noticeMessageDTO.setParameter(params);
         //保存站内信
@@ -58,7 +58,7 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
         NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
         //如果订单状态不为空
         if (orderDetailVO != null) {
-            Map<String, String> params = new HashMap<>();
+            Map<String, String> params = new HashMap<>(2);
             switch (orderMessage.getNewStatus()) {
                 //如果订单新的状态为已取消 则发送取消订单站内信
                 case CANCELLED:
@@ -103,7 +103,7 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
     public void afterSaleStatusChange(AfterSale afterSale) {
         NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
         noticeMessageDTO.setMemberId(afterSale.getMemberId());
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>(2);
         params.put("goods", afterSale.getGoodsName());
         params.put("refuse", afterSale.getAuditRemark());
         noticeMessageDTO.setParameter(params);
@@ -154,7 +154,7 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
         //组织站内信参数
         NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
         noticeMessageDTO.setMemberId(memberPointMessage.getMemberId());
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>(2);
         if (memberPointMessage.getType()) {
             params.put("expenditure_points", "0");
             params.put("income_points", memberPointMessage.getPoint().toString());
@@ -178,7 +178,7 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
             //组织参数
             NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
             noticeMessageDTO.setMemberId(memberWithdrawalMessage.getMemberId());
-            Map<String, String> params = new HashMap<>();
+            Map<String, String> params = new HashMap<>(2);
             params.put("income", memberWithdrawalMessage.getPrice().toString());
             noticeMessageDTO.setParameter(params);
             noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_SUCCESS);

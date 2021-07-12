@@ -39,19 +39,27 @@ import java.util.List;
  * @date 2020-03-14 23:04:56
  */
 @Service
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderMapper, DistributionOrder> implements DistributionOrderService {
 
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
-    //店铺流水
+    /**
+     * 店铺流水
+     */
     @Autowired
     private StoreFlowService storeFlowService;
-    //分销员
+    /**
+     * 分销员
+     */
     @Autowired
     private DistributionService distributionService;
-    //系统设置
+    /**
+     * 系统设置
+     */
     @Autowired
     private SettingService settingService;
 

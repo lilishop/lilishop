@@ -49,10 +49,10 @@ public class AfterSaleApplyVO {
     private String accountType;
 
     @ApiModelProperty(value = "是否支持退货")
-    private boolean returnGoods;
+    private Boolean returnGoods;
 
     @ApiModelProperty(value = "是否支持退款")
-    private boolean returnMoney;
+    private Boolean returnMoney;
 
 
 }

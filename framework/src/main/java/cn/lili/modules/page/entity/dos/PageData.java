@@ -57,7 +57,6 @@ public class PageData extends BaseEntity {
     @ApiModelProperty(value = "值")
     private String num;
 
-    //店铺首页
     public PageData(String name, String pageClientType, String pageData) {
         this.pageClientType = pageClientType;
         this.pageData = pageData;

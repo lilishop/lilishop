@@ -25,16 +25,24 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component(TimeExecuteConstant.PROMOTION_EXECUTOR)
 public class PromotionTimeTriggerExecutor implements TimeTriggerExecutor {
-    //促销
+    /**
+     * 促销
+     */
     @Autowired
     private PromotionService promotionService;
-    //Rocketmq
+    /**
+     * RocketMQ
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    //延时任务
+    /**
+     * 延时任务
+     */
     @Autowired
     private TimeTrigger timeTrigger;
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
 

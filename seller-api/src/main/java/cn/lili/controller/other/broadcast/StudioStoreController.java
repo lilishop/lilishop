@@ -56,7 +56,7 @@ public class StudioStoreController {
 
     @ApiOperation(value = "修改直播间")
     @PutMapping("/edit")
-    public ResultMessage<Object> edit(@Validated Studio studio) {
+    public ResultMessage<Object> edit(Studio studio) {
         if (studioService.edit(studio)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }

@@ -32,23 +32,35 @@ import java.util.List;
 @Service
 public class StockUpdateExecute implements OrderStatusChangeEvent {
 
-    //出库失败消息
+    /**
+     * 出库失败消息
+     */
     static String outOfStockMessage = "库存不足，出库失败";
-    //Redis
+    /**
+     * Redis
+     */
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private DefaultRedisScript<Boolean> quantityScript;
-    //订单
+    /**
+     * 订单
+     */
     @Autowired
     private OrderService orderService;
-    //规格商品
+    /**
+     * 规格商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    //促销商品
+    /**
+     * 促销商品
+     */
     @Autowired
     private PromotionGoodsService promotionGoodsService;
-    //缓存
+    /**
+     * 缓存
+     */
     @Autowired
     private Cache cache;
 

@@ -20,7 +20,6 @@ import javax.transaction.Transactional;
  * @since 2020/12/5
  **/
 @Service
-@Transactional
 public class OrderComplaintCommunicationServiceImpl extends ServiceImpl<OrderComplainCommunicationMapper, OrderComplaintCommunication> implements OrderComplaintCommunicationService {
 
     @Override
