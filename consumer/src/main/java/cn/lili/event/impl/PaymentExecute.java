@@ -40,7 +40,10 @@ public class PaymentExecute implements OrderStatusChangeEvent {
                 if (order.getPayStatus() == PayStatusEnum.UNPAID.name()) {
                     return;
                 }
-
+                //如果未付款，则不去要退回相关代码执行
+                if (order.getPayStatus().equals(PayStatusEnum.UNPAID.name())) {
+                    return;
+                }
                 PaymentMethodEnum paymentMethodEnum = PaymentMethodEnum.valueOf(order.getPaymentMethod());
                 //进行退款操作
                 switch (paymentMethodEnum) {
@@ -69,7 +72,7 @@ public class PaymentExecute implements OrderStatusChangeEvent {
                     case BANK_TRANSFER:
                         break;
                     default:
-                        log.error("订单支付执行异常,订单编号：", orderMessage.getOrderSn());
+                        log.error("订单支付执行异常,订单编号：{}", orderMessage.getOrderSn());
                         break;
                 }
                 break;
