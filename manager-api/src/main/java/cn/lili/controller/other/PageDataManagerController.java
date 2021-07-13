@@ -58,7 +58,7 @@ public class PageDataManagerController {
     }
 
     @ApiOperation(value = "页面列表")
-    @GetMapping("pageDataList")
+    @GetMapping("/pageDataList")
     public ResultMessage<IPage<PageDataListVO>> pageDataList(PageVO pageVO, PageDataDTO pageDataDTO) {
         return ResultUtil.data(pageDataService.getPageDataList(pageVO, pageDataDTO));
     }

@@ -84,7 +84,6 @@ public class AfterSaleSearchParams extends PageVO {
         if (StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.MANAGER.name())
                 && StringUtils.isNotEmpty(storeId)
         ) {
-
             queryWrapper.eq("store_id", storeId);
         }
         if (StringUtils.isNotEmpty(memberName)) {

@@ -40,9 +40,6 @@ public class GoodsSearchParams extends PageVO {
     @ApiModelProperty(value = "分类path")
     private String categoryPath;
 
-    @ApiModelProperty(value = "是否是积分商品")
-    private Boolean isPoint;
-
     @ApiModelProperty(value = "店铺分类id")
     private String storeCategoryPath;
 
@@ -92,9 +89,6 @@ public class GoodsSearchParams extends PageVO {
         }
         if (StringUtils.isNotEmpty(categoryPath)) {
             queryWrapper.like("category_path", categoryPath);
-        }
-        if (isPoint != null) {
-            queryWrapper.eq("is_point", isPoint);
         }
         if (StringUtils.isNotEmpty(storeCategoryPath)) {
             queryWrapper.like("store_category_path", storeCategoryPath);

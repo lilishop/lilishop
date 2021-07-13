@@ -111,8 +111,8 @@ public class StoreManagerController {
 
     @ApiOperation(value = "查询一级分类列表")
     @ApiImplicitParam(name = "storeId", value = "店铺id", required = true, dataType = "String", paramType = "path")
-    @GetMapping(value = "/ManagementCategory/{storeId}")
-    public ResultMessage<List<CategoryVO>> firstCategory(String storeId) {
+    @GetMapping(value = "/managementCategory/{storeId}")
+    public ResultMessage<List<CategoryVO>> firstCategory(@PathVariable String storeId) {
         return ResultUtil.data(this.storeDetailService.goodsManagementCategory(storeId));
     }
 
