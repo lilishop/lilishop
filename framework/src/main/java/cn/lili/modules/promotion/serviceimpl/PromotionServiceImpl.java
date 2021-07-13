@@ -9,7 +9,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.promotion.entity.dos.*;
-import cn.lili.modules.promotion.entity.dto.KanJiaActivityGoodsDTO;
+import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.enums.*;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.entity.vos.PintuanVO;
@@ -98,7 +98,7 @@ public class PromotionServiceImpl implements PromotionService {
     @Autowired
     private MongoTemplate mongoTemplate;
     @Autowired
-    private KanJiaActivityGoodsService kanJiaActivityGoodsService;
+    private KanjiaActivityGoodsService kanJiaActivityGoodsService;
 
 
     @Override
@@ -465,7 +465,7 @@ public class PromotionServiceImpl implements PromotionService {
      * @return 修改结果
      */
     private boolean updateKanJiaGoods(PromotionMessage promotionMessage, PromotionTypeEnum promotionTypeEnum) {
-        KanJiaActivityGoodsDTO kanJiaActivityGoodsDTO = this.mongoTemplate.findById(promotionMessage.getPromotionId(), KanJiaActivityGoodsDTO.class);
+        KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO = this.mongoTemplate.findById(promotionMessage.getPromotionId(), KanjiaActivityGoodsDTO.class);
         if (kanJiaActivityGoodsDTO == null) {
             this.throwPromotionException(promotionTypeEnum, promotionMessage.getPromotionId(), promotionMessage.getPromotionStatus());
             return false;

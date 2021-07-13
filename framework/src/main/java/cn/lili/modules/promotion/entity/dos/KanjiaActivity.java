@@ -20,13 +20,13 @@ import javax.persistence.Table;
 @Table(name = "li_kanjia_activity")
 @TableName("li_kanjia_activity")
 @ApiModel(value = "砍价活动参与对象")
-public class KanJiaActivity extends BaseEntity {
+public class KanjiaActivity extends BaseEntity {
 
 
     private static final long serialVersionUID = -1583030890805926292L;
 
     @ApiModelProperty(value = "砍价商品id")
-    private String kanJiaActivityGoodsId;
+    private String kanjiaActivityGoodsId;
 
     @ApiModelProperty(value = "参与砍价活动会员id")
     private String memberId;

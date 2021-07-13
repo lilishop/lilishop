@@ -6,10 +6,10 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.promotion.entity.dto.KanJiaActivityGoodsDTO;
-import cn.lili.modules.promotion.entity.dto.KanJiaActivityGoodsOperationDTO;
-import cn.lili.modules.promotion.entity.vos.KanJiaActivityGoodsParams;
-import cn.lili.modules.promotion.service.KanJiaActivityGoodsService;
+import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
+import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsOperationDTO;
+import cn.lili.modules.promotion.entity.vos.KanjiaActivityGoodsParams;
+import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,11 +31,11 @@ import java.util.Arrays;
 public class KanJiaActivityGoodsManagerController {
 
     @Autowired
-    private KanJiaActivityGoodsService kanJiaActivityGoodsService;
+    private KanjiaActivityGoodsService kanJiaActivityGoodsService;
 
     @PostMapping
     @ApiOperation(value = "添加砍价活动")
-    public ResultMessage<Object> add(@RequestBody KanJiaActivityGoodsOperationDTO kanJiaActivityGoodsOperationDTO) {
+    public ResultMessage<Object> add(@RequestBody KanjiaActivityGoodsOperationDTO kanJiaActivityGoodsOperationDTO) {
         kanJiaActivityGoodsService.add(kanJiaActivityGoodsOperationDTO);
         return ResultUtil.success();
     }
@@ -43,7 +43,7 @@ public class KanJiaActivityGoodsManagerController {
 
     @ApiOperation(value = "获取砍价活动分页")
     @GetMapping
-    public ResultMessage<IPage<KanJiaActivityGoodsDTO>> getKanJiaActivityPage(KanJiaActivityGoodsParams KanJiaActivityParams, PageVO page) {
+    public ResultMessage<IPage<KanjiaActivityGoodsDTO>> getKanJiaActivityPage(KanjiaActivityGoodsParams KanJiaActivityParams, PageVO page) {
         return ResultUtil.data(kanJiaActivityGoodsService.getForPage(KanJiaActivityParams, page));
     }
 
@@ -51,14 +51,14 @@ public class KanJiaActivityGoodsManagerController {
     @GetMapping("/{id}")
     @ApiOperation(value = "获取积分商品详情")
     public ResultMessage<Object> getPointsGoodsDetail(@PathVariable("id") String goodsId) {
-        KanJiaActivityGoodsDTO kanJiaActivityGoodsDTO = kanJiaActivityGoodsService.getKanJiaGoodsDetail(goodsId);
+        KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO = kanJiaActivityGoodsService.getKanJiaGoodsDetail(goodsId);
         return ResultUtil.data(kanJiaActivityGoodsDTO);
     }
 
 
     @PutMapping
     @ApiOperation(value = "修改砍价商品")
-    public ResultMessage<Object> updatePointsGoods(@RequestBody KanJiaActivityGoodsDTO kanJiaActivityGoodsDTO) {
+    public ResultMessage<Object> updatePointsGoods(@RequestBody KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO) {
         kanJiaActivityGoodsService.updateKanJiaActivityGoods(kanJiaActivityGoodsDTO);
         return ResultUtil.success();
     }

@@ -1,19 +1,14 @@
 package cn.lili.modules.promotion.entity.vos;
 
 
-import org.springframework.data.domain.Sort;
-
-import org.springframework.data.domain.Sort.Direction;
-
-import org.springframework.data.mongodb.core.query.Criteria;
-
-import org.springframework.data.mongodb.core.query.Query;
-
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.lili.modules.promotion.entity.enums.*;
+import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -26,17 +21,17 @@ import java.util.regex.Pattern;
  * @date 2020/8/21
  **/
 @Data
-public class KanJiaActivityGoodsParams implements Serializable {
+public class KanjiaActivityGoodsParams implements Serializable {
 
     private static final long serialVersionUID = 1344104067705714289L;
 
     @ApiModelProperty(value = "活动商品")
     private String goodsName;
 
-    @ApiModelProperty(value = "活动开始时间", required = true)
+    @ApiModelProperty(value = "活动开始时间")
     private Long startTime;
 
-    @ApiModelProperty(value = "活动结束时间", required = true)
+    @ApiModelProperty(value = "活动结束时间")
     private Long endTime;
 
     @ApiModelProperty(value = "skuId")

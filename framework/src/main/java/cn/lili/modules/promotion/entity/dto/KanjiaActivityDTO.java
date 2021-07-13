@@ -1,7 +1,7 @@
 package cn.lili.modules.promotion.entity.dto;
 
 
-import cn.lili.modules.promotion.entity.dos.KanJiaActivityLog;
+import cn.lili.modules.promotion.entity.dos.KanjiaActivityLog;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -15,9 +15,9 @@ import lombok.Data;
  */
 @Data
 @ApiModel(value = "砍价活动参与记录对象")
-public class KanJiaActivityDTO extends KanJiaActivityLog {
+public class KanjiaActivityDTO extends KanjiaActivityLog {
 
     @ApiModelProperty(value = "砍价金额")
-    private String kanJiaActivityGoodsId;
+    private String kanjiaActivityGoodsId;
 
 }

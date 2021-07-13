@@ -17,7 +17,7 @@ import java.util.List;
  * @date 2020/8/21
  **/
 @Data
-public class KanJiaActivityGoodsOperationDTO implements Serializable {
+public class KanjiaActivityGoodsOperationDTO implements Serializable {
 
 
     private static final long serialVersionUID = -1378599087650538592L;
@@ -33,6 +33,6 @@ public class KanJiaActivityGoodsOperationDTO implements Serializable {
     private Date endTime;
 
     @ApiModelProperty(value = "砍价活动商品列表")
-    List<KanJiaActivityGoodsDTO> promotionGoodsList;
+    List<KanjiaActivityGoodsDTO> promotionGoodsList;
 
 }

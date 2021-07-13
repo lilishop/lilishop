@@ -26,7 +26,7 @@ import java.util.Date;
 @Table(name = "li_kanjia_activity_goods")
 @TableName("li_kanjia_activity_goods")
 @ApiModel(value = "砍价活动商品对象")
-public class KanJiaActivityGoods extends BaseEntity {
+public class KanjiaActivityGoods extends BaseEntity {
 
     private static final long serialVersionUID = 6694714877345423488L;
 

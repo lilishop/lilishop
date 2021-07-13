@@ -17,7 +17,7 @@ import java.util.Date;
  */
 @Data
 @ApiModel(value = "砍价活动参与记录查询对象")
-public class KanJiaActivityQuery {
+public class KanjiaActivityQuery {
 
 
     private static final long serialVersionUID = -1583030890805926292L;

@@ -1,6 +1,6 @@
 package cn.lili.modules.promotion.mapper;
 
-import cn.lili.modules.promotion.entity.dos.KanJiaActivity;
+import cn.lili.modules.promotion.entity.dos.KanjiaActivity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -10,6 +10,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author qiuqiu
  * @date 2021/7/1
  */
-public interface KanJiaActivityMapper extends BaseMapper<KanJiaActivity> {
+public interface KanJiaActivityMapper extends BaseMapper<KanjiaActivity> {
 
 }
