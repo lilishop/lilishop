@@ -57,8 +57,9 @@ public class PointLogInterceptor {
                 memberPointsHistory.setMemberId(member.getId());
                 memberPointsHistory.setMemberName(member.getUsername());
                 memberPointsHistory.setPointType(type ? PointTypeEnum.INCREASE.name() : PointTypeEnum.REDUCE.name());
+
                 memberPointsHistory.setVariablePoint(point);
-                memberPointsHistory.setBeforePoint(new Double(CurrencyUtil.sub(member.getPoint(), point)).longValue());
+                memberPointsHistory.setBeforePoint(true ? new Double(CurrencyUtil.sub(member.getPoint(), point)).longValue() : new Double(CurrencyUtil.add(member.getPoint(), point)).longValue());
                 memberPointsHistory.setPoint(member.getPoint());
                 memberPointsHistory.setContent(obj[3] == null ? "" : obj[3].toString());
                 memberPointsHistory.setCreateBy("系统");
