@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.entity.dos;
 
 import cn.lili.base.BaseEntity;
+import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -46,6 +47,9 @@ public class KanjiaActivity extends BaseEntity {
     @ApiModelProperty(value = "缩略图")
     private String thumbnail;
 
+    /**
+     * @see KanJiaStatusEnum
+     */
     @ApiModelProperty(value = "我的砍价状态")
     private String status;
 

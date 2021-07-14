@@ -30,10 +30,10 @@ public class KanJiaActivityLogQuery {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
 
         if (CharSequenceUtil.isNotEmpty(kanJiaActivityId)) {
-            queryWrapper.like("kan_jia_activity_id", kanJiaActivityId);
+            queryWrapper.like("kanjia_activity_id", kanJiaActivityId);
         }
         if (memberId != null) {
-            queryWrapper.eq("kan_jia_member_id", memberId);
+            queryWrapper.eq("kanjia_member_id", memberId);
         }
         queryWrapper.eq("delete_flag", false);
         queryWrapper.orderByDesc("create_time");

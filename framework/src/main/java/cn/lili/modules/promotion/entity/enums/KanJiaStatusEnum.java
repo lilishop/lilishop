@@ -8,7 +8,22 @@ package cn.lili.modules.promotion.entity.enums;
  */
 public enum KanJiaStatusEnum {
 
-    START("开始"), FAIL("失败"), SUCCESS("成功");
+    /**
+     * 已开始
+     */
+    START("开始"),
+    /**
+     * 砍价失败
+     */
+    FAIL("失败"),
+    /**
+     * 砍价成功
+     */
+    SUCCESS("成功"),
+    /**
+     * 砍价活动结束
+     */
+    END("已结束");
 
     private final String description;
 

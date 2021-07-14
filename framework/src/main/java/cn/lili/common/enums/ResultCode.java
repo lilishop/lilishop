@@ -241,6 +241,7 @@ public enum ResultCode {
     PROMOTION_UPDATE_ERROR(40008,"当前活动已开始/结束，无法编辑！"),
     PROMOTION_ACTIVITY_GOODS_ERROR(40009,"当前活动已经开始无法添加商品"),
     PROMOTION_ACTIVITY_ERROR(40009,"当前促销活动不存在"),
+    PROMOTION_LOG_EXIST(40010,"活动已参加，已发重复参加"),
 
     /**
      * 优惠券
@@ -339,6 +340,8 @@ public enum ResultCode {
     KANJIA_ACTIVITY_NOT_FOUND_ERROR(48008, "砍价记录不存在"),
     KANJIA_ACTIVITY_LOG_MEMBER_ERROR(48009, "当前会员已经帮砍"),
     KANJIA_ACTIVITY_MEMBER_ERROR(48010, "当前会员已经发起此砍价商品活动"),
+    KANJIA_ACTIVITY_NOT_PASS_ERROR(48011, "当前砍价未满足条件，不能进行购买"),
+    KANJIA_NUM_BUY_ERROR(48012, "砍价商品购买数量不正确"),
     /**
      * 店铺
      */

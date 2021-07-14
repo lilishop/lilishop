@@ -34,9 +34,9 @@ public class KanjiaActivitySearchParams {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq(StrUtil.isNotEmpty(id), "id", id);
         queryWrapper.eq(StrUtil.isNotEmpty(kanjiaActivityId), "id", kanjiaActivityId);
-        queryWrapper.eq(StrUtil.isNotEmpty(kanjiaActivityGoodsId), "kanJia_activity_goods_id", kanjiaActivityGoodsId);
+        queryWrapper.eq(StrUtil.isNotEmpty(kanjiaActivityGoodsId), "kanjia_activity_goods_id", kanjiaActivityGoodsId);
         queryWrapper.eq(StrUtil.isNotEmpty(memberId), "member_id", memberId);
         queryWrapper.eq(StrUtil.isNotEmpty(status), "status", status);
-        return wrapper();
+        return queryWrapper;
     }
 }

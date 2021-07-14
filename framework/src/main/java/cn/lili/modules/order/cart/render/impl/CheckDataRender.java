@@ -10,6 +10,7 @@ import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
@@ -42,12 +43,14 @@ public class CheckDataRender implements CartRenderStep {
 
     @Override
     public void render(TradeDTO tradeDTO) {
-        //校验商品有效性
-        checkData(tradeDTO);
-        //店铺分组数据初始化
-        groupStore(tradeDTO);
         //预校验
         preCalibration(tradeDTO);
+
+        //校验商品有效性
+        checkData(tradeDTO);
+
+        //店铺分组数据初始化
+        groupStore(tradeDTO);
 
     }
 
@@ -125,15 +128,22 @@ public class CheckDataRender implements CartRenderStep {
      * @param tradeDTO
      */
     private void preCalibration(TradeDTO tradeDTO) {
-        //拼团判定，不能参与自己创建的拼团
-        if (tradeDTO.getParentOrderSn() != null) {
-            //订单接受
-            cn.lili.modules.order.order.entity.dos.Order parentOrder = orderService.getBySn(tradeDTO.getParentOrderSn());
-            //参与活动判定
-            if (parentOrder.getMemberId().equals(UserContext.getCurrentUser().getId())) {
-                throw new ServiceException(ResultCode.PINTUAN_JOIN_ERROR);
+
+        //拼团订单预校验
+        if(tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)){
+            //拼团判定，不能参与自己创建的拼团
+            if (tradeDTO.getParentOrderSn() != null) {
+                //订单接受
+                cn.lili.modules.order.order.entity.dos.Order parentOrder = orderService.getBySn(tradeDTO.getParentOrderSn());
+                //参与活动判定
+                if (parentOrder.getMemberId().equals(UserContext.getCurrentUser().getId())) {
+                    throw new ServiceException(ResultCode.PINTUAN_JOIN_ERROR);
+                }
             }
+        }else if(tradeDTO.getCartTypeEnum().equals(CartTypeEnum.KANJIA)){
+
         }
+
     }
 
 }

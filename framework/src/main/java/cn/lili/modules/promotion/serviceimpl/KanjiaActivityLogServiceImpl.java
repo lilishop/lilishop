@@ -51,8 +51,8 @@ public class KanjiaActivityLogServiceImpl extends ServiceImpl<KanJiaActivityLogM
     public KanjiaActivityLog addKanJiaActivityLog(KanjiaActivityDTO kanjiaActivityDTO) {
         //校验当前会员是否已经参与过此次砍价
         QueryWrapper<KanjiaActivityLog> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq(kanjiaActivityDTO.getKanjiaMemberId() != null, "kan_jia_member_id", kanjiaActivityDTO.getKanjiaMemberId());
-        queryWrapper.eq(kanjiaActivityDTO.getKanjiaActivityId() != null, "kan_jia_activity_id", kanjiaActivityDTO.getKanjiaActivityId());
+        queryWrapper.eq(kanjiaActivityDTO.getKanjiaMemberId() != null, "kanjia_member_id", kanjiaActivityDTO.getKanjiaMemberId());
+        queryWrapper.eq(kanjiaActivityDTO.getKanjiaActivityId() != null, "kanjia_activity_id", kanjiaActivityDTO.getKanjiaActivityId());
         Integer count = this.baseMapper.selectCount(queryWrapper);
         if (count > 0) {
             throw new ServiceException(ResultCode.KANJIA_ACTIVITY_LOG_MEMBER_ERROR);

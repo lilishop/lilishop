@@ -70,7 +70,7 @@ public class SkuPromotionRender implements CartRenderStep {
 
 
     /**
-     * 渲染单品优惠 积分/拼团/秒杀
+     * 渲染单品优惠 积分/拼团/秒杀/砍价
      *
      * @param tradeDTO 购物车视图
      */

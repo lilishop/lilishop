@@ -27,6 +27,10 @@ public enum CartTypeEnum {
     /**
      * 虚拟商品
      */
-    VIRTUAL;
+    VIRTUAL,
+    /**
+     * 砍价商品
+     */
+    KANJIA;
 
 }

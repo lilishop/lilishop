@@ -17,7 +17,6 @@ import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
-import cn.lili.modules.promotion.entity.dos.PointsGoods;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
 import cn.lili.modules.promotion.entity.dto.BasePromotion;
@@ -123,10 +122,14 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
             //下一次更新时间
             cartSkuVO.setUpdatePromotionTime(date);
         }
-        PointsGoods pointsGoods = pointsGoodsService.getPointsGoodsDetailBySkuId(cartSkuVO.getGoodsSku().getId());
-        if (pointsGoods != null) {
-            cartSkuVO.setPoint(pointsGoods.getPoints().intValue());
-        }
+        //TODO 积分商品逻辑实现
+//        PointsGoods pointsGoods = pointsGoodsService.getPointsGoodsDetailBySkuId(cartSkuVO.getGoodsSku().getId());
+//        if (pointsGoods != null) {
+//            cartSkuVO.setPoint(pointsGoods.getPoints().intValue());
+//        }
+
+
+        //分销商品
         DistributionGoods distributionGoods = distributionGoodsService.distributionGoodsVOBySkuId(cartSkuVO.getGoodsSku().getId());
         if (distributionGoods != null) {
             cartSkuVO.setDistributionGoods(distributionGoods);

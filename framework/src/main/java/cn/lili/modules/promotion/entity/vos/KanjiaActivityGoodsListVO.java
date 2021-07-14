@@ -12,8 +12,8 @@ import lombok.Data;
 @Data
 public class KanjiaActivityGoodsListVO {
 
-    @ApiModelProperty(value = "货品id")
-    private String skuId;
+    @ApiModelProperty(value = "砍价活动商品id")
+    private String id;
 
     @ApiModelProperty(value = "货品名称")
     private String goodsName;
