@@ -73,9 +73,10 @@ public class MemberPointsHistory {
     @ApiModelProperty(value = "content")
     private String content;
 
-    @Min(message = "最小值为0", value = 0)
-    @Max(message = "最大值为1", value = 1)
-    @ApiModelProperty(value = "消费积分类型，1为增加，0为消费")
-    private Integer pointType;
+    /**
+     * @see cn.lili.modules.member.entity.enums.PointTypeEnum
+     */
+    @ApiModelProperty(value = "消费积分类型")
+    private String pointType;
 
 }

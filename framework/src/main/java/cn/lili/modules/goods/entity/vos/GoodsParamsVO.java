@@ -12,7 +12,7 @@ import lombok.Data;
  * @date 2020-02-26 23:24:13
  */
 @Data
-public class GoodsParamsDTOVO extends GoodsParamsDTO {
+public class GoodsParamsVO extends GoodsParamsDTO {
 
     private static final long serialVersionUID = -4904700751774005326L;
     @ApiModelProperty("1 输入项   2 选择项")
