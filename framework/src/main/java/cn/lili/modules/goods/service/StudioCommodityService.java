@@ -1,6 +1,6 @@
-package cn.lili.modules.broadcast.service;
+package cn.lili.modules.goods.service;
 
-import cn.lili.modules.broadcast.entity.dos.StudioCommodity;
+import cn.lili.modules.goods.entity.dos.StudioCommodity;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

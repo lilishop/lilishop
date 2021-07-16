@@ -1,4 +1,4 @@
-package cn.lili.modules.base.aspect;
+package cn.lili.modules.system.aspect;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;

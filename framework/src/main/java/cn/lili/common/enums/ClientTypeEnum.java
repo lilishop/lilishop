@@ -1,4 +1,4 @@
-package cn.lili.modules.base.enums;
+package cn.lili.common.enums;
 
 
 /**

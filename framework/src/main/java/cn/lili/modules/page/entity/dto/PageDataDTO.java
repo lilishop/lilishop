@@ -1,6 +1,6 @@
 package cn.lili.modules.page.entity.dto;
 
-import cn.lili.modules.base.enums.ClientTypeEnum;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.page.entity.enums.PageEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

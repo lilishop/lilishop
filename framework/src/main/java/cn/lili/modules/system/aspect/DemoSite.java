@@ -1,4 +1,4 @@
-package cn.lili.modules.base.aspect;
+package cn.lili.modules.system.aspect;
 
 import java.lang.annotation.*;
 

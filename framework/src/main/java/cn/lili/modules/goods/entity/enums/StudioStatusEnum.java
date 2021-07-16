@@ -1,4 +1,4 @@
-package cn.lili.modules.broadcast.entity.enums;
+package cn.lili.modules.goods.entity.enums;
 
 
 /**

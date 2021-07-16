@@ -1,6 +1,6 @@
-package cn.lili.modules.broadcast.entity.vos;
+package cn.lili.modules.goods.entity.vos;
 
-import cn.lili.modules.broadcast.entity.dos.Commodity;
+import cn.lili.modules.goods.entity.dos.Commodity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

@@ -1,6 +1,6 @@
 package cn.lili.modules.order.cart.entity.vo;
 
-import cn.lili.modules.base.enums.ClientTypeEnum;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.order.cart.entity.dto.StoreRemarkDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

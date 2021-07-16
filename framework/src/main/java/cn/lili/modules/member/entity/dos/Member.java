@@ -1,7 +1,7 @@
 package cn.lili.modules.member.entity.dos;
 
 import cn.lili.base.BaseEntity;
-import cn.lili.modules.base.enums.ClientTypeEnum;
+import cn.lili.common.enums.ClientTypeEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;

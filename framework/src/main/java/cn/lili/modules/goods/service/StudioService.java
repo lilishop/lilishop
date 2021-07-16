@@ -1,9 +1,9 @@
-package cn.lili.modules.broadcast.service;
+package cn.lili.modules.goods.service;
 
 import cn.lili.common.delayqueue.BroadcastMessage;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.broadcast.entity.dos.Studio;
-import cn.lili.modules.broadcast.entity.vos.StudioVO;
+import cn.lili.modules.goods.entity.dos.Studio;
+import cn.lili.modules.goods.entity.vos.StudioVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 

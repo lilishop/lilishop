@@ -1,6 +1,6 @@
 package cn.lili.modules.payment.kit.plugin.bank;
 
-import cn.lili.modules.base.enums.ClientTypeEnum;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.kit.Payment;

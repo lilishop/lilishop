@@ -1,8 +1,8 @@
-package cn.lili.modules.broadcast.service;
+package cn.lili.modules.goods.service;
 
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.broadcast.entity.dos.Commodity;
-import cn.lili.modules.broadcast.entity.vos.CommodityVO;
+import cn.lili.modules.goods.entity.dos.Commodity;
+import cn.lili.modules.goods.entity.vos.CommodityVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 

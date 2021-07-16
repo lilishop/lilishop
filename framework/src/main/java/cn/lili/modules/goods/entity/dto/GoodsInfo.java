@@ -1,7 +1,7 @@
-package cn.lili.modules.broadcast.entity.dto;
+package cn.lili.modules.goods.entity.dto;
 
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.modules.broadcast.entity.dos.Commodity;
+import cn.lili.modules.goods.entity.dos.Commodity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;

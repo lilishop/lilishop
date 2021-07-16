@@ -3,7 +3,7 @@ package cn.lili.modules.page.entity.dos;
 import cn.lili.base.BaseEntity;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.enums.SwitchEnum;
-import cn.lili.modules.base.enums.ClientTypeEnum;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.page.entity.enums.PageEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;

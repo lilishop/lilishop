@@ -1,11 +1,11 @@
-package cn.lili.modules.broadcast.util;
+package cn.lili.modules.goods.util;
 
 import cn.hutool.json.JSONObject;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.base.enums.ClientTypeEnum;
-import cn.lili.modules.broadcast.entity.dos.Commodity;
-import cn.lili.modules.broadcast.entity.dos.Studio;
-import cn.lili.modules.broadcast.entity.dto.GoodsInfo;
+import cn.lili.common.enums.ClientTypeEnum;
+import cn.lili.modules.goods.entity.dos.Commodity;
+import cn.lili.modules.goods.entity.dos.Studio;
+import cn.lili.modules.goods.entity.dto.GoodsInfo;
 import cn.lili.modules.message.util.WechatAccessTokenUtil;
 import cn.lili.modules.system.utils.HttpUtils;
 import lombok.extern.slf4j.Slf4j;

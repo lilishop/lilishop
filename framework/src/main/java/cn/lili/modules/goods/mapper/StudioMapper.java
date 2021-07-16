@@ -1,6 +1,6 @@
-package cn.lili.modules.broadcast.mapper;
+package cn.lili.modules.goods.mapper;
 
-import cn.lili.modules.broadcast.entity.dos.Studio;
+import cn.lili.modules.goods.entity.dos.Studio;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

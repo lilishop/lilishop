@@ -1,7 +1,7 @@
-package cn.lili.modules.broadcast.mapper;
+package cn.lili.modules.goods.mapper;
 
-import cn.lili.modules.broadcast.entity.dos.Commodity;
-import cn.lili.modules.broadcast.entity.vos.CommodityVO;
+import cn.lili.modules.goods.entity.dos.Commodity;
+import cn.lili.modules.goods.entity.vos.CommodityVO;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;

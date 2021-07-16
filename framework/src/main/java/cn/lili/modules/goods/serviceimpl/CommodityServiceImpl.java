@@ -1,4 +1,4 @@
-package cn.lili.modules.broadcast.serviceimpl;
+package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONArray;
@@ -10,12 +10,12 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.broadcast.entity.dos.Commodity;
-import cn.lili.modules.broadcast.entity.dto.CommodityDTO;
-import cn.lili.modules.broadcast.entity.vos.CommodityVO;
-import cn.lili.modules.broadcast.mapper.CommodityMapper;
-import cn.lili.modules.broadcast.service.CommodityService;
-import cn.lili.modules.broadcast.util.WechatLivePlayerUtil;
+import cn.lili.modules.goods.entity.dos.Commodity;
+import cn.lili.modules.goods.entity.dto.CommodityDTO;
+import cn.lili.modules.goods.entity.vos.CommodityVO;
+import cn.lili.modules.goods.mapper.CommodityMapper;
+import cn.lili.modules.goods.service.CommodityService;
+import cn.lili.modules.goods.util.WechatLivePlayerUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;

@@ -1,8 +1,8 @@
-package cn.lili.modules.broadcast.serviceimpl;
+package cn.lili.modules.goods.serviceimpl;
 
-import cn.lili.modules.broadcast.entity.dos.StudioCommodity;
-import cn.lili.modules.broadcast.mapper.StudioCommodityMapper;
-import cn.lili.modules.broadcast.service.StudioCommodityService;
+import cn.lili.modules.goods.entity.dos.StudioCommodity;
+import cn.lili.modules.goods.mapper.StudioCommodityMapper;
+import cn.lili.modules.goods.service.StudioCommodityService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 

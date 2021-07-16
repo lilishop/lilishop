@@ -1,4 +1,4 @@
-package cn.lili.modules.broadcast.entity.dto;
+package cn.lili.modules.goods.entity.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 

@@ -1,4 +1,4 @@
-package cn.lili.modules.broadcast.entity.dos;
+package cn.lili.modules.goods.entity.dos;
 
 import cn.lili.base.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;

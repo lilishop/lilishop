@@ -1,9 +1,9 @@
-package cn.lili.modules.broadcast.util;
+package cn.lili.modules.goods.util;
 
 import cn.hutool.json.JSONObject;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.base.enums.ClientTypeEnum;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.message.util.WechatAccessTokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
