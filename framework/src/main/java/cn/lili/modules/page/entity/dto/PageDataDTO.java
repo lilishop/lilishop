@@ -1,5 +1,6 @@
 package cn.lili.modules.page.entity.dto;
 
+import cn.lili.modules.base.enums.ClientTypeEnum;
 import cn.lili.modules.page.entity.enums.PageEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -25,7 +26,7 @@ public class PageDataDTO {
     private String pageType;
 
     /**
-     * @see cn.lili.modules.base.entity.enums.ClientTypeEnum
+     * @see ClientTypeEnum
      */
     @ApiModelProperty(value = "客户端类型", allowableValues = "PC,H5,WECHAT_MP,APP")
     private String pageClientType;

@@ -1,7 +1,7 @@
 package cn.lili.modules.order.order.entity.vo;
 
 import cn.lili.common.utils.StringUtils;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+import cn.lili.modules.base.enums.ClientTypeEnum;
 import cn.lili.modules.order.order.entity.enums.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;

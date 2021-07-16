@@ -1,11 +1,11 @@
-package cn.lili.modules.base.serviceimpl;
+package cn.lili.modules.system.serviceimpl;
 
 import cn.lili.common.cache.Cache;
 import cn.lili.common.utils.HttpClientUtils;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.modules.base.mapper.RegionMapper;
-import cn.lili.modules.base.service.RegionService;
+import cn.lili.modules.system.mapper.RegionMapper;
+import cn.lili.modules.system.service.RegionService;
 import cn.lili.modules.system.entity.dos.Region;
 import cn.lili.modules.system.entity.vo.RegionVO;
 import com.alibaba.fastjson.JSONArray;

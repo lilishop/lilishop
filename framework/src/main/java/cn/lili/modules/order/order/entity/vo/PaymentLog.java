@@ -1,7 +1,7 @@
 package cn.lili.modules.order.order.entity.vo;
 
 import cn.lili.base.BaseEntity;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+import cn.lili.modules.base.enums.ClientTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;

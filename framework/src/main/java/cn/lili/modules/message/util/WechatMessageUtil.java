@@ -7,7 +7,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+import cn.lili.modules.base.enums.ClientTypeEnum;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.enums.ConnectEnum;
 import cn.lili.modules.connect.service.ConnectService;

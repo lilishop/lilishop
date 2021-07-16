@@ -1,13 +1,12 @@
-package cn.lili.modules.base.serviceimpl;
+package cn.lili.modules.system.serviceimpl;
 
 import cn.lili.common.cache.Cache;
-import cn.lili.modules.base.entity.dos.VerificationSource;
-import cn.lili.modules.base.entity.enums.VerificationSourceEnum;
-import cn.lili.modules.base.entity.vo.VerificationVO;
-import cn.lili.modules.base.mapper.VerificationSourceMapper;
-import cn.lili.modules.base.service.VerificationSourceService;
+import cn.lili.modules.system.entity.dos.VerificationSource;
+import cn.lili.modules.system.entity.enums.VerificationSourceEnum;
+import cn.lili.modules.system.entity.vo.VerificationVO;
+import cn.lili.modules.system.mapper.VerificationSourceMapper;
+import cn.lili.modules.system.service.VerificationSourceService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,6 +1,7 @@
-package cn.lili.modules.base.entity.dos;
+package cn.lili.modules.system.entity.dos;
 
 import cn.lili.base.BaseEntity;
+import cn.lili.modules.system.entity.enums.VerificationSourceEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -30,7 +31,7 @@ public class VerificationSource extends BaseEntity {
     private String resource;
 
     /**
-     * @see cn.lili.modules.base.entity.enums.VerificationSourceEnum
+     * @see VerificationSourceEnum
      */
     @ApiModelProperty(value = "验证码资源类型 SLIDER/SOURCE")
     private String type;

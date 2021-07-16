@@ -10,7 +10,7 @@ import cn.lili.common.token.Token;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.config.properties.ApiProperties;
 import cn.lili.config.properties.DomainProperties;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+import cn.lili.modules.base.enums.ClientTypeEnum;
 import cn.lili.modules.connect.config.AuthConfig;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
 import cn.lili.modules.connect.entity.dto.AuthCallback;

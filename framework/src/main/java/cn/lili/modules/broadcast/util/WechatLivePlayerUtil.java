@@ -2,7 +2,7 @@ package cn.lili.modules.broadcast.util;
 
 import cn.hutool.json.JSONObject;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+import cn.lili.modules.base.enums.ClientTypeEnum;
 import cn.lili.modules.broadcast.entity.dos.Commodity;
 import cn.lili.modules.broadcast.entity.dos.Studio;
 import cn.lili.modules.broadcast.entity.dto.GoodsInfo;
