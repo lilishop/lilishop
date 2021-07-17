@@ -22,9 +22,9 @@ import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsOperationDTO;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
-import cn.lili.modules.promotion.entity.vos.KanjiaActivityGoodsListVO;
-import cn.lili.modules.promotion.entity.vos.KanjiaActivityGoodsParams;
-import cn.lili.modules.promotion.entity.vos.KanjiaActivityGoodsVO;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsListVO;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsParams;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsVO;
 import cn.lili.modules.promotion.mapper.KanJiaActivityGoodsMapper;
 import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
 import cn.lili.modules.promotion.tools.PromotionTools;
@@ -110,7 +110,7 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
      * @param kanJiaActivityGoods 砍价商品信息
      */
     private void addKanJiaGoodsPromotionTask(KanjiaActivityGoodsDTO kanJiaActivityGoods) {
-        PromotionMessage promotionMessage = new PromotionMessage(kanJiaActivityGoods.getId(), PromotionTypeEnum.KAN_JIA.name(),
+        PromotionMessage promotionMessage = new PromotionMessage(kanJiaActivityGoods.getId(), PromotionTypeEnum.KANJIA.name(),
                 PromotionStatusEnum.START.name(),
                 kanJiaActivityGoods.getStartTime(), kanJiaActivityGoods.getEndTime());
         TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
@@ -278,7 +278,7 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
         if (result) {
             this.mongoTemplate.save(kanJiaActivityGoodsDTO);
             if (dbKanJiaActivityGoods.getStartTime().getTime() != kanJiaActivityGoodsDTO.getStartTime().getTime()) {
-                PromotionMessage promotionMessage = new PromotionMessage(kanJiaActivityGoodsDTO.getId(), PromotionTypeEnum.KAN_JIA.name(), PromotionStatusEnum.START.name(), kanJiaActivityGoodsDTO.getStartTime(), kanJiaActivityGoodsDTO.getEndTime());
+                PromotionMessage promotionMessage = new PromotionMessage(kanJiaActivityGoodsDTO.getId(), PromotionTypeEnum.KANJIA.name(), PromotionStatusEnum.START.name(), kanJiaActivityGoodsDTO.getStartTime(), kanJiaActivityGoodsDTO.getEndTime());
                 //更新延时任务
                 this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
                         promotionMessage,
@@ -299,7 +299,7 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
             KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO = this.getKanJiaGoodsDetail(id);
             this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
                     kanJiaActivityGoodsDTO.getStartTime().getTime(),
-                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.KAN_JIA.name() + kanJiaActivityGoodsDTO.getId())),
+                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.KANJIA.name() + kanJiaActivityGoodsDTO.getId())),
                     rocketmqCustomProperties.getPromotionTopic());
             skuIds.add(kanJiaActivityGoodsDTO.getSkuId());
         }

@@ -1,19 +1,14 @@
 package cn.lili.modules.promotion.entity.dos;
 
-import cn.lili.base.BaseEntity;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.modules.promotion.entity.dto.BasePromotion;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.util.Date;
 
 /**
  * 砍价活动商品实体类
@@ -26,13 +21,16 @@ import java.util.Date;
 @Table(name = "li_kanjia_activity_goods")
 @TableName("li_kanjia_activity_goods")
 @ApiModel(value = "砍价活动商品对象")
-public class KanjiaActivityGoods extends BaseEntity {
+public class KanjiaActivityGoods extends BasePromotion {
 
     private static final long serialVersionUID = 6694714877345423488L;
 
     @ApiModelProperty(value = "结算价格")
     @NotEmpty(message = "结算价格不能为空")
     private Double settlementPrice;
+
+    @ApiModelProperty(value = "商品原价")
+    private Double originalPrice;
 
     @ApiModelProperty(value = "最低购买金额")
     @NotEmpty(message = "最低购买金额不能为空")
@@ -59,24 +57,4 @@ public class KanjiaActivityGoods extends BaseEntity {
     @ApiModelProperty(value = "每人最高砍价金额")
     @NotEmpty(message = "每人最高砍价金额不能为空")
     private Double highestPrice;
-
-    /**
-     * @see PromotionStatusEnum
-     */
-    @ApiModelProperty(value = "活动状态")
-    @NotNull(message = "活动状态不能为空")
-    private String promotionStatus;
-
-    @Min(message = "活动开始时间不能为空", value = 0)
-    @ApiModelProperty(value = "活动开始时间", required = true)
-    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date startTime;
-
-    @Min(message = "活动结束时间不能为空", value = 0)
-    @ApiModelProperty(value = "活动结束时间", required = true)
-    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date endTime;
-
-
-
 }

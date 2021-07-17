@@ -145,8 +145,9 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     public void getCartSkuPromotion(CartSkuVO cartSkuVO) {
         Date date = DateUtil.getCurrentDayEndTime();
         LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(PromotionGoods::getSkuId, cartSkuVO.getGoodsSku().getId()).eq(PromotionGoods::getPromotionStatus, PromotionStatusEnum.START.name());
-        queryWrapper.le(PromotionGoods::getStartTime, date);
+        queryWrapper.eq(PromotionGoods::getSkuId, cartSkuVO.getGoodsSku().getId())
+                .eq(PromotionGoods::getPromotionStatus, PromotionStatusEnum.START.name())
+                .le(PromotionGoods::getStartTime, date);
         //获取有效的促销活动
         List<PromotionGoods> promotionGoods = this.list(queryWrapper);
         //同步查询缓存中的促销活动商品的库存
@@ -171,7 +172,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
                 promotionGoods.add(p);
             }
         }
-        //单独检查，添加适用于全品类的全平台或属于当前店铺的满优惠活动
+        //单独检查，添加适用于全品类的全平台或属于当前店铺的优惠券活动
         List<CouponVO> couponVOS = mongoTemplate.find(query, CouponVO.class);
         for (CouponVO couponVO : couponVOS) {
             boolean aLLScopeType = (couponVO.getPromotionGoodsList() == null

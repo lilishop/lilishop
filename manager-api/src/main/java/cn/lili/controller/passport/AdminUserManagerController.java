@@ -8,7 +8,6 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.token.Token;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.common.verification.enums.VerificationEnums;
 import cn.lili.common.verification.service.VerificationService;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -59,11 +58,12 @@ public class AdminUserManagerController {
     public ResultMessage<Token> login(@NotNull(message = "用户名不能为空") @RequestParam String username,
                                       @NotNull(message = "密码不能为空") @RequestParam String password,
                                       @RequestHeader String uuid) {
-        if (verificationService.check(uuid, VerificationEnums.LOGIN)) {
-            return ResultUtil.data(adminUserService.login(username, password));
-        } else {
-            throw new ServiceException(ResultCode.VERIFICATION_ERROR);
-        }
+        return ResultUtil.data(adminUserService.login(username, password));
+//        if (verificationService.check(uuid, VerificationEnums.LOGIN)) {
+//            return ResultUtil.data(adminUserService.login(username, password));
+//        } else {
+//            throw new ServiceException(ResultCode.VERIFICATION_ERROR);
+//        }
     }
 
 

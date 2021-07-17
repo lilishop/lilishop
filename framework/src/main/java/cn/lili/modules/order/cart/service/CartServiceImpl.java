@@ -31,7 +31,7 @@ import cn.lili.modules.promotion.entity.enums.CouponScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
-import cn.lili.modules.promotion.entity.vos.KanjiaActivitySearchParams;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivitySearchParams;
 import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsSearchService;
@@ -705,7 +705,7 @@ public class CartServiceImpl implements CartService {
         if (kanjiaActivity == null) {
             throw new ServiceException(ResultCode.KANJIA_ACTIVITY_NOT_FOUND_ERROR);
             //判断砍价活动是否已满足条件
-        } else if (!KanJiaStatusEnum.PASS.name().equals(kanjiaActivity.getStatus())) {
+        } else if (!KanJiaStatusEnum.SUCCESS.name().equals(kanjiaActivity.getStatus())) {
             throw new ServiceException(ResultCode.KANJIA_ACTIVITY_NOT_PASS_ERROR);
             //判断砍价商品数量
         } else if (cartSkuVO.getNum() > 1) {

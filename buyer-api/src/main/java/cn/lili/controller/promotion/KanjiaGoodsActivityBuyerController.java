@@ -10,10 +10,7 @@ import cn.lili.modules.promotion.entity.dos.KanjiaActivityLog;
 import cn.lili.modules.promotion.entity.dto.KanJiaActivityLogQuery;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityQuery;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.modules.promotion.entity.vos.KanjiaActivityGoodsListVO;
-import cn.lili.modules.promotion.entity.vos.KanjiaActivityGoodsParams;
-import cn.lili.modules.promotion.entity.vos.KanjiaActivityGoodsVO;
-import cn.lili.modules.promotion.entity.vos.KanjiaActivitySearchParams;
+import cn.lili.modules.promotion.entity.vos.kanjia.*;
 import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
 import cn.lili.modules.promotion.service.KanjiaActivityLogService;
 import cn.lili.modules.promotion.service.KanjiaActivityService;
@@ -53,10 +50,10 @@ public class KanjiaGoodsActivityBuyerController {
 
     @GetMapping
     @ApiOperation(value = "分页获取砍价商品")
-    public ResultMessage<IPage<KanjiaActivityGoodsListVO>> kanJiaActivityGoodsPage(KanjiaActivityGoodsParams kanJiaActivityGoodsParams, PageVO page) {
+    public ResultMessage<IPage<KanjiaActivityGoodsListVO>> kanJiaActivityGoodsPage(KanjiaActivityGoodsParams kanjiaActivityGoodsParams, PageVO page) {
         // 会员端查询到的肯定是已经开始的活动商品
-        kanJiaActivityGoodsParams.setPromotionStatus(PromotionStatusEnum.START.name());
-        return ResultUtil.data(kanJiaActivityGoodsService.kanJiaGoodsVOPage(kanJiaActivityGoodsParams, page));
+        kanjiaActivityGoodsParams.setPromotionStatus(PromotionStatusEnum.START.name());
+        return ResultUtil.data(kanJiaActivityGoodsService.kanJiaGoodsVOPage(kanjiaActivityGoodsParams, page));
     }
 
     @GetMapping("/{id}")
@@ -69,43 +66,42 @@ public class KanjiaGoodsActivityBuyerController {
     @GetMapping("/getKanjiaActivity/logs")
     @ApiOperation(value = "分页获取砍价活动-帮砍记录")
     public ResultMessage<IPage<KanjiaActivityLog>> getPointsGoodsPage(KanJiaActivityLogQuery kanJiaActivityLogQuery, PageVO page) {
-        // 会员端查询到的肯定是已经开始的活动商品
-        kanJiaActivityLogQuery.setMemberId(UserContext.getCurrentUser().getId());
         return ResultUtil.data(kanJiaActivityLogService.getForPage(kanJiaActivityLogQuery, page));
     }
 
     @PostMapping("/getKanjiaActivity")
     @ApiOperation(value = "获取砍价活动")
-    public ResultMessage<KanjiaActivity> getKanJiaActivity(KanjiaActivitySearchParams kanJiaActivitySearchParams) {
+    public ResultMessage<KanjiaActivityVO> getKanJiaActivity(KanjiaActivitySearchParams kanjiaActivitySearchParams) {
         //如果是非被邀请关系则填写会员ID
-        if (StrUtil.isEmpty(kanJiaActivitySearchParams.getKanjiaActivityId())) {
-            kanJiaActivitySearchParams.setMemberId(UserContext.getCurrentUser().getId());
+        if (StrUtil.isEmpty(kanjiaActivitySearchParams.getKanjiaActivityId())) {
+            kanjiaActivitySearchParams.setMemberId(UserContext.getCurrentUser().getId());
         }
-        return ResultUtil.data(kanJiaActivityService.getKanjiaActivity(kanJiaActivitySearchParams));
+        return ResultUtil.data(kanJiaActivityService.getKanjiaActivityVO(kanjiaActivitySearchParams));
     }
 
     @PostMapping
     @ApiImplicitParam(name = "id", value = "砍价活动商品ID", required = true, paramType = "path")
     @ApiOperation(value = "发起砍价活动")
     public ResultMessage<KanjiaActivityLog> launchKanJiaActivity(String id) {
-        KanjiaActivityLog kanJiaActivityLog = kanJiaActivityService.add(id);
-        return ResultUtil.data(kanJiaActivityLog);
+        KanjiaActivityLog kanjiaActivityLog = kanJiaActivityService.add(id);
+        return ResultUtil.data(kanjiaActivityLog);
     }
 
-    @PostMapping("/help")
+    @PostMapping("/help/{kanjiaActivityId}")
+    @ApiImplicitParam(name = "kanJiaActivityId", value = "砍价活动ID", required = true, paramType = "path")
     @ApiOperation(value = "帮砍一刀")
-    public ResultMessage<KanjiaActivityLog> helpKanJia(String kanJiaActivityId) {
-        KanjiaActivityLog kanJiaActivityLog = kanJiaActivityService.helpKanJia(kanJiaActivityId);
-        return ResultUtil.data(kanJiaActivityLog);
+    public ResultMessage<KanjiaActivityLog> helpKanJia(@PathVariable String kanjiaActivityId) {
+        KanjiaActivityLog kanjiaActivityLog = kanJiaActivityService.helpKanJia(kanjiaActivityId);
+        return ResultUtil.data(kanjiaActivityLog);
     }
 
     @GetMapping("/kanjiaActivity/mine/")
     @ApiOperation(value = "分页获取已参与的砍价活动")
-    public ResultMessage<IPage<KanjiaActivity>> getPointsGoodsPage(KanjiaActivityQuery kanJiaActivityQuery, PageVO page) {
+    public ResultMessage<IPage<KanjiaActivity>> getPointsGoodsPage(KanjiaActivityQuery kanjiaActivityQuery, PageVO page) {
         // 会员端查询到的肯定是已经开始的活动商品
-        kanJiaActivityQuery.setMemberId(UserContext.getCurrentUser().getId());
-        IPage<KanjiaActivity> kanJiaActivityIPage = kanJiaActivityService.getForPage(kanJiaActivityQuery, page);
-        return ResultUtil.data(kanJiaActivityIPage);
+        kanjiaActivityQuery.setMemberId(UserContext.getCurrentUser().getId());
+        IPage<KanjiaActivity> kanjiaActivity = kanJiaActivityService.getForPage(kanjiaActivityQuery, page);
+        return ResultUtil.data(kanjiaActivity);
     }
 
 }

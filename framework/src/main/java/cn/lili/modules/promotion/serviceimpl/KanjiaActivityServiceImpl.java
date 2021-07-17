@@ -6,6 +6,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
@@ -20,7 +21,8 @@ import cn.lili.modules.promotion.entity.dto.KanjiaActivityDTO;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityQuery;
 import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.modules.promotion.entity.vos.KanjiaActivitySearchParams;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivitySearchParams;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityVO;
 import cn.lili.modules.promotion.mapper.KanJiaActivityMapper;
 import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
 import cn.lili.modules.promotion.service.KanjiaActivityLogService;
@@ -61,43 +63,72 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
     }
 
     @Override
+    public KanjiaActivityVO getKanjiaActivityVO(KanjiaActivitySearchParams kanJiaActivitySearchParams) {
+        KanjiaActivity kanjiaActivity = this.getKanjiaActivity(kanJiaActivitySearchParams);
+        KanjiaActivityVO kanjiaActivityVO = new KanjiaActivityVO();
+        BeanUtil.copyProperties(kanjiaActivity, kanjiaActivityVO);
+
+        //判断是否发起了砍价活动,如果发起可参与活动
+        if (kanjiaActivity != null) {
+            kanjiaActivityVO.setLaunch(true);
+            //如果已发起砍价判断用户是否可以砍价
+            KanjiaActivityLog kanjiaActivityLog = kanjiaActivityLogService.getOne(new LambdaQueryWrapper<KanjiaActivityLog>()
+                    .eq(KanjiaActivityLog::getKanjiaActivityId, kanjiaActivity.getId())
+                    .eq(KanjiaActivityLog::getKanjiaMemberId, UserContext.getCurrentUser().getId()));
+            if (kanjiaActivityLog == null) {
+                kanjiaActivityVO.setHelp(true);
+            }
+            //判断活动已通过并且是当前用户发起的砍价则可以进行购买
+            if (kanjiaActivity.getStatus().equals(KanJiaStatusEnum.SUCCESS.name()) &&
+                    kanjiaActivity.getMemberId().equals(UserContext.getCurrentUser().getId())) {
+                kanjiaActivityVO.setPass(true);
+            }
+        }
+        return kanjiaActivityVO;
+    }
+
+    @Override
     public KanjiaActivityLog add(String id) {
         //根据skuId查询当前sku是否参与活动并且是在活动进行中
         KanjiaActivityGoods kanJiaActivityGoods = kanjiaActivityGoodsService.getById(id);
         //只有砍价商品存在且已经开始的活动才可以发起砍价
-        if (kanJiaActivityGoods != null && kanJiaActivityGoods.getPromotionStatus().equals(PromotionStatusEnum.START.name())) {
-            //获取会员信息
-            Member member = memberService.getById(UserContext.getCurrentUser().getId());
-            //校验此活动是否已经发起过
-            QueryWrapper<KanjiaActivity> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("kanjia_activity_goods_id", kanJiaActivityGoods.getId());
-            queryWrapper.eq("member_id", member.getId());
-            if (this.count(queryWrapper) > 0) {
-                throw new ServiceException(ResultCode.KANJIA_ACTIVITY_MEMBER_ERROR);
-            }
-            KanjiaActivity kanJiaActivity = new KanjiaActivity();
-            //获取商品信息
-            GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(kanJiaActivityGoods.getSkuId());
-            if (goodsSku != null && member != null) {
-                kanJiaActivity.setSkuId(kanJiaActivityGoods.getSkuId());
-                kanJiaActivity.setGoodsName(goodsSku.getGoodsName());
-                kanJiaActivity.setKanjiaActivityGoodsId(kanJiaActivityGoods.getId());
-                kanJiaActivity.setThumbnail(goodsSku.getThumbnail());
-                kanJiaActivity.setMemberId(UserContext.getCurrentUser().getId());
-                kanJiaActivity.setMemberName(member.getUsername());
-                kanJiaActivity.setStatus(KanJiaStatusEnum.START.name());
-                //剩余砍价金额 开始 是商品金额;
-                kanJiaActivity.setSurplusPrice(goodsSku.getPrice());
-                //保存我的砍价活动
-                boolean result = this.save(kanJiaActivity);
-                //因为发起砍价就是自己给自己砍一刀，所以要添加砍价记录信息
-                if (result) {
-                    this.helpKanJia(kanJiaActivity.getId());
-                }
-            }
-            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+        if (kanJiaActivityGoods == null || !kanJiaActivityGoods.getPromotionStatus().equals(PromotionStatusEnum.START.name())) {
+            throw new ServiceException(ResultCode.PROMOTION_STATUS_END);
         }
-        throw new ServiceException(ResultCode.PROMOTION_STATUS_END);
+        KanjiaActivityLog kanjiaActivityLog = new KanjiaActivityLog();
+        //获取会员信息
+        Member member = memberService.getById(UserContext.getCurrentUser().getId());
+        //校验此活动是否已经发起过
+        QueryWrapper<KanjiaActivity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("kanjia_activity_goods_id", kanJiaActivityGoods.getId());
+        queryWrapper.eq("member_id", member.getId());
+        if (this.count(queryWrapper) > 0) {
+            throw new ServiceException(ResultCode.KANJIA_ACTIVITY_MEMBER_ERROR);
+        }
+        KanjiaActivity kanJiaActivity = new KanjiaActivity();
+        //获取商品信息
+        GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(kanJiaActivityGoods.getSkuId());
+        if (goodsSku != null && member != null) {
+            kanJiaActivity.setSkuId(kanJiaActivityGoods.getSkuId());
+            kanJiaActivity.setGoodsName(goodsSku.getGoodsName());
+            kanJiaActivity.setKanjiaActivityGoodsId(kanJiaActivityGoods.getId());
+            kanJiaActivity.setThumbnail(goodsSku.getThumbnail());
+            kanJiaActivity.setMemberId(UserContext.getCurrentUser().getId());
+            kanJiaActivity.setMemberName(member.getUsername());
+            kanJiaActivity.setStatus(KanJiaStatusEnum.START.name());
+            //剩余砍价金额 开始 是商品金额;
+            kanJiaActivity.setSurplusPrice(goodsSku.getPrice());
+            //砍价最低购买金额
+            kanJiaActivity.setPurchasePrice(kanJiaActivityGoods.getPurchasePrice());
+            //保存我的砍价活动
+            boolean result = this.save(kanJiaActivity);
+
+            //因为发起砍价就是自己给自己砍一刀，所以要添加砍价记录信息
+            if (result) {
+                kanjiaActivityLog = this.helpKanJia(kanJiaActivity.getId());
+            }
+        }
+        return kanjiaActivityLog;
     }
 
 
@@ -165,8 +196,9 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
         }
 
         //获取随机砍价金额
-        BigDecimal bigDecimal = RandomUtil.randomBigDecimal(Convert.toBigDecimal(kanjiaActivityGoods.getHighestPrice()),
-                Convert.toBigDecimal(kanjiaActivityGoods.getLowestPrice()));
+        BigDecimal bigDecimal = RandomUtil.randomBigDecimal(Convert.toBigDecimal(kanjiaActivityGoods.getLowestPrice()),
+                Convert.toBigDecimal(kanjiaActivityGoods.getHighestPrice()));
+        bigDecimal.setScale(2, BigDecimal.ROUND_UP);
         return Convert.toDouble(bigDecimal, 0.0);
 
     }

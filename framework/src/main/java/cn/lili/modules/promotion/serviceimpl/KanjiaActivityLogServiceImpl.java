@@ -3,6 +3,7 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
@@ -16,6 +17,7 @@ import cn.lili.modules.promotion.mapper.KanJiaActivityLogMapper;
 import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
 import cn.lili.modules.promotion.service.KanjiaActivityLogService;
 import cn.lili.modules.promotion.service.KanjiaActivityService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -50,9 +52,9 @@ public class KanjiaActivityLogServiceImpl extends ServiceImpl<KanJiaActivityLogM
     @Override
     public KanjiaActivityLog addKanJiaActivityLog(KanjiaActivityDTO kanjiaActivityDTO) {
         //校验当前会员是否已经参与过此次砍价
-        QueryWrapper<KanjiaActivityLog> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq(kanjiaActivityDTO.getKanjiaMemberId() != null, "kanjia_member_id", kanjiaActivityDTO.getKanjiaMemberId());
-        queryWrapper.eq(kanjiaActivityDTO.getKanjiaActivityId() != null, "kanjia_activity_id", kanjiaActivityDTO.getKanjiaActivityId());
+        LambdaQueryWrapper<KanjiaActivityLog> queryWrapper = new LambdaQueryWrapper<KanjiaActivityLog>();
+        queryWrapper.eq(kanjiaActivityDTO.getKanjiaActivityId() != null, KanjiaActivityLog::getKanjiaActivityId, kanjiaActivityDTO.getKanjiaActivityId());
+        queryWrapper.eq( KanjiaActivityLog::getKanjiaMemberId, UserContext.getCurrentUser().getId());
         Integer count = this.baseMapper.selectCount(queryWrapper);
         if (count > 0) {
             throw new ServiceException(ResultCode.KANJIA_ACTIVITY_LOG_MEMBER_ERROR);

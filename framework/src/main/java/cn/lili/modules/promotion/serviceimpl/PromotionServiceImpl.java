@@ -129,8 +129,8 @@ public class PromotionServiceImpl implements PromotionService {
                 result = this.updatePointsGoods(promotionMessage, esPromotionKey, promotionTypeEnum);
                 break;
             //砍价商品商品
-            case KAN_JIA:
-                result = this.updateKanJiaGoods(promotionMessage, promotionTypeEnum);
+            case KANJIA:
+                result = this.updateKanjiaGoods(promotionMessage, promotionTypeEnum);
                 break;
             //优惠券活动
             case COUPON_ACTIVITY:
@@ -464,7 +464,7 @@ public class PromotionServiceImpl implements PromotionService {
      * @param promotionTypeEnum 促销分类枚举
      * @return 修改结果
      */
-    private boolean updateKanJiaGoods(PromotionMessage promotionMessage, PromotionTypeEnum promotionTypeEnum) {
+    private boolean updateKanjiaGoods(PromotionMessage promotionMessage, PromotionTypeEnum promotionTypeEnum) {
         KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO = this.mongoTemplate.findById(promotionMessage.getPromotionId(), KanjiaActivityGoodsDTO.class);
         if (kanJiaActivityGoodsDTO == null) {
             this.throwPromotionException(promotionTypeEnum, promotionMessage.getPromotionId(), promotionMessage.getPromotionStatus());

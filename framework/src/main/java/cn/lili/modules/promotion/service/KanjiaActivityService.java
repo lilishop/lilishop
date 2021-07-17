@@ -5,7 +5,8 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivity;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivityLog;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityQuery;
-import cn.lili.modules.promotion.entity.vos.KanjiaActivitySearchParams;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivitySearchParams;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -21,13 +22,21 @@ public interface KanjiaActivityService extends IService<KanjiaActivity> {
     /**
      * 获取砍价活动
      *
+     * @param kanJiaActivitySearchParams 砍价活动搜索参数
+     * @return 砍价活动
+     */
+    KanjiaActivity getKanjiaActivity(KanjiaActivitySearchParams kanJiaActivitySearchParams);
+
+    /**
+     * 获取砍价活动
+     * <p>
      * 有值说明是已参加的砍价活动
      * 没有值说明是未参加的砍价活动
      *
      * @param kanJiaActivitySearchParams 砍价活动搜索参数
      * @return 砍价活动
      */
-    KanjiaActivity getKanjiaActivity(KanjiaActivitySearchParams kanJiaActivitySearchParams);
+    KanjiaActivityVO getKanjiaActivityVO(KanjiaActivitySearchParams kanJiaActivitySearchParams);
 
     /**
      * 发起人发起砍价活动

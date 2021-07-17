@@ -5,9 +5,9 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivityGoods;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsOperationDTO;
-import cn.lili.modules.promotion.entity.vos.KanjiaActivityGoodsListVO;
-import cn.lili.modules.promotion.entity.vos.KanjiaActivityGoodsParams;
-import cn.lili.modules.promotion.entity.vos.KanjiaActivityGoodsVO;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsListVO;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsParams;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 

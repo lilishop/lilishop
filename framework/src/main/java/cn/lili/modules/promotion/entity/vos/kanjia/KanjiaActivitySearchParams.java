@@ -1,4 +1,4 @@
-package cn.lili.modules.promotion.entity.vos;
+package cn.lili.modules.promotion.entity.vos.kanjia;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;

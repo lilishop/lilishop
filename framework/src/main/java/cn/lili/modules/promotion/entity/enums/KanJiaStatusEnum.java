@@ -22,6 +22,7 @@ public enum KanJiaStatusEnum {
     SUCCESS("成功"),
     /**
      * 砍价活动结束
+     * 已购买、超时未购买都是这个状态
      */
     END("已结束");
 

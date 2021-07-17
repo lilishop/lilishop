@@ -1,4 +1,4 @@
-package cn.lili.modules.promotion.entity.vos;
+package cn.lili.modules.promotion.entity.vos.kanjia;
 
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import io.swagger.annotations.ApiModelProperty;

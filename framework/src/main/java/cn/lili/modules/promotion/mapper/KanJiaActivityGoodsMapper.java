@@ -1,7 +1,7 @@
 package cn.lili.modules.promotion.mapper;
 
 import cn.lili.modules.promotion.entity.dos.KanjiaActivityGoods;
-import cn.lili.modules.promotion.entity.vos.KanjiaActivityGoodsListVO;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsListVO;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;

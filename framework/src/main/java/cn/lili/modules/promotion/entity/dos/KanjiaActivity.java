@@ -29,14 +29,17 @@ public class KanjiaActivity extends BaseEntity {
     @ApiModelProperty(value = "砍价商品id")
     private String kanjiaActivityGoodsId;
 
-    @ApiModelProperty(value = "参与砍价活动会员id")
+    @ApiModelProperty(value = "发起砍价活动会员id")
     private String memberId;
 
-    @ApiModelProperty(value = "参与砍价活动会员名称")
+    @ApiModelProperty(value = "发起砍价活动会员名称")
     private String memberName;
 
     @ApiModelProperty(value = "剩余购买金额")
     private Double surplusPrice;
+
+    @ApiModelProperty(value = "砍价最低购买金额")
+    private Double purchasePrice;
 
     @ApiModelProperty(value = "砍价商品skuId")
     private String skuId;
@@ -50,7 +53,7 @@ public class KanjiaActivity extends BaseEntity {
     /**
      * @see KanJiaStatusEnum
      */
-    @ApiModelProperty(value = "我的砍价状态")
+    @ApiModelProperty(value = "砍价活动状态")
     private String status;
 
 

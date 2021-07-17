@@ -23,17 +23,12 @@ public class KanJiaActivityLogQuery {
     @ApiModelProperty(value = "砍价发起活动id")
     private String kanJiaActivityId;
 
-    @ApiModelProperty(value = "会员id", hidden = true)
-    private String memberId;
 
     public <T> QueryWrapper<T> wrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
 
         if (CharSequenceUtil.isNotEmpty(kanJiaActivityId)) {
             queryWrapper.like("kanjia_activity_id", kanJiaActivityId);
-        }
-        if (memberId != null) {
-            queryWrapper.eq("kanjia_member_id", memberId);
         }
         queryWrapper.eq("delete_flag", false);
         queryWrapper.orderByDesc("create_time");

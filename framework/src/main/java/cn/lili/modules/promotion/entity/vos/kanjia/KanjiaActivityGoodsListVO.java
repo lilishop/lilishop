@@ -1,4 +1,4 @@
-package cn.lili.modules.promotion.entity.vos;
+package cn.lili.modules.promotion.entity.vos.kanjia;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
