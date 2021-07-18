@@ -203,20 +203,14 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
         return this.checkExist(id);
     }
 
-    /**
-     * 根据SkuID获取积分详情
-     *
-     * @param skuId@return 积分详情
-     */
     @Override
-    public PointsGoods getPointsGoodsDetailBySkuId(String skuId) {
-        LambdaQueryWrapper<PointsGoods> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(PointsGoods::getSkuId, skuId).eq(PointsGoods::getPromotionStatus, PromotionStatusEnum.START.name());
-        List<PointsGoods> list = this.list(queryWrapper);
-        if (list.size() == 1) {
-            return list.get(0);
-        }
-        return null;
+    public PointsGoodsVO getPointsGoodsVOByMongo(String skuId) {
+        //mongo查询条件
+        Query query = new Query();
+        query.addCriteria(Criteria.where("skuId").ne(skuId))
+                .addCriteria(Criteria.where("promotionStatus").ne(PromotionStatusEnum.START.name()));
+        List<PointsGoodsVO> pointsGoodsVO=this.mongoTemplate.find(query, PointsGoodsVO.class);
+        return pointsGoodsVO.get(0);
     }
 
     /**

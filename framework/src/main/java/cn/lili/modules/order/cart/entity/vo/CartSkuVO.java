@@ -66,8 +66,7 @@ public class CartSkuVO extends CartBase implements Serializable {
     @ApiModelProperty(value = "是否可配送")
     private Boolean isShip;
 
-    @ApiModelProperty(value =
-            "拼团id 如果是拼团购买 此值为拼团活动id，" +
+    @ApiModelProperty(value = "拼团id 如果是拼团购买 此值为拼团活动id，" +
                     "当pintuanId为空，则表示普通购买（或者拼团商品，单独购买）")
     private String pintuanId;
 

@@ -1,15 +1,16 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.promotion.entity.dos.*;
 import cn.lili.modules.promotion.entity.dto.*;
 import cn.lili.modules.promotion.entity.enums.*;
-import cn.lili.modules.promotion.service.PromotionGoodsService;
-import cn.lili.modules.promotion.service.PromotionPriceService;
-import cn.lili.modules.promotion.service.SeckillApplyService;
+import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
+import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -50,27 +51,114 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
      */
     @Autowired
     private GoodsSkuService goodsSkuService;
+    /**
+     * 积分商品
+     */
+    @Autowired
+    private PointsGoodsService pointsGoodsService;
+    /**
+     * 积分商品
+     */
+    @Autowired
+    private KanjiaActivityGoodsService kanjiaActivityGoodsService;
+
 
     @Override
-    public PromotionPriceDTO calculationPromotionPrice(List<PromotionPriceParamDTO> tradeSkuList, List<MemberCoupon> memberCouponList) {
+    public PromotionPriceDTO calculationPromotionPrice(List<PromotionPriceParamDTO> tradeSkuList, List<MemberCoupon> memberCouponList, CartTypeEnum cartTypeEnum) {
 
-        PromotionPriceDTO promotionPrice = new PromotionPriceDTO();
+        List<GoodsSkuPromotionPriceDTO> priceDTOList=new ArrayList<>();
+
         //拆分出SkuId列表
         List<String> skuIds = tradeSkuList.parallelStream().map(PromotionPriceParamDTO::getSkuId).collect(Collectors.toList());
         //参与计算的ES商品SKU及其促销信息列表
         List<EsGoodsIndex> esGoodsSkus = goodsSearchService.getEsGoodsBySkuIds(skuIds);
-        //参与计算的缓存中的商品SKU列表
-        List<GoodsSku> goodsSkus = goodsSkuService.getGoodsSkuByIdFromCache(skuIds);
-        //单品商品SKU促销计算结果列表
-        List<GoodsSkuPromotionPriceDTO> priceDTOList = this.packageGoodsSkuPromotionPrice(tradeSkuList, esGoodsSkus, goodsSkus);
+
+        //判断交易类型，进行不同的处理
+        if (cartTypeEnum.equals(CartTypeEnum.POINTS)) {
+            this.pointGoodsPromotion(tradeSkuList);
+        } else if (cartTypeEnum.equals(CartTypeEnum.KANJIA)) {
+            this.kanjiaPromotion(tradeSkuList);
+        } else {
+            //参与计算的缓存中的商品SKU列表
+            List<GoodsSku> goodsSkus = goodsSkuService.getGoodsSkuByIdFromCache(skuIds);
+
+            //单品商品SKU促销计算结果列表
+            priceDTOList = this.packageGoodsSkuPromotionPrice(tradeSkuList, esGoodsSkus, goodsSkus);
+        }
+
+
+        //获取商品促销价格DTO列表
+        List<StorePromotionPriceDTO> storePromotionPriceList = new ArrayList<>();
+
+        //计算优惠券金额
+        Double couponTotalPrice = 0.0;
         //将使用的优惠券根据店铺分类
         Map<String, List<MemberCoupon>> couponCollect = memberCouponList.parallelStream().collect(Collectors.groupingBy(MemberCoupon::getStoreId));
+        //获取店铺优惠券金额
+        this.getStorePromotionPrice(storePromotionPriceList, priceDTOList, esGoodsSkus, couponCollect, couponTotalPrice);
+        //获取平台优惠金额
+        this.getPlatformPromotionPrice(couponCollect, storePromotionPriceList, priceDTOList, couponTotalPrice);
 
-        double couponTotalPrice = 0;
+        //计算最终结算金额返回数据
+        return this.getPromotionPriceDTO(storePromotionPriceList, couponTotalPrice);
+    }
 
+    /**
+     * 获取促销金额DTO
+     *
+     * @param storePromotionPriceList 店铺促销列表
+     * @param couponTotalPrice        优惠券优惠金额
+     * @return 促销金额DTO
+     */
+    private PromotionPriceDTO getPromotionPriceDTO(List<StorePromotionPriceDTO> storePromotionPriceList, Double couponTotalPrice) {
+
+        PromotionPriceDTO promotionPrice = new PromotionPriceDTO();
+        promotionPrice.setStorePromotionPriceList(storePromotionPriceList);
+        promotionPrice.setTotalCouponPrice(couponTotalPrice);
+        promotionPrice.setTotalOriginPrice(storePromotionPriceList.parallelStream().mapToDouble(StorePromotionPriceDTO::getTotalOriginPrice).sum());
+        promotionPrice.setTotalPoints(storePromotionPriceList.parallelStream().mapToDouble(StorePromotionPriceDTO::getTotalPoints).sum());
+        promotionPrice.setTotalDiscountPrice(storePromotionPriceList.parallelStream().mapToDouble(StorePromotionPriceDTO::getTotalDiscountPrice).sum());
+        //最终结算金额 = 商品原价格合计 - 总优惠价格合计 - 优惠券合计
+        double totalFinalePrice = CurrencyUtil.sub(CurrencyUtil.sub(promotionPrice.getTotalOriginPrice(), promotionPrice.getTotalDiscountPrice()), promotionPrice.getTotalCouponPrice());
+        promotionPrice.setTotalFinalePrice(totalFinalePrice);
+
+        return promotionPrice;
+    }
+
+    /**
+     * 获取平台优惠券促销金额
+     *
+     * @param couponCollect           优惠券列表
+     * @param storePromotionPriceList 店铺促销列表
+     * @param priceDTOList            商品促销DTO列表
+     * @param couponTotalPrice        优惠券金额合计
+     */
+    private void getPlatformPromotionPrice(Map<String, List<MemberCoupon>> couponCollect, List<StorePromotionPriceDTO> storePromotionPriceList, List<GoodsSkuPromotionPriceDTO> priceDTOList, Double couponTotalPrice) {
+        //获取平台优惠券
+        List<MemberCoupon> platformCoupons = couponCollect.get("platform");
+        if (platformCoupons != null && !platformCoupons.isEmpty()) {
+            //计算平台优惠券活动
+            couponTotalPrice = CurrencyUtil.add(couponTotalPrice, this.calculationCoupon(platformCoupons, priceDTOList));
+            for (StorePromotionPriceDTO storePromotionPriceDTO : storePromotionPriceList) {
+                Double couponPrice = storePromotionPriceDTO.getGoodsSkuPromotionPriceList().parallelStream().mapToDouble(GoodsSkuPromotionPriceDTO::getCouponPrice).sum();
+                storePromotionPriceDTO.setTotalCouponPrice(couponPrice);
+            }
+        }
+    }
+
+    /**
+     * 获取店铺优惠券促销金额
+     *
+     * @param storePromotionPriceList 店铺促销金额列表
+     * @param priceDTOList            商品促销金额DTO列表
+     * @param esGoodsSkus             商品索引SKU
+     * @param couponCollect           会员优惠券列表
+     * @param couponTotalPrice        优惠券金额合计
+     */
+    private void getStorePromotionPrice(List<StorePromotionPriceDTO> storePromotionPriceList, List<GoodsSkuPromotionPriceDTO> priceDTOList,
+                                        List<EsGoodsIndex> esGoodsSkus, Map<String, List<MemberCoupon>> couponCollect, Double couponTotalPrice) {
         //根据卖家分组商品信息
         Map<String, List<GoodsSkuPromotionPriceDTO>> storeCollect = priceDTOList.parallelStream().collect(Collectors.groupingBy(GoodsSkuPromotionPriceDTO::getStoreId));
-        List<StorePromotionPriceDTO> storePromotionPriceList = new ArrayList<>();
         for (Map.Entry<String, List<GoodsSkuPromotionPriceDTO>> entry : storeCollect.entrySet()) {
             StorePromotionPriceDTO storePromotionPrice = new StorePromotionPriceDTO();
             storePromotionPrice.setStoreId(entry.getKey());
@@ -110,25 +198,6 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
 
             storePromotionPriceList.add(storePromotionPrice);
         }
-        //获取平台优惠券
-        List<MemberCoupon> platformCoupons = couponCollect.get("platform");
-        if (platformCoupons != null && !platformCoupons.isEmpty()) {
-            //计算平台优惠券活动
-            couponTotalPrice = CurrencyUtil.add(couponTotalPrice, this.calculationCoupon(platformCoupons, priceDTOList));
-            for (StorePromotionPriceDTO storePromotionPriceDTO : storePromotionPriceList) {
-                Double couponPrice = storePromotionPriceDTO.getGoodsSkuPromotionPriceList().parallelStream().mapToDouble(GoodsSkuPromotionPriceDTO::getCouponPrice).sum();
-                storePromotionPriceDTO.setTotalCouponPrice(couponPrice);
-            }
-        }
-        promotionPrice.setStorePromotionPriceList(storePromotionPriceList);
-        promotionPrice.setTotalCouponPrice(couponTotalPrice);
-        promotionPrice.setTotalOriginPrice(storePromotionPriceList.parallelStream().mapToDouble(StorePromotionPriceDTO::getTotalOriginPrice).sum());
-        promotionPrice.setTotalPoints(storePromotionPriceList.parallelStream().mapToDouble(StorePromotionPriceDTO::getTotalPoints).sum());
-        promotionPrice.setTotalDiscountPrice(storePromotionPriceList.parallelStream().mapToDouble(StorePromotionPriceDTO::getTotalDiscountPrice).sum());
-        //最终结算金额 = 商品原价格合计 - 总优惠价格合计 - 优惠券合计
-        double totalFinalePrice = CurrencyUtil.sub(CurrencyUtil.sub(promotionPrice.getTotalOriginPrice(), promotionPrice.getTotalDiscountPrice()), promotionPrice.getTotalCouponPrice());
-        promotionPrice.setTotalFinalePrice(totalFinalePrice);
-        return promotionPrice;
     }
 
     /**
@@ -156,12 +225,70 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
                 this.calculationPromotionMap(promotionMap, goodsSkuPromotionPrice, esGoodsIndex, promotionPriceParamDTO);
 
                 goodsSkuPromotionPrice.setTotalOriginalPrice(CurrencyUtil.mul(goodsSkuPromotionPrice.getOriginalPrice(), goodsSkuPromotionPrice.getNumber()));
-                goodsSkuPromotionPrice.setTotalPoints(CurrencyUtil.mul(goodsSkuPromotionPrice.getPoints(), goodsSkuPromotionPrice.getNumber()));
                 goodsSkuPromotionPrice.setTotalDiscountPrice(CurrencyUtil.mul(goodsSkuPromotionPrice.getDiscountPrice(), goodsSkuPromotionPrice.getNumber()));
                 goodsSkuPromotionPrice.setTotalFinalePrice(CurrencyUtil.mul(goodsSkuPromotionPrice.getFinalePrice(), goodsSkuPromotionPrice.getNumber()));
                 priceDTOList.add(goodsSkuPromotionPrice);
             }
         }
+        return priceDTOList;
+    }
+
+
+    /**
+     * 计算积分商品
+     * 积分商品的购买金额是：0
+     * 1.根据SkuId去查询积分商品（Mongo）
+     * 2.计算积分商品的优惠信息
+     *
+     * @param tradeSkuList 交易商品促销金额列表
+     * @return 计算结果
+     */
+    private List<GoodsSkuPromotionPriceDTO> pointGoodsPromotion(List<PromotionPriceParamDTO> tradeSkuList) {
+        List<GoodsSkuPromotionPriceDTO> priceDTOList = new ArrayList<>();
+        //获取积分商品SkuId
+        String skuId = tradeSkuList.get(0).getSkuId();
+        //获取积分商品VO
+        PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsVOByMongo(skuId);
+        //参与计算的缓存中的商品SKU列表
+        GoodsSku goodsSku = pointsGoodsVO.getGoodsSku();
+        //获取商品促销金额
+        GoodsSkuPromotionPriceDTO goodsSkuPromotionPrice = new GoodsSkuPromotionPriceDTO(goodsSku, tradeSkuList.get(0).getNum());
+        //计算商品原价=原价*数量
+        goodsSkuPromotionPrice.setTotalOriginalPrice(CurrencyUtil.mul(goodsSkuPromotionPrice.getOriginalPrice(), goodsSkuPromotionPrice.getNumber()));
+        //计算商品积分数量=兑换积分*数量
+        goodsSkuPromotionPrice.setTotalPoints(pointsGoodsVO.getPoints() * Convert.toLong(goodsSkuPromotionPrice.getNumber()));
+        //优惠金额=商品原价*数量
+        goodsSkuPromotionPrice.setTotalDiscountPrice(CurrencyUtil.mul(goodsSkuPromotionPrice.getOriginalPrice(), goodsSkuPromotionPrice.getNumber()));
+        //购买价格=积分商品价格为 0
+        goodsSkuPromotionPrice.setTotalFinalePrice(0.0);
+        priceDTOList.add(goodsSkuPromotionPrice);
+        return priceDTOList;
+    }
+
+    /**
+     * 计算砍价商品
+     * 砍价商品只能购买一件
+     * 1.根据SkuId去查询积分商品（Mongo）
+     * 2.计算积分商品的优惠信息
+     *
+     * @param tradeSkuList 交易商品促销金额列表
+     * @return 计算结果
+     */
+    private List<GoodsSkuPromotionPriceDTO> kanjiaPromotion(List<PromotionPriceParamDTO> tradeSkuList) {
+        List<GoodsSkuPromotionPriceDTO> priceDTOList = new ArrayList<>();
+        //获取积分商品SkuId
+        String skuId = tradeSkuList.get(0).getSkuId();
+        //获取积分商品VO
+        KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO = kanjiaActivityGoodsService.getKanJiaGoodsBySku(skuId);
+
+        //参与计算的缓存中的商品SKU列表
+        GoodsSku goodsSku = kanjiaActivityGoodsDTO.getGoodsSku();
+        GoodsSkuPromotionPriceDTO goodsSkuPromotionPrice = new GoodsSkuPromotionPriceDTO(goodsSku, tradeSkuList.get(0).getNum());
+        //优惠金额=商品原价-购买价格
+        goodsSkuPromotionPrice.setTotalDiscountPrice(CurrencyUtil.sub(goodsSkuPromotionPrice.getOriginalPrice(), kanjiaActivityGoodsDTO.getPurchasePrice()));
+        //购买价格=砍价成交金额
+        goodsSkuPromotionPrice.setTotalFinalePrice(kanjiaActivityGoodsDTO.getPurchasePrice());
+        priceDTOList.add(goodsSkuPromotionPrice);
         return priceDTOList;
     }
 
@@ -171,7 +298,7 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
      * @param promotionMap           当前商品所有参加的促销活动
      * @param goodsSkuPromotionPrice 商品SKU促销计算信息
      * @param esGoodsIndex           ES商品信息
-     * @param promotionPriceParamDTO              拼团id，标示是否计算拼团活动
+     * @param promotionPriceParamDTO 拼团id，标示是否计算拼团活动
      */
     private void calculationPromotionMap(Map<String, Object> promotionMap, GoodsSkuPromotionPriceDTO goodsSkuPromotionPrice, EsGoodsIndex esGoodsIndex, PromotionPriceParamDTO promotionPriceParamDTO) {
         //未参加促销则直接返回

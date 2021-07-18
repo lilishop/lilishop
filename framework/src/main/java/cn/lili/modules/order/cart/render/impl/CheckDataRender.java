@@ -16,6 +16,10 @@ import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.promotion.entity.dos.Pintuan;
+import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.modules.promotion.service.PintuanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +45,9 @@ public class CheckDataRender implements CartRenderStep {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private PintuanService pintuanService;
 
     @Override
     public void render(TradeDTO tradeDTO) {
@@ -140,6 +148,18 @@ public class CheckDataRender implements CartRenderStep {
                     throw new ServiceException(ResultCode.PINTUAN_JOIN_ERROR);
                 }
             }
+            //判断拼团商品的限购数量
+            Optional<String> pintuanId = tradeDTO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
+            if (pintuanId.isPresent()) {
+                Pintuan pintuan = pintuanService.getPintuanById(pintuanId.get());
+                Integer limitNum = pintuan.getLimitNum();
+                for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
+                    if (limitNum != 0 && cartSkuVO.getNum() > limitNum) {
+                        throw new ServiceException(ResultCode.PINTUAN_LIMIT_NUM_ERROR);
+                    }
+                }
+            }
+
         }else if(tradeDTO.getCartTypeEnum().equals(CartTypeEnum.KANJIA)){
 
         }

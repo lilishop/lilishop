@@ -315,17 +315,11 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
 
     @Override
     public KanjiaActivityGoodsDTO getKanJiaGoodsBySku(String skuId) {
-        //构建查询条件
-        KanjiaActivityGoodsParams kanJiaActivityGoodsParams = new KanjiaActivityGoodsParams();
-        kanJiaActivityGoodsParams.setSkuId(skuId);
-        kanJiaActivityGoodsParams.setPromotionStatus(PromotionStatusEnum.START.name());
-        //查询相关数据
-        Query query = kanJiaActivityGoodsParams.mongoQuery();
-        List<KanjiaActivityGoodsDTO> kanJiaActivityGoodsDTOS = this.mongoTemplate.find(query, KanjiaActivityGoodsDTO.class);
-        // 为了担心会查到多条数据 所以查询集合  正常情况下只会查询到一条
-        if (kanJiaActivityGoodsDTOS.size() > 0) {
-            return kanJiaActivityGoodsDTOS.get(0);
-        }
-        return null;
+        //mongo查询条件
+        Query query = new Query();
+        query.addCriteria(Criteria.where("skuId").ne(skuId))
+                .addCriteria(Criteria.where("promotionStatus").ne(PromotionStatusEnum.START.name()));
+        List<KanjiaActivityGoodsDTO> kanjiaActivityGoodsDTOList=this.mongoTemplate.find(query, KanjiaActivityGoodsDTO.class);
+        return kanjiaActivityGoodsDTOList.get(0);
     }
 }
