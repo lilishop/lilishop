@@ -9,7 +9,7 @@ import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.CategoryParameterGroup;
 import cn.lili.modules.goods.entity.vos.CategoryVO;
 import cn.lili.modules.goods.entity.vos.GoodsParamsGroupVO;
-import cn.lili.modules.goods.entity.vos.GoodsParamsDTOVO;
+import cn.lili.modules.goods.entity.vos.GoodsParamsVO;
 import cn.lili.modules.goods.mapper.CategoryMapper;
 import cn.lili.modules.goods.service.CategoryService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -268,13 +268,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      * @param paramList 参数列表
      * @return 拼装后的返回值
      */
-    private List<GoodsParamsGroupVO> convertParamList(List<CategoryParameterGroup> groupList, List<GoodsParamsDTOVO> paramList) {
-        Map<String, List<GoodsParamsDTOVO>> map = new HashMap<>(16);
-        for (GoodsParamsDTOVO param : paramList) {
+    private List<GoodsParamsGroupVO> convertParamList(List<CategoryParameterGroup> groupList, List<GoodsParamsVO> paramList) {
+        Map<String, List<GoodsParamsVO>> map = new HashMap<>(16);
+        for (GoodsParamsVO param : paramList) {
             if (map.get(param.getGroupId()) != null) {
                 map.get(param.getGroupId()).add(param);
             } else {
-                List<GoodsParamsDTOVO> list = new ArrayList<>();
+                List<GoodsParamsVO> list = new ArrayList<>();
                 list.add(param);
                 map.put(param.getGroupId(), list);
             }

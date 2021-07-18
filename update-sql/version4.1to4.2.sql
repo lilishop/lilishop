@@ -10,3 +10,7 @@ INSERT INTO `lilishop`.`li_menu`(`id`, `create_by`, `create_time`, `delete_flag`
 
 /** 促销商品添加商品类型**/
 ALTER TABLE li_promotion_goods ADD goods_type varchar (200);
+/** 修改历史积分积分类型的字段类型 **/
+alter table li_member_points_history modify column point_type varchar(50);
+update li_member_points_history set point_type = 'INCREASE' where point_type=1;
+update li_member_points_history set point_type = 'REDUCE' where point_type=0;

@@ -1,6 +1,6 @@
 package cn.lili.modules.system.entity.dto.payment;
 
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
 import cn.lili.modules.system.entity.dto.payment.dto.PaymentSupportForm;
 import cn.lili.modules.system.entity.dto.payment.dto.PaymentSupportItem;

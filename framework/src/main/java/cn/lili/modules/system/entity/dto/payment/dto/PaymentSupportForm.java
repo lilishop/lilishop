@@ -1,6 +1,6 @@
 package cn.lili.modules.system.entity.dto.payment.dto;
 
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
 import lombok.Data;
 import lombok.experimental.Accessors;

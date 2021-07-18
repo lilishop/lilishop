@@ -36,10 +36,7 @@ public class PaymentExecute implements OrderStatusChangeEvent {
         switch (orderMessage.getNewStatus()) {
             case CANCELLED:
                 Order order = orderService.getBySn(orderMessage.getOrderSn());
-                //未付款不做处理 直接返回
-                if (order.getPayStatus() == PayStatusEnum.UNPAID.name()) {
-                    return;
-                }
+
                 //如果未付款，则不去要退回相关代码执行
                 if (order.getPayStatus().equals(PayStatusEnum.UNPAID.name())) {
                     return;

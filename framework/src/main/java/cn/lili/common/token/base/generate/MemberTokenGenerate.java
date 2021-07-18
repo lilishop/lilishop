@@ -6,7 +6,7 @@ import cn.lili.common.token.Token;
 import cn.lili.common.token.TokenUtil;
 import cn.lili.common.token.base.AbstractTokenGenerate;
 import cn.lili.config.context.ThreadContextHolder;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;

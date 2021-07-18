@@ -3,7 +3,7 @@ package cn.lili.modules.order.order.entity.dos;
 import cn.hutool.json.JSONUtil;
 import cn.lili.base.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;

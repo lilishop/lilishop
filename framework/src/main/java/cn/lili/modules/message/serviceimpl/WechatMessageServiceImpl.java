@@ -5,7 +5,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.message.entity.dos.WechatMessage;
 import cn.lili.modules.message.entity.enums.WechatMessageItemEnums;
 import cn.lili.modules.message.mapper.WechatMessageMapper;
