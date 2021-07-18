@@ -2,7 +2,7 @@ package cn.lili.modules.message.util;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.message.entity.dos.ShortLink;
 import cn.lili.modules.message.service.ShortLinkService;
 import com.alibaba.fastjson.JSON;

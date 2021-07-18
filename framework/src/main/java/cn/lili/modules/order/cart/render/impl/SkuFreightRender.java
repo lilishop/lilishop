@@ -1,8 +1,6 @@
 package cn.lili.modules.order.cart.render.impl;
 
 import cn.hutool.core.util.NumberUtil;
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -53,7 +51,9 @@ public class SkuFreightRender implements CartRenderStep {
             }
             //寻找对应对商品运费计算模版
             FreightTemplateVO freightTemplate = freightTemplateService.getFreightTemplate(freightTemplateId);
-            if (freightTemplate != null && freightTemplate.getFreightTemplateChildList() != null && !freightTemplate.getFreightTemplateChildList().isEmpty()) {
+            if (freightTemplate != null
+                    && freightTemplate.getFreightTemplateChildList() != null
+                    && !freightTemplate.getFreightTemplateChildList().isEmpty()) {
                 //店铺支付运费则跳过
                 if (freightTemplate.getPricingMethod().equals(FreightTemplateEnum.FREE.name())) {
                     break;

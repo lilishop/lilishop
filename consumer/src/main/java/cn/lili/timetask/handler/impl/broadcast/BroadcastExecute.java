@@ -1,6 +1,6 @@
 package cn.lili.timetask.handler.impl.broadcast;
 
-import cn.lili.modules.broadcast.service.CommodityService;
+import cn.lili.modules.goods.service.CommodityService;
 import cn.lili.timetask.handler.EveryHourExecute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

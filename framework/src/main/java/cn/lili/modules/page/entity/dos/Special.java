@@ -1,6 +1,7 @@
 package cn.lili.modules.page.entity.dos;
 
 import cn.lili.base.BaseEntity;
+import cn.lili.common.enums.ClientTypeEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -26,7 +27,7 @@ public class Special extends BaseEntity {
     private String specialName;
 
     /**
-     * @see cn.lili.modules.base.entity.enums.ClientTypeEnum
+     * @see ClientTypeEnum
      */
     @ApiModelProperty(value = "楼层对应连接端类型", allowableValues = "PC,H5,WECHAT_MP,APP")
     private String clientType;

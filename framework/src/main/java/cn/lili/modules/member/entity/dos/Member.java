@@ -1,6 +1,7 @@
 package cn.lili.modules.member.entity.dos;
 
 import cn.lili.base.BaseEntity;
+import cn.lili.common.enums.ClientTypeEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -76,7 +77,7 @@ public class Member extends BaseEntity {
     private String storeId;
 
     /**
-     * @see cn.lili.modules.base.entity.enums.ClientTypeEnum
+     * @see ClientTypeEnum
      */
     @ApiModelProperty(value = "客户端")
     private String clientEnum;

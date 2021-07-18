@@ -3,7 +3,7 @@ package cn.lili.controller.other;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.base.aspect.DemoSite;
+import cn.lili.modules.system.aspect.DemoSite;
 import cn.lili.modules.page.entity.dos.PageData;
 import cn.lili.modules.page.entity.dto.PageDataDTO;
 import cn.lili.modules.page.entity.vos.PageDataListVO;
@@ -58,7 +58,7 @@ public class PageDataManagerController {
     }
 
     @ApiOperation(value = "页面列表")
-    @GetMapping("pageDataList")
+    @GetMapping("/pageDataList")
     public ResultMessage<IPage<PageDataListVO>> pageDataList(PageVO pageVO, PageDataDTO pageDataDTO) {
         return ResultUtil.data(pageDataService.getPageDataList(pageVO, pageDataDTO));
     }

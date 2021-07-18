@@ -13,7 +13,7 @@ import cn.lili.common.token.base.generate.MemberTokenGenerate;
 import cn.lili.common.utils.CookieUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.config.context.ThreadContextHolder;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.entity.dto.WechatMPLoginParams;

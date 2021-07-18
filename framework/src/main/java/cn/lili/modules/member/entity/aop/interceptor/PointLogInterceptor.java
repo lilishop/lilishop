@@ -3,6 +3,7 @@ package cn.lili.modules.member.entity.aop.interceptor;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberPointsHistory;
+import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.service.MemberPointsHistoryService;
 import cn.lili.modules.member.service.MemberService;
 import lombok.extern.slf4j.Slf4j;
@@ -55,9 +56,10 @@ public class PointLogInterceptor {
                 MemberPointsHistory memberPointsHistory = new MemberPointsHistory();
                 memberPointsHistory.setMemberId(member.getId());
                 memberPointsHistory.setMemberName(member.getUsername());
-                memberPointsHistory.setPointType(type ? 1 : 0);
+                memberPointsHistory.setPointType(type ? PointTypeEnum.INCREASE.name() : PointTypeEnum.REDUCE.name());
+
                 memberPointsHistory.setVariablePoint(point);
-                memberPointsHistory.setBeforePoint(new Double(CurrencyUtil.sub(member.getPoint(), point)).longValue());
+                memberPointsHistory.setBeforePoint(true ? new Double(CurrencyUtil.sub(member.getPoint(), point)).longValue() : new Double(CurrencyUtil.add(member.getPoint(), point)).longValue());
                 memberPointsHistory.setPoint(member.getPoint());
                 memberPointsHistory.setContent(obj[3] == null ? "" : obj[3].toString());
                 memberPointsHistory.setCreateBy("系统");
