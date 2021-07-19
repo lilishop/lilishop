@@ -1,6 +1,6 @@
 package cn.lili.controller.common;
 
-import cn.lili.common.cache.limit.annotation.LimitPoint;
+import cn.lili.cache.limit.annotation.LimitPoint;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.enums.ResultUtil;

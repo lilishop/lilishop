@@ -1,8 +1,8 @@
 package cn.lili.listener;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.cache.Cache;
-import cn.lili.common.rocketmq.tags.MqOrderTagsEnum;
+import cn.lili.cache.Cache;
+import cn.lili.rocketmq.tags.MqOrderTagsEnum;
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.event.TradeEvent;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;

@@ -1,7 +1,7 @@
 package cn.lili.controller.common;
 
 import cn.hutool.core.util.StrUtil;
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
@@ -12,7 +12,7 @@ import cn.lili.common.utils.CommonUtil;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.config.properties.SystemSetting;
+import cn.lili.common.config.properties.SystemSetting;
 import cn.lili.modules.file.entity.File;
 import cn.lili.modules.file.plugin.FileManagerPlugin;
 import cn.lili.modules.file.service.FileService;

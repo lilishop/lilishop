@@ -1,6 +1,6 @@
 package cn.lili.modules.goods.service;
 
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.CachePrefix;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;

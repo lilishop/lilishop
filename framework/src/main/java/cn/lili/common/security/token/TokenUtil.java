@@ -1,13 +1,13 @@
 package cn.lili.common.security.token;
 
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.enums.SecurityEnum;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.config.properties.JWTTokenProperties;
+import cn.lili.common.config.properties.JWTTokenProperties;
 import com.google.gson.Gson;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;

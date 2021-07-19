@@ -1,7 +1,7 @@
 package cn.lili.event.impl;
 
 import cn.hutool.core.convert.Convert;
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;

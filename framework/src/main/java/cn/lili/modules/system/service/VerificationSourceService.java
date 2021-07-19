@@ -1,6 +1,6 @@
 package cn.lili.modules.system.service;
 
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.CachePrefix;
 import cn.lili.modules.system.entity.dos.VerificationSource;
 import cn.lili.modules.system.entity.vo.VerificationVO;
 import com.baomidou.mybatisplus.extension.service.IService;

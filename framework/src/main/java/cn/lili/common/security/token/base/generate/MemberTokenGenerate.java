@@ -5,7 +5,7 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.security.token.TokenUtil;
 import cn.lili.common.security.token.base.AbstractTokenGenerate;
-import cn.lili.config.context.ThreadContextHolder;
+import cn.lili.common.config.context.ThreadContextHolder;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;

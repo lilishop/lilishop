@@ -1,19 +1,19 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.DelayTypeEnums;
-import cn.lili.common.trigger.message.PromotionMessage;
+import cn.lili.trigger.util.DelayQueueTools;
+import cn.lili.trigger.enums.DelayTypeEnums;
+import cn.lili.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.trigger.interfaces.TimeTrigger;
-import cn.lili.common.trigger.model.TimeExecuteConstant;
-import cn.lili.common.trigger.model.TimeTriggerMsg;
+import cn.lili.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.model.TimeExecuteConstant;
+import cn.lili.trigger.model.TimeTriggerMsg;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;

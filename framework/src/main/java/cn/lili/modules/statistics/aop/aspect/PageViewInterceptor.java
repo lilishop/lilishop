@@ -1,7 +1,7 @@
 package cn.lili.modules.statistics.aop.aspect;
 
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.utils.SpelUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.connect.util.IpUtils;

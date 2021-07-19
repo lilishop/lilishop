@@ -2,7 +2,7 @@ package cn.lili.trigger.executor;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.delayqueue.BroadcastMessage;
-import cn.lili.common.trigger.model.TimeExecuteConstant;
+import cn.lili.trigger.model.TimeExecuteConstant;
 import cn.lili.modules.goods.service.StudioService;
 import cn.lili.trigger.TimeTriggerExecutor;
 import lombok.extern.slf4j.Slf4j;

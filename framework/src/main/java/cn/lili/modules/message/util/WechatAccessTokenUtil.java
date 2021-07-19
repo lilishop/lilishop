@@ -2,8 +2,8 @@ package cn.lili.modules.message.util;
 
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.enums.ClientTypeEnum;

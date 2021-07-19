@@ -1,7 +1,7 @@
 package cn.lili.modules.order.cart.service;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;

@@ -1,15 +1,15 @@
 package cn.lili.modules.connect.util;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.config.properties.ApiProperties;
-import cn.lili.config.properties.DomainProperties;
+import cn.lili.common.config.properties.ApiProperties;
+import cn.lili.common.config.properties.DomainProperties;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.connect.config.AuthConfig;
 import cn.lili.modules.connect.config.ConnectAuthEnum;

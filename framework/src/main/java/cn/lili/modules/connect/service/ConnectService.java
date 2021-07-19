@@ -1,6 +1,6 @@
 package cn.lili.modules.connect.service;
 
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.security.token.Token;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;

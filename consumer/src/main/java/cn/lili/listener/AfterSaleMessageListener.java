@@ -1,7 +1,7 @@
 package cn.lili.listener;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.rocketmq.tags.AfterSaleTagsEnum;
+import cn.lili.rocketmq.tags.AfterSaleTagsEnum;
 import cn.lili.event.AfterSaleStatusChangeEvent;
 import cn.lili.modules.order.order.entity.dos.AfterSale;
 import lombok.extern.slf4j.Slf4j;

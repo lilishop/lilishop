@@ -1,6 +1,6 @@
 package cn.lili.modules.search.entity.dos;
 
-import cn.lili.common.elasticsearch.EsSuffix;
+import cn.lili.elasticsearch.EsSuffix;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;

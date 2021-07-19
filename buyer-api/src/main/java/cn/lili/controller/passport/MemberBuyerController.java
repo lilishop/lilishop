@@ -2,7 +2,7 @@ package cn.lili.controller.passport;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.sms.SmsUtil;
+import cn.lili.modules.system.sms.SmsUtil;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.modules.verification.enums.VerificationEnums;
 import cn.lili.modules.verification.service.VerificationService;

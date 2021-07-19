@@ -1,10 +1,10 @@
 package cn.lili.modules.message.serviceimpl;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.common.rocketmq.tags.OtherTagsEnum;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.OtherTagsEnum;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.message.entity.dos.SmsReach;
 import cn.lili.modules.message.entity.dto.SmsReachDTO;
 import cn.lili.modules.message.mapper.SmsReachMapper;
@@ -13,7 +13,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

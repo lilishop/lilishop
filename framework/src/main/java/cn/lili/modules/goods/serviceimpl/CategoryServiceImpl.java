@@ -1,8 +1,8 @@
 package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.core.util.StrUtil;
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dos.Category;

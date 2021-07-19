@@ -1,7 +1,7 @@
 package cn.lili.common.security.token.base.generate;
 
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.PermissionEnum;

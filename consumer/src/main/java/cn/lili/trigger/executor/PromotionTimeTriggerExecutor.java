@@ -1,13 +1,13 @@
 package cn.lili.trigger.executor;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.interfaces.TimeTrigger;
 import cn.lili.trigger.TimeTriggerExecutor;
-import cn.lili.common.trigger.message.PintuanOrderMessage;
-import cn.lili.common.trigger.message.PromotionMessage;
-import cn.lili.common.trigger.model.TimeExecuteConstant;
-import cn.lili.common.trigger.model.TimeTriggerMsg;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.trigger.message.PintuanOrderMessage;
+import cn.lili.trigger.message.PromotionMessage;
+import cn.lili.trigger.model.TimeExecuteConstant;
+import cn.lili.trigger.model.TimeTriggerMsg;
+import cn.lili.common.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.service.PromotionService;

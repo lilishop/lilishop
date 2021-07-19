@@ -2,7 +2,7 @@ package cn.lili.modules.system.aspect.interceptor;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.config.properties.SystemSetting;
+import cn.lili.common.config.properties.SystemSetting;
 import cn.lili.modules.system.aspect.DemoSite;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
