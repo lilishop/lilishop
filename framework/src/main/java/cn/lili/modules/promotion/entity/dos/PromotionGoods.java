@@ -1,7 +1,7 @@
 package cn.lili.modules.promotion.entity.dos;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import com.baomidou.mybatisplus.annotation.TableName;

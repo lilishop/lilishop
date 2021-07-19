@@ -1,6 +1,6 @@
 package cn.lili.modules.store.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.store.entity.dto.AdminStoreApplyDTO;

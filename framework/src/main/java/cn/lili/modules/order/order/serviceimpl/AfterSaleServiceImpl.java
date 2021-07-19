@@ -2,7 +2,7 @@ package cn.lili.modules.order.order.serviceimpl;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.aop.syslog.annotation.SystemLogPoint;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;

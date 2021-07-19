@@ -1,12 +1,12 @@
 package cn.lili.modules.permission.serviceimpl;
 
-import cn.lili.common.aop.syslog.annotation.SystemLogPoint;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.token.Token;
-import cn.lili.common.token.base.generate.ManagerTokenGenerate;
+import cn.lili.common.security.token.Token;
+import cn.lili.common.security.token.base.generate.ManagerTokenGenerate;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.permission.entity.dos.AdminUser;

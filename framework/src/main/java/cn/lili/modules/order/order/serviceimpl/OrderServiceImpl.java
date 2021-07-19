@@ -8,7 +8,7 @@ import cn.hutool.json.JSONUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
-import cn.lili.common.aop.syslog.annotation.SystemLogPoint;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.common.trigger.util.DelayQueueTools;
 import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.message.PintuanOrderMessage;

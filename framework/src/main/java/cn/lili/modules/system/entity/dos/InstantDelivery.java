@@ -1,7 +1,7 @@
 package cn.lili.modules.system.entity.dos;
 
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.system.entity.vo.InstantDeliveryVO;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.google.gson.Gson;

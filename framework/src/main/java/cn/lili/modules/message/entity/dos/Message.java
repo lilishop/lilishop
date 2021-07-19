@@ -1,6 +1,6 @@
 package cn.lili.modules.message.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.message.entity.enums.RangeEnum;
 import cn.lili.modules.message.entity.enums.MessageSendClient;
 import com.baomidou.mybatisplus.annotation.TableField;

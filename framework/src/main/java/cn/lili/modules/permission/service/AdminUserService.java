@@ -1,7 +1,7 @@
 package cn.lili.modules.permission.service;
 
 
-import cn.lili.common.token.Token;
+import cn.lili.common.security.token.Token;
 import cn.lili.modules.permission.entity.dos.AdminUser;
 import cn.lili.modules.permission.entity.dto.AdminUserDTO;
 import cn.lili.modules.permission.entity.vo.AdminUserVO;

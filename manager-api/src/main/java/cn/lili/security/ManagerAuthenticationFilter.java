@@ -6,7 +6,7 @@ import cn.lili.common.cache.CachePrefix;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.enums.SecurityEnum;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.common.token.SecretKeyUtil;
+import cn.lili.common.security.token.SecretKeyUtil;
 import cn.lili.common.utils.ResponseUtil;
 import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;

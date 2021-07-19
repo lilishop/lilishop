@@ -1,7 +1,5 @@
 package cn.lili.modules.purchase.entity.dos;
 
-import cn.lili.base.BaseEntity;
-import cn.lili.common.utils.SnowFlake;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;

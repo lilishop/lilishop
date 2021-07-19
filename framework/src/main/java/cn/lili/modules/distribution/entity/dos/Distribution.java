@@ -1,6 +1,6 @@
 package cn.lili.modules.distribution.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.distribution.entity.dto.DistributionApplyDTO;
 import cn.lili.modules.distribution.entity.enums.DistributionStatusEnum;

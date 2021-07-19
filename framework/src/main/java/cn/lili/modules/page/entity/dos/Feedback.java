@@ -1,7 +1,5 @@
 package cn.lili.modules.page.entity.dos;
 
-import cn.lili.base.BaseEntity;
-import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.page.entity.enums.FeedbackTypeEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;

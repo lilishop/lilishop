@@ -10,7 +10,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.sms.AliSmsUtil;
 import cn.lili.common.sms.SmsUtil;
 import cn.lili.common.utils.CommonUtil;
-import cn.lili.common.verification.enums.VerificationEnums;
+import cn.lili.modules.verification.enums.VerificationEnums;
 import cn.lili.config.properties.SmsTemplateSetting;
 import cn.lili.config.properties.SystemSetting;
 import cn.lili.modules.connect.util.Base64Utils;
