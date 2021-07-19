@@ -39,7 +39,7 @@ public interface StoreLogisticsMapper extends BaseMapper<StoreLogistics> {
      * @param storeId 店铺列表
      * @return 店铺地址VO列表
      */
-    @Select("SELECT *, ( SELECT sl.id FROM li_store_logistics sl WHERE l.id = sl.logistics_id AND sl.store_id=#{storeId} ) AS selected FROM li_logistics l AND l.disabled='OPEN';")
+    @Select("SELECT *, ( SELECT sl.id FROM li_store_logistics sl WHERE l.id = sl.logistics_id AND sl.store_id=#{storeId} ) AS selected FROM li_logistics l WHERE l.disabled='OPEN';")
     List<StoreLogisticsVO> getStoreLogistics(String storeId);
 
 }

@@ -98,8 +98,8 @@ public class OrderSearchParams extends PageVO {
 
         //关键字查询
         if (StringUtils.isNotEmpty(keywords)) {
-            wrapper.and(queryWrapper -> wrapper.like("o.sn", keywords).or().
-                    like("oi.goods_name", keywords));
+            wrapper.like("o.sn", keywords);
+            wrapper.like("oi.goods_name", keywords);
         }
         //按卖家查询
         wrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()), "o.store_id", UserContext.getCurrentUser().getStoreId());
@@ -126,13 +126,13 @@ public class OrderSearchParams extends PageVO {
 
         //按订单类型
         if (StringUtils.isNotEmpty(orderType)) {
-            wrapper.and(queryWrapper-> queryWrapper.eq("o.order_type", orderType).or()
+            wrapper.and(queryWrapper -> queryWrapper.eq("o.order_type", orderType).or()
                     .eq("o.order_promotion_type", orderType));
         }
 
 
         //物流查询
-        wrapper.like(StringUtils.isNotEmpty(shipName), "o.ship_name", shipName);
+        wrapper.like(StringUtils.isNotEmpty(shipName), "o.consignee_name", shipName);
 
         //按商品名称查询
         wrapper.like(StringUtils.isNotEmpty(goodsName), "oi.goods_name", goodsName);
