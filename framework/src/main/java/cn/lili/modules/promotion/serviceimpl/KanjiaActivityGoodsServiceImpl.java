@@ -90,6 +90,7 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
             kanJiaActivityGoodsDTO.setThumbnail(goodsSku.getThumbnail());
             kanJiaActivityGoodsDTO.setGoodsName(goodsSku.getGoodsName());
             kanJiaActivityGoodsDTO.setPromotionStatus(PromotionStatusEnum.NEW.name());
+            kanJiaActivityGoodsDTO.setOriginalPrice(kanJiaActivityGoodsDTO.getGoodsSku().getPrice());
             kanjiaActivityGoodsList.add(kanJiaActivityGoodsDTO);
         }
         Boolean result = this.saveBatch(kanjiaActivityGoodsList);
