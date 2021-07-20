@@ -4,7 +4,6 @@ import cn.lili.common.cache.Cache;
 import cn.lili.common.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.page.entity.dos.Article;
 import cn.lili.modules.page.entity.dos.ArticleCategory;
 import cn.lili.modules.page.entity.enums.ArticleCategoryEnum;
@@ -54,12 +53,6 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
 
     @Override
     public ArticleCategory saveArticleCategory(ArticleCategory articleCategory) {
-        //不能添加重复的分类名称
-        List<ArticleCategory> list = this.list(
-                new LambdaQueryWrapper<ArticleCategory>().eq(ArticleCategory::getArticleCategoryName, articleCategory.getArticleCategoryName()));
-        if (StringUtils.isNotEmpty(list)) {
-            throw new ServiceException(ResultCode.ARTICLE_CATEGORY_NAME_EXIST);
-        }
         //非顶级分类
         if (articleCategory.getParentId() != null && !parentId.equals(articleCategory.getParentId())) {
             ArticleCategory parent = this.getById(articleCategory.getParentId());
