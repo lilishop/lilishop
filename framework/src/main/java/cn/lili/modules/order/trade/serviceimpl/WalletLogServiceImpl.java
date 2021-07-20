@@ -1,6 +1,6 @@
 package cn.lili.modules.order.trade.serviceimpl;
 
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.trade.entity.dos.WalletLog;

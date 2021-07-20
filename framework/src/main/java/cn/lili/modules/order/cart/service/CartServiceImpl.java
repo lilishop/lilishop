@@ -28,7 +28,7 @@ import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.enums.CouponScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.service.MemberAddressService;
 import cn.lili.modules.promotion.service.MemberCouponService;
 import cn.lili.modules.promotion.service.PintuanService;

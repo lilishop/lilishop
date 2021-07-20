@@ -20,7 +20,7 @@ import cn.lili.modules.promotion.entity.dto.GoodsSkuPromotionPriceDTO;
 import cn.lili.modules.promotion.entity.dto.PromotionPriceDTO;
 import cn.lili.modules.promotion.entity.dto.PromotionPriceParamDTO;
 import cn.lili.modules.promotion.entity.dto.StorePromotionPriceDTO;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.service.PintuanService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.service.PromotionPriceService;

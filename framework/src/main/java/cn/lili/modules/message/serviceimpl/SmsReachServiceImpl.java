@@ -4,7 +4,7 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.OtherTagsEnum;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.common.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.message.entity.dos.SmsReach;
 import cn.lili.modules.message.entity.dto.SmsReachDTO;
 import cn.lili.modules.message.mapper.SmsReachMapper;

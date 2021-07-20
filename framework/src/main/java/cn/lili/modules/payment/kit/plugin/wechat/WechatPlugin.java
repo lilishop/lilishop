@@ -15,7 +15,7 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.common.config.properties.ApiProperties;
+import cn.lili.common.properties.ApiProperties;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.enums.ConnectEnum;

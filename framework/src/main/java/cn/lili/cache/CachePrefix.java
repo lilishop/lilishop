@@ -1,7 +1,7 @@
 package cn.lili.cache;
 
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
 
 /**
  * 缓存前缀

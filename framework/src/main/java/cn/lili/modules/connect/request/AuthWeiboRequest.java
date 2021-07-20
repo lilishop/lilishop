@@ -13,8 +13,8 @@ import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.entity.enums.AuthResponseStatus;
 import cn.lili.modules.connect.entity.enums.AuthUserGender;
 import cn.lili.modules.connect.exception.AuthException;
-import cn.lili.modules.connect.util.HttpUtils;
-import cn.lili.modules.connect.util.IpUtils;
+import cn.lili.common.utils.HttpUtils;
+import cn.lili.common.utils.IpUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.xkcoding.http.support.HttpHeader;
 

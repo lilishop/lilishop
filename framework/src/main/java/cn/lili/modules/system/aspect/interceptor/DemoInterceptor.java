@@ -2,8 +2,8 @@ package cn.lili.modules.system.aspect.interceptor;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.config.properties.SystemSetting;
-import cn.lili.modules.system.aspect.DemoSite;
+import cn.lili.common.properties.SystemSettingProperties;
+import cn.lili.modules.system.aspect.annotation.DemoSite;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +22,11 @@ import org.springframework.stereotype.Component;
 public class DemoInterceptor {
 
     @Autowired
-    private SystemSetting systemSetting;
+    private SystemSettingProperties systemSettingProperties;
 
     @Before("@annotation(demoSite)")
     public void doAfter(DemoSite demoSite) {
-        if (systemSetting.getIsDemoSite()) {
+        if (systemSettingProperties.getIsDemoSite()) {
             throw new ServiceException(ResultCode.DEMO_SITE_EXCEPTION);
         }
     }

@@ -9,7 +9,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.common.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.member.entity.dos.MemberSign;
 import cn.lili.modules.member.mapper.MemberSignMapper;
 import cn.lili.modules.member.service.MemberService;

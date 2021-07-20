@@ -1,7 +1,7 @@
 package cn.lili.modules.statistics.serviceimpl;
 
 import cn.lili.common.utils.DateUtil;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;

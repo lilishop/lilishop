@@ -5,7 +5,7 @@ import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.common.utils.OperationalJudgment;
+import cn.lili.modules.system.utils.OperationalJudgment;
 import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
 import cn.lili.modules.order.order.entity.dos.Order;

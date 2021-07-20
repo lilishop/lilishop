@@ -12,7 +12,7 @@ import cn.lili.modules.connect.entity.enums.AuthResponseStatus;
 import cn.lili.modules.connect.entity.enums.AuthUserGender;
 import cn.lili.modules.connect.exception.AuthException;
 import cn.lili.modules.connect.util.GlobalAuthUtils;
-import cn.lili.modules.connect.util.HttpUtils;
+import cn.lili.common.utils.HttpUtils;
 import com.alibaba.fastjson.JSONObject;
 
 /**

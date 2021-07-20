@@ -7,7 +7,7 @@ import cn.lili.trigger.message.PintuanOrderMessage;
 import cn.lili.trigger.message.PromotionMessage;
 import cn.lili.trigger.model.TimeExecuteConstant;
 import cn.lili.trigger.model.TimeTriggerMsg;
-import cn.lili.common.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.service.PromotionService;

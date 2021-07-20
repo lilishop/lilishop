@@ -1,5 +1,6 @@
 package cn.lili.modules.connect.util;
 
+import cn.lili.common.utils.Base64Utils;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.connect.exception.AuthException;
 import com.alibaba.fastjson.JSON;

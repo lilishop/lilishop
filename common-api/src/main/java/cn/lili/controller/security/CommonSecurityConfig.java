@@ -2,7 +2,7 @@ package cn.lili.controller.security;
 
 import cn.lili.cache.Cache;
 import cn.lili.common.security.CustomAccessDeniedHandler;
-import cn.lili.common.config.properties.IgnoredUrlsProperties;
+import cn.lili.common.properties.IgnoredUrlsProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

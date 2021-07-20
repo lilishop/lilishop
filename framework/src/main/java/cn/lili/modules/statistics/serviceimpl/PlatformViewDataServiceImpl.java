@@ -6,7 +6,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.common.config.properties.StatisticsProperties;
+import cn.lili.common.properties.StatisticsProperties;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.member.entity.vo.MemberDistributionVO;
 import cn.lili.modules.member.service.MemberService;

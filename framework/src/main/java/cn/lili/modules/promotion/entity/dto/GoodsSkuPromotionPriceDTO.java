@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.entity.dto;
 
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import io.swagger.annotations.ApiModelProperty;
@@ -77,7 +78,7 @@ public class GoodsSkuPromotionPriceDTO implements Serializable {
     private String promotionId;
 
     /**
-     * @see cn.lili.modules.promotion.entity.enums.PromotionTypeEnum
+     * @see PromotionTypeEnum
      */
     @ApiModelProperty(value = "促销活动类型")
     private String promotionType;
