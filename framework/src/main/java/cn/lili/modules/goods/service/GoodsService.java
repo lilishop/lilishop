@@ -8,6 +8,9 @@ import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
 
@@ -17,6 +20,7 @@ import java.util.List;
  * @author pikachu
  * @date 2020-02-23 16:18:56
  */
+@CacheConfig(cacheNames = "{goods}")
 public interface GoodsService extends IService<Goods> {
 
 
@@ -48,6 +52,7 @@ public interface GoodsService extends IService<Goods> {
      * @param goodsOperationDTO 商品查询条件
      * @param goodsId           商品ID
      */
+    @CacheEvict(key = "#goodsId")
     void editGoods(GoodsOperationDTO goodsOperationDTO, String goodsId);
 
     /**
@@ -56,6 +61,7 @@ public interface GoodsService extends IService<Goods> {
      * @param goodsId 商品id
      * @return 商品VO
      */
+    @Cacheable(key = "#goodsId")
     GoodsVO getGoodsVO(String goodsId);
 
     /**
