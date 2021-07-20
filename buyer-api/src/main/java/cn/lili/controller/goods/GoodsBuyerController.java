@@ -5,7 +5,6 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.distribution.service.DistributionService;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
@@ -61,12 +60,6 @@ public class GoodsBuyerController {
      */
     @Autowired
     private EsGoodsSearchService goodsSearchService;
-    /**
-     * 分销员
-     */
-    @Autowired
-    private DistributionService distributionService;
-
 
     @ApiOperation(value = "通过id获取商品信息")
     @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "path", dataType = "Long")
