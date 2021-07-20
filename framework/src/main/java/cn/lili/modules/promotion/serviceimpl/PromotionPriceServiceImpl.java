@@ -484,8 +484,8 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
                 goodsSkuPromotionPrice.setTotalDiscountPrice(distributeDiscountTotalPrice);
                 //单品成交价
                 double finalPrice = CurrencyUtil.sub(goodsSkuPromotionPrice.getTotalOriginalPrice(), distributeDiscountTotalPrice);
-                goodsSkuPromotionPrice.setFinalePrice(finalPrice);
-                goodsSkuPromotionPrice.setTotalFinalePrice(CurrencyUtil.mul(finalPrice, goodsSkuPromotionPrice.getNumber()));
+                goodsSkuPromotionPrice.setFinalePrice(CurrencyUtil.div(finalPrice, goodsSkuPromotionPrice.getNumber()));
+                goodsSkuPromotionPrice.setTotalFinalePrice(finalPrice);
                 fullDiscount.setPromotionName(PromotionTypeEnum.FULL_DISCOUNT.name());
                 goodsSkuPromotionPrice.getJoinPromotion().add(fullDiscount);
 
