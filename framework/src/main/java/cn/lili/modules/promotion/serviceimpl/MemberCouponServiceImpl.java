@@ -141,7 +141,8 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         queryWrapper.eq(MemberCoupon::getMemberId, memberId);
         queryWrapper.eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name());
         queryWrapper.eq(MemberCoupon::getScopeType, CouponScopeTypeEnum.ALL.name());
-        queryWrapper.gt(MemberCoupon::getEndTime, new Date()).and(i -> i.in(MemberCoupon::getStoreId, storeId).or(j -> j.eq(MemberCoupon::getIsPlatform, true)));
+        queryWrapper.gt(MemberCoupon::getEndTime, new Date());
+        //queryWrapper.and(i -> i.in(MemberCoupon::getStoreId, storeId).or(j -> j.eq(MemberCoupon::getIsPlatform, true)));
         return this.list(queryWrapper);
     }
 

@@ -27,10 +27,6 @@ public class FullDiscount extends BasePromotion {
 
     private static final long serialVersionUID = 430433787214894166L;
 
-    @NotEmpty(message = "活动名称不能为空")
-    @ApiModelProperty(value = "活动名称", required = true)
-    private String promotionName;
-
     @NotNull(message = "请填写优惠门槛")
     @DecimalMax(value = "99999999.00", message = "优惠券门槛金额超出限制")
     @ApiModelProperty(value = "优惠门槛金额", required = true)

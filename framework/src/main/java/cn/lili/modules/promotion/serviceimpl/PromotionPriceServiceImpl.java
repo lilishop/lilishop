@@ -66,7 +66,7 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
     @Override
     public PromotionPriceDTO calculationPromotionPrice(List<PromotionPriceParamDTO> tradeSkuList, List<MemberCoupon> memberCouponList, CartTypeEnum cartTypeEnum) {
 
-        List<GoodsSkuPromotionPriceDTO> priceDTOList=new ArrayList<>();
+        List<GoodsSkuPromotionPriceDTO> priceDTOList = new ArrayList<>();
 
         //拆分出SkuId列表
         List<String> skuIds = tradeSkuList.parallelStream().map(PromotionPriceParamDTO::getSkuId).collect(Collectors.toList());
@@ -75,9 +75,9 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
 
         //判断交易类型，进行不同的处理
         if (cartTypeEnum.equals(CartTypeEnum.POINTS)) {
-            this.pointGoodsPromotion(tradeSkuList);
+            priceDTOList = this.pointGoodsPromotion(tradeSkuList);
         } else if (cartTypeEnum.equals(CartTypeEnum.KANJIA)) {
-            this.kanjiaPromotion(tradeSkuList);
+            priceDTOList = this.kanjiaPromotion(tradeSkuList);
         } else {
             //参与计算的缓存中的商品SKU列表
             List<GoodsSku> goodsSkus = goodsSkuService.getGoodsSkuByIdFromCache(skuIds);
@@ -288,6 +288,8 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
         goodsSkuPromotionPrice.setTotalDiscountPrice(CurrencyUtil.sub(goodsSkuPromotionPrice.getOriginalPrice(), kanjiaActivityGoodsDTO.getPurchasePrice()));
         //购买价格=砍价成交金额
         goodsSkuPromotionPrice.setTotalFinalePrice(kanjiaActivityGoodsDTO.getPurchasePrice());
+        //原价
+        goodsSkuPromotionPrice.setTotalOriginalPrice(goodsSkuPromotionPrice.getOriginalPrice());
         priceDTOList.add(goodsSkuPromotionPrice);
         return priceDTOList;
     }

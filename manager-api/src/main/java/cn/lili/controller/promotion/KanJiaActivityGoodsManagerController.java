@@ -51,7 +51,7 @@ public class KanJiaActivityGoodsManagerController {
     @GetMapping("/{id}")
     @ApiOperation(value = "获取积分商品详情")
     public ResultMessage<Object> getPointsGoodsDetail(@PathVariable("id") String goodsId) {
-        KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO = kanJiaActivityGoodsService.getKanJiaGoodsDetail(goodsId);
+        KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO = kanJiaActivityGoodsService.getKanjiaGoodsDetail(goodsId);
         return ResultUtil.data(kanJiaActivityGoodsDTO);
     }
 
@@ -59,7 +59,7 @@ public class KanJiaActivityGoodsManagerController {
     @PutMapping
     @ApiOperation(value = "修改砍价商品")
     public ResultMessage<Object> updatePointsGoods(@RequestBody KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO) {
-        kanJiaActivityGoodsService.updateKanJiaActivityGoods(kanJiaActivityGoodsDTO);
+        kanJiaActivityGoodsService.updateKanjiaActivityGoods(kanJiaActivityGoodsDTO);
         return ResultUtil.success();
     }
 

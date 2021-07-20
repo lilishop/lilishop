@@ -97,7 +97,10 @@ public class CartPriceRender implements CartRenderStep {
                     if (Boolean.TRUE.equals(cartSkuVO.getChecked())) {
                         PriceDetailDTO priceDetailDTO = cartSkuVO.getPriceDetailDTO();
                         //流水金额(入账 出帐金额) = goodsPrice + freight - discountPrice - couponPrice
-                        double flowPrice = CurrencyUtil.sub(CurrencyUtil.add(priceDetailDTO.getGoodsPrice(), priceDetailDTO.getFreightPrice()), CurrencyUtil.add(priceDetailDTO.getDiscountPrice(), priceDetailDTO.getCouponPrice() != null ? priceDetailDTO.getCouponPrice() : 0));
+                        double flowPrice = CurrencyUtil.sub(
+                                CurrencyUtil.add(priceDetailDTO.getGoodsPrice(), priceDetailDTO.getFreightPrice()),
+                                CurrencyUtil.add(priceDetailDTO.getDiscountPrice(),
+                                        priceDetailDTO.getCouponPrice() != null ? priceDetailDTO.getCouponPrice() : 0));
                         priceDetailDTO.setFlowPrice(flowPrice);
 
                         //最终结算金额 = flowPrice - platFormCommission - distributionCommission

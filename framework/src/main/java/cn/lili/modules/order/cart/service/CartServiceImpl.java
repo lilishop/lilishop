@@ -27,10 +27,8 @@ import cn.lili.modules.promotion.entity.dos.KanjiaActivity;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.enums.CouponScopeTypeEnum;
-import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
-import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
+import cn.lili.modules.promotion.entity.enums.*;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivitySearchParams;
 import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
@@ -98,6 +96,8 @@ public class CartServiceImpl implements CartService {
      */
     @Autowired
     private KanjiaActivityService kanjiaActivityService;
+    @Autowired
+    private KanjiaActivityGoodsService kanjiaActivityGoodsService;
     /**
      * 交易
      */
@@ -691,25 +691,25 @@ public class CartServiceImpl implements CartService {
      */
     private void checkKanjia(CartSkuVO cartSkuVO) {
 
-        List<PromotionGoods> currentPromotion = cartSkuVO.getPromotions().stream().filter(
-                promotionGoods -> (promotionGoods.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())))
-                .collect(Collectors.toList());
+        //根据skuId获取砍价商品
+        KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO=kanjiaActivityGoodsService.getKanjiaGoodsBySkuId(cartSkuVO.getGoodsSku().getId());
 
-        //校验砍价活动是否满足条件
+        //查找当前会员的砍价商品活动
         KanjiaActivitySearchParams kanjiaActivitySearchParams = new KanjiaActivitySearchParams();
-        kanjiaActivitySearchParams.setKanjiaActivityGoodsId(currentPromotion.get(0).getSkuId());
+        kanjiaActivitySearchParams.setKanjiaActivityGoodsId(kanjiaActivityGoodsDTO.getId());
         kanjiaActivitySearchParams.setMemberId(UserContext.getCurrentUser().getId());
+        kanjiaActivitySearchParams.setStatus(KanJiaStatusEnum.SUCCESS.name());
         KanjiaActivity kanjiaActivity = kanjiaActivityService.getKanjiaActivity(kanjiaActivitySearchParams);
 
+        //校验砍价活动是否满足条件
         //判断发起砍价活动
         if (kanjiaActivity == null) {
             throw new ServiceException(ResultCode.KANJIA_ACTIVITY_NOT_FOUND_ERROR);
             //判断砍价活动是否已满足条件
         } else if (!KanJiaStatusEnum.SUCCESS.name().equals(kanjiaActivity.getStatus())) {
             throw new ServiceException(ResultCode.KANJIA_ACTIVITY_NOT_PASS_ERROR);
-            //判断砍价商品数量
-        } else if (cartSkuVO.getNum() > 1) {
-            throw new ServiceException(ResultCode.KANJIA_NUM_BUY_ERROR);
         }
+        //砍价商品默认一件货物
+        cartSkuVO.setNum(1);
     }
 }

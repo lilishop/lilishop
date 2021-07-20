@@ -16,12 +16,18 @@ import lombok.Data;
 public class KanjiaActivityVO extends KanjiaActivity {
 
     @ApiModelProperty(value = "是否可以砍价")
-    private Boolean help = false;
+    private Boolean help;
 
     @ApiModelProperty(value = "是否已发起砍价")
-    private Boolean launch = false;
+    private Boolean launch;
 
     @ApiModelProperty(value = "是否可购买")
-    private Boolean pass = false;
+    private Boolean pass;
+
+    public KanjiaActivityVO() {
+        this.setHelp(false);
+        this.setLaunch(false);
+        this.setPass(false);
+    }
 
 }

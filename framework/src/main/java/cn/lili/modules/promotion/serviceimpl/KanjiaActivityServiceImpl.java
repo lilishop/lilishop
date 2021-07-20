@@ -66,6 +66,10 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
     public KanjiaActivityVO getKanjiaActivityVO(KanjiaActivitySearchParams kanJiaActivitySearchParams) {
         KanjiaActivity kanjiaActivity = this.getKanjiaActivity(kanJiaActivitySearchParams);
         KanjiaActivityVO kanjiaActivityVO = new KanjiaActivityVO();
+        //判断是否参与活动
+        if (kanjiaActivity == null) {
+            return kanjiaActivityVO;
+        }
         BeanUtil.copyProperties(kanjiaActivity, kanjiaActivityVO);
 
         //判断是否发起了砍价活动,如果发起可参与活动
@@ -195,6 +199,10 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
             return surplusPrice;
         }
 
+        //如果金额相等则直接返回
+        if (kanjiaActivityGoods.getLowestPrice().equals(kanjiaActivityGoods.getHighestPrice())) {
+            return kanjiaActivityGoods.getLowestPrice();
+        }
         //获取随机砍价金额
         BigDecimal bigDecimal = RandomUtil.randomBigDecimal(Convert.toBigDecimal(kanjiaActivityGoods.getLowestPrice()),
                 Convert.toBigDecimal(kanjiaActivityGoods.getHighestPrice()));

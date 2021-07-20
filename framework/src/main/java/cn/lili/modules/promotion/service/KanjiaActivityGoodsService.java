@@ -47,7 +47,7 @@ public interface KanjiaActivityGoodsService extends IService<KanjiaActivityGoods
      * @param pageVO                    分页信息
      * @return 砍价商品
      */
-    IPage<KanjiaActivityGoodsListVO> kanJiaGoodsVOPage(KanjiaActivityGoodsParams kanJiaActivityGoodsParams, PageVO pageVO);
+    IPage<KanjiaActivityGoodsListVO> kanjiaGoodsVOPage(KanjiaActivityGoodsParams kanJiaActivityGoodsParams, PageVO pageVO);
 
     /**
      * 查询砍价活动商品
@@ -55,7 +55,14 @@ public interface KanjiaActivityGoodsService extends IService<KanjiaActivityGoods
      * @param goodsId 砍价活动商品id
      * @return 砍价活动商品信息
      */
-    KanjiaActivityGoodsDTO getKanJiaGoodsDetail(String goodsId);
+    KanjiaActivityGoodsDTO getKanjiaGoodsDetail(String goodsId);
+
+    /**
+     * 根据SkuId获取正在进行中的砍价商品
+     * @param skuId 商品规格Id
+     * @return 砍价商品
+     */
+    KanjiaActivityGoodsDTO getKanjiaGoodsBySkuId(String skuId);
 
     /**
      * 查询砍价活动商品VO
@@ -67,10 +74,10 @@ public interface KanjiaActivityGoodsService extends IService<KanjiaActivityGoods
     /**
      * 修改看见商品信息
      *
-     * @param kanJiaActivityGoodsDTO 砍价商品信息
+     * @param kanjiaActivityGoodsDTO 砍价商品信息
      * @return 是否修改成功
      */
-    boolean updateKanJiaActivityGoods(KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO);
+    boolean updateKanjiaActivityGoods(KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO);
 
     /**
      * 删除砍价商品

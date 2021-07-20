@@ -140,7 +140,7 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
     }
 
     @Override
-    public IPage<KanjiaActivityGoodsListVO> kanJiaGoodsVOPage(KanjiaActivityGoodsParams kanjiaActivityGoodsParams, PageVO pageVO) {
+    public IPage<KanjiaActivityGoodsListVO> kanjiaGoodsVOPage(KanjiaActivityGoodsParams kanjiaActivityGoodsParams, PageVO pageVO) {
         return this.baseMapper.kanjiaActivityGoodsVOPage(PageUtil.initPage(pageVO),kanjiaActivityGoodsParams.wrapper());
     }
 
@@ -225,13 +225,23 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
     }
 
     @Override
-    public KanjiaActivityGoodsDTO getKanJiaGoodsDetail(String goodsId) {
+    public KanjiaActivityGoodsDTO getKanjiaGoodsDetail(String goodsId) {
         KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO = this.mongoTemplate.findById(goodsId, KanjiaActivityGoodsDTO.class);
         if (kanJiaActivityGoodsDTO == null) {
             log.error("id为" + goodsId + "的砍价商品不存在！");
             throw new ServiceException();
         }
         return kanJiaActivityGoodsDTO;
+    }
+
+    @Override
+    public KanjiaActivityGoodsDTO getKanjiaGoodsBySkuId(String skuId) {
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("promotionStatus").is(PromotionStatusEnum.START.name()));
+        query.addCriteria(Criteria.where("skuId").is(skuId));
+        List<KanjiaActivityGoodsDTO> kanjiaActivityGoodsDTOS = this.mongoTemplate.find(query, KanjiaActivityGoodsDTO.class);
+        return kanjiaActivityGoodsDTOS.get(0);
     }
 
     @Override
@@ -252,9 +262,9 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
     }
 
     @Override
-    public boolean updateKanJiaActivityGoods(KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO) {
+    public boolean updateKanjiaActivityGoods(KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO) {
         //校验砍价商品是否存在
-        KanjiaActivityGoodsDTO dbKanJiaActivityGoods = this.getKanJiaGoodsDetail(kanJiaActivityGoodsDTO.getId());
+        KanjiaActivityGoodsDTO dbKanJiaActivityGoods = this.getKanjiaGoodsDetail(kanJiaActivityGoodsDTO.getId());
         //校验当前活动是否已经开始,只有新建的未开始的活动可以编辑
         if (!dbKanJiaActivityGoods.getPromotionStatus().equals(PromotionStatusEnum.NEW.name())) {
             throw new ServiceException(ResultCode.PROMOTION_UPDATE_ERROR);
@@ -297,7 +307,7 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
     public boolean deleteKanJiaGoods(List<String> ids) {
         List<String> skuIds = new ArrayList<>();
         for (String id : ids) {
-            KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO = this.getKanJiaGoodsDetail(id);
+            KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO = this.getKanjiaGoodsDetail(id);
             this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
                     kanJiaActivityGoodsDTO.getStartTime().getTime(),
                     DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.KANJIA.name() + kanJiaActivityGoodsDTO.getId())),
@@ -318,8 +328,8 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
     public KanjiaActivityGoodsDTO getKanJiaGoodsBySku(String skuId) {
         //mongo查询条件
         Query query = new Query();
-        query.addCriteria(Criteria.where("skuId").ne(skuId))
-                .addCriteria(Criteria.where("promotionStatus").ne(PromotionStatusEnum.START.name()));
+        query.addCriteria(Criteria.where("skuId").is(skuId))
+                .addCriteria(Criteria.where("promotionStatus").is(PromotionStatusEnum.START.name()));
         List<KanjiaActivityGoodsDTO> kanjiaActivityGoodsDTOList=this.mongoTemplate.find(query, KanjiaActivityGoodsDTO.class);
         return kanjiaActivityGoodsDTOList.get(0);
     }
