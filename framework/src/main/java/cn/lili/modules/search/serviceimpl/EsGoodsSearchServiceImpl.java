@@ -1,5 +1,6 @@
 package cn.lili.modules.search.serviceimpl;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.cache.Cache;
 import cn.lili.common.utils.StringUtils;
@@ -392,11 +393,11 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             if(prices.length==0){
                 return;
             }
-            double min = StringUtils.toDouble(prices[0], 0.0);
+            double min = Convert.toDouble(prices[0], 0.0);
             double max = Integer.MAX_VALUE;
 
             if (prices.length == 2) {
-                max = StringUtils.toDouble(prices[1], Double.MAX_VALUE);
+                max = Convert.toDouble(prices[1], Double.MAX_VALUE);
             }
             filterBuilder.must(QueryBuilders.rangeQuery("price").from(min).to(max).includeLower(true).includeUpper(true));
         }

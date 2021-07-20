@@ -1,6 +1,5 @@
 package cn.lili.common.utils;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 
 import java.beans.BeanInfo;
@@ -10,7 +9,6 @@ import java.lang.reflect.Method;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -50,99 +48,6 @@ public class StringUtils extends StrUtil {
     }
 
     /**
-     * 将object转为数字
-     *
-     * @param obj     需要转object的对象
-     * @param checked 如果为true格式不正确抛出异常
-     * @return
-     */
-    public static int toInt(Object obj, boolean checked) {
-        int value = 0;
-        if (obj == null) {
-            return 0;
-        }
-        try {
-            value = Convert.toInt(obj.toString());
-        } catch (Exception ex) {
-            if (checked) {
-                throw new RuntimeException("整型数字格式不正确");
-            } else {
-                return 0;
-            }
-        }
-        return value;
-    }
-
-    /**
-     * 将一个字串转为long，如果无空，则返回默认值
-     *
-     * @param str          要转换的数字字串
-     * @param defaultValue 默认值
-     * @return
-     */
-    public static Long toLong(String str, Long defaultValue) {
-        Long value = defaultValue;
-        if (str == null || "".equals(str)) {
-            return defaultValue;
-        }
-        try {
-            value = Long.parseLong(str);
-        } catch (Exception ex) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * 将一个object转为double 如果object 为 null 则返回0；
-     *
-     * @param obj     需要转成Double的对象
-     * @param checked 如果为true格式不正确抛出异常
-     * @return
-     */
-    public static Double toDouble(Object obj, boolean checked) {
-        Double value = 0d;
-        if (obj == null) {
-            if (checked) {
-                throw new RuntimeException("数字格式不正确");
-            } else {
-                return 0D;
-            }
-        }
-        try {
-            value = Double.valueOf(obj.toString());
-        } catch (Exception ex) {
-            if (checked) {
-                throw new RuntimeException("数字格式不正确");
-            } else {
-                return 0D;
-            }
-        }
-        return value;
-    }
-
-    /**
-     * 将一个字串转为Double，如果无空，则返回默认值
-     *
-     * @param str          要转换的数字字串
-     * @param defaultValue 默认值
-     * @return
-     */
-    public static Double toDouble(String str, Double defaultValue) {
-        Double value = defaultValue;
-        if (str == null || "".equals(str)) {
-            return 0d;
-        }
-        try {
-            value = Double.valueOf(str);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            value = defaultValue;
-        }
-        return value;
-    }
-
-    /**
      * 获取随机数
      *
      * @param n 随机次数
@@ -156,18 +61,6 @@ public class StringUtils extends StrUtil {
             sRand += rand;
         }
         return sRand;
-    }
-
-
-    /**
-     * 判断一个数组是否为空，并且长度大于0
-     *
-     * @param list
-     * @return true 不空/false 空
-     */
-    public static boolean isNotEmpty(List list) {
-
-        return list != null && list.size() > 0;
     }
 
     /**

@@ -1,11 +1,14 @@
 package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.StringUtils;
-import cn.lili.modules.goods.entity.dos.*;
+import cn.lili.modules.goods.entity.dos.Category;
+import cn.lili.modules.goods.entity.dos.DraftGoods;
+import cn.lili.modules.goods.entity.dos.GoodsGallery;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.DraftGoodsDTO;
 import cn.lili.modules.goods.entity.dto.DraftGoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
@@ -135,16 +138,16 @@ public class DraftGoodsServiceImpl extends ServiceImpl<DraftGoodsMapper, DraftGo
                     sku.setSn(m.getValue() != null ? m.getValue().toString() : "");
                     break;
                 case "cost":
-                    sku.setCost(StringUtils.toDouble(m.getValue(), false));
+                    sku.setCost(Convert.toDouble(m.getValue()));
                     break;
                 case "price":
-                    sku.setPrice(StringUtils.toDouble(m.getValue(), false));
+                    sku.setPrice(Convert.toDouble(m.getValue()));
                     break;
                 case "quantity":
-                    sku.setQuantity(StringUtils.toInt(m.getValue(), false));
+                    sku.setQuantity(Convert.toInt(m.getValue()));
                     break;
                 case "weight":
-                    sku.setWeight(StringUtils.toDouble(m.getValue(), false));
+                    sku.setWeight(Convert.toDouble(m.getValue()));
                     break;
                 default:
                     specMap.put(m.getKey(), m.getValue());
