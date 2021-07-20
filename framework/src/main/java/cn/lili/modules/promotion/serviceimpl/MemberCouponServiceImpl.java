@@ -58,8 +58,8 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         if (coupon.getPublishNum() != 0 && coupon.getReceivedNum() >= coupon.getPublishNum()) {
             throw new ServiceException(ResultCode.COUPON_NUM_INSUFFICIENT_ERROR);
         }
-        if (haveCoupons >= coupon.getCouponLimitNum()) {
-            throw new ServiceException("此优惠券最多领取" + coupon.getCouponLimitNum() + "张");
+        if (!coupon.getCouponLimitNum().equals(0) && haveCoupons >= coupon.getCouponLimitNum()) {
+            throw new ServiceException(ResultCode.COUPON_LIMIT_ERROR, "此优惠券最多领取" + coupon.getCouponLimitNum() + "张");
         }
     }
 
