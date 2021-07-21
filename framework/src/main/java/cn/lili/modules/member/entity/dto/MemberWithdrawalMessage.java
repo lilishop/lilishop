@@ -18,6 +18,9 @@ public class MemberWithdrawalMessage {
     @ApiModelProperty(value = "会员id")
     private String memberId;
 
+    @ApiModelProperty(value = "提现状态")
+    private String status;
+
     /**
      * @see cn.lili.modules.member.entity.enums.MemberWithdrawalDestinationEnum
      */
