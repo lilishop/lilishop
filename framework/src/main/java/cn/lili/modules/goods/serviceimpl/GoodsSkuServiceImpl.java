@@ -194,7 +194,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         String quantity = stringRedisTemplate.opsForValue().get(GoodsSkuService.getStockCacheKey(id));
 
         //如果sku缓存的库存与库存缓存不符则按照库存缓存进行
-        if (quantity == null) {
+        if (StrUtil.isNotEmpty(quantity)) {
             goodsSku.setQuantity(Convert.toInt(quantity));
             cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
         }
