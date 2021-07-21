@@ -13,7 +13,7 @@ import javax.persistence.Table;
  * 小程序直播间
  *
  * @author Bulbasaur
- * @date: 2021/5/17 9:47 上午
+ * @since: 2021/5/17 9:47 上午
  */
 @Data
 @Entity

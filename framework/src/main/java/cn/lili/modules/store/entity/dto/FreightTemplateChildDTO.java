@@ -14,7 +14,7 @@ import javax.validation.constraints.NotEmpty;
  * 模版详细配置
  *
  * @author pikachu
- * @date 2018-08-22 15:10:51
+ * @since 2018-08-22 15:10:51
  */
 @Data
 @NoArgsConstructor

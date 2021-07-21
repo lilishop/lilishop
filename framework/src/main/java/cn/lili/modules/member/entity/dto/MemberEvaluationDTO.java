@@ -10,7 +10,7 @@ import javax.validation.constraints.NotEmpty;
  * 会员评价DTO
  *
  * @author Chopper
- * @date 2020/11/29 11:13 下午
+ * @since 2020/11/29 11:13 下午
  */
 @Data
 public class MemberEvaluationDTO {

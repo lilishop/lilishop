@@ -11,7 +11,7 @@ import javax.validation.constraints.Size;
  * 添加会员DTO
  *
  * @author Bulbasaur
- * @date 2020/12/14 16:31
+ * @since 2020/12/14 16:31
  */
 @Data
 public class MemberAddDTO {

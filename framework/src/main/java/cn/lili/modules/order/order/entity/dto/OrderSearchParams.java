@@ -21,7 +21,7 @@ import java.util.Date;
  * 订单查询参数
  *
  * @author Chopper
- * @date 2020/11/17 4:33 下午
+ * @since 2020/11/17 4:33 下午
  */
 @Data
 public class OrderSearchParams extends PageVO {
@@ -77,17 +77,17 @@ public class OrderSearchParams extends PageVO {
     private String paymentMethod;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "支付时间")
     private Date paymentTime;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+  @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "下单开始时间")
     private Date startDate;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+  @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "下单结束时间")
     private Date endDate;
 

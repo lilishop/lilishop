@@ -27,7 +27,7 @@ import javax.validation.constraints.NotNull;
  * 买家端,买家优惠券接口
  *
  * @author paulG
- * @date 2020/11/17 3:35 下午
+ * @since 2020/11/17 3:35 下午
  */
 @RestController
 @Api(tags = "买家端,买家优惠券接口")

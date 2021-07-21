@@ -17,7 +17,6 @@ import java.util.List;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/11/26 15:23
  */
 public class PageUtil {
@@ -26,8 +25,9 @@ public class PageUtil {
     /**
      * Mybatis-Plus分页封装
      *
-     * @param page
-     * @return
+     * @param page 分页VO
+     * @param <T> 范型
+     * @return 分页响应
      */
     public static <T> Page<T> initPage(PageVO page) {
 
@@ -74,8 +74,8 @@ public class PageUtil {
      * 生成条件搜索 全对象对比 equals
      * 如果需要like 需要另行处理
      *
-     * @param object
-     * @return
+     * @param object 对象（根据对象构建查询条件）
+     * @return 查询wrapper
      */
     public static <T> QueryWrapper<T> initWrapper(Object object) {
         return initWrapper(object, null);
@@ -84,9 +84,9 @@ public class PageUtil {
     /**
      * 生成条件搜索 全对象对比
      *
-     * @param object
-     * @param searchVo
-     * @return
+     * @param object 对象
+     * @param searchVo 查询条件
+     * @return 查询wrapper
      */
     public static <T> QueryWrapper<T> initWrapper(Object object, SearchVO searchVo) {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
@@ -118,9 +118,9 @@ public class PageUtil {
     /**
      * List 手动分页
      *
-     * @param page
-     * @param list
-     * @return
+     * @param page 分页对象
+     * @param list 分页集合
+     * @return 范型结果
      */
     public static <T> List<T> listToPage(PageVO page, List<T> list) {
 

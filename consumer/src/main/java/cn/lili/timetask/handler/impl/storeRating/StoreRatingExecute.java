@@ -21,7 +21,7 @@ import java.util.List;
  * 店铺评分
  *
  * @author Chopper
- * @date 2021/3/15 5:30 下午
+ * @since 2021/3/15 5:30 下午
  */
 @Component
 public class StoreRatingExecute implements EveryDayExecute {

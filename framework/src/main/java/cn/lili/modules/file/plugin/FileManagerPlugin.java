@@ -7,7 +7,6 @@ import java.util.List;
  * 文件管理插件
  *
  * @author Chopper
- * @date 2020/11/26 17:50
  */
 public interface FileManagerPlugin {
 

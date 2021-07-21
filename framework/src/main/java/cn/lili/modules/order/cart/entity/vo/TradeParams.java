@@ -12,7 +12,7 @@ import java.util.List;
  * 交易参数
  *
  * @author paulG
- * @date 2021/2/23
+ * @since 2021/2/23
  **/
 @Data
 public class TradeParams implements Serializable {

@@ -12,7 +12,7 @@ import javax.validation.constraints.NotEmpty;
  * 管理员入库dto
  *
  * @author Chopper
- * @date 2020/11/16 19:55
+ * @since 2020/11/16 19:55
  */
 @Data
 @ApiModel(value = "管理员入库dto")

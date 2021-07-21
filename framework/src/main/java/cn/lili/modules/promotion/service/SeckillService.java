@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 秒杀业务层
  *
  * @author Chopper
- * @date 2020/11/18 9:45 上午
+ * @since 2020/11/18 9:45 上午
  */
 public interface SeckillService extends IService<Seckill> {
 
@@ -44,8 +44,6 @@ public interface SeckillService extends IService<Seckill> {
 
     /**
      * 初始化秒杀活动，默认开启三十天的秒杀活动
-     *
-     * @return 是否保存成功
      */
     void init();
     /**
@@ -103,7 +101,6 @@ public interface SeckillService extends IService<Seckill> {
     /**
      * 更新秒杀活动的商品数量
      * @param seckillId 秒杀活动ID
-     * @return 更新结果
      */
     void updateSeckillGoodsNum(String seckillId);
 }

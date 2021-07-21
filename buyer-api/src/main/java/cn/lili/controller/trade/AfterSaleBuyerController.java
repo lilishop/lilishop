@@ -30,7 +30,7 @@ import java.util.List;
  * 买家端,售后管理接口
  *
  * @author Chopper
- * @date 2020/11/16 10:02 下午
+ * @since 2020/11/16 10:02 下午
  */
 @RestController
 @Api(tags = "买家端,售后管理接口")
@@ -95,7 +95,7 @@ public class AfterSaleBuyerController {
     public ResultMessage<AfterSale> delivery(@NotNull(message = "售后编号不能为空") @PathVariable("afterSaleSn") String afterSaleSn,
                                              @NotNull(message = "发货单号不能为空") @RequestParam String logisticsNo,
                                              @NotNull(message = "请选择物流公司") @RequestParam String logisticsId,
-                                             @NotNull(message = "请选择发货时间") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date mDeliverTime) {
+                                             @NotNull(message = "请选择发货时间") @RequestParam  @DateTimeFormat(pattern = "yyyy-MM-dd") Date mDeliverTime) {
         return ResultUtil.data(afterSaleService.buyerDelivery(afterSaleSn, logisticsNo, logisticsId, mDeliverTime));
     }
 

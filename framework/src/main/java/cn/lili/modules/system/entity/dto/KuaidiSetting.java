@@ -8,7 +8,7 @@ import java.io.Serializable;
  * 快递设置
  *
  * @author Chopper
- * @date 2020-03-10 10:04 上午
+ * @since 2020-03-10 10:04 上午
  */
 @Data
 public class KuaidiSetting implements Serializable {

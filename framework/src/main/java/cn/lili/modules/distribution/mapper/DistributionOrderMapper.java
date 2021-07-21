@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Update;
  * 分销订单数据处理层
  *
  * @author pikachu
- * @date 2020-03-15 10:45:56
+ * @since 2020-03-15 10:45:56
  */
 public interface DistributionOrderMapper extends BaseMapper<DistributionOrder> {
 

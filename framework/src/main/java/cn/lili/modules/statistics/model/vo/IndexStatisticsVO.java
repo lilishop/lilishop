@@ -7,7 +7,7 @@ import lombok.Data;
  * 首页统计内容
  *
  * @author Bulbasaur
- * @date 2020/12/22 14:23
+ * @since 2020/12/22 14:23
  */
 @Data
 public class IndexStatisticsVO {

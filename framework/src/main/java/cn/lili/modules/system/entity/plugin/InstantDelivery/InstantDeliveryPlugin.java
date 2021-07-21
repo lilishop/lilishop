@@ -14,7 +14,6 @@ import java.util.Map;
  *
  * @author pikachu
  * @version v1.0
- * @Description:
  * @since 2020/12/01 15:58
  */
 public interface InstantDeliveryPlugin {

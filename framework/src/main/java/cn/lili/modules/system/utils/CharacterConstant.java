@@ -2,7 +2,7 @@ package cn.lili.modules.system.utils;
 
 /**
  *
- * @Description: 字符常量
+ * 字符常量
  * @author Bulbasaur
  * @version v1.0
  * @since v1.0

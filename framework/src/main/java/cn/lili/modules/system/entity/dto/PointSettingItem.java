@@ -7,7 +7,7 @@ import lombok.Data;
  * 积分签到设置
  *
  * @author Chopper
- * @date 2021-02-26 11:48
+ * @since 2021-02-26 11:48
  */
 @Data
 public class PointSettingItem implements Comparable<PointSettingItem> {

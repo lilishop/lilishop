@@ -33,7 +33,7 @@ import java.util.List;
  * 促销活动每日定时器
  *
  * @author Chopper
- * @date 2021/3/18 3:23 下午
+ * @since 2021/3/18 3:23 下午
  */
 @Slf4j
 @Component

@@ -5,7 +5,7 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 
 /**
  * @author paulG
- * @date 2020/10/15
+ * @since 2020/10/15
  **/
 public interface EsGoodsIndexRepository extends ElasticsearchRepository<EsGoodsIndex, String> {
 

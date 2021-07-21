@@ -19,7 +19,7 @@ import javax.persistence.Table;
  * 即时配送
  *
  * @author pikachu
- * @date 2020/12/01 15:58
+ * @since 2020/12/01 15:58
  */
 @Data
 @Entity

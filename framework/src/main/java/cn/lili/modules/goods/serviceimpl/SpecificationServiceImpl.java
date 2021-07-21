@@ -21,7 +21,7 @@ import java.util.List;
  * 商品规格业务层实现
  *
  * @author pikachu
- * @date 2020-02-18 16:18:56
+ * @since 2020-02-18 16:18:56
  */
 @Service
 public class SpecificationServiceImpl extends ServiceImpl<SpecificationMapper, Specification> implements SpecificationService {

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
  * 商品SKU变化
  *
  * @author Chopper
- * @date 2020-07-03 11:20
+ * @since 2020-07-03 11:20
  */
 @Service
 public class GoodsSkuExecute implements GoodsCommentCompleteEvent {

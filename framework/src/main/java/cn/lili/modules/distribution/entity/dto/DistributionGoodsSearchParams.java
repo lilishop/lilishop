@@ -11,7 +11,7 @@ import lombok.Data;
  * 分销员商品查询条件
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
+ * @since 2020-03-14 23:04:56
  */
 @Data
 public class DistributionGoodsSearchParams extends PageVO {

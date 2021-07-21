@@ -8,7 +8,7 @@ import lombok.experimental.Accessors;
  * 统一下单-商户门店信息
  *
  * @author Chopper
- * @date 2020/12/17 17:58
+ * @since 2020/12/17 17:58
  */
 
 @Data

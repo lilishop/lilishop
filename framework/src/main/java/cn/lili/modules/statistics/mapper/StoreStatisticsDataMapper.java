@@ -16,7 +16,7 @@ import java.util.List;
  * 店铺统计数据处理层
  *
  * @author Bulbasaur
- * @date 2020/11/17 7:34 下午
+ * @since 2020/11/17 7:34 下午
  */
 public interface StoreStatisticsDataMapper extends BaseMapper<StoreFlow> {
 

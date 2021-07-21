@@ -18,8 +18,8 @@ public class OperationalJudgment<t> {
      * 需要判定的对象必须包含属性 memberId，storeId 代表判定的角色
      *
      * @param object 判定的对象
-     * @param <t>
-     * @return
+     * @param <t> 判定处理对象
+     * @return 处理结果
      */
     public static <t> t judgment(t object) {
         return judgment(object, "memberId", "storeId");
@@ -28,10 +28,10 @@ public class OperationalJudgment<t> {
     /**
      * 需要判定的对象必须包含属性 memberId，storeId 代表判定的角色
      *
-     * @param object
-     * @param buyerIdField
-     * @param storeIdField
-     * @param <t>
+     * @param object 判定对象
+     * @param buyerIdField 买家id
+     * @param storeIdField 店铺id
+     * @param <t> 范型
      * @return 返回判定本身，防止多次查询对象
      */
     public static <t> t judgment(t object, String buyerIdField, String storeIdField) {

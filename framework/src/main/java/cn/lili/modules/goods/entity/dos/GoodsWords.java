@@ -15,7 +15,7 @@ import javax.persistence.Table;
  * 商品关键字
  *
  * @author paulG
- * @date 2020/10/15
+ * @since 2020/10/15
  */
 @Data
 @Entity

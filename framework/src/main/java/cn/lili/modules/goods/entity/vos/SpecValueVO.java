@@ -11,7 +11,7 @@ import java.util.List;
  * 规格值
  *
  * @author Chopper
- * @date 2020-02-26 23:24:13
+ * @since 2020-02-26 23:24:13
  */
 @Data
 public class SpecValueVO implements Serializable {

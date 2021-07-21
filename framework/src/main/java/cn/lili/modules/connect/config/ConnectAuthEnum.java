@@ -6,7 +6,6 @@ package cn.lili.modules.connect.config;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/12/4 14:10
  */
 public enum ConnectAuthEnum implements ConnectAuth {

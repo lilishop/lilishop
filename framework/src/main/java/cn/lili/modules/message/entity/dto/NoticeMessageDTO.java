@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * 站内信消息
  * @author Chopper
- * @date 2020/12/8 9:46
+ * @since 2020/12/8 9:46
  */
 @Data
 public class NoticeMessageDTO {

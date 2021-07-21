@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
  * 秒杀活动申请实体类
  *
  * @author Chopper
- * @date 2020-03-19 10:44 上午
+ * @since 2020-03-19 10:44 上午
  */
 @Data
 @Entity

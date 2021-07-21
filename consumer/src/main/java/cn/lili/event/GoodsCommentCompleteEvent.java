@@ -6,7 +6,7 @@ import cn.lili.modules.member.entity.dos.MemberEvaluation;
  * 订单状态改变事件
  *
  * @author Chopper
- * @date 2020/11/17 7:13 下午
+ * @since 2020/11/17 7:13 下午
  */
 public interface GoodsCommentCompleteEvent {
 

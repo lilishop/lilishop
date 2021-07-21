@@ -10,7 +10,7 @@ import javax.validation.constraints.Size;
  * 店铺-银行信息
  *
  * @author Bulbasaur
- * @date 2020/12/7 15:54
+ * @since 2020/12/7 15:54
  */
 @Data
 public class StoreBankDTO {

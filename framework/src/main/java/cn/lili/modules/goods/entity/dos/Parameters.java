@@ -22,7 +22,7 @@ import javax.validation.constraints.NotNull;
  * 商品参数
  *
  * @author pikachu
- * @date 2020-02-23 9:14:33
+ * @since 2020-02-23 9:14:33
  */
 @Data
 @Entity

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  * 店铺端,草稿商品接口
  *
  * @author paulG
- * @date 2021/2/20 2:26 下午
+ * @since 2021/2/20 2:26 下午
  *
  */
 @RestController

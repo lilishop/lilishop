@@ -10,7 +10,6 @@ import java.io.InputStream;
  * 序列化的input stream
  *
  * @author Chopper
- * @date 2021-03-25 16:32
  */
 @Data
 @NoArgsConstructor

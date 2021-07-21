@@ -39,6 +39,7 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
      * 使用2个字符的hash定位。
      */
     protected static SensitiveWordsNode[] nodes;
+
     @Autowired
     private SensitiveWordsService sensitiveWordsService;
 
@@ -47,8 +48,8 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
      * 增加一个敏感词，如果词的长度（trim后）小于2，则丢弃<br/>
      * 此方法（构建）并不是主要的性能优化点。
      *
-     * @param word
-     * @return
+     * @param word 敏感词
+     * @return 操作结果
      */
     public static boolean put(String word) {
 

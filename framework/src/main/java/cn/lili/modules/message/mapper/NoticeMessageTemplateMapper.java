@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * 通知类消息模板数据处理层
  *
  * @author Bulbasaur
- * @date 2020/12/8 9:46
+ * @since 2020/12/8 9:46
  */
 public interface NoticeMessageTemplateMapper extends BaseMapper<NoticeMessage> {
 

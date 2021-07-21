@@ -12,7 +12,7 @@ import java.util.List;
  * 会员消息发送业务层
  *
  * @author Chopper
- * @date 2020/11/17 3:44 下午
+ * @since 2020/11/17 3:44 下午
  */
 public interface MemberMessageService extends IService<MemberMessage> {
 

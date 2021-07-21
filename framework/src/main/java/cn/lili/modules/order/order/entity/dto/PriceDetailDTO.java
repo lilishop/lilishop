@@ -14,7 +14,7 @@ import java.util.List;
  * 商城流水，细节到orderItem
  *
  * @author Chopper
- * @date 2020/11/17 7:25 下午
+ * @since 2020/11/17 7:25 下午
  */
 @Data
 public class PriceDetailDTO implements Serializable {

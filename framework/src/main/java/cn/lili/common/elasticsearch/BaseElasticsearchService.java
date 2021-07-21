@@ -335,7 +335,7 @@ public abstract class BaseElasticsearchService {
      * @param index index名
      * @return boolean
      * @author fanxb
-     * @date 2019/7/24 14:57
+     * @since 2019/7/24 14:57
      */
     public boolean indexExist(String index) {
         try {

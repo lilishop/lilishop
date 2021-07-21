@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * 拼团查询通用类
  *
  * @author paulG
- * @date 2020/10/9
+ * @since 2020/10/9
  **/
 @Data
 public class PintuanSearchParams {

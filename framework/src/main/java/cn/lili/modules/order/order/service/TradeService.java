@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 交易业务层
  *
  * @author Chopper
- * @date 2020/11/17 7:37 下午
+ * @since 2020/11/17 7:37 下午
  */
 public interface TradeService extends IService<Trade> {
 

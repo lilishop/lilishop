@@ -14,7 +14,6 @@ import java.util.List;
  * 文件管理业务层
  *
  * @author Chopper
- * @date 2020/11/26 17:50
  */
 public interface FileService extends IService<File> {
 

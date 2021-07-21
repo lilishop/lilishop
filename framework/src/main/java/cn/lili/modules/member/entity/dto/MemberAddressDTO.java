@@ -11,7 +11,7 @@ import javax.validation.constraints.NotEmpty;
  * 会员地址DTO
  *
  * @author Bulbasaur
- * @date 2020/12/14 16:31
+ * @since 2020/12/14 16:31
  */
 @Data
 public class MemberAddressDTO {

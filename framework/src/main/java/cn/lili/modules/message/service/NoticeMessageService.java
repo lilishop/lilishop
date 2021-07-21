@@ -10,7 +10,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 通知类消息模板业务层
  *
  * @author Bulbasaur
- * @date 2020/12/8 9:47
+ * @since 2020/12/8 9:47
  */
 public interface NoticeMessageService extends IService<NoticeMessage> {
 

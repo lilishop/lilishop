@@ -41,7 +41,7 @@ import java.util.Map;
  * 小程序直播间业务层实现
  *
  * @author Bulbasaur
- * @date: 2021/5/17 10:04 上午
+ * @since: 2021/5/17 10:04 上午
  */
 @Service
 public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> implements StudioService {

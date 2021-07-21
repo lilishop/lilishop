@@ -10,7 +10,7 @@ import java.util.List;
  * 商品分类规格业务层
  *
  * @author pikachu
- * @date 2020-02-26 16:18:56
+ * @since 2020-02-26 16:18:56
  */
 public interface CategorySpecificationService extends IService<CategorySpecification> {
     /**

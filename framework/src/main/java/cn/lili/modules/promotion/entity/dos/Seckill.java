@@ -21,7 +21,7 @@ import java.util.Date;
  * 秒杀活动实体类
  *
  * @author Chopper
- * @date 2020-03-19 10:44 上午
+ * @since 2020-03-19 10:44 上午
  */
 @Data
 @Entity

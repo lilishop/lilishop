@@ -17,7 +17,7 @@ import java.util.Date;
  * 结算单业务层
  *
  * @author Chopper
- * @date 2020/11/17 4:28 下午
+ * @since 2020/11/17 4:28 下午
  */
 @CacheConfig(cacheNames = "bill")
 public interface BillService extends IService<Bill> {

@@ -15,8 +15,8 @@ public class BeanUtil {
     /**
      * 复制属性
      *
-     * @param objectFrom
-     * @param objectTo
+     * @param objectFrom 源自对象
+     * @param objectTo 复制给对象
      */
     public static void copyProperties(Object objectFrom, Object objectTo) {
         BeanUtils.copyProperties(objectFrom, objectTo);
@@ -25,6 +25,8 @@ public class BeanUtil {
 
     /**
      * 获取属性名数组
+     * @param o 获取字段的对象
+     * @return 返回各个字段
      */
     public static String[] getFiledName(Object o) {
         Field[] fields = o.getClass().getDeclaredFields();
@@ -67,6 +69,8 @@ public class BeanUtil {
     /**
      * 将对象转换为key value
      * A=a&B=b&C=c 格式
+     * @param object 对象
+     * @return 格式化结果
      */
     public static String formatKeyValuePair(Object object) {
         //准备接受的字符串
@@ -91,6 +95,10 @@ public class BeanUtil {
     /**
      * key value键值对 转换为 对象
      * A=a&B=b&C=c 格式 转换为对象
+     * @param str 对象字符串
+     * @param t 范型
+     * @param <T> 范型
+     * @return 格式化结果
      */
     public static <T> T formatKeyValuePair(String str, T t) {
         //填写对参数键值对

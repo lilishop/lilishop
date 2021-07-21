@@ -12,7 +12,7 @@ import lombok.Data;
  * 评价查询条件
  *
  * @author Bulbasaur
- * @date 2020/11/30 14:52
+ * @since 2020/11/30 14:52
  */
 @Data
 public class EvaluationQueryParams extends PageVO {

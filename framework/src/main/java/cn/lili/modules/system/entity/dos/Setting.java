@@ -13,7 +13,7 @@ import javax.persistence.Table;
 /**
  * 设置
  * @author Chopper
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Data
 @Entity

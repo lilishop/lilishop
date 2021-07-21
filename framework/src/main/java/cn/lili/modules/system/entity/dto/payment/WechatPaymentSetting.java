@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
  * 微信支付设置
  *
  * @author Chopper
- * @date 2020-12-02 10:08
+ * @since 2020-12-02 10:08
  */
 @Data
 @Accessors(chain = true)

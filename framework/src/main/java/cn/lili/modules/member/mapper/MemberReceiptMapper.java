@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * 会员发票数据层
  *
  * @author Chopper
- * @date 2021-03-29 14:10:16
+ * @since 2021-03-29 14:10:16
  */
 public interface MemberReceiptMapper extends BaseMapper<MemberReceipt> {
 

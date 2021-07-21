@@ -11,7 +11,7 @@ import java.util.List;
  * 积分设置
  *
  * @author Chopper
- * @date 2020/11/17 7:59 下午
+ * @since 2020/11/17 7:59 下午
  */
 @Data
 public class PointSetting implements Serializable {

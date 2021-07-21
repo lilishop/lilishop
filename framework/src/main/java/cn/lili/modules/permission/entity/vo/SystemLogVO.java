@@ -14,7 +14,7 @@ import java.util.Map;
  * 日志
  *
  * @author Chopper
- * @date 2020/12/2 17:50
+ * @since 2020/12/2 17:50
  */
 @Data
 public class SystemLogVO implements Serializable {

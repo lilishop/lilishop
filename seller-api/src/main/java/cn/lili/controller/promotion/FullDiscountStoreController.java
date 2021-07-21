@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  * 店铺端,满额活动接口
  *
  * @author paulG
- * @date 2020/8/19
+ * @since 2020/8/19
  **/
 @RestController
 @Api(tags = "店铺端,满额活动接口")

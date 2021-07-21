@@ -10,7 +10,7 @@ import java.util.List;
  * 满额活动VO
  *
  * @author Chopper
- * @date 2020-04-01 10:42 上午
+ * @since 2020-04-01 10:42 上午
  */
 @Data
 public class FullDiscountVO extends FullDiscount {

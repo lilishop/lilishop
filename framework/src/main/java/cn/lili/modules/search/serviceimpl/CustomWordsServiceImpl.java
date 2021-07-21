@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * 自定义分词业务层实现
  * @author paulG
- * @date 2020/10/15
+ * @since 2020/10/15
  **/
 @Service
 public class CustomWordsServiceImpl extends ServiceImpl<CustomWordsMapper, CustomWords> implements CustomWordsService {

@@ -86,7 +86,7 @@ public class RedisCache implements Cache {
     /**
      * 删除
      *
-     * @param key
+     * @param key 模糊删除key
      */
     @Override
     public void vagueDel(Object key) {
@@ -130,7 +130,7 @@ public class RedisCache implements Cache {
      * 获取符合条件的key
      *
      * @param pattern 表达式
-     * @return
+     * @return 模糊匹配key
      */
     @Override
     public List<String> keys(String pattern) {
@@ -236,7 +236,7 @@ public class RedisCache implements Cache {
      * @param sortedSetName sortedSetName
      * @param start         查询范围开始位置
      * @param end           查询范围结束位置
-     * @return
+     * @return 符合排序的集合
      */
     @Override
     public Set<ZSetOperations.TypedTuple<Object>> reverseRangeWithScores(String sortedSetName, Integer start, Integer end) {

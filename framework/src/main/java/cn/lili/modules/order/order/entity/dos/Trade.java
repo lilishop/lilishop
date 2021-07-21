@@ -17,7 +17,7 @@ import javax.persistence.Table;
  * 交易
  *
  * @author Chopper
- * @date 2020/11/17 7:34 下午
+ * @since 2020/11/17 7:34 下午
  */
 @Data
 @Entity

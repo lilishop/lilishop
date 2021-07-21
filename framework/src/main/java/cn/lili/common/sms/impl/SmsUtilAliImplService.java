@@ -40,7 +40,6 @@ import java.util.Map;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/11/30 15:44
  */
 @Component
@@ -343,10 +342,9 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
 
 
     /**
-     * 使用AK&SK初始化账号Client
+     * 初始化账号Client
      *
-     * @return Client
-     * @throws Exception
+     * @return Client 短信操作util
      */
     public com.aliyun.dysmsapi20170525.Client createClient() {
         try {

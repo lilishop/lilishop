@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 /**
  * 管理端发送消息内容数据处理层
  * @author Chopper
- * @date 2020/12/2 17:50
+ * @since 2020/12/2 17:50
  */
 public interface MessageMapper extends BaseMapper<Message> {
 }

@@ -7,7 +7,7 @@ import lombok.Data;
  * 售后申请VO
  *
  * @author Chopper
- * @date 2021/3/12 10:33 上午
+ * @since 2021/3/12 10:33 上午
  */
 @Data
 public class AfterSaleApplyVO {

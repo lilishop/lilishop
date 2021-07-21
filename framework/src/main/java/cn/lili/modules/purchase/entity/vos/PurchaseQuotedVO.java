@@ -10,7 +10,7 @@ import java.util.List;
  * 报价单VO
  *
  * @author Bulbasaur
- * @date 2020/11/26 19:54
+ * @since 2020/11/26 19:54
  */
 @Data
 public class PurchaseQuotedVO extends PurchaseQuoted {

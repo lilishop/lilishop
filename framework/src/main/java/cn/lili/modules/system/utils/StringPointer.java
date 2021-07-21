@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  *
  * @author Bulbasaur
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 public class StringPointer implements Serializable, CharSequence, Comparable<StringPointer>{
 

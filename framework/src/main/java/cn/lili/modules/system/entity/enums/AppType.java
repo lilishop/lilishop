@@ -5,7 +5,7 @@ package cn.lili.modules.system.entity.enums;
  * app类型 安卓 IOS
  *
  * @author Chopper
- * @date 2020/9/11 17:03
+ * @since 2020/9/11 17:03
  */
 public enum AppType {
 

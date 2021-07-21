@@ -15,7 +15,7 @@ import javax.persistence.Table;
  * 会员店铺收藏
  *
  * @author Chopper
- * @date 2020/11/18 3:32 下午
+ * @since 2020/11/18 3:32 下午
  */
 @Data
 @Entity

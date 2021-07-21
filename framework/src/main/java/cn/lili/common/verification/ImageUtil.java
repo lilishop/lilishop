@@ -16,9 +16,9 @@ public class ImageUtil {
     /**
      * 添加水印
      *
-     * @param oriImage
-     * @param text
-     * @throws IOException
+     * @param oriImage 原图
+     * @param text     文字
+     * @throws IOException 流操作异常
      */
     public static void addWatermark(BufferedImage oriImage, String text) {
         Graphics2D graphics2D = oriImage.createGraphics();

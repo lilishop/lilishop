@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2021/2/21 10:19
  */
 @Data

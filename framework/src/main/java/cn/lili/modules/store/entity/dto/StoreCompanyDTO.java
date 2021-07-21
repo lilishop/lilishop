@@ -11,7 +11,7 @@ import javax.validation.constraints.*;
  * 店铺-公司信息
  *
  * @author Bulbasaur
- * @date 2020/12/7 15:50
+ * @since 2020/12/7 15:50
  */
 @Data
 public class StoreCompanyDTO {

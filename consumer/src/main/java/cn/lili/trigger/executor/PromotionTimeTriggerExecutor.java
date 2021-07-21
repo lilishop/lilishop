@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
  *
  * @author Chopper
  * @version v4.1
- * @date 2020/11/17 7:20 下午
+ * @since 2020/11/17 7:20 下午
  */
 @Slf4j
 @Component(TimeExecuteConstant.PROMOTION_EXECUTOR)

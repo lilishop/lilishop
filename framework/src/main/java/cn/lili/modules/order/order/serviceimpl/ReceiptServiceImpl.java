@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 发票业务层实现
  *
  * @author Bulbasaur
- * @date 2020/11/17 7:38 下午
+ * @since 2020/11/17 7:38 下午
  */
 @Service
 public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, Receipt> implements ReceiptService {

@@ -16,7 +16,7 @@ import java.math.BigDecimal;
  * 部门
  *
  * @author Chopper
- * @date 2020/11/19 11:57
+ * @since 2020/11/19 11:57
  */
 @Data
 @Entity

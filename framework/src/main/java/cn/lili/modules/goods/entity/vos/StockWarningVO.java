@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  * 库存警告封装类
  *
  * @author paulG
- * @date 2020/12/24
+ * @since 2020/12/24
  **/
 @Data
 @NoArgsConstructor

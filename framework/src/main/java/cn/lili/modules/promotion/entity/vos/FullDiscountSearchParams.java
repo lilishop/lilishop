@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * 满优惠查询通用类
  *
  * @author paulG
- * @date 2020/8/21
+ * @since 2020/8/21
  **/
 @Data
 public class FullDiscountSearchParams implements Serializable {

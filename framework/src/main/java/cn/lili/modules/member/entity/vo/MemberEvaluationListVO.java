@@ -11,7 +11,7 @@ import java.util.Date;
  * 会员评价VO
  *
  * @author Bulbasaur
- * @date 2020/11/30 15:00
+ * @since 2020/11/30 15:00
  */
 @Data
 public class MemberEvaluationListVO {
@@ -39,7 +39,7 @@ public class MemberEvaluationListVO {
 
     @ApiModelProperty(value = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
 

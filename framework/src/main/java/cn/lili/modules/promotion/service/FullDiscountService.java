@@ -13,7 +13,7 @@ import java.util.List;
  * 满优惠业务层
  *
  * @author Chopper
- * @date 2020/8/21
+ * @since 2020/8/21
  */
 public interface FullDiscountService extends IService<FullDiscount> {
 

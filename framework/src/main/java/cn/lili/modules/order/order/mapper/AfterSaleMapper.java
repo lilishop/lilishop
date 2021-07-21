@@ -13,7 +13,7 @@ import org.apache.ibatis.annotations.Select;
  * 售后数据处理层
  *
  * @author Chopper
- * @date 2020/11/17 7:34 下午
+ * @since 2020/11/17 7:34 下午
  */
 public interface AfterSaleMapper extends BaseMapper<AfterSale> {
 

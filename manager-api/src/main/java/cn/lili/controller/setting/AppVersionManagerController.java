@@ -24,7 +24,7 @@ import javax.validation.Valid;
  * 管理端,app版本控制器
  *
  * @author Chopper
- * @date 2018-07-04 21:50:52
+ * @since 2018-07-04 21:50:52
  */
 @RestController
 @Api("管理端,app版本控制器")

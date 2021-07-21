@@ -23,7 +23,7 @@ import javax.validation.constraints.NotNull;
  * 店铺端,分销商品接口
  *
  * @author Bulbasaur
- * @date 2020/11/16 10:06 下午
+ * @since 2020/11/16 10:06 下午
  */
 @RestController
 @Api(tags = "店铺端,分销商品接口")

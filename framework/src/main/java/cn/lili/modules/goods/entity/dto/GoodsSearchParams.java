@@ -12,7 +12,7 @@ import lombok.Data;
  * 商品查询条件
  *
  * @author pikachu
- * @date 2020-02-24 19:27:20
+ * @since 2020-02-24 19:27:20
  */
 @Data
 public class GoodsSearchParams extends PageVO {

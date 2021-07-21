@@ -15,7 +15,7 @@ import org.apache.ibatis.annotations.Select;
  * 发票数据处理层
  *
  * @author Chopper
- * @date 2020/11/17 7:35 下午
+ * @since 2020/11/17 7:35 下午
  */
 public interface ReceiptMapper extends BaseMapper<Receipt> {
 

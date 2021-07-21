@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
  * 品牌VO
  *
  * @author pikachu
- * @date 2020-02-26 23:24:13
+ * @since 2020-02-26 23:24:13
  */
 @Data
 public class BrandVO extends Brand {

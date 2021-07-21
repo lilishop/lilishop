@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * 直播间事件触发
  *
  * @author Bulbasaur
- * @date: 2021/6/1 5:02 下午
+ * @since: 2021/6/1 5:02 下午
  */
 @Slf4j
 @Component(TimeExecuteConstant.BROADCAST_EXECUTOR)

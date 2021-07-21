@@ -4,7 +4,6 @@ package cn.lili.modules.distribution.entity.enums;
  * 分销员订单状态
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
  */
 public enum DistributionOrderStatusEnum {
     //待结算（冻结）

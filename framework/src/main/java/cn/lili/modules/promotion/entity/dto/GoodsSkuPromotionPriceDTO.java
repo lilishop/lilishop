@@ -14,7 +14,7 @@ import java.util.List;
  * 促销活动商品价格数据传输对象
  *
  * @author paulG
- * @date 2020/8/20
+ * @since 2020/8/20
  **/
 @Data
 @NoArgsConstructor

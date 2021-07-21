@@ -9,7 +9,7 @@ import java.util.List;
  * 拼图会员分享对象
  *
  * @author paulG
- * @date 2021/3/24
+ * @since 2021/3/24
  **/
 @Data
 public class PintuanShareVO {

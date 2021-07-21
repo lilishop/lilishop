@@ -15,7 +15,7 @@ import javax.persistence.Table;
  * 管理员类
  *
  * @author Chopper
- * @date 2020/11/19 11:42
+ * @since 2020/11/19 11:42
  */
 @Data
 @Entity

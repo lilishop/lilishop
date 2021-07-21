@@ -9,7 +9,7 @@ import javax.persistence.Column;
  * 发票子内容
  *
  * @author Bulbasaur
- * @date 2020/11/28 11:44
+ * @since 2020/11/28 11:44
  */
 @Data
 public class ReceiptDTO {

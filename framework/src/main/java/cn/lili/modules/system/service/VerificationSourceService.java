@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 验证码资源维护 业务层
  *
  * @author Chopper
- * @date 2020/11/17 3:44 下午
+ * @since 2020/11/17 3:44 下午
  */
 public interface VerificationSourceService extends IService<VerificationSource> {
 

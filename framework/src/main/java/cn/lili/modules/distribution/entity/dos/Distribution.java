@@ -19,7 +19,7 @@ import javax.validation.constraints.Size;
  * 分销员对象
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
+ * @since 2020-03-14 23:04:56
  */
 @Data
 @Entity

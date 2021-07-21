@@ -9,7 +9,7 @@ import java.io.Serializable;
  * 秒杀活动商品视图对象
  *
  * @author paulG
- * @date 2020/8/26
+ * @since 2020/8/26
  **/
 @Data
 public class SeckillGoodsVO implements Serializable {

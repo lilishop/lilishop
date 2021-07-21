@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * 优惠券查询通用类
  *
  * @author paulG
- * @date 2020/8/14
+ * @since 2020/8/14
  **/
 @Data
 public class CouponSearchParams implements Serializable {
