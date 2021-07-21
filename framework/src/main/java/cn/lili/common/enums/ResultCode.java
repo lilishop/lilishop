@@ -243,11 +243,12 @@ public enum ResultCode {
     /**
      * 优惠券
      */
+    COUPON_LIMIT_ERROR(41000, "超出领取限制"),
     COUPON_EDIT_STATUS_SUCCESS(41001, "修改状态成功！"),
     COUPON_CANCELLATION_SUCCESS(41002, "会员优惠券作废成功"),
     COUPON_EXPIRED(41003, "优惠券已使用/已过期，不能使用"),
     COUPON_EDIT_STATUS_ERROR(41004, "优惠券修改状态失败！"),
-    COUPON_RECEIVE_ERROR(41005, "当前优惠券状态不可领取"),
+    COUPON_RECEIVE_ERROR(41005, "当前优惠券已经被领取完了，下次要早点来哦"),
     COUPON_NUM_INSUFFICIENT_ERROR(41006, "优惠券剩余领取数量不足"),
     COUPON_NOT_EXIST(41007, "当前优惠券不存在"),
     COUPON_LIMIT_NUM_LESS_THAN_0(41008, "领取限制数量不能为负数"),
