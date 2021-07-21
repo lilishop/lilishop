@@ -161,6 +161,11 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
     /**
      * 同步库存和促销库存
      *
+     * 需修改：DB：商品库存、Sku商品库存、活动商品库存
+     * 1.获取需要修改的Sku列表、活动商品列表
+     * 2.写入sku商品库存，批量修改
+     * 3.写入促销商品的卖出数量、剩余数量,批量修改
+     * 4.调用方法修改商品库存
      * @param order 订单
      */
     private void synchroDB(OrderDetailVO order) {

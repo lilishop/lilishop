@@ -153,7 +153,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         }
 
         afterSaleApplyVO.setAccountType(order.getPaymentMethod());
-        afterSaleApplyVO.setApplyRefundPrice(CurrencyUtil.sub(orderItem.getFlowPrice(), orderItem.getNum()));
+        afterSaleApplyVO.setApplyRefundPrice(CurrencyUtil.div(orderItem.getFlowPrice(), orderItem.getNum()));
         afterSaleApplyVO.setNum(orderItem.getNum());
         afterSaleApplyVO.setGoodsId(orderItem.getGoodsId());
         afterSaleApplyVO.setGoodsName(orderItem.getGoodsName());

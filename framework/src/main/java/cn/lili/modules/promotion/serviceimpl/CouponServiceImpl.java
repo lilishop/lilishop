@@ -156,16 +156,14 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
             couponVO.setPromotionStatus(promotionStatus.name());
             this.updateById(couponVO);
             this.mongoTemplate.save(couponVO);
-            if (promotionStatus.name().equals(PromotionStatusEnum.START.name())) {
-                PromotionMessage promotionMessage = new PromotionMessage(couponVO.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), couponVO.getStartTime(), couponVO.getEndTime());
-                //更新延时任务
-                this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                        promotionMessage,
-                        couponVO.getStartTime().getTime(), couponVO.getStartTime().getTime(),
-                        DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                        DateUtil.getDelayTime(couponVO.getStartTime().getTime()),
-                        rocketmqCustomProperties.getPromotionTopic());
-            }
+            PromotionMessage promotionMessage = new PromotionMessage(couponVO.getId(), PromotionTypeEnum.COUPON.name(), promotionStatus.name(), couponVO.getStartTime(), couponVO.getEndTime());
+            //更新延时任务
+            this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
+                    promotionMessage,
+                    couponVO.getStartTime().getTime(), couponVO.getStartTime().getTime(),
+                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                    DateUtil.getDelayTime(couponVO.getStartTime().getTime()),
+                    rocketmqCustomProperties.getPromotionTopic());
         }
         return true;
     }
