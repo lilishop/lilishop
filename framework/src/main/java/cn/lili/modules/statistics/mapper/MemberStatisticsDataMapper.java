@@ -11,7 +11,7 @@ import org.apache.ibatis.annotations.Select;
  * 会员统计数据处理层
  *
  * @author Bulbasaur
- * @date 2020/11/17 7:34 下午
+ * @since 2020/11/17 7:34 下午
  */
 public interface MemberStatisticsDataMapper extends BaseMapper<MemberStatisticsData> {
 

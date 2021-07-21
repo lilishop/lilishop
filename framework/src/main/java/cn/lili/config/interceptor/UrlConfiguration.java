@@ -32,7 +32,8 @@ public class UrlConfiguration implements WebMvcConfigurer {
 
     /**
      * 开放资源 这里配置swagger可以在前端访问
-     * @param registry
+     *
+     * @param registry 资源处理
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

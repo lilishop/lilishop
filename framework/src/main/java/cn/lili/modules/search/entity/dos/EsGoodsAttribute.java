@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * 商品属性索引
  * @author paulG
- * @date 2020/10/14
+ * @since 2020/10/14
  **/
 @Data
 @NoArgsConstructor

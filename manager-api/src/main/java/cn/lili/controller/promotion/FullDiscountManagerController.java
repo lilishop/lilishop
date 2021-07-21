@@ -1,25 +1,26 @@
 package cn.lili.controller.promotion;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
+import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.entity.vos.FullDiscountSearchParams;
 import cn.lili.modules.promotion.service.FullDiscountService;
-import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 管理端,满额活动接口
  *
  * @author paulG
- * @date 2021/1/12
+ * @since 2021/1/12
  **/
 @RestController
 @Api(tags = "管理端,满额活动接口")
@@ -47,4 +48,16 @@ public class FullDiscountManagerController {
         return ResultUtil.data(fullDiscountService.getFullDiscount(id));
     }
 
+    @ApiOperation(value = "修改满额活动状态")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "满额活动ID", required = true, paramType = "path"),
+            @ApiImplicitParam(name = "promotionStatus", value = "满额活动状态", required = true, paramType = "path")
+    })
+    @PutMapping("/status/{id}/{promotionStatus}")
+    public ResultMessage<Object> updateCouponStatus(@PathVariable String id, @PathVariable String promotionStatus) {
+        if (fullDiscountService.updateFullDiscountStatus(id, PromotionStatusEnum.valueOf(promotionStatus))) {
+            return ResultUtil.success(ResultCode.SUCCESS);
+        }
+        return ResultUtil.error(ResultCode.ERROR);
+    }
 }

@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * 采购单数据处理层
  *
  * @author Bulbasaur
- * @date 2020/11/26 16:11
+ * @since 2020/11/26 16:11
  */
 public interface PurchaseOrderMapper extends BaseMapper<PurchaseOrder> {
 

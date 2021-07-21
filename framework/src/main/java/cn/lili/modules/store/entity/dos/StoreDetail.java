@@ -28,7 +28,7 @@ import java.util.Date;
  * 店铺详细
  *
  * @author pikachu
- * @date 2020-02-18 15:18:56
+ * @since 2020-02-18 15:18:56
  */
 @Data
 @Entity
@@ -153,7 +153,7 @@ public class StoreDetail {
     private String settlementCycle;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "结算日", hidden = true)
     private Date settlementDay;
 

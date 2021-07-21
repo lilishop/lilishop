@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  * 积分商品查询通用类
  *
  * @author paulG
- * @date 2021/1/13
+ * @since 2021/1/13
  **/
 @Data
 public class PointsGoodsSearchParams {

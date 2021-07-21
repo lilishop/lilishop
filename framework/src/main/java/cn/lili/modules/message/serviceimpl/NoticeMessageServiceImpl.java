@@ -25,7 +25,7 @@ import java.util.Map;
  * 通知类消息模板业务层实现
  *
  * @author Bulbasaur
- * @date 2020/12/8 9:48
+ * @since 2020/12/8 9:48
  */
 @Service
 public class NoticeMessageServiceImpl extends ServiceImpl<NoticeMessageTemplateMapper, NoticeMessage> implements NoticeMessageService {

@@ -29,7 +29,7 @@ import java.util.List;
  * 会员发票业务层实现
  *
  * @author Chopper
- * @date 2021-03-29 14:10:16
+ * @since 2021-03-29 14:10:16
  */
 @Service
 public class MemberReceiptServiceImpl extends ServiceImpl<MemberReceiptMapper, MemberReceipt> implements MemberReceiptService {

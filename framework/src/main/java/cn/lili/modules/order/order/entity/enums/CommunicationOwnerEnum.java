@@ -4,7 +4,7 @@ package cn.lili.modules.order.order.entity.enums;
  * 投诉角色枚举
  *
  * @author paulG
- * @date 2020/12/7
+ * @since 2020/12/7
  **/
 public enum CommunicationOwnerEnum {
 

@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
  * 统一下单-结算信息
  *
  * @author Chopper
- * @date 2020/12/17 17:58
+ * @since 2020/12/17 17:58
  */
 @Data
 @Accessors(chain = true)

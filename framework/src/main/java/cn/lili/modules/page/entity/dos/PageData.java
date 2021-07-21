@@ -18,7 +18,7 @@ import javax.persistence.Table;
  * 页面数据DO
  *
  * @author Bulbasaur
- * @date 2020/12/10 17:42
+ * @since 2020/12/10 17:42
  */
 @Data
 @Entity

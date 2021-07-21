@@ -9,7 +9,7 @@ import lombok.Data;
  * 发票搜索参数
  *
  * @author paulG
- * @date 2021/1/12
+ * @since 2021/1/12
  **/
 @Data
 public class ReceiptSearchParams {

@@ -7,7 +7,7 @@ import lombok.Data;
  * 会员积分
  *
  * @author Bulbasaur
- * @date 2020/12/14 16:31
+ * @since 2020/12/14 16:31
  */
 @Data
 public class MemberPointMessage {

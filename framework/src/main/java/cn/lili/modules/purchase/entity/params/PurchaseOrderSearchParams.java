@@ -8,7 +8,7 @@ import lombok.Data;
  * 供求单查询参数
  *
  * @author Bulbasaur
- * @date 2020/11/27 11:29
+ * @since 2020/11/27 11:29
  */
 @Data
 public class PurchaseOrderSearchParams extends PageVO {

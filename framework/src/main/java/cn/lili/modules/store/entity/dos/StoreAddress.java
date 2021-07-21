@@ -14,7 +14,7 @@ import javax.validation.constraints.NotEmpty;
  * 店铺自提点
  *
  * @author Bulbasaur
- * @date 2020/12/7 15:09
+ * @since 2020/12/7 15:09
  */
 @Data
 @Entity

@@ -12,7 +12,7 @@ import java.util.List;
  * 权限业务层
  *
  * @author Chopper
- * @date 2020/11/17 3:45 下午
+ * @since 2020/11/17 3:45 下午
  */
 @CacheConfig(cacheNames = "{menu}")
 public interface MenuService extends IService<Menu> {

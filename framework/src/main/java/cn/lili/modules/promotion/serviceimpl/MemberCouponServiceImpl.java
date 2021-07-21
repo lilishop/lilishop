@@ -33,7 +33,7 @@ import java.util.List;
  * 会员优惠券业务层实现
  *
  * @author Chopper
- * @date 2020/8/21
+ * @since 2020/8/21
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -59,7 +59,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
             throw new ServiceException(ResultCode.COUPON_NUM_INSUFFICIENT_ERROR);
         }
         if (!coupon.getCouponLimitNum().equals(0) && haveCoupons >= coupon.getCouponLimitNum()) {
-            throw new ServiceException("此优惠券最多领取" + coupon.getCouponLimitNum() + "张");
+            throw new ServiceException(ResultCode.COUPON_LIMIT_ERROR, "此优惠券最多领取" + coupon.getCouponLimitNum() + "张");
         }
     }
 

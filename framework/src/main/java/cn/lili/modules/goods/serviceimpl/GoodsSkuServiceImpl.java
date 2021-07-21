@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
  * 商品sku业务层实现
  *
  * @author pikachu
- * @date 2020-02-23 15:18:56
+ * @since 2020-02-23 15:18:56
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -189,17 +189,15 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             }
             cache.put(GoodsSkuService.getCacheKeys(id), goodsSku);
         }
+
         //获取商品库存
         String quantity = stringRedisTemplate.opsForValue().get(GoodsSkuService.getStockCacheKey(id));
-        if (quantity != null) {
-            if (goodsSku.getQuantity().equals(Convert.toInt(quantity))) {
-                goodsSku.setQuantity(Convert.toInt(quantity));
-                this.updateById(goodsSku);
-            }
-        } else {
-            stringRedisTemplate.opsForValue().set(GoodsSkuService.getStockCacheKey(id), goodsSku.getQuantity().toString());
-        }
 
+        //如果sku缓存的库存与库存缓存不符则按照库存缓存进行
+        if (StrUtil.isNotEmpty(quantity)) {
+            goodsSku.setQuantity(Convert.toInt(quantity));
+            cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
+        }
         return goodsSku;
     }
 
@@ -437,7 +435,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                     quantity += goodsSku.getQuantity();
                 }
             }
-            //保存商品库存结果     这里在for循环中调用数据库保存不太好，需要优化
+            //保存商品库存结果
             goodsService.updateStock(goodsId, quantity);
         }
 

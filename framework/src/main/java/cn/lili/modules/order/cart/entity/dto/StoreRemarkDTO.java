@@ -9,7 +9,7 @@ import java.io.Serializable;
  * 店铺备注
  *
  * @author Chopper
- * @date 2020-03-25 2:30 下午
+ * @since 2020-03-25 2:30 下午
  */
 @Data
 public class StoreRemarkDTO implements Serializable {

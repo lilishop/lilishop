@@ -17,7 +17,7 @@ import javax.persistence.Table;
  * 短信签名
  *
  * @author Chopper
- * @date 2021/1/30 4:13 下午
+ * @since 2021/1/30 4:13 下午
  */
 @Data
 @Entity

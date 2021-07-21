@@ -19,7 +19,7 @@ import java.util.List;
  * 店铺端,商品统计接口
  *
  * @author Bulbasaur
- * @date: 2020/11/22 14:23
+ * @since: 2020/11/22 14:23
  */
 @Api(tags = "店铺端,商品统计接口")
 @RestController

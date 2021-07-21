@@ -7,7 +7,7 @@ import lombok.Data;
  * 会员商品收藏VO
  *
  * @author Chopper
- * @date 2021/1/27 10:41 上午
+ * @since 2021/1/27 10:41 上午
  */
 @Data
 public class GoodsCollectionVO {

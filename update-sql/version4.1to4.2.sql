@@ -14,3 +14,9 @@ ALTER TABLE li_promotion_goods ADD goods_type varchar (200);
 alter table li_member_points_history modify column point_type varchar(50);
 update li_member_points_history set point_type = 'INCREASE' where point_type=1;
 update li_member_points_history set point_type = 'REDUCE' where point_type=0;
+
+/** 添加分词管理菜单*/
+INSERT INTO `lilishop`.`li_menu` (`id`, `create_by`, `create_time`, `delete_flag`, `update_by`, `update_time`, `description`, `front_route`, `icon`, `level`, `name`, `parent_id`, `path`, `sort_order`, `title`, `front_component`) VALUES (1349247640584085511, 'admin', '2021-01-13 14:51:20', b'0', 'admin', '2021-02-25 09:02:59', 'null', 'customWords/index', 'ios-american-football', 2, 'customWords', '1349237129847005184', 'customWords', 8.00, '分词管理', 'null');
+
+/** 修改会员评价店铺图片字段类型 **/
+alter table li_member_evaluation modify column reply_image text;

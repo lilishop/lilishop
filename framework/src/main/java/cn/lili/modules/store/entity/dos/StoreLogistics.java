@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
  * 店铺-物流公司设置
  *
  * @author Chopper
- * @date 2020/11/17 8:01 下午
+ * @since 2020/11/17 8:01 下午
  */
 @Data
 @Entity

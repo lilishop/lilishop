@@ -13,7 +13,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 会员发票业务层
  *
  * @author Chopper
- * @date 2021-03-29 14:10:16
+ * @since 2021-03-29 14:10:16
  */
 public interface MemberReceiptService extends IService<MemberReceipt> {
 

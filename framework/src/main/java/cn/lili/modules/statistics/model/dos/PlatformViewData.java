@@ -17,7 +17,7 @@ import java.util.Date;
  * 平台pv统计
  *
  * @author Chopper
- * @date 2020-06-19 17:50
+ * @since 2020-06-19 17:50
  */
 @Data
 @Entity

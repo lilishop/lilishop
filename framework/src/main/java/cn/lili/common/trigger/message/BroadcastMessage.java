@@ -10,7 +10,7 @@ import java.util.Date;
  * 直播消息实体
  *
  * @author Bulbasaur
- * @date: 2021/6/1 4:48 下午
+ * @since: 2021/6/1 4:48 下午
  */
 @Data
 @NoArgsConstructor

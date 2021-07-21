@@ -24,7 +24,7 @@ import java.util.Date;
  * 店铺
  *
  * @author pikachu
- * @date 2020-02-18 15:18:56
+ * @since 2020-02-18 15:18:56
  */
 @Data
 @Entity
@@ -46,7 +46,7 @@ public class Store extends BaseEntity {
     private String storeName;
 
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+  @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "店铺关闭时间")
     private Date storeEndTime;
 

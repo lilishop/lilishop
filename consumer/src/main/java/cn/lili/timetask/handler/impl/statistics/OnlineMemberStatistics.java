@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * 实时在线人数统计
  *
  * @author Chopper
- * @date 2021-02-21 09:47
+ * @since 2021-02-21 09:47
  */
 @Component
 public class OnlineMemberStatistics implements EveryHourExecute {

@@ -20,7 +20,7 @@ import java.util.List;
  * 买家端,秒杀活动接口
  *
  * @author paulG
- * @date 2020/11/17 2:30 下午
+ * @since 2020/11/17 2:30 下午
  */
 @Api(tags = "买家端,秒杀活动接口")
 @RestController

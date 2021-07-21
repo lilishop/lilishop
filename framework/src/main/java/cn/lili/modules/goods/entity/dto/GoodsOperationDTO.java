@@ -18,7 +18,7 @@ import java.util.Map;
  * 商品编辑DTO
  *
  * @author pikachu
- * @date 2020-02-24 19:27:20
+ * @since 2020-02-24 19:27:20
  */
 @Data
 @ToString

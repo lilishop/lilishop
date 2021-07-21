@@ -21,7 +21,7 @@ import java.util.Date;
  * 会员发票
  *
  * @author Chopper
- * @date 2021-03-29 14:10:16
+ * @since 2021-03-29 14:10:16
  */
 @Data
 @Entity
@@ -70,7 +70,7 @@ public class MemberReceipt {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;

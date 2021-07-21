@@ -11,7 +11,7 @@ import java.util.List;
  * 会员浏览历史业务层
  *
  * @author Chopper
- * @date 2020/11/18 10:46 上午
+ * @since 2020/11/18 10:46 上午
  */
 public interface FootprintService extends IService<FootPrint> {
 

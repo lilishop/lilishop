@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * @author paulG
- * @date 2020/10/15
+ * @since 2020/10/15
  **/
 @Data
 public class EsGoodsSearchDTO {

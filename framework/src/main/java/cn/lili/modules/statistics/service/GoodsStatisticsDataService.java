@@ -12,7 +12,7 @@ import java.util.List;
  * 商品统计业务层
  *
  * @author Bulbasaur
- * @date 2020/12/9 11:06
+ * @since 2020/12/9 11:06
  */
 public interface GoodsStatisticsDataService extends IService<StoreFlow> {
 

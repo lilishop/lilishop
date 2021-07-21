@@ -10,7 +10,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 自定义分词业务层
  *
  * @author paulG
- * @date 2020/10/15
+ * @since 2020/10/15
  **/
 public interface CustomWordsService extends IService<CustomWords> {
 

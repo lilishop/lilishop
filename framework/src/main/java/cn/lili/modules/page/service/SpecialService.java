@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 专题活动业务层
  *
  * @author Bulbasaur
- * @date 2020/12/7 11:27
+ * @since 2020/12/7 11:27
  */
 public interface SpecialService extends IService<Special> {
 

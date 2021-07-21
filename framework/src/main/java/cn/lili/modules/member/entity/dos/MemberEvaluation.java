@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
  * 会员商品评价
  *
  * @author Bulbasaur
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Data
 @Entity

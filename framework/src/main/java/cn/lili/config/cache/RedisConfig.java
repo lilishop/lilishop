@@ -36,7 +36,6 @@ import java.util.Map;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2021/3/20 09:37
  */
 
@@ -54,8 +53,8 @@ public class RedisConfig extends CachingConfigurerSupport {
     /**
      * 当有多个管理器的时候，必须使用该注解在一个管理器上注释：表示该管理器为默认的管理器
      *
-     * @param connectionFactory
-     * @return
+     * @param connectionFactory 链接工厂
+     * @return 缓存
      */
     @Bean
     @Primary

@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * 站内信消息DTO
  * @author Chopper
- * @date 2020/12/8 9:46
+ * @since 2020/12/8 9:46
  */
 @Data
 public class NoticeMessageDetailDTO extends NoticeMessage {

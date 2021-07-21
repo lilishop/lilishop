@@ -17,7 +17,7 @@ import java.util.Map;
  * 商品sku业务层
  *
  * @author pikachu
- * @date 2020-02-24 16:18:56
+ * @since 2020-02-24 16:18:56
  */
 public interface GoodsSkuService extends IService<GoodsSku> {
 

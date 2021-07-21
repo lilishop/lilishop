@@ -12,7 +12,7 @@ import java.util.Date;
  * 促销商品查询通用类
  *
  * @author paulG
- * @date 2021/2/21
+ * @since 2021/2/21
  **/
 @Data
 public class PromotionGoodsSearchParams {

@@ -19,7 +19,7 @@ public interface Cache<T> {
     /**
      * Get an item from the cache, nontransactionally
      *
-     * @param key
+     * @param key 缓存key
      * @return the cached object or <tt>null</tt>
      */
     T get(Object key);
@@ -27,7 +27,7 @@ public interface Cache<T> {
     /**
      * Get an item from the cache, nontransactionally
      *
-     * @param key
+     * @param key 缓存key
      * @return the cached object or <tt>null</tt>
      */
     String getString(Object key);
@@ -37,14 +37,14 @@ public interface Cache<T> {
      * multiGet
      *
      * @param keys 要查询的key集合
-     * @return
+     * @return 集合
      */
     List multiGet(Collection keys);
 
     /**
      * 批量set
      *
-     * @param map
+     * @param map 键值对
      */
     void multiSet(Map map);
 
@@ -60,16 +60,16 @@ public interface Cache<T> {
      * Add an item to the cache, nontransactionally, with
      * failfast semantics
      *
-     * @param key
-     * @param value
+     * @param key 缓存key
+     * @param value 缓存value
      */
     void put(Object key, T value);
 
     /**
      * 往缓存中写入内容
      *
-     * @param key
-     * @param value
+     * @param key 缓存key
+     * @param value 缓存value
      * @param exp   超时时间，单位为秒
      */
     void put(Object key, T value, Long exp);
@@ -77,24 +77,24 @@ public interface Cache<T> {
     /**
      * 往缓存中写入内容
      *
-     * @param key
-     * @param value
-     * @param exp
-     * @param timeUnit 写入单位
+     * @param key 缓存key
+     * @param value 缓存value
+     * @param exp 过期时间
+     * @param timeUnit 过期单位
      */
     void put(Object key, T value, Long exp, TimeUnit timeUnit);
 
     /**
      * 删除
      *
-     * @param key
+     * @param key 缓存key
      */
     void remove(Object key);
 
     /**
      * 删除
      *
-     * @param key
+     * @param key 缓存key
      */
     void vagueDel(Object key);
 
@@ -116,33 +116,34 @@ public interface Cache<T> {
     /**
      * 玩缓存中写入内容
      *
-     * @param key
-     * @param map
+     * @param key 缓存key
+     * @param map map value
      */
     void putAllHash(Object key, Map map);
 
     /**
      * 读取缓存值
      *
-     * @param key
-     * @param hashKey
-     * @return
+     * @param key 缓存key
+     * @param hashKey map value
+     * @return 返回缓存中的数据
      */
     T getHash(Object key, Object hashKey);
 
     /**
      * 读取缓存值
      *
-     * @param key
-     * @return
+     * @param key 缓存key
+     * @return 缓存中的数据
      */
     Map<Object, Object> getHash(Object key);
 
     /**
      * 是否包含
      *
-     * @param key
-     * @return
+     * @param key 缓存key
+     * @return  缓存中的数据
+     *
      */
     boolean hasKey(Object key);
 
@@ -150,8 +151,8 @@ public interface Cache<T> {
     /**
      * 模糊匹配key
      *
-     * @param pattern
-     * @return
+     * @param pattern 模糊key
+     * @return 缓存中的数据
      */
     List<String> keys(String pattern);
 
@@ -163,9 +164,9 @@ public interface Cache<T> {
      * 效率较高的 计数器
      * 如需清零，按照普通key 移除即可
      *
-     * @param key
-     * @param value
-     * @return
+     * @param key key值
+     * @param value 去重统计值
+     * @return 计数器结果
      */
     Long cumulative(Object key, Object value);
 
@@ -175,8 +176,8 @@ public interface Cache<T> {
      * 效率较高的 计数器 统计返回
      * 如需清零，按照普通key 移除即可
      *
-     * @param key
-     * @return
+     * @param key 计数器key
+     * @return 计数器结果
      */
     Long counter(Object key);
 
@@ -184,7 +185,7 @@ public interface Cache<T> {
      * 批量计数
      *
      * @param keys 要查询的key集合
-     * @return
+     * @return 批量计数
      */
     List multiCounter(Collection keys);
 
@@ -194,8 +195,8 @@ public interface Cache<T> {
      * 效率较高的 计数器 统计返回
      * 如需清零，按照普通key 移除即可
      *
-     * @param key
-     * @return
+     * @param key key值
+     * @return 计数器结果
      */
     Long mergeCounter(Object... key);
     //---------------------------------------------------用于特殊场景，redis去重统计-----------------------------------------
@@ -208,7 +209,7 @@ public interface Cache<T> {
      *
      * @param key      为累计的key，同一key每次调用则值 +1
      * @param liveTime 单位秒后失效
-     * @return
+     * @return 计数器结果
      */
     Long incr(String key, long liveTime);
     //-----------------------------------------------redis计数---------------------------------------------
@@ -230,7 +231,7 @@ public interface Cache<T> {
      * @param sortedSetName sortedSetName
      * @param start         查询范围开始位置
      * @param end           查询范围结束位置
-     * @return
+     * @return 获取满足条件的集合
      */
     Set<ZSetOperations.TypedTuple<Object>> reverseRangeWithScores(String sortedSetName, Integer start, Integer end);
 

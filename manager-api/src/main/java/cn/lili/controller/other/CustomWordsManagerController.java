@@ -20,7 +20,7 @@ import javax.validation.constraints.NotNull;
  * 管理端,自定义分词接口
  *
  * @author paulG
- * @date 2020/10/16
+ * @since 2020/10/16
  **/
 @RestController
 @Api(tags = "管理端,自定义分词接口")

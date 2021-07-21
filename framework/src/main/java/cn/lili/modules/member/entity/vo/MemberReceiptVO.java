@@ -12,7 +12,7 @@ import lombok.Data;
  * 会员发票查询VO
  *
  * @author Chopper
- * @date 2021-03-29 14:10:16
+ * @since 2021-03-29 14:10:16
  */
 @Data
 @ApiModel(value = "会员发票")

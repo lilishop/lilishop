@@ -17,7 +17,7 @@ import javax.persistence.Table;
  * 分销员已选择分销商品
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
+ * @since 2020-03-14 23:04:56
  */
 @Data
 @Entity

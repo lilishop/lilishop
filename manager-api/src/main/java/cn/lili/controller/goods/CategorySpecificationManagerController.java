@@ -21,7 +21,7 @@ import java.util.List;
  * 管理端,商品分类规格接口
  *
  * @author pikachu
- * @date 2020-02-27 15:18:56
+ * @since 2020-02-27 15:18:56
  */
 @RestController
 @Api(tags = "管理端,商品分类规格接口")

@@ -19,7 +19,6 @@ import java.util.Random;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/11/17 14:34
  */
 @Component

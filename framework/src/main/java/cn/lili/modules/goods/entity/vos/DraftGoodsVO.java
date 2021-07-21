@@ -11,7 +11,7 @@ import java.util.List;
  * 草稿商品VO
  *
  * @author pikachu
- * @date 2020-02-26 23:24:13
+ * @since 2020-02-26 23:24:13
  */
 @Data
 public class DraftGoodsVO extends DraftGoods {

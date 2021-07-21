@@ -10,7 +10,7 @@ import java.util.List;
  * 物流公司业务层
  *
  * @author Chopper
- * @date 2020/11/17 8:02 下午
+ * @since 2020/11/17 8:02 下午
  */
 public interface LogisticsService extends IService<Logistics> {
 

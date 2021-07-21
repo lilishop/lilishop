@@ -7,7 +7,7 @@ import lombok.Data;
  * 权限搜索参数
  *
  * @author Chopper
- * @date 2020-11-19 16:46
+ * @since 2020-11-19 16:46
  */
 @Data
 public class MenuSearchParams {

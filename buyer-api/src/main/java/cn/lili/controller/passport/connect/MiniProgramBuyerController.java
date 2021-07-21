@@ -23,7 +23,7 @@ import java.util.List;
  * 买家端,小程序登录接口
  *
  * @author Chopper
- * @date 2021/2/19 09:28
+ * @since 2021/2/19 09:28
  */
 @RestController
 @RequestMapping("/buyer/mini-program")

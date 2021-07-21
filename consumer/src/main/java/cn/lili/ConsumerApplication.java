@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * 消费者
  *
  * @author Chopper
- * @date 2020/11/16 10:03 下午
+ * @since 2020/11/16 10:03 下午
  */
 @SpringBootApplication
 public class ConsumerApplication {

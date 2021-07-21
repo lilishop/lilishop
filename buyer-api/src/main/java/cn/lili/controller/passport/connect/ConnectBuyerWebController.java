@@ -29,7 +29,6 @@ import java.io.IOException;
  * 买家端,web联合登录
  *
  * @author Chopper
- * @date 2020-11-25 19:29
  */
 @Slf4j
 @RestController

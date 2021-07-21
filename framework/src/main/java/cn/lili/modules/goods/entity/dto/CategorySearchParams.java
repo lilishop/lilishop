@@ -9,7 +9,7 @@ import java.math.BigDecimal;
  * 分类查询参数
  *
  * @author paulG
- * @date 2020/12/1
+ * @since 2020/12/1
  **/
 @Data
 public class CategorySearchParams {

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 管理端,收款日志接口
  *
  * @author Chopper
- * @date 2020/11/17 4:34 下午
+ * @since 2020/11/17 4:34 下午
  */
 @RestController
 @Api(tags = "管理端,收款日志接口")

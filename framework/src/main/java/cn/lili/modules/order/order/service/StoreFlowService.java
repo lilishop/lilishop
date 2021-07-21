@@ -12,7 +12,7 @@ import java.util.Date;
  * 商家订单流水业务层
  *
  * @author Chopper
- * @date 2020/11/17 7:37 下午
+ * @since 2020/11/17 7:37 下午
  */
 public interface StoreFlowService extends IService<StoreFlow> {
 

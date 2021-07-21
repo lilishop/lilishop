@@ -8,7 +8,7 @@ import java.io.Serializable;
  * OSS设置
  *
  * @author Chopper
- * @date 2020/11/26 15:50
+ * @since 2020/11/26 15:50
  */
 
 @Data

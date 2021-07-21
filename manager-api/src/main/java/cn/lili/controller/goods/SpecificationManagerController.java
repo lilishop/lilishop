@@ -23,7 +23,7 @@ import java.util.List;
  * 管理端,商品规格接口
  *
  * @author pikachu
- * @date 2020-02-18 15:18:56
+ * @since 2020-02-18 15:18:56
  */
 @RestController
 @Api(tags = "管理端,商品规格接口")

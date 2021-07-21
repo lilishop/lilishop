@@ -19,7 +19,7 @@ import java.util.List;
  * 用于订单列表查看
  *
  * @author Chopper
- * @date 2020-08-17 20:28
+ * @since 2020-08-17 20:28
  */
 @Data
 public class OrderSimpleVO {
@@ -31,7 +31,7 @@ public class OrderSimpleVO {
     private Double flowPrice;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "创建时间")
     private Date createTime;
 

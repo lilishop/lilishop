@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 会员预存款业务层
  *
  * @author pikachu
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 public interface MemberWalletService extends IService<MemberWallet> {
 

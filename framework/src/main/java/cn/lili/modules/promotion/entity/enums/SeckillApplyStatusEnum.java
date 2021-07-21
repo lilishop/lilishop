@@ -4,7 +4,7 @@ package cn.lili.modules.promotion.entity.enums;
  * 秒杀活动状态枚举
  *
  * @author paulG
- * @date 2020/8/26
+ * @since 2020/8/26
  **/
 public enum SeckillApplyStatusEnum {
 

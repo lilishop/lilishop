@@ -7,7 +7,7 @@ import lombok.Data;
  * 店铺售后收件地址
  *
  * @author pikachu
- * @date 2020-08-22 15:10:51
+ * @since 2020-08-22 15:10:51
  */
 @Data
 public class StoreAfterSaleAddressDTO {

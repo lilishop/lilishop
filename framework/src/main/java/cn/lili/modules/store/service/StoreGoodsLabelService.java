@@ -10,7 +10,7 @@ import java.util.List;
  * 店铺商品分类业务层
  *
  * @author Bulbasaur
- * @date 2020-03-07 09:24:33
+ * @since 2020-03-07 09:24:33
  */
 public interface StoreGoodsLabelService extends IService<StoreGoodsLabel> {
 

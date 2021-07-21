@@ -10,7 +10,7 @@ import lombok.Data;
  * 分销佣金查询信息
  *
  * @author pikachu
- * @date 2020-03-26 09:04:53
+ * @since 2020-03-26 09:04:53
  */
 @Data
 public class DistributionCashSearchParams extends PageVO {

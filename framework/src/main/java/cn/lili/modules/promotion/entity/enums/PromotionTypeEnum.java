@@ -5,7 +5,7 @@ package cn.lili.modules.promotion.entity.enums;
  * 促销分类枚举
  *
  * @author Chopper
- * @date 2021/2/1 19:32
+ * @since 2021/2/1 19:32
  */
 public enum PromotionTypeEnum {
     /**

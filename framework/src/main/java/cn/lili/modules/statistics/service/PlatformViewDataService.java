@@ -13,7 +13,7 @@ import java.util.List;
  * 平台PV统计
  *
  * @author Bulbasaur
- * @date 2020/12/9 11:06
+ * @since 2020/12/9 11:06
  */
 public interface PlatformViewDataService extends IService<PlatformViewData> {
 

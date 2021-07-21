@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  * 拼图会员视图对象
  *
  * @author paulG
- * @date 2021/3/3
+ * @since 2021/3/3
  **/
 @Data
 @NoArgsConstructor

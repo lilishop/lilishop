@@ -8,7 +8,7 @@ import lombok.Data;
  * 发票
  *
  * @author Bulbasaur
- * @date 2020/11/28 11:38
+ * @since 2020/11/28 11:38
  */
 @Data
 @ApiModel(value = "发票")

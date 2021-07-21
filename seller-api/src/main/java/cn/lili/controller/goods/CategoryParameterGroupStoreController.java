@@ -21,7 +21,7 @@ import java.util.List;
  * 店铺端,分类绑定参数组管理接口
  *
  * @author pikachu
- * @date 2020-02-18 15:18:56
+ * @since 2020-02-18 15:18:56
  */
 @RestController
 @Api(tags = "店铺端,分类绑定参数组管理接口")

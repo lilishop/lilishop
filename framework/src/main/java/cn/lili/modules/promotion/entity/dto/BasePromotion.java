@@ -16,7 +16,7 @@ import java.util.Date;
  * 促销活动基础类
  *
  * @author Chopper
- * @date 2020-03-19 10:44 上午
+ * @since 2020-03-19 10:44 上午
  */
 @Data
 @MappedSuperclass

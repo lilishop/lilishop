@@ -25,7 +25,7 @@ import java.util.List;
  * 店铺端,优惠券接口
  *
  * @author paulG
- * @date 2020/8/28
+ * @since 2020/8/28
  **/
 @RestController
 @Api(tags = "店铺端,优惠券接口")

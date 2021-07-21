@@ -11,7 +11,6 @@ import java.nio.charset.Charset;
  * 要实现对象的缓存，定义自己的序列化和反序列化器。使用阿里的fastjson来实现的比较多
  *
  * @author Bulbasaur
- * @date: 2021/7/9 12:25 上午
  */
 public class FastJsonRedisSerializer<T> implements RedisSerializer<T> {
     private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");

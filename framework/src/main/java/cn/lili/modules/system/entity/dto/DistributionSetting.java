@@ -8,7 +8,7 @@ import java.io.Serializable;
  * 分销配置
  *
  * @author Chopper
- * @date 2020/12/23 18:35
+ * @since 2020/12/23 18:35
  */
 @Data
 public class DistributionSetting implements Serializable {

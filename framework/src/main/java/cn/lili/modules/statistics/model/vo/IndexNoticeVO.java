@@ -7,7 +7,7 @@ import lombok.Data;
  * 消息提示
  *
  * @author Bulbasaur
- * @date 2020/12/9 14:25
+ * @since 2020/12/9 14:25
  */
 @Data
 public class IndexNoticeVO {

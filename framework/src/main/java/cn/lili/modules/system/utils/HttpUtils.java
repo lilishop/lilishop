@@ -15,7 +15,7 @@ import java.util.Map;
  * Http工具
  *
  * @author pikachu
- * @date 2018/3/13
+ * @since 2018/3/13
  */
 @Slf4j
 public final class HttpUtils {

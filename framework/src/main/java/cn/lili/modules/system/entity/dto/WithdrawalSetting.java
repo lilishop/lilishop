@@ -8,7 +8,7 @@ import java.io.Serializable;
  * 提现配置
  *
  * @author pikachu
- * @date 2020/11/30 15:23
+ * @since 2020/11/30 15:23
  */
 @Data
 public class WithdrawalSetting implements Serializable {

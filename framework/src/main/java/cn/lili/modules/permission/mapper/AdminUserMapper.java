@@ -9,7 +9,7 @@ import java.util.List;
  * 用户数据处理层
  *
  * @author Chopper
- * @date 2020-11-22 09:17
+ * @since 2020-11-22 09:17
  */
 public interface AdminUserMapper extends BaseMapper<AdminUser> {
 

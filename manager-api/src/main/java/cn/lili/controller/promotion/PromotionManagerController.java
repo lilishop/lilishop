@@ -21,7 +21,7 @@ import java.util.Map;
  * 管理端,促销接口
  *
  * @author paulG
- * @date 2021/2/2
+ * @since 2021/2/2
  **/
 @RestController
 @Api(tags = "管理端,促销接口")

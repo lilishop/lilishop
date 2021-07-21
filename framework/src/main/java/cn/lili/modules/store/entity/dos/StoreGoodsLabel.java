@@ -14,7 +14,7 @@ import java.math.BigDecimal;
  * 店铺商品分类
  *
  * @author pikachu
- * @date 2020-02-18 15:18:56
+ * @since 2020-02-18 15:18:56
  */
 @Data
 @Entity

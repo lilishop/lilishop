@@ -10,7 +10,6 @@ import java.util.Map;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/11/30 15:44
  */
 public interface SmsUtil {

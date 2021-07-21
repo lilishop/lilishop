@@ -11,7 +11,7 @@ import java.util.List;
  * 部门业务层
  *
  * @author Chopper
- * @date 2020/11/17 3:43 下午
+ * @since 2020/11/17 3:43 下午
  */
 public interface DepartmentService extends IService<Department> {
 

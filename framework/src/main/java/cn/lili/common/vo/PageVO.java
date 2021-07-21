@@ -10,7 +10,6 @@ import java.io.Serializable;
  * 查询参数
  *
  * @author Chopper
- * @date 2020/11/26 14:43
  */
 @Data
 public class PageVO implements Serializable {

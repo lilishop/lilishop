@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * app版本业务层
  *
  * @author Chopper
- * @date 2020/11/17 8:02 下午
+ * @since 2020/11/17 8:02 下午
  */
 public interface AppVersionService extends IService<AppVersion> {
 

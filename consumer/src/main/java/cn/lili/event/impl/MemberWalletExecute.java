@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  * 会员钱包创建
  *
  * @author Chopper
- * @date 2020-07-03 11:20
+ * @since 2020-07-03 11:20
  */
 @Service
 public class MemberWalletExecute implements MemberRegisterEvent {

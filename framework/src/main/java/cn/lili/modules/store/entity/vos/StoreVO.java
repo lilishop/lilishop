@@ -8,7 +8,7 @@ import lombok.Data;
  * 店铺VO
  *
  * @author pikachu
- * @date 2020-03-07 17:02:05
+ * @since 2020-03-07 17:02:05
  */
 @Data
 public class StoreVO extends Store {

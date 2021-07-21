@@ -11,7 +11,7 @@ import java.util.List;
  * 拼团视图对象
  *
  * @author paulG
- * @date 2020/10/28
+ * @since 2020/10/28
  **/
 @Data
 public class PintuanVO extends Pintuan {

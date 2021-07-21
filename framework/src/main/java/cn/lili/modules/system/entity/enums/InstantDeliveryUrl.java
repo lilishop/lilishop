@@ -8,7 +8,7 @@ import lombok.Setter;
  * 即时配送url接口地址
  *
  * @author pikachu
- * @date 2020/9/11 17:03
+ * @since 2020/9/11 17:03
  */
 public enum InstantDeliveryUrl {
 

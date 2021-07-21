@@ -14,7 +14,7 @@ import javax.persistence.Table;
  * 运费模板子配置
  *
  * @author Chopper
- * @date 2020/11/17 4:27 下午
+ * @since 2020/11/17 4:27 下午
  */
 @Data
 @Entity

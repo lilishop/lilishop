@@ -28,7 +28,7 @@ import java.util.Map;
  * 通知类消息实现
  *
  * @author Chopper
- * @date 2020-07-03 11:20
+ * @since 2020-07-03 11:20
  **/
 @Service
 public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent, AfterSaleStatusChangeEvent, MemberPointChangeEvent, MemberWithdrawalEvent {
