@@ -1,7 +1,7 @@
 package cn.lili.modules.member.service;
 
 
-import cn.lili.cache.token.Token;
+import cn.lili.common.security.token.Token;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.member.entity.dos.Member;

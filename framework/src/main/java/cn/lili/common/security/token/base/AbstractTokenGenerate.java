@@ -1,7 +1,7 @@
-package cn.lili.cache.token.base;
+package cn.lili.common.security.token.base;
 
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.cache.token.Token;
+import cn.lili.common.security.token.Token;
 
 /**
  * AbstractToken

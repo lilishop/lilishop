@@ -5,7 +5,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.cache.token.Token;
+import cn.lili.common.security.token.Token;
 import cn.lili.modules.system.token.ManagerTokenGenerate;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.StringUtils;

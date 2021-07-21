@@ -1,10 +1,7 @@
-package cn.lili.common.delayqueue;
+package cn.lili.trigger.message;
 
-import cn.hutool.core.date.DateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
 
 /**
  * 直播消息实体

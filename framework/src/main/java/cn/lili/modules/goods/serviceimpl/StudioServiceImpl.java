@@ -2,7 +2,7 @@ package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.delayqueue.BroadcastMessage;
+import cn.lili.trigger.message.BroadcastMessage;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;

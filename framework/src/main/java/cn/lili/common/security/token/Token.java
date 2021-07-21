@@ -1,4 +1,4 @@
-package cn.lili.cache.token;
+package cn.lili.common.security.token;
 
 import lombok.Data;
 

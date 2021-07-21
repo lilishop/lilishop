@@ -5,7 +5,7 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.cache.token.Token;
+import cn.lili.common.security.token.Token;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.verification.enums.VerificationEnums;

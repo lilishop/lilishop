@@ -8,7 +8,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.cache.token.Token;
+import cn.lili.common.security.token.Token;
 import cn.lili.modules.member.token.MemberTokenGenerate;
 import cn.lili.common.utils.CookieUtil;
 import cn.lili.common.utils.StringUtils;

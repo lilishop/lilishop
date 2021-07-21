@@ -1,7 +1,7 @@
 package cn.lili.modules.connect.service;
 
 import cn.lili.cache.CachePrefix;
-import cn.lili.cache.token.Token;
+import cn.lili.common.security.token.Token;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.entity.dto.WechatMPLoginParams;

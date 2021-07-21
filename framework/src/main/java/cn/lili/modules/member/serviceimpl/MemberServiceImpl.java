@@ -12,7 +12,7 @@ import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.cache.token.Token;
+import cn.lili.common.security.token.Token;
 import cn.lili.modules.member.token.MemberTokenGenerate;
 import cn.lili.modules.member.token.StoreTokenGenerate;
 import cn.lili.common.utils.*;

@@ -1,4 +1,4 @@
-package cn.lili.cache.token;
+package cn.lili.common.security.token;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import io.jsonwebtoken.io.Decoders;

@@ -1,7 +1,7 @@
 package cn.lili.trigger.executor;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.delayqueue.BroadcastMessage;
+import cn.lili.trigger.message.BroadcastMessage;
 import cn.lili.trigger.model.TimeExecuteConstant;
 import cn.lili.modules.goods.service.StudioService;
 import cn.lili.trigger.TimeTriggerExecutor;
