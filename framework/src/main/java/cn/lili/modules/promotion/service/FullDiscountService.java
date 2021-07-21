@@ -1,9 +1,10 @@
 package cn.lili.modules.promotion.service;
 
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.promotion.entity.dos.FullDiscount;
-import cn.lili.modules.promotion.entity.vos.FullDiscountSearchParams;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
+import cn.lili.modules.promotion.entity.dos.FullDiscount;
+import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.modules.promotion.entity.vos.FullDiscountSearchParams;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -16,14 +17,6 @@ import java.util.List;
  * @date 2020/8/21
  */
 public interface FullDiscountService extends IService<FullDiscount> {
-
-    /**
-     * 当前满优惠活动
-     *
-     * @param storeId 商家编号
-     * @return 满优惠活动信息
-     */
-    FullDiscountVO currentPromotion(String storeId);
 
     /**
      * 当前满优惠活动
@@ -53,8 +46,8 @@ public interface FullDiscountService extends IService<FullDiscount> {
     /**
      * 从mongo中分页获取满优惠列表
      *
-     * @param searchParams    搜索参数
-     * @param page            分页参数
+     * @param searchParams 搜索参数
+     * @param page         分页参数
      * @return 满优惠列表
      */
     IPage<FullDiscountVO> getFullDiscountByPageFromMongo(FullDiscountSearchParams searchParams, PageVO page);
@@ -83,5 +76,14 @@ public interface FullDiscountService extends IService<FullDiscount> {
      * @return 删除结果
      */
     boolean deleteFullDiscount(String id);
+
+    /**
+     * 更新满额活动状态
+     *
+     * @param id              优惠券编号
+     * @param promotionStatus 促销状态
+     * @return 更新结果
+     */
+    boolean updateFullDiscountStatus(String id, PromotionStatusEnum promotionStatus);
 
 }

@@ -1,13 +1,13 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.DelayTypeEnums;
-import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.trigger.enums.DelayTypeEnums;
 import cn.lili.common.trigger.interfaces.TimeTrigger;
+import cn.lili.common.trigger.message.PromotionMessage;
 import cn.lili.common.trigger.model.TimeExecuteConstant;
 import cn.lili.common.trigger.model.TimeTriggerMsg;
+import cn.lili.common.trigger.util.DelayQueueTools;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.PageUtil;
 import cn.lili.common.vo.PageVO;
@@ -76,13 +76,6 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
      */
     @Autowired
     private PromotionGoodsService promotionGoodsService;
-
-    @Override
-    public FullDiscountVO currentPromotion(String storeId) {
-        Query query = this.getMongoQuery();
-        query.addCriteria(Criteria.where(SELLER_ID_COLUMN).is(storeId));
-        return mongoTemplate.findOne(query, FullDiscountVO.class);
-    }
 
     @Override
     public List<FullDiscountVO> currentPromotion(List<String> storeId) {
@@ -201,6 +194,48 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
                 DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.FULL_DISCOUNT.name() + fullDiscount.getId())),
                 rocketmqCustomProperties.getPromotionTopic());
         return result;
+    }
+
+    @Override
+    public boolean updateFullDiscountStatus(String id, PromotionStatusEnum promotionStatus) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("id").is(id));
+        List<FullDiscountVO> fullDiscountVOList = this.mongoTemplate.find(query, FullDiscountVO.class);
+
+        //判断满额活动是否为空
+        if (fullDiscountVOList.isEmpty() || fullDiscountVOList == null) {
+            throw new ServiceException(ResultCode.FULL_DISCOUNT_NOT_EXIST_ERROR);
+        }
+        FullDiscountVO fullDiscountVO = fullDiscountVOList.get(0);
+
+        //如果是开启活动则需要校验参数
+        if (promotionStatus.equals(PromotionStatusEnum.START)) {
+            //验证是否是有效参数
+            PromotionTools.paramValid(fullDiscountVO.getStartTime().getTime(), fullDiscountVO.getEndTime().getTime(), fullDiscountVO.getNumber(), fullDiscountVO.getPromotionGoodsList());
+            //当前时间段是否存在同类活动
+            this.checkSameActiveExist(fullDiscountVO.getStartTime(), fullDiscountVO.getEndTime(), fullDiscountVO.getStoreId(), null);
+            //检查满减参数
+            this.checkFullDiscount(fullDiscountVO);
+        }
+
+        //填写活动状态
+        fullDiscountVO.setPromotionStatus(promotionStatus.name());
+
+        //保存到MYSQL中
+        this.updateById(fullDiscountVO);
+
+        //添加促销消息
+        PromotionMessage promotionMessage = new PromotionMessage(fullDiscountVO.getId(), PromotionTypeEnum.FULL_DISCOUNT.name(),
+                promotionStatus.name(),
+                fullDiscountVO.getStartTime(), fullDiscountVO.getEndTime());
+        //添加延时任务
+        TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
+                fullDiscountVO.getStartTime().getTime(), promotionMessage,
+                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                rocketmqCustomProperties.getPromotionTopic());
+        //发送促销活动开始的延时任务
+        this.timeTrigger.addDelay(timeTriggerMsg);
+        return true;
     }
 
     /**
