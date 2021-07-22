@@ -26,7 +26,7 @@ import java.util.Map;
  * 页面浏览统计拦截
  *
  * @author Chopper
- * @date 2021-01-14 18:01
+ * @since 2021-01-14 18:01
  */
 @Aspect
 @Configuration

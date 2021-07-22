@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Update;
  * 交易数据处理层
  *
  * @author Chopper
- * @date 2020/11/17 7:35 下午
+ * @since 2020/11/17 7:35 下午
  */
 public interface TradeMapper extends BaseMapper<Trade> {
 

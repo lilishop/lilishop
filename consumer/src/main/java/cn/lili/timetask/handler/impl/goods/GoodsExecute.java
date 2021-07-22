@@ -18,7 +18,7 @@ import java.util.Map;
  * 商品定时器
  *
  * @author Chopper
- * @date 2021/3/18 3:23 下午
+ * @since 2021/3/18 3:23 下午
  */
 @Component
 public class GoodsExecute implements EveryDayExecute {

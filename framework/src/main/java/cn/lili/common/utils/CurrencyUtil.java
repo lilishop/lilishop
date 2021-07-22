@@ -6,7 +6,7 @@ import java.math.BigDecimal;
  * 金额计算工具
  *
  * @author Bulbasaur
- * @date: 2021/7/9 1:40 上午
+ * @since: 2021/7/9 1:40 上午
  */
 public final class CurrencyUtil {
     /**
@@ -130,8 +130,8 @@ public final class CurrencyUtil {
     /**
      * 金额转分
      *
-     * @param money
-     * @return
+     * @param money 金额
+     * @return 转换单位为分
      */
     public static Integer fen(Double money) {
         double price = mul(money, 100);
@@ -141,15 +141,11 @@ public final class CurrencyUtil {
     /**
      * 金额转分
      *
-     * @param money
-     * @return
+     * @param money 金额
+     * @return double类型分
      */
     public static double reversalFen(Double money) {
         double price = div(money, 100);
         return price;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(fen(23.4324));
     }
 }

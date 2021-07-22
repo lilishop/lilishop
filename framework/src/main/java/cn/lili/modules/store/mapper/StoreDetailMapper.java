@@ -16,7 +16,7 @@ import java.util.List;
  * 店铺详细数据处理层
  *
  * @author pikachu
- * @date 2020-03-07 09:18:56
+ * @since 2020-03-07 09:18:56
  */
 public interface StoreDetailMapper extends BaseMapper<StoreDetail> {
 

@@ -9,7 +9,7 @@ import java.util.List;
  * 促销价格数据传输对象
  *
  * @author paulG
- * @date 2020/11/17
+ * @since 2020/11/17
  **/
 @Data
 public class PromotionPriceDTO {

@@ -25,7 +25,7 @@ import java.util.Date;
  * 管理端,平台拼团接口
  *
  * @author paulG
- * @date 2020/10/9
+ * @since 2020/10/9
  **/
 @RestController
 @Api(tags = "管理端,平台拼团接口")

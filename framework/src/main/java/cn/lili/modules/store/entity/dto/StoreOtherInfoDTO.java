@@ -11,7 +11,7 @@ import javax.validation.constraints.Size;
  * 店铺入驻其他信息
  *
  * @author Bulbasaur
- * @date 2020/12/7 16:16
+ * @since 2020/12/7 16:16
  */
 @Data
 public class StoreOtherInfoDTO {

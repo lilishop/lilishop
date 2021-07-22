@@ -22,7 +22,7 @@ import java.util.Date;
  * 商家订单流水
  *
  * @author Chopper
- * @date 2020/11/17 7:31 下午
+ * @since 2020/11/17 7:31 下午
  */
 @Data
 @Entity
@@ -124,7 +124,7 @@ public class StoreFlow {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;

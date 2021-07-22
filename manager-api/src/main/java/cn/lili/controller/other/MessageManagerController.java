@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  * 管理端,消息发送管理接口
  *
  * @author pikachu
- * @date 2020-05-06 15:18:56
+ * @since 2020-05-06 15:18:56
  */
 @RestController
 @Api(tags = "管理端,消息发送管理接口")

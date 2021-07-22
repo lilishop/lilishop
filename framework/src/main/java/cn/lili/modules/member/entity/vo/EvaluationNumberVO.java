@@ -7,7 +7,7 @@ import lombok.Data;
  * 评价数量VO
  *
  * @author Chopper
- * @date 2021/1/27 10:41 上午
+ * @since 2021/1/27 10:41 上午
  */
 @Data
 public class EvaluationNumberVO {

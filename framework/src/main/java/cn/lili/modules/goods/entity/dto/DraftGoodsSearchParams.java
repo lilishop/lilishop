@@ -10,7 +10,7 @@ import lombok.Data;
  * 草稿商品搜索对象
  *
  * @author paulG
- * @date 2020/12/21
+ * @since 2020/12/21
  **/
 @Data
 public class DraftGoodsSearchParams extends GoodsSearchParams {

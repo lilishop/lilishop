@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
  * 分类参数组关联
  *
  * @author pikachu
- * @date 2020-02-26 10:34:02
+ * @since 2020-02-26 10:34:02
  */
 @Data
 @Entity

@@ -5,7 +5,7 @@ package cn.lili.modules.system.entity.enums;
  * 验证码资源枚举
  *
  * @author Chopper
- * @date 2021/1/26 15:55
+ * @since 2021/1/26 15:55
  */
 public enum VerificationSourceEnum {
     /**

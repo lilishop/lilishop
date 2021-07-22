@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
  * 会员经验值
  *
  * @author Bulbasaur
- * @date: 2021/5/16 11:16 下午
+ * @since: 2021/5/16 11:16 下午
  */
 @Service
 public class MemberExperienceExecute implements MemberRegisterEvent, GoodsCommentCompleteEvent, OrderStatusChangeEvent {

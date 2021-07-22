@@ -10,7 +10,7 @@ import java.util.List;
  * 分类绑定参数组业务层
  *
  * @author pikachu
- * @date 2020-03-02 16:44:56
+ * @since 2020-03-02 16:44:56
  */
 public interface CategoryParameterGroupService extends IService<CategoryParameterGroup> {
 

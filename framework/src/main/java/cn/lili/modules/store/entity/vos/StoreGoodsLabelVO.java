@@ -11,7 +11,7 @@ import java.util.List;
  * 店铺商品分类VO
  *
  * @author Bulbasaur
- * @date 2020/12/11 16:18
+ * @since 2020/12/11 16:18
  */
 @Data
 @NoArgsConstructor

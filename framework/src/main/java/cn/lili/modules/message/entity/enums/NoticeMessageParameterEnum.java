@@ -4,7 +4,7 @@ package cn.lili.modules.message.entity.enums;
  * 消息编码枚举
  *
  * @author pikachu
- * @date 2020/12/8 9:46
+ * @since 2020/12/8 9:46
  */
 public enum NoticeMessageParameterEnum {
 
@@ -35,7 +35,11 @@ public enum NoticeMessageParameterEnum {
     /**
      * 取消原因
      */
-    CANCEL_REASON("cancel_reason", "取消原因");
+    CANCEL_REASON("cancel_reason", "取消原因"),
+    /**
+     * 取消原因
+     */
+    PRICE("price", "金额");
 
     private final String type;
     private final String description;

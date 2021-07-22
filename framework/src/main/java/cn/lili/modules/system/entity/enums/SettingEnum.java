@@ -4,7 +4,7 @@ package cn.lili.modules.system.entity.enums;
  * 系统设置常量
  *
  * @author Chopper
- * @date 2020/9/11 17:03
+ * @since 2020/9/11 17:03
  */
 public enum SettingEnum {
     //基础配置

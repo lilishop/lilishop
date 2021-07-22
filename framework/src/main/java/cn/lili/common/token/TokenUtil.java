@@ -37,7 +37,8 @@ public class TokenUtil {
      * @param username 主体
      * @param claim    私有声明
      * @param longTerm 长时间特殊token 如：移动端，微信小程序等
-     * @return
+     * @param userEnums 用户枚举
+     * @return TOKEN
      */
     public Token createToken(String username, Object claim, boolean longTerm, UserEnums userEnums) {
         Token token = new Token();
@@ -61,6 +62,7 @@ public class TokenUtil {
      * 刷新token
      *
      * @param oldRefreshToken 刷新token
+     * @param userEnums 用户枚举
      * @return token
      */
     public Token refreshToken(String oldRefreshToken, UserEnums userEnums) {
@@ -118,7 +120,7 @@ public class TokenUtil {
      * @param username       主体
      * @param claim          私有神明内容
      * @param expirationTime 过期时间（分钟）
-     * @return
+     * @return token字符串
      */
     private String createToken(String username, Object claim, Long expirationTime) {
         //JWT 生成

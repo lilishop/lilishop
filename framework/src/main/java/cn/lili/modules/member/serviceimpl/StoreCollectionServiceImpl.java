@@ -21,7 +21,7 @@ import java.util.Optional;
  * 会员店铺收藏业务层实现
  *
  * @author Chopper
- * @date 2020/11/18 2:52 下午
+ * @since 2020/11/18 2:52 下午
  */
 @Service
 public class StoreCollectionServiceImpl extends ServiceImpl<StoreCollectionMapper, StoreCollection> implements StoreCollectionService {

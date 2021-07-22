@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 商品参数业务层实现
  *
  * @author pikachu
- * @date 2020-03-02 16:18:56
+ * @since 2020-03-02 16:18:56
  */
 @Service
 public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Parameters> implements ParametersService {

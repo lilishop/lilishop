@@ -14,7 +14,7 @@ import java.util.Map;
  * 商品索引业务层
  *
  * @author paulG
- * @date 2020/10/14
+ * @since 2020/10/14
  **/
 public interface EsGoodsIndexService {
 

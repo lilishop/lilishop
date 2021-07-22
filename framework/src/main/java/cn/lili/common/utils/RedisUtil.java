@@ -29,7 +29,7 @@ public class RedisUtil {
      *
      * @param key  键
      * @param time 时间(秒)
-     * @return
+     * @return 操作结果
      */
     public boolean expire(String key, long time) {
         try {
@@ -133,7 +133,7 @@ public class RedisUtil {
      *
      * @param key   键
      * @param value 值
-     * @return
+     * @return 操作结果
      */
     public boolean lSet(String key, Object value) {
         try {
@@ -151,7 +151,7 @@ public class RedisUtil {
      * @param key   键
      * @param value 值
      * @param time  时间(秒)
-     * @return
+     * @return 操作结果
      */
     public boolean lSet(String key, Object value, long time) {
         try {
@@ -171,7 +171,7 @@ public class RedisUtil {
      *
      * @param key   键
      * @param value 值
-     * @return
+     * @return 操作结果
      */
     public boolean lSet(String key, List<Object> value) {
         try {
@@ -190,7 +190,7 @@ public class RedisUtil {
      * @param key   键
      * @param value 值
      * @param time  时间(秒)
-     * @return
+     * @return 操作结果
      */
     public boolean lSet(String key, List<Object> value, long time) {
         try {
@@ -211,10 +211,10 @@ public class RedisUtil {
     /**
      * 向Zset里添加成员
      *
-     * @param key
-     * @param score
-     * @param value
-     * @return
+     * @param key 键
+     * @param score 分数
+     * @param value 值
+     * @return 操作结果
      */
     public boolean zadd(String key, long score, String value) {
         return redisTemplate.opsForZSet().add(key, value, score);
@@ -225,10 +225,10 @@ public class RedisUtil {
     /**
      * 获取 某key 下 某一分值区间的队列
      *
-     * @param key
-     * @param from
-     * @param to
-     * @return
+     * @param key 键
+     * @param from 起始位置
+     * @param to 结束为止
+     * @return 符合条件的结果集
      */
     public Set<DefaultTypedTuple> zrangeByScoreWithScores(String key, int from, long to) {
         Set<DefaultTypedTuple> set = redisTemplate.opsForZSet().rangeByScoreWithScores(key, from, to);
@@ -238,9 +238,9 @@ public class RedisUtil {
     /**
      * 移除 Zset队列值
      *
-     * @param key
-     * @param value
-     * @return
+     * @param key 键
+     * @param value 值集合
+     * @return 移除数量
      */
     public Long zremove(String key, String... value) {
         return redisTemplate.opsForZSet().remove(key, value);

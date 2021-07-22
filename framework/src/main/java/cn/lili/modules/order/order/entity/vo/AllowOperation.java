@@ -15,7 +15,7 @@ import java.io.Serializable;
  * 订单可进行的操作
  *
  * @author Chopper
- * @date 2020/11/17 7:29 下午
+ * @since 2020/11/17 7:29 下午
  */
 @Data
 public class AllowOperation implements Serializable {

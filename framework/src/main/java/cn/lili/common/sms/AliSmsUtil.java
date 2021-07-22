@@ -8,7 +8,6 @@ import java.util.Map;
 /**
  * @author Chopper
  * @version v4.1
- * @Description:
  * @since 2021/2/1 6:05 下午
  */
 public interface AliSmsUtil {

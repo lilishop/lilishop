@@ -11,7 +11,7 @@ import java.util.List;
  * 商品分类品牌数据处理层
  *
  * @author pikachu
- * @date 2020-02-26 18:12:56
+ * @since 2020-02-26 18:12:56
  */
 public interface CategoryBrandMapper extends BaseMapper<CategoryBrand> {
 

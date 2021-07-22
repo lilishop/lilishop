@@ -16,7 +16,7 @@ import javax.validation.constraints.NotEmpty;
  * 商品规格项
  *
  * @author pikachu
- * @date 2020-02-18 15:18:56
+ * @since 2020-02-18 15:18:56
  */
 @Data
 @Entity

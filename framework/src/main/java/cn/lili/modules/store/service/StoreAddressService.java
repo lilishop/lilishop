@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 店铺地址（自提点）详细业务层
  *
  * @author Bulbasaur
- * @date 2020-03-07 09:24:33
+ * @since 2020-03-07 09:24:33
  */
 public interface StoreAddressService extends IService<StoreAddress> {
 

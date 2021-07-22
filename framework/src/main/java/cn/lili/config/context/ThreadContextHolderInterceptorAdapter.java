@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/12/9 10:44
  */
 public class ThreadContextHolderInterceptorAdapter extends HandlerInterceptorAdapter {
@@ -21,11 +20,11 @@ public class ThreadContextHolderInterceptorAdapter extends HandlerInterceptorAda
     /**
      * 拦截request和response并放到上下文中
      *
-     * @param request
-     * @param response
-     * @param handler
-     * @return
-     * @throws Exception
+     * @param request 请求
+     * @param response 响应
+     * @param handler 处理程序
+     * @return 处理结果
+     * @throws Exception 未知异常
      */
     @Override
     public boolean preHandle(HttpServletRequest request,
@@ -41,11 +40,11 @@ public class ThreadContextHolderInterceptorAdapter extends HandlerInterceptorAda
     /**
      * 从上下文中移除 request 和response
      *
-     * @param request
-     * @param response
-     * @param handler
-     * @param ex
-     * @throws Exception
+     * @param request 请求
+     * @param response 响应
+     * @param handler 处理程序
+     * @param ex 异常
+     * @throws Exception 完成之前处理异常
      */
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {

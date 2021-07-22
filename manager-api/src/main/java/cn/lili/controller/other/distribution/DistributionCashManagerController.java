@@ -19,7 +19,7 @@ import javax.validation.constraints.NotNull;
  * 管理端,分销佣金管理接口
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
+ * @since 2020-03-14 23:04:56
  */
 @RestController
 @Api(tags = "管理端,分销佣金管理接口")

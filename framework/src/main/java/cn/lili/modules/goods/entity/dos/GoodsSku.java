@@ -20,7 +20,7 @@ import java.util.Date;
  * 商品sku
  *
  * @author pikachu
- * @date 2020-02-23 9:14:33
+ * @since 2020-02-23 9:14:33
  */
 @Data
 @Entity

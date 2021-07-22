@@ -13,7 +13,7 @@ import org.apache.ibatis.annotations.Select;
  * 退款统计数据处理层
  *
  * @author Bulbasaur
- * @date 2020/12/10 11:22
+ * @since 2020/12/10 11:22
  */
 public interface RefundOrderStatisticsDataMapper extends BaseMapper<StoreFlow> {
 

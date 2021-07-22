@@ -9,7 +9,7 @@ import java.io.Serializable;
  * 订单设置
  *
  * @author Chopper
- * @date 2020/11/17 7:59 下午
+ * @since 2020/11/17 7:59 下午
  */
 @Data
 public class OrderSetting implements Serializable {

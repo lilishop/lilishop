@@ -40,8 +40,8 @@ public class IpHelper {
     /**
      * 获取IP返回地理信息
      *
-     * @param
-     * @return
+     * @param request 请求参数
+     * @return 城市信息
      */
     public String getIpCity(HttpServletRequest request) {
 

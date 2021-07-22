@@ -19,7 +19,7 @@ import javax.validation.constraints.Size;
  * 店铺修改DTO
  *
  * @author pikachu
- * @date 2020-08-22 15:10:51
+ * @since 2020-08-22 15:10:51
  */
 @Data
 public class StoreEditDTO {

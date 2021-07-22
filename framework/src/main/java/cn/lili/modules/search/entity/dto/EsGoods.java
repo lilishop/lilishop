@@ -6,7 +6,7 @@ import lombok.Data;
  * 商品搜索结果实体
  *
  * @author paulG
- * @date 2020/10/16
+ * @since 2020/10/16
  **/
 @Data
 public class EsGoods {

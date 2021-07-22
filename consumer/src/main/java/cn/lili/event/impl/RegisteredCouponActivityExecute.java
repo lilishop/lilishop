@@ -16,7 +16,7 @@ import java.util.List;
  * 注册赠券活动
  *
  * @author Bulbasaur
- * @date: 2021/5/24 10:48 上午
+ * @since: 2021/5/24 10:48 上午
  */
 @Component
 public class RegisteredCouponActivityExecute implements MemberRegisterEvent {

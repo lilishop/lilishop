@@ -11,7 +11,7 @@ import java.util.List;
  * 部门VO
  *
  * @author Chopper
- * @date 2020-11-23 18:48
+ * @since 2020-11-23 18:48
  */
 @Data
 public class DepartmentVO extends Department {

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 买家端,APP版本
  *
  * @author Bulbasaur
- * @date: 2021/5/21 11:15 上午
+ * @since: 2021/5/21 11:15 上午
  */
 @RestController
 @Api(tags = "买家端,APP版本")

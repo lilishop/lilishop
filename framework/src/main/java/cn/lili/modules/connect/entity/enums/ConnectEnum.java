@@ -5,7 +5,6 @@ package cn.lili.modules.connect.entity.enums;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/11/25 18:20
  */
 public enum ConnectEnum {

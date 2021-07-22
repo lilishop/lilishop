@@ -12,7 +12,7 @@ import java.util.Date;
  * 分销商品信息
  *
  * @author pikachu
- * @date 2020-03-26 09:04:53
+ * @since 2020-03-26 09:04:53
  */
 @Data
 public class DistributionGoodsVO {
@@ -52,7 +52,7 @@ public class DistributionGoodsVO {
     private Double commission;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "添加时间")
     private Date createTime;
 

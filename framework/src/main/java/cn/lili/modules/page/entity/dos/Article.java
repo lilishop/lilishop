@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
  * 文章DO
  *
  * @author Bulbasaur
- * @date 2020/12/10 17:42
+ * @since 2020/12/10 17:42
  */
 @Data
 @Entity

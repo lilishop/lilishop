@@ -11,7 +11,7 @@ import java.util.List;
  * 菜单数据处理层
  *
  * @author Chopper
- * @date 2020-11-22 09:17
+ * @since 2020-11-22 09:17
  */
 public interface MenuMapper extends BaseMapper<Menu> {
 

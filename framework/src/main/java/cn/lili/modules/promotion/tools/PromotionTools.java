@@ -22,7 +22,7 @@ import java.util.List;
  * 优惠活动通用验证类
  *
  * @author paulG
- * @date 2020/8/18
+ * @since 2020/8/18
  **/
 public class PromotionTools {
 

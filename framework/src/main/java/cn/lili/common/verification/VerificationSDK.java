@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/11/17 15:43
  */
 @Component

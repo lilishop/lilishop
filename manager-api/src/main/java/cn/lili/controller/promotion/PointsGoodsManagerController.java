@@ -24,7 +24,7 @@ import java.util.List;
  * 管理端,积分商品接口
  *
  * @author paulG
- * @date 2021/1/14
+ * @since 2021/1/14
  **/
 @RestController
 @Api(tags = "管理端,积分商品接口")

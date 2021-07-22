@@ -10,7 +10,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
  * 支付日志 业务层
  *
  * @author Chopper
- * @date 2020-12-19 09:25
+ * @since 2020-12-19 09:25
  */
 public interface PaymentService {
 

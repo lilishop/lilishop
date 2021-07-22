@@ -23,7 +23,7 @@ import java.util.Date;
  * app历史版本维护
  *
  * @author zh
- * @date 2020-06-20 09:29:19
+ * @since 2020-06-20 09:29:19
  */
 @Data
 @Entity
@@ -43,7 +43,7 @@ public class AppVersion {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;
@@ -74,7 +74,7 @@ public class AppVersion {
     @ApiModelProperty(value = "类型")
     private String type;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "版本更新时间")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date versionUpdateDate;

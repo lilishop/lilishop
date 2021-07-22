@@ -2,7 +2,7 @@ package cn.lili.modules.search.entity.enums;
 
 /**
  * @author paulG
- * @date 2021/1/20
+ * @since 2021/1/20
  **/
 public enum HotWordsRedisKeyEnum {
 

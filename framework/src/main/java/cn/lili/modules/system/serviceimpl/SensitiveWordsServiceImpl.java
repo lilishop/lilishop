@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 敏感词业务层实现
  *
  * @author Bulbasaur
- * @date 2020/11/17 8:02 下午
+ * @since 2020/11/17 8:02 下午
  */
 @Service
 public class SensitiveWordsServiceImpl extends ServiceImpl<SensitiveWordsMapper, SensitiveWords> implements SensitiveWordsService {

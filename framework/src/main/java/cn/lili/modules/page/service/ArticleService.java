@@ -16,7 +16,7 @@ import java.util.List;
  * 文章业务层
  *
  * @author pikachu
- * @date 2020/11/18 11:40 上午
+ * @since 2020/11/18 11:40 上午
  */
 @CacheConfig(cacheNames = "{article}")
 public interface ArticleService extends IService<Article> {

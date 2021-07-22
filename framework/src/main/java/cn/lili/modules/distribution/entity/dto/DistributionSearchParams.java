@@ -9,7 +9,7 @@ import lombok.Data;
  * 分销查询参数
  *
  * @author Chopper
- * @date 2021/3/20 10:13
+ * @since 2021/3/20 10:13
  */
 @Data
 public class DistributionSearchParams {

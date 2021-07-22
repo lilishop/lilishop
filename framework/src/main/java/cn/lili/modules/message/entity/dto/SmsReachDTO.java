@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * 短信任务DTO
  * @author Chopper
- * @date 2020/12/8 9:46
+ * @since 2020/12/8 9:46
  */
 @Data
 public class SmsReachDTO extends SmsReach {

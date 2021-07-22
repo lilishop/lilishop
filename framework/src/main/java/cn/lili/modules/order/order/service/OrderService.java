@@ -22,7 +22,7 @@ import java.util.List;
  * 子订单业务层
  *
  * @author Chopper
- * @date 2020/11/17 7:36 下午
+ * @since 2020/11/17 7:36 下午
  */
 public interface OrderService extends IService<Order> {
 
@@ -208,9 +208,8 @@ public interface OrderService extends IService<Order> {
     /**
      * 获取待发货订单编号列表
      *
-     * @param response
+     * @param response 响应
      * @param logisticsName 店铺已选择物流公司列表
-     * @return 待发货订单编号列表
      */
     void getBatchDeliverList(HttpServletResponse response, List<String> logisticsName);
 

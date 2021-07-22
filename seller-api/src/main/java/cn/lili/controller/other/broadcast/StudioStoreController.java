@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  * 店铺端,直播间接口
  *
  * @author Bulbasaur
- * @date: 2021/5/17 2:05 下午
+ * @since: 2021/5/17 2:05 下午
  */
 @RestController
 @Api(tags = "店铺端,直播间接口")

@@ -10,7 +10,7 @@ import lombok.Data;
  * 子订单VO
  *
  * @author Chopper
- * @date 2020-08-17 20:28
+ * @since 2020-08-17 20:28
  */
 @Data
 public class OrderItemVO {

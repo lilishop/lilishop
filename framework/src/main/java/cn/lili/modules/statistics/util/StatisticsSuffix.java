@@ -6,7 +6,7 @@ import java.util.Calendar;
  * 统计缓存后缀工具
  *
  * @author Chopper
- * @date 2021-01-15 15:30
+ * @since 2021-01-15 15:30
  */
 public class StatisticsSuffix {
 

@@ -12,7 +12,7 @@ import java.util.List;
  * ES商品搜索业务层
  *
  * @author paulG
- * @date 2020/10/15
+ * @since 2020/10/15
  **/
 public interface EsGoodsSearchService {
 

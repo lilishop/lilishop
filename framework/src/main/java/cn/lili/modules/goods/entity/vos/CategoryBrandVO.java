@@ -7,7 +7,7 @@ import lombok.Data;
  * 分类品牌VO
  *
  * @author pikachu
- * @date 2020-02-26 23:24:13
+ * @since 2020-02-26 23:24:13
  */
 @Data
 public class CategoryBrandVO {

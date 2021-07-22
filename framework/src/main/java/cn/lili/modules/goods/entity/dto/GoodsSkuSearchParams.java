@@ -9,7 +9,7 @@ import lombok.Data;
  * 规格商品查询条件
  *
  * @author paulG
- * @date 2020/12/15
+ * @since 2020/12/15
  **/
 @Data
 public class GoodsSkuSearchParams extends GoodsSearchParams {

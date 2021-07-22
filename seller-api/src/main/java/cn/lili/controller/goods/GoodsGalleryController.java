@@ -19,7 +19,7 @@ import java.util.List;
  * 店铺端,商品相册接口
  *
  * @author pikachu
- * @date 2020-03-13 11:18:56
+ * @since 2020-03-13 11:18:56
  */
 @RestController
 @Api(tags = "店铺端,商品相册接口")

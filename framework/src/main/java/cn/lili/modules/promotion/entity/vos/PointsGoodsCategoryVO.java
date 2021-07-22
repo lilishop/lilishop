@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
  * 积分商品分类视图对象
  *
  * @author paulG
- * @date 2021/1/15
+ * @since 2021/1/15
  **/
 @Data
 public class PointsGoodsCategoryVO extends PointsGoodsCategory {

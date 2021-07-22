@@ -7,7 +7,7 @@ import lombok.Data;
  * 店铺首页数据
  *
  * @author Chopper
- * @date 2021/3/17 4:04 下午
+ * @since 2021/3/17 4:04 下午
  */
 @Data
 public class StoreIndexStatisticsVO {

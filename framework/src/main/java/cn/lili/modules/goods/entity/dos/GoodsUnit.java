@@ -14,7 +14,7 @@ import javax.validation.constraints.NotEmpty;
  * 商品计量单位
  *
  * @author Bulbasaur
- * @date: 2020/11/26 16:08
+ * @since: 2020/11/26 16:08
  */
 @Data
 @Entity

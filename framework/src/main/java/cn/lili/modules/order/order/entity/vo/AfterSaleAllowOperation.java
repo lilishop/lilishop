@@ -9,7 +9,7 @@ import lombok.Data;
  * 售后可操作类型
  *
  * @author Chopper
- * @date 2021/3/12 10:33 上午
+ * @since 2021/3/12 10:33 上午
  */
 @Data
 public class AfterSaleAllowOperation {

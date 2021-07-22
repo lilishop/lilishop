@@ -11,7 +11,7 @@ import java.util.Date;
  * 结算单VO
  *
  * @author pikachu
- * @date 2020年3月07日 上午11:04:25
+ * @since 2020年3月07日 上午11:04:25
  */
 @Data
 public class BillListVO {

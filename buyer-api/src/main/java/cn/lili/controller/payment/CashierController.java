@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
  * 买家端,收银台接口
  *
  * @author Chopper
- * @date 2020-12-18 16:59
+ * @since 2020-12-18 16:59
  */
 @Slf4j
 @RestController

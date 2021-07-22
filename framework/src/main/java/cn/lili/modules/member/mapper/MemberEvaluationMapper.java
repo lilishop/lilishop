@@ -17,7 +17,7 @@ import java.util.Map;
  * 会员商品评价数据处理层
  *
  * @author Bulbasaur
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 public interface MemberEvaluationMapper extends BaseMapper<MemberEvaluation> {
 

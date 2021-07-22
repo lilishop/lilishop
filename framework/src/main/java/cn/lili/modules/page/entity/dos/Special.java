@@ -14,7 +14,7 @@ import javax.persistence.Table;
  * 专题活动
  *
  * @author Bulbasaur
- * @date 2020/12/10 17:42
+ * @since 2020/12/10 17:42
  */
 @Data
 @Entity

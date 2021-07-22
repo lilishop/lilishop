@@ -4,7 +4,7 @@ package cn.lili.modules.promotion.entity.enums;
  * 会员优惠券状态枚举
  *
  * @author Chopper
- * @date 2020-03-19 9:36 上午
+ * @since 2020-03-19 9:36 上午
  */
 public enum MemberCouponStatusEnum {
     /**

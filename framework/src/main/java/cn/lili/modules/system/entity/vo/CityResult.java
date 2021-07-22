@@ -6,7 +6,7 @@ import lombok.Data;
  * 获取城市结果
  *
  * @author pikachu
- * @date 18/6/27 上午9:28
+ * @since 18/6/27 上午9:28
  */
 @Data
 public class CityResult {

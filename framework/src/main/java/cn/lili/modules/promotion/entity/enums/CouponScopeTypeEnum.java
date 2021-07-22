@@ -4,7 +4,7 @@ package cn.lili.modules.promotion.entity.enums;
  * 优惠券适用范围类型枚举
  *
  * @author Chopper
- * @date 2020-03-19 9:36 上午
+ * @since 2020-03-19 9:36 上午
  */
 public enum CouponScopeTypeEnum {
 

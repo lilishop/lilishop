@@ -4,7 +4,7 @@ package cn.lili.modules.order.trade.entity.enums;
  * 售后状态
  *
  * @author Chopper
- * @date 2020-08-20 15:39
+ * @since 2020-08-20 15:39
  */
 public enum AfterSaleStatusEnum {
 

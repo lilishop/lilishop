@@ -13,7 +13,7 @@ import java.util.List;
  * 店铺详细业务层
  *
  * @author pikachu
- * @date 2020-03-07 09:24:33
+ * @since 2020-03-07 09:24:33
  */
 public interface StoreDetailService extends IService<StoreDetail> {
     /**

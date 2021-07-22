@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 买家端,会员站服务消息接口
  *
  * @author Chopper
- * @date: 2020/11/17 2:31 下午
+ * @since: 2020/11/17 2:31 下午
  */
 @RestController
 @RequestMapping("/service/notice")

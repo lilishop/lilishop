@@ -11,7 +11,7 @@ import java.util.List;
  * 商品分类业务层
  *
  * @author pikachu
- * @date 2020-03-02 16:44:56
+ * @since 2020-03-02 16:44:56
  */
 public interface CategoryService extends IService<Category> {
 

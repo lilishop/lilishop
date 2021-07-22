@@ -13,7 +13,7 @@ import org.apache.ibatis.annotations.Select;
  * 店铺数据处理层
  *
  * @author pikachu
- * @date2020-03-07 09:18:56
+ * @since2020-03-07 09:18:56
  */
 public interface StoreMapper extends BaseMapper<Store> {
 

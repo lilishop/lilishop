@@ -5,7 +5,7 @@ import cn.lili.common.cache.CachePrefix;
 /**
  * 满额活动缓存Key
  * @author paulG
- * @date 2020/10/12
+ * @since 2020/10/12
  **/
 public class PromotionCacheKeys {
 

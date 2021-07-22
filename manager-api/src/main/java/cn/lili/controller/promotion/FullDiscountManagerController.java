@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
  * 管理端,满额活动接口
  *
  * @author paulG
- * @date 2021/1/12
+ * @since 2021/1/12
  **/
 @RestController
 @Api(tags = "管理端,满额活动接口")

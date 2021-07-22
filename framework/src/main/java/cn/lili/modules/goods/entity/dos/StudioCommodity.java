@@ -17,7 +17,7 @@ import javax.persistence.Table;
  * 直播商品
  *
  * @author Bulbasaur
- * @date: 2021/5/18 5:42 下午
+ * @since: 2021/5/18 5:42 下午
  */
 @Data
 @Entity

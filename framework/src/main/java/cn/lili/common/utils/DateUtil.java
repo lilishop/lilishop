@@ -23,7 +23,7 @@ public class DateUtil {
     /**
      * 当天的开始时间
      *
-     * @return
+     * @return 今天开始时间
      */
     public static Date startOfTodDayTime() {
         Calendar calendar = Calendar.getInstance();
@@ -36,8 +36,8 @@ public class DateUtil {
 
     /**
      * 当天的开始时间
-     *
-     * @return
+     * @param date 时间
+     * @return 根据传入的时间获取开始时间
      */
     public static Date startOfTodDayTime(Date date) {
         Calendar calendar = Calendar.getInstance();
@@ -51,7 +51,7 @@ public class DateUtil {
     /**
      * 当天的开始时间
      *
-     * @return
+     * @return 今天开始时间
      */
     public static long startOfTodDay() {
         Calendar calendar = Calendar.getInstance();
@@ -63,14 +63,10 @@ public class DateUtil {
         return date.getTime() / 1000;
     }
 
-    public static void main(String[] args) {
-
-    }
-
     /**
      * 当天的结束时间
      *
-     * @return
+     * @return 今天结束时间
      */
     public static Date endOfDate() {
         Calendar calendar = Calendar.getInstance();
@@ -83,8 +79,8 @@ public class DateUtil {
 
     /**
      * 当天的结束时间
-     *
-     * @return
+     * @param date 传入日期
+     * @return 获得传入日期当天结束时间
      */
     public static Date endOfDate(Date date) {
         if (date == null) {
@@ -125,7 +121,7 @@ public class DateUtil {
      *
      * @param date    字符串日期
      * @param pattern 日期格式
-     * @return
+     * @return date
      */
     public static Date toDate(String date, String pattern) {
         if ("".equals("" + date)) {
@@ -148,7 +144,7 @@ public class DateUtil {
     /**
      * 获取上个月的开始结束时间
      *
-     * @return
+     * @return 上个月的开始结束时间
      */
     public static Long[] getLastMonth() {
         //取得系统当前时间
@@ -198,7 +194,7 @@ public class DateUtil {
      * 把日期转换成字符串型
      *
      * @param date 日期
-     * @return
+     * @return 字符串时间
      */
     public static String toString(Date date) {
         return toString(date, STANDARD_FORMAT);
@@ -207,8 +203,8 @@ public class DateUtil {
     /**
      * 把日期转换成字符串型
      *
-     * @param Long 日期
-     * @return
+     * @param date 日期
+     * @return 字符串时间
      */
     public static String toString(Long date) {
         return toString(date, STANDARD_FORMAT);
@@ -219,7 +215,7 @@ public class DateUtil {
      *
      * @param date    日期
      * @param pattern 类型
-     * @return
+     * @return 字符串时间
      */
     public static String toString(Date date, String pattern) {
         if (date == null) {
@@ -243,7 +239,7 @@ public class DateUtil {
      *
      * @param time    时间戳
      * @param pattern 格式
-     * @return
+     * @return 字符串时间
      */
     public static String toString(Long time, String pattern) {
         if (time > 0) {
@@ -251,8 +247,7 @@ public class DateUtil {
                 time = time * 1000;
             }
             Date date = new Date(time);
-            String str = DateUtil.toString(date, pattern);
-            return str;
+            return DateUtil.toString(date, pattern);
         }
         return "";
     }
@@ -321,7 +316,7 @@ public class DateUtil {
      * 获取几个月之前的日期时间戳
      *
      * @param beforeMonth 几个月之前
-     * @return
+     * @return 时间戳
      */
     public static long getBeforeMonthDateline(int beforeMonth) {
         SimpleDateFormat format = new SimpleDateFormat(STANDARD_FORMAT);

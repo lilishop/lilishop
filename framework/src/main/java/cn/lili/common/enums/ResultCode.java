@@ -5,7 +5,7 @@ package cn.lili.common.enums;
  * 第一位 1:商品；2:用户；3:交易,4:促销,5:店铺,6:页面,7:设置,8:其他
  *
  * @author Chopper
- * @date 2020/4/8 1:36 下午
+ * @since 2020/4/8 1:36 下午
  */
 public enum ResultCode {
 

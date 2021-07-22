@@ -15,7 +15,7 @@ import javax.validation.constraints.NotEmpty;
  * 自定义分词
  *
  * @author paulG
- * @date 2020/10/15
+ * @since 2020/10/15
  **/
 @Data
 @Entity

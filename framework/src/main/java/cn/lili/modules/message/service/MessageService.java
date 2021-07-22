@@ -10,7 +10,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 管理端发送消息内容业务层
  *
  * @author Chopper
- * @date 2020/11/17 3:44 下午
+ * @since 2020/11/17 3:44 下午
  */
 public interface MessageService extends IService<Message> {
 

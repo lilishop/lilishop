@@ -5,7 +5,6 @@ package cn.lili.common.security.enums;
  *
  * @author Chopper
  * @version v1.0
- * @Description:
  * @since 2020/8/18 15:23
  */
 public enum UserEnums {

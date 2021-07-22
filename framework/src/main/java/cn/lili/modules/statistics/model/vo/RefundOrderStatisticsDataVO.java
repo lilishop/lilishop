@@ -7,7 +7,7 @@ import lombok.Data;
  * 退款统计VO
  *
  * @author Bulbasaur
- * @date 2020/12/10 11:24
+ * @since 2020/12/10 11:24
  */
 @Data
 public class RefundOrderStatisticsDataVO {

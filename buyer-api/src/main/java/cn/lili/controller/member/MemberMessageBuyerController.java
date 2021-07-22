@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  * 买家端,会员站内消息接口
  *
  * @author Bulbasaur
- * @date: 2020/11/16 10:07 下午
+ * @since: 2020/11/16 10:07 下午
  */
 @RestController
 @Api(tags = "买家端,会员站内消息接口")

@@ -33,8 +33,8 @@ public class ResultUtil<T> {
     /**
      * 返回数据
      *
-     * @param t
-     * @return
+     * @param t 范型
+     * @return 消息
      */
     public ResultMessage<T> setData(T t) {
         this.resultMessage.setResult(t);
@@ -58,9 +58,9 @@ public class ResultUtil<T> {
 
     /**
      * 抽象静态方法，返回结果集
-     * @param t
-     * @param <T>
-     * @return
+     * @param t 范型
+     * @param <T>  范型
+     * @return 消息
      */
     public static <T> ResultMessage<T> data(T t) {
         return new ResultUtil<T>().setData(t);
@@ -70,6 +70,7 @@ public class ResultUtil<T> {
      * 返回成功
      *
      * @param resultCode 返回状态码
+     * @return 消息
      */
     public static <T> ResultMessage<T> success(ResultCode resultCode) {
         return new ResultUtil<T>().setSuccessMsg(resultCode);
@@ -77,6 +78,7 @@ public class ResultUtil<T> {
 
     /**
      * 返回成功
+     * @return 消息
      */
     public static <T> ResultMessage<T> success() {
         return new ResultUtil<T>().setSuccessMsg(ResultCode.SUCCESS);
@@ -86,6 +88,7 @@ public class ResultUtil<T> {
      * 返回失败
      *
      * @param resultCode 返回状态码
+     * @return 消息
      */
     public static <T> ResultMessage<T> error(ResultCode resultCode) {
         return new ResultUtil<T>().setErrorMsg(resultCode);
@@ -96,6 +99,7 @@ public class ResultUtil<T> {
      *
      * @param code 状态码
      * @param msg  返回消息
+     * @return 消息
      */
     public static <T> ResultMessage<T> error(Integer code, String msg) {
         return new ResultUtil<T>().setErrorMsg(code, msg);
@@ -103,8 +107,8 @@ public class ResultUtil<T> {
 
     /**
      * 服务器异常 追加状态码
-     *
      * @param resultCode 返回码
+     * @return 消息
      */
     public ResultMessage<T> setErrorMsg(ResultCode resultCode) {
         this.resultMessage.setSuccess(false);
@@ -118,6 +122,7 @@ public class ResultUtil<T> {
      *
      * @param code 状态码
      * @param msg  返回消息
+     * @return 消息
      */
     public ResultMessage<T> setErrorMsg(Integer code, String msg) {
         this.resultMessage.setSuccess(false);

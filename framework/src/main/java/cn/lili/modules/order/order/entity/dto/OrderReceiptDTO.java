@@ -10,7 +10,7 @@ import lombok.Data;
  * 订单发票
  *
  * @author lili
- * @date 2020/11/28 11:38
+ * @since 2020/11/28 11:38
  */
 @Data
 @ApiModel(value = "订单发票")
