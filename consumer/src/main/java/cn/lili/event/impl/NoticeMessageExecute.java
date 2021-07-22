@@ -1,6 +1,7 @@
 package cn.lili.event.impl;
 
 import cn.lili.event.*;
+import cn.lili.modules.distribution.entity.enums.DistributionCashStatusEnum;
 import cn.lili.modules.member.entity.dto.MemberPointMessage;
 import cn.lili.modules.member.entity.dto.MemberWithdrawalMessage;
 import cn.lili.modules.member.entity.enums.MemberWithdrawalDestinationEnum;
@@ -171,27 +172,58 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
 
     @Override
     public void memberWithdrawal(MemberWithdrawalMessage memberWithdrawalMessage) {
-
-        //如果提现到余额
-        if (memberWithdrawalMessage.getDestination().equals(MemberWithdrawalDestinationEnum.WALLET.name())) {
-
-            //组织参数
-            NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
-            noticeMessageDTO.setMemberId(memberWithdrawalMessage.getMemberId());
-            Map<String, String> params = new HashMap<>(2);
-            params.put("income", memberWithdrawalMessage.getPrice().toString());
-            noticeMessageDTO.setParameter(params);
-            noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_SUCCESS);
-            //发送提现申请成功消息
-            noticeMessageService.noticeMessage(noticeMessageDTO);
-
-            params.put("income", memberWithdrawalMessage.getPrice().toString());
-            params.put("expenditure", "0");
-            noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_CHANGE);
-            noticeMessageDTO.setParameter(params);
-            //发送余额变动消息
-            noticeMessageService.noticeMessage(noticeMessageDTO);
+        //如果提现状态为申请则发送申请提现站内消息
+        if(memberWithdrawalMessage.getStatus().equals(DistributionCashStatusEnum.APPLY.name())){
+            //如果提现到余额
+            if (memberWithdrawalMessage.getDestination().equals(MemberWithdrawalDestinationEnum.WALLET.name())) {
+                NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
+                noticeMessageDTO.setMemberId(memberWithdrawalMessage.getMemberId());
+                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_CREATE);
+                Map<String, String> params = new HashMap<>(2);
+                params.put("price", memberWithdrawalMessage.getPrice().toString());
+                noticeMessageDTO.setParameter(params);
+                //发送提现申请成功消息
+                noticeMessageService.noticeMessage(noticeMessageDTO);
+            }
         }
+        //如果提现状态为通过则发送审核通过站内消息
+        if(memberWithdrawalMessage.getStatus().equals(DistributionCashStatusEnum.PASS.name())){
+            //如果提现到余额
+            if (memberWithdrawalMessage.getDestination().equals(MemberWithdrawalDestinationEnum.WALLET.name())) {
+                //组织参数
+                NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
+                noticeMessageDTO.setMemberId(memberWithdrawalMessage.getMemberId());
+                Map<String, String> params = new HashMap<>(2);
+                params.put("income", memberWithdrawalMessage.getPrice().toString());
+                noticeMessageDTO.setParameter(params);
+                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_SUCCESS);
+                //发送提现成功消息
+                noticeMessageService.noticeMessage(noticeMessageDTO);
+
+                params.put("income", memberWithdrawalMessage.getPrice().toString());
+                params.put("expenditure", "0");
+                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_CHANGE);
+                noticeMessageDTO.setParameter(params);
+                //发送余额变动消息
+                noticeMessageService.noticeMessage(noticeMessageDTO);
+            }
+        }
+        //如果提现状态为拒绝则发送审核拒绝站内消息
+        if(memberWithdrawalMessage.getStatus().equals(DistributionCashStatusEnum.REFUSE.name())){
+            //如果提现到余额
+            if (memberWithdrawalMessage.getDestination().equals(MemberWithdrawalDestinationEnum.WALLET.name())) {
+                NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
+                noticeMessageDTO.setMemberId(memberWithdrawalMessage.getMemberId());
+                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_ERROR);
+                Map<String, String> params = new HashMap<>(2);
+                params.put("price", memberWithdrawalMessage.getPrice().toString());
+                noticeMessageDTO.setParameter(params);
+                //发送提现申请成功消息
+                noticeMessageService.noticeMessage(noticeMessageDTO);
+            }
+        }
+
+
 
 
     }

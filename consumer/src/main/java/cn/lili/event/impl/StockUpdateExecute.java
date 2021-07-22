@@ -184,6 +184,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
             skuKeys.add(GoodsSkuService.getStockCacheKey(orderItem.getSkuId()));
             GoodsSku goodsSku = new GoodsSku();
             goodsSku.setId(orderItem.getSkuId());
+            goodsSku.setGoodsId(orderItem.getGoodsId());
             //如果有促销信息
             if (null != orderItem.getPromotionType() && null != orderItem.getPromotionId()) {
                 //如果促销有库存信息

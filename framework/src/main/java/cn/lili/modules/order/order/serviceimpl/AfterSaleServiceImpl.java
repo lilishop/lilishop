@@ -140,7 +140,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             throw new ServiceException(ResultCode.AFTER_SALES_NOT_PAY_ERROR);
         }
         //判断支付方式是否为线上支付
-        if (order.getPaymentMethod().equals(PaymentMethodEnum.BANK_TRANSFER)) {
+        if (order.getPaymentMethod().equals(PaymentMethodEnum.BANK_TRANSFER.name())) {
             afterSaleApplyVO.setRefundWay(AfterSaleRefundWayEnum.OFFLINE.name());
         } else {
             afterSaleApplyVO.setRefundWay(AfterSaleRefundWayEnum.ORIGINAL.name());

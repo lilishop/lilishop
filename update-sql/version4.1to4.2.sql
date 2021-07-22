@@ -20,3 +20,6 @@ INSERT INTO `lilishop`.`li_menu` (`id`, `create_by`, `create_time`, `delete_flag
 
 /** 修改会员评价店铺图片字段类型 **/
 alter table li_member_evaluation modify column reply_image text;
+
+/** 修改售后图片字段类型 **/
+alter table li_after_sale modify column after_sale_image text;

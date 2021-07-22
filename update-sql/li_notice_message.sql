@@ -11,7 +11,7 @@
  Target Server Version : 80023
  File Encoding         : 65001
 
- Date: 18/07/2021 17:11:47
+ Date: 21/07/2021 19:26:53
 */
 
 SET NAMES utf8mb4;
@@ -56,8 +56,10 @@ INSERT INTO `li_notice_message` VALUES (13, NULL, '2021-07-15 19:39:31.000000', 
 INSERT INTO `li_notice_message` VALUES (14, NULL, '2021-07-15 19:39:39.000000', NULL, NULL, '2021-07-15 19:39:43.000000', '订单 #{商品名称} 商家已签收哦，请关注后续退款状态，将在1-3个工作日内自动退款~', '退货物品签收通知', 'OPEN', '退货物品签收通知', 'goods');
 INSERT INTO `li_notice_message` VALUES (15, NULL, '2021-07-15 19:44:38.000000', NULL, NULL, '2021-07-15 19:44:40.000000', '售后单 #{商品名称} 已经完成，请关注及时关注售后单状态~', '售后完成通知', 'OPEN', '售后完成通知', 'goods');
 INSERT INTO `li_notice_message` VALUES (16, NULL, '2021-07-15 19:47:27.000000', NULL, NULL, '2021-07-15 19:47:31.000000', '您当前到账{获得积分}积分，消费#{消费积分} 积分，积分可以抵现金哦，真的很棒棒呢~', '积分变更通知', 'OPEN', '积分变更通知', 'income_points,expenditure_points');
-INSERT INTO `li_notice_message` VALUES (17, NULL, '2021-07-15 19:53:10.000000', NULL, NULL, '2021-07-15 19:53:13.000000', '您的余额账户今日收入#{收入金额}，支出#{支出金额}，如遇异常变动，请及时联系我们哦~', '余额账户变更通知', 'OPEN', '余额账户变更通知', 'income,expenditure');
-INSERT INTO `li_notice_message` VALUES (18, NULL, '2021-07-15 19:57:01.000000', NULL, NULL, '2021-07-15 19:57:04.000000', '恭喜您，您的提处理成功，提现金额为#{收入金额}，将在1-3工作日内到账', '提现成功通知', 'OPEN', '提现成功通知', 'income');
+INSERT INTO `li_notice_message` VALUES (17, NULL, '2021-07-15 19:53:10.000000', NULL, NULL, '2021-07-15 19:53:13.000000', '您的余额账户今日收入¥#{收入金额}，支出¥#{支出金额}，如遇异常变动，请及时联系我们哦~', '余额账户变更通知', 'OPEN', '余额账户变更通知', 'income,expenditure');
+INSERT INTO `li_notice_message` VALUES (18, NULL, '2021-07-15 19:57:01.000000', NULL, NULL, '2021-07-15 19:57:04.000000', '恭喜您，您的提处理成功，提现金额为¥#{收入金额}，将在1-3工作日内到账', '提现成功通知', 'OPEN', '提现成功通知', 'income');
+INSERT INTO `li_notice_message` VALUES (19, NULL, '2021-07-21 18:58:10.000000', NULL, NULL, '2021-07-21 18:58:13.000000', '恭喜您，您的提现金额为¥#{金额}的申请已经提交审核，请及时关注审核动态哦~', '提现申请提交成功通知', 'OPEN', '提现申请提交成功通知', 'price');
+INSERT INTO `li_notice_message` VALUES (20, NULL, '2021-07-21 19:16:58.000000', NULL, NULL, '2021-07-21 19:17:02.000000', '很抱歉，您的提现金额为¥#{金额}的申请已被拒绝，如有问题请及时联系管理员哦~', '提现申请驳回通知', 'OPEN', '提现申请驳回通知', 'price');
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
