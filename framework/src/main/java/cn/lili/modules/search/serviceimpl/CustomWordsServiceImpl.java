@@ -2,9 +2,9 @@ package cn.lili.modules.search.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.config.context.ThreadContextHolder;
+import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.modules.search.entity.dos.CustomWords;
 import cn.lili.modules.search.entity.vo.CustomWordsVO;
 import cn.lili.modules.search.mapper.CustomWordsMapper;

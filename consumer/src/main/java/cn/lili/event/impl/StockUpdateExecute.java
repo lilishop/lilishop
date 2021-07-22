@@ -1,7 +1,7 @@
 package cn.lili.event.impl;
 
 import cn.hutool.core.convert.Convert;
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
@@ -11,7 +11,7 @@ import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

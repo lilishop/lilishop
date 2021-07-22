@@ -1,6 +1,6 @@
 package cn.lili.modules.promotion.entity.dto;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;

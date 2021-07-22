@@ -1,7 +1,7 @@
 package cn.lili.modules.connect.util;
 
 
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.modules.connect.config.AuthConfig;
 import cn.lili.modules.connect.config.ConnectAuth;
 import cn.lili.modules.connect.config.ConnectAuthEnum;

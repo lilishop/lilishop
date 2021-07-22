@@ -1,7 +1,8 @@
 package cn.lili.modules.promotion.entity.dos;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.lili.base.BaseEntity;
+import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -58,7 +59,7 @@ public class PromotionGoods extends BaseEntity {
     private String promotionId;
 
     /**
-     * @see cn.lili.modules.promotion.entity.enums.PromotionTypeEnum
+     * @see PromotionTypeEnum
      */
     @ApiModelProperty(value = "促销工具类型")
     private String promotionType;

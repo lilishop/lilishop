@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.modules.page.entity.dos.Article;
 import cn.lili.modules.page.entity.dto.ArticleSearchParams;
 import cn.lili.modules.page.entity.enums.ArticleEnum;

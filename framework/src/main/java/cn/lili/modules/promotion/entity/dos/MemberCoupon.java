@@ -3,7 +3,7 @@ package cn.lili.modules.promotion.entity.dos;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.promotion.entity.enums.CouponRangeDayEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import com.baomidou.mybatisplus.annotation.TableName;

@@ -1,6 +1,6 @@
 package cn.lili.modules.system.serviceimpl;
 
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.common.utils.HttpClientUtils;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;

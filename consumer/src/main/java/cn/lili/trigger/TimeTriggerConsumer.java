@@ -1,9 +1,9 @@
 package cn.lili.trigger;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.cache.Cache;
-import cn.lili.common.trigger.model.TimeTriggerMsg;
-import cn.lili.common.trigger.util.DelayQueueTools;
+import cn.lili.cache.Cache;
+import cn.lili.trigger.model.TimeTriggerMsg;
+import cn.lili.trigger.util.DelayQueueTools;
 import cn.lili.common.utils.SpringContextUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;

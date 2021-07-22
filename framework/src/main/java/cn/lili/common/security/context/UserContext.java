@@ -1,11 +1,11 @@
 package cn.lili.common.security.context;
 
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.enums.SecurityEnum;
-import cn.lili.common.token.SecretKeyUtil;
+import cn.lili.common.security.token.SecretKeyUtil;
 import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

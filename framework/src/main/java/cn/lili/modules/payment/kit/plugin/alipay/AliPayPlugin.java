@@ -10,7 +10,7 @@ import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.config.properties.ApiProperties;
+import cn.lili.common.properties.ApiProperties;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.kit.CashierSupport;
 import cn.lili.modules.payment.kit.Payment;

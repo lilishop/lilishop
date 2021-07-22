@@ -1,9 +1,9 @@
 package cn.lili.trigger.listen;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.trigger.enums.DelayQueueEnums;
-import cn.lili.common.trigger.interfaces.TimeTrigger;
-import cn.lili.common.trigger.model.TimeTriggerMsg;
+import cn.lili.trigger.enums.DelayQueueEnums;
+import cn.lili.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.model.TimeTriggerMsg;
 import cn.lili.trigger.AbstractDelayQueueListen;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

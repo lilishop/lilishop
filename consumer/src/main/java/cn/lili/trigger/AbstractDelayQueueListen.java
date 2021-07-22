@@ -1,7 +1,7 @@
 package cn.lili.trigger;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.common.utils.ThreadPoolUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
