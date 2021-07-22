@@ -13,7 +13,7 @@ import cn.lili.modules.verification.service.VerificationService;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.vo.SearchVO;
-import cn.lili.modules.system.aspect.DemoSite;
+import cn.lili.modules.system.aspect.annotation.DemoSite;
 import cn.lili.modules.permission.entity.dos.AdminUser;
 import cn.lili.modules.permission.entity.dto.AdminUserDTO;
 import cn.lili.modules.permission.entity.vo.AdminUserVO;
