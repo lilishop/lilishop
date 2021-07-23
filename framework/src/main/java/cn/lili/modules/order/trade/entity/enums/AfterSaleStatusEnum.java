@@ -14,7 +14,7 @@ public enum AfterSaleStatusEnum {
     APPLY("申请中"),
     PASS("已通过"),
     REFUSE("已拒绝"),
-    BUYER_RETURN("买家退货，待卖家收货"),
+    BUYER_RETURN("待卖家收货"),
     SELLER_CONFIRM("卖家确认收货"),
     SELLER_TERMINATION("卖家终止售后"),
     BUYER_CANCEL("买家取消售后"),

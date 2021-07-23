@@ -201,6 +201,7 @@ public enum ResultCode {
     AFTER_SALES_LOGISTICS_ERROR(33005, "物流公司错误，请重新选择"),
     AFTER_STATUS_ERROR(33006, "售后状态错误，请刷新页面"),
     RETURN_MONEY_OFFLINE_BANK_ERROR(33007, "当账号类型为银行转账时，银行信息不能为空"),
+    AFTER_SALES_PRICE_ERROR(33004, "申请退款金额错误"),
 
     /**
      * 投诉

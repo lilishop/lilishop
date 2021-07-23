@@ -6,6 +6,7 @@ import cn.lili.modules.order.order.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.vo.AfterSaleSearchParams;
 import cn.lili.modules.order.order.entity.vo.AfterSaleVO;
 import cn.lili.modules.order.order.service.AfterSaleService;
+import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.system.entity.vo.Traces;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
@@ -80,7 +81,7 @@ public class AfterSaleManagerController {
             @ApiImplicitParam(name = "remark", value = "备注", paramType = "query"),
             @ApiImplicitParam(name = "actualRefundPrice", value = "实际退款金额", paramType = "query")
     })
-    @PutMapping(value = "/review/{afterSaleSn}")
+    @PutMapping(value = "/confirm/{afterSaleSn}")
     public ResultMessage<AfterSale> review(@NotNull(message = "请选择售后单") @PathVariable String afterSaleSn,
                                            @NotNull(message = "请审核") String serviceStatus,
                                            String remark,
@@ -89,4 +90,10 @@ public class AfterSaleManagerController {
         return ResultUtil.data(afterSaleService.review(afterSaleSn, serviceStatus, remark,actualRefundPrice));
     }
 
+    @ApiOperation(value = "获取商家售后收件地址")
+    @ApiImplicitParam(name = "sn", value = "售后单号", required = true, paramType = "path")
+    @GetMapping(value = "/getStoreAfterSaleAddress/{sn}")
+    public ResultMessage<StoreAfterSaleAddressDTO> getStoreAfterSaleAddress(@NotNull(message = "售后单号") @PathVariable("sn") String sn) {
+        return ResultUtil.data(afterSaleService.getStoreAfterSaleAddressDTO(sn));
+    }
 }

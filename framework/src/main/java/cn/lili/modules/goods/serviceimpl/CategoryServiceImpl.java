@@ -144,9 +144,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      */
     @Override
     public List<String> getCategoryNameByIds(List<String> ids) {
-        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(Category::getId, ids);
-        return this.baseMapper.getNamesByIds(queryWrapper);
+        List<String> categoryVOS = categoryTree().stream().filter(item -> ids.contains(item.getId())).map(Category::getName).collect(Collectors.toList());
+        return categoryVOS;
     }
 
     @Override

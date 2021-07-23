@@ -46,6 +46,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,6 +64,7 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
+@CacheConfig(cacheNames = "{goods}")
 public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements GoodsService {
 
 
@@ -153,6 +157,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
 
     @Override
+    @CachePut(key = "#goodsId")
     public void editGoods(GoodsOperationDTO goodsOperationDTO, String goodsId) {
         Goods goods = new Goods(goodsOperationDTO);
         goods.setId(goodsId);
@@ -176,6 +181,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @Cacheable(key = "#goodsId")
     public GoodsVO getGoodsVO(String goodsId) {
         //查询商品信息
         Goods goods = this.getById(goodsId);

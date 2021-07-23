@@ -1,5 +1,6 @@
 package cn.lili.modules.order.order.serviceimpl;
 
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.aop.syslog.annotation.SystemLogPoint;
@@ -181,12 +182,17 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     public AfterSale review(String afterSaleSn, String serviceStatus, String remark, Double actualRefundPrice) {
         //根据售后单号获取售后单
         AfterSale afterSale = OperationalJudgment.judgment(this.getBySn(afterSaleSn));
-        afterSale.setActualRefundPrice(actualRefundPrice);
 
         //判断为待审核的售后服务
         if (!afterSale.getServiceStatus().equals(AfterSaleStatusEnum.APPLY.name())) {
             throw new ServiceException(ResultCode.AFTER_SALES_DOUBLE_ERROR);
         }
+        //判断退款金额与付款金额是否正确,退款金额不能小于付款金额
+        if (NumberUtil.compare(afterSale.getFlowPrice(), actualRefundPrice) == -1) {
+            throw new ServiceException(ResultCode.AFTER_SALES_PRICE_ERROR);
+        }
+
+        afterSale.setActualRefundPrice(actualRefundPrice);
 
         //判断审核状态
         //如果售后类型为：退款，审核状态为已通过并且退款方式为原路退回，售后单状态为已完成。

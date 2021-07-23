@@ -6,6 +6,7 @@ import cn.lili.modules.order.order.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.vo.AfterSaleSearchParams;
 import cn.lili.modules.order.order.entity.vo.AfterSaleVO;
 import cn.lili.modules.order.order.service.AfterSaleService;
+import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.system.entity.vo.Traces;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
@@ -86,6 +87,13 @@ public class AfterSaleStoreController {
     @GetMapping(value = "/getDeliveryTraces/{sn}")
     public ResultMessage<Traces> getDeliveryTraces(@PathVariable String sn) {
         return ResultUtil.data(afterSaleService.deliveryTraces(sn));
+    }
+
+    @ApiOperation(value = "获取商家售后收件地址")
+    @ApiImplicitParam(name = "sn", value = "售后单号", required = true, paramType = "path")
+    @GetMapping(value = "/getStoreAfterSaleAddress/{sn}")
+    public ResultMessage<StoreAfterSaleAddressDTO> getStoreAfterSaleAddress(@NotNull(message = "售后单号") @PathVariable("sn") String sn) {
+        return ResultUtil.data(afterSaleService.getStoreAfterSaleAddressDTO(sn));
     }
 
 }
