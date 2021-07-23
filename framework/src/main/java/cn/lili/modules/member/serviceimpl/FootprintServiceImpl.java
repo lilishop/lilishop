@@ -1,7 +1,7 @@
 package cn.lili.modules.member.serviceimpl;
 
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.mapper.FootprintMapper;

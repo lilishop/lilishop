@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
-import org.thymeleaf.util.ListUtils;
 
 import java.io.Serializable;
 import java.util.List;
@@ -237,15 +236,13 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
             nodes = new SensitiveWordsNode[DEFAULT_INITIAL_CAPACITY];
             //加入平台添加的敏感词
             List<SensitiveWords> list = sensitiveWordsService.list();
-            if (ListUtils.isEmpty(list)) {
+            if (list != null && list.size() > 0) {
                 for (SensitiveWords sensitiveWords : list) {
                     put(sensitiveWords.getSensitiveWord());
                 }
             }
         } catch (Exception e) {
-            log.error("初始化敏感词错误",e);
+            log.error("初始化敏感词错误", e);
         }
-
-
     }
 }

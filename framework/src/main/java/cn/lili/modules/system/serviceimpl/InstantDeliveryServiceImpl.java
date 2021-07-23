@@ -1,6 +1,6 @@
 package cn.lili.modules.system.serviceimpl;
 
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.system.entity.dos.InstantDelivery;
 import cn.lili.modules.system.entity.plugin.InstantDelivery.InstantDeliveryPlugin;

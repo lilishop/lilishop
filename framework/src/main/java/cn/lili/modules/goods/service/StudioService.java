@@ -1,6 +1,6 @@
 package cn.lili.modules.goods.service;
 
-import cn.lili.common.delayqueue.BroadcastMessage;
+import cn.lili.trigger.message.BroadcastMessage;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.Studio;
 import cn.lili.modules.goods.entity.vos.StudioVO;

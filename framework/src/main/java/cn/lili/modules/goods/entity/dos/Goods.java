@@ -2,7 +2,7 @@ package cn.lili.modules.goods.entity.dos;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONUtil;
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;

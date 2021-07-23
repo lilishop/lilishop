@@ -1,7 +1,7 @@
 package cn.lili.modules.message.serviceimpl;
 
 import cn.lili.common.enums.SwitchEnum;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.message.entity.dos.MemberMessage;

@@ -1,6 +1,6 @@
 package cn.lili.modules.message.entity.dos;
 
-import cn.lili.base.IdEntity;
+import cn.lili.mybatis.IdEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

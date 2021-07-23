@@ -1,6 +1,6 @@
 package cn.lili.modules.system.serviceimpl;
 
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.modules.system.entity.dos.VerificationSource;
 import cn.lili.modules.system.entity.enums.VerificationSourceEnum;
 import cn.lili.modules.system.entity.vo.VerificationVO;

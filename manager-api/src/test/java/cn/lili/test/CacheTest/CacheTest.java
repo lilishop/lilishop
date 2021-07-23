@@ -1,7 +1,7 @@
 package cn.lili.test.CacheTest;
 
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.modules.statistics.util.StatisticsSuffix;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

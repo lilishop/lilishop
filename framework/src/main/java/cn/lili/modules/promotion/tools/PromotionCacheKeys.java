@@ -1,6 +1,6 @@
 package cn.lili.modules.promotion.tools;
 
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.CachePrefix;
 
 /**
  * 满额活动缓存Key
