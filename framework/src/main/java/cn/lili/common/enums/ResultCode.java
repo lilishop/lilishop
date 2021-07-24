@@ -220,6 +220,7 @@ public enum ResultCode {
     WALLET_NOT_EXIT_ERROR(34000, "钱包不存在，请联系管理员"),
     WALLET_INSUFFICIENT(34001, "余额不足以支付订单，请充值!"),
     WALLET_WITHDRAWAL_INSUFFICIENT(34002, "可提现金额不足！"),
+    WALLET_WITHDRAWAL_FROZEN_AMOUNT_INSUFFICIENT(34006, "冻结金额不足，无法处理提现申请请求！"),
     WALLET_ERROR_INSUFFICIENT(34003, "零钱提现失败！"),
     WALLET_REMARK_ERROR(34004, "请填写审核备注！"),
     WALLET_APPLY_ERROR(34005, "提现申请异常！"),
