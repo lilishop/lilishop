@@ -281,14 +281,6 @@ public class Order extends BaseEntity {
                 Optional<String> pintuanId = cartVO.getSkuList().get(0).getPromotions().stream()
                         .filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
                 promotionId = pintuanId.get();
-            }else if (tradeDTO.getCartTypeEnum().name().equals(PromotionTypeEnum.POINTS_GOODS.name())) {
-                Optional<String> pointsGoodsId = cartVO.getSkuList().get(0).getPromotions().stream()
-                        .filter(i -> i.getPromotionType().equals(PromotionTypeEnum.POINTS_GOODS.name())).map(PromotionGoods::getPromotionId).findFirst();
-                promotionId = pointsGoodsId.get();
-            }else if (tradeDTO.getCartTypeEnum().name().equals(PromotionTypeEnum.KANJIA.name())) {
-                Optional<String> kanjiaId = cartVO.getSkuList().get(0).getPromotions().stream()
-                        .filter(i -> i.getPromotionType().equals(PromotionTypeEnum.KANJIA.name())).map(PromotionGoods::getPromotionId).findFirst();
-                promotionId = kanjiaId.get();
             }
         }
     }
