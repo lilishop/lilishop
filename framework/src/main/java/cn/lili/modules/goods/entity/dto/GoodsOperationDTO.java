@@ -120,6 +120,12 @@ public class GoodsOperationDTO implements Serializable {
     @ApiModelProperty(value = "商品类型")
     private String goodsType;
 
+    /**
+     * 商品视频
+     */
+    @ApiModelProperty(value = "商品视频")
+    private String goodsVideo;
+
 
 
 }
