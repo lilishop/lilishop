@@ -3,6 +3,7 @@ package cn.lili.modules.member.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.utils.DateUtil;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
@@ -45,22 +46,23 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
         //查询申请记录
         MemberWithdrawApply memberWithdrawApply = this.getById(applyId);
         memberWithdrawApply.setInspectRemark(remark);
+        memberWithdrawApply.setInspectTime(new Date());
         if (memberWithdrawApply != null) {
-            //写入备注
-            memberWithdrawApply.setInspectRemark(remark);
+           //获取账户余额
+            MemberWalletVO memberWalletVO = memberWalletService.getMemberWallet(memberWithdrawApply.getMemberId());
+            //校验金额是否满足提现，因为是从冻结金额扣减，所以校验的是冻结金额
+            if (memberWalletVO.getMemberFrozenWallet() < memberWithdrawApply.getApplyMoney()) {
+                throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_FROZEN_AMOUNT_INSUFFICIENT);
+            }
             //如果审核通过 则微信直接提现，反之则记录审核状态
             if (result) {
-                //校验金额是否满足提现，因为是从冻结金额扣减，所以校验的是冻结金额
-                MemberWalletVO memberWalletVO = memberWalletService.getMemberWallet(memberWithdrawApply.getMemberId());
-                if (memberWalletVO.getMemberFrozenWallet() < memberWithdrawApply.getApplyMoney()) {
-                    throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_INSUFFICIENT);
-                }
                 memberWithdrawApply.setApplyStatus(WithdrawStatusEnum.VIA_AUDITING.name());
-                //保存审核记录
-                this.updateById(memberWithdrawApply);
                 //提现，微信提现成功后扣减冻结金额
                 Boolean bool = memberWalletService.withdrawal(memberWithdrawApply);
                 if (bool) {
+                    //保存修改审核记录
+                    this.updateById(memberWithdrawApply);
+                    //记录日志
                     memberWalletService.reduceFrozen(memberWithdrawApply.getApplyMoney(), memberWithdrawApply.getMemberId(), "审核通过，余额提现", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name());
                     return true;
                 }
@@ -70,6 +72,7 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
                     throw new ServiceException(ResultCode.WALLET_REMARK_ERROR);
                 }
                 memberWithdrawApply.setApplyStatus(WithdrawStatusEnum.FAIL_AUDITING.name());
+                //保存修改审核记录
                 this.updateById(memberWithdrawApply);
                 //需要从冻结金额扣减到余额
                 memberWalletService.increaseWithdrawal(memberWithdrawApply.getApplyMoney(), memberWithdrawApply.getMemberId(), "审核拒绝，提现金额解冻到余额", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name());

@@ -23,3 +23,6 @@ alter table li_member_evaluation modify column reply_image text;
 
 /** 修改售后图片字段类型 **/
 alter table li_after_sale modify column after_sale_image text;
+
+/** 提现申请审核sql **/
+INSERT INTO `lilishop`.`li_menu`(`id`, `create_by`, `create_time`, `delete_flag`, `update_by`, `update_time`, `description`, `front_route`, `icon`, `level`, `name`, `parent_id`, `path`, `sort_order`, `title`, `front_component`) VALUES (1367042804944994305, 'admin', '2021-03-03 09:22:58', b'0', NULL, NULL, NULL, 'member/advance/withdrawApply', 'ios-alert', 2, 'withdrawApply', '1367042490443497472', 'withdrawApply', 1.00, '提现申请', NULL);
