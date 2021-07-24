@@ -17,6 +17,10 @@ public enum CartTypeEnum {
      */
     BUY_NOW,
     /**
+     * 虚拟商品
+     */
+    VIRTUAL,
+    /**
      * 拼团
      */
     PINTUAN,
@@ -24,10 +28,6 @@ public enum CartTypeEnum {
      * 积分
      */
     POINTS,
-    /**
-     * 虚拟商品
-     */
-    VIRTUAL,
     /**
      * 砍价商品
      */

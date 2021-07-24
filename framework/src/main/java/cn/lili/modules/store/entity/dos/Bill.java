@@ -92,6 +92,7 @@ public class Bill {
      * -commissionPrice+refundCommissionPrice
      * -distributionCommission+distributionRefundCommission
      * +siteCouponCommission-siteCouponRefundCommission
+     * +kanjiaSettlementPrice+pointSettlementPrice
      */
     @ApiModelProperty(value = "结算周期内订单付款总金额")
     private Double orderPrice;
@@ -116,6 +117,12 @@ public class Bill {
 
     @ApiModelProperty(value = "退货平台优惠券补贴返还")
     private Double siteCouponRefundCommission;
+
+    @ApiModelProperty(value = "积分商品结算价格")
+    private Double pointSettlementPrice;
+
+    @ApiModelProperty(value = "砍价商品结算价格")
+    private Double kanjiaSettlementPrice;
 
     @ApiModelProperty(value = "最终结算金额")
     private Double billPrice;

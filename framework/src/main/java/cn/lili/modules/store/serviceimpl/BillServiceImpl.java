@@ -89,7 +89,11 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
             bill.setCommissionPrice(orderBill.getCommissionPrice());
             bill.setDistributionCommission(orderBill.getDistributionCommission());
             bill.setSiteCouponCommission(orderBill.getSiteCouponCommission());
-            orderPrice = orderBill.getBillPrice();
+            bill.setPointSettlementPrice(orderBill.getPointSettlementPrice());
+            bill.setKanjiaSettlementPrice(orderBill.getKanjiaSettlementPrice());
+            //入账金额=订单金额+积分商品+砍价商品
+            orderPrice = CurrencyUtil.add(CurrencyUtil.add(orderBill.getBillPrice(), orderBill.getPointSettlementPrice()),
+                    orderBill.getKanjiaSettlementPrice());
         }
 
 
