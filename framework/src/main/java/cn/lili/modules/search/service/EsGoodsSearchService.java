@@ -35,6 +35,14 @@ public interface EsGoodsSearchService {
     List<String> getHotWords(Integer start, Integer end);
 
     /**
+     * 设置热门关键词
+     *
+     * @param words 关键词
+     * @param point 赋予分数
+     */
+    void setHotWords(String words, Integer point);
+
+    /**
      * 获取筛选器
      *
      * @param goodsSearch 搜索条件
