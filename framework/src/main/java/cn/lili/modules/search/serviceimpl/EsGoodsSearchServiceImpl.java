@@ -3,6 +3,7 @@ package cn.lili.modules.search.serviceimpl;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.Brand;
@@ -16,7 +17,6 @@ import cn.lili.modules.search.entity.dos.EsGoodsRelatedInfo;
 import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
 import cn.lili.modules.search.entity.dto.ParamOptions;
 import cn.lili.modules.search.entity.dto.SelectorOptions;
-import cn.lili.modules.search.entity.enums.HotWordsRedisKeyEnum;
 import cn.lili.modules.search.repository.EsGoodsIndexRepository;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +51,7 @@ import java.util.*;
 
 /**
  * ES商品搜索业务层实现
+ *
  * @author paulG
  * @since 2020/10/16
  **/
@@ -90,7 +91,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     @Override
     public Page<EsGoodsIndex> searchGoods(EsGoodsSearchDTO searchDTO, PageVO pageVo) {
         if (CharSequenceUtil.isNotEmpty(searchDTO.getKeyword())) {
-            cache.incrementScore(HotWordsRedisKeyEnum.SEARCH_HOT_WORD.name(), searchDTO.getKeyword());
+            cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), searchDTO.getKeyword());
         }
         NativeSearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(searchDTO, pageVo, true);
         NativeSearchQuery searchQuery = searchQueryBuilder.build();
@@ -102,11 +103,16 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     @Override
     public List<String> getHotWords(Integer start, Integer end) {
         List<String> hotWords = new ArrayList<>();
-        Set<DefaultTypedTuple> set = cache.reverseRangeWithScores(HotWordsRedisKeyEnum.SEARCH_HOT_WORD.name(), start, end);
+        Set<DefaultTypedTuple> set = cache.reverseRangeWithScores(CachePrefix.HOT_WORD.getPrefix(), start, end);
         for (DefaultTypedTuple defaultTypedTuple : set) {
             hotWords.add(Objects.requireNonNull(defaultTypedTuple.getValue()).toString());
         }
         return hotWords;
+    }
+
+    @Override
+    public void setHotWords(String words, Integer point) {
+        cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), words, point);
     }
 
     @Override
@@ -318,6 +324,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
     /**
      * 查询属性处理
+     *
      * @param filterBuilder
      * @param queryBuilder
      * @param searchDTO
@@ -391,7 +398,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         //价格区间判定
         if (CharSequenceUtil.isNotEmpty(searchDTO.getPrice())) {
             String[] prices = searchDTO.getPrice().split("_");
-            if(prices.length==0){
+            if (prices.length == 0) {
                 return;
             }
             double min = Convert.toDouble(prices[0], 0.0);
@@ -406,6 +413,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
     /**
      * 关键字查询处理
+     *
      * @param filterBuilder
      * @param queryBuilder
      * @param keyword

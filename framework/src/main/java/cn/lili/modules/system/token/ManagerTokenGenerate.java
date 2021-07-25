@@ -3,8 +3,8 @@ package cn.lili.modules.system.token;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.security.AuthUser;
-import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.enums.PermissionEnum;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.security.token.TokenUtil;
 import cn.lili.common.security.token.base.AbstractTokenGenerate;
@@ -116,11 +116,19 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
      */
     void initPermission(List<String> superPermissions, List<String> queryPermissions) {
         //用户信息维护
-        superPermissions.add("/manager/user/info");
-        superPermissions.add("/manager/user/edit");
+        superPermissions.add("/manager/user/info*");
+        superPermissions.add("/manager/user/edit*");
         superPermissions.add("/manager/user/editPassword*");
-        //统计查看
+
+        //统计查看权限
         queryPermissions.add("/manager/statistics*");
+        //菜单查看权限
+        queryPermissions.add("/manager/menu*");
+        //商品分类查看权限
+        queryPermissions.add("/manager/goods/category*");
+        //查看地区接口
+        queryPermissions.add("/manager/region*");
+
     }
 
 }

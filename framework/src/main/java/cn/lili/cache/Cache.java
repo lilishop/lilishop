@@ -60,7 +60,7 @@ public interface Cache<T> {
      * Add an item to the cache, nontransactionally, with
      * failfast semantics
      *
-     * @param key 缓存key
+     * @param key   缓存key
      * @param value 缓存value
      */
     void put(Object key, T value);
@@ -68,7 +68,7 @@ public interface Cache<T> {
     /**
      * 往缓存中写入内容
      *
-     * @param key 缓存key
+     * @param key   缓存key
      * @param value 缓存value
      * @param exp   超时时间，单位为秒
      */
@@ -77,9 +77,9 @@ public interface Cache<T> {
     /**
      * 往缓存中写入内容
      *
-     * @param key 缓存key
-     * @param value 缓存value
-     * @param exp 过期时间
+     * @param key      缓存key
+     * @param value    缓存value
+     * @param exp      过期时间
      * @param timeUnit 过期单位
      */
     void put(Object key, T value, Long exp, TimeUnit timeUnit);
@@ -124,7 +124,7 @@ public interface Cache<T> {
     /**
      * 读取缓存值
      *
-     * @param key 缓存key
+     * @param key     缓存key
      * @param hashKey map value
      * @return 返回缓存中的数据
      */
@@ -142,8 +142,7 @@ public interface Cache<T> {
      * 是否包含
      *
      * @param key 缓存key
-     * @return  缓存中的数据
-     *
+     * @return 缓存中的数据
      */
     boolean hasKey(Object key);
 
@@ -164,7 +163,7 @@ public interface Cache<T> {
      * 效率较高的 计数器
      * 如需清零，按照普通key 移除即可
      *
-     * @param key key值
+     * @param key   key值
      * @param value 去重统计值
      * @return 计数器结果
      */
@@ -222,6 +221,16 @@ public interface Cache<T> {
      * @param keyword       关键词
      */
     void incrementScore(String sortedSetName, String keyword);
+
+    /**
+     * 使用Sorted Set记录keyword
+     * zincrby命令，对于一个Sorted Set，存在的就把分数加x(x可自行设定)，不存在就创建一个分数为1的成员
+     *
+     * @param sortedSetName sortedSetName的Sorted Set不用预先创建，不存在会自动创建，存在则向里添加数据
+     * @param keyword       关键词
+     * @param score         分数
+     */
+    void incrementScore(String sortedSetName, String keyword, Integer score);
 
     /**
      * zrevrange命令, 查询Sorted Set中指定范围的值
