@@ -4,6 +4,7 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.entity.dos.EsGoodsRelatedInfo;
 import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
+import cn.lili.modules.search.entity.dto.HotWordsDTO;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -36,11 +37,9 @@ public interface EsGoodsSearchService {
 
     /**
      * 设置热门关键词
-     *
-     * @param words 关键词
-     * @param point 赋予分数
+     * @param hotWords 热词分数
      */
-    void setHotWords(String words, Integer point);
+    void setHotWords(HotWordsDTO hotWords);
 
     /**
      * 获取筛选器

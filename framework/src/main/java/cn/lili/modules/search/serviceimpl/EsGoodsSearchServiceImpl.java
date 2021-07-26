@@ -15,6 +15,7 @@ import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.entity.dos.EsGoodsRelatedInfo;
 import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
+import cn.lili.modules.search.entity.dto.HotWordsDTO;
 import cn.lili.modules.search.entity.dto.ParamOptions;
 import cn.lili.modules.search.entity.dto.SelectorOptions;
 import cn.lili.modules.search.repository.EsGoodsIndexRepository;
@@ -111,8 +112,8 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     }
 
     @Override
-    public void setHotWords(String words, Integer point) {
-        cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), words, point);
+    public void setHotWords(HotWordsDTO hotWords) {
+        cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), hotWords.getKeywords(), hotWords.getPoint());
     }
 
     @Override
