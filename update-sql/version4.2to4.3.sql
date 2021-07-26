@@ -1,0 +1,2 @@
+/** 热词管理*/
+UPDATE `lilishop`.`li_menu` SET `create_by` = 'admin', `create_time` = '2021-03-03 09:54:51', `delete_flag` = b'0', `update_by` = 'admin', `update_time` = '2021-07-23 19:07:45', `description` = 'null', `front_route` = 'page/article-manage/hotWords', `icon` = 'md-aperture', `level` = 2, `name` = 'hotKeyWord', `parent_id` = '1367050250249830400', `path` = 'hotKeyWord', `sort_order` = 0.00, `title` = '关键字', `front_component` = 'null' WHERE `id` = 1367050829697122304;
