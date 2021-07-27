@@ -10,6 +10,8 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.member.entity.dos.Member;
+import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
@@ -48,6 +50,9 @@ public class CheckDataRender implements CartRenderStep {
 
     @Autowired
     private PintuanService pintuanService;
+
+    @Autowired
+    private MemberService memberService;
 
     @Override
     public void render(TradeDTO tradeDTO) {
@@ -159,9 +164,12 @@ public class CheckDataRender implements CartRenderStep {
                     }
                 }
             }
-
-        }else if(tradeDTO.getCartTypeEnum().equals(CartTypeEnum.KANJIA)){
-
+        //积分商品，判断用户积分是否满足
+        }else if(tradeDTO.getCartTypeEnum().equals(CartTypeEnum.POINTS)){
+            Member member=memberService.getUserInfo();
+            if(member.getPoint()<tradeDTO.getSkuList().get(0).getPoint()){
+                throw new ServiceException(ResultCode.USER_POINTS_ERROR);
+            }
         }
 
     }

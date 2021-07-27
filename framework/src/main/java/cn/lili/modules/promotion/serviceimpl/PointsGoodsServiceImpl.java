@@ -207,8 +207,8 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
     public PointsGoodsVO getPointsGoodsVOByMongo(String skuId) {
         //mongo查询条件
         Query query = new Query();
-        query.addCriteria(Criteria.where("skuId").ne(skuId))
-                .addCriteria(Criteria.where("promotionStatus").ne(PromotionStatusEnum.START.name()));
+        query.addCriteria(Criteria.where("skuId").is(skuId))
+                .addCriteria(Criteria.where("promotionStatus").is(PromotionStatusEnum.START.name()));
         List<PointsGoodsVO> pointsGoodsVO=this.mongoTemplate.find(query, PointsGoodsVO.class);
         return pointsGoodsVO.get(0);
     }

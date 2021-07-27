@@ -127,7 +127,7 @@ public class PromotionServiceImpl implements PromotionService {
                 break;
             //积分商品
             case POINTS_GOODS:
-                result = this.updatePointsGoods(promotionMessage, esPromotionKey, promotionTypeEnum);
+                result = this.updatePointsGoods(promotionMessage, promotionTypeEnum);
                 break;
             //砍价商品商品
             case KANJIA:
@@ -439,11 +439,10 @@ public class PromotionServiceImpl implements PromotionService {
      * 修改积分商品状态
      *
      * @param promotionMessage  信息队列传输促销信息实体
-     * @param esPromotionKey    es Key
      * @param promotionTypeEnum 促销分类枚举
      * @return 修改结果
      */
-    private boolean updatePointsGoods(PromotionMessage promotionMessage, String esPromotionKey, PromotionTypeEnum promotionTypeEnum) {
+    private boolean updatePointsGoods(PromotionMessage promotionMessage, PromotionTypeEnum promotionTypeEnum) {
         boolean result;
         PointsGoodsVO pointsGoodsVO = this.mongoTemplate.findById(promotionMessage.getPromotionId(), PointsGoodsVO.class);
         if (pointsGoodsVO == null) {
@@ -452,8 +451,6 @@ public class PromotionServiceImpl implements PromotionService {
         }
         pointsGoodsVO.setPromotionStatus(promotionMessage.getPromotionStatus());
         result = this.pointsGoodsService.update(updateWrapper(promotionMessage));
-        PointsGoods pointsGoods = JSONUtil.toBean(JSONUtil.toJsonStr(pointsGoodsVO), PointsGoods.class);
-        this.goodsIndexService.updateEsGoodsIndex(pointsGoodsVO.getSkuId(), pointsGoods, esPromotionKey, null);
         this.mongoTemplate.save(pointsGoodsVO);
         return result;
     }
@@ -528,6 +525,7 @@ public class PromotionServiceImpl implements PromotionService {
 
     /**
      * 根据消息，获取update wrapper
+     *
      * @param <T>
      * @return
      */
