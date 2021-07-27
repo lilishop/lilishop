@@ -39,7 +39,6 @@ public class InstantDeliveryManagerController {
         IPage<InstantDelivery> data = instantDeliveryService.page(PageUtil.initPage(page));
         //组织数据结构
         IPage<InstantDeliveryVO> newData = instantDeliveryService.getInstantDeliveryPage(data, page);
-        System.out.println();
         //返回数据
         return ResultUtil.data(newData);
     }

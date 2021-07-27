@@ -223,9 +223,13 @@ public class RedisCache implements Cache {
      */
     @Override
     public void incrementScore(String sortedSetName, String keyword) {
-        //x 的含义请见本方法的注释
-        double x = 1.0;
-        this.redisTemplate.opsForZSet().incrementScore(sortedSetName, keyword, x);
+        //指向key名为KEY的zset元素
+        redisTemplate.opsForZSet().incrementScore(sortedSetName,keyword, 1);
+    }
+
+    @Override
+    public void incrementScore(String sortedSetName, String keyword, Integer score) {
+        redisTemplate.opsForZSet().incrementScore(sortedSetName, keyword, score);
     }
 
     /**

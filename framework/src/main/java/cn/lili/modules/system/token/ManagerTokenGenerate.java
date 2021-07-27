@@ -3,8 +3,8 @@ package cn.lili.modules.system.token;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.security.AuthUser;
-import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.enums.PermissionEnum;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.security.token.TokenUtil;
 import cn.lili.common.security.token.base.AbstractTokenGenerate;
@@ -77,28 +77,27 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
         //循环权限菜单
         userMenuVOList.forEach(menu -> {
             //循环菜单，赋予用户权限
-            if (menu.getPath() != null) {
+            if (menu.getPermission() != null) {
                 //获取路径集合
-                String[] paths = menu.getPath().split("\\|");
+                String[] permissionUrl = menu.getPermission().split(",");
                 //for循环路径集合
-                for (String path : paths) {
+                for (String url : permissionUrl) {
                     //如果是超级权限 则计入超级权限
-                    if (menu.getIsSupper() != null && menu.getIsSupper()) {
+                    if (menu.getSupper()) {
                         //如果已有超级权限，则这里就不做权限的累加
-                        if (!superPermissions.contains(path)) {
-                            superPermissions.add(path);
+                        if (!superPermissions.contains(url)) {
+                            superPermissions.add(url);
                         }
                     }
                     //否则计入浏览权限
                     else {
-                        //如果已有超级权限，或者已有普通查看权限，则这里就不做权限的累加
-                        if (!superPermissions.contains(path) && !queryPermissions.contains(path)) {
-                            queryPermissions.add(path);
+                        //没有权限，则累加。
+                        if (!queryPermissions.contains(url)) {
+                            queryPermissions.add(url);
                         }
                     }
                 }
             }
-
             //去除无效的权限
             superPermissions.forEach(queryPermissions::remove);
         });
@@ -116,11 +115,19 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
      */
     void initPermission(List<String> superPermissions, List<String> queryPermissions) {
         //用户信息维护
-        superPermissions.add("/manager/user/info");
-        superPermissions.add("/manager/user/edit");
+        superPermissions.add("/manager/user/info*");
+        superPermissions.add("/manager/user/edit*");
         superPermissions.add("/manager/user/editPassword*");
-        //统计查看
+
+        //统计查看权限
         queryPermissions.add("/manager/statistics*");
+        //菜单查看权限
+        queryPermissions.add("/manager/menu*");
+        //商品分类查看权限
+        queryPermissions.add("/manager/goods/category*");
+        //查看地区接口
+        queryPermissions.add("/manager/region*");
+
     }
 
 }

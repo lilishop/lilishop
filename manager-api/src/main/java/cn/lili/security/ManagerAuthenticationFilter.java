@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.security.AuthUser;
+import cn.lili.common.security.enums.PermissionEnum;
 import cn.lili.common.security.enums.SecurityEnum;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.SecretKeyUtil;
@@ -20,6 +21,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.util.PatternMatchUtils;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.naming.NoPermissionException;
 import javax.servlet.FilterChain;
@@ -71,27 +74,36 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
      */
     private void customAuthentication(HttpServletRequest request, HttpServletResponse response, UsernamePasswordAuthenticationToken authentication) throws NoPermissionException {
         AuthUser authUser = (AuthUser) authentication.getDetails();
-        Map<String, List<String>> permission = (Map<String, List<String>>) cache.get(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + authUser.getId());
-        if (authUser.getIsSuper()) {
-            return;
-        } else {
-            //用户是否拥有权限判定œ
-            //获取数据权限
-//           if (request.getMethod().equals(RequestMethod.GET.name())) {
-//               if (!PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER).toArray(new String[0]), request.getRequestURI()) ||
-//                       PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.QUERY).toArray(new String[0]), request.getRequestURI())) {
-//
-//                   ResponseUtil.output(response, ResponseUtil.resultMap(false, 401, "抱歉，您没有访问权限"));
-//                   throw new NoPermissionException("权限不足");
-//               }
-//           } else {
-//               if (!PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER).toArray(new String[0]), request.getRequestURI())) {
-//
-//                   ResponseUtil.output(response, ResponseUtil.resultMap(false, 401, "抱歉，您没有访问权限"));
-//                   throw new NoPermissionException("权限不足");
-//               }
-//           }
-            return;
+        String requestUrl = request.getRequestURI();
+
+
+        //如果不是超级管理员， 则鉴权
+        if (!authUser.getIsSuper()) {
+            Map<String, List<String>> permission = (Map<String, List<String>>) cache.get(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + authUser.getId());
+
+            System.out.println(requestUrl);
+            System.out.println(PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER.name()).toArray(new String[0]), requestUrl));
+            System.out.println(PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.QUERY.name()).toArray(new String[0]), requestUrl));
+
+            //获取数据(GET 请求)权限
+            if (request.getMethod().equals(RequestMethod.GET.name())) {
+                //如果用户的超级权限和查阅权限都不包含当前请求的api
+                if (PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER.name()).toArray(new String[0]), requestUrl)
+                        || PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.QUERY.name()).toArray(new String[0]), requestUrl)) {
+                } else {
+                    ResponseUtil.output(response, ResponseUtil.resultMap(false, 400, "权限不足"));
+                    throw new NoPermissionException("权限不足");
+                }
+            }
+            //非get请求（数据操作） 判定鉴权
+            else {
+                if (PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER.name()).toArray(new String[0]), request.getRequestURI())) {
+
+                } else {
+                    ResponseUtil.output(response, ResponseUtil.resultMap(false, 400, "权限不足"));
+                    throw new NoPermissionException("权限不足");
+                }
+            }
         }
     }
 
