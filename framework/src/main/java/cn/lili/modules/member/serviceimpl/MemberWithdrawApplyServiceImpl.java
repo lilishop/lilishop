@@ -3,7 +3,9 @@ package cn.lili.modules.member.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.DateUtil;
+import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.modules.member.entity.dto.MemberWithdrawalMessage;
+import cn.lili.modules.member.entity.enums.MemberWithdrawalDestinationEnum;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
@@ -15,9 +17,12 @@ import cn.lili.modules.member.mapper.MemberWithdrawApplyMapper;
 import cn.lili.modules.member.service.MemberWalletService;
 import cn.lili.modules.member.service.MemberWithdrawApplyService;
 import cn.lili.modules.order.trade.entity.enums.DepositServiceTypeEnum;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +40,11 @@ import java.util.Date;
 @Transactional(rollbackFor = Exception.class)
 public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawApplyMapper, MemberWithdrawApply> implements MemberWithdrawApplyService {
 
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
+
     /**
      * 会员余额
      */
@@ -43,12 +53,13 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
 
     @Override
     public Boolean audit(String applyId, Boolean result, String remark) {
+        MemberWithdrawalMessage memberWithdrawalMessage = new MemberWithdrawalMessage();
         //查询申请记录
         MemberWithdrawApply memberWithdrawApply = this.getById(applyId);
         memberWithdrawApply.setInspectRemark(remark);
         memberWithdrawApply.setInspectTime(new Date());
         if (memberWithdrawApply != null) {
-           //获取账户余额
+            //获取账户余额
             MemberWalletVO memberWalletVO = memberWalletService.getMemberWallet(memberWithdrawApply.getMemberId());
             //校验金额是否满足提现，因为是从冻结金额扣减，所以校验的是冻结金额
             if (memberWalletVO.getMemberFrozenWallet() < memberWithdrawApply.getApplyMoney()) {
@@ -60,13 +71,17 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
                 //提现，微信提现成功后扣减冻结金额
                 Boolean bool = memberWalletService.withdrawal(memberWithdrawApply);
                 if (bool) {
+                    memberWithdrawalMessage.setStatus(WithdrawStatusEnum.VIA_AUDITING.name());
                     //保存修改审核记录
                     this.updateById(memberWithdrawApply);
                     //记录日志
                     memberWalletService.reduceFrozen(memberWithdrawApply.getApplyMoney(), memberWithdrawApply.getMemberId(), "审核通过，余额提现", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name());
-                    return true;
+                } else {
+                    //如果提现失败则无法审核
+                    throw new ServiceException(ResultCode.WALLET_APPLY_ERROR);
                 }
             } else {
+                memberWithdrawalMessage.setStatus(WithdrawStatusEnum.FAIL_AUDITING.name());
                 //如果审核拒绝 审核备注必填
                 if (StringUtils.isEmpty(remark)) {
                     throw new ServiceException(ResultCode.WALLET_REMARK_ERROR);
@@ -76,8 +91,15 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
                 this.updateById(memberWithdrawApply);
                 //需要从冻结金额扣减到余额
                 memberWalletService.increaseWithdrawal(memberWithdrawApply.getApplyMoney(), memberWithdrawApply.getMemberId(), "审核拒绝，提现金额解冻到余额", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name());
-                return true;
             }
+            //发送审核消息
+            memberWithdrawalMessage.setMemberId(memberWithdrawApply.getMemberId());
+            memberWithdrawalMessage.setPrice(memberWithdrawApply.getApplyMoney());
+            memberWithdrawalMessage.setDestination(MemberWithdrawalDestinationEnum.WECHAT.name());
+
+            String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_WITHDRAWAL.name();
+            rocketMQTemplate.asyncSend(destination, memberWithdrawalMessage, RocketmqSendCallbackBuilder.commonCallback());
+            return true;
         }
         throw new ServiceException(ResultCode.WALLET_APPLY_ERROR);
     }
