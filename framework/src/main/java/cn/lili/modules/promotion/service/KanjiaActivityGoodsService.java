@@ -29,7 +29,7 @@ public interface KanjiaActivityGoodsService extends IService<KanjiaActivityGoods
      * @param kanJiaActivityGoodsDTOS 砍价商品
      * @return 是否添加成功
      */
-    boolean add(KanjiaActivityGoodsOperationDTO kanJiaActivityGoodsDTOS);
+    Boolean add(KanjiaActivityGoodsOperationDTO kanJiaActivityGoodsDTOS);
 
     /**
      * 查询砍价活动商品分页信息

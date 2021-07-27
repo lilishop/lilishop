@@ -70,7 +70,7 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
 
 
     @Override
-    public boolean add(KanjiaActivityGoodsOperationDTO kanJiaActivityGoodsOperationDTO) {
+    public Boolean add(KanjiaActivityGoodsOperationDTO kanJiaActivityGoodsOperationDTO) {
         List<KanjiaActivityGoods> kanjiaActivityGoodsList = new ArrayList<>();
         for (KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO : kanJiaActivityGoodsOperationDTO.getPromotionGoodsList()) {
             //根据skuId查询商品信息

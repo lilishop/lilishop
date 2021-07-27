@@ -1,14 +1,16 @@
 package cn.lili.event.impl;
 
 
+import cn.hutool.core.convert.Convert;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.event.AfterSaleStatusChangeEvent;
-import cn.lili.event.GoodsCommentCompleteEvent;
-import cn.lili.event.MemberRegisterEvent;
-import cn.lili.event.OrderStatusChangeEvent;
+import cn.lili.event.*;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.service.MemberService;
+import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.order.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
@@ -31,7 +33,7 @@ import org.springframework.stereotype.Service;
  * @since 2020-07-03 11:20
  */
 @Service
-public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentCompleteEvent, OrderStatusChangeEvent, AfterSaleStatusChangeEvent {
+public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentCompleteEvent, OrderStatusChangeEvent, AfterSaleStatusChangeEvent, TradeEvent {
 
     /**
      * 配置
@@ -86,7 +88,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
         if (orderMessage.getNewStatus().equals(OrderStatusEnum.COMPLETED)) {
             //根据订单编号获取订单数据,如果为积分订单则跳回
             Order order = orderService.getBySn(orderMessage.getOrderSn());
-            if (order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINT.name())) {
+            if (order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINTS.name())) {
                 return;
             }
             //获取积分设置
@@ -95,7 +97,13 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
             Double point = CurrencyUtil.mul(pointSetting.getMoney(), order.getFlowPrice(), 0);
             //赠送会员积分
             memberService.updateMemberPoint(point.longValue(), true, order.getMemberId(), "会员下单，赠送积分" + point + "分");
-
+            //取消订单恢复积分
+        } else if (orderMessage.getNewStatus().equals(OrderStatusEnum.CANCELLED)) {
+            //根据订单编号获取订单数据,如果为积分订单则跳回
+            Order order = orderService.getBySn(orderMessage.getOrderSn());
+            if (order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINTS.name()) && order.getPriceDetailDTO().getPayPoint() != null) {
+                memberService.updateMemberPoint(Convert.toLong(order.getPriceDetailDTO().getPayPoint()), true, order.getMemberId(), "订单取消,恢复积分:" + order.getPriceDetailDTO().getPayPoint() + "分");
+            }
         }
     }
 
@@ -125,5 +133,26 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
     private PointSetting getPointSetting() {
         Setting setting = settingService.get(SettingEnum.POINT_SETTING.name());
         return new Gson().fromJson(setting.getSettingValue(), PointSetting.class);
+    }
+
+    /**
+     * 积分订单 扣除用户积分
+     *
+     * @param tradeDTO 交易
+     */
+    @Override
+    public void orderCreate(TradeDTO tradeDTO) {
+        if (tradeDTO.getPriceDetailDTO() != null && tradeDTO.getPriceDetailDTO().getPayPoint() != null && tradeDTO.getPriceDetailDTO().getPayPoint() > 0) {
+            StringBuilder orderSns = new StringBuilder();
+            for (CartVO item : tradeDTO.getCartList()) {
+                orderSns.append(item.getSn());
+            }
+            boolean result = memberService.updateMemberPoint((0 - tradeDTO.getPriceDetailDTO().getPayPoint().longValue()), false, tradeDTO.getMemberId(),
+                    "订单【" + orderSns + "】创建，积分扣减");
+
+            if (!result) {
+                throw new ServiceException(ResultCode.PAY_POINT_ENOUGH);
+            }
+        }
     }
 }

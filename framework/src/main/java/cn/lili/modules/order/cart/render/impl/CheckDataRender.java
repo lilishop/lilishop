@@ -21,7 +21,9 @@ import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
 import cn.lili.modules.promotion.service.PintuanService;
+import cn.lili.modules.promotion.service.PointsGoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -53,6 +55,9 @@ public class CheckDataRender implements CartRenderStep {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private PointsGoodsService pointsGoodsService;
 
     @Override
     public void render(TradeDTO tradeDTO) {
@@ -143,7 +148,7 @@ public class CheckDataRender implements CartRenderStep {
     private void preCalibration(TradeDTO tradeDTO) {
 
         //拼团订单预校验
-        if(tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)){
+        if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)) {
             //拼团判定，不能参与自己创建的拼团
             if (tradeDTO.getParentOrderSn() != null) {
                 //订单接受
@@ -164,10 +169,16 @@ public class CheckDataRender implements CartRenderStep {
                     }
                 }
             }
-        //积分商品，判断用户积分是否满足
-        }else if(tradeDTO.getCartTypeEnum().equals(CartTypeEnum.POINTS)){
-            Member member=memberService.getUserInfo();
-            if(member.getPoint()<tradeDTO.getSkuList().get(0).getPoint()){
+            //积分商品，判断用户积分是否满足
+        } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.POINTS)) {
+            String skuId = tradeDTO.getSkuList().get(0).getGoodsSku().getId();
+            //获取积分商品VO
+            PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsVOByMongo(skuId);
+            if(pointsGoodsVO==null){
+                throw new ServiceException(ResultCode.POINT_GOODS_ERROR);
+            }
+            Member member = memberService.getUserInfo();
+            if (member.getPoint() < pointsGoodsVO.getPoints()) {
                 throw new ServiceException(ResultCode.USER_POINTS_ERROR);
             }
         }

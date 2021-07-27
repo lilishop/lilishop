@@ -23,7 +23,7 @@ public enum OrderPromotionTypeEnum {
     /**
      * 积分订单
      */
-    POINT,
+    POINTS,
     /**
      * 砍价订单
      */
