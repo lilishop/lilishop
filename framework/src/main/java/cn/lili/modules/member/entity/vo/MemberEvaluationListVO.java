@@ -39,8 +39,16 @@ public class MemberEvaluationListVO {
 
     @ApiModelProperty(value = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
+    @ApiModelProperty(value = "物流评分")
+    private Integer deliveryScore;
+
+    @ApiModelProperty(value = "服务评分")
+    private Integer serviceScore;
+
+    @ApiModelProperty(value = "描述评分")
+    private Integer descriptionScore;
 
 }
