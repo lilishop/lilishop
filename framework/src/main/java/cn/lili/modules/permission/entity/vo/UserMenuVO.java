@@ -19,4 +19,10 @@ public class UserMenuVO extends Menu {
      */
     private Boolean isSupper;
 
+    public Boolean getSupper() {
+        if (this.isSupper == null) {
+            return false;
+        }
+        return isSupper;
+    }
 }
