@@ -3,7 +3,7 @@ package cn.lili.modules.promotion.entity.dos;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.promotion.entity.enums.CouponRangeDayEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -21,7 +21,7 @@ import java.util.Date;
  * 会员优惠券实体类
  *
  * @author Chopper
- * @date 2020-03-19 10:44 上午
+ * @since 2020-03-19 10:44 上午
  */
 @Data
 @Entity

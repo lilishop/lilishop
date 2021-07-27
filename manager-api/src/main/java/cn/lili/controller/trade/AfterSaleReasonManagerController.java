@@ -1,7 +1,6 @@
 package cn.lili.controller.trade;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -21,7 +20,7 @@ import javax.validation.Valid;
  * 管理端,售后原因接口
  *
  * @author Bulbasaur
- * @date: 2021/1/6 14:11
+ * @since: 2021/1/6 14:11
  */
 @RestController
 @RequestMapping("/manager/afterSaleReason")

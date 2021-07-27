@@ -2,12 +2,12 @@ package cn.lili.modules.message.util;
 
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.enums.ClientTypeEnum;
-import cn.lili.modules.connect.util.HttpUtils;
+import cn.lili.common.utils.HttpUtils;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.connect.WechatConnectSetting;
 import cn.lili.modules.system.entity.dto.connect.dto.WechatConnectSettingItem;

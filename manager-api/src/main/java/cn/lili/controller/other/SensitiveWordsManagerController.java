@@ -1,7 +1,7 @@
 package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultUtil;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.system.entity.dos.SensitiveWords;
@@ -21,7 +21,7 @@ import java.util.List;
  * 管理端,敏感词管理接口
  *
  * @author Bulbasaur
- * @date 2020-05-06 15:18:56
+ * @since 2020-05-06 15:18:56
  */
 @RestController
 @Api(tags = "管理端,敏感词管理接口")

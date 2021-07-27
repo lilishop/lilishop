@@ -1,6 +1,6 @@
 package cn.lili.modules.system.entity.vo;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.Data;
  * 物流公司设置
  *
  * @author Chopper
- * @date 2020/11/17 8:01 下午
+ * @since 2020/11/17 8:01 下午
  */
 
 @Data

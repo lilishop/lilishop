@@ -8,26 +8,26 @@ import cn.hutool.json.JSONUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
-import cn.lili.common.aop.syslog.annotation.SystemLogPoint;
-import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.DelayTypeEnums;
-import cn.lili.common.trigger.message.PintuanOrderMessage;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
+import cn.lili.trigger.util.DelayQueueTools;
+import cn.lili.trigger.enums.DelayTypeEnums;
+import cn.lili.trigger.message.PintuanOrderMessage;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.common.rocketmq.tags.GoodsTagsEnum;
-import cn.lili.common.rocketmq.tags.MqOrderTagsEnum;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
+import cn.lili.rocketmq.tags.MqOrderTagsEnum;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.common.trigger.interfaces.TimeTrigger;
-import cn.lili.common.trigger.model.TimeExecuteConstant;
-import cn.lili.common.trigger.model.TimeTriggerMsg;
-import cn.lili.common.utils.OperationalJudgment;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.model.TimeExecuteConstant;
+import cn.lili.trigger.model.TimeTriggerMsg;
+import cn.lili.modules.system.utils.OperationalJudgment;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.goods.service.GoodsSkuService;
@@ -83,7 +83,7 @@ import java.util.*;
  * 子订单业务层实现
  *
  * @author Chopper
- * @date 2020/11/17 7:38 下午
+ * @since 2020/11/17 7:38 下午
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

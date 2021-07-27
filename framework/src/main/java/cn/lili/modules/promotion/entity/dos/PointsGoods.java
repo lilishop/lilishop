@@ -15,7 +15,7 @@ import javax.persistence.Table;
  * 积分商品实体类
  *
  * @author paulG
- * @date 2020-03-19 10:44 上午
+ * @since 2020-03-19 10:44 上午
  **/
 @Data
 @Entity

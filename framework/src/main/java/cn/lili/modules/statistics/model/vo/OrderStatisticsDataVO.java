@@ -11,7 +11,7 @@ import java.util.Date;
  * 订单统计数据VO
  *
  * @author Bulbasaur
- * @date 2020/12/9 17:13
+ * @since 2020/12/9 17:13
  */
 @Data
 public class OrderStatisticsDataVO {
@@ -26,7 +26,7 @@ public class OrderStatisticsDataVO {
     private Double price;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "创建时间")
     private Date createTime;
 

@@ -1,6 +1,6 @@
 package cn.lili.modules.system.serviceimpl;
 
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.modules.system.entity.dos.VerificationSource;
 import cn.lili.modules.system.entity.enums.VerificationSourceEnum;
 import cn.lili.modules.system.entity.vo.VerificationVO;
@@ -18,7 +18,7 @@ import java.util.List;
  * 验证码资源维护 业务层实现
  *
  * @author Chopper
- * @date 2020/11/17 3:48 下午
+ * @since 2020/11/17 3:48 下午
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

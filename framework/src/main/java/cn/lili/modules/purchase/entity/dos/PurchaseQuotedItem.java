@@ -22,7 +22,7 @@ import java.util.Date;
  * 报价单字内容
  *
  * @author Bulbasaur
- * @date 2020/11/26 20:43
+ * @since 2020/11/26 20:43
  */
 @Data
 @Entity
@@ -40,7 +40,7 @@ public class PurchaseQuotedItem {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;

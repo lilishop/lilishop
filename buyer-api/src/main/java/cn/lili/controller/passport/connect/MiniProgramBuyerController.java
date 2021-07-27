@@ -1,6 +1,6 @@
 package cn.lili.controller.passport.connect;
 
-import cn.lili.common.token.Token;
+import cn.lili.common.security.token.Token;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.connect.entity.dto.WechatMPLoginParams;
@@ -23,7 +23,7 @@ import java.util.List;
  * 买家端,小程序登录接口
  *
  * @author Chopper
- * @date 2021/2/19 09:28
+ * @since 2021/2/19 09:28
  */
 @RestController
 @RequestMapping("/buyer/mini-program")

@@ -1,8 +1,8 @@
 package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.core.util.StrUtil;
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dos.Category;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * 商品分类业务层实现
  *
  * @author pikachu
- * @date 2020-02-23 15:18:56
+ * @since 2020-02-23 15:18:56
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -144,9 +144,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      */
     @Override
     public List<String> getCategoryNameByIds(List<String> ids) {
-        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(Category::getId, ids);
-        return this.baseMapper.getNamesByIds(queryWrapper);
+        List<String> categoryVOS = categoryTree().stream().filter(item -> ids.contains(item.getId())).map(Category::getName).collect(Collectors.toList());
+        return categoryVOS;
     }
 
     @Override

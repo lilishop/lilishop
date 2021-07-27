@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * 分销佣金业务层
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
+ * @since 2020-03-14 23:04:56
  */
 public interface DistributionCashService extends IService<DistributionCash> {
 

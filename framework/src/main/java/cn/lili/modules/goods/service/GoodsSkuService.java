@@ -1,11 +1,10 @@
 package cn.lili.modules.goods.service;
 
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.CachePrefix;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
-import cn.lili.modules.goods.entity.vos.GoodsSkuSpecVO;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -17,7 +16,7 @@ import java.util.Map;
  * 商品sku业务层
  *
  * @author pikachu
- * @date 2020-02-24 16:18:56
+ * @since 2020-02-24 16:18:56
  */
 public interface GoodsSkuService extends IService<GoodsSku> {
 
@@ -81,14 +80,6 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * @return 商品sku详情
      */
     Map<String, Object> getGoodsSkuDetail(String goodsId, String skuId);
-
-    /**
-     * 根据商品分组商品sku及其规格信息
-     *
-     * @param goodsId 商品id
-     * @return 分组后的商品sku及其规格信息
-     */
-    List<GoodsSkuSpecVO> groupBySkuAndSpec(String goodsId);
 
     /**
      * 批量从redis中获取商品SKU信息

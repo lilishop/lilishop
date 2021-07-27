@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
  * 店铺设置
  *
  * @author Bulbasaur
- * @date 2020/12/16 15:15
+ * @since 2020/12/16 15:15
  */
 @Data
 public class StoreSettingDTO {

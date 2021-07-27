@@ -1,9 +1,9 @@
 package cn.lili.trigger;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.cache.Cache;
-import cn.lili.common.trigger.model.TimeTriggerMsg;
-import cn.lili.common.trigger.util.DelayQueueTools;
+import cn.lili.cache.Cache;
+import cn.lili.trigger.model.TimeTriggerMsg;
+import cn.lili.trigger.util.DelayQueueTools;
 import cn.lili.common.utils.SpringContextUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  * 事件触发消费者
  *
  * @author paulG
- * @date 2020/11/17 7:19 下午
+ * @since 2020/11/17 7:19 下午
  */
 @Component
 @Slf4j

@@ -1,6 +1,6 @@
 package cn.lili.modules.member.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.enums.ClientTypeEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -20,7 +20,7 @@ import java.util.Date;
  * 会员
  *
  * @author Bulbasaur
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Data
 @Entity
@@ -46,7 +46,7 @@ public class Member extends BaseEntity {
     private Integer sex;
 
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+  @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "会员生日")
     private Date birthday;
 

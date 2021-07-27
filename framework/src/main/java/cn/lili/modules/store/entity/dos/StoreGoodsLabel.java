@@ -1,6 +1,6 @@
 package cn.lili.modules.store.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,7 +14,7 @@ import java.math.BigDecimal;
  * 店铺商品分类
  *
  * @author pikachu
- * @date 2020-02-18 15:18:56
+ * @since 2020-02-18 15:18:56
  */
 @Data
 @Entity

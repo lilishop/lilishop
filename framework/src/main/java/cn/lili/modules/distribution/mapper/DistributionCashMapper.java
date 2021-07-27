@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * 分销佣金数据处理层
  *
  * @author pikachu
- * @date 2020-03-26 18:45:56
+ * @since 2020-03-26 18:45:56
  */
 public interface DistributionCashMapper extends BaseMapper<DistributionCash> {
 

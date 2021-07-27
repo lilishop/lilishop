@@ -1,7 +1,7 @@
 package cn.lili.listener;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.rocketmq.tags.GoodsTagsEnum;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import cn.lili.event.GoodsCommentCompleteEvent;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
 import cn.lili.modules.distribution.entity.dos.DistributionSelectedGoods;

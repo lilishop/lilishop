@@ -1,7 +1,7 @@
 package cn.lili.modules.system.entity.dos;
 
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.system.entity.vo.InstantDeliveryVO;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.google.gson.Gson;
@@ -19,7 +19,7 @@ import javax.persistence.Table;
  * 即时配送
  *
  * @author pikachu
- * @date 2020/12/01 15:58
+ * @since 2020/12/01 15:58
  */
 @Data
 @Entity

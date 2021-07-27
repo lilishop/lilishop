@@ -2,7 +2,7 @@ package cn.lili.controller.goods;
 
 
 import cn.lili.common.enums.ResultUtil;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -23,7 +23,7 @@ import java.util.List;
  * 管理端,商品规格接口
  *
  * @author pikachu
- * @date 2020-02-18 15:18:56
+ * @since 2020-02-18 15:18:56
  */
 @RestController
 @Api(tags = "管理端,商品规格接口")

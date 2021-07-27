@@ -4,7 +4,7 @@ import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.BasePromotion;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.Map;
  * 商品索引业务层
  *
  * @author paulG
- * @date 2020/10/14
+ * @since 2020/10/14
  **/
 public interface EsGoodsIndexService {
 

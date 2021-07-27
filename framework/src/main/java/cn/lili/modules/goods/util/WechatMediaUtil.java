@@ -17,7 +17,7 @@ import java.net.URL;
  * 微信媒体工具
  *
  * @author Bulbasaur
- * @date: 2021/5/19 8:02 下午
+ * @since: 2021/5/19 8:02 下午
  */
 @Slf4j
 @Component

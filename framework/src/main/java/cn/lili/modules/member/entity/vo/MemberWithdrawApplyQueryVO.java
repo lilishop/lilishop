@@ -12,7 +12,7 @@ import java.io.Serializable;
  * 余额提现记录查询条件
  *
  * @author pikachu
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Data
 @ApiModel(value = "余额提现记录查询条件")

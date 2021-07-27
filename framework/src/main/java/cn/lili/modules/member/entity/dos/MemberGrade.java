@@ -1,6 +1,6 @@
 package cn.lili.modules.member.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
  * 会员等级
  *
  * @author Bulbasaur
- * @date 2021/5/14 5:43 下午
+ * @since 2021/5/14 5:43 下午
  */
 @Data
 @Entity

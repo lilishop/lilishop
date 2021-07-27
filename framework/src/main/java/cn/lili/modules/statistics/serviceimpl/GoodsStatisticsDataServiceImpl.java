@@ -24,7 +24,7 @@ import java.util.List;
  * 商品统计业务层实现
  *
  * @author Bulbasaur
- * @date 2020/12/9 11:30
+ * @since 2020/12/9 11:30
  */
 @Service
 public class GoodsStatisticsDataServiceImpl extends ServiceImpl<GoodsStatisticsDataMapper, StoreFlow> implements GoodsStatisticsDataService {

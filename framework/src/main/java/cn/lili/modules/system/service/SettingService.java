@@ -10,7 +10,7 @@ import org.springframework.cache.annotation.Cacheable;
  * 配置业务层
  *
  * @author Chopper
- * @date 2020/11/17 3:46 下午
+ * @since 2020/11/17 3:46 下午
  */
 @CacheConfig(cacheNames = "{setting}")
 public interface SettingService extends IService<Setting> {

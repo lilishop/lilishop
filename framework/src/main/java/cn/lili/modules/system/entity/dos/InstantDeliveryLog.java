@@ -27,7 +27,7 @@ import java.util.Date;
  * 即时配送日志
  *
  * @author pikachu
- * @date 2020/12/01 15:58
+ * @since 2020/12/01 15:58
  */
 
 @Data
@@ -48,7 +48,7 @@ public class InstantDeliveryLog {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;

@@ -4,7 +4,7 @@ package cn.lili.modules.order.cart.entity.enums;
  * 配送方式
  *
  * @author paulG
- * @date 2020-03-25 2:30 下午
+ * @since 2020-03-25 2:30 下午
  **/
 public enum DeliveryMethodEnum {
 

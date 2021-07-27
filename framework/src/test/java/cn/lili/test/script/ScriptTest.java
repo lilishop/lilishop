@@ -1,6 +1,5 @@
 package cn.lili.test.script;
 
-import cn.lili.common.test.BaseTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +34,7 @@ import java.util.List;
 @ContextConfiguration
 @Configuration
 @ComponentScan("cn.lili")
-public class ScriptTest extends BaseTest {
+public class ScriptTest {
     @Resource
     private DefaultRedisScript<Boolean> redisScript;
     @Resource

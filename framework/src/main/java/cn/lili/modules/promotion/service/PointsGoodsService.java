@@ -13,7 +13,7 @@ import java.util.List;
  * 积分商品业务层
  *
  * @author paulG
- * @date 2020/11/18 9:45 上午
+ * @since 2020/11/18 9:45 上午
  **/
 public interface PointsGoodsService extends IService<PointsGoods> {
 

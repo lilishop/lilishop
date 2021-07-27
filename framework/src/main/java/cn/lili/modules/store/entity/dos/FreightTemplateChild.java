@@ -1,6 +1,6 @@
 package cn.lili.modules.store.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,7 +14,7 @@ import javax.persistence.Table;
  * 运费模板子配置
  *
  * @author Chopper
- * @date 2020/11/17 4:27 下午
+ * @since 2020/11/17 4:27 下午
  */
 @Data
 @Entity

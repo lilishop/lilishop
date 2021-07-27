@@ -1,9 +1,9 @@
 package cn.lili.security;
 
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.common.security.CustomAccessDeniedHandler;
 import cn.lili.common.utils.SpringContextUtil;
-import cn.lili.config.properties.IgnoredUrlsProperties;
+import cn.lili.common.properties.IgnoredUrlsProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +19,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/11/14 16:20
  */
 

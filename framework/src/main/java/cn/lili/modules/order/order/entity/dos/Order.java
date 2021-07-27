@@ -2,7 +2,7 @@ package cn.lili.modules.order.order.entity.dos;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
@@ -13,7 +13,7 @@ import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.*;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -32,7 +32,7 @@ import java.util.Optional;
  * 订单
  *
  * @author Chopper
- * @date 2020/11/17 7:30 下午
+ * @since 2020/11/17 7:30 下午
  */
 @Data
 @Entity
@@ -86,7 +86,7 @@ public class Order extends BaseEntity {
     private String paymentMethod;
 
     @ApiModelProperty(value = "支付时间")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date paymentTime;
 

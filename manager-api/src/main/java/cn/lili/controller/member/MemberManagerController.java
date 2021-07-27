@@ -3,12 +3,13 @@ package cn.lili.controller.member;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.system.aspect.DemoSite;
+import cn.lili.modules.system.aspect.annotation.DemoSite;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dto.ManagerMemberEditDTO;
 import cn.lili.modules.member.entity.dto.MemberAddDTO;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
 import cn.lili.modules.member.service.MemberService;
+import cn.lili.modules.system.aspect.annotation.DemoSite;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -24,7 +25,7 @@ import java.util.List;
  * 管理端,会员接口
  *
  * @author Bulbasaur
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @RestController
 @Api(tags = "管理端,会员接口")

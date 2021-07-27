@@ -1,10 +1,10 @@
 package cn.lili.modules.promotion.service;
 
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.PromotionGoodsDTO;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -17,7 +17,7 @@ import java.util.List;
  * 促销商品业务层
  *
  * @author Chopper
- * @date 2020/11/18 9:45 上午
+ * @since 2020/11/18 9:45 上午
  */
 public interface PromotionGoodsService extends IService<PromotionGoods> {
 

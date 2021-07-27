@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  * 会员预存款VO
  *
  * @author pikachu
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Data
 @ApiModel(value = "会员预存款")

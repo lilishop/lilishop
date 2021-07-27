@@ -1,7 +1,7 @@
 package cn.lili.modules.member.serviceimpl;
 
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.mapper.FootprintMapper;
@@ -23,7 +23,7 @@ import java.util.Objects;
  * 会员浏览历史业务层实现
  *
  * @author Chopper
- * @date 2020/11/18 10:46 上午
+ * @since 2020/11/18 10:46 上午
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

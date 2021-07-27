@@ -6,7 +6,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
@@ -17,7 +17,7 @@ import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
 import cn.lili.modules.promotion.entity.enums.PromotionApplyStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.vos.*;
 import cn.lili.modules.promotion.mapper.SeckillApplyMapper;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  * 秒杀申请业务层实现
  *
  * @author Chopper
- * @date 2020/8/21
+ * @since 2020/8/21
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

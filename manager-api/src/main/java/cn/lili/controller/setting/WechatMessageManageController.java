@@ -1,7 +1,7 @@
 package cn.lili.controller.setting;
 
 import cn.lili.common.enums.ResultUtil;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.message.entity.dos.WechatMessage;
@@ -19,7 +19,7 @@ import java.util.List;
  * 管理端,微信消息接口
  *
  * @author Chopper
- * @date 2020/12/2 10:40
+ * @since 2020/12/2 10:40
  */
 @RestController
 @Api(tags = "管理端,微信消息接口")

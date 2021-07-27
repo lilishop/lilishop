@@ -1,15 +1,16 @@
 package cn.lili.modules.message.serviceimpl;
 
 import cn.lili.common.enums.SwitchEnum;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.member.entity.dos.MemberNotice;
-import cn.lili.modules.member.service.MemberNoticeService;
+import cn.lili.modules.message.entity.dos.MemberMessage;
 import cn.lili.modules.message.entity.dos.NoticeMessage;
 import cn.lili.modules.message.entity.dto.NoticeMessageDTO;
+import cn.lili.modules.message.entity.enums.MessageStatusEnum;
 import cn.lili.modules.message.entity.enums.NoticeMessageParameterEnum;
 import cn.lili.modules.message.mapper.NoticeMessageTemplateMapper;
+import cn.lili.modules.message.service.MemberMessageService;
 import cn.lili.modules.message.service.NoticeMessageService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -17,7 +18,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -25,13 +25,13 @@ import java.util.Map;
  * 通知类消息模板业务层实现
  *
  * @author Bulbasaur
- * @date 2020/12/8 9:48
+ * @since 2020/12/8 9:48
  */
 @Service
 public class NoticeMessageServiceImpl extends ServiceImpl<NoticeMessageTemplateMapper, NoticeMessage> implements NoticeMessageService {
 
     @Autowired
-    private MemberNoticeService memberNoticeService;
+    private MemberMessageService memberMessageService;
 
     @Override
     public IPage<NoticeMessage> getMessageTemplate(PageVO pageVO, String type) {
@@ -54,18 +54,19 @@ public class NoticeMessageServiceImpl extends ServiceImpl<NoticeMessageTemplateM
             NoticeMessage noticeMessage = this.getOne(new LambdaQueryWrapper<NoticeMessage>().eq(NoticeMessage::getNoticeNode, noticeMessageDTO.getNoticeMessageNodeEnum().getDescription().trim()));
             //如果通知类站内信开启的情况下
             if (noticeMessage != null && noticeMessage.getNoticeStatus().equals(SwitchEnum.OPEN.name())) {
-                MemberNotice memberNotice = new MemberNotice();
-                memberNotice.setMemberId(noticeMessageDTO.getMemberId());
-                memberNotice.setTitle(noticeMessage.getNoticeTitle());
-                memberNotice.setContent(noticeMessage.getNoticeContent());
+                MemberMessage memberMessage = new MemberMessage();
+                memberMessage.setMemberId(noticeMessageDTO.getMemberId());
+                memberMessage.setTitle(noticeMessage.getNoticeTitle());
+                memberMessage.setContent(noticeMessage.getNoticeContent());
                 //参数不为空，替换内容
                 if (noticeMessageDTO.getParameter() != null) {
-                    memberNotice.setContent(replaceNoticeContent(noticeMessage.getNoticeContent(), noticeMessageDTO.getParameter()));
+                    memberMessage.setContent(replaceNoticeContent(noticeMessage.getNoticeContent(), noticeMessageDTO.getParameter()));
                 } else {
-                    memberNotice.setContent(noticeMessage.getNoticeContent());
+                    memberMessage.setContent(noticeMessage.getNoticeContent());
                 }
+                memberMessage.setStatus(MessageStatusEnum.UN_READY.name());
                 //添加站内信
-                memberNoticeService.save(memberNotice);
+                memberMessageService.save(memberMessage);
             }
         } catch (Exception e) {
             log.error("站内信发送失败：", e);

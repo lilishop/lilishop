@@ -1,7 +1,7 @@
 package cn.lili.modules.member.service;
 
 
-import cn.lili.common.token.Token;
+import cn.lili.common.security.token.Token;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.member.entity.dos.Member;
@@ -19,7 +19,7 @@ import java.util.List;
  * 会员业务层
  *
  * @author Bulbasaur
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 public interface MemberService extends IService<Member> {
 

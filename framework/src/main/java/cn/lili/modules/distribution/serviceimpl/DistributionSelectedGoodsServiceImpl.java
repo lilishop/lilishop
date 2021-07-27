@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 分销选择商品接口实现
  *
  * @author pikachu
- * @date 2020-03-24 23:04:56
+ * @since 2020-03-24 23:04:56
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

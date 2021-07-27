@@ -1,7 +1,5 @@
 package cn.lili.modules.page.entity.dos;
 
-import cn.lili.base.BaseEntity;
-import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.page.entity.enums.FeedbackTypeEnum;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -27,7 +25,7 @@ import java.util.Date;
  * 意见反馈
  *
  * @author Bulbasaur
- * @date 2020/12/10 17:42
+ * @since 2020/12/10 17:42
  */
 @Data
 @Entity
@@ -46,7 +44,7 @@ public class Feedback implements Serializable {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;

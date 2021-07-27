@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.entity.dto;
 
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,7 +15,7 @@ import java.util.List;
  * 促销活动商品价格数据传输对象
  *
  * @author paulG
- * @date 2020/8/20
+ * @since 2020/8/20
  **/
 @Data
 @NoArgsConstructor
@@ -77,7 +78,7 @@ public class GoodsSkuPromotionPriceDTO implements Serializable {
     private String promotionId;
 
     /**
-     * @see cn.lili.modules.promotion.entity.enums.PromotionTypeEnum
+     * @see PromotionTypeEnum
      */
     @ApiModelProperty(value = "促销活动类型")
     private String promotionType;

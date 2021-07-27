@@ -1,6 +1,6 @@
 package cn.lili.modules.member.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
  * 会员商品评价
  *
  * @author Bulbasaur
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Data
 @Entity

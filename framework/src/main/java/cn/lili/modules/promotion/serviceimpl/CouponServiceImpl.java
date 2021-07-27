@@ -3,17 +3,18 @@ package cn.lili.modules.promotion.serviceimpl;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.trigger.enums.DelayTypeEnums;
-import cn.lili.common.trigger.interfaces.TimeTrigger;
-import cn.lili.common.trigger.message.PromotionMessage;
-import cn.lili.common.trigger.model.TimeExecuteConstant;
-import cn.lili.common.trigger.model.TimeTriggerMsg;
-import cn.lili.common.trigger.util.DelayQueueTools;
+import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.trigger.enums.DelayTypeEnums;
+import cn.lili.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.message.PromotionMessage;
+import cn.lili.trigger.model.TimeExecuteConstant;
+import cn.lili.trigger.model.TimeTriggerMsg;
+import cn.lili.trigger.util.DelayQueueTools;
 import cn.lili.common.utils.DateUtil;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.entity.dos.*;
@@ -44,7 +45,7 @@ import java.util.stream.Collectors;
  * 优惠券活动业务层实现
  *
  * @author Chopper
- * @date 2020/8/21
+ * @since 2020/8/21
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -156,16 +157,14 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
             couponVO.setPromotionStatus(promotionStatus.name());
             this.updateById(couponVO);
             this.mongoTemplate.save(couponVO);
-            if (promotionStatus.name().equals(PromotionStatusEnum.START.name())) {
-                PromotionMessage promotionMessage = new PromotionMessage(couponVO.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), couponVO.getStartTime(), couponVO.getEndTime());
-                //更新延时任务
-                this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                        promotionMessage,
-                        couponVO.getStartTime().getTime(), couponVO.getStartTime().getTime(),
-                        DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                        DateUtil.getDelayTime(couponVO.getStartTime().getTime()),
-                        rocketmqCustomProperties.getPromotionTopic());
-            }
+            PromotionMessage promotionMessage = new PromotionMessage(couponVO.getId(), PromotionTypeEnum.COUPON.name(), promotionStatus.name(), couponVO.getStartTime(), couponVO.getEndTime());
+            //更新延时任务
+            this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
+                    promotionMessage,
+                    couponVO.getStartTime().getTime(), couponVO.getStartTime().getTime(),
+                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
+                    DateUtil.getDelayTime(couponVO.getStartTime().getTime()),
+                    rocketmqCustomProperties.getPromotionTopic());
         }
         return true;
     }

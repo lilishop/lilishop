@@ -2,7 +2,7 @@ package cn.lili.modules.goods.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.modules.goods.entity.dos.Brand;
 import cn.lili.modules.goods.entity.dos.CategoryBrand;
 import cn.lili.modules.goods.entity.dto.BrandPageDTO;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  * 商品品牌业务层实现
  *
  * @author pikachu
- * @date 2020-02-18 16:18:56
+ * @since 2020-02-18 16:18:56
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

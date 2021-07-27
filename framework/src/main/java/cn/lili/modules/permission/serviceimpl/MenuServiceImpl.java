@@ -4,7 +4,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.SearchVO;
 import cn.lili.modules.permission.entity.dos.Menu;
@@ -28,7 +28,7 @@ import java.util.List;
  * 权限业务层实现
  *
  * @author Chopper
- * @date 2020/11/17 3:49 下午
+ * @since 2020/11/17 3:49 下午
  */
 @Slf4j
 @Service

@@ -1,10 +1,10 @@
 package cn.lili.modules.statistics.aop.aspect;
 
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.utils.SpelUtil;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.connect.util.IpUtils;
+import cn.lili.common.utils.IpUtils;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.statistics.aop.PageViewPoint;
 import cn.lili.modules.statistics.aop.enums.PageViewEnum;
@@ -26,7 +26,7 @@ import java.util.Map;
  * 页面浏览统计拦截
  *
  * @author Chopper
- * @date 2021-01-14 18:01
+ * @since 2021-01-14 18:01
  */
 @Aspect
 @Configuration

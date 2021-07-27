@@ -9,7 +9,7 @@ import cn.lili.modules.payment.kit.params.dto.CashierParam;
  * 收银台接口
  *
  * @author Chopper
- * @date 2021-01-25 19:08
+ * @since 2021-01-25 19:08
  */
 public interface CashierExecute {
 

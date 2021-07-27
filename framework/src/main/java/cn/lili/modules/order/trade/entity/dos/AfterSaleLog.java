@@ -24,7 +24,7 @@ import java.util.Date;
  * 售后日志
  *
  * @author Bulbasaur
- * @date 2020-03-25 2:30 下午
+ * @since 2020-03-25 2:30 下午
  */
 @Data
 @Entity
@@ -48,7 +48,7 @@ public class AfterSaleLog {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;

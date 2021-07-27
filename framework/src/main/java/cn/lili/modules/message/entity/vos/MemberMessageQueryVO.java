@@ -10,7 +10,7 @@ import lombok.Data;
  * 会员接收消息查询vo
  *
  * @author Chopper
- * @date 2020/12/2 17:50
+ * @since 2020/12/2 17:50
  */
 @Data
 @ApiModel(value = "会员接收消息查询vo")

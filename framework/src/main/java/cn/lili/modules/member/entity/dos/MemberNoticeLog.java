@@ -1,6 +1,6 @@
 package cn.lili.modules.member.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -17,7 +17,7 @@ import java.util.Date;
  * 会员消息
  *
  * @author Chopper
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Data
 @Entity
@@ -63,7 +63,7 @@ public class MemberNoticeLog extends BaseEntity {
     @Column(name = "send_time")
     @ApiModelProperty(value = "发送时间")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date sendTime;
     /**
      * 发送类型

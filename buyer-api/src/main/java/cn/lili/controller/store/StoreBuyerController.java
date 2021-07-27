@@ -4,8 +4,6 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.statistics.aop.PageViewPoint;
-import cn.lili.modules.statistics.aop.enums.PageViewEnum;
 import cn.lili.modules.store.entity.dto.StoreBankDTO;
 import cn.lili.modules.store.entity.dto.StoreCompanyDTO;
 import cn.lili.modules.store.entity.dto.StoreOtherInfoDTO;
@@ -29,7 +27,7 @@ import java.util.List;
  * 买家端,店铺接口
  *
  * @author Bulbasaur
- * @date: 2020/11/17 2:32 下午
+ * @since: 2020/11/17 2:32 下午
  */
 @RestController
 @RequestMapping("/buyer/store")
@@ -61,7 +59,6 @@ public class StoreBuyerController {
     @ApiOperation(value = "通过id获取店铺信息")
     @ApiImplicitParam(name = "id", value = "店铺ID", required = true, paramType = "path")
     @GetMapping(value = "/get/detail/{id}")
-    @PageViewPoint(type = PageViewEnum.STORE, id = "#id")
     public ResultMessage<StoreBasicInfoVO> detail(@NotNull @PathVariable String id) {
         return ResultUtil.data(storeDetailService.getStoreBasicInfoDTO(id));
     }

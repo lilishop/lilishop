@@ -1,6 +1,6 @@
 package cn.lili.controller.common;
 
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
@@ -27,7 +27,7 @@ import java.util.List;
  * 文件管理管理接口
  *
  * @author Chopper
- * @date 2020/11/26 15:41
+ * @since 2020/11/26 15:41
  */
 @RestController
 @Api(tags = "文件管理管理接口")

@@ -21,7 +21,7 @@ import java.util.List;
  * 订单详情VO
  *
  * @author Chopper
- * @date 2020/11/17 7:29 下午
+ * @since 2020/11/17 7:29 下午
  */
 @Data
 @NoArgsConstructor

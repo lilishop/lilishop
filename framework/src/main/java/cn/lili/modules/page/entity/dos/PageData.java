@@ -1,6 +1,6 @@
 package cn.lili.modules.page.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.enums.ClientTypeEnum;
@@ -18,7 +18,7 @@ import javax.persistence.Table;
  * 页面数据DO
  *
  * @author Bulbasaur
- * @date 2020/12/10 17:42
+ * @since 2020/12/10 17:42
  */
 @Data
 @Entity

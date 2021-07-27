@@ -1,6 +1,6 @@
 package cn.lili.modules.order.order.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
  * 售后原因
  *
  * @author Bulbasaur
- * @date: 2021/7/9 1:39 上午
+ * @since: 2021/7/9 1:39 上午
  */
 @Data
 @Entity

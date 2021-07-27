@@ -10,7 +10,7 @@ import java.io.Serializable;
  * 结算单传输对象
  *
  * @author Chopper
- * @date 2020/11/17 4:26 下午
+ * @since 2020/11/17 4:26 下午
  */
 @Data
 public class BillDTO implements Serializable {

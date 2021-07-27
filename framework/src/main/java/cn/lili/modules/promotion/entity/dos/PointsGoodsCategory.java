@@ -1,12 +1,11 @@
 package cn.lili.modules.promotion.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
@@ -18,7 +17,7 @@ import java.math.BigDecimal;
  * 积分商品分类
  *
  * @author paulG
- * @date 2020-03-19 10:44 上午
+ * @since 2020-03-19 10:44 上午
  **/
 @Data
 @Entity

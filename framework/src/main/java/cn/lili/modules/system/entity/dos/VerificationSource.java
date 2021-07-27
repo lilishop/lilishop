@@ -1,6 +1,6 @@
 package cn.lili.modules.system.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.system.entity.enums.VerificationSourceEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -13,7 +13,7 @@ import javax.persistence.Table;
 /**
  * 验证码资源维护
  * @author Chopper
- * @date 2021/1/30 4:13 下午
+ * @since 2021/1/30 4:13 下午
  */
 @Data
 @Entity

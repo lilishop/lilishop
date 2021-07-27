@@ -1,7 +1,7 @@
 package cn.lili.listener;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.rocketmq.tags.MemberTagsEnum;
+import cn.lili.rocketmq.tags.MemberTagsEnum;
 import cn.lili.event.MemberPointChangeEvent;
 import cn.lili.event.MemberRegisterEvent;
 import cn.lili.event.MemberWithdrawalEvent;

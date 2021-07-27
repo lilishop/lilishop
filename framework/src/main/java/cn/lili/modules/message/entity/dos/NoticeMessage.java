@@ -1,6 +1,6 @@
 package cn.lili.modules.message.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,7 +14,7 @@ import javax.persistence.Table;
  *
  * @author Bulbasaur
  * @version v4.1
- * @date 2020/12/8 9:46
+ * @since 2020/12/8 9:46
  */
 @Data
 @Entity

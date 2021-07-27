@@ -1,6 +1,7 @@
 package cn.lili.modules.search.entity.dos;
 
-import cn.lili.common.elasticsearch.EsSuffix;
+import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.elasticsearch.EsSuffix;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -24,7 +25,6 @@ import java.util.Map;
  * 商品索引
  *
  * @author paulG
- * @date 2020/10/13
  **/
 @Data
 @Document(indexName = "#{elasticsearchProperties.indexPrefix}_" + EsSuffix.GOODS_INDEX_NAME)
@@ -239,7 +239,7 @@ public class EsGoodsIndex implements Serializable {
      * 商品促销活动集合
      * key 为 促销活动类型
      *
-     * @see cn.lili.modules.promotion.entity.enums.PromotionTypeEnum
+     * @see PromotionTypeEnum
      * value 为 促销活动实体信息
      */
     @Field(type = FieldType.Nested)

@@ -1,11 +1,11 @@
 package cn.lili.common.security.context;
 
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.enums.SecurityEnum;
-import cn.lili.common.token.SecretKeyUtil;
+import cn.lili.common.security.token.SecretKeyUtil;
 import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/11/14 20:27
  */
 public class UserContext {
@@ -27,7 +26,7 @@ public class UserContext {
     /**
      * 根据request获取用户信息
      *
-     * @return
+     * @return 授权用户
      */
     public static AuthUser getCurrentUser() {
         if (RequestContextHolder.getRequestAttributes() != null) {
@@ -44,7 +43,7 @@ public class UserContext {
      *
      * @param cache       缓存
      * @param accessToken token
-     * @return
+     * @return 授权用户
      */
     public static AuthUser getAuthUser(Cache cache, String accessToken) {
         try {
@@ -61,7 +60,7 @@ public class UserContext {
      * 根据jwt获取token重的用户信息
      *
      * @param accessToken token
-     * @return
+     * @return 授权用户
      */
     public static AuthUser getAuthUser(String accessToken) {
         try {

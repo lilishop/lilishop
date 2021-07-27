@@ -25,7 +25,7 @@ import java.util.Date;
  * 分类品牌关联
  *
  * @author pikachu
- * @date 2020-03-02 09:34:02
+ * @since 2020-03-02 09:34:02
  */
 @Data
 @Entity
@@ -52,7 +52,7 @@ public class CategoryBrand  implements Serializable {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;

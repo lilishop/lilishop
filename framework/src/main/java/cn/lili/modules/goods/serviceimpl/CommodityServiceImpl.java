@@ -8,7 +8,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.Commodity;
 import cn.lili.modules.goods.entity.dto.CommodityDTO;
@@ -33,7 +33,7 @@ import java.util.List;
  * 直播商品业务层实现
  *
  * @author Bulbasaur
- * @date: 2021/5/17 11:16 上午
+ * @since: 2021/5/17 11:16 上午
  */
 @Service
 public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity> implements CommodityService {

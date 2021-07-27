@@ -26,7 +26,7 @@ import javax.validation.constraints.NotNull;
  * 买家端,分销商品佣金提现接口
  *
  * @author pikachu
- * @date: 2020/11/16 10:03 下午
+ * @since: 2020/11/16 10:03 下午
  */
 @RestController
 @Api(tags = "买家端,分销商品佣金提现接口")

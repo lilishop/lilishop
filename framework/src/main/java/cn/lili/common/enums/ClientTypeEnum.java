@@ -5,7 +5,7 @@ package cn.lili.common.enums;
  * 客户端类型
  *
  * @author Chopper
- * @date 2020/12/8 9:46
+ * @since 2020/12/8 9:46
  */
 
 public enum ClientTypeEnum {

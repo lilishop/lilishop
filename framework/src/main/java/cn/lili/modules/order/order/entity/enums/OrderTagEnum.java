@@ -4,7 +4,7 @@ package cn.lili.modules.order.order.entity.enums;
  * 前端订单页面TAB标签枚举
  *
  * @author Chopper
- * @date 2020/11/17 7:28 下午
+ * @since 2020/11/17 7:28 下午
  */
 public enum OrderTagEnum {
 

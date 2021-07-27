@@ -1,6 +1,6 @@
 package cn.lili.modules.order.trade.serviceimpl;
 
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.trade.entity.dos.WalletLog;
@@ -19,7 +19,7 @@ import java.util.Date;
  * 预存款日志业务层实现
  *
  * @author pikachu
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

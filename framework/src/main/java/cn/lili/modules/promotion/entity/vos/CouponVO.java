@@ -12,7 +12,7 @@ import java.util.List;
  * 优惠券视图对象
  *
  * @author Chopper
- * @date 2020/8/14
+ * @since 2020/8/14
  */
 @Data
 @ApiModel(value = "优惠券")

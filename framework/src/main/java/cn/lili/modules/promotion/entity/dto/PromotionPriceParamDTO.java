@@ -7,7 +7,7 @@ import lombok.Data;
  * 促销价格参数数据传输对象
  *
  * @author paulG
- * @date 2020/11/17
+ * @since 2020/11/17
  **/
 @Data
 public class PromotionPriceParamDTO {

@@ -21,7 +21,7 @@ import java.util.Date;
  * 结算单
  *
  * @author Chopper
- * @date 2020/11/17 4:27 下午
+ * @since 2020/11/17 4:27 下午
  */
 @Data
 @Entity
@@ -40,7 +40,7 @@ public class Bill {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;
@@ -71,7 +71,7 @@ public class Bill {
 
     @ApiModelProperty(value = "平台付款时间")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date payTime;
 
     @ApiModelProperty(value = "银行开户名")

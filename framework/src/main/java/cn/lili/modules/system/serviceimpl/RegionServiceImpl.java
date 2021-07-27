@@ -1,6 +1,6 @@
 package cn.lili.modules.system.serviceimpl;
 
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.common.utils.HttpClientUtils;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
@@ -24,7 +24,7 @@ import java.util.*;
  * 行政地区业务层实现
  *
  * @author Chopper
- * @date 2020/12/2 11:11
+ * @since 2020/12/2 11:11
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

@@ -7,7 +7,7 @@ import lombok.Data;
  * 会员分布VO
  *
  * @author Chopper
- * @date 2021-02-26 17:25
+ * @since 2021-02-26 17:25
  */
 @Data
 public class MemberDistributionVO {

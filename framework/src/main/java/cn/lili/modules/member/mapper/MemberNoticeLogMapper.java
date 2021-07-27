@@ -7,7 +7,7 @@ import cn.lili.modules.member.entity.dos.MemberNoticeLog;
  * 会员消息数据处理层
  *
  * @author Chopper
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 public interface MemberNoticeLogMapper extends BaseMapper<MemberNoticeLog> {
 

@@ -1,7 +1,6 @@
 package cn.lili.controller.setting;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -24,7 +23,7 @@ import java.util.List;
  * 管理端,即时配送接口
  *
  * @author pikachu
- * @date: 2020/11/17 7:56 下午
+ * @since: 2020/11/17 7:56 下午
  */
 @RestController
 @Api(tags = "管理端,即时配送接口")
@@ -40,7 +39,6 @@ public class InstantDeliveryManagerController {
         IPage<InstantDelivery> data = instantDeliveryService.page(PageUtil.initPage(page));
         //组织数据结构
         IPage<InstantDeliveryVO> newData = instantDeliveryService.getInstantDeliveryPage(data, page);
-        System.out.println();
         //返回数据
         return ResultUtil.data(newData);
     }

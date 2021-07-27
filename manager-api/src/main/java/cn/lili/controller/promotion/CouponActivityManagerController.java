@@ -3,7 +3,7 @@ package cn.lili.controller.promotion;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.CouponActivity;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
  * 优惠券活动
  *
  * @author Bulbasaur
- * @date: 2021/5/21 7:11 下午
+ * @since: 2021/5/21 7:11 下午
  */
 @RestController
 @Api(tags = "管理端,优惠券活动接口")

@@ -3,12 +3,12 @@ package cn.lili.modules.member.serviceimpl;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.common.rocketmq.tags.GoodsTagsEnum;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.member.entity.dos.GoodsCollection;
 import cn.lili.modules.member.entity.vo.GoodsCollectionVO;
 import cn.lili.modules.member.mapper.GoodsCollectionMapper;
@@ -29,7 +29,7 @@ import java.util.Optional;
  * 会员收藏业务层实现
  *
  * @author Chopper
- * @date 2020/11/18 2:25 下午
+ * @since 2020/11/18 2:25 下午
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

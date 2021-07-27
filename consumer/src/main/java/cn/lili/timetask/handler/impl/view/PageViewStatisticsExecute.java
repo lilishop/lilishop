@@ -1,8 +1,8 @@
 package cn.lili.timetask.handler.impl.view;
 
 import cn.hutool.core.convert.Convert;
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.statistics.model.dos.PlatformViewData;
 import cn.lili.modules.statistics.service.PlatformViewDataService;
@@ -23,7 +23,7 @@ import java.util.List;
  * 统计 入库
  *
  * @author Chopper
- * @date 2021-01-15 18:20
+ * @since 2021-01-15 18:20
  */
 @Slf4j
 @Component

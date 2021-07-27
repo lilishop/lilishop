@@ -112,9 +112,9 @@ spring:
     #            standard:
     #              sharding-column: create_time
     #              #分表策略
-    #              precise-algorithm-class-name: cn.lili.config.sharding.CreateTimeShardingTableAlgorithm
+    #              precise-algorithm-class-name: cn.lili.mybatis.sharding.CreateTimeShardingTableAlgorithm
     #              #范围查询实现
-    #              range-algorithm-class-name: cn.lili.config.sharding.CreateTimeShardingTableAlgorithm
+    #              range-algorithm-class-name: cn.lili.mybatis.sharding.CreateTimeShardingTableAlgorithm
     props:
       #是否打印逻辑SQL语句和实际SQL语句，建议调试时打印，在生产环境关闭
       sql:

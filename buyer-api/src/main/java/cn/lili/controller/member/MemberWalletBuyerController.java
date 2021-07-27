@@ -5,8 +5,8 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.enums.ResultUtil;
-import cn.lili.common.verification.enums.VerificationEnums;
-import cn.lili.common.verification.service.VerificationService;
+import cn.lili.modules.verification.enums.VerificationEnums;
+import cn.lili.modules.verification.service.VerificationService;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberWallet;
@@ -30,7 +30,7 @@ import javax.validation.constraints.Pattern;
  * 买家端,会员余额接口
  *
  * @author pikachu
- * @date: 2020/11/16 10:07 下午
+ * @since: 2020/11/16 10:07 下午
  */
 @RestController
 @Api(tags = "买家端,会员余额接口")

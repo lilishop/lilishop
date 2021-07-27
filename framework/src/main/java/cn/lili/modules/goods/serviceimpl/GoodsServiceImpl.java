@@ -6,13 +6,13 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.common.rocketmq.tags.GoodsTagsEnum;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
@@ -46,6 +46,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,10 +60,11 @@ import java.util.List;
  * 商品业务层实现
  *
  * @author pikachu
- * @date 2020-02-23 15:18:56
+ * @since 2020-02-23 15:18:56
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
+@CacheConfig(cacheNames = "{goods}")
 public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements GoodsService {
 
 
@@ -153,6 +157,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
 
     @Override
+    @CachePut(key = "#goodsId")
     public void editGoods(GoodsOperationDTO goodsOperationDTO, String goodsId) {
         Goods goods = new Goods(goodsOperationDTO);
         goods.setId(goodsId);
@@ -176,6 +181,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @Cacheable(key = "#goodsId")
     public GoodsVO getGoodsVO(String goodsId) {
         //查询商品信息
         Goods goods = this.getById(goodsId);

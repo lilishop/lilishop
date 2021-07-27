@@ -1,7 +1,8 @@
 package cn.lili.modules.order.cart.service;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
@@ -28,7 +29,9 @@ import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
-import cn.lili.modules.promotion.entity.enums.*;
+import cn.lili.modules.promotion.entity.enums.CouponScopeTypeEnum;
+import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
+import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivitySearchParams;
 import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
@@ -48,7 +51,7 @@ import java.util.stream.Collectors;
  * 购物车业务层实现
  *
  * @author Chopper
- * @date 2020-03-23 12:29 下午
+ * @since 2020-03-23 12:29 下午
  */
 @Slf4j
 @Service

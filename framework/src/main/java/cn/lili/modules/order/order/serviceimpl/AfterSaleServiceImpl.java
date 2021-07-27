@@ -1,18 +1,21 @@
 package cn.lili.modules.order.order.serviceimpl;
 
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.aop.syslog.annotation.SystemLogPoint;
+import cn.lili.modules.system.utils.OperationalJudgment;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.common.rocketmq.tags.AfterSaleTagsEnum;
+import cn.lili.mybatis.util.PageUtil;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.AfterSaleTagsEnum;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.*;
 import cn.lili.common.vo.PageVO;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.order.order.aop.AfterSaleLogPoint;
 import cn.lili.modules.order.order.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
@@ -60,7 +63,7 @@ import java.util.List;
  * 售后业务层实现
  *
  * @author Chopper
- * @date 2020/11/17 7:38 下午
+ * @since 2020/11/17 7:38 下午
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -138,7 +141,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             throw new ServiceException(ResultCode.AFTER_SALES_NOT_PAY_ERROR);
         }
         //判断支付方式是否为线上支付
-        if (order.getPaymentMethod().equals(PaymentMethodEnum.BANK_TRANSFER)) {
+        if (order.getPaymentMethod().equals(PaymentMethodEnum.BANK_TRANSFER.name())) {
             afterSaleApplyVO.setRefundWay(AfterSaleRefundWayEnum.OFFLINE.name());
         } else {
             afterSaleApplyVO.setRefundWay(AfterSaleRefundWayEnum.ORIGINAL.name());
@@ -153,7 +156,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         }
 
         afterSaleApplyVO.setAccountType(order.getPaymentMethod());
-        afterSaleApplyVO.setApplyRefundPrice(CurrencyUtil.sub(orderItem.getFlowPrice(), orderItem.getNum()));
+        afterSaleApplyVO.setApplyRefundPrice(CurrencyUtil.div(orderItem.getFlowPrice(), orderItem.getNum()));
         afterSaleApplyVO.setNum(orderItem.getNum());
         afterSaleApplyVO.setGoodsId(orderItem.getGoodsId());
         afterSaleApplyVO.setGoodsName(orderItem.getGoodsName());
@@ -181,12 +184,17 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     public AfterSale review(String afterSaleSn, String serviceStatus, String remark, Double actualRefundPrice) {
         //根据售后单号获取售后单
         AfterSale afterSale = OperationalJudgment.judgment(this.getBySn(afterSaleSn));
-        afterSale.setActualRefundPrice(actualRefundPrice);
 
         //判断为待审核的售后服务
         if (!afterSale.getServiceStatus().equals(AfterSaleStatusEnum.APPLY.name())) {
             throw new ServiceException(ResultCode.AFTER_SALES_DOUBLE_ERROR);
         }
+        //判断退款金额与付款金额是否正确,退款金额不能小于付款金额
+        if (NumberUtil.compare(afterSale.getFlowPrice(), actualRefundPrice) == -1) {
+            throw new ServiceException(ResultCode.AFTER_SALES_PRICE_ERROR);
+        }
+
+        afterSale.setActualRefundPrice(actualRefundPrice);
 
         //判断审核状态
         //如果售后类型为：退款，审核状态为已通过并且退款方式为原路退回，售后单状态为已完成。

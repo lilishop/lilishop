@@ -1,6 +1,6 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.goods.entity.enums.DraftGoodsSaveType;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -20,7 +20,7 @@ import javax.validation.constraints.Max;
  * 草稿商品
  *
  * @author pikachu
- * @date 2020-02-23 9:14:33
+ * @since 2020-02-23 9:14:33
  */
 @Data
 @Entity

@@ -6,7 +6,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.DateUtil;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
 import cn.lili.modules.distribution.service.DistributionGoodsService;
@@ -23,7 +23,7 @@ import cn.lili.modules.promotion.entity.dto.BasePromotion;
 import cn.lili.modules.promotion.entity.dto.PromotionGoodsDTO;
 import cn.lili.modules.promotion.entity.enums.CouponScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
@@ -52,7 +52,7 @@ import java.util.List;
  * 促销商品业务层实现
  *
  * @author Chopper
- * @date 2021/3/18 9:22 上午
+ * @since 2021/3/18 9:22 上午
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

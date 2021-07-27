@@ -15,18 +15,18 @@ import org.springframework.format.annotation.DateTimeFormat;
  * 结算单搜索参数
  *
  * @author Chopper
- * @date 2021/3/17 6:08 下午
+ * @since 2021/3/17 6:08 下午
  */
 @Data
 public class BillSearchParams extends PageVO {
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "起始日期")
     private String startDate;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "结束日期")
     private String endDate;
 

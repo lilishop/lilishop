@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 会员消息业务层
  *
  * @author Chopper
- * @date 2020/11/17 3:44 下午
+ * @since 2020/11/17 3:44 下午
  */
 public interface MemberNoticeSenterService extends IService<MemberNoticeSenter> {
 

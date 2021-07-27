@@ -12,7 +12,6 @@ import java.io.Serializable;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/12/4 23:48
  */
 @Data

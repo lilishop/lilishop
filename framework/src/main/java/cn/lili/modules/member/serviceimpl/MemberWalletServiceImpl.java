@@ -39,7 +39,7 @@ import java.util.Date;
  * 会员预存款业务层实现
  *
  * @author pikachu
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -154,7 +154,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         if (0 > CurrencyUtil.sub(memberWallet.getMemberWallet(), money)) {
             throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_INSUFFICIENT);
         }
-        memberWallet.setMemberWallet(CurrencyUtil.sub(memberWallet.getMemberWallet(), money));
+        memberWallet.setMemberFrozenWallet(CurrencyUtil.sub(memberWallet.getMemberFrozenWallet(), money));
         this.updateById(memberWallet);
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberId(), memberWallet.getMemberName(), -money, "提现金额已冻结，审核通过提现成功", serviceType);

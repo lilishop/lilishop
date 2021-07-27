@@ -4,7 +4,6 @@ package cn.lili.common.utils;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpUtil;
-import cn.lili.modules.connect.util.IpUtils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
@@ -40,8 +39,8 @@ public class IpHelper {
     /**
      * 获取IP返回地理信息
      *
-     * @param
-     * @return
+     * @param request 请求参数
+     * @return 城市信息
      */
     public String getIpCity(HttpServletRequest request) {
 

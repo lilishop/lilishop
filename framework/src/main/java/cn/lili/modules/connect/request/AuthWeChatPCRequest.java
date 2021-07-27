@@ -1,6 +1,6 @@
 package cn.lili.modules.connect.request;
 
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.common.utils.UrlBuilder;
 import cn.lili.modules.connect.config.AuthConfig;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
@@ -11,7 +11,7 @@ import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.entity.enums.AuthResponseStatus;
 import cn.lili.modules.connect.entity.enums.AuthUserGender;
 import cn.lili.modules.connect.exception.AuthException;
-import cn.lili.modules.connect.util.HttpUtils;
+import cn.lili.common.utils.HttpUtils;
 import com.alibaba.fastjson.JSONObject;
 
 /**

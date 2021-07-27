@@ -13,7 +13,7 @@ import org.apache.ibatis.annotations.Select;
  * 积分商品数据处理层
  *
  * @author paulG
- * @date 2020/8/21
+ * @since 2020/8/21
  **/
 public interface PointsGoodsMapper extends BaseMapper<PointsGoods> {
 

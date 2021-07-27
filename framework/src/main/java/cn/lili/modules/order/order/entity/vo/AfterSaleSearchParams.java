@@ -15,7 +15,7 @@ import java.util.Date;
  * 售后搜索参数
  *
  * @author paulG
- * @date 2020/12/4
+ * @since 2020/12/4
  **/
 @Data
 public class AfterSaleSearchParams extends PageVO {
@@ -56,11 +56,11 @@ public class AfterSaleSearchParams extends PageVO {
     @ApiModelProperty(value = "售后单状态", allowableValues = "APPLY,PASS,REFUSE,BUYER_RETURN,SELLER_RE_DELIVERY,BUYER_CONFIRM,SELLER_CONFIRM,COMPLETE")
     private String serviceStatus;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "开始时间")
     private Date startDate;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "结束时间")
     private Date endDate;
 

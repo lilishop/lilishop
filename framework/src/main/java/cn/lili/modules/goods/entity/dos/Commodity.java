@@ -1,6 +1,6 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,7 +12,7 @@ import javax.persistence.Table;
 /**
  * 小程序直播商品
  * @author Bulbasaur
- * @date: 2021/5/17 9:34 上午
+ * @since: 2021/5/17 9:34 上午
  *
  */
 @Data

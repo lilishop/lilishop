@@ -10,7 +10,7 @@ import java.util.List;
  * 验证码资源缓存VO
  *
  * @author Chopper
- * @date 2020/12/2 17:50
+ * @since 2020/12/2 17:50
  */
 @Data
 public class VerificationVO implements Serializable {

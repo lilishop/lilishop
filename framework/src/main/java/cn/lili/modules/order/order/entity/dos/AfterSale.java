@@ -1,6 +1,6 @@
 package cn.lili.modules.order.order.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -17,7 +17,7 @@ import java.util.Date;
  * 售后
  *
  * @author Chopper
- * @date 2020/11/17 7:30 下午
+ * @since 2020/11/17 7:30 下午
  */
 @Data
 @Entity
@@ -148,7 +148,7 @@ public class AfterSale extends BaseEntity {
     private String mLogisticsName;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+  @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "买家发货时间")
     private Date mDeliverTime;
 

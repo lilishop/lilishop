@@ -4,7 +4,7 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dos.DistributionOrder;
 import cn.lili.modules.distribution.entity.enums.DistributionOrderStatusEnum;
@@ -36,7 +36,7 @@ import java.util.List;
  * 分销订单接口实现
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
+ * @since 2020-03-14 23:04:56
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

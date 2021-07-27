@@ -10,7 +10,7 @@ import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.config.properties.ApiProperties;
+import cn.lili.common.properties.ApiProperties;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.kit.CashierSupport;
 import cn.lili.modules.payment.kit.Payment;
@@ -43,7 +43,7 @@ import java.util.Map;
  * 支付宝支付
  *
  * @author Chopper
- * @date 2020/12/17 09:55
+ * @since 2020/12/17 09:55
  */
 @Slf4j
 @Component

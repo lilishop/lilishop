@@ -3,11 +3,12 @@ package cn.lili.controller.other;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.system.aspect.DemoSite;
+import cn.lili.modules.system.aspect.annotation.DemoSite;
 import cn.lili.modules.page.entity.dos.PageData;
 import cn.lili.modules.page.entity.dto.PageDataDTO;
 import cn.lili.modules.page.entity.vos.PageDataListVO;
 import cn.lili.modules.page.service.PageDataService;
+import cn.lili.modules.system.aspect.annotation.DemoSite;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -23,7 +24,7 @@ import javax.validation.constraints.NotNull;
  * 管理端,页面设置管理接口
  *
  * @author paulGao
- * @date 2020-05-06 15:18:56
+ * @since 2020-05-06 15:18:56
  */
 @RestController
 @Api(tags = "管理端,页面设置管理接口")

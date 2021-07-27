@@ -4,7 +4,7 @@ package cn.lili.modules.payment.kit.enums;
  * 支付方式枚举
  *
  * @author Chopper
- * @date 2020/12/18 18:08
+ * @since 2020/12/18 18:08
  */
 public enum PaymentClientEnum {
 

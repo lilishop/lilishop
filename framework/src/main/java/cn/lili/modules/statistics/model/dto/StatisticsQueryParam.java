@@ -7,7 +7,7 @@ import lombok.Data;
  * 统计查询参数
  *
  * @author Bulbasaur
- * @date 2020/12/9 14:20
+ * @since 2020/12/9 14:20
  */
 @Data
 public class StatisticsQueryParam {

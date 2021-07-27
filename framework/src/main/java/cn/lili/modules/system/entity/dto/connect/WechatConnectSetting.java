@@ -9,7 +9,7 @@ import java.util.List;
  * 微信设置
  *
  * @author Chopper
- * @date 2020/11/17 8:00 下午
+ * @since 2020/11/17 8:00 下午
  */
 @Data
 public class WechatConnectSetting {

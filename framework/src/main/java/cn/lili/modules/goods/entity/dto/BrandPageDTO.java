@@ -11,7 +11,7 @@ import lombok.Data;
  * 商品品牌dto
  *
  * @author pikachu
- * @date 2020-02-18 15:18:56
+ * @since 2020-02-18 15:18:56
  */
 @Data
 @JsonNaming(value = PropertyNamingStrategy.SnakeCaseStrategy.class)

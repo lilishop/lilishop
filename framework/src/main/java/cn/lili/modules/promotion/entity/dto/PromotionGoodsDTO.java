@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  * 促销商品数据传输对象
  *
  * @author paulG
- * @date 2020/10/9
+ * @since 2020/10/9
  **/
 @Data
 @NoArgsConstructor

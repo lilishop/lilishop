@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
  * 支付参数
  *
  * @author Chopper
- * @date 2020/12/19 11:46
+ * @since 2020/12/19 11:46
  */
 @Data
 @ToString

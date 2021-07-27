@@ -1,10 +1,10 @@
 package cn.lili.modules.message.serviceimpl;
 
-import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.common.rocketmq.tags.OtherTagsEnum;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.OtherTagsEnum;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.message.entity.dos.Message;
 import cn.lili.modules.message.entity.vos.MessageVO;
 import cn.lili.modules.message.mapper.MessageMapper;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 管理端发送消息内容业务层实现
  *
  * @author Chopper
- * @date 2020/11/17 3:48 下午
+ * @since 2020/11/17 3:48 下午
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

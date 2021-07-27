@@ -4,7 +4,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
 import cn.lili.modules.distribution.entity.dto.DistributionGoodsSearchParams;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 分销商品接口实现
  *
  * @author pikachu
- * @date 2020-03-24 23:04:56
+ * @since 2020-03-24 23:04:56
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

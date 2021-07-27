@@ -2,8 +2,8 @@ package cn.lili.listener;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.SwitchEnum;
-import cn.lili.common.rocketmq.tags.OtherTagsEnum;
-import cn.lili.common.sms.SmsUtil;
+import cn.lili.rocketmq.tags.OtherTagsEnum;
+import cn.lili.modules.system.sms.SmsUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;

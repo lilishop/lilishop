@@ -1,7 +1,7 @@
 package cn.lili.modules.permission.service;
 
 
-import cn.lili.common.token.Token;
+import cn.lili.common.security.token.Token;
 import cn.lili.modules.permission.entity.dos.AdminUser;
 import cn.lili.modules.permission.entity.dto.AdminUserDTO;
 import cn.lili.modules.permission.entity.vo.AdminUserVO;
@@ -17,7 +17,7 @@ import java.util.List;
  * 用户业务层
  *
  * @author Chopper
- * @date 2020/11/17 3:42 下午
+ * @since 2020/11/17 3:42 下午
  */
 @CacheConfig(cacheNames = "{adminuser}")
 public interface AdminUserService extends IService<AdminUser> {

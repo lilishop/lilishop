@@ -3,7 +3,7 @@ package cn.lili.controller.store;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.system.aspect.DemoSite;
+import cn.lili.modules.system.aspect.annotation.DemoSite;
 import cn.lili.modules.goods.entity.vos.CategoryVO;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dto.AdminStoreApplyDTO;
@@ -13,6 +13,7 @@ import cn.lili.modules.store.entity.vos.StoreSearchParams;
 import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.store.service.StoreService;
+import cn.lili.modules.system.aspect.annotation.DemoSite;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
@@ -29,7 +30,7 @@ import java.util.List;
  * 管理端,店铺管理接口
  *
  * @author Bulbasaur
- * @date: 2020/12/6 16:09
+ * @since: 2020/12/6 16:09
  */
 @Api(tags = "管理端,店铺管理接口")
 @RestController

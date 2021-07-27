@@ -2,7 +2,7 @@ package cn.lili.modules.order.order.entity.dos;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * 子订单
  *
  * @author Chopper
- * @date 2020/11/17 7:30 下午
+ * @since 2020/11/17 7:30 下午
  */
 @Data
 @Entity

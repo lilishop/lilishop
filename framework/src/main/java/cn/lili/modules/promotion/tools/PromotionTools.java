@@ -8,7 +8,7 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.BasePromotion;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -22,7 +22,7 @@ import java.util.List;
  * 优惠活动通用验证类
  *
  * @author paulG
- * @date 2020/8/18
+ * @since 2020/8/18
  **/
 public class PromotionTools {
 

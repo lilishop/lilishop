@@ -3,7 +3,7 @@ package cn.lili.modules.promotion.serviceimpl;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
@@ -33,7 +33,7 @@ import java.util.List;
  * 会员优惠券业务层实现
  *
  * @author Chopper
- * @date 2020/8/21
+ * @since 2020/8/21
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -58,8 +58,8 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         if (coupon.getPublishNum() != 0 && coupon.getReceivedNum() >= coupon.getPublishNum()) {
             throw new ServiceException(ResultCode.COUPON_NUM_INSUFFICIENT_ERROR);
         }
-        if (haveCoupons >= coupon.getCouponLimitNum()) {
-            throw new ServiceException("此优惠券最多领取" + coupon.getCouponLimitNum() + "张");
+        if (!coupon.getCouponLimitNum().equals(0) && haveCoupons >= coupon.getCouponLimitNum()) {
+            throw new ServiceException(ResultCode.COUPON_LIMIT_ERROR, "此优惠券最多领取" + coupon.getCouponLimitNum() + "张");
         }
     }
 

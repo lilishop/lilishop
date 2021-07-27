@@ -1,6 +1,6 @@
 package cn.lili.modules.promotion.entity.dto;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,7 +16,7 @@ import java.util.Date;
  * 促销活动基础类
  *
  * @author Chopper
- * @date 2020-03-19 10:44 上午
+ * @since 2020-03-19 10:44 上午
  */
 @Data
 @MappedSuperclass

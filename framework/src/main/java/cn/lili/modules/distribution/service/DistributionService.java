@@ -12,7 +12,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 分销员业务层
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
+ * @since 2020-03-14 23:04:56
  */
 public interface DistributionService extends IService<Distribution> {
 

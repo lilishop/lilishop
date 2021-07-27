@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * 满优惠数据处理层
  *
  * @author Chopper
- * @date 2020/8/21
+ * @since 2020/8/21
  */
 public interface FullDiscountMapper extends BaseMapper<FullDiscount> {
 

@@ -10,7 +10,7 @@ import java.util.Date;
  * 流量数据展示VO
  *
  * @author Chopper
- * @date 2020-06-19 17:50
+ * @since 2020-06-19 17:50
  */
 @Data
 public class PlatformViewVO {

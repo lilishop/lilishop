@@ -11,7 +11,7 @@ import java.util.List;
  * 促销计算
  *
  * @author paulG
- * @date 2020/8/21
+ * @since 2020/8/21
  **/
 public interface PromotionPriceService {
 

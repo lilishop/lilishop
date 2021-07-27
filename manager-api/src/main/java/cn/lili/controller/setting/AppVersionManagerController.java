@@ -2,7 +2,7 @@ package cn.lili.controller.setting;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
@@ -24,7 +24,7 @@ import javax.validation.Valid;
  * 管理端,app版本控制器
  *
  * @author Chopper
- * @date 2018-07-04 21:50:52
+ * @since 2018-07-04 21:50:52
  */
 @RestController
 @Api("管理端,app版本控制器")

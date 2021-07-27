@@ -1,5 +1,6 @@
 package cn.lili.modules.order.order.entity.dto;
 
+import cn.hutool.core.util.StrUtil;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.DateUtil;
@@ -20,7 +21,7 @@ import java.util.Date;
  * 订单查询参数
  *
  * @author Chopper
- * @date 2020/11/17 4:33 下午
+ * @since 2020/11/17 4:33 下午
  */
 @Data
 public class OrderSearchParams extends PageVO {
@@ -76,17 +77,17 @@ public class OrderSearchParams extends PageVO {
     private String paymentMethod;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "支付时间")
     private Date paymentTime;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+  @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "下单开始时间")
     private Date startDate;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+  @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "下单结束时间")
     private Date endDate;
 
@@ -97,60 +98,56 @@ public class OrderSearchParams extends PageVO {
         QueryWrapper<T> wrapper = new QueryWrapper<>();
 
         //关键字查询
-        if (StringUtils.isNotEmpty(keywords)) {
+        if (StrUtil.isNotEmpty(keywords)) {
             wrapper.like("o.sn", keywords);
             wrapper.like("oi.goods_name", keywords);
         }
         //按卖家查询
-        wrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()), "o.store_id", UserContext.getCurrentUser().getStoreId());
+        wrapper.eq(StrUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()), "o.store_id", UserContext.getCurrentUser().getStoreId());
 
         //店铺查询
-        wrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.MANAGER.name())
+        wrapper.eq(StrUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.MANAGER.name())
                 && StringUtils.isNotEmpty(storeId), "o.store_id", storeId);
 
         //按买家查询
-        wrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.MEMBER.name()), "o.member_id", UserContext.getCurrentUser().getId());
+        wrapper.eq(StrUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.MEMBER.name()), "o.member_id", UserContext.getCurrentUser().getId());
 
         //按照买家查询
-        wrapper.like(StringUtils.isNotEmpty(memberId), "o.member_id", memberId);
+        wrapper.like(StrUtil.isNotEmpty(memberId), "o.member_id", memberId);
 
         //按订单编号查询
-        wrapper.like(StringUtils.isNotEmpty(orderSn), "o.sn", orderSn);
+        wrapper.like(StrUtil.isNotEmpty(orderSn), "o.sn", orderSn);
 
         //按时间查询
         wrapper.ge(startDate != null, "o.create_time", startDate);
 
         wrapper.le(endDate != null, "o.create_time", DateUtil.endOfDate(endDate));
         //按购买人用户名
-        wrapper.like(StringUtils.isNotEmpty(buyerName), "o.member_name", buyerName);
+        wrapper.like(StrUtil.isNotEmpty(buyerName), "o.member_name", buyerName);
 
         //按订单类型
-        if (StringUtils.isNotEmpty(orderType)) {
-            wrapper.and(queryWrapper -> queryWrapper.eq("o.order_type", orderType).or()
-                    .eq("o.order_promotion_type", orderType));
-        }
-
+        wrapper.eq(StrUtil.isNotEmpty(orderType), "o.order_type", orderType);
 
         //物流查询
-        wrapper.like(StringUtils.isNotEmpty(shipName), "o.consignee_name", shipName);
+        wrapper.like(StrUtil.isNotEmpty(shipName), "o.consignee_name", shipName);
 
         //按商品名称查询
-        wrapper.like(StringUtils.isNotEmpty(goodsName), "oi.goods_name", goodsName);
+        wrapper.like(StrUtil.isNotEmpty(goodsName), "oi.goods_name", goodsName);
 
         //付款方式
-        wrapper.like(StringUtils.isNotEmpty(paymentType), "o.payment_type", paymentType);
+        wrapper.like(StrUtil.isNotEmpty(paymentType), "o.payment_type", paymentType);
 
         //按支付方式
-        wrapper.eq(StringUtils.isNotEmpty(paymentMethod), "o.payment_method", paymentMethod);
+        wrapper.eq(StrUtil.isNotEmpty(paymentMethod), "o.payment_method", paymentMethod);
 
         //订单状态
-        wrapper.eq(StringUtils.isNotEmpty(orderStatus), "o.order_status", orderStatus);
+        wrapper.eq(StrUtil.isNotEmpty(orderStatus), "o.order_status", orderStatus);
 
         //付款状态
-        wrapper.eq(StringUtils.isNotEmpty(payStatus), "o.pay_status", payStatus);
+        wrapper.eq(StrUtil.isNotEmpty(payStatus), "o.pay_status", payStatus);
 
         //订单来源
-        wrapper.like(StringUtils.isNotEmpty(clientType), "o.client_type", clientType);
+        wrapper.like(StrUtil.isNotEmpty(clientType), "o.client_type", clientType);
 
 
         //按标签查询

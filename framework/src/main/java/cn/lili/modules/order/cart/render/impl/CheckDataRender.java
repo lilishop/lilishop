@@ -1,6 +1,7 @@
 package cn.lili.modules.order.cart.render.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
@@ -18,7 +19,6 @@ import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.service.PintuanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  * 商品有效性校验
  *
  * @author Chopper
- * @date 2020-07-02 14:47
+ * @since 2020-07-02 14:47
  */
 @Order(0)
 @Service

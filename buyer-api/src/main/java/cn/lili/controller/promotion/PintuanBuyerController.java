@@ -6,7 +6,7 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dto.PromotionGoodsDTO;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.vos.PintuanMemberVO;
 import cn.lili.modules.promotion.entity.vos.PintuanShareVO;
 import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
@@ -27,7 +27,7 @@ import java.util.List;
  * 买家端,拼团接口
  *
  * @author paulG
- * @date 2021/2/20
+ * @since 2021/2/20
  **/
 @Api(tags = "买家端,拼团接口")
 @RestController

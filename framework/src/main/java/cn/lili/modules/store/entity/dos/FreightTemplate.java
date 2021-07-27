@@ -1,6 +1,6 @@
 package cn.lili.modules.store.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.store.entity.enums.FreightTemplateEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -15,7 +15,7 @@ import javax.validation.constraints.NotEmpty;
  * 运费模板
  *
  * @author Chopper
- * @date 2020/11/17 4:27 下午
+ * @since 2020/11/17 4:27 下午
  */
 @Data
 @Entity

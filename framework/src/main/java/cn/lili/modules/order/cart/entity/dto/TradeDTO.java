@@ -22,7 +22,7 @@ import java.util.Map;
  * 购物车视图
  *
  * @author Chopper
- * @date 2020-03-25 2:30 下午
+ * @since 2020-03-25 2:30 下午
  */
 @Data
 public class TradeDTO implements Serializable {

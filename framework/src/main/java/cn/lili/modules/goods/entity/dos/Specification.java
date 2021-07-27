@@ -1,6 +1,6 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.base.IdEntity;
+import cn.lili.mybatis.IdEntity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -16,7 +16,7 @@ import javax.validation.constraints.NotEmpty;
  * 商品规格项
  *
  * @author pikachu
- * @date 2020-02-18 15:18:56
+ * @since 2020-02-18 15:18:56
  */
 @Data
 @Entity

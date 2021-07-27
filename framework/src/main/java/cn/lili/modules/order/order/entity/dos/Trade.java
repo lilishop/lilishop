@@ -1,6 +1,6 @@
 package cn.lili.modules.order.order.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -17,7 +17,7 @@ import javax.persistence.Table;
  * 交易
  *
  * @author Chopper
- * @date 2020/11/17 7:34 下午
+ * @since 2020/11/17 7:34 下午
  */
 @Data
 @Entity

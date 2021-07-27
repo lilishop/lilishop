@@ -2,7 +2,7 @@ package cn.lili.modules.store.serviceimpl;
 
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.store.entity.dos.StoreAddress;
 import cn.lili.modules.store.mapper.StoreAddressMapper;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 店铺地址（自提点）业务层实现
  *
  * @author Bulbasaur
- * @date 2020/11/22 16:00
+ * @since 2020/11/22 16:00
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

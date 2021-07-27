@@ -1,6 +1,6 @@
 package cn.lili.controller.member;
 
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 买家端,会员站服务消息接口
  *
  * @author Chopper
- * @date: 2020/11/17 2:31 下午
+ * @since: 2020/11/17 2:31 下午
  */
 @RestController
 @RequestMapping("/service/notice")

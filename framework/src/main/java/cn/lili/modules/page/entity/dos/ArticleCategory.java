@@ -1,6 +1,6 @@
 package cn.lili.modules.page.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.page.entity.enums.ArticleCategoryEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -18,7 +18,7 @@ import javax.validation.constraints.NotEmpty;
  *
  * @author pikachu
  * @author Bulbasaur
- * @date 2020/12/10 17:42
+ * @since 2020/12/10 17:42
  */
 @Data
 @Entity

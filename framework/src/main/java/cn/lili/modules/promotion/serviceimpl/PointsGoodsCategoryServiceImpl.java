@@ -2,7 +2,7 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.util.StrUtil;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.PointsGoodsCategory;
 import cn.lili.modules.promotion.mapper.PointsGoodsCategoryMapper;
@@ -10,8 +10,6 @@ import cn.lili.modules.promotion.service.PointsGoodsCategoryService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 积分商品分类业务层实现
  *
  * @author paulG
- * @date 2020/8/21
+ * @since 2020/8/21
  **/
 @Service
 @Transactional(rollbackFor = Exception.class)

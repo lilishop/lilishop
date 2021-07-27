@@ -2,7 +2,7 @@ package cn.lili.modules.goods.entity.dos;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONUtil;
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
@@ -26,7 +26,7 @@ import java.util.Map;
  * 商品
  *
  * @author pikachu
- * @date 2020-02-23 9:14:33
+ * @since 2020-02-23 9:14:33
  */
 @Data
 @Entity
@@ -222,6 +222,7 @@ public class Goods extends BaseEntity {
         this.intro = goodsOperationDTO.getIntro();
         this.mobileIntro = goodsOperationDTO.getMobileIntro();
         this.cost = goodsOperationDTO.getCost();
+        this.goodsVideo = goodsOperationDTO.getGoodsVideo();
         if (goodsOperationDTO.getGoodsParamsDTOList() != null && goodsOperationDTO.getGoodsParamsDTOList().isEmpty()) {
             this.params = JSONUtil.toJsonStr(goodsOperationDTO.getGoodsParamsDTOList());
         }

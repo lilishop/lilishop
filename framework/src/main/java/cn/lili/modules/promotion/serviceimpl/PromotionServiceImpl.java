@@ -6,7 +6,8 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.trigger.message.PromotionMessage;
+import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.trigger.message.PromotionMessage;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.promotion.entity.dos.*;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
@@ -36,7 +37,7 @@ import java.util.*;
  * 促销业务层实现
  *
  * @author Chopper
- * @date 2020/8/21
+ * @since 2020/8/21
  */
 @Slf4j
 @Service

@@ -1,7 +1,7 @@
 package cn.lili.controller.common;
 
 import cn.hutool.core.util.StrUtil;
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
@@ -12,7 +12,7 @@ import cn.lili.common.utils.CommonUtil;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.config.properties.SystemSetting;
+import cn.lili.common.properties.SystemSettingProperties;
 import cn.lili.modules.file.entity.File;
 import cn.lili.modules.file.plugin.FileManagerPlugin;
 import cn.lili.modules.file.service.FileService;
@@ -35,7 +35,7 @@ import java.io.InputStream;
  * 文件上传接口
  *
  * @author Chopper
- * @date 2020/11/26 15:41
+ * @since 2020/11/26 15:41
  */
 @Slf4j
 @RestController
@@ -53,7 +53,7 @@ public class UploadController {
     private Cache cache;
 
     @Autowired
-    private SystemSetting systemSetting;
+    private SystemSettingProperties systemSettingProperties;
 
     @ApiOperation(value = "文件上传")
     @PostMapping(value = "/file")
@@ -109,6 +109,6 @@ public class UploadController {
     @ApiOperation(value = "返回licences")
     @PostMapping(value = "/licences")
     public ResultMessage<Object> licences() {
-        return ResultUtil.data(systemSetting.getLicences());
+        return ResultUtil.data(systemSettingProperties.getLicences());
     }
 }

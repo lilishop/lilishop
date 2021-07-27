@@ -8,7 +8,7 @@ import lombok.Data;
  * 店铺基本信息DTO
  *
  * @author Bulbasaur
- * @date 2020/12/7 14:43
+ * @since 2020/12/7 14:43
  */
 @Data
 public class StoreBasicInfoVO {

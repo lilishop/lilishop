@@ -1,6 +1,6 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -15,7 +15,7 @@ import javax.persistence.Table;
  * 商品关键字
  *
  * @author paulG
- * @date 2020/10/15
+ * @since 2020/10/15
  */
 @Data
 @Entity

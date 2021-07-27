@@ -7,7 +7,7 @@ import lombok.Data;
  * 商品购买完成信息
  *
  * @author paulG
- * @date 2021/3/24
+ * @since 2021/3/24
  **/
 @Data
 public class GoodsCompleteMessage {

@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * 商品计量单位数据处理层
  *
  * @author Bulbasaur
- * @date 2020/11/26 16:11
+ * @since 2020/11/26 16:11
  */
 public interface GoodsUnitMapper extends BaseMapper<GoodsUnit> {
 

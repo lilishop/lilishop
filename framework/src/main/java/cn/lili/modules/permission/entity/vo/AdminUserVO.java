@@ -13,7 +13,7 @@ import java.util.List;
  * 管理员VO
  *
  * @author Chopper
- * @date 2020-11-22 09:17
+ * @since 2020-11-22 09:17
  */
 @Data
 public class AdminUserVO extends AdminUser {

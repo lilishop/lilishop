@@ -10,7 +10,7 @@ import java.io.Serializable;
  * 订单价格详情
  *
  * @author Chopper
- * @date 2020-04-01 10:42 上午
+ * @since 2020-04-01 10:42 上午
  */
 @Data
 public class PriceDetailVO implements Serializable {

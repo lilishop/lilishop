@@ -1,6 +1,6 @@
 package cn.lili.modules.permission.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,7 +16,7 @@ import java.math.BigDecimal;
  * 部门
  *
  * @author Chopper
- * @date 2020/11/19 11:57
+ * @since 2020/11/19 11:57
  */
 @Data
 @Entity

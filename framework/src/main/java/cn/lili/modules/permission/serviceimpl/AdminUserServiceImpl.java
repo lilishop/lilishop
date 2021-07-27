@@ -1,12 +1,12 @@
 package cn.lili.modules.permission.serviceimpl;
 
-import cn.lili.common.aop.syslog.annotation.SystemLogPoint;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.token.Token;
-import cn.lili.common.token.base.generate.ManagerTokenGenerate;
+import cn.lili.common.security.token.Token;
+import cn.lili.modules.system.token.ManagerTokenGenerate;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.permission.entity.dos.AdminUser;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  * 用户业务层实现
  *
  * @author Chopper
- * @date 2020/11/17 3:46 下午
+ * @since 2020/11/17 3:46 下午
  */
 @Slf4j
 @Service
@@ -56,7 +56,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     /**
      * 角色长度
      */
-    private int rolesMaxSize =10;
+    private int rolesMaxSize = 10;
 
     @Override
     public IPage<AdminUserVO> adminUserPage(Page initPage, QueryWrapper<AdminUser> initWrapper) {
@@ -120,7 +120,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
         try {
             return managerTokenGenerate.createToken(username, false);
         } catch (Exception e) {
-            log.error("管理员登录错误",e);
+            log.error("管理员登录错误", e);
         }
         return null;
 
@@ -231,7 +231,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
      * @param roles  角色id集合
      */
     private void updateRole(String userId, List<String> roles) {
-        if (!StringUtils.isNotEmpty(roles)) {
+        if (roles.isEmpty() || roles == null) {
             return;
         }
         List<UserRole> userRoles = new ArrayList<>(roles.size());

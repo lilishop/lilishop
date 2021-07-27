@@ -3,7 +3,7 @@ package cn.lili.modules.message.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.message.entity.dos.StoreMessage;
@@ -22,7 +22,7 @@ import java.util.List;
  * 消息发送业务层实现
  *
  * @author Chopper
- * @date 2020/11/17 3:48 下午
+ * @since 2020/11/17 3:48 下午
  */
 @Service
 public class StoreMessageServiceImpl extends ServiceImpl<StoreMessageMapper, StoreMessage> implements StoreMessageService {

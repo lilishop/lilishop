@@ -11,7 +11,7 @@ import org.apache.ibatis.annotations.Select;
  * 平台流量数据
  *
  * @author Bulbasaur
- * @date 2020/11/17 7:34 下午
+ * @since 2020/11/17 7:34 下午
  */
 public interface PlatformViewDataMapper extends BaseMapper<PlatformViewData> {
     /**

@@ -5,7 +5,7 @@ package cn.lili.common.enums;
  * 第一位 1:商品；2:用户；3:交易,4:促销,5:店铺,6:页面,7:设置,8:其他
  *
  * @author Chopper
- * @date 2020/4/8 1:36 下午
+ * @since 2020/4/8 1:36 下午
  */
 public enum ResultCode {
 
@@ -201,6 +201,7 @@ public enum ResultCode {
     AFTER_SALES_LOGISTICS_ERROR(33005, "物流公司错误，请重新选择"),
     AFTER_STATUS_ERROR(33006, "售后状态错误，请刷新页面"),
     RETURN_MONEY_OFFLINE_BANK_ERROR(33007, "当账号类型为银行转账时，银行信息不能为空"),
+    AFTER_SALES_PRICE_ERROR(33004, "申请退款金额错误"),
 
     /**
      * 投诉
@@ -219,6 +220,7 @@ public enum ResultCode {
     WALLET_NOT_EXIT_ERROR(34000, "钱包不存在，请联系管理员"),
     WALLET_INSUFFICIENT(34001, "余额不足以支付订单，请充值!"),
     WALLET_WITHDRAWAL_INSUFFICIENT(34002, "可提现金额不足！"),
+    WALLET_WITHDRAWAL_FROZEN_AMOUNT_INSUFFICIENT(34006, "冻结金额不足，无法处理提现申请请求！"),
     WALLET_ERROR_INSUFFICIENT(34003, "零钱提现失败！"),
     WALLET_REMARK_ERROR(34004, "请填写审核备注！"),
     WALLET_APPLY_ERROR(34005, "提现申请异常！"),
@@ -246,11 +248,12 @@ public enum ResultCode {
     /**
      * 优惠券
      */
+    COUPON_LIMIT_ERROR(41000, "超出领取限制"),
     COUPON_EDIT_STATUS_SUCCESS(41001, "修改状态成功！"),
     COUPON_CANCELLATION_SUCCESS(41002, "会员优惠券作废成功"),
     COUPON_EXPIRED(41003, "优惠券已使用/已过期，不能使用"),
     COUPON_EDIT_STATUS_ERROR(41004, "优惠券修改状态失败！"),
-    COUPON_RECEIVE_ERROR(41005, "当前优惠券状态不可领取"),
+    COUPON_RECEIVE_ERROR(41005, "当前优惠券已经被领取完了，下次要早点来哦"),
     COUPON_NUM_INSUFFICIENT_ERROR(41006, "优惠券剩余领取数量不足"),
     COUPON_NOT_EXIST(41007, "当前优惠券不存在"),
     COUPON_LIMIT_NUM_LESS_THAN_0(41008, "领取限制数量不能为负数"),

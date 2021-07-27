@@ -1,12 +1,12 @@
 package cn.lili.modules.statistics.serviceimpl;
 
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.config.properties.StatisticsProperties;
+import cn.lili.common.properties.StatisticsProperties;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.member.entity.vo.MemberDistributionVO;
 import cn.lili.modules.member.service.MemberService;
@@ -38,7 +38,6 @@ import java.util.List;
  *
  * @author Chopper
  * @version v1.0
- * @Description:
  * @since v7.0
  * 2021/1/18 12:07
  */

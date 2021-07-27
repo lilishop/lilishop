@@ -1,6 +1,6 @@
 package cn.lili.modules.goods.service;
 
-import cn.lili.common.delayqueue.BroadcastMessage;
+import cn.lili.trigger.message.BroadcastMessage;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.Studio;
 import cn.lili.modules.goods.entity.vos.StudioVO;
@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 直播间业务层
  *
  * @author Bulbasaur
- * @date: 2021/5/17 10:02 上午
+ * @since: 2021/5/17 10:02 上午
  */
 public interface StudioService extends IService<Studio> {
 

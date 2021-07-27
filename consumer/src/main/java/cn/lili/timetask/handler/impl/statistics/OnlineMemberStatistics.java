@@ -1,9 +1,9 @@
 package cn.lili.timetask.handler.impl.statistics;
 
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.config.properties.StatisticsProperties;
+import cn.lili.common.properties.StatisticsProperties;
 import cn.lili.modules.statistics.model.vo.OnlineMemberVO;
 import cn.lili.timetask.handler.EveryHourExecute;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * 实时在线人数统计
  *
  * @author Chopper
- * @date 2021-02-21 09:47
+ * @since 2021-02-21 09:47
  */
 @Component
 public class OnlineMemberStatistics implements EveryHourExecute {

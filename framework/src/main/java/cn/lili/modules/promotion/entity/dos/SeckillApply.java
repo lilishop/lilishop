@@ -1,6 +1,6 @@
 package cn.lili.modules.promotion.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
  * 秒杀活动申请实体类
  *
  * @author Chopper
- * @date 2020-03-19 10:44 上午
+ * @since 2020-03-19 10:44 上午
  */
 @Data
 @Entity

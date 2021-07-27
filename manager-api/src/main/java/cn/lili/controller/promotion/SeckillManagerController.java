@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
  * 管理端,秒杀活动接口
  *
  * @author paulG
- * @date 2020/8/20
+ * @since 2020/8/20
  **/
 @RestController
 @Api(tags = "管理端,秒杀活动接口")

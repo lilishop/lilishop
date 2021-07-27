@@ -1,7 +1,7 @@
 package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultUtil;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.page.entity.dos.Special;
@@ -20,7 +20,7 @@ import java.util.List;
  * 管理端,专题活动接口
  *
  * @author Bulbasaur
- * @date: 2020/12/7 11:33
+ * @since: 2020/12/7 11:33
  */
 @RestController
 @Api(tags = "管理端,专题活动接口")

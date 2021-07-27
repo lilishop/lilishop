@@ -2,21 +2,21 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.util.StrUtil;
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.trigger.util.DelayQueueTools;
-import cn.lili.common.trigger.enums.DelayTypeEnums;
-import cn.lili.common.trigger.message.PromotionMessage;
+import cn.lili.trigger.util.DelayQueueTools;
+import cn.lili.trigger.enums.DelayTypeEnums;
+import cn.lili.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.trigger.interfaces.TimeTrigger;
-import cn.lili.common.trigger.model.TimeExecuteConstant;
-import cn.lili.common.trigger.model.TimeTriggerMsg;
+import cn.lili.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.model.TimeExecuteConstant;
+import cn.lili.trigger.model.TimeTriggerMsg;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.entity.dos.PointsGoods;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.vos.PointsGoodsSearchParams;
 import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
 import cn.lili.modules.promotion.mapper.PointsGoodsMapper;
@@ -42,7 +42,7 @@ import java.util.List;
  * 积分商品业务层实现
  *
  * @author paulG
- * @date 2020/8/21
+ * @since 2020/8/21
  **/
 @Service
 @Transactional(rollbackFor = Exception.class)

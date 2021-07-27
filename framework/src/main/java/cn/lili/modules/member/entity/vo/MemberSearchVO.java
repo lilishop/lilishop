@@ -8,7 +8,7 @@ import lombok.Data;
  * 会员搜索VO
  *
  * @author Bulbasaur
- * @date 2020/12/15 10:48
+ * @since 2020/12/15 10:48
  */
 @Data
 public class MemberSearchVO {

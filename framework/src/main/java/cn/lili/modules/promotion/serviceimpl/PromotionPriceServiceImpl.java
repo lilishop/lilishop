@@ -2,6 +2,7 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
  * 促销价格计算业务层实现
  *
  * @author paulG
- * @date 2020/8/21
+ * @since 2020/8/21
  **/
 @Service
 @Slf4j
@@ -615,8 +616,8 @@ public class PromotionPriceServiceImpl implements PromotionPriceService {
                 goodsSkuPromotionPrice.setTotalDiscountPrice(distributeDiscountTotalPrice);
                 //单品成交价
                 double finalPrice = CurrencyUtil.sub(goodsSkuPromotionPrice.getTotalOriginalPrice(), distributeDiscountTotalPrice);
-                goodsSkuPromotionPrice.setFinalePrice(finalPrice);
-                goodsSkuPromotionPrice.setTotalFinalePrice(CurrencyUtil.mul(finalPrice, goodsSkuPromotionPrice.getNumber()));
+                goodsSkuPromotionPrice.setFinalePrice(CurrencyUtil.div(finalPrice, goodsSkuPromotionPrice.getNumber()));
+                goodsSkuPromotionPrice.setTotalFinalePrice(finalPrice);
                 fullDiscount.setPromotionName(PromotionTypeEnum.FULL_DISCOUNT.name());
                 goodsSkuPromotionPrice.getJoinPromotion().add(fullDiscount);
 

@@ -7,7 +7,7 @@ import lombok.Data;
  * 售后dto
  *
  * @author Chopper
- * @date 2021/3/20 10:48
+ * @since 2021/3/20 10:48
  */
 @Data
 public class AfterSaleDTO {

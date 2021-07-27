@@ -11,7 +11,7 @@ import java.util.List;
  * 秒杀活动视图对象
  *
  * @author paulG
- * @date 2020/8/20
+ * @since 2020/8/20
  **/
 @Data
 public class SeckillVO extends Seckill {

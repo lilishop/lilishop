@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
  * 管理端,积分商品分类接口
  *
  * @author paulG
- * @date 2021/1/14
+ * @since 2021/1/14
  **/
 @RestController
 @Api(tags = "管理端,积分商品分类接口")

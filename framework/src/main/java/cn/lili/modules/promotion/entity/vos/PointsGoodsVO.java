@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
  * 积分商品视图对象
  *
  * @author paulG
- * @date 2021/1/13
+ * @since 2021/1/13
  **/
 @EqualsAndHashCode(callSuper = true)
 @Data

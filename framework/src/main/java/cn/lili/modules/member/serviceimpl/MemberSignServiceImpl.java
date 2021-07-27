@@ -2,14 +2,14 @@ package cn.lili.modules.member.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.common.rocketmq.tags.MemberTagsEnum;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.MemberTagsEnum;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.member.entity.dos.MemberSign;
 import cn.lili.modules.member.mapper.MemberSignMapper;
 import cn.lili.modules.member.service.MemberService;
@@ -33,7 +33,7 @@ import java.util.Map;
  * 会员签到业务层实现
  *
  * @author pikachu
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Service
 public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberSign> implements MemberSignService {

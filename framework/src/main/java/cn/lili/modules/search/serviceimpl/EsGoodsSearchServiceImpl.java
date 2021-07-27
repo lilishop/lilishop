@@ -1,7 +1,9 @@
 package cn.lili.modules.search.serviceimpl;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.Brand;
@@ -13,15 +15,16 @@ import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.entity.dos.EsGoodsRelatedInfo;
 import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
+import cn.lili.modules.search.entity.dto.HotWordsDTO;
 import cn.lili.modules.search.entity.dto.ParamOptions;
 import cn.lili.modules.search.entity.dto.SelectorOptions;
-import cn.lili.modules.search.entity.enums.HotWordsRedisKeyEnum;
 import cn.lili.modules.search.repository.EsGoodsIndexRepository;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.lucene.search.function.FunctionScoreQuery;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
@@ -49,6 +52,7 @@ import java.util.*;
 
 /**
  * ES商品搜索业务层实现
+ *
  * @author paulG
  * @since 2020/10/16
  **/
@@ -88,7 +92,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     @Override
     public Page<EsGoodsIndex> searchGoods(EsGoodsSearchDTO searchDTO, PageVO pageVo) {
         if (CharSequenceUtil.isNotEmpty(searchDTO.getKeyword())) {
-            cache.incrementScore(HotWordsRedisKeyEnum.SEARCH_HOT_WORD.name(), searchDTO.getKeyword());
+            cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), searchDTO.getKeyword());
         }
         NativeSearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(searchDTO, pageVo, true);
         NativeSearchQuery searchQuery = searchQueryBuilder.build();
@@ -100,11 +104,16 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     @Override
     public List<String> getHotWords(Integer start, Integer end) {
         List<String> hotWords = new ArrayList<>();
-        Set<DefaultTypedTuple> set = cache.reverseRangeWithScores(HotWordsRedisKeyEnum.SEARCH_HOT_WORD.name(), start, end);
+        Set<DefaultTypedTuple> set = cache.reverseRangeWithScores(CachePrefix.HOT_WORD.getPrefix(), start, end);
         for (DefaultTypedTuple defaultTypedTuple : set) {
             hotWords.add(Objects.requireNonNull(defaultTypedTuple.getValue()).toString());
         }
         return hotWords;
+    }
+
+    @Override
+    public void setHotWords(HotWordsDTO hotWords) {
+        cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), hotWords.getKeywords(), hotWords.getPoint());
     }
 
     @Override
@@ -316,6 +325,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
     /**
      * 查询属性处理
+     *
      * @param filterBuilder
      * @param queryBuilder
      * @param searchDTO
@@ -389,14 +399,14 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         //价格区间判定
         if (CharSequenceUtil.isNotEmpty(searchDTO.getPrice())) {
             String[] prices = searchDTO.getPrice().split("_");
-            if(prices.length==0){
+            if (prices.length == 0) {
                 return;
             }
-            double min = StringUtils.toDouble(prices[0], 0.0);
+            double min = Convert.toDouble(prices[0], 0.0);
             double max = Integer.MAX_VALUE;
 
             if (prices.length == 2) {
-                max = StringUtils.toDouble(prices[1], Double.MAX_VALUE);
+                max = Convert.toDouble(prices[1], Double.MAX_VALUE);
             }
             filterBuilder.must(QueryBuilders.rangeQuery("price").from(min).to(max).includeLower(true).includeUpper(true));
         }
@@ -404,6 +414,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
     /**
      * 关键字查询处理
+     *
      * @param filterBuilder
      * @param queryBuilder
      * @param keyword
@@ -411,12 +422,23 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
      */
     private void keywordSearch(BoolQueryBuilder filterBuilder, BoolQueryBuilder queryBuilder, String keyword, boolean isAggregation) {
         List<FunctionScoreQueryBuilder.FilterFunctionBuilder> filterFunctionBuilders = new ArrayList<>();
-        //商品名字匹配
-        filterFunctionBuilders.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(QueryBuilders.wildcardQuery("goodsName", "*" + keyword + "*"),
-                ScoreFunctionBuilders.weightFactorFunction(10)));
-        //属性匹配
-        filterFunctionBuilders.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(QueryBuilders.nestedQuery(ATTR_PATH, QueryBuilders.wildcardQuery(ATTR_VALUE, "*" + keyword + "*"), ScoreMode.None),
-                ScoreFunctionBuilders.weightFactorFunction(8)));
+        if (keyword.contains(" ")) {
+            for (String s : keyword.split(" ")) {
+                filterFunctionBuilders.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(QueryBuilders.matchQuery("goodsName", s).operator(Operator.AND),
+                        ScoreFunctionBuilders.weightFactorFunction(10)));
+                //属性匹配
+                filterFunctionBuilders.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(QueryBuilders.nestedQuery(ATTR_PATH, QueryBuilders.wildcardQuery(ATTR_VALUE, "*" + s + "*"), ScoreMode.None),
+                        ScoreFunctionBuilders.weightFactorFunction(8)));
+            }
+        } else {
+            //分词匹配
+            filterFunctionBuilders.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(QueryBuilders.matchQuery("goodsName", keyword).operator(Operator.AND),
+                    ScoreFunctionBuilders.weightFactorFunction(10)));
+            //属性匹配
+            filterFunctionBuilders.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(QueryBuilders.nestedQuery(ATTR_PATH, QueryBuilders.wildcardQuery(ATTR_VALUE, "*" + keyword + "*"), ScoreMode.None),
+                    ScoreFunctionBuilders.weightFactorFunction(8)));
+        }
+
 
         FunctionScoreQueryBuilder.FilterFunctionBuilder[] builders = new FunctionScoreQueryBuilder.FilterFunctionBuilder[filterFunctionBuilders.size()];
         filterFunctionBuilders.toArray(builders);

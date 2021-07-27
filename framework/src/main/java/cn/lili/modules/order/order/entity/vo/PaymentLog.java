@@ -1,6 +1,6 @@
 package cn.lili.modules.order.order.entity.vo;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
@@ -16,7 +16,7 @@ import java.util.Date;
  * 订单支付日志：实际为订单部分字段提取过来的一个vo
  *
  * @author Chopper
- * @date 2020/11/17 7:30 下午
+ * @since 2020/11/17 7:30 下午
  */
 @Data
 @Entity

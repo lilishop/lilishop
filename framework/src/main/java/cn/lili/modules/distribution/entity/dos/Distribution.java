@@ -1,6 +1,6 @@
 package cn.lili.modules.distribution.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.distribution.entity.dto.DistributionApplyDTO;
 import cn.lili.modules.distribution.entity.enums.DistributionStatusEnum;
@@ -19,7 +19,7 @@ import javax.validation.constraints.Size;
  * 分销员对象
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
+ * @since 2020-03-14 23:04:56
  */
 @Data
 @Entity

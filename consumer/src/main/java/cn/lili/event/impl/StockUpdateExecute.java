@@ -1,7 +1,7 @@
 package cn.lili.event.impl;
 
 import cn.hutool.core.convert.Convert;
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
@@ -11,7 +11,7 @@ import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import java.util.List;
  * 库存扣减，他表示了订单状态是否出库成功
  *
  * @author Chopper
- * @date 2020-07-03 11:20
+ * @since 2020-07-03 11:20
  */
 @Slf4j
 @Service
@@ -161,6 +161,11 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
     /**
      * 同步库存和促销库存
      *
+     * 需修改：DB：商品库存、Sku商品库存、活动商品库存
+     * 1.获取需要修改的Sku列表、活动商品列表
+     * 2.写入sku商品库存，批量修改
+     * 3.写入促销商品的卖出数量、剩余数量,批量修改
+     * 4.调用方法修改商品库存
      * @param order 订单
      */
     private void synchroDB(OrderDetailVO order) {
@@ -179,6 +184,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
             skuKeys.add(GoodsSkuService.getStockCacheKey(orderItem.getSkuId()));
             GoodsSku goodsSku = new GoodsSku();
             goodsSku.setId(orderItem.getSkuId());
+            goodsSku.setGoodsId(orderItem.getGoodsId());
             //如果有促销信息
             if (null != orderItem.getPromotionType() && null != orderItem.getPromotionId()) {
                 //如果促销有库存信息

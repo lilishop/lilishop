@@ -7,7 +7,7 @@ import lombok.Data;
  * 会员提现消息
  *
  * @author Bulbasaur
- * @date 2020/12/14 16:31
+ * @since 2020/12/14 16:31
  */
 @Data
 public class MemberWithdrawalMessage {
@@ -17,6 +17,9 @@ public class MemberWithdrawalMessage {
 
     @ApiModelProperty(value = "会员id")
     private String memberId;
+
+    @ApiModelProperty(value = "提现状态")
+    private String status;
 
     /**
      * @see cn.lili.modules.member.entity.enums.MemberWithdrawalDestinationEnum

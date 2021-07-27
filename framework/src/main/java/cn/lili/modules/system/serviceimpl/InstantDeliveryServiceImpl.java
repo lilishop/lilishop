@@ -1,6 +1,6 @@
 package cn.lili.modules.system.serviceimpl;
 
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.system.entity.dos.InstantDelivery;
 import cn.lili.modules.system.entity.plugin.InstantDelivery.InstantDeliveryPlugin;
@@ -27,7 +27,7 @@ import java.util.Map;
  * 即时配送业务层实现
  *
  * @author pikachu
- * @date 2020/11/17 8:02 下午
+ * @since 2020/11/17 8:02 下午
  */
 @Service
 @Transactional(rollbackFor = Exception.class)

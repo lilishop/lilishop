@@ -7,7 +7,7 @@ import lombok.Data;
  * 商品库存DTO
  *
  * @author paulG
- * @date 2020/12/23
+ * @since 2020/12/23
  **/
 @Data
 public class GoodsSkuStockDTO {
