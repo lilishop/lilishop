@@ -3,6 +3,7 @@ package cn.lili.modules.member.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
@@ -11,6 +12,8 @@ import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberWallet;
 import cn.lili.modules.member.entity.dos.MemberWithdrawApply;
+import cn.lili.modules.member.entity.dto.MemberWithdrawalMessage;
+import cn.lili.modules.member.entity.enums.MemberWithdrawalDestinationEnum;
 import cn.lili.modules.member.entity.enums.WithdrawStatusEnum;
 import cn.lili.modules.member.entity.vo.MemberWalletVO;
 import cn.lili.modules.member.mapper.MemberWalletMapper;
@@ -24,9 +27,12 @@ import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.WithdrawalSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,6 +50,12 @@ import java.util.Date;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, MemberWallet> implements MemberWalletService {
+
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
+
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
 
     /**
      * 预存款日志
@@ -230,6 +242,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
      */
     @Override
     public Boolean applyWithdrawal(Double price) {
+        MemberWithdrawalMessage memberWithdrawalMessage = new MemberWithdrawalMessage();
         AuthUser authUser = UserContext.getCurrentUser();
         //构建审核参数
         MemberWithdrawApply memberWithdrawApply = new MemberWithdrawApply();
@@ -251,15 +264,24 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
                 if (memberWalletVO.getMemberWallet() < price) {
                     throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_INSUFFICIENT);
                 }
+                memberWithdrawalMessage.setStatus(WithdrawStatusEnum.VIA_AUDITING.name());
                 //微信零钱提现
                 Boolean result = withdrawal(memberWithdrawApply);
                 if (result) {
                     this.reduce(price, authUser.getId(), "余额提现成功", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name());
                 }
             } else {
+                memberWithdrawalMessage.setStatus(WithdrawStatusEnum.APPLY.name());
                 //扣减余额到冻结金额
                 this.reduceWithdrawal(price, authUser.getId(), "提现金额已冻结，审核成功后到账", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name());
             }
+            //发送余额提现申请消息
+
+            memberWithdrawalMessage.setMemberId(authUser.getId());
+            memberWithdrawalMessage.setPrice(price);
+            memberWithdrawalMessage.setDestination(MemberWithdrawalDestinationEnum.WECHAT.name());
+            String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_WITHDRAWAL.name();
+            rocketMQTemplate.asyncSend(destination, memberWithdrawalMessage, RocketmqSendCallbackBuilder.commonCallback());
         }
         return memberWithdrawApplyService.save(memberWithdrawApply);
     }

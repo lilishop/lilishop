@@ -2,6 +2,7 @@ package cn.lili.modules.distribution.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.modules.member.entity.enums.WithdrawStatusEnum;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
 import cn.lili.common.utils.CurrencyUtil;
@@ -11,7 +12,6 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dos.DistributionCash;
-import cn.lili.modules.distribution.entity.enums.DistributionCashStatusEnum;
 import cn.lili.modules.distribution.entity.enums.DistributionStatusEnum;
 import cn.lili.modules.distribution.entity.vos.DistributionCashSearchParams;
 import cn.lili.modules.distribution.mapper.DistributionCashMapper;
@@ -84,7 +84,7 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
                 memberWithdrawalMessage.setMemberId(distribution.getMemberId());
                 memberWithdrawalMessage.setPrice(applyMoney);
                 memberWithdrawalMessage.setDestination(MemberWithdrawalDestinationEnum.WALLET.name());
-                memberWithdrawalMessage.setStatus(DistributionCashStatusEnum.APPLY.name());
+                memberWithdrawalMessage.setStatus(WithdrawStatusEnum.APPLY.name());
                 String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_WITHDRAWAL.name();
                 rocketMQTemplate.asyncSend(destination, memberWithdrawalMessage, RocketmqSendCallbackBuilder.commonCallback());
                 return true;
@@ -125,8 +125,8 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
             if (distribution != null && distributorCash != null && distribution.getDistributionStatus().equals(DistributionStatusEnum.PASS.name())) {
                 MemberWithdrawalMessage memberWithdrawalMessage = new MemberWithdrawalMessage();
                 //审核通过
-                if (result.equals(DistributionCashStatusEnum.PASS.name())) {
-                    memberWithdrawalMessage.setStatus(DistributionCashStatusEnum.PASS.name());
+                if (result.equals(WithdrawStatusEnum.VIA_AUDITING.name())) {
+                    memberWithdrawalMessage.setStatus(WithdrawStatusEnum.VIA_AUDITING.name());
                     //审核通过需要校验冻结金额不足情况
                     if (distribution.getCommissionFrozen() < distributorCash.getPrice()) {
                         throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_INSUFFICIENT);
@@ -134,17 +134,17 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
                     //分销员佣金解冻
                     distribution.setCommissionFrozen(CurrencyUtil.sub(distribution.getCommissionFrozen(), distributorCash.getPrice()));
                     //分销记录操作
-                    distributorCash.setDistributionCashStatus(DistributionCashStatusEnum.PASS.name());
+                    distributorCash.setDistributionCashStatus(WithdrawStatusEnum.VIA_AUDITING.name());
                     distributorCash.setPayTime(new Date());
                     //提现到余额
                     memberWalletService.increase(distributorCash.getPrice(), distribution.getMemberId(), "分销佣金提现到余额", DepositServiceTypeEnum.WALLET_COMMISSION.name());
                 } else {
-                    memberWithdrawalMessage.setStatus(DistributionCashStatusEnum.REFUSE.name());
+                    memberWithdrawalMessage.setStatus(WithdrawStatusEnum.FAIL_AUDITING.name());
                     //分销员佣金解冻
                     distribution.setCommissionFrozen(CurrencyUtil.sub(distribution.getCommissionFrozen(), distributorCash.getPrice()));
                     //分销员可提现金额退回
                     distribution.setCanRebate(CurrencyUtil.add(distribution.getCanRebate(), distributorCash.getPrice()));
-                    distributorCash.setDistributionCashStatus(DistributionCashStatusEnum.REFUSE.name());
+                    distributorCash.setDistributionCashStatus(WithdrawStatusEnum.FAIL_AUDITING.name());
                 }
                 //分销员金额相关处理
                 distributionService.updateById(distribution);
@@ -169,7 +169,7 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
     @Override
     public Integer newDistributionCash() {
         QueryWrapper queryWrapper = Wrappers.query();
-        queryWrapper.eq("distribution_cash_status", DistributionCashStatusEnum.APPLY.name());
+        queryWrapper.eq("distribution_cash_status", WithdrawStatusEnum.APPLY.name());
         return this.count(queryWrapper);
     }
 }

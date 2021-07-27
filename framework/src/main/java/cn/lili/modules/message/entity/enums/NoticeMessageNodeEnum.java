@@ -49,7 +49,8 @@ public enum NoticeMessageNodeEnum {
      */
     WALLET_CHANGE("余额账户变更通知"),
     WALLET_WITHDRAWAL_CREATE("提现申请提交成功通知"),
-    WALLET_WITHDRAWAL_SUCCESS("提现成功通知"),
+    WALLET_WITHDRAWAL_SUCCESS("余额提现成功通知"),
+    WALLET_WITHDRAWAL_WEICHAT_SUCCESS("微信提现成功通知"),
     WALLET_WITHDRAWAL_ERROR("提现申请驳回通知");
 
 
