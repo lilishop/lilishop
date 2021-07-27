@@ -40,6 +40,10 @@ public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, W
     private WechatAccessTokenUtil wechatAccessTokenUtil;
 
     /**
+     * 设置行业
+     */
+    private final String setIndustry = "https://api.weixin.qq.com/cgi-bin/template/api_set_industry?access_token=";
+    /**
      * get 获取所有的模版
      */
     private final String allMsgTpl = "https://api.weixin.qq.com/cgi-bin/template/get_all_private_template?access_token=";
@@ -54,9 +58,18 @@ public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, W
         try {
             this.baseMapper.deleteAll();
 
+            //获取token
             String accessToken = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.H5);
+
+
+            //设置行业
+            Map<String, Object> setIndustryParams = new HashMap<>();
+            setIndustryParams.put("industry_id1", 1);//互联网/电子商务
+            setIndustryParams.put("industry_id2", 5);//通信与运营商
+            String context = HttpUtils.doPostWithJson(setIndustry + accessToken, setIndustryParams);
+
             //获取已有模版，删除
-            String context = HttpUtil.get(allMsgTpl + accessToken);
+            context = HttpUtil.get(allMsgTpl + accessToken);
             JSONObject jsonObject = new JSONObject(context);
             WechatMessageUtil.wechatHandler(jsonObject);
             List<String> oldList = new ArrayList<>();
@@ -77,7 +90,7 @@ public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, W
             List<WechatMessageData> tmpList = initData();
             tmpList.forEach(tplData -> {
                 WechatMessage wechatMessage = new WechatMessage();
-                Map params = new HashMap<>(1);
+                Map<String, Object> params = new HashMap<>(1);
                 params.put("template_id_short", tplData.getMsgId());
                 String content = HttpUtils.doPostWithJson(addTpl + accessToken, params);
                 JSONObject tplContent = new JSONObject(content);

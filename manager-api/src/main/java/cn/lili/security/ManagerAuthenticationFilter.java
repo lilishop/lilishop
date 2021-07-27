@@ -75,24 +75,32 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
     private void customAuthentication(HttpServletRequest request, HttpServletResponse response, UsernamePasswordAuthenticationToken authentication) throws NoPermissionException {
         AuthUser authUser = (AuthUser) authentication.getDetails();
         String requestUrl = request.getRequestURI();
-        Map<String, List<String>> permission = (Map<String, List<String>>) cache.get(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + authUser.getId());
-        //如果不是超级管理员， 不做鉴权
+
+
+        //如果不是超级管理员， 则鉴权
         if (!authUser.getIsSuper()) {
-            //获取数据权限
+            Map<String, List<String>> permission = (Map<String, List<String>>) cache.get(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + authUser.getId());
+
+            System.out.println(requestUrl);
+            System.out.println(PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER.name()).toArray(new String[0]), requestUrl));
+            System.out.println(PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.QUERY.name()).toArray(new String[0]), requestUrl));
+
+            //获取数据(GET 请求)权限
             if (request.getMethod().equals(RequestMethod.GET.name())) {
                 //如果用户的超级权限和查阅权限都不包含当前请求的api
-                if (!PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER.name()).toArray(new String[0]), requestUrl) &&
-                        !PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.QUERY.name()).toArray(new String[0]), requestUrl)) {
-
-                    ResponseUtil.output(response, ResponseUtil.resultMap(false, 401, "抱歉，您没有访问权限"));
+                if (PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER.name()).toArray(new String[0]), requestUrl)
+                        || PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.QUERY.name()).toArray(new String[0]), requestUrl)) {
+                } else {
+                    ResponseUtil.output(response, ResponseUtil.resultMap(false, 400, "权限不足"));
                     throw new NoPermissionException("权限不足");
                 }
             }
-            //非get请求（数据操作） 判定
+            //非get请求（数据操作） 判定鉴权
             else {
-                if (!PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER.name()).toArray(new String[0]), request.getRequestURI())) {
+                if (PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER.name()).toArray(new String[0]), request.getRequestURI())) {
 
-                    ResponseUtil.output(response, ResponseUtil.resultMap(false, 401, "抱歉，您没有访问权限"));
+                } else {
+                    ResponseUtil.output(response, ResponseUtil.resultMap(false, 400, "权限不足"));
                     throw new NoPermissionException("权限不足");
                 }
             }

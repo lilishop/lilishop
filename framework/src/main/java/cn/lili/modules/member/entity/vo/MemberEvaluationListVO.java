@@ -50,5 +50,4 @@ public class MemberEvaluationListVO {
 
     @ApiModelProperty(value = "描述评分")
     private Integer descriptionScore;
-
 }

@@ -93,7 +93,7 @@ public class WechatMessageUtil {
             return;
         }
 
-        log.info("微信消息发送消息：", order.getMemberId() + "-" + sn);
+        log.info("微信消息发送消息：{}", order.getMemberId() + "-" + sn);
         //获取token
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.H5);
 
@@ -137,7 +137,7 @@ public class WechatMessageUtil {
         wechatMPMessageQueryWrapper.eq(WechatMPMessage::getOrderStatus, order.getOrderStatus());
         WechatMPMessage wechatMPMessage = wechatMPMessageService.getOne(wechatMPMessageQueryWrapper);
         if (wechatMPMessage == null) {
-            log.error("未配置微信消息订阅");
+            log.info("未配置微信消息订阅");
             return;
         }
 
@@ -150,7 +150,7 @@ public class WechatMessageUtil {
             return;
         }
 
-        log.info("微信消息订阅消息发送：", order.getMemberId() + "-" + sn);
+        log.info("微信消息订阅消息发送：{}", order.getMemberId() + "-" + sn);
         //获取token
         String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
 
@@ -270,7 +270,7 @@ public class WechatMessageUtil {
     /**
      * 如果返回信息有错误
      *
-     * @param jsonObject
+     * @param jsonObject 返回消息
      */
     public static void wechatHandler(JSONObject jsonObject) {
         if (jsonObject.containsKey("errmsg")) {
@@ -283,9 +283,9 @@ public class WechatMessageUtil {
     }
 
     /**
-     * 如果返回信息有错误....................................................................................................................................................................................333333333333333333
+     * 如果返回信息有错误
      *
-     * @param string
+     * @param string 返回消息
      */
     public static String wechatHandler(String string) {
         JSONObject jsonObject = new JSONObject();
