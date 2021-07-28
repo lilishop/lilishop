@@ -1,7 +1,7 @@
 package cn.lili.modules.distribution.entity.dos;
 
+import cn.lili.modules.member.entity.enums.WithdrawStatusEnum;
 import cn.lili.mybatis.BaseEntity;
-import cn.lili.modules.distribution.entity.enums.DistributionCashStatusEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -59,7 +59,7 @@ public class DistributionCash extends BaseEntity {
         this.sn = sn;
         this.distributionId = distributionId;
         this.price = price;
-        this.distributionCashStatus = DistributionCashStatusEnum.APPLY.name();
+        this.distributionCashStatus = WithdrawStatusEnum.APPLY.name();
         this.distributionName = memberName;
     }
 }
