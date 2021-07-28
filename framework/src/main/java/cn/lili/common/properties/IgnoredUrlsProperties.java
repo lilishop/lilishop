@@ -17,6 +17,4 @@ import java.util.List;
 public class IgnoredUrlsProperties {
 
     private List<String> urls = new ArrayList<>();
-
-    private List<String> limitUrls = new ArrayList<>();
 }
