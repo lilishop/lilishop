@@ -54,9 +54,6 @@ public class DistributionOrderExecute implements OrderStatusChangeEvent, EveryDa
                 distributionOrderService.cancelOrder(orderMessage.getOrderSn());
                 break;
             }
-            default:
-                log.error("分销订单执行异常：", orderMessage.getOrderSn());
-                break;
         }
     }
 
