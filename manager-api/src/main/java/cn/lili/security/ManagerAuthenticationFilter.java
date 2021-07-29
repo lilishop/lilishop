@@ -80,11 +80,6 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
         //如果不是超级管理员， 则鉴权
         if (!authUser.getIsSuper()) {
             Map<String, List<String>> permission = (Map<String, List<String>>) cache.get(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + authUser.getId());
-
-            System.out.println(requestUrl);
-            System.out.println(PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER.name()).toArray(new String[0]), requestUrl));
-            System.out.println(PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.QUERY.name()).toArray(new String[0]), requestUrl));
-
             //获取数据(GET 请求)权限
             if (request.getMethod().equals(RequestMethod.GET.name())) {
                 //如果用户的超级权限和查阅权限都不包含当前请求的api
