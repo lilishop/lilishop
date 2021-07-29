@@ -61,16 +61,19 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
         //获取用户信息，存入context
         UsernamePasswordAuthenticationToken authentication = getAuthentication(jwt, response);
         //自定义权限过滤
-        customAuthentication(request, response, authentication);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        if (authentication != null) {
+            customAuthentication(request, response, authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
         chain.doFilter(request, response);
     }
 
     /**
      * 自定义权限过滤
      *
-     * @param request
-     * @param authentication
+     * @param request        请求
+     * @param response       响应
+     * @param authentication 用户信息
      */
     private void customAuthentication(HttpServletRequest request, HttpServletResponse response, UsernamePasswordAuthenticationToken authentication) throws NoPermissionException {
         AuthUser authUser = (AuthUser) authentication.getDetails();
