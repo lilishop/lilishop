@@ -166,17 +166,22 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
             //获取收款分销订单
             DistributionOrder distributionOrder = this.getOne(new LambdaQueryWrapper<DistributionOrder>()
                     .eq(DistributionOrder::getOrderItemSn, storeFlow.getOrderItemSn()));
-
+            //分销订单不存在，则直接返回
+            if (distributionOrder == null) {
+                return;
+            }
             //已提交无法重复提交
-            //如果未结算则将分销订单取消
-            //如果已结算则创建退款分销订单
             if (distributionOrder.getDistributionOrderStatus().equals(DistributionOrderStatusEnum.CANCEL.name())) {
                 return;
-            } else if (distributionOrder.getDistributionOrderStatus().equals(DistributionOrderStatusEnum.WAIT_BILL.name())) {
+            }
+            //如果未结算则将分销订单取消
+            else if (distributionOrder.getDistributionOrderStatus().equals(DistributionOrderStatusEnum.WAIT_BILL.name())) {
                 this.update(new LambdaUpdateWrapper<DistributionOrder>()
                         .eq(DistributionOrder::getOrderItemSn, storeFlow.getOrderItemSn())
                         .set(DistributionOrder::getDistributionOrderStatus, DistributionOrderStatusEnum.CANCEL.name()));
-            } else {
+            }
+            //如果已结算则创建退款分销订单
+            else {
                 //修改分销员提成金额
                 distributionService.subCanRebate(CurrencyUtil.sub(0, storeFlow.getDistributionRebate()), distributionOrder.getDistributionId());
             }

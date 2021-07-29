@@ -18,7 +18,6 @@ import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * 会员经验值
@@ -26,7 +25,7 @@ import org.springframework.stereotype.Service;
  * @author Bulbasaur
  * @since: 2021/5/16 11:16 下午
  */
-@Service
+//@Service
 public class MemberExperienceExecute implements MemberRegisterEvent, GoodsCommentCompleteEvent, OrderStatusChangeEvent {
 
     /**

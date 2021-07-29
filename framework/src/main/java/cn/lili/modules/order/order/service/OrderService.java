@@ -158,6 +158,13 @@ public interface OrderService extends IService<Order> {
     void complete(String orderSn);
 
     /**
+     * 系统定时完成订单
+     *
+     * @param orderSn 订单编号
+     */
+    void systemComplete(String orderSn);
+
+    /**
      * 通过trade 获取订单列表
      *
      * @param tradeSn 交易编号

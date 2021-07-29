@@ -2,6 +2,7 @@ package cn.lili.event.impl;
 
 
 import cn.lili.common.utils.CurrencyUtil;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.event.AfterSaleStatusChangeEvent;
 import cn.lili.event.GoodsCommentCompleteEvent;
 import cn.lili.event.MemberRegisterEvent;
@@ -84,9 +85,9 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
     public void orderChange(OrderMessage orderMessage) {
 
         if (orderMessage.getNewStatus().equals(OrderStatusEnum.COMPLETED)) {
-            //根据订单编号获取订单数据,如果为积分订单则跳回
             Order order = orderService.getBySn(orderMessage.getOrderSn());
-            if (order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINT.name())) {
+            //根据订单编号获取订单数据,如果订单促销类型不为空，并且订单促销类型为积分订单 则直接返回
+            if (StringUtils.isNotEmpty(order.getOrderPromotionType()) && order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINT.name())) {
                 return;
             }
             //获取积分设置

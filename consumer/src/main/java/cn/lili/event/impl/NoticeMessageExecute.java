@@ -95,8 +95,12 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
             //添加站内信参数
             params.put(NoticeMessageParameterEnum.GOODS.getType(), orderDetailVO.getOrderItems().get(0).getGoodsName());
             noticeMessageDTO.setParameter(params);
-            //保存站内信
-            noticeMessageService.noticeMessage(noticeMessageDTO);
+
+            //如果有消息，则发送消息
+            if (noticeMessageDTO.getNoticeMessageNodeEnum() != null) {
+                //保存站内信
+                noticeMessageService.noticeMessage(noticeMessageDTO);
+            }
         }
     }
 

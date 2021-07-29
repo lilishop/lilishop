@@ -32,22 +32,18 @@ public class AfterSaleMessageListener implements RocketMQListener<MessageExt> {
 
     @Override
     public void onMessage(MessageExt messageExt) {
-        switch (AfterSaleTagsEnum.valueOf(messageExt.getTags())) {
-            case AFTER_SALE_STATUS_CHANGE:
-                for (AfterSaleStatusChangeEvent afterSaleStatusChangeEvent : afterSaleStatusChangeEvents) {
-                    try {
-                        AfterSale afterSale = JSONUtil.toBean(new String(messageExt.getBody()), AfterSale.class);
-                        afterSaleStatusChangeEvent.afterSaleStatusChange(afterSale);
-                    } catch (Exception e) {
-                        log.error("售后{},在{}业务中，状态修改事件执行异常",
-                                new String(messageExt.getBody()),
-                                afterSaleStatusChangeEvent.getClass().getName(),
-                                e);
-                    }
+        if (AfterSaleTagsEnum.valueOf(messageExt.getTags()) == AfterSaleTagsEnum.AFTER_SALE_STATUS_CHANGE) {
+            for (AfterSaleStatusChangeEvent afterSaleStatusChangeEvent : afterSaleStatusChangeEvents) {
+                try {
+                    AfterSale afterSale = JSONUtil.toBean(new String(messageExt.getBody()), AfterSale.class);
+                    afterSaleStatusChangeEvent.afterSaleStatusChange(afterSale);
+                } catch (Exception e) {
+                    log.error("售后{},在{}业务中，状态修改事件执行异常",
+                            new String(messageExt.getBody()),
+                            afterSaleStatusChangeEvent.getClass().getName(),
+                            e);
                 }
-            default:
-                log.error("售后状态修改事件执行异常：", new String(messageExt.getBody()));
-                break;
+            }
         }
 
     }

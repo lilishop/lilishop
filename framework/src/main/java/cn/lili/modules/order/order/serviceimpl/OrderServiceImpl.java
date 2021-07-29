@@ -407,8 +407,23 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public void complete(String orderSn) {
         //是否可以查询到订单
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
+        complete(order, orderSn);
+    }
 
-        //修改订单状态为完成
+    @Override
+    @OrderLogPoint(description = "'订单['+#orderSn+']完成'", orderSn = "#orderSn")
+    public void systemComplete(String orderSn) {
+        Order order = this.getBySn(orderSn);
+        complete(order, orderSn);
+    }
+
+    /**
+     * 完成订单方法封装
+     *
+     * @param order   订单
+     * @param orderSn 订单编号
+     */
+    private void complete(Order order, String orderSn) {//修改订单状态为完成
         this.updateStatus(orderSn, OrderStatusEnum.COMPLETED);
 
         //修改订单货物可以进行评价
@@ -437,7 +452,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             //发送订单变更mq消息
             rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goodsCompleteMessageList), RocketmqSendCallbackBuilder.commonCallback());
         }
-
     }
 
     @Override

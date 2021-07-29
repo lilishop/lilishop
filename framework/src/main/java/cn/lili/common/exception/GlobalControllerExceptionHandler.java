@@ -40,7 +40,6 @@ public class GlobalControllerExceptionHandler {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ResultMessage<Object> handleServiceException(HttpServletRequest request, final Exception e, HttpServletResponse response) {
 
-        log.error("全局异常[ServiceException]:", e);
 
         //如果是自定义异常，则获取异常，返回自定义错误消息
         if (e instanceof ServiceException) {
@@ -58,7 +57,13 @@ public class GlobalControllerExceptionHandler {
             if (!serviceException.getMsg().equals(ServiceException.DEFAULT_MESSAGE)) {
                 message += ":" + serviceException.getMsg();
             }
+
+            log.error("全局异常[ServiceException]:{}-{}", serviceException.getResultCode().code(), serviceException.getResultCode().message(), e);
             return ResultUtil.error(code, message);
+
+        } else {
+
+            log.error("全局异常[ServiceException]:", e);
         }
 
         //默认错误消息
