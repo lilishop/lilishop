@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 管理端token过滤
+ *
  * @author Chopper
  */
 @Slf4j
@@ -108,9 +110,9 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
     /**
      * 获取token信息
      *
-     * @param jwt
-     * @param response
-     * @return
+     * @param jwt      token信息
+     * @param response 响应
+     * @return 获取鉴权对象
      */
     private UsernamePasswordAuthenticationToken getAuthentication(String jwt, HttpServletResponse response) {
 
@@ -138,7 +140,7 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
         } catch (ExpiredJwtException e) {
             log.debug("user analysis exception:", e);
         } catch (Exception e) {
-            log.error("user analysis exception:", e);
+            log.error("other exception:", e);
         }
         return null;
     }
