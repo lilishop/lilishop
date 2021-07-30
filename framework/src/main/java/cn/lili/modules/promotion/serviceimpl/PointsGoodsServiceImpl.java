@@ -209,8 +209,11 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
         Query query = new Query();
         query.addCriteria(Criteria.where("skuId").is(skuId))
                 .addCriteria(Criteria.where("promotionStatus").is(PromotionStatusEnum.START.name()));
-        List<PointsGoodsVO> pointsGoodsVO=this.mongoTemplate.find(query, PointsGoodsVO.class);
-        return pointsGoodsVO.get(0);
+        List<PointsGoodsVO> pointsGoodsVO = this.mongoTemplate.find(query, PointsGoodsVO.class);
+        if (pointsGoodsVO != null && pointsGoodsVO.size() > 0) {
+            return pointsGoodsVO.get(0);
+        }
+        return null;
     }
 
     /**
