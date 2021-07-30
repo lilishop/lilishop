@@ -1,6 +1,7 @@
 package cn.lili.modules.order.cart.render.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
@@ -9,12 +10,20 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.member.entity.dos.Member;
+import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.promotion.entity.dos.Pintuan;
+import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
+import cn.lili.modules.promotion.service.PintuanService;
+import cn.lili.modules.promotion.service.PointsGoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -22,6 +31,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -40,14 +50,25 @@ public class CheckDataRender implements CartRenderStep {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private PintuanService pintuanService;
+
+    @Autowired
+    private MemberService memberService;
+
+    @Autowired
+    private PointsGoodsService pointsGoodsService;
+
     @Override
     public void render(TradeDTO tradeDTO) {
-        //校验商品有效性
-        checkData(tradeDTO);
-        //店铺分组数据初始化
-        groupStore(tradeDTO);
         //预校验
         preCalibration(tradeDTO);
+
+        //校验商品有效性
+        checkData(tradeDTO);
+
+        //店铺分组数据初始化
+        groupStore(tradeDTO);
 
     }
 
@@ -125,15 +146,43 @@ public class CheckDataRender implements CartRenderStep {
      * @param tradeDTO
      */
     private void preCalibration(TradeDTO tradeDTO) {
-        //拼团判定，不能参与自己创建的拼团
-        if (tradeDTO.getParentOrderSn() != null) {
-            //订单接受
-            cn.lili.modules.order.order.entity.dos.Order parentOrder = orderService.getBySn(tradeDTO.getParentOrderSn());
-            //参与活动判定
-            if (parentOrder.getMemberId().equals(UserContext.getCurrentUser().getId())) {
-                throw new ServiceException(ResultCode.PINTUAN_JOIN_ERROR);
+
+        //拼团订单预校验
+        if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)) {
+            //拼团判定，不能参与自己创建的拼团
+            if (tradeDTO.getParentOrderSn() != null) {
+                //订单接受
+                cn.lili.modules.order.order.entity.dos.Order parentOrder = orderService.getBySn(tradeDTO.getParentOrderSn());
+                //参与活动判定
+                if (parentOrder.getMemberId().equals(UserContext.getCurrentUser().getId())) {
+                    throw new ServiceException(ResultCode.PINTUAN_JOIN_ERROR);
+                }
+            }
+            //判断拼团商品的限购数量
+            Optional<String> pintuanId = tradeDTO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
+            if (pintuanId.isPresent()) {
+                Pintuan pintuan = pintuanService.getPintuanById(pintuanId.get());
+                Integer limitNum = pintuan.getLimitNum();
+                for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
+                    if (limitNum != 0 && cartSkuVO.getNum() > limitNum) {
+                        throw new ServiceException(ResultCode.PINTUAN_LIMIT_NUM_ERROR);
+                    }
+                }
+            }
+            //积分商品，判断用户积分是否满足
+        } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.POINTS)) {
+            String skuId = tradeDTO.getSkuList().get(0).getGoodsSku().getId();
+            //获取积分商品VO
+            PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsVOByMongo(skuId);
+            if(pointsGoodsVO==null){
+                throw new ServiceException(ResultCode.POINT_GOODS_ERROR);
+            }
+            Member member = memberService.getUserInfo();
+            if (member.getPoint() < pointsGoodsVO.getPoints()) {
+                throw new ServiceException(ResultCode.USER_POINTS_ERROR);
             }
         }
+
     }
 
 }

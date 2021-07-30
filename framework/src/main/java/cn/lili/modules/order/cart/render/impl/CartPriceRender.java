@@ -1,13 +1,18 @@
 package cn.lili.modules.order.cart.render.impl;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
+import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
+import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
+import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
+import cn.lili.modules.promotion.service.PointsGoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -33,6 +38,16 @@ public class CartPriceRender implements CartRenderStep {
      */
     @Autowired
     private CategoryService categoryService;
+    /**
+     * 积分商品
+     */
+    @Autowired
+    private PointsGoodsService pointsGoodsService;
+    /**
+     * 砍价商品
+     */
+    @Autowired
+    private KanjiaActivityGoodsService kanjiaActivityGoodsService;
 
     @Override
     public void render(TradeDTO tradeDTO) {
@@ -97,21 +112,43 @@ public class CartPriceRender implements CartRenderStep {
                     if (Boolean.TRUE.equals(cartSkuVO.getChecked())) {
                         PriceDetailDTO priceDetailDTO = cartSkuVO.getPriceDetailDTO();
                         //流水金额(入账 出帐金额) = goodsPrice + freight - discountPrice - couponPrice
-                        double flowPrice = CurrencyUtil.sub(CurrencyUtil.add(priceDetailDTO.getGoodsPrice(), priceDetailDTO.getFreightPrice()), CurrencyUtil.add(priceDetailDTO.getDiscountPrice(), priceDetailDTO.getCouponPrice() != null ? priceDetailDTO.getCouponPrice() : 0));
+                        double flowPrice = CurrencyUtil.sub(
+                                CurrencyUtil.add(priceDetailDTO.getGoodsPrice(), priceDetailDTO.getFreightPrice()),
+                                CurrencyUtil.add(priceDetailDTO.getDiscountPrice(),
+                                        priceDetailDTO.getCouponPrice() != null ? priceDetailDTO.getCouponPrice() : 0));
                         priceDetailDTO.setFlowPrice(flowPrice);
 
-                        //最终结算金额 = flowPrice - platFormCommission - distributionCommission
-                        double billPrice = CurrencyUtil.sub(CurrencyUtil.sub(flowPrice, priceDetailDTO.getPlatFormCommission()), priceDetailDTO.getDistributionCommission());
-                        priceDetailDTO.setBillPrice(billPrice);
+                        //如果是普通订单最终结算金额 = flowPrice - platFormCommission - distributionCommission
+                        //砍价、积分订单按照商品的结算价进行结算
+                        if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.CART)
+                                || tradeDTO.getCartTypeEnum().equals(CartTypeEnum.BUY_NOW)
+                                || tradeDTO.getCartTypeEnum().equals(CartTypeEnum.VIRTUAL)) {
+
+                            double billPrice = CurrencyUtil.sub(CurrencyUtil.sub(flowPrice, priceDetailDTO.getPlatFormCommission()), priceDetailDTO.getDistributionCommission());
+                            priceDetailDTO.setBillPrice(billPrice);
+                        } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.POINTS)) {
+                            PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsVOByMongo(cartSkuVO.getGoodsSku().getId());
+                            priceDetailDTO.setBillPrice(pointsGoodsVO.getSettlementPrice());
+                            priceDetailDTO.setSettlementPrice(pointsGoodsVO.getSettlementPrice());
+                        } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.KANJIA)) {
+                            KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO = kanjiaActivityGoodsService.getKanJiaGoodsBySku(cartSkuVO.getGoodsSku().getId());
+                            priceDetailDTO.setBillPrice(kanjiaActivityGoodsDTO.getSettlementPrice());
+                            priceDetailDTO.setSettlementPrice(kanjiaActivityGoodsDTO.getSettlementPrice());
+                        }
+                        //填写结算价格
+
 
                         //平台佣金
                         String categoryId = cartSkuVO.getGoodsSku().getCategoryPath().substring(
                                 cartSkuVO.getGoodsSku().getCategoryPath().lastIndexOf(",") + 1
                         );
-                        if (CharSequenceUtil.isNotEmpty(categoryId)) {
+
+                        //平台佣金=订单金额 * 分类佣金百分比
+                        if (StrUtil.isNotEmpty(categoryId)) {
                             Double platFormCommission = CurrencyUtil.div(CurrencyUtil.mul(flowPrice, categoryService.getById(categoryId).getCommissionRate()), 100);
                             priceDetailDTO.setPlatFormCommission(platFormCommission);
                         }
+
                         priceDetailDTOS.add(priceDetailDTO);
                     }
                 }

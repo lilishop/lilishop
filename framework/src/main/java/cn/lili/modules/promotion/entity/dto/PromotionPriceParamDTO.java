@@ -20,4 +20,10 @@ public class PromotionPriceParamDTO {
 
     @ApiModelProperty(value = "拼团id 如果是拼团购买 此值为拼团活动id，当pintuanId为空，则表示普通购买（或者拼团商品，单独购买）")
     private String pintuanId;
+
+    @ApiModelProperty(value = "砍价ID")
+    private String kanjiaId;
+
+    @ApiModelProperty(value = "积分ID")
+    private String pointsId;
 }

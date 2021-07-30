@@ -2,11 +2,11 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.DateUtil;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
 import cn.lili.modules.distribution.service.DistributionGoodsService;
@@ -24,7 +24,6 @@ import cn.lili.modules.promotion.entity.dto.BasePromotion;
 import cn.lili.modules.promotion.entity.dto.PromotionGoodsDTO;
 import cn.lili.modules.promotion.entity.enums.CouponScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
@@ -32,6 +31,7 @@ import cn.lili.modules.promotion.mapper.PromotionGoodsMapper;
 import cn.lili.modules.promotion.service.PointsGoodsService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.service.SeckillApplyService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -123,10 +123,14 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
             //下一次更新时间
             cartSkuVO.setUpdatePromotionTime(date);
         }
-        PointsGoods pointsGoods = pointsGoodsService.getPointsGoodsDetailBySkuId(cartSkuVO.getGoodsSku().getId());
+        //skuvo写入需支付积分
+        PointsGoods pointsGoods = pointsGoodsService.getPointsGoodsVOByMongo(cartSkuVO.getGoodsSku().getId());
         if (pointsGoods != null) {
             cartSkuVO.setPoint(pointsGoods.getPoints().intValue());
         }
+
+
+        //分销商品
         DistributionGoods distributionGoods = distributionGoodsService.distributionGoodsVOBySkuId(cartSkuVO.getGoodsSku().getId());
         if (distributionGoods != null) {
             cartSkuVO.setDistributionGoods(distributionGoods);
@@ -142,8 +146,9 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     public void getCartSkuPromotion(CartSkuVO cartSkuVO) {
         Date date = DateUtil.getCurrentDayEndTime();
         LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(PromotionGoods::getSkuId, cartSkuVO.getGoodsSku().getId()).eq(PromotionGoods::getPromotionStatus, PromotionStatusEnum.START.name());
-        queryWrapper.le(PromotionGoods::getStartTime, date);
+        queryWrapper.eq(PromotionGoods::getSkuId, cartSkuVO.getGoodsSku().getId())
+                .eq(PromotionGoods::getPromotionStatus, PromotionStatusEnum.START.name())
+                .le(PromotionGoods::getStartTime, date);
         //获取有效的促销活动
         List<PromotionGoods> promotionGoods = this.list(queryWrapper);
         //同步查询缓存中的促销活动商品的库存
@@ -168,7 +173,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
                 promotionGoods.add(p);
             }
         }
-        //单独检查，添加适用于全品类的全平台或属于当前店铺的满优惠活动
+        //单独检查，添加适用于全品类的全平台或属于当前店铺的优惠券活动
         List<CouponVO> couponVOS = mongoTemplate.find(query, CouponVO.class);
         for (CouponVO couponVO : couponVOS) {
             boolean aLLScopeType = (couponVO.getPromotionGoodsList() == null

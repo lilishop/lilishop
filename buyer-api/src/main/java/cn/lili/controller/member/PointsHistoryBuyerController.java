@@ -37,7 +37,7 @@ public class PointsHistoryBuyerController {
 
         LambdaQueryWrapper<MemberPointsHistory> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(MemberPointsHistory::getMemberId, UserContext.getCurrentUser().getId());
-
+        queryWrapper.orderByDesc(MemberPointsHistory::getCreateTime);
         return ResultUtil.data(memberPointsHistoryService.page(PageUtil.initPage(page), queryWrapper));
     }
 

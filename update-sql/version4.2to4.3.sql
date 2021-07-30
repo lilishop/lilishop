@@ -16,6 +16,14 @@
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+/** 添加结算单积分、砍价结算价信息**/
+ALTER TABLE li_bill ADD point_settlement_price double DEFAULT 0.00 COMMENT '积分商品结算金额 ';
+ALTER TABLE li_bill ADD kanjia_settlement_price double DEFAULT 0.00 COMMENT '砍价商品结算金额';
+ALTER TABLE li_store_flow ADD point_settlement_price double DEFAULT 0.00 COMMENT '积分商品结算金额';
+ALTER TABLE li_store_flow ADD kanjia_settlement_price double DEFAULT 0.00 COMMENT '砍价商品结算金额';
+
+/** 热词管理*/
+UPDATE `lilishop`.`li_menu` SET `create_by` = 'admin', `create_time` = '2021-03-03 09:54:51', `delete_flag` = b'0', `update_by` = 'admin', `update_time` = '2021-07-23 19:07:45', `description` = 'null', `front_route` = 'page/article-manage/hotWords', `icon` = 'md-aperture', `level` = 2, `name` = 'hotKeyWord', `parent_id` = '1367050250249830400', `path` = 'hotKeyWord', `sort_order` = 0.00, `title` = '搜索热词', `front_component` = 'null' WHERE `id` = 1367050829697122304;
 
 -- ----------------------------
 -- Table structure for li_menu
@@ -146,5 +154,4 @@ INSERT INTO `li_menu` VALUES (1407602673334636546, 'admin', '2021-06-23 15:33:24
 INSERT INTO `li_menu` VALUES (1410862675914764290, 'admin', '2021-07-02 15:27:29', b'0', 'admin', '2021-07-27 16:06:26', 'null', 'distribution/distributionCash', '', 2, 'distributionCash', '1374173575405109248', 'distributionCash', 5.00, '分销提现', 'null', '/manager/distribution/cash*');
 INSERT INTO `li_menu` VALUES (1419926569920536578, 'admin', '2021-07-27 15:44:10', b'0', 'admin', '2021-07-27 16:07:10', NULL, 'customWords/index', NULL, 2, 'customWords', '1367050250249830400', 'customWords', 4.00, 'ES分词', NULL, '/manager/manager/custom-words*');
 COMMIT;
-
 SET FOREIGN_KEY_CHECKS = 1;

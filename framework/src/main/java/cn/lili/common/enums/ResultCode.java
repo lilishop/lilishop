@@ -125,6 +125,7 @@ public enum ResultCode {
     USER_OVERDUE_CONNECT_ERROR(20022, "授权信息已过期，请重新授权/登录"),
     USER_CONNECT_BANDING_ERROR(20023, "当前联合登陆方式，已绑定其他账号，需进行解绑操作"),
     USER_CONNECT_NOT_EXIST_ERROR(20024, "暂无联合登陆信息，无法实现一键注册功能，请点击第三方登录进行授权"),
+    USER_POINTS_ERROR(20024, "用户积分不足"),
 
     /**
      * 权限
@@ -234,13 +235,16 @@ public enum ResultCode {
      * 活动
      */
     PROMOTION_GOODS_NOT_EXIT(40001, "当前促销商品不存在！"),
-    PROMOTION_SAME_ACTIVE_EXIST(40002, "当前时间内已存在同类活动"),
-    PROMOTION_START_TIME_ERROR(40003, "活动起始时间不能大于活动结束时间"),
-    PROMOTION_TIME_ERROR(40004, "活动起始时间必须大于当前时间"),
-    PROMOTION_SAME_ERROR(40005, "当前时间段已存在相同活动！"),
-    PROMOTION_GOODS_ERROR(40006, "请选择要参与活动的商品"),
-    PROMOTION_STATUS_END(40007, "当前活动已停止"),
-    PROMOTION_UPDATE_ERROR(40008, "当前活动已开始/结束，无法编辑！"),
+    PROMOTION_SAME_ACTIVE_EXIST(40002,"当前时间内已存在同类活动"),
+    PROMOTION_START_TIME_ERROR(40003,"活动起始时间不能大于活动结束时间"),
+    PROMOTION_TIME_ERROR(40004,"活动起始时间必须大于当前时间"),
+    PROMOTION_SAME_ERROR(40005,"当前时间段已存在相同活动！"),
+    PROMOTION_GOODS_ERROR(40006,"请选择要参与活动的商品"),
+    PROMOTION_STATUS_END(40007,"当前活动已停止"),
+    PROMOTION_UPDATE_ERROR(40008,"当前活动已开始/结束，无法编辑！"),
+    PROMOTION_ACTIVITY_GOODS_ERROR(40009,"当前活动已经开始无法添加商品"),
+    PROMOTION_ACTIVITY_ERROR(40009,"当前促销活动不存在"),
+    PROMOTION_LOG_EXIST(40010,"活动已参加，已发重复参加"),
 
     /**
      * 优惠券
@@ -325,7 +329,23 @@ public enum ResultCode {
      * 其他促销
      */
     MEMBER_SIGN_REPEAT(47001, "请勿重复签到"),
-    POINT_GOODS_ACTIVE_STOCK_ERROR(47002, "活动库存数量不能高于商品库存"),
+    POINT_GOODS_ACTIVE_STOCK_ERROR(47002, "最低金额不能高于商品金额"),
+
+    /**
+     * 砍价活动
+     */
+    KANJIA_GOODS_ACTIVE_STOCK_ERROR(48001, "活动库存数量不能高于商品库存"),
+    KANJIA_GOODS_ACTIVE_PRICE_ERROR(48002, "最低购买金额不能高于商品金额"),
+    KANJIA_GOODS_ACTIVE_HIGHEST_PRICE_ERROR(48003, "最高砍价金额不能为0且不能超过商品金额"),
+    KANJIA_GOODS_ACTIVE_LOWEST_PRICE_ERROR(48004, "最低砍价金额不能为0且不能超过商品金额"),
+    KANJIA_GOODS_ACTIVE_HIGHEST_LOWEST_PRICE_ERROR(48005, "最低砍价金额不能高于最高砍价金额"),
+    KANJIA_GOODS_ACTIVE_SETTLEMENT_PRICE_ERROR(48006, "结算金额不能高于商品金额"),
+    KANJIA_GOODS_DELETE_ERROR(48007, "删除砍价商品异常"),
+    KANJIA_ACTIVITY_NOT_FOUND_ERROR(48008, "砍价记录不存在"),
+    KANJIA_ACTIVITY_LOG_MEMBER_ERROR(48009, "当前会员已经帮砍"),
+    KANJIA_ACTIVITY_MEMBER_ERROR(48010, "当前会员已经发起此砍价商品活动"),
+    KANJIA_ACTIVITY_NOT_PASS_ERROR(48011, "当前砍价未满足条件，不能进行购买"),
+    KANJIA_NUM_BUY_ERROR(48012, "砍价商品购买数量不正确"),
     /**
      * 店铺
      */

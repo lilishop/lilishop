@@ -59,12 +59,12 @@ public interface PointsGoodsService extends IService<PointsGoods> {
     PointsGoodsVO getPointsGoodsDetail(String id);
 
     /**
-     * 根据SkuID获取积分商品信息
+     * 根据ID获取积分详情
      *
-     * @param skuId 商品skuId
+     * @param skuId 商品SkuId
      * @return 积分详情
      */
-    PointsGoods getPointsGoodsDetailBySkuId(String skuId);
+    PointsGoodsVO getPointsGoodsVOByMongo(String skuId);
 
     /**
      * 根据条件查询积分商品

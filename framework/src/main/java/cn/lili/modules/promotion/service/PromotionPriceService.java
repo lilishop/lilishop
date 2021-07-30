@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.service;
 
+import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dto.PromotionPriceDTO;
 import cn.lili.modules.promotion.entity.dto.PromotionPriceParamDTO;
@@ -19,8 +20,9 @@ public interface PromotionPriceService {
      *
      * @param tradeSkuList     促销计算参数
      * @param memberCouponList 使用的优惠券
+     * @param cartTypeEnum 购物车类型
      * @return 促销计算结果
      */
-    PromotionPriceDTO calculationPromotionPrice(List<PromotionPriceParamDTO> tradeSkuList, List<MemberCoupon> memberCouponList);
+    PromotionPriceDTO calculationPromotionPrice(List<PromotionPriceParamDTO> tradeSkuList, List<MemberCoupon> memberCouponList, CartTypeEnum cartTypeEnum);
 
 }

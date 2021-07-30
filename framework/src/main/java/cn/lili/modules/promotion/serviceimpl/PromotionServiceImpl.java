@@ -10,6 +10,7 @@ import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.trigger.message.PromotionMessage;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.promotion.entity.dos.*;
+import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.enums.*;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.entity.vos.PintuanVO;
@@ -97,6 +98,8 @@ public class PromotionServiceImpl implements PromotionService {
      */
     @Autowired
     private MongoTemplate mongoTemplate;
+    @Autowired
+    private KanjiaActivityGoodsService kanJiaActivityGoodsService;
 
 
     @Override
@@ -124,7 +127,11 @@ public class PromotionServiceImpl implements PromotionService {
                 break;
             //积分商品
             case POINTS_GOODS:
-                result = this.updatePointsGoods(promotionMessage, esPromotionKey, promotionTypeEnum);
+                result = this.updatePointsGoods(promotionMessage, promotionTypeEnum);
+                break;
+            //砍价商品商品
+            case KANJIA:
+                result = this.updateKanjiaGoods(promotionMessage, promotionTypeEnum);
                 break;
             //优惠券活动
             case COUPON_ACTIVITY:
@@ -432,11 +439,10 @@ public class PromotionServiceImpl implements PromotionService {
      * 修改积分商品状态
      *
      * @param promotionMessage  信息队列传输促销信息实体
-     * @param esPromotionKey    es Key
      * @param promotionTypeEnum 促销分类枚举
      * @return 修改结果
      */
-    private boolean updatePointsGoods(PromotionMessage promotionMessage, String esPromotionKey, PromotionTypeEnum promotionTypeEnum) {
+    private boolean updatePointsGoods(PromotionMessage promotionMessage, PromotionTypeEnum promotionTypeEnum) {
         boolean result;
         PointsGoodsVO pointsGoodsVO = this.mongoTemplate.findById(promotionMessage.getPromotionId(), PointsGoodsVO.class);
         if (pointsGoodsVO == null) {
@@ -445,9 +451,28 @@ public class PromotionServiceImpl implements PromotionService {
         }
         pointsGoodsVO.setPromotionStatus(promotionMessage.getPromotionStatus());
         result = this.pointsGoodsService.update(updateWrapper(promotionMessage));
-        PointsGoods pointsGoods = JSONUtil.toBean(JSONUtil.toJsonStr(pointsGoodsVO), PointsGoods.class);
-        this.goodsIndexService.updateEsGoodsIndex(pointsGoodsVO.getSkuId(), pointsGoods, esPromotionKey, null);
         this.mongoTemplate.save(pointsGoodsVO);
+        return result;
+    }
+
+    /**
+     * 修改砍价商品状态
+     *
+     * @param promotionMessage  信息队列传输促销信息实体
+     * @param promotionTypeEnum 促销分类枚举
+     * @return 修改结果
+     */
+    private boolean updateKanjiaGoods(PromotionMessage promotionMessage, PromotionTypeEnum promotionTypeEnum) {
+        KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO = this.mongoTemplate.findById(promotionMessage.getPromotionId(), KanjiaActivityGoodsDTO.class);
+        if (kanJiaActivityGoodsDTO == null) {
+            this.throwPromotionException(promotionTypeEnum, promotionMessage.getPromotionId(), promotionMessage.getPromotionStatus());
+            return false;
+        }
+        kanJiaActivityGoodsDTO.setPromotionStatus(promotionMessage.getPromotionStatus());
+        boolean result = this.kanJiaActivityGoodsService.updateById(kanJiaActivityGoodsDTO);
+        if (result) {
+            this.mongoTemplate.save(kanJiaActivityGoodsDTO);
+        }
         return result;
     }
 
@@ -500,6 +525,7 @@ public class PromotionServiceImpl implements PromotionService {
 
     /**
      * 根据消息，获取update wrapper
+     *
      * @param <T>
      * @return
      */

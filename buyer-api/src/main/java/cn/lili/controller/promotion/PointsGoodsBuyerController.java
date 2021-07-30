@@ -10,9 +10,11 @@ import cn.lili.modules.promotion.service.PointsGoodsCategoryService;
 import cn.lili.modules.promotion.service.PointsGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,6 +44,13 @@ public class PointsGoodsBuyerController {
     @ApiOperation(value = "获取积分商品分类分页")
     public ResultMessage<IPage<PointsGoodsCategory>> page(String name, PageVO page) {
         return ResultUtil.data(pointsGoodsCategoryService.getCategoryByPage(name, page));
+    }
+
+    @GetMapping("/{id}")
+    @ApiOperation(value = "获取积分活动商品")
+    @ApiImplicitParam(name = "id", value = "积分商品ID", required = true, paramType = "path")
+    public ResultMessage<PointsGoodsVO> getPointsGoodsPage(@PathVariable String id) {
+        return ResultUtil.data(pointsGoodsService.getPointsGoodsDetail(id));
     }
 
 }

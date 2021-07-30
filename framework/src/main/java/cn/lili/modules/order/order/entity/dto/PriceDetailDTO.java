@@ -81,6 +81,9 @@ public class PriceDetailDTO implements Serializable {
     @ApiModelProperty(value = "流水金额(入账 出帐金额) = goodsPrice + freight - discountPrice - couponPrice + updatePrice")
     private Double flowPrice;
 
+    @ApiModelProperty(value = "结算价格 与 商家/供应商 结算价格（例如积分商品/砍价商品）")
+    private Double settlementPrice;
+
     @ApiModelProperty(value = "最终结算金额 = flowPrice - platFormCommission - distributionCommission")
     private Double billPrice;
 

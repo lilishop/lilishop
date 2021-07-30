@@ -9,6 +9,10 @@ package cn.lili.modules.order.order.entity.enums;
 public enum OrderPromotionTypeEnum {
 
     /**
+     * 普通订单
+     */
+    NORMAL,
+    /**
      * 赠品订单
      */
     GIFT,
@@ -19,6 +23,10 @@ public enum OrderPromotionTypeEnum {
     /**
      * 积分订单
      */
-    POINT
+    POINTS,
+    /**
+     * 砍价订单
+     */
+    KANJIA
 
 }

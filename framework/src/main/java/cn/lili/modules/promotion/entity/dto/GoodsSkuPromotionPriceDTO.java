@@ -53,8 +53,8 @@ public class GoodsSkuPromotionPriceDTO implements Serializable {
     @ApiModelProperty(value = "单个商品积分购买数量")
     private Double points;
 
-    @ApiModelProperty(value = "商品购买总数量 = 单个商品积分购买数量 * 数量")
-    private Double totalPoints;
+    @ApiModelProperty(value = "商品购买积分总数量 = 单个商品积分购买数量 * 数量")
+    private Long totalPoints;
 
     @ApiModelProperty(value = "单个优惠的所占总优惠金额比例")
     private Double discountPriceRate;
@@ -102,8 +102,9 @@ public class GoodsSkuPromotionPriceDTO implements Serializable {
         this.setOriginalPrice(sku.getPrice());
         this.setCouponPrice(0D);
         this.setPoints(0d);
-        this.setTotalPoints(0d);
+        this.setTotalPoints(0L);
         this.setFinalePrice(sku.getPrice());
         this.setJoinPromotion(new ArrayList<>());
+
     }
 }

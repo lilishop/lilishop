@@ -7,6 +7,7 @@ import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
+import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.mapper.StoreFlowMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
@@ -25,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -63,14 +63,13 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         //根据订单编号获取订单数据
         Order order = orderService.getBySn(orderSn);
 
-        List<String> sns = new ArrayList<>();
-        sns.add(order.getSn());
-        sns.add(order.getTradeSn());
-
         //如果查询到多条支付记录，打印日志
         if (order.getPayStatus().equals(PayStatusEnum.PAID.name())) {
             log.error("订单[{}]检测到重复付款，请处理", orderSn);
         }
+
+        //获取订单促销类型,如果为促销订单则获取促销商品并获取结算价
+        String orderPromotionType = order.getOrderPromotionType();
         //循环子订单记录流水
         for (OrderItem item : orderItems) {
             StoreFlow storeFlow = new StoreFlow();
@@ -93,6 +92,18 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
             storeFlow.setCommissionPrice(item.getPriceDetailDTO().getPlatFormCommission());
             storeFlow.setDistributionRebate(item.getPriceDetailDTO().getDistributionCommission());
             storeFlow.setBillPrice(item.getPriceDetailDTO().getBillPrice());
+            //兼容为空，以及普通订单操作
+            if (StringUtils.isNotEmpty(orderPromotionType) || orderPromotionType.equals(OrderPromotionTypeEnum.NORMAL.name())) {
+                //普通订单操作
+            }
+            //如果为砍价活动，填写砍价结算价
+            else if (orderPromotionType.equals(OrderPromotionTypeEnum.KANJIA.name())) {
+                storeFlow.setKanjiaSettlementPrice(item.getPriceDetailDTO().getSettlementPrice());
+            }
+            //如果为砍价活动，填写砍价结算价
+            else if (orderPromotionType.equals(OrderPromotionTypeEnum.POINTS.name())) {
+                storeFlow.setPointSettlementPrice(item.getPriceDetailDTO().getSettlementPrice());
+            }
 
             //添加支付方式
             storeFlow.setPaymentName(order.getPaymentMethod());
@@ -148,9 +159,9 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
 
         LambdaQueryWrapper<StoreFlow> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(StoreFlow::getStoreId, storeId);
-        lambdaQueryWrapper.isNotNull(distribution,StoreFlow::getDistributionRebate);
+        lambdaQueryWrapper.isNotNull(distribution, StoreFlow::getDistributionRebate);
         lambdaQueryWrapper.between(StoreFlow::getCreateTime, startTime, endTime);
-        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(type),StoreFlow::getFlowType, type);
+        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(type), StoreFlow::getFlowType, type);
         return this.page(PageUtil.initPage(pageVO), lambdaQueryWrapper);
     }
 }

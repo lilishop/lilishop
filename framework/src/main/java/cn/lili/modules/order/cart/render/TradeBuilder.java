@@ -49,10 +49,16 @@ public class TradeBuilder {
     int[] defaultRender = {0, 1, 2, 4, 5, 6, 7};
 
     /**
+     * 单个商品优惠，不需要渲染满减优惠
+     */
+    int[] singleRender = {0, 2, 4, 5, 6, 7};
+
+    /**
      * 购物车购物车渲染
      * 0-> 校验商品， 1-》 满优惠渲染， 2->渲染优惠，  5->计算价格
      */
     int[] cartRender = {0, 1, 2, 5};
+
 
     /**
      * 构造购物车
@@ -98,12 +104,23 @@ public class TradeBuilder {
         //将购物车到sku未选择信息过滤
         List<CartSkuVO> collect = tradeDTO.getSkuList().parallelStream().filter(i -> Boolean.TRUE.equals(i.getChecked())).collect(Collectors.toList());
         tradeDTO.setSkuList(collect);
-        //按照计划进行渲染
-        for (int index : defaultRender) {
-            try {
-                cartRenderSteps.get(index).render(tradeDTO);
-            } catch (Exception e) {
-                log.error("购物车{}渲染异常：", cartRenderSteps.get(index).getClass(), e);
+        if (checkedWay.equals(CartTypeEnum.CART) || checkedWay.equals(CartTypeEnum.BUY_NOW) || checkedWay.equals(CartTypeEnum.VIRTUAL)) {
+            //按照计划进行渲染
+            for (int index : defaultRender) {
+                try {
+                    cartRenderSteps.get(index).render(tradeDTO);
+                } catch (Exception e) {
+                    log.error("购物车{}渲染异常：", cartRenderSteps.get(index).getClass(), e);
+                }
+            }
+        } else {
+            //按照计划进行渲染
+            for (int index : singleRender) {
+                try {
+                    cartRenderSteps.get(index).render(tradeDTO);
+                } catch (Exception e) {
+                    log.error("购物车{}渲染异常：", cartRenderSteps.get(index).getClass(), e);
+                }
             }
         }
 

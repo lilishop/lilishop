@@ -91,6 +91,17 @@ public class StoreFlow {
     @ApiModelProperty(value = "流水类型：PAY/REFUND 支付/退款", allowableValues = "PAY,REFUND")
     private String flowType;
 
+    /**
+     * @see cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum
+     */
+    @ApiModelProperty(value = "订单促销类型")
+    private String orderPromotionType;
+
+    @ApiModelProperty(value = "积分活动商品结算价格")
+    private Double pointSettlementPrice;
+
+    @ApiModelProperty(value = "砍价活动商品结算价格")
+    private Double kanjiaSettlementPrice;
 
     @ApiModelProperty(value = "平台优惠券 使用金额")
     private Double siteCouponPrice;
