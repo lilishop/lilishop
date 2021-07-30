@@ -39,7 +39,7 @@ public class ArticleCategoryManagerController {
         try {
             return ResultUtil.data(this.articleCategoryService.allChildren());
         } catch (Exception e) {
-            log.error("查询分类列表错误",e);
+            log.error("查询分类列表错误", e);
         }
         return null;
     }
@@ -57,6 +57,9 @@ public class ArticleCategoryManagerController {
         if (articleCategory.getLevel() == null) {
             articleCategory.setLevel(0);
         }
+        if (articleCategory.getSort() == null) {
+            articleCategory.setSort(0);
+        }
 
         return ResultUtil.data(articleCategoryService.saveArticleCategory(articleCategory));
     }
@@ -65,6 +68,14 @@ public class ArticleCategoryManagerController {
     @ApiImplicitParam(name = "id", value = "文章分类ID", required = true, dataType = "String", paramType = "path")
     @PutMapping("/update/{id}")
     public ResultMessage<ArticleCategory> update(@Valid ArticleCategory articleCategory, @PathVariable("id") String id) {
+
+        if (articleCategory.getLevel() == null) {
+            articleCategory.setLevel(0);
+        }
+        if (articleCategory.getSort() == null) {
+            articleCategory.setSort(0);
+        }
+
         articleCategory.setId(id);
         return ResultUtil.data(articleCategoryService.updateArticleCategory(articleCategory));
     }

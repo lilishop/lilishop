@@ -51,4 +51,17 @@ public class ArticleCategory extends BaseEntity {
     @ApiModelProperty(value = "类型")
     private String type;
 
+    public Integer getSort() {
+        if (sort == null) {
+            return 0;
+        }
+        return sort;
+    }
+
+    public Integer getLevel() {
+        if (level == null) {
+            return 1;
+        }
+        return level;
+    }
 }
