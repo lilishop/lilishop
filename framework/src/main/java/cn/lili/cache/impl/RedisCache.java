@@ -224,7 +224,7 @@ public class RedisCache implements Cache {
     @Override
     public void incrementScore(String sortedSetName, String keyword) {
         //指向key名为KEY的zset元素
-        redisTemplate.opsForZSet().incrementScore(sortedSetName,keyword, 1);
+        redisTemplate.opsForZSet().incrementScore(sortedSetName, keyword, 1);
     }
 
     @Override
@@ -245,6 +245,20 @@ public class RedisCache implements Cache {
     @Override
     public Set<ZSetOperations.TypedTuple<Object>> reverseRangeWithScores(String sortedSetName, Integer start, Integer end) {
         return this.redisTemplate.opsForZSet().reverseRangeWithScores(sortedSetName, start, end);
+    }
+
+    /**
+     * zrevrange命令, 查询Sorted Set中指定范围的值
+     * 返回的有序集合中，score大的在前面
+     * zrevrange方法无需担心用于指定范围的start和end出现越界报错问题
+     *
+     * @param sortedSetName sortedSetName
+     * @param count         获取数量
+     * @return 符合排序的集合
+     */
+    @Override
+    public Set<ZSetOperations.TypedTuple<Object>> reverseRangeWithScores(String sortedSetName, Integer count) {
+        return this.redisTemplate.opsForZSet().reverseRangeWithScores(sortedSetName, 0, count);
     }
 
 

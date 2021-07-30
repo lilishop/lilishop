@@ -102,9 +102,9 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     }
 
     @Override
-    public List<String> getHotWords(Integer start, Integer end) {
+    public List<String> getHotWords(Integer count) {
         List<String> hotWords = new ArrayList<>();
-        Set<DefaultTypedTuple> set = cache.reverseRangeWithScores(CachePrefix.HOT_WORD.getPrefix(), start, end);
+        Set<DefaultTypedTuple> set = cache.reverseRangeWithScores(CachePrefix.HOT_WORD.getPrefix(), count);
         for (DefaultTypedTuple defaultTypedTuple : set) {
             hotWords.add(Objects.requireNonNull(defaultTypedTuple.getValue()).toString());
         }

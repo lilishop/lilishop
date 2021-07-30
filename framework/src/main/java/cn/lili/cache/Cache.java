@@ -244,6 +244,17 @@ public interface Cache<T> {
      */
     Set<ZSetOperations.TypedTuple<Object>> reverseRangeWithScores(String sortedSetName, Integer start, Integer end);
 
+    /**
+     * zrevrange命令, 查询Sorted Set中指定范围的值
+     * 返回的有序集合中，score大的在前面
+     * zrevrange方法无需担心用于指定范围的start和end出现越界报错问题
+     *
+     * @param sortedSetName sortedSetName
+     * @param count         查询数量
+     * @return 获取满足条件的集合
+     */
+    Set<ZSetOperations.TypedTuple<Object>> reverseRangeWithScores(String sortedSetName, Integer count);
+
 
     /**
      * 向Zset里添加成员

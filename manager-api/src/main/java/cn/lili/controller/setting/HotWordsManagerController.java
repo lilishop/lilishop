@@ -30,7 +30,7 @@ public class HotWordsManagerController {
     @ApiOperation(value = "获取热词")
     @GetMapping
     public ResultMessage getHotWords() {
-        return ResultUtil.data(esGoodsSearchService.getHotWords(0, 99));
+        return ResultUtil.data(esGoodsSearchService.getHotWords(99));
     }
 
     @ApiOperation(value = "设置热词")

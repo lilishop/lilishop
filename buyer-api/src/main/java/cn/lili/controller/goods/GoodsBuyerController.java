@@ -115,8 +115,8 @@ public class GoodsBuyerController {
 
     @ApiOperation(value = "获取搜索热词")
     @GetMapping("/hot-words")
-    public ResultMessage<List<String>> getGoodsHotWords(Integer start, Integer end) {
-        List<String> hotWords = goodsSearchService.getHotWords(start, end);
+    public ResultMessage<List<String>> getGoodsHotWords(Integer count) {
+        List<String> hotWords = goodsSearchService.getHotWords(count);
         return ResultUtil.data(hotWords);
     }
 
