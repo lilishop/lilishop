@@ -123,13 +123,6 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
             //下一次更新时间
             cartSkuVO.setUpdatePromotionTime(date);
         }
-        //skuvo写入需支付积分
-        PointsGoods pointsGoods = pointsGoodsService.getPointsGoodsVOByMongo(cartSkuVO.getGoodsSku().getId());
-        if (pointsGoods != null) {
-            cartSkuVO.setPoint(pointsGoods.getPoints().intValue());
-        }
-
-
         //分销商品
         DistributionGoods distributionGoods = distributionGoodsService.distributionGoodsVOBySkuId(cartSkuVO.getGoodsSku().getId());
         if (distributionGoods != null) {
