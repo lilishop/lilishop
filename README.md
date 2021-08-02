@@ -86,7 +86,7 @@ Lilishop 基于SpringBoot研发的B2B2C多用户商城系统，前端使用 Vue�
 
 
 
-PS:单独部署的话，商城数据库文件访问这里：https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql
+PS:单独部署的话，点击跳转 https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql 这里有与tag版本一致的sql，根据tag获取sql，如果使用master代码，则需要在lilishop项目根目录的update-sql目录中，获取对应的升级sql。
 
 ##### 商城部署后 API/UI 地址
 

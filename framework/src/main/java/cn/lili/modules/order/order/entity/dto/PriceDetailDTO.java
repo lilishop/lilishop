@@ -94,6 +94,13 @@ public class PriceDetailDTO implements Serializable {
     private List<BasePromotion> joinPromotion;
 
 
+    public Double getOriginalPrice() {
+        if (originalPrice == null) {
+            return flowPrice;
+        }
+        return originalPrice;
+    }
+
     public PriceDetailDTO() {
         goodsPrice = 0d;
         freightPrice = 0d;
@@ -116,13 +123,50 @@ public class PriceDetailDTO implements Serializable {
         joinPromotion = new ArrayList<>();
     }
 
+
+    /**
+     * 写入修改金额，自动计算订单各个金额
+     *
+     * @param updatePrice 修改后的订单金额
+     */
+    public void setUpdatePrice(Double updatePrice) {
+        this.updatePrice = updatePrice;
+    }
+
+
+    /**
+     * 写入佣金比例，计算结算金额
+     *
+     * @param commission 佣金比例
+     */
+    public void setCommission(Double commission) {
+
+        //流水金额(入账 出帐金额) = goodsPrice + freight - （discountPrice + couponPrice）
+        this.flowPrice = CurrencyUtil.sub(
+                CurrencyUtil.add(goodsPrice, freightPrice),
+                CurrencyUtil.add(discountPrice,
+                        couponPrice != null ? couponPrice : 0));
+
+        //计算平台佣金  流水金额*平台佣金比例
+        if (commission != null && commission > 0) {
+            platFormCommission = CurrencyUtil.div(CurrencyUtil.mul(flowPrice, commission), 100);
+        }
+        countBill();
+    }
+
+    public void countBill() {
+        //如果是普通订单最终结算金额 = flowPrice - platFormCommission - distributionCommission
+        billPrice = CurrencyUtil.sub(CurrencyUtil.sub(flowPrice, platFormCommission), distributionCommission);
+
+    }
+
     /**
      * 累加
      *
      * @param priceDetailDTOS
      * @return
      */
-    public static PriceDetailDTO accumulationPriceDTO(List<PriceDetailDTO> priceDetailDTOS, PriceDetailDTO originPriceDetail) {
+    public void accumulationPriceDTO(List<PriceDetailDTO> priceDetailDTOS) {
 
 
         double goodsPrice = 0d;
@@ -164,23 +208,21 @@ public class PriceDetailDTO implements Serializable {
             billPrice = CurrencyUtil.add(billPrice, price.getBillPrice());
 
         }
-        originPriceDetail.setGoodsPrice(goodsPrice);
-        originPriceDetail.setFreightPrice(freightPrice);
-        originPriceDetail.setPayPoint(payPoint);
-        originPriceDetail.setUpdatePrice(updatePrice);
-        originPriceDetail.setDiscountPrice(discountPrice);
+        this.setGoodsPrice(goodsPrice);
+        this.setFreightPrice(freightPrice);
+        this.setPayPoint(payPoint);
+        this.setUpdatePrice(updatePrice);
+        this.setDiscountPrice(discountPrice);
 
-        originPriceDetail.setDistributionCommission(distributionCommission);
-        originPriceDetail.setPlatFormCommission(platFormCommission);
+        this.setDistributionCommission(distributionCommission);
+        this.setPlatFormCommission(platFormCommission);
 
-        originPriceDetail.setSiteCouponPrice(siteCouponPrice);
-        originPriceDetail.setSiteCouponPoint(siteCouponPoint);
-        originPriceDetail.setSiteCouponCommission(siteCouponCommission);
+        this.setSiteCouponPrice(siteCouponPrice);
+        this.setSiteCouponPoint(siteCouponPoint);
+        this.setSiteCouponCommission(siteCouponCommission);
 
-        originPriceDetail.setFlowPrice(flowPrice);
-        originPriceDetail.setBillPrice(billPrice);
-
-        return originPriceDetail;
+        this.setFlowPrice(flowPrice);
+        this.setBillPrice(billPrice);
     }
 
     /**
@@ -203,11 +245,4 @@ public class PriceDetailDTO implements Serializable {
         return goodsPrice;
     }
 
-    /**
-     * 自身计价
-     */
-    public void count() {
-        this.flowPrice = CurrencyUtil.sub(CurrencyUtil.add(goodsPrice, freightPrice), discountPrice);
-        //this.billPrice = CurrencyUtil.sub(CurrencyUtil.sub(CurrencyUtil.sub(flowPrice, platFormCommission)), distributionCommission);
-    }
 }

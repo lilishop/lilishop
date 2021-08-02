@@ -73,6 +73,8 @@ public class CartPriceRender implements CartRenderStep {
                 if (cart.getStoreId().equals(sku.getStoreId()) && !cart.getSkuList().contains(sku)) {
                     cart.getSkuList().add(sku);
                 }
+                //写入初始价格
+                sku.getPriceDetailDTO().setGoodsPrice(CurrencyUtil.mul(sku.getPurchasePrice(), sku.getNum()));
             }
         }
     }
@@ -105,55 +107,40 @@ public class CartPriceRender implements CartRenderStep {
         //计算购物车价格
         for (CartVO cart : cartVOS) {
             List<CartSkuVO> cartSkuVOS = map.get(cart.getStoreId());
+
+            //累加价格
             List<PriceDetailDTO> priceDetailDTOS = new ArrayList<>();
+            //购物车选中
             if (Boolean.TRUE.equals(cart.getChecked())) {
-                //累加价格
                 for (CartSkuVO cartSkuVO : cartSkuVOS) {
+                    //sku选中
                     if (Boolean.TRUE.equals(cartSkuVO.getChecked())) {
                         PriceDetailDTO priceDetailDTO = cartSkuVO.getPriceDetailDTO();
-                        //流水金额(入账 出帐金额) = goodsPrice + freight - （discountPrice + couponPrice）
-                        double flowPrice = CurrencyUtil.sub(
-                                CurrencyUtil.add(priceDetailDTO.getGoodsPrice(), priceDetailDTO.getFreightPrice()),
-                                CurrencyUtil.add(priceDetailDTO.getDiscountPrice(),
-                                        priceDetailDTO.getCouponPrice() != null ? priceDetailDTO.getCouponPrice() : 0));
-                        priceDetailDTO.setFlowPrice(flowPrice);
+                        //平台佣金根据分类计算
+                        String categoryId = cartSkuVO.getGoodsSku().getCategoryPath()
+                                .substring(cartSkuVO.getGoodsSku().getCategoryPath().lastIndexOf(",") + 1);
+                        if (StrUtil.isNotEmpty(categoryId)) {
+                            Double commissionRate = categoryService.getById(categoryId).getCommissionRate();
+                            priceDetailDTO.setCommission(commissionRate);
+                        }
 
-                        //如果积分订单 计算金额
+                        //如果积分订单 积分订单，单独操作订单结算金额和商家结算字段
                         if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.POINTS)) {
                             PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsVOByMongo(cartSkuVO.getGoodsSku().getId());
                             priceDetailDTO.setBillPrice(pointsGoodsVO.getSettlementPrice());
                             priceDetailDTO.setSettlementPrice(pointsGoodsVO.getSettlementPrice());
                         }
-                        //如果砍价订单 计算金额
+                        //如果砍价订单 计算金额，单独操作订单结算金额和商家结算字段
                         else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.KANJIA)) {
                             KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO = kanjiaActivityGoodsService.getKanJiaGoodsBySku(cartSkuVO.getGoodsSku().getId());
                             priceDetailDTO.setBillPrice(kanjiaActivityGoodsDTO.getSettlementPrice());
                             priceDetailDTO.setSettlementPrice(kanjiaActivityGoodsDTO.getSettlementPrice());
                         }
-                        //兜底普通计算
-                        else {
-                            //如果是普通订单最终结算金额 = flowPrice - platFormCommission - distributionCommission
-                            double billPrice = CurrencyUtil.sub(
-                                    CurrencyUtil.sub(
-                                            flowPrice, priceDetailDTO.getPlatFormCommission()), priceDetailDTO.getDistributionCommission());
-                            priceDetailDTO.setBillPrice(billPrice);
-                        }
-
-                        //平台佣金
-                        String categoryId = cartSkuVO.getGoodsSku().getCategoryPath().substring(
-                                cartSkuVO.getGoodsSku().getCategoryPath().lastIndexOf(",") + 1
-                        );
-
-                        //平台佣金=订单金额 * 分类佣金百分比
-                        if (StrUtil.isNotEmpty(categoryId)) {
-                            Double platFormCommission = CurrencyUtil.div(CurrencyUtil.mul(flowPrice, categoryService.getById(categoryId).getCommissionRate()), 100);
-                            priceDetailDTO.setPlatFormCommission(platFormCommission);
-                        }
 
                         priceDetailDTOS.add(priceDetailDTO);
                     }
                 }
-                cart.setPriceDetailDTO(PriceDetailDTO.accumulationPriceDTO(priceDetailDTOS, cart.getPriceDetailDTO()));
+                cart.getPriceDetailDTO().accumulationPriceDTO(priceDetailDTOS);
             }
         }
     }
@@ -172,7 +159,7 @@ public class CartPriceRender implements CartRenderStep {
         for (CartVO cart : cartVOS) {
             priceDetailDTOS.add(cart.getPriceDetailDTO());
         }
-        tradeDTO.setPriceDetailDTO(PriceDetailDTO.accumulationPriceDTO(priceDetailDTOS, tradeDTO.getPriceDetailDTO()));
+        tradeDTO.getPriceDetailDTO().accumulationPriceDTO(priceDetailDTOS);
     }
 
 }

@@ -1,11 +1,9 @@
 package cn.lili.modules.order.order.serviceimpl;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.modules.system.utils.OperationalJudgment;
 import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
 import cn.lili.modules.order.order.entity.dos.Order;
@@ -20,6 +18,8 @@ import cn.lili.modules.order.order.service.OrderPriceService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.plugin.bank.BankTransferPlugin;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
+import cn.lili.modules.system.utils.OperationalJudgment;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 订单价格业务层实现
@@ -122,16 +123,21 @@ public class OrderPriceServiceImpl implements OrderPriceService {
         //获取订单价格信息
         PriceDetailDTO orderPriceDetailDTO = order.getPriceDetailDTO();
 
-        //如果未修改过金额则记录订单原始价格
-        if (orderPriceDetailDTO.getOriginalPrice() == null) {
-            orderPriceDetailDTO.setOriginalPrice(order.getFlowPrice());
-        }
-
         //修改订单价格
         order.setFlowPrice(orderPrice);
         //订单修改金额=使用订单原始金额-修改后金额
         orderPriceDetailDTO.setUpdatePrice(CurrencyUtil.sub(orderPriceDetailDTO.getOriginalPrice(), orderPrice));
         orderPriceDetailDTO.setFlowPrice(orderPrice);
+
+        List<OrderItem> orderItems = updateOrderItemPrice(order);
+
+        //这里如果直接赋予订单金额，则累加可能会出现小数点，最后无法累加回去，所以用一个零时变量累加后，将平台佣金赋予对象
+        PriceDetailDTO tempPriceDetail = new PriceDetailDTO();
+        tempPriceDetail.accumulationPriceDTO(orderItems.stream().map(OrderItem::getPriceDetailDTO).collect(Collectors.toList()));
+
+        orderPriceDetailDTO.setPlatFormCommission(tempPriceDetail.getPlatFormCommission());
+
+        orderPriceDetailDTO.countBill();
         //修改订单
         order.setPriceDetail(JSONUtil.toJsonStr(orderPriceDetailDTO));
         orderService.updateById(order);
@@ -148,19 +154,14 @@ public class OrderPriceServiceImpl implements OrderPriceService {
      *
      * @param order 订单
      */
-    private void updateOrderItemPrice(Order order) {
+    private List<OrderItem> updateOrderItemPrice(Order order) {
         List<OrderItem> orderItems = orderItemService.getByOrderSn(order.getSn());
         for (OrderItem orderItem : orderItems) {
 
             //获取订单货物价格信息
             PriceDetailDTO priceDetailDTO = orderItem.getPriceDetailDTO();
 
-            //如果未修改过金额则记录订单原始价格
-            if (priceDetailDTO.getOriginalPrice() == null) {
-                priceDetailDTO.setOriginalPrice(orderItem.getFlowPrice());
-            }
-
-            //获取订单货物占订单金额的百分比
+            //SKU占总订单 金额的百分比
             Double priceFluctuationRatio = CurrencyUtil.div(priceDetailDTO.getOriginalPrice(), order.getPriceDetailDTO().getOriginalPrice());
 
             //计算修改后的订单货物金额
@@ -168,22 +169,22 @@ public class OrderPriceServiceImpl implements OrderPriceService {
 
             //记录修改金额
             priceDetailDTO.setUpdatePrice(CurrencyUtil.sub(priceDetailDTO.getOriginalPrice(), flowPrice));
+
             priceDetailDTO.setFlowPrice(flowPrice);
 
             //计算平台佣金=交易金额*分类佣金比例/100
             Double platFormCommission = CurrencyUtil.div(CurrencyUtil.mul(flowPrice, categoryService.getById(orderItem.getCategoryId()).getCommissionRate()), 100);
             priceDetailDTO.setPlatFormCommission(platFormCommission);
 
-            //最终结算金额 = 流水金额-平台佣金-分销提佣
-            double billPrice = CurrencyUtil.sub(CurrencyUtil.sub(priceDetailDTO.getFlowPrice(), priceDetailDTO.getPlatFormCommission()),
-                    priceDetailDTO.getDistributionCommission());
-            priceDetailDTO.setBillPrice(billPrice);
-
             //修改订单货物金额
             orderItem.setFlowPrice(flowPrice);
+
+            priceDetailDTO.countBill();
             orderItem.setPriceDetail(JSONUtil.toJsonStr(priceDetailDTO));
             orderItemService.update(orderItem, new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getId, orderItem.getId()));
+
         }
+        return orderItems;
     }
 
 }

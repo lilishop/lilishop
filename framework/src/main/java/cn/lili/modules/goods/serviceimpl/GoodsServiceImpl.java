@@ -225,6 +225,11 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    public GoodsVO getGoodsVOFromDB(String goodsId) {
+        return getGoodsVO(goodsId);
+    }
+
+    @Override
     public IPage<Goods> queryByParams(GoodsSearchParams goodsSearchParams) {
         return this.page(PageUtil.initPage(goodsSearchParams), goodsSearchParams.queryWrapper());
     }

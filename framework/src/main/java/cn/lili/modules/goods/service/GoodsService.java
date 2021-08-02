@@ -59,6 +59,14 @@ public interface GoodsService extends IService<Goods> {
     GoodsVO getGoodsVO(String goodsId);
 
     /**
+     * 数据库查询商品VO
+     *
+     * @param goodsId 商品id
+     * @return 商品VO
+     */
+    GoodsVO getGoodsVOFromDB(String goodsId);
+
+    /**
      * 商品查询
      *
      * @param goodsSearchParams 查询参数
