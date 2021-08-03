@@ -93,18 +93,19 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
             storeFlow.setDistributionRebate(item.getPriceDetailDTO().getDistributionCommission());
             storeFlow.setBillPrice(item.getPriceDetailDTO().getBillPrice());
             //兼容为空，以及普通订单操作
-            if (StringUtils.isNotEmpty(orderPromotionType) || orderPromotionType.equals(OrderPromotionTypeEnum.NORMAL.name())) {
-                //普通订单操作
+            if (StringUtils.isNotEmpty(orderPromotionType)) {
+                if (orderPromotionType.equals(OrderPromotionTypeEnum.NORMAL.name())) {
+                    //普通订单操作
+                }
+                //如果为砍价活动，填写砍价结算价
+                else if (orderPromotionType.equals(OrderPromotionTypeEnum.KANJIA.name())) {
+                    storeFlow.setKanjiaSettlementPrice(item.getPriceDetailDTO().getSettlementPrice());
+                }
+                //如果为砍价活动，填写砍价结算价
+                else if (orderPromotionType.equals(OrderPromotionTypeEnum.POINTS.name())) {
+                    storeFlow.setPointSettlementPrice(item.getPriceDetailDTO().getSettlementPrice());
+                }
             }
-            //如果为砍价活动，填写砍价结算价
-            else if (orderPromotionType.equals(OrderPromotionTypeEnum.KANJIA.name())) {
-                storeFlow.setKanjiaSettlementPrice(item.getPriceDetailDTO().getSettlementPrice());
-            }
-            //如果为砍价活动，填写砍价结算价
-            else if (orderPromotionType.equals(OrderPromotionTypeEnum.POINTS.name())) {
-                storeFlow.setPointSettlementPrice(item.getPriceDetailDTO().getSettlementPrice());
-            }
-
             //添加支付方式
             storeFlow.setPaymentName(order.getPaymentMethod());
             //添加第三方支付流水号
