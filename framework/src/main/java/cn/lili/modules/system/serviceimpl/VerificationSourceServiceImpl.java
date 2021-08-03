@@ -3,7 +3,7 @@ package cn.lili.modules.system.serviceimpl;
 import cn.lili.cache.Cache;
 import cn.lili.modules.system.entity.dos.VerificationSource;
 import cn.lili.modules.system.entity.enums.VerificationSourceEnum;
-import cn.lili.modules.system.entity.vo.VerificationVO;
+import cn.lili.modules.system.entity.vo.VerificationDTO;
 import cn.lili.modules.system.mapper.VerificationSourceMapper;
 import cn.lili.modules.system.service.VerificationSourceService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -25,10 +25,10 @@ import java.util.List;
 public class VerificationSourceServiceImpl extends ServiceImpl<VerificationSourceMapper, VerificationSource> implements VerificationSourceService {
 
     @Autowired
-    private Cache<VerificationVO> cache;
+    private Cache<VerificationDTO> cache;
 
     @Override
-    public VerificationVO initCache() {
+    public VerificationDTO initCache() {
         List<VerificationSource> dbList = this.list();
         List<VerificationSource> resourceList = new ArrayList<>();
         List<VerificationSource> sliderList = new ArrayList<>();
@@ -39,19 +39,19 @@ public class VerificationSourceServiceImpl extends ServiceImpl<VerificationSourc
                 sliderList.add(item);
             }
         }
-        VerificationVO verificationVO = new VerificationVO();
-        verificationVO.setVerificationResources(resourceList);
-        verificationVO.setVerificationSlider(sliderList);
-        cache.put(VERIFICATION_CACHE, verificationVO);
-        return verificationVO;
+        VerificationDTO verificationDTO = new VerificationDTO();
+        verificationDTO.setVerificationResources(resourceList);
+        verificationDTO.setVerificationSlider(sliderList);
+        cache.put(VERIFICATION_CACHE, verificationDTO);
+        return verificationDTO;
     }
 
     @Override
-    public VerificationVO getVerificationCache() {
-        VerificationVO verificationVO = cache.get(VERIFICATION_CACHE);
-        if (verificationVO == null) {
+    public VerificationDTO getVerificationCache() {
+        VerificationDTO verificationDTO = cache.get(VERIFICATION_CACHE);
+        if (verificationDTO == null) {
             return initCache();
         }
-        return verificationVO;
+        return verificationDTO;
     }
 }

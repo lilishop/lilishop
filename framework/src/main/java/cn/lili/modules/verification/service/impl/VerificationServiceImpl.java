@@ -10,7 +10,7 @@ import cn.lili.modules.verification.enums.VerificationEnums;
 import cn.lili.modules.verification.service.VerificationService;
 import cn.lili.common.vo.SerializableStream;
 import cn.lili.modules.system.entity.dos.VerificationSource;
-import cn.lili.modules.system.entity.vo.VerificationVO;
+import cn.lili.modules.system.entity.vo.VerificationDTO;
 import cn.lili.modules.system.service.VerificationSourceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,10 +52,10 @@ public class VerificationServiceImpl implements VerificationService {
         }
 
         //获取验证码配置
-        VerificationVO verificationVO = verificationSourceService.getVerificationCache();
+        VerificationDTO verificationDTO = verificationSourceService.getVerificationCache();
 
-        List<VerificationSource> verificationResources = verificationVO.getVerificationResources();
-        List<VerificationSource> verificationSlider = verificationVO.getVerificationSlider();
+        List<VerificationSource> verificationResources = verificationDTO.getVerificationResources();
+        List<VerificationSource> verificationSlider = verificationDTO.getVerificationSlider();
 
 
         Random random = new Random();

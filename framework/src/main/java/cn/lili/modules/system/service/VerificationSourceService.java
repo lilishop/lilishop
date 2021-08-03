@@ -2,7 +2,7 @@ package cn.lili.modules.system.service;
 
 import cn.lili.cache.CachePrefix;
 import cn.lili.modules.system.entity.dos.VerificationSource;
-import cn.lili.modules.system.entity.vo.VerificationVO;
+import cn.lili.modules.system.entity.vo.VerificationDTO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -24,12 +24,12 @@ public interface VerificationSourceService extends IService<VerificationSource> 
      *
      * @return
      */
-    VerificationVO initCache();
+    VerificationDTO initCache();
 
     /**
      * 获取验证缓存
      *
      * @return 验证码
      */
-    VerificationVO getVerificationCache();
+    VerificationDTO getVerificationCache();
 }
