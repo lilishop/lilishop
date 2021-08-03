@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.pinyin.PinyinUtil;
 import cn.lili.elasticsearch.BaseElasticsearchService;
 import cn.lili.elasticsearch.EsSuffix;
@@ -367,7 +368,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     /**
      * 重置当前商品索引
      *
-     * @param goodsSku 商品sku信息
+     * @param goodsSku       商品sku信息
      * @param goodsParamDTOS 商品参数
      * @return 商品索引
      */
@@ -449,6 +450,9 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      * @param words 商品关键字
      */
     private void wordsToDb(String words) {
+        if (StrUtil.isEmpty(words)) {
+            return;
+        }
         try {
             //是否有重复
             GoodsWords entity = goodsWordsService.getOne(new LambdaQueryWrapper<GoodsWords>().eq(GoodsWords::getWords, words));
