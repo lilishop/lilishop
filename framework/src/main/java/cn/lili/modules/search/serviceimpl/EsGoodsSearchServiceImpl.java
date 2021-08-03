@@ -104,6 +104,9 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     @Override
     public List<String> getHotWords(Integer count) {
         List<String> hotWords = new ArrayList<>();
+        if (hotWords.isEmpty() || hotWords == null) {
+            return null;
+        }
         //下表从0开始，所以count-1
         count = count - 1;
         Set<DefaultTypedTuple> set = cache.reverseRangeWithScores(CachePrefix.HOT_WORD.getPrefix(), count);
