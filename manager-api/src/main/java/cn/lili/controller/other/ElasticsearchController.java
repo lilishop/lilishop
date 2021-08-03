@@ -2,8 +2,8 @@ package cn.lili.controller.other;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.modules.goods.entity.dos.Goods;
-import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsService;
@@ -66,7 +66,6 @@ public class ElasticsearchController {
         String goodsId = null;
         //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
         for (GoodsSku goodsSku : list) {
-            if (goodsId == null || !goodsId.equals(goodsSku.getGoodsId())) {
                 goodsId = goodsSku.getGoodsId();
                 Goods goods = goodsService.getById(goodsId);
                 EsGoodsIndex index = new EsGoodsIndex(goodsSku);
@@ -78,7 +77,7 @@ public class ElasticsearchController {
                 index.setPromotionMap(goodsCurrentPromotionMap);
                 esGoodsIndices.add(index);
                 stringRedisTemplate.opsForValue().set(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity().toString());
-            }
+
         }
         //初始化商品索引
         esGoodsIndexService.initIndex(esGoodsIndices);
