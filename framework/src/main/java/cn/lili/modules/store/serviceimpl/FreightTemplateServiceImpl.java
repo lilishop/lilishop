@@ -58,7 +58,7 @@ public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMappe
         list = new ArrayList<>();
         //查询运费模板
         LambdaQueryWrapper<FreightTemplate> lambdaQueryWrapper = Wrappers.lambdaQuery();
-        lambdaQueryWrapper.eq(FreightTemplate::getStoreId, UserContext.getCurrentUser().getId());
+        lambdaQueryWrapper.eq(FreightTemplate::getStoreId, UserContext.getCurrentUser().getStoreId());
         List<FreightTemplate> freightTemplates = this.baseMapper.selectList(lambdaQueryWrapper);
         if (!freightTemplates.isEmpty()) {
             //如果模板不为空则查询子模板信息
@@ -105,7 +105,7 @@ public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMappe
         AuthUser tokenUser = UserContext.getCurrentUser();
         FreightTemplate freightTemplate = new FreightTemplate();
         //设置店铺ID
-        freightTemplateVO.setStoreId(tokenUser.getId());
+        freightTemplateVO.setStoreId(tokenUser.getStoreId());
         //复制属性
         BeanUtils.copyProperties(freightTemplateVO, freightTemplate);
         //添加运费模板
