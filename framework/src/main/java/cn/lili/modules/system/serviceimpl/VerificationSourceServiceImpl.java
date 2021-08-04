@@ -48,11 +48,10 @@ public class VerificationSourceServiceImpl extends ServiceImpl<VerificationSourc
 
     @Override
     public VerificationDTO getVerificationCache() {
-        return initCache();
-//        VerificationDTO verificationDTO = cache.get(VERIFICATION_CACHE);
-//        if (verificationDTO == null) {
-//
-//        }
-//        return verificationDTO;
+        VerificationDTO verificationDTO = cache.get(VERIFICATION_CACHE);
+        if (verificationDTO == null) {
+            return initCache();
+        }
+        return verificationDTO;
     }
 }

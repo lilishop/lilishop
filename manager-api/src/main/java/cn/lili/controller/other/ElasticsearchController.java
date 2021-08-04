@@ -8,7 +8,6 @@ import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
-import cn.lili.modules.goods.service.ParametersService;
 import cn.lili.modules.promotion.service.PromotionService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
@@ -50,9 +49,6 @@ public class ElasticsearchController {
 
     @Autowired
     private PromotionService promotionService;
-
-    @Autowired
-    private ParametersService parametersService;
 
     @GetMapping
     public void init() {
