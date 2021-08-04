@@ -107,8 +107,8 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         // redis 排序中，下标从0开始，所以这里需要 -1 处理
         count = count - 1;
         Set<DefaultTypedTuple> set = cache.reverseRangeWithScores(CachePrefix.HOT_WORD.getPrefix(), count);
-        if (set.isEmpty() || set == null) {
-            return null;
+        if (set == null || set.isEmpty()) {
+            return new ArrayList<String>();
         }
         for (DefaultTypedTuple defaultTypedTuple : set) {
             hotWords.add(Objects.requireNonNull(defaultTypedTuple.getValue()).toString());
