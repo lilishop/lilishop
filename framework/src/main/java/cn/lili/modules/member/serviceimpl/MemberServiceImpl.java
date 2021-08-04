@@ -382,10 +382,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         if (member != null) {
             //积分变动后的会员积分
             long currentPoint;
+            //如果增加积分
             if (type) {
-                currentPoint = CurrencyUtil.add(member.getPoint(), point).longValue();
-            } else {
-                currentPoint = CurrencyUtil.sub(member.getPoint(), point) < 0 ? 0 : new Double(CurrencyUtil.sub(member.getPoint(), point)).longValue();
+                currentPoint = member.getPoint() + point;
+            }
+            //否则扣除积分
+            else {
+                currentPoint = member.getPoint() - point < 0 ? 0 : member.getPoint() - point;
             }
             member.setPoint(currentPoint);
             Boolean result = this.updateById(member);
@@ -576,7 +579,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         queryWrapper.like(StringUtils.isNotBlank(memberSearchVO.getMobile()), "mobile", memberSearchVO.getMobile());
         //按照状态查询
         queryWrapper.eq(StringUtils.isNotBlank(memberSearchVO.getDisabled()), "disabled",
-                memberSearchVO.getDisabled().equals(SwitchEnum.OPEN.name()) ? 1 : 0);        queryWrapper.orderByDesc("create_time");
+                memberSearchVO.getDisabled().equals(SwitchEnum.OPEN.name()) ? 1 : 0);
+        queryWrapper.orderByDesc("create_time");
         return this.count(queryWrapper);
     }
 

@@ -178,9 +178,9 @@ public interface MemberService extends IService<Member> {
      * 会员积分变动
      *
      * @param point    变动积分
-     * @param type     是否增加积分
+     * @param type     是否增加积分 true 增加积分，反之扣减积分
      * @param memberId 会员id
-     * @param content  变动详细
+     * @param content  变动日志
      * @return 操作结果
      */
     Boolean updateMemberPoint(Long point, Boolean type, String memberId, String content);
