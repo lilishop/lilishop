@@ -408,7 +408,7 @@ public enum ResultCode {
      */
     OSS_NOT_EXIST(80101, "OSS未配置"),
     OSS_EXCEPTION_ERROR(80102, "文件上传失败，请稍后重试"),
-    OSS_DELETE_ERROR(80102, "图片删除失败"),
+    OSS_DELETE_ERROR(80103, "图片删除失败"),
 
     /**
      * 验证码

@@ -126,6 +126,6 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
      * 清除缓存
      */
     private void removeCache(String storeId) {
-        cache.remove(CachePrefix.CATEGORY.getPrefix() + storeId + "tree");
+        cache.remove(CachePrefix.STORE_CATEGORY.getPrefix() + storeId + "tree");
     }
 }

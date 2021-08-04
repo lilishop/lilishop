@@ -8,6 +8,8 @@ import lombok.Data;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 /**
@@ -28,12 +30,16 @@ public class StoreGoodsLabel extends BaseEntity {
     @ApiModelProperty("店铺ID")
     private String storeId;
 
+    @NotEmpty(message = "店铺商品分类名称不能为空")
     @ApiModelProperty("店铺商品分类名称")
     private String labelName;
 
+
+    @NotNull(message = "店铺商品分类排序不能为空")
     @ApiModelProperty("店铺商品分类排序")
     private BigDecimal sortOrder;
 
+    @NotNull(message = "父节点不能为空，需设定根节点或者某节点的子节点")
     @ApiModelProperty(value = "父id, 根节点为0")
     private String parentId;
 
