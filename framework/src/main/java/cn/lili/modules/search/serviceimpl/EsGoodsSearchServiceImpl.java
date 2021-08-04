@@ -104,6 +104,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     @Override
     public List<String> getHotWords(Integer count) {
         List<String> hotWords = new ArrayList<>();
+        // redis 排序中，下标从0开始，所以这里需要 -1 处理
         count = count - 1;
         Set<DefaultTypedTuple> set = cache.reverseRangeWithScores(CachePrefix.HOT_WORD.getPrefix(), count);
         if (set.isEmpty() || set == null) {
