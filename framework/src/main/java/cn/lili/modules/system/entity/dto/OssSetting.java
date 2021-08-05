@@ -18,21 +18,21 @@ public class OssSetting implements Serializable {
     /**
      * 域名
      */
-    private String endPoint = "oss-cn-beijing.aliyuncs.com";
+    private String endPoint = "";
     /**
      * 储存空间
      */
-    private String bucketName = "lilishop-oss";
+    private String bucketName = "";
     /**
      * 存放路径路径
      */
-    private String picLocation = "/template";
+    private String picLocation = "";
     /**
      * 密钥id
      */
-    private String accessKeyId = "LTAI4G4deX59EyjpEULaJdsU";
+    private String accessKeyId = "";
     /**
      * 密钥
      */
-    private String accessKeySecret = "BlRBpl7WBman6GYYwLKMiKqMTXFhWf";
+    private String accessKeySecret = "";
 }
