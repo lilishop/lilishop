@@ -1,6 +1,7 @@
 package cn.lili.modules.member.serviceimpl;
 
 
+import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHistoryMapper, MemberPointsHistory> implements MemberPointsHistoryService {
 
+
+
     @Override
     public MemberPointsHistoryVO getMemberPointsHistoryVO(String memberId) {
         MemberPointsHistoryVO memberPointsHistoryVO = new MemberPointsHistoryVO();
@@ -29,12 +32,12 @@ public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHist
         Long variablePoint = 0L;
 
         if (StringUtils.isNotEmpty(memberId)) {
-            point = this.baseMapper.getMemberPointsHistoryVO(1, memberId);
-            variablePoint = this.baseMapper.getMemberPointsHistoryVO(0, memberId);
+            point = this.baseMapper.getMemberPointsHistoryVO(PointTypeEnum.INCREASE.name(), memberId);
+            variablePoint = this.baseMapper.getMemberPointsHistoryVO(PointTypeEnum.REDUCE.name(), memberId);
 
         } else {
-            point = this.baseMapper.getALLMemberPointsHistoryVO(0);
-            variablePoint = this.baseMapper.getALLMemberPointsHistoryVO(1);
+            point = this.baseMapper.getALLMemberPointsHistoryVO(PointTypeEnum.REDUCE.name());
+            variablePoint = this.baseMapper.getALLMemberPointsHistoryVO(PointTypeEnum.INCREASE.name());
         }
         memberPointsHistoryVO.setPoint(point == null ? 0 : point);
         memberPointsHistoryVO.setVariablePoint(variablePoint == null ? 0 : variablePoint);
