@@ -157,15 +157,20 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     @Override
     @SystemLogPoint(description = "修改管理员", customerLog = "'修改管理员:'+#adminUser.username")
     public boolean updateAdminUser(AdminUser adminUser, List<String> roles) {
-        if (roles.size() > rolesMaxSize) {
-            throw new ServiceException(ResultCode.PERMISSION_BEYOND_TEN);
-        }
+
         if (roles != null && roles.size() > 0) {
+
+            if (roles.size() > rolesMaxSize) {
+                throw new ServiceException(ResultCode.PERMISSION_BEYOND_TEN);
+            }
             adminUser.setRoleIds(StringUtils.join(",", roles));
+
+        } else {
+            adminUser.setRoleIds("");
         }
 
-        this.updateById(adminUser);
         updateRole(adminUser.getId(), roles);
+        this.updateById(adminUser);
         return true;
     }
 
