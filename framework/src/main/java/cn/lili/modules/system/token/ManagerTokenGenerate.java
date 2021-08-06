@@ -77,7 +77,7 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
         //循环权限菜单
         userMenuVOList.forEach(menu -> {
             //循环菜单，赋予用户权限
-            if (menu.getPermission() != null) {
+            if (!menu.getPermission().isEmpty()) {
                 //获取路径集合
                 String[] permissionUrl = menu.getPermission().split(",");
                 //for循环路径集合
