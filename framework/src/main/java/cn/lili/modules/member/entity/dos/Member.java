@@ -46,7 +46,7 @@ public class Member extends BaseEntity {
     private Integer sex;
 
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-  @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "会员生日")
     private Date birthday;
 
@@ -63,6 +63,10 @@ public class Member extends BaseEntity {
     @Min(message = "必须为数字", value = 0)
     @ApiModelProperty(value = "积分数量")
     private Long point;
+
+    @Min(message = "必须为数字", value = 0)
+    @ApiModelProperty(value = "积分总数量")
+    private Long totalPoint;
 
     @ApiModelProperty(value = "会员头像")
     private String face;
@@ -103,6 +107,7 @@ public class Member extends BaseEntity {
         this.haveStore = false;
         this.sex = 0;
         this.point = 0L;
+        this.totalPoint = 0L;
         this.lastLoginDate = new Date();
     }
 
@@ -116,6 +121,7 @@ public class Member extends BaseEntity {
         this.face = face;
         this.sex = 0;
         this.point = 0L;
+        this.totalPoint = 0L;
         this.lastLoginDate = new Date();
     }
 
@@ -129,6 +135,7 @@ public class Member extends BaseEntity {
         this.face = face;
         this.sex = sex;
         this.point = 0L;
+        this.totalPoint = 0L;
         this.lastLoginDate = new Date();
     }
 }

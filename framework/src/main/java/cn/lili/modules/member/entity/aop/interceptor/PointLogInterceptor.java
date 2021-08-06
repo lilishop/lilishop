@@ -41,9 +41,9 @@ public class PointLogInterceptor {
                 point = Long.valueOf(obj[0].toString());
             }
             //变动类型
-            Boolean type = false;
+            String type = PointTypeEnum.INCREASE.name();
             if (obj[1] != null) {
-                type = Boolean.valueOf(obj[1].toString());
+                type = obj[1].toString();
             }
             //会员ID
             String memberId = "";
@@ -56,10 +56,15 @@ public class PointLogInterceptor {
                 MemberPointsHistory memberPointsHistory = new MemberPointsHistory();
                 memberPointsHistory.setMemberId(member.getId());
                 memberPointsHistory.setMemberName(member.getUsername());
-                memberPointsHistory.setPointType(type ? PointTypeEnum.INCREASE.name() : PointTypeEnum.REDUCE.name());
+                memberPointsHistory.setPointType(type);
 
                 memberPointsHistory.setVariablePoint(point);
-                memberPointsHistory.setBeforePoint(type ? member.getPoint() - point : member.getPoint() + point);
+                if (type.equals(PointTypeEnum.INCREASE.name())) {
+                    memberPointsHistory.setBeforePoint(member.getPoint() - point);
+                } else {
+                    memberPointsHistory.setBeforePoint(member.getPoint() + point);
+                }
+
                 memberPointsHistory.setPoint(member.getPoint());
                 memberPointsHistory.setContent(obj[3] == null ? "" : obj[3].toString());
                 memberPointsHistory.setCreateBy("系统");

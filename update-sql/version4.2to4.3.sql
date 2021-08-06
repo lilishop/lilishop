@@ -156,3 +156,6 @@ INSERT INTO `li_menu` VALUES (1410862675914764290, 'admin', '2021-07-02 15:27:29
 INSERT INTO `li_menu` VALUES (1419926569920536578, 'admin', '2021-07-27 15:44:10', b'0', 'admin', '2021-07-27 16:07:10', NULL, 'customWords/index', NULL, 2, 'customWords', '1367050250249830400', 'customWords', 4.00, 'ES分词', NULL, '/manager/manager/custom-words*');
 COMMIT;
 SET FOREIGN_KEY_CHECKS = 1;
+
+/** 新增会员获的总积分 **/
+ALTER TABLE li_member ADD total_point bigint ( 20 ) DEFAULT 0 COMMENT '积分总数量';

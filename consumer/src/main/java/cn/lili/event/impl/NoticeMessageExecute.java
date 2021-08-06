@@ -4,6 +4,7 @@ import cn.lili.event.*;
 import cn.lili.modules.member.entity.dto.MemberPointMessage;
 import cn.lili.modules.member.entity.dto.MemberWithdrawalMessage;
 import cn.lili.modules.member.entity.enums.MemberWithdrawalDestinationEnum;
+import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.entity.enums.WithdrawStatusEnum;
 import cn.lili.modules.message.entity.dto.NoticeMessageDTO;
 import cn.lili.modules.message.entity.enums.NoticeMessageNodeEnum;
@@ -160,7 +161,7 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
         NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
         noticeMessageDTO.setMemberId(memberPointMessage.getMemberId());
         Map<String, String> params = new HashMap<>(2);
-        if (memberPointMessage.getType()) {
+        if (memberPointMessage.getType().equals(PointTypeEnum.INCREASE.name())) {
             params.put("expenditure_points", "0");
             params.put("income_points", memberPointMessage.getPoint().toString());
         } else {

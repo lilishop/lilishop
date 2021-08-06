@@ -16,7 +16,7 @@ public class MemberPointMessage {
     private Long point;
 
     @ApiModelProperty(value = "是否增加积分")
-    private Boolean type;
+    private String type;
 
     @ApiModelProperty(value = "会员id")
     private String memberId;
