@@ -1,11 +1,11 @@
 package cn.lili.modules.page.serviceimpl;
 
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.mybatis.util.PageUtil;
+import cn.lili.common.properties.SystemSettingProperties;
 import cn.lili.common.vo.PageVO;
-import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.page.entity.dos.PageData;
 import cn.lili.modules.page.entity.dto.PageDataDTO;
 import cn.lili.modules.page.entity.enums.PageEnum;
@@ -13,11 +13,13 @@ import cn.lili.modules.page.entity.vos.PageDataListVO;
 import cn.lili.modules.page.entity.vos.PageDataVO;
 import cn.lili.modules.page.mapper.PageDataMapper;
 import cn.lili.modules.page.service.PageDataService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -28,6 +30,10 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> implements PageDataService {
+
+
+    @Autowired
+    private SystemSettingProperties systemSettingProperties;
 
     @Override
     public void addStorePageData(String storeId) {
@@ -51,12 +57,15 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
     @Override
     public PageData addPageData(PageData pageData) {
         //如果页面为发布，则关闭其他页面，开启此页面
-        if (pageData.getPageShow().equals(SwitchEnum.OPEN.name())) {
+        //演示站点不可以开启楼层
+        if (!systemSettingProperties.getIsDemoSite() && pageData.getPageShow().equals(SwitchEnum.OPEN.name())) {
             LambdaUpdateWrapper<PageData> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
             lambdaUpdateWrapper.eq(PageData::getPageType, pageData.getPageType());
             lambdaUpdateWrapper.eq(PageData::getPageClientType, pageData.getPageClientType());
             lambdaUpdateWrapper.set(PageData::getPageShow, SwitchEnum.CLOSE.name());
             this.update(lambdaUpdateWrapper);
+        } else {
+            pageData.setPageShow(SwitchEnum.CLOSE.name());
         }
         this.save(pageData);
         return pageData;

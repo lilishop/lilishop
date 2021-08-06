@@ -84,7 +84,9 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
 
         //如果不是超级管理员， 则鉴权
         if (!authUser.getIsSuper()) {
+            //获取缓存中的权限
             Map<String, List<String>> permission = (Map<String, List<String>>) cache.get(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + authUser.getId());
+
             //获取数据(GET 请求)权限
             if (request.getMethod().equals(RequestMethod.GET.name())) {
                 //如果用户的超级权限和查阅权限都不包含当前请求的api

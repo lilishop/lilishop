@@ -68,7 +68,7 @@ public class WechatAccessTokenUtil {
             }
             //获取token
             String content = HttpUtil.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential" +
-                    "&appid=wx6cfbe6e0ace12ce8&secret=6dfbe0c72380dce5d49d65b3c91059b1");
+                    "&appid=" + item.getAppId() + "&secret=" + item.getAppSecret());
 
             JSONObject object = new JSONObject(content);
             log.info("token获取【" + clientTypeEnum.name() + "】返回" + object.toString());
