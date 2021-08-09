@@ -19,6 +19,8 @@ import java.util.List;
 @Data
 public class PriceDetailDTO implements Serializable {
 
+
+    private static final long serialVersionUID = 8808470688518188146L;
     /**
      * 订单原始总价格
      * 用于订单价格修改金额计算使用
@@ -26,7 +28,6 @@ public class PriceDetailDTO implements Serializable {
     @ApiModelProperty(value = "订单原始总价格")
     private Double originalPrice;
 
-    private static final long serialVersionUID = 8808470688518188146L;
     @ApiModelProperty(value = "商品总金额（商品原价）")
     private Double goodsPrice;
 
@@ -102,11 +103,13 @@ public class PriceDetailDTO implements Serializable {
     }
 
     public PriceDetailDTO() {
+        originalPrice=0d;
         goodsPrice = 0d;
         freightPrice = 0d;
 
         payPoint = 0;
         discountPrice = 0d;
+        couponPrice=0d;
 
         distributionCommission = 0d;
         platFormCommission = 0d;
@@ -119,6 +122,8 @@ public class PriceDetailDTO implements Serializable {
 
         flowPrice = 0d;
         billPrice = 0d;
+        settlementPrice=0d;
+
 
         joinPromotion = new ArrayList<>();
     }
@@ -245,4 +250,95 @@ public class PriceDetailDTO implements Serializable {
         return goodsPrice;
     }
 
+    public Double getGoodsPrice() {
+        if (goodsPrice <= 0) {
+            return 0D;
+        }
+        return goodsPrice;
+    }
+
+    public Double getFreightPrice() {
+        if (freightPrice <= 0) {
+            return 0D;
+        }
+        return freightPrice;
+    }
+
+    public Integer getPayPoint() {
+        if (payPoint <= 0) {
+            return 0;
+        }
+        return payPoint;
+    }
+
+    public Double getDiscountPrice() {
+        if (discountPrice <= 0) {
+            return 0D;
+        }
+        return discountPrice;
+    }
+
+    public Double getCouponPrice() {
+        if (couponPrice <= 0) {
+            return 0D;
+        }
+        return couponPrice;
+    }
+
+    public Double getDistributionCommission() {
+        if (distributionCommission <= 0) {
+            return 0D;
+        }
+        return distributionCommission;
+    }
+
+    public Double getPlatFormCommission() {
+        if (platFormCommission <= 0) {
+            return 0D;
+        }
+        return platFormCommission;
+    }
+
+    public Double getSiteCouponPrice() {
+        if (siteCouponPrice <= 0) {
+            return 0D;
+        }
+        return siteCouponPrice;
+    }
+
+    public Double getSiteCouponPoint() {
+        if (siteCouponPoint <= 0) {
+            return 0D;
+        }
+        return siteCouponPoint;
+    }
+
+    public Double getSiteCouponCommission() {
+        if (siteCouponCommission <= 0) {
+            return 0D;
+        }
+        return siteCouponCommission;
+    }
+
+
+    public Double getFlowPrice() {
+        if (flowPrice <= 0) {
+            return 0D;
+        }
+        return flowPrice;
+    }
+
+    public Double getSettlementPrice() {
+        if (settlementPrice <= 0) {
+            return 0D;
+        }
+        return settlementPrice;
+    }
+
+    public Double getBillPrice() {
+        if (billPrice <= 0) {
+            return 0D;
+        }
+        return billPrice;
+    }
 }
