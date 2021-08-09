@@ -4,15 +4,14 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONUtil;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.rocketmq.tags.GoodsTagsEnum;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
@@ -37,6 +36,9 @@ import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.GoodsSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
+import cn.lili.mybatis.util.PageUtil;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -46,9 +48,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,7 +63,6 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-@CacheConfig(cacheNames = "{goods}")
 public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements GoodsService {
 
 
@@ -115,6 +113,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     private CategoryParameterGroupService categoryParameterGroupService;
 
 
+    @Autowired
+    private Cache<GoodsVO> cache;
+
     @Override
     public void underStoreGoods(String storeId) {
         //获取商品ID列表
@@ -157,7 +158,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
 
     @Override
-    @CachePut(key = "#goodsId")
     public void editGoods(GoodsOperationDTO goodsOperationDTO, String goodsId) {
         Goods goods = new Goods(goodsOperationDTO);
         goods.setId(goodsId);
@@ -177,19 +177,23 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (goodsOperationDTO.getGoodsGalleryList() != null && !goodsOperationDTO.getGoodsGalleryList().isEmpty()) {
             this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
         }
-
+        cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
     }
 
     @Override
-    @Cacheable(key = "#goodsId")
     public GoodsVO getGoodsVO(String goodsId) {
+        //缓存获取，如果没有则读取缓存
+        GoodsVO goodsVO = cache.get(CachePrefix.GOODS.getPrefix() + goodsId);
+        if (goodsVO != null) {
+            return goodsVO;
+        }
         //查询商品信息
         Goods goods = this.getById(goodsId);
         if (goods == null) {
             log.error("商品ID为" + goodsId + "的商品不存在");
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
-        GoodsVO goodsVO = new GoodsVO();
+        goodsVO = new GoodsVO();
         //赋值
         BeanUtils.copyProperties(goods, goodsVO);
         //商品id
@@ -225,11 +229,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
-    public GoodsVO getGoodsVOFromDB(String goodsId) {
-        return getGoodsVO(goodsId);
-    }
-
-    @Override
     public IPage<Goods> queryByParams(GoodsSearchParams goodsSearchParams) {
         return this.page(PageUtil.initPage(goodsSearchParams), goodsSearchParams.queryWrapper());
     }
@@ -242,6 +241,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             goods.setIsAuth(goodsAuthEnum.name());
             result = this.updateById(goods);
             goodsSkuService.updateGoodsSkuStatus(goods);
+            //删除之前的缓存
+            cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
             //商品审核消息
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_AUDIT.name();
             //发送mq消息

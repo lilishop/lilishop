@@ -94,7 +94,7 @@ public class GoodsStoreController {
     @GetMapping(value = "/get/{id}")
     public ResultMessage<GoodsVO> get(@PathVariable String id) {
         AuthUser tokenUser = UserContext.getCurrentUser();
-        GoodsVO goods = goodsService.getGoodsVOFromDB(id);
+        GoodsVO goods = goodsService.getGoodsVO(id);
         assert tokenUser != null;
         if (tokenUser.getStoreId().equals(goods.getStoreId())) {
             return ResultUtil.data(goods);
