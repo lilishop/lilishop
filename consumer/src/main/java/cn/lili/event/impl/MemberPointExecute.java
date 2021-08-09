@@ -10,6 +10,7 @@ import cn.lili.event.MemberRegisterEvent;
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
+import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.order.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
@@ -61,7 +62,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
         //获取积分设置
         PointSetting pointSetting = getPointSetting();
         //赠送会员积分
-        memberService.updateMemberPoint(Long.valueOf(pointSetting.getRegister().longValue()), true, member.getId(), "会员注册，赠送积分" + pointSetting.getRegister() + "分");
+        memberService.updateMemberPoint(Long.valueOf(pointSetting.getRegister().longValue()), PointTypeEnum.INCREASE.name(), member.getId(), "会员注册，赠送积分" + pointSetting.getRegister() + "分");
     }
 
     /**
@@ -74,7 +75,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
         //获取积分设置
         PointSetting pointSetting = getPointSetting();
         //赠送会员积分
-        memberService.updateMemberPoint(Long.valueOf(pointSetting.getComment().longValue()), true, memberEvaluation.getMemberId(), "会员评价，赠送积分" + pointSetting.getComment() + "分");
+        memberService.updateMemberPoint(Long.valueOf(pointSetting.getComment().longValue()), PointTypeEnum.INCREASE.name(), memberEvaluation.getMemberId(), "会员评价，赠送积分" + pointSetting.getComment() + "分");
     }
 
     /**
@@ -96,13 +97,13 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
             //计算赠送积分数量
             Double point = CurrencyUtil.mul(pointSetting.getMoney(), order.getFlowPrice(), 0);
             //赠送会员积分
-            memberService.updateMemberPoint(point.longValue(), true, order.getMemberId(), "会员下单，赠送积分" + point + "分");
+            memberService.updateMemberPoint(point.longValue(), PointTypeEnum.INCREASE.name(), order.getMemberId(), "会员下单，赠送积分" + point + "分");
             //取消订单恢复积分
         } else if (orderMessage.getNewStatus().equals(OrderStatusEnum.CANCELLED)) {
             //根据订单编号获取订单数据,如果为积分订单则跳回
             Order order = orderService.getBySn(orderMessage.getOrderSn());
             if (order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINTS.name()) && order.getPriceDetailDTO().getPayPoint() != null) {
-                memberService.updateMemberPoint(Convert.toLong(order.getPriceDetailDTO().getPayPoint()), true, order.getMemberId(), "订单取消,恢复积分:" + order.getPriceDetailDTO().getPayPoint() + "分");
+                memberService.updateMemberPoint(Convert.toLong(order.getPriceDetailDTO().getPayPoint()), PointTypeEnum.INCREASE.name(), order.getMemberId(), "订单取消,恢复积分:" + order.getPriceDetailDTO().getPayPoint() + "分");
             }
         }
     }
@@ -120,7 +121,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
             //计算扣除积分数量
             Double point = CurrencyUtil.mul(pointSetting.getMoney(), afterSale.getActualRefundPrice(), 0);
             //扣除会员积分
-            memberService.updateMemberPoint(point.longValue(), false, afterSale.getMemberId(), "会员退款，扣除积分" + point + "分");
+            memberService.updateMemberPoint(point.longValue(), PointTypeEnum.REDUCE.name(), afterSale.getMemberId(), "会员退款，回退积分" + point + "分");
 
         }
     }

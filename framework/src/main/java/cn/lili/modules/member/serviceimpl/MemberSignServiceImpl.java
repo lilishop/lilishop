@@ -2,6 +2,7 @@ package cn.lili.modules.member.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
 import cn.lili.common.security.AuthUser;
@@ -66,8 +67,8 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
         AuthUser authUser = UserContext.getCurrentUser();
         if (authUser != null) {
             QueryWrapper<MemberSign> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("member_id",authUser.getId());
-            queryWrapper.between("create_time",new Date(DateUtil.startOfTodDay()*1000),DateUtil.getCurrentDayEndTime());
+            queryWrapper.eq("member_id", authUser.getId());
+            queryWrapper.between("create_time", new Date(DateUtil.startOfTodDay() * 1000), DateUtil.getCurrentDayEndTime());
             //校验今天是否已经签到
             List<MemberSign> todaySigns = this.baseMapper.getTodayMemberSign(queryWrapper);
             if (todaySigns.size() > 0) {
@@ -139,10 +140,10 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
                     content = "会员签到第" + day + "天，赠送积分" + point + "分";
                 }
                 //赠送会员积分
-                memberService.updateMemberPoint(point, true, memberId, content);
+                memberService.updateMemberPoint(point, PointTypeEnum.INCREASE.name(), memberId, content);
             }
         } catch (Exception e) {
-            log.error("会员签到错误",e);
+            log.error("会员签到错误", e);
         }
     }
 

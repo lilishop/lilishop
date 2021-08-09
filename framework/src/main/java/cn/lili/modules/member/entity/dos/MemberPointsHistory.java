@@ -67,7 +67,7 @@ public class MemberPointsHistory {
     @ApiModelProperty(value = "消费之前积分")
     private Long beforePoint;
 
-    @ApiModelProperty(value = "消费积分")
+    @ApiModelProperty(value = "变动积分")
     private Long variablePoint;
 
     @ApiModelProperty(value = "content")
@@ -76,7 +76,7 @@ public class MemberPointsHistory {
     /**
      * @see cn.lili.modules.member.entity.enums.PointTypeEnum
      */
-    @ApiModelProperty(value = "消费积分类型")
+    @ApiModelProperty(value = "积分类型")
     private String pointType;
 
 }

@@ -7,6 +7,7 @@ import cn.lili.event.MemberRegisterEvent;
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
+import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
@@ -54,7 +55,7 @@ public class MemberExperienceExecute implements MemberRegisterEvent, GoodsCommen
         //获取经验值设置
         ExperienceSetting experienceSetting = getExperienceSetting();
         //赠送会员经验值
-        memberService.updateMemberExperience(Long.valueOf(experienceSetting.getRegister().longValue()), true, member.getId(), "会员注册，赠送经验值" + experienceSetting.getRegister());
+        memberService.updateMemberPoint(Long.valueOf(experienceSetting.getRegister().longValue()), PointTypeEnum.INCREASE.name(), member.getId(), "会员注册，赠送经验值" + experienceSetting.getRegister());
     }
 
     /**
@@ -67,7 +68,7 @@ public class MemberExperienceExecute implements MemberRegisterEvent, GoodsCommen
         //获取经验值设置
         ExperienceSetting experienceSetting = getExperienceSetting();
         //赠送会员经验值
-        memberService.updateMemberExperience(Long.valueOf(experienceSetting.getComment().longValue()), true, memberEvaluation.getMemberId(), "会员评价，赠送经验值" + experienceSetting.getComment());
+        memberService.updateMemberPoint(Long.valueOf(experienceSetting.getComment().longValue()), PointTypeEnum.INCREASE.name(), memberEvaluation.getMemberId(), "会员评价，赠送经验值" + experienceSetting.getComment());
     }
 
     /**
@@ -85,7 +86,7 @@ public class MemberExperienceExecute implements MemberRegisterEvent, GoodsCommen
             //计算赠送经验值数量
             Double point = CurrencyUtil.mul(experienceSetting.getMoney(), order.getFlowPrice(), 0);
             //赠送会员经验值
-            memberService.updateMemberExperience(point.longValue(), true, order.getMemberId(), "会员下单，赠送经验值" + point + "分");
+            memberService.updateMemberPoint(point.longValue(), PointTypeEnum.INCREASE.name(), order.getMemberId(), "会员下单，赠送经验值" + point + "分");
         }
     }
 

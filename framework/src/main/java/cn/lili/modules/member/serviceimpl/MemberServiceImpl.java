@@ -7,6 +7,7 @@ import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
@@ -376,21 +377,26 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     @PointLogPoint
-    public Boolean updateMemberPoint(Long point, Boolean type, String memberId, String content) {
+    public Boolean updateMemberPoint(Long point, String type, String memberId, String content) {
         //获取当前会员信息
         Member member = this.getById(memberId);
         if (member != null) {
             //积分变动后的会员积分
             long currentPoint;
+            //会员总获得积分
+            long totalPoint = member.getTotalPoint();
             //如果增加积分
-            if (type) {
+            if (type.equals(PointTypeEnum.INCREASE.name())) {
                 currentPoint = member.getPoint() + point;
+                //如果是增加积分 需要增加总获得积分
+                totalPoint = totalPoint + point;
             }
             //否则扣除积分
             else {
                 currentPoint = member.getPoint() - point < 0 ? 0 : member.getPoint() - point;
             }
             member.setPoint(currentPoint);
+            member.setTotalPoint(totalPoint);
             Boolean result = this.updateById(member);
             if (result) {
                 //发送会员消息
@@ -407,26 +413,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         }
         throw new ServiceException(ResultCode.USER_NOT_EXIST);
     }
-
-    @Override
-    public Boolean updateMemberExperience(Long experience, Boolean type, String memberId, String content) {
-        //获取当前会员信息
-        Member member = this.getById(memberId);
-        if (member != null) {
-            //积分变动后的会员积分
-            long currentExperience;
-            if (type) {
-                currentExperience = CurrencyUtil.add(member.getPoint(), experience).longValue();
-            } else {
-                currentExperience = CurrencyUtil.sub(member.getPoint(), experience) < 0 ? 0 : new Double(CurrencyUtil.sub(member.getExperience(), experience)).longValue();
-            }
-            member.setExperience(currentExperience);
-
-            return this.updateById(member);
-        }
-        throw new ServiceException(ResultCode.USER_NOT_EXIST);
-    }
-
 
     @Override
     public Boolean updateMemberStatus(List<String> memberIds, Boolean status) {
