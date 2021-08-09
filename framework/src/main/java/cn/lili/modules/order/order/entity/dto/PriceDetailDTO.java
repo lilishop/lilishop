@@ -103,13 +103,13 @@ public class PriceDetailDTO implements Serializable {
     }
 
     public PriceDetailDTO() {
-        originalPrice=0d;
+        originalPrice = 0d;
         goodsPrice = 0d;
         freightPrice = 0d;
 
         payPoint = 0;
         discountPrice = 0d;
-        couponPrice=0d;
+        couponPrice = 0d;
 
         distributionCommission = 0d;
         platFormCommission = 0d;
@@ -122,7 +122,7 @@ public class PriceDetailDTO implements Serializable {
 
         flowPrice = 0d;
         billPrice = 0d;
-        settlementPrice=0d;
+        settlementPrice = 0d;
 
 
         joinPromotion = new ArrayList<>();
@@ -251,70 +251,70 @@ public class PriceDetailDTO implements Serializable {
     }
 
     public Double getGoodsPrice() {
-        if (goodsPrice <= 0) {
+        if (goodsPrice == null || goodsPrice <= 0) {
             return 0D;
         }
         return goodsPrice;
     }
 
     public Double getFreightPrice() {
-        if (freightPrice <= 0) {
+        if (freightPrice == null || freightPrice <= 0) {
             return 0D;
         }
         return freightPrice;
     }
 
     public Integer getPayPoint() {
-        if (payPoint <= 0) {
+        if (payPoint == null || payPoint <= 0) {
             return 0;
         }
         return payPoint;
     }
 
     public Double getDiscountPrice() {
-        if (discountPrice <= 0) {
+        if (discountPrice == null || discountPrice <= 0) {
             return 0D;
         }
         return discountPrice;
     }
 
     public Double getCouponPrice() {
-        if (couponPrice <= 0) {
+        if (couponPrice == null || couponPrice <= 0) {
             return 0D;
         }
         return couponPrice;
     }
 
     public Double getDistributionCommission() {
-        if (distributionCommission <= 0) {
+        if (distributionCommission == null || distributionCommission <= 0) {
             return 0D;
         }
         return distributionCommission;
     }
 
     public Double getPlatFormCommission() {
-        if (platFormCommission <= 0) {
+        if (platFormCommission == null || platFormCommission <= 0) {
             return 0D;
         }
         return platFormCommission;
     }
 
     public Double getSiteCouponPrice() {
-        if (siteCouponPrice <= 0) {
+        if (siteCouponPrice == null || siteCouponPrice <= 0) {
             return 0D;
         }
         return siteCouponPrice;
     }
 
     public Double getSiteCouponPoint() {
-        if (siteCouponPoint <= 0) {
+        if (siteCouponPoint == null || siteCouponPoint <= 0) {
             return 0D;
         }
         return siteCouponPoint;
     }
 
     public Double getSiteCouponCommission() {
-        if (siteCouponCommission <= 0) {
+        if (siteCouponCommission == null || siteCouponCommission <= 0) {
             return 0D;
         }
         return siteCouponCommission;
@@ -322,21 +322,21 @@ public class PriceDetailDTO implements Serializable {
 
 
     public Double getFlowPrice() {
-        if (flowPrice <= 0) {
+        if (flowPrice == null || flowPrice <= 0) {
             return 0D;
         }
         return flowPrice;
     }
 
     public Double getSettlementPrice() {
-        if (settlementPrice <= 0) {
+        if (settlementPrice == null || settlementPrice <= 0) {
             return 0D;
         }
         return settlementPrice;
     }
 
     public Double getBillPrice() {
-        if (billPrice <= 0) {
+        if (billPrice == null || billPrice <= 0) {
             return 0D;
         }
         return billPrice;
