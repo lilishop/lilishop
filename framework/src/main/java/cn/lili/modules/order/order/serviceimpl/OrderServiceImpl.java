@@ -596,6 +596,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @param list 待发货订单列表
      */
     private void checkBatchDeliver(List<OrderBatchDeliverDTO> list) {
+
+        List<Logistics> logistics = logisticsService.list();
         for (OrderBatchDeliverDTO orderBatchDeliverDTO : list) {
             //查看订单号是否存在-是否是当前店铺的订单
             Order order = this.getOne(new LambdaQueryWrapper<Order>()
@@ -603,15 +605,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     .eq(Order::getSn, orderBatchDeliverDTO.getOrderSn()));
             if (order == null) {
                 throw new ServiceException("订单编号：'" + orderBatchDeliverDTO.getOrderSn() + " '不存在");
-            } else if (order.getOrderStatus().equals(OrderStatusEnum.DELIVERED.name())) {
+            } else if (!order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())) {
                 throw new ServiceException("订单编号：'" + orderBatchDeliverDTO.getOrderSn() + " '不能发货");
             }
-            //查看物流公司
-            Logistics logistics = logisticsService.getOne(new LambdaQueryWrapper<Logistics>().eq(Logistics::getName, orderBatchDeliverDTO.getLogisticsName()));
-            if (logistics == null) {
+            //获取物流公司
+            logistics.forEach(item -> {
+                if (item.getName().equals(orderBatchDeliverDTO.getLogisticsName())) {
+                    orderBatchDeliverDTO.setLogisticsId(item.getId());
+                }
+            });
+            if (StringUtils.isEmpty(orderBatchDeliverDTO.getLogisticsId())) {
                 throw new ServiceException("物流公司：'" + orderBatchDeliverDTO.getLogisticsName() + " '不存在");
-            } else {
-                orderBatchDeliverDTO.setLogisticsId(logistics.getId());
             }
         }
 
