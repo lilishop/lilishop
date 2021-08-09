@@ -40,8 +40,8 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
     public List<StoreGoodsLabelVO> listByStoreId(String storeId) {
 
         //从缓存中获取店铺分类
-        if (cache.hasKey(CachePrefix.STORE_CATEGORY.getPrefix() + storeId + "tree")) {
-            return (List<StoreGoodsLabelVO>) cache.get(CachePrefix.CATEGORY.getPrefix() + "tree");
+        if (cache.hasKey(CachePrefix.STORE_CATEGORY.getPrefix() + storeId)) {
+            return (List<StoreGoodsLabelVO>) cache.get(CachePrefix.STORE_CATEGORY.getPrefix() + storeId);
         }
 
         List<StoreGoodsLabel> list = list(storeId);
@@ -126,6 +126,6 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
      * 清除缓存
      */
     private void removeCache(String storeId) {
-        cache.remove(CachePrefix.STORE_CATEGORY.getPrefix() + storeId + "tree");
+        cache.remove(CachePrefix.STORE_CATEGORY.getPrefix() + storeId);
     }
 }

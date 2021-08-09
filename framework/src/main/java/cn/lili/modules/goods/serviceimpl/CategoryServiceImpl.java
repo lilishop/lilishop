@@ -50,8 +50,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public List<CategoryVO> categoryTree() {
-        if (cache.hasKey(CachePrefix.CATEGORY.getPrefix() + "tree")) {
-            return (List<CategoryVO>) cache.get(CachePrefix.CATEGORY.getPrefix() + "tree");
+        List<CategoryVO> categoryVOList = (List<CategoryVO>) cache.get(CachePrefix.CATEGORY.getPrefix());
+        if (categoryVOList != null) {
+            return categoryVOList;
         }
 
         //获取全部分类
@@ -60,7 +61,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         List<Category> list = this.list(queryWrapper);
 
         //构造分类树
-        List<CategoryVO> categoryVOList = new ArrayList<>();
+        categoryVOList = new ArrayList<>();
         for (Category category : list) {
             if ("0".equals(category.getParentId())) {
                 CategoryVO categoryVO = new CategoryVO(category);
@@ -75,7 +76,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             }
         });
         if (categoryVOList.size() != 0) {
-            cache.put(CachePrefix.CATEGORY.getPrefix() + "tree", categoryVOList);
+            cache.put(CachePrefix.CATEGORY.getPrefix(), categoryVOList);
+            cache.put(CachePrefix.CATEGORY_ARRAY.getPrefix(), list);
         }
         return categoryVOList;
     }
@@ -144,8 +146,28 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      */
     @Override
     public List<String> getCategoryNameByIds(List<String> ids) {
-        List<String> categoryVOS = categoryTree().stream().filter(item -> ids.contains(item.getId())).map(Category::getName).collect(Collectors.toList());
-        return categoryVOS;
+        List<String> categoryName = new ArrayList<>();
+        List<Category> categoryVOs = (List<Category>) cache.get(CachePrefix.CATEGORY_ARRAY.getPrefix());
+        //如果缓存中为空，则重新获取缓存
+        if (categoryVOs == null) {
+            categoryTree();
+            categoryVOs = (List<Category>) cache.get(CachePrefix.CATEGORY_ARRAY.getPrefix());
+        }
+        //还为空的话，直接返回
+        if (categoryVOs == null) {
+            return null;
+        }
+        //循环顶级分类
+        for (Category category : categoryVOs) {
+            //循环查询的id匹配
+            for (String id : ids) {
+                if (category.getId().equals(id)) {
+                    //写入商品分类
+                    categoryName.add(category.getName());
+                }
+            }
+        }
+        return categoryName;
     }
 
     @Override
@@ -327,6 +349,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      * 清除缓存
      */
     private void removeCache() {
-        cache.remove(CachePrefix.CATEGORY.getPrefix() + "tree");
+        cache.remove(CachePrefix.CATEGORY.getPrefix());
     }
 }

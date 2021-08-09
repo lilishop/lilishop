@@ -125,9 +125,13 @@ public enum CachePrefix {
     GOODS_STOCK,
 
     /**
-     * 商品分类
+     * 商品分类 树状结构
      */
     CATEGORY,
+    /**
+     * 商品分类 集合
+     */
+    CATEGORY_ARRAY,
     /**
      * 浏览次数
      */
