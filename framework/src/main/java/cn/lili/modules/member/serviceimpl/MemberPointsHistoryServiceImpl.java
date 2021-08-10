@@ -35,12 +35,6 @@ public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHist
     @Autowired
     private MemberService memberService;
 
-    @Autowired
-    private MemberMapper memberMapper;
-
-    @Autowired
-    private MemberPointsHistoryMapper memberPointsHistoryMapper;
-
     @Override
     public MemberPointsHistoryVO getMemberPointsHistoryVO(String memberId) {
         //获取会员积分历史
@@ -67,24 +61,4 @@ public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHist
         return this.page(PageUtil.initPage(page), lambdaQueryWrapper);
     }
 
-
-    @Override
-    public String repairPointData() {
-        List<Member> memberList = memberMapper.selectList(new QueryWrapper<Member>());
-        for (Member member : memberList) {
-            QueryWrapper<MemberPointsHistory> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("member_id", member.getId());
-            queryWrapper.eq("point_type", PointTypeEnum.INCREASE.name());
-            List<MemberPointsHistory> memberPointsHistorys = memberPointsHistoryMapper.selectList(queryWrapper);
-            Long point = 0L;
-            if (memberPointsHistorys.size() > 0) {
-                for (MemberPointsHistory memberPointsHistory : memberPointsHistorys) {
-                    point += memberPointsHistory.getVariablePoint();
-                }
-            }
-            member.setTotalPoint(point);
-            memberMapper.updateById(member);
-        }
-        return "SUCCESS";
-    }
 }

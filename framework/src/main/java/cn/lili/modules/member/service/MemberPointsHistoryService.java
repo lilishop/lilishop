@@ -32,9 +32,4 @@ public interface MemberPointsHistoryService extends IService<MemberPointsHistory
      */
     IPage<MemberPointsHistory> MemberPointsHistoryList(PageVO page, String memberId, String memberName);
 
-    /**
-     * 修复会员总积分数据
-     */
-    String repairPointData();
-
 }

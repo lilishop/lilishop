@@ -48,10 +48,5 @@ public class PointsHistoryBuyerController {
         return ResultUtil.data(memberPointsHistoryService.getMemberPointsHistoryVO(UserContext.getCurrentUser().getId()));
     }
 
-    @ApiOperation(value = "修复会员总获得积分数据")
-    @PostMapping(value = "/repairPointData")
-    public ResultMessage<String> repairPointData() {
-        return ResultUtil.data(memberPointsHistoryService.repairPointData());
-    }
 
 }
