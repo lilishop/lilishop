@@ -8,15 +8,12 @@ import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
-import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
-import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.mapper.TradeMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderPriceService;
 import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.plugin.bank.BankTransferPlugin;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.utils.OperationalJudgment;
@@ -91,14 +88,6 @@ public class OrderPriceServiceImpl implements OrderPriceService {
         }
 
         bankTransferPlugin.callBack(order);
-
-        //发送订单状态变化消息
-        OperationalJudgment.judgment(orderService.getBySn(orderSn));
-        OrderMessage orderMessage = new OrderMessage();
-        orderMessage.setOrderSn(orderSn);
-        orderMessage.setPaymentMethod(PaymentMethodEnum.BANK_TRANSFER.name());
-        orderMessage.setNewStatus(OrderStatusEnum.PAID);
-        orderService.sendUpdateStatusMessage(orderMessage);
     }
 
 
