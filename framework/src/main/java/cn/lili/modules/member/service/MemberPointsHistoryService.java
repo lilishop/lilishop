@@ -24,11 +24,17 @@ public interface MemberPointsHistoryService extends IService<MemberPointsHistory
 
     /**
      * 会员积分历史
-     * @param page 分页
-     * @param memberId 会员ID
+     *
+     * @param page       分页
+     * @param memberId   会员ID
      * @param memberName 会员名称
      * @return 积分历史分页
      */
-    IPage<MemberPointsHistory>  MemberPointsHistoryList(PageVO page, String memberId, String memberName);
+    IPage<MemberPointsHistory> MemberPointsHistoryList(PageVO page, String memberId, String memberName);
+
+    /**
+     * 修复会员总积分数据
+     */
+    String repairPointData();
 
 }

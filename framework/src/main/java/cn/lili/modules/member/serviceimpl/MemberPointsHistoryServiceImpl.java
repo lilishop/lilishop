@@ -3,6 +3,7 @@ package cn.lili.modules.member.serviceimpl;
 
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
+import cn.lili.modules.member.mapper.MemberMapper;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
@@ -12,10 +13,14 @@ import cn.lili.modules.member.entity.vo.MemberPointsHistoryVO;
 import cn.lili.modules.member.mapper.MemberPointsHistoryMapper;
 import cn.lili.modules.member.service.MemberPointsHistoryService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 会员积分历史业务层实现
@@ -29,6 +34,12 @@ public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHist
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private MemberMapper memberMapper;
+
+    @Autowired
+    private MemberPointsHistoryMapper memberPointsHistoryMapper;
 
     @Override
     public MemberPointsHistoryVO getMemberPointsHistoryVO(String memberId) {
@@ -54,5 +65,26 @@ public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHist
             page.setOrder("desc");
         }
         return this.page(PageUtil.initPage(page), lambdaQueryWrapper);
+    }
+
+
+    @Override
+    public String repairPointData() {
+        List<Member> memberList = memberMapper.selectList(new QueryWrapper<Member>());
+        for (Member member : memberList) {
+            QueryWrapper<MemberPointsHistory> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("member_id", member.getId());
+            queryWrapper.eq("point_type", PointTypeEnum.INCREASE.name());
+            List<MemberPointsHistory> memberPointsHistorys = memberPointsHistoryMapper.selectList(queryWrapper);
+            Long point = 0L;
+            if (memberPointsHistorys.size() > 0) {
+                for (MemberPointsHistory memberPointsHistory : memberPointsHistorys) {
+                    point += memberPointsHistory.getVariablePoint();
+                }
+            }
+            member.setTotalPoint(point);
+            memberMapper.updateById(member);
+        }
+        return "SUCCESS";
     }
 }
