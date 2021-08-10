@@ -137,7 +137,7 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
                     distributorCash.setDistributionCashStatus(WithdrawStatusEnum.VIA_AUDITING.name());
                     distributorCash.setPayTime(new Date());
                     //提现到余额
-                    memberWalletService.increase(distributorCash.getPrice(), distribution.getMemberId(), "分销佣金提现到余额", DepositServiceTypeEnum.WALLET_COMMISSION.name());
+                    memberWalletService.increase(distributorCash.getPrice(), distribution.getMemberId(), "分销[" + distributorCash.getSn() + "]佣金提现到余额[" + distributorCash.getPrice() + "]", DepositServiceTypeEnum.WALLET_COMMISSION.name());
                 } else {
                     memberWithdrawalMessage.setStatus(WithdrawStatusEnum.FAIL_AUDITING.name());
                     //分销员佣金解冻
