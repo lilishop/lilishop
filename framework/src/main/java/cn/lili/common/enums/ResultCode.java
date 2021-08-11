@@ -213,6 +213,7 @@ public enum ResultCode {
     COMPLAINT_NOT_EXIT(33103, "当前投诉记录不存在"),
     COMPLAINT_ARBITRATION_RESULT_ERROR(33104, "结束订单投诉时，仲裁结果不能为空"),
     COMPLAINT_APPEAL_CONTENT_ERROR(33105, "商家申诉时，申诉内容不能为空"),
+    COMPLAINT_CANCEL_ERROR(33106, "申诉已完成，不需要进行取消申诉操作"),
 
 
     /**

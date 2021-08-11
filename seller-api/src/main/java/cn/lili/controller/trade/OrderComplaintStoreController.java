@@ -71,10 +71,9 @@ public class OrderComplaintStoreController {
     @ApiOperation(value = "修改申诉信息")
     @PutMapping
     public ResultMessage<OrderComplaintVO> update(OrderComplaintVO orderComplainVO) {
-        orderComplainVO.setStoreId(UserContext.getCurrentUser().getId());
+        orderComplainVO.setStoreId(UserContext.getCurrentUser().getStoreId());
         orderComplaintService.updateOrderComplain(orderComplainVO);
         return ResultUtil.data(orderComplainVO);
-
     }
 
     @ApiOperation(value = "申诉")
