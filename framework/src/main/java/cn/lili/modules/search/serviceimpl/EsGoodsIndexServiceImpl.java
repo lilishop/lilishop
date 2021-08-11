@@ -6,18 +6,20 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.pinyin.PinyinUtil;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.elasticsearch.BaseElasticsearchService;
 import cn.lili.elasticsearch.EsSuffix;
 import cn.lili.elasticsearch.config.ElasticsearchProperties;
-import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dos.GoodsWords;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.enums.GoodsWordsTypeEnum;
 import cn.lili.modules.goods.service.GoodsWordsService;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.BasePromotion;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.service.PromotionService;
 import cn.lili.modules.search.entity.dos.EsGoodsAttribute;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
@@ -36,7 +38,6 @@ import org.elasticsearch.search.SearchHit;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -65,7 +66,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Autowired
     private PromotionService promotionService;
     @Autowired
-    private ElasticsearchRestTemplate elasticsearchRestTemplate;
+    private Cache<Object> cache;
 
     @Override
     public void addIndex(EsGoodsIndex goods) {
@@ -152,6 +153,9 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
     @Override
     public void initIndex(List<EsGoodsIndex> goodsIndexList) {
+        if (goodsIndexList == null || goodsIndexList.isEmpty()) {
+            return;
+        }
         //索引名称拼接
         String indexName = elasticsearchProperties.getIndexPrefix() + "_" + EsSuffix.GOODS_INDEX_NAME;
 
@@ -165,12 +169,32 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
         //如果索引不存在，则创建索引
         createIndexRequest(indexName);
-        if (goodsIndexList != null && !goodsIndexList.isEmpty()) {
+        Map<String, Integer> resultMap = new HashMap<>();
+        final String KEY_SUCCESS = "success";
+        final String KEY_FAIL = "fail";
+        final String KEY_PROCESSED = "processed";
+        resultMap.put("total", goodsIndexList.size());
+        resultMap.put(KEY_SUCCESS, 0);
+        resultMap.put(KEY_FAIL, 0);
+        resultMap.put(KEY_PROCESSED, 0);
+        cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix() + "", resultMap);
+        cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), true);
+        if (!goodsIndexList.isEmpty()) {
             goodsIndexRepository.deleteAll();
             for (EsGoodsIndex goodsIndex : goodsIndexList) {
-                addIndex(goodsIndex);
+                try {
+                    addIndex(goodsIndex);
+                    resultMap.put(KEY_SUCCESS, resultMap.get(KEY_SUCCESS) + 1);
+                } catch (Exception e) {
+                    log.error("商品{}生成索引错误！", goodsIndex);
+                    resultMap.put(KEY_FAIL, resultMap.get(KEY_FAIL) + 1);
+                }
+                resultMap.put(KEY_PROCESSED, resultMap.get(KEY_PROCESSED) + 1);
+                cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), resultMap);
             }
         }
+        cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), resultMap);
+        cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false);
     }
 
     @Override
@@ -440,7 +464,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 }
             }
             //移除促销信息
-            promotionMap.keySet().removeAll(removeKeys);
+            removeKeys.forEach(promotionMap.keySet()::remove);
         }
     }
 
