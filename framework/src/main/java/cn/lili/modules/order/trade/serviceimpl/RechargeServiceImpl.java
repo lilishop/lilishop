@@ -77,7 +77,7 @@ public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> i
     }
 
     @Override
-    public void paySuccess(String sn, String receivableNo,String paymentMethod) {
+    public void paySuccess(String sn, String receivableNo, String paymentMethod) {
         //根据sn获取支付账单
         Recharge recharge = this.getOne(new QueryWrapper<Recharge>().eq("recharge_sn", sn));
         //如果支付账单不为空则进行一下逻辑
@@ -103,4 +103,13 @@ public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> i
         throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
     }
 
+
+    @Override
+    public void rechargeOrderCancel(String sn) {
+        Recharge recharge = this.getOne(new QueryWrapper<Recharge>().eq("recharge_sn", sn));
+        if (recharge != null) {
+            recharge.setPayStatus(PayStatusEnum.CANCEL.name());
+            this.updateById(recharge);
+        }
+    }
 }

@@ -234,17 +234,18 @@ public enum ResultCode {
     /**
      * 活动
      */
-    PROMOTION_GOODS_NOT_EXIT(40001, "当前促销商品不存在！"),
-    PROMOTION_SAME_ACTIVE_EXIST(40002,"当前时间内已存在同类活动"),
-    PROMOTION_START_TIME_ERROR(40003,"活动起始时间不能大于活动结束时间"),
-    PROMOTION_TIME_ERROR(40004,"活动起始时间必须大于当前时间"),
-    PROMOTION_SAME_ERROR(40005,"当前时间段已存在相同活动！"),
-    PROMOTION_GOODS_ERROR(40006,"请选择要参与活动的商品"),
-    PROMOTION_STATUS_END(40007,"当前活动已停止"),
-    PROMOTION_UPDATE_ERROR(40008,"当前活动已开始/结束，无法编辑！"),
-    PROMOTION_ACTIVITY_GOODS_ERROR(40009,"当前活动已经开始无法添加商品"),
-    PROMOTION_ACTIVITY_ERROR(40009,"当前促销活动不存在"),
-    PROMOTION_LOG_EXIST(40010,"活动已参加，已发重复参加"),
+    PROMOTION_GOODS_NOT_EXIT(40000, "当前促销商品不存在！"),
+    PROMOTION_SAME_ACTIVE_EXIST(40001, "当前时间内已存在同类活动"),
+    PROMOTION_START_TIME_ERROR(40002, "活动起始时间不能小于当前时间"),
+    PROMOTION_END_TIME_ERROR(40003, "活动结束时间不能小于当前时间"),
+    PROMOTION_TIME_ERROR(40004, "活动起始时间必须大于结束时间"),
+    PROMOTION_SAME_ERROR(40005, "当前时间段已存在相同活动！"),
+    PROMOTION_GOODS_ERROR(40006, "请选择要参与活动的商品"),
+    PROMOTION_STATUS_END(40007, "当前活动已停止"),
+    PROMOTION_UPDATE_ERROR(40008, "当前活动已开始/结束，无法编辑！"),
+    PROMOTION_ACTIVITY_GOODS_ERROR(40009, "当前活动已经开始无法添加商品"),
+    PROMOTION_ACTIVITY_ERROR(400010, "当前促销活动不存在"),
+    PROMOTION_LOG_EXIST(40011, "活动已参加，已发重复参加"),
 
     /**
      * 优惠券
