@@ -2,6 +2,7 @@ package cn.lili.modules.order.cart.entity.vo;
 
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.vos.CouponVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -45,6 +46,9 @@ public class CartVO extends CartBase implements Serializable {
 
     @ApiModelProperty(value = "使用的优惠券列表")
     private List<MemberCoupon> couponList;
+
+    @ApiModelProperty(value = "使用的优惠券列表")
+    private List<CouponVO> canReceiveCoupon;
 
     @ApiModelProperty(value = "赠品列表")
     private List<String> giftList;

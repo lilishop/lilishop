@@ -647,17 +647,16 @@ public class CartServiceImpl implements CartService {
      * @param num          数量
      */
     private void checkCart(CartTypeEnum cartTypeEnum, CartSkuVO cartSkuVO, String skuId, Integer num) {
+
+        this.checkSetGoodsQuantity(cartSkuVO, skuId, num);
         //拼团判定
         if (cartTypeEnum.equals(CartTypeEnum.PINTUAN)) {
-            checkPintuan(cartSkuVO);
             //砍价判定
+            checkPintuan(cartSkuVO);
         } else if (cartTypeEnum.equals(CartTypeEnum.KANJIA)) {
-            checkKanjia(cartSkuVO);
             //检测购物车的数量
-        } else {
-            this.checkSetGoodsQuantity(cartSkuVO, skuId, num);
+            checkKanjia(cartSkuVO);
         }
-
     }
 
     /**
@@ -695,7 +694,7 @@ public class CartServiceImpl implements CartService {
     private void checkKanjia(CartSkuVO cartSkuVO) {
 
         //根据skuId获取砍价商品
-        KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO=kanjiaActivityGoodsService.getKanjiaGoodsBySkuId(cartSkuVO.getGoodsSku().getId());
+        KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO = kanjiaActivityGoodsService.getKanjiaGoodsBySkuId(cartSkuVO.getGoodsSku().getId());
 
         //查找当前会员的砍价商品活动
         KanjiaActivitySearchParams kanjiaActivitySearchParams = new KanjiaActivitySearchParams();

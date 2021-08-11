@@ -14,6 +14,7 @@ import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
+import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
@@ -57,6 +58,12 @@ public class CheckDataRender implements CartRenderStep {
 
     @Autowired
     private PointsGoodsService pointsGoodsService;
+
+
+    @Override
+    public RenderStepEnums step() {
+        return RenderStepEnums.CHECK_DATA;
+    }
 
     @Override
     public void render(TradeDTO tradeDTO) {
@@ -171,7 +178,7 @@ public class CheckDataRender implements CartRenderStep {
             String skuId = tradeDTO.getSkuList().get(0).getGoodsSku().getId();
             //获取积分商品VO
             PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsVOByMongo(skuId);
-            if(pointsGoodsVO==null){
+            if (pointsGoodsVO == null) {
                 throw new ServiceException(ResultCode.POINT_GOODS_ERROR);
             }
             Member member = memberService.getUserInfo();

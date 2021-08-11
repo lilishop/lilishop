@@ -4,6 +4,7 @@ import cn.hutool.core.util.NumberUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.store.entity.dos.FreightTemplateChild;
@@ -30,6 +31,11 @@ public class SkuFreightRender implements CartRenderStep {
 
     @Autowired
     private FreightTemplateService freightTemplateService;
+
+    @Override
+    public RenderStepEnums step() {
+        return RenderStepEnums.SKU_FREIGHT;
+    }
 
     @Override
     public void render(TradeDTO tradeDTO) {

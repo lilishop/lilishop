@@ -3,6 +3,7 @@ package cn.lili.modules.order.cart.render.impl;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.order.cart.entity.dto.MemberCouponDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
@@ -20,6 +21,12 @@ import java.util.Map;
 @Order(3)
 @Service
 public class CouponRender implements CartRenderStep {
+
+    @Override
+    public RenderStepEnums step() {
+        return RenderStepEnums.COUPON;
+    }
+
 
     @Override
     public void render(TradeDTO tradeDTO) {

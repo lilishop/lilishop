@@ -2,6 +2,7 @@ package cn.lili.modules.order.cart.render;
 
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
+import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.service.CartService;
@@ -44,20 +45,40 @@ public class TradeBuilder {
 
     /**
      * 渲染整比交易
-     * 0-> 校验商品， 1-》 满优惠渲染， 2->渲染优惠， 3->优惠券渲染， 4->计算运费， 5->计算价格， 6->分销渲染， 7->扩展操作
+     * 校验商品 》 满优惠渲染  》  渲染优惠  》  优惠券渲染  》 计算运费  》  计算价格  》  分销渲染  》 订单SN初始化
      */
-    int[] defaultRender = {0, 1, 2, 4, 5, 6, 7};
+    RenderStepEnums[] defaultRender = {
+            RenderStepEnums.CHECK_DATA,
+            RenderStepEnums.FULL_DISCOUNT,
+            RenderStepEnums.SKU_PROMOTION,
+            RenderStepEnums.COUPON,
+            RenderStepEnums.SKU_FREIGHT,
+            RenderStepEnums.CART_PRICE,
+            RenderStepEnums.DISTRIBUTION,
+            RenderStepEnums.CART_SN
+    };
 
     /**
      * 单个商品优惠，不需要渲染满减优惠
+     * 用于特殊场景：例如积分商品，拼团商品，虚拟商品等等
      */
-    int[] singleRender = {0, 2, 4, 5, 6, 7};
+    RenderStepEnums[] singleRender = {
+            RenderStepEnums.CHECK_DATA,
+            RenderStepEnums.SKU_PROMOTION,
+            RenderStepEnums.SKU_FREIGHT,
+            RenderStepEnums.CART_PRICE,
+            RenderStepEnums.DISTRIBUTION,
+            RenderStepEnums.CART_SN};
 
     /**
      * 购物车购物车渲染
-     * 0-> 校验商品， 1-》 满优惠渲染， 2->渲染优惠，  5->计算价格
+     * 校验商品 》 满优惠渲染  》  渲染优惠  》计算价格
      */
-    int[] cartRender = {0, 1, 2, 5};
+    RenderStepEnums[] cartRender = {
+            RenderStepEnums.CHECK_DATA,
+            RenderStepEnums.FULL_DISCOUNT,
+            RenderStepEnums.SKU_PROMOTION,
+            RenderStepEnums.CART_PRICE};
 
 
     /**
@@ -78,11 +99,15 @@ public class TradeBuilder {
         }
 
         //按照计划进行渲染
-        for (int index : cartRender) {
-            try {
-                cartRenderSteps.get(index).render(tradeDTO);
-            } catch (Exception e) {
-                log.error("购物车{}渲染异常：", cartRenderSteps.get(index).getClass(), e);
+        for (RenderStepEnums step : cartRender) {
+            for (CartRenderStep render : cartRenderSteps) {
+                try {
+                    if (render.step().equals(step)) {
+                        render.render(tradeDTO);
+                    }
+                } catch (Exception e) {
+                    log.error("购物车{}渲染异常：", render.getClass(), e);
+                }
             }
         }
         return tradeDTO;
@@ -106,20 +131,27 @@ public class TradeBuilder {
         tradeDTO.setSkuList(collect);
         if (checkedWay.equals(CartTypeEnum.CART) || checkedWay.equals(CartTypeEnum.BUY_NOW) || checkedWay.equals(CartTypeEnum.VIRTUAL)) {
             //按照计划进行渲染
-            for (int index : defaultRender) {
-                try {
-                    cartRenderSteps.get(index).render(tradeDTO);
-                } catch (Exception e) {
-                    log.error("购物车{}渲染异常：", cartRenderSteps.get(index).getClass(), e);
+            for (RenderStepEnums step : defaultRender) {
+                for (CartRenderStep render : cartRenderSteps) {
+                    try {
+                        if (render.step().equals(step)) {
+                            render.render(tradeDTO);
+                        }
+                    } catch (Exception e) {
+                        log.error("购物车{}渲染异常：", render.getClass(), e);
+                    }
                 }
             }
         } else {
-            //按照计划进行渲染
-            for (int index : singleRender) {
-                try {
-                    cartRenderSteps.get(index).render(tradeDTO);
-                } catch (Exception e) {
-                    log.error("购物车{}渲染异常：", cartRenderSteps.get(index).getClass(), e);
+            for (RenderStepEnums step : singleRender) {
+                for (CartRenderStep render : cartRenderSteps) {
+                    try {
+                        if (render.step().equals(step)) {
+                            render.render(tradeDTO);
+                        }
+                    } catch (Exception e) {
+                        log.error("购物车{}渲染异常：", render.getClass(), e);
+                    }
                 }
             }
         }

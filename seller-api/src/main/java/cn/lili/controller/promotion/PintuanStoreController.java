@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -66,7 +67,7 @@ public class PintuanStoreController {
 
     @PostMapping(consumes = "application/json", produces = "application/json")
     @ApiOperation(value = "添加拼团活动")
-    public ResultMessage<String> addPintuan(@RequestBody PintuanVO pintuan) {
+    public ResultMessage<String> addPintuan(@RequestBody @Validated PintuanVO pintuan) {
         AuthUser currentUser = UserContext.getCurrentUser();
         pintuan.setStoreId(currentUser.getStoreId());
         pintuan.setStoreName(currentUser.getStoreName());
@@ -78,7 +79,7 @@ public class PintuanStoreController {
 
     @PutMapping(consumes = "application/json", produces = "application/json")
     @ApiOperation(value = "修改拼团活动")
-    public ResultMessage<String> editPintuan(@RequestBody PintuanVO pintuan) {
+    public ResultMessage<String> editPintuan(@RequestBody @Validated PintuanVO pintuan) {
         AuthUser currentUser = UserContext.getCurrentUser();
         pintuan.setStoreId(currentUser.getStoreId());
         pintuan.setStoreName(currentUser.getStoreName());

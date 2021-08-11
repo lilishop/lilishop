@@ -83,7 +83,7 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
                 //for循环路径集合
                 for (String url : permissionUrl) {
                     //如果是超级权限 则计入超级权限
-                    if (menu.getSupper()) {
+                    if (menu.getSuper()) {
                         //如果已有超级权限，则这里就不做权限的累加
                         if (!superPermissions.contains(url)) {
                             superPermissions.add(url);
@@ -98,8 +98,8 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
                     }
                 }
             }
-            //去除无效的权限
-            superPermissions.forEach(queryPermissions::remove);
+            //去除重复的权限
+            queryPermissions.removeAll(superPermissions);
         });
         permission.put(PermissionEnum.SUPER.name(), superPermissions);
         permission.put(PermissionEnum.QUERY.name(), queryPermissions);

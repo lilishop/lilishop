@@ -5,6 +5,7 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.order.cart.entity.dto.MemberCouponDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
+import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
@@ -37,6 +38,9 @@ import java.util.stream.Collectors;
 @Service
 @Order(2)
 public class SkuPromotionRender implements CartRenderStep {
+
+
+
     /**
      * 促销计算
      */
@@ -47,6 +51,11 @@ public class SkuPromotionRender implements CartRenderStep {
      */
     @Autowired
     private PromotionGoodsService promotionGoodsService;
+
+    @Override
+    public RenderStepEnums step() {
+        return RenderStepEnums.SKU_PROMOTION;
+    }
 
     @Override
     public void render(TradeDTO tradeDTO) {

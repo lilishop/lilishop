@@ -4,6 +4,7 @@ import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,11 @@ public class DistributionPriceRender implements CartRenderStep {
      */
     @Autowired
     private Cache cache;
+
+    @Override
+    public RenderStepEnums step() {
+        return RenderStepEnums.DISTRIBUTION;
+    }
 
     @Override
     public void render(TradeDTO tradeDTO) {

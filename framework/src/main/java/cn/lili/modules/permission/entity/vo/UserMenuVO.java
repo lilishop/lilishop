@@ -17,12 +17,12 @@ public class UserMenuVO extends Menu {
     /**
      * 是否是超级管理员
      */
-    private Boolean isSupper;
+    private Boolean isSuper;
 
-    public Boolean getSupper() {
-        if (this.isSupper == null) {
+    public Boolean getSuper() {
+        if (this.isSuper == null) {
             return false;
         }
-        return isSupper;
+        return isSuper;
     }
 }

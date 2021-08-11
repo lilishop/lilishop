@@ -5,6 +5,7 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
+import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
@@ -49,6 +50,10 @@ public class CartPriceRender implements CartRenderStep {
     @Autowired
     private KanjiaActivityGoodsService kanjiaActivityGoodsService;
 
+    @Override
+    public RenderStepEnums step() {
+        return RenderStepEnums.CART_PRICE;
+    }
     @Override
     public void render(TradeDTO tradeDTO) {
         //构造cartVO

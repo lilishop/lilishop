@@ -99,7 +99,7 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
             }
             //非get请求（数据操作） 判定鉴权
             else {
-                if (PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER.name()).toArray(new String[0]), request.getRequestURI())) {
+                if (PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER.name()).toArray(new String[0]), requestUrl)) {
 
                 } else {
                     ResponseUtil.output(response, ResponseUtil.resultMap(false, 400, "权限不足"));

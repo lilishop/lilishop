@@ -1,6 +1,7 @@
 package cn.lili.modules.order.cart.render.impl;
 
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
@@ -29,6 +30,10 @@ public class FullDiscountRender implements CartRenderStep {
     @Autowired
     private FullDiscountService fullDiscountService;
 
+    @Override
+    public RenderStepEnums step() {
+        return RenderStepEnums.FULL_DISCOUNT;
+    }
     @Override
     public void render(TradeDTO tradeDTO) {
 

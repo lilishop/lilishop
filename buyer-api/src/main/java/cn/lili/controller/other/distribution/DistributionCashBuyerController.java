@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 
@@ -50,8 +52,10 @@ public class DistributionCashBuyerController {
             @ApiImplicitParam(name = "price", value = "申请金额", required = true, paramType = "query", dataType = "double")
     })
     @PostMapping
-    public ResultMessage<Object> cash(@NotNull @ApiIgnore Double price) {
-        if(distributionCashService.cash(price)){
+    public ResultMessage<Object> cash(@Max(value = 1000, message = "充值金额单次最多允许提现1000元")
+                                          @Min(value = 1, message = "充值金额单次最少提现金额为1元")
+                                          @NotNull @ApiIgnore Double price) {
+        if (distributionCashService.cash(price)) {
             return ResultUtil.success();
         }
         throw new ServiceException(ResultCode.ERROR);
