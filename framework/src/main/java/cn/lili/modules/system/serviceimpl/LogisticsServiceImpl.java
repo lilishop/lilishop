@@ -91,7 +91,7 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
             Map<String, String> params = new HashMap<String, String>(8);
             params.put("RequestData", urlEncoder(requestData, "UTF-8"));
             params.put("EBusinessID", EBusinessID);
-            params.put("RequestType", "8001");
+            params.put("RequestType", "1002");
             String dataSign = encrypt(requestData, AppKey, "UTF-8");
             params.put("DataSign", urlEncoder(dataSign, "UTF-8"));
             params.put("DataType", "2");

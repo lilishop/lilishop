@@ -229,6 +229,7 @@ public class Goods extends BaseEntity {
         //如果立即上架则
         this.marketEnable = goodsOperationDTO.getRelease() ? GoodsStatusEnum.UPPER.name() : GoodsStatusEnum.DOWN.name();
         this.goodsType = goodsOperationDTO.getGoodsType();
+        this.grade = 100D;
 
         //循环sku，判定sku是否有效
         for (Map<String, Object> sku : goodsOperationDTO.getSkuList()) {

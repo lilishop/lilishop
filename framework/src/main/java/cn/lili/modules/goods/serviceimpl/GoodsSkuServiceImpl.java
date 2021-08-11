@@ -588,6 +588,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         sku.setIntro(goods.getIntro());
         sku.setMobileIntro(goods.getMobileIntro());
         sku.setGoodsUnit(goods.getGoodsUnit());
+        sku.setGrade(100D);
         //商品状态
         sku.setIsAuth(goods.getIsAuth());
         sku.setSalesModel(goods.getSalesModel());
