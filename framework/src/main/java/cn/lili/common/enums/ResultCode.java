@@ -236,7 +236,7 @@ public enum ResultCode {
      */
     PROMOTION_GOODS_NOT_EXIT(40001, "当前促销商品不存在！"),
     PROMOTION_SAME_ACTIVE_EXIST(40002,"当前时间内已存在同类活动"),
-    PROMOTION_START_TIME_ERROR(40003,"活动起始时间不能大于活动结束时间"),
+    PROMOTION_START_TIME_ERROR(40003,"活动起始时间不能小于当前时间"),
     PROMOTION_TIME_ERROR(40004,"活动起始时间必须大于当前时间"),
     PROMOTION_SAME_ERROR(40005,"当前时间段已存在相同活动！"),
     PROMOTION_GOODS_ERROR(40006,"请选择要参与活动的商品"),

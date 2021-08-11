@@ -1,15 +1,13 @@
 package cn.lili.modules.promotion.entity.dto;
 
-import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.mybatis.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**
@@ -34,12 +32,10 @@ public class BasePromotion extends BaseEntity {
     @ApiModelProperty(value = "活动名称", required = true)
     private String promotionName;
 
-    @Min(message = "活动开始时间不能为空", value = 0)
     @ApiModelProperty(value = "活动开始时间", required = true)
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date startTime;
 
-    @Min(message = "活动结束时间不能为空", value = 0)
     @ApiModelProperty(value = "活动结束时间", required = true)
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endTime;
@@ -48,6 +44,5 @@ public class BasePromotion extends BaseEntity {
      * @see PromotionStatusEnum
      */
     @ApiModelProperty(value = "活动状态")
-    @NotNull(message = "活动状态不能为空")
     private String promotionStatus;
 }
