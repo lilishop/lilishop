@@ -214,6 +214,11 @@ public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper,
     @Override
     public boolean cancel(String id) {
 
+        OrderComplaint orderComplaint = this.getById(id);
+        //如果以及仲裁，则不可以进行申诉取消
+        if(orderComplaint.getComplainStatus().equals(ComplaintStatusEnum.COMPLETE.name())){
+            throw new ServiceException(ResultCode.COMPLAINT_CANCEL_ERROR);
+        }
         LambdaUpdateWrapper<OrderComplaint> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.eq(OrderComplaint::getId, id);
         lambdaUpdateWrapper.set(OrderComplaint::getComplainStatus, ComplaintStatusEnum.CANCEL.name());
