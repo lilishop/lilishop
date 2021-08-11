@@ -11,8 +11,9 @@ public enum PayStatusEnum {
     /**
      * 支付状态
      */
-    UNPAID("未付款"),
-    PAID("已付款");
+    UNPAID("待付款"),
+    PAID("已付款"),
+    CANCEL("已取消");
 
     private final String description;
 
