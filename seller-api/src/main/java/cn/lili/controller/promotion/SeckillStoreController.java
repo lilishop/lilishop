@@ -1,8 +1,7 @@
 package cn.lili.controller.promotion;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.security.context.UserContext;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.Seckill;
@@ -18,7 +17,6 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -72,11 +70,10 @@ public class SeckillStoreController {
         return ResultUtil.success();
     }
 
-    @DeleteMapping("/apply/{seckillId}/{ids}")
-    @ApiOperation(value = "删除秒杀活动申请")
-    public ResultMessage<String> deleteSeckillApply(@PathVariable("seckillId") String seckillId, @PathVariable("ids") String ids) {
-        String[] idsSplit = ids.split(",");
-        seckillApplyService.removeSeckillApplyByIds(seckillId, Arrays.asList(idsSplit));
+    @DeleteMapping("/apply/{seckillId}/{id}")
+    @ApiOperation(value = "删除秒杀活动商品")
+    public ResultMessage<String> deleteSeckillApply(@PathVariable String seckillId,@PathVariable String id) {
+        seckillApplyService.removeSeckillApply(seckillId, id);
         return ResultUtil.success();
     }
 

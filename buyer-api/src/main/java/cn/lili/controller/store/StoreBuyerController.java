@@ -63,6 +63,13 @@ public class StoreBuyerController {
         return ResultUtil.data(storeDetailService.getStoreBasicInfoDTO(id));
     }
 
+    @ApiOperation(value = "通过id获取店铺详细信息-营业执照")
+    @ApiImplicitParam(name = "id", value = "店铺ID", required = true, paramType = "path")
+    @GetMapping(value = "/get/licencePhoto/{id}")
+    public ResultMessage<StoreOtherVO> licencePhoto(@NotNull @PathVariable String id) {
+        return ResultUtil.data(storeDetailService.getStoreOtherVO(id));
+    }
+
     @ApiOperation(value = "通过id获取店铺商品分类")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "店铺ID", required = true, paramType = "path")

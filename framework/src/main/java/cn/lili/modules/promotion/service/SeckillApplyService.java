@@ -57,10 +57,10 @@ public interface SeckillApplyService extends IService<SeckillApply> {
     void addSeckillApply(String seckillId, String storeId, List<SeckillApplyVO> seckillApplyList);
 
     /**
-     * 批量删除秒杀活动申请
+     * 批量删除秒杀活动商品
      *
      * @param seckillId 秒杀活动活动id
-     * @param ids       秒杀活动申请id集合
+     * @param id       秒杀活动商品
      */
-    void removeSeckillApplyByIds(String seckillId, List<String> ids);
+    void removeSeckillApply(String seckillId, String id );
 }

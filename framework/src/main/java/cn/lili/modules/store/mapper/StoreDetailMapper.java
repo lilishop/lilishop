@@ -6,6 +6,7 @@ import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.store.entity.dto.StoreSettlementDay;
 import cn.lili.modules.store.entity.vos.StoreBasicInfoVO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
+import cn.lili.modules.store.entity.vos.StoreOtherVO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -79,4 +80,12 @@ public interface StoreDetailMapper extends BaseMapper<StoreDetail> {
      */
     @Update("UPDATE li_store_detail SET settlement_day=#{dateTime} WHERE store_id=#{storeId}")
     void updateSettlementDay(String storeId, DateTime dateTime);
+
+    /**
+     * 查看店铺营业执照信息
+     * @param storeId 店铺ID
+     * @return 店铺营业执照
+     */
+    @Select("SELECT * FROM li_store_detail WHERE store_id=#{storeId}")
+    StoreOtherVO getLicencePhoto(String storeId);
 }

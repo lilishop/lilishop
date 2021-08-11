@@ -5,6 +5,7 @@ import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.store.entity.dto.StoreSettingDTO;
 import cn.lili.modules.store.entity.vos.StoreBasicInfoVO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
+import cn.lili.modules.store.entity.vos.StoreOtherVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -95,4 +96,12 @@ public interface StoreDetailService extends IService<StoreDetail> {
      * @return 店铺经营范围
      */
     List goodsManagementCategory(String storeId);
+
+    /**
+     * 获取店铺其他信息
+     *
+     * @param storeId 店铺ID
+     * @return 店铺其他信息
+     */
+    StoreOtherVO getStoreOtherVO(String storeId);
 }

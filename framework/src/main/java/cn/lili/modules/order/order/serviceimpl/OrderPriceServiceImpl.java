@@ -71,7 +71,7 @@ public class OrderPriceServiceImpl implements OrderPriceService {
         Order order = updateOrderPrice(orderSn, orderPrice);
 
         //修改订单货物金额
-        updateOrderItemPrice(order);
+        //updateOrderItemPrice(order);
 
         //修改交易金额
         tradeMapper.updateTradePrice(order.getTradeSn());
@@ -112,12 +112,16 @@ public class OrderPriceServiceImpl implements OrderPriceService {
         //获取订单价格信息
         PriceDetailDTO orderPriceDetailDTO = order.getPriceDetailDTO();
 
+        if (orderPriceDetailDTO.getOriginalPrice() == 0D) {
+            orderPriceDetailDTO.setOriginalPrice(orderPriceDetailDTO.getFlowPrice());
+        }
         //修改订单价格
         order.setFlowPrice(orderPrice);
         //订单修改金额=使用订单原始金额-修改后金额
         orderPriceDetailDTO.setUpdatePrice(CurrencyUtil.sub(orderPriceDetailDTO.getOriginalPrice(), orderPrice));
         orderPriceDetailDTO.setFlowPrice(orderPrice);
 
+        order.setPriceDetail(JSONUtil.toJsonStr(orderPriceDetailDTO));
         List<OrderItem> orderItems = updateOrderItemPrice(order);
 
         //这里如果直接赋予订单金额，则累加可能会出现小数点，最后无法累加回去，所以用一个零时变量累加后，将平台佣金赋予对象
@@ -150,6 +154,9 @@ public class OrderPriceServiceImpl implements OrderPriceService {
             //获取订单货物价格信息
             PriceDetailDTO priceDetailDTO = orderItem.getPriceDetailDTO();
 
+            if (priceDetailDTO.getOriginalPrice() == 0D) {
+                priceDetailDTO.setOriginalPrice(priceDetailDTO.getFlowPrice());
+            }
             //SKU占总订单 金额的百分比
             Double priceFluctuationRatio = CurrencyUtil.div(priceDetailDTO.getOriginalPrice(), order.getPriceDetailDTO().getOriginalPrice());
 
@@ -161,13 +168,14 @@ public class OrderPriceServiceImpl implements OrderPriceService {
 
             priceDetailDTO.setFlowPrice(flowPrice);
 
+
             //计算平台佣金=交易金额*分类佣金比例/100
             Double platFormCommission = CurrencyUtil.div(CurrencyUtil.mul(flowPrice, categoryService.getById(orderItem.getCategoryId()).getCommissionRate()), 100);
             priceDetailDTO.setPlatFormCommission(platFormCommission);
 
             //修改订单货物金额
             orderItem.setFlowPrice(flowPrice);
-
+            orderItem.setUnitPrice(CurrencyUtil.div(flowPrice,orderItem.getNum()));
             priceDetailDTO.countBill();
             orderItem.setPriceDetail(JSONUtil.toJsonStr(priceDetailDTO));
             orderItemService.update(orderItem, new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getId, orderItem.getId()));
