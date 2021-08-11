@@ -1,5 +1,6 @@
 package cn.lili.modules.system.token;
 
+import cn.hutool.core.util.StrUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.security.AuthUser;
@@ -77,7 +78,7 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
         //循环权限菜单
         userMenuVOList.forEach(menu -> {
             //循环菜单，赋予用户权限
-            if (!menu.getPermission().isEmpty()) {
+            if (StrUtil.isNotEmpty(menu.getPermission())) {
                 //获取路径集合
                 String[] permissionUrl = menu.getPermission().split(",");
                 //for循环路径集合

@@ -329,7 +329,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         checkMember(memberAddDTO.getUsername(), memberAddDTO.getMobile());
 
         //添加会员
-        Member member = new Member(memberAddDTO.getUsername(), memberAddDTO.getPassword(), memberAddDTO.getMobile());
+        Member member = new Member(memberAddDTO.getUsername(), new BCryptPasswordEncoder().encode(memberAddDTO.getPassword()), memberAddDTO.getMobile());
         this.save(member);
         String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_REGISTER.name();
         rocketMQTemplate.asyncSend(destination, member, RocketmqSendCallbackBuilder.commonCallback());
