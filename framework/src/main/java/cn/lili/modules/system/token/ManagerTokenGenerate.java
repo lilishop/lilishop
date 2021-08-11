@@ -99,8 +99,8 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
                     }
                 }
             }
-            //去除无效的权限
-            superPermissions.forEach(queryPermissions::remove);
+            //去除重复的权限
+            queryPermissions.removeAll(superPermissions);
         });
         permission.put(PermissionEnum.SUPER.name(), superPermissions);
         permission.put(PermissionEnum.QUERY.name(), queryPermissions);
