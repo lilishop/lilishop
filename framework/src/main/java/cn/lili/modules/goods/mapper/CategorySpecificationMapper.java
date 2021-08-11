@@ -20,8 +20,7 @@ public interface CategorySpecificationMapper extends BaseMapper<CategorySpecific
      * @param categoryId 分类id
      * @return 分类绑定规格列表
      */
-    @Select("select s.* from " +
-            "li_specification s INNER join li_category_specification cs on s.id = cs.specification_id and cs.category_id = #{categoryId} " +
-            "where s.delete_flag = 0")
+    @Select("select s.* from  li_specification s INNER join li_category_specification cs " +
+            "on s.id = cs.specification_id and cs.category_id = #{categoryId} ")
     List<Specification> getCategorySpecList(String categoryId);
 }
