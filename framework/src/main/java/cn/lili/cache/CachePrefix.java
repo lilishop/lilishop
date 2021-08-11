@@ -456,6 +456,16 @@ public enum CachePrefix {
     ARTICLE_CACHE,
 
     /**
+     * 初始化索引
+     */
+    INIT_INDEX_PROCESS,
+
+    /**
+     * 初始化索引标示
+     */
+    INIT_INDEX_FLAG,
+
+    /**
      * 店铺分类
      */
     STORE_CATEGORY;
