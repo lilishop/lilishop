@@ -189,7 +189,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         if (!afterSale.getServiceStatus().equals(AfterSaleStatusEnum.APPLY.name())) {
             throw new ServiceException(ResultCode.AFTER_SALES_DOUBLE_ERROR);
         }
-        //判断退款金额与付款金额是否正确,退款金额不能小于付款金额
+        //判断退款金额与付款金额是否正确,退款金额不能大于付款金额
         if (NumberUtil.compare(afterSale.getFlowPrice(), actualRefundPrice) == -1) {
             throw new ServiceException(ResultCode.AFTER_SALES_PRICE_ERROR);
         }

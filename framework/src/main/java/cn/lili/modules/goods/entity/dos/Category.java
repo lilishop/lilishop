@@ -52,7 +52,6 @@ public class Category extends BaseEntity {
     @ApiModelProperty(value = "佣金比例")
     private Double commissionRate;
 
-    @NotEmpty(message = "分类图标不能为空")
     @ApiModelProperty(value = "分类图标")
     private String image;
 

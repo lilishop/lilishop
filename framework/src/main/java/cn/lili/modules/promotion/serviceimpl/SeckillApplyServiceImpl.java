@@ -25,6 +25,7 @@ import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.service.SeckillService;
 import cn.lili.modules.promotion.tools.PromotionCacheKeys;
 import cn.lili.modules.promotion.tools.PromotionTools;
+import cn.lili.modules.search.service.EsGoodsIndexService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -74,6 +75,11 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
      */
     @Autowired
     private SeckillService seckillService;
+    /**
+     * 商品索引
+     */
+    @Autowired
+    private EsGoodsIndexService goodsIndexService;
 
     @Override
     public List<SeckillTimelineVO> getSeckillTimeline() {
@@ -201,20 +207,31 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
      * 批量删除秒杀活动申请
      *
      * @param seckillId 秒杀活动活动id
-     * @param ids       秒杀活动申请id集合
+     * @param id        秒杀活动申请id
      */
     @Override
-    public void removeSeckillApplyByIds(String seckillId, List<String> ids) {
+    public void removeSeckillApply(String seckillId, String id) {
         SeckillVO seckillVO = this.mongoTemplate.findById(seckillId, SeckillVO.class);
         if (seckillVO == null) {
             throw new ServiceException(ResultCode.SECKILL_NOT_EXIST_ERROR);
         }
-        if (seckillVO.getPromotionStatus().equals(PromotionStatusEnum.START.name())) {
-            throw new ServiceException(ResultCode.SECKILL_UPDATE_ERROR);
-        }
-        seckillVO.getSeckillApplyList().removeIf(seckillApply -> ids.contains(seckillApply.getId()));
+        SeckillApply seckillApply = this.getById(id);
+        //获取商品SKUID
+        String skuId = seckillApply.getSkuId();
+
+        //清除秒杀活动中的商品
+        seckillVO.getSeckillApplyList().removeIf(seckillApply1 -> id.contains(seckillApply1.getId()));
         this.mongoTemplate.save(seckillVO);
-        this.removeByIds(ids);
+
+        //删除促销商品
+        this.removeById(id);
+
+        //清除索引
+        this.goodsIndexService.deleteEsGoodsPromotionByPromotionId(skuId, seckillId);
+        //删除促销商品
+        promotionGoodsService.remove(new LambdaQueryWrapper<PromotionGoods>()
+                .eq(PromotionGoods::getSkuId, skuId)
+                .eq(PromotionGoods::getPromotionType, PromotionTypeEnum.SECKILL.name()));
     }
 
     /**
@@ -244,48 +261,6 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
                 existSku.add(seckillApply.getSkuId());
             }
 
-        }
-    }
-
-    /**
-     * 组装促销商品信息
-     *
-     * @param seckillApply     秒杀活动申请信息
-     * @param seckillStartTime 当前秒杀活动申请的开始时间
-     * @return 促销商品信息
-     */
-    private PromotionGoods setPromotionGoods(SeckillApply seckillApply, Date seckillStartTime) {
-        PromotionGoods promotionGoods = new PromotionGoods();
-        promotionGoods.setTitle("秒杀活动");
-        promotionGoods.setSkuId(seckillApply.getSkuId());
-        promotionGoods.setPromotionType(PromotionTypeEnum.SECKILL.name());
-        promotionGoods.setPromotionId(seckillApply.getSeckillId());
-        promotionGoods.setPrice(seckillApply.getPrice());
-        promotionGoods.setNum(seckillApply.getQuantity());
-        promotionGoods.setStoreId(seckillApply.getStoreId());
-        promotionGoods.setPromotionStatus(PromotionStatusEnum.NEW.name());
-        //商品活动的开始时间为当前商品的参加时间段
-        int timeLine = seckillApply.getTimeLine();
-        String date = cn.lili.common.utils.DateUtil.toString(seckillStartTime, cn.lili.common.utils.DateUtil.STANDARD_DATE_FORMAT);
-        long startTime = cn.lili.common.utils.DateUtil.getDateline(date + " " + timeLine + ":00:00", cn.lili.common.utils.DateUtil.STANDARD_FORMAT);
-        long endTime = cn.lili.common.utils.DateUtil.getDateline(date + " 23:59:59", cn.lili.common.utils.DateUtil.STANDARD_FORMAT);
-
-        promotionGoods.setStartTime(new Date(startTime));
-        promotionGoods.setEndTime(new Date(endTime));
-        return promotionGoods;
-    }
-
-    /**
-     * 检查缓存中是否存在相同商品参与的秒杀活动活动
-     *
-     * @param startTime 秒杀活动开始时间
-     */
-    private void checkCache(Long startTime) {
-        String seckillCacheKey = PromotionCacheKeys.getSeckillTimelineKey(cn.lili.common.utils.DateUtil.toString(startTime, cn.lili.common.utils.DateUtil.STANDARD_DATE_NO_UNDERLINE_FORMAT));
-        Map<Object, Object> hash = cache.getHash(seckillCacheKey);
-        //如果缓存中存在当前审核商品参与的秒杀活动活动商品信息，清除
-        if (hash != null && !hash.isEmpty()) {
-            cache.remove(seckillCacheKey);
         }
     }
 

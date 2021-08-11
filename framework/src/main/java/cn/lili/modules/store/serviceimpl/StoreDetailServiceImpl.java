@@ -12,6 +12,7 @@ import cn.lili.modules.store.entity.dto.StoreSettingDTO;
 import cn.lili.modules.store.entity.vos.StoreBasicInfoVO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
 import cn.lili.modules.store.entity.vos.StoreManagementCategoryVO;
+import cn.lili.modules.store.entity.vos.StoreOtherVO;
 import cn.lili.modules.store.mapper.StoreDetailMapper;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.store.service.StoreService;
@@ -132,6 +133,13 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
             list.add(storeManagementCategoryVO);
         }
         return list;
+    }
+
+    @Override
+    public StoreOtherVO getStoreOtherVO(String storeId) {
+
+        StoreOtherVO storeOtherVO=this.baseMapper.getLicencePhoto(storeId);
+        return storeOtherVO;
     }
 
 }

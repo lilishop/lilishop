@@ -96,7 +96,7 @@ public class PriceDetailDTO implements Serializable {
 
 
     public Double getOriginalPrice() {
-        if (originalPrice == null) {
+        if (originalPrice == 0D) {
             return flowPrice;
         }
         return originalPrice;

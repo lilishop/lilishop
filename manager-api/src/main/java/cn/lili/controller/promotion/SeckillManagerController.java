@@ -96,4 +96,12 @@ public class SeckillManagerController {
         return ResultUtil.data(seckillApply);
     }
 
+    @DeleteMapping("/apply/{seckillId}/{id}")
+    @ApiOperation(value = "删除秒杀活动申请")
+    public ResultMessage<String> deleteSeckillApply(@PathVariable String seckillId, @PathVariable String id) {
+        seckillApplyService.removeSeckillApply(seckillId, id);
+        return ResultUtil.success();
+    }
+
+
 }

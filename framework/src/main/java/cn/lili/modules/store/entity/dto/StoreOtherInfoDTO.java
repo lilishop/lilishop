@@ -37,4 +37,16 @@ public class StoreOtherInfoDTO {
     @ApiModelProperty(value = "店铺经营类目")
     private String goodsManagementCategory;
 
+    @NotBlank(message = "地址不能为空")
+    @ApiModelProperty(value = "地址名称， '，'分割")
+    private String storeAddressPath;
+
+    @NotBlank(message = "地址ID不能为空")
+    @ApiModelProperty(value = "地址id，'，'分割 ")
+    private String storeAddressIdPath;
+
+    @NotBlank(message = "地址详情")
+    @ApiModelProperty(value = "地址详情")
+    private String storeAddressDetail;
+
 }
