@@ -297,6 +297,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
      */
     private void checkParam(CouponVO coupon) {
 
+        //优惠券限制领取数量
         if (coupon.getCouponLimitNum() < 0) {
             throw new ServiceException(ResultCode.COUPON_LIMIT_NUM_LESS_THAN_0);
         }
@@ -304,18 +305,21 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         if (coupon.getPublishNum() != 0 && coupon.getCouponLimitNum() > coupon.getPublishNum()) {
             throw new ServiceException(ResultCode.COUPON_LIMIT_GREATER_THAN_PUBLISH);
         }
+        //打折优惠券大于10折
         boolean discountCoupon = (coupon.getCouponType().equals(CouponTypeEnum.DISCOUNT.name())
                 && (coupon.getCouponDiscount() < 0 && coupon.getCouponDiscount() > 10));
         if (discountCoupon) {
             throw new ServiceException(ResultCode.COUPON_DISCOUNT_ERROR);
         }
 
+        //优惠券为固定时间类型
         if (coupon.getRangeDayType() != null && coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
             long nowTime = DateUtil.getDateline() * 1000;
-            if (coupon.getStartTime().getTime() < nowTime && coupon.getEndTime().getTime() > nowTime) {
-                throw new ServiceException(ResultCode.PROMOTION_TIME_ERROR);
+            //固定时间的优惠券不能小于当前时间
+            if (coupon.getEndTime().getTime() < nowTime) {
+                throw new ServiceException(ResultCode.PROMOTION_END_TIME_ERROR);
             }
-
+            //促销通用时间校验
             PromotionTools.checkPromotionTime(coupon.getStartTime().getTime(), coupon.getEndTime().getTime());
         }
 
