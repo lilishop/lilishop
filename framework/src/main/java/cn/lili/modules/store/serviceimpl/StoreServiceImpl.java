@@ -239,15 +239,13 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             BeanUtil.copyProperties(storeCompanyDTO, storeDetail);
             return storeDetailService.save(storeDetail);
         } else {
-            store.setStoreAddressDetail(storeCompanyDTO.getStoreAddressDetail());
-            store.setStoreAddressIdPath(storeCompanyDTO.getStoreAddressIdPath());
-            store.setStoreAddressPath(storeCompanyDTO.getStoreAddressPath());
-            this.saveOrUpdate(store);
+            BeanUtil.copyProperties(storeCompanyDTO, store);
+            this.updateById(store);
+            //判断是否存在店铺详情，如果没有则进行新建，如果存在则进行修改
+            StoreDetail storeDetail = storeDetailService.getStoreDetail(store.getId());
+            BeanUtil.copyProperties(storeCompanyDTO, storeDetail);
+            return storeDetailService.updateById(storeDetail);
         }
-        //判断是否存在店铺详情，如果没有则进行新建，如果存在则进行修改
-        StoreDetail storeDetail = storeDetailService.getStoreDetail(store.getId());
-        BeanUtil.copyProperties(storeCompanyDTO, storeDetail);
-        return storeDetailService.updateById(storeDetail);
     }
 
     @Override
@@ -265,6 +263,9 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     public boolean applyThirdStep(StoreOtherInfoDTO storeOtherInfoDTO) {
         //获取当前操作的店铺
         Store store = getStoreByMember();
+        BeanUtil.copyProperties(storeOtherInfoDTO, store);
+        this.updateById(store);
+
         StoreDetail storeDetail = storeDetailService.getStoreDetail(store.getId());
         //设置店铺的其他信息
         BeanUtil.copyProperties(storeOtherInfoDTO, storeDetail);

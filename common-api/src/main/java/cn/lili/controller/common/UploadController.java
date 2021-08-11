@@ -68,7 +68,7 @@ public class UploadController {
             throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
         Setting setting = settingService.get(SettingEnum.OSS_SETTING.name());
-        if (StrUtil.isEmpty(setting.getSettingValue())) {
+        if (setting == null || StrUtil.isBlank(setting.getSettingValue())) {
             throw new ServiceException(ResultCode.OSS_NOT_EXIST);
         }
 
