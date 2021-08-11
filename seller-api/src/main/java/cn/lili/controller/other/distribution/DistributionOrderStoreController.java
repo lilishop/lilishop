@@ -36,7 +36,7 @@ public class DistributionOrderStoreController {
     public ResultMessage<IPage<DistributionOrder>> distributionOrder(DistributionOrderSearchParams distributionOrderSearchParams) {
 
         //获取当前登录商家账号-查询当前店铺的分销订单
-        distributionOrderSearchParams.setStoreId(UserContext.getCurrentUser().getId());
+        distributionOrderSearchParams.setStoreId(UserContext.getCurrentUser().getStoreId());
         //查询分销订单列表
         IPage<DistributionOrder> distributionOrderPage = distributionOrderService.getDistributionOrderPage(distributionOrderSearchParams);
         return ResultUtil.data(distributionOrderPage);
