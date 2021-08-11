@@ -72,7 +72,7 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
     /**
      * 1.查看订单是否为分销订单
      * 2.查看店铺流水计算分销总佣金
-     * 3.修改分销员的分销总金额、可提现金额
+     * 3.修改分销员的分销总金额、冻结金额
      *
      * @param orderSn 订单编号
      */
@@ -102,15 +102,36 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
                 //设置结算天数(解冻日期)
                 Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
                 DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
-                DateTime dateTime = new DateTime();
                 //默认解冻1天
-                dateTime.offsetNew(DateField.DAY_OF_MONTH, distributionSetting.getCashDay());
-                distributionOrder.setSettleCycle(dateTime);
+                if (distributionSetting.getCashDay().equals(0)) {
+                    distributionOrder.setSettleCycle(new DateTime());
+                } else {
+                    DateTime dateTime = new DateTime();
+                    dateTime.offsetNew(DateField.DAY_OF_MONTH, distributionSetting.getCashDay());
+                    distributionOrder.setSettleCycle(dateTime);
+                }
+
+                //添加分销订单
                 this.save(distributionOrder);
-            }
-            //如果包含分销商品则记录会员的分销总额
-            if (rebate != 0.0) {
-                distributionService.addRebate(rebate, order.getDistributionId());
+
+                //记录会员的分销总额
+                if (rebate != 0.0) {
+                    distributionService.addRebate(rebate, order.getDistributionId());
+
+                    //如果天数写0则立即进行结算
+                    if (distributionSetting.getCashDay().equals(0)) {
+                        //计算分销提佣
+                        this.baseMapper.rebate(DistributionOrderStatusEnum.WAIT_BILL.name(), new DateTime());
+
+                        //修改分销订单状态
+                        this.update(new LambdaUpdateWrapper<DistributionOrder>()
+                                .eq(DistributionOrder::getDistributionOrderStatus, DistributionOrderStatusEnum.WAIT_BILL.name())
+                                .le(DistributionOrder::getSettleCycle, new DateTime())
+                                .set(DistributionOrder::getDistributionOrderStatus, DistributionOrderStatusEnum.WAIT_CASH.name()));
+                    }
+                }
+
+
             }
         }
 
@@ -145,7 +166,7 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
 
             //如果包含分销商品则记录会员的分销总额
             if (rebate != 0.0) {
-                distributionService.addRebate(CurrencyUtil.sub(0, rebate), order.getDistributionId());
+                distributionService.subCanRebate(CurrencyUtil.sub(0, rebate), order.getDistributionId());
             }
         }
 

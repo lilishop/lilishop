@@ -45,7 +45,7 @@ public class DistributionOrder {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;
@@ -91,21 +91,21 @@ public class DistributionOrder {
     @ApiModelProperty(value = "商品数量")
     private Integer num;
 
-    public DistributionOrder(StoreFlow storeFlow){
-        distributionOrderStatus=DistributionOrderStatusEnum.WAIT_BILL.name();
-        memberId=storeFlow.getMemberId();
-        memberName=storeFlow.getMemberName();
-        rebate=storeFlow.getDistributionRebate();
-        storeId=storeFlow.getStoreId();
-        storeName=storeFlow.getStoreName();
-        orderSn=storeFlow.getOrderSn();
-        orderItemSn=storeFlow.getOrderItemSn();
-        goodsId=storeFlow.getGoodsId();
-        goodsName=storeFlow.getGoodsName();
-        skuId=storeFlow.getSkuId();
-        specs=storeFlow.getSpecs();
-        image=storeFlow.getImage();
-        num= storeFlow.getNum();
+    public DistributionOrder(StoreFlow storeFlow) {
+        distributionOrderStatus = DistributionOrderStatusEnum.WAIT_BILL.name();
+        memberId = storeFlow.getMemberId();
+        memberName = storeFlow.getMemberName();
+        rebate = storeFlow.getDistributionRebate();
+        storeId = storeFlow.getStoreId();
+        storeName = storeFlow.getStoreName();
+        orderSn = storeFlow.getOrderSn();
+        orderItemSn = storeFlow.getOrderItemSn();
+        goodsId = storeFlow.getGoodsId();
+        goodsName = storeFlow.getGoodsName();
+        skuId = storeFlow.getSkuId();
+        specs = storeFlow.getSpecs();
+        image = storeFlow.getImage();
+        num = storeFlow.getNum();
     }
 
 }

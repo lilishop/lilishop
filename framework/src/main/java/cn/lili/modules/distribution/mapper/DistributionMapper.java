@@ -16,18 +16,19 @@ public interface DistributionMapper extends BaseMapper<Distribution> {
     /**
      * 修改分销员可提现金额
      *
-     * @param canRebate      提现金额
+     * @param commissionFrozen      分销金额
      * @param distributionId 分销员ID
      */
-    @Update("UPDATE li_distribution set can_rebate = can_rebate+#{canRebate} WHERE id = #{distributionId}")
-    void subCanRebate(Double canRebate, String distributionId);
+    @Update("UPDATE li_distribution set commission_frozen = (commission_frozen+#{commissionFrozen}) , rebate_total=(rebate_total+#{commissionFrozen})  WHERE id = #{distributionId}")
+    void subCanRebate(Double commissionFrozen, String distributionId);
 
     /**
-     * 添加可提现金额
+     * 添加分销金额
      *
-     * @param canRebate      提现金额
+     * @param commissionFrozen      分销金额
      * @param distributionId 分销员ID
      */
-    @Update("UPDATE li_distribution set can_rebate = (can_rebate+#{canRebate}) , rebate_total=(rebate_total+#{canRebate}) , distribution_order_count=(distribution_order_count+1) WHERE id = #{distributionId}")
-    void addCanRebate(Double canRebate, String distributionId);
+    @Update("UPDATE li_distribution set commission_frozen = (commission_frozen+#{commissionFrozen}) , rebate_total=(rebate_total+#{commissionFrozen}) , distribution_order_count=(distribution_order_count+1) WHERE id = #{distributionId}")
+    void addCanRebate(Double commissionFrozen, String distributionId);
+
 }

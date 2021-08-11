@@ -67,6 +67,7 @@ public class DistributionOrderExecute implements OrderStatusChangeEvent, EveryDa
                 .eq(DistributionOrder::getDistributionOrderStatus, DistributionOrderStatusEnum.WAIT_BILL.name())
                 .le(DistributionOrder::getSettleCycle, new DateTime())
                 .set(DistributionOrder::getDistributionOrderStatus, DistributionOrderStatusEnum.WAIT_CASH.name()));
+
     }
 
     @Override

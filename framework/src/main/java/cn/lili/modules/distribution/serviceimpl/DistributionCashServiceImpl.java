@@ -73,7 +73,6 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
             }
             //将提现金额存入冻结金额,扣减可提现金额
             distribution.setCanRebate(CurrencyUtil.sub(distribution.getCanRebate(), applyMoney));
-            distribution.setCommissionFrozen(CurrencyUtil.add(distribution.getCommissionFrozen(), applyMoney));
             distributionService.updateById(distribution);
             //提现申请记录
             DistributionCash distributionCash = new DistributionCash("D" + SnowFlake.getId(), distribution.getId(), applyMoney, distribution.getMemberName());
@@ -127,12 +126,6 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
                 //审核通过
                 if (result.equals(WithdrawStatusEnum.VIA_AUDITING.name())) {
                     memberWithdrawalMessage.setStatus(WithdrawStatusEnum.VIA_AUDITING.name());
-                    //审核通过需要校验冻结金额不足情况
-                    if (distribution.getCommissionFrozen() < distributorCash.getPrice()) {
-                        throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_INSUFFICIENT);
-                    }
-                    //分销员佣金解冻
-                    distribution.setCommissionFrozen(CurrencyUtil.sub(distribution.getCommissionFrozen(), distributorCash.getPrice()));
                     //分销记录操作
                     distributorCash.setDistributionCashStatus(WithdrawStatusEnum.VIA_AUDITING.name());
                     distributorCash.setPayTime(new Date());
@@ -140,8 +133,6 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
                     memberWalletService.increase(distributorCash.getPrice(), distribution.getMemberId(), "分销[" + distributorCash.getSn() + "]佣金提现到余额[" + distributorCash.getPrice() + "]", DepositServiceTypeEnum.WALLET_COMMISSION.name());
                 } else {
                     memberWithdrawalMessage.setStatus(WithdrawStatusEnum.FAIL_AUDITING.name());
-                    //分销员佣金解冻
-                    distribution.setCommissionFrozen(CurrencyUtil.sub(distribution.getCommissionFrozen(), distributorCash.getPrice()));
                     //分销员可提现金额退回
                     distribution.setCanRebate(CurrencyUtil.add(distribution.getCanRebate(), distributorCash.getPrice()));
                     distributorCash.setDistributionCashStatus(WithdrawStatusEnum.FAIL_AUDITING.name());

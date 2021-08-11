@@ -20,7 +20,9 @@ public interface DistributionOrderMapper extends BaseMapper<DistributionOrder> {
      * @param settleCycle             时间
      */
     @Update("UPDATE li_distribution AS d " +
-            "SET d.can_rebate =(d.can_rebate +(SELECT SUM( dorder.rebate ) FROM li_distribution_order AS dorder WHERE dorder.distribution_id = d.id AND dorder.distribution_order_status=#{distributionOrderStatus} AND dorder.settle_cycle< #{settleCycle} ))")
+            "SET d.can_rebate =(d.can_rebate +(SELECT SUM( dorder.rebate ) " +
+            "SET d.commission_frozen =(d.commission_frozen -(SELECT SUM( dorder.rebate ) " +
+            "FROM li_distribution_order AS dorder WHERE dorder.distribution_id = d.id AND dorder.distribution_order_status=#{distributionOrderStatus} AND dorder.settle_cycle< #{settleCycle} ))")
     void rebate(String distributionOrderStatus, DateTime settleCycle);
 
 }
