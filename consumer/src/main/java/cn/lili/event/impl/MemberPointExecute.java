@@ -1,7 +1,6 @@
 package cn.lili.event.impl;
 
 
-import cn.hutool.core.convert.Convert;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.event.AfterSaleStatusChangeEvent;
@@ -99,12 +98,6 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
             //赠送会员积分
             memberService.updateMemberPoint(point.longValue(), PointTypeEnum.INCREASE.name(), order.getMemberId(), "会员下单，赠送积分" + point + "分");
             //取消订单恢复积分
-        } else if (orderMessage.getNewStatus().equals(OrderStatusEnum.CANCELLED)) {
-            //根据订单编号获取订单数据,如果为积分订单则跳回
-            Order order = orderService.getBySn(orderMessage.getOrderSn());
-            if (order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINTS.name()) && order.getPriceDetailDTO().getPayPoint() != null) {
-                memberService.updateMemberPoint(Convert.toLong(order.getPriceDetailDTO().getPayPoint()), PointTypeEnum.INCREASE.name(), order.getMemberId(), "订单取消,恢复积分:" + order.getPriceDetailDTO().getPayPoint() + "分");
-            }
         }
     }
 
