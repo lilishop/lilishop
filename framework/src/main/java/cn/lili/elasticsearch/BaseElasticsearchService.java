@@ -253,6 +253,9 @@ public abstract class BaseElasticsearchService {
                         "          }\n" +
                         "        }\n" +
                         "      },\n" +
+                        "      \"recommend\": {\n" +
+                        "        \"type\": \"boolean\"\n" +
+                        "      },\n" +
                         "      \"selfOperated\": {\n" +
                         "        \"type\": \"boolean\"\n" +
                         "      },\n" +

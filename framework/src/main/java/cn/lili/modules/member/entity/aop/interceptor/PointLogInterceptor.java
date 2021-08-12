@@ -1,6 +1,5 @@
 package cn.lili.modules.member.entity.aop.interceptor;
 
-import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberPointsHistory;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
@@ -45,11 +44,16 @@ public class PointLogInterceptor {
             if (obj[1] != null) {
                 type = obj[1].toString();
             }
-            //会员ID
+            // 会员ID
             String memberId = "";
             if (obj[2] != null) {
                 memberId = obj[2].toString();
             }
+            // 变动积分为0，则直接返回
+            if (point == 0) {
+                return;
+            }
+
             //根据会员id查询会员信息
             Member member = memberService.getById(memberId);
             if (member != null) {

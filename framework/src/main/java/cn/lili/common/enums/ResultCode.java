@@ -439,8 +439,8 @@ public enum ResultCode {
     CUSTOM_WORDS_EXIST_ERROR(90000, "当前自定义分词已存在！"),
     CUSTOM_WORDS_NOT_EXIST_ERROR(90001, "当前自定义分词不存在！"),
     CUSTOM_WORDS_SECRET_KEY_ERROR(90002, "秘钥验证失败！"),
-    CONNECT_NOT_EXIST(90000, "登录方式不存在"),
-
+    CONNECT_NOT_EXIST(90000, "登录方式不存在！"),
+    ELASTICSEARCH_INDEX_INIT_ERROR(90003, "索引初始化失败！"),
     ;
 
     private final Integer code;
