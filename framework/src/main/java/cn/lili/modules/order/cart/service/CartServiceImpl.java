@@ -324,7 +324,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public TradeDTO getCheckedTradeDTO(CartTypeEnum way) {
-        return tradeBuilder.buildTrade(way);
+        return tradeBuilder.buildChecked(way);
     }
 
     /**

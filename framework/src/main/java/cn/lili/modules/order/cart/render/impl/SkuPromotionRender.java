@@ -20,7 +20,6 @@ import cn.lili.modules.promotion.entity.dto.StorePromotionPriceDTO;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.service.PromotionPriceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -36,9 +35,7 @@ import java.util.stream.Collectors;
  * @since 2020-07-02 14:47
  */
 @Service
-@Order(2)
 public class SkuPromotionRender implements CartRenderStep {
-
 
 
     /**
@@ -108,7 +105,7 @@ public class SkuPromotionRender implements CartRenderStep {
         //店铺优惠券集合
         List<MemberCoupon> memberCoupons = this.getMemberCoupons(tradeDTO);
         //调用价格计算模块，返回价格计算结果
-        PromotionPriceDTO promotionPrice = promotionPriceService.calculationPromotionPrice(promotionPriceParamList, memberCoupons,tradeDTO.getCartTypeEnum());
+        PromotionPriceDTO promotionPrice = promotionPriceService.calculationPromotionPrice(promotionPriceParamList, memberCoupons, tradeDTO.getCartTypeEnum());
         // 分配计算后的促销
         this.distributionPromotionPrice(tradeDTO, promotionPrice);
     }
@@ -174,27 +171,32 @@ public class SkuPromotionRender implements CartRenderStep {
      */
     private void distributionPromotionPrice(TradeDTO tradeDTO, PromotionPriceDTO promotionPrice) {
 
+        //根据店铺分配店铺价格计算结果
         for (CartVO cartVO : tradeDTO.getCartList()) {
-            //根据店铺分配店铺价格计算结果
-            Optional<StorePromotionPriceDTO> storePromotionPriceDTOOptional = promotionPrice.getStorePromotionPriceList().parallelStream().filter(i -> i.getStoreId().equals(cartVO.getStoreId())).findAny();
+
+            //根据店铺id分组
+            Optional<StorePromotionPriceDTO> storePromotionPriceDTOOptional =
+                    promotionPrice.getStorePromotionPriceList().parallelStream().filter(i -> i.getStoreId().equals(cartVO.getStoreId())).findAny();
+
+            //参数有效 则分发
             if (storePromotionPriceDTOOptional.isPresent()) {
                 StorePromotionPriceDTO storePromotionPriceDTO = storePromotionPriceDTOOptional.get();
                 //根据商品分配商品结果计算结果
                 this.distributionSkuPromotionPrice(cartVO.getSkuList(), storePromotionPriceDTO);
 
-                PriceDetailDTO sSpd = new PriceDetailDTO();
-                PriceDetailVO sPd = new PriceDetailVO();
-                sSpd.setGoodsPrice(storePromotionPriceDTO.getTotalOriginPrice());
-                sSpd.setDiscountPrice(storePromotionPriceDTO.getTotalDiscountPrice());
-                sSpd.setCouponPrice(storePromotionPriceDTO.getTotalCouponPrice());
-                sSpd.setPayPoint(storePromotionPriceDTO.getTotalPoints().intValue());
+                PriceDetailDTO priceDetailDTO = new PriceDetailDTO();
+                PriceDetailVO priceDetailVO = new PriceDetailVO();
+                priceDetailDTO.setGoodsPrice(storePromotionPriceDTO.getTotalOriginPrice());
+                priceDetailDTO.setDiscountPrice(storePromotionPriceDTO.getTotalDiscountPrice());
+                priceDetailDTO.setCouponPrice(storePromotionPriceDTO.getTotalCouponPrice());
+                priceDetailDTO.setPayPoint(storePromotionPriceDTO.getTotalPoints().intValue());
 
-                sPd.setOriginalPrice(storePromotionPriceDTO.getTotalOriginPrice());
-                sPd.setFinalePrice(storePromotionPriceDTO.getTotalFinalePrice());
-                sPd.setDiscountPrice(storePromotionPriceDTO.getTotalDiscountPrice());
-                sPd.setPayPoint(storePromotionPriceDTO.getTotalPoints().intValue());
-                cartVO.setPriceDetailDTO(sSpd);
-                cartVO.setPriceDetailVO(sPd);
+                priceDetailVO.setOriginalPrice(storePromotionPriceDTO.getTotalOriginPrice());
+                priceDetailVO.setFinalePrice(storePromotionPriceDTO.getTotalFinalePrice());
+                priceDetailVO.setDiscountPrice(storePromotionPriceDTO.getTotalDiscountPrice());
+                priceDetailVO.setPayPoint(storePromotionPriceDTO.getTotalPoints().intValue());
+                cartVO.setPriceDetailDTO(priceDetailDTO);
+                cartVO.setPriceDetailVO(priceDetailVO);
                 cartVO.setWeight(storePromotionPriceDTO.getTotalWeight());
             }
         }

@@ -25,7 +25,6 @@ import java.util.List;
  * @author Chopper
  * @since 2020-07-02 14:47
  */
-@Order(4)
 @Service
 public class SkuFreightRender implements CartRenderStep {
 

@@ -15,7 +15,6 @@ import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
 import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
 import cn.lili.modules.promotion.service.PointsGoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -29,7 +28,6 @@ import java.util.Map;
  * @author Chopper
  * @see CartVO
  */
-@Order(5)
 @Service
 public class CartPriceRender implements CartRenderStep {
 

@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
  * @since 2020-07-02 14:47
  */
 @Service
-@Order(6)
 public class DistributionPriceRender implements CartRenderStep {
     /**
      * 缓存
@@ -53,7 +52,6 @@ public class DistributionPriceRender implements CartRenderStep {
             if(cartSkuVO.getDistributionGoods()!=null){
                 cartSkuVO.getPriceDetailDTO().setDistributionCommission(CurrencyUtil.mul(cartSkuVO.getNum(), cartSkuVO.getDistributionGoods().getCommission()));
             }
-
         }
 
     }

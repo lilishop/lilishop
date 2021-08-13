@@ -99,6 +99,9 @@ public class PriceDetailDTO implements Serializable {
         if (originalPrice == 0D) {
             return flowPrice;
         }
+        if (originalPrice < 0) {
+            return 0d;
+        }
         return originalPrice;
     }
 
@@ -160,9 +163,14 @@ public class PriceDetailDTO implements Serializable {
     }
 
     public void countBill() {
+
+        //如果结算信息包含结算金额，则最终结算金额直接等于该交易 平台与商户的结算金额
+        if (settlementPrice > 0) {
+            billPrice = settlementPrice;
+        }
+
         //如果是普通订单最终结算金额 = flowPrice - platFormCommission - distributionCommission
         billPrice = CurrencyUtil.sub(CurrencyUtil.sub(flowPrice, platFormCommission), distributionCommission);
-
     }
 
     /**
@@ -174,11 +182,13 @@ public class PriceDetailDTO implements Serializable {
     public void accumulationPriceDTO(List<PriceDetailDTO> priceDetailDTOS) {
 
 
+        double originalPrice = 0d;
         double goodsPrice = 0d;
         double freightPrice = 0d;
 
         int payPoint = 0;
         double discountPrice = 0d;
+        double couponPrice = 0d;
 
         double distributionCommission = 0d;
         double platFormCommission = 0d;
@@ -191,16 +201,20 @@ public class PriceDetailDTO implements Serializable {
 
         double flowPrice = 0d;
         double billPrice = 0d;
+        double settlementPrice = 0d;
+
 
         for (PriceDetailDTO price : priceDetailDTOS) {
 
+            originalPrice = CurrencyUtil.add(originalPrice, price.getOriginalPrice());
             goodsPrice = CurrencyUtil.add(goodsPrice, price.getGoodsPrice());
             freightPrice = CurrencyUtil.add(freightPrice, price.getFreightPrice());
+
             payPoint = payPoint + price.getPayPoint();
             discountPrice = CurrencyUtil.add(discountPrice, price.getDiscountPrice());
+            couponPrice = CurrencyUtil.add(couponPrice, price.getCouponPrice());
 
             updatePrice = CurrencyUtil.add(updatePrice, price.getUpdatePrice());
-
 
             distributionCommission = CurrencyUtil.add(distributionCommission, price.getDistributionCommission());
             platFormCommission = CurrencyUtil.add(platFormCommission, price.getPlatFormCommission());
@@ -211,13 +225,18 @@ public class PriceDetailDTO implements Serializable {
 
             flowPrice = CurrencyUtil.add(flowPrice, price.getFlowPrice());
             billPrice = CurrencyUtil.add(billPrice, price.getBillPrice());
-
+            settlementPrice = CurrencyUtil.add(settlementPrice, price.getSettlementPrice());
         }
+
+        this.setOriginalPrice(originalPrice);
         this.setGoodsPrice(goodsPrice);
         this.setFreightPrice(freightPrice);
+
         this.setPayPoint(payPoint);
-        this.setUpdatePrice(updatePrice);
+        this.setCouponPrice(couponPrice);
         this.setDiscountPrice(discountPrice);
+
+        this.setUpdatePrice(updatePrice);
 
         this.setDistributionCommission(distributionCommission);
         this.setPlatFormCommission(platFormCommission);
@@ -228,6 +247,7 @@ public class PriceDetailDTO implements Serializable {
 
         this.setFlowPrice(flowPrice);
         this.setBillPrice(billPrice);
+        this.setSettlementPrice(settlementPrice);
     }
 
     /**

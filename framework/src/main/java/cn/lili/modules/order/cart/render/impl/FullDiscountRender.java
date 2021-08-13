@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
  * @since 2020-04-01 10:27 上午
  */
 @Service
-@Order(1)
 public class FullDiscountRender implements CartRenderStep {
 
     @Autowired

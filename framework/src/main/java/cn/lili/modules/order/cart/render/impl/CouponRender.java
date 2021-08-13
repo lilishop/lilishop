@@ -18,7 +18,6 @@ import java.util.Map;
  * @author Chopper
  * @since 2020-07-02 14:47
  */
-@Order(3)
 @Service
 public class CouponRender implements CartRenderStep {
 

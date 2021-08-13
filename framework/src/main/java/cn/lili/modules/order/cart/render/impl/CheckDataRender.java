@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
  * @author Chopper
  * @since 2020-07-02 14:47
  */
-@Order(0)
 @Service
 public class CheckDataRender implements CartRenderStep {
 

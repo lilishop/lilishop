@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
  * @author Chopper
  * @since 2020-07-02 14:47
  */
-@Order(7)
 @Service
 public class CartSnRender implements CartRenderStep {
 
