@@ -1,5 +1,6 @@
 package cn.lili.controller.trade;
 
+import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -15,6 +16,8 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 店铺端,结算单接口
@@ -69,4 +72,14 @@ public class BillStoreController {
         billService.check(id);
         return ResultUtil.success();
     }
+
+    @ApiOperation(value = "下载结算单",produces="application/octet-stream")
+    @ApiImplicitParam(name = "id", value = "结算单ID", required = true, paramType = "path", dataType = "String")
+    @GetMapping(value = "/downLoad/{id}")
+    public void downLoadDeliverExcel(@PathVariable String id) {
+        HttpServletResponse response = ThreadContextHolder.getHttpResponse();
+        billService.download(response,id);
+
+    }
+
 }

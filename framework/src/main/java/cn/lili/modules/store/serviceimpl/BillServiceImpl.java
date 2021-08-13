@@ -2,26 +2,32 @@ package cn.lili.modules.store.serviceimpl;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
+import cn.lili.modules.order.order.mapper.StoreFlowMapper;
 import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.store.entity.dos.Bill;
 import cn.lili.modules.store.entity.dto.BillSearchParams;
 import cn.lili.modules.store.entity.enums.BillStatusEnum;
 import cn.lili.modules.store.entity.vos.BillListVO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
+import cn.lili.modules.store.entity.vos.StoreFlowPayDownloadVO;
 import cn.lili.modules.store.mapper.BillMapper;
 import cn.lili.modules.store.service.BillService;
 import cn.lili.modules.store.service.StoreDetailService;
+import cn.lili.mybatis.util.PageUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -32,7 +38,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 结算单业务层实现
@@ -54,6 +65,8 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      */
     @Autowired
     private StoreFlowService storeFlowService;
+    @Resource
+    private StoreFlowMapper storeFlowMapper;
 
     @Override
     public void createBill(String storeId, Date startTime, DateTime endTime) {
@@ -208,6 +221,87 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         lambdaUpdateWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
                 Bill::getStoreId, UserContext.getCurrentUser().getStoreId());
         return this.count(lambdaUpdateWrapper);
+    }
+
+    public void download(HttpServletResponse response, String id) {
+
+        Bill bill = this.getById(id);
+        ExcelWriter writer = ExcelUtil.getWriterWithSheet("入账订单");
+        writer.setSheet("入账订单");
+        writer.addHeaderAlias("createTime", "入账时间");
+        writer.setColumnWidth(0, 20);
+        writer.addHeaderAlias("orderSn", "订单编号");
+        writer.setColumnWidth(1, 35);
+        writer.addHeaderAlias("storeName", "店铺名称");
+        writer.setColumnWidth(2, 20);
+        writer.addHeaderAlias("goodsName", "商品名称");
+        writer.setColumnWidth(3, 70);
+        writer.addHeaderAlias("num", "销售量");
+        writer.addHeaderAlias("finalPrice", "订单金额");
+        writer.addHeaderAlias("commissionPrice", "平台分佣");
+        writer.addHeaderAlias("siteCouponPrice", "平台优惠券");
+        writer.setColumnWidth(7, 12);
+        writer.addHeaderAlias("distributionRebate", "分销金额");
+        writer.addHeaderAlias("pointSettlementPrice", "积分结算金额");
+        writer.setColumnWidth(9, 12);
+        writer.addHeaderAlias("kanjiaSettlementPrice", "砍价结算金额");
+        writer.setColumnWidth(10, 12);
+        writer.addHeaderAlias("billPrice", "应结金额");
+        writer.setColumnWidth(11, 20);
+
+        //存放入账列表
+        LambdaQueryWrapper<StoreFlow> lambdaQueryWrapper = Wrappers.lambdaQuery();
+        lambdaQueryWrapper.eq(StoreFlow::getStoreId, bill.getStoreId());
+        lambdaQueryWrapper.between(StoreFlow::getCreateTime, bill.getStartTime(), bill.getCreateTime());
+        lambdaQueryWrapper.eq(StoreFlow::getFlowType, FlowTypeEnum.PAY.name());
+        List<StoreFlowPayDownloadVO> storeFlowList = storeFlowMapper.getStoreFlowPayDownloadVO(lambdaQueryWrapper);
+        writer.write(storeFlowList, true);
+
+        writer.setSheet("退款订单");
+        writer.addHeaderAlias("createTime", "入账时间");
+        writer.setColumnWidth(0, 20);
+        writer.addHeaderAlias("orderSn", "订单编号");
+        writer.setColumnWidth(1, 35);
+        writer.addHeaderAlias("refundSn", "售后单号");
+        writer.setColumnWidth(2, 35);
+        writer.addHeaderAlias("storeName", "店铺名称");
+        writer.setColumnWidth(3, 20);
+        writer.addHeaderAlias("goodsName", "商品名称");
+        writer.setColumnWidth(4, 70);
+        writer.addHeaderAlias("num", "销售量");
+        writer.addHeaderAlias("finalPrice", "退款金额");
+        writer.addHeaderAlias("commissionPrice", "平台分佣");
+        writer.addHeaderAlias("siteCouponPrice", "平台优惠券");
+        writer.setColumnWidth(8, 12);
+        writer.addHeaderAlias("distributionRebate", "分销金额");
+        writer.addHeaderAlias("pointSettlementPrice", "积分结算金额");
+        writer.setColumnWidth(10, 12);
+        writer.addHeaderAlias("kanjiaSettlementPrice", "砍价结算金额");
+        writer.setColumnWidth(11, 12);
+        writer.addHeaderAlias("billPrice", "结算金额");
+        writer.setColumnWidth(12, 20);
+
+        //存放入账列表
+        LambdaQueryWrapper<StoreFlow> storeFlowlambdaQueryWrapper = Wrappers.lambdaQuery();
+        storeFlowlambdaQueryWrapper.eq(StoreFlow::getStoreId, bill.getStoreId());
+        storeFlowlambdaQueryWrapper.between(StoreFlow::getCreateTime, bill.getStartTime(), bill.getCreateTime());
+        storeFlowlambdaQueryWrapper.eq(StoreFlow::getFlowType, FlowTypeEnum.PAY.name());
+        storeFlowList = storeFlowMapper.getStoreFlowPayDownloadVO(storeFlowlambdaQueryWrapper);
+        writer.write(storeFlowList, true);
+
+        ServletOutputStream out = null;
+        try {
+            //设置公共属性，列表名称
+            response.setContentType("application/vnd.ms-excel;charset=utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(bill.getStoreName() + "-" + bill.getSn(), "UTF8") + ".xls");
+            out = response.getOutputStream();
+            writer.flush(out, true);
+        } catch (Exception e) {
+            log.error("下载结算单错误", e);
+        } finally {
+            writer.close();
+            IoUtil.close(out);
+        }
     }
 
 }
