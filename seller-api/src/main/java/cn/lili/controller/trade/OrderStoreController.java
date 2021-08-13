@@ -150,8 +150,6 @@ public class OrderStoreController {
         //下载订单批量发货Excel
         this.orderService.getBatchDeliverList(response,logisticsName);
 
-        //return ResultUtil.success(ResultCode.SUCCESS);
-
     }
 
     @PostMapping(value = "/batchDeliver", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

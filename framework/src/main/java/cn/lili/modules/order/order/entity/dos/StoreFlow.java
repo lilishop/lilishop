@@ -52,10 +52,10 @@ public class StoreFlow {
     @ApiModelProperty(value = "售后SN")
     private String refundSn;
 
-    @ApiModelProperty(value = "商家id")
+    @ApiModelProperty(value = "店铺id")
     private String storeId;
 
-    @ApiModelProperty(value = "商家名称 ")
+    @ApiModelProperty(value = "店铺名称 ")
     private String storeName;
 
     @ApiModelProperty(value = "会员id")

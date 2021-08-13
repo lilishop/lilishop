@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.cache.annotation.CacheConfig;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
 /**
@@ -92,4 +93,9 @@ public interface BillService extends IService<Bill> {
      */
     Integer billNum(BillStatusEnum billStatusEnum);
 
+    /**
+     * 下载结算单
+     * @param id 结算单ID
+     */
+    void download(HttpServletResponse response, String id);
 }
