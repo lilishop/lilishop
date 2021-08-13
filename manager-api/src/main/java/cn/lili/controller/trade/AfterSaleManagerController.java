@@ -81,7 +81,7 @@ public class AfterSaleManagerController {
             @ApiImplicitParam(name = "remark", value = "备注", paramType = "query"),
             @ApiImplicitParam(name = "actualRefundPrice", value = "实际退款金额", paramType = "query")
     })
-    @PutMapping(value = "/confirm/{afterSaleSn}")
+    @PutMapping(value = "/review/{afterSaleSn}")
     public ResultMessage<AfterSale> review(@NotNull(message = "请选择售后单") @PathVariable String afterSaleSn,
                                            @NotNull(message = "请审核") String serviceStatus,
                                            String remark,
