@@ -63,7 +63,9 @@ public class CartPriceRender implements CartRenderStep {
 
         cartVOS.forEach(cartVO -> {
             cartVO.getPriceDetailDTO().accumulationPriceDTO(
-                    cartVO.getSkuList().stream().map(CartSkuVO::getPriceDetailDTO).collect(Collectors.toList()));
+                    cartVO.getSkuList().stream().filter(CartSkuVO::getChecked)
+                            .map(CartSkuVO::getPriceDetailDTO).collect(Collectors.toList())
+            );
         });
     }
 
