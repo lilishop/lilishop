@@ -141,7 +141,9 @@ ignored:
     - /buyer/article/**
     - /buyer/goods/**
     - /buyer/category/**
-    - /buyer/store/**
+    - /buyer/store
+    - /buyer/store/get**
+    - /buyer/store/label/get**
     - /buyer/connect/**
     - /buyer/members/**
     - /buyer/promotion/pintuan/**

@@ -21,6 +21,9 @@ public class FullDiscountVO extends FullDiscount {
      */
     private List<PromotionGoods> promotionGoodsList;
 
+    /**
+     * 参与商品，为-1则代表所有商品参加
+     */
     private Integer number;
 
     public String notice() {

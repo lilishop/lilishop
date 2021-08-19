@@ -8,8 +8,6 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.distribution.entity.dos.DistributionGoods;
-import cn.lili.modules.distribution.service.DistributionGoodsService;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
@@ -84,11 +82,6 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
      */
     @Autowired
     private PointsGoodsService pointsGoodsService;
-    /**
-     * 分销商品
-     */
-    @Autowired
-    private DistributionGoodsService distributionGoodsService;
 
     @Override
     public PromotionGoods findByPromotion(String promotionId, String skuId) {
@@ -122,11 +115,6 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
             //下一次更新时间
             cartSkuVO.setUpdatePromotionTime(date);
         }
-        //分销商品
-        DistributionGoods distributionGoods = distributionGoodsService.distributionGoodsVOBySkuId(cartSkuVO.getGoodsSku().getId());
-        if (distributionGoods != null) {
-            cartSkuVO.setDistributionGoods(distributionGoods);
-        }
     }
 
     /**
@@ -136,7 +124,12 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
      */
     @Override
     public void getCartSkuPromotion(CartSkuVO cartSkuVO) {
+
+        updatePromotion(cartSkuVO);
+
         Date date = DateUtil.getCurrentDayEndTime();
+
+
         LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(PromotionGoods::getSkuId, cartSkuVO.getGoodsSku().getId())
                 .eq(PromotionGoods::getPromotionStatus, PromotionStatusEnum.START.name())
@@ -154,7 +147,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         query.addCriteria(Criteria.where("startTime").lte(date));
         List<FullDiscountVO> fullDiscountVOS = mongoTemplate.find(query, FullDiscountVO.class);
         for (FullDiscountVO fullDiscountVO : fullDiscountVOS) {
-            if (fullDiscountVO.getPromotionGoodsList() == null && fullDiscountVO.getNumber() == -1 &&
+            if (fullDiscountVO.getPromotionGoodsList() == null &&
                     cartSkuVO.getStoreId().equals(fullDiscountVO.getStoreId())) {
                 PromotionGoods p = new PromotionGoods(cartSkuVO.getGoodsSku());
                 p.setPromotionId(fullDiscountVO.getId());

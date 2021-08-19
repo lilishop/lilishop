@@ -53,7 +53,6 @@ public class CommissionRender implements CartRenderStep {
     @Override
     public void render(TradeDTO tradeDTO) {
         buildCartPrice(tradeDTO);
-        buildTradePrice(tradeDTO);
     }
 
     /**
@@ -77,42 +76,22 @@ public class CommissionRender implements CartRenderStep {
                         .substring(cartSkuVO.getGoodsSku().getCategoryPath().lastIndexOf(",") + 1);
                 if (StrUtil.isNotEmpty(categoryId)) {
                     Double commissionRate = categoryService.getById(categoryId).getCommissionRate();
-                    priceDetailDTO.setCommission(commissionRate);
+                    priceDetailDTO.setPlatFormCommissionPoint(commissionRate);
                 }
 
                 //如果积分订单 积分订单，单独操作订单结算金额和商家结算字段
                 if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.POINTS)) {
                     PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsVOByMongo(cartSkuVO.getGoodsSku().getId());
-                    priceDetailDTO.setBillPrice(pointsGoodsVO.getSettlementPrice());
                     priceDetailDTO.setSettlementPrice(pointsGoodsVO.getSettlementPrice());
                 }
                 //如果砍价订单 计算金额，单独操作订单结算金额和商家结算字段
                 else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.KANJIA)) {
                     KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO = kanjiaActivityGoodsService.getKanJiaGoodsBySku(cartSkuVO.getGoodsSku().getId());
-                    priceDetailDTO.setBillPrice(kanjiaActivityGoodsDTO.getSettlementPrice());
                     priceDetailDTO.setSettlementPrice(kanjiaActivityGoodsDTO.getSettlementPrice());
                 }
-
-                priceDetailDTOS.add(priceDetailDTO);
             }
-            cart.getPriceDetailDTO().accumulationPriceDTO(priceDetailDTOS);
         }
     }
 
-    /**
-     * 再次总计金额
-     *
-     * @param tradeDTO 购物车展示信息
-     */
-    void buildTradePrice(TradeDTO tradeDTO) {
-        //购物车列表
-        List<CartVO> cartVOS = tradeDTO.getCartList();
-
-        List<PriceDetailDTO> priceDetailDTOS = new ArrayList<>();
-        for (CartVO cart : cartVOS) {
-            priceDetailDTOS.add(cart.getPriceDetailDTO());
-        }
-        tradeDTO.getPriceDetailDTO().accumulationPriceDTO(priceDetailDTOS);
-    }
 
 }

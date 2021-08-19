@@ -69,9 +69,9 @@ public class TradeBuilder {
         TradeDTO tradeDTO = cartService.readDTO(checkedWay);
         //需要对购物车渲染
         if (isSingle(checkedWay)) {
-            renderCartBySteps(tradeDTO, RenderStepStatement.checkedRender);
-        } else {
             renderCartBySteps(tradeDTO, RenderStepStatement.checkedSingleRender);
+        } else {
+            renderCartBySteps(tradeDTO, RenderStepStatement.checkedRender);
         }
 
         return tradeDTO;
@@ -107,7 +107,9 @@ public class TradeBuilder {
      * @return 返回是否单品
      */
     private boolean isSingle(CartTypeEnum checkedWay) {
-        return (checkedWay.equals(CartTypeEnum.CART) || checkedWay.equals(CartTypeEnum.BUY_NOW) || checkedWay.equals(CartTypeEnum.VIRTUAL));
+        //拼团   积分   砍价商品
+
+        return (checkedWay.equals(CartTypeEnum.PINTUAN) || checkedWay.equals(CartTypeEnum.POINTS) || checkedWay.equals(CartTypeEnum.KANJIA));
     }
 
     /**

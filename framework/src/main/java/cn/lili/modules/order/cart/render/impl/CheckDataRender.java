@@ -18,6 +18,7 @@ import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
+import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
@@ -25,7 +26,6 @@ import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
 import cn.lili.modules.promotion.service.PintuanService;
 import cn.lili.modules.promotion.service.PointsGoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -144,7 +144,8 @@ public class CheckDataRender implements CartRenderStep {
 
     /**
      * 订单预校验
-     * 1、自己拼团自己创建都拼团判定
+     * 1、自己拼团自己创建都拼团判定、拼团限购
+     * 2、积分购买，积分足够与否
      *
      * @param tradeDTO
      */
@@ -154,8 +155,8 @@ public class CheckDataRender implements CartRenderStep {
         if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)) {
             //拼团判定，不能参与自己创建的拼团
             if (tradeDTO.getParentOrderSn() != null) {
-                //订单接受
-                cn.lili.modules.order.order.entity.dos.Order parentOrder = orderService.getBySn(tradeDTO.getParentOrderSn());
+                //订单接收
+                Order parentOrder = orderService.getBySn(tradeDTO.getParentOrderSn());
                 //参与活动判定
                 if (parentOrder.getMemberId().equals(UserContext.getCurrentUser().getId())) {
                     throw new ServiceException(ResultCode.PINTUAN_JOIN_ERROR);

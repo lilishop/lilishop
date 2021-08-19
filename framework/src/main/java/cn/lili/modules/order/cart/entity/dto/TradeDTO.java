@@ -61,14 +61,6 @@ public class TradeDTO implements Serializable {
      * 购物车类型
      */
     private CartTypeEnum cartTypeEnum;
-
-    /**
-     * key 为商家id
-     * value 为商家优惠券
-     * 店铺优惠券
-     */
-    private Map<String, MemberCouponDTO> storeCoupons;
-
     /**
      * 店铺备注
      */
@@ -88,6 +80,14 @@ public class TradeDTO implements Serializable {
      * 使用平台优惠券，一笔订单只能使用一个平台优惠券
      */
     private MemberCouponDTO platformCoupon;
+
+    /**
+     * key 为商家id
+     * value 为商家优惠券
+     * 店铺优惠券
+     */
+    private Map<String, MemberCouponDTO> storeCoupons;
+
 
     /**
      * 收货地址

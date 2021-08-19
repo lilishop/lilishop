@@ -159,6 +159,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 //如果商品状态值不对，则es索引移除
                 if (goods.getIsAuth().equals(GoodsAuthEnum.PASS.name()) && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())) {
                     goodsIndexService.deleteIndexById(sku.getId());
+                    this.clearCache(sku.getId());
                 }
             }
             this.updateBatchById(newSkuList);
@@ -179,6 +180,17 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
     }
 
+
+    /**
+     * 清除sku缓存
+     *
+     * @param skuId skuID
+     */
+    @Override
+    public void clearCache(String skuId) {
+        cache.remove(GoodsSkuService.getCacheKeys(skuId));
+    }
+
     @Override
     public GoodsSku getGoodsSkuByIdFromCache(String id) {
         //获取缓存中的sku
@@ -195,10 +207,14 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //获取商品库存
         String quantity = stringRedisTemplate.opsForValue().get(GoodsSkuService.getStockCacheKey(id));
 
-        //如果sku缓存的库存与库存缓存不符则按照库存缓存进行
+        //库存不为空
         if (StrUtil.isNotEmpty(quantity)) {
-            goodsSku.setQuantity(Convert.toInt(quantity));
-            cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
+            //库存与缓存中不一致，
+            if (!goodsSku.getQuantity().equals(Convert.toInt(quantity))) {
+                //写入最新的库存信息
+                goodsSku.setQuantity(Convert.toInt(quantity));
+                cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
+            }
         }
         return goodsSku;
     }

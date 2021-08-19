@@ -52,7 +52,7 @@ public class CartController {
                                      String cartType) {
         try {
             //读取选中的列表
-            cartService.add(skuId, num, cartType);
+            cartService.add(skuId, num, cartType, false);
             return ResultUtil.success();
         } catch (ServiceException se) {
             log.info(se.getMsg(), se);
@@ -93,7 +93,7 @@ public class CartController {
     @PostMapping(value = "/sku/num/{skuId}")
     public ResultMessage<Object> update(@NotNull(message = "产品id不能为空") @PathVariable(name = "skuId") String skuId,
                                         Integer num) {
-        cartService.updateNum(skuId, num);
+        cartService.add(skuId, num, CartTypeEnum.CART.name(), true);
         return ResultUtil.success();
     }
 

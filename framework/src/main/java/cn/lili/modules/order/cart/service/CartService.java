@@ -52,16 +52,9 @@ public interface CartService {
      * @param skuId    要写入的skuId
      * @param num      要加入购物车的数量
      * @param cartType 购物车类型
+     * @param cover    是否覆盖购物车的数量，如果为否则累加，否则直接覆盖
      */
-    void add(String skuId, Integer num, String cartType);
-
-    /**
-     * 更新商品数量
-     *
-     * @param skuId 要写入的skuId
-     * @param num   要加入购物车的数量
-     */
-    void updateNum(String skuId, int num);
+    void add(String skuId, Integer num, String cartType, Boolean cover);
 
 
     /**

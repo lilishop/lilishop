@@ -3,16 +3,21 @@ package cn.lili.modules.order.cart.render.impl;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.utils.CurrencyUtil;
+import cn.lili.modules.distribution.entity.dos.DistributionGoods;
+import cn.lili.modules.distribution.service.DistributionGoodsService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
+import com.xkcoding.http.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
- * 购物促销信息渲染实现
+ * 分销佣金计算
  *
  * @author Chopper
  * @since 2020-07-02 14:47
@@ -25,6 +30,9 @@ public class DistributionPriceRender implements CartRenderStep {
     @Autowired
     private Cache cache;
 
+    @Autowired
+    private DistributionGoodsService distributionGoodsService;
+
     @Override
     public RenderStepEnums step() {
         return RenderStepEnums.DISTRIBUTION;
@@ -32,7 +40,6 @@ public class DistributionPriceRender implements CartRenderStep {
 
     @Override
     public void render(TradeDTO tradeDTO) {
-        //主要渲染各个优惠的价格
         this.renderDistribution(tradeDTO);
     }
 
@@ -43,13 +50,31 @@ public class DistributionPriceRender implements CartRenderStep {
      */
     private void renderDistribution(TradeDTO tradeDTO) {
 
-        if(cache.get(CachePrefix.DISTRIBUTION.getPrefix()+"_"+tradeDTO.getMemberId())==null){
+        //如果存在分销员
+        String distributionId = (String) cache.get(CachePrefix.DISTRIBUTION.getPrefix() + "_" + tradeDTO.getMemberId());
+        if (StringUtil.isEmpty(distributionId)) {
             return;
         }
         //循环订单商品列表，如果是分销商品则计算商品佣金
-        tradeDTO.setDistributionId(cache.get(CachePrefix.DISTRIBUTION.getPrefix()+"_"+tradeDTO.getMemberId()).toString());
-        for (CartSkuVO cartSkuVO: tradeDTO.getSkuList()) {
-            if(cartSkuVO.getDistributionGoods()!=null){
+        tradeDTO.setDistributionId(distributionId);
+
+        List<String> skuIds = tradeDTO.getSkuList().stream().map(cartSkuVO -> {
+            return cartSkuVO.getGoodsSku().getId();
+        }).collect(Collectors.toList());
+        //是否包含分销商品
+        List<DistributionGoods> distributionGoods = distributionGoodsService.distributionGoods(skuIds);
+        if (distributionGoods != null && distributionGoods.size() > 0) {
+            distributionGoods.forEach(dg -> {
+                tradeDTO.getSkuList().forEach(cartSkuVO -> {
+                    if (cartSkuVO.getGoodsSku().getId().equals(dg.getSkuId())) {
+                        cartSkuVO.setDistributionGoods(dg);
+                    }
+                });
+            });
+        }
+
+        for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
+            if (cartSkuVO.getDistributionGoods() != null) {
                 cartSkuVO.getPriceDetailDTO().setDistributionCommission(CurrencyUtil.mul(cartSkuVO.getNum(), cartSkuVO.getDistributionGoods().getCommission()));
             }
         }

@@ -65,6 +65,13 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     void update(GoodsSku goodsSku);
 
     /**
+     * 清除sku缓存
+     *
+     * @param skuId skuid
+     */
+    void clearCache(String skuId);
+
+    /**
      * 从redis缓存中获取商品SKU信息
      *
      * @param id SkuId

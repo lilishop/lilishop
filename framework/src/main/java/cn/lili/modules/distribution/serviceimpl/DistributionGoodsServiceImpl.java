@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 /**
  * 分销商品接口实现
@@ -76,6 +78,11 @@ public class DistributionGoodsServiceImpl extends ServiceImpl<DistributionGoodsM
     @Override
     public DistributionGoods distributionGoodsVOBySkuId(String skuId) {
         return this.getOne(new LambdaUpdateWrapper<DistributionGoods>().eq(DistributionGoods::getSkuId, skuId));
+    }
+
+    @Override
+    public List<DistributionGoods> distributionGoods(List<String> skuIds) {
+        return this.list(new LambdaUpdateWrapper<DistributionGoods>().in(DistributionGoods::getSkuId, skuIds));
     }
 
     @Override

@@ -1,15 +1,14 @@
 package cn.lili.test.promotion;
 
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dto.BasePromotion;
 import cn.lili.modules.promotion.entity.dto.PromotionGoodsDTO;
-import cn.lili.common.enums.PromotionTypeEnum;
-import cn.lili.modules.promotion.service.PromotionPriceService;
-import cn.lili.modules.promotion.service.PromotionService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
+import cn.lili.modules.promotion.service.PromotionService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -27,9 +26,6 @@ import java.util.Map;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 class PromotionPriceTest {
-
-    @Autowired
-    private PromotionPriceService promotionPriceService;
 
     @Autowired
     private PromotionService promotionService;

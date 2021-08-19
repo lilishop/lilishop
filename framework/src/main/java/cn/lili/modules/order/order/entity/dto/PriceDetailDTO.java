@@ -54,6 +54,9 @@ public class PriceDetailDTO implements Serializable {
     private Double distributionCommission;
 
 
+    @ApiModelProperty(value = "平台收取交易佣金比例")
+    private Double platFormCommissionPoint;
+
     @ApiModelProperty(value = "平台收取交易佣金")
     private Double platFormCommission;
 
@@ -115,6 +118,7 @@ public class PriceDetailDTO implements Serializable {
         couponPrice = 0d;
 
         distributionCommission = 0d;
+        platFormCommissionPoint = 0d;
         platFormCommission = 0d;
 
         siteCouponPrice = 0d;
@@ -143,132 +147,72 @@ public class PriceDetailDTO implements Serializable {
 
 
     /**
-     * 写入佣金比例，计算结算金额
-     *
-     * @param commission 佣金比例
+     * 全部重新计算
      */
-    public void setCommission(Double commission) {
-
-        //流水金额(入账 出帐金额) = goodsPrice + freight - （discountPrice + couponPrice）
+    public void recount() {
+        //流水金额(入账 出帐金额) = "流水金额(入账 出帐金额) = goodsPrice + freight - discountPrice - couponPrice + updatePrice"
         this.flowPrice = CurrencyUtil.sub(
                 CurrencyUtil.add(goodsPrice, freightPrice),
                 CurrencyUtil.add(discountPrice,
                         couponPrice != null ? couponPrice : 0));
+        if (updatePrice > 0) {
+            CurrencyUtil.add(flowPrice, updatePrice);
+        }
 
         //计算平台佣金  流水金额*平台佣金比例
-        if (commission != null && commission > 0) {
-            platFormCommission = CurrencyUtil.div(CurrencyUtil.mul(flowPrice, commission), 100);
+        if (platFormCommissionPoint != null && getPlatFormCommissionPoint() > 0) {
+            platFormCommission = CurrencyUtil.div(CurrencyUtil.mul(flowPrice, platFormCommissionPoint), 100);
         }
-        countBill();
-    }
-
-    public void countBill() {
 
         //如果结算信息包含结算金额，则最终结算金额直接等于该交易 平台与商户的结算金额
         if (settlementPrice > 0) {
             billPrice = settlementPrice;
+        } else {
+            //如果是普通订单最终结算金额 = flowPrice - platFormCommission - distributionCommission 流水金额-平台佣金-分销佣金
+            billPrice = CurrencyUtil.sub(CurrencyUtil.sub(flowPrice, platFormCommission), distributionCommission);
         }
-
-        //如果是普通订单最终结算金额 = flowPrice - platFormCommission - distributionCommission
-        billPrice = CurrencyUtil.sub(CurrencyUtil.sub(flowPrice, platFormCommission), distributionCommission);
     }
 
     /**
-     * 累加
+     * 累加金额
+     */
+    public void increase(PriceDetailDTO priceDetailDTO) {
+
+        originalPrice = CurrencyUtil.add(originalPrice, priceDetailDTO.getOriginalPrice());
+        goodsPrice = CurrencyUtil.add(goodsPrice, priceDetailDTO.getGoodsPrice());
+        freightPrice = CurrencyUtil.add(freightPrice, priceDetailDTO.getFreightPrice());
+
+        payPoint = payPoint + priceDetailDTO.getPayPoint();
+        discountPrice = CurrencyUtil.add(discountPrice, priceDetailDTO.getDiscountPrice());
+        couponPrice = CurrencyUtil.add(couponPrice, priceDetailDTO.getCouponPrice());
+
+        distributionCommission = CurrencyUtil.add(distributionCommission, priceDetailDTO.getDistributionCommission());
+        platFormCommission = CurrencyUtil.add(platFormCommission, priceDetailDTO.getPlatFormCommission());
+
+        siteCouponPrice = CurrencyUtil.add(siteCouponPrice, priceDetailDTO.getSiteCouponPrice());
+        siteCouponPoint = CurrencyUtil.add(siteCouponPoint, priceDetailDTO.getSiteCouponPoint());
+        siteCouponCommission = CurrencyUtil.add(siteCouponCommission, priceDetailDTO.getSiteCouponCommission());
+
+        updatePrice = CurrencyUtil.add(updatePrice, priceDetailDTO.getUpdatePrice());
+
+        flowPrice = CurrencyUtil.add(flowPrice, priceDetailDTO.getFlowPrice());
+        billPrice = CurrencyUtil.add(billPrice, priceDetailDTO.getBillPrice());
+        settlementPrice = CurrencyUtil.add(settlementPrice, priceDetailDTO.getSettlementPrice());
+
+    }
+
+    /**
+     * 批量累加
      *
      * @param priceDetailDTOS
      * @return
      */
     public void accumulationPriceDTO(List<PriceDetailDTO> priceDetailDTOS) {
-
-
-        double originalPrice = 0d;
-        double goodsPrice = 0d;
-        double freightPrice = 0d;
-
-        int payPoint = 0;
-        double discountPrice = 0d;
-        double couponPrice = 0d;
-
-        double distributionCommission = 0d;
-        double platFormCommission = 0d;
-
-        double siteCouponPrice = 0d;
-        double siteCouponPoint = 0d;
-        double siteCouponCommission = 0d;
-
-        double updatePrice = 0d;
-
-        double flowPrice = 0d;
-        double billPrice = 0d;
-        double settlementPrice = 0d;
-
-
         for (PriceDetailDTO price : priceDetailDTOS) {
-
-            originalPrice = CurrencyUtil.add(originalPrice, price.getOriginalPrice());
-            goodsPrice = CurrencyUtil.add(goodsPrice, price.getGoodsPrice());
-            freightPrice = CurrencyUtil.add(freightPrice, price.getFreightPrice());
-
-            payPoint = payPoint + price.getPayPoint();
-            discountPrice = CurrencyUtil.add(discountPrice, price.getDiscountPrice());
-            couponPrice = CurrencyUtil.add(couponPrice, price.getCouponPrice());
-
-            updatePrice = CurrencyUtil.add(updatePrice, price.getUpdatePrice());
-
-            distributionCommission = CurrencyUtil.add(distributionCommission, price.getDistributionCommission());
-            platFormCommission = CurrencyUtil.add(platFormCommission, price.getPlatFormCommission());
-
-            siteCouponPrice = CurrencyUtil.add(siteCouponPrice, price.getSiteCouponPrice());
-            siteCouponPoint = CurrencyUtil.add(siteCouponPoint, price.getSiteCouponPoint());
-            siteCouponCommission = CurrencyUtil.add(siteCouponCommission, price.getSiteCouponCommission());
-
-            flowPrice = CurrencyUtil.add(flowPrice, price.getFlowPrice());
-            billPrice = CurrencyUtil.add(billPrice, price.getBillPrice());
-            settlementPrice = CurrencyUtil.add(settlementPrice, price.getSettlementPrice());
+            this.increase(price);
         }
-
-        this.setOriginalPrice(originalPrice);
-        this.setGoodsPrice(goodsPrice);
-        this.setFreightPrice(freightPrice);
-
-        this.setPayPoint(payPoint);
-        this.setCouponPrice(couponPrice);
-        this.setDiscountPrice(discountPrice);
-
-        this.setUpdatePrice(updatePrice);
-
-        this.setDistributionCommission(distributionCommission);
-        this.setPlatFormCommission(platFormCommission);
-
-        this.setSiteCouponPrice(siteCouponPrice);
-        this.setSiteCouponPoint(siteCouponPoint);
-        this.setSiteCouponCommission(siteCouponCommission);
-
-        this.setFlowPrice(flowPrice);
-        this.setBillPrice(billPrice);
-        this.setSettlementPrice(settlementPrice);
     }
 
-    /**
-     * 累加
-     *
-     * @param priceDetailDTOS
-     * @return
-     */
-    public static Double sumGoodsPrice(List<PriceDetailDTO> priceDetailDTOS) {
-
-
-        double goodsPrice = 0d;
-
-        for (PriceDetailDTO price : priceDetailDTOS) {
-
-            goodsPrice = CurrencyUtil.add(goodsPrice, price.getGoodsPrice());
-
-        }
-
-        return goodsPrice;
-    }
 
     public Double getGoodsPrice() {
         if (goodsPrice == null || goodsPrice <= 0) {
@@ -360,5 +304,89 @@ public class PriceDetailDTO implements Serializable {
             return 0D;
         }
         return billPrice;
+    }
+
+    public Double getUpdatePrice() {
+        if (updatePrice == null || updatePrice <= 0) {
+            return 0D;
+        }
+        return updatePrice;
+    }
+
+
+    public void setSiteCouponPrice(Double siteCouponPrice) {
+        this.siteCouponPrice = siteCouponPrice;
+
+        if (siteCouponPoint != null && siteCouponPoint != 0) {
+            this.siteCouponCommission = CurrencyUtil.mul(siteCouponPrice, siteCouponPoint);
+        }
+    }
+
+    public void setSiteCouponPoint(Double siteCouponPoint) {
+        this.siteCouponPoint = siteCouponPoint;
+
+        if (siteCouponPoint != null && siteCouponPoint != 0) {
+            this.siteCouponCommission = CurrencyUtil.mul(siteCouponPrice, siteCouponPoint);
+        }
+    }
+
+
+    public void setGoodsPrice(Double goodsPrice) {
+        this.goodsPrice = goodsPrice;
+        this.recount();
+    }
+
+    public void setFreightPrice(Double freightPrice) {
+        this.freightPrice = freightPrice;
+        this.recount();
+    }
+
+    public void setPayPoint(Integer payPoint) {
+        this.payPoint = payPoint;
+    }
+
+    public void setDiscountPrice(Double discountPrice) {
+        this.discountPrice = discountPrice;
+        this.recount();
+    }
+
+    public void setCouponPrice(Double couponPrice) {
+        this.couponPrice = couponPrice;
+        this.recount();
+    }
+
+    public void setDistributionCommission(Double distributionCommission) {
+        this.distributionCommission = distributionCommission;
+        this.recount();
+    }
+
+    public void setPlatFormCommissionPoint(Double platFormCommissionPoint) {
+        this.platFormCommissionPoint = platFormCommissionPoint;
+        this.recount();
+    }
+
+    public void setPlatFormCommission(Double platFormCommission) {
+        this.platFormCommission = platFormCommission;
+        this.recount();
+    }
+
+    public void setSiteCouponCommission(Double siteCouponCommission) {
+        this.siteCouponCommission = siteCouponCommission;
+        this.recount();
+    }
+
+    public void setFlowPrice(Double flowPrice) {
+        this.flowPrice = flowPrice;
+        this.recount();
+    }
+
+    public void setSettlementPrice(Double settlementPrice) {
+        this.settlementPrice = settlementPrice;
+        this.recount();
+    }
+
+    public void setBillPrice(Double billPrice) {
+        this.billPrice = billPrice;
+        this.recount();
     }
 }

@@ -41,10 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -108,26 +105,37 @@ public class CartServiceImpl implements CartService {
     private TradeBuilder tradeBuilder;
 
     @Override
-    public void add(String skuId, Integer num, String cartType) {
+    public void add(String skuId, Integer num, String cartType, Boolean cover) {
         CartTypeEnum cartTypeEnum = getCartType(cartType);
-        GoodsSku dataSku = checkGoods(skuId, num);
+        GoodsSku dataSku = checkGoods(skuId);
         try {
             //购物车方式购买需要保存之前的选择，其他方式购买，则直接抹除掉之前的记录
             TradeDTO tradeDTO;
             if (cartTypeEnum.equals(CartTypeEnum.CART)) {
+
                 //如果存在，则变更数量不做新增，否则新增一个商品进入集合
                 tradeDTO = this.readDTO(cartTypeEnum);
                 List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
                 CartSkuVO cartSkuVO = cartSkuVOS.stream().filter(i -> i.getGoodsSku().getId().equals(skuId)).findFirst().orElse(null);
+
+
                 //购物车中已经存在，更新数量
                 if (cartSkuVO != null && dataSku.getUpdateTime().equals(cartSkuVO.getGoodsSku().getUpdateTime())) {
-                    //判断是商品否被修改
-                    int oldNum = cartSkuVO.getNum();
-                    int newNum = oldNum + num;
-                    this.checkSetGoodsQuantity(cartSkuVO, skuId, newNum);
+
+                    //如果覆盖购物车中商品数量
+                    if (cover) {
+                        cartSkuVO.setNum(num);
+                        this.checkSetGoodsQuantity(cartSkuVO, skuId, num);
+                    } else {
+                        int oldNum = cartSkuVO.getNum();
+                        int newNum = oldNum + num;
+                        this.checkSetGoodsQuantity(cartSkuVO, skuId, newNum);
+                    }
+
                     //计算购物车小计
                     cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
                 } else {
+
                     //先清理一下 如果商品无效的话
                     cartSkuVOS.remove(cartSkuVO);
                     //购物车中不存在此商品，则新建立一个
@@ -169,30 +177,6 @@ public class CartServiceImpl implements CartService {
             this.resetTradeDTO(tradeDTO);
         } catch (ServiceException serviceException) {
             throw serviceException;
-        } catch (Exception e) {
-            log.error("购物车渲染异常", e);
-            throw new ServiceException(errorMessage);
-        }
-    }
-
-    @Override
-    public void updateNum(String skuId, int num) {
-        try {
-            checkGoods(skuId, num);
-            TradeDTO tradeDTO = this.readDTO(CartTypeEnum.CART);
-            CartSkuVO cartSkuVO = null;
-            for (CartSkuVO skuVO : tradeDTO.getSkuList()) {
-                if (skuVO.getGoodsSku().getId().equals(skuId)) {
-                    cartSkuVO = skuVO;
-                }
-            }
-            if (cartSkuVO != null) {
-                this.checkSetGoodsQuantity(cartSkuVO, skuId, num);
-            }
-            String originKey = this.getOriginKey(CartTypeEnum.CART);
-            cache.put(originKey, tradeDTO);
-        } catch (ServiceException se) {
-            log.error("购物车渲染异常", se);
         } catch (Exception e) {
             log.error("购物车渲染异常", e);
             throw new ServiceException(errorMessage);
@@ -372,22 +356,14 @@ public class CartServiceImpl implements CartService {
      * 校验商品有效性，判定失效和库存
      *
      * @param skuId 商品skuId
-     * @param num   数量
      */
-    private GoodsSku checkGoods(String skuId, Integer num) {
+    private GoodsSku checkGoods(String skuId) {
         GoodsSku dataSku = this.goodsSkuService.getGoodsSkuByIdFromCache(skuId);
         if (dataSku == null) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
         if (!GoodsAuthEnum.PASS.name().equals(dataSku.getIsAuth()) || !GoodsStatusEnum.UPPER.name().equals(dataSku.getMarketEnable())) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
-        }
-        //读取sku的可用库存
-        Integer enableQuantity = goodsSkuService.getStock(skuId);
-
-        //如果sku的可用库存小于等于0或者小于用户购买的数量，则不允许购买
-        if (enableQuantity <= 0 || enableQuantity < num) {
-            throw new ServiceException(ResultCode.GOODS_SKU_QUANTITY_NOT_ENOUGH);
         }
         return dataSku;
     }
@@ -401,13 +377,22 @@ public class CartServiceImpl implements CartService {
      */
     private void checkSetGoodsQuantity(CartSkuVO cartSkuVO, String skuId, Integer num) {
         Integer enableStock = goodsSkuService.getStock(skuId);
+
+        //读取sku的可用库存
+        Integer enableQuantity = goodsSkuService.getStock(skuId);
+
+        //如果sku的可用库存小于等于0或者小于用户购买的数量，则不允许购买
+        if (enableQuantity <= 0 || enableQuantity < num) {
+            throw new ServiceException(ResultCode.GOODS_SKU_QUANTITY_NOT_ENOUGH);
+        }
+
         if (enableStock <= num) {
             cartSkuVO.setNum(enableStock);
         } else {
             cartSkuVO.setNum(num);
         }
 
-        if (cartSkuVO.getNum() > 100) {
+        if (cartSkuVO.getNum() > 99) {
             cartSkuVO.setNum(99);
         }
     }
@@ -505,7 +490,7 @@ public class CartServiceImpl implements CartService {
             throw new ServiceException(ResultCode.COUPON_EXPIRED);
         }
         //使用优惠券 与否
-        if (use && checkCoupon(memberCoupon, tradeDTO)) {
+        if (use) {
             this.useCoupon(tradeDTO, memberCoupon, cartTypeEnum);
         } else if (!use) {
             if (Boolean.TRUE.equals(memberCoupon.getIsPlatform())) {
@@ -567,56 +552,62 @@ public class CartServiceImpl implements CartService {
      * @param cartTypeEnum 购物车
      */
     private void useCoupon(TradeDTO tradeDTO, MemberCoupon memberCoupon, CartTypeEnum cartTypeEnum) {
-        //如果是平台优惠券
-        if (Boolean.TRUE.equals(memberCoupon.getIsPlatform())) {
-            //购物车价格
-            Double cartPrice = 0d;
-            for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
-                //获取商品的促销信息
-                Optional<PromotionGoods> promotionOptional =
-                        cartSkuVO.getPromotions().parallelStream().filter(promotionGoods ->
-                                (promotionGoods.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name()) &&
-                                        cartTypeEnum.equals(CartTypeEnum.PINTUAN)) ||
-                                        promotionGoods.getPromotionType().equals(PromotionTypeEnum.SECKILL.name())).findAny();
-                //有促销金额则用促销金额，否则用商品原价
-                if (promotionOptional.isPresent()) {
-                    cartPrice = CurrencyUtil.add(cartPrice, CurrencyUtil.mul(promotionOptional.get().getPrice(), cartSkuVO.getNum()));
-                } else {
-                    cartPrice = CurrencyUtil.add(cartPrice, CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
-                }
 
+        //截取符合优惠券的商品
+        List<CartSkuVO> cartSkuVOS = checkCoupon(memberCoupon, tradeDTO);
+
+        //定义使用优惠券的信息商品信息
+        Map<String, Double> skuPrice = new HashMap<>();
+
+
+        //购物车价格
+        Double cartPrice = 0d;
+
+        //循环符合优惠券的商品
+        for (CartSkuVO cartSkuVO : cartSkuVOS) {
+            //获取商品的促销信息
+            Optional<PromotionGoods> promotionOptional =
+                    cartSkuVO.getPromotions().parallelStream().filter(promotionGoods ->
+                            (promotionGoods.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name()) &&
+                                    cartTypeEnum.equals(CartTypeEnum.PINTUAN)) ||
+                                    promotionGoods.getPromotionType().equals(PromotionTypeEnum.SECKILL.name())).findAny();
+            //有促销金额则用促销金额，否则用商品原价
+            if (promotionOptional.isPresent()) {
+                cartPrice = CurrencyUtil.add(cartPrice, CurrencyUtil.mul(promotionOptional.get().getPrice(), cartSkuVO.getNum()));
+                skuPrice.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.mul(promotionOptional.get().getPrice(), cartSkuVO.getNum()));
+            } else {
+                cartPrice = CurrencyUtil.add(cartPrice, CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
+                skuPrice.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
             }
-            //如果购物车金额大于消费门槛则使用
-            if (memberCoupon.getConsumeThreshold() <= cartPrice) {
-                tradeDTO.setPlatformCoupon(new MemberCouponDTO(memberCoupon));
+        }
+
+
+        //如果购物车金额大于消费门槛则使用
+        if (cartPrice >= memberCoupon.getConsumeThreshold()) {
+            //如果是平台优惠券
+            if (memberCoupon.getIsPlatform()) {
+                tradeDTO.setPlatformCoupon(new MemberCouponDTO(skuPrice, memberCoupon));
                 //选择平台优惠券，则将品台优惠券清空
                 tradeDTO.setStoreCoupons(new HashMap<>(16));
+            } else {
+                tradeDTO.getStoreCoupons().put(memberCoupon.getStoreId(), new MemberCouponDTO(skuPrice, memberCoupon));
+
             }
         }
-        //否则为店铺优惠券
-        else {
-            //过滤对应店铺购物车
-            CartSkuVO cartVO = tradeDTO.getSkuList().stream().filter(i -> i.getStoreId().equals(memberCoupon.getStoreId())).findFirst().orElse(null);
-            //优惠券消费门槛 <= 商品购买时的成交价（单品） * 购买数量
-            if (cartVO != null && memberCoupon.getConsumeThreshold() <= CurrencyUtil.mul(cartVO.getPurchasePrice(), cartVO.getNum())) {
-                tradeDTO.getStoreCoupons().put(memberCoupon.getStoreId(), new MemberCouponDTO(memberCoupon));
-                //选择店铺优惠券，则将品台优惠券清空
-                tradeDTO.setPlatformCoupon(null);
-            }
-        }
+
     }
 
     /**
-     * 校验是否可以使用优惠券
+     * 获取可以使用优惠券的商品信息
      *
      * @param memberCoupon 用于计算优惠券结算详情
      * @param tradeDTO     购物车信息
      * @return 是否可以使用优惠券
      */
-    private boolean checkCoupon(MemberCoupon memberCoupon, TradeDTO tradeDTO) {
+    private List<CartSkuVO> checkCoupon(MemberCoupon memberCoupon, TradeDTO tradeDTO) {
         List<CartSkuVO> cartSkuVOS;
         //如果是店铺优惠券，判定的内容
-        if (Boolean.FALSE.equals(memberCoupon.getIsPlatform())) {
+        if (!memberCoupon.getIsPlatform()) {
             cartSkuVOS = tradeDTO.getSkuList().stream().filter(i -> i.getStoreId().equals(memberCoupon.getStoreId())).collect(Collectors.toList());
         }
         //否则为平台优惠券，筛选商品为全部商品
@@ -625,17 +616,19 @@ public class CartServiceImpl implements CartService {
         }
 
         //当初购物车商品中是否存在符合优惠券条件的商品sku
-        if (memberCoupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS_CATEGORY.name())) {
+        if (memberCoupon.getScopeType().equals(CouponScopeTypeEnum.ALL.name())) {
+            return cartSkuVOS;
+        } else if (memberCoupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS_CATEGORY.name())) {
             //分类路径是否包含
-            return cartSkuVOS.stream().anyMatch(i -> i.getGoodsSku().getCategoryPath().indexOf("," + memberCoupon.getScopeId() + ",") <= 0);
+            return cartSkuVOS.stream().filter(i -> i.getGoodsSku().getCategoryPath().indexOf("," + memberCoupon.getScopeId() + ",") <= 0).collect(Collectors.toList());
         } else if (memberCoupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS.name())) {
             //范围关联ID是否包含
-            return cartSkuVOS.stream().anyMatch(i -> memberCoupon.getScopeId().indexOf("," + i.getGoodsSku().getId() + ",") <= 0);
+            return cartSkuVOS.stream().filter(i -> memberCoupon.getScopeId().indexOf("," + i.getGoodsSku().getId() + ",") <= 0).collect(Collectors.toList());
         } else if (memberCoupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_SHOP_CATEGORY.name())) {
-            //分类路径是否包含
-            return cartSkuVOS.stream().anyMatch(i -> i.getGoodsSku().getStoreCategoryPath().indexOf("," + memberCoupon.getScopeId() + ",") <= 0);
+            //店铺分类路径是否包含
+            return cartSkuVOS.stream().filter(i -> i.getGoodsSku().getStoreCategoryPath().indexOf("," + memberCoupon.getScopeId() + ",") <= 0).collect(Collectors.toList());
         }
-        return true;
+        return new ArrayList<>();
     }
 
     /**

@@ -195,7 +195,7 @@ public class PromotionServiceImpl implements PromotionService {
         query.addCriteria(Criteria.where("endTime").gt(new Date()));
         List<FullDiscountVO> fullDiscountVOS = mongoTemplate.find(query, FullDiscountVO.class);
         for (FullDiscountVO fullDiscountVO : fullDiscountVOS) {
-            if (fullDiscountVO.getPromotionGoodsList() == null && fullDiscountVO.getNumber() == -1) {
+            if (fullDiscountVO.getPromotionGoodsList() == null) {
                 if (index.getStoreId().equals(fullDiscountVO.getStoreId())) {
                     String fullDiscountKey = PromotionTypeEnum.FULL_DISCOUNT.name() + "-" + fullDiscountVO.getId();
                     promotionMap.put(fullDiscountKey, fullDiscountVO);
@@ -288,7 +288,7 @@ public class PromotionServiceImpl implements PromotionService {
         //clone一个活动信息，用于存放与索引中
         FullDiscountVO clone = ObjectUtil.clone(fullDiscountVO);
         clone.setPromotionGoodsList(null);
-        if (fullDiscountVO.getPromotionGoodsList() == null && fullDiscountVO.getNumber() == -1) {
+        if (fullDiscountVO.getPromotionGoodsList() == null) {
             //如果为全品类则更新全部索引
             this.goodsIndexService.updateEsGoodsIndexAllByList(clone, esPromotionKey);
         } else {

@@ -42,7 +42,6 @@ class FullDiscountTest {
         FullDiscountVO fullDiscountVO = new FullDiscountVO();
         fullDiscountVO.setStoreId("131");
         fullDiscountVO.setStoreName("小米自营旗舰店");
-        fullDiscountVO.setNumber(1);
         fullDiscountVO.setDescription("full discount test " + RandomUtil.randomNumber());
         fullDiscountVO.setIsFullMinus(true);
         fullDiscountVO.setFullMoney(130D);
@@ -97,7 +96,6 @@ class FullDiscountTest {
         fullDiscountVO.setId("1325981729404248064");
         fullDiscountVO.setStoreId("132");
         fullDiscountVO.setStoreName("联想自营旗舰店");
-        fullDiscountVO.setNumber(1);
         fullDiscountVO.setDescription("Not worth");
         fullDiscountVO.setIsFullMinus(true);
         fullDiscountVO.setFullMoney(100D);

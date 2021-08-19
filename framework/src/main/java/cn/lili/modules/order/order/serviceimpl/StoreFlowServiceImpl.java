@@ -87,6 +87,8 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
             storeFlow.setMemberName(order.getMemberName());
             storeFlow.setGoodsName(item.getGoodsName());
 
+            storeFlow.setOrderPromotionType(item.getPromotionType());
+
             //计算平台佣金
             storeFlow.setFinalPrice(item.getPriceDetailDTO().getFlowPrice());
             storeFlow.setCommissionPrice(item.getPriceDetailDTO().getPlatFormCommission());
