@@ -128,7 +128,7 @@ public class PromotionPriceUtil {
                         //商品金额占比
                         Double point = CurrencyUtil.div(cartSkuVO.getPriceDetailDTO().getGoodsPrice(), totalPrice, 4);
                         //商品优惠金额
-                        skuDiscountPrice = CurrencyUtil.mul(totalPrice, point);
+                        skuDiscountPrice = CurrencyUtil.mul(discountPrice, point);
                         //累加已优惠金额
                         deducted = CurrencyUtil.add(deducted, skuDiscountPrice);
                     }
@@ -138,6 +138,7 @@ public class PromotionPriceUtil {
                     }
                     //优惠券金额，则计入优惠券 ，其他则计入总的discount price
                     if (promotionTypeEnum == PromotionTypeEnum.COUPON) {
+
                         cartSkuVO.getPriceDetailDTO().setCouponPrice(
                                 CurrencyUtil.add(cartSkuVO.getPriceDetailDTO().getCouponPrice(), skuDiscountPrice));
                     } else {
