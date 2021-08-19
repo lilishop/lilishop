@@ -177,7 +177,10 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             seckillApply.setOriginalPrice(goodsSku.getPrice());
             seckillApply.setPromotionApplyStatus(PromotionApplyStatusEnum.PASS.name());
             seckillApply.setSalesNum(0);
-            originList.add(seckillApply);
+            //过滤掉已经新增过的秒杀商品
+            if (seckillApply.getId() == null) {
+                originList.add(seckillApply);
+            }
             //获取促销商品
             PromotionGoods promotionGoods = this.setSeckillGoods(goodsSku, seckillApply, seckill);
             promotionGoodsList.add(promotionGoods);
