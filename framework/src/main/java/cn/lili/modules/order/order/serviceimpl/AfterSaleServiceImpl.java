@@ -121,7 +121,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     }
 
     @Override
-    public AfterSaleApplyVO getAfterSaleDTO(String sn) {
+    public AfterSaleApplyVO getAfterSaleVO(String sn) {
 
         AfterSaleApplyVO afterSaleApplyVO = new AfterSaleApplyVO();
 
@@ -429,8 +429,15 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         if (afterSaleDTO.getImages() != null) {
             afterSale.setAfterSaleImage(afterSaleDTO.getImages());
         }
-        //计算退回金额
-        afterSale.setApplyRefundPrice(CurrencyUtil.mul(orderItem.getUnitPrice(), afterSale.getNum()));
+
+        if (afterSale.getNum().equals(orderItem.getNum())) {
+            //计算退回金额
+            afterSale.setApplyRefundPrice(orderItem.getFlowPrice());
+        } else {
+            //单价计算
+            Double utilPrice = CurrencyUtil.div(orderItem.getPriceDetailDTO().getFlowPrice(), orderItem.getNum());
+            afterSale.setApplyRefundPrice(CurrencyUtil.mul(afterSale.getNum(), utilPrice));
+        }
         //添加售后
         this.save(afterSale);
         //发送售后消息

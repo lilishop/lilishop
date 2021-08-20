@@ -143,6 +143,7 @@ public class PriceDetailDTO implements Serializable {
      */
     public void setUpdatePrice(Double updatePrice) {
         this.updatePrice = updatePrice;
+        this.recount();
     }
 
 
@@ -155,8 +156,8 @@ public class PriceDetailDTO implements Serializable {
                 CurrencyUtil.add(goodsPrice, freightPrice),
                 CurrencyUtil.add(discountPrice,
                         couponPrice != null ? couponPrice : 0));
-        if (updatePrice > 0) {
-            CurrencyUtil.add(flowPrice, updatePrice);
+        if (updatePrice != 0) {
+            flowPrice = CurrencyUtil.add(flowPrice, updatePrice);
         }
 
         //计算平台佣金  流水金额*平台佣金比例
@@ -190,7 +191,8 @@ public class PriceDetailDTO implements Serializable {
         platFormCommission = CurrencyUtil.add(platFormCommission, priceDetailDTO.getPlatFormCommission());
 
         siteCouponPrice = CurrencyUtil.add(siteCouponPrice, priceDetailDTO.getSiteCouponPrice());
-        siteCouponPoint = CurrencyUtil.add(siteCouponPoint, priceDetailDTO.getSiteCouponPoint());
+        //平台优惠券一笔交易只有一个，所以这里直接移值就好了
+        siteCouponPoint = priceDetailDTO.getSiteCouponPoint();
         siteCouponCommission = CurrencyUtil.add(siteCouponCommission, priceDetailDTO.getSiteCouponCommission());
 
         updatePrice = CurrencyUtil.add(updatePrice, priceDetailDTO.getUpdatePrice());
@@ -326,7 +328,7 @@ public class PriceDetailDTO implements Serializable {
         this.siteCouponPoint = siteCouponPoint;
 
         if (siteCouponPoint != null && siteCouponPoint != 0) {
-            this.siteCouponCommission = CurrencyUtil.mul(siteCouponPrice, siteCouponPoint);
+            this.siteCouponCommission = CurrencyUtil.div(CurrencyUtil.mul(siteCouponPrice, siteCouponPoint), 100);
         }
     }
 

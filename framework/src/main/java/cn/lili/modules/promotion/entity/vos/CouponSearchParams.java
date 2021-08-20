@@ -5,7 +5,6 @@ import cn.lili.modules.promotion.entity.enums.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -189,25 +188,25 @@ public class CouponSearchParams implements Serializable {
         if (CharSequenceUtil.isNotEmpty(price)) {
             String[] s = price.split("_");
             if (s.length > 1) {
-                query.addCriteria(Criteria.where(PRICE_COLUMN).gt(s[1]));
+                query.addCriteria(Criteria.where(PRICE_COLUMN).gte(s[1]));
             } else {
-                query.addCriteria(Criteria.where(PRICE_COLUMN).lt(s[0]));
+                query.addCriteria(Criteria.where(PRICE_COLUMN).lte(s[0]));
             }
         }
         if (CharSequenceUtil.isNotEmpty(publishNum)) {
             String[] s = publishNum.split("_");
             if (s.length > 1) {
-                query.addCriteria(Criteria.where("publishNum").gt(s[1]));
+                query.addCriteria(Criteria.where("publishNum").gte(s[1]));
             } else {
-                query.addCriteria(Criteria.where("publishNum").lt(s[0]));
+                query.addCriteria(Criteria.where("publishNum").lte(s[0]));
             }
         }
         if (CharSequenceUtil.isNotEmpty(receivedNum)) {
             String[] s = receivedNum.split("_");
             if (s.length > 1) {
-                query.addCriteria(Criteria.where("receivedNum").gt(s[1]));
+                query.addCriteria(Criteria.where("receivedNum").gte(s[1]));
             } else {
-                query.addCriteria(Criteria.where("receivedNum").lt(s[0]));
+                query.addCriteria(Criteria.where("receivedNum").lte(s[0]));
             }
         }
     }

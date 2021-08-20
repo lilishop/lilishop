@@ -302,7 +302,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     public Integer todayStoreNum() {
         LambdaQueryWrapper<Store> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(Store::getStoreDisable, StoreStatusEnum.OPEN.name());
-        queryWrapper.gt(Store::getCreateTime, DateUtil.beginOfDay(new DateTime()));
+        queryWrapper.ge(Store::getCreateTime, DateUtil.beginOfDay(new DateTime()));
         return this.count(queryWrapper);
     }
 

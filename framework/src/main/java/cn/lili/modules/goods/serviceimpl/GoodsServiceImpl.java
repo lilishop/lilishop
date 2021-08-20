@@ -268,7 +268,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     public Integer todayUpperNum() {
         LambdaQueryWrapper<Goods> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name());
-        queryWrapper.gt(Goods::getCreateTime, DateUtil.beginOfDay(new DateTime()));
+        queryWrapper.ge(Goods::getCreateTime, DateUtil.beginOfDay(new DateTime()));
         return this.count(queryWrapper);
     }
 

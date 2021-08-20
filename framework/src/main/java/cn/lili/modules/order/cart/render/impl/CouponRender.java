@@ -85,7 +85,9 @@ public class CouponRender implements CartRenderStep {
         //减免现金，则按照商品价格计算 需要通过工具类进行优惠金额的分发，分发给每个商品
         if (coupon.getCouponType().equals(CouponTypeEnum.PRICE.name())) {
             //分发优惠券
-            promotionPriceUtil.recountPrice(tradeDTO, memberCouponDTO.getSkuDetail(), memberCouponDTO.getMemberCoupon().getPrice(), PromotionTypeEnum.COUPON);
+            promotionPriceUtil.recountPrice(tradeDTO, memberCouponDTO.getSkuDetail(), memberCouponDTO.getMemberCoupon().getPrice(),
+                    coupon.getIsPlatform() ?
+                            PromotionTypeEnum.PLATFORM_COUPON : PromotionTypeEnum.COUPON);
             //如果是平台券 则需要计算商家承担比例
             if (coupon.getIsPlatform() && coupon.getStoreCommission() > 0) {
 
@@ -95,7 +97,7 @@ public class CouponRender implements CartRenderStep {
                     for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
                         //写入平台优惠券承担比例
                         if (cartSkuVO.getGoodsSku().getId().equals(skuId)) {
-                            cartSkuVO.getPriceDetailDTO().setSiteCouponPrice(cartSkuVO.getPriceDetailDTO().getSiteCouponPrice());
+                            //写入店铺承担比例
                             cartSkuVO.getPriceDetailDTO().setSiteCouponPoint(coupon.getStoreCommission());
                         }
                     }

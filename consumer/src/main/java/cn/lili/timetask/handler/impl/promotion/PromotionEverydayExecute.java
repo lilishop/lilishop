@@ -96,7 +96,7 @@ public class PromotionEverydayExecute implements EveryDayExecute {
         query.addCriteria(Criteria.where("promotionStatus").ne(PromotionStatusEnum.END.name())
                 .orOperator(Criteria.where("promotionStatus").ne(PromotionStatusEnum.CLOSE.name())));
         //结束条件 活动结束时间大于当前时间
-        query.addCriteria(Criteria.where("endTime").lt(new Date()));
+        query.addCriteria(Criteria.where("endTime").lte(new Date()));
 
         //结束满减活动
         endFullDiscount(query);

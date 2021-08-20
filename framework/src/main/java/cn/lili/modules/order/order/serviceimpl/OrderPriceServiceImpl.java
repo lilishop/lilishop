@@ -156,7 +156,7 @@ public class OrderPriceServiceImpl implements OrderPriceService {
                 Double priceFluctuationRatio = CurrencyUtil.div(priceDetailDTO.getOriginalPrice(), order.getPriceDetailDTO().getOriginalPrice(), 4);
 
                 //记录修改金额
-                priceDetailDTO.setUpdatePrice(CurrencyUtil.sub(order.getUpdatePrice(), priceFluctuationRatio));
+                priceDetailDTO.setUpdatePrice(CurrencyUtil.mul(order.getUpdatePrice(), priceFluctuationRatio));
 
                 //修改订单货物金额
                 orderItem.setFlowPrice(priceDetailDTO.getFlowPrice());

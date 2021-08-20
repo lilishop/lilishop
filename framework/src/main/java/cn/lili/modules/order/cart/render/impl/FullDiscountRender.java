@@ -109,8 +109,8 @@ public class FullDiscountRender implements CartRenderStep {
             for (PromotionGoods promotionGoods : fullDiscount.getPromotionGoodsList()) {
                 //sku 集合判定
                 for (CartSkuVO cartSkuVO : cartSkuVOS) {
-                    //如果参加，则记录商品sku
-                    if (cartSkuVO.getGoodsSku().getId().equals(promotionGoods.getSkuId())) {
+                    // 如果参加满减，并且购物车选中状态 ，则记录商品sku
+                    if (cartSkuVO.getChecked() && cartSkuVO.getGoodsSku().getId().equals(promotionGoods.getSkuId())) {
                         skuPriceDetail.put(cartSkuVO.getGoodsSku().getId(), cartSkuVO.getPriceDetailDTO().getGoodsPrice());
                     }
                 }

@@ -277,7 +277,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         List<SeckillTimelineVO> timelineList = new ArrayList<>();
         LambdaQueryWrapper<Seckill> queryWrapper = new LambdaQueryWrapper<>();
         //查询当天时间段内的且状态不为结束或关闭的秒杀活动活动
-        queryWrapper.gt(Seckill::getStartTime, new Date(cn.lili.common.utils.DateUtil.startOfTodDay() * 1000)).lt(Seckill::getEndTime, cn.lili.common.utils.DateUtil.endOfDate())
+        queryWrapper.ge(Seckill::getStartTime, new Date(cn.lili.common.utils.DateUtil.startOfTodDay() * 1000)).le(Seckill::getEndTime, cn.lili.common.utils.DateUtil.endOfDate())
                 .and(i -> i.eq(Seckill::getPromotionStatus, PromotionStatusEnum.NEW.name())
                         .or(j -> j.eq(Seckill::getPromotionStatus, PromotionStatusEnum.START.name())));
         List<Seckill> seckillList = seckillService.list(queryWrapper);
@@ -326,7 +326,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     private List<SeckillGoodsVO> wrapperSeckillGoods(Integer startTimeline) {
         List<SeckillGoodsVO> seckillGoodsVoS = new ArrayList<>();
         LambdaQueryWrapper<Seckill> seckillLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        seckillLambdaQueryWrapper.gt(Seckill::getStartTime, new Date(cn.lili.common.utils.DateUtil.startOfTodDay() * 1000)).lt(Seckill::getEndTime, cn.lili.common.utils.DateUtil.endOfDate())
+        seckillLambdaQueryWrapper.ge(Seckill::getStartTime, new Date(cn.lili.common.utils.DateUtil.startOfTodDay() * 1000)).le(Seckill::getEndTime, cn.lili.common.utils.DateUtil.endOfDate())
                 .and(i -> i.eq(Seckill::getPromotionStatus, PromotionStatusEnum.NEW.name())
                         .or(j -> j.eq(Seckill::getPromotionStatus, PromotionStatusEnum.START.name())));
         List<Seckill> seckillList = this.seckillService.list(seckillLambdaQueryWrapper);

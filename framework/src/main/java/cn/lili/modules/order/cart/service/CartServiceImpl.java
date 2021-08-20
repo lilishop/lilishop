@@ -32,6 +32,7 @@ import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.enums.CouponScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
+import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivitySearchParams;
 import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
@@ -76,6 +77,11 @@ public class CartServiceImpl implements CartService {
      */
     @Autowired
     private PromotionGoodsService promotionGoodsService;
+    /**
+     * 促销商品
+     */
+    @Autowired
+    private PointsGoodsService pointsGoodsService;
     /**
      * 会员地址
      */
@@ -565,6 +571,9 @@ public class CartServiceImpl implements CartService {
 
         //循环符合优惠券的商品
         for (CartSkuVO cartSkuVO : cartSkuVOS) {
+            if (!cartSkuVO.getChecked()) {
+                continue;
+            }
             //获取商品的促销信息
             Optional<PromotionGoods> promotionOptional =
                     cartSkuVO.getPromotions().parallelStream().filter(promotionGoods ->
@@ -649,6 +658,9 @@ public class CartServiceImpl implements CartService {
         } else if (cartTypeEnum.equals(CartTypeEnum.KANJIA)) {
             //检测购物车的数量
             checkKanjia(cartSkuVO);
+        } else if (cartTypeEnum.equals(CartTypeEnum.POINTS)) {
+            //检测购物车的数量
+            checkPoint(cartSkuVO);
         }
     }
 
@@ -658,7 +670,6 @@ public class CartServiceImpl implements CartService {
      * @param cartSkuVO 购物车信息
      */
     private void checkPintuan(CartSkuVO cartSkuVO) {
-
         //拼团活动，需要对限购数量进行判定
         //获取拼团信息
         List<PromotionGoods> currentPromotion = cartSkuVO.getPromotions().stream().filter(
@@ -666,8 +677,12 @@ public class CartServiceImpl implements CartService {
                 .collect(Collectors.toList());
         //拼团活动判定
         if (!currentPromotion.isEmpty()) {
+            PromotionGoods promotionGoods = currentPromotion.get(0);
             //写入拼团信息
-            cartSkuVO.setPintuanId(currentPromotion.get(0).getPromotionId());
+            cartSkuVO.setPintuanId(promotionGoods.getPromotionId());
+            //写入成交信息
+            cartSkuVO.setUtilPrice(promotionGoods.getPrice());
+            cartSkuVO.setPurchasePrice(promotionGoods.getPrice());
         } else {
             throw new ServiceException(ResultCode.CART_PINTUAN_NOT_EXIST_ERROR);
         }
@@ -702,9 +717,26 @@ public class CartServiceImpl implements CartService {
             throw new ServiceException(ResultCode.KANJIA_ACTIVITY_NOT_FOUND_ERROR);
             //判断砍价活动是否已满足条件
         } else if (!KanJiaStatusEnum.SUCCESS.name().equals(kanjiaActivity.getStatus())) {
+            cartSkuVO.setKanjiaId(kanjiaActivity.getKanjiaActivityGoodsId());
+            cartSkuVO.setPurchasePrice(0D);
             throw new ServiceException(ResultCode.KANJIA_ACTIVITY_NOT_PASS_ERROR);
         }
         //砍价商品默认一件货物
         cartSkuVO.setNum(1);
+    }
+
+    /**
+     * 校验积分商品信息
+     *
+     * @param cartSkuVO 购物车信息
+     */
+    private void checkPoint(CartSkuVO cartSkuVO) {
+
+        PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsVOByMongo(cartSkuVO.getGoodsSku().getId());
+
+        if (pointsGoodsVO != null) {
+            cartSkuVO.setPoint(pointsGoodsVO.getPoints());
+            cartSkuVO.setPurchasePrice(0D);
+        }
     }
 }

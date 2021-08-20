@@ -70,7 +70,7 @@ public class SystemLogServiceImpl implements SystemLogService {
         //时间有效性判定
         if (searchVo.getConvertStartDate() != null && searchVo.getConvertEndDate() != null) {
             //大于方法
-            Criteria gt = Criteria.where("createTime").gt(searchVo.getConvertStartDate());
+            Criteria gt = Criteria.where("createTime").gte(searchVo.getConvertStartDate());
             //小于方法
             Criteria lt = Criteria.where("createTime").lte(searchVo.getConvertEndDate());
             query.addCriteria(new Criteria().andOperator(gt, lt));

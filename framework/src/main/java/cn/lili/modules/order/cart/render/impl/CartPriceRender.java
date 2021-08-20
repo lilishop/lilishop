@@ -66,6 +66,11 @@ public class CartPriceRender implements CartRenderStep {
                     cartVO.getSkuList().stream().filter(CartSkuVO::getChecked)
                             .map(CartSkuVO::getPriceDetailDTO).collect(Collectors.toList())
             );
+            List<Integer> skuNum = cartVO.getSkuList().stream().filter(CartSkuVO::getChecked)
+                    .map(CartSkuVO::getNum).collect(Collectors.toList());
+            for (Integer num : skuNum) {
+                cartVO.addGoodsNum(num);
+            }
         });
     }
 

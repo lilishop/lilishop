@@ -216,8 +216,8 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         promotionGoodsPage.setCurrent(pageVo.getPageNumber());
         Date now = new Date();
         Query query = new Query();
-        query.addCriteria(Criteria.where("startTime").lt(now));
-        query.addCriteria(Criteria.where("endTime").gt(now));
+        query.addCriteria(Criteria.where("startTime").lte(now));
+        query.addCriteria(Criteria.where("endTime").gte(now));
         List<PromotionGoodsDTO> promotionGoodsDTOList = new ArrayList<>();
         int total = 0;
         //根据促销活动类型的不同，将满足当前促销活动类型且正在进行的促销商品返回出去

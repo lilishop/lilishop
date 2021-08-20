@@ -212,7 +212,7 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
             queryWrapper.eq("store_id", authUser.getStoreId());
         }
         //大于今天凌晨
-        queryWrapper.gt("create_time", DateUtil.startOfTodDayTime());
+        queryWrapper.ge("create_time", DateUtil.startOfTodDayTime());
 
         queryWrapper.select("SUM(final_price) AS price , COUNT(0) AS num");
         return this.getMap(queryWrapper);

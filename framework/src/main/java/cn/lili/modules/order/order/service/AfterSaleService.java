@@ -54,7 +54,7 @@ public interface AfterSaleService extends IService<AfterSale> {
      * @param sn 订单编号
      * @return
      */
-    AfterSaleApplyVO getAfterSaleDTO(String sn);
+    AfterSaleApplyVO getAfterSaleVO(String sn);
 
     /**
      * 售后申请

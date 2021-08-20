@@ -16,7 +16,6 @@ import cn.lili.modules.promotion.service.PointsGoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -67,7 +66,6 @@ public class CommissionRender implements CartRenderStep {
         //计算购物车价格
         for (CartVO cart : cartVOS) {
             //累加价格
-            List<PriceDetailDTO> priceDetailDTOS = new ArrayList<>();
             for (CartSkuVO cartSkuVO : cart.getSkuList()) {
 
                 PriceDetailDTO priceDetailDTO = cartSkuVO.getPriceDetailDTO();

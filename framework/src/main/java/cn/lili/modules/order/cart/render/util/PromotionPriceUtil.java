@@ -141,6 +141,13 @@ public class PromotionPriceUtil {
 
                         cartSkuVO.getPriceDetailDTO().setCouponPrice(
                                 CurrencyUtil.add(cartSkuVO.getPriceDetailDTO().getCouponPrice(), skuDiscountPrice));
+                    } else if (promotionTypeEnum == PromotionTypeEnum.PLATFORM_COUPON) {
+
+                        cartSkuVO.getPriceDetailDTO().setSiteCouponPrice(
+                                CurrencyUtil.add(cartSkuVO.getPriceDetailDTO().getCouponPrice(), skuDiscountPrice));
+
+                        cartSkuVO.getPriceDetailDTO().setCouponPrice(
+                                CurrencyUtil.add(cartSkuVO.getPriceDetailDTO().getCouponPrice(), cartSkuVO.getPriceDetailDTO().getSiteCouponPrice()));
                     } else {
                         cartSkuVO.getPriceDetailDTO().setDiscountPrice(
                                 CurrencyUtil.add(cartSkuVO.getPriceDetailDTO().getDiscountPrice(), skuDiscountPrice));

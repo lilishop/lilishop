@@ -198,7 +198,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
 
     @Override
     public Integer todayMemberEvaluation() {
-        return this.count(new LambdaQueryWrapper<MemberEvaluation>().gt(MemberEvaluation::getCreateTime, DateUtil.beginOfDay(new DateTime())));
+        return this.count(new LambdaQueryWrapper<MemberEvaluation>().ge(MemberEvaluation::getCreateTime, DateUtil.beginOfDay(new DateTime())));
     }
 
     @Override

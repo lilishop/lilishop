@@ -45,6 +45,9 @@ public class CartSkuVO extends CartBase implements Serializable {
 
     @ApiModelProperty(value = "小记")
     private Double subTotal;
+
+    @ApiModelProperty(value = "小记")
+    private Double utilPrice;
     /**
      * 是否选中，要去结算 0:未选中 1:已选中，默认
      */
@@ -55,7 +58,7 @@ public class CartSkuVO extends CartBase implements Serializable {
     private Boolean isFreeFreight;
 
     @ApiModelProperty(value = "积分购买 积分数量")
-    private Integer point;
+    private Long point;
 
     @ApiModelProperty(value = "是否失效 ")
     private Boolean invalid;
@@ -101,6 +104,7 @@ public class CartSkuVO extends CartBase implements Serializable {
         this.isShip = true;
         this.purchasePrice = goodsSku.getIsPromotion() != null && goodsSku.getIsPromotion() ? goodsSku.getPromotionPrice() : goodsSku.getPrice();
         this.isFreeFreight = false;
+        this.utilPrice = 0D;
         this.setStoreId(goodsSku.getStoreId());
         this.setStoreName(goodsSku.getStoreName());
     }

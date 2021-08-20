@@ -14,6 +14,7 @@ public enum PromotionTypeEnum {
     PINTUAN("拼团"),
     SECKILL("秒杀"),
     COUPON("优惠券"),
+    PLATFORM_COUPON("平台优惠券"),
     FULL_DISCOUNT("满减"),
     POINTS_GOODS("积分商品"),
     KANJIA("砍价"),

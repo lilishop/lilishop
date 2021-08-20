@@ -1,6 +1,5 @@
 package cn.lili.modules.order.cart.render.impl;
 
-import cn.hutool.core.util.NumberUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -13,7 +12,6 @@ import cn.lili.modules.store.entity.enums.FreightTemplateEnum;
 import cn.lili.modules.store.entity.vos.FreightTemplateVO;
 import cn.lili.modules.store.service.FreightTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -96,14 +94,8 @@ public class SkuFreightRender implements CartRenderStep {
 
                 //计算运费
                 Double countFreight = countFreight(count, freightTemplateChildDTO);
-                //写入运费
+                //写入SKU运费
                 cartSkuVO.getPriceDetailDTO().setFreightPrice(countFreight);
-                //运费逻辑处理
-                if (tradeDTO.getPriceDetailDTO().getFreightPrice() != null) {
-                    tradeDTO.getPriceDetailDTO().setFreightPrice(CurrencyUtil.add(tradeDTO.getPriceDetailDTO().getFreightPrice(), countFreight));
-                } else {
-                    tradeDTO.getPriceDetailDTO().setFreightPrice(countFreight);
-                }
             }
         }
     }
@@ -118,14 +110,19 @@ public class SkuFreightRender implements CartRenderStep {
     private Double countFreight(Double count, FreightTemplateChildDTO template) {
         try {
             Double finalFreight = template.getFirstPrice();
-            //不满首重
+            //不满首重 / 首件
             if (template.getFirstCompany() >= count) {
                 return finalFreight;
             }
+            //如果续重/续件，费用不为空，则返回
+            if (template.getContinuedCompany() == 0 || template.getContinuedPrice() == 0) {
+                return finalFreight;
+            }
+
+            //计算 续重 / 续件 价格
             Double continuedCount = count - template.getFirstCompany();
-            //计算续重价格
             return CurrencyUtil.add(finalFreight,
-                    CurrencyUtil.mul(NumberUtil.parseInt(String.valueOf((continuedCount / template.getContinuedCompany()))), template.getContinuedPrice()));
+                    CurrencyUtil.mul(Math.ceil(continuedCount / template.getContinuedCompany()), template.getContinuedPrice()));
         } catch (Exception e) {
             return 0D;
         }

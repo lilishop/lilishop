@@ -35,14 +35,14 @@ public class MemberStatisticsDataServiceImpl extends ServiceImpl<MemberStatistic
     @Override
     public Integer todayMemberNum() {
         QueryWrapper queryWrapper = Wrappers.query();
-        queryWrapper.gt("create_time", DateUtil.beginOfDay(new Date()));
+        queryWrapper.ge("create_time", DateUtil.beginOfDay(new Date()));
         return this.baseMapper.customSqlQuery(queryWrapper);
     }
 
     @Override
     public Integer memberCount(Date endTime) {
         QueryWrapper queryWrapper = Wrappers.query();
-        queryWrapper.lt("create_time", endTime);
+        queryWrapper.le("create_time", endTime);
         return this.baseMapper.customSqlQuery(queryWrapper);
     }
 

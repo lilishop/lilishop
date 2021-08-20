@@ -154,8 +154,8 @@ public class PromotionServiceImpl implements PromotionService {
         Map<String, Object> resultMap = new HashMap<>(16);
         QueryWrapper queryWrapper = new QueryWrapper();
         queryWrapper.eq("promotion_status", PromotionStatusEnum.START.name());
-        queryWrapper.gt("start_time", new Date());
-        queryWrapper.lt("end_time", new Date());
+        queryWrapper.ge("start_time", new Date());
+        queryWrapper.le("end_time", new Date());
         //获取当前进行的秒杀活动活动
         List<Seckill> seckillList = seckillService.list(queryWrapper);
         if (seckillList != null && !seckillList.isEmpty()) {
@@ -192,7 +192,7 @@ public class PromotionServiceImpl implements PromotionService {
         Query query = new Query();
         query.addCriteria(Criteria.where("deleteFlag").is(false));
         query.addCriteria(Criteria.where("promotionStatus").is(PromotionStatusEnum.START.name()));
-        query.addCriteria(Criteria.where("endTime").gt(new Date()));
+        query.addCriteria(Criteria.where("endTime").gte(new Date()));
         List<FullDiscountVO> fullDiscountVOS = mongoTemplate.find(query, FullDiscountVO.class);
         for (FullDiscountVO fullDiscountVO : fullDiscountVOS) {
             if (fullDiscountVO.getPromotionGoodsList() == null) {
@@ -211,13 +211,13 @@ public class PromotionServiceImpl implements PromotionService {
                 }
             }
         }
-        LambdaQueryWrapper<PromotionGoods> queryWrapper1 = new LambdaQueryWrapper<>();
-        queryWrapper1.eq(PromotionGoods::getDeleteFlag, false);
-        queryWrapper1.eq(PromotionGoods::getPromotionStatus, PromotionStatusEnum.START.name());
-        queryWrapper1.gt(PromotionGoods::getEndTime, new Date());
-        queryWrapper1.eq(PromotionGoods::getSkuId, index.getId());
-        List<PromotionGoods> list1 = promotionGoodsService.list(queryWrapper1);
-        for (PromotionGoods promotionGoods : list1) {
+        LambdaQueryWrapper<PromotionGoods> promotionGoodsQuery = new LambdaQueryWrapper<>();
+        promotionGoodsQuery.eq(PromotionGoods::getDeleteFlag, false);
+        promotionGoodsQuery.eq(PromotionGoods::getPromotionStatus, PromotionStatusEnum.START.name());
+        promotionGoodsQuery.ge(PromotionGoods::getEndTime, new Date());
+        promotionGoodsQuery.eq(PromotionGoods::getSkuId, index.getId());
+        List<PromotionGoods> promotionGoodsList = promotionGoodsService.list(promotionGoodsQuery);
+        for (PromotionGoods promotionGoods : promotionGoodsList) {
             String esPromotionKey = promotionGoods.getPromotionType() + "-" + promotionGoods.getPromotionId();
             switch (PromotionTypeEnum.valueOf(promotionGoods.getPromotionType())) {
                 case COUPON:

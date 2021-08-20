@@ -52,7 +52,6 @@ public class SkuPromotionRender implements CartRenderStep {
                 cartVO -> {
                     cartVO.getSkuList().forEach(cartSkuVO -> {
                         PriceDetailDTO priceDetailDTO = cartSkuVO.getPriceDetailDTO();
-                        priceDetailDTO.setOriginalPrice(CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
                         priceDetailDTO.setGoodsPrice(cartSkuVO.getSubTotal());
                         priceDetailDTO.setDiscountPrice(CurrencyUtil.sub(priceDetailDTO.getOriginalPrice(), cartSkuVO.getSubTotal()));
                     });

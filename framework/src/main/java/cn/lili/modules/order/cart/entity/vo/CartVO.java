@@ -98,4 +98,5 @@ public class CartVO extends CartBase implements Serializable {
             this.goodsNum += goodsNum;
         }
     }
+
 }

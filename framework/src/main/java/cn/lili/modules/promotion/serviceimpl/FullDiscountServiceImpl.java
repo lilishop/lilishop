@@ -364,8 +364,8 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
         Query query = new Query();
         Date now = new Date();
         query.addCriteria(Criteria.where(PROMOTION_STATUS_COLUMN).is(PromotionStatusEnum.START.name()));
-        query.addCriteria(Criteria.where("startTime").lt(now));
-        query.addCriteria(Criteria.where("endTime").gt(now));
+        query.addCriteria(Criteria.where("startTime").lte(now));
+        query.addCriteria(Criteria.where("endTime").gte(now));
         return query;
     }
 }
