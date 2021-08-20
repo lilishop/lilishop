@@ -41,11 +41,12 @@ public interface CategoryService extends IService<Category> {
     List<CategoryVO> listAllChildren(String parentId);
 
     /**
-     * 查询所有的分类，父子关系 数据库获取
+     * 查询所有的分类，父子关系
+     * 数据库获取
      *
      * @return 所有的分类，父子关系
      */
-    List<CategoryVO> listAllChildrenDB();
+    List<CategoryVO> listAllChildren();
 
     /**
      * 获取指定分类的分类名称

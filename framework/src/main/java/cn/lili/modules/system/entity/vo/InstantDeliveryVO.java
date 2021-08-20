@@ -3,7 +3,7 @@ package cn.lili.modules.system.entity.vo;
 
 import cn.lili.modules.system.entity.dos.InstantDelivery;
 import cn.lili.modules.system.entity.plugin.ConfigItem;
-import cn.lili.modules.system.entity.plugin.InstantDelivery.InstantDeliveryPlugin;
+import cn.lili.modules.system.entity.plugin.logistics.InstantDeliveryPlugin;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import io.swagger.annotations.ApiModel;

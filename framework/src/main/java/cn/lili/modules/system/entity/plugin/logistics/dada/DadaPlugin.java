@@ -1,4 +1,4 @@
-package cn.lili.modules.system.entity.plugin.InstantDelivery.dada;
+package cn.lili.modules.system.entity.plugin.logistics.dada;
 
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -13,8 +13,8 @@ import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.system.entity.dos.InstantDeliveryLog;
 import cn.lili.modules.system.entity.enums.InstantDeliveryUrl;
 import cn.lili.modules.system.entity.plugin.ConfigItem;
-import cn.lili.modules.system.entity.plugin.InstantDelivery.InstantDeliveryPlugin;
-import cn.lili.modules.system.entity.plugin.InstantDelivery.dada.vo.DdOrderBackVO;
+import cn.lili.modules.system.entity.plugin.logistics.InstantDeliveryPlugin;
+import cn.lili.modules.system.entity.plugin.logistics.dada.vo.DdOrderBackVO;
 import cn.lili.modules.system.entity.vo.CityResult;
 import cn.lili.modules.system.entity.vo.InstantDeliveryResultVO;
 import cn.lili.modules.system.service.InstantDeliveryLogService;
@@ -95,20 +95,10 @@ public class DadaPlugin implements InstantDeliveryPlugin {
     public InstantDeliveryResultVO addStore(StoreDetailVO storeDetailVO, Map config) {
         JSONArray jsonArray = new JSONArray();
         JSONObject jsonObject = new JSONObject();
-//       //门店名称
-//       jsonObject.put("station_name", storeDetailVO.getStoreName());
         //业务类型(食品小吃-1,饮料-2,鲜花-3,文印票务-8,便利店-9,水果生鲜-13,同城电商-19, 医药-20,蛋糕-21,酒品-24,小商品市场-25,服装-26,汽修零配-27,数码-28,小龙虾-29,火锅-51,其他-5)
         jsonObject.set("business", 19);
-        //城市名称(如,上海)
-//       jsonObject.put("city_name", storeDetailVO.getCompanyCity());
-        //区域名称(如,浦东新区)
-//       jsonObject.put("area_name", storeDetailVO.getCompanyCounty());
         //门店地址
         jsonObject.set("station_address", storeDetailVO.getCompanyAddress());
-//       //门店经度
-//       jsonObject.put("lng", storeDetailVO.getStoreLongitude());
-//       //门店纬度
-//       jsonObject.put("lat", storeDetailVO.getStoreLatitude());
         //联系人姓名
         jsonObject.set("contact_name", storeDetailVO.getLinkName());
         //联系人电话

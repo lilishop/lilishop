@@ -95,6 +95,7 @@ public interface BillService extends IService<Bill> {
 
     /**
      * 下载结算单
+     * @response response
      * @param id 结算单ID
      */
     void download(HttpServletResponse response, String id);

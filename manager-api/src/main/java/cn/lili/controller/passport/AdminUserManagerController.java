@@ -10,7 +10,6 @@ import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.vo.SearchVO;
-import cn.lili.modules.system.aspect.annotation.DemoSite;
 import cn.lili.modules.permission.entity.dos.AdminUser;
 import cn.lili.modules.permission.entity.dto.AdminUserDTO;
 import cn.lili.modules.permission.entity.vo.AdminUserVO;
@@ -97,10 +96,10 @@ public class AdminUserManagerController {
         AuthUser tokenUser = UserContext.getCurrentUser();
         if (tokenUser != null) {
             //查询当前管理员
-            AdminUser adminUserDB = adminUserService.findByUsername(tokenUser.getUsername());
-            adminUserDB.setAvatar(adminUser.getAvatar());
-            adminUserDB.setNickName(adminUser.getNickName());
-            if (!adminUserService.updateById(adminUserDB)) {
+            AdminUser oldAdminUser = adminUserService.findByUsername(tokenUser.getUsername());
+            oldAdminUser.setAvatar(adminUser.getAvatar());
+            oldAdminUser.setNickName(adminUser.getNickName());
+            if (!adminUserService.updateById(oldAdminUser)) {
                 throw new ServiceException(ResultCode.USER_EDIT_ERROR);
             }
             return ResultUtil.success(ResultCode.USER_EDIT_SUCCESS);

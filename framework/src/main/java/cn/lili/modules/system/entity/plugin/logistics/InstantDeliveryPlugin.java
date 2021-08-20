@@ -1,4 +1,4 @@
-package cn.lili.modules.system.entity.plugin.InstantDelivery;
+package cn.lili.modules.system.entity.plugin.logistics;
 
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.order.order.entity.dos.Order;

@@ -19,9 +19,19 @@ import java.util.List;
  */
 public interface StoreFlowMapper extends BaseMapper<StoreFlow> {
 
+    /**
+     * 获取结算单的入账流水
+     * @param queryWrapper 查询条件
+     * @return 入账流水
+     */
     @Select("SELECT * FROM li_store_flow ${ew.customSqlSegment}")
     List<StoreFlowPayDownloadVO> getStoreFlowPayDownloadVO(@Param(Constants.WRAPPER) Wrapper<StoreFlow> queryWrapper);
 
+    /**
+     * 获取结算单的退款流水
+     * @param queryWrapper 查询条件
+     * @return 退款流水
+     */
     @Select("SELECT * FROM li_store_flow ${ew.customSqlSegment}")
     List<StoreFlowRefundDownloadVO> getStoreFlowRefundDownloadVO(@Param(Constants.WRAPPER) Wrapper<StoreFlow> queryWrapper);
 }

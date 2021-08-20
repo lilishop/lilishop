@@ -2,8 +2,8 @@ package cn.lili.modules.system.entity.dos;
 
 
 import cn.lili.common.utils.StringUtils;
-import cn.lili.modules.system.entity.plugin.InstantDelivery.dada.enums.DadaOrderStatusEnum;
-import cn.lili.modules.system.entity.plugin.InstantDelivery.dada.vo.DdOrderBackVO;
+import cn.lili.modules.system.entity.plugin.logistics.dada.enums.DadaOrderStatusEnum;
+import cn.lili.modules.system.entity.plugin.logistics.dada.vo.DdOrderBackVO;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;

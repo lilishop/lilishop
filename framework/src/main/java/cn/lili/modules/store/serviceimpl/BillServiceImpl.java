@@ -23,6 +23,7 @@ import cn.lili.modules.store.entity.enums.BillStatusEnum;
 import cn.lili.modules.store.entity.vos.BillListVO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
 import cn.lili.modules.store.entity.vos.StoreFlowPayDownloadVO;
+import cn.lili.modules.store.entity.vos.StoreFlowRefundDownloadVO;
 import cn.lili.modules.store.mapper.BillMapper;
 import cn.lili.modules.store.service.BillService;
 import cn.lili.modules.store.service.StoreDetailService;
@@ -223,6 +224,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         return this.count(lambdaUpdateWrapper);
     }
 
+    @Override
     public void download(HttpServletResponse response, String id) {
 
         Bill bill = this.getById(id);
@@ -286,8 +288,8 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         storeFlowlambdaQueryWrapper.eq(StoreFlow::getStoreId, bill.getStoreId());
         storeFlowlambdaQueryWrapper.between(StoreFlow::getCreateTime, bill.getStartTime(), bill.getCreateTime());
         storeFlowlambdaQueryWrapper.eq(StoreFlow::getFlowType, FlowTypeEnum.PAY.name());
-        storeFlowList = storeFlowMapper.getStoreFlowPayDownloadVO(storeFlowlambdaQueryWrapper);
-        writer.write(storeFlowList, true);
+        List<StoreFlowRefundDownloadVO> storeFlowRefundDownloadVOList = storeFlowMapper.getStoreFlowRefundDownloadVO(storeFlowlambdaQueryWrapper);
+        writer.write(storeFlowRefundDownloadVOList, true);
 
         ServletOutputStream out = null;
         try {

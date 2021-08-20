@@ -3,7 +3,7 @@ package cn.lili.modules.system.serviceimpl;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.system.entity.dos.InstantDelivery;
-import cn.lili.modules.system.entity.plugin.InstantDelivery.InstantDeliveryPlugin;
+import cn.lili.modules.system.entity.plugin.logistics.InstantDeliveryPlugin;
 import cn.lili.modules.system.entity.vo.InstantDeliveryVO;
 import cn.lili.modules.system.mapper.InstantDeliveryMapper;
 import cn.lili.modules.system.service.InstantDeliveryService;

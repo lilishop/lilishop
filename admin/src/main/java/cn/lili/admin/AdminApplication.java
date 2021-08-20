@@ -12,6 +12,12 @@ import org.springframework.security.web.authentication.SavedRequestAwareAuthenti
 
 import java.util.UUID;
 
+/**
+ * Admin
+ *
+ * @author Chopper
+ * @since 2020/11/16 10:03 下午
+ */
 @Configuration
 @EnableAutoConfiguration
 @EnableAdminServer

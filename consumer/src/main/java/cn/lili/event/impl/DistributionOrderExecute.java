@@ -54,6 +54,9 @@ public class DistributionOrderExecute implements OrderStatusChangeEvent, EveryDa
                 distributionOrderService.cancelOrder(orderMessage.getOrderSn());
                 break;
             }
+            default: {
+                break;
+            }
         }
     }
 

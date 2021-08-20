@@ -169,7 +169,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
         //如果索引不存在，则创建索引
         createIndexRequest(indexName);
-        Map<String, Integer> resultMap = new HashMap<>();
+        Map<String, Integer> resultMap = new HashMap<>(16);
         final String KEY_SUCCESS = "success";
         final String KEY_FAIL = "fail";
         final String KEY_PROCESSED = "processed";

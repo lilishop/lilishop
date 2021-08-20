@@ -5,7 +5,6 @@ import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.order.order.entity.enums.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
-import jdk.nashorn.internal.objects.annotations.Getter;
 import lombok.Data;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -31,7 +30,7 @@ public class OrderSimpleVO {
     private Double flowPrice;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "创建时间")
     private Date createTime;
 
@@ -135,7 +134,6 @@ public class OrderSimpleVO {
     @ApiModelProperty(value = "货运状态")
     private String deliverStatus;
 
-    @Getter
     public List<OrderItemVO> getOrderItems() {
         if (StringUtils.isEmpty(groupGoodsId)) {
             return new ArrayList<>();
@@ -162,7 +160,6 @@ public class OrderSimpleVO {
     /**
      * 初始化自身状态
      */
-    @Getter
     public AllowOperation getAllowOperationVO() {
         //设置订单的可操作状态
         return new AllowOperation(this);

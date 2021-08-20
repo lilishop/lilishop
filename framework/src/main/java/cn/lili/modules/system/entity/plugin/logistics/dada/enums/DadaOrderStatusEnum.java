@@ -1,4 +1,4 @@
-package cn.lili.modules.system.entity.plugin.InstantDelivery.dada.enums;
+package cn.lili.modules.system.entity.plugin.logistics.dada.enums;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -63,9 +63,11 @@ public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, W
 
 
             //设置行业
-            Map<String, Object> setIndustryParams = new HashMap<>();
-            setIndustryParams.put("industry_id1", 1);//互联网/电子商务
-            setIndustryParams.put("industry_id2", 5);//通信与运营商
+            Map<String, Object> setIndustryParams = new HashMap<>(16);
+            //互联网/电子商务
+            setIndustryParams.put("industry_id1", 1);
+            //通信与运营商
+            setIndustryParams.put("industry_id2", 5);
             String context = HttpUtils.doPostWithJson(setIndustry + accessToken, setIndustryParams);
 
             //获取已有模版，删除

@@ -52,19 +52,27 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGoodsMapper, KanjiaActivityGoods> implements KanjiaActivityGoodsService {
 
-    //规格商品
+    /**
+     * 规格商品
+     */
     @Autowired
     private GoodsSkuService goodsSkuService;
 
-    //Rocketmq
+    /**
+     * Rocketmq
+     */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
 
-    //延时任务
+    /**
+     * 延时任务
+     */
     @Autowired
     private TimeTrigger timeTrigger;
 
-    //Mongo
+    /**
+     * Mongo
+     */
     @Autowired
     private MongoTemplate mongoTemplate;
 

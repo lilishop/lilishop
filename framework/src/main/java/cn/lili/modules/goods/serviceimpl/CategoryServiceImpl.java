@@ -85,9 +85,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public List<CategoryVO> getStoreCategory(String[] categories) {
         List<String> arr = Arrays.asList(categories.clone());
-        List<CategoryVO> categoryVOS = categoryTree().stream()
+        List<CategoryVO> categoryVOList = categoryTree().stream()
                 .filter(item -> arr.contains(item.getId())).collect(Collectors.toList());
-        return categoryVOS;
+        return categoryVOList;
 
     }
 
@@ -115,7 +115,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     }
 
     @Override
-    public List<CategoryVO> listAllChildrenDB() {
+    public List<CategoryVO> listAllChildren() {
 
         //获取全部分类
         List<Category> list = this.list();
@@ -147,18 +147,18 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public List<String> getCategoryNameByIds(List<String> ids) {
         List<String> categoryName = new ArrayList<>();
-        List<Category> categoryVOs = (List<Category>) cache.get(CachePrefix.CATEGORY_ARRAY.getPrefix());
+        List<Category> categoryVOList = (List<Category>) cache.get(CachePrefix.CATEGORY_ARRAY.getPrefix());
         //如果缓存中为空，则重新获取缓存
-        if (categoryVOs == null) {
+        if (categoryVOList == null) {
             categoryTree();
-            categoryVOs = (List<Category>) cache.get(CachePrefix.CATEGORY_ARRAY.getPrefix());
+            categoryVOList = (List<Category>) cache.get(CachePrefix.CATEGORY_ARRAY.getPrefix());
         }
         //还为空的话，直接返回
-        if (categoryVOs == null) {
+        if (categoryVOList == null) {
             return null;
         }
         //循环顶级分类
-        for (Category category : categoryVOs) {
+        for (Category category : categoryVOList) {
             //循环查询的id匹配
             for (String id : ids) {
                 if (category.getId().equals(id)) {
@@ -273,13 +273,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Category::getParentId, category.getId());
         List<Category> categories = this.list(queryWrapper);
-        List<CategoryVO> categoryVOS = new ArrayList<>();
+        List<CategoryVO> categoryVOList = new ArrayList<>();
         for (Category category1 : categories) {
-            categoryVOS.add(new CategoryVO(category1));
+            categoryVOList.add(new CategoryVO(category1));
         }
-        category.setChildren(categoryVOS);
-        if (!categoryVOS.isEmpty()) {
-            categoryVOS.forEach(this::findAllChild);
+        category.setChildren(categoryVOList);
+        if (!categoryVOList.isEmpty()) {
+            categoryVOList.forEach(this::findAllChild);
         }
     }
 
@@ -330,16 +330,16 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      * 递归自身，找到id等于parentId的对象，获取他的children 返回
      *
      * @param parentId    父ID
-     * @param categoryVOS 分类VO
+     * @param categoryVOList 分类VO
      * @return 子分类列表VO
      */
-    private List<CategoryVO> getChildren(String parentId, List<CategoryVO> categoryVOS) {
-        for (CategoryVO item : categoryVOS) {
+    private List<CategoryVO> getChildren(String parentId, List<CategoryVO> categoryVOList) {
+        for (CategoryVO item : categoryVOList) {
             if (item.getId().equals(parentId)) {
                 return item.getChildren();
             }
             if (item.getChildren() != null && item.getChildren().size() > 0) {
-                return getChildren(parentId, categoryVOS);
+                return getChildren(parentId, categoryVOList);
             }
         }
         return null;

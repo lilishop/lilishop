@@ -1,4 +1,4 @@
-package cn.lili.modules.system.entity.plugin.InstantDelivery.dada.vo;
+package cn.lili.modules.system.entity.plugin.logistics.dada.vo;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

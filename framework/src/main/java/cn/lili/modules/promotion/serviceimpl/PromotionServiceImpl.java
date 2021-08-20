@@ -432,6 +432,7 @@ public class PromotionServiceImpl implements PromotionService {
                 this.goodsIndexService.updateEsGoodsIndex(seckillApply.getSkuId(), seckill1, promotionTypeEnum.name() + "-" + seckillApply.getTimeLine(), seckillApply.getPrice());
             }
         }
+        this.mongoTemplate.save(seckill);
         return result;
     }
 

@@ -54,7 +54,7 @@ public class CategoryManagerController {
     @ApiOperation(value = "查询全部分类列表")
     @GetMapping(value = "/allChildren")
     public ResultMessage<List<CategoryVO>> list() {
-        return ResultUtil.data(this.categoryService.listAllChildrenDB());
+        return ResultUtil.data(this.categoryService.listAllChildren());
     }
 
     @PostMapping
