@@ -67,16 +67,32 @@ public class SkuPromotionRender implements CartRenderStep {
      */
     private void renderSkuPromotion(TradeDTO tradeDTO) {
 
+
+        switch (tradeDTO.getCartTypeEnum()) {
+            case POINTS:
+                for (CartVO cartVO : tradeDTO.getCartList()) {
+                    for (CartSkuVO cartSkuVO : cartVO.getSkuList()) {
+                        cartSkuVO.getPriceDetailDTO().setPayPoint(cartSkuVO.getPoint());
+                    }
+                }
+            case CART:
+            case BUY_NOW:
+            case VIRTUAL:
+                for (CartVO cartVO : tradeDTO.getCartList()) {
+                    for (CartSkuVO cartSkuVO : cartVO.getSkuList()) {
+                        promotionGoodsService.updatePromotion(cartSkuVO);
+                    }
+                }
+                return;
+            default:
+        }
+
         //非积分商品、拼团、砍价商品可渲染满优惠活动
         //这里普通购物车也只渲染满优惠，其他优惠都是商品级别的，都写在商品属性里
         if (!tradeDTO.getCartTypeEnum().equals(CartTypeEnum.POINTS)
                 && !tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)
                 && !tradeDTO.getCartTypeEnum().equals(CartTypeEnum.KANJIA)) {
-            for (CartVO cartVO : tradeDTO.getCartList()) {
-                for (CartSkuVO cartSkuVO : cartVO.getSkuList()) {
-                    promotionGoodsService.updatePromotion(cartSkuVO);
-                }
-            }
+
         }
     }
 

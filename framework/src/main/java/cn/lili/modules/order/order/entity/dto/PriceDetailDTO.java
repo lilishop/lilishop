@@ -37,7 +37,7 @@ public class PriceDetailDTO implements Serializable {
     //============discount price============
 
     @ApiModelProperty(value = "支付积分")
-    private Integer payPoint;
+    private Long payPoint;
 
     @ApiModelProperty(value = "优惠金额")
     private Double discountPrice;
@@ -113,7 +113,7 @@ public class PriceDetailDTO implements Serializable {
         goodsPrice = 0d;
         freightPrice = 0d;
 
-        payPoint = 0;
+        payPoint = 0L;
         discountPrice = 0d;
         couponPrice = 0d;
 
@@ -230,9 +230,9 @@ public class PriceDetailDTO implements Serializable {
         return freightPrice;
     }
 
-    public Integer getPayPoint() {
+    public Long getPayPoint() {
         if (payPoint == null || payPoint <= 0) {
-            return 0;
+            return 0L;
         }
         return payPoint;
     }
@@ -343,7 +343,7 @@ public class PriceDetailDTO implements Serializable {
         this.recount();
     }
 
-    public void setPayPoint(Integer payPoint) {
+    public void setPayPoint(Long payPoint) {
         this.payPoint = payPoint;
     }
 

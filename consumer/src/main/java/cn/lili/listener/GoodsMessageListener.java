@@ -107,10 +107,12 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 break;
             //审核商品
             case GOODS_AUDIT:
+                updateGoodsNum(messageExt);
                 break;
             //删除商品
             case GOODS_DELETE:
                 deleteGoods(messageExt);
+                updateGoodsNum(messageExt);
                 break;
             //规格删除
             case SKU_DELETE:
@@ -156,8 +158,6 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
      */
     private void deleteGoods(MessageExt messageExt) {
         Goods goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
-        //更新店铺商品数量
-        storeService.updateStoreGoodsNum(goods.getStoreId());
 
         //删除获取分销商品
         DistributionGoods distributionGoods = distributionGoodsService.getOne(new LambdaQueryWrapper<DistributionGoods>()
@@ -169,6 +169,18 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
 
         //删除分销商品
         distributionGoodsService.removeById(distributionGoods.getId());
+    }
+
+    /**
+     * 修改商品数量
+     *
+     * @param messageExt
+     */
+    private void updateGoodsNum(MessageExt messageExt) {
+
+        Goods goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
+        //更新店铺商品数量
+        storeService.updateStoreGoodsNum(goods.getStoreId());
     }
 
     /**
