@@ -205,6 +205,16 @@ jasypt:
     password: lili
 
 lili:
+  #验证码设置
+  verification-code:
+    #图形验证码有效时间 秒 包含滑块验证码有效时间， 以及验证通过之后，缓存中存储的验证结果有效时间
+    effectiveTime: 300
+    #水印
+    watermark: LILI-SHOP
+    #干扰项数量 最大2 默认0
+    interfereNum: 0
+    #允许误差像素
+    faultTolerant: 3
   #短信模版配置
   sms:
     #登录

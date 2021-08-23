@@ -3,7 +3,6 @@ package cn.lili.modules.verification;
 import cn.lili.common.utils.Base64DecodeMultipartFile;
 import cn.lili.common.vo.SerializableStream;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
 
 import javax.imageio.ImageIO;
@@ -21,9 +20,9 @@ import java.util.Random;
  * @version v4.0
  * @since 2020/11/17 14:34
  */
-@Component
 @Slf4j
 public class SliderImageUtil {
+
 
     private static final int BOLD = 5;
 
@@ -34,12 +33,18 @@ public class SliderImageUtil {
     /**
      * 根据模板切图
      *
-     * @param sliderFile
-     * @param originalFile
-     * @return
+     * @param sliderFile   滑块
+     * @param originalFile 原图
+     * @param watermark    水印
+     * @param interfereNum 干扰选项
+     * @return 滑块参数
      * @throws Exception sliderFile, originalFile
      */
-    public static Map<String, Object> pictureTemplatesCut(SerializableStream sliderFile, SerializableStream originalFile) throws Exception {
+    public static Map<String, Object> pictureTemplatesCut(
+            SerializableStream sliderFile,
+            SerializableStream interfereSliderFile,
+            SerializableStream originalFile,
+            String watermark, Integer interfereNum) throws Exception {
 
         Random random = new Random();
         Map<String, Object> pictureMap = new HashMap<>(16);
@@ -70,6 +75,18 @@ public class SliderImageUtil {
         //新建的图像根据模板颜色赋值,源图生成遮罩
         ImageUtil.cutByTemplate(originalImage, sliderImage, newImage, randomX, randomY);
 
+
+        //干扰项
+        if (interfereNum > 0) {
+            BufferedImage interfereSliderImage = ImageIO.read(Base64DecodeMultipartFile.base64ToInputStream(interfereSliderFile.getBase64()));
+            for (int i = 0; i < interfereNum; i++) {
+                int interfereX = random.nextInt(originalWidth - 3 * sliderWidth) + 2 * sliderWidth;
+                int interfereY = random.nextInt(originalHeight - sliderHeight);
+                ImageUtil.interfereTemplate(originalImage, interfereSliderImage, interfereX, interfereY);
+            }
+        }
+
+
         //设置“抗锯齿”的属性
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         graphics.setStroke(new BasicStroke(BOLD, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
@@ -77,7 +94,7 @@ public class SliderImageUtil {
         graphics.dispose();
 
         //添加水印
-        ImageUtil.addWatermark(originalImage, "LILI-SHOP");
+        ImageUtil.addWatermark(originalImage, watermark);
         //新建流
         ByteArrayOutputStream newImageOs = new ByteArrayOutputStream();
         //利用ImageIO类提供的write方法，将bi以png图片的数据模式写入流。

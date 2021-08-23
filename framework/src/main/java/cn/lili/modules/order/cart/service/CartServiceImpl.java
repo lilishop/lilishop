@@ -330,7 +330,7 @@ public class CartServiceImpl implements CartService {
         double totalPrice = tradeDTO.getSkuList().stream().mapToDouble(i -> i.getPurchasePrice() * i.getNum()).sum();
         if (tradeDTO.getSkuList() != null && !tradeDTO.getSkuList().isEmpty()) {
             List<String> ids = tradeDTO.getSkuList().parallelStream().filter(i -> Boolean.TRUE.equals(i.getChecked())).map(i -> i.getGoodsSku().getId()).collect(Collectors.toList());
-            List<String> storeIds = new ArrayList<>();
+
             List<EsGoodsIndex> esGoodsList = esGoodsSearchService.getEsGoodsBySkuIds(ids);
             for (EsGoodsIndex esGoodsIndex : esGoodsList) {
                 if (esGoodsIndex != null) {
@@ -341,9 +341,17 @@ public class CartServiceImpl implements CartService {
                             count = currentGoodsCanUse.size();
                         }
                     }
-                    storeIds.add(esGoodsIndex.getStoreId());
                 }
             }
+
+            List<String> storeIds = new ArrayList<>();
+            for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
+                if (!storeIds.contains(cartSkuVO.getStoreId())) {
+                    storeIds.add(cartSkuVO.getStoreId());
+                }
+            }
+
+            //获取可操作的优惠券集合
             List<MemberCoupon> allScopeMemberCoupon = memberCouponService.getAllScopeMemberCoupon(tradeDTO.getMemberId(), storeIds);
             if (allScopeMemberCoupon != null && !allScopeMemberCoupon.isEmpty()) {
                 //过滤满足消费门槛
