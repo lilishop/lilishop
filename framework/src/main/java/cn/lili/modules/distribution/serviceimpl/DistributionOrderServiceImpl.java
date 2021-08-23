@@ -25,6 +25,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,7 @@ import java.util.List;
  * @author pikachu
  * @since 2020-03-14 23:04:56
  */
+@Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderMapper, DistributionOrder> implements DistributionOrderService {
@@ -107,7 +109,7 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
                     distributionOrder.setSettleCycle(new DateTime());
                 } else {
                     DateTime dateTime = new DateTime();
-                    dateTime.offsetNew(DateField.DAY_OF_MONTH, distributionSetting.getCashDay());
+                    dateTime = dateTime.offsetNew(DateField.DAY_OF_MONTH, distributionSetting.getCashDay());
                     distributionOrder.setSettleCycle(dateTime);
                 }
 
@@ -120,13 +122,15 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
 
                     //如果天数写0则立即进行结算
                     if (distributionSetting.getCashDay().equals(0)) {
+                        DateTime dateTime = new DateTime();
+                        dateTime = dateTime.offsetNew(DateField.MINUTE, 5);
                         //计算分销提佣
-                        this.baseMapper.rebate(DistributionOrderStatusEnum.WAIT_BILL.name(), new DateTime());
+                        this.baseMapper.rebate(DistributionOrderStatusEnum.WAIT_BILL.name(), dateTime);
 
                         //修改分销订单状态
                         this.update(new LambdaUpdateWrapper<DistributionOrder>()
                                 .eq(DistributionOrder::getDistributionOrderStatus, DistributionOrderStatusEnum.WAIT_BILL.name())
-                                .le(DistributionOrder::getSettleCycle, new DateTime())
+                                .le(DistributionOrder::getSettleCycle, dateTime)
                                 .set(DistributionOrder::getDistributionOrderStatus, DistributionOrderStatusEnum.WAIT_CASH.name()));
                     }
                 }
