@@ -17,8 +17,8 @@ public class RenderStepStatement {
      */
     public static RenderStepEnums[] cartRender = {
             RenderStepEnums.CHECK_DATA,
-            RenderStepEnums.FULL_DISCOUNT,
             RenderStepEnums.SKU_PROMOTION,
+            RenderStepEnums.FULL_DISCOUNT,
             RenderStepEnums.CART_PRICE};
 
     /**
@@ -29,8 +29,8 @@ public class RenderStepStatement {
     public static RenderStepEnums[] checkedRender = {
             RenderStepEnums.CHECKED_FILTER,
             RenderStepEnums.CHECK_DATA,
-            RenderStepEnums.FULL_DISCOUNT,
             RenderStepEnums.SKU_PROMOTION,
+            RenderStepEnums.FULL_DISCOUNT,
             RenderStepEnums.COUPON,
             RenderStepEnums.SKU_FREIGHT,
             RenderStepEnums.CART_PRICE,
@@ -68,8 +68,8 @@ public class RenderStepStatement {
     public static RenderStepEnums[] tradeRender = {
             RenderStepEnums.CHECKED_FILTER,
             RenderStepEnums.CHECK_DATA,
-            RenderStepEnums.FULL_DISCOUNT,
             RenderStepEnums.SKU_PROMOTION,
+            RenderStepEnums.FULL_DISCOUNT,
             RenderStepEnums.COUPON,
             RenderStepEnums.SKU_FREIGHT,
             RenderStepEnums.CART_PRICE,
