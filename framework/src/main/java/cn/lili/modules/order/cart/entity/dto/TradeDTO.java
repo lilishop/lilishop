@@ -9,6 +9,8 @@ import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.entity.vo.PriceDetailVO;
+import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -88,6 +90,15 @@ public class TradeDTO implements Serializable {
      */
     private Map<String, MemberCouponDTO> storeCoupons;
 
+    /**
+     * 可用优惠券列表
+     */
+    private List<MemberCoupon> canUseCoupons;
+
+    /**
+     * 无法使用优惠券无法使用的原因
+     */
+    private List<MemberCouponVO> cantUseCoupons;
 
     /**
      * 收货地址
@@ -120,13 +131,16 @@ public class TradeDTO implements Serializable {
     private List<OrderVO> orderVO;
 
     public TradeDTO(CartTypeEnum cartTypeEnum) {
+        this.cartTypeEnum = cartTypeEnum;
+
         this.skuList = new ArrayList<>();
         this.cartList = new ArrayList<>();
         this.skuPromotionDetail = new HashMap<>();
         this.storeCoupons = new HashMap<>();
         this.storeCoupons = new HashMap<>();
         this.priceDetailDTO = new PriceDetailDTO();
-        this.cartTypeEnum = cartTypeEnum;
+        this.cantUseCoupons = new ArrayList<>();
+        this.canUseCoupons = new ArrayList<>();
         this.needReceipt = false;
     }
 

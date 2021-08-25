@@ -45,6 +45,13 @@ public interface MemberCouponService extends IService<MemberCoupon> {
     IPage<MemberCoupon> getMemberCoupons(CouponSearchParams param, PageVO pageVo);
 
     /**
+     * 获取会员所有优惠券
+     *
+     * @return 会员优惠券列表
+     */
+    List<MemberCoupon> getMemberCoupons();
+
+    /**
      * 获取会员优惠券列表
      *
      * @param param      查询参数

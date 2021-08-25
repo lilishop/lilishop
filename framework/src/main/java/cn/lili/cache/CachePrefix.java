@@ -468,7 +468,11 @@ public enum CachePrefix {
     /**
      * 店铺分类
      */
-    STORE_CATEGORY;
+    STORE_CATEGORY,
+    /**
+     * 订单暂时缓存
+     */
+    ORDER;
 
 
     public static String removePrefix(String str) {

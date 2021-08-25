@@ -23,23 +23,6 @@ import java.util.stream.Collectors;
 @Service
 public class CartPriceRender implements CartRenderStep {
 
-
-    /**
-     * 商品分类
-     */
-    @Autowired
-    private CategoryService categoryService;
-    /**
-     * 积分商品
-     */
-    @Autowired
-    private PointsGoodsService pointsGoodsService;
-    /**
-     * 砍价商品
-     */
-    @Autowired
-    private KanjiaActivityGoodsService kanjiaActivityGoodsService;
-
     @Override
     public RenderStepEnums step() {
         return RenderStepEnums.CART_PRICE;

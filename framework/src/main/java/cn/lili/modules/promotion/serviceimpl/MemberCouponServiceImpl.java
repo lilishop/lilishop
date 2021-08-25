@@ -86,6 +86,13 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         return this.page(PageUtil.initPage(pageVo), queryWrapper);
     }
 
+    @Override
+    public List<MemberCoupon> getMemberCoupons() {
+        QueryWrapper<MemberCoupon> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("member_id", UserContext.getCurrentUser().getId());
+        return this.list(queryWrapper);
+    }
+
     /**
      * 获取会员优惠券列表
      *

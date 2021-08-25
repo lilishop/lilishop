@@ -45,6 +45,19 @@ public class OrderMessageListener implements RocketMQListener<MessageExt> {
 
     @Override
     public void onMessage(MessageExt messageExt) {
+        try {
+            this.orderStatusEvent(messageExt);
+        } catch (Exception e) {
+            log.error("订单状态变更事件调用异常", e);
+        }
+    }
+
+    /**
+     * 订单状态变更
+     * @param messageExt
+     */
+    public void orderStatusEvent(MessageExt messageExt) {
+
         switch (MqOrderTagsEnum.valueOf(messageExt.getTags())) {
             //订单创建
             case ORDER_CREATE:
@@ -86,5 +99,4 @@ public class OrderMessageListener implements RocketMQListener<MessageExt> {
                 break;
         }
     }
-
 }

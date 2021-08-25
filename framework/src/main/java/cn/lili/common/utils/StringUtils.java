@@ -159,6 +159,23 @@ public class StringUtils extends StrUtil {
         Matcher m = p.matcher(str);
         return m.replaceAll("").trim();
     }
+
+    /**
+     * double 转价格字符串
+     *
+     * @return
+     */
+    public static String toFen(Double doubleValue) {
+        String str = doubleValue.toString();
+
+        if (!str.contains(".")) {
+            str = str + ".00";
+        } else if (str.substring(str.indexOf(".")).length() == 2) {
+            str = str + "0";
+        }
+        return str;
+    }
+
 }
 
 

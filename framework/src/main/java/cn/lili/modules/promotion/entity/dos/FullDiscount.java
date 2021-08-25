@@ -72,4 +72,46 @@ public class FullDiscount extends BasePromotion {
     @ApiModelProperty(value = "活动说明")
     private String description;
 
+
+    public Boolean getIsFullMinus() {
+        if (isFullMinus == null) {
+            return false;
+        }
+        return isFullMinus;
+    }
+
+    public Boolean getIsFullRate() {
+        if (isFullRate == null) {
+            return false;
+        }
+        return isFullRate;
+    }
+
+    public Boolean getIsPoint() {
+        if (isPoint == null) {
+            return false;
+        }
+        return isPoint;
+    }
+
+    public Boolean getIsFreeFreight() {
+        if (isFreeFreight == null) {
+            return false;
+        }
+        return isFreeFreight;
+    }
+
+    public Boolean getIsGift() {
+        if (isGift == null) {
+            return false;
+        }
+        return isGift;
+    }
+
+    public Boolean getIsCoupon() {
+        if (isCoupon == null) {
+            return false;
+        }
+        return isCoupon;
+    }
 }

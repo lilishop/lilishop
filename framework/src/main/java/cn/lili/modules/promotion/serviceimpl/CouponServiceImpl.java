@@ -264,7 +264,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
      */
     @Override
     public void receiveCoupon(String couponId, Integer receiveNum) {
-        CouponVO couponVO = checkStatus(couponId);
+        CouponVO couponVO = this.mongoTemplate.findById(couponId, CouponVO.class);
         couponVO.setReceivedNum(couponVO.getReceivedNum() + receiveNum);
         LambdaUpdateWrapper<Coupon> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(Coupon::getId, couponId);
@@ -401,7 +401,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         LambdaQueryWrapper<FullDiscount> queryWrapper = new LambdaQueryWrapper<FullDiscount>().eq(FullDiscount::getIsCoupon, true).eq(FullDiscount::getCouponId, id);
         FullDiscount fullDiscount = fullDiscountService.getOne(queryWrapper);
         if (fullDiscount != null) {
-            throw new ServiceException("当前优惠券参与了促销活动 " + fullDiscount.getTitle() + " 不能进行编辑删除操作");
+            throw new ServiceException("当前优惠券参与了促销活动【" + fullDiscount.getPromotionName() + "】不能进行编辑删除操作");
         }
         return coupon;
     }

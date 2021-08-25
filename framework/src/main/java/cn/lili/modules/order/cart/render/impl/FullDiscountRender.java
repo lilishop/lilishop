@@ -9,6 +9,7 @@ import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.cart.render.util.PromotionPriceUtil;
+import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.service.FullDiscountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +80,11 @@ public class FullDiscountRender implements CartRenderStep {
                             if (fullDiscount.getIsFullMinus()) {
                                 promotionPriceUtil.recountPrice(tradeDTO, skuPriceDetail, fullDiscount.getFullMinus(), PromotionTypeEnum.FULL_DISCOUNT);
                             }
+                            //打折
+                            else if (fullDiscount.getIsFullRate()) {
+                                this.renderFullRate(cart, skuPriceDetail, CurrencyUtil.div(fullDiscount.getFullRate(), 10));
+                            }
+                            //渲染满优惠
                             renderFullMinus(cart);
                         }
                     }
@@ -86,6 +92,35 @@ public class FullDiscountRender implements CartRenderStep {
                 }
             }
         }
+
+    }
+
+    /**
+     * 渲染满折
+     *
+     * @param cart
+     * @param skuPriceDetail
+     */
+    private void renderFullRate(CartVO cart, Map<String, Double> skuPriceDetail, Double rate) {
+
+        List<CartSkuVO> cartSkuVOS = cart.getSkuList().stream().filter(cartSkuVO -> {
+            return skuPriceDetail.containsKey(cartSkuVO.getGoodsSku().getId());
+        }).collect(Collectors.toList());
+
+        // 循环计算扣减金额
+        cartSkuVOS.forEach(cartSkuVO -> {
+            PriceDetailDTO priceDetailDTO = cartSkuVO.getPriceDetailDTO();
+
+            //优惠金额=旧的优惠金额+商品金额*商品折扣比例
+            priceDetailDTO.setDiscountPrice(
+                    CurrencyUtil.add(priceDetailDTO.getDiscountPrice(),
+                            CurrencyUtil.mul(priceDetailDTO.getGoodsPrice(),
+                                    CurrencyUtil.sub(1, rate)
+                            )
+                    )
+            );
+
+        });
 
     }
 
@@ -153,8 +188,6 @@ public class FullDiscountRender implements CartRenderStep {
      * @return 是否满足满优惠
      */
     private boolean isFull(Double price, CartVO cart) {
-
-
         if (cart.getFullDiscount().getFullMoney() <= price) {
             cart.setPromotionNotice("正在参与满优惠活动（" + cart.getFullDiscount().getPromotionName() + "）" + cart.getFullDiscount().notice());
             return true;

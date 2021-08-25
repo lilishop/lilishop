@@ -22,6 +22,9 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         AuthUser authUser = UserContext.getCurrentUser();
         if (authUser != null) {
             this.setFieldValByName("createBy", authUser.getUsername(), metaObject);
+        }else{
+
+            this.setFieldValByName("createBy", "SYSTEM", metaObject);
         }
         this.setFieldValByName("createTime", new Date(), metaObject);
         //有值，则写入

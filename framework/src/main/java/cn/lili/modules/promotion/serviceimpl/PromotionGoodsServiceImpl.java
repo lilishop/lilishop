@@ -273,16 +273,43 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         String promotionStockKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(typeEnum, promotionId, skuId);
         String promotionGoodsStock = stringRedisTemplate.opsForValue().get(promotionStockKey);
 
-        PromotionGoods promotionGoods = this.getPromotionGoods(typeEnum, promotionId, skuId);
-        if (promotionGoods == null) {
-            throw new ServiceException(ResultCode.PROMOTION_GOODS_NOT_EXIT);
-        }
-        if (promotionGoodsStock != null && CharSequenceUtil.isNotEmpty(promotionGoodsStock) && promotionGoods.getQuantity().equals(Convert.toInt(promotionGoodsStock))) {
+        //库存如果不为空，则直接返回
+        if (promotionGoodsStock != null && CharSequenceUtil.isNotEmpty(promotionGoodsStock)) {
             return Convert.toInt(promotionGoodsStock);
-        } else {
+        }
+        //如果为空
+        else {
+            //获取促销商品，如果不存在促销商品，则返回0
+            PromotionGoods promotionGoods = this.getPromotionGoods(typeEnum, promotionId, skuId);
+            if (promotionGoods == null) {
+                return 0;
+            }
+            //否则写入新的促销商品库存
             stringRedisTemplate.opsForValue().set(promotionStockKey, promotionGoods.getQuantity().toString());
             return promotionGoods.getQuantity();
         }
+    }
+
+    @Override
+    public List<Integer> getPromotionGoodsStock(PromotionTypeEnum typeEnum, String promotionId, List<String> skuId) {
+        //获取促销商品，如果不存在促销商品，则返回0
+        List<PromotionGoods> promotionGoods = this.getPromotionGoods(typeEnum, promotionId, skuId);
+        //接收数据
+        List<Integer> result = new ArrayList<>(skuId.size());
+        for (String sid : skuId) {
+            Integer stock = null;
+            for (PromotionGoods pg : promotionGoods) {
+                if (sid.equals(pg.getSkuId())) {
+                    stock = pg.getQuantity();
+                }
+            }
+            //如果促销商品不存在，给一个默认值
+            if (stock == null) {
+                stock = 0;
+            }
+            result.add(stock);
+        }
+        return result;
     }
 
     /**
@@ -298,6 +325,22 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(PromotionGoods::getPromotionType, typeEnum.name()).eq(PromotionGoods::getPromotionId, promotionId).eq(PromotionGoods::getSkuId, skuId);
         return this.getOne(queryWrapper);
+    }
+
+    /**
+     * 根据条件获取促销活动商品详情
+     *
+     * @param typeEnum    促销类型
+     * @param promotionId 促销活动id
+     * @param skuId       商品skuId
+     * @return 促销活动商品详情
+     */
+    @Override
+    public List<PromotionGoods> getPromotionGoods(PromotionTypeEnum typeEnum, String promotionId, List<String> skuId) {
+        LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(PromotionGoods::getPromotionType, typeEnum.name()).eq(PromotionGoods::getPromotionId, promotionId)
+                .in(PromotionGoods::getSkuId, skuId);
+        return this.list(queryWrapper);
     }
 
     /**

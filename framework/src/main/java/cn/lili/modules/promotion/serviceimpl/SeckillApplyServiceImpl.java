@@ -135,17 +135,21 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             seckillApplyPage.setCurrent(pageVo.getMongoPageNumber());
             seckillApplyPage.setSize(pageVo.getPageSize());
             List<SeckillApply> seckillApplyList = seckillVO.getSeckillApplyList() != null ? seckillVO.getSeckillApplyList() : new ArrayList<>();
-            for (SeckillApply seckillApply : seckillApplyList) {
-                if (CharSequenceUtil.isNotEmpty(queryParam.getStoreId()) && !seckillApply.getStoreId().equals(queryParam.getStoreId())) {
-                    seckillApplyList.remove(seckillApply);
-                }
-                try {
-                    Integer goodsStock = promotionGoodsService.getPromotionGoodsStock(PromotionTypeEnum.SECKILL, seckillApply.getSeckillId(), seckillApply.getSkuId());
-                    seckillApply.setQuantity(goodsStock);
-                } catch (Exception e) {
-                    log.error("获取促销商品促销失败！", e);
+            // 如果查询参数店铺id不为空，则表示是店铺在查询信息，那么这里要对店铺的请求做过滤处理，把其他店铺的信息进行移除
+            seckillApplyList.removeIf(seckillApply -> CharSequenceUtil.isNotEmpty(queryParam.getStoreId()) && !seckillApply.getStoreId().equals(queryParam.getStoreId()));
+
+            //获取skuid
+            List<String> skuIds = seckillApplyList.stream()
+                    .map(SeckillApply::getSkuId).collect(Collectors.toList());
+
+            //循环获取 店铺/全平台 参与的促销商品库存进行填充
+            if (skuIds.size() > 0) {
+                List<Integer> skuStock = promotionGoodsService.getPromotionGoodsStock(PromotionTypeEnum.SECKILL, seckillVO.getId(), skuIds);
+                for (int i = 0; i < skuIds.size(); i++) {
+                    seckillApplyList.get(i).setQuantity(skuStock.get(i));
                 }
             }
+
             seckillApplyPage.setTotal(seckillApplyList.size());
             List<SeckillApply> page = CollUtil.page(pageVo.getMongoPageNumber(), pageVo.getPageSize(), seckillApplyList);
             seckillApplyPage.setRecords(page);

@@ -273,10 +273,14 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
             if (noGiftSelected) {
                 throw new ServiceException(ResultCode.FULL_DISCOUNT_GIFT_ERROR);
             }
+        }else{
+            fullDiscountVO.setGiftId(null);
         }
         //如果优惠方式是赠优惠券
         if (Boolean.TRUE.equals(fullDiscountVO.getIsCoupon())) {
             this.checkCoupon(fullDiscountVO.getCouponId(), fullDiscountVO.getEndTime().getTime());
+        }else{
+            fullDiscountVO.setCouponId(null);
         }
         //如果优惠方式是折扣
         if (Boolean.TRUE.equals(fullDiscountVO.getIsFullRate())) {
@@ -316,9 +320,6 @@ public class FullDiscountServiceImpl extends ServiceImpl<FullDiscountMapper, Ful
             throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
         }
         Coupon coupon = this.couponService.getById(couponId);
-        if (coupon.getEndTime().getTime() < endTime) {
-            throw new ServiceException(ResultCode.FULL_DISCOUNT_COUPON_TIME_ERROR);
-        }
     }
 
     /**

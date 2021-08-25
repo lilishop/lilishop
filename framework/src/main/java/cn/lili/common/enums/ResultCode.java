@@ -17,7 +17,7 @@ public enum ResultCode {
     /**
      * 失败返回码
      */
-    ERROR(400, "服务器繁忙，请稍后重试"),
+    ERROR(400, "业务异常，请核对问题后进行重试"),
 
     /**
      * 失败返回码
@@ -296,7 +296,7 @@ public enum ResultCode {
     FULL_DISCOUNT_NOT_EXIST_ERROR(43004, "当前要操作的满优惠活动不存在！"),
     FULL_DISCOUNT_WAY_ERROR(43005, "请选择一种优惠方式！"),
     FULL_DISCOUNT_GIFT_ERROR(43006, "请选择赠品！"),
-    FULL_DISCOUNT_COUPON_TIME_ERROR(43007, "赠送的优惠券有效时间必须大于活动时间"),
+    FULL_DISCOUNT_COUPON_TIME_ERROR(43007, "赠送的优惠券有效时间必须在活动时间之内"),
     FULL_DISCOUNT_MONEY_ERROR(43008, "请填写满减金额"),
     FULL_DISCOUNT_MONEY_GREATER_THAN_MINUS(43009, "满减金额不能大于优惠门槛"),
     FULL_RATE_NUM_ERROR(43010, "请填写打折数值"),

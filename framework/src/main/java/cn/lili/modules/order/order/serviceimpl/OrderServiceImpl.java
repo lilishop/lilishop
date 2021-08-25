@@ -8,37 +8,25 @@ import cn.hutool.json.JSONUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
-import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
-import cn.lili.trigger.util.DelayQueueTools;
-import cn.lili.trigger.enums.DelayTypeEnums;
-import cn.lili.trigger.message.PintuanOrderMessage;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.rocketmq.tags.GoodsTagsEnum;
-import cn.lili.rocketmq.tags.MqOrderTagsEnum;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.trigger.interfaces.TimeTrigger;
-import cn.lili.trigger.model.TimeExecuteConstant;
-import cn.lili.trigger.model.TimeTriggerMsg;
-import cn.lili.modules.system.utils.OperationalJudgment;
-import cn.lili.mybatis.util.PageUtil;
-import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
-import cn.lili.common.properties.RocketmqCustomProperties;
-import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
-import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.Receipt;
-import cn.lili.modules.order.order.entity.dto.*;
+import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
+import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
+import cn.lili.modules.order.order.entity.dto.OrderMessage;
+import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.enums.*;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
@@ -56,9 +44,21 @@ import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.service.PintuanService;
 import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.util.StatisticsDateUtil;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.entity.dos.Logistics;
 import cn.lili.modules.system.entity.vo.Traces;
 import cn.lili.modules.system.service.LogisticsService;
+import cn.lili.modules.system.utils.OperationalJudgment;
+import cn.lili.mybatis.util.PageUtil;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
+import cn.lili.rocketmq.tags.MqOrderTagsEnum;
+import cn.lili.trigger.enums.DelayTypeEnums;
+import cn.lili.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.message.PintuanOrderMessage;
+import cn.lili.trigger.model.TimeExecuteConstant;
+import cn.lili.trigger.model.TimeTriggerMsg;
+import cn.lili.trigger.util.DelayQueueTools;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -77,7 +77,9 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 子订单业务层实现
@@ -185,8 +187,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderItemService.saveBatch(orderItems);
         //批量记录订单操作日志
         orderLogService.saveBatch(orderLogs);
-        //赠品根据店铺单独生成订单
-        this.generatorGiftOrder(tradeDTO);
     }
 
     @Override
@@ -733,79 +733,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
     }
 
-    /**
-     * 生成赠品订单
-     *
-     * @param tradeDTO 生成订单所需参数
-     */
-    private void generatorGiftOrder(TradeDTO tradeDTO) {
-        List<Order> orders = new ArrayList<>(tradeDTO.getCartList().size());
-        List<OrderItem> orderItems = new ArrayList<>();
-        List<OrderLog> orderLogs = new ArrayList<>();
-        for (CartVO cartVO : tradeDTO.getCartList()) {
-            if (cartVO.getGiftList() != null && !cartVO.getGiftList().isEmpty()) {
-                Order order = new Order();
-                PriceDetailDTO priceDetailDTO = new PriceDetailDTO();
-                BeanUtil.copyProperties(cartVO, order, "id");
-                BeanUtil.copyProperties(priceDetailDTO, order, "id");
-                order.setSn(SnowFlake.createStr("G"));
-                order.setTradeSn(tradeDTO.getSn());
-                order.setOrderType(OrderPromotionTypeEnum.GIFT.name());
-                order.setOrderStatus(OrderStatusEnum.UNPAID.name());
-                order.setPayStatus(PayStatusEnum.UNPAID.name());
-                order.setDeliverStatus(DeliverStatusEnum.UNDELIVERED.name());
-                order.setMemberId(tradeDTO.getMemberId());
-                order.setMemberName(tradeDTO.getMemberName());
-                order.setNeedReceipt(false);
-                order.setPriceDetailDTO(priceDetailDTO);
-                order.setClientType(tradeDTO.getClientType());
-
-                if (tradeDTO.getMemberAddress() != null) {
-                    order.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());
-                    order.setConsigneeAddressPath(tradeDTO.getMemberAddress().getConsigneeAddressPath());
-                    order.setConsigneeDetail(tradeDTO.getMemberAddress().getDetail());
-                    order.setConsigneeMobile(tradeDTO.getMemberAddress().getMobile());
-                    order.setConsigneeName(tradeDTO.getMemberAddress().getName());
-                }
-                orders.add(order);
-                String message = "赠品订单[" + order.getSn() + "]创建";
-                orderLogs.add(new OrderLog(order.getSn(), UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), message));
-                for (String giftGoodsId : cartVO.getGiftList()) {
-                    GoodsSku goodsSkuByIdFromCache = goodsSkuService.getGoodsSkuByIdFromCache(giftGoodsId);
-                    OrderItem orderItem = new OrderItem();
-                    BeanUtil.copyProperties(goodsSkuByIdFromCache, orderItem, "id");
-                    BeanUtil.copyProperties(priceDetailDTO, orderItem, "id");
-                    orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.NEW.name());
-                    orderItem.setCommentStatus(CommentStatusEnum.NEW.name());
-                    orderItem.setComplainStatus(OrderComplaintStatusEnum.NEW.name());
-                    orderItem.setNum(cartVO.getGoodsNum());
-                    orderItem.setOrderSn(order.getSn());
-                    orderItem.setTradeSn(tradeDTO.getSn());
-                    orderItem.setImage(goodsSkuByIdFromCache.getThumbnail());
-                    orderItem.setGoodsName(goodsSkuByIdFromCache.getGoodsName());
-                    orderItem.setSkuId(goodsSkuByIdFromCache.getId());
-                    orderItem.setCategoryId(goodsSkuByIdFromCache.getCategoryPath().substring(
-                            goodsSkuByIdFromCache.getCategoryPath().lastIndexOf(",") + 1
-                    ));
-                    orderItem.setGoodsPrice(goodsSkuByIdFromCache.getPrice());
-                    orderItem.setPriceDetailDTO(priceDetailDTO);
-                    orderItems.add(orderItem);
-                }
-            }
-        }
-        if (!orders.isEmpty()) {
-            this.saveBatch(orders);
-            orderItemService.saveBatch(orderItems);
-            orderLogService.saveBatch(orderLogs);
-            for (Order order : orders) {
-                OrderMessage orderMessage = new OrderMessage();
-                orderMessage.setOrderSn(order.getSn());
-                orderMessage.setPaymentMethod(PaymentMethodEnum.BANK_TRANSFER.name());
-                orderMessage.setNewStatus(OrderStatusEnum.PAID);
-                this.sendUpdateStatusMessage(orderMessage);
-            }
-        }
-    }
 
     /**
      * 检查交易信息

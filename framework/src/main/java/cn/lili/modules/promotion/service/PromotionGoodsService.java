@@ -123,6 +123,16 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
     Integer getPromotionGoodsStock(PromotionTypeEnum typeEnum, String promotionId, String skuId);
 
     /**
+     * 批量获取促销活动商品库存
+     *
+     * @param typeEnum    促销商品类型
+     * @param promotionId 促销活动id
+     * @param skuId       批量商品skuId
+     * @return 促销活动商品库存
+     */
+    List<Integer> getPromotionGoodsStock(PromotionTypeEnum typeEnum, String promotionId, List<String> skuId);
+
+    /**
      * 根据条件获取促销活动商品详情
      *
      * @param typeEnum    促销类型
@@ -131,6 +141,16 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
      * @return 促销活动商品详情
      */
     PromotionGoods getPromotionGoods(PromotionTypeEnum typeEnum, String promotionId, String skuId);
+
+    /**
+     * 批量获取促销商品信息
+     *
+     * @param typeEnum    促销类型
+     * @param promotionId 促销活动id
+     * @param skuId       商品skuId
+     * @return 促销活动商品详情
+     */
+    List<PromotionGoods> getPromotionGoods(PromotionTypeEnum typeEnum, String promotionId, List<String> skuId);
 
     /**
      * 更新促销活动商品库存

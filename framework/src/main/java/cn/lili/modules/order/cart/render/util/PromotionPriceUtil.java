@@ -2,16 +2,9 @@ package cn.lili.modules.order.cart.render.util;
 
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
-import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
-import cn.lili.modules.promotion.service.PointsGoodsService;
-import cn.lili.modules.promotion.service.PromotionGoodsService;
-import cn.lili.modules.promotion.service.SeckillApplyService;
-import cn.lili.modules.search.service.EsGoodsSearchService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -27,38 +20,6 @@ import java.util.Map;
 @Service
 @Slf4j
 public class PromotionPriceUtil {
-
-    /**
-     * ES商品
-     */
-    @Autowired
-    private EsGoodsSearchService goodsSearchService;
-    /**
-     * 秒杀活动申请
-     */
-    @Autowired
-    private SeckillApplyService seckillApplyService;
-    /**
-     * 促销商品
-     */
-    @Autowired
-    private PromotionGoodsService promotionGoodsService;
-    /**
-     * 规格商品
-     */
-    @Autowired
-    private GoodsSkuService goodsSkuService;
-    /**
-     * 积分商品
-     */
-    @Autowired
-    private PointsGoodsService pointsGoodsService;
-    /**
-     * 积分商品
-     */
-    @Autowired
-    private KanjiaActivityGoodsService kanjiaActivityGoodsService;
-
 
     /**
      * 重新计算购物车价格
@@ -158,67 +119,6 @@ public class PromotionPriceUtil {
 
 
     }
-
-
-//    /**
-//     * 计算积分商品
-//     * 积分商品的购买金额是：0
-//     * 1.根据SkuId去查询积分商品（Mongo）
-//     * 2.计算积分商品的优惠信息
-//     *
-//     * @param tradeSkuList 交易商品促销金额列表
-//     * @return 计算结果
-//     */
-//    private List<GoodsSkuPromotionPriceDTO> pointGoodsPromotion(List<PromotionPriceParamDTO> tradeSkuList) {
-//        List<GoodsSkuPromotionPriceDTO> priceDTOList = new ArrayList<>();
-//        //获取积分商品SkuId
-//        String skuId = tradeSkuList.get(0).getSkuId();
-//        //获取积分商品VO
-//        PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsVOByMongo(skuId);
-//        //参与计算的缓存中的商品SKU列表
-//        GoodsSku goodsSku = pointsGoodsVO.getGoodsSku();
-//        //获取商品促销金额
-//        GoodsSkuPromotionPriceDTO goodsSkuPromotionPrice = new GoodsSkuPromotionPriceDTO(goodsSku, tradeSkuList.get(0).getNum());
-//        //计算商品原价=原价*数量
-//        goodsSkuPromotionPrice.setTotalOriginalPrice(CurrencyUtil.mul(goodsSkuPromotionPrice.getOriginalPrice(), goodsSkuPromotionPrice.getNumber()));
-//        //计算商品积分数量=兑换积分*数量
-//        goodsSkuPromotionPrice.setTotalPoints(pointsGoodsVO.getPoints() * Convert.toLong(goodsSkuPromotionPrice.getNumber()));
-//        //优惠金额=商品原价*数量
-//        goodsSkuPromotionPrice.setTotalDiscountPrice(CurrencyUtil.mul(goodsSkuPromotionPrice.getOriginalPrice(), goodsSkuPromotionPrice.getNumber()));
-//        //购买价格=积分商品价格为 0
-//        goodsSkuPromotionPrice.setTotalFinalePrice(0.0);
-//        priceDTOList.add(goodsSkuPromotionPrice);
-//        return priceDTOList;
-//    }
-//
-//    /**
-//     * 计算砍价商品
-//     * 砍价商品只能购买一件
-//     * 1.根据SkuId去查询积分商品（Mongo）
-//     * 2.计算积分商品的优惠信息
-//     *
-//     * @param tradeSkuList 交易商品促销金额列表
-//     * @return 计算结果
-//     */
-//    private List<GoodsSkuPromotionPriceDTO> kanjiaPromotion(List<PromotionPriceParamDTO> tradeSkuList) {
-//        List<GoodsSkuPromotionPriceDTO> priceDTOList = new ArrayList<>();
-//        //获取积分商品SkuId
-//        String skuId = tradeSkuList.get(0).getSkuId();
-//        //获取积分商品VO
-//        KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO = kanjiaActivityGoodsService.getKanJiaGoodsBySku(skuId);
-//
-//        //参与计算的缓存中的商品SKU列表
-//        GoodsSku goodsSku = kanjiaActivityGoodsDTO.getGoodsSku();
-//        GoodsSkuPromotionPriceDTO goodsSkuPromotionPrice = new GoodsSkuPromotionPriceDTO(goodsSku, tradeSkuList.get(0).getNum());
-//        //优惠金额=商品原价-购买价格
-//        goodsSkuPromotionPrice.setTotalDiscountPrice(CurrencyUtil.sub(goodsSkuPromotionPrice.getOriginalPrice(), kanjiaActivityGoodsDTO.getPurchasePrice()));
-//        //购买价格=砍价成交金额
-//        goodsSkuPromotionPrice.setTotalFinalePrice(kanjiaActivityGoodsDTO.getPurchasePrice());
-//        //原价
-//        goodsSkuPromotionPrice.setTotalOriginalPrice(goodsSkuPromotionPrice.getOriginalPrice());
-//        priceDTOList.add(goodsSkuPromotionPrice);
-//        return priceDTOList;
-//    }
 
 
     /**
