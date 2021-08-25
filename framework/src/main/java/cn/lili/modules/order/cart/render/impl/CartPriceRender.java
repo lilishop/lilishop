@@ -1,14 +1,11 @@
 package cn.lili.modules.order.cart.render.impl;
 
-import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
-import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
-import cn.lili.modules.promotion.service.PointsGoodsService;
-import org.springframework.beans.factory.annotation.Autowired;
+import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,9 +27,25 @@ public class CartPriceRender implements CartRenderStep {
 
     @Override
     public void render(TradeDTO tradeDTO) {
+        //价格过滤 在购物车商品失效时，需要对价格进行初始化操作
+        initPriceDTO(tradeDTO);
+
+
         //构造cartVO
-        this.buildCartPrice(tradeDTO);
-        this.buildTradePrice(tradeDTO);
+        buildCartPrice(tradeDTO);
+        buildTradePrice(tradeDTO);
+
+
+    }
+
+    /**
+     * 特殊情况下对购物车金额进行护理
+     *
+     * @param tradeDTO
+     */
+    private void initPriceDTO(TradeDTO tradeDTO) {
+        tradeDTO.getCartList().forEach(cartVO -> cartVO.setPriceDetailDTO(new PriceDetailDTO()));
+        tradeDTO.setPriceDetailDTO(new PriceDetailDTO());
     }
 
     /**
