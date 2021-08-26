@@ -154,7 +154,7 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
         order.setSn(SnowFlake.createStr("G"));
         order.setOrderType(OrderPromotionTypeEnum.GIFT.name());
         order.setOrderStatus(OrderStatusEnum.UNPAID.name());
-        order.setPayStatus(PayStatusEnum.UNPAID.name());
+        order.setPayStatus(PayStatusEnum.PAID.name());
         order.setDeliverStatus(DeliverStatusEnum.UNDELIVERED.name());
         order.setNeedReceipt(false);
         order.setPriceDetailDTO(priceDetailDTO);
