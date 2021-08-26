@@ -2,6 +2,8 @@ package cn.lili.modules.order.cart.render.impl;
 
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.utils.CurrencyUtil;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
@@ -32,6 +34,9 @@ public class FullDiscountRender implements CartRenderStep {
 
     @Autowired
     private PromotionPriceUtil promotionPriceUtil;
+
+    @Autowired
+    private GoodsSkuService goodsSkuService;
 
     @Override
     public RenderStepEnums step() {
@@ -64,6 +69,13 @@ public class FullDiscountRender implements CartRenderStep {
                 for (CartVO cart : cartList) {
                     //如果购物车中的店铺id与活动店铺id相等，则进行促销计算
                     if (fullDiscount.getStoreId().equals(cart.getStoreId())) {
+
+                        //如果有赠品，则将赠品信息写入
+                        if (fullDiscount.getIsGift()) {
+                            GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(fullDiscount.getGiftId());
+                            fullDiscount.setGiftSku(goodsSku);
+                        }
+
                         //写入满减活动
                         cart.setFullDiscount(fullDiscount);
                         Map<String, Double> skuPriceDetail;
@@ -189,7 +201,7 @@ public class FullDiscountRender implements CartRenderStep {
      */
     private boolean isFull(Double price, CartVO cart) {
         if (cart.getFullDiscount().getFullMoney() <= price) {
-            cart.setPromotionNotice("正在参与满优惠活动（" + cart.getFullDiscount().getPromotionName() + "）" + cart.getFullDiscount().notice());
+            cart.setPromotionNotice("正在参与满优惠活动[" + cart.getFullDiscount().getPromotionName() + "]" + cart.getFullDiscount().notice());
             return true;
         } else {
             cart.setPromotionNotice("还差" + CurrencyUtil.sub(cart.getFullDiscount().getFullMoney(), price) + " 即可参与活动（" + cart.getFullDiscount().getPromotionName() + "）" + cart.getFullDiscount().notice());

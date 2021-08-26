@@ -25,7 +25,6 @@ import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.mapper.PromotionGoodsMapper;
-import cn.lili.modules.promotion.service.PointsGoodsService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.mybatis.util.PageUtil;
@@ -77,18 +76,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
      */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    /**
-     * 积分商品
-     */
-    @Autowired
-    private PointsGoodsService pointsGoodsService;
 
-    @Override
-    public PromotionGoods findByPromotion(String promotionId, String skuId) {
-        LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(PromotionGoods::getPromotionId, promotionId).eq(PromotionGoods::getSkuId, skuId);
-        return new PromotionGoods();
-    }
 
     @Override
     public void removePromotionGoods(List<PromotionGoods> promotionGoodsList, PromotionTypeEnum promotionType) {
@@ -100,9 +88,52 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
 
     @Override
     public List<PromotionGoods> findNowSkuPromotion(String skuId) {
-        return this.list(new LambdaQueryWrapper<PromotionGoods>()
+
+        GoodsSku sku = goodsSkuService.getGoodsSkuByIdFromCache(skuId);
+        if (sku == null) {
+            return null;
+        }
+
+        List<PromotionGoods> promotionGoods = new ArrayList<>();
+        promotionGoods.addAll(this.list(new LambdaQueryWrapper<PromotionGoods>()
                 .eq(PromotionGoods::getSkuId, skuId)
-                .eq(PromotionGoods::getPromotionStatus, PromotionStatusEnum.START.name()));
+                .eq(PromotionGoods::getPromotionStatus, PromotionStatusEnum.START.name())));
+
+
+        //单独检查，添加适用于全品类的满优惠活动
+        Query query = new Query();
+        query.addCriteria(Criteria.where("promotionStatus").is(PromotionStatusEnum.START.name()));
+        query.addCriteria(Criteria.where("startTime").lte(new Date().getTime()));
+        List<FullDiscountVO> fullDiscountVOS = mongoTemplate.find(query, FullDiscountVO.class);
+        for (FullDiscountVO fullDiscountVO : fullDiscountVOS) {
+            if (fullDiscountVO.getPromotionGoodsList() == null &&
+                    sku.getStoreId().equals(fullDiscountVO.getStoreId())) {
+                PromotionGoods p = new PromotionGoods(sku);
+                p.setPromotionId(fullDiscountVO.getId());
+                p.setPromotionStatus(fullDiscountVO.getPromotionStatus());
+                p.setPromotionType(PromotionTypeEnum.FULL_DISCOUNT.name());
+                p.setStartTime(fullDiscountVO.getStartTime());
+                p.setEndTime(fullDiscountVO.getEndTime());
+                promotionGoods.add(p);
+            }
+        }
+        //单独检查，添加适用于全品类的全平台或属于当前店铺的优惠券活动
+        List<CouponVO> couponVOS = mongoTemplate.find(query, CouponVO.class);
+        for (CouponVO couponVO : couponVOS) {
+            boolean aLLScopeType = (couponVO.getPromotionGoodsList() == null
+                    && couponVO.getScopeType().equals(CouponScopeTypeEnum.ALL.name())
+                    && (("0").equals(couponVO.getStoreId()) || sku.getStoreId().equals(couponVO.getStoreId())));
+            if (aLLScopeType) {
+                PromotionGoods p = new PromotionGoods(sku);
+                p.setPromotionId(couponVO.getId());
+                p.setPromotionStatus(couponVO.getPromotionStatus());
+                p.setPromotionType(PromotionTypeEnum.COUPON.name());
+                p.setStartTime(couponVO.getStartTime());
+                p.setEndTime(couponVO.getEndTime());
+                promotionGoods.add(p);
+            }
+        }
+        return promotionGoods;
     }
 
     @Override
@@ -140,39 +171,6 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         for (PromotionGoods promotionGood : promotionGoods) {
             Integer goodsStock = this.getPromotionGoodsStock(PromotionTypeEnum.valueOf(promotionGood.getPromotionType()), promotionGood.getPromotionId(), promotionGood.getSkuId());
             promotionGood.setQuantity(goodsStock);
-        }
-        //单独检查，添加适用于全品类的满优惠活动
-        Query query = new Query();
-        query.addCriteria(Criteria.where("promotionStatus").is(PromotionStatusEnum.START.name()));
-        query.addCriteria(Criteria.where("startTime").lte(date));
-        List<FullDiscountVO> fullDiscountVOS = mongoTemplate.find(query, FullDiscountVO.class);
-        for (FullDiscountVO fullDiscountVO : fullDiscountVOS) {
-            if (fullDiscountVO.getPromotionGoodsList() == null &&
-                    cartSkuVO.getStoreId().equals(fullDiscountVO.getStoreId())) {
-                PromotionGoods p = new PromotionGoods(cartSkuVO.getGoodsSku());
-                p.setPromotionId(fullDiscountVO.getId());
-                p.setPromotionStatus(fullDiscountVO.getPromotionStatus());
-                p.setPromotionType(PromotionTypeEnum.FULL_DISCOUNT.name());
-                p.setStartTime(fullDiscountVO.getStartTime());
-                p.setEndTime(fullDiscountVO.getEndTime());
-                promotionGoods.add(p);
-            }
-        }
-        //单独检查，添加适用于全品类的全平台或属于当前店铺的优惠券活动
-        List<CouponVO> couponVOS = mongoTemplate.find(query, CouponVO.class);
-        for (CouponVO couponVO : couponVOS) {
-            boolean aLLScopeType = (couponVO.getPromotionGoodsList() == null
-                    && couponVO.getScopeType().equals(CouponScopeTypeEnum.ALL.name())
-                    && (("0").equals(couponVO.getStoreId()) || cartSkuVO.getStoreId().equals(couponVO.getStoreId())));
-            if (aLLScopeType) {
-                PromotionGoods p = new PromotionGoods(cartSkuVO.getGoodsSku());
-                p.setPromotionId(couponVO.getId());
-                p.setPromotionStatus(couponVO.getPromotionStatus());
-                p.setPromotionType(PromotionTypeEnum.COUPON.name());
-                p.setStartTime(couponVO.getStartTime());
-                p.setEndTime(couponVO.getEndTime());
-                promotionGoods.add(p);
-            }
         }
         cartSkuVO.setPromotions(promotionGoods);
         //下一次更新时间

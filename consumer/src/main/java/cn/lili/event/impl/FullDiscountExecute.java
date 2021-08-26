@@ -130,7 +130,7 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
         try {
             //赠品潘迪ing
             if (cartVO.getGiftList() != null && cartVO.getGiftList().size() > 0) {
-                generatorGiftOrder(cartVO.getGiftList(), cartVO, order);
+                generatorGiftOrder(cartVO.getGiftList(), order);
             }
         } catch (Exception e) {
             log.error("订单赠送赠品异常", e);
@@ -141,10 +141,9 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
      * 生成赠品订单
      *
      * @param skuIds      赠品sku信息
-     * @param cartVO      购物车信息
      * @param originOrder 赠品原订单信息
      */
-    private void generatorGiftOrder(List<String> skuIds, CartVO cartVO, Order originOrder) {
+    private void generatorGiftOrder(List<String> skuIds, Order originOrder) {
         List<OrderItem> orderItems = new ArrayList<>();
         List<OrderLog> orderLogs = new ArrayList<>();
         Order order = new Order();
