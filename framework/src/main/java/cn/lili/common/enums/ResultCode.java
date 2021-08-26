@@ -310,6 +310,7 @@ public enum ResultCode {
     /**
      * 秒杀
      */
+    SECKILL_NOT_START_ERROR(45000, "今日没有限时抢购活动，请明天再来看看吧。"),
     SECKILL_NOT_EXIST_ERROR(45001, "当前参与的秒杀活动不存在！"),
     SECKILL_UPDATE_ERROR(45002, "当前秒杀活动活动已经开始，无法修改！"),
     SECKILL_PRICE_ERROR(45003, "活动价格不能大于商品原价"),

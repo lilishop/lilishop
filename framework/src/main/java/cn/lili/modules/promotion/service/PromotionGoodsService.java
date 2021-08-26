@@ -50,13 +50,6 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
     void updatePromotion(CartSkuVO cartSkuVO);
 
     /**
-     * 获取购物车商品的促销活动
-     *
-     * @param cartSkuVO 购物车中的产品
-     */
-    void getCartSkuPromotion(CartSkuVO cartSkuVO);
-
-    /**
      * 获取某sku当日所有活动
      *
      * @param skuId 商品skuId

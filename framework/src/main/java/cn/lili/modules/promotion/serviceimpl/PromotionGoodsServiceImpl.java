@@ -148,35 +148,6 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         }
     }
 
-    /**
-     * 获取购物车商品的促销活动
-     *
-     * @param cartSkuVO 购物车中的产品
-     */
-    @Override
-    public void getCartSkuPromotion(CartSkuVO cartSkuVO) {
-
-        updatePromotion(cartSkuVO);
-
-        Date date = DateUtil.getCurrentDayEndTime();
-
-
-        LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(PromotionGoods::getSkuId, cartSkuVO.getGoodsSku().getId())
-                .eq(PromotionGoods::getPromotionStatus, PromotionStatusEnum.START.name())
-                .le(PromotionGoods::getStartTime, date);
-        //获取有效的促销活动
-        List<PromotionGoods> promotionGoods = this.list(queryWrapper);
-        //同步查询缓存中的促销活动商品的库存
-        for (PromotionGoods promotionGood : promotionGoods) {
-            Integer goodsStock = this.getPromotionGoodsStock(PromotionTypeEnum.valueOf(promotionGood.getPromotionType()), promotionGood.getPromotionId(), promotionGood.getSkuId());
-            promotionGood.setQuantity(goodsStock);
-        }
-        cartSkuVO.setPromotions(promotionGoods);
-        //下一次更新时间
-        cartSkuVO.setUpdatePromotionTime(date);
-    }
-
     @Override
     public List<PromotionGoods> getPromotionGoods(String skuId) {
         long currTime = DateUtil.getDateline();

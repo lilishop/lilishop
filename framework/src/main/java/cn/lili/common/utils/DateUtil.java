@@ -36,6 +36,7 @@ public class DateUtil {
 
     /**
      * 当天的开始时间
+     *
      * @param date 时间
      * @return 根据传入的时间获取开始时间
      */
@@ -79,6 +80,7 @@ public class DateUtil {
 
     /**
      * 当天的结束时间
+     *
      * @param date 传入日期
      * @return 获得传入日期当天结束时间
      */
