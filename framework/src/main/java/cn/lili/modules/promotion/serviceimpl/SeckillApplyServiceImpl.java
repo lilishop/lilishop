@@ -303,9 +303,8 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
                         long currentTime = cn.lili.common.utils.DateUtil.getDateline();
                         //秒杀活动的时刻
                         long timeLine = cn.lili.common.utils.DateUtil.getDateline(date + " " + hoursSored[i], "yyyy-MM-dd HH");
-                        if ((i + 1) < hoursSored.length && hour > hoursSored[i] && hour <= hoursSored[i + 1]) {
-                            timeLine = cn.lili.common.utils.DateUtil.getDateline(date + " " + hoursSored[i + 1], "yyyy-MM-dd HH");
-                        }
+
+
                         Long distanceTime = timeLine - currentTime < 0 ? 0 : timeLine - currentTime;
                         tempTimeline.setDistanceStartTime(distanceTime);
                         tempTimeline.setStartTime(timeLine);
