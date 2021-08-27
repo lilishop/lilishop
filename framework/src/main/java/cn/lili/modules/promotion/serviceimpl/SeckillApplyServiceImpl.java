@@ -101,7 +101,11 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
                 timelineVoS.add(seckillTimelineVO);
             }
         }
-        return timelineVoS;
+        if (timelineVoS.size() > 0) {
+            return timelineVoS;
+        } else {
+            throw new ServiceException(ResultCode.SECKILL_NOT_START_ERROR);
+        }
     }
 
     @Override
