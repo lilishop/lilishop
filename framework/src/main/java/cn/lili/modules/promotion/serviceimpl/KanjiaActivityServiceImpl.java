@@ -73,20 +73,18 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
         BeanUtil.copyProperties(kanjiaActivity, kanjiaActivityVO);
 
         //判断是否发起了砍价活动,如果发起可参与活动
-        if (kanjiaActivity != null) {
-            kanjiaActivityVO.setLaunch(true);
-            //如果已发起砍价判断用户是否可以砍价
-            KanjiaActivityLog kanjiaActivityLog = kanjiaActivityLogService.getOne(new LambdaQueryWrapper<KanjiaActivityLog>()
-                    .eq(KanjiaActivityLog::getKanjiaActivityId, kanjiaActivity.getId())
-                    .eq(KanjiaActivityLog::getKanjiaMemberId, UserContext.getCurrentUser().getId()));
-            if (kanjiaActivityLog == null) {
-                kanjiaActivityVO.setHelp(true);
-            }
-            //判断活动已通过并且是当前用户发起的砍价则可以进行购买
-            if (kanjiaActivity.getStatus().equals(KanJiaStatusEnum.SUCCESS.name()) &&
-                    kanjiaActivity.getMemberId().equals(UserContext.getCurrentUser().getId())) {
-                kanjiaActivityVO.setPass(true);
-            }
+        kanjiaActivityVO.setLaunch(true);
+        //如果已发起砍价判断用户是否可以砍价
+        KanjiaActivityLog kanjiaActivityLog = kanjiaActivityLogService.getOne(new LambdaQueryWrapper<KanjiaActivityLog>()
+                .eq(KanjiaActivityLog::getKanjiaActivityId, kanjiaActivity.getId())
+                .eq(KanjiaActivityLog::getKanjiaMemberId, UserContext.getCurrentUser().getId()));
+        if (kanjiaActivityLog == null) {
+            kanjiaActivityVO.setHelp(true);
+        }
+        //判断活动已通过并且是当前用户发起的砍价则可以进行购买
+        if (kanjiaActivity.getStatus().equals(KanJiaStatusEnum.SUCCESS.name()) &&
+                kanjiaActivity.getMemberId().equals(UserContext.getCurrentUser().getId())) {
+            kanjiaActivityVO.setPass(true);
         }
         return kanjiaActivityVO;
     }
