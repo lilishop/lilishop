@@ -725,7 +725,7 @@ public class CartServiceImpl implements CartService {
             throw new ServiceException(ResultCode.KANJIA_ACTIVITY_NOT_FOUND_ERROR);
             //判断砍价活动是否已满足条件
         } else if (!KanJiaStatusEnum.SUCCESS.name().equals(kanjiaActivity.getStatus())) {
-            cartSkuVO.setKanjiaId(kanjiaActivity.getKanjiaActivityGoodsId());
+            cartSkuVO.setKanjiaId(kanjiaActivity.getId());
             cartSkuVO.setPurchasePrice(0D);
             throw new ServiceException(ResultCode.KANJIA_ACTIVITY_NOT_PASS_ERROR);
         }

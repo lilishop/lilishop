@@ -2,6 +2,7 @@ package cn.lili.event.impl;
 
 import cn.hutool.core.convert.Convert;
 import cn.lili.cache.Cache;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
@@ -10,11 +11,17 @@ import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.promotion.entity.dos.KanjiaActivity;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
+import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
+import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
+import cn.lili.modules.promotion.service.KanjiaActivityService;
+import cn.lili.modules.promotion.service.PointsGoodsService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -63,6 +70,14 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
      */
     @Autowired
     private Cache cache;
+    @Autowired
+    private KanjiaActivityService kanjiaActivityService;
+    @Autowired
+    private KanjiaActivityGoodsService kanjiaActivityGoodsService;
+    @Autowired
+    private PointsGoodsService pointsGoodsService;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Override
     public void orderChange(OrderMessage orderMessage) {
@@ -160,12 +175,13 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
 
     /**
      * 同步库存和促销库存
-     *
+     * <p>
      * 需修改：DB：商品库存、Sku商品库存、活动商品库存
      * 1.获取需要修改的Sku列表、活动商品列表
      * 2.写入sku商品库存，批量修改
      * 3.写入促销商品的卖出数量、剩余数量,批量修改
      * 4.调用方法修改商品库存
+     *
      * @param order 订单
      */
     private void synchroDB(OrderDetailVO order) {
@@ -186,10 +202,25 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
             goodsSku.setId(orderItem.getSkuId());
             goodsSku.setGoodsId(orderItem.getGoodsId());
             //如果有促销信息
-            if (null != orderItem.getPromotionType() && null != orderItem.getPromotionId()) {
+            if (null != orderItem.getPromotionType() && null != orderItem.getPromotionId() && PromotionTypeEnum.haveStock(orderItem.getPromotionType())) {
                 //如果促销有库存信息
-                if (PromotionTypeEnum.haveStock(orderItem.getPromotionType())) {
-                    PromotionTypeEnum promotionTypeEnum = PromotionTypeEnum.valueOf(orderItem.getPromotionType());
+                PromotionTypeEnum promotionTypeEnum = PromotionTypeEnum.valueOf(orderItem.getPromotionType());
+                List promotionStocks = cache.multiGet(promotionKey);
+                //修改砍价商品库存
+                if (promotionTypeEnum.equals(PromotionTypeEnum.KANJIA)) {
+                    KanjiaActivity kanjiaActivity=kanjiaActivityService.getById(orderItem.getPromotionId());
+                    KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO=kanjiaActivityGoodsService.getKanjiaGoodsDetail(kanjiaActivity.getKanjiaActivityGoodsId());
+                    kanjiaActivityGoodsDTO.setStock(Convert.toInt(promotionStocks.get(0).toString()));
+                    kanjiaActivityGoodsService.updateById(kanjiaActivityGoodsDTO);
+                    this.mongoTemplate.save(kanjiaActivityGoodsDTO);
+                    orderItem.getPromotionId();
+                //修改积分商品库存
+                } else if (promotionTypeEnum.equals(PromotionTypeEnum.POINTS_GOODS)) {
+                    PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsDetail(orderItem.getPromotionId());
+                    pointsGoodsVO.setActiveStock(Convert.toLong(promotionStocks.get(0).toString()));
+                    pointsGoodsService.updateById(pointsGoodsVO);
+                    this.mongoTemplate.save(pointsGoodsVO);
+                } else {
                     PromotionGoods pGoods = promotionGoodsService.getPromotionGoods(promotionTypeEnum, orderItem.getPromotionId(), orderItem.getSkuId());
                     //记录需要更新的促销库存信息
                     promotionKey.add(
