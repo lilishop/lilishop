@@ -730,6 +730,7 @@ public class CartServiceImpl implements CartService {
             throw new ServiceException(ResultCode.KANJIA_ACTIVITY_NOT_PASS_ERROR);
         }
         //砍价商品默认一件货物
+        cartSkuVO.setKanjiaId(kanjiaActivity.getId());
         cartSkuVO.setNum(1);
     }
 
@@ -745,6 +746,7 @@ public class CartServiceImpl implements CartService {
         if (pointsGoodsVO != null) {
             cartSkuVO.setPoint(pointsGoodsVO.getPoints());
             cartSkuVO.setPurchasePrice(0D);
+            cartSkuVO.setPointsId(pointsGoodsVO.getId());
         }
     }
 }

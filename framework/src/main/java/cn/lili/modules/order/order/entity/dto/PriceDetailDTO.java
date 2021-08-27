@@ -2,7 +2,7 @@ package cn.lili.modules.order.order.entity.dto;
 
 
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.modules.promotion.entity.dto.BasePromotion;
+import cn.lili.modules.promotion.entity.vos.PromotionSkuVO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -95,7 +95,7 @@ public class PriceDetailDTO implements Serializable {
      * 参与的促销活动
      */
     @ApiModelProperty(value = "参与的促销活动")
-    private List<BasePromotion> joinPromotion;
+    private List<PromotionSkuVO> joinPromotion;
 
 
     public Double getOriginalPrice() {

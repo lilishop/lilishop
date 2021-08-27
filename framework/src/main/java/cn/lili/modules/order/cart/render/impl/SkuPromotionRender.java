@@ -1,5 +1,6 @@
 package cn.lili.modules.order.cart.render.impl;
 
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -9,6 +10,7 @@ import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
+import cn.lili.modules.promotion.entity.vos.PromotionSkuVO;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivitySearchParams;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityVO;
 import cn.lili.modules.promotion.service.KanjiaActivityService;
@@ -76,16 +78,18 @@ public class SkuPromotionRender implements CartRenderStep {
 
 
         switch (tradeDTO.getCartTypeEnum()) {
+
+            //这里是双重循环，但是实际积分购买或者是砍价购买时，购物车只有一个商品，所以没有循环操作数据库或者其他的问题
             case POINTS:
                 //处理积分商品购买
                 for (CartVO cartVO : tradeDTO.getCartList()) {
                     for (CartSkuVO cartSkuVO : cartVO.getSkuList()) {
                         cartSkuVO.getPriceDetailDTO().setPayPoint(cartSkuVO.getPoint());
+                        PromotionSkuVO promotionSkuVO = new PromotionSkuVO(PromotionTypeEnum.PINTUAN.name(), cartSkuVO.getPointsId());
+                        cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
                     }
                 }
                 return;
-
-
             case KANJIA:
                 for (CartVO cartVO : tradeDTO.getCartList()) {
                     for (CartSkuVO cartSkuVO : cartVO.getSkuList()) {
@@ -101,11 +105,20 @@ public class SkuPromotionRender implements CartRenderStep {
                             cartSkuVO.setSubTotal(kanjiaActivityVO.getPurchasePrice());
                             cartSkuVO.getPriceDetailDTO().setGoodsPrice(kanjiaActivityVO.getPurchasePrice());
                         }
+
+                        PromotionSkuVO promotionSkuVO = new PromotionSkuVO(PromotionTypeEnum.KANJIA.name(), cartSkuVO.getKanjiaId());
+                        cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
                     }
                 }
                 return;
-
             case PINTUAN:
+                for (CartVO cartVO : tradeDTO.getCartList()) {
+                    for (CartSkuVO cartSkuVO : cartVO.getSkuList()) {
+                        PromotionSkuVO promotionSkuVO = new PromotionSkuVO(PromotionTypeEnum.PINTUAN.name(), cartSkuVO.getPintuanId());
+                        cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
+                    }
+                }
+                return;
             case CART:
             case BUY_NOW:
             case VIRTUAL:
