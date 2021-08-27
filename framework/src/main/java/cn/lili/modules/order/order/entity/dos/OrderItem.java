@@ -2,17 +2,17 @@ package cn.lili.modules.order.order.entity.dos;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.SnowFlake;
+import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
+import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
-import cn.lili.modules.promotion.entity.dto.BasePromotion;
-import cn.lili.modules.order.cart.entity.dto.TradeDTO;
-import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
-import cn.lili.modules.order.cart.entity.vo.CartVO;
+import cn.lili.modules.promotion.entity.vos.PromotionSkuVO;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -126,8 +126,8 @@ public class OrderItem extends BaseEntity {
         BeanUtil.copyProperties(cartSkuVO, this);
         this.setId(oldId);
         if (cartSkuVO.getPriceDetailDTO().getJoinPromotion() != null && !cartSkuVO.getPriceDetailDTO().getJoinPromotion().isEmpty()) {
-            this.setPromotionType(CollUtil.join(cartSkuVO.getPriceDetailDTO().getJoinPromotion().stream().map(BasePromotion::getPromotionName).collect(Collectors.toList()), ","));
-            this.setPromotionId(CollUtil.join(cartSkuVO.getPriceDetailDTO().getJoinPromotion().stream().map(BasePromotion::getId).collect(Collectors.toList()), ","));
+            this.setPromotionType(CollUtil.join(cartSkuVO.getPriceDetailDTO().getJoinPromotion().stream().map(PromotionSkuVO::getPromotionType).collect(Collectors.toList()), ","));
+            this.setPromotionId(CollUtil.join(cartSkuVO.getPriceDetailDTO().getJoinPromotion().stream().map(PromotionSkuVO::getActivityId).collect(Collectors.toList()), ","));
         }
         this.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.NEW.name());
         this.setCommentStatus(CommentStatusEnum.NEW.name());

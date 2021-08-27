@@ -57,9 +57,6 @@ public class CartSkuVO extends CartBase implements Serializable {
     @ApiModelProperty(value = "是否免运费")
     private Boolean isFreeFreight;
 
-    @ApiModelProperty(value = "积分购买 积分数量")
-    private Long point;
-
     @ApiModelProperty(value = "是否失效 ")
     private Boolean invalid;
 
@@ -78,6 +75,9 @@ public class CartSkuVO extends CartBase implements Serializable {
 
     @ApiModelProperty(value = "积分兑换ID")
     private String pointsId;
+
+    @ApiModelProperty(value = "积分购买 积分数量")
+    private Long point;
 
     @ApiModelProperty(value = "可参与的单品活动")
     private List<PromotionGoods> promotions;

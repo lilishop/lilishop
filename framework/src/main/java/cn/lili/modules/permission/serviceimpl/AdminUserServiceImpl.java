@@ -226,7 +226,6 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
         QueryWrapper<UserRole> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("user_id", ids);
         userRoleService.remove(queryWrapper);
-
     }
 
     /**
@@ -236,6 +235,11 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
      * @param roles  角色id集合
      */
     private void updateRole(String userId, List<String> roles) {
+
+        QueryWrapper queryWrapper = new QueryWrapper();
+        queryWrapper.eq("user_id", userId);
+        userRoleService.remove(queryWrapper);
+
         if (roles.isEmpty() || roles == null) {
             return;
         }
