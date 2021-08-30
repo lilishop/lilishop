@@ -2,7 +2,7 @@ package cn.lili.modules.distribution.entity.dos;
 
 import cn.lili.modules.distribution.entity.enums.DistributionOrderStatusEnum;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -27,7 +27,7 @@ import java.util.Date;
 @ApiModel(value = "分销订单")
 @TableName("li_distribution_order")
 @NoArgsConstructor
-public class DistributionOrder extends IdEntity {
+public class DistributionOrder extends BaseIdEntity {
 
     private static final long serialVersionUID = 501799944909496507L;
 

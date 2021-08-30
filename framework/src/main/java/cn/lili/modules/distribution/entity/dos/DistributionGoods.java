@@ -3,7 +3,7 @@ package cn.lili.modules.distribution.entity.dos;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -32,7 +32,7 @@ import java.util.Map;
 @ApiModel(value = "分销商品")
 @TableName("li_distribution_goods")
 @NoArgsConstructor
-public class DistributionGoods extends IdEntity {
+public class DistributionGoods extends BaseIdEntity {
 
     private static final long serialVersionUID = 1L;
 

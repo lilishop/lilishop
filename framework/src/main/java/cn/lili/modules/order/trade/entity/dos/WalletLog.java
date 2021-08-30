@@ -1,9 +1,8 @@
 package cn.lili.modules.order.trade.entity.dos;
 
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -26,7 +25,7 @@ import java.util.Date;
 @TableName("li_wallet_log")
 @ApiModel(value = "钱包变动日志")
 @NoArgsConstructor
-public class WalletLog extends IdEntity {
+public class WalletLog extends BaseIdEntity {
 
     private static final long serialVersionUID = -1599270544927161096L;
 

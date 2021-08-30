@@ -1,8 +1,6 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.mybatis.IdEntity;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -20,7 +18,7 @@ import lombok.NoArgsConstructor;
 @ApiModel(value = "直播商品")
 @TableName("li_studio_commodity")
 @NoArgsConstructor
-public class StudioCommodity extends IdEntity {
+public class StudioCommodity extends BaseIdEntity {
 
     @ApiModelProperty(value = "房间ID")
     private Integer roomId;

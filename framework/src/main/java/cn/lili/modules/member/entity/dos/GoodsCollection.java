@@ -1,9 +1,8 @@
 package cn.lili.modules.member.entity.dos;
 
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -25,7 +24,7 @@ import java.util.Date;
 @NoArgsConstructor
 @ApiModel(value = "会员商品收藏")
 @TableName("li_goods_collection")
-public class GoodsCollection extends IdEntity {
+public class GoodsCollection extends BaseIdEntity {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")

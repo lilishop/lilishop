@@ -1,9 +1,8 @@
 package cn.lili.modules.connect.entity;
 
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -14,7 +13,6 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -24,7 +22,7 @@ import java.util.Date;
 @TableName("li_connect")
 @ApiModel(value = "联合登陆")
 @NoArgsConstructor
-public class Connect extends IdEntity {
+public class Connect extends BaseIdEntity {
 
     private static final long serialVersionUID = 1L;
 

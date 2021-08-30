@@ -1,10 +1,9 @@
 package cn.lili.modules.message.entity.dos;
 
 import cn.lili.modules.message.entity.enums.MessageStatusEnum;
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -25,7 +24,7 @@ import java.util.Date;
 @Data
 @TableName("li_store_message")
 @ApiModel(value = "店铺消息")
-public class StoreMessage extends IdEntity {
+public class StoreMessage extends BaseIdEntity {
 
     private static final long serialVersionUID = 1L;
 

@@ -6,7 +6,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.lili.common.validation.Mobile;
 import cn.lili.common.validation.Phone;
 import cn.lili.modules.store.entity.dto.AdminStoreApplyDTO;
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -31,7 +31,7 @@ import java.util.Date;
 @TableName("li_store_detail")
 @ApiModel(value = "店铺详细")
 @NoArgsConstructor
-public class StoreDetail extends IdEntity {
+public class StoreDetail extends BaseIdEntity {
 
     private static final long serialVersionUID = 4949782642253898816L;
 

@@ -1,6 +1,6 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @TableName("li_parameters")
 @ApiModel(value = "商品参数")
-public class Parameters extends IdEntity {
+public class Parameters extends BaseIdEntity {
 
 
 

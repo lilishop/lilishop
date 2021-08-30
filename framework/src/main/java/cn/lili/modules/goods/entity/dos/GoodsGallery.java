@@ -1,16 +1,13 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedBy;
-
-import java.io.Serializable;
 
 /**
  * 商品相册
@@ -21,7 +18,7 @@ import java.io.Serializable;
 @Data
 @TableName("li_goods_gallery")
 @ApiModel(value = "商品相册")
-public class GoodsGallery extends IdEntity {
+public class GoodsGallery extends BaseIdEntity {
 
 
     @CreatedBy

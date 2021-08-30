@@ -1,8 +1,6 @@
 package cn.lili.modules.statistics.model.dos;
 
-import cn.lili.mybatis.IdEntity;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -19,7 +17,7 @@ import java.util.Date;
 @Data
 @TableName("li_s_platform_view_data")
 @ApiModel(value = "平台pv统计")
-public class PlatformViewData extends IdEntity {
+public class PlatformViewData extends BaseIdEntity {
 
 
     @ApiModelProperty(value = "pv数量")

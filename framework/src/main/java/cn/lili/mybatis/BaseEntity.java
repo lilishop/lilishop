@@ -27,7 +27,7 @@ import java.util.Date;
  * @since 2020/8/20 14:34
  */
 @Data
-@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler", "fieldHandler"})
+@JsonIgnoreProperties(value = { "handler", "fieldHandler"})
 @AllArgsConstructor
 @NoArgsConstructor
 public abstract class BaseEntity implements Serializable {

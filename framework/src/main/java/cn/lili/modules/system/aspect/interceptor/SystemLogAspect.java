@@ -43,8 +43,10 @@ public class SystemLogAspect {
 
     @Autowired
     private SystemLogService systemLogService;
+
     @Autowired
     private HttpServletRequest request;
+
     @Autowired
     private IpHelper ipHelper;
 
@@ -118,6 +120,8 @@ public class SystemLogAspect {
             //调用线程保存
             ThreadPoolUtil.getPool().execute(new SaveSystemLogThread(systemLogVO, systemLogService));
 
+
+            BEGIN_TIME_THREAD_LOCAL.remove();
         } catch (Exception e) {
             log.error("系统日志保存异常", e);
         }

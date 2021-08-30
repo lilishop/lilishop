@@ -1,10 +1,9 @@
 package cn.lili.modules.order.trade.entity.dos;
 
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -30,7 +29,7 @@ import java.util.Date;
 @ApiModel(value = "预存款充值记录")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Recharge extends IdEntity {
+public class Recharge extends BaseIdEntity {
 
     private static final long serialVersionUID = -1529240544327161096L;
 

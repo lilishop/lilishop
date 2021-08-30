@@ -1,10 +1,9 @@
 package cn.lili.modules.order.trade.entity.dos;
 
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -27,7 +26,7 @@ import java.util.Date;
 @TableName("li_after_sale_log")
 @ApiModel(value = "售后日志")
 @NoArgsConstructor
-public class AfterSaleLog extends IdEntity {
+public class AfterSaleLog extends BaseIdEntity {
 
     @CreatedBy
     @TableField(fill = FieldFill.INSERT)

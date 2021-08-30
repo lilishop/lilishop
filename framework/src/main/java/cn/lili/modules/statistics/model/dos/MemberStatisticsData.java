@@ -1,6 +1,6 @@
 package cn.lili.modules.statistics.model.dos;
 
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -18,7 +18,7 @@ import java.util.Date;
 @Data
 @TableName("li_member_statistics_data")
 @ApiModel(value = "会员统计")
-public class MemberStatisticsData extends IdEntity {
+public class MemberStatisticsData extends BaseIdEntity {
 
     private static final long serialVersionUID = 1L;
 

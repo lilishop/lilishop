@@ -63,7 +63,7 @@ public class ConnectBuyerWebController {
     @ApiOperation(value = "信任登录统一回调地址", hidden = true)
     @GetMapping("/callback/{type}")
     public void callBack(@PathVariable String type, AuthCallback callback, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
-        connectUtil.callback(type, callback,httpServletRequest, httpServletResponse);
+        connectUtil.callback(type, callback, httpServletRequest, httpServletResponse);
     }
 
     @ApiOperation(value = "信任登录响应结果获取")
@@ -90,11 +90,11 @@ public class ConnectBuyerWebController {
             @ApiImplicitParam(name = "uniAccessToken", value = "联合登陆返回的accessToken", required = true, paramType = "query")
     })
     @GetMapping("/app/login")
-    public ResultMessage<Token> unionIDLogin(ConnectAuthUser authUser, @RequestHeader("uuid") String uuid) {
+    public ResultMessage<Token> unionLogin(ConnectAuthUser authUser, @RequestHeader("uuid") String uuid) {
         try {
             return ResultUtil.data(connectService.appLoginCallback(authUser, uuid));
         } catch (Exception e) {
-            log.error("unionID登录错误",e);
+            log.error("unionID登录错误", e);
         }
         return null;
     }

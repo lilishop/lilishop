@@ -25,9 +25,9 @@ import com.xkcoding.http.support.HttpHeader;
  * @author yadong.zhang (yadong.zhang0415(a)gmail.com)
  * @since 1.0.0
  */
-public class AuthWeiboRequest extends AuthDefaultRequest {
+public class BaseAuthWeiboRequest extends BaseAuthRequest {
 
-    public AuthWeiboRequest(AuthConfig config, Cache cache) {
+    public BaseAuthWeiboRequest(AuthConfig config, Cache cache) {
         super(config, ConnectAuthEnum.WEIBO, cache);
     }
 

@@ -1,9 +1,8 @@
 package cn.lili.modules.message.entity.dos;
 
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -24,7 +23,7 @@ import java.util.Date;
 @Data
 @TableName("li_sms_reach")
 @ApiModel(value = "短信任务")
-public class SmsReach extends IdEntity {
+public class SmsReach extends BaseIdEntity {
 
     @ApiModelProperty(value = "签名名称", required = true)
     private String signName;

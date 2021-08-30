@@ -1,6 +1,6 @@
 package cn.lili.modules.member.entity.dos;
 
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -23,7 +23,7 @@ import java.util.Date;
 @Data
 @TableName("li_member_receipt")
 @ApiModel(value = "会员发票")
-public class MemberReceipt extends IdEntity {
+public class MemberReceipt extends BaseIdEntity {
 
     private static final long serialVersionUID = -8210927482915675995L;
 

@@ -103,7 +103,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         //单独检查，添加适用于全品类的满优惠活动
         Query query = new Query();
         query.addCriteria(Criteria.where("promotionStatus").is(PromotionStatusEnum.START.name()));
-        query.addCriteria(Criteria.where("startTime").lte(new Date().getTime()));
+        query.addCriteria(Criteria.where("startTime").lte(System.currentTimeMillis()));
         List<FullDiscountVO> fullDiscountVOS = mongoTemplate.find(query, FullDiscountVO.class);
         for (FullDiscountVO fullDiscountVO : fullDiscountVOS) {
             if (fullDiscountVO.getPromotionGoodsList() == null &&

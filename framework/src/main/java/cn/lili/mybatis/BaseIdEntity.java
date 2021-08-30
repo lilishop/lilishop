@@ -19,10 +19,10 @@ import java.io.Serializable;
  * @since 2020/8/20 14:34
  */
 @Data
-@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler", "fieldHandler"})
+@JsonIgnoreProperties(value = {"handler", "fieldHandler"})
 @AllArgsConstructor
 @NoArgsConstructor
-public abstract class IdEntity implements Serializable {
+public abstract class BaseIdEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

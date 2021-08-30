@@ -1,6 +1,6 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -26,7 +26,7 @@ import java.util.Date;
 @TableName("li_category_brand")
 @ApiModel(value = "商品分类品牌关联")
 @NoArgsConstructor
-public class CategoryBrand extends IdEntity {
+public class CategoryBrand extends BaseIdEntity {
 
     private static final long serialVersionUID = 3315719881926878L;
 

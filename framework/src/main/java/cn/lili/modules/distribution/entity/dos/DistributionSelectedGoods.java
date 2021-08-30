@@ -1,8 +1,6 @@
 package cn.lili.modules.distribution.entity.dos;
 
-import cn.lili.mybatis.IdEntity;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -20,7 +18,7 @@ import lombok.NoArgsConstructor;
 @ApiModel(value = "分销商已选择分销商品")
 @TableName("li_distribution_selected_goods")
 @NoArgsConstructor
-public class DistributionSelectedGoods extends IdEntity {
+public class DistributionSelectedGoods extends BaseIdEntity {
 
 
     @ApiModelProperty(value = "分销员ID")

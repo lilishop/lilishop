@@ -64,7 +64,7 @@ public class WalletPlugin implements Payment {
     }
 
     @Override
-    public ResultMessage<Object> JSApiPay(HttpServletRequest request, PayParam payParam) {
+    public ResultMessage<Object> jsApiPay(HttpServletRequest request, PayParam payParam) {
         savePaymentLog(payParam);
         return ResultUtil.success(ResultCode.PAY_SUCCESS);
     }

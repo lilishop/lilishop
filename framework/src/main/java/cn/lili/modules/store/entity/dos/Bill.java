@@ -1,10 +1,9 @@
 package cn.lili.modules.store.entity.dos;
 
 import cn.lili.modules.store.entity.enums.BillStatusEnum;
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -24,7 +23,7 @@ import java.util.Date;
 @Data
 @TableName("li_bill")
 @ApiModel(value = "结算单")
-public class Bill extends IdEntity {
+public class Bill extends BaseIdEntity {
 
     private static final long serialVersionUID = 1L;
 

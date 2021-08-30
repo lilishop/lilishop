@@ -4,10 +4,9 @@ package cn.lili.modules.system.entity.dos;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.system.entity.plugin.logistics.dada.enums.DadaOrderStatusEnum;
 import cn.lili.modules.system.entity.plugin.logistics.dada.vo.DdOrderBackVO;
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -32,7 +31,7 @@ import java.util.Date;
 @ApiModel(value = "即时配送日志")
 @AllArgsConstructor
 @NoArgsConstructor
-public class InstantDeliveryLog extends IdEntity {
+public class InstantDeliveryLog extends BaseIdEntity {
 
 
     @CreatedDate

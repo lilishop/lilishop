@@ -1,4 +1,4 @@
-package cn.lili.timetask.handler.impl.storeRating;
+package cn.lili.timetask.handler.impl.storerating;
 
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;

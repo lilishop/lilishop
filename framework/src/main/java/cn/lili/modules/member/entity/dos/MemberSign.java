@@ -1,9 +1,8 @@
 package cn.lili.modules.member.entity.dos;
 
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -23,7 +22,7 @@ import java.util.Date;
 @Data
 @TableName("li_member_sign")
 @ApiModel(value = "会员签到")
-public class MemberSign extends IdEntity {
+public class MemberSign extends BaseIdEntity {
 
     private static final long serialVersionUID = 1L;
 

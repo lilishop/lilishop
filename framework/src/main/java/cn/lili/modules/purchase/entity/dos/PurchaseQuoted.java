@@ -1,9 +1,8 @@
 package cn.lili.modules.purchase.entity.dos;
 
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -23,7 +22,7 @@ import java.util.Date;
 @Data
 @ApiModel(value = "供求单报价")
 @TableName("li_purchase_quoted")
-public class PurchaseQuoted extends IdEntity {
+public class PurchaseQuoted extends BaseIdEntity {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")

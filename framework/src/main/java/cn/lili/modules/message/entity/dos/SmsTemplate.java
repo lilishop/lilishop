@@ -1,8 +1,6 @@
 package cn.lili.modules.message.entity.dos;
 
-import cn.lili.mybatis.IdEntity;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -18,7 +16,7 @@ import lombok.Data;
 @Data
 @TableName("li_sms_template")
 @ApiModel(value = "短信模板")
-public class SmsTemplate extends IdEntity {
+public class SmsTemplate extends BaseIdEntity {
 
     @ApiModelProperty(value = "模板名称", required = true)
     private String templateName;

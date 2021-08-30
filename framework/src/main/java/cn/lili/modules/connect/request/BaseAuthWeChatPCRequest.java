@@ -20,9 +20,9 @@ import com.alibaba.fastjson.JSONObject;
  * @author yangkai.shen (https://xkcoding.com)
  * @since 1.1.0
  */
-public class AuthWeChatPCRequest extends AuthDefaultRequest {
+public class BaseAuthWeChatPCRequest extends BaseAuthRequest {
 
-    public AuthWeChatPCRequest(AuthConfig config, Cache cache) {
+    public BaseAuthWeChatPCRequest(AuthConfig config, Cache cache) {
         super(config, ConnectAuthEnum.WECHAT_PC, cache);
     }
 

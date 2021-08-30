@@ -1,6 +1,6 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -18,7 +18,7 @@ import javax.validation.constraints.NotEmpty;
 @Data
 @TableName("li_specification")
 @ApiModel(value = "规格项")
-public class Specification extends IdEntity {
+public class Specification extends BaseIdEntity {
 
     private static final long serialVersionUID = 147792597901239486L;
 
