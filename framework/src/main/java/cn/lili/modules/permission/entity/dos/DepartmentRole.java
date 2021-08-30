@@ -8,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 角色部门绑定关系
@@ -18,8 +16,6 @@ import javax.persistence.Table;
  * @since 2020/11/19 12:18
  */
 @Data
-@Entity
-@Table(name = "li_department_role")
 @TableName("li_department_role")
 @ApiModel(value = "角色部门")
 @NoArgsConstructor

@@ -9,9 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
 /**
  * 分类参数组关联
  *
@@ -19,8 +16,6 @@ import javax.persistence.Table;
  * @since 2020-02-26 10:34:02
  */
 @Data
-@Entity
-@Table(name = "li_category_specification")
 @TableName("li_category_specification")
 @NoArgsConstructor
 @AllArgsConstructor

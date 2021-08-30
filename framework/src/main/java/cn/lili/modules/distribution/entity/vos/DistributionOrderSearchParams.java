@@ -30,7 +30,7 @@ public class DistributionOrderSearchParams extends PageVO {
     @ApiModelProperty(value = "订单sn")
     private String orderSn;
 
-    @ApiModelProperty(value = "分销员ID",hidden = true)
+    @ApiModelProperty(value = "分销员ID", hidden = true)
     private String distributionId;
 
     @ApiModelProperty(value = "分销订单状态")
@@ -40,12 +40,12 @@ public class DistributionOrderSearchParams extends PageVO {
     private String storeId;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "开始时间")
     private Date startTime;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "结束时间")
     private Date endTime;
 

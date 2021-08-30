@@ -1,5 +1,6 @@
 package cn.lili.modules.member.entity.dos;
 
+import cn.lili.mybatis.IdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -12,10 +13,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -25,23 +22,14 @@ import java.util.Date;
  * @since 2020/11/18 3:31 下午
  */
 @Data
-@Entity
 @NoArgsConstructor
 @ApiModel(value = "会员商品收藏")
 @TableName("li_goods_collection")
-@Table(name = "li_goods_collection")
-public class GoodsCollection {
-
-    @Id
-    @TableId
-    @TableField
-    @Column(columnDefinition = "bigint(20)")
-    @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id;
+public class GoodsCollection extends IdEntity {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;

@@ -7,8 +7,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -19,8 +17,6 @@ import javax.validation.constraints.NotNull;
  * @since 2020-02-26 10:34:02
  */
 @Data
-@Entity
-@Table(name = "li_category_parameter_group")
 @TableName("li_category_parameter_group")
 @ApiModel(value = "分类绑定参数组")
 public class CategoryParameterGroup extends BaseEntity {

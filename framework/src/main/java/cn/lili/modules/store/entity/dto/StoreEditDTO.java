@@ -8,8 +8,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -25,10 +23,6 @@ import javax.validation.constraints.Size;
 public class StoreEditDTO {
 
 
-    @Id
-    @TableId
-    @TableField
-    @Column(columnDefinition = "bigint(20)")
     @ApiModelProperty(value = "唯一标识", hidden = true)
     private String id;
 
@@ -131,7 +125,6 @@ public class StoreEditDTO {
 
     @NotBlank(message = "店铺经营类目不能为空")
     @ApiModelProperty(value = "店铺经营类目")
-    @Column(columnDefinition = "TEXT")
     private String goodsManagementCategory;
 
     @ApiModelProperty(value = "结算周期")

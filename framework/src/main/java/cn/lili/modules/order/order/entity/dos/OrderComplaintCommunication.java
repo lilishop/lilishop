@@ -8,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 交易投诉通信
@@ -18,8 +16,6 @@ import javax.persistence.Table;
  * @since 2020/12/5
  **/
 @Data
-@Entity
-@Table(name = "li_order_complaint_communication")
 @TableName("li_order_complaint_communication")
 @ApiModel(value = "订单交易投诉通信")
 @AllArgsConstructor

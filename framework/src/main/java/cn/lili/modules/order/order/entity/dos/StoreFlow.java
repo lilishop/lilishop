@@ -1,6 +1,7 @@
 package cn.lili.modules.order.order.entity.dos;
 
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
+import cn.lili.mybatis.IdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -12,10 +13,6 @@ import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -25,18 +22,9 @@ import java.util.Date;
  * @since 2020/11/17 7:31 下午
  */
 @Data
-@Entity
-@Table(name = "li_store_flow")
 @TableName("li_store_flow")
 @ApiModel(value = "商家订单流水")
-public class StoreFlow {
-
-    @Id
-    @TableId
-    @TableField
-    @Column(columnDefinition = "bigint(20)")
-    @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id;
+public class StoreFlow extends IdEntity {
 
     private static final long serialVersionUID = -5998757398902747939L;
 
@@ -81,7 +69,6 @@ public class StoreFlow {
     private String categoryId;
 
     @ApiModelProperty(value = "规格json")
-    @Column(columnDefinition = "TEXT")
     private String specs;
 
 

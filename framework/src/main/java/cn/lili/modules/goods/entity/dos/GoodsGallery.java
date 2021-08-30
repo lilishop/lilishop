@@ -1,5 +1,6 @@
 package cn.lili.modules.goods.entity.dos;
 
+import cn.lili.mybatis.IdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -9,10 +10,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedBy;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.io.Serializable;
 
 /**
@@ -22,18 +19,9 @@ import java.io.Serializable;
  * @since 2020-02-23 9:14:33
  */
 @Data
-@Entity
-@Table(name = "li_goods_gallery")
 @TableName("li_goods_gallery")
 @ApiModel(value = "商品相册")
-public class GoodsGallery implements Serializable {
-
-    @Id
-    @TableId
-    @TableField
-    @Column(columnDefinition = "bigint(20)")
-    @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id;
+public class GoodsGallery extends IdEntity {
 
 
     @CreatedBy

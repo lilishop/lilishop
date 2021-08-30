@@ -7,17 +7,12 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
 /**
  * 验证码资源维护
  * @author Chopper
  * @since 2021/1/30 4:13 下午
  */
 @Data
-@Entity
-@Table(name = "li_verification_source")
 @TableName("li_verification_source")
 @ApiModel(value = "验证码资源维护")
 public class VerificationSource extends BaseEntity {

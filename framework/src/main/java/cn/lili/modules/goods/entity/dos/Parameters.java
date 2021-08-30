@@ -7,8 +7,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
@@ -21,8 +19,6 @@ import javax.validation.constraints.NotNull;
  * @since 2020-02-23 9:14:33
  */
 @Data
-@Entity
-@Table(name = "li_parameters")
 @TableName("li_parameters")
 @ApiModel(value = "商品参数")
 public class Parameters extends IdEntity {

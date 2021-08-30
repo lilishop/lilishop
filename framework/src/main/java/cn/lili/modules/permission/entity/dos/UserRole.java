@@ -6,9 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
 /**
  * 用户角色
  *
@@ -16,8 +13,6 @@ import javax.persistence.Table;
  * @since 2020/11/19 12:18
  */
 @Data
-@Entity
-@Table(name = "li_user_role")
 @TableName("li_user_role")
 @ApiModel(value = "用户角色")
 public class UserRole extends IdEntity {

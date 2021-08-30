@@ -10,8 +10,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
@@ -22,10 +20,8 @@ import javax.validation.constraints.Size;
  * @since 2020-03-14 23:04:56
  */
 @Data
-@Entity
 @ApiModel(value = "分销员")
 @TableName("li_distribution")
-@Table(name = "li_distribution")
 @NoArgsConstructor
 public class Distribution extends BaseEntity {
 

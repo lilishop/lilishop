@@ -2,6 +2,7 @@ package cn.lili.modules.distribution.entity.dos;
 
 import cn.lili.modules.distribution.entity.enums.DistributionOrderStatusEnum;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
+import cn.lili.mybatis.IdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -14,10 +15,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -27,19 +24,15 @@ import java.util.Date;
  * @since 2020-03-14 23:04:56
  */
 @Data
-@Entity
 @ApiModel(value = "分销订单")
 @TableName("li_distribution_order")
-@Table(name = "li_distribution_order")
 @NoArgsConstructor
-public class DistributionOrder {
+public class DistributionOrder extends IdEntity {
 
     private static final long serialVersionUID = 501799944909496507L;
 
-    @Id
     @TableId
     @TableField
-    @Column(columnDefinition = "bigint(20)")
     @ApiModelProperty(value = "唯一标识", hidden = true)
     private String id;
 
@@ -84,7 +77,6 @@ public class DistributionOrder {
     @ApiModelProperty(value = "货品ID")
     private String skuId;
     @ApiModelProperty(value = "规格")
-    @Column(columnDefinition = "TEXT")
     private String specs;
     @ApiModelProperty(value = "图片")
     private String image;

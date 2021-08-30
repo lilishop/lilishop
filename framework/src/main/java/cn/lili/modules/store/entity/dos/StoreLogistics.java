@@ -8,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -19,8 +17,6 @@ import javax.validation.constraints.NotNull;
  * @since 2020/11/17 8:01 下午
  */
 @Data
-@Entity
-@Table(name = "li_store_logistics")
 @TableName("li_store_logistics")
 @ApiModel(value = "店铺-物流公司")
 @AllArgsConstructor

@@ -8,8 +8,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,8 +15,6 @@ import java.util.Map;
  * @author Chopper
  */
 @Data
-@Entity
-@Table(name = "li_connect_config")
 @TableName("li_connect_config")
 @ApiModel(value = "联合登陆配置")
 @NoArgsConstructor

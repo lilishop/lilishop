@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -23,8 +21,6 @@ import java.util.Date;
  * @since 2020-03-14 23:04:56
  */
 @Data
-@Entity
-@Table(name = "li_distribution_cash")
 @TableName("li_distribution_cash")
 @ApiModel(value = "分销佣金")
 @NoArgsConstructor
@@ -48,7 +44,7 @@ public class DistributionCash extends BaseEntity {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "支付时间")
     private Date payTime;
 

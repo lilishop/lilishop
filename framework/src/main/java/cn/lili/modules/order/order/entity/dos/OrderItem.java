@@ -20,9 +20,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.stream.Collectors;
 
 /**
@@ -32,8 +29,6 @@ import java.util.stream.Collectors;
  * @since 2020/11/17 7:30 下午
  */
 @Data
-@Entity
-@Table(name = "li_order_item")
 @TableName("li_order_item")
 @ApiModel(value = "子订单")
 @NoArgsConstructor
@@ -79,7 +74,6 @@ public class OrderItem extends BaseEntity {
     private String snapshotId;
 
     @ApiModelProperty(value = "规格json")
-    @Column(columnDefinition = "TEXT")
     private String specs;
 
     @ApiModelProperty(value = "促销类型")
@@ -106,7 +100,6 @@ public class OrderItem extends BaseEntity {
     @ApiModelProperty(value = "售后状态")
     private String afterSaleStatus;
 
-    @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "价格详情")
     private String priceDetail;
 

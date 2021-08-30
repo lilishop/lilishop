@@ -6,9 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
 /**
  * 优惠券活动实体类
  *
@@ -16,8 +13,6 @@ import javax.persistence.Table;
  * @since 2020-03-19 10:44 上午
  */
 @Data
-@Entity
-@Table(name = "li_coupon_activity_item")
 @TableName("li_coupon_activity_item")
 @ApiModel(value = "优惠券活动-优惠券关联实体类")
 public class CouponActivityItem extends BaseEntity {

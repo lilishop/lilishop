@@ -2,6 +2,7 @@ package cn.lili.modules.order.trade.entity.dos;
 
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.StringUtils;
+import cn.lili.mybatis.IdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -15,10 +16,6 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -28,21 +25,13 @@ import java.util.Date;
  * @since 2020-03-25 2:30 下午
  */
 @Data
-@Entity
-@Table(name = "li_order_log")
 @TableName("li_order_log")
 @ApiModel(value = "订单日志")
 @NoArgsConstructor
-public class OrderLog {
+public class OrderLog extends IdEntity {
 
     private static final long serialVersionUID = -1599270944927160096L;
 
-    @Id
-    @TableId
-    @TableField
-    @Column(columnDefinition = "bigint(20)")
-    @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id;
 
     @CreatedBy
     @TableField(fill = FieldFill.INSERT)
@@ -51,7 +40,7 @@ public class OrderLog {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;

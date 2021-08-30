@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 
@@ -17,7 +16,6 @@ import java.util.Date;
  * @since 2020-03-19 10:44 上午
  */
 @Data
-@MappedSuperclass
 public class BasePromotion extends BaseEntity {
 
     private static final long serialVersionUID = 7814832369110695758L;

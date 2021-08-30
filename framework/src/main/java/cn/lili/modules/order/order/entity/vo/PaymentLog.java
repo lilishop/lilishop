@@ -9,7 +9,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
 import java.util.Date;
 
 /**
@@ -19,7 +18,7 @@ import java.util.Date;
  * @since 2020/11/17 7:30 下午
  */
 @Data
-@Entity
+
 @ApiModel(value = "订单")
 public class PaymentLog extends BaseEntity {
 
@@ -78,8 +77,4 @@ public class PaymentLog extends BaseEntity {
     @ApiModelProperty(value = "订单类型")
     private String orderType;
 
-
-    public PaymentLog() {
-
-    }
 }

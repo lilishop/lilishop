@@ -8,8 +8,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -19,8 +17,6 @@ import javax.validation.constraints.NotNull;
  * @since 2020-03-19 10:44 上午
  */
 @Data
-@Entity
-@Table(name = "li_coupon_activity")
 @TableName("li_coupon_activity")
 @ApiModel(value = "优惠券活动实体类")
 public class CouponActivity extends BasePromotion {

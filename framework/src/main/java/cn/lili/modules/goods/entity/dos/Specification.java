@@ -7,9 +7,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 
 /**
@@ -19,8 +16,6 @@ import javax.validation.constraints.NotEmpty;
  * @since 2020-02-18 15:18:56
  */
 @Data
-@Entity
-@Table(name = "li_specification")
 @TableName("li_specification")
 @ApiModel(value = "规格项")
 public class Specification extends IdEntity {
@@ -46,7 +41,6 @@ public class Specification extends IdEntity {
      * 规格值名字
      */
     @TableField(value = "spec_value")
-    @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "规格值名字, 《,》分割")
     private String specValue;
 

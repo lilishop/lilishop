@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration;
 
-import javax.annotation.Nonnull;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.List;
@@ -40,7 +39,6 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
 
     @Override
     @Bean
-    @Nonnull
     public RestHighLevelClient elasticsearchClient() {
         RestClientBuilder restBuilder = RestClient
                 .builder(this.getHttpHosts());

@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
 import java.util.Date;
 
 /**
@@ -23,7 +22,6 @@ public class DistributionGoodsVO {
     @ApiModelProperty(value = "商品名称")
     private String goodsName;
 
-    @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "规格")
     private String specs;
 
@@ -52,7 +50,7 @@ public class DistributionGoodsVO {
     private Double commission;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "添加时间")
     private Date createTime;
 

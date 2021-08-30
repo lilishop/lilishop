@@ -6,8 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -19,8 +17,6 @@ import javax.validation.constraints.NotNull;
  * @since 2020-03-19 10:44 上午
  */
 @Data
-@Entity
-@Table(name = "li_pintuan")
 @TableName("li_pintuan")
 @ApiModel(value = "拼团")
 public class Pintuan extends BasePromotion {

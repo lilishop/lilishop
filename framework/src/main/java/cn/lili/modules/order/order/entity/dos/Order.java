@@ -22,9 +22,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 import java.util.Optional;
 
@@ -35,8 +32,6 @@ import java.util.Optional;
  * @since 2020/11/17 7:30 下午
  */
 @Data
-@Entity
-@Table(name = "li_order")
 @TableName("li_order")
 @ApiModel(value = "订单")
 @NoArgsConstructor
@@ -86,7 +81,7 @@ public class Order extends BaseEntity {
     private String paymentMethod;
 
     @ApiModelProperty(value = "支付时间")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date paymentTime;
 
@@ -185,7 +180,6 @@ public class Order extends BaseEntity {
     @ApiModelProperty(value = "订单促销类型")
     private String orderPromotionType;
 
-    @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "价格详情")
     private String priceDetail;
 

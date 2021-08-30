@@ -7,8 +7,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -18,10 +16,8 @@ import java.util.Date;
  * @since 2020-03-14 23:04:56
  */
 @Data
-@Entity
 @ApiModel(value = "供求单")
 @TableName("li_purchase_order")
-@Table(name = "li_purchase_order")
 public class PurchaseOrder extends BaseEntity {
 
     @ApiModelProperty(value = "标题")

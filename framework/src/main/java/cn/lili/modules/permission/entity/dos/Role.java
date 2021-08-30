@@ -7,8 +7,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 角色
@@ -18,8 +16,6 @@ import javax.persistence.Table;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Entity
-@Table(name = "li_role")
 @TableName("li_role")
 @ApiModel(value = "角色")
 public class Role extends BaseEntity {

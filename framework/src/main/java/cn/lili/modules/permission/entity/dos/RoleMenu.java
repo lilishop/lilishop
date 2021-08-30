@@ -6,8 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 角色权限绑定关系
@@ -16,8 +14,6 @@ import javax.persistence.Table;
  * @since 2020/11/19 12:18
  */
 @Data
-@Entity
-@Table(name = "li_role_menu")
 @TableName("li_role_menu")
 @ApiModel(value = "角色权限")
 public class RoleMenu extends BaseEntity {

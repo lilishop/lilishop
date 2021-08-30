@@ -1,6 +1,7 @@
 package cn.lili.modules.purchase.entity.dos;
 
 import cn.lili.common.utils.SnowFlake;
+import cn.lili.mybatis.IdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -12,10 +13,6 @@ import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -25,22 +22,13 @@ import java.util.Date;
  * @since 2020/11/26 20:43
  */
 @Data
-@Entity
 @ApiModel(value = "供求单报价")
 @TableName("li_purchase_quoted_item")
-@Table(name = "li_purchase_quoted_item")
-public class PurchaseQuotedItem {
-
-    @Id
-    @TableId
-    @TableField
-    @Column(columnDefinition = "bigint(20)")
-    @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id;
+public class PurchaseQuotedItem extends IdEntity {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;
@@ -52,7 +40,6 @@ public class PurchaseQuotedItem {
     private String goodsName;
 
     @ApiModelProperty(value = "规格")
-    @Column(columnDefinition = "TEXT")
     private String specs;
 
     @ApiModelProperty(value = "数量")

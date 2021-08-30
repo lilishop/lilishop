@@ -10,8 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import java.util.Date;
@@ -23,8 +21,6 @@ import java.util.Date;
  * @since 2020-02-25 14:10:16
  */
 @Data
-@Entity
-@Table(name = "li_member")
 @TableName("li_member")
 @ApiModel(value = "会员")
 @NoArgsConstructor

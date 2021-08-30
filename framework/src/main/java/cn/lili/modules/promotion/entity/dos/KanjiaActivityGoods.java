@@ -6,8 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 
 /**
@@ -17,8 +15,6 @@ import javax.validation.constraints.NotEmpty;
  * @date 2020-7-1 10:44 上午
  */
 @Data
-@Entity
-@Table(name = "li_kanjia_activity_goods")
 @TableName("li_kanjia_activity_goods")
 @ApiModel(value = "砍价活动商品对象")
 public class KanjiaActivityGoods extends BasePromotion {

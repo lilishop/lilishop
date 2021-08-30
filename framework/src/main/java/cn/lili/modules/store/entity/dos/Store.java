@@ -13,8 +13,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
@@ -27,8 +25,6 @@ import java.util.Date;
  * @since 2020-02-18 15:18:56
  */
 @Data
-@Entity
-@Table(name = "li_store")
 @TableName("li_store")
 @ApiModel(value = "店铺")
 @NoArgsConstructor
@@ -46,7 +42,7 @@ public class Store extends BaseEntity {
     private String storeName;
 
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-  @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "店铺关闭时间")
     private Date storeEndTime;
 
@@ -109,11 +105,11 @@ public class Store extends BaseEntity {
         deliveryScore = 5.0;
         serviceScore = 5.0;
         descriptionScore = 5.0;
-        goodsNum=0;
-        collectionNum=0;
+        goodsNum = 0;
+        collectionNum = 0;
     }
 
-    public Store(Member member,AdminStoreApplyDTO adminStoreApplyDTO) {
+    public Store(Member member, AdminStoreApplyDTO adminStoreApplyDTO) {
         BeanUtil.copyProperties(adminStoreApplyDTO, this);
 
         this.memberId = member.getId();
@@ -123,8 +119,8 @@ public class Store extends BaseEntity {
         deliveryScore = 5.0;
         serviceScore = 5.0;
         descriptionScore = 5.0;
-        goodsNum=0;
-        collectionNum=0;
+        goodsNum = 0;
+        collectionNum = 0;
     }
 
 }

@@ -12,9 +12,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -24,8 +21,6 @@ import java.util.Date;
  * @since 2020-03-19 10:44 上午
  */
 @Data
-@Entity
-@Table(name = "li_member_coupon")
 @TableName("li_member_coupon")
 @ApiModel(value = "会员优惠券")
 public class MemberCoupon extends BaseEntity {
@@ -72,7 +67,6 @@ public class MemberCoupon extends BaseEntity {
 
 
     @ApiModelProperty(value = "范围关联的id")
-    @Column(columnDefinition = "TEXT")
     private String scopeId;
 
     @ApiModelProperty(value = "使用起始时间")
