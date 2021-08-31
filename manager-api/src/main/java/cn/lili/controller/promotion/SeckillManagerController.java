@@ -1,8 +1,6 @@
 package cn.lili.controller.promotion;
 
 import cn.lili.common.enums.ResultUtil;
-import cn.lili.common.security.AuthUser;
-import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.Seckill;
@@ -44,9 +42,6 @@ public class SeckillManagerController {
     @ApiOperation(value = "修改秒杀活动")
     @PutMapping
     public ResultMessage<Seckill> updateSeckill(SeckillVO seckillVO) {
-        AuthUser currentUser = UserContext.getCurrentUser();
-        seckillVO.setStoreId(currentUser.getId());
-        seckillVO.setStoreName(currentUser.getUsername());
         seckillService.modifySeckill(seckillVO);
         return ResultUtil.data(seckillVO);
     }
