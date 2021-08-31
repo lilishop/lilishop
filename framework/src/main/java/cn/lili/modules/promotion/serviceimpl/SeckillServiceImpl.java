@@ -61,6 +61,10 @@ import java.util.stream.Collectors;
 public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> implements SeckillService {
 
     /**
+     * 预创建活动数量
+     */
+    private final Integer preCreation = 30;
+    /**
      * 延时任务
      */
     @Autowired
@@ -139,7 +143,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
 
         Setting setting = settingService.get(SettingEnum.SECKILL_SETTING.name());
         SeckillSetting seckillSetting = new Gson().fromJson(setting.getSettingValue(), SeckillSetting.class);
-        for (int i = 1; i <= 30; i++) {
+        for (int i = 1; i <= preCreation; i++) {
             Seckill seckill = new Seckill(i, seckillSetting.getHours(), seckillSetting.getSeckillRule());
             this.saveSeckill(seckill);
         }
@@ -290,7 +294,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
      *
      * @param seckill 秒杀活动
      */
-    private void addSeckillStartTask(SeckillVO seckill) {
+    public void addSeckillStartTask(SeckillVO seckill) {
         PromotionMessage promotionMessage = new PromotionMessage(seckill.getId(), PromotionTypeEnum.SECKILL.name(), PromotionStatusEnum.START.name(), seckill.getStartTime(), seckill.getEndTime());
         TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
                 seckill.getStartTime().getTime(),

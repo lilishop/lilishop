@@ -9,6 +9,7 @@ import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
+import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
 import cn.lili.modules.promotion.entity.vos.PromotionSkuVO;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivitySearchParams;
@@ -122,9 +123,22 @@ public class SkuPromotionRender implements CartRenderStep {
             case CART:
             case BUY_NOW:
             case VIRTUAL:
+                //循环购物车
                 for (CartVO cartVO : tradeDTO.getCartList()) {
+                    //循环sku
                     for (CartSkuVO cartSkuVO : cartVO.getSkuList()) {
+                        //更新商品促销
                         promotionGoodsService.updatePromotion(cartSkuVO);
+                        //赋予商品促销信息
+                        for (PromotionGoods promotionGoods : cartSkuVO.getPromotions()) {
+
+                            PromotionSkuVO promotionSkuVO = new PromotionSkuVO(promotionGoods.getPromotionType(), promotionGoods.getPromotionId());
+                            cartSkuVO.setPurchasePrice(promotionGoods.getPrice());
+                            cartSkuVO.setSubTotal(CurrencyUtil.mul(promotionGoods.getPrice(), cartSkuVO.getNum()));
+                            cartSkuVO.getPriceDetailDTO().setGoodsPrice(cartSkuVO.getSubTotal());
+
+                            cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
+                        }
                     }
                 }
                 return;
