@@ -32,7 +32,8 @@ public class Specification extends BaseIdEntity {
     /**
      * 所属卖家 0属于平台
      * <p>
-     * 店铺自定义规格暂时废弃 2021-06-23 后续推出新配置方式
+     * 店铺自定义规格暂时废弃 2021-06-23
+     * 后续推出新配置方式
      */
     @ApiModelProperty(hidden = true)
     private String storeId;

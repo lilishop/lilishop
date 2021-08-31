@@ -245,13 +245,17 @@ public class CouponRender implements CartRenderStep {
                     if (item.getGoodsSku().getId().equals(skuId)) {
 
                         PriceDetailDTO priceDetailDTO = item.getPriceDetailDTO();
+
+                        // 打折金额=商品金额*折扣/10
+                        Double discountCouponPrice = CurrencyUtil.mul(priceDetailDTO.getGoodsPrice(),
+                                CurrencyUtil.div(coupon.getDiscount(), 10, 3));
+
                         //平台券则写入店铺承担优惠券比例
                         if (coupon.getIsPlatform()) {
-                            priceDetailDTO.setSiteCouponPrice(CurrencyUtil.mul(priceDetailDTO.getGoodsPrice(), coupon.getDiscount()));
+                            priceDetailDTO.setSiteCouponPrice(discountCouponPrice);
                             priceDetailDTO.setSiteCouponPoint(coupon.getStoreCommission());
                         }
-                        priceDetailDTO.setCouponPrice(CurrencyUtil.add(priceDetailDTO.getCouponPrice(),
-                                CurrencyUtil.mul(priceDetailDTO.getGoodsPrice(), coupon.getDiscount())));
+                        priceDetailDTO.setCouponPrice(CurrencyUtil.add(priceDetailDTO.getCouponPrice(), discountCouponPrice));
 
                     }
                 }
