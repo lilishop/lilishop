@@ -1,16 +1,10 @@
 package cn.lili.modules.message.entity.dos;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 
 
 /**
@@ -20,18 +14,9 @@ import javax.persistence.Table;
  * @since 2021/1/30 4:13 下午
  */
 @Data
-@Entity
-@Table(name = "li_sms_template")
 @TableName("li_sms_template")
 @ApiModel(value = "短信模板")
-public class SmsTemplate {
-
-    @Id
-    @TableId
-    @TableField
-    @Column(columnDefinition = "bigint(20)")
-    @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id;
+public class SmsTemplate extends BaseIdEntity {
 
     @ApiModelProperty(value = "模板名称", required = true)
     private String templateName;

@@ -6,8 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 会员站内信
@@ -16,8 +14,6 @@ import javax.persistence.Table;
  * @since 2020-02-25 14:10:16
  */
 @Data
-@Entity
-@Table(name = "li_member_notice")
 @TableName("li_member_notice")
 @ApiModel(value = "会员站内信")
 public class MemberNotice extends BaseEntity {

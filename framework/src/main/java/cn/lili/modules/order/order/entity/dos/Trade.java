@@ -10,8 +10,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 交易
@@ -20,8 +18,6 @@ import javax.persistence.Table;
  * @since 2020/11/17 7:34 下午
  */
 @Data
-@Entity
-@Table(name = "li_trade")
 @TableName("li_trade")
 @ApiModel(value = "交易")
 @NoArgsConstructor

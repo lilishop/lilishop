@@ -6,9 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
 /**
  * 通知类站内信模版对象
  *
@@ -17,8 +14,6 @@ import javax.persistence.Table;
  * @since 2020/12/8 9:46
  */
 @Data
-@Entity
-@Table(name = "li_notice_message")
 @TableName("li_notice_message")
 @ApiModel(value = "通知类消息模板")
 public class NoticeMessage extends BaseEntity {

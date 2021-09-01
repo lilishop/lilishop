@@ -15,6 +15,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface SeckillService extends IService<Seckill> {
 
+    /**
+     * 预创建活动数量
+     */
+    public static final Integer PRE_CREATION = 7;
 
     /**
      * 从mysql中根据条件获取秒杀活动分页列表

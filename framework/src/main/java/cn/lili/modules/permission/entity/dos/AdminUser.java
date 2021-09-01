@@ -6,9 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 管理员类
@@ -17,8 +14,6 @@ import javax.persistence.Table;
  * @since 2020/11/19 11:42
  */
 @Data
-@Entity
-@Table(name = "li_admin_user")
 @TableName("li_admin_user")
 @ApiModel(value = "管理员")
 public class AdminUser extends BaseEntity {
@@ -26,7 +21,6 @@ public class AdminUser extends BaseEntity {
     private static final long serialVersionUID = 2918352800205024873L;
 
     @ApiModelProperty(value = "用户名")
-    @Column(unique = true, nullable = false, columnDefinition = "varchar(200)")
     private String username;
 
     @ApiModelProperty(value = "密码")
@@ -42,7 +36,6 @@ public class AdminUser extends BaseEntity {
     private String email;
 
     @ApiModelProperty(value = "用户头像")
-    @Column(length = 1000)
     private String avatar = "https://i.loli.net/2020/11/19/LyN6JF7zZRskdIe.png";
 
     @ApiModelProperty(value = "是否是超级管理员 超级管理员/普通管理员")

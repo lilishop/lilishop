@@ -12,8 +12,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
@@ -24,8 +22,6 @@ import java.util.Date;
  * @since 2020-03-19 10:44 上午
  */
 @Data
-@Entity
-@Table(name = "li_seckill")
 @TableName("li_seckill")
 @ApiModel(value = "秒杀活动活动")
 @NoArgsConstructor

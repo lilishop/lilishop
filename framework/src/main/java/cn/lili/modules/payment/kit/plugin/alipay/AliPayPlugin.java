@@ -104,7 +104,7 @@ public class AliPayPlugin implements Payment {
 
 
     @Override
-    public ResultMessage<Object> JSApiPay(HttpServletRequest request, PayParam payParam) {
+    public ResultMessage<Object> jsApiPay(HttpServletRequest request, PayParam payParam) {
         throw new ServiceException(ResultCode.PAY_NOT_SUPPORT);
     }
 

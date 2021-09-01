@@ -26,9 +26,9 @@ import java.util.Map;
  * @author yangkai.shen (https://xkcoding.com)
  * @since 1.1.0
  */
-public class AuthQQRequest extends AuthDefaultRequest {
+public class BaseAuthQQRequest extends BaseAuthRequest {
 
-    public AuthQQRequest(AuthConfig config, Cache cache) {
+    public BaseAuthQQRequest(AuthConfig config, Cache cache) {
         super(config, ConnectAuthEnum.QQ, cache);
     }
 
@@ -75,7 +75,7 @@ public class AuthQQRequest extends AuthDefaultRequest {
      * 获取QQ用户的OpenId，支持自定义是否启用查询unionid的功能，如果启用查询unionid的功能，
      * 那就需要开发者先通过邮件申请unionid功能，参考链接 {@see http://wiki.connect.qq.com/unionid%E4%BB%8B%E7%BB%8D}
      *
-     * @param authToken 通过{@link AuthQQRequest#getAccessToken(AuthCallback)}获取到的{@code authToken}
+     * @param authToken 通过{@link BaseAuthQQRequest#getAccessToken(AuthCallback)}获取到的{@code authToken}
      * @return openId
      */
     private String getOpenId(AuthToken authToken) {

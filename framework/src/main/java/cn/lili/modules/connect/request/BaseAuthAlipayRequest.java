@@ -29,12 +29,12 @@ import com.alipay.api.response.AlipayUserInfoShareResponse;
  * @author yadong.zhang (yadong.zhang0415(a)gmail.com)
  * @since 1.0.1
  */
-public class AuthAlipayRequest extends AuthDefaultRequest {
+public class BaseAuthAlipayRequest extends BaseAuthRequest {
 
     private final AlipayClient alipayClient;
 
 
-    public AuthAlipayRequest(AuthConfig config, Cache cache) {
+    public BaseAuthAlipayRequest(AuthConfig config, Cache cache) {
         super(config, ConnectAuthEnum.ALIPAY, cache);
         this.alipayClient = new DefaultAlipayClient(ConnectAuthEnum.ALIPAY.accessToken(), config.getClientId(), config.getClientSecret(), "json", "UTF-8", config
                 .getAlipayPublicKey(), "RSA2");

@@ -6,7 +6,7 @@ package cn.lili.trigger.model;
  * @author paulG
  * @since 2020/8/20
  **/
-public abstract class TimeExecuteConstant {
+public interface TimeExecuteConstant {
 
     /**
      * 促销延迟加载执行器

@@ -40,10 +40,6 @@ spring:
   #amqp
   #  rabbitmq:
   #    host: 192.168.0.116
-  jpa:
-    # 自动生成表结构
-    generate-ddl: true
-    open-in-view: false
   # Redis
   redis:
     host: 192.168.0.116

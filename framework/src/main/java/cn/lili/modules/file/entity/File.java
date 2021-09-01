@@ -8,8 +8,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 文件系统
@@ -18,8 +16,6 @@ import javax.persistence.Table;
  * @since 2020/11/26 15:35
  */
 @Data
-@Entity
-@Table(name = "li_file")
 @TableName("li_file")
 @ApiModel(value = "文件")
 public class File extends BaseEntity {

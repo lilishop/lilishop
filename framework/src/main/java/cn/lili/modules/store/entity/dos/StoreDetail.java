@@ -6,6 +6,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.lili.common.validation.Mobile;
 import cn.lili.common.validation.Phone;
 import cn.lili.modules.store.entity.dto.AdminStoreApplyDTO;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -17,10 +18,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import javax.validation.constraints.*;
 import java.util.Date;
 
@@ -31,19 +28,15 @@ import java.util.Date;
  * @since 2020-02-18 15:18:56
  */
 @Data
-@Entity
-@Table(name = "li_store_detail")
 @TableName("li_store_detail")
 @ApiModel(value = "店铺详细")
 @NoArgsConstructor
-public class StoreDetail {
+public class StoreDetail extends BaseIdEntity {
 
     private static final long serialVersionUID = 4949782642253898816L;
 
-    @Id
     @TableId
     @TableField
-    @Column(columnDefinition = "bigint(20)")
     @ApiModelProperty(value = "唯一标识", hidden = true)
     private String id;
 
@@ -146,14 +139,13 @@ public class StoreDetail {
 
     @NotBlank(message = "店铺经营类目不能为空")
     @ApiModelProperty(value = "店铺经营类目")
-    @Column(columnDefinition = "TEXT")
     private String goodsManagementCategory;
 
     @ApiModelProperty(value = "结算周期")
     private String settlementCycle;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "结算日", hidden = true)
     private Date settlementDay;
 
@@ -186,12 +178,12 @@ public class StoreDetail {
     private String salesConsigneeDetail;
 
 
-    public StoreDetail(Store store, AdminStoreApplyDTO adminStoreApplyDTO){
-        this.storeId=store.getId();
+    public StoreDetail(Store store, AdminStoreApplyDTO adminStoreApplyDTO) {
+        this.storeId = store.getId();
         //设置店铺公司信息、设置店铺银行信息、设置店铺其他信息
         BeanUtil.copyProperties(adminStoreApplyDTO, this);
-        this.settlementDay= DateUtil.date();
-        this.stockWarning=10;
+        this.settlementDay = DateUtil.date();
+        this.stockWarning = 10;
     }
 
 

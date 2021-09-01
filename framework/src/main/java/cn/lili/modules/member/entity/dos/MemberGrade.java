@@ -6,8 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -17,8 +15,6 @@ import javax.validation.constraints.NotNull;
  * @since 2021/5/14 5:43 下午
  */
 @Data
-@Entity
-@Table(name = "li_member_grade")
 @TableName("li_member_grade")
 @ApiModel(value = "会员等级")
 public class MemberGrade extends BaseEntity {

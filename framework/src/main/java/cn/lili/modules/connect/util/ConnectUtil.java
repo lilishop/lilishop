@@ -17,10 +17,10 @@ import cn.lili.modules.connect.entity.dto.AuthCallback;
 import cn.lili.modules.connect.entity.dto.AuthResponse;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.exception.AuthException;
-import cn.lili.modules.connect.request.AuthQQRequest;
+import cn.lili.modules.connect.request.BaseAuthQQRequest;
 import cn.lili.modules.connect.request.AuthRequest;
-import cn.lili.modules.connect.request.AuthWeChatPCRequest;
-import cn.lili.modules.connect.request.AuthWeChatRequest;
+import cn.lili.modules.connect.request.BaseAuthWeChatPCRequest;
+import cn.lili.modules.connect.request.BaseAuthWeChatRequest;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.connect.QQConnectSetting;
@@ -152,7 +152,7 @@ public class ConnectUtil {
 
                 for (WechatConnectSettingItem wechatConnectSettingItem : wechatConnectSetting.getWechatConnectSettingItems()) {
                     if (wechatConnectSettingItem.getClientType().equals(ClientTypeEnum.H5.name())) {
-                        authRequest = new AuthWeChatRequest(AuthConfig.builder()
+                        authRequest = new BaseAuthWeChatRequest(AuthConfig.builder()
                                 .clientId(wechatConnectSettingItem.getAppId())
                                 .clientSecret(wechatConnectSettingItem.getAppSecret())
                                 .redirectUri(getRedirectUri(authInterface))
@@ -167,7 +167,7 @@ public class ConnectUtil {
                 WechatConnectSetting wechatConnectSetting = JSONUtil.toBean(setting.getSettingValue(), WechatConnectSetting.class);
                 for (WechatConnectSettingItem wechatConnectSettingItem : wechatConnectSetting.getWechatConnectSettingItems()) {
                     if (wechatConnectSettingItem.getClientType().equals(ClientTypeEnum.PC.name())) {
-                        authRequest = new AuthWeChatPCRequest(AuthConfig.builder()
+                        authRequest = new BaseAuthWeChatPCRequest(AuthConfig.builder()
                                 .clientId(wechatConnectSettingItem.getAppId())
                                 .clientSecret(wechatConnectSettingItem.getAppSecret())
                                 .redirectUri(getRedirectUri(authInterface))
@@ -184,7 +184,7 @@ public class ConnectUtil {
                 QQConnectSetting qqConnectSetting = JSONUtil.toBean(setting.getSettingValue(), QQConnectSetting.class);
                 for (QQConnectSettingItem qqConnectSettingItem : qqConnectSetting.getQqConnectSettingItemList()) {
                     if (qqConnectSettingItem.getClientType().equals(ClientTypeEnum.PC.name())) {
-                        authRequest = new AuthQQRequest(AuthConfig.builder()
+                        authRequest = new BaseAuthQQRequest(AuthConfig.builder()
                                 .clientId(qqConnectSettingItem.getAppId())
                                 .clientSecret(qqConnectSettingItem.getAppKey())
                                 .redirectUri(getRedirectUri(authInterface))

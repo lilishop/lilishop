@@ -571,7 +571,7 @@ public class CartServiceImpl implements CartService {
         List<CartSkuVO> cartSkuVOS = checkCoupon(memberCoupon, tradeDTO);
 
         //定义使用优惠券的信息商品信息
-        Map<String, Double> skuPrice = new HashMap<>();
+        Map<String, Double> skuPrice = new HashMap<>(1);
 
 
         //购物车价格

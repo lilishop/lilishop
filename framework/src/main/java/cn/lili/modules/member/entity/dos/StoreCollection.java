@@ -8,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 会员店铺收藏
@@ -18,8 +16,6 @@ import javax.persistence.Table;
  * @since 2020/11/18 3:32 下午
  */
 @Data
-@Entity
-@Table(name = "li_store_collection")
 @TableName("li_store_collection")
 @ApiModel(value = "会员收藏")
 @NoArgsConstructor

@@ -3,9 +3,9 @@ package cn.lili.modules.distribution.entity.dos;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -17,10 +17,6 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -33,21 +29,12 @@ import java.util.Map;
  * @since 2020-03-14 23:04:56
  */
 @Data
-@Entity
 @ApiModel(value = "分销商品")
-@Table(name = "li_distribution_goods")
 @TableName("li_distribution_goods")
 @NoArgsConstructor
-public class DistributionGoods {
+public class DistributionGoods extends BaseIdEntity {
 
     private static final long serialVersionUID = 1L;
-
-    @Id
-    @TableId
-    @TableField
-    @Column(columnDefinition = "bigint(20)")
-    @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id;
 
     @CreatedBy
     @TableField(fill = FieldFill.INSERT)
@@ -56,7 +43,7 @@ public class DistributionGoods {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;
@@ -73,7 +60,6 @@ public class DistributionGoods {
     private String skuId;
 
     @ApiModelProperty(value = "规格信息json", hidden = true)
-    @Column(columnDefinition = "TEXT")
     @JsonIgnore
     private String specs;
 

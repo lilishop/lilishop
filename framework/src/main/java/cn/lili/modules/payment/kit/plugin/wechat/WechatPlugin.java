@@ -156,7 +156,7 @@ public class WechatPlugin implements Payment {
     }
 
     @Override
-    public ResultMessage<Object> JSApiPay(HttpServletRequest request, PayParam payParam) {
+    public ResultMessage<Object> jsApiPay(HttpServletRequest request, PayParam payParam) {
 
         try {
             LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();

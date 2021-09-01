@@ -1,9 +1,9 @@
 package cn.lili.modules.order.trade.entity.dos;
 
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -15,10 +15,6 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 
@@ -29,22 +25,13 @@ import java.util.Date;
  * @since 2020-02-25 14:10:16
  */
 @Data
-@Entity
-@Table(name = "li_recharge")
 @TableName("li_recharge")
 @ApiModel(value = "预存款充值记录")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Recharge {
+public class Recharge extends BaseIdEntity {
 
     private static final long serialVersionUID = -1529240544327161096L;
-
-    @Id
-    @TableId
-    @TableField
-    @Column(columnDefinition = "bigint(20)")
-    @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id;
 
     @CreatedBy
     @TableField(fill = FieldFill.INSERT)
@@ -53,7 +40,7 @@ public class Recharge {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;
@@ -86,7 +73,7 @@ public class Recharge {
 
     @ApiModelProperty(value = "支付时间")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date payTime;
 
 

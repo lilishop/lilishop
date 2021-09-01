@@ -7,8 +7,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 砍价活动参与实体类
@@ -17,8 +15,6 @@ import javax.persistence.Table;
  * @date 2020-7-1 10:44 上午
  */
 @Data
-@Entity
-@Table(name = "li_kanjia_activity")
 @TableName("li_kanjia_activity")
 @ApiModel(value = "砍价活动参与对象")
 public class KanjiaActivity extends BaseEntity {

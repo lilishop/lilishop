@@ -144,7 +144,7 @@ public class FullDiscountRender implements CartRenderStep {
      * @return 参与满优惠的商品id
      */
     public Map<String, Double> initFullDiscountGoods(FullDiscountVO fullDiscount, List<CartSkuVO> cartSkuVOS) {
-        Map<String, Double> skuPriceDetail = new HashMap<>();
+        Map<String, Double> skuPriceDetail = new HashMap<>(16);
 
         //全品类参与
         if (fullDiscount.getNumber() == -1) {

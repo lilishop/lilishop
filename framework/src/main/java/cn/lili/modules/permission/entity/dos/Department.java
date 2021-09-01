@@ -6,9 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.math.BigDecimal;
 
 
@@ -19,8 +16,6 @@ import java.math.BigDecimal;
  * @since 2020/11/19 11:57
  */
 @Data
-@Entity
-@Table(name = "li_department")
 @TableName("li_department")
 @ApiModel(value = "部门")
 public class Department extends BaseEntity {
@@ -34,6 +29,5 @@ public class Department extends BaseEntity {
     private String parentId;
 
     @ApiModelProperty(value = "排序值")
-    @Column(precision = 10, scale = 2)
-    private BigDecimal sortOrder;
+    private Double sortOrder;
 }

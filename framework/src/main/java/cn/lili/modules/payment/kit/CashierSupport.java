@@ -76,7 +76,7 @@ public class CashierSupport {
             case APP:
                 return payment.appPay(request, payParam);
             case JSAPI:
-                return payment.JSApiPay(request, payParam);
+                return payment.jsApiPay(request, payParam);
             case NATIVE:
                 return payment.nativePay(request, payParam);
             case MP:

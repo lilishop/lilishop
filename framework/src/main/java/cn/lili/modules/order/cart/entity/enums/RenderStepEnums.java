@@ -5,6 +5,9 @@ package cn.lili.modules.order.cart.entity.enums;
  */
 public enum RenderStepEnums {
 
+    /**
+     * 购物车渲染枚举
+     */
     CHECK_DATA("校验商品"),
     CHECKED_FILTER("选择商品过滤"),
     COUPON("优惠券价格渲染"),
@@ -17,6 +20,10 @@ public enum RenderStepEnums {
     CART_SN("交易编号创建");
 
     private String distribution;
+
+    public String getDistribution() {
+        return distribution;
+    }
 
     RenderStepEnums(String distribution) {
         this.distribution = distribution;

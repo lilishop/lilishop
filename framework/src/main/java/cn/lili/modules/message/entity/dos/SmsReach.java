@@ -1,8 +1,8 @@
 package cn.lili.modules.message.entity.dos;
 
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -11,9 +11,6 @@ import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Date;
 
 
@@ -24,17 +21,9 @@ import java.util.Date;
  * @since 2021/1/30 4:13 下午
  */
 @Data
-@Entity
-@Table(name = "li_sms_reach")
 @TableName("li_sms_reach")
 @ApiModel(value = "短信任务")
-public class SmsReach {
-
-    @Id
-    @TableId
-    @TableField
-    @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id;
+public class SmsReach extends BaseIdEntity {
 
     @ApiModelProperty(value = "签名名称", required = true)
     private String signName;
@@ -56,7 +45,7 @@ public class SmsReach {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;

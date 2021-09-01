@@ -6,8 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 小程序直播商品
@@ -16,10 +14,8 @@ import javax.persistence.Table;
  *
  */
 @Data
-@Entity
 @ApiModel(value = "Commodity", description = "直播商品")
 @TableName("li_commodity")
-@Table(name = "li_commodity")
 public class Commodity extends BaseEntity {
 
     @ApiModelProperty(value = "图片")

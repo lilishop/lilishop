@@ -7,8 +7,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 
@@ -19,8 +17,6 @@ import javax.validation.constraints.NotEmpty;
  * @since 2020-02-25 14:10:16
  */
 @Data
-@Entity
-@Table(name = "li_member_address")
 @TableName("li_member_address")
 @ApiModel(value = "会员地址")
 public class MemberAddress extends BaseEntity {

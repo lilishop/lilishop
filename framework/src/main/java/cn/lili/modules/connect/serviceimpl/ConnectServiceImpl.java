@@ -339,7 +339,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
                 return JSONUtil.parseObj(result);
             }
         } catch (Exception e) {
-            log.error("解密，获取微信信息错误",e);
+            log.error("解密，获取微信信息错误", e);
         }
         throw new ServiceException(ResultCode.USER_CONNECT_ERROR);
     }

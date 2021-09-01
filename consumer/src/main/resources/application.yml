@@ -42,11 +42,6 @@ spring:
   #      replica-set-name: mongoreplset
   cache:
     type: redis
-
-  jpa:
-    # 自动生成表结构
-    generate-ddl: true
-    open-in-view: false
   # Redis
   redis:
     host: 127.0.0.1

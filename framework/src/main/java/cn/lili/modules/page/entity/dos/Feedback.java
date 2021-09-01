@@ -1,9 +1,9 @@
 package cn.lili.modules.page.entity.dos;
 
 import cn.lili.modules.page.entity.enums.FeedbackTypeEnum;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -13,12 +13,7 @@ import org.hibernate.validator.constraints.Length;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -28,23 +23,15 @@ import java.util.Date;
  * @since 2020/12/10 17:42
  */
 @Data
-@Entity
-@Table(name = "li_feedback")
 @TableName("li_feedback")
 @ApiModel(value = "意见反馈")
-public class Feedback implements Serializable {
+public class Feedback extends BaseIdEntity {
 
     private static final long serialVersionUID = 1L;
-    @Id
-    @TableId
-    @TableField
-    @Column(columnDefinition = "bigint(20)")
-    @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id;
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;

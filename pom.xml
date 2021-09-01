@@ -18,7 +18,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <revision>4.2.0</revision>
+        <revision>4.2.2</revision>
         <docker-registry>registry.cn-beijing.aliyuncs.com/lili-images</docker-registry>
         <images-version>0.0.1</images-version>
         <swagger-bootstrap-ui-version>1.9.6</swagger-bootstrap-ui-version>
@@ -30,7 +30,6 @@
         <jasypt-version>3.0.0</jasypt-version>
         <neetl-version>2.9.10</neetl-version>
         <lombok-version>1.18.10</lombok-version>
-        <minio-version>6.0.11</minio-version>
         <aliyun-version>4.5.18</aliyun-version>
         <aliyun-sdk-oss-version>3.11.1</aliyun-sdk-oss-version>
         <aliyun-sdk-dysms-version>2.0.1</aliyun-sdk-dysms-version>

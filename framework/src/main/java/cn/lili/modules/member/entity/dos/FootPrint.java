@@ -8,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 浏览历史
@@ -18,8 +16,6 @@ import javax.persistence.Table;
  * @since 2020/11/17 7:22 下午
  */
 @Data
-@Entity
-@Table(name = "li_foot_print")
 @TableName("li_foot_print")
 @ApiModel(value = "浏览历史")
 @NoArgsConstructor

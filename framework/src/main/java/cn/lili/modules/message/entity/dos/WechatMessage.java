@@ -6,8 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 微信消息
@@ -17,8 +15,6 @@ import javax.persistence.Table;
  * @since 2020/12/10 17:02
  */
 @Data
-@Entity
-@Table(name = "li_wechat_message")
 @TableName("li_wechat_message")
 @ApiModel(value = "微信消息")
 public class WechatMessage extends BaseEntity {

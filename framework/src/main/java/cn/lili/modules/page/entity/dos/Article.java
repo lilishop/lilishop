@@ -8,8 +8,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -20,8 +18,6 @@ import javax.validation.constraints.NotNull;
  * @since 2020/12/10 17:42
  */
 @Data
-@Entity
-@Table(name = "li_article")
 @TableName("li_article")
 @ApiModel(value = "文章")
 public class Article extends BaseEntity {

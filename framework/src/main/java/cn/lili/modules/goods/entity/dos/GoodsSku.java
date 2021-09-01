@@ -10,9 +10,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import java.util.Date;
 
@@ -23,8 +20,6 @@ import java.util.Date;
  * @since 2020-02-23 9:14:33
  */
 @Data
-@Entity
-@Table(name = "li_goods_sku")
 @TableName("li_goods_sku")
 @ApiModel(value = "商品sku对象")
 public class GoodsSku extends BaseEntity {
@@ -35,7 +30,6 @@ public class GoodsSku extends BaseEntity {
     private String goodsId;
 
     @ApiModelProperty(value = "规格信息json", hidden = true)
-    @Column(columnDefinition = "TEXT")
     @JsonIgnore
     private String specs;
 
@@ -80,7 +74,6 @@ public class GoodsSku extends BaseEntity {
     private String marketEnable;
 
     @ApiModelProperty(value = "商品详情")
-    @Column(columnDefinition = "TEXT")
     private String intro;
 
     @Max(value = 99999999, message = "价格不能超过99999999")
@@ -147,7 +140,6 @@ public class GoodsSku extends BaseEntity {
     private Boolean selfOperated;
 
     @ApiModelProperty(value = "商品移动端详情")
-    @Column(columnDefinition = "TEXT")
     private String mobileIntro;
 
     @ApiModelProperty(value = "商品视频")

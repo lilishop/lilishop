@@ -7,8 +7,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 
 /**
@@ -18,8 +16,6 @@ import javax.validation.constraints.NotEmpty;
  * @since 2020/10/15
  **/
 @Data
-@Entity
-@Table(name = "li_custom_words")
 @TableName("li_custom_words")
 @ApiModel(value = "自定义分词")
 public class CustomWords extends BaseEntity {

@@ -6,8 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
@@ -17,8 +15,6 @@ import javax.validation.constraints.Size;
  * 2020-02-25 14:10:16
  */
 @Data
-@Entity
-@Table(name = "li_sensitive_words")
 @TableName("li_sensitive_words")
 @ApiModel(value = "敏感词")
 public class SensitiveWords extends BaseEntity {

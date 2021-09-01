@@ -7,8 +7,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 专题活动
@@ -17,8 +15,6 @@ import javax.persistence.Table;
  * @since 2020/12/10 17:42
  */
 @Data
-@Entity
-@Table(name = "li_special")
 @TableName("li_special")
 @ApiModel(value = "专题活动")
 public class Special extends BaseEntity {

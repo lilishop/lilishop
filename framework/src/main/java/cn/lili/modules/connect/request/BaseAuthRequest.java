@@ -27,13 +27,15 @@ import java.util.List;
  * @since 1.0.0
  */
 @Slf4j
-public abstract class AuthDefaultRequest implements AuthRequest {
+public abstract class BaseAuthRequest implements AuthRequest {
+
+
     protected AuthConfig config;
     protected ConnectAuth source;
     protected Cache cache;
 
 
-    public AuthDefaultRequest(AuthConfig config, ConnectAuth connectAuth, Cache cache) {
+    public BaseAuthRequest(AuthConfig config, ConnectAuth connectAuth, Cache cache) {
         this.config = config;
         this.source = connectAuth;
         this.cache = cache;
@@ -81,7 +83,7 @@ public abstract class AuthDefaultRequest implements AuthRequest {
     }
 
     /**
-     * 处理{@link AuthDefaultRequest#login(AuthCallback)} 发生异常的情况，统一响应参数
+     * 处理{@link BaseAuthRequest#login(AuthCallback)} 发生异常的情况，统一响应参数
      *
      * @param e 具体的异常
      * @return AuthResponse

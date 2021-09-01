@@ -11,9 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.Max;
 
 /**
@@ -23,8 +20,6 @@ import javax.validation.constraints.Max;
  * @since 2020-02-23 9:14:33
  */
 @Data
-@Entity
-@Table(name = "li_draft_goods")
 @TableName("li_draft_goods")
 @ApiModel(value = "草稿商品")
 @AllArgsConstructor
@@ -134,19 +129,15 @@ public class DraftGoods extends BaseEntity {
     @ApiModelProperty(value = "草稿商品保存类型")
     private String saveType;
 
-    @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "分类名称JSON")
     private String categoryNameJson;
 
-    @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "商品参数JSON")
     private String goodsParamsListJson;
 
-    @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "商品图片JSON")
     private String goodsGalleryListJson;
-
-    @Column(columnDefinition = "TEXT")
+ 
     @ApiModelProperty(value = "sku列表JSON")
     private String skuListJson;
 

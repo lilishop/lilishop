@@ -34,11 +34,6 @@ spring:
       max-request-size: 20MB
   cache:
     type: redis
-  #JPA
-  jpa:
-    # 自动生成表结构
-    generate-ddl: true
-    open-in-view: false
   #jackson json解析
   jackson:
     time-zone: GMT+8

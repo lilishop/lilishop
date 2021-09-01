@@ -10,8 +10,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -21,8 +19,6 @@ import java.util.Date;
  * @since 2020-02-25 14:10:16
  */
 @Data
-@Entity
-@Table(name = "li_member_withdraw_apply")
 @TableName("li_member_withdraw_apply")
 @ApiModel(value = "会员提现申请")
 public class MemberWithdrawApply extends BaseEntity {
@@ -44,13 +40,13 @@ public class MemberWithdrawApply extends BaseEntity {
     @ApiModelProperty(value = "审核备注")
     private String inspectRemark;
 
-    @ApiModelProperty(value="审核时间")
+    @ApiModelProperty(value = "审核时间")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     private Date inspectTime;
 
-    @ApiModelProperty(value="sn")
+    @ApiModelProperty(value = "sn")
     private String sn;
 
 }

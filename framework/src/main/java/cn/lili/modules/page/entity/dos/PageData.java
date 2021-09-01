@@ -11,8 +11,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 页面数据DO
@@ -21,8 +19,6 @@ import javax.persistence.Table;
  * @since 2020/12/10 17:42
  */
 @Data
-@Entity
-@Table(name = "li_page_data")
 @TableName("li_page_data")
 @ApiModel(value = "页面数据DO")
 @NoArgsConstructor

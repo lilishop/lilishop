@@ -13,8 +13,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -24,8 +22,6 @@ import javax.validation.constraints.NotNull;
  * @since 2020-02-25 14:10:16
  */
 @Data
-@Entity
-@Table(name = "li_member_evaluation")
 @TableName("li_member_evaluation")
 @ApiModel(value = "会员商品评价")
 @NoArgsConstructor
@@ -93,11 +89,11 @@ public class MemberEvaluation extends BaseEntity {
     @ApiModelProperty(value = "评价回复图片")
     private String replyImage;
 
-    @ApiModelProperty(value = "评论是否有图片 1 有 ,0 没有")
-    private boolean haveImage;
+    @ApiModelProperty(value = "评论是否有图片 true 有 ,false 没有")
+    private Boolean haveImage;
 
-    @ApiModelProperty(value = "回复是否有图片 1 有 ,0 没有")
-    private boolean haveReplyImage;
+    @ApiModelProperty(value = "回复是否有图片 true 有 ,false 没有")
+    private Boolean haveReplyImage;
 
     @ApiModelProperty(value = "回复状态")
     private boolean replyStatus;

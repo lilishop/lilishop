@@ -1,8 +1,8 @@
 package cn.lili.common.security.token;
 
-import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.SecretKey;
 

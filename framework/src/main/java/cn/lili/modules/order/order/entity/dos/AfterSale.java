@@ -8,9 +8,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -20,8 +17,6 @@ import java.util.Date;
  * @since 2020/11/17 7:30 下午
  */
 @Data
-@Entity
-@Table(name = "li_after_sale")
 @TableName("li_after_sale")
 @ApiModel(value = "售后")
 public class AfterSale extends BaseEntity {
@@ -68,7 +63,6 @@ public class AfterSale extends BaseEntity {
     private String goodsName;
 
     @ApiModelProperty(value = "规格json")
-    @Column(columnDefinition = "TEXT")
     private String specs;
     @ApiModelProperty(value = "实际金额")
     private Double flowPrice;

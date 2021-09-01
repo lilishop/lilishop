@@ -36,7 +36,7 @@ public interface Payment {
      * @param payParam api参数
      * @return 公众号内部支付参数
      */
-    default ResultMessage<Object> JSApiPay(HttpServletRequest request, PayParam payParam) {
+    default ResultMessage<Object> jsApiPay(HttpServletRequest request, PayParam payParam) {
         throw new ServiceException(ResultCode.PAY_ERROR);
     }
 

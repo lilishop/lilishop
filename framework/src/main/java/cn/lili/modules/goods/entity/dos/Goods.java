@@ -16,9 +16,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import java.util.Map;
 
@@ -29,8 +26,6 @@ import java.util.Map;
  * @since 2020-02-23 9:14:33
  */
 @Data
-@Entity
-@Table(name = "li_goods")
 @TableName("li_goods")
 @ApiModel(value = "商品")
 public class Goods extends BaseEntity {
@@ -198,7 +193,6 @@ public class Goods extends BaseEntity {
     private String goodsType;
 
     @ApiModelProperty(value = "商品参数json", hidden = true)
-    @Column(columnDefinition = "TEXT")
     @JsonIgnore
     private String params;
 

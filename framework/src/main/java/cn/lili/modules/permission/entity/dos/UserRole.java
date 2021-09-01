@@ -1,13 +1,10 @@
 package cn.lili.modules.permission.entity.dos;
 
-import cn.lili.mybatis.IdEntity;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 用户角色
@@ -16,11 +13,9 @@ import javax.persistence.Table;
  * @since 2020/11/19 12:18
  */
 @Data
-@Entity
-@Table(name = "li_user_role")
 @TableName("li_user_role")
 @ApiModel(value = "用户角色")
-public class UserRole extends IdEntity {
+public class UserRole extends BaseIdEntity {
 
     @ApiModelProperty(value = "用户唯一id")
     private String userId;

@@ -8,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 积分商品实体类
@@ -18,8 +16,6 @@ import javax.persistence.Table;
  * @since 2020-03-19 10:44 上午
  **/
 @Data
-@Entity
-@Table(name = "li_points_goods")
 @TableName("li_points_goods")
 @ApiModel(value = "积分商品")
 @AllArgsConstructor

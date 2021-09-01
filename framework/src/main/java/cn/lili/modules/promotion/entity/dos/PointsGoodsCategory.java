@@ -8,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import java.math.BigDecimal;
 
@@ -20,8 +18,6 @@ import java.math.BigDecimal;
  * @since 2020-03-19 10:44 上午
  **/
 @Data
-@Entity
-@Table(name = "li_points_goods_category")
 @TableName("li_points_goods_category")
 @ApiModel(value = "积分商品分类")
 @AllArgsConstructor

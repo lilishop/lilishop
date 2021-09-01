@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Column;
 import javax.validation.constraints.NotEmpty;
 
 /**
@@ -22,7 +21,6 @@ public class AdminUserDTO extends BaseEntity {
 
     @ApiModelProperty(value = "用户名")
     @NotEmpty(message = "用户名不能为空")
-    @Column(unique = true, nullable = false)
     private String username;
 
     @NotEmpty(message = "密码不能为空")

@@ -7,8 +7,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 设置
@@ -16,8 +14,6 @@ import javax.persistence.Table;
  * @since 2020-02-25 14:10:16
  */
 @Data
-@Entity
-@Table(name = "li_setting")
 @TableName("li_setting")
 @ApiModel(value = "配置")
 @NoArgsConstructor

@@ -1,8 +1,8 @@
 package cn.lili.modules.payment.entity;
 
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -14,10 +14,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -27,21 +23,12 @@ import java.util.Date;
  * @since 2021/1/28 09:21
  */
 @Data
-@Entity
-@Table(name = "li_refund_log")
 @TableName("li_refund_log")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(value = "退款日志")
-public class RefundLog {
-
-    @Id
-    @TableId
-    @TableField
-    @Column(columnDefinition = "bigint(20)")
-    @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id;
+public class RefundLog extends BaseIdEntity {
 
     @ApiModelProperty(value = "会员ID")
     private String memberId;
@@ -59,7 +46,7 @@ public class RefundLog {
     private Double payPrice;
 
     @ApiModelProperty(value = "是否已退款")
-    private Boolean isRefund ;
+    private Boolean isRefund;
 
     @ApiModelProperty(value = "退款方式")
     private String paymentName;
@@ -83,7 +70,7 @@ public class RefundLog {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;

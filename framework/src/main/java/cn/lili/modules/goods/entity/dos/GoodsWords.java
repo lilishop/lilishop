@@ -7,9 +7,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
 
 /**
  * 商品关键字
@@ -18,8 +15,6 @@ import javax.persistence.Table;
  * @since 2020/10/15
  */
 @Data
-@Entity
-@Table(name = "li_goods_words")
 @TableName("li_goods_words")
 @ApiModel(value = "商品关键字")
 @NoArgsConstructor

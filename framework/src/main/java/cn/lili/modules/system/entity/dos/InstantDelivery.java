@@ -11,9 +11,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 即时配送
@@ -22,8 +19,6 @@ import javax.persistence.Table;
  * @since 2020/12/01 15:58
  */
 @Data
-@Entity
-@Table(name = "li_instant_delivery")
 @TableName("li_instant_delivery")
 @ApiModel(value = "即时配送")
 @AllArgsConstructor
@@ -45,7 +40,6 @@ public class InstantDelivery extends BaseEntity {
      * 即时配送配置
      */
     @ApiModelProperty(value = "即时配送配置")
-    @Column(columnDefinition = "TEXT")
     private String deliveryConfig;
     /**
      * 即时配送bean

@@ -6,8 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -19,8 +17,6 @@ import java.math.BigDecimal;
  * @since 2020-02-18 15:18:56
  */
 @Data
-@Entity
-@Table(name = "li_store_goods_label")
 @TableName("li_store_goods_label")
 @ApiModel(value = "店铺商品分类")
 public class StoreGoodsLabel extends BaseEntity {

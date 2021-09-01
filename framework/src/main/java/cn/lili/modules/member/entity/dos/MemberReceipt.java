@@ -1,5 +1,6 @@
 package cn.lili.modules.member.entity.dos;
 
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -11,10 +12,6 @@ import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -24,18 +21,14 @@ import java.util.Date;
  * @since 2021-03-29 14:10:16
  */
 @Data
-@Entity
-@Table(name = "li_member_receipt")
 @TableName("li_member_receipt")
 @ApiModel(value = "会员发票")
-public class MemberReceipt {
+public class MemberReceipt extends BaseIdEntity {
 
     private static final long serialVersionUID = -8210927482915675995L;
 
-    @Id
     @TableId
     @TableField
-    @Column(columnDefinition = "bigint(20)")
     @ApiModelProperty(value = "唯一标识", hidden = true)
     private String id;
 
@@ -70,7 +63,7 @@ public class MemberReceipt {
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;

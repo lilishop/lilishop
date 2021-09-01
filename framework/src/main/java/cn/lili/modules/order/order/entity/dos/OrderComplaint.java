@@ -8,8 +8,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -19,8 +17,6 @@ import java.util.Date;
  * @since 2020/12/4
  **/
 @Data
-@Entity
-@Table(name = "li_order_complaint")
 @TableName("li_order_complaint")
 @ApiModel(value = "订单交易投诉")
 public class OrderComplaint extends BaseEntity {
