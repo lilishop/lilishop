@@ -30,7 +30,7 @@ import java.io.Serializable;
 public class LimitInterceptor {
     private RedisTemplate<String, Serializable> redisTemplate;
 
-    private DefaultRedisScript<Number> limitScript;
+    private DefaultRedisScript<Long> limitScript;
 
     @Autowired
     public void setRedisTemplate(RedisTemplate redisTemplate) {
@@ -38,7 +38,7 @@ public class LimitInterceptor {
     }
 
     @Autowired
-    public void setLimitScript(DefaultRedisScript<Number> limitScript) {
+    public void setLimitScript(DefaultRedisScript<Long> limitScript) {
         this.limitScript = limitScript;
     }
 

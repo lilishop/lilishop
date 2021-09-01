@@ -17,7 +17,7 @@ import java.util.List;
  **/
 @Data
 @Builder
-@Component
+@Component("elasticsearchProperties")
 @NoArgsConstructor
 @AllArgsConstructor
 @ConfigurationProperties(prefix = "lili.data.elasticsearch")
