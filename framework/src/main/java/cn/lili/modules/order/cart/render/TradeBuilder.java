@@ -1,5 +1,6 @@
 package cn.lili.modules.order.cart.render;
 
+import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
@@ -125,6 +126,8 @@ public class TradeBuilder {
                     if (render.step().equals(step)) {
                         render.render(tradeDTO);
                     }
+                } catch (ServiceException e) {
+                    throw e;
                 } catch (Exception e) {
                     log.error("购物车{}渲染异常：", render.getClass(), e);
                 }

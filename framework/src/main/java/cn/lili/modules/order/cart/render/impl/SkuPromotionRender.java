@@ -86,7 +86,7 @@ public class SkuPromotionRender implements CartRenderStep {
                 for (CartVO cartVO : tradeDTO.getCartList()) {
                     for (CartSkuVO cartSkuVO : cartVO.getSkuList()) {
                         cartSkuVO.getPriceDetailDTO().setPayPoint(cartSkuVO.getPoint());
-                        PromotionSkuVO promotionSkuVO = new PromotionSkuVO(PromotionTypeEnum.PINTUAN.name(), cartSkuVO.getPointsId());
+                        PromotionSkuVO promotionSkuVO = new PromotionSkuVO(PromotionTypeEnum.POINTS_GOODS.name(), cartSkuVO.getPointsId());
                         cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
                     }
                 }

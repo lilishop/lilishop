@@ -15,10 +15,7 @@ import cn.lili.modules.promotion.entity.dos.KanjiaActivity;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
-import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
-import cn.lili.modules.promotion.service.KanjiaActivityService;
-import cn.lili.modules.promotion.service.PointsGoodsService;
-import cn.lili.modules.promotion.service.PromotionGoodsService;
+import cn.lili.modules.promotion.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -66,10 +63,16 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
     @Autowired
     private PromotionGoodsService promotionGoodsService;
     /**
+     * 促销商品
+     */
+    @Autowired
+    private SeckillApplyService seckillApplyService;
+    /**
      * 缓存
      */
     @Autowired
     private Cache cache;
+
     @Autowired
     private KanjiaActivityService kanjiaActivityService;
     @Autowired
@@ -95,6 +98,11 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                     values.add(Integer.toString(i));
                     setPromotionStock(keys, values, orderItem);
                 }
+
+                List<Integer> stocks = cache.multiGet(keys);
+                //如果缓存中不存在存在等量的库存值，则重新写入缓存，防止缓存击穿导致无法下单
+                checkStocks(stocks, order);
+
                 //库存扣除结果
                 Boolean skuResult = stringRedisTemplate.execute(quantityScript, keys, values.toArray());
                 //如果库存扣减都成功，则记录成交订单
@@ -141,6 +149,75 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                 break;
         }
     }
+
+
+    /**
+     * 校验库存是否有效
+     *
+     * @param stocks
+     */
+    private void checkStocks(List<Integer> stocks, OrderDetailVO order) {
+        for (int i = 0; i < stocks.size(); i++) {
+            if (null == stocks.get(i)) {
+                initSkuCache(order.getOrderItems());
+                initPromotionCache(order.getOrderItems());
+                return;
+            }
+
+        }
+    }
+
+    /**
+     * 缓存中sku库存值不存在时，将不存在的信息重新写入一边
+     *
+     * @param orderItems
+     */
+    private void initSkuCache(List<OrderItem> orderItems) {
+        orderItems.forEach(orderItem -> {
+            //如果不存在
+            if (!cache.hasKey(GoodsSkuService.getStockCacheKey(orderItem.getSkuId()))) {
+                //内部会自动写入，这里不需要进行二次处理
+                goodsSkuService.getStock(orderItem.getSkuId());
+            }
+        });
+    }
+
+    /**
+     * 初始化促销商品缓存
+     *
+     * @param orderItems
+     */
+    private void initPromotionCache(List<OrderItem> orderItems) {
+
+        //如果促销类型需要库存判定，则做对应处理
+        orderItems.forEach(orderItem -> {
+            if (orderItem.getPromotionType() != null) {
+                //如果此促销有库存概念，则计入
+                if (PromotionTypeEnum.haveStock(orderItem.getPromotionType())) {
+
+                    PromotionTypeEnum promotionTypeEnum = PromotionTypeEnum.valueOf(orderItem.getPromotionType());
+
+                    String cacheKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, orderItem.getPromotionId(), orderItem.getSkuId());
+
+                    switch (promotionTypeEnum) {
+                        case KANJIA:
+                            cache.put(cacheKey, kanjiaActivityGoodsService.getKanJiaGoodsBySku(orderItem.getSkuId()).getStock().intValue());
+                            return;
+                        case POINTS_GOODS:
+                            cache.put(cacheKey, pointsGoodsService.getPointsGoodsVOByMongo(orderItem.getSkuId()).getActiveStock().intValue());
+                            return;
+                        case SECKILL:
+                        case PINTUAN:
+                            cache.put(cacheKey, promotionGoodsService.getPromotionGoodsStock(promotionTypeEnum, orderItem.getPromotionId(), orderItem.getSkuId()));
+                            return;
+                        default:
+                            break;
+                    }
+                }
+            }
+        });
+    }
+
 
     /**
      * 订单出库失败
@@ -208,13 +285,12 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                 List promotionStocks = cache.multiGet(promotionKey);
                 //修改砍价商品库存
                 if (promotionTypeEnum.equals(PromotionTypeEnum.KANJIA)) {
-                    KanjiaActivity kanjiaActivity=kanjiaActivityService.getById(orderItem.getPromotionId());
-                    KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO=kanjiaActivityGoodsService.getKanjiaGoodsDetail(kanjiaActivity.getKanjiaActivityGoodsId());
+                    KanjiaActivity kanjiaActivity = kanjiaActivityService.getById(orderItem.getPromotionId());
+                    KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO = kanjiaActivityGoodsService.getKanjiaGoodsDetail(kanjiaActivity.getKanjiaActivityGoodsId());
                     kanjiaActivityGoodsDTO.setStock(Convert.toInt(promotionStocks.get(0).toString()));
                     kanjiaActivityGoodsService.updateById(kanjiaActivityGoodsDTO);
                     this.mongoTemplate.save(kanjiaActivityGoodsDTO);
-                    orderItem.getPromotionId();
-                //修改积分商品库存
+                    //修改积分商品库存
                 } else if (promotionTypeEnum.equals(PromotionTypeEnum.POINTS_GOODS)) {
                     PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsDetail(orderItem.getPromotionId());
                     pointsGoodsVO.setActiveStock(Convert.toLong(promotionStocks.get(0).toString()));

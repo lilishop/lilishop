@@ -1,6 +1,5 @@
 package cn.lili.timetask.handler.impl.coupon;
 
-import cn.hutool.core.date.DateUtil;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.service.MemberCouponService;
@@ -18,6 +17,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class CouponExecute implements EveryDayExecute {
 
+    /**
+     * 过期常量，过期后或者使用后一定时间内，删除无效的优惠券，物理删除
+     */
+    static final int EXPIRATION_DAY = 7;
+
     @Autowired
     private MemberCouponService memberCouponService;
 
@@ -27,11 +31,18 @@ public class CouponExecute implements EveryDayExecute {
      */
     @Override
     public void execute() {
+        //将过期优惠券变更为过期状体
         LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<MemberCoupon>()
                 .eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name())
-                .le(MemberCoupon::getEndTime, DateUtil.date())
+                .le(MemberCoupon::getEndTime, System.currentTimeMillis())
                 .set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.EXPIRE.name());
         this.memberCouponService.update(updateWrapper);
+
+        //删除过期/已使用的优惠券
+        LambdaUpdateWrapper<MemberCoupon> deleteWrapper = new LambdaUpdateWrapper<MemberCoupon>()
+                //如果结束时间小于 当前时间增加指定删除日期，则删除
+                .le(MemberCoupon::getEndTime, System.currentTimeMillis() + 24 * 60 * 60 * 1000 * EXPIRATION_DAY);
+        this.memberCouponService.remove(deleteWrapper);
 
     }
 
