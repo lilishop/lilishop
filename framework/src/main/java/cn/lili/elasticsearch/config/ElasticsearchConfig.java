@@ -31,10 +31,10 @@ import java.util.List;
  **/
 @Slf4j
 @Configuration
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
 
-    private final ElasticsearchProperties elasticsearchProperties;
+    @Autowired
+    private ElasticsearchProperties elasticsearchProperties;
 
     private RestHighLevelClient client;
 
