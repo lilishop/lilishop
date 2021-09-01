@@ -178,8 +178,14 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
      */
     private void updateGoodsNum(MessageExt messageExt) {
 
-        Goods goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
+        Goods goods = null;
+        try {
+            goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
+        } catch (Exception e) {
+            log.error("商品传输信息错误-{}", messageExt.toString());
+        }
         //更新店铺商品数量
+        assert goods != null;
         storeService.updateStoreGoodsNum(goods.getStoreId());
     }
 
