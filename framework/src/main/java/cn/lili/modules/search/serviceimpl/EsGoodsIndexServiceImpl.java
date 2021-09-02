@@ -1,7 +1,5 @@
 package cn.lili.modules.search.serviceimpl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.StrUtil;
@@ -30,14 +28,13 @@ import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.IterableUtil;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.indices.AnalyzeRequest;
 import org.elasticsearch.client.indices.AnalyzeResponse;
-import org.elasticsearch.search.SearchHit;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -234,14 +231,16 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      */
     @Override
     public void updateEsGoodsIndexAllByList(BasePromotion promotion, String key) {
-        List<EsGoodsIndex> goodsIndices;
+        List<EsGoodsIndex> goodsIndices = new ArrayList<>();
         //如果storeId不为空，则表示是店铺活动
         if (promotion.getStoreId() != null) {
             EsGoodsSearchDTO searchDTO = new EsGoodsSearchDTO();
             searchDTO.setStoreId(promotion.getStoreId());
             //查询出店铺商品
-            Page<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(searchDTO, null);
-            goodsIndices = esGoodsIndices.getContent();
+            SearchPage<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(searchDTO, null);
+            for (SearchHit<EsGoodsIndex> searchHit : esGoodsIndices.getContent()) {
+                goodsIndices.add(searchHit.getContent());
+            }
         } else {
             //否则是平台活动
             Iterable<EsGoodsIndex> all = goodsIndexRepository.findAll();
@@ -494,16 +493,16 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         }
     }
 
-    public List<EsGoodsIndex> searchList(String index) {
-        SearchResponse searchResponse = search(index);
-        SearchHit[] hits = searchResponse.getHits().getHits();
-        List<EsGoodsIndex> goodsIndices = new ArrayList<>();
-        Arrays.stream(hits).forEach(hit -> {
-            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-            EsGoodsIndex person = BeanUtil.mapToBean(sourceAsMap, EsGoodsIndex.class, false, CopyOptions.create());
-            goodsIndices.add(person);
-        });
-        return goodsIndices;
-    }
+//    public List<EsGoodsIndex> searchList(String index) {
+//        SearchResponse searchResponse = search(index);
+//        SearchHit[] hits = searchResponse.getHits().getHits();
+//        List<EsGoodsIndex> goodsIndices = new ArrayList<>();
+//        Arrays.stream(hits).forEach(hit -> {
+//            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+//            EsGoodsIndex person = BeanUtil.mapToBean(sourceAsMap, EsGoodsIndex.class, false, CopyOptions.create());
+//            goodsIndices.add(person);
+//        });
+//        return goodsIndices;
+//    }
 
 }

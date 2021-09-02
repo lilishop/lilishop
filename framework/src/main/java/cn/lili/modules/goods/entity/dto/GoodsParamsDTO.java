@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -15,7 +16,9 @@ import java.util.List;
  */
 @Data
 @ApiModel(value = "商品参数分组")
-public class GoodsParamsDTO {
+public class GoodsParamsDTO implements Serializable {
+
+    private static final long serialVersionUID = 4892783539320159200L;
 
     @TableField(value = "group_id")
     @ApiModelProperty(value = "分组id")

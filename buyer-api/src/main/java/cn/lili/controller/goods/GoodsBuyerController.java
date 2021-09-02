@@ -24,6 +24,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -99,9 +100,9 @@ public class GoodsBuyerController {
 
     @ApiOperation(value = "从ES中获取商品信息")
     @GetMapping("/es")
-    public ResultMessage<Page<EsGoodsIndex>> getGoodsByPageFromEs(EsGoodsSearchDTO goodsSearchParams, PageVO pageVO) {
+    public ResultMessage<SearchPage<EsGoodsIndex>> getGoodsByPageFromEs(EsGoodsSearchDTO goodsSearchParams, PageVO pageVO) {
         pageVO.setNotConvert(true);
-        Page<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(goodsSearchParams, pageVO);
+        SearchPage<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(goodsSearchParams, pageVO);
         return ResultUtil.data(esGoodsIndices);
     }
 

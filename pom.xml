@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.4.RELEASE</version>
+        <version>2.4.10</version>
         <relativePath/>
     </parent>
 
@@ -29,7 +29,7 @@
         <TinyPinyin-verions>2.0.3.RELEASE</TinyPinyin-verions>
         <jasypt-version>3.0.0</jasypt-version>
         <neetl-version>2.9.10</neetl-version>
-        <lombok-version>1.18.10</lombok-version>
+        <lombok-version>1.18.20</lombok-version>
         <aliyun-version>4.5.18</aliyun-version>
         <aliyun-sdk-oss-version>3.11.1</aliyun-sdk-oss-version>
         <aliyun-sdk-dysms-version>2.0.1</aliyun-sdk-dysms-version>

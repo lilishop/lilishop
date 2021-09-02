@@ -8,14 +8,10 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.rocketmq.tags.GoodsTagsEnum;
-import cn.lili.common.security.context.UserContext;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
@@ -36,6 +32,9 @@ import cn.lili.modules.member.service.MemberEvaluationService;
 import cn.lili.modules.search.entity.dos.EsGoodsAttribute;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
+import cn.lili.mybatis.util.PageUtil;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -486,41 +485,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      * @param goods 商品信息
      */
     private void generateEsCheck(Goods goods) {
-        //如果商品通过审核&&并且已上架
-        List<GoodsSku> goodsSkuList = this.list(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goods.getId()));
-        if (goods.getIsAuth().equals(GoodsAuthEnum.PASS.name())
-                && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())
-                && Boolean.FALSE.equals(goods.getDeleteFlag())) {
-            List<EsGoodsIndex> goodsIndices = new ArrayList<>();
-            for (GoodsSku goodsSku : goodsSkuList) {
-                EsGoodsIndex esGoodsOld = goodsIndexService.findById(goodsSku.getId());
-                EsGoodsIndex goodsIndex = new EsGoodsIndex(goodsSku);
-                if (goods.getParams() != null && !goods.getParams().isEmpty()) {
-                    List<GoodsParamsDTO> goodsParamDTOS = JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class);
-                    goodsIndex = new EsGoodsIndex(goodsSku, goodsParamDTOS);
-                }
-                //如果商品库存不为0，并且es中有数据
-                if (goodsSku.getQuantity() > 0 && esGoodsOld == null) {
-                    goodsIndices.add(goodsIndex);
-                } else if (goodsSku.getQuantity() > 0 && esGoodsOld != null) {
-                    goodsIndexService.updateIndex(goodsIndex);
-                }
-            }
-            if (!goodsIndices.isEmpty()) {
-                String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GENERATOR_GOODS_INDEX.name();
-                //发送mq消息
-                rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goodsIndices), RocketmqSendCallbackBuilder.commonCallback());
-            }
-        }
-        //如果商品状态值不支持es搜索，那么将商品信息做下架处理
-        else {
-            for (GoodsSku goodsSku : goodsSkuList) {
-                EsGoodsIndex esGoodsOld = goodsIndexService.findById(goodsSku.getId());
-                if (esGoodsOld != null) {
-                    goodsIndexService.deleteIndexById(goodsSku.getId());
-                }
-            }
-        }
+        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GENERATOR_GOODS_INDEX.name();
+        //发送mq消息
+        rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goods), RocketmqSendCallbackBuilder.commonCallback());
     }
 
     /**
