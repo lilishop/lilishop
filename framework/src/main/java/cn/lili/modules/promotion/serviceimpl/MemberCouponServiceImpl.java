@@ -90,6 +90,9 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     public List<MemberCoupon> getMemberCoupons() {
         QueryWrapper<MemberCoupon> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("member_id", UserContext.getCurrentUser().getId());
+        queryWrapper.ge("member_coupon_status", MemberCouponStatusEnum.NEW.name());
+        queryWrapper.ge("start_time", System.currentTimeMillis());
+        queryWrapper.le("end_time", System.currentTimeMillis());
         return this.list(queryWrapper);
     }
 

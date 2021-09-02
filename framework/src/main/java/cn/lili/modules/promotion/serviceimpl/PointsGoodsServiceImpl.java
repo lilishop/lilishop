@@ -2,6 +2,8 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.util.StrUtil;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.trigger.util.DelayQueueTools;
 import cn.lili.trigger.enums.DelayTypeEnums;
 import cn.lili.trigger.message.PromotionMessage;
@@ -226,6 +228,9 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
     @Override
     public IPage<PointsGoodsVO> getPointsGoodsByPage(PointsGoodsSearchParams searchParams, PageVO page) {
         IPage<PointsGoodsVO> pointsGoodsPage = new Page<>();
+        if (UserContext.getCurrentUser().getRole().equals(UserEnums.MEMBER)) {
+            searchParams.setPromotionStatus(PromotionStatusEnum.START.name());
+        }
         Query query = searchParams.mongoQuery();
         if (page != null) {
             PromotionTools.mongoQueryPageParam(query, page);

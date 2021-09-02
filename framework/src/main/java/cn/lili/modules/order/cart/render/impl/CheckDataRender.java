@@ -85,6 +85,13 @@ public class CheckDataRender implements CartRenderStep {
     private void checkData(TradeDTO tradeDTO) {
         //循环购物车中的商品
         for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
+
+            //如果失效，确认sku为未选中状态
+            if (cartSkuVO.getInvalid()) {
+                //设置购物车未选中
+                cartSkuVO.setChecked(false);
+            }
+
             //缓存中的商品信息
             GoodsSku dataSku = goodsSkuService.getGoodsSkuByIdFromCache(cartSkuVO.getGoodsSku().getId());
             //商品有效性判定

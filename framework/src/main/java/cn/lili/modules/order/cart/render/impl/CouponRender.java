@@ -248,7 +248,7 @@ public class CouponRender implements CartRenderStep {
 
                         // 打折金额=商品金额*折扣/10
                         Double discountCouponPrice = CurrencyUtil.mul(priceDetailDTO.getGoodsPrice(),
-                                CurrencyUtil.div(coupon.getDiscount(), 10, 3));
+                                CurrencyUtil.sub(1, CurrencyUtil.div(coupon.getDiscount(), 10, 3)));
 
                         //平台券则写入店铺承担优惠券比例
                         if (coupon.getIsPlatform()) {

@@ -241,7 +241,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             //商品审核消息
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_AUDIT.name();
             //发送mq消息
-            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goods.getStoreId()), RocketmqSendCallbackBuilder.commonCallback());
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goods), RocketmqSendCallbackBuilder.commonCallback());
         }
         return result;
     }
