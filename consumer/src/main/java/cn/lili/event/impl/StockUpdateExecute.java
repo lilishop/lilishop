@@ -204,7 +204,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                             cache.put(cacheKey, kanjiaActivityGoodsService.getKanJiaGoodsBySku(orderItem.getSkuId()).getStock().intValue());
                             return;
                         case POINTS_GOODS:
-                            cache.put(cacheKey, pointsGoodsService.getPointsGoodsVOByMongo(orderItem.getSkuId()).dgetActiveStock().intValue());
+                            cache.put(cacheKey, pointsGoodsService.getPointsGoodsVOByMongo(orderItem.getSkuId()).getActiveStock().intValue());
                             return;
                         case SECKILL:
                         case PINTUAN:
