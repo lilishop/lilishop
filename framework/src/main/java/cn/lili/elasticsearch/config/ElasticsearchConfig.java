@@ -1,7 +1,6 @@
 package cn.lili.elasticsearch.config;
 
 import cn.hutool.core.convert.Convert;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -30,10 +29,10 @@ import java.util.List;
  **/
 @Slf4j
 @Configuration
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
 
-    private final ElasticsearchProperties elasticsearchProperties;
+    @Autowired
+    private ElasticsearchProperties elasticsearchProperties;
 
     private RestHighLevelClient client;
 

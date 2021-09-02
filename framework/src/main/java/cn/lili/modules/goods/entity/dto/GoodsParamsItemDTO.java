@@ -4,8 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import java.io.Serializable;
 
 /**
  * 商品参数项
@@ -16,7 +15,9 @@ import javax.validation.constraints.Min;
  */
 @Data
 @ApiModel(value = "商品参数列表")
-public class GoodsParamsItemDTO {
+public class GoodsParamsItemDTO implements Serializable {
+
+    private static final long serialVersionUID = -8823775607604091035L;
 
     @ApiModelProperty(value = "参数ID")
     private String paramId;
@@ -32,4 +33,7 @@ public class GoodsParamsItemDTO {
 
     @ApiModelProperty(value = "是否必填，0 不显示 1 显示")
     private Integer required = 0;
+
+    @ApiModelProperty(value = "排序")
+    private Integer sort;
 }

@@ -1,7 +1,6 @@
 package cn.lili.listener;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import cn.lili.event.GoodsCommentCompleteEvent;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
 import cn.lili.modules.distribution.entity.dos.DistributionSelectedGoods;
@@ -10,6 +9,9 @@ import cn.lili.modules.distribution.service.DistributionSelectedGoodsService;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
+import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
+import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.FootPrint;
@@ -19,6 +21,7 @@ import cn.lili.modules.member.service.GoodsCollectionService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.store.service.StoreService;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -98,11 +101,37 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 break;
             //生成索引
             case GENERATOR_GOODS_INDEX:
-                String goodsIndexJsonStr = new String(messageExt.getBody());
-                List<EsGoodsIndex> goodsIndices = JSONUtil.toList(JSONUtil.parseArray(goodsIndexJsonStr), EsGoodsIndex.class);
-                for (EsGoodsIndex goodsIndex : goodsIndices) {
-                    log.info("生成商品索引" + goodsIndex);
-                    this.goodsIndexService.addIndex(goodsIndex);
+                String goodsJsonStr = new String(messageExt.getBody());
+                Goods goods = JSONUtil.toBean(goodsJsonStr, Goods.class);
+                //如果商品通过审核&&并且已上架
+                List<GoodsSku> goodsSkuList = this.goodsSkuService.list(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goods.getId()));
+                if (goods.getIsAuth().equals(GoodsAuthEnum.PASS.name())
+                        && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())
+                        && Boolean.FALSE.equals(goods.getDeleteFlag())) {
+                    for (GoodsSku goodsSku : goodsSkuList) {
+                        EsGoodsIndex esGoodsOld = goodsIndexService.findById(goodsSku.getId());
+                        EsGoodsIndex goodsIndex = new EsGoodsIndex(goodsSku);
+                        if (goods.getParams() != null && !goods.getParams().isEmpty()) {
+                            List<GoodsParamsDTO> goodsParamDTOS = JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class);
+                            goodsIndex = new EsGoodsIndex(goodsSku, goodsParamDTOS);
+                        }
+                        //如果商品库存不为0，并且es中有数据
+                        if (goodsSku.getQuantity() > 0 && esGoodsOld == null) {
+                            log.info("生成商品索引 {}", goodsIndex);
+                            this.goodsIndexService.addIndex(goodsIndex);
+                        } else if (goodsSku.getQuantity() > 0 && esGoodsOld != null) {
+                            goodsIndexService.updateIndex(goodsIndex);
+                        }
+                    }
+                }
+                //如果商品状态值不支持es搜索，那么将商品信息做下架处理
+                else {
+                    for (GoodsSku goodsSku : goodsSkuList) {
+                        EsGoodsIndex esGoodsOld = goodsIndexService.findById(goodsSku.getId());
+                        if (esGoodsOld != null) {
+                            goodsIndexService.deleteIndexById(goodsSku.getId());
+                        }
+                    }
                 }
                 break;
             //审核商品
@@ -143,7 +172,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 this.goodsBuyComplete(messageExt);
                 break;
             default:
-                log.error("商品执行异常：", new String(messageExt.getBody()));
+                log.error("商品执行异常：{}", new String(messageExt.getBody()));
                 break;
         }
     }

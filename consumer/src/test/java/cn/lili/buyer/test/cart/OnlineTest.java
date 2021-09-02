@@ -3,10 +3,10 @@ package cn.lili.buyer.test.cart;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.timetask.handler.impl.statistics.OnlineMemberStatistics;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Calendar;
 import java.util.Random;
@@ -14,7 +14,7 @@ import java.util.Random;
 /**
  * 订单库存扣减
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 class OnlineTest {
 

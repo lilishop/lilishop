@@ -33,10 +33,10 @@ public class LuaScript {
      * @return
      */
     @Bean
-    public DefaultRedisScript<Number> limitScript() {
-        DefaultRedisScript<Number> redisScript = new DefaultRedisScript<>();
+    public DefaultRedisScript<Long> limitScript() {
+        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
         redisScript.setScriptSource(new ResourceScriptSource(new ClassPathResource("script/limit.lua")));
-        redisScript.setResultType(Number.class);
+        redisScript.setResultType(Long.class);
         return redisScript;
     }
 }

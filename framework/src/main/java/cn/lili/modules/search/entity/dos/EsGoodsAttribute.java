@@ -9,6 +9,7 @@ import java.io.Serializable;
 
 /**
  * 商品属性索引
+ *
  * @author paulG
  * @since 2020/10/14
  **/
@@ -47,11 +48,19 @@ public class EsGoodsAttribute implements Serializable {
     @Field(type = FieldType.Text)
     private String value;
 
-    public EsGoodsAttribute(Integer type,String nameId,String name,String valueId,String value){
-        this.type=type;
-        this.nameId=nameId;
-        this.name=name;
-        this.valueId=valueId;
-        this.value=value;
+
+    /**
+     * 排序
+     */
+    @Field(type = FieldType.Integer)
+    private Integer sort;
+
+    public EsGoodsAttribute(Integer type, String nameId, String name, String valueId, String value, Integer sort) {
+        this.type = type;
+        this.nameId = nameId;
+        this.name = name;
+        this.valueId = valueId;
+        this.value = value;
+        this.sort = sort;
     }
 }

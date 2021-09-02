@@ -17,12 +17,13 @@ import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ import java.util.Map;
  * @author paulG
  * @since 2020/10/14
  **/
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 class EsTest {
 
@@ -59,7 +60,7 @@ class EsTest {
     void searchGoods() {
         EsGoodsSearchDTO goodsSearchDTO = new EsGoodsSearchDTO();
 //       goodsSearchDTO.setKeyword("黄");
-        goodsSearchDTO.setProp("IETF_HTTP/3");
+//        goodsSearchDTO.setProp("IETF_HTTP/3");
 //       goodsSearchDTO.setPrice("100_20000");
 //       goodsSearchDTO.setStoreCatId(1L);
 //       goodsSearchDTO.setBrandId(123L);
@@ -70,7 +71,7 @@ class EsTest {
         pageVo.setPageSize(100);
         pageVo.setOrder("desc");
         pageVo.setNotConvert(true);
-        Page<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(goodsSearchDTO, pageVo);
+        SearchPage<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(goodsSearchDTO, pageVo);
         Assertions.assertNotNull(esGoodsIndices);
         esGoodsIndices.getContent().forEach(System.out::println);
 //       esGoodsIndices.getContent().forEach(i -> {

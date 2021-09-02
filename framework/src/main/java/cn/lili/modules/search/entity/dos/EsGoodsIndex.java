@@ -27,7 +27,7 @@ import java.util.Map;
  * @author paulG
  **/
 @Data
-@Document(indexName = "#{elasticsearchProperties.indexPrefix}_" + EsSuffix.GOODS_INDEX_NAME)
+@Document(indexName = "#{@elasticsearchProperties.indexPrefix}_" + EsSuffix.GOODS_INDEX_NAME)
 @ToString
 @NoArgsConstructor
 public class EsGoodsIndex implements Serializable {
@@ -300,6 +300,7 @@ public class EsGoodsIndex implements Serializable {
                                     attribute.setType(1);
                                     attribute.setName(goodsParam.getParamName());
                                     attribute.setValue(goodsParam.getParamValue());
+                                    attribute.setSort(goodsParam.getSort());
                                     attributes.add(attribute);
                                 }
                             }

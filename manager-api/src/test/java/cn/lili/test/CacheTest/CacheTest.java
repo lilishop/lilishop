@@ -5,11 +5,11 @@ import cn.lili.cache.CachePrefix;
 import cn.lili.modules.statistics.util.StatisticsSuffix;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.DefaultTypedTuple;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Date;
 import java.util.Random;
@@ -21,7 +21,7 @@ import java.util.Set;
  * @since v7.0
  * 2021/1/15 16:25
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 class CacheTest {
 
