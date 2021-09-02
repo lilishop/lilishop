@@ -281,7 +281,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
      */
     @Override
     public void usedCoupon(String couponId, Integer usedNum) {
-        CouponVO couponVO = checkStatus(couponId);
+        CouponVO couponVO = this.mongoTemplate.findById(couponId, CouponVO.class);
         couponVO.setUsedNum(couponVO.getUsedNum() + usedNum);
         LambdaUpdateWrapper<Coupon> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(Coupon::getId, couponId);
