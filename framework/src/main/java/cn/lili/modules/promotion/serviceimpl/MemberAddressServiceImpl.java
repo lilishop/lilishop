@@ -1,11 +1,11 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.lili.common.security.context.UserContext;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.member.mapper.MemberAddressMapper;
 import cn.lili.modules.promotion.service.MemberAddressService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -13,8 +13,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 收货地址业务层实现
@@ -27,7 +25,7 @@ import java.util.List;
 public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, MemberAddress> implements MemberAddressService {
 
     @Override
-    public IPage<MemberAddress> getAddressByMember(PageVO page,String memberId) {
+    public IPage<MemberAddress> getAddressByMember(PageVO page, String memberId) {
         return this.page(PageUtil.initPage(page),
                 new QueryWrapper<MemberAddress>()
                         .eq("member_id", memberId));
@@ -69,10 +67,6 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
     public MemberAddress updateMemberAddress(MemberAddress memberAddress) {
         //判断当前地址是否为默认地址，如果为默认需要将其他的地址修改为非默认
         updateDefaultShippingAddress(memberAddress);
-        //修改会员地址
-        this.update(memberAddress,
-                new QueryWrapper<MemberAddress>()
-                        .eq("id", memberAddress.getId()));
         return memberAddress;
     }
 
@@ -85,21 +79,21 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
     /**
      * 修改会员默认收件地址
      *
-     * @param shippingAddress 收件地址
+     * @param memberAddress 收件地址
      */
-    private void updateDefaultShippingAddress(MemberAddress shippingAddress) {
-        //校验此地址是否为第一个会员地址  如果是默认是会员默认地址
-        List<MemberAddress> list = this.baseMapper.selectList(new QueryWrapper<MemberAddress>().eq("member_id", shippingAddress.getMemberId()));
-        if (list.size() == 1) {
-            shippingAddress.setIsDefault(true);
-        }
+    private void updateDefaultShippingAddress(MemberAddress memberAddress) {
         //如果不是默认地址不需要处理
-        if (shippingAddress.getIsDefault()) {
+        if (memberAddress.getIsDefault()) {
             //将会员的地址修改为非默认地址
             LambdaUpdateWrapper<MemberAddress> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
             lambdaUpdateWrapper.set(MemberAddress::getIsDefault, false);
-            lambdaUpdateWrapper.eq(MemberAddress::getMemberId, shippingAddress.getMemberId());
+            lambdaUpdateWrapper.eq(MemberAddress::getMemberId, memberAddress.getMemberId());
             this.update(lambdaUpdateWrapper);
+
+            //修改会员地址
+            this.update(memberAddress,
+                    new QueryWrapper<MemberAddress>()
+                            .eq("id", memberAddress.getId()));
         }
 
     }

@@ -53,6 +53,8 @@ public class KanjiaGoodsActivityBuyerController {
     public ResultMessage<IPage<KanjiaActivityGoodsListVO>> kanjiaActivityGoodsPage(KanjiaActivityGoodsParams kanjiaActivityGoodsParams, PageVO page) {
         // 会员端查询到的肯定是已经开始的活动商品
         kanjiaActivityGoodsParams.setPromotionStatus(PromotionStatusEnum.START.name());
+        kanjiaActivityGoodsParams.setStartTime(System.currentTimeMillis());
+        kanjiaActivityGoodsParams.setEndTime(System.currentTimeMillis());
         return ResultUtil.data(kanJiaActivityGoodsService.kanjiaGoodsVOPage(kanjiaActivityGoodsParams, page));
     }
 

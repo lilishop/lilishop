@@ -2,6 +2,8 @@ package cn.lili.modules.promotion.entity.vos.kanjia;
 
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
@@ -53,10 +55,14 @@ public class KanjiaActivityGoodsParams implements Serializable {
             queryWrapper.eq("promotion_status", promotionStatus);
         }
         if (startTime != null) {
-            queryWrapper.ge("start_time", new Date(startTime));
+            queryWrapper.le("start_time", new Date(startTime));
         }
         if (endTime != null) {
-            queryWrapper.le("end_time", new Date(endTime));
+            queryWrapper.ge("end_time", new Date(endTime));
+        }
+        if (UserContext.getCurrentUser() != null && UserContext.getCurrentUser().getRole().equals(UserEnums.MEMBER)) {
+
+            queryWrapper.gt("stock", 0);
         }
         queryWrapper.eq("delete_flag", false);
         return queryWrapper;
