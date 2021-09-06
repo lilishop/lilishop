@@ -275,6 +275,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         //循环订单
         for (OrderItem orderItem : order.getOrderItems()) {
             skuKeys.add(GoodsSkuService.getStockCacheKey(orderItem.getSkuId()));
+
             GoodsSku goodsSku = new GoodsSku();
             goodsSku.setId(orderItem.getSkuId());
             goodsSku.setGoodsId(orderItem.getGoodsId());
@@ -282,18 +283,22 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
             if (null != orderItem.getPromotionType() && null != orderItem.getPromotionId() && PromotionTypeEnum.haveStock(orderItem.getPromotionType())) {
                 //如果促销有库存信息
                 PromotionTypeEnum promotionTypeEnum = PromotionTypeEnum.valueOf(orderItem.getPromotionType());
-                List promotionStocks = cache.multiGet(promotionKey);
+
                 //修改砍价商品库存
                 if (promotionTypeEnum.equals(PromotionTypeEnum.KANJIA)) {
                     KanjiaActivity kanjiaActivity = kanjiaActivityService.getById(orderItem.getPromotionId());
                     KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO = kanjiaActivityGoodsService.getKanjiaGoodsDetail(kanjiaActivity.getKanjiaActivityGoodsId());
-                    kanjiaActivityGoodsDTO.setStock(Convert.toInt(promotionStocks.get(0).toString()));
+
+                    Integer stock = Integer.parseInt(cache.get(PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, orderItem.getPromotionId(), orderItem.getSkuId())).toString());
+                    kanjiaActivityGoodsDTO.setStock(stock);
+
                     kanjiaActivityGoodsService.updateById(kanjiaActivityGoodsDTO);
                     this.mongoTemplate.save(kanjiaActivityGoodsDTO);
                     //修改积分商品库存
                 } else if (promotionTypeEnum.equals(PromotionTypeEnum.POINTS_GOODS)) {
                     PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsDetail(orderItem.getPromotionId());
-                    pointsGoodsVO.setActiveStock(Convert.toLong(promotionStocks.get(0).toString()));
+                    Integer stock = Integer.parseInt(cache.get(PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, orderItem.getPromotionId(), orderItem.getSkuId())).toString());
+                    pointsGoodsVO.setActiveStock(stock);
                     pointsGoodsService.updateById(pointsGoodsVO);
                     this.mongoTemplate.save(pointsGoodsVO);
                 } else {

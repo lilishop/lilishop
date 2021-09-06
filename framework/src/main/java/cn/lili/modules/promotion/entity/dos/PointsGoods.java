@@ -37,7 +37,7 @@ public class PointsGoods extends BasePromotion {
     private String pointsGoodsCategoryName;
 
     @ApiModelProperty(value = "活动库存数量")
-    private Long activeStock;
+    private Integer activeStock;
 
     @ApiModelProperty(value = "兑换积分")
     private Long points;
