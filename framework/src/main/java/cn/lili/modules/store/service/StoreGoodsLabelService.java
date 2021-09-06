@@ -23,6 +23,14 @@ public interface StoreGoodsLabelService extends IService<StoreGoodsLabel> {
     List<StoreGoodsLabelVO> listByStoreId(String storeId);
 
     /**
+     * 根据分类id集合获取所有店铺分类根据层级排序
+     *
+     * @param ids 商家ID
+     * @return 店铺分类列表
+     */
+    List<StoreGoodsLabel> listByStoreIds(List<String> ids);
+
+    /**
      * 添加商品分类
      *
      * @param storeGoodsLabel 店铺商品分类

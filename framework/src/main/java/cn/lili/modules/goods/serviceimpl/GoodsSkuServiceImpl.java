@@ -117,7 +117,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
 
         this.updateStock(newSkuList);
-        generateEsCheck(goods);
+        generateEs(goods);
     }
 
     @Override
@@ -164,7 +164,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             this.updateBatchById(newSkuList);
         }
         this.updateStock(newSkuList);
-        generateEsCheck(goods);
+        generateEs(goods);
     }
 
     /**
@@ -248,6 +248,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         EsGoodsIndex goodsIndex = goodsIndexService.findById(skuId);
         if (goodsIndex == null) {
             goodsIndex = goodsIndexService.resetEsGoodsIndex(goodsSku, goodsVO.getGoodsParamsDTOList());
+
+            //发送mq消息
+            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.RESET_GOODS_INDEX.name();
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(Collections.singletonList(goodsIndex)), RocketmqSendCallbackBuilder.commonCallback());
         }
 
         //商品规格
@@ -300,7 +304,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 cache.remove(GoodsSkuService.getCacheKeys(sku.getId()));
                 cache.put(GoodsSkuService.getCacheKeys(sku.getId()), sku);
             }
-            generateEsCheck(goods);
+            generateEs(goods);
         }
     }
 
@@ -473,18 +477,18 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //修改规格
         this.update(goodsSku);
         //修改规格索引
-        goodsIndexService.updateIndexCommentNum(goodsSku.getId(), goodsSku.getCommentNum(), highPraiseNum, grade);
+        goodsIndexService.updateIndex(goodsSku.getId(), new EsGoodsIndex().setCommentNum(goodsSku.getCommentNum()).setHighPraiseNum(highPraiseNum).setGrade(grade));
 
         //修改商品的评价数量
         goodsService.updateGoodsCommentNum(goodsSku.getGoodsId());
     }
 
     /**
-     * 生成ES商品索引
+     * 发送生成ES商品索引
      *
      * @param goods 商品信息
      */
-    private void generateEsCheck(Goods goods) {
+    private void generateEs(Goods goods) {
         String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GENERATOR_GOODS_INDEX.name();
         //发送mq消息
         rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goods), RocketmqSendCallbackBuilder.commonCallback());

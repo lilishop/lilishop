@@ -1,6 +1,6 @@
 package cn.lili.modules.goods.serviceimpl;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
@@ -48,6 +48,17 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         return this.list(new LambdaQueryWrapper<Category>().eq(Category::getParentId, parentId));
     }
 
+    /**
+     * 根据分类id集合获取所有分类根据层级排序
+     *
+     * @param ids 分类ID集合
+     * @return 商品分类列表
+     */
+    @Override
+    public List<Category> listByIdsOrderByLevel(List<String> ids) {
+        return this.list(new LambdaQueryWrapper<Category>().in(Category::getId, ids).orderByAsc(Category::getLevel));
+    }
+
     @Override
     public List<CategoryVO> categoryTree() {
         List<CategoryVO> categoryVOList = (List<CategoryVO>) cache.get(CachePrefix.CATEGORY.getPrefix());
@@ -69,13 +80,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                 categoryVOList.add(categoryVO);
             }
         }
-        categoryVOList.sort(new Comparator<CategoryVO>() {
-            @Override
-            public int compare(CategoryVO o1, CategoryVO o2) {
-                return o1.getSortOrder().compareTo(o2.getSortOrder());
-            }
-        });
-        if (categoryVOList.size() != 0) {
+        categoryVOList.sort(Comparator.comparing(Category::getSortOrder));
+        if (!categoryVOList.isEmpty()) {
             cache.put(CachePrefix.CATEGORY.getPrefix(), categoryVOList);
             cache.put(CachePrefix.CATEGORY_ARRAY.getPrefix(), list);
         }
@@ -85,15 +91,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public List<CategoryVO> getStoreCategory(String[] categories) {
         List<String> arr = Arrays.asList(categories.clone());
-        List<CategoryVO> categoryVOList = categoryTree().stream()
+        return categoryTree().stream()
                 .filter(item -> arr.contains(item.getId())).collect(Collectors.toList());
-        return categoryVOList;
-
     }
 
     @Override
     public List<Category> firstCategory() {
-        QueryWrapper queryWrapper = Wrappers.query();
+        QueryWrapper<Category> queryWrapper = Wrappers.query();
         queryWrapper.eq("level", 0);
         return list(queryWrapper);
     }
@@ -108,8 +112,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         for (CategoryVO item : topCatList) {
             if (item.getId().equals(parentId)) {
                 return item.getChildren();
+            } else {
+                return getChildren(parentId, item.getChildren());
             }
-            return getChildren(parentId, item.getChildren());
         }
         return new ArrayList<>();
     }
@@ -129,12 +134,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                 categoryVOList.add(categoryVO);
             }
         }
-        categoryVOList.sort(new Comparator<CategoryVO>() {
-            @Override
-            public int compare(CategoryVO o1, CategoryVO o2) {
-                return o1.getSortOrder().compareTo(o2.getSortOrder());
-            }
-        });
+        categoryVOList.sort(Comparator.comparing(Category::getSortOrder));
         return categoryVOList;
     }
 
@@ -155,7 +155,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         }
         //还为空的话，直接返回
         if (categoryVOList == null) {
-            return null;
+            return new ArrayList<>();
         }
         //循环顶级分类
         for (Category category : categoryVOList) {
@@ -174,7 +174,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     public List<Category> findByAllBySortOrder(Category category) {
         QueryWrapper<Category> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq(category.getLevel() != null, "level", category.getLevel())
-                .eq(StrUtil.isNotBlank(category.getName()), "name", category.getName())
+                .eq(CharSequenceUtil.isNotBlank(category.getName()), "name", category.getName())
                 .eq(category.getParentId() != null, "parent_id", category.getParentId())
                 .ne(category.getId() != null, "id", category.getId())
                 .eq(DELETE_FLAG_COLUMN, false)
@@ -329,7 +329,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     /**
      * 递归自身，找到id等于parentId的对象，获取他的children 返回
      *
-     * @param parentId    父ID
+     * @param parentId       父ID
      * @param categoryVOList 分类VO
      * @return 子分类列表VO
      */
@@ -338,11 +338,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             if (item.getId().equals(parentId)) {
                 return item.getChildren();
             }
-            if (item.getChildren() != null && item.getChildren().size() > 0) {
+            if (item.getChildren() != null && !item.getChildren().isEmpty()) {
                 return getChildren(parentId, categoryVOList);
             }
         }
-        return null;
+        return categoryVOList;
     }
 
     /**

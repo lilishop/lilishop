@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -30,6 +31,7 @@ import java.util.Map;
 @Document(indexName = "#{@elasticsearchProperties.indexPrefix}_" + EsSuffix.GOODS_INDEX_NAME)
 @ToString
 @NoArgsConstructor
+@Accessors(chain = true)
 public class EsGoodsIndex implements Serializable {
 
     private static final long serialVersionUID = -6856471777036048874L;
@@ -100,6 +102,20 @@ public class EsGoodsIndex implements Serializable {
     private String brandId;
 
     /**
+     * 品牌名称
+     */
+    @Field(type = FieldType.Keyword, fielddata = true)
+    @ApiModelProperty("品牌名称")
+    private String brandName;
+
+    /**
+     * 品牌图片地址
+     */
+    @Field(type = FieldType.Keyword, fielddata = true)
+    @ApiModelProperty("品牌图片地址")
+    private String brandUrl;
+
+    /**
      * 分类path
      */
     @Field(type = FieldType.Keyword)
@@ -107,11 +123,25 @@ public class EsGoodsIndex implements Serializable {
     private String categoryPath;
 
     /**
+     * 分类名称path
+     */
+    @Field(type = FieldType.Keyword)
+    @ApiModelProperty("分类名称path")
+    private String categoryNamePath;
+
+    /**
      * 店铺分类id
      */
     @Field(type = FieldType.Keyword)
     @ApiModelProperty("店铺分类id")
     private String storeCategoryPath;
+
+    /**
+     * 店铺分类名称
+     */
+    @Field(type = FieldType.Keyword)
+    @ApiModelProperty("店铺分类名称")
+    private String storeCategoryNamePath;
 
     /**
      * 商品价格
@@ -279,8 +309,8 @@ public class EsGoodsIndex implements Serializable {
     /**
      * 参数索引增加
      *
-     * @param sku
-     * @param goodsParamDTOS
+     * @param sku 商品sku信息
+     * @param goodsParamDTOS 商品参数信息
      */
     public EsGoodsIndex(GoodsSku sku, List<GoodsParamsDTO> goodsParamDTOS) {
         this(sku);

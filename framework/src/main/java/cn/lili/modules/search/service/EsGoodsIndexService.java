@@ -1,10 +1,10 @@
 package cn.lili.modules.search.service;
 
-import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.BasePromotion;
-import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 
 import java.util.List;
@@ -33,22 +33,19 @@ public interface EsGoodsIndexService {
     void updateIndex(EsGoodsIndex goods);
 
     /**
-     * 更新商品索引的购买数量
+     * 更新商品索引的的部分属性（只填写更新的字段，不需要更新的字段不要填写）
      *
      * @param id       商品索引id
-     * @param buyCount 更新后的购买数量
+     * @param goods 更新后的购买数量
      */
-    void updateIndexBuyNum(String id, Integer buyCount);
+    void updateIndex(String id, EsGoodsIndex goods);
 
     /**
-     * 更新商品索引的评论相关数据
+     * 批量商品索引的的属性（ID 必填, 其他字段只填写更新的字段，不需要更新的字段不要填写。）
      *
-     * @param id            商品索引ID
-     * @param commentNum    评论数量
-     * @param highPraiseNum 好评数量
-     * @param grade         好评率
+     * @param goodsIndices 商品索引列表
      */
-    void updateIndexCommentNum(String id, Integer commentNum, Integer highPraiseNum, Double grade);
+    void updateBulkIndex(List<EsGoodsIndex> goodsIndices);
 
     /**
      * 删除索引
