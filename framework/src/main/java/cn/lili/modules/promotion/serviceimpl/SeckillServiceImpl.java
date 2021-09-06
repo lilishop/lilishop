@@ -1,24 +1,17 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
-import cn.lili.trigger.util.DelayQueueTools;
-import cn.lili.trigger.enums.DelayTypeEnums;
-import cn.lili.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.trigger.interfaces.TimeTrigger;
-import cn.lili.trigger.model.TimeExecuteConstant;
-import cn.lili.trigger.model.TimeTriggerMsg;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.DateUtil;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
-import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.enums.SeckillApplyStatusEnum;
 import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
@@ -32,6 +25,13 @@ import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.SeckillSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
+import cn.lili.mybatis.util.PageUtil;
+import cn.lili.trigger.enums.DelayTypeEnums;
+import cn.lili.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.message.PromotionMessage;
+import cn.lili.trigger.model.TimeExecuteConstant;
+import cn.lili.trigger.model.TimeTriggerMsg;
+import cn.lili.trigger.util.DelayQueueTools;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -47,6 +47,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -193,6 +194,9 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
         this.mongoTemplate.save(seckillVO);
         //如果编辑后活动时间不一致，则编辑延时任务
         if (seckill.getStartTime().getTime() != seckillVO.getStartTime().getTime()) {
+            if (seckillVO.getEndTime() == null) {
+                seckillVO.setEndTime(cn.hutool.core.date.DateUtil.endOfDay(new Date()));
+            }
             PromotionMessage promotionMessage = new PromotionMessage(seckillVO.getId(), PromotionTypeEnum.SECKILL.name(), PromotionStatusEnum.START.name(), seckillVO.getStartTime(), seckillVO.getEndTime());
             //更新延时任务
             this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,

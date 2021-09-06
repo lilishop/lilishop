@@ -4,10 +4,9 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.enums.PromotionTypeEnum;
-import cn.lili.trigger.message.PromotionMessage;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.promotion.entity.dos.*;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
@@ -19,6 +18,7 @@ import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
+import cn.lili.trigger.message.PromotionMessage;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -115,7 +115,7 @@ public class PromotionServiceImpl implements PromotionService {
                 break;
             //秒杀
             case SECKILL:
-                result = this.updateSeckill(promotionMessage, esPromotionKey, promotionTypeEnum);
+                result = this.updateSeckill(promotionMessage, promotionTypeEnum);
                 break;
             //拼团
             case PINTUAN:
@@ -381,11 +381,10 @@ public class PromotionServiceImpl implements PromotionService {
      * 修改秒杀状态
      *
      * @param promotionMessage  信息队列传输促销信息实体
-     * @param esPromotionKey    es Key
      * @param promotionTypeEnum 促销分类枚举
      * @return 修改结果
      */
-    private boolean updateSeckill(PromotionMessage promotionMessage, String esPromotionKey, PromotionTypeEnum promotionTypeEnum) {
+    private boolean updateSeckill(PromotionMessage promotionMessage, PromotionTypeEnum promotionTypeEnum) {
         boolean result;
         SeckillVO seckill = this.mongoTemplate.findById(promotionMessage.getPromotionId(), SeckillVO.class);
         if (seckill == null) {

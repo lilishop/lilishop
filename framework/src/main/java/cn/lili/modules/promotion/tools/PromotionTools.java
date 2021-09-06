@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.tools;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.DateUtil;
@@ -8,7 +9,6 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.BasePromotion;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.common.enums.PromotionTypeEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -120,7 +120,9 @@ public class PromotionTools {
             promotionGoods.setPromotionId(promotion.getId());
             promotionGoods.setStoreName(promotion.getStoreName());
             promotionGoods.setTitle(promotion.getPromotionName());
-            promotionGoods.setStartTime(promotion.getStartTime());
+            if (promotionGoods.getStartTime() == null) {
+                promotionGoods.setStartTime(promotion.getStartTime());
+            }
             if (promotion.getEndTime() == null) {
                 promotionGoods.setEndTime(promotion.getEndTime());
             }

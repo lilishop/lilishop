@@ -1,7 +1,7 @@
 package cn.lili.modules.order.order.entity.vo;
 
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.enums.ClientTypeEnum;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.order.order.entity.enums.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
@@ -149,7 +149,7 @@ public class OrderSimpleVO {
         String[] complainStatus = groupComplainStatus.split(",");
         String[] commentStatus = groupCommentStatus.split(",");
         String[] goodsPrice = groupGoodsPrice.split(",");
-//       String goodsId, String skuId, Integer num, String image, String name, String afterSaleStatus
+
         for (int i = 0; i < goodsId.length; i++) {
             orderItemVOS.add(new OrderItemVO(orderItemsSn[i], goodsId[i], skuId[i], num[i], image[i], name[i], afterSaleStatus[i], complainStatus[i], commentStatus[i], Double.parseDouble(goodsPrice[i])));
         }
