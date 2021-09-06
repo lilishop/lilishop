@@ -1,7 +1,10 @@
 package cn.lili.modules.store.serviceimpl;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.modules.store.entity.dos.StoreGoodsLabel;
@@ -61,23 +64,32 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
                 });
 
         //调整店铺分类排序
-        storeGoodsLabelVOList.sort(new Comparator<StoreGoodsLabelVO>() {
-            @Override
-            public int compare(StoreGoodsLabelVO o1, StoreGoodsLabelVO o2) {
-                return o1.getSortOrder().compareTo(o2.getSortOrder());
-            }
-        });
+        storeGoodsLabelVOList.sort(Comparator.comparing(StoreGoodsLabelVO::getSortOrder));
 
-        if (storeGoodsLabelVOList.size() != 0) {
+        if (!storeGoodsLabelVOList.isEmpty()) {
             cache.put(CachePrefix.CATEGORY.getPrefix() + storeId + "tree", storeGoodsLabelVOList);
         }
         return storeGoodsLabelVOList;
+    }
+
+    /**
+     * 根据分类id集合获取所有店铺分类根据层级排序
+     *
+     * @param ids 商家ID
+     * @return 店铺分类列表
+     */
+    @Override
+    public List<StoreGoodsLabel> listByStoreIds(List<String> ids) {
+        return this.list(new LambdaQueryWrapper<StoreGoodsLabel>().in(StoreGoodsLabel::getId, ids).orderByAsc(StoreGoodsLabel::getLevel));
     }
 
     @Override
     public StoreGoodsLabel addStoreGoodsLabel(StoreGoodsLabel storeGoodsLabel) {
         //获取当前登录商家账号
         AuthUser tokenUser = UserContext.getCurrentUser();
+        if (tokenUser == null || CharSequenceUtil.isEmpty(tokenUser.getStoreId())) {
+            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        }
         storeGoodsLabel.setStoreId(tokenUser.getStoreId());
         //保存店铺分类
         this.save(storeGoodsLabel);
@@ -90,6 +102,9 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
     public StoreGoodsLabel editStoreGoodsLabel(StoreGoodsLabel storeGoodsLabel) {
         //修改当前店铺的商品分类
         AuthUser tokenUser = UserContext.getCurrentUser();
+        if (tokenUser == null || CharSequenceUtil.isEmpty(tokenUser.getStoreId())) {
+            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        }
         LambdaUpdateWrapper<StoreGoodsLabel> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.eq(StoreGoodsLabel::getStoreId, tokenUser.getStoreId());
         lambdaUpdateWrapper.eq(StoreGoodsLabel::getId, storeGoodsLabel.getId());
@@ -103,11 +118,15 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
     @Override
     public void removeStoreGoodsLabel(String storeLabelId) {
 
+        AuthUser tokenUser = UserContext.getCurrentUser();
+        if (tokenUser == null || CharSequenceUtil.isEmpty(tokenUser.getStoreId())) {
+            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        }
         //删除店铺分类
         this.removeById(storeLabelId);
 
         //清除缓存
-        removeCache(UserContext.getCurrentUser().getStoreId());
+        removeCache(tokenUser.getStoreId());
     }
 
     /**

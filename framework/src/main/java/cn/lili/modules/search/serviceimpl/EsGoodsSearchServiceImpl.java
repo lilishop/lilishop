@@ -2,22 +2,18 @@ package cn.lili.modules.search.serviceimpl;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.goods.entity.dos.Brand;
-import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
-import cn.lili.modules.goods.service.BrandService;
-import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.entity.dos.EsGoodsRelatedInfo;
 import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
 import cn.lili.modules.search.entity.dto.HotWordsDTO;
 import cn.lili.modules.search.entity.dto.ParamOptions;
 import cn.lili.modules.search.entity.dto.SelectorOptions;
-import cn.lili.modules.search.repository.EsGoodsIndexRepository;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.join.ScoreMode;
@@ -61,21 +57,9 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     private static final String ATTR_VALUE = "attrList.value";
     private static final String ATTR_NAME = "attrList.name";
     private static final String ATTR_SORT = "attrList.sort";
+    private static final String ATTR_BRAND_ID = "brandId";
     private static final String ATTR_NAME_KEY = "nameList";
     private static final String ATTR_VALUE_KEY = "valueList";
-
-    @Autowired
-    private EsGoodsIndexRepository goodsIndexRepository;
-    /**
-     * 商品分类
-     */
-    @Autowired
-    private CategoryService categoryService;
-    /**
-     * 品牌
-     */
-    @Autowired
-    private BrandService brandService;
     /**
      * ES
      */
@@ -123,9 +107,14 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     public EsGoodsRelatedInfo getSelector(EsGoodsSearchDTO goodsSearch, PageVO pageVo) {
         NativeSearchQueryBuilder builder = createSearchQueryBuilder(goodsSearch, null, true);
         //分类
-        builder.addAggregation(AggregationBuilders.terms("categoryAgg").field("categoryPath"));
+        AggregationBuilder categoryNameBuilder = AggregationBuilders.terms("categoryNameAgg").field("categoryNamePath.keyword");
+        builder.addAggregation(AggregationBuilders.terms("categoryAgg").field("categoryPath").subAggregation(categoryNameBuilder));
+
         //品牌
-        builder.addAggregation(AggregationBuilders.terms("brandAgg").field("brandId").size(Integer.MAX_VALUE));
+        AggregationBuilder brandNameBuilder = AggregationBuilders.terms("brandNameAgg").field("brandName.keyword");
+        builder.addAggregation(AggregationBuilders.terms("brandIdNameAgg").field(ATTR_BRAND_ID).size(Integer.MAX_VALUE).subAggregation(brandNameBuilder));
+        AggregationBuilder brandUrlBuilder = AggregationBuilders.terms("brandUrlAgg").field("brandUrl.keyword");
+        builder.addAggregation(AggregationBuilders.terms("brandIdUrlAgg").field(ATTR_BRAND_ID).size(Integer.MAX_VALUE).subAggregation(brandUrlBuilder));
         //参数
         AggregationBuilder valuesBuilder = AggregationBuilders.terms("valueAgg").field(ATTR_VALUE);
         AggregationBuilder sortBuilder = AggregationBuilders.sum("sortAgg").field(ATTR_SORT);
@@ -162,18 +151,22 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         if (categoryBuckets != null && !categoryBuckets.isEmpty()) {
             for (Terms.Bucket categoryBucket : categoryBuckets) {
                 String categoryPath = categoryBucket.getKey().toString();
-                String[] split = categoryPath.split(",");
-                for (String s : split) {
-                    if (CharSequenceUtil.isNotEmpty(s)) {
-                        Category category = categoryService.getById(s);
-                        if (category != null) {
-                            SelectorOptions so = new SelectorOptions();
-                            so.setName(category.getName());
-                            so.setValue(category.getId());
-                            if (!categoryOptions.contains(so)) {
-                                categoryOptions.add(so);
-                            }
-                        }
+                ParsedStringTerms categoryNameAgg = categoryBucket.getAggregations().get("categoryNameAgg");
+                List<? extends Terms.Bucket> categoryNameBuckets = categoryNameAgg.getBuckets();
+
+
+                String categoryNamePath = categoryPath;
+                if (!categoryBuckets.isEmpty()) {
+                    categoryNamePath = categoryNameBuckets.get(0).getKey().toString();
+                }
+                String[] split = ArrayUtil.distinct(categoryPath.split(","));
+                String[] nameSplit = categoryNamePath.split(",");
+                for (int i = 0; i < split.length; i++) {
+                    SelectorOptions so = new SelectorOptions();
+                    so.setName(nameSplit[i]);
+                    so.setValue(split[i]);
+                    if (!categoryOptions.contains(so)) {
+                        categoryOptions.add(so);
                     }
                 }
 
@@ -182,25 +175,47 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         esGoodsRelatedInfo.setCategories(categoryOptions);
 
         //品牌
-        ParsedStringTerms brandTerms = (ParsedStringTerms) aggregationMap.get("brandAgg");
-        List<? extends Terms.Bucket> brandBuckets = brandTerms.getBuckets();
+        ParsedStringTerms brandNameTerms = (ParsedStringTerms) aggregationMap.get("brandIdNameAgg");
+        ParsedStringTerms brandUrlTerms = (ParsedStringTerms) aggregationMap.get("brandIdUrlAgg");
+        List<? extends Terms.Bucket> brandBuckets = brandNameTerms.getBuckets();
+        List<? extends Terms.Bucket> brandUrlBuckets = brandUrlTerms.getBuckets();
         List<SelectorOptions> brandOptions = new ArrayList<>();
         if (brandBuckets != null && !brandBuckets.isEmpty()) {
-            for (Terms.Bucket brandBucket : brandBuckets) {
+            for (int i = 0; i < brandBuckets.size(); i++) {
+                String brandId = brandBuckets.get(i).getKey().toString();
                 if (CharSequenceUtil.isNotEmpty(goodsSearch.getBrandId())) {
                     List<String> brandList = Arrays.asList(goodsSearch.getBrandId().split("@"));
-                    if (brandList.contains(brandBucket.getKey().toString())) {
+                    if (brandList.contains(brandId)) {
                         continue;
                     }
                 }
-                Brand brand = brandService.getById(brandBucket.getKey().toString());
-                if (brand != null) {
-                    SelectorOptions so = new SelectorOptions();
-                    so.setName(brand.getName());
-                    so.setValue(brand.getId());
-                    so.setUrl(brand.getLogo());
-                    brandOptions.add(so);
+
+                String brandName = "";
+                if (brandBuckets.get(i).getAggregations() != null && brandBuckets.get(i).getAggregations().get("brandNameAgg") != null) {
+                    ParsedStringTerms brandNameAgg = brandBuckets.get(i).getAggregations().get("brandNameAgg");
+                    List<? extends Terms.Bucket> categoryNameBuckets = brandNameAgg.getBuckets();
+                    if (categoryNameBuckets != null && !categoryNameBuckets.isEmpty()) {
+                        brandName = categoryNameBuckets.get(0).getKey().toString();
+                    }
                 }
+
+                String brandUrl = "";
+                if (brandUrlBuckets != null && !brandUrlBuckets.isEmpty() &&
+                        brandUrlBuckets.get(i).getAggregations() != null &&
+                        brandUrlBuckets.get(i).getAggregations().get("brandUrlAgg") != null) {
+
+                    ParsedStringTerms brandUrlAgg = brandUrlBuckets.get(i).getAggregations().get("brandUrlAgg");
+                    List<? extends Terms.Bucket> categoryUrlBuckets = brandUrlAgg.getBuckets();
+                    if (categoryUrlBuckets != null && !categoryUrlBuckets.isEmpty()) {
+                        brandUrl = categoryUrlBuckets.get(0).getKey().toString();
+                    }
+
+                }
+                SelectorOptions so = new SelectorOptions();
+                so.setName(brandName);
+                so.setValue(brandId);
+                so.setUrl(brandUrl);
+                brandOptions.add(so);
             }
         }
         esGoodsRelatedInfo.setBrands(brandOptions);
@@ -339,7 +354,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         //品牌判定
         if (CharSequenceUtil.isNotEmpty(searchDTO.getBrandId())) {
             String[] brands = searchDTO.getBrandId().split("@");
-            filterBuilder.must(QueryBuilders.termsQuery("brandId", brands));
+            filterBuilder.must(QueryBuilders.termsQuery(ATTR_BRAND_ID, brands));
         }
         if (searchDTO.getRecommend() != null) {
             filterBuilder.filter(QueryBuilders.termQuery("storeId", searchDTO.getRecommend()));

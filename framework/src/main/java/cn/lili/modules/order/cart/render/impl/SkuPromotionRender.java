@@ -59,13 +59,11 @@ public class SkuPromotionRender implements CartRenderStep {
      */
     private void renderBasePrice(TradeDTO tradeDTO) {
         tradeDTO.getCartList().forEach(
-                cartVO -> {
-                    cartVO.getSkuList().forEach(cartSkuVO -> {
-                        PriceDetailDTO priceDetailDTO = cartSkuVO.getPriceDetailDTO();
-                        priceDetailDTO.setGoodsPrice(cartSkuVO.getSubTotal());
-                        priceDetailDTO.setDiscountPrice(CurrencyUtil.sub(priceDetailDTO.getOriginalPrice(), cartSkuVO.getSubTotal()));
-                    });
-                }
+                cartVO -> cartVO.getSkuList().forEach(cartSkuVO -> {
+                    PriceDetailDTO priceDetailDTO = cartSkuVO.getPriceDetailDTO();
+                    priceDetailDTO.setGoodsPrice(cartSkuVO.getSubTotal());
+                    priceDetailDTO.setDiscountPrice(CurrencyUtil.sub(priceDetailDTO.getOriginalPrice(), cartSkuVO.getSubTotal()));
+                })
         );
     }
 

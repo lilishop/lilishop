@@ -1,16 +1,16 @@
 package cn.lili.trigger.executor;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.trigger.interfaces.TimeTrigger;
-import cn.lili.trigger.TimeTriggerExecutor;
-import cn.lili.trigger.message.PintuanOrderMessage;
-import cn.lili.trigger.message.PromotionMessage;
-import cn.lili.trigger.model.TimeExecuteConstant;
-import cn.lili.trigger.model.TimeTriggerMsg;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.service.PromotionService;
+import cn.lili.trigger.TimeTriggerExecutor;
+import cn.lili.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.message.PintuanOrderMessage;
+import cn.lili.trigger.message.PromotionMessage;
+import cn.lili.trigger.model.TimeExecuteConstant;
+import cn.lili.trigger.model.TimeTriggerMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -62,11 +62,13 @@ public class PromotionTimeTriggerExecutor implements TimeTriggerExecutor {
                 //促销活动开始后，设置促销活动结束的定时任务
                 promotionMessage.setPromotionStatus(PromotionStatusEnum.END.name());
                 String uniqueKey = "{TIME_TRIGGER_" + promotionMessage.getPromotionType() + "}_" + promotionMessage.getPromotionId();
-                //结束时间（延时一分钟）
-                long closeTime = promotionMessage.getEndTime().getTime() + 60000;
-                TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR, closeTime, promotionMessage, uniqueKey, rocketmqCustomProperties.getPromotionTopic());
-                //添加延时任务
-                timeTrigger.addDelay(timeTriggerMsg);
+                if (promotionMessage.getEndTime() != null) {
+                    //结束时间（延时一分钟）
+                    long closeTime = promotionMessage.getEndTime().getTime() + 60000;
+                    TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR, closeTime, promotionMessage, uniqueKey, rocketmqCustomProperties.getPromotionTopic());
+                    //添加延时任务
+                    timeTrigger.addDelay(timeTriggerMsg);
+                }
             } else {
                 //不是开始，则修改活动状态
                 promotionService.updatePromotionStatus(promotionMessage);

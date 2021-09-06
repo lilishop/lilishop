@@ -91,12 +91,12 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
 
         GoodsSku sku = goodsSkuService.getGoodsSkuByIdFromCache(skuId);
         if (sku == null) {
-            return null;
+            return new ArrayList<>();
         }
 
-        List<PromotionGoods> promotionGoods = new ArrayList<>();
-        promotionGoods.addAll(this.list(new LambdaQueryWrapper<PromotionGoods>()
+        List<PromotionGoods> promotionGoods = new ArrayList<>(this.list(new LambdaQueryWrapper<PromotionGoods>()
                 .eq(PromotionGoods::getSkuId, skuId)
+                .le(PromotionGoods::getStartTime, System.currentTimeMillis())
                 .eq(PromotionGoods::getPromotionStatus, PromotionStatusEnum.START.name())));
 
 
@@ -170,8 +170,8 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         promotionGoodsPage.setSize(page.getSize());
         promotionGoodsPage.setTotal(page.getTotal());
         promotionGoodsPage.setPages(page.getPages());
-        for (PromotionGoods record : page.getRecords()) {
-            PromotionGoodsDTO promotionGoodsDTO = this.wrapperPromotionGoodsDTO(record);
+        for (PromotionGoods promotionGoods : page.getRecords()) {
+            PromotionGoodsDTO promotionGoodsDTO = this.wrapperPromotionGoodsDTO(promotionGoods);
             promotionGoodsList.add(promotionGoodsDTO);
         }
         promotionGoodsPage.setRecords(promotionGoodsList);
@@ -380,8 +380,8 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         promotionGoodsPage.setTotal(page.getTotal());
         promotionGoodsPage.setPages(page.getPages());
         List<PromotionGoods> records = page.getRecords();
-        for (PromotionGoods record : records) {
-            PromotionGoodsDTO promotionGoodsDTO = this.wrapperPromotionGoodsDTO(record);
+        for (PromotionGoods promotionGoods : records) {
+            PromotionGoodsDTO promotionGoodsDTO = this.wrapperPromotionGoodsDTO(promotionGoods);
             promotionGoodsList.add(promotionGoodsDTO);
         }
         promotionGoodsPage.setRecords(promotionGoodsList);
@@ -414,9 +414,9 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         searchParams.setOrder(pageVo.getOrder());
         IPage<GoodsSku> goodsSkuByPage = goodsSkuService.getGoodsSkuByPage(searchParams);
         //将查询到的商品sku转换为促销商品
-        for (GoodsSku record : goodsSkuByPage.getRecords()) {
-            PromotionGoodsDTO promotionGoods = new PromotionGoodsDTO(record);
-            promotionGoods.setGoodsImage(record.getThumbnail());
+        for (GoodsSku goodsSku : goodsSkuByPage.getRecords()) {
+            PromotionGoodsDTO promotionGoods = new PromotionGoodsDTO(goodsSku);
+            promotionGoods.setGoodsImage(goodsSku.getThumbnail());
             promotionGoods.setStartTime(promotion.getStartTime());
             promotionGoods.setEndTime(promotion.getEndTime());
             promotionGoods.setTitle(promotion.getPromotionName());

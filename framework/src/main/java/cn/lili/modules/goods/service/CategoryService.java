@@ -26,6 +26,14 @@ public interface CategoryService extends IService<Category> {
     List<Category> dbList(String parentId);
 
     /**
+     * 根据分类id集合获取所有分类根据层级排序
+     *
+     * @param ids 分类ID集合
+     * @return 商品分类列表
+     */
+    List<Category> listByIdsOrderByLevel(List<String> ids);
+
+    /**
      * 获取分类树
      *
      * @return 分类树

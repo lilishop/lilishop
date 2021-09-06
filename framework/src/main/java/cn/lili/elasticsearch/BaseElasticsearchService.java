@@ -140,6 +140,26 @@ public abstract class BaseElasticsearchService {
                         "          }\n" +
                         "        }\n" +
                         "      },\n" +
+                        "      \"brandName\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fielddata\": true,\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"brandUrl\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fielddata\": true,\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
                         "      \"buyCount\": {\n" +
                         "        \"type\": \"long\"\n" +
                         "      },\n" +
@@ -154,6 +174,16 @@ public abstract class BaseElasticsearchService {
                         "        }\n" +
                         "      },\n" +
                         "      \"categoryPath\": {\n" +
+                        "        \"type\": \"text\",\n" +
+                        "        \"fielddata\": true,\n" +
+                        "        \"fields\": {\n" +
+                        "          \"keyword\": {\n" +
+                        "            \"type\": \"keyword\",\n" +
+                        "            \"ignore_above\": 256\n" +
+                        "          }\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"categoryNamePath\": {\n" +
                         "        \"type\": \"text\",\n" +
                         "        \"fielddata\": true,\n" +
                         "        \"fields\": {\n" +

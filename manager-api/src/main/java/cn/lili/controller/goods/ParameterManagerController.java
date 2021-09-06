@@ -44,7 +44,7 @@ public class ParameterManagerController {
     @PutMapping
     public ResultMessage<Parameters> update(@Valid Parameters parameters) {
 
-        if (parametersService.updateById(parameters)) {
+        if (parametersService.updateParameter(parameters)) {
             return ResultUtil.data(parameters);
         }
         throw new ServiceException(ResultCode.PARAMETER_UPDATE_ERROR);
