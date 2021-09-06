@@ -119,7 +119,6 @@ public enum ResultCode {
     USER_OLD_PASSWORD_ERROR(20016, "旧密码不正确"),
     USER_COLLECTION_EXIST(20017, "无法重复收藏"),
     USER_GRADE_IS_DEFAULT(20018, "会员等级为默认会员等级"),
-    DELETE_EXIST(20019, "无法重复收藏"),
     USER_NOT_BINDING(20020, "未绑定用户"),
     USER_AUTO_REGISTER_ERROR(20021, "自动注册失败,请稍后重试"),
     USER_OVERDUE_CONNECT_ERROR(20022, "授权信息已过期，请重新授权/登录"),

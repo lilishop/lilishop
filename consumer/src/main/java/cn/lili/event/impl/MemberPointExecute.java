@@ -102,7 +102,9 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
         } else if (orderMessage.getNewStatus().equals(OrderStatusEnum.CANCELLED)) {
             //根据订单编号获取订单数据,如果为积分订单则跳回
             Order order = orderService.getBySn(orderMessage.getOrderSn());
-            if (order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINTS.name()) && order.getPriceDetailDTO().getPayPoint() != null) {
+            //增加对积分订单的判定，如果积分支付，取消订单则退还用户积分
+            if (StringUtils.isNotEmpty(order.getOrderPromotionType()) &&
+                    order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINTS.name()) && order.getPriceDetailDTO().getPayPoint() != null) {
                 memberService.updateMemberPoint(Convert.toLong(order.getPriceDetailDTO().getPayPoint()), PointTypeEnum.INCREASE.name(), order.getMemberId(), "订单取消,恢复积分:" + order.getPriceDetailDTO().getPayPoint() + "分");
             }
         }
