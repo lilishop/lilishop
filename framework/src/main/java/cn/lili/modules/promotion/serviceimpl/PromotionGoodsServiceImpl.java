@@ -96,7 +96,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
 
         List<PromotionGoods> promotionGoods = new ArrayList<>(this.list(new LambdaQueryWrapper<PromotionGoods>()
                 .eq(PromotionGoods::getSkuId, skuId)
-                .le(PromotionGoods::getStartTime, System.currentTimeMillis())
+//                .ge(PromotionGoods::getStartTime, new Date())
                 .eq(PromotionGoods::getPromotionStatus, PromotionStatusEnum.START.name())));
 
 
