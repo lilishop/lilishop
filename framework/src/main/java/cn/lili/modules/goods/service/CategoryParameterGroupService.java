@@ -30,5 +30,14 @@ public interface CategoryParameterGroupService extends IService<CategoryParamete
      * @return 参数组列表
      */
     List<CategoryParameterGroup> getCategoryGroup(String categoryId);
+
+
+    /**
+     * 更新分类参数组绑定信息
+     *
+     * @param categoryParameterGroup 分类参数组信息
+     * @return 是否成功
+     */
+    boolean updateCategoryGroup(CategoryParameterGroup categoryParameterGroup);
     
 }

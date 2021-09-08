@@ -1,5 +1,7 @@
 package cn.lili.modules.goods.serviceimpl;
 
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dos.CategoryParameterGroup;
 import cn.lili.modules.goods.entity.dos.Parameters;
 import cn.lili.modules.goods.entity.vos.ParameterGroupVO;
@@ -50,11 +52,27 @@ public class CategoryParameterGroupServiceImpl extends ServiceImpl<CategoryParam
     }
 
     /**
+     * 更新分类参数组绑定信息
+     *
+     * @param categoryParameterGroup 分类参数组信息
+     * @return 是否成功
+     */
+    @Override
+    public boolean updateCategoryGroup(CategoryParameterGroup categoryParameterGroup) {
+        CategoryParameterGroup origin = this.getById(categoryParameterGroup.getId());
+        if (origin == null) {
+            throw new ServiceException(ResultCode.CATEGORY_PARAMETER_NOT_EXIST);
+        }
+
+        return false;
+    }
+
+    /**
      * 拼装参数组和参数的返回值
      *
      * @param groupList 参数组list
      * @param paramList 商品参数list
-     * @return
+     * @return 参数组和参数的返回值
      */
     public List<ParameterGroupVO> convertParamList(List<CategoryParameterGroup> groupList, List<Parameters> paramList) {
         Map<String, List<Parameters>> map = new HashMap<>(paramList.size());

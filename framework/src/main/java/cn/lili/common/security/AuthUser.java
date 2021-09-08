@@ -13,6 +13,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class AuthUser implements Serializable {
 
+    private static final long serialVersionUID = 582441893336003319L;
+
     /**
      * 用户名
      */

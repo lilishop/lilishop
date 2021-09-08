@@ -1,6 +1,8 @@
 package cn.lili.common.security.filter;
 
 
+import cn.hutool.http.HtmlUtil;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.util.regex.Pattern;
@@ -107,25 +109,26 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private String cleanXSS(String value) {
         if (value != null) {
-            //推荐使用ESAPI库来避免脚本攻击,value = ESAPI.encoder().canonicalize(value);
-            //避免script 标签
-            value = SCRIPT_PATTERN1.matcher(value).replaceAll("");
-            //删除单个的 </script> 标签
-            value = SCRIPT_PATTERN2.matcher(value).replaceAll("");
-            //删除单个的<script ...> 标签
-            value = SCRIPT_PATTERN3.matcher(value).replaceAll("");
-            //避免 javascript: 表达式
-            value = SCRIPT_PATTERN4.matcher(value).replaceAll("");
-            //避免src形式的表达式
-            value = SRC_PATTERN.matcher(value).replaceAll("");
-            //避免 eval(...) 形式表达式
-            value = EVAL_PATTERN.matcher(value).replaceAll("");
-            //避免 e­xpression(...) 表达式
-            value = E_­_XPRESSION_PATTERN.matcher(value).replaceAll("");
-            //避免 vbscript:表达式
-            value = VB_SCRIPT_PATTERN.matcher(value).replaceAll("");
-            //避免 onload= 表达式
-            value = ONLOAD_PATTERN.matcher(value).replaceAll("");
+//            //推荐使用ESAPI库来避免脚本攻击,value = ESAPI.encoder().canonicalize(value);
+//            //避免script 标签
+//            value = SCRIPT_PATTERN1.matcher(value).replaceAll("");
+//            //删除单个的 </script> 标签
+//            value = SCRIPT_PATTERN2.matcher(value).replaceAll("");
+//            //删除单个的<script ...> 标签
+//            value = SCRIPT_PATTERN3.matcher(value).replaceAll("");
+//            //避免 javascript: 表达式
+//            value = SCRIPT_PATTERN4.matcher(value).replaceAll("");
+//            //避免src形式的表达式
+//            value = SRC_PATTERN.matcher(value).replaceAll("");
+//            //避免 eval(...) 形式表达式
+//            value = EVAL_PATTERN.matcher(value).replaceAll("");
+//            //避免 e­xpression(...) 表达式
+//            value = E_­_XPRESSION_PATTERN.matcher(value).replaceAll("");
+//            //避免 vbscript:表达式
+//            value = VB_SCRIPT_PATTERN.matcher(value).replaceAll("");
+//            //避免 onload= 表达式
+//            value = ONLOAD_PATTERN.matcher(value).replaceAll("");
+            value = HtmlUtil.filter(value);
         }
         return value;
     }

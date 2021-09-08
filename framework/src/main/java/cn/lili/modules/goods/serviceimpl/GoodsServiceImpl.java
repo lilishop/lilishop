@@ -274,6 +274,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     public Boolean updateGoodsMarketAble(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, String underReason) {
+        boolean result;
+
+        if (UserContext.getCurrentUser() == null || UserContext.getCurrentUser().getStoreId() == null) {
+            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        }
+        String storeId = UserContext.getCurrentUser().getStoreId();
 
         //如果商品为空，直接返回
         if (goodsIds == null || goodsIds.isEmpty()) {
@@ -283,16 +289,16 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         LambdaUpdateWrapper<Goods> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.set(Goods::getMarketEnable, goodsStatusEnum.name());
         updateWrapper.set(Goods::getUnderMessage, underReason);
+        updateWrapper.eq(Goods::getStoreId, storeId);
         updateWrapper.in(Goods::getId, goodsIds);
-        this.update(updateWrapper);
+        result = this.update(updateWrapper);
 
         //修改规格商品
-        List<Goods> goodsList = this.list(new LambdaQueryWrapper<Goods>().in(Goods::getId, goodsIds));
+        List<Goods> goodsList = this.list(new LambdaQueryWrapper<Goods>().in(Goods::getId, goodsIds).eq(Goods::getStoreId, storeId));
         for (Goods goods : goodsList) {
             goodsSkuService.updateGoodsSkuStatus(goods);
         }
-        return true;
-
+        return result;
     }
 
     @Override

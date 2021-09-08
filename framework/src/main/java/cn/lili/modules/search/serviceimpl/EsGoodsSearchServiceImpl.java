@@ -85,6 +85,9 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
     @Override
     public List<String> getHotWords(Integer count) {
+        if (count == null) {
+            count = 0;
+        }
         List<String> hotWords = new ArrayList<>();
         // redis 排序中，下标从0开始，所以这里需要 -1 处理
         count = count - 1;
@@ -118,7 +121,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         //参数
         AggregationBuilder valuesBuilder = AggregationBuilders.terms("valueAgg").field(ATTR_VALUE);
         AggregationBuilder sortBuilder = AggregationBuilders.sum("sortAgg").field(ATTR_SORT);
-        AggregationBuilder paramsNameBuilder = AggregationBuilders.terms("nameAgg").field(ATTR_NAME).subAggregation(sortBuilder).order(BucketOrder.aggregation("sortAgg",false)).subAggregation(valuesBuilder);
+        AggregationBuilder paramsNameBuilder = AggregationBuilders.terms("nameAgg").field(ATTR_NAME).subAggregation(sortBuilder).order(BucketOrder.aggregation("sortAgg", false)).subAggregation(valuesBuilder);
         builder.addAggregation(AggregationBuilders.nested("attrAgg", ATTR_PATH).subAggregation(paramsNameBuilder));
         NativeSearchQuery searchQuery = builder.build();
         SearchHits<EsGoodsIndex> search = restTemplate.search(searchQuery, EsGoodsIndex.class);
