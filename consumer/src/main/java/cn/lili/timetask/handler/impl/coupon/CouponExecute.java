@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  * 优惠券状态监测
  *
  * @author Bulbasaur
- * @since: 2021/5/24 10:08 上午
+ * @since 2021/5/24 10:08 上午
  */
 @Component
 public class CouponExecute implements EveryDayExecute {

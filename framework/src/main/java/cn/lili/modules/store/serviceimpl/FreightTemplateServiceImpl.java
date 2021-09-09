@@ -7,7 +7,6 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.store.entity.dos.FreightTemplate;
 import cn.lili.modules.store.entity.dos.FreightTemplateChild;
@@ -15,6 +14,7 @@ import cn.lili.modules.store.entity.vos.FreightTemplateVO;
 import cn.lili.modules.store.mapper.FreightTemplateMapper;
 import cn.lili.modules.store.service.FreightTemplateChildService;
 import cn.lili.modules.store.service.FreightTemplateService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -58,7 +58,7 @@ public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMappe
         list = new ArrayList<>();
         //查询运费模板
         LambdaQueryWrapper<FreightTemplate> lambdaQueryWrapper = Wrappers.lambdaQuery();
-        lambdaQueryWrapper.eq(FreightTemplate::getStoreId, UserContext.getCurrentUser().getStoreId());
+        lambdaQueryWrapper.eq(FreightTemplate::getStoreId, storeId);
         List<FreightTemplate> freightTemplates = this.baseMapper.selectList(lambdaQueryWrapper);
         if (!freightTemplates.isEmpty()) {
             //如果模板不为空则查询子模板信息

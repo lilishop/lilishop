@@ -6,7 +6,7 @@ import lombok.Data;
 /**
  * 订单批量发货DTO
  * @author Bulbasaur
- * @since: 2021/5/26 4:21 下午
+ * @since 2021/5/26 4:21 下午
  *
  */
 @Data

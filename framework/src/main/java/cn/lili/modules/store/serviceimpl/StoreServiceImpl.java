@@ -4,9 +4,9 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.Goods;
@@ -28,6 +28,7 @@ import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.mapper.StoreMapper;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.store.service.StoreService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -88,8 +89,9 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
 
     @Override
     public StoreVO getStoreDetail() {
-        StoreVO storeVO = this.baseMapper.getStoreDetail(UserContext.getCurrentUser().getStoreId());
-        storeVO.setNickName(UserContext.getCurrentUser().getNickName());
+        AuthUser currentUser = UserContext.getCurrentUser();
+        StoreVO storeVO = this.baseMapper.getStoreDetail(currentUser.getStoreId());
+        storeVO.setNickName(currentUser.getNickName());
         return storeVO;
     }
 

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 买家端,直播间接口
  *
  * @author Bulbasaur
- * @since: 2021/5/20 12:03 下午
+ * @since 2021/5/20 12:03 下午
  */
 @RestController
 @Api(tags = "买家端,直播间接口")

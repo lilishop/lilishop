@@ -27,7 +27,7 @@ import java.util.List;
  * 买家端,店铺接口
  *
  * @author Bulbasaur
- * @since: 2020/11/17 2:32 下午
+ * @since 2020/11/17 2:32 下午
  */
 @RestController
 @RequestMapping("/buyer/store")

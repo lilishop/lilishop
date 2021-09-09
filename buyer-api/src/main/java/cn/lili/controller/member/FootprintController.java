@@ -19,7 +19,7 @@ import java.util.List;
  * 买家端,浏览历史接口
  *
  * @author Chopper
- * @since: 2020/11/16 10:06 下午
+ * @since 2020/11/16 10:06 下午
  */
 @RestController
 @Api(tags = "买家端,浏览历史接口")

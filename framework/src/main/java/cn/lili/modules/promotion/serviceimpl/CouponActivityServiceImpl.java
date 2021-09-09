@@ -1,16 +1,11 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.trigger.enums.DelayTypeEnums;
-import cn.lili.trigger.interfaces.TimeTrigger;
-import cn.lili.trigger.message.PromotionMessage;
-import cn.lili.trigger.model.TimeExecuteConstant;
-import cn.lili.trigger.model.TimeTriggerMsg;
-import cn.lili.trigger.util.DelayQueueTools;
-import cn.lili.common.utils.DateUtil;
 import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.common.utils.DateUtil;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.promotion.entity.dos.Coupon;
@@ -21,7 +16,6 @@ import cn.lili.modules.promotion.entity.dto.CouponActivityDTO;
 import cn.lili.modules.promotion.entity.enums.CouponActivitySendTypeEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
 import cn.lili.modules.promotion.mapper.CouponActivityMapper;
 import cn.lili.modules.promotion.service.CouponActivityItemService;
@@ -29,6 +23,12 @@ import cn.lili.modules.promotion.service.CouponActivityService;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
 import cn.lili.modules.promotion.tools.PromotionTools;
+import cn.lili.trigger.enums.DelayTypeEnums;
+import cn.lili.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.message.PromotionMessage;
+import cn.lili.trigger.model.TimeExecuteConstant;
+import cn.lili.trigger.model.TimeTriggerMsg;
+import cn.lili.trigger.util.DelayQueueTools;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -42,7 +42,7 @@ import java.util.*;
  * 优惠券活动业务层实现
  *
  * @author Bulbasaur
- * @since: 2021/5/20 6:10 下午
+ * @since 2021/5/20 6:10 下午
  */
 @Slf4j
 @Service

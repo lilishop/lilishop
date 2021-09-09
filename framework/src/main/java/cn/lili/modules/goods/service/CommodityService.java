@@ -12,7 +12,7 @@ import java.util.List;
  * 直播商品业务层
  *
  * @author Bulbasaur
- * @since: 2021/5/17 10:39 上午
+ * @since 2021/5/17 10:39 上午
  */
 public interface CommodityService extends IService<Commodity> {
 

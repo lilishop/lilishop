@@ -4,7 +4,7 @@ package cn.lili.modules.promotion.entity.enums;
  * 优惠券时间范围枚举
  *
  * @author Bulbasaur
- * @since: 2021/5/24 8:31 上午
+ * @since 2021/5/24 8:31 上午
  */
 public enum CouponRangeDayEnum {
 

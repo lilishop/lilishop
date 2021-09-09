@@ -19,7 +19,7 @@ public interface StoreAddressService extends IService<StoreAddress> {
      * @param pageVo 分页
      * @return 自提点列表
      */
-    IPage<StoreAddress> getStoreAddress(PageVO pageVo);
+    IPage<StoreAddress> getStoreAddress(String storeId, PageVO pageVo);
 
     /**
      * 添加商家自提点
@@ -27,7 +27,7 @@ public interface StoreAddressService extends IService<StoreAddress> {
      * @param storeAddress 自提点
      * @return 自提点
      */
-    StoreAddress addStoreAddress(StoreAddress storeAddress);
+    StoreAddress addStoreAddress(String storeId, StoreAddress storeAddress);
 
     /**
      * 修改商家自提点
@@ -35,7 +35,7 @@ public interface StoreAddressService extends IService<StoreAddress> {
      * @param storeAddress 自提点
      * @return 自提点
      */
-    StoreAddress editStoreAddress(StoreAddress storeAddress);
+    StoreAddress editStoreAddress(String storeId, StoreAddress storeAddress);
 
     /**
      * 删除商家自提点

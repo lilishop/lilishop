@@ -48,7 +48,12 @@ public class VerificationSourceServiceImpl extends ServiceImpl<VerificationSourc
 
     @Override
     public VerificationDTO getVerificationCache() {
-        VerificationDTO verificationDTO = cache.get(VERIFICATION_CACHE);
+        VerificationDTO verificationDTO;
+        try {
+            verificationDTO = cache.get(VERIFICATION_CACHE);
+        } catch (ClassCastException cce) {
+            verificationDTO = null;
+        }
         if (verificationDTO == null) {
             return initCache();
         }

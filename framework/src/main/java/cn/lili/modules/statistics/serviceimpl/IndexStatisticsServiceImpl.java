@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 首页统计数据业务层实现
@@ -190,6 +191,7 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
     @Override
     public StoreIndexStatisticsVO storeIndexStatistics() {
 
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         StoreIndexStatisticsVO storeIndexStatisticsVO = new StoreIndexStatisticsVO();
 
         //商品总数量
@@ -202,7 +204,7 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         //访问量
         StatisticsQueryParam queryParam = new StatisticsQueryParam();
         queryParam.setSearchType(SearchTypeEnum.TODAY.name());
-        queryParam.setStoreId(UserContext.getCurrentUser().getStoreId());
+        queryParam.setStoreId(storeId);
         PlatformViewVO platformViewVO = platformViewDataService.list(queryParam).get(0);
         storeIndexStatisticsVO.setStoreUV(platformViewVO.getUvNum().intValue());
 

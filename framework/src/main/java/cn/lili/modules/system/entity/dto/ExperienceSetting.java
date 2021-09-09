@@ -9,7 +9,7 @@ import java.io.Serializable;
  * 经验值设置
  *
  * @author Bulbasaur
- * @since: 2021/5/16 11:10 下午
+ * @since 2021/5/16 11:10 下午
  */
 @Data
 public class ExperienceSetting implements Serializable {

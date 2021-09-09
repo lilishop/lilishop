@@ -1,6 +1,7 @@
 package cn.lili.controller.trade;
 
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.order.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.vo.AfterSaleSearchParams;
@@ -8,6 +9,7 @@ import cn.lili.modules.order.order.entity.vo.AfterSaleVO;
 import cn.lili.modules.order.order.service.AfterSaleService;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.system.entity.vo.Traces;
+import cn.lili.modules.system.utils.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 店铺端,售后管理接口
@@ -37,18 +40,23 @@ public class AfterSaleStoreController {
     @ApiImplicitParam(name = "sn", value = "售后单号", required = true, paramType = "path")
     @GetMapping(value = "/{sn}")
     public ResultMessage<AfterSaleVO> get(@PathVariable String sn) {
-        return ResultUtil.data(afterSaleService.getAfterSale(sn));
+        AfterSaleVO afterSale = OperationalJudgment.judgment(afterSaleService.getAfterSale(sn));
+        return ResultUtil.data(afterSale);
     }
 
     @ApiOperation(value = "分页获取售后服务")
     @GetMapping(value = "/page")
     public ResultMessage<IPage<AfterSaleVO>> getByPage(AfterSaleSearchParams searchParams) {
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        searchParams.setStoreId(storeId);
         return ResultUtil.data(afterSaleService.getAfterSalePages(searchParams));
     }
 
     @ApiOperation(value = "获取导出售后服务列表列表")
     @GetMapping(value = "/exportAfterSaleOrder")
     public ResultMessage<List<AfterSale>> exportAfterSaleOrder(AfterSaleSearchParams searchParams) {
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        searchParams.setStoreId(storeId);
         return ResultUtil.data(afterSaleService.exportAfterSaleOrder(searchParams));
     }
 

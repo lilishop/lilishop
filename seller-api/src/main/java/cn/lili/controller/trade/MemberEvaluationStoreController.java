@@ -2,12 +2,12 @@ package cn.lili.controller.trade;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
 import cn.lili.modules.member.entity.vo.MemberEvaluationListVO;
 import cn.lili.modules.member.entity.vo.MemberEvaluationVO;
 import cn.lili.modules.member.service.MemberEvaluationService;
+import cn.lili.modules.system.utils.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -15,6 +15,8 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 /**
  * 店铺端,商品评价管理接口
@@ -33,7 +35,8 @@ public class MemberEvaluationStoreController {
     @ApiOperation(value = "分页获取会员评论列表")
     @GetMapping
     public ResultMessage<IPage<MemberEvaluationListVO>> getByPage(EvaluationQueryParams evaluationQueryParams) {
-        evaluationQueryParams.setStoreId(UserContext.getCurrentUser().getStoreId());
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        evaluationQueryParams.setStoreId(storeId);
         return ResultUtil.data(memberEvaluationService.queryPage(evaluationQueryParams));
     }
 
@@ -41,7 +44,7 @@ public class MemberEvaluationStoreController {
     @ApiImplicitParam(name = "id", value = "评价ID", required = true, dataType = "String", paramType = "path")
     @GetMapping(value = "/get/{id}")
     public ResultMessage<MemberEvaluationVO> get(@PathVariable String id) {
-        return ResultUtil.data(memberEvaluationService.queryById(id));
+        return ResultUtil.data(OperationalJudgment.judgment(memberEvaluationService.queryById(id)));
     }
 
     @ApiOperation(value = "回复评价")
@@ -52,6 +55,7 @@ public class MemberEvaluationStoreController {
     })
     @PutMapping(value = "/reply/{id}")
     public ResultMessage<MemberEvaluationVO> reply(@PathVariable String id, @RequestParam String reply, @RequestParam String replyImage) {
+        OperationalJudgment.judgment(memberEvaluationService.queryById(id));
         memberEvaluationService.reply(id, reply, replyImage);
         return ResultUtil.success();
     }

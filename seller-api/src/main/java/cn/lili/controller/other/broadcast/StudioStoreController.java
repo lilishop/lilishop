@@ -3,11 +3,13 @@ package cn.lili.controller.other.broadcast;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Studio;
 import cn.lili.modules.goods.entity.vos.StudioVO;
 import cn.lili.modules.goods.service.StudioService;
+import cn.lili.modules.system.utils.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -17,11 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
+
 /**
  * 店铺端,直播间接口
  *
  * @author Bulbasaur
- * @since: 2021/5/17 2:05 下午
+ * @since 2021/5/17 2:05 下午
  */
 @RestController
 @Api(tags = "店铺端,直播间接口")
@@ -42,13 +46,13 @@ public class StudioStoreController {
     @ApiImplicitParam(name = "studioId", value = "直播间ID", required = true, dataType = "String", paramType = "path")
     @GetMapping("/studioInfo/{studioId}")
     public ResultMessage<StudioVO> studioInfo(@PathVariable String studioId) {
-        return ResultUtil.data(studioService.getStudioVO(studioId));
+        return ResultUtil.data(OperationalJudgment.judgment(studioService.getStudioVO(studioId)));
     }
 
     @ApiOperation(value = "添加直播间")
     @PostMapping
     public ResultMessage<Object> add(@Validated Studio studio) {
-        if (studioService.create(studio)) {
+        if (Boolean.TRUE.equals(studioService.create(studio))) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
         throw new ServiceException(ResultCode.ERROR);
@@ -57,7 +61,8 @@ public class StudioStoreController {
     @ApiOperation(value = "修改直播间")
     @PutMapping("/edit")
     public ResultMessage<Object> edit(Studio studio) {
-        if (studioService.edit(studio)) {
+        OperationalJudgment.judgment(studioService.getById(studio.getId()));
+        if (Boolean.TRUE.equals(studioService.edit(studio))) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
         throw new ServiceException(ResultCode.ERROR);
@@ -70,7 +75,8 @@ public class StudioStoreController {
     })
     @PutMapping(value = "/push/{roomId}/{liveGoodsId}")
     public ResultMessage<Studio> push(@PathVariable Integer roomId, @PathVariable Integer liveGoodsId) {
-        if (studioService.push(roomId, liveGoodsId)) {
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        if (Boolean.TRUE.equals(studioService.push(roomId, liveGoodsId, storeId))) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
         throw new ServiceException(ResultCode.ERROR);
@@ -83,7 +89,8 @@ public class StudioStoreController {
     })
     @DeleteMapping(value = "/deleteInRoom/{roomId}/{liveGoodsId}")
     public ResultMessage<Studio> deleteInRoom(@PathVariable Integer roomId, @PathVariable Integer liveGoodsId) {
-        if (studioService.goodsDeleteInRoom(roomId, liveGoodsId)) {
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        if (Boolean.TRUE.equals(studioService.goodsDeleteInRoom(roomId, liveGoodsId, storeId))) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
         throw new ServiceException(ResultCode.ERROR);

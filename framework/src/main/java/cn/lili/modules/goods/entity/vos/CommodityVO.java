@@ -8,7 +8,7 @@ import lombok.Data;
  * 直播商品VO
  *
  * @author Bulbasaur
- * @since: 2021/5/26 6:09 下午
+ * @since 2021/5/26 6:09 下午
  */
 @Data
 public class CommodityVO extends Commodity {
