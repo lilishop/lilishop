@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
  * 直播消息实体
  *
  * @author Bulbasaur
- * @since: 2021/6/1 4:48 下午
+ * @since 2021/6/1 4:48 下午
  */
 @Data
 @NoArgsConstructor

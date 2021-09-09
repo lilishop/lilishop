@@ -26,6 +26,9 @@ public class PromotionGoodsSearchParams {
     @ApiModelProperty(value = "促销状态")
     private String promotionStatus;
 
+    @ApiModelProperty(value = "促销活动id")
+    private String storeId;
+
     @ApiModelProperty(value = "商品名称")
     private String goodsName;
 
@@ -61,6 +64,9 @@ public class PromotionGoodsSearchParams {
         }
         if (endTime != null) {
             queryWrapper.ge(PromotionGoods::getEndTime, new Date(endTime));
+        }
+        if (CharSequenceUtil.isNotEmpty(storeId)) {
+            queryWrapper.eq(PromotionGoods::getStoreId, storeId);
         }
         queryWrapper.eq(PromotionGoods::getDeleteFlag, false);
         return queryWrapper;

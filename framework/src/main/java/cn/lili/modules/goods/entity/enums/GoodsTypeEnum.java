@@ -4,7 +4,7 @@ package cn.lili.modules.goods.entity.enums;
  * 商品类型
  *
  * @author Bulbasaur
- * @since: 2021/5/28 4:23 下午
+ * @since 2021/5/28 4:23 下午
  */
 public enum GoodsTypeEnum {
 

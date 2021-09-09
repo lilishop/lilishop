@@ -360,6 +360,7 @@ public enum ResultCode {
     STORE_NOT_OPEN(50004, "该会员未开通店铺"),
     STORE_NOT_LOGIN_ERROR(50005, "未登录店铺"),
     STORE_CLOSE_ERROR(50006, "店铺关闭，请联系管理员"),
+    FREIGHT_TEMPLATE_NOT_EXIST(50010, "当前模版不存在"),
 
     /**
      * 结算单

@@ -1,10 +1,7 @@
 package cn.lili.controller.goods;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.common.security.AuthUser;
-import cn.lili.common.security.context.UserContext;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -17,7 +14,10 @@ import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.entity.vos.StockWarningVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.service.StoreDetailService;
+import cn.lili.modules.system.utils.OperationalJudgment;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -27,6 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 店铺端,商品接口
@@ -58,20 +60,18 @@ public class GoodsStoreController {
     @ApiOperation(value = "分页获取商品列表")
     @GetMapping(value = "/list")
     public ResultMessage<IPage<Goods>> getByPage(GoodsSearchParams goodsSearchParams) {
-
         //获取当前登录商家账号
-        AuthUser tokenUser = UserContext.getCurrentUser();
-        goodsSearchParams.setStoreId(tokenUser.getStoreId());
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        goodsSearchParams.setStoreId(storeId);
         return ResultUtil.data(goodsService.queryByParams(goodsSearchParams));
     }
 
     @ApiOperation(value = "分页获取商品Sku列表")
     @GetMapping(value = "/sku/list")
     public ResultMessage<IPage<GoodsSku>> getSkuByPage(GoodsSearchParams goodsSearchParams) {
-
         //获取当前登录商家账号
-        AuthUser tokenUser = UserContext.getCurrentUser();
-        goodsSearchParams.setStoreId(tokenUser.getStoreId());
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        goodsSearchParams.setStoreId(storeId);
         return ResultUtil.data(goodsSkuService.getGoodsSkuByPage(goodsSearchParams));
     }
 
@@ -79,10 +79,11 @@ public class GoodsStoreController {
     @GetMapping(value = "/list/stock")
     public ResultMessage<StockWarningVO> getWarningStockByPage(GoodsSearchParams goodsSearchParams) {
         //获取当前登录商家账号
-        AuthUser tokenUser = UserContext.getCurrentUser();
-        Integer stockWarnNum = storeDetailService.getStoreDetail(tokenUser.getStoreId()).getStockWarning();
-        goodsSearchParams.setStoreId(tokenUser.getStoreId());
-        goodsSearchParams.setQuantity(storeDetailService.getStoreDetail(tokenUser.getStoreId()).getStockWarning());
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        StoreDetail storeDetail = OperationalJudgment.judgment(storeDetailService.getStoreDetail(storeId));
+        Integer stockWarnNum = storeDetail.getStockWarning();
+        goodsSearchParams.setStoreId(storeId);
+        goodsSearchParams.setQuantity(stockWarnNum);
         goodsSearchParams.setMarketEnable(GoodsStatusEnum.UPPER.name());
         IPage<GoodsSku> goodsSku = goodsSkuService.getGoodsSkuByPage(goodsSearchParams);
         StockWarningVO stockWarning = new StockWarningVO(stockWarnNum, goodsSku);
@@ -93,19 +94,13 @@ public class GoodsStoreController {
     @ApiOperation(value = "通过id获取")
     @GetMapping(value = "/get/{id}")
     public ResultMessage<GoodsVO> get(@PathVariable String id) {
-        AuthUser tokenUser = UserContext.getCurrentUser();
-        GoodsVO goods = goodsService.getGoodsVO(id);
-        assert tokenUser != null;
-        if (tokenUser.getStoreId().equals(goods.getStoreId())) {
-            return ResultUtil.data(goods);
-        }
-        throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        GoodsVO goods = OperationalJudgment.judgment(goodsService.getGoodsVO(id));
+        return ResultUtil.data(goods);
     }
 
     @ApiOperation(value = "新增商品")
     @PostMapping(value = "/create", consumes = "application/json", produces = "application/json")
     public ResultMessage<GoodsOperationDTO> save(@RequestBody GoodsOperationDTO goodsOperationDTO) {
-
         goodsService.addGoods(goodsOperationDTO);
         return ResultUtil.success();
     }
@@ -156,14 +151,22 @@ public class GoodsStoreController {
     @ApiOperation(value = "根据goodsId分页获取商品规格列表")
     @GetMapping(value = "/sku/{goodsId}/list")
     public ResultMessage<List<GoodsSkuVO>> getSkuByList(@PathVariable String goodsId) {
-
-        return ResultUtil.data(goodsSkuService.getGoodsListByGoodsId(goodsId));
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        return ResultUtil.data(goodsSkuService.getGoodsSkuVOList(goodsSkuService.list(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goodsId).eq(GoodsSku::getStoreId, storeId))));
     }
 
     @ApiOperation(value = "修改商品库存")
     @PutMapping(value = "/update/stocks", consumes = "application/json")
     public ResultMessage<Object> updateStocks(@RequestBody List<GoodsSkuStockDTO> updateStockList) {
-        goodsSkuService.updateStocks(updateStockList);
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        // 获取商品skuId集合
+        List<String> goodsSkuIds = updateStockList.stream().map(GoodsSkuStockDTO::getSkuId).collect(Collectors.toList());
+        // 根据skuId集合查询商品信息
+        List<GoodsSku> goodsSkuList = goodsSkuService.list(new LambdaQueryWrapper<GoodsSku>().in(GoodsSku::getId, goodsSkuIds).eq(GoodsSku::getStoreId, storeId));
+        // 过滤不符合当前店铺的商品
+        List<String> filterGoodsSkuIds = goodsSkuList.stream().map(GoodsSku::getId).collect(Collectors.toList());
+        List<GoodsSkuStockDTO> collect = updateStockList.stream().filter(i -> filterGoodsSkuIds.contains(i.getSkuId())).collect(Collectors.toList());
+        goodsSkuService.updateStocks(collect);
         return ResultUtil.success();
     }
 

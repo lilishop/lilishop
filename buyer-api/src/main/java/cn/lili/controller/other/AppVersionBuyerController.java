@@ -1,11 +1,11 @@
 package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultUtil;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.system.entity.dos.AppVersion;
 import cn.lili.modules.system.service.AppVersionService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 买家端,APP版本
  *
  * @author Bulbasaur
- * @since: 2021/5/21 11:15 上午
+ * @since 2021/5/21 11:15 上午
  */
 @RestController
 @Api(tags = "买家端,APP版本")

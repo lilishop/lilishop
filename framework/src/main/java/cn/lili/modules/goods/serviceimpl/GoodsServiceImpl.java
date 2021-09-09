@@ -9,6 +9,7 @@ import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.StringUtils;
@@ -27,7 +28,9 @@ import cn.lili.modules.goods.service.*;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
+import cn.lili.modules.store.entity.dos.FreightTemplate;
 import cn.lili.modules.store.entity.vos.StoreVO;
+import cn.lili.modules.store.service.FreightTemplateService;
 import cn.lili.modules.store.service.StoreService;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.GoodsSetting;
@@ -51,6 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 商品业务层实现
@@ -109,6 +113,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Autowired
     private CategoryParameterGroupService categoryParameterGroupService;
 
+    @Autowired
+    private FreightTemplateService freightTemplateService;
 
     @Autowired
     private Cache<GoodsVO> cache;
@@ -276,10 +282,10 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     public Boolean updateGoodsMarketAble(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, String underReason) {
         boolean result;
 
-        if (UserContext.getCurrentUser() == null || UserContext.getCurrentUser().getStoreId() == null) {
-            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        AuthUser currentUser = UserContext.getCurrentUser();
+        if (currentUser == null || (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() == null)) {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
-        String storeId = UserContext.getCurrentUser().getStoreId();
 
         //如果商品为空，直接返回
         if (goodsIds == null || goodsIds.isEmpty()) {
@@ -289,12 +295,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         LambdaUpdateWrapper<Goods> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.set(Goods::getMarketEnable, goodsStatusEnum.name());
         updateWrapper.set(Goods::getUnderMessage, underReason);
-        updateWrapper.eq(Goods::getStoreId, storeId);
+        updateWrapper.eq(Goods::getStoreId, currentUser.getStoreId());
         updateWrapper.in(Goods::getId, goodsIds);
         result = this.update(updateWrapper);
 
         //修改规格商品
-        List<Goods> goodsList = this.list(new LambdaQueryWrapper<Goods>().in(Goods::getId, goodsIds).eq(Goods::getStoreId, storeId));
+        List<Goods> goodsList = this.list(new LambdaQueryWrapper<Goods>().in(Goods::getId, goodsIds).eq(Goods::getStoreId, currentUser.getStoreId()));
         for (Goods goods : goodsList) {
             goodsSkuService.updateGoodsSkuStatus(goods);
         }
@@ -304,14 +310,20 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Override
     public Boolean deleteGoods(List<String> goodsIds) {
 
+        AuthUser currentUser = UserContext.getCurrentUser();
+        if (currentUser == null || (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() == null)) {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        }
+
         LambdaUpdateWrapper<Goods> updateWrapper = Wrappers.lambdaUpdate();
         updateWrapper.set(Goods::getMarketEnable, GoodsStatusEnum.DOWN.name());
         updateWrapper.set(Goods::getDeleteFlag, true);
+        updateWrapper.eq(Goods::getStoreId, currentUser.getStoreId());
         updateWrapper.in(Goods::getId, goodsIds);
         this.update(updateWrapper);
 
         //修改规格商品
-        List<Goods> goodsList = this.list(new LambdaQueryWrapper<Goods>().in(Goods::getId, goodsIds));
+        List<Goods> goodsList = this.list(new LambdaQueryWrapper<Goods>().in(Goods::getId, goodsIds).eq(Goods::getStoreId, currentUser.getStoreId()));
         for (Goods goods : goodsList) {
             //修改SKU状态
             goodsSkuService.updateGoodsSkuStatus(goods);
@@ -326,6 +338,19 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     public Boolean freight(List<String> goodsIds, String templateId) {
+
+        AuthUser currentUser = UserContext.getCurrentUser();
+        if (currentUser == null || (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() == null)) {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        }
+
+        FreightTemplate freightTemplate = freightTemplateService.getById(templateId);
+        if (freightTemplate == null) {
+            throw new ServiceException(ResultCode.FREIGHT_TEMPLATE_NOT_EXIST);
+        }
+        if (!freightTemplate.getStoreId().equals(currentUser.getStoreId())) {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        }
         LambdaUpdateWrapper<Goods> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.set(Goods::getTemplateId, templateId);
         lambdaUpdateWrapper.in(Goods::getId, goodsIds);
@@ -419,7 +444,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         //是否需要审核
         goods.setIsAuth(Boolean.TRUE.equals(goodsSetting.getGoodsCheck()) ? GoodsAuthEnum.TOBEAUDITED.name() : GoodsAuthEnum.PASS.name());
         //判断当前用户是否为店铺
-        if (UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
+        if (Objects.requireNonNull(UserContext.getCurrentUser()).getRole().equals(UserEnums.STORE)) {
             StoreVO storeDetail = this.storeService.getStoreDetail();
             if (storeDetail.getSelfOperated() != null) {
                 goods.setSelfOperated(storeDetail.getSelfOperated());

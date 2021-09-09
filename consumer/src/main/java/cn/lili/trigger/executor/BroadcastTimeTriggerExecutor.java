@@ -1,10 +1,10 @@
 package cn.lili.trigger.executor;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.trigger.message.BroadcastMessage;
-import cn.lili.trigger.model.TimeExecuteConstant;
 import cn.lili.modules.goods.service.StudioService;
 import cn.lili.trigger.TimeTriggerExecutor;
+import cn.lili.trigger.message.BroadcastMessage;
+import cn.lili.trigger.model.TimeExecuteConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * 直播间事件触发
  *
  * @author Bulbasaur
- * @since: 2021/6/1 5:02 下午
+ * @since 2021/6/1 5:02 下午
  */
 @Slf4j
 @Component(TimeExecuteConstant.BROADCAST_EXECUTOR)

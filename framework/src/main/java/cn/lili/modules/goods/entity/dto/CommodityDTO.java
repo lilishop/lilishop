@@ -7,7 +7,7 @@ import lombok.Data;
  * 用于获取直播商品状态时使用
  *
  * @author Bulbasaur
- * @since: 2021/5/25 12:12 下午
+ * @since 2021/5/25 12:12 下午
  */
 @Data
 public class CommodityDTO {

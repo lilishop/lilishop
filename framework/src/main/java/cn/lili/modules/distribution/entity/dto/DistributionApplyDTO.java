@@ -9,7 +9,7 @@ import javax.validation.constraints.Size;
 /**
  * 分销员申请DTO
  * @author Bulbasaur
- * @since: 2021/6/30 11:07 上午
+ * @since 2021/6/30 11:07 上午
  *
  */
 @Data

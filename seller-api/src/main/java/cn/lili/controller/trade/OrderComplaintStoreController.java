@@ -10,6 +10,7 @@ import cn.lili.modules.order.order.entity.enums.CommunicationOwnerEnum;
 import cn.lili.modules.order.order.entity.vo.*;
 import cn.lili.modules.order.order.service.OrderComplaintCommunicationService;
 import cn.lili.modules.order.order.service.OrderComplaintService;
+import cn.lili.modules.system.utils.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -17,6 +18,8 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 /**
  * 店铺端,交易投诉接口
@@ -45,13 +48,14 @@ public class OrderComplaintStoreController {
     @ApiImplicitParam(name = "id", value = "投诉单ID", required = true, paramType = "path")
     @GetMapping(value = "/{id}")
     public ResultMessage<OrderComplaintVO> get(@PathVariable String id) {
-        return ResultUtil.data(orderComplaintService.getOrderComplainById(id));
+        return ResultUtil.data(OperationalJudgment.judgment(orderComplaintService.getOrderComplainById(id)));
     }
 
     @ApiOperation(value = "分页获取")
     @GetMapping
     public ResultMessage<IPage<OrderComplaint>> get(OrderComplaintSearchParams searchParams, PageVO pageVO) {
-        searchParams.setStoreId(UserContext.getCurrentUser().getStoreId());
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        searchParams.setStoreId(storeId);
         return ResultUtil.data(orderComplaintService.getOrderComplainByPage(searchParams, pageVO));
     }
 
@@ -62,7 +66,7 @@ public class OrderComplaintStoreController {
     })
     @PostMapping("/communication")
     public ResultMessage<OrderComplaintCommunicationVO> addCommunication(@RequestParam String complainId, @RequestParam String content) {
-        AuthUser currentUser = UserContext.getCurrentUser();
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         OrderComplaintCommunicationVO communicationVO = new OrderComplaintCommunicationVO(complainId, content, CommunicationOwnerEnum.STORE.name(), currentUser.getStoreId(), currentUser.getUsername());
         orderComplaintCommunicationService.addCommunication(communicationVO);
         return ResultUtil.success();
@@ -71,7 +75,8 @@ public class OrderComplaintStoreController {
     @ApiOperation(value = "修改申诉信息")
     @PutMapping
     public ResultMessage<OrderComplaintVO> update(OrderComplaintVO orderComplainVO) {
-        orderComplainVO.setStoreId(UserContext.getCurrentUser().getStoreId());
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        orderComplainVO.setStoreId(storeId);
         orderComplaintService.updateOrderComplain(orderComplainVO);
         return ResultUtil.data(orderComplainVO);
     }

@@ -1,11 +1,11 @@
 package cn.lili.controller.member;
 
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.system.entity.dos.ServiceNotice;
 import cn.lili.modules.system.service.ServiceNoticeService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 买家端,会员站服务消息接口
  *
  * @author Chopper
- * @since: 2020/11/17 2:31 下午
+ * @since 2020/11/17 2:31 下午
  */
 @RestController
 @RequestMapping("/service/notice")

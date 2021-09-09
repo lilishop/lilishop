@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
  * 用于直播间前台使用的直播间商品DTO
  *
  * @author Bulbasaur
- * @since: 2021/5/20 2:34 下午
+ * @since 2021/5/20 2:34 下午
  */
 public class SimpleCommodity {
 

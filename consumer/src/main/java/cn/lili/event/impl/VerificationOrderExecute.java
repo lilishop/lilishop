@@ -1,7 +1,6 @@
 package cn.lili.event.impl;
 
 import cn.hutool.core.util.RandomUtil;
-import cn.lili.common.utils.CommonUtil;
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
@@ -13,7 +12,6 @@ import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +19,7 @@ import org.springframework.stereotype.Component;
  * 虚拟商品
  *
  * @author Bulbasaur
- * @since: 2021/5/29 9:17 上午
+ * @since 2021/5/29 9:17 上午
  */
 @Component
 public class VerificationOrderExecute implements OrderStatusChangeEvent {

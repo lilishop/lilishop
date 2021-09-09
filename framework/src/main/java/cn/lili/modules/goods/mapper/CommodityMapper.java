@@ -15,7 +15,7 @@ import java.util.List;
  * 直播商品数据层
  *
  * @author Bulbasaur
- * @since: 2021/5/17 9:56 上午
+ * @since 2021/5/17 9:56 上午
  */
 public interface CommodityMapper extends BaseMapper<Commodity> {
 

@@ -8,7 +8,7 @@ import lombok.Data;
  * 优惠券活动的优惠券VO
  *
  * @author Bulbasaur
- * @since: 2021/6/18 11:00 上午
+ * @since 2021/6/18 11:00 上午
  */
 @Data
 public class CouponActivityItemVO extends CouponActivityItem {

@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 管理端,余额提现记录接口
  *
  * @author pikachu
- * @since: 2020/11/16 10:07 下午
+ * @since 2020/11/16 10:07 下午
  */
 @RestController
 @Api(tags = "管理端,余额提现记录接口")

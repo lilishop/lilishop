@@ -2,12 +2,12 @@ package cn.lili.modules.goods.entity.dos;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONUtil;
-import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.xkcoding.http.util.StringUtil;
@@ -221,7 +221,7 @@ public class Goods extends BaseEntity {
             this.params = JSONUtil.toJsonStr(goodsOperationDTO.getGoodsParamsDTOList());
         }
         //如果立即上架则
-        this.marketEnable = goodsOperationDTO.getRelease() ? GoodsStatusEnum.UPPER.name() : GoodsStatusEnum.DOWN.name();
+        this.marketEnable = Boolean.TRUE.equals(goodsOperationDTO.getRelease()) ? GoodsStatusEnum.UPPER.name() : GoodsStatusEnum.DOWN.name();
         this.goodsType = goodsOperationDTO.getGoodsType();
         this.grade = 100D;
 
@@ -238,10 +238,8 @@ public class Goods extends BaseEntity {
                 throw new ServiceException(ResultCode.GOODS_SKU_COST_ERROR);
             }
             //虚拟商品没有重量字段
-            if (sku.containsKey("weight")) {
-                if (StringUtil.isEmpty(sku.get("weight").toString()) || Convert.toDouble(sku.get("weight").toString()) < 0) {
-                    throw new ServiceException(ResultCode.GOODS_SKU_WEIGHT_ERROR);
-                }
+            if (sku.containsKey("weight") && (StringUtil.isEmpty(sku.get("weight").toString()) || Convert.toDouble(sku.get("weight").toString()) < 0)) {
+                throw new ServiceException(ResultCode.GOODS_SKU_WEIGHT_ERROR);
             }
             if (StringUtil.isEmpty(sku.get("quantity").toString()) || Convert.toInt(sku.get("quantity").toString()) < 0) {
                 throw new ServiceException(ResultCode.GOODS_SKU_QUANTITY_ERROR);
