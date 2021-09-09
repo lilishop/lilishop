@@ -89,7 +89,7 @@ public class WechatMessageUtil {
 
         QueryWrapper<Connect> queryWrapper = new QueryWrapper();
         queryWrapper.eq("user_id", order.getMemberId());
-        queryWrapper.eq("union_type", ConnectEnum.WECHAT_OPEN_ID.name());
+        queryWrapper.eq("union_type", ConnectEnum.WECHAT.name());
 
         Connect connect = connectService.getOne(queryWrapper);
         if (connect == null) {

@@ -161,7 +161,7 @@ public class WechatPlugin implements Payment {
         try {
             LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Connect::getUserId, UserContext.getCurrentUser().getId())
-                    .eq(Connect::getUnionType, ConnectEnum.WECHAT_OPEN_ID.name());
+                    .eq(Connect::getUnionType, ConnectEnum.WECHAT.name());
             Connect connect = connectService.getOne(queryWrapper);
             if (connect == null) {
                 return null;
