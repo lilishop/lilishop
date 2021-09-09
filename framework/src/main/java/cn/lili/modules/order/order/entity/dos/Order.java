@@ -2,9 +2,11 @@ package cn.lili.modules.order.order.entity.dos;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.mybatis.BaseEntity;
-import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.enums.ClientTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.common.security.filter.Sensitive;
+import cn.lili.common.security.filter.SensitiveStrategy;
+import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
@@ -13,7 +15,7 @@ import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.*;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -89,6 +91,7 @@ public class Order extends BaseEntity {
     private String consigneeName;
 
     @ApiModelProperty(value = "收件人手机")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String consigneeMobile;
 
     /**

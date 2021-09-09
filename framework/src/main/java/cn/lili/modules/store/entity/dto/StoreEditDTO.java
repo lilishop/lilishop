@@ -1,9 +1,10 @@
 package cn.lili.modules.store.entity.dto;
 
+import cn.lili.common.security.filter.Sensitive;
+import cn.lili.common.security.filter.SensitiveStrategy;
 import cn.lili.common.validation.Mobile;
 import cn.lili.common.validation.Phone;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
@@ -75,6 +76,7 @@ public class StoreEditDTO {
     @NotBlank(message = "手机号不能为空")
     @Phone
     @ApiModelProperty(value = "联系人电话")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String linkPhone;
 
     @Size(min = 18, max = 18, message = "营业执照长度为18位字符")
