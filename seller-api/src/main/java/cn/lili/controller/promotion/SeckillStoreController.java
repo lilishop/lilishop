@@ -11,6 +11,7 @@ import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.service.SeckillService;
+import cn.lili.modules.system.utils.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 店铺端,秒杀活动接口
@@ -44,7 +46,7 @@ public class SeckillStoreController {
     @GetMapping("/apply")
     @ApiOperation(value = "获取秒杀活动申请列表")
     public ResultMessage<IPage<SeckillApply>> getSeckillApplyPage(SeckillSearchParams queryParam, PageVO pageVo) {
-        String storeId = UserContext.getCurrentUser().getStoreId();
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         queryParam.setStoreId(storeId);
         IPage<SeckillApply> seckillPage = seckillApplyService.getSeckillApplyFromMongo(queryParam, pageVo);
         return ResultUtil.data(seckillPage);
@@ -59,20 +61,22 @@ public class SeckillStoreController {
     @GetMapping("/apply/{seckillApplyId}")
     @ApiOperation(value = "获取秒杀活动申请")
     public ResultMessage<SeckillApply> getSeckillApply(@PathVariable String seckillApplyId) {
-        return ResultUtil.data(seckillApplyService.getById(seckillApplyId));
+        SeckillApply seckillApply = OperationalJudgment.judgment(seckillApplyService.getById(seckillApplyId));
+        return ResultUtil.data(seckillApply);
     }
 
     @PostMapping(path = "/apply/{seckillId}", consumes = "application/json", produces = "application/json")
     @ApiOperation(value = "添加秒杀活动申请")
     public ResultMessage<String> addSeckillApply(@PathVariable String seckillId, @RequestBody List<SeckillApplyVO> applyVos) {
-        String storeId = UserContext.getCurrentUser().getStoreId();
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         seckillApplyService.addSeckillApply(seckillId, storeId, applyVos);
         return ResultUtil.success();
     }
 
     @DeleteMapping("/apply/{seckillId}/{id}")
     @ApiOperation(value = "删除秒杀活动商品")
-    public ResultMessage<String> deleteSeckillApply(@PathVariable String seckillId,@PathVariable String id) {
+    public ResultMessage<String> deleteSeckillApply(@PathVariable String seckillId, @PathVariable String id) {
+        OperationalJudgment.judgment(seckillApplyService.getById(id));
         seckillApplyService.removeSeckillApply(seckillId, id);
         return ResultUtil.success();
     }

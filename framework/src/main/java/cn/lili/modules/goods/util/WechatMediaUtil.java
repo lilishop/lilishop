@@ -1,9 +1,9 @@
 package cn.lili.modules.goods.util;
 
 import cn.hutool.json.JSONObject;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.message.util.WechatAccessTokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.net.URL;
  * 微信媒体工具
  *
  * @author Bulbasaur
- * @since: 2021/5/19 8:02 下午
+ * @since 2021/5/19 8:02 下午
  */
 @Slf4j
 @Component

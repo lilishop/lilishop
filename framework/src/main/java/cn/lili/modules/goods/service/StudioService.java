@@ -1,9 +1,9 @@
 package cn.lili.modules.goods.service;
 
-import cn.lili.trigger.message.BroadcastMessage;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.Studio;
 import cn.lili.modules.goods.entity.vos.StudioVO;
+import cn.lili.trigger.message.BroadcastMessage;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 直播间业务层
  *
  * @author Bulbasaur
- * @since: 2021/5/17 10:02 上午
+ * @since 2021/5/17 10:02 上午
  */
 public interface StudioService extends IService<Studio> {
 
@@ -48,11 +48,12 @@ public interface StudioService extends IService<Studio> {
 
     /**
      * 推送商品
-     * @param roomId 店铺ID
+     * @param roomId 房间ID
      * @param goodsId 商品ID
+     * @param storeId 店铺ID
      * @return 操作结果
      */
-    Boolean push(Integer roomId,Integer goodsId);
+    Boolean push(Integer roomId,Integer goodsId, String storeId);
 
     /**
      * 删除商品
@@ -60,7 +61,7 @@ public interface StudioService extends IService<Studio> {
      * @param goodsId 商品ID
      * @return 操作结果
      */
-    Boolean goodsDeleteInRoom(Integer roomId,Integer goodsId);
+    Boolean goodsDeleteInRoom(Integer roomId,Integer goodsId, String storeId);
 
     /**
      * 获取直播间列表

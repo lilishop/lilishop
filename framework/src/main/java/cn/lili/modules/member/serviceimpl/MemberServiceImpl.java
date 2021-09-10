@@ -4,22 +4,18 @@ package cn.lili.modules.member.serviceimpl;
 import cn.hutool.core.convert.Convert;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
+import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.member.entity.enums.PointTypeEnum;
-import cn.lili.mybatis.util.PageUtil;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.rocketmq.tags.MemberTagsEnum;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.token.Token;
-import cn.lili.modules.member.token.MemberTokenGenerate;
-import cn.lili.modules.member.token.StoreTokenGenerate;
-import cn.lili.common.utils.*;
+import cn.lili.common.utils.BeanUtil;
+import cn.lili.common.utils.CookieUtil;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
-import cn.lili.common.context.ThreadContextHolder;
-import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
@@ -31,15 +27,21 @@ import cn.lili.modules.member.entity.dto.ManagerMemberEditDTO;
 import cn.lili.modules.member.entity.dto.MemberAddDTO;
 import cn.lili.modules.member.entity.dto.MemberEditDTO;
 import cn.lili.modules.member.entity.dto.MemberPointMessage;
+import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.entity.vo.MemberDistributionVO;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
 import cn.lili.modules.member.mapper.MemberMapper;
 import cn.lili.modules.member.service.MemberService;
+import cn.lili.modules.member.token.MemberTokenGenerate;
+import cn.lili.modules.member.token.StoreTokenGenerate;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.enums.StoreStatusEnum;
 import cn.lili.modules.store.service.StoreService;
 import cn.lili.modules.system.utils.CharacterConstant;
 import cn.lili.modules.system.utils.SensitiveWordsFilter;
+import cn.lili.mybatis.util.PageUtil;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -54,6 +56,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 会员接口业务层实现
@@ -229,7 +232,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public Token mobilePhoneLogin(String mobilePhone) {
-        QueryWrapper<Member> queryWrapper = new QueryWrapper();
+        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("mobile", mobilePhone);
         Member member = this.baseMapper.selectOne(queryWrapper);
         //如果手机号不存在则自动注册用户
@@ -247,7 +250,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Override
     public Member editOwn(MemberEditDTO memberEditDTO) {
         //查询会员信息
-        Member member = this.findByUsername(UserContext.getCurrentUser().getUsername());
+        Member member = this.findByUsername(Objects.requireNonNull(UserContext.getCurrentUser()).getUsername());
         //传递修改会员信息
         BeanUtil.copyProperties(memberEditDTO, member);
         //修改会员
@@ -292,11 +295,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public boolean changeMobile(String mobile) {
-        AuthUser tokenUser = UserContext.getCurrentUser();
+        AuthUser tokenUser = Objects.requireNonNull(UserContext.getCurrentUser());
         Member member = this.findByUsername(tokenUser.getUsername());
 
         //判断是否用户登录并且会员ID为当前登录会员ID
-        if (tokenUser == null || tokenUser.getId() != member.getId()) {
+        if (!Objects.equals(tokenUser.getId(), member.getId())) {
             throw new ServiceException(ResultCode.USER_NOT_LOGIN);
         }
         //修改会员手机号

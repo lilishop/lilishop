@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
@@ -16,6 +17,7 @@ import javax.validation.constraints.NotNull;
  * @author pikachu
  * @since 2020-02-26 10:34:02
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("li_category_parameter_group")
 @ApiModel(value = "分类绑定参数组")

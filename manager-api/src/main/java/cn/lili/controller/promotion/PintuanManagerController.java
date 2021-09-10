@@ -1,13 +1,13 @@
 package cn.lili.controller.promotion;
 
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dto.PromotionGoodsDTO;
-import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.vos.PintuanSearchParams;
 import cn.lili.modules.promotion.entity.vos.PintuanVO;
 import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
@@ -39,7 +39,7 @@ public class PintuanManagerController {
     @GetMapping(value = "/{id}")
     @ApiOperation(value = "通过id获取")
     public ResultMessage<Pintuan> get(@PathVariable String id) {
-        Pintuan pintuan = pintuanService.getById(id);
+        Pintuan pintuan = pintuanService.getPintuanByIdFromMongo(id);
         return ResultUtil.data(pintuan);
     }
 

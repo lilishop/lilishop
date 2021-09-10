@@ -1,9 +1,10 @@
 package cn.lili.controller.trade;
 
+import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
@@ -12,6 +13,7 @@ import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.service.OrderPriceService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.system.service.StoreLogisticsService;
+import cn.lili.modules.system.utils.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -28,6 +30,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 店铺端,订单接口
@@ -71,7 +74,7 @@ public class OrderStoreController {
     })
     @GetMapping(value = "/{orderSn}")
     public ResultMessage<OrderDetailVO> detail(@NotNull @PathVariable String orderSn) {
-
+        OperationalJudgment.judgment(orderService.getBySn(orderSn));
         return ResultUtil.data(orderService.queryDetail(orderSn));
     }
 
@@ -120,7 +123,7 @@ public class OrderStoreController {
     @ApiOperation(value = "根据核验码获取订单信息")
     @ApiImplicitParam(name = "verificationCode", value = "核验码", required = true, paramType = "path")
     @GetMapping(value = "/getOrderByVerificationCode/{verificationCode}")
-    public ResultMessage<Object> getOrderByVerificationCode(@PathVariable String verificationCode){
+    public ResultMessage<Object> getOrderByVerificationCode(@PathVariable String verificationCode) {
         return ResultUtil.data(orderService.getOrderByVerificationCode(verificationCode));
     }
 
@@ -130,25 +133,27 @@ public class OrderStoreController {
             @ApiImplicitParam(name = "verificationCode", value = "核验码", required = true, paramType = "path")
     })
     @PutMapping(value = "/take/{orderSn}/{verificationCode}")
-    public ResultMessage<Object> take(@PathVariable String orderSn,@PathVariable String verificationCode) {
-        return ResultUtil.data(orderService.take(orderSn,verificationCode));
+    public ResultMessage<Object> take(@PathVariable String orderSn, @PathVariable String verificationCode) {
+        return ResultUtil.data(orderService.take(orderSn, verificationCode));
     }
 
     @ApiOperation(value = "查询物流踪迹")
     @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path")
     @GetMapping(value = "/getTraces/{orderSn}")
     public ResultMessage<Object> getTraces(@NotBlank(message = "订单编号不能为空") @PathVariable String orderSn) {
+        OperationalJudgment.judgment(orderService.getBySn(orderSn));
         return ResultUtil.data(orderService.getTraces(orderSn));
     }
 
-    @ApiOperation(value = "下载待发货的订单列表",produces="application/octet-stream")
+    @ApiOperation(value = "下载待发货的订单列表", produces = "application/octet-stream")
     @GetMapping(value = "/downLoadDeliverExcel")
     public void downLoadDeliverExcel() {
         HttpServletResponse response = ThreadContextHolder.getHttpResponse();
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         //获取店铺已经选择物流公司列表
-        List<String> logisticsName = storeLogisticsService.getStoreSelectedLogisticsName();
+        List<String> logisticsName = storeLogisticsService.getStoreSelectedLogisticsName(storeId);
         //下载订单批量发货Excel
-        this.orderService.getBatchDeliverList(response,logisticsName);
+        this.orderService.getBatchDeliverList(response, logisticsName);
 
     }
 

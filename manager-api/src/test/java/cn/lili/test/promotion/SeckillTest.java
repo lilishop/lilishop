@@ -1,11 +1,8 @@
 package cn.lili.test.promotion;
 
-import cn.hutool.core.date.DateUtil;
+import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.promotion.entity.enums.PromotionApplyStatusEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.modules.promotion.entity.enums.SeckillApplyStatusEnum;
 import cn.lili.modules.promotion.entity.vos.SeckillApplyVO;
-import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.service.SeckillService;
 import org.junit.jupiter.api.Assertions;
@@ -32,23 +29,27 @@ class SeckillTest {
     @Autowired
     private SeckillApplyService seckillApplyService;
 
+    @Autowired
+    private MemberService memberService;
+
     @Test
     void add() {
-        SeckillVO seckillVO = new SeckillVO();
-        seckillVO.setId("10000");
-        seckillVO.setStoreIds("132");
-        seckillVO.setSeckillApplyStatus(SeckillApplyStatusEnum.NOT_APPLY.name());
-        seckillVO.setPromotionStatus(PromotionStatusEnum.NEW.name());
-        seckillVO.setApplyEndTime(DateUtil.parse("2021-09-06 14:20:00"));
-        seckillVO.setStartTime(DateUtil.parse("2021-09-06 14:22:00"));
-        seckillVO.setEndTime(DateUtil.parse("2021-09-06 23:59:00"));
-        seckillVO.setHours("15,17,19");
-        seckillVO.setPromotionName("Seckill" + seckillVO.getId());
-        seckillVO.setSeckillRule("rule" + seckillVO.getId());
-        seckillVO.setStoreId("1376433565247471616");
-        seckillVO.setStoreName("platform");
-
-        Assertions.assertTrue(seckillService.saveSeckill(seckillVO));
+//        SeckillVO seckillVO = new SeckillVO();
+//        seckillVO.setId("10000");
+//        seckillVO.setStoreIds("132");
+//        seckillVO.setSeckillApplyStatus(SeckillApplyStatusEnum.NOT_APPLY.name());
+//        seckillVO.setPromotionStatus(PromotionStatusEnum.NEW.name());
+//        seckillVO.setApplyEndTime(DateUtil.parse("2021-09-06 14:20:00"));
+//        seckillVO.setStartTime(DateUtil.parse("2021-09-06 14:22:00"));
+//        seckillVO.setEndTime(DateUtil.parse("2021-09-06 23:59:00"));
+//        seckillVO.setHours("15,17,19");
+//        seckillVO.setPromotionName("Seckill" + seckillVO.getId());
+//        seckillVO.setSeckillRule("rule" + seckillVO.getId());
+//        seckillVO.setStoreId("1376433565247471616");
+//        seckillVO.setStoreName("platform");
+//
+//        Assertions.assertTrue(seckillService.saveSeckill(seckillVO));
+//        memberService.getUserInfo()
     }
 
     @Test

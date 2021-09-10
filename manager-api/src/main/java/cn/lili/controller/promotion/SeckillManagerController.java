@@ -50,14 +50,14 @@ public class SeckillManagerController {
     @ApiImplicitParam(name = "id", value = "秒杀活动ID", required = true, dataType = "String", paramType = "path")
     @GetMapping(value = "/{id}")
     public ResultMessage<Seckill> get(@PathVariable String id) {
-        Seckill seckill = seckillService.getById(id);
+        Seckill seckill = seckillService.getSeckillByIdFromMongo(id);
         return ResultUtil.data(seckill);
     }
 
     @ApiOperation(value = "分页查询秒杀活动列表")
     @GetMapping
-    public ResultMessage<IPage<Seckill>> getAll(SeckillSearchParams param, PageVO pageVo) {
-        return ResultUtil.data(seckillService.getSeckillByPageFromMysql(param, pageVo));
+    public ResultMessage<IPage<SeckillVO>> getAll(SeckillSearchParams param, PageVO pageVo) {
+        return ResultUtil.data(seckillService.getSeckillByPageFromMongo(param, pageVo));
     }
 
     @ApiOperation(value = "删除一个秒杀活动")

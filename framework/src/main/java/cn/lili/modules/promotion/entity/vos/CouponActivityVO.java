@@ -12,7 +12,7 @@ import java.util.List;
  * 优惠券活动VO
  *
  * @author Bulbasaur
- * @since: 2021/5/21 7:01 下午
+ * @since 2021/5/21 7:01 下午
  */
 @Data
 @NoArgsConstructor

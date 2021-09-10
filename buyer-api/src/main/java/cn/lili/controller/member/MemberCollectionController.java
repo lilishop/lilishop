@@ -18,7 +18,7 @@ import javax.validation.constraints.NotNull;
  * 买家端,会员收藏接口
  *
  * @author Chopper
- * @since: 2020/11/17 2:32 下午
+ * @since 2020/11/17 2:32 下午
  */
 @RestController
 @Api(tags = "买家端,会员收藏接口")

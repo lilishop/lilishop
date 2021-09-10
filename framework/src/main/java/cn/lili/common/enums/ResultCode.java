@@ -47,6 +47,7 @@ public enum ResultCode {
     CATEGORY_HAS_CHILDREN(10005, "此类别下存在子类别不能删除"),
     CATEGORY_HAS_GOODS(10006, "此类别下存在商品不能删除"),
     CATEGORY_SAVE_ERROR(10007, "此类别下存在商品不能删除"),
+    CATEGORY_PARAMETER_NOT_EXIST(10012, "分类绑定参数组不存在"),
     CATEGORY_PARAMETER_SAVE_ERROR(10008, "分类绑定参数组添加失败"),
     CATEGORY_PARAMETER_UPDATE_ERROR(10009, "分类绑定参数组添加失败"),
     CATEGORY_DELETE_FLAG_ERROR(10010, "子类状态不能与父类不一致！"),
@@ -72,6 +73,7 @@ public enum ResultCode {
     GOODS_PARAMS_ERROR(11013, "商品参数错误，刷新后重试"),
     PHYSICAL_GOODS_NEED_TEMP(11014, "实物商品需选择配送模板"),
     VIRTUAL_GOODS_NOT_NEED_TEMP(11015, "实物商品需选择配送模板"),
+    GOODS_NOT_EXIST_STORE(11017, "当前用户无权操作此商品"),
     GOODS_TYPE_ERROR(11016, "需选择商品类型"),
 
     /**
@@ -358,6 +360,7 @@ public enum ResultCode {
     STORE_NOT_OPEN(50004, "该会员未开通店铺"),
     STORE_NOT_LOGIN_ERROR(50005, "未登录店铺"),
     STORE_CLOSE_ERROR(50006, "店铺关闭，请联系管理员"),
+    FREIGHT_TEMPLATE_NOT_EXIST(50010, "当前模版不存在"),
 
     /**
      * 结算单

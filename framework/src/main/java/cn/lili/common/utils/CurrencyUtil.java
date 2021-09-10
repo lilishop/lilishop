@@ -6,7 +6,7 @@ import java.math.BigDecimal;
  * 金额计算工具
  *
  * @author Bulbasaur
- * @since: 2021/7/9 1:40 上午
+ * @since 2021/7/9 1:40 上午
  */
 public final class CurrencyUtil {
     /**

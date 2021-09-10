@@ -4,8 +4,8 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.message.entity.enums.MessageStatusEnum;
 import cn.lili.modules.message.entity.dos.MemberMessage;
+import cn.lili.modules.message.entity.enums.MessageStatusEnum;
 import cn.lili.modules.message.entity.vos.MemberMessageQueryVO;
 import cn.lili.modules.message.service.MemberMessageService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  * 买家端,会员站内消息接口
  *
  * @author Bulbasaur
- * @since: 2020/11/16 10:07 下午
+ * @since 2020/11/16 10:07 下午
  */
 @RestController
 @Api(tags = "买家端,会员站内消息接口")

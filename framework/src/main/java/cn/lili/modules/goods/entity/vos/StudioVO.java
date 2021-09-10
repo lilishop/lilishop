@@ -11,7 +11,7 @@ import java.util.List;
  * 直播间VO
  *
  * @author Bulbasaur
- * @since: 2021/5/31 11:58 上午
+ * @since 2021/5/31 11:58 上午
  */
 @Data
 public class StudioVO extends Studio {

@@ -1,11 +1,10 @@
 package cn.lili.controller.promotion;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.mybatis.util.PageUtil;
-import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.Coupon;
@@ -15,6 +14,7 @@ import cn.lili.modules.promotion.entity.vos.CouponSearchParams;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
@@ -42,9 +42,9 @@ public class CouponManagerController {
 
     @ApiOperation(value = "获取优惠券列表")
     @GetMapping
-    public ResultMessage<IPage<Coupon>> getCouponList(CouponSearchParams queryParam, PageVO page) {
+    public ResultMessage<IPage<CouponVO>> getCouponList(CouponSearchParams queryParam, PageVO page) {
         queryParam.setStoreId("platform");
-        return ResultUtil.data(couponService.getCouponsByPage(queryParam, page));
+        return ResultUtil.data(couponService.getCouponsByPageFromMongo(queryParam, page));
     }
 
     @ApiOperation(value = "获取优惠券详情")

@@ -80,6 +80,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 子订单业务层实现
@@ -396,9 +397,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public Order getOrderByVerificationCode(String verificationCode) {
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         return this.getOne(new LambdaQueryWrapper<Order>()
                 .eq(Order::getOrderStatus, OrderStatusEnum.TAKE.name())
-                .eq(Order::getStoreId, UserContext.getCurrentUser().getStoreId())
+                .eq(Order::getStoreId, storeId)
                 .eq(Order::getVerificationCode, verificationCode));
     }
 

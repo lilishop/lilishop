@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 会员经验值
  *
  * @author Bulbasaur
- * @since: 2021/5/16 11:16 下午
+ * @since 2021/5/16 11:16 下午
  */
 //@Service
 public class MemberExperienceExecute implements MemberRegisterEvent, GoodsCommentCompleteEvent, OrderStatusChangeEvent {

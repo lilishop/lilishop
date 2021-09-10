@@ -1,8 +1,8 @@
 package cn.lili.controller.member;
 
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
@@ -24,7 +24,7 @@ import javax.validation.constraints.NotNull;
  * 买家端,会员商品评价接口
  *
  * @author Bulbasaur
- * @since: 2020/11/16 10:08 下午
+ * @since 2020/11/16 10:08 下午
  */
 @RestController
 @Api(tags = "买家端,会员商品评价接口")

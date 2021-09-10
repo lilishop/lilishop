@@ -8,7 +8,7 @@ import java.lang.annotation.*;
  * 埋点统计
  *
  * @author Bulbasaur
- * @since: 2021/7/9 1:47 上午
+ * @since 2021/7/9 1:47 上午
  */
 @Target({ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

@@ -1,12 +1,12 @@
 package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultUtil;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.vo.SearchVO;
 import cn.lili.modules.system.entity.dos.VerificationSource;
 import cn.lili.modules.system.service.VerificationSourceService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,7 +21,7 @@ import java.util.List;
  * 管理端,验证码资源维护接口
  *
  * @author Chopper
- * @since: 2020/12/7 11:33
+ * @since 2020/12/7 11:33
  */
 @RestController
 @Api(tags = "管理端,验证码资源维护接口")

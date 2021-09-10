@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 管理端,直播间管理接口
  *
  * @author Bulbasaur
- * @since: 2021/5/28 11:56 上午
+ * @since 2021/5/28 11:56 上午
  */
 @RestController
 @Api(tags = "店铺端,直播商品接口")

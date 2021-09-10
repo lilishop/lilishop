@@ -4,7 +4,6 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
 import cn.lili.modules.distribution.entity.dto.DistributionGoodsSearchParams;
@@ -14,6 +13,7 @@ import cn.lili.modules.distribution.service.DistributionGoodsService;
 import cn.lili.modules.distribution.service.DistributionService;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -50,7 +51,7 @@ public class DistributionGoodsServiceImpl extends ServiceImpl<DistributionGoodsM
     @Override
     public IPage<DistributionGoodsVO> goodsPage(DistributionGoodsSearchParams searchParams) {
         //获取商家的分销商品列表
-        if (UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
+        if (Objects.requireNonNull(UserContext.getCurrentUser()).getRole().equals(UserEnums.STORE)) {
             return this.baseMapper.getDistributionGoodsVO(PageUtil.initPage(searchParams), searchParams.storeQueryWrapper());
         } else if (UserContext.getCurrentUser().getRole().equals(UserEnums.MEMBER)) {
             //判断当前登录用户是否为分销员
@@ -86,7 +87,7 @@ public class DistributionGoodsServiceImpl extends ServiceImpl<DistributionGoodsM
     }
 
     @Override
-    public DistributionGoods checked(String skuId, Double commission) {
+    public DistributionGoods checked(String skuId, Double commission, String storeId) {
 
         //检查分销功能开关
         distributionService.checkDistributionSetting();
@@ -98,6 +99,9 @@ public class DistributionGoodsServiceImpl extends ServiceImpl<DistributionGoodsM
             throw new ServiceException(ResultCode.DISTRIBUTION_GOODS_DOUBLE);
         }
         GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(skuId);
+        if (!goodsSku.getStoreId().equals(storeId)) {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        }
         DistributionGoods distributionGoods = new DistributionGoods(goodsSku, commission);
         this.save(distributionGoods);
         return distributionGoods;

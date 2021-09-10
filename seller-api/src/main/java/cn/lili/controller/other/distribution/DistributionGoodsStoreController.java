@@ -1,7 +1,7 @@
 package cn.lili.controller.other.distribution;
 
-import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
 import cn.lili.modules.distribution.entity.dos.DistributionSelectedGoods;
@@ -9,6 +9,7 @@ import cn.lili.modules.distribution.entity.dto.DistributionGoodsSearchParams;
 import cn.lili.modules.distribution.entity.vos.DistributionGoodsVO;
 import cn.lili.modules.distribution.service.DistributionGoodsService;
 import cn.lili.modules.distribution.service.DistributionSelectedGoodsService;
+import cn.lili.modules.system.utils.OperationalJudgment;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 /**
  * 店铺端,分销商品接口
@@ -54,13 +56,16 @@ public class DistributionGoodsStoreController {
     @PutMapping(value = "/checked/{skuId}")
     public ResultMessage<DistributionGoods> distributionCheckGoods(@NotNull(message = "规格ID不能为空") @PathVariable String skuId,
                                                                    @NotNull(message = "佣金金额不能为空") @RequestParam Double commission) {
-        return ResultUtil.data(distributionGoodsService.checked(skuId, commission));
+
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        return ResultUtil.data(distributionGoodsService.checked(skuId, commission, storeId));
     }
 
     @ApiOperation(value = "取消分销商品")
     @ApiImplicitParam(name = "id", value = "分销商商品ID", required = true, paramType = "path")
     @DeleteMapping(value = "/cancel/{id}")
     public ResultMessage<Object> cancel(@NotNull @PathVariable String id) {
+        OperationalJudgment.judgment(distributionGoodsService.getById(id));
         //清除分销商已选择分销商品
         distributionSelectedGoodsService.remove(new QueryWrapper<DistributionSelectedGoods>().eq("distribution_goods_id", id));
         //清除分销商品
