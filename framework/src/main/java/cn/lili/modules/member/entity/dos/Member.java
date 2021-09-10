@@ -1,8 +1,6 @@
 package cn.lili.modules.member.entity.dos;
 
 import cn.lili.common.enums.ClientTypeEnum;
-import cn.lili.common.security.filter.Sensitive;
-import cn.lili.common.security.filter.SensitiveStrategy;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -56,7 +54,6 @@ public class Member extends BaseEntity {
 
     @NotEmpty(message = "手机号码不能为空")
     @ApiModelProperty(value = "手机号码", required = true)
-    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String mobile;
 
     @Min(message = "必须为数字", value = 0)
