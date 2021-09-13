@@ -104,11 +104,4 @@ public class UploadController {
         }
         return ResultUtil.data(result);
     }
-
-
-    @ApiOperation(value = "返回licences")
-    @PostMapping(value = "/licences")
-    public ResultMessage<Object> licences() {
-        return ResultUtil.data(systemSettingProperties.getLicences());
-    }
 }

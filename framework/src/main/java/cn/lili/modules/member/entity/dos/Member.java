@@ -1,8 +1,8 @@
 package cn.lili.modules.member.entity.dos;
 
 import cn.lili.common.enums.ClientTypeEnum;
-import cn.lili.common.security.filter.Sensitive;
-import cn.lili.common.security.filter.SensitiveStrategy;
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;

@@ -552,23 +552,38 @@ public class WechatPlugin implements Payment {
         String result = HttpKit.readData(request);
         log.info("微信退款通知密文 {}", result);
         JSONObject ciphertext = JSONUtil.parseObj(result);
-        if (!("REFUND.SUCCESS").equals(ciphertext.getStr("event_type"))) {
-            return;
-        }
-        try {
-            //校验服务器端响应¬
+
+        try { //校验服务器端响应¬
             String plainText = WxPayKit.verifyNotify(serialNo, result, signature, nonce, timestamp,
                     wechatPaymentSetting().getApiKey3(), Objects.requireNonNull(getPlatformCert()));
             log.info("微信退款通知明文 {}", plainText);
-            JSONObject jsonObject = JSONUtil.parseObj(plainText);
-            String transactionId = jsonObject.getStr("transaction_id");
-            String refundId = jsonObject.getStr("refund_id");
 
-            RefundLog refundLog = refundLogService.getOne(new LambdaQueryWrapper<RefundLog>().eq(RefundLog::getPaymentReceivableNo, transactionId));
-            if (refundLog != null) {
-                refundLog.setIsRefund(true);
-                refundLog.setReceivableNo(refundId);
-                refundLogService.saveOrUpdate(refundLog);
+            if (("REFUND.SUCCESS").equals(ciphertext.getStr("event_type"))) {
+                log.info("退款成功 {}", plainText);
+                //校验服务器端响应
+                JSONObject jsonObject = JSONUtil.parseObj(plainText);
+                String transactionId = jsonObject.getStr("transaction_id");
+                String refundId = jsonObject.getStr("refund_id");
+
+                RefundLog refundLog = refundLogService.getOne(new LambdaQueryWrapper<RefundLog>().eq(RefundLog::getPaymentReceivableNo, transactionId));
+                if (refundLog != null) {
+                    refundLog.setIsRefund(true);
+                    refundLog.setReceivableNo(refundId);
+                    refundLogService.saveOrUpdate(refundLog);
+                }
+
+            } else {
+                log.info("退款失败 {}", plainText);
+                JSONObject jsonObject = JSONUtil.parseObj(plainText);
+                String transactionId = jsonObject.getStr("transaction_id");
+                String refundId = jsonObject.getStr("refund_id");
+
+                RefundLog refundLog = refundLogService.getOne(new LambdaQueryWrapper<RefundLog>().eq(RefundLog::getPaymentReceivableNo, transactionId));
+                if (refundLog != null) {
+                    refundLog.setReceivableNo(refundId);
+                    refundLog.setErrorMessage(ciphertext.getStr("summary"));
+                    refundLogService.saveOrUpdate(refundLog);
+                }
             }
         } catch (Exception e) {
             log.error("微信退款失败", e);

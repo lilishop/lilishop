@@ -114,7 +114,7 @@ spring:
     props:
       #是否打印逻辑SQL语句和实际SQL语句，建议调试时打印，在生产环境关闭
       sql:
-        show: false
+        show: true
 
 # 忽略鉴权url
 ignored:
@@ -227,6 +227,12 @@ lili:
   system:
     isDemoSite: false
     isTestModel: true
+#     脱敏级别：
+#     0：不做脱敏处理
+#     1：管理端用户手机号等信息脱敏
+#     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
+#    sensitiveLevel: 2
+
   statistics:
     # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数
     onlineMember: 48

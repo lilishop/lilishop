@@ -27,7 +27,34 @@ public class SystemSettingProperties {
     private Boolean isTestModel = false;
 
     /**
-     * 授权信息
+     * 脱敏级别：
+     * 0：不做脱敏处理
+     * 1：管理端用户手机号等信息脱敏
+     * 2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
+     * <p>
+     * PS:
      */
-    private String licences = "";
+    private Integer sensitiveLevel = 0;
+
+
+    public Boolean getDemoSite() {
+        if (isDemoSite == null) {
+            return false;
+        }
+        return isDemoSite;
+    }
+
+    public Boolean getTestModel() {
+        if (isTestModel == null) {
+            return false;
+        }
+        return isTestModel;
+    }
+
+    public Integer getSensitiveLevel() {
+        if (sensitiveLevel == null) {
+            return 0;
+        }
+        return sensitiveLevel;
+    }
 }
