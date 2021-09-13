@@ -4,6 +4,8 @@ import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -13,7 +15,9 @@ import java.util.List;
  * @author paulG
  * @since 2020/8/20
  **/
+@EqualsAndHashCode(callSuper = true)
 @Data
+@ToString(callSuper = true)
 public class SeckillVO extends Seckill {
 
     private static final long serialVersionUID = 2891461638257152270L;

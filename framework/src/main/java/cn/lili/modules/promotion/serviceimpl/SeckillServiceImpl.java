@@ -240,6 +240,9 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
     @Override
     public void openSeckill(String id) {
         SeckillVO seckillVO = checkSeckillExist(id);
+        if (seckillVO.getEndTime() == null) {
+            seckillVO.setEndTime(cn.hutool.core.date.DateUtil.endOfDay(seckillVO.getStartTime()));
+        }
         PromotionTools.checkPromotionTime(seckillVO.getStartTime().getTime(), seckillVO.getEndTime().getTime());
         if (PromotionStatusEnum.NEW.name().equals(seckillVO.getPromotionStatus()) || PromotionStatusEnum.CLOSE.name().equals(seckillVO.getPromotionStatus())) {
             LambdaUpdateWrapper<Seckill> updateWrapper = new LambdaUpdateWrapper<Seckill>().eq(Seckill::getId, id).set(Seckill::getPromotionStatus, PromotionStatusEnum.START.name());
