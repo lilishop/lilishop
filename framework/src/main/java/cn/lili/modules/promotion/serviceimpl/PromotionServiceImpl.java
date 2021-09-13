@@ -391,11 +391,13 @@ public class PromotionServiceImpl implements PromotionService {
             this.throwPromotionException(promotionTypeEnum, promotionMessage.getPromotionId(), promotionMessage.getPromotionStatus());
             return false;
         }
-
+        if (seckill.getEndTime() == null) {
+            seckill.setEndTime(DateUtil.endOfDay(seckill.getStartTime()));
+        }
         //修改活动状态
         seckill.setPromotionStatus(promotionMessage.getPromotionStatus());
         result = this.seckillService.update(updateWrapper(promotionMessage));
-
+        log.info("更新限时抢购活动状态：{}", seckill);
         //判断参与活动的商品是否为空，如果为空则返回
         if (seckill.getSeckillApplyList() == null) {
             return result;
@@ -428,6 +430,7 @@ public class PromotionServiceImpl implements PromotionService {
                 seckill1.setStartTime(parseStartTime);
                 //当时商品的秒杀活动活动结束时间为下个时间段的开始
                 seckill1.setEndTime(parseEndTime);
+                log.info("更新限时抢购商品状态:{}", seckill1);
                 this.goodsIndexService.updateEsGoodsIndex(seckillApply.getSkuId(), seckill1, promotionTypeEnum.name() + "-" + seckillApply.getTimeLine(), seckillApply.getPrice());
             }
         }

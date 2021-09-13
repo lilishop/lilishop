@@ -437,6 +437,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      * @param promotion  活动
      */
     private void updateGoodsIndexPromotion(EsGoodsIndex goodsIndex, String key, BasePromotion promotion) {
+        log.info("修改商品活动索引");
+        log.info("商品索引: {}", goodsIndex);
+        log.info("关键字: {}", key);
+        log.info("活动: {}", promotion);
         Map<String, Object> promotionMap;
         //数据非空处理，如果空给一个新的信息
         if (goodsIndex.getPromotionMap() == null || goodsIndex.getPromotionMap().isEmpty()) {
