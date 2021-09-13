@@ -4,6 +4,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -89,6 +91,7 @@ public class Order extends BaseEntity {
     private String consigneeName;
 
     @ApiModelProperty(value = "收件人手机")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String consigneeMobile;
 
     /**

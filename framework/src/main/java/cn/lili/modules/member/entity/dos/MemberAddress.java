@@ -1,5 +1,7 @@
 package cn.lili.modules.member.entity.dos;
 
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.common.validation.Phone;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -32,6 +34,7 @@ public class MemberAddress extends BaseEntity {
 
     @Phone
     @ApiModelProperty(value = "手机号码")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String mobile;
 
     @NotBlank(message = "地址不能为空")
