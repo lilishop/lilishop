@@ -1,7 +1,9 @@
 package cn.lili.modules.page.entity.dos;
 
+import cn.hutool.http.HtmlUtil;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.SwitchEnum;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.page.entity.enums.PageEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -62,4 +64,10 @@ public class PageData extends BaseEntity {
         this.pageType = PageEnum.STORE.name();
     }
 
+    public String getPageData() {
+        if (StringUtils.isNotEmpty(pageData)) {
+            return HtmlUtil.unescape(pageData);
+        }
+        return pageData;
+    }
 }
