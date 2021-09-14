@@ -1,6 +1,7 @@
 package cn.lili.common.security.filter;
 
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.http.HtmlUtil;
 import cn.hutool.json.JSONUtil;
 
@@ -120,7 +121,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         //获取输入流
         ServletInputStream in = super.getInputStream();
         //用于存储输入流
-        StringBuffer body = new StringBuffer();
+        StringBuilder body = new StringBuilder();
         InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
         BufferedReader bufferedReader = new BufferedReader(reader);
         //按行读取输入流
@@ -136,24 +137,52 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         reader.close();
         in.close();
 
-        //将body转换为map
-        Map<String, Object> map = JSONUtil.parseObj(body.toString());
-        //创建空的map用于存储结果
-        Map<String, Object> resultMap = new HashMap<>(map.size());
-        //遍历数组
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            //如果map.get(key)获取到的是字符串就需要进行转义，如果不是直接存储resultMap
-            if (map.get(entry.getKey()) instanceof String) {
-                resultMap.put(entry.getKey(), cleanXSS(entry.getValue().toString()));
-            } else {
-                resultMap.put(entry.getKey(), entry.getValue());
+        if (CharSequenceUtil.isNotEmpty(body) && Boolean.TRUE.equals(JSONUtil.isJsonObj(body.toString()))) {
+            //将body转换为map
+            Map<String, Object> map = JSONUtil.parseObj(body.toString());
+            //创建空的map用于存储结果
+            Map<String, Object> resultMap = new HashMap<>(map.size());
+            //遍历数组
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                //如果map.get(key)获取到的是字符串就需要进行转义，如果不是直接存储resultMap
+                if (map.get(entry.getKey()) instanceof String) {
+                    resultMap.put(entry.getKey(), cleanXSS(entry.getValue().toString()));
+                } else {
+                    resultMap.put(entry.getKey(), entry.getValue());
+                }
             }
+
+            //将resultMap转换为json字符串
+            String resultStr = JSONUtil.toJsonStr(resultMap);
+            //将json字符串转换为字节
+            final ByteArrayInputStream resultBIS = new ByteArrayInputStream(resultStr.getBytes());
+
+            //实现接口
+            return new ServletInputStream() {
+                @Override
+                public boolean isFinished() {
+                    return false;
+                }
+
+                @Override
+                public boolean isReady() {
+                    return false;
+                }
+
+                @Override
+                public void setReadListener(ReadListener readListener) {
+
+                }
+
+                @Override
+                public int read() {
+                    return resultBIS.read();
+                }
+            };
         }
 
-        //将resultMap转换为json字符串
-        String resultStr = JSONUtil.toJsonStr(resultMap);
         //将json字符串转换为字节
-        final ByteArrayInputStream bis = new ByteArrayInputStream(resultStr.getBytes());
+        final ByteArrayInputStream bis = new ByteArrayInputStream(body.toString().getBytes());
 
         //实现接口
         return new ServletInputStream() {
@@ -177,6 +206,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
                 return bis.read();
             }
         };
+
     }
 
     private String cleanXSS(String value) {
