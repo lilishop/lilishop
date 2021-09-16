@@ -80,9 +80,15 @@ public class ElasticsearchController {
     public ResultMessage<String> init() {
 
         Boolean flag = (Boolean) cache.get(CachePrefix.INIT_INDEX_FLAG.getPrefix());
+        if (flag == null) {
+            cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false);
+        }
         if (Boolean.TRUE.equals(flag)) {
             return ResultUtil.error(100000, "当前有任务在执行");
         }
+
+        cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), null);
+        cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), true);
         ThreadUtil.execAsync(() -> {
             //查询商品信息
             LambdaQueryWrapper<GoodsSku> queryWrapper = new LambdaQueryWrapper<>();
@@ -129,9 +135,13 @@ public class ElasticsearchController {
 
     @GetMapping("/progress")
     public ResultMessage<Map<String, Integer>> getProgress() {
-        Map<String, Integer> map = (Map<String, Integer>) cache.get(CachePrefix.INIT_INDEX_PROCESS.getPrefix());
-        Boolean flag = (Boolean) cache.get(CachePrefix.INIT_INDEX_FLAG.getPrefix());
-        map.put("flag", Boolean.TRUE.equals(flag) ? 1 : 0);
-        return ResultUtil.data(map);
+        try {
+            Map<String, Integer> map = (Map<String, Integer>) cache.get(CachePrefix.INIT_INDEX_PROCESS.getPrefix());
+            Boolean flag = (Boolean) cache.get(CachePrefix.INIT_INDEX_FLAG.getPrefix());
+            map.put("flag", Boolean.TRUE.equals(flag) ? 1 : 0);
+            return ResultUtil.data(map);
+        } catch (Exception e) {
+            return ResultUtil.data(null);
+        }
     }
 }

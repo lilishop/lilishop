@@ -199,7 +199,6 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         resultMap.put(KEY_FAIL, 0);
         resultMap.put(KEY_PROCESSED, 0);
         cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix() + "", resultMap);
-        cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), true);
         if (!goodsIndexList.isEmpty()) {
             goodsIndexRepository.deleteAll();
             for (EsGoodsIndex goodsIndex : goodsIndexList) {
