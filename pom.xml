@@ -20,7 +20,7 @@
         <java.version>1.8</java.version>
         <revision>4.2.2</revision>
         <docker-registry>registry.cn-beijing.aliyuncs.com/lili-images</docker-registry>
-        <images-version>0.0.1</images-version>
+        <images-version>1</images-version>
         <swagger-bootstrap-ui-version>1.9.6</swagger-bootstrap-ui-version>
         <alipay-sdk-version>4.13.40.ALL</alipay-sdk-version>
         <mysql-connector-version>5.1.48</mysql-connector-version>
@@ -85,7 +85,7 @@
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>${spotify}</version>
                 <configuration>
-                    <imageName>${docker-registry}/${project.build.finalName}:${images-version}</imageName>
+                    <imageName>${docker-registry}/${project.artifactId}:${revision}.${images-version}</imageName>
                     <baseImage>java</baseImage>
                     <entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
                     <pushImage>true</pushImage>
