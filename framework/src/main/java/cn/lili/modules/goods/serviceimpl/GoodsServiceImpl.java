@@ -282,25 +282,27 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     public Boolean updateGoodsMarketAble(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, String underReason) {
         boolean result;
 
-        AuthUser currentUser = UserContext.getCurrentUser();
-        if (currentUser == null || (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() == null)) {
-            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
-        }
-
         //如果商品为空，直接返回
         if (goodsIds == null || goodsIds.isEmpty()) {
             return true;
         }
 
         LambdaUpdateWrapper<Goods> updateWrapper = Wrappers.lambdaUpdate();
+        LambdaQueryWrapper<Goods> queryWrapper = new LambdaQueryWrapper<Goods>().in(Goods::getId, goodsIds);
         updateWrapper.set(Goods::getMarketEnable, goodsStatusEnum.name());
         updateWrapper.set(Goods::getUnderMessage, underReason);
-        updateWrapper.eq(Goods::getStoreId, currentUser.getStoreId());
+        AuthUser currentUser = UserContext.getCurrentUser();
+        if (currentUser == null || (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() == null)) {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        } else if (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() != null) {
+            updateWrapper.eq(Goods::getStoreId, currentUser.getStoreId());
+            queryWrapper.eq(Goods::getStoreId, currentUser.getStoreId());
+        }
         updateWrapper.in(Goods::getId, goodsIds);
         result = this.update(updateWrapper);
 
         //修改规格商品
-        List<Goods> goodsList = this.list(new LambdaQueryWrapper<Goods>().in(Goods::getId, goodsIds).eq(Goods::getStoreId, currentUser.getStoreId()));
+        List<Goods> goodsList = this.list(queryWrapper);
         for (Goods goods : goodsList) {
             goodsSkuService.updateGoodsSkuStatus(goods);
         }
