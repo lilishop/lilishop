@@ -97,6 +97,11 @@ public class Store extends BaseEntity {
     @ApiModelProperty(value = "腾讯云智服小程序唯一标识")
     private String yzfMpSign;
 
+
+    @ApiModelProperty(value = "udesk IM标识")
+    private String merchantEuid;
+
+
     public Store(Member member) {
         this.memberId = member.getId();
         this.memberName = member.getUsername();
