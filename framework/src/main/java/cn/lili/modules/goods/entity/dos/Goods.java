@@ -1,6 +1,8 @@
 package cn.lili.modules.goods.entity.dos;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.http.HtmlUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -247,4 +249,19 @@ public class Goods extends BaseEntity {
 
         }
     }
+
+    public String getIntro() {
+        if (CharSequenceUtil.isNotEmpty(intro)) {
+            return HtmlUtil.unescape(intro);
+        }
+        return intro;
+    }
+
+    public String getMobileIntro() {
+        if (CharSequenceUtil.isNotEmpty(mobileIntro)) {
+            return HtmlUtil.unescape(mobileIntro);
+        }
+        return mobileIntro;
+    }
+
 }
