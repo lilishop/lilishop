@@ -5,6 +5,7 @@ import cn.lili.mybatis.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.Date;
@@ -15,6 +16,7 @@ import java.util.Date;
  * @author Chopper
  * @since 2020-03-19 10:44 上午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class BasePromotion extends BaseEntity {
 
