@@ -31,6 +31,8 @@ public enum SettingEnum {
     EXPERIENCE_SETTING,
     //秒杀活动设置
     SECKILL_SETTING,
+    //IM 配置
+    IM_SETTING,
 
     //微信 联合登陆设置
     WECHAT_CONNECT,
@@ -42,7 +44,5 @@ public enum SettingEnum {
     //支付宝支付设置
     ALIPAY_PAYMENT,
     //微信支付设置
-    WECHAT_PAYMENT,
-    //IM 配置
-    IM;
+    WECHAT_PAYMENT;
 }
