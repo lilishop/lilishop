@@ -138,6 +138,7 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
     private List<StoreGoodsLabel> list(String storeId) {
         LambdaQueryWrapper<StoreGoodsLabel> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(StoreGoodsLabel::getStoreId, storeId);
+        queryWrapper.orderByDesc(StoreGoodsLabel::getSortOrder);
         return this.baseMapper.selectList(queryWrapper);
     }
 

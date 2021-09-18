@@ -226,6 +226,7 @@ public enum ResultCode {
     WALLET_WITHDRAWAL_FROZEN_AMOUNT_INSUFFICIENT(34006, "冻结金额不足，无法处理提现申请请求！"),
     WALLET_ERROR_INSUFFICIENT(34003, "零钱提现失败！"),
     WALLET_REMARK_ERROR(34004, "请填写审核备注！"),
+    WALLET_EXIT_ERROR(34000, "钱包已存在，无法重复创建"),
     WALLET_APPLY_ERROR(34005, "提现申请异常！"),
 
     /**
