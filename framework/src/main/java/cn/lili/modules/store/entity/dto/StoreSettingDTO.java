@@ -31,6 +31,6 @@ public class StoreSettingDTO {
 
     @NotEmpty
     @ApiModelProperty(value = "经纬度")
-    private String center;
+    private String storeCenter;
 
 }

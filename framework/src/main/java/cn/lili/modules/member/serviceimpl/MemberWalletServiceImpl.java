@@ -223,7 +223,12 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
 
     @Override
     public MemberWallet save(String memberId, String memberName) {
-        MemberWallet memberWallet = new MemberWallet();
+        //获取会员预存款信息
+        MemberWallet memberWallet = this.getOne(new QueryWrapper<MemberWallet>().eq("member_id", memberId));
+        if (memberWallet != null) {
+            return memberWallet;
+        }
+        memberWallet = new MemberWallet();
         memberWallet.setMemberId(memberId);
         memberWallet.setMemberName(memberName);
         memberWallet.setMemberWallet(0D);
