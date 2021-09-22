@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,5 +38,19 @@ public class CategoryBrandServiceImpl extends ServiceImpl<CategoryBrandMapper, C
     @Override
     public List<CategoryBrand> getCategoryBrandListByBrandId(String brandId) {
         return this.list(new LambdaQueryWrapper<CategoryBrand>().eq(CategoryBrand::getBrandId, brandId));
+    }
+
+    @Override
+    public void saveCategoryBrandList(String categoryId, List<String> brandIds) {
+        //删除分类品牌绑定信息
+        this.deleteByCategoryId(categoryId);
+        //绑定品牌信息
+        if (!brandIds.isEmpty()) {
+            List<CategoryBrand> categoryBrands = new ArrayList<>();
+            for (String brandId : brandIds) {
+                categoryBrands.add(new CategoryBrand(categoryId, brandId));
+            }
+            this.saveBatch(categoryBrands);
+        }
     }
 }

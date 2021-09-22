@@ -88,20 +88,44 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
         Brand brand = this.checkExist(brandId);
         //如果是要禁用，则需要先判定绑定关系
         if (Boolean.TRUE.equals(disable)) {
-            //分了绑定关系查询
-            List<CategoryBrand> categoryBrands = categoryBrandService.getCategoryBrandListByBrandId(brandId);
-            if (!categoryBrands.isEmpty()) {
-                List<String> brandIds = categoryBrands.stream().map(categoryBrand -> {
-                    return categoryBrand.getCategoryId();
-                }).collect(Collectors.toList());
-                throw new ServiceException(ResultCode.BRAND_USE_DISABLE_ERROR,
-                        JSONUtil.toJsonStr(categoryService.getCategoryNameByIds(brandIds)));
-            }
+            checkoutCategory(brandId);
         }
         brand.setDeleteFlag(disable);
         return updateById(brand);
     }
 
+    @Override
+    public void deleteBrands(List<String> ids) {
+        ids.forEach(id -> {
+            checkoutCategory(id);
+        });
+        this.removeByIds(ids);
+    }
+
+
+    /**
+     * 校验绑定关系
+     *
+     * @param brandId
+     */
+    private void checkoutCategory(String brandId) {
+        //分了绑定关系查询
+        List<CategoryBrand> categoryBrands = categoryBrandService.getCategoryBrandListByBrandId(brandId);
+        if (!categoryBrands.isEmpty()) {
+            List<String> brandIds = categoryBrands.stream().map(categoryBrand -> {
+                return categoryBrand.getCategoryId();
+            }).collect(Collectors.toList());
+            throw new ServiceException(ResultCode.BRAND_USE_DISABLE_ERROR,
+                    JSONUtil.toJsonStr(categoryService.getCategoryNameByIds(brandIds)));
+        }
+    }
+
+    /**
+     * 校验是否存在
+     *
+     * @param brandId
+     * @return
+     */
     private Brand checkExist(String brandId) {
         Brand brand = getById(brandId);
         if (brand == null) {

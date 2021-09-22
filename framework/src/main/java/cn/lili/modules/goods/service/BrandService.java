@@ -26,6 +26,13 @@ public interface BrandService extends IService<Brand> {
     IPage<Brand> getBrandsByPage(BrandPageDTO page);
 
     /**
+     * 删除品牌
+     *
+     * @param ids 品牌id
+     */
+    void deleteBrands(List<String> ids);
+
+    /**
      * 根据分类ID获取品牌列表
      *
      * @param categoryId 分类ID
