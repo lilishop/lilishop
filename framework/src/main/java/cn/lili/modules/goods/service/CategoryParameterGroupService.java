@@ -39,5 +39,11 @@ public interface CategoryParameterGroupService extends IService<CategoryParamete
      * @return 是否成功
      */
     boolean updateCategoryGroup(CategoryParameterGroup categoryParameterGroup);
-    
+
+    /**
+     * 通过分类ID删除关联品牌
+     * @param categoryId 品牌ID
+     */
+    void deleteByCategoryId(String categoryId);
+
 }

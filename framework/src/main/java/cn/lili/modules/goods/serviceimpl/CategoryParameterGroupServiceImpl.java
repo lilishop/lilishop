@@ -2,6 +2,7 @@ package cn.lili.modules.goods.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.modules.goods.entity.dos.CategoryBrand;
 import cn.lili.modules.goods.entity.dos.CategoryParameterGroup;
 import cn.lili.modules.goods.entity.dos.Parameters;
 import cn.lili.modules.goods.entity.vos.ParameterGroupVO;
@@ -9,6 +10,7 @@ import cn.lili.modules.goods.mapper.CategoryParameterGroupMapper;
 import cn.lili.modules.goods.service.CategoryParameterGroupService;
 import cn.lili.modules.goods.service.ParametersService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,6 +67,11 @@ public class CategoryParameterGroupServiceImpl extends ServiceImpl<CategoryParam
         }
 
         return false;
+    }
+
+    @Override
+    public void deleteByCategoryId(String categoryId) {
+        this.baseMapper.delete(new LambdaUpdateWrapper<CategoryParameterGroup>().eq(CategoryParameterGroup::getCategoryId, categoryId));
     }
 
     /**

@@ -97,7 +97,7 @@ public enum ResultCode {
     BRAND_DISABLE_ERROR(14003, "品牌禁用失败"),
     BRAND_DELETE_ERROR(14004, "品牌删除失败"),
     BRAND_NAME_EXIST_ERROR(20002, "品牌名称重复！"),
-    BRAND_USE_DISABLE_ERROR(20003, "当前品牌下存在分类不可禁用"),
+    BRAND_USE_DISABLE_ERROR(20003, "分类已经绑定此品牌，请先解除关联"),
     BRAND_NOT_EXIST(20004, "品牌不存在"),
 
     /**

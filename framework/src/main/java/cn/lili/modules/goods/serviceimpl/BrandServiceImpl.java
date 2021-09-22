@@ -1,7 +1,9 @@
 package cn.lili.modules.goods.serviceimpl;
 
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.modules.goods.entity.dos.Brand;
 import cn.lili.modules.goods.entity.dos.CategoryBrand;
@@ -38,6 +40,9 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
      */
     @Autowired
     private CategoryBrandService categoryBrandService;
+
+    @Autowired
+    private CategoryService categoryService;
 
     @Override
     public IPage<Brand> getBrandsByPage(BrandPageDTO page) {
@@ -81,8 +86,14 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
     @Override
     public boolean brandDisable(String brandId, boolean disable) {
         Brand brand = this.checkExist(brandId);
-        if (Boolean.TRUE.equals(disable) && !categoryBrandService.getCategoryBrandListByBrandId(brandId).isEmpty()) {
-            throw new ServiceException(ResultCode.BRAND_USE_DISABLE_ERROR);
+        if (Boolean.TRUE.equals(disable)) {
+            List<CategoryBrand> categoryBrands = categoryBrandService.getCategoryBrandListByBrandId(brandId);
+            List<String> brandIds = categoryBrands.stream().map(categoryBrand -> {
+                return categoryBrand.getCategoryId();
+            }).collect(Collectors.toList());
+
+            throw new ServiceException(ResultCode.BRAND_USE_DISABLE_ERROR,
+                    JSONUtil.toJsonStr(categoryService.getCategoryNameByIds(brandIds)));
         }
         brand.setDeleteFlag(disable);
         return updateById(brand);

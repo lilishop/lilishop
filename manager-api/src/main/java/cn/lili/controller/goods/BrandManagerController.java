@@ -83,7 +83,7 @@ public class BrandManagerController {
     @ApiOperation(value = "后台禁用品牌")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "brandId", value = "品牌ID", required = true, dataType = "String", paramType = "path"),
-            @ApiImplicitParam(name = "id", value = "是否不可用", required = true, dataType = "String", paramType = "query")
+            @ApiImplicitParam(name = "disable", value = "是否可用", required = true, dataType = "boolean", paramType = "query")
     })
     @PutMapping(value = "/disable/{brandId}")
     public ResultMessage<Object> disable(@PathVariable String brandId, @RequestParam Boolean disable) {

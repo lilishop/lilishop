@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 /**
  * 商品品牌
@@ -21,16 +22,14 @@ public class Brand extends BaseEntity {
 
 
     private static final long serialVersionUID = -8236865838438521426L;
-    /**
-     * 品牌名称
-     */
+
     @NotEmpty(message = "品牌名称不能为空")
+    @Size(max = 20, message = "品牌名称应该小于20长度字符")
     @ApiModelProperty(value = "品牌名称", required = true)
     private String name;
-    /**
-     * 品牌图标
-     */
+
     @NotEmpty(message = "品牌图标不能为空")
+    @Size(max = 255, message = "品牌图标地址长度超过255字符")
     @ApiModelProperty(value = "品牌图标", required = true)
     private String logo;
 

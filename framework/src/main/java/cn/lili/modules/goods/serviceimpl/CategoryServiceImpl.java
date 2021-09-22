@@ -11,7 +11,10 @@ import cn.lili.modules.goods.entity.vos.CategoryVO;
 import cn.lili.modules.goods.entity.vos.GoodsParamsGroupVO;
 import cn.lili.modules.goods.entity.vos.GoodsParamsVO;
 import cn.lili.modules.goods.mapper.CategoryMapper;
+import cn.lili.modules.goods.service.CategoryBrandService;
+import cn.lili.modules.goods.service.CategoryParameterGroupService;
 import cn.lili.modules.goods.service.CategoryService;
+import cn.lili.modules.goods.service.CategorySpecificationService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -42,6 +45,15 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      */
     @Autowired
     private Cache cache;
+
+    @Autowired
+    private CategoryBrandService categoryBrandService;
+
+    @Autowired
+    private CategoryParameterGroupService categoryParameterGroupService;
+
+    @Autowired
+    private CategorySpecificationService categorySpecificationService;
 
     @Override
     public List<Category> dbList(String parentId) {
@@ -227,6 +239,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     public void delete(String id) {
         this.removeById(id);
         removeCache();
+        //删除关联关系
+        categoryBrandService.deleteByCategoryId(id);
+        categoryParameterGroupService.deleteByCategoryId(id);
+        categorySpecificationService.deleteByCategoryId(id);
     }
 
     @Override
