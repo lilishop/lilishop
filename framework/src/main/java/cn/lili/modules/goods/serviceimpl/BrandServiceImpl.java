@@ -86,14 +86,17 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
     @Override
     public boolean brandDisable(String brandId, boolean disable) {
         Brand brand = this.checkExist(brandId);
+        //如果是要禁用，则需要先判定绑定关系
         if (Boolean.TRUE.equals(disable)) {
+            //分了绑定关系查询
             List<CategoryBrand> categoryBrands = categoryBrandService.getCategoryBrandListByBrandId(brandId);
-            List<String> brandIds = categoryBrands.stream().map(categoryBrand -> {
-                return categoryBrand.getCategoryId();
-            }).collect(Collectors.toList());
-
-            throw new ServiceException(ResultCode.BRAND_USE_DISABLE_ERROR,
-                    JSONUtil.toJsonStr(categoryService.getCategoryNameByIds(brandIds)));
+            if (!categoryBrands.isEmpty()) {
+                List<String> brandIds = categoryBrands.stream().map(categoryBrand -> {
+                    return categoryBrand.getCategoryId();
+                }).collect(Collectors.toList());
+                throw new ServiceException(ResultCode.BRAND_USE_DISABLE_ERROR,
+                        JSONUtil.toJsonStr(categoryService.getCategoryNameByIds(brandIds)));
+            }
         }
         brand.setDeleteFlag(disable);
         return updateById(brand);
