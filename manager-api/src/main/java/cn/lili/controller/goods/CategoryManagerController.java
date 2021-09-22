@@ -89,7 +89,7 @@ public class CategoryManagerController {
     }
 
     @DeleteMapping(value = "/{id}")
-    @ApiImplicitParam(name = "goodsId", value = "分类ID", required = true, paramType = "path", dataType = "String")
+    @ApiImplicitParam(name = "id", value = "分类ID", required = true, paramType = "path", dataType = "String")
     @ApiOperation(value = "通过id删除分类")
     public ResultMessage<Category> delAllByIds(@NotNull @PathVariable String id) {
         Category category = new Category();

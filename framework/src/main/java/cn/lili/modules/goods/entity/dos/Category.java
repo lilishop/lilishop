@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -37,6 +38,7 @@ public class Category extends BaseEntity {
     private String parentId;
 
     @NotNull(message = "层级不能为空")
+    @Min(value = 0,message = "层级需要大于0")
     @ApiModelProperty(value = "层级, 从0开始")
     private Integer level;
 
