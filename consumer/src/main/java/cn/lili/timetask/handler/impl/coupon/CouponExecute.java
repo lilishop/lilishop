@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 /**
  * 优惠券状态监测
  *
@@ -34,7 +36,7 @@ public class CouponExecute implements EveryDayExecute {
         //将过期优惠券变更为过期状体
         LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<MemberCoupon>()
                 .eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name())
-                .le(MemberCoupon::getEndTime, System.currentTimeMillis())
+                .le(MemberCoupon::getEndTime, new Date())
                 .set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.EXPIRE.name());
         this.memberCouponService.update(updateWrapper);
 
