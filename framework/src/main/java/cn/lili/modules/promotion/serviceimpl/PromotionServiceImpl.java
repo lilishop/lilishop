@@ -398,42 +398,42 @@ public class PromotionServiceImpl implements PromotionService {
         seckill.setPromotionStatus(promotionMessage.getPromotionStatus());
         result = this.seckillService.update(updateWrapper(promotionMessage));
         log.info("更新限时抢购活动状态：{}", seckill);
-        //判断参与活动的商品是否为空，如果为空则返回
-        if (seckill.getSeckillApplyList() == null) {
-            return result;
-        }
 
-        //循环秒杀商品数据，将数据按照时间段进行存储
-        for (SeckillApply seckillApply : seckill.getSeckillApplyList()) {
-            if (seckillApply.getPromotionApplyStatus().equals(PromotionApplyStatusEnum.PASS.name())) {
-                //下一个时间，默认为当天结束时间
-                int nextHour = 23;
-                String[] split = seckill.getHours().split(",");
-                int[] hoursSored = Arrays.stream(split).mapToInt(Integer::parseInt).toArray();
-                //排序时间段
-                Arrays.sort(hoursSored);
-                for (int i : hoursSored) {
-                    //如果当前时间段大于排序后的时间段的某个，当前时间段的下个时间段即为排序后的时间段的某个
-                    if (seckillApply.getTimeLine() < i) {
-                        nextHour = i;
-                        break;
+        //判断参与活动的商品是否为空
+        if (seckill.getSeckillApplyList() != null && !seckill.getSeckillApplyList().isEmpty()) {
+            //循环秒杀商品数据，将数据按照时间段进行存储
+            for (SeckillApply seckillApply : seckill.getSeckillApplyList()) {
+                if (seckillApply.getPromotionApplyStatus().equals(PromotionApplyStatusEnum.PASS.name())) {
+                    //下一个时间，默认为当天结束时间
+                    int nextHour = 23;
+                    String[] split = seckill.getHours().split(",");
+                    int[] hoursSored = Arrays.stream(split).mapToInt(Integer::parseInt).toArray();
+                    //排序时间段
+                    Arrays.sort(hoursSored);
+                    for (int i : hoursSored) {
+                        //如果当前时间段大于排序后的时间段的某个，当前时间段的下个时间段即为排序后的时间段的某个
+                        if (seckillApply.getTimeLine() < i) {
+                            nextHour = i;
+                            break;
+                        }
                     }
+                    Seckill seckill1 = JSONUtil.toBean(JSONUtil.toJsonStr(seckill), Seckill.class);
+                    String format = DateUtil.format(seckill.getStartTime(), cn.lili.common.utils.DateUtil.STANDARD_DATE_FORMAT);
+                    DateTime parseStartTime = DateUtil.parse((format + " " + seckillApply.getTimeLine()), "yyyy-MM-dd HH");
+                    DateTime parseEndTime = DateUtil.parse((format + " " + nextHour), "yyyy-MM-dd HH");
+                    //如果是当天最后的时间段则设置到当天结束时间的59分59秒
+                    if (nextHour == seckillApply.getTimeLine()) {
+                        parseEndTime = DateUtil.parse((format + " " + nextHour + ":59:59"), cn.lili.common.utils.DateUtil.STANDARD_FORMAT);
+                    }
+                    seckill1.setStartTime(parseStartTime);
+                    //当时商品的秒杀活动活动结束时间为下个时间段的开始
+                    seckill1.setEndTime(parseEndTime);
+                    log.info("更新限时抢购商品状态:{}", seckill1);
+                    this.goodsIndexService.updateEsGoodsIndex(seckillApply.getSkuId(), seckill1, promotionTypeEnum.name() + "-" + seckillApply.getTimeLine(), seckillApply.getPrice());
                 }
-                Seckill seckill1 = JSONUtil.toBean(JSONUtil.toJsonStr(seckill), Seckill.class);
-                String format = DateUtil.format(seckill.getStartTime(), cn.lili.common.utils.DateUtil.STANDARD_DATE_FORMAT);
-                DateTime parseStartTime = DateUtil.parse((format + " " + seckillApply.getTimeLine()), "yyyy-MM-dd HH");
-                DateTime parseEndTime = DateUtil.parse((format + " " + nextHour), "yyyy-MM-dd HH");
-                //如果是当天最后的时间段则设置到当天结束时间的59分59秒
-                if (nextHour == seckillApply.getTimeLine()) {
-                    parseEndTime = DateUtil.parse((format + " " + nextHour + ":59:59"), cn.lili.common.utils.DateUtil.STANDARD_FORMAT);
-                }
-                seckill1.setStartTime(parseStartTime);
-                //当时商品的秒杀活动活动结束时间为下个时间段的开始
-                seckill1.setEndTime(parseEndTime);
-                log.info("更新限时抢购商品状态:{}", seckill1);
-                this.goodsIndexService.updateEsGoodsIndex(seckillApply.getSkuId(), seckill1, promotionTypeEnum.name() + "-" + seckillApply.getTimeLine(), seckillApply.getPrice());
             }
         }
+
         this.mongoTemplate.save(seckill);
         return result;
     }

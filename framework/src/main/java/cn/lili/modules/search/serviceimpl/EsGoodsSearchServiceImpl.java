@@ -164,15 +164,16 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
                 }
                 String[] split = ArrayUtil.distinct(categoryPath.split(","));
                 String[] nameSplit = categoryNamePath.split(",");
-                for (int i = 0; i < split.length; i++) {
-                    SelectorOptions so = new SelectorOptions();
-                    so.setName(nameSplit[i]);
-                    so.setValue(split[i]);
-                    if (!categoryOptions.contains(so)) {
-                        categoryOptions.add(so);
+                if (split.length == nameSplit.length) {
+                    for (int i = 0; i < split.length; i++) {
+                        SelectorOptions so = new SelectorOptions();
+                        so.setName(nameSplit[i]);
+                        so.setValue(split[i]);
+                        if (!categoryOptions.contains(so)) {
+                            categoryOptions.add(so);
+                        }
                     }
                 }
-
             }
         }
         esGoodsRelatedInfo.setCategories(categoryOptions);
