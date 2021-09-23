@@ -1,5 +1,6 @@
 package cn.lili.modules.goods.serviceimpl;
 
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dos.Category;
@@ -38,7 +39,6 @@ public class SpecificationServiceImpl extends ServiceImpl<SpecificationMapper, S
     private CategoryServiceImpl categoryService;
 
 
-
     @Override
     public boolean deleteSpecification(List<String> ids) {
         for (String id : ids) {
@@ -49,16 +49,8 @@ public class SpecificationServiceImpl extends ServiceImpl<SpecificationMapper, S
                 list.forEach(item -> {
                     categoryIds.add(item.getCategoryId());
                 });
-                //返回包含分类的信息
-                LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper();
-                queryWrapper.in(Category::getId, categoryIds);
-                List<Category> categories = categoryService.list(queryWrapper);
-                StringBuffer stringBuffer = new StringBuffer("包含的分类有-");
-                categories.stream().forEach(item -> {
-                    stringBuffer.append(item.getName());
-                    stringBuffer.append(",");
-                });
-                throw new ServiceException(ResultCode.SPEC_DELETE_ERROR, stringBuffer.toString());
+                throw new ServiceException(ResultCode.SPEC_DELETE_ERROR,
+                        JSONUtil.toJsonStr(categoryService.getCategoryNameByIds(categoryIds)));
             }
             //删除规格
             this.removeById(id);

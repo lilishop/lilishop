@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -66,17 +67,17 @@ public class Distribution extends BaseEntity {
     @ApiModelProperty(value = "分销员状态", required = true)
     private String distributionStatus;
 
-    @Size(min = 1, max = 200, message = "结算银行开户行名称长度为1-200位")
+    @Length(min = 1, max = 200, message = "结算银行开户行名称长度为1-200位")
     @NotBlank(message = "结算银行开户行名称不能为空")
     @ApiModelProperty(value = "结算银行开户行名称")
     private String settlementBankAccountName;
 
-    @Size(min = 1, max = 200, message = "结算银行开户账号长度为1-200位")
+    @Length(min = 1, max = 200, message = "结算银行开户账号长度为1-200位")
     @NotBlank(message = "结算银行开户账号不能为空")
     @ApiModelProperty(value = "结算银行开户账号")
     private String settlementBankAccountNum;
 
-    @Size(min = 1, max = 200, message = "结算银行开户支行名称长度为1-200位")
+    @Length(min = 1, max = 200, message = "结算银行开户支行名称长度为1-200位")
     @NotBlank(message = "结算银行开户支行名称不能为空")
     @ApiModelProperty(value = "结算银行开户支行名称")
     private String settlementBankBranchName;

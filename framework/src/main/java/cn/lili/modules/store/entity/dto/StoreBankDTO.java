@@ -2,6 +2,7 @@ package cn.lili.modules.store.entity.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -15,22 +16,22 @@ import javax.validation.constraints.Size;
 @Data
 public class StoreBankDTO {
 
-    @Size(min = 1, max = 200)
+    @Length(min = 1, max = 200)
     @NotBlank(message = "结算银行开户行名称不能为空")
     @ApiModelProperty(value = "结算银行开户行名称")
     private String settlementBankAccountName;
 
-    @Size(min = 1, max = 200)
+    @Length(min = 1, max = 200)
     @NotBlank(message = "结算银行开户账号不能为空")
     @ApiModelProperty(value = "结算银行开户账号")
     private String settlementBankAccountNum;
 
-    @Size(min = 1, max = 200)
+    @Length(min = 1, max = 200)
     @NotBlank(message = "结算银行开户支行名称不能为空")
     @ApiModelProperty(value = "结算银行开户支行名称")
     private String settlementBankBranchName;
 
-    @Size(min = 1, max = 50)
+    @Length(min = 1, max = 50)
     @NotBlank(message = "结算银行支行联行号不能为空")
     @ApiModelProperty(value = "结算银行支行联行号")
     private String settlementBankJointName;

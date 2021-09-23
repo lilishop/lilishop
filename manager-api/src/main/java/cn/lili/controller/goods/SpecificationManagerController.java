@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 
@@ -51,14 +52,14 @@ public class SpecificationManagerController {
 
     @PostMapping
     @ApiOperation(value = "保存规格")
-    public ResultMessage<Object> save(Specification specification) {
+    public ResultMessage<Object> save(@Valid Specification specification) {
         specificationService.save(specification);
         return ResultUtil.success();
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "更改规格")
-    public ResultMessage<Object> update(Specification specification, @PathVariable String id) {
+    public ResultMessage<Object> update(@Valid Specification specification, @PathVariable String id) {
         specification.setId(id);
         specificationService.saveOrUpdate(specification);
         return ResultUtil.success();

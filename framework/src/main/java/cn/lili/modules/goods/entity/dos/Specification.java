@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 /**
  * 商品规格项
@@ -26,6 +28,7 @@ public class Specification extends BaseIdEntity {
      * 规格名称
      */
     @NotEmpty(message = "规格名称不能为空")
+    @Size(max = 20, message = "规格名称不能超过20个字符")
     @ApiModelProperty(value = "规格名称", required = true)
     private String specName;
 
@@ -43,6 +46,7 @@ public class Specification extends BaseIdEntity {
      */
     @TableField(value = "spec_value")
     @ApiModelProperty(value = "规格值名字, 《,》分割")
+    @Length(max = 255, message = "长度超出限制")
     private String specValue;
 
 

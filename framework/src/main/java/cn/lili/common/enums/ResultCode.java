@@ -87,7 +87,7 @@ public enum ResultCode {
      */
     SPEC_SAVE_ERROR(13001, "规格修改失败"),
     SPEC_UPDATE_ERROR(13002, "规格修改失败"),
-    SPEC_DELETE_ERROR(13003, "此规格已绑定分类不允许删除"),
+    SPEC_DELETE_ERROR(13003, "分类已经绑定此规格，请先解除关联"),
 
     /**
      * 品牌

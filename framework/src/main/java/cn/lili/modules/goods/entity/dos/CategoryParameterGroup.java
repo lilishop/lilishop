@@ -30,7 +30,7 @@ public class CategoryParameterGroup extends BaseEntity {
      */
     @ApiModelProperty(value = "参数组名称", required = true)
     @NotEmpty(message = "参数组名称不能为空")
-    @Length(max = 50, message = "参数组名称不能超过50字")
+    @Length(max = 20, message = "参数组名称不能超过20字")
     private String groupName;
     /**
      * 关联分类id
