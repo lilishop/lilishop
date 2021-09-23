@@ -1,5 +1,6 @@
 package cn.lili.modules.goods.entity.dto;
 
+import cn.lili.common.validation.EnumValue;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
@@ -43,6 +44,7 @@ public class GoodsOperationDTO implements Serializable {
 
     @ApiModelProperty(value = "商品名称", required = true)
     @NotEmpty(message = "商品名称不能为空")
+    @Length(max = 50, message = "商品名称不能超过50个字符")
     private String goodsName;
 
     @ApiModelProperty(value = "商品编号", required = true)
@@ -57,12 +59,14 @@ public class GoodsOperationDTO implements Serializable {
 
     @ApiModelProperty(value = "市场价格", required = true)
     @NotNull(message = "市场价格不能为空")
+    @Min(value = 0, message = "市场价格不能为负数")
+    @Max(value = 99999999, message = "市场价格不能超过99999999")
     private Double cost;
 
     @ApiModelProperty(value = "重量", required = true)
     @NotNull(message = "商品重量不能为空")
-    @Min(value = 0, message = "重量不能为负数")
-    @Max(value = 99999999, message = "重量不能超过99999999")
+    @Min(value = 0, message = "商品重量不能为负数")
+    @Max(value = 99999999, message = "商品重量不能超过99999999")
     private Double weight;
 
     @ApiModelProperty(value = "详情")
@@ -72,6 +76,7 @@ public class GoodsOperationDTO implements Serializable {
     private String mobileIntro;
 
     @ApiModelProperty(value = "库存")
+    @Min(value = 0, message = "库存不能为负数")
     @Max(value = 99999999, message = "库存不能超过99999999")
     private Integer quantity;
 
@@ -118,6 +123,7 @@ public class GoodsOperationDTO implements Serializable {
      * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
      */
     @ApiModelProperty(value = "商品类型")
+    @EnumValue(strValues = {"PHYSICAL_GOODS","VIRTUAL_GOODS","E_COUPON"},message = "商品类型参数值错误")
     private String goodsType;
 
     /**

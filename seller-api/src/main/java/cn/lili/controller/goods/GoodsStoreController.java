@@ -26,6 +26,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -100,7 +101,7 @@ public class GoodsStoreController {
 
     @ApiOperation(value = "新增商品")
     @PostMapping(value = "/create", consumes = "application/json", produces = "application/json")
-    public ResultMessage<GoodsOperationDTO> save(@RequestBody GoodsOperationDTO goodsOperationDTO) {
+    public ResultMessage<GoodsOperationDTO> save(@Valid @RequestBody GoodsOperationDTO goodsOperationDTO) {
         goodsService.addGoods(goodsOperationDTO);
         return ResultUtil.success();
     }
