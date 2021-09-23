@@ -56,7 +56,7 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
     @Override
     public MemberAddress saveMemberAddress(MemberAddress memberAddress) {
         //判断当前地址是否为默认地址，如果为默认需要将其他的地址修改为非默认
-        updateDefaultShippingAddress(memberAddress);
+        removeDefaultAddress(memberAddress);
         //添加会员地址
         this.save(memberAddress);
 
@@ -65,8 +65,18 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
 
     @Override
     public MemberAddress updateMemberAddress(MemberAddress memberAddress) {
-        //判断当前地址是否为默认地址，如果为默认需要将其他的地址修改为非默认
-        updateDefaultShippingAddress(memberAddress);
+        MemberAddress originalMemberAddress = this.getMemberAddress(memberAddress.getId());
+        if (originalMemberAddress != null &&
+                originalMemberAddress.getMemberId().equals(UserContext.getCurrentUser().getId())) {
+
+            if (memberAddress.getIsDefault() == null) {
+                memberAddress.setIsDefault(false);
+            }
+            //判断当前地址是否为默认地址，如果为默认需要将其他的地址修改为非默认
+            removeDefaultAddress(memberAddress);
+            this.saveOrUpdate(memberAddress);
+        }
+
         return memberAddress;
     }
 
@@ -81,7 +91,7 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
      *
      * @param memberAddress 收件地址
      */
-    private void updateDefaultShippingAddress(MemberAddress memberAddress) {
+    private void removeDefaultAddress(MemberAddress memberAddress) {
         //如果不是默认地址不需要处理
         if (memberAddress.getIsDefault()) {
             //将会员的地址修改为非默认地址
@@ -89,11 +99,6 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
             lambdaUpdateWrapper.set(MemberAddress::getIsDefault, false);
             lambdaUpdateWrapper.eq(MemberAddress::getMemberId, memberAddress.getMemberId());
             this.update(lambdaUpdateWrapper);
-
-            //修改会员地址
-            this.update(memberAddress,
-                    new QueryWrapper<MemberAddress>()
-                            .eq("id", memberAddress.getId()));
         }
 
     }
