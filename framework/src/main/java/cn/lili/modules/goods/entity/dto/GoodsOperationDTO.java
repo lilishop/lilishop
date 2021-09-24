@@ -30,6 +30,12 @@ public class GoodsOperationDTO implements Serializable {
     @ApiModelProperty(hidden = true)
     private String goodsId;
 
+    @ApiModelProperty(value = "商品价格", required = true)
+    @NotNull(message = "商品价格不能为空")
+    @Min(value = 0, message = "商品价格不能为负数")
+    @Max(value = 99999999, message = "商品价格不能超过99999999")
+    private Double price;
+
     @ApiModelProperty(value = "分类path")
     private String categoryPath;
 
@@ -46,28 +52,6 @@ public class GoodsOperationDTO implements Serializable {
     @NotEmpty(message = "商品名称不能为空")
     @Length(max = 50, message = "商品名称不能超过50个字符")
     private String goodsName;
-
-    @ApiModelProperty(value = "商品编号", required = true)
-    @Length(max = 30, message = "商品编号太长，不能超过30个字符")
-    private String sn;
-
-    @ApiModelProperty(value = "商品价格", required = true)
-    @NotNull(message = "商品价格不能为空")
-    @Min(value = 0, message = "商品价格不能为负数")
-    @Max(value = 99999999, message = "商品价格不能超过99999999")
-    private Double price;
-
-    @ApiModelProperty(value = "市场价格", required = true)
-    @NotNull(message = "市场价格不能为空")
-    @Min(value = 0, message = "市场价格不能为负数")
-    @Max(value = 99999999, message = "市场价格不能超过99999999")
-    private Double cost;
-
-    @ApiModelProperty(value = "重量", required = true)
-    @NotNull(message = "商品重量不能为空")
-    @Min(value = 0, message = "商品重量不能为负数")
-    @Max(value = 99999999, message = "商品重量不能超过99999999")
-    private Double weight;
 
     @ApiModelProperty(value = "详情")
     private String intro;

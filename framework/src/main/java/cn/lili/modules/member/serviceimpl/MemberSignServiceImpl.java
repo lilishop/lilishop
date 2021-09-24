@@ -3,6 +3,7 @@ package cn.lili.modules.member.serviceimpl;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
+import cn.lili.modules.system.entity.dto.PointSettingItem;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
 import cn.lili.common.security.AuthUser;
@@ -118,24 +119,19 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
             if (setting != null) {
                 PointSetting pointSetting = new Gson().fromJson(setting.getSettingValue(), PointSetting.class);
                 String content = "";
-                Long point = -1L;
-                //将对象转换成map 方便签到天数和签到积分数获取，方便扩展
-                Map map = StringUtils.objectToMap(pointSetting);
-                for (int i = 1; i <= 4; i++) {
-                    //连续签到数
-                    Object dayObj = map.get("signIn" + i);
-                    //连续签到赠送积分
-                    Object pointObj = map.get("signIn" + i + "Point");
-                    if (dayObj != null && pointObj != null) {
-                        //如果当前连续赠送天数等于设置连续赠送天数 则记录赠送积分数
-                        if (dayObj == day) {
-                            point = Long.valueOf(map.get("signIn" + i + "Point").toString());
+                //赠送积分
+                Long point = null;
+                List<PointSettingItem> pointSettingItems = pointSetting.getPointSettingItems();
+                if (!pointSettingItems.isEmpty()) {
+                    for (PointSettingItem item : pointSettingItems) {
+                        if (item.getDay().equals(day)) {
+                            point = item.getPoint().longValue();
                             content = "会员连续签到" + day + "天，赠送积分" + point + "分";
                         }
                     }
                 }
                 //如果他不处于连续赠送阶段，则只赠送签到积分数
-                if (point == -1 && pointSetting.getSignIn() != null) {
+                if (point == null && pointSetting.getSignIn() != null) {
                     point = Long.valueOf(pointSetting.getSignIn().toString());
                     content = "会员签到第" + day + "天，赠送积分" + point + "分";
                 }

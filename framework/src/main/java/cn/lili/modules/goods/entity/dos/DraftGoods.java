@@ -35,9 +35,10 @@ public class DraftGoods extends BaseEntity {
     @ApiModelProperty(value = "商品名称")
     private String goodsName;
 
-    @Length(max = 30, message = "商品规格编号太长，不能超过30个字符")
-    @ApiModelProperty(value = "商品编号")
-    private String sn;
+    @Max(value = 99999999, message = "价格不能超过99999999")
+    @ApiModelProperty(value = "商品价格")
+    private Double price;
+
 
     @ApiModelProperty(value = "品牌id")
     private String brandId;
@@ -51,9 +52,6 @@ public class DraftGoods extends BaseEntity {
     @ApiModelProperty(value = "卖点")
     private String sellingPoint;
 
-    @ApiModelProperty(value = "重量")
-    @Max(value = 99999999, message = "重量不能超过99999999")
-    private Double weight;
     /**
      * @see GoodsStatusEnum
      */
@@ -66,14 +64,6 @@ public class DraftGoods extends BaseEntity {
 
     @ApiModelProperty(value = "商品移动端详情")
     private String mobileIntro;
-
-    @Max(value = 99999999, message = "价格不能超过99999999")
-    @ApiModelProperty(value = "商品价格")
-    private Double price;
-
-    @Max(value = 99999999, message = "成本价格99999999")
-    @ApiModelProperty(value = "成本价格")
-    private Double cost;
 
     @ApiModelProperty(value = "购买数量")
     private Integer buyCount;

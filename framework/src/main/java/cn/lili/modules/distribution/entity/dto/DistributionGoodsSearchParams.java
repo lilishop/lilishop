@@ -31,7 +31,7 @@ public class DistributionGoodsSearchParams extends PageVO {
 
     public <T> QueryWrapper<T> distributionQueryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq(StringUtils.isNotEmpty(goodsName), "dg.goods_name", goodsName);
+        queryWrapper.like(StringUtils.isNotEmpty(goodsName), "dg.goods_name", goodsName);
         return queryWrapper;
     }
 

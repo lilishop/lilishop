@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -27,15 +29,17 @@ public class StoreGoodsLabel extends BaseEntity {
     private String storeId;
 
     @NotEmpty(message = "店铺商品分类名称不能为空")
+    @Length(max = 20,message = "店铺商品分类名称太长")
     @ApiModelProperty("店铺商品分类名称")
     private String labelName;
 
 
     @NotNull(message = "店铺商品分类排序不能为空")
+    @Max(value = 99999,message = "排序值太大")
     @ApiModelProperty("店铺商品分类排序")
     private BigDecimal sortOrder;
 
-    @NotNull(message = "父节点不能为空，需设定根节点或者某节点的子节点")
+    @NotEmpty(message = "父节点不能为空，需设定根节点或者某节点的子节点")
     @ApiModelProperty(value = "父id, 根节点为0")
     private String parentId;
 
