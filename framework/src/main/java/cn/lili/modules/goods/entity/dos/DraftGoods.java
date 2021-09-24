@@ -1,13 +1,16 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.mybatis.BaseEntity;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.http.HtmlUtil;
 import cn.lili.modules.goods.entity.enums.DraftGoodsSaveType;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
@@ -19,6 +22,7 @@ import javax.validation.constraints.Max;
  * @author pikachu
  * @since 2020-02-23 9:14:33
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("li_draft_goods")
 @ApiModel(value = "草稿商品")
@@ -137,7 +141,7 @@ public class DraftGoods extends BaseEntity {
 
     @ApiModelProperty(value = "商品图片JSON")
     private String goodsGalleryListJson;
- 
+
     @ApiModelProperty(value = "sku列表JSON")
     private String skuListJson;
 
@@ -146,5 +150,19 @@ public class DraftGoods extends BaseEntity {
      */
     @ApiModelProperty(value = "商品类型", required = true)
     private String goodsType;
+
+    public String getIntro() {
+        if (CharSequenceUtil.isNotEmpty(intro)) {
+            return HtmlUtil.unescape(intro);
+        }
+        return intro;
+    }
+
+    public String getMobileIntro() {
+        if (CharSequenceUtil.isNotEmpty(mobileIntro)) {
+            return HtmlUtil.unescape(mobileIntro);
+        }
+        return mobileIntro;
+    }
 
 }
