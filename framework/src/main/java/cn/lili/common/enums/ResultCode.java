@@ -335,7 +335,8 @@ public enum ResultCode {
      * 其他促销
      */
     MEMBER_SIGN_REPEAT(47001, "请勿重复签到"),
-    POINT_GOODS_ACTIVE_STOCK_ERROR(47002, "最低金额不能高于商品金额"),
+    POINT_GOODS_ACTIVE_STOCK_ERROR(47002, "活动库存数量不能高于商品库存"),
+    POINT_GOODS_ACTIVE_STOCK_INSUFFICIENT(47003, "积分商品库存不足"),
 
     /**
      * 砍价活动

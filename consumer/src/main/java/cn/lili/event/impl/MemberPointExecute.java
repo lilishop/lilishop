@@ -17,6 +17,7 @@ import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
+import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -62,7 +63,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
         //获取积分设置
         PointSetting pointSetting = getPointSetting();
         //赠送会员积分
-        memberService.updateMemberPoint(Long.valueOf(pointSetting.getRegister().longValue()), PointTypeEnum.INCREASE.name(), member.getId(), "会员注册，赠送积分" + pointSetting.getRegister() + "分");
+        memberService.updateMemberPoint(pointSetting.getRegister().longValue(), PointTypeEnum.INCREASE.name(), member.getId(), "会员注册，赠送积分" + pointSetting.getRegister() + "分");
     }
 
     /**
@@ -75,7 +76,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
         //获取积分设置
         PointSetting pointSetting = getPointSetting();
         //赠送会员积分
-        memberService.updateMemberPoint(Long.valueOf(pointSetting.getComment().longValue()), PointTypeEnum.INCREASE.name(), memberEvaluation.getMemberId(), "会员评价，赠送积分" + pointSetting.getComment() + "分");
+        memberService.updateMemberPoint(pointSetting.getComment().longValue(), PointTypeEnum.INCREASE.name(), memberEvaluation.getMemberId(), "会员评价，赠送积分" + pointSetting.getComment() + "分");
     }
 
     /**
@@ -86,29 +87,42 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
     @Override
     public void orderChange(OrderMessage orderMessage) {
 
-        if (orderMessage.getNewStatus().equals(OrderStatusEnum.COMPLETED)) {
-            Order order = orderService.getBySn(orderMessage.getOrderSn());
-            //根据订单编号获取订单数据,如果订单促销类型不为空，并且订单促销类型为积分订单 则直接返回
-            if (StringUtils.isNotEmpty(order.getOrderPromotionType()) && order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINTS.name())) {
-                return;
+        switch (orderMessage.getNewStatus()) {
+            case CANCELLED: {
+                Order order = orderService.getBySn(orderMessage.getOrderSn());
+                Long point = order.getPriceDetailDTO().getPayPoint();
+                if (point <= 0) {
+                    return;
+                }
+                //如果未付款，则不去要退回相关代码执行
+                if (order.getPayStatus().equals(PayStatusEnum.UNPAID.name())) {
+                    return;
+                }
+                String content = "订单取消，积分返还：" + point + "分";
+                //赠送会员积分
+                memberService.updateMemberPoint(point, PointTypeEnum.INCREASE.name(), order.getMemberId(), content);
+                break;
             }
-            //获取积分设置
-            PointSetting pointSetting = getPointSetting();
-            //计算赠送积分数量
-            Double point = CurrencyUtil.mul(pointSetting.getMoney(), order.getFlowPrice(), 0);
-            //赠送会员积分
-            memberService.updateMemberPoint(point.longValue(), PointTypeEnum.INCREASE.name(), order.getMemberId(), "会员下单，赠送积分" + point + "分");
-            //取消订单恢复积分
-        } else if (orderMessage.getNewStatus().equals(OrderStatusEnum.CANCELLED)) {
-            //根据订单编号获取订单数据,如果为积分订单则跳回
-            Order order = orderService.getBySn(orderMessage.getOrderSn());
-            //增加对积分订单的判定，如果积分支付，取消订单则退还用户积分
-            if (StringUtils.isNotEmpty(order.getOrderPromotionType()) &&
-                    order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINTS.name()) && order.getPriceDetailDTO().getPayPoint() != null) {
-                memberService.updateMemberPoint(Convert.toLong(order.getPriceDetailDTO().getPayPoint()), PointTypeEnum.INCREASE.name(), order.getMemberId(), "订单取消,恢复积分:" + order.getPriceDetailDTO().getPayPoint() + "分");
+            case COMPLETED: {
+                Order order = orderService.getBySn(orderMessage.getOrderSn());
+                //根据订单编号获取订单数据,如果订单促销类型不为空，并且订单促销类型为积分订单 则直接返回
+                if (StringUtils.isNotEmpty(order.getOrderPromotionType()) && order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINTS.name())) {
+                    return;
+                }
+                //获取积分设置
+                PointSetting pointSetting = getPointSetting();
+                //计算赠送积分数量
+                Double point = CurrencyUtil.mul(pointSetting.getMoney(), order.getFlowPrice(), 0);
+                //赠送会员积分
+                memberService.updateMemberPoint(point.longValue(), PointTypeEnum.INCREASE.name(), order.getMemberId(), "会员下单，赠送积分" + point + "分");
+                break;
             }
+
+            default:
+                break;
         }
     }
+
 
     /**
      * 提交售后后扣除积分

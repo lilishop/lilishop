@@ -744,6 +744,10 @@ public class CartServiceImpl implements CartService {
         PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsVOByMongo(cartSkuVO.getGoodsSku().getId());
 
         if (pointsGoodsVO != null) {
+
+            if (pointsGoodsVO.getActiveStock() < 1) {
+                throw new ServiceException(ResultCode.POINT_GOODS_ACTIVE_STOCK_INSUFFICIENT);
+            }
             cartSkuVO.setPoint(pointsGoodsVO.getPoints());
             cartSkuVO.setPurchasePrice(0D);
             cartSkuVO.setPointsId(pointsGoodsVO.getId());

@@ -185,7 +185,7 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
         }
         //校验活动库存是否超出此sku的库存
         if (goodsSku.getQuantity() < kanJiaActivityGoodsDTO.getStock()) {
-            throw new ServiceException(ResultCode.POINT_GOODS_ACTIVE_STOCK_ERROR);
+            throw new ServiceException(ResultCode.KANJIA_GOODS_ACTIVE_STOCK_ERROR);
         }
         //校验最低购买金额不能高于商品金额
         if (goodsSku.getPrice() < kanJiaActivityGoodsDTO.getPurchasePrice()) {
