@@ -22,6 +22,12 @@ import java.util.List;
 public interface ArticleService extends IService<Article> {
 
     /**
+     * 管理端获取文章
+     * @param articleSearchParams
+     * @return
+     */
+    IPage<ArticleVO> managerArticlePage(ArticleSearchParams articleSearchParams);
+    /**
      * 获取文章分页
      *
      * @param articleSearchParams 文章搜索条件

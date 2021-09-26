@@ -24,6 +24,6 @@ public class ArticleVO {
     @ApiModelProperty(value = "文章排序")
     private Integer sort;
 
-    @ApiModelProperty(value = "状态, allowableValues = OPEN,CLOSE")
+    @ApiModelProperty(value = "开启状态")
     private Boolean openStatus;
 }
