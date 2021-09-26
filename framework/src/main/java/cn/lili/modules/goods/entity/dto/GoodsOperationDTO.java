@@ -7,10 +7,7 @@ import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +37,7 @@ public class GoodsOperationDTO implements Serializable {
     private String categoryPath;
 
     @ApiModelProperty(value = "店铺分类id", required = true)
-    @NotNull(message = "店铺分类不能为空")
-    @Min(value = 0, message = "店铺分类值不正确")
+    @Size(max = 200, message = "选择了太多店铺分类")
     private String storeCategoryPath;
 
     @ApiModelProperty(value = "品牌id")
