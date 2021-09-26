@@ -88,12 +88,12 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
 
     @Override
     public List<MemberCoupon> getMemberCoupons() {
-        QueryWrapper<MemberCoupon> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("member_id", UserContext.getCurrentUser().getId());
-        queryWrapper.eq("member_coupon_status", MemberCouponStatusEnum.NEW.name());
-        queryWrapper.le("start_time", new Date());
-        queryWrapper.ge("end_time", new Date());
-        return this.list(queryWrapper);
+        LambdaQueryWrapper<MemberCoupon> LambdaQueryWrapper = new LambdaQueryWrapper<>();
+        LambdaQueryWrapper.eq(MemberCoupon::getMemberId,UserContext.getCurrentUser().getId());
+        LambdaQueryWrapper.eq(MemberCoupon::getMemberCouponStatus,MemberCouponStatusEnum.NEW.name());
+        LambdaQueryWrapper.le(MemberCoupon::getStartTime,new Date());
+        LambdaQueryWrapper.ge(MemberCoupon::getEndTime,new Date());
+        return this.list(LambdaQueryWrapper);
     }
 
     /**
