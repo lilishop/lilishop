@@ -188,6 +188,9 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
         if (PromotionStatusEnum.START.name().equals(seckillVO.getPromotionStatus())) {
             throw new ServiceException(ResultCode.PROMOTION_UPDATE_ERROR);
         }
+        if (seckillVO.getEndTime() == null) {
+            seckillVO.setEndTime(cn.hutool.core.date.DateUtil.endOfDay(seckillVO.getStartTime()));
+        }
         PromotionTools.checkPromotionTime(seckillVO.getStartTime().getTime(), seckillVO.getEndTime().getTime());
         //更新到MYSQL中
         boolean result = this.updateById(seckillVO);
