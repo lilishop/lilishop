@@ -42,7 +42,6 @@
         <antlr4-version>4.7.2</antlr4-version>
         <okhttp-version>4.4.1</okhttp-version>
         <httpclient-version>4.5.12</httpclient-version>
-        <beetl-version>2.9.10</beetl-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <skipTests>true</skipTests>

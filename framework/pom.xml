@@ -136,12 +136,6 @@
             <artifactId>jasypt-spring-boot-starter</artifactId>
             <version>${jasypt-version}</version>
         </dependency>
-        <!-- 模板引擎 -->
-<!--        <dependency>-->
-<!--            <groupId>com.ibeetl</groupId>-->
-<!--            <artifactId>beetl</artifactId>-->
-<!--            <version>${beetl-version}</version>-->
-<!--        </dependency>-->
         <!-- 阿里云核心包-->
         <dependency>
             <groupId>com.aliyun</groupId>
