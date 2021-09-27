@@ -215,7 +215,7 @@ public interface OrderService extends IService<Order> {
     /**
      * 获取待发货订单编号列表
      *
-     * @param response 响应
+     * @param response      响应
      * @param logisticsName 店铺已选择物流公司列表
      */
     void getBatchDeliverList(HttpServletResponse response, List<String> logisticsName);
@@ -227,4 +227,12 @@ public interface OrderService extends IService<Order> {
      */
     void batchDeliver(MultipartFile files);
 
+
+    /**
+     * 获取订单实际支付的总金额
+     *
+     * @param orderSn 订单sn
+     * @return 金额
+     */
+    Double getPaymentTotal(String orderSn);
 }
