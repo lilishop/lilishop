@@ -43,8 +43,6 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
         //保存站内信信息
         this.save(message);
         //发送站内信消息提醒
-        String destination = rocketmqCustomProperties.getOtherTopic() + ":" + OtherTagsEnum.MESSAGE.name();
-        rocketMQTemplate.asyncSend(destination, message, RocketmqSendCallbackBuilder.commonCallback());
         String noticeSendDestination = rocketmqCustomProperties.getNoticeSendTopic() + ":" + OtherTagsEnum.MESSAGE.name();
         rocketMQTemplate.asyncSend(noticeSendDestination, message, RocketmqSendCallbackBuilder.commonCallback());
         return true;

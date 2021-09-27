@@ -1,5 +1,6 @@
 package cn.lili.modules.payment.kit.plugin.alipay;
 
+import cn.hutool.http.HtmlUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.*;
 import com.alipay.api.domain.*;
@@ -950,7 +951,7 @@ public class AliPayApi {
             for (int i = 0; i < values.length; i++) {
                 valueStr = (i == values.length - 1) ? valueStr + values[i] : valueStr + values[i] + ",";
             }
-            params.put(name, valueStr);
+            params.put(name, HtmlUtil.unescape(valueStr));
         }
         return params;
     }

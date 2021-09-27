@@ -45,9 +45,11 @@ public class Feedback extends BaseIdEntity {
     private String context;
 
     @ApiModelProperty(value = "手机号")
+    @Length(max = 11, message = "手机号不能超过11位")
     private String mobile;
 
     @ApiModelProperty(value = "图片，多个图片使用：(，)分割")
+    @Length(max = 255, message = "图片上传太多啦，请选择删除掉")
     private String images;
 
     /**

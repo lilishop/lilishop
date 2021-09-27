@@ -137,11 +137,11 @@
             <version>${jasypt-version}</version>
         </dependency>
         <!-- 模板引擎 -->
-        <dependency>
-            <groupId>com.ibeetl</groupId>
-            <artifactId>beetl</artifactId>
-            <version>${beetl-version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.ibeetl</groupId>-->
+<!--            <artifactId>beetl</artifactId>-->
+<!--            <version>${beetl-version}</version>-->
+<!--        </dependency>-->
         <!-- 阿里云核心包-->
         <dependency>
             <groupId>com.aliyun</groupId>
@@ -276,11 +276,11 @@
             <artifactId>logstash-logback-encoder</artifactId>
             <version>${logstash-logback-encoder}</version>
         </dependency>
-        <dependency>
-            <groupId>javax.interceptor</groupId>
-            <artifactId>javax.interceptor-api</artifactId>
-            <version>${interceptor-api}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>javax.interceptor</groupId>-->
+<!--            <artifactId>javax.interceptor-api</artifactId>-->
+<!--            <version>${interceptor-api}</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>de.codecentric</groupId>
             <artifactId>spring-boot-admin-starter-client</artifactId>

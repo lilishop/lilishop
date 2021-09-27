@@ -96,7 +96,7 @@ public class NoticeMessageManagerController {
             noticeMessage.setNoticeContent(noticeContent);
             noticeMessage.setNoticeTitle(noticeTitle);
             noticeMessageService.updateById(noticeMessage);
-            ResultUtil.data(noticeMessage);
+            return ResultUtil.data(noticeMessage);
         }
         throw new ResourceNotFoundException(ResultCode.NOTICE_NOT_EXIST.message());
     }
