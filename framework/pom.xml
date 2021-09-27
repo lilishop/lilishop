@@ -108,11 +108,6 @@
             <artifactId>knife4j-spring-boot-starter</artifactId>
             <version>${knife4j.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.github.xiaoymin</groupId>
-            <artifactId>swagger-bootstrap-ui</artifactId>
-            <version>${swagger-bootstrap-ui-version}</version>
-        </dependency>
         <!-- Hutool工具包 -->
         <dependency>
             <groupId>cn.hutool</groupId>

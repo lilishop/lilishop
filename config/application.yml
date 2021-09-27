@@ -151,7 +151,7 @@ ignored:
     - /swagger-resources/**
     - /swagger/**
     - /webjars/**
-    - /v2/api-docs
+    - /v2/api-docs**
     - /configuration/ui
     - /boot-admin
     - /manager/promotion/seckill/init
@@ -162,9 +162,9 @@ ignored:
 
 # Swagger界面内容配置
 swagger:
-  title: lili API接口文档
-  description: lili Api Documentation
-  version: 1.0.0
+  title: lilishop API接口文档
+  description: lilishop Api Documentation
+  version: 4.2.2
   termsOfServiceUrl: https://pickmall.cn
   contact:
     name: lili
