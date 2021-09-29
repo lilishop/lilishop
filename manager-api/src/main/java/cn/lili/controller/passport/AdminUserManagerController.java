@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -110,7 +111,7 @@ public class AdminUserManagerController {
     @PutMapping(value = "/admin/edit")
     @ApiOperation(value = "超级管理员修改其他管理员资料")
     @DemoSite
-    public ResultMessage<Object> edit(AdminUser adminUser,
+    public ResultMessage<Object> edit(@Valid AdminUser adminUser,
                                       @RequestParam(required = false) List<String> roles) {
         if (!adminUserService.updateAdminUser(adminUser, roles)) {
             throw new ServiceException(ResultCode.USER_EDIT_ERROR);
@@ -154,7 +155,7 @@ public class AdminUserManagerController {
 
     @PostMapping
     @ApiOperation(value = "添加用户")
-    public ResultMessage<Object> register(AdminUserDTO adminUser,
+    public ResultMessage<Object> register(@Valid AdminUserDTO adminUser,
                                           @RequestParam(required = false) List<String> roles) {
         int rolesMaxSize=10;
         try {
