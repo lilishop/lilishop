@@ -4,7 +4,7 @@
 
 
 
-#### 欢迎交流需求，交流业务，交流技术
+#### 欢迎交流需求，交流业务，交流技术（基础问题自行解决，进群先看文档后提问）
 
 ##### 交流 qq 1群 961316482（已满）
 
@@ -28,75 +28,75 @@ Lilishop 商城系统 基于SpringBoot 研发，B2B2C多用户商城系统，前
 业务兼容O2O商城/B2B商城/B2B2C商城/F2B2C商城/S2B2C商城。支持小程序商城、H5商城、APP商城、 PC商城。
 
 
-
 商城前后端分离、支持分布式部署。
 
 商城包含 会员模块、**第三方登录模块**、**第三方支付模块**、**楼层装修模块**、订单模块、分销模块、文章模块、系统设置模块、流量分析模块
 
 商城包含各种中间件、搜索引擎、多级缓存、分布式事务、分布式任务调度等，支持Docker，支持k8s。是一款高性能，支持高并发的商城系统。
 
+##### 商城 API/消费者 聚合版
+api不需要单独部署，只需启动一个jar包就可以正常运转 如有需要，可以点击跳转https://gitee.com/beijing_hongye_huicheng/lilishop-simplify
 
-
-### ☃️ 帮助文档
+### ☃️ 商城 开发/使用/常见问题 帮助文档
 
 https://docs.pickmall.cn
 
-### 💧 项目链接(gitee)
+### 💧 开源商城项目地址(gitee)
 
-**Java后台**：https://gitee.com/beijing_hongye_huicheng/lilishop.git
+**Java后台（商城所有API）**：https://gitee.com/beijing_hongye_huicheng/lilishop.git
 
-**Vue后台前端**： https://gitee.com/beijing_hongye_huicheng/lilishop-ui.git
+**UI（商城管理端/商家端/买家PC端）**： https://gitee.com/beijing_hongye_huicheng/lilishop-ui.git
 
-**Uni-app**：https://gitee.com/beijing_hongye_huicheng/lilishop-uniapp.git
+**Uni-app（商城移动端，支持小程序/APP/H5）**：https://gitee.com/beijing_hongye_huicheng/lilishop-uniapp.git
 
-**docker一键部署**：https://gitee.com/beijing_hongye_huicheng/docker.git
+**docker一键部署（商城部署脚本）**：https://gitee.com/beijing_hongye_huicheng/docker.git
 
-### 💧 项目链接(github)
+### 💧 开源商城项目地址(github)
 
-**Java后台**：https://github.com/hongyehuicheng/lilishop.git
+**Java后台（商城所有API）**：https://github.com/hongyehuicheng/lilishop.git
 
-**Vue后台前端**： https://github.com/hongyehuicheng/lilishop-ui.git
+**UI（商城管理端/商家端/买家PC端）**： https://github.com/hongyehuicheng/lilishop-ui.git
 
-**Uni-app**：https://github.com/hongyehuicheng/lilishop-uniapp.git
+**Uni-app（商城移动端，支持小程序/APP/H5）**：https://github.com/hongyehuicheng/lilishop-uniapp.git
 
-**docker一键部署**：https://github.com/hongyehuicheng/docker.git
+**docker一键部署（商城部署脚本）**：https://github.com/hongyehuicheng/docker.git
 
 ### 💧 演示地址(手机验证码为 ‘111111’)
 
-**运营后台**：https://admin-b2b2c.pickmall.cn 账号：admin/123456
+**商城管理端**：https://admin-b2b2c.pickmall.cn 账号：admin/123456
 
-**店铺后台**：https://store-b2b2c.pickmall.cn 账号：13011111111/111111
+**商城店铺后台**：https://store-b2b2c.pickmall.cn 账号：13011111111/111111
 
-**PC**：https://pc-b2b2c.pickmall.cn
+**商城PC页面**：https://pc-b2b2c.pickmall.cn
 
-**WAP**：https://m-b2b2c.pickmall.cn
+**商城移动端（请使浏览器手机模式，或者用手机浏览器打开）**：https://m-b2b2c.pickmall.cn
 
 **小程序/公众号**：扫描二维码
 
 ![image-20210511171611793](https://pickmall.cn/assets/imgs/h5-qrcode.png)
 
-### 🚙 3行命令搭建本地运行环境
+### 🚙 3行命令搭建本地商城（注：只能本机访问，如需调整，请自行操作镜像）
 
 温馨提示：由于服务中间件较多，如果笔记本环境启动内存没有32g可能无法启动成功（macbookpro 2020 16g内存启动无法成功），台式机在16g内存、AMD 3700x 的ubuntu系统成功运行。
 
 
 
-#####  docker环境安装 [点击跳转](https://docs.pickmall.cn/deploy/%E4%B8%80%E9%94%AE%E9%83%A8%E7%BD%B2.html)
+#####  docker环境安装 [点击跳转](https://docs.pickmall.cn/deploy/%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87.html)
 
 
 
 ##### 下载docker-compose脚本
 `git clone https://gitee.com/beijing_hongye_huicheng/docker.git `
 
-##### 部署基础环境
+##### 部署商城所需中间件
 `docker-compose up -d`
 
-##### 部署应用
+##### 部署商城应用
 `docker-compose -f docker-compose-application.yml up -d`
 
 
 
-PS:单独部署的话，点击跳转 https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql 这里有与tag版本一致的sql，根据tag获取sql，如果使用master代码，则需要在lilishop项目根目录的update-sql目录中，获取对应的升级sql。
+PS:商城数据库单独部署 https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql 这里有与tag版本一致的sql，根据tag获取sql，如果使用master代码，则需要在lilishop项目根目录的DB目录中，获取对应的升级sql。
 
 ##### 商城 API/UI 地址
 
@@ -193,7 +193,7 @@ PS:单独部署的话，点击跳转 https://gitee.com/beijing_hongye_huicheng/d
 ```
 商城后续会持续版本升级，修复bug，完善功能，覆盖更多业务场景 o2o/b2b/s2b2b2c/跨境电商
 
-后续会考虑推出微服务商城系统/中台商城等
+后续会考虑推出微服务商城系统/商城中台等
 ```
 
 

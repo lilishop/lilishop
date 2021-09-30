@@ -108,11 +108,6 @@
             <artifactId>knife4j-spring-boot-starter</artifactId>
             <version>${knife4j.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.github.xiaoymin</groupId>
-            <artifactId>swagger-bootstrap-ui</artifactId>
-            <version>${swagger-bootstrap-ui-version}</version>
-        </dependency>
         <!-- Hutool工具包 -->
         <dependency>
             <groupId>cn.hutool</groupId>
@@ -135,12 +130,6 @@
             <groupId>com.github.ulisesbocchio</groupId>
             <artifactId>jasypt-spring-boot-starter</artifactId>
             <version>${jasypt-version}</version>
-        </dependency>
-        <!-- 模板引擎 -->
-        <dependency>
-            <groupId>com.ibeetl</groupId>
-            <artifactId>beetl</artifactId>
-            <version>${beetl-version}</version>
         </dependency>
         <!-- 阿里云核心包-->
         <dependency>
@@ -276,11 +265,11 @@
             <artifactId>logstash-logback-encoder</artifactId>
             <version>${logstash-logback-encoder}</version>
         </dependency>
-        <dependency>
-            <groupId>javax.interceptor</groupId>
-            <artifactId>javax.interceptor-api</artifactId>
-            <version>${interceptor-api}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>javax.interceptor</groupId>-->
+<!--            <artifactId>javax.interceptor-api</artifactId>-->
+<!--            <version>${interceptor-api}</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>de.codecentric</groupId>
             <artifactId>spring-boot-admin-starter-client</artifactId>

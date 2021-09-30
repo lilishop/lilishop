@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 
 /**
@@ -21,18 +22,22 @@ public class AdminUser extends BaseEntity {
     private static final long serialVersionUID = 2918352800205024873L;
 
     @ApiModelProperty(value = "用户名")
+    @Length(max = 20,message = "用户名长度不能超过20个字符")
     private String username;
 
     @ApiModelProperty(value = "密码")
     private String password;
 
     @ApiModelProperty(value = "昵称")
+    @Length(max = 10,message = "昵称长度不能超过10个字符")
     private String nickName;
 
     @ApiModelProperty(value = "手机")
+    @Length(max = 11,message = "手机号长度不能超过11")
     private String mobile;
 
     @ApiModelProperty(value = "邮件")
+    @Length(max = 100,message = "邮箱长度不能超过100")
     private String email;
 
     @ApiModelProperty(value = "用户头像")

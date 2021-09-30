@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 /**
  * 买家端,意见反馈接口
  *
@@ -31,7 +33,7 @@ public class FeedbackBuyerController {
 
     @ApiOperation(value = "添加意见反馈")
     @PostMapping()
-    public ResultMessage<Object> save(Feedback feedback) {
+    public ResultMessage<Object> save(@Valid Feedback feedback) {
         feedback.setUserName(UserContext.getCurrentUser().getNickName());
         feedbackService.save(feedback);
         return ResultUtil.success();

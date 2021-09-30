@@ -23,6 +23,7 @@ import cn.lili.modules.order.order.aop.OrderLogPoint;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.Receipt;
+import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
 import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
@@ -33,10 +34,7 @@ import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.entity.vo.OrderVO;
 import cn.lili.modules.order.order.mapper.OrderItemMapper;
 import cn.lili.modules.order.order.mapper.OrderMapper;
-import cn.lili.modules.order.order.service.OrderItemService;
-import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.modules.order.order.service.ReceiptService;
-import cn.lili.modules.order.order.service.StoreFlowService;
+import cn.lili.modules.order.order.service.*;
 import cn.lili.modules.order.trade.entity.dos.OrderLog;
 import cn.lili.modules.order.trade.service.OrderLogService;
 import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
@@ -144,11 +142,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Autowired
     private PintuanService pintuanService;
-    /**
-     * 规格商品
-     */
+
     @Autowired
-    private GoodsSkuService goodsSkuService;
+    private TradeService tradeService;
 
     @Override
     public void intoDB(TradeDTO tradeDTO) {
@@ -590,6 +586,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         for (OrderBatchDeliverDTO orderBatchDeliverDTO : orderBatchDeliverDTOList) {
             this.delivery(orderBatchDeliverDTO.getOrderSn(), orderBatchDeliverDTO.getLogisticsNo(), orderBatchDeliverDTO.getLogisticsId());
         }
+    }
+
+
+    @Override
+    public Double getPaymentTotal(String orderSn) {
+        Order order = this.getBySn(orderSn);
+        Trade trade = tradeService.getBySn(order.getTradeSn());
+        if (trade.getPayStatus().equals(PayStatusEnum.PAID.name())) {
+            return trade.getFlowPrice();
+        }
+        return order.getFlowPrice();
     }
 
     /**

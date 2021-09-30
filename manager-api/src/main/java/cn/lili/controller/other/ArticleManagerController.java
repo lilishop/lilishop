@@ -49,7 +49,7 @@ public class ArticleManagerController {
     })
     @GetMapping(value = "/getByPage")
     public ResultMessage<IPage<ArticleVO>> getByPage(ArticleSearchParams articleSearchParams) {
-        return ResultUtil.data(articleService.articlePage(articleSearchParams));
+        return ResultUtil.data(articleService.managerArticlePage(articleSearchParams));
     }
 
     @ApiOperation(value = "添加文章")
