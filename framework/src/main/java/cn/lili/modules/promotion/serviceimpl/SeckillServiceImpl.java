@@ -192,6 +192,8 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
             seckillVO.setEndTime(cn.hutool.core.date.DateUtil.endOfDay(seckillVO.getStartTime()));
         }
         PromotionTools.checkPromotionTime(seckillVO.getStartTime().getTime(), seckillVO.getEndTime().getTime());
+        //检查秒杀活动参数
+        this.checkSeckillParam(seckillVO);
         //更新到MYSQL中
         boolean result = this.updateById(seckillVO);
         //保存到MONGO中
