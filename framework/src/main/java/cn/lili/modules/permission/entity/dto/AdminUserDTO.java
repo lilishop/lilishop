@@ -37,7 +37,7 @@ public class AdminUserDTO extends BaseEntity {
     private String mobile;
 
     @ApiModelProperty(value = "邮件")
-    @Length(max = 100,message = "又想长度不能超过100")
+    @Length(max = 100,message = "邮箱长度不能超过100")
     private String email;
 
     @ApiModelProperty(value = "头像")
