@@ -75,7 +75,7 @@ public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, W
             setIndustryParams.put("industry_id2", 5);
             String context = HttpUtils.doPostWithJson(setIndustry + accessToken, setIndustryParams);
 
-            log.info("设置行业：{}", context);
+            log.info("设置模版请求{},设置行业响应：{}", setIndustryParams, context);
             //获取已有模版，删除
             context = HttpUtil.get(allMsgTpl + accessToken);
             JSONObject jsonObject = new JSONObject(context);
@@ -94,7 +94,7 @@ public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, W
                     Map<String, Object> params = new HashMap<>(1);
                     params.put("template_id", templateId);
                     String message = WechatMessageUtil.wechatHandler(HttpUtil.post(delMsgTpl + accessToken, params));
-                    log.info("删除模版响应：{}", message);
+                    log.info("删除模版请求:{},删除模版响应：{}", params, message);
                 });
             }
 
@@ -104,10 +104,10 @@ public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, W
                 WechatMessage wechatMessage = new WechatMessage();
                 Map<String, Object> params = new HashMap<>(1);
                 params.put("template_id_short", tplData.getMsgId());
-                String content = HttpUtils.doPostWithJson(addTpl + accessToken, params);
-                log.info("添加模版响应：{}", content);
+                String message = HttpUtils.doPostWithJson(addTpl + accessToken, params);
+                log.info("添加模版请求:{},添加模版响应：{}", params, message);
 
-                JSONObject tplContent = new JSONObject(content);
+                JSONObject tplContent = new JSONObject(message);
                 WechatMessageUtil.wechatHandler(tplContent);
 
                 //如果包含模版id则进行操作，否则抛出异常

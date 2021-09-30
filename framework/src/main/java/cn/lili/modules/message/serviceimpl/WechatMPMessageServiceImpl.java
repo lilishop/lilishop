@@ -80,7 +80,7 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
                     Map<String, Object> params = new HashMap<>(1);
                     params.put("priTmplId", templateId);
                     String message = WechatMessageUtil.wechatHandler(HttpUtil.post(delMsgTpl + accessToken, params));
-                    log.info("删除模版响应：{}", message);
+                    log.info("删除模版请求:{},删除模版响应：{}", params, message);
                 });
             }
 
@@ -117,9 +117,8 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
                 params.put("tid", tplData.getTid());
                 params.put("kidList", kids);
                 params.put("sceneDesc", tplData.getSceneDesc());
-                log.info("添加模版参数:{}", JSONUtil.toJsonStr(params));
                 String content = HttpUtils.doPostWithJson(addTpl + accessToken, params);
-                log.info("添加模版响应:{}", content);
+                log.info("添加模版参数:{},添加模版响应:{}", params, content);
                 JSONObject tplContent = new JSONObject(content);
                 WechatMessageUtil.wechatHandler(tplContent);
 
