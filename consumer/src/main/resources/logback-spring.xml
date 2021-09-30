@@ -4,9 +4,9 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
     <!--应用名称-->
-    <property name="APP_NAME" value="common-api"/>
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name"/>
     <!--日志文件保存路径-->
-    <property name="LOG_FILE_PATH" value="lili-logs"/>
+    <springProperty scope="context" name="LOG_FILE_PATH" source="logging.file.path"/>
     <contextName>${APP_NAME}</contextName>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">

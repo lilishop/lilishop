@@ -25,6 +25,8 @@ management:
       exposure:
         include: '*'
 spring:
+  application:
+    name: consumer
   # 要在其中注册的Spring Boot Admin Server的URL。
   boot:
     admin:
@@ -184,6 +186,7 @@ mybatis-plus:
 
 # 日志
 logging:
+  config: classpath:logback-spring.xml
   # 输出级别
   level:
     cn.lili: info
@@ -193,10 +196,12 @@ logging:
   file:
     # 指定路径
     path: lili-logs
-    # 最大保存天数
-    max-history: 7
-    # 每个文件最大大小
-    max-size: 5MB
+  logback:
+    rollingpolicy:
+      # 最大保存天数
+      max-history: 7
+      # 每个文件最大大小
+      max-file-size: 5MB
 #加密参数
 jasypt:
   encryptor:
