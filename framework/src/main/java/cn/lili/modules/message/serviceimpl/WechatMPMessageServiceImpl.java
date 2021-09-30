@@ -19,6 +19,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +35,8 @@ import java.util.Map;
  * @author Chopper
  */
 @Service
+@Slf4j
 @Transactional(rollbackFor = Exception.class)
-
 public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMapper, WechatMPMessage> implements WechatMPMessageService {
     @Autowired
     private WechatAccessTokenUtil wechatAccessTokenUtil;
@@ -52,6 +53,9 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
      * post 删除模版 添加模版 获取模版id
      */
     private final String delMsgTpl = "https://api.weixin.qq.com/wxaapi/newtmpl/deltemplate?access_token=";
+    /**
+     * post 添加模版
+     */
     private final String addTpl = "https://api.weixin.qq.com/wxaapi/newtmpl/addtemplate?access_token=";
 
     @Override
@@ -61,6 +65,8 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
             String accessToken = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
             //获取已有模版，删除
             String context = HttpUtil.get(allMsgTpl + accessToken);
+
+            log.info("获取全部模版：{}", context);
             JSONObject jsonObject = new JSONObject(context);
             WechatMessageUtil.wechatHandler(jsonObject);
             List<String> oldList = new ArrayList<>();
@@ -73,7 +79,8 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
                 oldList.forEach(templateId -> {
                     Map<String, Object> params = new HashMap<>(1);
                     params.put("priTmplId", templateId);
-                    WechatMessageUtil.wechatHandler(HttpUtil.post(delMsgTpl + accessToken, params));
+                    String message = WechatMessageUtil.wechatHandler(HttpUtil.post(delMsgTpl + accessToken, params));
+                    log.info("删除模版响应：{}", message);
                 });
             }
 
@@ -89,7 +96,7 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
                 JSONArray jsonArray = new JSONObject(keywordsItems).getJSONArray("data");
                 List<WechatMessageKeyword> keywordArray = jsonArray.toList(WechatMessageKeyword.class);
 
-                log.error("keywords:" + keywordArray);
+                log.info("keywords:" + keywordArray);
                 //存放约定好的kids
                 List<String> kids = new ArrayList<>(tplData.keyWord.size());
                 List<String> kidTexts = new ArrayList<>(tplData.keyWord.size());
@@ -110,8 +117,9 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
                 params.put("tid", tplData.getTid());
                 params.put("kidList", kids);
                 params.put("sceneDesc", tplData.getSceneDesc());
+                log.info("添加模版参数:{}", JSONUtil.toJsonStr(params));
                 String content = HttpUtils.doPostWithJson(addTpl + accessToken, params);
-                log.error(JSONUtil.toJsonStr(params));
+                log.info("添加模版响应:{}", content);
                 JSONObject tplContent = new JSONObject(content);
                 WechatMessageUtil.wechatHandler(tplContent);
 
