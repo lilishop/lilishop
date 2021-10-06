@@ -6,7 +6,7 @@ package cn.lili.modules.payment.kit.plugin.wechat.enums;
  * @author Chopper
  * @since 2020/12/17 17:43
  */
-public enum WechatApi {
+public enum WechatApiEnum {
 
     /**
      * 沙箱环境
@@ -562,7 +562,7 @@ public enum WechatApi {
      */
     private final String url;
 
-    WechatApi(String url) {
+    WechatApiEnum(String url) {
         this.url = url;
     }
 

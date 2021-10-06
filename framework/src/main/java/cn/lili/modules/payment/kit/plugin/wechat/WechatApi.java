@@ -7,6 +7,7 @@ import cn.lili.modules.payment.kit.core.enums.RequestMethodEnums;
 import cn.lili.modules.payment.kit.core.kit.HttpKit;
 import cn.lili.modules.payment.kit.core.kit.PayKit;
 import cn.lili.modules.payment.kit.core.kit.WxPayKit;
+import cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApiEnum;
 import cn.lili.modules.payment.kit.plugin.wechat.enums.WechatDomain;
 
 import java.io.File;
@@ -30,47 +31,47 @@ public class WechatApi {
     /**
      * 获取接口请求的 URL
      *
-     * @param wechatApi {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 支付 API 接口枚举
+     * @param wechatApiEnum {@link WechatApiEnum} 支付 API 接口枚举
      * @return {@link String} 返回完整的接口请求URL
      */
-    public static String getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi wechatApi) {
-        return getReqUrl(wechatApi, null, false);
+    public static String getReqUrl(WechatApiEnum wechatApiEnum) {
+        return getReqUrl(wechatApiEnum, null, false);
     }
 
     /**
      * 获取接口请求的 URL
      *
-     * @param wechatApi {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 支付 API 接口枚举
+     * @param wechatApiEnum {@link WechatApiEnum} 支付 API 接口枚举
      * @param isSandBox 是否是沙箱环境
      * @return {@link String} 返回完整的接口请求URL
      */
-    public static String getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi wechatApi, boolean isSandBox) {
-        return getReqUrl(wechatApi, null, isSandBox);
+    public static String getReqUrl(WechatApiEnum wechatApiEnum, boolean isSandBox) {
+        return getReqUrl(wechatApiEnum, null, isSandBox);
     }
 
     /**
      * 获取接口请求的 URL
      *
-     * @param wechatApi    {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 支付 API 接口枚举
+     * @param wechatApiEnum    {@link WechatApiEnum} 支付 API 接口枚举
      * @param wechatDomain {@link WechatDomain} 支付 API 接口域名枚举
      * @param isSandBox    是否是沙箱环境
      * @return {@link String} 返回完整的接口请求URL
      */
-    public static String getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi wechatApi, WechatDomain wechatDomain, boolean isSandBox) {
+    public static String getReqUrl(WechatApiEnum wechatApiEnum, WechatDomain wechatDomain, boolean isSandBox) {
         if (wechatDomain == null) {
             wechatDomain = WechatDomain.CHINA;
         }
         return wechatDomain.getType()
-                .concat(isSandBox ? cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi.SAND_BOX_NEW.getUrl() : "")
-                .concat(wechatApi.getUrl());
+                .concat(isSandBox ? WechatApiEnum.SAND_BOX_NEW.getUrl() : "")
+                .concat(wechatApiEnum.getUrl());
     }
 
     /**
      * 发起请求
      *
      * @param apiUrl 接口 URL
-     *               通过 {@link WechatApi#getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi)}
-     *               或者 {@link WechatApi#getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi, WechatDomain, boolean)} 来获取
+     *               通过 {@link WechatApi#getReqUrl(WechatApiEnum)}
+     *               或者 {@link WechatApi#getReqUrl(WechatApiEnum, WechatDomain, boolean)} 来获取
      * @param params 接口请求参数
      * @return {@link String} 请求返回的结果
      */
@@ -82,8 +83,8 @@ public class WechatApi {
      * 发起请求
      *
      * @param apiUrl 接口 URL
-     *               通过 {@link WechatApi#getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi)}
-     *               或者 {@link WechatApi#getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi, WechatDomain, boolean)} 来获取
+     *               通过 {@link WechatApi#getReqUrl(WechatApiEnum)}
+     *               或者 {@link WechatApi#getReqUrl(WechatApiEnum, WechatDomain, boolean)} 来获取
      * @param params 接口请求参数
      * @return {@link String} 请求返回的结果
      */
@@ -95,8 +96,8 @@ public class WechatApi {
      * 发起请求
      *
      * @param apiUrl   接口 URL
-     *                 通过 {@link WechatApi#getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi)}
-     *                 或者 {@link WechatApi#getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi, WechatDomain, boolean)} 来获取
+     *                 通过 {@link WechatApi#getReqUrl(WechatApiEnum)}
+     *                 或者 {@link WechatApi#getReqUrl(WechatApiEnum, WechatDomain, boolean)} 来获取
      * @param params   接口请求参数
      * @param certPath 证书文件路径
      * @param certPass 证书密码
@@ -110,8 +111,8 @@ public class WechatApi {
      * 发起请求
      *
      * @param apiUrl   接口 URL
-     *                 通过 {@link WechatApi#getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi)}
-     *                 或者 {@link WechatApi#getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi, WechatDomain, boolean)} 来获取
+     *                 通过 {@link WechatApi#getReqUrl(WechatApiEnum)}
+     *                 或者 {@link WechatApi#getReqUrl(WechatApiEnum, WechatDomain, boolean)} 来获取
      * @param params   接口请求参数
      * @param certPath 证书文件路径
      * @return {@link String} 请求返回的结果
@@ -124,8 +125,8 @@ public class WechatApi {
      * 发起请求
      *
      * @param apiUrl   接口 URL
-     *                 通过 {@link WechatApi#getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi)}
-     *                 或者 {@link WechatApi#getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi, WechatDomain, boolean)} 来获取
+     *                 通过 {@link WechatApi#getReqUrl(WechatApiEnum)}
+     *                 或者 {@link WechatApi#getReqUrl(WechatApiEnum, WechatDomain, boolean)} 来获取
      * @param params   接口请求参数
      * @param certFile 证书文件输入流
      * @param certPass 证书密码
@@ -139,8 +140,8 @@ public class WechatApi {
      * 发起请求
      *
      * @param apiUrl   接口 URL
-     *                 通过 {@link WechatApi#getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi)}
-     *                 或者 {@link WechatApi#getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi, WechatDomain, boolean)} 来获取
+     *                 通过 {@link WechatApi#getReqUrl(WechatApiEnum)}
+     *                 或者 {@link WechatApi#getReqUrl(WechatApiEnum, WechatDomain, boolean)} 来获取
      * @param params   接口请求参数
      * @param certFile 证书文件输入流
      * @return {@link String} 请求返回的结果
@@ -160,7 +161,7 @@ public class WechatApi {
      *
      * @param method       {@link RequestMethodEnums} 请求方法
      * @param urlPrefix    可通过 {@link WechatDomain}来获取
-     * @param urlSuffix    可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix    可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId        商户Id
      * @param serialNo     商户 API 证书序列号
      * @param platSerialNo 平台序列号，接口中包含敏感信息时必传
@@ -203,7 +204,7 @@ public class WechatApi {
      *
      * @param method       {@link RequestMethodEnums} 请求方法
      * @param urlPrefix    可通过 {@link WechatDomain}来获取
-     * @param urlSuffix    可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix    可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId        商户Id
      * @param serialNo     商户 API 证书序列号
      * @param platSerialNo 平台序列号，接口中包含敏感信息时必传
@@ -247,7 +248,7 @@ public class WechatApi {
      *
      * @param method       {@link RequestMethodEnums} 请求方法
      * @param urlPrefix    可通过 {@link WechatDomain}来获取
-     * @param urlSuffix    可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix    可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId        商户Id
      * @param serialNo     商户 API 证书序列号
      * @param platSerialNo 平台序列号
@@ -269,7 +270,7 @@ public class WechatApi {
      *
      * @param method       {@link RequestMethodEnums} 请求方法
      * @param urlPrefix    可通过 {@link WechatDomain}来获取
-     * @param urlSuffix    可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix    可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId        商户Id
      * @param serialNo     商户 API 证书序列号
      * @param platSerialNo 平台序列号
@@ -291,7 +292,7 @@ public class WechatApi {
      *
      * @param method       {@link RequestMethodEnums} 请求方法
      * @param urlPrefix    可通过 {@link WechatDomain}来获取
-     * @param urlSuffix    可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix    可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId        商户Id
      * @param serialNo     商户 API 证书序列号
      * @param platSerialNo 平台序列号
@@ -317,7 +318,7 @@ public class WechatApi {
      *
      * @param method       {@link RequestMethodEnums} 请求方法
      * @param urlPrefix    可通过 {@link WechatDomain}来获取
-     * @param urlSuffix    可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix    可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId        商户Id
      * @param serialNo     商户 API 证书序列号
      * @param platSerialNo 平台序列号
@@ -342,7 +343,7 @@ public class WechatApi {
      * V3 接口统一执行入口
      *
      * @param urlPrefix    可通过 {@link WechatDomain}来获取
-     * @param urlSuffix    可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix    可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId        商户Id
      * @param serialNo     商户 API 证书序列号
      * @param platSerialNo 平台序列号
@@ -363,7 +364,7 @@ public class WechatApi {
      * V3 接口统一执行入口
      *
      * @param urlPrefix    可通过 {@link WechatDomain}来获取
-     * @param urlSuffix    可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix    可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId        商户Id
      * @param serialNo     商户 API 证书序列号
      * @param platSerialNo 平台序列号
@@ -386,7 +387,7 @@ public class WechatApi {
      *
      * @param method       {@link RequestMethodEnums} 请求方法
      * @param urlPrefix    可通过 {@link WechatDomain}来获取
-     * @param urlSuffix    可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix    可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId        商户Id
      * @param serialNo     商户 API 证书序列号
      * @param platSerialNo 平台序列号，接口中包含敏感信息时必传
@@ -413,7 +414,7 @@ public class WechatApi {
      *
      * @param method    {@link RequestMethodEnums} 请求方法
      * @param urlPrefix 可通过 {@link WechatDomain}来获取
-     * @param urlSuffix 可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix 可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId     商户Id
      * @param serialNo  商户 API 证书序列号
      * @param keyPath   apiclient_key.pem 证书路径
@@ -432,7 +433,7 @@ public class WechatApi {
      *
      * @param method       {@link RequestMethodEnums} 请求方法
      * @param urlPrefix    可通过 {@link WechatDomain}来获取
-     * @param urlSuffix    可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix    可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId        商户Id
      * @param serialNo     商户 API 证书序列号
      * @param platSerialNo 平台序列号
@@ -453,7 +454,7 @@ public class WechatApi {
      *
      * @param method       {@link RequestMethodEnums} 请求方法
      * @param urlPrefix    可通过 {@link WechatDomain}来获取
-     * @param urlSuffix    可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix    可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId        商户Id
      * @param serialNo     商户 API 证书序列号
      * @param platSerialNo 平台序列号
@@ -475,7 +476,7 @@ public class WechatApi {
      *
      * @param method    {@link RequestMethodEnums} 请求方法
      * @param urlPrefix 可通过 {@link WechatDomain}来获取
-     * @param urlSuffix 可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix 可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId     商户Id
      * @param serialNo  商户 API 证书序列号
      * @param keyPath   apiclient_key.pem 证书路径
@@ -495,7 +496,7 @@ public class WechatApi {
      * V3 接口统一执行入口
      *
      * @param urlPrefix    可通过 {@link WechatDomain}来获取
-     * @param urlSuffix    可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix    可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId        商户Id
      * @param serialNo     商户 API 证书序列号
      * @param platSerialNo 平台序列号
@@ -515,7 +516,7 @@ public class WechatApi {
      * V3 接口统一执行入口
      *
      * @param urlPrefix 可通过 {@link WechatDomain}来获取
-     * @param urlSuffix 可通过 {@link cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi} 来获取，URL挂载参数需要自行拼接
+     * @param urlSuffix 可通过 {@link WechatApiEnum} 来获取，URL挂载参数需要自行拼接
      * @param mchId     商户Id
      * @param serialNo  商户 API 证书序列号
      * @param keyPath   apiclient_key.pem 证书路径
@@ -538,7 +539,7 @@ public class WechatApi {
      * @return {@link String} 请求返回的结果
      */
     public static String sendWorkWxRedPack(Map<String, String> params, String certPath, String certPass) {
-        return execution(getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi.SEND_WORK_WX_RED_PACK), params, certPath, certPass);
+        return execution(getReqUrl(WechatApiEnum.SEND_WORK_WX_RED_PACK), params, certPath, certPass);
     }
 
     /**
@@ -550,7 +551,7 @@ public class WechatApi {
      * @return {@link String} 请求返回的结果
      */
     public static String sendWorkWxRedPack(Map<String, String> params, InputStream certFile, String certPass) {
-        return execution(getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi.SEND_WORK_WX_RED_PACK), params, certFile, certPass);
+        return execution(getReqUrl(WechatApiEnum.SEND_WORK_WX_RED_PACK), params, certFile, certPass);
     }
 
     /**
@@ -562,7 +563,7 @@ public class WechatApi {
      * @return {@link String} 请求返回的结果
      */
     public static String queryWorkWxRedPack(Map<String, String> params, String certPath, String certPass) {
-        return execution(getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi.QUERY_WORK_WX_RED_PACK), params, certPath, certPass);
+        return execution(getReqUrl(WechatApiEnum.QUERY_WORK_WX_RED_PACK), params, certPath, certPass);
     }
 
     /**
@@ -574,7 +575,7 @@ public class WechatApi {
      * @return {@link String} 请求返回的结果
      */
     public static String queryWorkWxRedPack(Map<String, String> params, InputStream certFile, String certPass) {
-        return execution(getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi.QUERY_WORK_WX_RED_PACK), params, certFile, certPass);
+        return execution(getReqUrl(WechatApiEnum.QUERY_WORK_WX_RED_PACK), params, certFile, certPass);
     }
 
     /**
@@ -586,7 +587,7 @@ public class WechatApi {
      * @return {@link String} 请求返回的结果
      */
     public static String trans2pocket(Map<String, String> params, String certPath, String certPass) {
-        return execution(getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi.PAY_WWS_TRANS_2_POCKET), params, certPath, certPass);
+        return execution(getReqUrl(WechatApiEnum.PAY_WWS_TRANS_2_POCKET), params, certPath, certPass);
     }
 
     /**
@@ -598,7 +599,7 @@ public class WechatApi {
      * @return {@link String} 请求返回的结果
      */
     public static String trans2pocket(Map<String, String> params, InputStream certFile, String certPass) {
-        return execution(getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi.PAY_WWS_TRANS_2_POCKET), params, certFile, certPass);
+        return execution(getReqUrl(WechatApiEnum.PAY_WWS_TRANS_2_POCKET), params, certFile, certPass);
     }
 
     /**
@@ -610,7 +611,7 @@ public class WechatApi {
      * @return {@link String} 请求返回的结果
      */
     public static String queryTrans2pocket(Map<String, String> params, String certPath, String certPass) {
-        return execution(getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi.QUERY_WWS_TRANS_2_POCKET), params, certPath, certPass);
+        return execution(getReqUrl(WechatApiEnum.QUERY_WWS_TRANS_2_POCKET), params, certPath, certPass);
     }
 
     /**
@@ -622,7 +623,7 @@ public class WechatApi {
      * @return {@link String} 请求返回的结果
      */
     public static String queryTrans2pocket(Map<String, String> params, InputStream certFile, String certPass) {
-        return execution(getReqUrl(cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApi.QUERY_WWS_TRANS_2_POCKET), params, certFile, certPass);
+        return execution(getReqUrl(WechatApiEnum.QUERY_WWS_TRANS_2_POCKET), params, certFile, certPass);
     }
 
     /**
