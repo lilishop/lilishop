@@ -1,12 +1,13 @@
 package cn.lili.modules.goods.entity.dto;
 
-import cn.lili.common.utils.StringUtils;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 商品查询条件
@@ -14,6 +15,7 @@ import lombok.Data;
  * @author pikachu
  * @since 2020-02-24 19:27:20
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class GoodsSearchParams extends PageVO {
 
@@ -72,34 +74,34 @@ public class GoodsSearchParams extends PageVO {
 
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
-        if (StringUtils.isNotEmpty(goodsId)) {
+        if (CharSequenceUtil.isNotEmpty(goodsId)) {
             queryWrapper.eq("goods_id", goodsId);
         }
-        if (StringUtils.isNotEmpty(goodsName)) {
+        if (CharSequenceUtil.isNotEmpty(goodsName)) {
             queryWrapper.like("goods_name", goodsName);
         }
-        if (StringUtils.isNotEmpty(id)) {
+        if (CharSequenceUtil.isNotEmpty(id)) {
             queryWrapper.eq("id", id);
         }
-        if (StringUtils.isNotEmpty(storeId)) {
+        if (CharSequenceUtil.isNotEmpty(storeId)) {
             queryWrapper.eq("store_id", storeId);
         }
-        if (StringUtils.isNotEmpty(storeName)) {
+        if (CharSequenceUtil.isNotEmpty(storeName)) {
             queryWrapper.like("store_name", storeName);
         }
-        if (StringUtils.isNotEmpty(categoryPath)) {
+        if (CharSequenceUtil.isNotEmpty(categoryPath)) {
             queryWrapper.like("category_path", categoryPath);
         }
-        if (StringUtils.isNotEmpty(storeCategoryPath)) {
+        if (CharSequenceUtil.isNotEmpty(storeCategoryPath)) {
             queryWrapper.like("store_category_path", storeCategoryPath);
         }
         if (selfOperated != null) {
             queryWrapper.eq("self_operated", selfOperated);
         }
-        if (StringUtils.isNotEmpty(marketEnable)) {
+        if (CharSequenceUtil.isNotEmpty(marketEnable)) {
             queryWrapper.eq("market_enable", marketEnable);
         }
-        if (StringUtils.isNotEmpty(isAuth)) {
+        if (CharSequenceUtil.isNotEmpty(isAuth)) {
             queryWrapper.eq("is_auth", isAuth);
         }
         if (quantity != null) {
@@ -108,7 +110,7 @@ public class GoodsSearchParams extends PageVO {
         if (recommend != null) {
             queryWrapper.le("recommend", recommend);
         }
-        if (goodsType != null) {
+        if (CharSequenceUtil.isNotEmpty(goodsType)) {
             queryWrapper.eq("goods_type", goodsType);
         }
 
@@ -118,7 +120,7 @@ public class GoodsSearchParams extends PageVO {
     }
 
     private <T> void betweenWrapper(QueryWrapper<T> queryWrapper) {
-        if (StringUtils.isNotEmpty(price)) {
+        if (CharSequenceUtil.isNotEmpty(price)) {
             String[] s = price.split("_");
             if (s.length > 1) {
                 queryWrapper.ge("price", s[1]);

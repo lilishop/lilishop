@@ -7,6 +7,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.cache.Cache;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
@@ -17,7 +18,6 @@ import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
 import cn.lili.modules.promotion.entity.enums.PromotionApplyStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.vos.*;
 import cn.lili.modules.promotion.mapper.SeckillApplyMapper;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
@@ -101,11 +101,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
                 timelineVoS.add(seckillTimelineVO);
             }
         }
-        if (timelineVoS.size() > 0) {
-            return timelineVoS;
-        } else {
-            throw new ServiceException(ResultCode.SECKILL_NOT_START_ERROR);
-        }
+        return timelineVoS;
     }
 
     @Override
