@@ -120,6 +120,7 @@ public class SkuPromotionRender implements CartRenderStep {
                 return;
             case CART:
             case BUY_NOW:
+                return;
             case VIRTUAL:
                 //循环购物车
                 for (CartVO cartVO : tradeDTO.getCartList()) {
@@ -130,6 +131,10 @@ public class SkuPromotionRender implements CartRenderStep {
                         //赋予商品促销信息
                         for (PromotionGoods promotionGoods : cartSkuVO.getPromotions()) {
 
+                            // 忽略拼团活动
+                            if (promotionGoods.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())) {
+                                continue;
+                            }
                             PromotionSkuVO promotionSkuVO = new PromotionSkuVO(promotionGoods.getPromotionType(), promotionGoods.getPromotionId());
                             cartSkuVO.setPurchasePrice(promotionGoods.getPrice());
                             cartSkuVO.setSubTotal(CurrencyUtil.mul(promotionGoods.getPrice(), cartSkuVO.getNum()));

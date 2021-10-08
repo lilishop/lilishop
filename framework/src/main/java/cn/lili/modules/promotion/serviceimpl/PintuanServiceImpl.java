@@ -2,18 +2,12 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
-import cn.lili.trigger.util.DelayQueueTools;
-import cn.lili.trigger.enums.DelayTypeEnums;
-import cn.lili.trigger.message.PromotionMessage;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.trigger.interfaces.TimeTrigger;
-import cn.lili.trigger.model.TimeExecuteConstant;
-import cn.lili.trigger.model.TimeTriggerMsg;
-import cn.lili.common.utils.DateUtil;
-import cn.lili.mybatis.util.PageUtil;
-import cn.lili.common.vo.PageVO;
 import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.common.utils.DateUtil;
+import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
@@ -24,7 +18,6 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.vos.PintuanMemberVO;
 import cn.lili.modules.promotion.entity.vos.PintuanSearchParams;
 import cn.lili.modules.promotion.entity.vos.PintuanShareVO;
@@ -33,6 +26,13 @@ import cn.lili.modules.promotion.mapper.PintuanMapper;
 import cn.lili.modules.promotion.service.PintuanService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.tools.PromotionTools;
+import cn.lili.mybatis.util.PageUtil;
+import cn.lili.trigger.enums.DelayTypeEnums;
+import cn.lili.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.message.PromotionMessage;
+import cn.lili.trigger.model.TimeExecuteConstant;
+import cn.lili.trigger.model.TimeTriggerMsg;
+import cn.lili.trigger.util.DelayQueueTools;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -219,7 +219,7 @@ public class PintuanServiceImpl extends ServiceImpl<PintuanMapper, Pintuan> impl
     public boolean modifyPintuan(PintuanVO pintuan) {
         PintuanVO pintuanVO = this.checkExist(pintuan.getId());
         if (!pintuan.getPromotionStatus().equals(PromotionStatusEnum.NEW.name())) {
-            throw new ServiceException(ResultCode.PINTUAN_EDIT_ERROR);
+            throw new ServiceException(ResultCode.PINTUAN_EDIT_ERROR_ITS_OPEN);
         }
         //检查促销时间
         PromotionTools.checkPromotionTime(pintuan.getStartTime().getTime(), pintuan.getEndTime().getTime());

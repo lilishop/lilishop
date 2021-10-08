@@ -286,6 +286,7 @@ public enum ResultCode {
     PINTUAN_MANUAL_CLOSE_ERROR(42007, "手动关闭拼团活动失败"),
     PINTUAN_ADD_ERROR(42008, "添加拼团活动失败"),
     PINTUAN_EDIT_ERROR(42009, "修改拼团活动失败"),
+    PINTUAN_EDIT_ERROR_ITS_OPEN(42019, "拼团活动已开启，无法修改拼团活动！"),
     PINTUAN_DELETE_ERROR(42010, "删除拼团活动失败"),
     PINTUAN_JOIN_ERROR(42011, "不能参与自己发起的拼团活动！"),
     PINTUAN_LIMIT_NUM_ERROR(42012, "购买数量超过拼团活动限制数量！"),
