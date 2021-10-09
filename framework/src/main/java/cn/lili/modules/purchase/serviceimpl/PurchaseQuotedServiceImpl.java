@@ -4,6 +4,7 @@ import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.purchase.entity.dos.PurchaseQuoted;
 import cn.lili.modules.purchase.entity.vos.PurchaseQuotedVO;
 import cn.lili.modules.purchase.mapper.PurchaseQuotedMapper;
+import cn.lili.modules.purchase.service.PurchaseOrderService;
 import cn.lili.modules.purchase.service.PurchaseQuotedItemService;
 import cn.lili.modules.purchase.service.PurchaseQuotedService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -11,7 +12,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,9 +26,10 @@ import java.util.List;
 public class PurchaseQuotedServiceImpl extends ServiceImpl<PurchaseQuotedMapper, PurchaseQuoted> implements PurchaseQuotedService {
     @Autowired
     private PurchaseQuotedItemService purchaseQuotedItemService;
-
     @Override
     public PurchaseQuotedVO addPurchaseQuoted(PurchaseQuotedVO purchaseQuotedVO) {
+
+
         PurchaseQuoted purchaseQuoted = new PurchaseQuoted();
         BeanUtil.copyProperties(purchaseQuotedVO, purchaseQuoted);
         //添加报价单
@@ -42,6 +43,7 @@ public class PurchaseQuotedServiceImpl extends ServiceImpl<PurchaseQuotedMapper,
     public List<PurchaseQuoted> getByPurchaseOrderId(String purchaseOrderId) {
         LambdaQueryWrapper<PurchaseQuoted> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(PurchaseQuoted::getPurchaseOrderId, purchaseOrderId);
+        lambdaQueryWrapper.orderByDesc(PurchaseQuoted::getCreateTime);
         return this.list(lambdaQueryWrapper);
     }
 
