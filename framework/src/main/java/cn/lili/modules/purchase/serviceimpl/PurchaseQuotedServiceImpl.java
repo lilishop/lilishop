@@ -4,7 +4,6 @@ import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.purchase.entity.dos.PurchaseQuoted;
 import cn.lili.modules.purchase.entity.vos.PurchaseQuotedVO;
 import cn.lili.modules.purchase.mapper.PurchaseQuotedMapper;
-import cn.lili.modules.purchase.service.PurchaseOrderService;
 import cn.lili.modules.purchase.service.PurchaseQuotedItemService;
 import cn.lili.modules.purchase.service.PurchaseQuotedService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -51,7 +50,8 @@ public class PurchaseQuotedServiceImpl extends ServiceImpl<PurchaseQuotedMapper,
     public PurchaseQuotedVO getById(String id) {
         //获取报价单
         PurchaseQuotedVO purchaseQuotedVO = new PurchaseQuotedVO();
-        BeanUtil.copyProperties(this.getById(id), purchaseQuotedVO);
+        PurchaseQuoted purchaseQuoted=this.getById(id);
+        BeanUtil.copyProperties(purchaseQuoted, purchaseQuotedVO);
         //获取报价单子内容
         purchaseQuotedVO.setPurchaseQuotedItems(purchaseQuotedItemService.purchaseQuotedItemList(id));
         return purchaseQuotedVO;
