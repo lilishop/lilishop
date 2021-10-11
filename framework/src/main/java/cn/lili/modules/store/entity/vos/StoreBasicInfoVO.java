@@ -55,4 +55,7 @@ public class StoreBasicInfoVO {
     @ApiModelProperty(value = "腾讯云智服小程序唯一标识")
     private String yzfMpSign;
 
+    @ApiModelProperty(value = "udesk标识")
+    private String merchantEuid;
+
 }

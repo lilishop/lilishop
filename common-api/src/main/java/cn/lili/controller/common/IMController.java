@@ -32,7 +32,7 @@ public class IMController {
     @Autowired
     private SettingService settingService;
 
-    @ApiOperation(value = "获取店铺列表分页")
+    @ApiOperation(value = "获取IM接口前缀")
     @GetMapping
     public ResultMessage<String> getUrl() {
         String imUrl;
