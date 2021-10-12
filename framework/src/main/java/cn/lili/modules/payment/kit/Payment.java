@@ -133,6 +133,17 @@ public interface Payment {
     }
 
     /**
+     * 支付回调地址
+     *
+     * @param api               api地址
+     * @param paymentMethodEnum 支付类型
+     * @return 回调地址
+     */
+    default String aliCallback(String api, PaymentMethodEnum paymentMethodEnum,String params) {
+        return api + "/buyer/cashier/callback/" + paymentMethodEnum.name()+"?passback_params="+params;
+    }
+
+    /**
      * 支付异步通知地址
      *
      * @param api               api地址

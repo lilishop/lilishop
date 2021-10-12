@@ -93,7 +93,7 @@ public class AliPayPlugin implements Payment {
         payModel.setProductCode("QUICK_WAP_PAY");
         try {
             log.info("支付宝H5支付：{}", JSONUtil.toJsonStr(payModel));
-            AliPayRequest.wapPay(response, payModel, callbackUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY),
+            AliPayRequest.wapPay(response, payModel, aliCallback(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY, URLEncoder.createAll().encode(BeanUtil.formatKeyValuePair(payParam), StandardCharsets.UTF_8)),
                     notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY));
         } catch (Exception e) {
             log.error("H5支付异常", e);
