@@ -3,9 +3,11 @@ package cn.lili.modules.payment.kit.plugin.alipay;
 import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.net.URLEncoder;
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.properties.DomainProperties;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
@@ -73,6 +75,11 @@ public class AliPayPlugin implements Payment {
      */
     @Autowired
     private ApiProperties apiProperties;
+    /**
+     * 域名配置
+     */
+    @Autowired
+    private DomainProperties domainProperties;
 
     @Override
     public ResultMessage<Object> h5pay(HttpServletRequest request, HttpServletResponse response, PayParam payParam) {
@@ -238,6 +245,7 @@ public class AliPayPlugin implements Payment {
     public void callBack(HttpServletRequest request) {
         log.info("支付同步回调：");
         callback(request);
+
     }
 
     @Override
@@ -264,7 +272,9 @@ public class AliPayPlugin implements Payment {
             } else {
                 log.info("支付回调通知：支付失败-参数：{}", map);
             }
-        } catch (AlipayApiException e) {
+
+            ThreadContextHolder.getHttpResponse().sendRedirect(domainProperties.getWap()+"/pages/order/myOrder?status=0");
+        } catch (Exception e) {
             log.error("支付回调同步通知异常", e);
         }
 
