@@ -34,7 +34,7 @@ public class PurchaseQuotedServiceImpl extends ServiceImpl<PurchaseQuotedMapper,
         //添加报价单
         this.save(purchaseQuoted);
         //添加采购单子内容
-        purchaseQuotedItemService.addPurchaseQuotedItem(purchaseQuotedVO.getId(), purchaseQuotedVO.getPurchaseQuotedItems());
+        purchaseQuotedItemService.addPurchaseQuotedItem(purchaseQuoted.getId(), purchaseQuotedVO.getPurchaseQuotedItems());
         return purchaseQuotedVO;
     }
 

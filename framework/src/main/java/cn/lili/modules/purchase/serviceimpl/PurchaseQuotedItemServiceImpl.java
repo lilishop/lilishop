@@ -23,9 +23,9 @@ public class PurchaseQuotedItemServiceImpl extends ServiceImpl<PurchaseQuotedIte
     public boolean addPurchaseQuotedItem(String purchaseQuotedId, List<PurchaseQuotedItem> purchaseQuotedItemList) {
         for (PurchaseQuotedItem purchaseQuotedItem : purchaseQuotedItemList) {
             purchaseQuotedItem.setPurchaseQuotedId(purchaseQuotedId);
-            this.save(purchaseQuotedItem);
         }
-        return true;
+
+        return this.saveBatch(purchaseQuotedItemList);
     }
 
     @Override
