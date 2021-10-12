@@ -93,7 +93,7 @@ public class AliPayPlugin implements Payment {
         payModel.setProductCode("QUICK_WAP_PAY");
         try {
             log.info("支付宝H5支付：{}", JSONUtil.toJsonStr(payModel));
-            AliPayRequest.wapPay(response, payModel, aliCallback(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY, URLEncoder.createAll().encode(BeanUtil.formatKeyValuePair(payParam), StandardCharsets.UTF_8)),
+            AliPayRequest.wapPay(response, payModel, callbackUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY),
                     notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY));
         } catch (Exception e) {
             log.error("H5支付异常", e);
@@ -236,14 +236,38 @@ public class AliPayPlugin implements Payment {
 
     @Override
     public void callBack(HttpServletRequest request) {
-        verifyNotify(request);
         log.info("支付同步回调：");
+        callback(request);
     }
 
     @Override
     public void notify(HttpServletRequest request) {
         verifyNotify(request);
         log.info("支付异步通知：");
+    }
+
+    /**
+     * 验证支付结果
+     *
+     * @param request
+     */
+    private void callback(HttpServletRequest request) {
+        try {
+            AlipayPaymentSetting alipayPaymentSetting = alipayPaymentSetting();
+            //获取支付宝反馈信息
+            Map<String, String> map = AliPayApi.toMap(request);
+            log.info("同步回调：{}", JSONUtil.toJsonStr(map));
+            boolean verifyResult = AlipaySignature.rsaCertCheckV1(map, alipayPaymentSetting.getAlipayPublicCertPath(), "UTF-8",
+                    "RSA2");
+            if (verifyResult) {
+                log.info("支付回调通知：支付成功-参数：{}", map);
+            } else {
+                log.info("支付回调通知：支付失败-参数：{}", map);
+            }
+        } catch (AlipayApiException e) {
+            log.error("支付回调同步通知异常", e);
+        }
+
     }
 
     /**
