@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 优惠券活动业务层实现
@@ -247,9 +249,14 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
             return memberService.listMaps(new QueryWrapper<Member>()
                     .select("id,nick_name"));
         } else {
+            List<Object> ids = new ArrayList<>();
+            if (JSONUtil.isJsonArray(couponActivity.getActivityScopeInfo())) {
+                JSONArray array = JSONUtil.parseArray(couponActivity.getActivityScopeInfo());
+                ids = array.toList(Map.class).stream().map(i -> i.get("id")).collect(Collectors.toList());
+            }
             return memberService.listMaps(new QueryWrapper<Member>()
                     .select("id,nick_name")
-                    .in("id", couponActivity.getActivityScopeInfo()));
+                    .in("id", ids));
         }
     }
 
