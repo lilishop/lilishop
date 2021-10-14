@@ -1,10 +1,18 @@
 package cn.lili.modules.store.serviceimpl;
 
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.json.JSONUtil;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.goods.entity.dos.Category;
+import cn.lili.modules.goods.entity.dos.Goods;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.CategoryService;
+import cn.lili.modules.goods.service.GoodsService;
+import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.search.utils.EsIndexUtil;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
@@ -16,16 +24,20 @@ import cn.lili.modules.store.entity.vos.StoreOtherVO;
 import cn.lili.modules.store.mapper.StoreDetailMapper;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.store.service.StoreService;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -48,6 +60,18 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
      */
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private GoodsService goodsService;
+
+    @Autowired
+    private GoodsSkuService goodsSkuService;
+
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
+
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
 
     @Override
     public StoreDetailVO getStoreDetailVO(String storeId) {
@@ -72,7 +96,30 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
         //修改店铺
         Store store = storeService.getById(tokenUser.getStoreId());
         BeanUtil.copyProperties(storeSettingDTO, store);
-        return storeService.updateById(store);
+        boolean result = storeService.updateById(store);
+        if (result) {
+            this.updateStoreGoodsInfo(store);
+        }
+        return result;
+    }
+
+    public void updateStoreGoodsInfo(Store store) {
+
+        goodsService.update(new LambdaUpdateWrapper<Goods>()
+                .eq(Goods::getStoreId, store.getId())
+                .set(Goods::getStoreName, store.getStoreName())
+                .set(Goods::getSelfOperated, store.getSelfOperated()));
+        goodsSkuService.update(new LambdaUpdateWrapper<GoodsSku>()
+                .eq(GoodsSku::getStoreId, store.getId())
+                .set(GoodsSku::getStoreName, store.getStoreName())
+                .set(GoodsSku::getSelfOperated, store.getSelfOperated()));
+
+        Map<String, Object> updateIndexFieldsMap = EsIndexUtil.getUpdateIndexFieldsMap(
+                MapUtil.builder().put("storeId", store.getId()).build(),
+                MapUtil.builder().put("storeName", store.getStoreName()).put("selfOperated", store.getSelfOperated()).build());
+        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX_FIELD.name();
+        //发送mq消息
+        rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(updateIndexFieldsMap), RocketmqSendCallbackBuilder.commonCallback());
     }
 
     @Override
@@ -118,7 +165,7 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
     }
 
     @Override
-    public List goodsManagementCategory(String storeId) {
+    public List<StoreManagementCategoryVO> goodsManagementCategory(String storeId) {
 
         //获取顶部分类列表
         List<Category> categoryList = categoryService.firstCategory();

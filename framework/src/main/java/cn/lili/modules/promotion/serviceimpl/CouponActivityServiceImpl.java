@@ -68,7 +68,7 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
         //检测优惠券活动是否可以添加
         this.checkParam(couponActivityDTO);
         //如果有会员，则写入会员信息
-        if (couponActivityDTO.getMemberDTOS() != null && couponActivityDTO.getMemberDTOS().size() != 0) {
+        if (couponActivityDTO.getMemberDTOS() != null && !couponActivityDTO.getMemberDTOS().isEmpty()) {
             couponActivityDTO.setActivityScopeInfo(JSONUtil.toJsonStr(couponActivityDTO.getMemberDTOS()));
         }
         //添加优惠券活动
@@ -106,8 +106,7 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
     @Override
     public CouponActivityVO getCouponActivityVO(String couponActivityId) {
         CouponActivity couponActivity = this.getById(couponActivityId);
-        CouponActivityVO couponActivityVO = new CouponActivityVO(couponActivity, couponActivityItemService.getCouponActivityItemListVO(couponActivityId));
-        return couponActivityVO;
+        return new CouponActivityVO(couponActivity, couponActivityItemService.getCouponActivityItemListVO(couponActivityId));
     }
 
     @Override
@@ -217,13 +216,11 @@ public class CouponActivityServiceImpl extends ServiceImpl<CouponActivityMapper,
         //活动时间需超过当前时间
         PromotionTools.checkPromotionTime(couponActivity.getStartTime().getTime(), couponActivity.getEndTime().getTime());
         //指定会员判定
-        if (couponActivity.getActivityScope().equals(CouponActivitySendTypeEnum.DESIGNATED.name())) {
-            if (couponActivity.getMemberDTOS().size() == 0) {
-                throw new ServiceException(ResultCode.COUPON_ACTIVITY_MEMBER_ERROR);
-            }
+        if (couponActivity.getActivityScope().equals(CouponActivitySendTypeEnum.DESIGNATED.name()) && couponActivity.getMemberDTOS().isEmpty()) {
+            throw new ServiceException(ResultCode.COUPON_ACTIVITY_MEMBER_ERROR);
         }
         //优惠券数量判定
-        if (couponActivity.getCouponActivityItems().size() == 0) {
+        if (couponActivity.getCouponActivityItems().isEmpty()) {
             throw new ServiceException(ResultCode.COUPON_ACTIVITY_ITEM_ERROR);
         } else if (couponActivity.getCouponActivityItems().size() > 10) {
             throw new ServiceException(ResultCode.COUPON_ACTIVITY_ITEM_MUST_NUM_ERROR);

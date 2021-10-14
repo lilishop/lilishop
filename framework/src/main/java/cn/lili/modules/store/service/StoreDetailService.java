@@ -1,10 +1,12 @@
 package cn.lili.modules.store.service;
 
+import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.store.entity.dto.StoreSettingDTO;
 import cn.lili.modules.store.entity.vos.StoreBasicInfoVO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
+import cn.lili.modules.store.entity.vos.StoreManagementCategoryVO;
 import cn.lili.modules.store.entity.vos.StoreOtherVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -95,7 +97,7 @@ public interface StoreDetailService extends IService<StoreDetail> {
      * @param storeId 店铺ID
      * @return 店铺经营范围
      */
-    List goodsManagementCategory(String storeId);
+    List<StoreManagementCategoryVO> goodsManagementCategory(String storeId);
 
     /**
      * 获取店铺其他信息
@@ -104,4 +106,11 @@ public interface StoreDetailService extends IService<StoreDetail> {
      * @return 店铺其他信息
      */
     StoreOtherVO getStoreOtherVO(String storeId);
+
+    /**
+     * 更新店铺内所有商品信息
+     *
+     * @param store 店铺信息
+     */
+    void updateStoreGoodsInfo(Store store);
 }

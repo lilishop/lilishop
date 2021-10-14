@@ -30,11 +30,18 @@ import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.IterableUtil;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.indices.AnalyzeRequest;
 import org.elasticsearch.client.indices.AnalyzeResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.UpdateByQueryRequest;
+import org.elasticsearch.script.Script;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -76,11 +83,9 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
     @Override
     public void addIndex(EsGoodsIndex goods) {
-        //索引名称拼接
-        String indexName = elasticsearchProperties.getIndexPrefix() + "_" + EsSuffix.GOODS_INDEX_NAME;
         try {
             //分词器分词
-            AnalyzeRequest analyzeRequest = AnalyzeRequest.withIndexAnalyzer(indexName, "ik_max_word", goods.getGoodsName());
+            AnalyzeRequest analyzeRequest = AnalyzeRequest.withIndexAnalyzer(getIndexName(), "ik_max_word", goods.getGoodsName());
             AnalyzeResponse analyze = client.indices().analyze(analyzeRequest, RequestOptions.DEFAULT);
             List<AnalyzeResponse.AnalyzeToken> tokens = analyze.getTokens();
 
@@ -127,6 +132,29 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     }
 
     /**
+     * 更新商品索引的的部分属性（只填写更新的字段，不需要更新的字段不要填写）
+     *
+     * @param queryFields  查询字段
+     * @param updateFields 更新字段
+     */
+    @Override
+    public void updateIndex(Map<String, Object> queryFields, Map<String, Object> updateFields) {
+        UpdateByQueryRequest update = new UpdateByQueryRequest(getIndexName());
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        for (Map.Entry<String, Object> entry : queryFields.entrySet()) {
+            TermQueryBuilder termQueryBuilder = new TermQueryBuilder(entry.getKey(), entry.getValue());
+            queryBuilder.filter(termQueryBuilder);
+        }
+        update.setQuery(queryBuilder);
+        StringBuilder script = new StringBuilder();
+        for (Map.Entry<String, Object> entry : updateFields.entrySet()) {
+            script.append("ctx._source.").append(entry.getKey()).append("=").append("'").append(entry.getValue()).append("'").append(";");
+        }
+        update.setScript(new Script(script.toString()));
+        client.updateByQueryAsync(update, RequestOptions.DEFAULT, this.actionListener());
+    }
+
+    /**
      * 批量商品索引的的属性（ID 必填, 其他字段只填写更新的字段，不需要更新的字段不要填写。）
      *
      * @param goodsIndices 商品索引列表
@@ -135,7 +163,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     public void updateBulkIndex(List<EsGoodsIndex> goodsIndices) {
         try {
             //索引名称拼接
-            String indexName = elasticsearchProperties.getIndexPrefix() + "_" + EsSuffix.GOODS_INDEX_NAME;
+            String indexName = getIndexName();
 
             BulkRequest request = new BulkRequest();
 
@@ -178,7 +206,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             return;
         }
         //索引名称拼接
-        String indexName = elasticsearchProperties.getIndexPrefix() + "_" + EsSuffix.GOODS_INDEX_NAME;
+        String indexName = this.getIndexName();
 
         //索引初始化，因为mapping结构问题：
         //但是如果索引已经自动生成过，这里就不会创建索引，设置mapping，所以这里决定在初始化索引的同时，将已有索引删除，重新创建
@@ -383,7 +411,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             }
             return promotionMap;
         }
-        return null;
+        return new HashMap<>();
     }
 
     /**
@@ -519,4 +547,22 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         }
     }
 
+    private String getIndexName() {
+        //索引名称拼接
+        return elasticsearchProperties.getIndexPrefix() + "_" + EsSuffix.GOODS_INDEX_NAME;
+    }
+
+    private ActionListener<BulkByScrollResponse> actionListener() {
+        return new ActionListener<BulkByScrollResponse>() {
+            @Override
+            public void onResponse(BulkByScrollResponse bulkByScrollResponse) {
+                log.debug("UpdateByQueryResponse: {}", bulkByScrollResponse);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                log.error("UpdateByQueryRequestFailure: ", e);
+            }
+        };
+    }
 }

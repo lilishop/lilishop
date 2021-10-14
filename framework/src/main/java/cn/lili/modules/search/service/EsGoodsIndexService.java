@@ -35,10 +35,18 @@ public interface EsGoodsIndexService {
     /**
      * 更新商品索引的的部分属性（只填写更新的字段，不需要更新的字段不要填写）
      *
-     * @param id       商品索引id
+     * @param id    商品索引id
      * @param goods 更新后的购买数量
      */
     void updateIndex(String id, EsGoodsIndex goods);
+
+    /**
+     * 更新商品索引的的部分属性
+     *
+     * @param queryFields  查询字段
+     * @param updateFields 更新字段
+     */
+    void updateIndex(Map<String, Object> queryFields, Map<String, Object> updateFields);
 
     /**
      * 批量商品索引的的属性（ID 必填, 其他字段只填写更新的字段，不需要更新的字段不要填写。）
@@ -105,10 +113,12 @@ public interface EsGoodsIndexService {
 
     /**
      * 删除索引中指定的促销活动id的促销活动
-     * @param skuId 商品skuId
+     *
+     * @param skuId       商品skuId
      * @param promotionId 促销活动Id
      */
     void deleteEsGoodsPromotionByPromotionId(String skuId, String promotionId);
+
     /**
      * 清除所以商品索引的无效促销活动
      */
@@ -142,7 +152,7 @@ public interface EsGoodsIndexService {
     /**
      * 重置当前商品索引
      *
-     * @param goodsSku 商品sku信息
+     * @param goodsSku       商品sku信息
      * @param goodsParamDTOS 商品参数
      * @return 商品索引
      */
