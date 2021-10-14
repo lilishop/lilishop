@@ -3,11 +3,11 @@ package cn.lili.controller.store;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.goods.entity.vos.CategoryVO;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dto.AdminStoreApplyDTO;
 import cn.lili.modules.store.entity.dto.StoreEditDTO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
+import cn.lili.modules.store.entity.vos.StoreManagementCategoryVO;
 import cn.lili.modules.store.entity.vos.StoreSearchParams;
 import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.service.StoreDetailService;
@@ -112,7 +112,7 @@ public class StoreManagerController {
     @ApiOperation(value = "查询一级分类列表")
     @ApiImplicitParam(name = "storeId", value = "店铺id", required = true, dataType = "String", paramType = "path")
     @GetMapping(value = "/managementCategory/{storeId}")
-    public ResultMessage<List<CategoryVO>> firstCategory(@PathVariable String storeId) {
+    public ResultMessage<List<StoreManagementCategoryVO>> firstCategory(@PathVariable String storeId) {
         return ResultUtil.data(this.storeDetailService.goodsManagementCategory(storeId));
     }
 

@@ -90,45 +90,50 @@ public class ElasticsearchController {
         cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), null);
         cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), true);
         ThreadUtil.execAsync(() -> {
-            //查询商品信息
-            LambdaQueryWrapper<GoodsSku> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(GoodsSku::getIsAuth, GoodsAuthEnum.PASS.name());
-            queryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
+            try {
+                //查询商品信息
+                LambdaQueryWrapper<GoodsSku> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(GoodsSku::getIsAuth, GoodsAuthEnum.PASS.name());
+                queryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
 
-            List<GoodsSku> list = goodsSkuService.list(queryWrapper);
-            List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
-            //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
-            for (GoodsSku goodsSku : list) {
-                Goods goods = goodsService.getById(goodsSku.getGoodsId());
-                EsGoodsIndex index = new EsGoodsIndex(goodsSku);
-                if (goods.getParams() != null && !goods.getParams().isEmpty()) {
-                    List<GoodsParamsDTO> goodsParamDTOS = JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class);
-                    index = new EsGoodsIndex(goodsSku, goodsParamDTOS);
-                }
-                if (goods.getCategoryPath() != null) {
-                    List<Category> categories = categoryService.listByIdsOrderByLevel(Arrays.asList(goods.getCategoryPath().split(",")));
-                    if (!categories.isEmpty()) {
-                        index.setCategoryNamePath(ArrayUtil.join(categories.stream().map(Category::getName).toArray(), ","));
+                List<GoodsSku> list = goodsSkuService.list(queryWrapper);
+                List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
+                //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
+                for (GoodsSku goodsSku : list) {
+                    Goods goods = goodsService.getById(goodsSku.getGoodsId());
+                    EsGoodsIndex index = new EsGoodsIndex(goodsSku);
+                    if (goods.getParams() != null && !goods.getParams().isEmpty()) {
+                        List<GoodsParamsDTO> goodsParamDTOS = JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class);
+                        index = new EsGoodsIndex(goodsSku, goodsParamDTOS);
                     }
-                }
-                Brand brand = brandService.getById(goods.getBrandId());
-                if (brand != null) {
-                    index.setBrandName(brand.getName());
-                    index.setBrandUrl(brand.getLogo());
-                }
-                if (goods.getStoreCategoryPath() != null && CharSequenceUtil.isNotEmpty(goods.getStoreCategoryPath())) {
-                    List<StoreGoodsLabel> storeGoodsLabels = storeGoodsLabelService.listByStoreIds(Arrays.asList(goods.getStoreCategoryPath().split(",")));
-                    if (!storeGoodsLabels.isEmpty()) {
-                        index.setStoreCategoryNamePath(ArrayUtil.join(storeGoodsLabels.stream().map(StoreGoodsLabel::getLabelName).toArray(), ","));
+                    if (goods.getCategoryPath() != null) {
+                        List<Category> categories = categoryService.listByIdsOrderByLevel(Arrays.asList(goods.getCategoryPath().split(",")));
+                        if (!categories.isEmpty()) {
+                            index.setCategoryNamePath(ArrayUtil.join(categories.stream().map(Category::getName).toArray(), ","));
+                        }
                     }
+                    Brand brand = brandService.getById(goods.getBrandId());
+                    if (brand != null) {
+                        index.setBrandName(brand.getName());
+                        index.setBrandUrl(brand.getLogo());
+                    }
+                    if (goods.getStoreCategoryPath() != null && CharSequenceUtil.isNotEmpty(goods.getStoreCategoryPath())) {
+                        List<StoreGoodsLabel> storeGoodsLabels = storeGoodsLabelService.listByStoreIds(Arrays.asList(goods.getStoreCategoryPath().split(",")));
+                        if (!storeGoodsLabels.isEmpty()) {
+                            index.setStoreCategoryNamePath(ArrayUtil.join(storeGoodsLabels.stream().map(StoreGoodsLabel::getLabelName).toArray(), ","));
+                        }
+                    }
+                    Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
+                    index.setPromotionMap(goodsCurrentPromotionMap);
+                    esGoodsIndices.add(index);
+                    stringRedisTemplate.opsForValue().set(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity().toString());
                 }
-                Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
-                index.setPromotionMap(goodsCurrentPromotionMap);
-                esGoodsIndices.add(index);
-                stringRedisTemplate.opsForValue().set(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity().toString());
+                //初始化商品索引
+                esGoodsIndexService.initIndex(esGoodsIndices);
+            } catch (Exception e) {
+                cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), null);
+                cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false);
             }
-            //初始化商品索引
-            esGoodsIndexService.initIndex(esGoodsIndices);
         });
         return ResultUtil.success();
     }

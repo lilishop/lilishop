@@ -2,12 +2,12 @@ package cn.lili.modules.store.serviceimpl;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -89,7 +90,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
 
     @Override
     public StoreVO getStoreDetail() {
-        AuthUser currentUser = UserContext.getCurrentUser();
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         StoreVO storeVO = this.baseMapper.getStoreDetail(currentUser.getStoreId());
         storeVO.setNickName(currentUser.getNickName());
         return storeVO;
@@ -99,7 +100,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     public Store add(AdminStoreApplyDTO adminStoreApplyDTO) {
 
         //判断店铺名称是否存在
-        QueryWrapper queryWrapper = Wrappers.query();
+        QueryWrapper<Store> queryWrapper = Wrappers.query();
         queryWrapper.eq("store_name", adminStoreApplyDTO.getStoreName());
         if (this.getOne(queryWrapper) != null) {
             throw new ServiceException(ResultCode.STORE_NAME_EXIST_ERROR);
@@ -111,7 +112,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             throw new ServiceException(ResultCode.USER_NOT_EXIST);
         }
         //判断是否拥有店铺
-        if (member.getHaveStore()) {
+        if (Boolean.TRUE.equals(member.getHaveStore())) {
             throw new ServiceException(ResultCode.STORE_APPLY_DOUBLE_ERROR);
         }
 
@@ -138,7 +139,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         if (storeEditDTO != null) {
             //判断店铺名是否唯一
             Store storeTmp = getOne(new QueryWrapper<Store>().eq("store_name", storeEditDTO.getStoreName()));
-            if (storeTmp != null && !StringUtils.equals(storeTmp.getId(), storeEditDTO.getStoreId())) {
+            if (storeTmp != null && !CharSequenceUtil.equals(storeTmp.getId(), storeEditDTO.getStoreId())) {
                 throw new ServiceException(ResultCode.STORE_NAME_EXIST_ERROR);
             }
             //修改店铺详细信息
@@ -160,7 +161,10 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         if (store != null) {
             BeanUtil.copyProperties(storeEditDTO, store);
             store.setId(storeEditDTO.getStoreId());
-            this.updateById(store);
+            boolean result = this.updateById(store);
+            if (result) {
+                storeDetailService.updateStoreGoodsInfo(store);
+            }
         }
         return store;
     }
@@ -232,7 +236,8 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         Store store = getStoreByMember();
         //如果没有申请过店铺，新增店铺
         if (!Optional.ofNullable(store).isPresent()) {
-            Member member = memberService.getById(UserContext.getCurrentUser().getId());
+            AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
+            Member member = memberService.getById(authUser.getId());
             store = new Store(member);
             BeanUtil.copyProperties(storeCompanyDTO, store);
             this.save(store);
@@ -336,11 +341,12 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     /**
      * 获取当前登录操作的店铺
      *
-     * @return
+     * @return 店铺信息
      */
     private Store getStoreByMember() {
+        AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
         LambdaQueryWrapper<Store> lambdaQueryWrapper = Wrappers.lambdaQuery();
-        lambdaQueryWrapper.eq(Store::getMemberId, UserContext.getCurrentUser().getId());
+        lambdaQueryWrapper.eq(Store::getMemberId, authUser.getId());
         return this.getOne(lambdaQueryWrapper);
     }
 

@@ -2,6 +2,7 @@ package cn.lili.listener;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.event.GoodsCommentCompleteEvent;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
@@ -42,6 +43,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 商品消息
@@ -137,12 +139,21 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
             case UPDATE_GOODS_INDEX:
                 try {
                     String goodsIdsJsonStr = new String(messageExt.getBody());
-                    List<Goods> goodsList = new ArrayList<>();
-                    for (String goodsId : JSONUtil.toList(goodsIdsJsonStr, String.class)) {
-                        Goods goods = goodsService.getById(goodsId);
-                        goodsList.add(goods);
-                    }
+                    List<Goods> goodsList = goodsService.list(new LambdaQueryWrapper<Goods>().in(Goods::getId, JSONUtil.toList(goodsIdsJsonStr, String.class)));
                     this.updateGoodsIndex(goodsList);
+                } catch (Exception e) {
+                    log.error("更新商品索引事件执行异常，商品信息 {}", new String(messageExt.getBody()));
+                }
+                break;
+            case UPDATE_GOODS_INDEX_FIELD:
+                try {
+                    String updateIndexFieldsJsonStr = new String(messageExt.getBody());
+                    JSONObject updateIndexFields = JSONUtil.parseObj(updateIndexFieldsJsonStr);
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> queryFields = updateIndexFields.get("queryFields", Map.class);
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> updateFields = updateIndexFields.get("updateFields", Map.class);
+                    goodsIndexService.updateIndex(queryFields, updateFields);
                 } catch (Exception e) {
                     log.error("更新商品索引事件执行异常，商品信息 {}", new String(messageExt.getBody()));
                 }
