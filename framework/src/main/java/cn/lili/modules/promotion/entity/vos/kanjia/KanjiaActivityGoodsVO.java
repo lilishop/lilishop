@@ -19,6 +19,13 @@ public class KanjiaActivityGoodsVO {
     @ApiModelProperty(value = "最低购买金额")
     private Double purchasePrice;
 
+    public Double getPurchasePrice() {
+        if (purchasePrice < 0) {
+            return 0D;
+        }
+        return purchasePrice;
+    }
+
     @ApiModelProperty(value = "活动库存")
     private Integer stock;
 
