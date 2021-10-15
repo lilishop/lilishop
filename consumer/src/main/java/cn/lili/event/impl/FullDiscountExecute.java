@@ -79,9 +79,9 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
         tradeDTO.getCartList().forEach(
                 cartVO -> {
                     //有满减优惠，则记录信息
-                    if (cartVO.getGiftList() != null && cartVO.getGiftList().size() > 0
-                            && cartVO.getGiftPoint() != null && cartVO.getGiftPoint() > 0
-                            && cartVO.getGiftCouponList() != null && cartVO.getGiftCouponList().size() > 0) {
+                    if ((cartVO.getGiftList() != null && !cartVO.getGiftList().isEmpty())
+                            || (cartVO.getGiftPoint() != null && cartVO.getGiftPoint() > 0)
+                            || (cartVO.getGiftCouponList() != null && !cartVO.getGiftCouponList().isEmpty())) {
                         cache.put(CachePrefix.ORDER.getPrefix() + cartVO.getSn(), cartVO);
                     }
                 }
@@ -90,8 +90,8 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
 
     @Override
     public void orderChange(OrderMessage orderMessage) {
-        System.out.println(CachePrefix.ORDER.getPrefix() + orderMessage.getOrderSn());
         if (orderMessage.getNewStatus().equals(OrderStatusEnum.PAID)) {
+            log.debug("满减活动，订单状态操作 {}", CachePrefix.ORDER.getPrefix() + orderMessage.getOrderSn());
             renderGift((CartVO) cache.get(CachePrefix.ORDER.getPrefix() + orderMessage.getOrderSn()), orderMessage);
         }
     }
@@ -118,10 +118,8 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
 
         try {
             //优惠券判定
-            if (cartVO.getGiftCouponList() != null && cartVO.getGiftCouponList().size() > 0) {
-                cartVO.getGiftCouponList().forEach(couponId -> {
-                    memberCouponService.receiveCoupon(couponId, order.getMemberId(), order.getMemberName());
-                });
+            if (cartVO.getGiftCouponList() != null && !cartVO.getGiftCouponList().isEmpty()) {
+                cartVO.getGiftCouponList().forEach(couponId -> memberCouponService.receiveCoupon(couponId, order.getMemberId(), order.getMemberName()));
             }
         } catch (Exception e) {
             log.error("订单赠送优惠券异常", e);
@@ -129,7 +127,7 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
 
         try {
             //赠品潘迪ing
-            if (cartVO.getGiftList() != null && cartVO.getGiftList().size() > 0) {
+            if (cartVO.getGiftList() != null && !cartVO.getGiftList().isEmpty()) {
                 generatorGiftOrder(cartVO.getGiftList(), order);
             }
         } catch (Exception e) {

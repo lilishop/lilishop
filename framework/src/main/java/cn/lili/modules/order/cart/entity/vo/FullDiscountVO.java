@@ -4,6 +4,7 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.promotion.entity.dos.FullDiscount;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
  * @author Chopper
  * @since 2020-04-01 10:42 上午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class FullDiscountVO extends FullDiscount {
 
@@ -46,6 +48,9 @@ public class FullDiscountVO extends FullDiscount {
 
         if (Boolean.TRUE.equals(this.getIsPoint())) {
             stringBuffer.append(" 赠").append(this.getPoint()).append("积分 ");
+        }
+        if (Boolean.TRUE.equals(this.getIsCoupon())) {
+            stringBuffer.append(" 赠").append("优惠券 ");
         }
         if (Boolean.TRUE.equals(this.getIsGift() && giftSku != null)) {
             stringBuffer.append(" 赠品[").append(giftSku.getGoodsName()).append("]");
