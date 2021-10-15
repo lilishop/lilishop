@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.NotEmpty;
@@ -16,6 +17,7 @@ import javax.validation.constraints.NotNull;
  * @author Chopper
  * @since 2020-03-19 10:44 上午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("li_full_discount")
 @ApiModel(value = "满优惠活动")
