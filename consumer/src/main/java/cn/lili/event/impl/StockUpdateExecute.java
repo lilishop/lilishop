@@ -123,7 +123,8 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                 //获取订单详情
                 OrderDetailVO order = orderService.queryDetail(orderMessage.getOrderSn());
                 //判定是否已支付 并且 非库存不足导致库存回滚 则需要考虑订单库存返还业务
-                if (order.getOrder().getPayStatus().equals(PayStatusEnum.PAID.name()) && order.getOrder().getCancelReason().equals(outOfStockMessage)) {
+                if (order.getOrder().getPayStatus().equals(PayStatusEnum.PAID.name())
+                        && !order.getOrder().getCancelReason().equals(outOfStockMessage)) {
                     //库存key 和 还原数量
                     List<String> keys = new ArrayList<>();
                     List<String> values = new ArrayList<>();
