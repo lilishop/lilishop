@@ -61,6 +61,10 @@ https://docs.pickmall.cn
 
 **docker一键部署（商城部署脚本）**：https://github.com/hongyehuicheng/docker.git
 
+
+☃️ UI 项目下3个文件夹 buyer：买家PC端，seller：商家端，manager：后台管理端
+
+
 ### 💧 演示地址(手机验证码为 ‘111111’)
 
 **商城管理端**：https://admin-b2b2c.pickmall.cn 账号：admin/123456
