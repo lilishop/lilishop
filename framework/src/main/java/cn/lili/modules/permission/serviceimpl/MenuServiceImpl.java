@@ -48,8 +48,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             throw new ServiceException(ResultCode.PERMISSION_MENU_ROLE_ERROR);
         }
         this.removeByIds(ids);
-        //删除关联关系
-        roleMenuService.deleteRoleMenu(ids);
     }
 
 
