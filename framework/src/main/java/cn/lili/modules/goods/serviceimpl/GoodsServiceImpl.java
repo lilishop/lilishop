@@ -13,7 +13,6 @@ import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
@@ -128,9 +127,23 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         updateGoodsMarketAble(list, GoodsStatusEnum.DOWN, "店铺关闭");
     }
 
+    /**
+     * 更新商品参数
+     *
+     * @param goodsId 商品id
+     * @param params  商品参数
+     */
+    @Override
+    public void updateGoodsParams(String goodsId, String params) {
+        LambdaUpdateWrapper<Goods> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(Goods::getId, goodsId);
+        updateWrapper.set(Goods::getParams, params);
+        this.update(updateWrapper);
+    }
+
     @Override
     public final Integer getGoodsCountByCategory(String categoryId) {
-        QueryWrapper queryWrapper = Wrappers.query();
+        QueryWrapper<Goods> queryWrapper = Wrappers.query();
         queryWrapper.like("category_path", categoryId);
         queryWrapper.eq("delete_flag", false);
         return this.count(queryWrapper);
@@ -223,7 +236,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         goodsVO.setCategoryName(categoryName);
 
         //参数非空则填写参数
-        if (StringUtils.isNotEmpty(goods.getParams())) {
+        if (CharSequenceUtil.isNotEmpty(goods.getParams())) {
             goodsVO.setGoodsParamsDTOList(JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class));
         }
 

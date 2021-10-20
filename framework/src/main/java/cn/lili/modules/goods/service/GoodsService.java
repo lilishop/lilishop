@@ -28,6 +28,14 @@ public interface GoodsService extends IService<Goods> {
     void underStoreGoods(String storeId);
 
     /**
+     * 更新商品参数
+     *
+     * @param goodsId 商品id
+     * @param params 商品参数
+     */
+    void updateGoodsParams(String goodsId, String params);
+
+    /**
      * 获取某分类下的商品数量
      *
      * @param categoryId 分类ID

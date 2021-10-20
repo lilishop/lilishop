@@ -128,7 +128,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 ReflectUtil.setFieldValue(goodsIndex, entry.getValue(), fieldValue);
             }
         }
-        goodsIndexRepository.save(goods);
+        goodsIndexRepository.save(goodsIndex);
     }
 
     /**

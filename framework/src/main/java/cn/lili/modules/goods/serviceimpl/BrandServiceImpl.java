@@ -3,8 +3,6 @@ package cn.lili.modules.goods.serviceimpl;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.goods.service.CategoryService;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.modules.goods.entity.dos.Brand;
 import cn.lili.modules.goods.entity.dos.CategoryBrand;
 import cn.lili.modules.goods.entity.dto.BrandPageDTO;
@@ -12,6 +10,8 @@ import cn.lili.modules.goods.entity.vos.BrandVO;
 import cn.lili.modules.goods.mapper.BrandMapper;
 import cn.lili.modules.goods.service.BrandService;
 import cn.lili.modules.goods.service.CategoryBrandService;
+import cn.lili.modules.goods.service.CategoryService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -96,9 +96,7 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
 
     @Override
     public void deleteBrands(List<String> ids) {
-        ids.forEach(id -> {
-            checkoutCategory(id);
-        });
+        ids.forEach(this::checkoutCategory);
         this.removeByIds(ids);
     }
 
@@ -112,9 +110,7 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
         //分了绑定关系查询
         List<CategoryBrand> categoryBrands = categoryBrandService.getCategoryBrandListByBrandId(brandId);
         if (!categoryBrands.isEmpty()) {
-            List<String> brandIds = categoryBrands.stream().map(categoryBrand -> {
-                return categoryBrand.getCategoryId();
-            }).collect(Collectors.toList());
+            List<String> brandIds = categoryBrands.stream().map(CategoryBrand::getCategoryId).collect(Collectors.toList());
             throw new ServiceException(ResultCode.BRAND_USE_DISABLE_ERROR,
                     JSONUtil.toJsonStr(categoryService.getCategoryNameByIds(brandIds)));
         }
