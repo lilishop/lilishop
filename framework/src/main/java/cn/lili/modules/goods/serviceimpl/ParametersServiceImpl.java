@@ -15,7 +15,6 @@ import cn.lili.modules.goods.service.ParametersService;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,6 @@ public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Paramet
 
     @Autowired
     private GoodsService goodsService;
-
 
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
@@ -70,10 +68,7 @@ public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Paramet
             List<GoodsParamsDTO> goodsParamsDTOS = JSONUtil.toList(params, GoodsParamsDTO.class);
             List<GoodsParamsDTO> goodsParamsDTOList = goodsParamsDTOS.stream().filter(i -> i.getGroupId() != null && i.getGroupId().equals(parameters.getGroupId())).collect(Collectors.toList());
             this.setGoodsItemDTOList(goodsParamsDTOList, parameters);
-            LambdaUpdateWrapper<Goods> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(Goods::getId, goods.get("id"));
-            updateWrapper.set(Goods::getParams, JSONUtil.toJsonStr(goodsParamsDTOS));
-            this.goodsService.update(updateWrapper);
+            this.goodsService.updateGoodsParams(goods.get("id").toString(), JSONUtil.toJsonStr(goodsParamsDTOS));
             goodsIds.add(goods.get("id").toString());
         }
 
