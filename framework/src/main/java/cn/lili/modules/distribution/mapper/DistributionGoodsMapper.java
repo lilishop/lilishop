@@ -46,7 +46,7 @@ public interface DistributionGoodsMapper extends BaseMapper<DistributionGoods> {
      * @param queryWrapper 查询条件
      * @return 分销商品VO分页
      */
-    @Select("SELECT dg.* FROM li_distribution_goods dg LEFT JOIN li_distribution_selected_goods dsg ON dg.id = dsg.distribution_goods_id ${ew.customSqlSegment}")
+    @Select("SELECT dg.* FROM li_distribution_goods dg ${ew.customSqlSegment}")
     IPage<DistributionGoodsVO> getDistributionGoodsVO(IPage<DistributionGoodsVO> page, @Param(Constants.WRAPPER) Wrapper<DistributionGoodsVO> queryWrapper);
 
 }
