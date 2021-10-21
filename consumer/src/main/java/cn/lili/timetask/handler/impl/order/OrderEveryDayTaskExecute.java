@@ -99,13 +99,14 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
      */
     private void completedOrder(OrderSetting orderSetting) {
 
+
         //订单自动收货时间 = 当前时间 - 自动收货时间天数
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getAutoReceive());
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Order::getOrderStatus, OrderStatusEnum.DELIVERED.name());
 
         //订单发货时间 >= 订单自动收货时间
-        queryWrapper.ge(Order::getLogisticsTime, receiveTime);
+        queryWrapper.le(Order::getLogisticsTime, receiveTime);
         List<Order> list = orderService.list(queryWrapper);
 
         //判断是否有符合条件的订单，进行订单完成处理
@@ -128,7 +129,7 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
         //订单完成时间 <= 订单自动好评时间
         QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.ge("o.complete_time", receiveTime);
+        queryWrapper.le("o.complete_time", receiveTime);
         queryWrapper.eq("oi.comment_status", CommentStatusEnum.UNFINISHED.name());
         List<OrderItem> orderItems = orderItemMapper.waitOperationOrderItem(queryWrapper);
 
