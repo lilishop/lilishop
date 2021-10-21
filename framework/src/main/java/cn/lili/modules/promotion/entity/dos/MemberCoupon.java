@@ -111,7 +111,7 @@ public class MemberCoupon extends BaseEntity {
         setScopeType(coupon.getScopeType());
         setScopeId(coupon.getScopeId());
         setCouponType(coupon.getCouponType());
-        setStartTime(coupon.getStartTime());
+        setStartTime(coupon.getStartTime() == null ? new Date() : coupon.getStartTime());
 
         setGetType(coupon.getGetType());
         setStoreCommission(coupon.getStoreCommission());
