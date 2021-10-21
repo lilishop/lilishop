@@ -9,13 +9,13 @@ import lombok.NoArgsConstructor;
 
 
 /**
- * 直播商品
+ * 直播间商品
  *
  * @author Bulbasaur
  * @since 2021/5/18 5:42 下午
  */
 @Data
-@ApiModel(value = "直播商品")
+@ApiModel(value = "直播间商品")
 @TableName("li_studio_commodity")
 @NoArgsConstructor
 public class StudioCommodity extends BaseIdEntity {
