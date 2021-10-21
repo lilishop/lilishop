@@ -112,7 +112,7 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         if (!list.isEmpty()) {
             List<String> receiveSnList = list.stream().map(Order::getSn).collect(Collectors.toList());
             for (String orderSn : receiveSnList) {
-                orderService.complete(orderSn);
+                orderService.systemComplete(orderSn);
             }
         }
     }
