@@ -164,7 +164,7 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
         //关闭售后订单=未售后订单+小于订单关闭售后申请时间
         QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.ge("o.complete_time", receiveTime);
+        queryWrapper.le("o.complete_time", receiveTime);
         queryWrapper.eq("oi.after_sale_status", OrderItemAfterSaleStatusEnum.NOT_APPLIED.name());
         List<OrderItem> orderItems = orderItemMapper.waitOperationOrderItem(queryWrapper);
 
@@ -195,7 +195,7 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
         //关闭售后订单=未售后订单+小于订单关闭售后申请时间
         QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.ge("o.complete_time", receiveTime);
+        queryWrapper.le("o.complete_time", receiveTime);
         queryWrapper.eq("oi.complain_status", OrderComplaintStatusEnum.NO_APPLY.name());
         List<OrderItem> orderItems = orderItemMapper.waitOperationOrderItem(queryWrapper);
 
