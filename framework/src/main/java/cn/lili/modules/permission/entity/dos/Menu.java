@@ -21,17 +21,18 @@ public class Menu extends BaseEntity {
 
     private static final long serialVersionUID = 7050744476203495207L;
 
-    @ApiModelProperty(value = "菜单名称")
-    private String name;
-
-    @ApiModelProperty(value = "菜单层级")
-    private Integer level;
 
     @ApiModelProperty(value = "菜单标题")
     private String title;
 
+    @ApiModelProperty(value = "路由名称")
+    private String name;
+
     @ApiModelProperty(value = "路径")
     private String path;
+
+    @ApiModelProperty(value = "菜单层级")
+    private Integer level;
 
     @ApiModelProperty(value = "前端目录文件")
     private String frontRoute;
