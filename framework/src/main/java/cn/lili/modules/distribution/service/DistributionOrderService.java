@@ -27,7 +27,7 @@ public interface DistributionOrderService extends IService<DistributionOrder> {
      *
      * @param orderSn 订单编号
      */
-    void payOrder(String orderSn);
+    void calculationDistribution(String orderSn);
 
     /**
      * 取消订单

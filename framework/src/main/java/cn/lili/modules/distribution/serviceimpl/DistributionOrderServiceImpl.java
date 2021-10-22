@@ -79,7 +79,7 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
      * @param orderSn 订单编号
      */
     @Override
-    public void payOrder(String orderSn) {
+    public void calculationDistribution(String orderSn) {
 
         //根据订单编号获取订单数据
         Order order = orderService.getBySn(orderSn);
@@ -160,6 +160,10 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
             List<DistributionOrder> distributionOrderList = this.list(new LambdaQueryWrapper<DistributionOrder>()
                     .eq(DistributionOrder::getOrderSn, orderSn));
 
+            //如果没有分销定单，则直接返回
+            if (distributionOrderList.isEmpty()) {
+                return;
+            }
             //分销金额
             Double rebate = 0.0;
 
