@@ -604,11 +604,8 @@ public class CartServiceImpl implements CartService {
             //如果是平台优惠券
             if (memberCoupon.getIsPlatform()) {
                 tradeDTO.setPlatformCoupon(new MemberCouponDTO(skuPrice, memberCoupon));
-                //选择平台优惠券，则将品台优惠券清空
-                tradeDTO.setStoreCoupons(new HashMap<>(16));
             } else {
                 tradeDTO.getStoreCoupons().put(memberCoupon.getStoreId(), new MemberCouponDTO(skuPrice, memberCoupon));
-
             }
         }
 
