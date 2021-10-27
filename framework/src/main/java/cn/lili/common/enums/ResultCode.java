@@ -154,7 +154,7 @@ public enum ResultCode {
      * 购物车
      */
     CART_ERROR(30001, "读取结算页的购物车异常"),
-    CART_PINTUAN_NOT_EXIST_ERROR(30002, "拼团活动不存在错误"),
+    CART_PINTUAN_NOT_EXIST_ERROR(30002, "拼团活动已关闭，请稍后重试"),
     CART_PINTUAN_LIMIT_ERROR(30003, "购买数量超过拼团活动限制数量"),
     SHIPPING_NOT_APPLY(30005, "购物商品不支持当前收货地址配送"),
 
@@ -449,9 +449,7 @@ public enum ResultCode {
     CUSTOM_WORDS_SECRET_KEY_ERROR(90002, "秘钥验证失败！"),
     CONNECT_NOT_EXIST(90000, "登录方式不存在！"),
     ELASTICSEARCH_INDEX_INIT_ERROR(90003, "索引初始化失败！"),
-    PURCHASE_ORDER_DEADLINE_ERROR(90004,"供求单，已超过报名截止时间")
-
-    ;
+    PURCHASE_ORDER_DEADLINE_ERROR(90004, "供求单，已超过报名截止时间");
 
     private final Integer code;
     private final String message;
