@@ -159,7 +159,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
 
                 String categoryNamePath = categoryPath;
-                if (!categoryBuckets.isEmpty()) {
+                if (!categoryNameBuckets.isEmpty()) {
                     categoryNamePath = categoryNameBuckets.get(0).getKey().toString();
                 }
                 String[] split = ArrayUtil.distinct(categoryPath.split(","));
@@ -187,6 +187,10 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         if (brandBuckets != null && !brandBuckets.isEmpty()) {
             for (int i = 0; i < brandBuckets.size(); i++) {
                 String brandId = brandBuckets.get(i).getKey().toString();
+                //当商品品牌id为0时，代表商品没有选择品牌，所以过滤掉品牌选择器
+                if (brandId.equals("0")) {
+                    continue;
+                }
                 if (CharSequenceUtil.isNotEmpty(goodsSearch.getBrandId())) {
                     List<String> brandList = Arrays.asList(goodsSearch.getBrandId().split("@"));
                     if (brandList.contains(brandId)) {
