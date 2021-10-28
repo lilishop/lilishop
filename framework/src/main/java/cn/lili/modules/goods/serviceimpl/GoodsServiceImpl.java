@@ -120,6 +120,13 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     private Cache<GoodsVO> cache;
 
     @Override
+    public List<Goods> getByBrandIds(List<String> brandIds) {
+        LambdaQueryWrapper<Goods> lambdaQueryWrapper = new LambdaQueryWrapper<Goods> ();
+        lambdaQueryWrapper.in(Goods::getBrandId,brandIds);
+        return list(lambdaQueryWrapper);
+    }
+
+    @Override
     public void underStoreGoods(String storeId) {
         //获取商品ID列表
         List<String> list = this.baseMapper.getGoodsIdByStoreId(storeId);

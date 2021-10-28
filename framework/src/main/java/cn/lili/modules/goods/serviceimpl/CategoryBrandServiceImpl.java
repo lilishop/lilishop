@@ -36,8 +36,8 @@ public class CategoryBrandServiceImpl extends ServiceImpl<CategoryBrandMapper, C
     }
 
     @Override
-    public List<CategoryBrand> getCategoryBrandListByBrandId(String brandId) {
-        return this.list(new LambdaQueryWrapper<CategoryBrand>().eq(CategoryBrand::getBrandId, brandId));
+    public List<CategoryBrand> getCategoryBrandListByBrandId(List<String> brandId) {
+        return this.list(new LambdaQueryWrapper<CategoryBrand>().in(CategoryBrand::getBrandId, brandId));
     }
 
     @Override

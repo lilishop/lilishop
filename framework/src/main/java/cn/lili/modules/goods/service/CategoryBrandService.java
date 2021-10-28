@@ -35,7 +35,7 @@ public interface CategoryBrandService extends IService<CategoryBrand> {
      * @param brandId 品牌ID
      * @return 分类品牌关联信息
      */
-    List<CategoryBrand> getCategoryBrandListByBrandId(String brandId);
+    List<CategoryBrand> getCategoryBrandListByBrandId(List<String> brandId);
 
     /**
      * 保存分类品牌关系
