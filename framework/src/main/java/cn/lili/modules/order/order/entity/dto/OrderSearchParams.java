@@ -99,8 +99,7 @@ public class OrderSearchParams extends PageVO {
 
         //关键字查询
         if (StrUtil.isNotEmpty(keywords)) {
-            wrapper.like("o.sn", keywords);
-            wrapper.like("oi.goods_name", keywords);
+            wrapper.like("o.sn", keywords).or().like("oi.goods_name", keywords);
         }
         //按卖家查询
         wrapper.eq(StrUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()), "o.store_id", UserContext.getCurrentUser().getStoreId());
