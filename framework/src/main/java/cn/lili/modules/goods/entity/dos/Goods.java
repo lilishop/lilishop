@@ -41,7 +41,7 @@ public class Goods extends BaseEntity {
 
     @ApiModelProperty(value = "商品名称")
     @NotEmpty(message = "商品名称不能为空")
-    @Length(max = 100, message = "商品名称提案仓，不能超过100个字符")
+    @Length(max = 100, message = "商品名称太长，不能超过100个字符")
     private String goodsName;
 
     @ApiModelProperty(value = "商品价格", required = true)
