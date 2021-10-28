@@ -6,6 +6,7 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Brand;
@@ -53,100 +54,16 @@ public class ElasticsearchController {
     private EsGoodsIndexService esGoodsIndexService;
 
     @Autowired
-    private GoodsSkuService goodsSkuService;
-
-    @Autowired
-    private GoodsService goodsService;
-
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-
-    @Autowired
-    private PromotionService promotionService;
-
-    @Autowired
-    private CategoryService categoryService;
-
-    @Autowired
-    private BrandService brandService;
-
-    @Autowired
-    private StoreGoodsLabelService storeGoodsLabelService;
-
-    @Autowired
     private Cache cache;
 
     @GetMapping
     public ResultMessage<String> init() {
-
-        Boolean flag = (Boolean) cache.get(CachePrefix.INIT_INDEX_FLAG.getPrefix());
-        if (flag == null) {
-            cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false);
-        }
-        if (Boolean.TRUE.equals(flag)) {
-            return ResultUtil.error(100000, "当前有任务在执行");
-        }
-
-        cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), null);
-        cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), true);
-        ThreadUtil.execAsync(() -> {
-            try {
-                //查询商品信息
-                LambdaQueryWrapper<GoodsSku> queryWrapper = new LambdaQueryWrapper<>();
-                queryWrapper.eq(GoodsSku::getIsAuth, GoodsAuthEnum.PASS.name());
-                queryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
-
-                List<GoodsSku> list = goodsSkuService.list(queryWrapper);
-                List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
-                //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
-                for (GoodsSku goodsSku : list) {
-                    Goods goods = goodsService.getById(goodsSku.getGoodsId());
-                    EsGoodsIndex index = new EsGoodsIndex(goodsSku);
-                    if (goods.getParams() != null && !goods.getParams().isEmpty()) {
-                        List<GoodsParamsDTO> goodsParamDTOS = JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class);
-                        index = new EsGoodsIndex(goodsSku, goodsParamDTOS);
-                    }
-                    if (goods.getCategoryPath() != null) {
-                        List<Category> categories = categoryService.listByIdsOrderByLevel(Arrays.asList(goods.getCategoryPath().split(",")));
-                        if (!categories.isEmpty()) {
-                            index.setCategoryNamePath(ArrayUtil.join(categories.stream().map(Category::getName).toArray(), ","));
-                        }
-                    }
-                    Brand brand = brandService.getById(goods.getBrandId());
-                    if (brand != null) {
-                        index.setBrandName(brand.getName());
-                        index.setBrandUrl(brand.getLogo());
-                    }
-                    if (goods.getStoreCategoryPath() != null && CharSequenceUtil.isNotEmpty(goods.getStoreCategoryPath())) {
-                        List<StoreGoodsLabel> storeGoodsLabels = storeGoodsLabelService.listByStoreIds(Arrays.asList(goods.getStoreCategoryPath().split(",")));
-                        if (!storeGoodsLabels.isEmpty()) {
-                            index.setStoreCategoryNamePath(ArrayUtil.join(storeGoodsLabels.stream().map(StoreGoodsLabel::getLabelName).toArray(), ","));
-                        }
-                    }
-                    Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
-                    index.setPromotionMap(goodsCurrentPromotionMap);
-                    esGoodsIndices.add(index);
-                    stringRedisTemplate.opsForValue().set(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity().toString());
-                }
-                //初始化商品索引
-                esGoodsIndexService.initIndex(esGoodsIndices);
-            } catch (Exception e) {
-                cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), null);
-                cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false);
-            }
-        });
+        esGoodsIndexService.init();
         return ResultUtil.success();
     }
 
     @GetMapping("/progress")
     public ResultMessage<Map<String, Integer>> getProgress() {
-        try {
-            Map<String, Integer> map = (Map<String, Integer>) cache.get(CachePrefix.INIT_INDEX_PROCESS.getPrefix());
-            Boolean flag = (Boolean) cache.get(CachePrefix.INIT_INDEX_FLAG.getPrefix());
-            map.put("flag", Boolean.TRUE.equals(flag) ? 1 : 0);
-            return ResultUtil.data(map);
-        } catch (Exception e) {
-            return ResultUtil.data(null);
-        }
+        return ResultUtil.data(esGoodsIndexService.getProgress());
     }
 }

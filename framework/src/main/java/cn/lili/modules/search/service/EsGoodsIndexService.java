@@ -19,6 +19,16 @@ import java.util.Map;
 public interface EsGoodsIndexService {
 
     /**
+     * 全局索引初始化
+     */
+    void init();
+
+    /**
+     * 获取es生成索引进度
+     * @return
+     */
+    Map<String, Integer> getProgress();
+    /**
      * 添加商品索引
      *
      * @param goods 商品索引信息
