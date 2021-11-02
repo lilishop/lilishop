@@ -204,7 +204,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         Integer integer = (Integer) cache.get(GoodsSkuService.getStockCacheKey(id));
 
         //库存不为空
-        if (integer == null) {
+        if (integer != null) {
             //库存与缓存中不一致，
             if (!goodsSku.getQuantity().equals(integer)) {
                 //写入最新的库存信息
