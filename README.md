@@ -43,21 +43,21 @@ https://docs.pickmall.cn
 
 ### 💧 开源商城项目地址(gitee)
 
-**Java后台（商城所有API）**：https://gitee.com/beijing_hongye_huicheng/lilishop.git
+**API（商城所有API）**：https://gitee.com/beijing_hongye_huicheng/lilishop.git
 
 **UI（商城管理端/商家端/买家PC端）**： https://gitee.com/beijing_hongye_huicheng/lilishop-ui.git
 
-**Uni-app（商城移动端，支持小程序/APP/H5）**：https://gitee.com/beijing_hongye_huicheng/lilishop-uniapp.git
+**uniapp（商城移动端，支持小程序/APP/H5）**：https://gitee.com/beijing_hongye_huicheng/lilishop-uniapp.git
 
 **docker一键部署（商城部署脚本）**：https://gitee.com/beijing_hongye_huicheng/docker.git
 
 ### 💧 开源商城项目地址(github)
 
-**Java后台（商城所有API）**：https://github.com/hongyehuicheng/lilishop.git
+**API（商城所有API）**：https://github.com/hongyehuicheng/lilishop.git
 
 **UI（商城管理端/商家端/买家PC端）**： https://github.com/hongyehuicheng/lilishop-ui.git
 
-**Uni-app（商城移动端，支持小程序/APP/H5）**：https://github.com/hongyehuicheng/lilishop-uniapp.git
+**uniapp（商城移动端，支持小程序/APP/H5）**：https://github.com/hongyehuicheng/lilishop-uniapp.git
 
 **docker一键部署（商城部署脚本）**：https://github.com/hongyehuicheng/docker.git
 
