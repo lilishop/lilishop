@@ -167,7 +167,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                     Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
                     index.setPromotionMap(goodsCurrentPromotionMap);
                     esGoodsIndices.add(index);
-                    cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity().toString());
+                    cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
                 }
                 //初始化商品索引
                 this.initIndex(esGoodsIndices);
