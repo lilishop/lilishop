@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 购物车视图
@@ -146,5 +147,17 @@ public class TradeDTO implements Serializable {
 
     public TradeDTO() {
         this(CartTypeEnum.CART);
+    }
+
+    /**
+     * 过滤购物车中已选择的sku
+     *
+     * @return
+     */
+    public List<CartSkuVO> getCheckedSkuList() {
+        if (skuList != null && !skuList.isEmpty()) {
+            return skuList.stream().filter(CartSkuVO::getChecked).collect(Collectors.toList());
+        }
+        return skuList;
     }
 }
