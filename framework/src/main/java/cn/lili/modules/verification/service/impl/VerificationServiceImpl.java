@@ -139,7 +139,7 @@ public class VerificationServiceImpl implements VerificationService {
         }
         log.debug("{}{}", randomX, xPos);
         //验证结果正确 && 删除标记成功
-        if (Math.abs(randomX - xPos) < verificationCodeProperties.getFaultTolerant() && cache.remove(cacheResult(verificationEnums, uuid))) {
+        if (Math.abs(randomX - xPos) < verificationCodeProperties.getFaultTolerant() && cache.remove(cacheKey(verificationEnums, uuid))) {
             //验证成功，则记录验证结果 验证有效时间与验证码创建有效时间一致
             cache.put(cacheResult(verificationEnums, uuid), true, verificationCodeProperties.getEffectiveTime());
             return true;
