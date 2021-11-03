@@ -18,7 +18,6 @@ import cn.lili.modules.order.cart.entity.dto.MemberCouponDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
-import cn.lili.modules.order.cart.entity.enums.TradeCacheEnum;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.entity.vo.TradeParams;
@@ -37,7 +36,6 @@ import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivitySearchParams;
 import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
-import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -204,17 +202,12 @@ public class CartServiceImpl implements CartService {
      */
     private String getOriginKey(CartTypeEnum cartTypeEnum) {
 
-        String cacheKey = "";
-        //如果会员登录了，则要以会员id为key
-        AuthUser currentUser = UserContext.getCurrentUser();
-        if (cartTypeEnum.equals(CartTypeEnum.CART)) {
-            cacheKey = TradeCacheEnum.CART_DATA.getPrefix() + currentUser.getId();
-        } else if (cartTypeEnum.equals(CartTypeEnum.BUY_NOW)) {
-            cacheKey = TradeCacheEnum.BUY_NOW_CART_DATA.getPrefix() + currentUser.getId();
-        } else if (cartTypeEnum.equals(CartTypeEnum.PINTUAN)) {
-            cacheKey = TradeCacheEnum.PINTUAN.getPrefix() + currentUser.getId();
+        //缓存key，默认使用购物车
+        if (cartTypeEnum != null) {
+            AuthUser currentUser = UserContext.getCurrentUser();
+            return cartTypeEnum.getPrefix() + currentUser.getId();
         }
-        return cacheKey;
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @Override
