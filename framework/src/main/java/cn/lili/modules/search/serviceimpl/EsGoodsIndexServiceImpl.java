@@ -542,8 +542,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 goodsWords.setSort(0);
                 goodsWordsService.save(goodsWords);
             }
-        } catch (MyBatisSystemException e) {
+        } catch (MyBatisSystemException me) {
             log.error(words + "关键字已存在！");
+        } catch (Exception e) {
+            log.error("关键字入库异常！", e);
         }
     }
 

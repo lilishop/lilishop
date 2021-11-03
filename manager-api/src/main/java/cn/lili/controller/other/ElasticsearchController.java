@@ -26,6 +26,7 @@ import cn.lili.modules.store.entity.dos.StoreGoodsLabel;
 import cn.lili.modules.store.service.StoreGoodsLabelService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.annotations.Api;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,6 +48,7 @@ import java.util.Map;
 @RestController
 @Api(tags = "ES初始化接口")
 @RequestMapping("/manager/elasticsearch")
+@Slf4j
 public class ElasticsearchController {
 
     @Autowired
@@ -133,6 +135,7 @@ public class ElasticsearchController {
             } catch (Exception e) {
                 cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), null);
                 cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false);
+                log.error("初始化索引异常", e);
             }
         });
         return ResultUtil.success();
