@@ -339,7 +339,7 @@ public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> impl
         int sameNum = this.count(queryWrapper);
         //当前时间段是否存在同类活动
         if (sameNum > 0) {
-            throw new ServiceException("当前时间内已存在同类活动:" + seckill.getStartTime());
+            throw new ServiceException(ResultCode.PROMOTION_SAME_ACTIVE_EXIST);
         }
     }
 }

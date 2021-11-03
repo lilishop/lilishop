@@ -11,13 +11,13 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.order.cart.entity.dto.MemberCouponDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
-import cn.lili.modules.order.cart.entity.enums.TradeCacheEnum;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.entity.vo.TradeParams;
@@ -92,6 +92,11 @@ public class CartServiceImpl implements CartService {
      */
     @Autowired
     private EsGoodsSearchService esGoodsSearchService;
+    /**
+     * ES商品
+     */
+    @Autowired
+    private GoodsService goodsService;
     /**
      * 拼团
      */
@@ -197,17 +202,12 @@ public class CartServiceImpl implements CartService {
      */
     private String getOriginKey(CartTypeEnum cartTypeEnum) {
 
-        String cacheKey = "";
-        //如果会员登录了，则要以会员id为key
-        AuthUser currentUser = UserContext.getCurrentUser();
-        if (cartTypeEnum.equals(CartTypeEnum.CART)) {
-            cacheKey = TradeCacheEnum.CART_DATA.getPrefix() + currentUser.getId();
-        } else if (cartTypeEnum.equals(CartTypeEnum.BUY_NOW)) {
-            cacheKey = TradeCacheEnum.BUY_NOW_CART_DATA.getPrefix() + currentUser.getId();
-        } else if (cartTypeEnum.equals(CartTypeEnum.PINTUAN)) {
-            cacheKey = TradeCacheEnum.PINTUAN.getPrefix() + currentUser.getId();
+        //缓存key，默认使用购物车
+        if (cartTypeEnum != null) {
+            AuthUser currentUser = UserContext.getCurrentUser();
+            return cartTypeEnum.getPrefix() + currentUser.getId();
         }
-        return cacheKey;
+        throw new ServiceException(ResultCode.ERROR);
     }
 
     @Override
@@ -689,6 +689,8 @@ public class CartServiceImpl implements CartService {
             cartSkuVO.setUtilPrice(promotionGoods.getPrice());
             cartSkuVO.setPurchasePrice(promotionGoods.getPrice());
         } else {
+            //如果拼团活动被异常处理，则在这里安排mq重新写入商品索引
+            goodsSkuService.generateEs(goodsService.getById(cartSkuVO.getGoodsSku().getGoodsId()));
             throw new ServiceException(ResultCode.CART_PINTUAN_NOT_EXIST_ERROR);
         }
         //检测拼团限购数量

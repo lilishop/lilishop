@@ -103,7 +103,7 @@ public class CouponRender implements CartRenderStep {
         if (memberCoupon == null) {
             return;
         }
-        List<CartSkuVO> filterSku = filterSkuVo(tradeDTO.getSkuList(), memberCoupon);
+        List<CartSkuVO> filterSku = filterSkuVo(tradeDTO.getCheckedSkuList(), memberCoupon);
         if (filterSku == null || filterSku.isEmpty()) {
             tradeDTO.getCantUseCoupons().add(new MemberCouponVO(memberCoupon,
                     "购物车中没有满足优惠券使用范围的优惠券"));

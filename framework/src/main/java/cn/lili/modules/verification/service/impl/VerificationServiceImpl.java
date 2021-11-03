@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
@@ -51,7 +50,7 @@ public class VerificationServiceImpl implements VerificationService {
      * @return 验证码参数
      */
     @Override
-    public Map<String, Object> createVerification(VerificationEnums verificationEnums, String uuid) throws IOException {
+    public Map<String, Object> createVerification(VerificationEnums verificationEnums, String uuid) {
 
         if (uuid == null) {
             throw new ServiceException(ResultCode.ILLEGAL_REQUEST_ERROR);
@@ -97,8 +96,7 @@ public class VerificationServiceImpl implements VerificationService {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            log.error("创建校验错误", e);
-            return null;
+            throw new ServiceException(ResultCode.ERROR);
         }
     }
 
@@ -136,16 +134,16 @@ public class VerificationServiceImpl implements VerificationService {
     public boolean preCheck(Integer xPos, String uuid, VerificationEnums verificationEnums) {
         Integer randomX = (Integer) cache.get(cacheKey(verificationEnums, uuid));
         if (randomX == null) {
-            return false;
+            throw new ServiceException(ResultCode.VERIFICATION_CODE_INVALID);
         }
         log.debug("{}{}", randomX, xPos);
-        //验证结果
-        if (Math.abs(randomX - xPos) < verificationCodeProperties.getFaultTolerant()) {
+        //验证结果正确 && 删除标记成功
+        if (Math.abs(randomX - xPos) < verificationCodeProperties.getFaultTolerant() && cache.remove(cacheKey(verificationEnums, uuid))) {
             //验证成功，则记录验证结果 验证有效时间与验证码创建有效时间一致
             cache.put(cacheResult(verificationEnums, uuid), true, verificationCodeProperties.getEffectiveTime());
             return true;
         }
-        return false;
+        throw new ServiceException(ResultCode.VERIFICATION_ERROR);
     }
 
     /**
@@ -157,13 +155,11 @@ public class VerificationServiceImpl implements VerificationService {
      */
     @Override
     public boolean check(String uuid, VerificationEnums verificationEnums) {
-        Object object = cache.get(cacheResult(verificationEnums, uuid));
-        if (object == null) {
-            return false;
-        } else {
-            cache.remove(cacheResult(verificationEnums, uuid));
+        //如果有校验标记，则返回校验结果
+        if (cache.remove(cacheResult(verificationEnums, uuid))) {
             return true;
         }
+        throw new ServiceException(ResultCode.VERIFICATION_CODE_INVALID);
     }
 
     /**

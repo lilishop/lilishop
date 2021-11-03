@@ -43,7 +43,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,7 +63,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      * 缓存
      */
     @Autowired
-    private Cache<GoodsSku> cache;
+    private Cache cache;
     /**
      * 分类
      */
@@ -75,11 +74,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      */
     @Autowired
     private GoodsGalleryService goodsGalleryService;
-    /**
-     * 缓存
-     */
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
     /**
      * rocketMq
      */
@@ -195,7 +189,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     public GoodsSku getGoodsSkuByIdFromCache(String id) {
         //获取缓存中的sku
-        GoodsSku goodsSku = cache.get(GoodsSkuService.getCacheKeys(id));
+        GoodsSku goodsSku = (GoodsSku) cache.get(GoodsSkuService.getCacheKeys(id));
         //如果缓存中没有信息，则查询数据库，然后写入缓存
         if (goodsSku == null) {
             goodsSku = this.getById(id);
@@ -206,14 +200,14 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
 
         //获取商品库存
-        String quantity = stringRedisTemplate.opsForValue().get(GoodsSkuService.getStockCacheKey(id));
+        Integer integer = (Integer) cache.get(GoodsSkuService.getStockCacheKey(id));
 
         //库存不为空
-        if (StrUtil.isNotEmpty(quantity)) {
+        if (integer != null) {
             //库存与缓存中不一致，
-            if (!goodsSku.getQuantity().equals(Convert.toInt(quantity))) {
+            if (!goodsSku.getQuantity().equals(integer)) {
                 //写入最新的库存信息
-                goodsSku.setQuantity(Convert.toInt(quantity));
+                goodsSku.setQuantity(integer);
                 cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
             }
         }
@@ -408,7 +402,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             goodsSku.setQuantity(quantity);
             this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
             cache.put(GoodsSkuService.getCacheKeys(skuId), goodsSku);
-            stringRedisTemplate.opsForValue().set(GoodsSkuService.getStockCacheKey(skuId), quantity.toString());
+            cache.put(GoodsSkuService.getStockCacheKey(skuId), quantity);
 
             //更新商品库存
             List<GoodsSku> goodsSkus = new ArrayList<>();
@@ -420,12 +414,12 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     public Integer getStock(String skuId) {
         String cacheKeys = GoodsSkuService.getStockCacheKey(skuId);
-        String stockStr = stringRedisTemplate.opsForValue().get(cacheKeys);
-        if (stockStr != null) {
-            return Convert.toInt(stockStr);
+        Integer stock = (Integer) cache.get(cacheKeys);
+        if (stock != null) {
+            return stock;
         } else {
             GoodsSku goodsSku = getGoodsSkuByIdFromCache(skuId);
-            stringRedisTemplate.opsForValue().set(cacheKeys, goodsSku.getQuantity().toString());
+            cache.put(cacheKeys, goodsSku.getQuantity());
             return goodsSku.getQuantity();
         }
     }
@@ -497,7 +491,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      *
      * @param goods 商品信息
      */
-    private void generateEs(Goods goods) {
+    public void generateEs(Goods goods) {
         String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GENERATOR_GOODS_INDEX.name();
         //发送mq消息
         rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goods), RocketmqSendCallbackBuilder.commonCallback());
@@ -536,7 +530,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             }
             goodsSku.setGoodsType(goods.getGoodsType());
             skus.add(goodsSku);
-            stringRedisTemplate.opsForValue().set(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity().toString());
+            cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
         }
         this.saveBatch(skus);
         return skus;

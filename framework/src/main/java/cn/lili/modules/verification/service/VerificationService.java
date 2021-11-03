@@ -20,7 +20,7 @@ public interface VerificationService {
      * @return 校验对象
      * @throws IOException 校验错误
      */
-    Map<String, Object> createVerification(VerificationEnums verificationEnums, String uuid) throws IOException;
+    Map<String, Object> createVerification(VerificationEnums verificationEnums, String uuid);
 
     /**
      * 预校验

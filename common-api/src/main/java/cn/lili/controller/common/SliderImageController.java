@@ -1,12 +1,10 @@
 package cn.lili.controller.common;
 
 import cn.lili.cache.limit.annotation.LimitPoint;
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.verification.enums.VerificationEnums;
 import cn.lili.modules.verification.service.VerificationService;
-import cn.lili.common.vo.ResultMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -32,14 +30,8 @@ public class SliderImageController {
     @GetMapping("/{verificationEnums}")
     @ApiOperation(value = "获取校验接口,一分钟同一个ip请求10次")
     public ResultMessage getSliderImage(@RequestHeader String uuid, @PathVariable VerificationEnums verificationEnums) {
-        try {
-            return ResultUtil.data(verificationService.createVerification(verificationEnums, uuid));
-        } catch (ServiceException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("获取校验接口错误", e);
-            throw new ServiceException(ResultCode.VERIFICATION_EXIST);
-        }
+        return ResultUtil.data(verificationService.createVerification(verificationEnums, uuid));
+
     }
 
     @LimitPoint(name = "slider_image", key = "verification_pre_check", limit = 600)

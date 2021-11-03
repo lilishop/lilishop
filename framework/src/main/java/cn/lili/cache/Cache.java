@@ -89,7 +89,7 @@ public interface Cache<T> {
      *
      * @param key 缓存key
      */
-    void remove(Object key);
+    Boolean remove(Object key);
 
     /**
      * 删除

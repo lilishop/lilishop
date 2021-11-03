@@ -182,7 +182,6 @@ mybatis-plus:
 
 # 日志
 logging:
-  config: classpath:logback-spring.xml
   # 输出级别
   level:
     cn.lili: info
@@ -230,11 +229,11 @@ lili:
   system:
     isDemoSite: false
     isTestModel: true
-#     脱敏级别：
-#     0：不做脱敏处理
-#     1：管理端用户手机号等信息脱敏
-#     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
-#    sensitiveLevel: 2
+  #     脱敏级别：
+  #     0：不做脱敏处理
+  #     1：管理端用户手机号等信息脱敏
+  #     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
+  #    sensitiveLevel: 2
 
   statistics:
     # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数

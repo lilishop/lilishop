@@ -78,9 +78,9 @@ public class RedisCache implements Cache {
     }
 
     @Override
-    public void remove(Object key) {
+    public Boolean remove(Object key) {
 
-        redisTemplate.delete(key);
+       return redisTemplate.delete(key);
     }
 
     /**

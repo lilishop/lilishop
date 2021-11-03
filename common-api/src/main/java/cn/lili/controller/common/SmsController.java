@@ -2,12 +2,11 @@ package cn.lili.controller.common;
 
 import cn.lili.cache.limit.annotation.LimitPoint;
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.system.sms.SmsUtil;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.system.sms.SmsUtil;
 import cn.lili.modules.verification.enums.VerificationEnums;
 import cn.lili.modules.verification.service.VerificationService;
-import cn.lili.common.vo.ResultMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -42,11 +41,8 @@ public class SmsController {
             @RequestHeader String uuid,
             @PathVariable String mobile,
             @PathVariable VerificationEnums verificationEnums) {
-        if (verificationService.check(uuid, verificationEnums)) {
-            smsUtil.sendSmsCode(mobile, verificationEnums, uuid);
-            return ResultUtil.success(ResultCode.VERIFICATION_SEND_SUCCESS);
-        } else {
-            throw new ServiceException(ResultCode.VERIFICATION_SMS_EXPIRED_ERROR);
-        }
+        verificationService.check(uuid, verificationEnums);
+        smsUtil.sendSmsCode(mobile, verificationEnums, uuid);
+        return ResultUtil.success(ResultCode.VERIFICATION_SEND_SUCCESS);
     }
 }

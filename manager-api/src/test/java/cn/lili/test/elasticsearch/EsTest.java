@@ -2,6 +2,7 @@ package cn.lili.test.elasticsearch;
 
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.json.JSONUtil;
+import cn.lili.cache.Cache;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
@@ -22,7 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.elasticsearch.core.SearchPage;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.lang.reflect.Field;
@@ -52,7 +52,7 @@ class EsTest {
     private GoodsSkuService goodsSkuService;
 
     @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+    private Cache cache;
 
     @Autowired
     private PromotionService promotionService;
@@ -161,7 +161,7 @@ class EsTest {
             Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
             index.setPromotionMap(goodsCurrentPromotionMap);
             esGoodsIndices.add(index);
-            stringRedisTemplate.opsForValue().set(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity().toString());
+            cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
         }
         esGoodsIndexService.initIndex(esGoodsIndices);
         Assertions.assertTrue(true);

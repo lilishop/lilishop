@@ -33,4 +33,8 @@ public enum CartTypeEnum {
      */
     KANJIA;
 
+    public String getPrefix() {
+        return "{" + this.name() + "}_";
+    }
+
 }

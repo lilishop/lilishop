@@ -99,7 +99,8 @@ public enum ResultCode {
     BRAND_DISABLE_ERROR(14003, "品牌禁用失败"),
     BRAND_DELETE_ERROR(14004, "品牌删除失败"),
     BRAND_NAME_EXIST_ERROR(20002, "品牌名称重复！"),
-    BRAND_USE_DISABLE_ERROR(20003, "分类已经绑定此品牌，请先解除关联"),
+    BRAND_USE_DISABLE_ERROR(20003, "分类已经绑定品牌，请先解除关联"),
+    BRAND_BIND_GOODS_ERROR(20005, "品牌已经绑定商品，请先解除关联"),
     BRAND_NOT_EXIST(20004, "品牌不存在"),
 
     /**
@@ -154,7 +155,7 @@ public enum ResultCode {
      * 购物车
      */
     CART_ERROR(30001, "读取结算页的购物车异常"),
-    CART_PINTUAN_NOT_EXIST_ERROR(30002, "拼团活动不存在错误"),
+    CART_PINTUAN_NOT_EXIST_ERROR(30002, "拼团活动已关闭，请稍后重试"),
     CART_PINTUAN_LIMIT_ERROR(30003, "购买数量超过拼团活动限制数量"),
     SHIPPING_NOT_APPLY(30005, "购物商品不支持当前收货地址配送"),
 
@@ -240,7 +241,7 @@ public enum ResultCode {
      * 活动
      */
     PROMOTION_GOODS_NOT_EXIT(40000, "当前促销商品不存在！"),
-    PROMOTION_SAME_ACTIVE_EXIST(40001, "当前时间内已存在同类活动"),
+    PROMOTION_SAME_ACTIVE_EXIST(40001, "活动时间内已存在同类活动，请选择关闭、删除当前时段的活动"),
     PROMOTION_START_TIME_ERROR(40002, "活动起始时间不能小于当前时间"),
     PROMOTION_END_TIME_ERROR(40003, "活动结束时间不能小于当前时间"),
     PROMOTION_TIME_ERROR(40004, "活动起始时间必须大于结束时间"),
@@ -425,8 +426,8 @@ public enum ResultCode {
      */
     VERIFICATION_SEND_SUCCESS(80201, "短信验证码,发送成功"),
     VERIFICATION_ERROR(80202, "验证失败"),
-    VERIFICATION_SMS_ERROR(80203, "短信验证码错误，请重新校验"),
-    VERIFICATION_SMS_EXPIRED_ERROR(80204, "验证码已失效，请重新校验"),
+    VERIFICATION_CODE_INVALID(80204, "验证码已失效，请重新校验"),
+    VERIFICATION_SMS_CHECKED_ERROR(80210, "短信验证码错误，请重新校验"),
 
     /**
      * 微信相关异常
@@ -449,9 +450,8 @@ public enum ResultCode {
     CUSTOM_WORDS_SECRET_KEY_ERROR(90002, "秘钥验证失败！"),
     CONNECT_NOT_EXIST(90000, "登录方式不存在！"),
     ELASTICSEARCH_INDEX_INIT_ERROR(90003, "索引初始化失败！"),
-    PURCHASE_ORDER_DEADLINE_ERROR(90004,"供求单，已超过报名截止时间")
-
-    ;
+    PURCHASE_ORDER_DEADLINE_ERROR(90004, "供求单，已超过报名截止时间"),
+    INDEX_BUILDING(90005, "索引正在生成");
 
     private final Integer code;
     private final String message;

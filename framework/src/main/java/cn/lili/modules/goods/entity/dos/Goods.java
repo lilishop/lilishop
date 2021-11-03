@@ -7,7 +7,6 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
-import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -41,7 +40,7 @@ public class Goods extends BaseEntity {
 
     @ApiModelProperty(value = "商品名称")
     @NotEmpty(message = "商品名称不能为空")
-    @Length(max = 100, message = "商品名称提案仓，不能超过100个字符")
+    @Length(max = 100, message = "商品名称太长，不能超过100个字符")
     private String goodsName;
 
     @ApiModelProperty(value = "商品价格", required = true)

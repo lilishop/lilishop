@@ -5,12 +5,14 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dos.Brand;
 import cn.lili.modules.goods.entity.dos.CategoryBrand;
+import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dto.BrandPageDTO;
 import cn.lili.modules.goods.entity.vos.BrandVO;
 import cn.lili.modules.goods.mapper.BrandMapper;
 import cn.lili.modules.goods.service.BrandService;
 import cn.lili.modules.goods.service.CategoryBrandService;
 import cn.lili.modules.goods.service.CategoryService;
+import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -43,6 +45,9 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private GoodsService goodsService;
 
     @Override
     public IPage<Brand> getBrandsByPage(BrandPageDTO page) {
@@ -88,7 +93,9 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
         Brand brand = this.checkExist(brandId);
         //如果是要禁用，则需要先判定绑定关系
         if (Boolean.TRUE.equals(disable)) {
-            checkoutCategory(brandId);
+            List<String> ids = new ArrayList<>();
+            ids.add(brandId);
+            checkBind(ids);
         }
         brand.setDeleteFlag(disable);
         return updateById(brand);
@@ -96,7 +103,7 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
 
     @Override
     public void deleteBrands(List<String> ids) {
-        ids.forEach(this::checkoutCategory);
+        checkBind(ids);
         this.removeByIds(ids);
     }
 
@@ -104,16 +111,32 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
     /**
      * 校验绑定关系
      *
-     * @param brandId
+     * @param brandIds
      */
-    private void checkoutCategory(String brandId) {
+    private void checkBind(List<String> brandIds) {
         //分了绑定关系查询
-        List<CategoryBrand> categoryBrands = categoryBrandService.getCategoryBrandListByBrandId(brandId);
+        List<CategoryBrand> categoryBrands = categoryBrandService.getCategoryBrandListByBrandId(brandIds);
         if (!categoryBrands.isEmpty()) {
-            List<String> brandIds = categoryBrands.stream().map(CategoryBrand::getCategoryId).collect(Collectors.toList());
+            List<String> categoryIds = categoryBrands.stream().map(CategoryBrand::getCategoryId).collect(Collectors.toList());
             throw new ServiceException(ResultCode.BRAND_USE_DISABLE_ERROR,
-                    JSONUtil.toJsonStr(categoryService.getCategoryNameByIds(brandIds)));
+                    JSONUtil.toJsonStr(categoryService.getCategoryNameByIds(categoryIds)));
         }
+
+        //分了商品绑定关系查询
+        List<Goods> goods = goodsService.getByBrandIds(brandIds);
+        if (!goods.isEmpty()) {
+            List<String> goodsNames = goods.stream().map(Goods::getGoodsName).collect(Collectors.toList());
+            throw new ServiceException(ResultCode.BRAND_BIND_GOODS_ERROR,
+                    JSONUtil.toJsonStr(goodsNames));
+        }
+    }
+
+    /**
+     * 校验绑定关系
+     *
+     * @param brandIds
+     */
+    private void checkoutGoods(List<String> brandIds) {
     }
 
     /**

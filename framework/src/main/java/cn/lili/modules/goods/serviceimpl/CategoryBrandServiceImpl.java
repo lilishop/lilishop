@@ -7,8 +7,6 @@ import cn.lili.modules.goods.service.CategoryBrandService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,8 +34,8 @@ public class CategoryBrandServiceImpl extends ServiceImpl<CategoryBrandMapper, C
     }
 
     @Override
-    public List<CategoryBrand> getCategoryBrandListByBrandId(String brandId) {
-        return this.list(new LambdaQueryWrapper<CategoryBrand>().eq(CategoryBrand::getBrandId, brandId));
+    public List<CategoryBrand> getCategoryBrandListByBrandId(List<String> brandId) {
+        return this.list(new LambdaQueryWrapper<CategoryBrand>().in(CategoryBrand::getBrandId, brandId));
     }
 
     @Override

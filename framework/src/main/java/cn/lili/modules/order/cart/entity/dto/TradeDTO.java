@@ -1,14 +1,14 @@
 package cn.lili.modules.order.cart.entity.dto;
 
 import cn.lili.modules.member.entity.dos.MemberAddress;
-import cn.lili.modules.order.cart.entity.enums.SuperpositionPromotionEnum;
-import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
-import cn.lili.modules.order.order.entity.vo.OrderVO;
-import cn.lili.modules.order.order.entity.vo.ReceiptVO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
+import cn.lili.modules.order.cart.entity.enums.SuperpositionPromotionEnum;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.entity.vo.PriceDetailVO;
+import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
+import cn.lili.modules.order.order.entity.vo.OrderVO;
+import cn.lili.modules.order.order.entity.vo.ReceiptVO;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
 import io.swagger.annotations.ApiModelProperty;
@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 购物车视图
@@ -146,5 +147,17 @@ public class TradeDTO implements Serializable {
 
     public TradeDTO() {
         this(CartTypeEnum.CART);
+    }
+
+    /**
+     * 过滤购物车中已选择的sku
+     *
+     * @return
+     */
+    public List<CartSkuVO> getCheckedSkuList() {
+        if (skuList != null && !skuList.isEmpty()) {
+            return skuList.stream().filter(CartSkuVO::getChecked).collect(Collectors.toList());
+        }
+        return skuList;
     }
 }
