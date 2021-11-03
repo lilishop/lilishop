@@ -426,8 +426,8 @@ public enum ResultCode {
      */
     VERIFICATION_SEND_SUCCESS(80201, "短信验证码,发送成功"),
     VERIFICATION_ERROR(80202, "验证失败"),
-    VERIFICATION_SMS_ERROR(80203, "短信验证码错误，请重新校验"),
-    VERIFICATION_SMS_EXPIRED_ERROR(80204, "验证码已失效，请重新校验"),
+    VERIFICATION_CODE_INVALID(80204, "验证码已失效，请重新校验"),
+    VERIFICATION_SMS_CHECKED_ERROR(80210, "短信验证码错误，请重新校验"),
 
     /**
      * 微信相关异常

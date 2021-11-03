@@ -42,11 +42,8 @@ public class SmsController {
             @RequestHeader String uuid,
             @PathVariable String mobile,
             @PathVariable VerificationEnums verificationEnums) {
-        if (verificationService.check(uuid, verificationEnums)) {
-            smsUtil.sendSmsCode(mobile, verificationEnums, uuid);
-            return ResultUtil.success(ResultCode.VERIFICATION_SEND_SUCCESS);
-        } else {
-            throw new ServiceException(ResultCode.VERIFICATION_SMS_EXPIRED_ERROR);
-        }
+        verificationService.check(uuid, verificationEnums);
+        smsUtil.sendSmsCode(mobile, verificationEnums, uuid);
+        return ResultUtil.success(ResultCode.VERIFICATION_SEND_SUCCESS);
     }
 }
