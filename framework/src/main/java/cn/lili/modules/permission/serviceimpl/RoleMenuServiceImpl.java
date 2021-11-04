@@ -1,13 +1,17 @@
 package cn.lili.modules.permission.serviceimpl;
 
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.modules.permission.entity.dos.RoleMenu;
 import cn.lili.modules.permission.entity.vo.UserMenuVO;
 import cn.lili.modules.permission.mapper.MenuMapper;
 import cn.lili.modules.permission.mapper.RoleMenuMapper;
 import cn.lili.modules.permission.service.RoleMenuService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import groovy.util.logging.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,16 +35,26 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> i
     @Resource
     private MenuMapper menuMapper;
 
+
+    @Autowired
+    private Cache<Object> cache;
+
     @Override
     public List<RoleMenu> findByRoleId(String roleId) {
-        QueryWrapper<RoleMenu> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("role_id", roleId);
+        LambdaQueryWrapper<RoleMenu> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(RoleMenu::getRoleId, roleId);
         return this.baseMapper.selectList(queryWrapper);
     }
 
     @Override
     public List<UserMenuVO> findAllMenu(String userId) {
-        return menuMapper.getUserRoleMenu(userId);
+        String cacheKey = CachePrefix.USER_MENU.getPrefix() + userId;
+        List<UserMenuVO> menuList = (List<UserMenuVO>) cache.get(cacheKey);
+        if (menuList == null) {
+            menuList = menuMapper.getUserRoleMenu(userId);
+            cache.put(cacheKey, menuList);
+        }
+        return menuList;
     }
 
 
@@ -51,8 +65,10 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> i
             this.deleteRoleMenu(roleId);
             //重新保存角色菜单关系
             this.saveBatch(roleMenus);
+            cache.vagueDel(CachePrefix.MENU_USER_ID.getPrefix());
+            cache.vagueDel(CachePrefix.USER_MENU.getPrefix());
         } catch (Exception e) {
-            log.error("修改用户权限错误",e);
+            log.error("修改用户权限错误", e);
         }
     }
 
@@ -62,12 +78,17 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> i
         QueryWrapper<RoleMenu> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("role_id", roleId);
         this.remove(queryWrapper);
+        cache.vagueDel(CachePrefix.MENU_USER_ID.getPrefix());
+        cache.vagueDel(CachePrefix.USER_MENU.getPrefix());
     }
+
     @Override
     public void deleteRoleMenu(List<String> roleId) {
         //删除
         QueryWrapper<RoleMenu> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("role_id", roleId);
         this.remove(queryWrapper);
+        cache.vagueDel(CachePrefix.MENU_USER_ID.getPrefix());
+        cache.vagueDel(CachePrefix.USER_MENU.getPrefix());
     }
 }

@@ -1,7 +1,7 @@
 package cn.lili.cache;
 
-import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.common.security.enums.UserEnums;
 
 /**
  * 缓存前缀
@@ -469,6 +469,14 @@ public enum CachePrefix {
      * 店铺分类
      */
     STORE_CATEGORY,
+    /**
+     * 用户菜单
+     */
+    MENU_USER_ID,
+    /**
+     * 用户菜单
+     */
+    USER_MENU,
     /**
      * 订单暂时缓存
      */

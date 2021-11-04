@@ -1,11 +1,12 @@
 package cn.lili.modules.permission.serviceimpl;
 
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.mybatis.util.PageUtil;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.SearchVO;
 import cn.lili.modules.permission.entity.dos.Menu;
 import cn.lili.modules.permission.entity.dos.RoleMenu;
@@ -14,15 +15,14 @@ import cn.lili.modules.permission.entity.vo.MenuVO;
 import cn.lili.modules.permission.mapper.MenuMapper;
 import cn.lili.modules.permission.service.MenuService;
 import cn.lili.modules.permission.service.RoleMenuService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * 权限业务层实现
@@ -39,6 +39,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Autowired
     private RoleMenuService roleMenuService;
 
+    @Autowired
+    private Cache<List<Menu>> cache;
+
     @Override
     public void deleteIds(List<String> ids) {
         QueryWrapper<RoleMenu> queryWrapper = new QueryWrapper<>();
@@ -53,8 +56,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Override
     public List<MenuVO> findUserTree() {
-        AuthUser authUser = UserContext.getCurrentUser();
-        if (authUser.getIsSuper()) {
+        AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        if (Boolean.TRUE.equals(authUser.getIsSuper())) {
             return this.tree();
         }
         List<Menu> userMenus = this.baseMapper.findByUserId(authUser.getId());
@@ -63,7 +66,28 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Override
     public List<Menu> findUserList(String userId) {
-        return this.baseMapper.findByUserId(userId);
+        String cacheKey = CachePrefix.MENU_USER_ID.getPrefix() + userId;
+        List<Menu> menuList = cache.get(cacheKey);
+        if (menuList == null) {
+            menuList = this.baseMapper.findByUserId(userId);
+            cache.put(cacheKey, menuList);
+        }
+        return menuList;
+    }
+
+    /**
+     * 添加更新菜单
+     *
+     * @param menu 菜单数据
+     * @return 是否成功
+     */
+    @Override
+    public boolean saveOrUpdateMenu(Menu menu) {
+        if (CharSequenceUtil.isNotEmpty(menu.getId())) {
+            cache.vagueDel(CachePrefix.MENU_USER_ID.getPrefix());
+            cache.vagueDel(CachePrefix.USER_MENU.getPrefix());
+        }
+        return this.saveOrUpdate(menu);
     }
 
     @Override
@@ -77,12 +101,12 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     public List<Menu> searchList(MenuSearchParams menuSearchParams) {
         //title 需要特殊处理
         String title = null;
-        if (StringUtils.isNotEmpty(menuSearchParams.getTitle())) {
+        if (CharSequenceUtil.isNotEmpty(menuSearchParams.getTitle())) {
             title = menuSearchParams.getTitle();
             menuSearchParams.setTitle(null);
         }
-        QueryWrapper queryWrapper = PageUtil.initWrapper(menuSearchParams, new SearchVO());
-        if (StringUtils.isNotEmpty(title)) {
+        QueryWrapper<Menu> queryWrapper = PageUtil.initWrapper(menuSearchParams, new SearchVO());
+        if (CharSequenceUtil.isNotEmpty(title)) {
             queryWrapper.like("title", title);
         }
         queryWrapper.orderByDesc("sort_order");
@@ -98,14 +122,14 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         } catch (Exception e) {
             log.error("菜单树错误", e);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     /**
      * 传入自定义菜单集合
      *
-     * @param menus
-     * @return
+     * @param menus 自定义菜单集合
+     * @return 修改后的自定义菜单集合
      */
     private List<MenuVO> tree(List<Menu> menus) {
         List<MenuVO> tree = new ArrayList<>();
@@ -117,12 +141,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             }
         });
         //对一级菜单排序
-        tree.sort(new Comparator<MenuVO>() {
-            @Override
-            public int compare(MenuVO o1, MenuVO o2) {
-                return o1.getSortOrder().compareTo(o2.getSortOrder());
-            }
-        });
+        tree.sort(Comparator.comparing(Menu::getSortOrder));
         return tree;
     }
 
