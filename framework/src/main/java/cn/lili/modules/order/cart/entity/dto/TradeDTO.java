@@ -1,14 +1,14 @@
 package cn.lili.modules.order.cart.entity.dto;
 
 import cn.lili.modules.member.entity.dos.MemberAddress;
-import cn.lili.modules.order.cart.entity.enums.SuperpositionPromotionEnum;
-import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
-import cn.lili.modules.order.order.entity.vo.OrderVO;
-import cn.lili.modules.order.order.entity.vo.ReceiptVO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
+import cn.lili.modules.order.cart.entity.enums.SuperpositionPromotionEnum;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.entity.vo.PriceDetailVO;
+import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
+import cn.lili.modules.order.order.entity.vo.OrderVO;
+import cn.lili.modules.order.order.entity.vo.ReceiptVO;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
 import io.swagger.annotations.ApiModelProperty;

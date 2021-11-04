@@ -12,7 +12,6 @@ import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.elasticsearch.BaseElasticsearchService;
 import cn.lili.elasticsearch.EsSuffix;
@@ -652,8 +651,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 goodsWords.setSort(0);
                 goodsWordsService.save(goodsWords);
             }
-        } catch (MyBatisSystemException e) {
+        } catch (MyBatisSystemException me) {
             log.error(words + "关键字已存在！");
+        } catch (Exception e) {
+            log.error("关键字入库异常！", e);
         }
     }
 

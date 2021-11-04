@@ -8,7 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author paulG
@@ -21,11 +22,8 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
     @Value("${spring.data.mongodb.database}")
     private String databaseName;
 
-    @Value("${spring.data.mongodb.host}")
-    private String host;
-
-    @Value("${spring.data.mongodb.port}")
-    private Integer port;
+    @Value("${spring.data.mongodb.uri}")
+    private List<String> uri = new ArrayList<>();
 
     @Value("${spring.data.mongodb.username}")
     private String username;
@@ -44,7 +42,14 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
     @Override
     protected void configureClientSettings(MongoClientSettings.Builder builder) {
         builder.credential(MongoCredential.createCredential(username, authenticationDatabase, password.toCharArray()))
-                .applyToClusterSettings(settings -> settings.hosts(Collections.singletonList(new ServerAddress(host, port))));
+                .applyToClusterSettings(settings -> {
+                    List<ServerAddress> serverAddresses = new ArrayList<>();
+                    for (String s : uri) {
+                        String[] node = s.split(":");
+                        serverAddresses.add(new ServerAddress(node[0], Integer.parseInt(node[1])));
+                    }
+                    settings.hosts(serverAddresses);
+                });
     }
 
 }

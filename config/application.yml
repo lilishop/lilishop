@@ -28,8 +28,7 @@ spring:
   # mongodb
   data:
     mongodb:
-      host: 192.168.0.116
-      port: 27017
+      uri: 192.168.0.116:27017
       database: lilishop
       username: root
       password: lilishop

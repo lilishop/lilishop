@@ -78,22 +78,14 @@ public class SensitiveJsonSerializer extends JsonSerializer<String>
         //如果是店铺
         if (authUser.getRole().equals(UserEnums.STORE)) {
             //店铺需要进行脱敏，则脱敏处理
-            if (systemSettingProperties.getSensitiveLevel() == 2) {
-                return true;
-            }
-            //默认不需要
-            return false;
+            return systemSettingProperties.getSensitiveLevel() == 2;
         }
 
 
         //如果是店铺
         if (authUser.getRole().equals(UserEnums.MANAGER)) {
             //店铺需要进行脱敏，则脱敏处理
-            if (systemSettingProperties.getSensitiveLevel() >= 1) {
-                return true;
-            }
-            //默认不需要
-            return false;
+            return systemSettingProperties.getSensitiveLevel() >= 1;
         }
 
         return false;

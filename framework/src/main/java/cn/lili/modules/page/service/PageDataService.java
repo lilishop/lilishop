@@ -7,7 +7,6 @@ import cn.lili.modules.page.entity.vos.PageDataListVO;
 import cn.lili.modules.page.entity.vos.PageDataVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.springframework.cache.annotation.CacheConfig;
 
 /**
  * 页面业务层
