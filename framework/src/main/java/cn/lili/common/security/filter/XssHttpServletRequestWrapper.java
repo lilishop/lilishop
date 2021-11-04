@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -39,7 +40,10 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     public String[] getParameterValues(String name) {
         String[] values = super.getParameterValues(name);
         if (values == null) {
-            return null;
+            return new String[0];
+        }
+        if (ignoreXss(name)) {
+            return values;
         }
         int count = values.length;
         String[] encodedValues = new String[count];
@@ -58,7 +62,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         if (value == null) {
             return null;
         }
-        return cleanXSS(value);
+        return ignoreXss(name) ? value : cleanXSS(value);
     }
 
     /**
@@ -67,6 +71,9 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     @Override
     public Object getAttribute(String name) {
         Object value = super.getAttribute(name);
+        if (ignoreXss(name)) {
+            return value;
+        }
         if (value instanceof String) {
             value = cleanXSS((String) value);
         }
@@ -82,7 +89,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         if (value == null) {
             return null;
         }
-        return cleanXSS(value);
+        return ignoreXss(name) ? value : cleanXSS(value);
     }
 
     @Override
@@ -96,12 +103,14 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
                 //根据key获取value
                 String[] values = entry.getValue();
-                //遍历数组
-                for (int i = 0; i < values.length; i++) {
-                    String value = values[i];
-                    value = cleanXSS(value);
-                    //将转义后的数据放回数组中
-                    values[i] = value;
+                if (!ignoreXss(entry.getKey())) {
+                    //遍历数组
+                    for (int i = 0; i < values.length; i++) {
+                        String value = values[i];
+                        value = cleanXSS(value);
+                        //将转义后的数据放回数组中
+                        values[i] = value;
+                    }
                 }
                 //将转义后的数组put到linkMap当中
                 params.put(entry.getKey(), values);
@@ -113,8 +122,8 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     /**
      * 获取输入流
      *
-     * @return
-     * @throws IOException
+     * @return 过滤后的输入流
+     * @throws IOException 异常信息
      */
     @Override
     public ServletInputStream getInputStream() throws IOException {
@@ -145,7 +154,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             //遍历数组
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 //如果map.get(key)获取到的是字符串就需要进行转义，如果不是直接存储resultMap
-                if (map.get(entry.getKey()) instanceof String) {
+                if (map.get(entry.getKey()) instanceof String && !ignoreXss(entry.getKey())) {
                     resultMap.put(entry.getKey(), cleanXSS(entry.getValue().toString()));
                 } else {
                     resultMap.put(entry.getKey(), entry.getValue());
@@ -171,7 +180,6 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
                 @Override
                 public void setReadListener(ReadListener readListener) {
-
                 }
 
                 @Override
@@ -215,4 +223,9 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         }
         return value;
     }
+
+    private boolean ignoreXss(String name) {
+        return CharSequenceUtil.containsAny(name.toLowerCase(Locale.ROOT), "logo", "url", "photo", "intro");
+    }
+
 }
