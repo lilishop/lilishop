@@ -4,7 +4,7 @@ import cn.hutool.core.convert.Convert;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.modules.statistics.model.dos.PlatformViewData;
+import cn.lili.modules.statistics.entity.dos.PlatformViewData;
 import cn.lili.modules.statistics.service.PlatformViewDataService;
 import cn.lili.timetask.handler.EveryDayExecute;
 import lombok.Data;

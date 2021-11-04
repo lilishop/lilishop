@@ -1,4 +1,4 @@
-package cn.lili.modules.statistics.model.vo;
+package cn.lili.modules.statistics.entity.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;

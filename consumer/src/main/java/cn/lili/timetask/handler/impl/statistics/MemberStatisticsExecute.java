@@ -1,6 +1,6 @@
 package cn.lili.timetask.handler.impl.statistics;
 
-import cn.lili.modules.statistics.model.dos.MemberStatisticsData;
+import cn.lili.modules.statistics.entity.dos.MemberStatisticsData;
 import cn.lili.modules.statistics.service.MemberStatisticsDataService;
 import cn.lili.timetask.handler.EveryDayExecute;
 import lombok.extern.slf4j.Slf4j;

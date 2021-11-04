@@ -2,9 +2,9 @@ package cn.lili.modules.statistics.serviceimpl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.lili.modules.statistics.mapper.MemberStatisticsDataMapper;
-import cn.lili.modules.statistics.model.dos.MemberStatisticsData;
-import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
-import cn.lili.modules.statistics.model.enums.SearchTypeEnum;
+import cn.lili.modules.statistics.entity.dos.MemberStatisticsData;
+import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
+import cn.lili.modules.statistics.entity.enums.SearchTypeEnum;
 import cn.lili.modules.statistics.service.MemberStatisticsDataService;
 import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;

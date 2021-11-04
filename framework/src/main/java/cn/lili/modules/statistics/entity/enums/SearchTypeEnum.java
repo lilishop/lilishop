@@ -1,4 +1,4 @@
-package cn.lili.modules.statistics.model.enums;
+package cn.lili.modules.statistics.entity.enums;
 
 /**
  * 搜索类型

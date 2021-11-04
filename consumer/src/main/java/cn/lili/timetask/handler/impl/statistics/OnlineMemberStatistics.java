@@ -4,7 +4,7 @@ import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.properties.StatisticsProperties;
-import cn.lili.modules.statistics.model.vo.OnlineMemberVO;
+import cn.lili.modules.statistics.entity.vo.OnlineMemberVO;
 import cn.lili.timetask.handler.EveryHourExecute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

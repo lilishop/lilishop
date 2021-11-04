@@ -1,6 +1,6 @@
 package cn.lili.modules.statistics.mapper;
 
-import cn.lili.modules.statistics.model.dos.MemberStatisticsData;
+import cn.lili.modules.statistics.entity.dos.MemberStatisticsData;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;

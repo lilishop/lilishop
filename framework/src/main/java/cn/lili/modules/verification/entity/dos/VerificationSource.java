@@ -1,7 +1,7 @@
-package cn.lili.modules.system.entity.dos;
+package cn.lili.modules.verification.entity.dos;
 
 import cn.lili.mybatis.BaseEntity;
-import cn.lili.modules.system.entity.enums.VerificationSourceEnum;
+import cn.lili.modules.verification.entity.enums.VerificationSourceEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

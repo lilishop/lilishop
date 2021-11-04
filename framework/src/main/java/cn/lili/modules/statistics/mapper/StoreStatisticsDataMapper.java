@@ -1,8 +1,8 @@
 package cn.lili.modules.statistics.mapper;
 
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
-import cn.lili.modules.statistics.model.vo.GoodsStatisticsDataVO;
-import cn.lili.modules.statistics.model.vo.StoreStatisticsDataVO;
+import cn.lili.modules.statistics.entity.vo.GoodsStatisticsDataVO;
+import cn.lili.modules.statistics.entity.vo.StoreStatisticsDataVO;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;

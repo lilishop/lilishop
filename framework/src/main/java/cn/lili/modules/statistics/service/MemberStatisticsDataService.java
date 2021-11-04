@@ -1,7 +1,7 @@
 package cn.lili.modules.statistics.service;
 
-import cn.lili.modules.statistics.model.dos.MemberStatisticsData;
-import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
+import cn.lili.modules.statistics.entity.dos.MemberStatisticsData;
+import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.Date;

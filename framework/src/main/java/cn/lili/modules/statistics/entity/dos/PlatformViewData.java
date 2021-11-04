@@ -1,4 +1,4 @@
-package cn.lili.modules.statistics.model.dos;
+package cn.lili.modules.statistics.entity.dos;
 
 import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableName;

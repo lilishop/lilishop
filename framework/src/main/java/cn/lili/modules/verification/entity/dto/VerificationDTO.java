@@ -1,6 +1,6 @@
-package cn.lili.modules.system.entity.vo;
+package cn.lili.modules.verification.entity.dto;
 
-import cn.lili.modules.system.entity.dos.VerificationSource;
+import cn.lili.modules.verification.entity.dos.VerificationSource;
 import lombok.Data;
 
 import java.io.Serializable;

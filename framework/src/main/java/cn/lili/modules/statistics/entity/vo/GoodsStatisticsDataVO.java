@@ -1,4 +1,4 @@
-package cn.lili.modules.statistics.model.vo;
+package cn.lili.modules.statistics.entity.vo;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -10,13 +10,13 @@ import lombok.Data;
  * @since 2020/12/9 14:25
  */
 @Data
-public class StoreStatisticsDataVO {
+public class GoodsStatisticsDataVO {
 
-    @ApiModelProperty(value = "店铺ID")
-    private String storeId;
+    @ApiModelProperty(value = "商品ID")
+    private String goodsId;
 
-    @ApiModelProperty(value = "店铺名称")
-    private String storeName;
+    @ApiModelProperty(value = "商品名称")
+    private String goodsName;
 
     @ApiModelProperty(value = "销售数量")
     private String num;

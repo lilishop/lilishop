@@ -1,4 +1,4 @@
-package cn.lili.modules.system.entity.enums;
+package cn.lili.modules.verification.entity.enums;
 
 
 /**
