@@ -1,4 +1,4 @@
-package cn.lili.modules.member.entity.aop.interceptor;
+package cn.lili.modules.member.aop.interceptor;
 
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberPointsHistory;
@@ -29,7 +29,7 @@ public class PointLogInterceptor {
     @Autowired
     private MemberService memberService;
 
-    @After("@annotation(cn.lili.modules.member.entity.aop.annotation.PointLogPoint)")
+    @After("@annotation(cn.lili.modules.member.aop.annotation.PointLogPoint)")
     public void doAfter(JoinPoint pjp) {
         //参数
         Object[] obj = pjp.getArgs();

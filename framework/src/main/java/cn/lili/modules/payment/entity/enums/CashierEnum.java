@@ -1,4 +1,4 @@
-package cn.lili.modules.payment.kit.enums;
+package cn.lili.modules.payment.entity.enums;
 
 /**
  * 订单类型

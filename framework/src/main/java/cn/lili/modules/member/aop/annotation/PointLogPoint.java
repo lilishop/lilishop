@@ -1,4 +1,4 @@
-package cn.lili.modules.member.entity.aop.annotation;
+package cn.lili.modules.member.aop.annotation;
 
 
 import java.lang.annotation.*;

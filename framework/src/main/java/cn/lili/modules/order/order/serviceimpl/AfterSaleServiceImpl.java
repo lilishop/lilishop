@@ -33,7 +33,7 @@ import cn.lili.modules.order.trade.entity.enums.AfterSaleRefundWayEnum;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleTypeEnum;
 import cn.lili.modules.payment.kit.RefundSupport;
-import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
