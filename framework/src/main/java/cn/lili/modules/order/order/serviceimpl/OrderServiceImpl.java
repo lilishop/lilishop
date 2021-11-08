@@ -168,7 +168,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             String message = "订单[" + item.getSn() + "]创建";
             //记录日志
             orderLogs.add(new OrderLog(item.getSn(), UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), message));
-            item.getSkuList().forEach(
+            item.getCheckedSkuList().forEach(
                     sku -> orderItems.add(new OrderItem(sku, item, tradeDTO))
             );
             //写入子订单信息

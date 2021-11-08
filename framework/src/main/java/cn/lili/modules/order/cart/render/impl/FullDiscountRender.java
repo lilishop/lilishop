@@ -46,8 +46,6 @@ public class FullDiscountRender implements CartRenderStep {
     @Override
     public void render(TradeDTO tradeDTO) {
 
-        //获取购物车中所有的商品
-        List<CartSkuVO> cartSkuList = tradeDTO.getSkuList();
 
         //店铺集合
         List<CartVO> cartList = tradeDTO.getCartList();
@@ -80,7 +78,7 @@ public class FullDiscountRender implements CartRenderStep {
                         cart.setFullDiscount(fullDiscount);
                         Map<String, Double> skuPriceDetail;
                         //参与活动的sku判定
-                        skuPriceDetail = initFullDiscountGoods(fullDiscount, cartSkuList);
+                        skuPriceDetail = initFullDiscountGoods(fullDiscount, cart.getCheckedSkuList());
                         //记录参与满减活动的sku
                         cart.setFullDiscountSkuIds(new ArrayList<>(skuPriceDetail.keySet()));
 
@@ -115,7 +113,7 @@ public class FullDiscountRender implements CartRenderStep {
      */
     private void renderFullRate(CartVO cart, Map<String, Double> skuPriceDetail, Double rate) {
 
-        List<CartSkuVO> cartSkuVOS = cart.getSkuList().stream().filter(cartSkuVO -> {
+        List<CartSkuVO> cartSkuVOS = cart.getCheckedSkuList().stream().filter(cartSkuVO -> {
             return skuPriceDetail.containsKey(cartSkuVO.getGoodsSku().getId());
         }).collect(Collectors.toList());
 
@@ -186,7 +184,7 @@ public class FullDiscountRender implements CartRenderStep {
         }
         //如果满足，判定是否免邮，免邮的话需要渲染一边sku
         if (fullDiscount.getIsFreeFreight()) {
-            for (CartSkuVO skuVO : cartVO.getSkuList()) {
+            for (CartSkuVO skuVO : cartVO.getCheckedSkuList()) {
                 skuVO.setIsFreeFreight(true);
             }
         }

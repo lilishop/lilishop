@@ -264,7 +264,7 @@ public class Order extends BaseEntity {
             this.setOrderType(OrderTypeEnum.VIRTUAL.name());
         } else {
             //促销订单（拼团、积分）-判断购买的是虚拟商品还是实物商品
-            String goodsType = cartVO.getSkuList().get(0).getGoodsSku().getGoodsType();
+            String goodsType = cartVO.getCheckedSkuList().get(0).getGoodsSku().getGoodsType();
             if (StrUtil.isEmpty(goodsType) || goodsType.equals(GoodsTypeEnum.PHYSICAL_GOODS.name())) {
                 this.setOrderType(OrderTypeEnum.NORMAL.name());
             } else {
@@ -275,7 +275,7 @@ public class Order extends BaseEntity {
 
             //判断是否为拼团订单，如果为拼团订单获取拼团ID，判断是否为主订单
             if (tradeDTO.getCartTypeEnum().name().equals(PromotionTypeEnum.PINTUAN.name())) {
-                Optional<String> pintuanId = cartVO.getSkuList().get(0).getPromotions().stream()
+                Optional<String> pintuanId = cartVO.getCheckedSkuList().get(0).getPromotions().stream()
                         .filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
                 promotionId = pintuanId.get();
             }
