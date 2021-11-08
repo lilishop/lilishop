@@ -519,7 +519,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         filterFunctionBuilders.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(QueryBuilders.nestedQuery(ATTR_PATH, QueryBuilders.wildcardQuery(ATTR_VALUE, "*" + keyword + "*"), ScoreMode.None),
                 ScoreFunctionBuilders.weightFactorFunction(8)));
 
-        GaussDecayFunctionBuilder skuNoScore = ScoreFunctionBuilders.gaussDecayFunction("skuNo", 100, 10).setWeight(7);
+        GaussDecayFunctionBuilder skuNoScore = ScoreFunctionBuilders.gaussDecayFunction("skuSource", 100, 10).setWeight(7);
         FunctionScoreQueryBuilder.FilterFunctionBuilder skuNoBuilder = new FunctionScoreQueryBuilder.FilterFunctionBuilder(goodsNameQuery, skuNoScore);
         filterFunctionBuilders.add(skuNoBuilder);
 
