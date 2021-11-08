@@ -139,10 +139,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                     skuQueryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
 
                     List<GoodsSku> goodsSkuList = goodsSkuService.list(skuQueryWrapper);
-                    int skuNo = 100;
+                    int skuSource = 100;
                     for (GoodsSku goodsSku : goodsSkuList) {
                         EsGoodsIndex esGoodsIndex = wrapperEsGoodsIndex(goodsSku, goods);
-                        esGoodsIndex.setSkuNo(skuNo--);
+                        esGoodsIndex.setSkuSource(skuSource--);
                         esGoodsIndices.add(esGoodsIndex);
                         //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
                         cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
