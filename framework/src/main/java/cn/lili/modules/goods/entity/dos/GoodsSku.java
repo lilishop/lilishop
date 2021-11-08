@@ -1,13 +1,14 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Max;
@@ -19,6 +20,7 @@ import java.util.Date;
  * @author pikachu
  * @since 2020-02-23 9:14:33
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("li_goods_sku")
 @ApiModel(value = "商品sku对象")
@@ -146,7 +148,7 @@ public class GoodsSku extends BaseEntity {
     private String goodsVideo;
 
     @ApiModelProperty(value = "是否为推荐商品", required = true)
-    private boolean recommend;
+    private Boolean recommend;
 
     @ApiModelProperty(value = "销售模式", required = true)
     private String salesModel;
