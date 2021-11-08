@@ -36,7 +36,7 @@ public class SkuFreightRender implements CartRenderStep {
 
     @Override
     public void render(TradeDTO tradeDTO) {
-        List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
+        List<CartSkuVO> cartSkuVOS = tradeDTO.getCheckedSkuList();
         //会员收货地址问题处理
         MemberAddress memberAddress = tradeDTO.getMemberAddress();
         //如果收货地址为空，则抛出异常

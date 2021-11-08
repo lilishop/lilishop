@@ -1,6 +1,6 @@
 package cn.lili.modules.system.mapper;
 
-import cn.lili.modules.system.entity.dos.VerificationSource;
+import cn.lili.modules.verification.entity.dos.VerificationSource;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

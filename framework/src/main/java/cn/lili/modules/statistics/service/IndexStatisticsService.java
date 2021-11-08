@@ -1,8 +1,8 @@
 package cn.lili.modules.statistics.service;
 
-import cn.lili.modules.statistics.model.dto.GoodsStatisticsQueryParam;
-import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
-import cn.lili.modules.statistics.model.vo.*;
+import cn.lili.modules.statistics.entity.dto.GoodsStatisticsQueryParam;
+import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
+import cn.lili.modules.statistics.entity.vo.*;
 
 import java.util.List;
 

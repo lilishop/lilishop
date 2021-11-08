@@ -1,10 +1,10 @@
 package cn.lili.modules.statistics.service;
 
 import cn.lili.modules.member.entity.vo.MemberDistributionVO;
-import cn.lili.modules.statistics.model.dos.PlatformViewData;
-import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
-import cn.lili.modules.statistics.model.vo.OnlineMemberVO;
-import cn.lili.modules.statistics.model.vo.PlatformViewVO;
+import cn.lili.modules.statistics.entity.dos.PlatformViewData;
+import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
+import cn.lili.modules.statistics.entity.vo.OnlineMemberVO;
+import cn.lili.modules.statistics.entity.vo.PlatformViewVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;

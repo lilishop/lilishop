@@ -31,7 +31,7 @@ import cn.lili.modules.payment.kit.core.kit.*;
 import cn.lili.modules.payment.kit.core.utils.DateTimeZoneUtil;
 import cn.lili.modules.payment.kit.dto.PayParam;
 import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
-import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
 import cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApiEnum;
 import cn.lili.modules.payment.kit.plugin.wechat.enums.WechatDomain;

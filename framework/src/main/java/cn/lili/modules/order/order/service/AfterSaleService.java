@@ -7,7 +7,7 @@ import cn.lili.modules.order.order.entity.dto.AfterSaleDTO;
 import cn.lili.modules.order.order.entity.vo.AfterSaleApplyVO;
 import cn.lili.modules.order.order.entity.vo.AfterSaleSearchParams;
 import cn.lili.modules.order.order.entity.vo.AfterSaleVO;
-import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
+import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.system.entity.vo.Traces;
 import com.baomidou.mybatisplus.core.metadata.IPage;

@@ -1,7 +1,7 @@
 package cn.lili.modules.statistics.mapper;
 
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
-import cn.lili.modules.statistics.model.vo.OrderStatisticsDataVO;
+import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;

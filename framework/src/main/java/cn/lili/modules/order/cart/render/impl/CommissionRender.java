@@ -66,7 +66,7 @@ public class CommissionRender implements CartRenderStep {
         //计算购物车价格
         for (CartVO cart : cartVOS) {
             //累加价格
-            for (CartSkuVO cartSkuVO : cart.getSkuList()) {
+            for (CartSkuVO cartSkuVO : cart.getCheckedSkuList()) {
 
                 PriceDetailDTO priceDetailDTO = cartSkuVO.getPriceDetailDTO();
                 //平台佣金根据分类计算

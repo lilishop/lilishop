@@ -1,9 +1,9 @@
 package cn.lili.modules.statistics.service;
 
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
-import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
-import cn.lili.modules.statistics.model.vo.OrderOverviewVO;
-import cn.lili.modules.statistics.model.vo.OrderStatisticsDataVO;
+import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
+import cn.lili.modules.statistics.entity.vo.OrderOverviewVO;
+import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
