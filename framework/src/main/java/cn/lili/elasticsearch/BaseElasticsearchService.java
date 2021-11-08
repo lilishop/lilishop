@@ -197,6 +197,9 @@ public abstract class BaseElasticsearchService {
                         "      \"commentNum\": {\n" +
                         "        \"type\": \"long\"\n" +
                         "      },\n" +
+                        "      \"skuNo\": {\n" +
+                        "        \"type\": \"long\"\n" +
+                        "      },\n" +
                         "      \"goodsId\": {\n" +
                         "        \"type\": \"text\",\n" +
                         "        \"fields\": {\n" +

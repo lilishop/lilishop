@@ -63,19 +63,20 @@ public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Paramet
         queryWrapper.like(Goods::getParams, parameters.getGroupId());
         List<Map<String, Object>> goodsList = this.goodsService.listMaps(queryWrapper);
 
-        for (Map<String, Object> goods : goodsList) {
-            String params = (String) goods.get("params");
-            List<GoodsParamsDTO> goodsParamsDTOS = JSONUtil.toList(params, GoodsParamsDTO.class);
-            List<GoodsParamsDTO> goodsParamsDTOList = goodsParamsDTOS.stream().filter(i -> i.getGroupId() != null && i.getGroupId().equals(parameters.getGroupId())).collect(Collectors.toList());
-            this.setGoodsItemDTOList(goodsParamsDTOList, parameters);
-            this.goodsService.updateGoodsParams(goods.get("id").toString(), JSONUtil.toJsonStr(goodsParamsDTOS));
-            goodsIds.add(goods.get("id").toString());
+        if (!goodsList.isEmpty()) {
+            for (Map<String, Object> goods : goodsList) {
+                String params = (String) goods.get("params");
+                List<GoodsParamsDTO> goodsParamsDTOS = JSONUtil.toList(params, GoodsParamsDTO.class);
+                List<GoodsParamsDTO> goodsParamsDTOList = goodsParamsDTOS.stream().filter(i -> i.getGroupId() != null && i.getGroupId().equals(parameters.getGroupId())).collect(Collectors.toList());
+                this.setGoodsItemDTOList(goodsParamsDTOList, parameters);
+                this.goodsService.updateGoodsParams(goods.get("id").toString(), JSONUtil.toJsonStr(goodsParamsDTOS));
+                goodsIds.add(goods.get("id").toString());
+            }
+
+            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX.name();
+            //发送mq消息
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goodsIds), RocketmqSendCallbackBuilder.commonCallback());
         }
-
-
-        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX.name();
-        //发送mq消息
-        rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goodsIds), RocketmqSendCallbackBuilder.commonCallback());
         return this.updateById(parameters);
     }
 

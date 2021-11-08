@@ -126,7 +126,7 @@ public class Goods extends BaseEntity {
 
 
     @ApiModelProperty(value = "是否为推荐商品", required = true)
-    private boolean recommend;
+    private Boolean recommend;
 
     @ApiModelProperty(value = "销售模式", required = true)
     private String salesModel;

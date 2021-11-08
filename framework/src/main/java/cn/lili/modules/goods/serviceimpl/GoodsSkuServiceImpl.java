@@ -587,6 +587,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         sku.setStoreName(goods.getStoreName());
         sku.setStoreCategoryPath(goods.getStoreCategoryPath());
         sku.setFreightTemplateId(goods.getTemplateId());
+        sku.setRecommend(goods.getRecommend());
     }
 
     /**

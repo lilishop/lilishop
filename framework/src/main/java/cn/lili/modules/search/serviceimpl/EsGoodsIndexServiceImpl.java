@@ -126,48 +126,30 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 queryWrapper.eq(GoodsSku::getIsAuth, GoodsAuthEnum.PASS.name());
                 queryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
 
-                List<GoodsSku> list = goodsSkuService.list(queryWrapper);
                 List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
-                //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
-                for (GoodsSku goodsSku : list) {
-                    Goods goods = goodsService.getById(goodsSku.getGoodsId());
-                    //如果出现极端情况，有sku，没有与之匹配的商品，则跳过
-                    if (goods == null) {
-                        continue;
-                    }
-                    EsGoodsIndex index = new EsGoodsIndex(goodsSku);
 
-                    //商品参数索引
-                    if (goods.getParams() != null && !goods.getParams().isEmpty()) {
-                        List<GoodsParamsDTO> goodsParamDTOS = JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class);
-                        index = new EsGoodsIndex(goodsSku, goodsParamDTOS);
+                LambdaQueryWrapper<Goods> goodsQueryWrapper = new LambdaQueryWrapper<>();
+                goodsQueryWrapper.eq(Goods::getIsAuth, GoodsAuthEnum.PASS.name());
+                goodsQueryWrapper.eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name());
+
+                for (Goods goods : goodsService.list(goodsQueryWrapper)) {
+                    LambdaQueryWrapper<GoodsSku> skuQueryWrapper = new LambdaQueryWrapper<>();
+                    skuQueryWrapper.eq(GoodsSku::getGoodsId, goods.getId());
+                    skuQueryWrapper.eq(GoodsSku::getIsAuth, GoodsAuthEnum.PASS.name());
+                    skuQueryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
+
+                    List<GoodsSku> goodsSkuList = goodsSkuService.list(skuQueryWrapper);
+                    int skuNo = 100;
+                    for (GoodsSku goodsSku : goodsSkuList) {
+                        EsGoodsIndex esGoodsIndex = wrapperEsGoodsIndex(goodsSku, goods);
+                        esGoodsIndex.setSkuNo(skuNo--);
+                        esGoodsIndices.add(esGoodsIndex);
+                        //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
+                        cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
                     }
-                    //商品分类索引
-                    if (goods.getCategoryPath() != null) {
-                        List<Category> categories = categoryService.listByIdsOrderByLevel(Arrays.asList(goods.getCategoryPath().split(",")));
-                        if (!categories.isEmpty()) {
-                            index.setCategoryNamePath(ArrayUtil.join(categories.stream().map(Category::getName).toArray(), ","));
-                        }
-                    }
-                    //商品品牌索引
-                    Brand brand = brandService.getById(goods.getBrandId());
-                    if (brand != null) {
-                        index.setBrandName(brand.getName());
-                        index.setBrandUrl(brand.getLogo());
-                    }
-                    //店铺分类索引
-                    if (goods.getStoreCategoryPath() != null && CharSequenceUtil.isNotEmpty(goods.getStoreCategoryPath())) {
-                        List<StoreGoodsLabel> storeGoodsLabels = storeGoodsLabelService.listByStoreIds(Arrays.asList(goods.getStoreCategoryPath().split(",")));
-                        if (!storeGoodsLabels.isEmpty()) {
-                            index.setStoreCategoryNamePath(ArrayUtil.join(storeGoodsLabels.stream().map(StoreGoodsLabel::getLabelName).toArray(), ","));
-                        }
-                    }
-                    //促销索引
-                    Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
-                    index.setPromotionMap(goodsCurrentPromotionMap);
-                    esGoodsIndices.add(index);
-                    cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
+
                 }
+
                 //初始化商品索引
                 this.initIndex(esGoodsIndices);
             } catch (Exception e) {
@@ -661,6 +643,40 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     private String getIndexName() {
         //索引名称拼接
         return elasticsearchProperties.getIndexPrefix() + "_" + EsSuffix.GOODS_INDEX_NAME;
+    }
+
+    private EsGoodsIndex wrapperEsGoodsIndex(GoodsSku goodsSku, Goods goods) {
+        EsGoodsIndex index = new EsGoodsIndex(goodsSku);
+
+        //商品参数索引
+        if (goods.getParams() != null && !goods.getParams().isEmpty()) {
+            List<GoodsParamsDTO> goodsParamDTOS = JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class);
+            index = new EsGoodsIndex(goodsSku, goodsParamDTOS);
+        }
+        //商品分类索引
+        if (goods.getCategoryPath() != null) {
+            List<Category> categories = categoryService.listByIdsOrderByLevel(Arrays.asList(goods.getCategoryPath().split(",")));
+            if (!categories.isEmpty()) {
+                index.setCategoryNamePath(ArrayUtil.join(categories.stream().map(Category::getName).toArray(), ","));
+            }
+        }
+        //商品品牌索引
+        Brand brand = brandService.getById(goods.getBrandId());
+        if (brand != null) {
+            index.setBrandName(brand.getName());
+            index.setBrandUrl(brand.getLogo());
+        }
+        //店铺分类索引
+        if (goods.getStoreCategoryPath() != null && CharSequenceUtil.isNotEmpty(goods.getStoreCategoryPath())) {
+            List<StoreGoodsLabel> storeGoodsLabels = storeGoodsLabelService.listByStoreIds(Arrays.asList(goods.getStoreCategoryPath().split(",")));
+            if (!storeGoodsLabels.isEmpty()) {
+                index.setStoreCategoryNamePath(ArrayUtil.join(storeGoodsLabels.stream().map(StoreGoodsLabel::getLabelName).toArray(), ","));
+            }
+        }
+        //促销索引
+        Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
+        index.setPromotionMap(goodsCurrentPromotionMap);
+        return index;
     }
 
     private ActionListener<BulkByScrollResponse> actionListener() {

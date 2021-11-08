@@ -288,9 +288,11 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
      * @param goodsSkuList 商品sku信息
      */
     private void generatorGoodsIndex(Goods goods, List<GoodsSku> goodsSkuList) {
+        int skuNo = 100;
         for (GoodsSku goodsSku : goodsSkuList) {
             EsGoodsIndex esGoodsOld = goodsIndexService.findById(goodsSku.getId());
             EsGoodsIndex goodsIndex = this.settingUpGoodsIndexData(goods, goodsSku);
+            goodsIndex.setSkuNo(skuNo--);
             //如果商品库存不为0，并且es中有数据
             if (goodsSku.getQuantity() > 0 && esGoodsOld == null) {
                 log.info("生成商品索引 {}", goodsIndex);
