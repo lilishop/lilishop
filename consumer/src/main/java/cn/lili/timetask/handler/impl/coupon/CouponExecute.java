@@ -43,7 +43,7 @@ public class CouponExecute implements EveryDayExecute {
         this.memberCouponService.update(updateWrapper);
 
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_MONTH,calendar.get(Calendar.DAY_OF_MONTH)+EXPIRATION_DAY);
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + EXPIRATION_DAY);
         Date removeTime = calendar.getTime();
         //删除过期/已使用的优惠券
         LambdaUpdateWrapper<MemberCoupon> deleteWrapper = new LambdaUpdateWrapper<MemberCoupon>()
