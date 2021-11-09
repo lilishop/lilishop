@@ -1,10 +1,10 @@
-package cn.lili.modules.promotion.serviceimpl;
+package cn.lili.modules.member.serviceimpl;
 
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.member.mapper.MemberAddressMapper;
-import cn.lili.modules.promotion.service.MemberAddressService;
+import cn.lili.modules.member.service.MemberAddressService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
