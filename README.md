@@ -12,7 +12,7 @@
 
 
 
-##### 商城 公众号/小程序体验，扫描二维码
+##### 商城 公众号/小程序/APP 体验，扫描二维码
 
 ![image-20210511171611793](https://pickmall.cn/assets/imgs/h5-qrcode.png)
 
