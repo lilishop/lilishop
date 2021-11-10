@@ -108,7 +108,7 @@ public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Paramet
             goodsParamsItemDTO.setRequired(parameters.getRequired());
             goodsParamsItemDTO.setIsIndex(parameters.getIsIndex());
             goodsParamsItemDTO.setSort(parameters.getSort());
-            if (CharSequenceUtil.isNotEmpty(parameters.getOptions()) && !parameters.getOptions().contains(goodsParamsItemDTO.getParamValue())) {
+            if (CharSequenceUtil.isNotEmpty(parameters.getOptions()) && CharSequenceUtil.isNotEmpty(goodsParamsItemDTO.getParamValue()) && !parameters.getOptions().contains(goodsParamsItemDTO.getParamValue())) {
                 if (parameters.getOptions().contains(",")) {
                     goodsParamsItemDTO.setParamValue(parameters.getOptions().substring(0, parameters.getOptions().indexOf(",")));
                 } else {
