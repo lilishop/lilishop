@@ -1,4 +1,4 @@
-package cn.lili.modules.promotion.service;
+package cn.lili.modules.member.service;
 
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.MemberAddress;
