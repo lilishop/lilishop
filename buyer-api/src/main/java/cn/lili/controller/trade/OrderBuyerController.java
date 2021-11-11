@@ -1,10 +1,10 @@
 package cn.lili.controller.trade;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
@@ -12,6 +12,7 @@ import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.system.utils.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -23,6 +24,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 /**
  * 买家端,订单接口
@@ -44,7 +46,7 @@ public class OrderBuyerController {
     @ApiOperation(value = "查询会员订单列表")
     @GetMapping
     public ResultMessage<IPage<OrderSimpleVO>> queryMineOrder(OrderSearchParams orderSearchParams) {
-        AuthUser currentUser = UserContext.getCurrentUser();
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         orderSearchParams.setMemberId(currentUser.getId());
         return ResultUtil.data(orderService.queryByParams(orderSearchParams));
     }
@@ -55,7 +57,9 @@ public class OrderBuyerController {
     })
     @GetMapping(value = "/{orderSn}")
     public ResultMessage<OrderDetailVO> detail(@NotNull(message = "订单编号不能为空") @PathVariable("orderSn") String orderSn) {
-        return ResultUtil.data(orderService.queryDetail(orderSn));
+        OrderDetailVO orderDetailVO = orderService.queryDetail(orderSn);
+        OperationalJudgment.judgment(orderDetailVO.getOrder());
+        return ResultUtil.data(orderDetailVO);
     }
 
     @ApiOperation(value = "确认收货")
@@ -93,6 +97,7 @@ public class OrderBuyerController {
     })
     @DeleteMapping(value = "/{orderSn}")
     public ResultMessage<Object> deleteOrder(@PathVariable String orderSn) {
+        OperationalJudgment.judgment(orderService.getBySn(orderSn));
         orderService.deleteOrder(orderSn);
         return ResultUtil.success();
     }
@@ -103,6 +108,7 @@ public class OrderBuyerController {
     })
     @PostMapping(value = "/getTraces/{orderSn}")
     public ResultMessage<Object> getTraces(@NotBlank(message = "订单编号不能为空") @PathVariable String orderSn) {
+        OperationalJudgment.judgment(orderService.getBySn(orderSn));
         return ResultUtil.data(orderService.getTraces(orderSn));
     }
 
@@ -113,6 +119,7 @@ public class OrderBuyerController {
     })
     @PostMapping(value = "/receipt/{orderSn}")
     public ResultMessage<Object> invoice(@NotBlank(message = "订单编号不能为空") @PathVariable String orderSn) {
+        OperationalJudgment.judgment(orderService.getBySn(orderSn));
         return ResultUtil.data(orderService.invoice(orderSn));
     }
 

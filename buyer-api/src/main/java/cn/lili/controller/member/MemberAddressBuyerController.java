@@ -6,6 +6,7 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.member.service.MemberAddressService;
+import cn.lili.modules.system.utils.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Objects;
 
 
 /**
@@ -56,7 +58,7 @@ public class MemberAddressBuyerController {
     @PostMapping
     public ResultMessage<MemberAddress> addShippingAddress(@Valid MemberAddress shippingAddress) {
         //添加会员地址
-        shippingAddress.setMemberId(UserContext.getCurrentUser().getId());
+        shippingAddress.setMemberId(Objects.requireNonNull(UserContext.getCurrentUser()).getId());
         if(shippingAddress.getIsDefault()==null){
             shippingAddress.setIsDefault(false);
         }
@@ -73,6 +75,7 @@ public class MemberAddressBuyerController {
     @ApiImplicitParam(name = "id", value = "会员地址ID", dataType = "String", paramType = "path")
     @DeleteMapping(value = "/delById/{id}")
     public ResultMessage<Object> delShippingAddressById(@PathVariable String id) {
+        OperationalJudgment.judgment(memberAddressService.getById(id));
         memberAddressService.removeMemberAddress(id);
         return ResultUtil.success();
     }

@@ -302,6 +302,13 @@
             <artifactId>commons-text</artifactId>
             <version>${commons-text}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.googlecode.owasp-java-html-sanitizer/owasp-java-html-sanitizer -->
+        <dependency>
+            <groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
+            <artifactId>owasp-java-html-sanitizer</artifactId>
+            <version>${owasp-java-html-sanitizer}</version>
+        </dependency>
+
     </dependencies>
 
 

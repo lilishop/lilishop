@@ -1,6 +1,6 @@
 package cn.lili.test.elasticsearch;
 
-import cn.hutool.core.util.ReflectUtil;
+import cn.hutool.http.HtmlUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.common.vo.PageVO;
@@ -20,14 +20,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.owasp.html.PolicyFactory;
+import org.owasp.html.Sanitizers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -59,47 +59,12 @@ class EsTest {
 
 
     public static void main(String[] args) {
-        EsGoodsIndex goodsIndex = new EsGoodsIndex();
-        goodsIndex.setGoodsName("1111");
-        goodsIndex.setBuyCount(99);
-        goodsIndex.setCommentNum(99);
-        goodsIndex.setGrade(100D);
-        goodsIndex.setHighPraiseNum(100);
-        goodsIndex.setIntro("I'd like a cup of tea, please");
-        goodsIndex.setIsAuth("1");
-        goodsIndex.setMarketEnable("1");
-        goodsIndex.setMobileIntro("I want something cold to drink");
-        goodsIndex.setPoint(0);
-        goodsIndex.setSelfOperated(true);
-        goodsIndex.setThumbnail("picture");
-        goodsIndex.setStoreCategoryPath("1");
-
-        String ignoreField = "serialVersionUID,promotionMap,id,goodsId";
-
-        List<EsGoodsIndex> goodsIndices = new ArrayList<>();
-        Map<String, Field> fieldMap = ReflectUtil.getFieldMap(EsGoodsIndex.class);
-        for (int i = 0; i < 10; i++) {
-            EsGoodsIndex a = new EsGoodsIndex();
-            for (Map.Entry<String, Field> entry : fieldMap.entrySet()) {
-                Object fieldValue = ReflectUtil.getFieldValue(goodsIndex, entry.getValue());
-                if (fieldValue != null && !ignoreField.contains(entry.getKey())) {
-                    ReflectUtil.setFieldValue(a, entry.getValue(), fieldValue);
-                }
-            }
-            goodsIndices.add(a);
-        }
-
-        ;
-//        BeanUtil.copyProperties(goodsIndex, a);
-        System.out.println(cn.hutool.core.date.DateUtil.endOfDay(new Date()));
-//        ReflectUtil.getFieldValue(goodsIndex, )
-//        for (Object o : ReflectUtil.getFieldsValue(goodsIndex)) {
-//            if (o != null) {
-//                System.out.println(o);
-//            }
-//        }
-
-
+        PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS);
+        String safeHTML = policy.sanitize("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-");
+        System.out.println(safeHTML);
+        System.out.println(Sanitizers.FORMATTING.and(Sanitizers.FORMATTING).sanitize("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-"));
+        System.out.println(HtmlUtil.unescape(safeHTML));
+        System.out.println(HtmlUtil.filter("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-"));
     }
 
     @Test

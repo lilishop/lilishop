@@ -13,6 +13,7 @@ import cn.lili.modules.order.order.service.AfterSaleReasonService;
 import cn.lili.modules.order.order.service.AfterSaleService;
 import cn.lili.modules.order.trade.entity.dos.AfterSaleLog;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
+import cn.lili.modules.system.utils.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -57,7 +58,8 @@ public class AfterSaleBuyerController {
     @ApiImplicitParam(name = "sn", value = "售后单号", required = true, paramType = "path")
     @GetMapping(value = "/get/{sn}")
     public ResultMessage<AfterSaleVO> get(@NotNull(message = "售后单号") @PathVariable("sn") String sn) {
-        return ResultUtil.data(afterSaleService.getAfterSale(sn));
+        AfterSaleVO afterSale = OperationalJudgment.judgment(afterSaleService.getAfterSale(sn));
+        return ResultUtil.data(afterSale);
     }
 
     @ApiOperation(value = "分页获取售后服务")
@@ -72,7 +74,8 @@ public class AfterSaleBuyerController {
     })
     @GetMapping(value = "/applyAfterSaleInfo/{sn}")
     public ResultMessage<AfterSaleApplyVO> applyAfterSaleInfo(@PathVariable String sn) {
-        return ResultUtil.data(afterSaleService.getAfterSaleVO(sn));
+        AfterSaleApplyVO afterSaleApplyVO = OperationalJudgment.judgment(afterSaleService.getAfterSaleVO(sn));
+        return ResultUtil.data(afterSaleApplyVO);
     }
 
     @PostMapping(value = "/save/{orderItemSn}")
@@ -95,7 +98,7 @@ public class AfterSaleBuyerController {
     public ResultMessage<AfterSale> delivery(@NotNull(message = "售后编号不能为空") @PathVariable("afterSaleSn") String afterSaleSn,
                                              @NotNull(message = "发货单号不能为空") @RequestParam String logisticsNo,
                                              @NotNull(message = "请选择物流公司") @RequestParam String logisticsId,
-                                             @NotNull(message = "请选择发货时间") @RequestParam  @DateTimeFormat(pattern = "yyyy-MM-dd") Date mDeliverTime) {
+                                             @NotNull(message = "请选择发货时间") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date mDeliverTime) {
         return ResultUtil.data(afterSaleService.buyerDelivery(afterSaleSn, logisticsNo, logisticsId, mDeliverTime));
     }
 

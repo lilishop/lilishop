@@ -32,8 +32,8 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleRefundWayEnum;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleTypeEnum;
-import cn.lili.modules.payment.kit.RefundSupport;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
+import cn.lili.modules.payment.kit.RefundSupport;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
@@ -404,7 +404,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
 
         //写入商家信息
         OrderItem orderItem = orderItemService.getBySn(afterSaleDTO.getOrderItemSn());
-        Order order = orderService.getBySn(orderItem.getOrderSn());
+        Order order = OperationalJudgment.judgment(orderService.getBySn(orderItem.getOrderSn()));
         afterSale.setStoreId(order.getStoreId());
         afterSale.setStoreName(order.getStoreName());
 

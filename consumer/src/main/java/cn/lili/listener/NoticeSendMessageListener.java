@@ -2,11 +2,9 @@ package cn.lili.listener;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.SwitchEnum;
-import cn.lili.rocketmq.tags.OtherTagsEnum;
-import cn.lili.modules.system.sms.SmsUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
+import cn.lili.modules.member.entity.vo.MemberVO;
 import cn.lili.modules.member.mapper.MemberMapper;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.message.entity.dos.MemberMessage;
@@ -20,6 +18,8 @@ import cn.lili.modules.message.service.MemberMessageService;
 import cn.lili.modules.message.service.StoreMessageService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.service.StoreService;
+import cn.lili.modules.system.sms.SmsUtil;
+import cn.lili.rocketmq.tags.OtherTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.rocketmq.common.message.MessageExt;
@@ -169,7 +169,7 @@ public class NoticeSendMessageListener implements RocketMQListener<MessageExt> {
                 PageVO pageVO = new PageVO();
                 pageVO.setPageSize(pageSize);
                 pageVO.setPageNumber(i);
-                IPage<Member> page = memberService.getMemberPage(memberSearchVO, pageVO);
+                IPage<MemberVO> page = memberService.getMemberPage(memberSearchVO, pageVO);
                 //循环要保存的信息
                 page.getRecords().forEach(item -> {
                     MemberMessage memberMessage = new MemberMessage();

@@ -13,6 +13,7 @@ import cn.lili.modules.order.order.entity.vo.OrderComplaintSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderComplaintVO;
 import cn.lili.modules.order.order.service.OrderComplaintCommunicationService;
 import cn.lili.modules.order.order.service.OrderComplaintService;
+import cn.lili.modules.system.utils.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Objects;
 
 /**
  * 买家端,交易投诉接口
@@ -51,13 +53,15 @@ public class OrderComplaintBuyerController {
     @ApiImplicitParam(name = "id", value = "投诉单ID", required = true, paramType = "path")
     @GetMapping(value = "/{id}")
     public ResultMessage<OrderComplaintVO> get(@PathVariable String id) {
-        return ResultUtil.data(orderComplaintService.getOrderComplainById(id));
+        OrderComplaintVO orderComplaintVO = OperationalJudgment.judgment(orderComplaintService.getOrderComplainById(id));
+        return ResultUtil.data(orderComplaintVO);
     }
 
     @ApiOperation(value = "分页获取")
     @GetMapping
     public ResultMessage<IPage<OrderComplaint>> get(OrderComplaintSearchParams searchParams, PageVO pageVO) {
-        searchParams.setMemberId(UserContext.getCurrentUser().getId());
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        searchParams.setMemberId(currentUser.getId());
         return ResultUtil.data(orderComplaintService.getOrderComplainByPage(searchParams, pageVO));
 
     }
@@ -75,7 +79,7 @@ public class OrderComplaintBuyerController {
     })
     @PostMapping("/communication")
     public ResultMessage<OrderComplaintCommunicationVO> addCommunication(@RequestParam String complainId, @RequestParam String content) {
-        AuthUser currentUser = UserContext.getCurrentUser();
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         OrderComplaintCommunicationVO communicationVO = new OrderComplaintCommunicationVO(complainId, content, CommunicationOwnerEnum.BUYER.name(), currentUser.getId(), currentUser.getNickName());
         orderComplaintCommunicationService.addCommunication(communicationVO);
         return ResultUtil.data(communicationVO);

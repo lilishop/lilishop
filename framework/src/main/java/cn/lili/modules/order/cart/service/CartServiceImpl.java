@@ -118,6 +118,9 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void add(String skuId, Integer num, String cartType, Boolean cover) {
+        if (num <= 0) {
+            throw new ServiceException(ResultCode.CART_NUM_ERROR);
+        }
         CartTypeEnum cartTypeEnum = getCartType(cartType);
         GoodsSku dataSku = checkGoods(skuId);
         try {
@@ -492,6 +495,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void selectCoupon(String couponId, String way, boolean use) {
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         //获取购物车，然后重新写入优惠券
         CartTypeEnum cartTypeEnum = getCartType(way);
         TradeDTO tradeDTO = this.readDTO(cartTypeEnum);
@@ -500,6 +504,7 @@ public class CartServiceImpl implements CartService {
                 memberCouponService.getOne(
                         new LambdaQueryWrapper<MemberCoupon>()
                                 .eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name())
+                                .eq(MemberCoupon::getMemberId, currentUser.getId())
                                 .eq(MemberCoupon::getId, couponId));
         if (memberCoupon == null) {
             throw new ServiceException(ResultCode.COUPON_EXPIRED);
@@ -507,7 +512,7 @@ public class CartServiceImpl implements CartService {
         //使用优惠券 与否
         if (use) {
             this.useCoupon(tradeDTO, memberCoupon, cartTypeEnum);
-        } else if (!use) {
+        } else {
             if (Boolean.TRUE.equals(memberCoupon.getIsPlatform())) {
                 tradeDTO.setPlatformCoupon(null);
             } else {
@@ -679,7 +684,7 @@ public class CartServiceImpl implements CartService {
         //拼团活动，需要对限购数量进行判定
         //获取拼团信息
         List<PromotionGoods> currentPromotion = cartSkuVO.getPromotions().stream().filter(
-                promotionGoods -> (promotionGoods.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())))
+                        promotionGoods -> (promotionGoods.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())))
                 .collect(Collectors.toList());
         //拼团活动判定
         if (!currentPromotion.isEmpty()) {

@@ -2,6 +2,7 @@ package cn.lili.modules.member.serviceimpl;
 
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.context.ThreadContextHolder;
@@ -11,6 +12,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CookieUtil;
@@ -30,6 +32,7 @@ import cn.lili.modules.member.entity.dto.MemberPointMessage;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.entity.vo.MemberDistributionVO;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
+import cn.lili.modules.member.entity.vo.MemberVO;
 import cn.lili.modules.member.mapper.MemberMapper;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.member.token.MemberTokenGenerate;
@@ -363,7 +366,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @Override
-    public IPage<Member> getMemberPage(MemberSearchVO memberSearchVO, PageVO page) {
+    public IPage<MemberVO> getMemberPage(MemberSearchVO memberSearchVO, PageVO page) {
         QueryWrapper<Member> queryWrapper = Wrappers.query();
         //用户名查询
         queryWrapper.like(StringUtils.isNotBlank(memberSearchVO.getUsername()), "username", memberSearchVO.getUsername());
@@ -375,7 +378,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         queryWrapper.eq(StringUtils.isNotBlank(memberSearchVO.getDisabled()), "disabled",
                 memberSearchVO.getDisabled().equals(SwitchEnum.OPEN.name()) ? 1 : 0);
         queryWrapper.orderByDesc("create_time");
-        return this.page(PageUtil.initPage(page), queryWrapper);
+        return this.baseMapper.pageByMemberVO(PageUtil.initPage(page), queryWrapper);
     }
 
     @Override
@@ -571,6 +574,17 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 memberSearchVO.getDisabled().equals(SwitchEnum.OPEN.name()) ? 1 : 0);
         queryWrapper.orderByDesc("create_time");
         return this.count(queryWrapper);
+    }
+
+    /**
+     * 登出
+     */
+    @Override
+    public void logout(UserEnums userEnums) {
+        String currentUserToken = UserContext.getCurrentUserToken();
+        if (CharSequenceUtil.isNotEmpty(currentUserToken)) {
+            cache.remove(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums) + currentUserToken);
+        }
     }
 
     /**

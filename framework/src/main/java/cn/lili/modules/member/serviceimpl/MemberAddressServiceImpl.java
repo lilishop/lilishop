@@ -14,6 +14,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 /**
  * 收货地址业务层实现
  *
@@ -36,7 +38,7 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
     public MemberAddress getMemberAddress(String id) {
         return this.getOne(
                 new QueryWrapper<MemberAddress>()
-                        .eq("member_id", UserContext.getCurrentUser().getId())
+                        .eq("member_id", Objects.requireNonNull(UserContext.getCurrentUser()).getId())
                         .eq("id", id));
     }
 
@@ -49,7 +51,7 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
     public MemberAddress getDefaultMemberAddress() {
         return this.getOne(
                 new QueryWrapper<MemberAddress>()
-                        .eq("member_id", UserContext.getCurrentUser().getId())
+                        .eq("member_id", Objects.requireNonNull(UserContext.getCurrentUser()).getId())
                         .eq("is_default", true));
     }
 
@@ -67,7 +69,7 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
     public MemberAddress updateMemberAddress(MemberAddress memberAddress) {
         MemberAddress originalMemberAddress = this.getMemberAddress(memberAddress.getId());
         if (originalMemberAddress != null &&
-                originalMemberAddress.getMemberId().equals(UserContext.getCurrentUser().getId())) {
+                originalMemberAddress.getMemberId().equals(Objects.requireNonNull(UserContext.getCurrentUser()).getId())) {
 
             if (memberAddress.getIsDefault() == null) {
                 memberAddress.setIsDefault(false);
@@ -93,7 +95,7 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
      */
     private void removeDefaultAddress(MemberAddress memberAddress) {
         //如果不是默认地址不需要处理
-        if (memberAddress.getIsDefault()) {
+        if (Boolean.TRUE.equals(memberAddress.getIsDefault())) {
             //将会员的地址修改为非默认地址
             LambdaUpdateWrapper<MemberAddress> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
             lambdaUpdateWrapper.set(MemberAddress::getIsDefault, false);

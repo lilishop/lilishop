@@ -4,6 +4,7 @@ package cn.lili.common.security.filter;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.http.HtmlUtil;
 import cn.hutool.json.JSONUtil;
+import org.owasp.html.Sanitizers;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
@@ -28,6 +29,7 @@ import java.util.Map;
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
+    private static final String[] ignoreField = {"logo", "url", "photo", "intro", "content", "name"};
 
     public XssHttpServletRequestWrapper(HttpServletRequest request) {
         super(request);
@@ -42,13 +44,10 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         if (values == null) {
             return new String[0];
         }
-        if (ignoreXss(name)) {
-            return values;
-        }
         int count = values.length;
         String[] encodedValues = new String[count];
         for (int i = 0; i < count; i++) {
-            encodedValues[i] = cleanXSS(values[i]);
+            encodedValues[i] = filterXss(name, values[i]);
         }
         return encodedValues;
     }
@@ -62,7 +61,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         if (value == null) {
             return null;
         }
-        return ignoreXss(name) ? value : cleanXSS(value);
+        return filterXss(name, value);
     }
 
     /**
@@ -71,11 +70,8 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     @Override
     public Object getAttribute(String name) {
         Object value = super.getAttribute(name);
-        if (ignoreXss(name)) {
-            return value;
-        }
         if (value instanceof String) {
-            value = cleanXSS((String) value);
+            value = filterXss(name, (String) value);
         }
         return value;
     }
@@ -89,7 +85,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         if (value == null) {
             return null;
         }
-        return ignoreXss(name) ? value : cleanXSS(value);
+        return filterXss(name, value);
     }
 
     @Override
@@ -103,15 +99,14 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
                 //根据key获取value
                 String[] values = entry.getValue();
-                if (!ignoreXss(entry.getKey())) {
-                    //遍历数组
-                    for (int i = 0; i < values.length; i++) {
-                        String value = values[i];
-                        value = cleanXSS(value);
-                        //将转义后的数据放回数组中
-                        values[i] = value;
-                    }
+                //遍历数组
+                for (int i = 0; i < values.length; i++) {
+                    String value = values[i];
+                    value = filterXss(entry.getKey(), value);
+                    //将转义后的数据放回数组中
+                    values[i] = value;
                 }
+
                 //将转义后的数组put到linkMap当中
                 params.put(entry.getKey(), values);
             }
@@ -153,9 +148,9 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             Map<String, Object> resultMap = new HashMap<>(map.size());
             //遍历数组
             for (Map.Entry<String, Object> entry : map.entrySet()) {
-                //如果map.get(key)获取到的是字符串就需要进行转义，如果不是直接存储resultMap
-                if (map.get(entry.getKey()) instanceof String && !ignoreXss(entry.getKey())) {
-                    resultMap.put(entry.getKey(), cleanXSS(entry.getValue().toString()));
+                //如果map.get(key)获取到的是字符串就需要进行处理，如果不是直接存储resultMap
+                if (map.get(entry.getKey()) instanceof String) {
+                    resultMap.put(entry.getKey(), filterXss(entry.getKey(), entry.getValue().toString()));
                 } else {
                     resultMap.put(entry.getKey(), entry.getValue());
                 }
@@ -219,13 +214,25 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private String cleanXSS(String value) {
         if (value != null) {
-            value = HtmlUtil.escape(value);
+            value = Sanitizers.FORMATTING.and(Sanitizers.LINKS).sanitize(value);
         }
         return value;
     }
 
-    private boolean ignoreXss(String name) {
-        return CharSequenceUtil.containsAny(name.toLowerCase(Locale.ROOT), "logo", "url", "photo", "intro");
+    /**
+     * 过滤xss
+     *
+     * @param name  参数名
+     * @param value 参数值
+     * @return 参数值
+     */
+    private String filterXss(String name, String value) {
+        if (CharSequenceUtil.containsAny(name.toLowerCase(Locale.ROOT), ignoreField)) {
+            // 忽略的处理，（过滤敏感字符）
+            return HtmlUtil.filter(value);
+        } else {
+            return cleanXSS(value);
+        }
     }
 
 }

@@ -1,6 +1,7 @@
 package cn.lili.modules.member.service;
 
 
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
@@ -10,6 +11,7 @@ import cn.lili.modules.member.entity.dto.MemberAddDTO;
 import cn.lili.modules.member.entity.dto.MemberEditDTO;
 import cn.lili.modules.member.entity.vo.MemberDistributionVO;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
+import cn.lili.modules.member.entity.vo.MemberVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -141,7 +143,7 @@ public interface MemberService extends IService<Member> {
      * @param page           分页
      * @return 会员分页
      */
-    IPage<Member> getMemberPage(MemberSearchVO memberSearchVO, PageVO page);
+    IPage<MemberVO> getMemberPage(MemberSearchVO memberSearchVO, PageVO page);
 
     /**
      * 一键注册会员
@@ -209,4 +211,11 @@ public interface MemberService extends IService<Member> {
      * @return 会员总数
      */
     Integer getMemberNum(MemberSearchVO memberSearchVO);
+
+    /**
+     * 登出
+     *
+     * @param userEnums token角色类型
+     */
+    void logout(UserEnums userEnums);
 }
