@@ -25,6 +25,14 @@ public enum SensitiveStrategy {
      */
     PHONE(s -> s.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2")),
     /**
+     * Email sensitive type.
+     */
+    EMAIL(s -> s.replaceAll("(^\\w)[^@]*(@.*$)", "$1****$2")),
+    /**
+     * Name sensitive type.
+     */
+    NAME(s -> s.replaceAll("^(.{3}).+(.{3})$", "$1*****$2")),
+    /**
      * Address sensitive type.
      */
     ADDRESS(s -> s.replaceAll("(\\S{3})\\S{2}(\\S*)\\S{2}", "$1****$2****"));

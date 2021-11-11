@@ -1,5 +1,7 @@
 package cn.lili.modules.page.entity.dos;
 
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.modules.page.entity.enums.FeedbackTypeEnum;
 import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
@@ -9,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,6 +25,7 @@ import java.util.Date;
  * @author Bulbasaur
  * @since 2020/12/10 17:42
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("li_feedback")
 @ApiModel(value = "意见反馈")
@@ -46,6 +50,7 @@ public class Feedback extends BaseIdEntity {
 
     @ApiModelProperty(value = "手机号")
     @Length(max = 11, message = "手机号不能超过11位")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String mobile;
 
     @ApiModelProperty(value = "图片，多个图片使用：(，)分割")

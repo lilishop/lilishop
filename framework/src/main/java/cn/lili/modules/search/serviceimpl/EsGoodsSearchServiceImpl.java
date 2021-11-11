@@ -397,7 +397,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             filterBuilder.must(QueryBuilders.termsQuery(ATTR_BRAND_ID, brands));
         }
         if (searchDTO.getRecommend() != null) {
-            filterBuilder.filter(QueryBuilders.termQuery("storeId", searchDTO.getRecommend()));
+            filterBuilder.filter(QueryBuilders.termQuery("recommend", searchDTO.getRecommend()));
         }
         //规格项判定
         if (searchDTO.getNameIds() != null && !searchDTO.getNameIds().isEmpty()) {

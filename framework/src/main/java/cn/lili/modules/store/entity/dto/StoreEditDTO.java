@@ -1,5 +1,7 @@
 package cn.lili.modules.store.entity.dto;
 
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.common.validation.Mobile;
 import cn.lili.common.validation.Phone;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -37,11 +39,13 @@ public class StoreEditDTO {
     @NotBlank(message = "公司名称不能为空")
     @Size(min = 2, max = 100, message = "公司名称错误")
     @ApiModelProperty(value = "公司名称")
+    @Sensitive(strategy = SensitiveStrategy.USERNAME)
     private String companyName;
 
     @NotBlank(message = "公司地址不能为空")
     @Size(min = 1, max = 200, message = "公司地址,长度为1-200字符")
     @ApiModelProperty(value = "公司地址")
+    @Sensitive(strategy = SensitiveStrategy.ADDRESS)
     private String companyAddress;
 
     @ApiModelProperty(value = "公司地址地区Id")
@@ -52,10 +56,12 @@ public class StoreEditDTO {
 
     @Mobile
     @ApiModelProperty(value = "公司电话")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String companyPhone;
 
     @Email
     @ApiModelProperty(value = "电子邮箱")
+    @Sensitive(strategy = SensitiveStrategy.EMAIL)
     private String companyEmail;
 
     @Min(value = 1, message = "员工总数,至少一位")
@@ -74,10 +80,12 @@ public class StoreEditDTO {
     @NotBlank(message = "手机号不能为空")
     @Phone
     @ApiModelProperty(value = "联系人电话")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String linkPhone;
 
     @Size(min = 18, max = 18, message = "营业执照长度为18位字符")
     @ApiModelProperty(value = "营业执照号")
+    @Sensitive(strategy = SensitiveStrategy.NAME)
     private String licenseNum;
 
     @Size(min = 1, max = 200, message = "法定经营范围长度为1-200位字符")
@@ -91,11 +99,13 @@ public class StoreEditDTO {
     @NotBlank(message = "法人姓名不能为空")
     @Size(min = 2, max = 20, message = "法人姓名长度为2-20位字符")
     @ApiModelProperty(value = "法人姓名")
+    @Sensitive(strategy = SensitiveStrategy.USERNAME)
     private String legalName;
 
     @NotBlank(message = "法人身份证不能为空")
     @Size(min = 18, max = 18, message = "法人身份证号长度为18位")
     @ApiModelProperty(value = "法人身份证")
+    @Sensitive(strategy = SensitiveStrategy.ID_CARD)
     private String legalId;
 
     @NotBlank(message = "法人身份证不能为空")
@@ -105,21 +115,25 @@ public class StoreEditDTO {
     @Size(min = 1, max = 200, message = "结算银行开户行名称长度为1-200位")
     @NotBlank(message = "结算银行开户行名称不能为空")
     @ApiModelProperty(value = "结算银行开户行名称")
+    @Sensitive(strategy = SensitiveStrategy.NAME)
     private String settlementBankAccountName;
 
     @Size(min = 1, max = 200, message = "结算银行开户账号长度为1-200位")
     @NotBlank(message = "结算银行开户账号不能为空")
     @ApiModelProperty(value = "结算银行开户账号")
+    @Sensitive(strategy = SensitiveStrategy.NAME)
     private String settlementBankAccountNum;
 
     @Size(min = 1, max = 200, message = "结算银行开户支行名称长度为1-200位")
     @NotBlank(message = "结算银行开户支行名称不能为空")
     @ApiModelProperty(value = "结算银行开户支行名称")
+    @Sensitive(strategy = SensitiveStrategy.NAME)
     private String settlementBankBranchName;
 
     @Size(min = 1, max = 50, message = "结算银行支行联行号长度为1-200位")
     @NotBlank(message = "结算银行支行联行号不能为空")
     @ApiModelProperty(value = "结算银行支行联行号")
+    @Sensitive(strategy = SensitiveStrategy.NAME)
     private String settlementBankJointName;
 
     @NotBlank(message = "店铺经营类目不能为空")
@@ -141,11 +155,12 @@ public class StoreEditDTO {
     private String ddCode;
 
     //店铺退货收件地址
-
     @ApiModelProperty(value = "收货人姓名")
+    @Sensitive(strategy = SensitiveStrategy.USERNAME)
     private String salesConsigneeName;
 
     @ApiModelProperty(value = "收件人手机")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String salesConsigneeMobile;
 
     @ApiModelProperty(value = "地址Id， '，'分割")

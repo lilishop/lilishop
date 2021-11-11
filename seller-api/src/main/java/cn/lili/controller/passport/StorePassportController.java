@@ -4,11 +4,12 @@ package cn.lili.controller.passport;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.verification.enums.VerificationEnums;
-import cn.lili.modules.verification.service.VerificationService;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
+import cn.lili.modules.verification.enums.VerificationEnums;
+import cn.lili.modules.verification.service.VerificationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -52,6 +53,13 @@ public class StorePassportController {
         } else {
             throw new ServiceException(ResultCode.VERIFICATION_ERROR);
         }
+    }
+
+    @ApiOperation(value = "注销接口")
+    @PostMapping("/logout")
+    public ResultMessage<Object> logout() {
+        this.memberService.logout(UserEnums.STORE);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "修改密码")

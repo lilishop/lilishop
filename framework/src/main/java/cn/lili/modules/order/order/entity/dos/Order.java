@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -33,6 +34,7 @@ import java.util.Optional;
  * @author Chopper
  * @since 2020/11/17 7:30 下午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("li_order")
 @ApiModel(value = "订单")
@@ -88,6 +90,7 @@ public class Order extends BaseEntity {
     private Date paymentTime;
 
     @ApiModelProperty(value = "收件人姓名")
+    @Sensitive(strategy = SensitiveStrategy.USERNAME)
     private String consigneeName;
 
     @ApiModelProperty(value = "收件人手机")
@@ -107,6 +110,7 @@ public class Order extends BaseEntity {
     private String consigneeAddressIdPath;
 
     @ApiModelProperty(value = "详细地址")
+    @Sensitive(strategy = SensitiveStrategy.ADDRESS)
     private String consigneeDetail;
 
     @ApiModelProperty(value = "总价格")

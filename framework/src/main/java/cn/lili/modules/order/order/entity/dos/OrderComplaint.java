@@ -1,12 +1,15 @@
 package cn.lili.modules.order.order.entity.dos;
 
-import cn.lili.mybatis.BaseEntity;
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.modules.order.order.entity.enums.ComplaintStatusEnum;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
@@ -16,6 +19,7 @@ import java.util.Date;
  * @author paulG
  * @since 2020/12/4
  **/
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("li_order_complaint")
 @ApiModel(value = "订单交易投诉")
@@ -96,12 +100,15 @@ public class OrderComplaint extends BaseEntity {
     private String memberName;
 
     @ApiModelProperty(value = "收货人")
+    @Sensitive(strategy = SensitiveStrategy.USERNAME)
     private String consigneeName;
 
     @ApiModelProperty(value = "收货地址")
+    @Sensitive(strategy = SensitiveStrategy.ADDRESS)
     private String consigneeAddressPath;
 
     @ApiModelProperty(value = "收货人手机")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String consigneeMobile;
 
     @ApiModelProperty(value = "仲裁结果")

@@ -3,11 +3,10 @@ package cn.lili.modules.order.order.serviceimpl;
 import cn.hutool.core.util.StrUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.modules.system.utils.OperationalJudgment;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -24,6 +23,8 @@ import cn.lili.modules.order.order.service.OrderComplaintCommunicationService;
 import cn.lili.modules.order.order.service.OrderComplaintService;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.system.utils.OperationalJudgment;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 交易投诉业务层实现
@@ -120,6 +122,7 @@ public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper,
     public OrderComplaint addOrderComplain(OrderComplaintDTO orderComplaintDTO) {
 
         try {
+            AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
             //查询订单信息
             OrderDetailVO orderDetailVO = orderService.queryDetail(orderComplaintDTO.getOrderSn());
             List<OrderItem> orderItems = orderDetailVO.getOrderItems();
@@ -159,8 +162,8 @@ public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper,
             orderComplaint.setStoreId(orderDetailVO.getOrder().getStoreId());
             orderComplaint.setStoreName(orderDetailVO.getOrder().getStoreName());
 
-            orderComplaint.setMemberId(UserContext.getCurrentUser().getId());
-            orderComplaint.setMemberName(UserContext.getCurrentUser().getUsername());
+            orderComplaint.setMemberId(currentUser.getId());
+            orderComplaint.setMemberName(currentUser.getUsername());
             //保存订单投诉
             this.save(orderComplaint);
 
@@ -213,8 +216,7 @@ public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper,
 
     @Override
     public boolean cancel(String id) {
-
-        OrderComplaint orderComplaint = this.getById(id);
+        OrderComplaint orderComplaint = OperationalJudgment.judgment(this.getById(id));
         //如果以及仲裁，则不可以进行申诉取消
         if(orderComplaint.getComplainStatus().equals(ComplaintStatusEnum.COMPLETE.name())){
             throw new ServiceException(ResultCode.COMPLAINT_CANCEL_ERROR);

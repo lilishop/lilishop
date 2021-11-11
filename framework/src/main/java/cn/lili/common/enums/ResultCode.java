@@ -37,6 +37,7 @@ public enum ResultCode {
     LIMIT_ERROR(1003, "访问过于频繁，请稍后再试"),
     ILLEGAL_REQUEST_ERROR(1004, "非法请求，请重新刷新页面操作"),
     IMAGE_FILE_EXT_ERROR(1005, "不支持图片格式"),
+    FILE_TYPE_NOT_SUPPORT(1010, "不支持上传的文件类型！"),
     PLATFORM_NOT_SUPPORTED_IM(1006, "平台未开启IM"),
     STORE_NOT_SUPPORTED_IM(1007, "店铺未开启IM"),
     /**
@@ -155,6 +156,7 @@ public enum ResultCode {
      * 购物车
      */
     CART_ERROR(30001, "读取结算页的购物车异常"),
+    CART_NUM_ERROR(30010, "购买数量必须大于0"),
     CART_PINTUAN_NOT_EXIST_ERROR(30002, "拼团活动已关闭，请稍后重试"),
     CART_PINTUAN_LIMIT_ERROR(30003, "购买数量超过拼团活动限制数量"),
     SHIPPING_NOT_APPLY(30005, "购物商品不支持当前收货地址配送"),

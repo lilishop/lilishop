@@ -1,12 +1,11 @@
 package cn.lili.modules.permission.serviceimpl;
 
-import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.token.Token;
-import cn.lili.modules.system.token.ManagerTokenGenerate;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.permission.entity.dos.AdminUser;
@@ -17,6 +16,8 @@ import cn.lili.modules.permission.entity.dto.AdminUserDTO;
 import cn.lili.modules.permission.entity.vo.AdminUserVO;
 import cn.lili.modules.permission.mapper.AdminUserMapper;
 import cn.lili.modules.permission.service.*;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
+import cn.lili.modules.system.token.ManagerTokenGenerate;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -68,7 +69,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
 
         adminUserPage.getRecords().forEach(adminUser -> {
             AdminUserVO adminUserVO = new AdminUserVO(adminUser);
-            if (!StringUtils.isEmpty(adminUser.getDepartmentId())) {
+            if (!CharSequenceUtil.isEmpty(adminUser.getDepartmentId())) {
                 try {
                     adminUserVO.setDepartmentTitle(
                             departments.stream().filter
@@ -208,8 +209,8 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
         if (roles.size() > rolesMaxSize) {
             throw new ServiceException(ResultCode.PERMISSION_BEYOND_TEN);
         }
-        if (roles.size() > 0) {
-            dbUser.setRoleIds(StringUtils.join(",", roles));
+        if (!roles.isEmpty()) {
+            dbUser.setRoleIds(CharSequenceUtil.join(",", roles));
         }
         this.save(dbUser);
         dbUser = this.findByUsername(dbUser.getUsername());
