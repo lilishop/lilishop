@@ -1,7 +1,5 @@
 package cn.lili.modules.order.order.entity.dos;
 
-import cn.lili.common.security.sensitive.Sensitive;
-import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.modules.order.order.entity.enums.ComplaintStatusEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -100,15 +98,12 @@ public class OrderComplaint extends BaseEntity {
     private String memberName;
 
     @ApiModelProperty(value = "收货人")
-    @Sensitive(strategy = SensitiveStrategy.USERNAME)
     private String consigneeName;
 
     @ApiModelProperty(value = "收货地址")
-    @Sensitive(strategy = SensitiveStrategy.ADDRESS)
     private String consigneeAddressPath;
 
     @ApiModelProperty(value = "收货人手机")
-    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String consigneeMobile;
 
     @ApiModelProperty(value = "仲裁结果")
