@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -54,7 +53,6 @@ public class StoreEditDTO {
     @ApiModelProperty(value = "公司电话")
     private String companyPhone;
 
-    @Email
     @ApiModelProperty(value = "电子邮箱")
     private String companyEmail;
 
