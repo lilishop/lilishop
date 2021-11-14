@@ -309,8 +309,10 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
      * @return 用户信息
      */
     public JSONObject getUserInfo(String encryptedData, String sessionKey, String iv) {
+
+        log.info("encryptedData:{},sessionKey:{},iv:{}", encryptedData, sessionKey, iv);
         //被加密的数据
-        byte[] dataByte = Base64.getDecoder().decode(encryptedData.replace("\r\n", ""));
+        byte[] dataByte = Base64.getDecoder().decode(encryptedData);
         //加密秘钥
         byte[] keyByte = Base64.getDecoder().decode(sessionKey);
         //偏移量

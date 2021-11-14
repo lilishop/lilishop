@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
-    private static final String[] ignoreField = {"logo", "url", "photo", "intro", "content", "name"};
+    private static final String[] ignoreField = {"logo", "url", "photo", "intro", "content", "name", "encrypted"};
 
     public XssHttpServletRequestWrapper(HttpServletRequest request) {
         super(request);
