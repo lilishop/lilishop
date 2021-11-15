@@ -115,7 +115,6 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         if (Boolean.TRUE.equals(member.getHaveStore())) {
             throw new ServiceException(ResultCode.STORE_APPLY_DOUBLE_ERROR);
         }
-
         //添加店铺
         Store store = new Store(member, adminStoreApplyDTO);
         this.save(store);

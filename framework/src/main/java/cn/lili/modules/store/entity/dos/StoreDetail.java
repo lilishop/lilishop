@@ -180,10 +180,27 @@ public class StoreDetail extends BaseIdEntity {
 
     public StoreDetail(Store store, AdminStoreApplyDTO adminStoreApplyDTO) {
         this.storeId = store.getId();
+        //过滤字段值
+        isNotNull(adminStoreApplyDTO);
         //设置店铺公司信息、设置店铺银行信息、设置店铺其他信息
         BeanUtil.copyProperties(adminStoreApplyDTO, this);
         this.settlementDay = DateUtil.date();
         this.stockWarning = 10;
+    }
+
+    public void isNotNull(AdminStoreApplyDTO adminStoreApplyDTO){
+        if("null".equals(adminStoreApplyDTO.getSalesConsigneeName())){
+            adminStoreApplyDTO.setSalesConsigneeName("");
+        }
+        if("null".equals(adminStoreApplyDTO.getSalesConsigneeMobile())){
+            adminStoreApplyDTO.setSalesConsigneeMobile("");
+        }
+        if("null".equals(adminStoreApplyDTO.getSalesConsigneeDetail())){
+            adminStoreApplyDTO.setSalesConsigneeDetail("");
+        }
+        if("null".equals(adminStoreApplyDTO.getDdCode())){
+            adminStoreApplyDTO.setDdCode("");
+        }
     }
 
 
