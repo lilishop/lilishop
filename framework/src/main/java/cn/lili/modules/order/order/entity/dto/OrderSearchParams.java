@@ -160,7 +160,7 @@ public class OrderSearchParams extends PageVO {
         wrapper.like(CharSequenceUtil.isNotEmpty(clientType), "o.client_type", clientType);
 
         //按评价状态
-        wrapper.like(CharSequenceUtil.isNotEmpty(commentStatus), "oi.comment_status", commentStatus);
+        wrapper.eq(CharSequenceUtil.isNotEmpty(commentStatus), "oi.comment_status", commentStatus);
 
         //按标签查询
         if (CharSequenceUtil.isNotEmpty(tag)) {
