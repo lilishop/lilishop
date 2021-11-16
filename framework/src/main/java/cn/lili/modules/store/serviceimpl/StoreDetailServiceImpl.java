@@ -75,7 +75,8 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
 
     @Override
     public StoreDetailVO getStoreDetailVO(String storeId) {
-        return this.baseMapper.getStoreDetail(storeId);
+        StoreDetailVO storeDetail = this.baseMapper.getStoreDetail(storeId);
+        return storeDetail;
     }
 
     @Override

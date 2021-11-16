@@ -84,5 +84,9 @@ public class MemberVO implements Serializable {
     @ApiModelProperty(value = "经验值数量")
     private Long experience;
 
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "创建时间", hidden = true)
+    private Date createTime;
 
 }

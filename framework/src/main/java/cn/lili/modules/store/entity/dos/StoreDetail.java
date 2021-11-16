@@ -18,7 +18,10 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Date;
 
 /**
@@ -180,10 +183,27 @@ public class StoreDetail extends BaseIdEntity {
 
     public StoreDetail(Store store, AdminStoreApplyDTO adminStoreApplyDTO) {
         this.storeId = store.getId();
+        //过滤字段值
+        isNotNull(adminStoreApplyDTO);
         //设置店铺公司信息、设置店铺银行信息、设置店铺其他信息
         BeanUtil.copyProperties(adminStoreApplyDTO, this);
         this.settlementDay = DateUtil.date();
         this.stockWarning = 10;
+    }
+
+    public void isNotNull(AdminStoreApplyDTO adminStoreApplyDTO){
+        if("null".equals(adminStoreApplyDTO.getSalesConsigneeName())){
+            adminStoreApplyDTO.setSalesConsigneeName("");
+        }
+        if("null".equals(adminStoreApplyDTO.getSalesConsigneeMobile())){
+            adminStoreApplyDTO.setSalesConsigneeMobile("");
+        }
+        if("null".equals(adminStoreApplyDTO.getSalesConsigneeDetail())){
+            adminStoreApplyDTO.setSalesConsigneeDetail("");
+        }
+        if("null".equals(adminStoreApplyDTO.getDdCode())){
+            adminStoreApplyDTO.setDdCode("");
+        }
     }
 
 
