@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
-    private static final String[] ignoreField = {"logo", "url", "photo", "intro", "content", "name"};
+    private static final String[] ignoreField = {"logo", "url", "photo", "intro", "content", "name", "image"};
 
     public XssHttpServletRequestWrapper(HttpServletRequest request) {
         super(request);
@@ -229,7 +229,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     private String filterXss(String name, String value) {
         if (CharSequenceUtil.containsAny(name.toLowerCase(Locale.ROOT), ignoreField)) {
             // 忽略的处理，（过滤敏感字符）
-            return HtmlUtil.filter(value);
+            return HtmlUtil.unescape(HtmlUtil.filter(value));
         } else {
             return cleanXSS(value);
         }

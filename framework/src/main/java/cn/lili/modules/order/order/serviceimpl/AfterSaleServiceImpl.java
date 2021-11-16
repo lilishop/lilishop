@@ -136,7 +136,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         }
 
         //获取售后类型
-        Order order = orderService.getBySn(orderItem.getOrderSn());
+        Order order = OperationalJudgment.judgment(orderService.getBySn(orderItem.getOrderSn()));
 
         //订单未支付，不能申请申请售后
         if (order.getPaymentMethod() == null) {
