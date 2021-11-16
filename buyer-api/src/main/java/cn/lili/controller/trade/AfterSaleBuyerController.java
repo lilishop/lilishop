@@ -74,8 +74,7 @@ public class AfterSaleBuyerController {
     })
     @GetMapping(value = "/applyAfterSaleInfo/{sn}")
     public ResultMessage<AfterSaleApplyVO> applyAfterSaleInfo(@PathVariable String sn) {
-        AfterSaleApplyVO afterSaleApplyVO = OperationalJudgment.judgment(afterSaleService.getAfterSaleVO(sn));
-        return ResultUtil.data(afterSaleApplyVO);
+        return ResultUtil.data(afterSaleService.getAfterSaleVO(sn));
     }
 
     @PostMapping(value = "/save/{orderItemSn}")
