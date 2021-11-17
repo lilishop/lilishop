@@ -2,6 +2,7 @@ package cn.lili.modules.statistics.aop.aspect;
 
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
+import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.utils.SpelUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.utils.IpUtils;
@@ -67,7 +68,7 @@ public class PageViewInterceptor {
             default:
                 storeId = "-1";
         }
-        String ip = IpUtils.getIpAddress(request);
+        String ip = IpUtils.getIpAddress(ThreadContextHolder.getHttpRequest());
         try {
             //PV 统计48小时过期 留下一定时间予以统计累计数据库
             cache.incr(CachePrefix.PV.getPrefix() + StatisticsSuffix.suffix(), 60 * 60 * 48);

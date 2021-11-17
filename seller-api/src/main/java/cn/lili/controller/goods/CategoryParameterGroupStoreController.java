@@ -27,8 +27,6 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class CategoryParameterGroupStoreController {
 
-    @Autowired
-    private ParametersService parametersService;
 
     @Autowired
     private CategoryParameterGroupService categoryParameterGroupService;
