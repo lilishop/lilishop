@@ -1,6 +1,5 @@
 package cn.lili.timetask.handler.impl.coupon;
 
-import cn.lili.common.utils.DateUtil;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.service.MemberCouponService;
@@ -43,7 +42,7 @@ public class CouponExecute implements EveryDayExecute {
         this.memberCouponService.update(updateWrapper);
 
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + EXPIRATION_DAY);
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) - EXPIRATION_DAY);
         Date removeTime = calendar.getTime();
         //删除过期/已使用的优惠券
         LambdaUpdateWrapper<MemberCoupon> deleteWrapper = new LambdaUpdateWrapper<MemberCoupon>()
