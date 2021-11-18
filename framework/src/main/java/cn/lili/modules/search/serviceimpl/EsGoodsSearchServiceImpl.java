@@ -364,7 +364,17 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
             //关键字检索
             if (CharSequenceUtil.isEmpty(searchDTO.getKeyword())) {
-                nativeSearchQueryBuilder.withQuery(QueryBuilders.matchAllQuery());
+                List<FunctionScoreQueryBuilder.FilterFunctionBuilder> filterFunctionBuilders = new ArrayList<>();
+                GaussDecayFunctionBuilder skuNoScore = ScoreFunctionBuilders.gaussDecayFunction("skuSource", 100, 10).setWeight(10);
+                FunctionScoreQueryBuilder.FilterFunctionBuilder skuNoBuilder = new FunctionScoreQueryBuilder.FilterFunctionBuilder(QueryBuilders.matchAllQuery(), skuNoScore);
+                filterFunctionBuilders.add(skuNoBuilder);
+                FunctionScoreQueryBuilder.FilterFunctionBuilder[] builders = new FunctionScoreQueryBuilder.FilterFunctionBuilder[filterFunctionBuilders.size()];
+                filterFunctionBuilders.toArray(builders);
+                FunctionScoreQueryBuilder functionScoreQueryBuilder = QueryBuilders.functionScoreQuery(builders)
+                        .scoreMode(FunctionScoreQuery.ScoreMode.SUM)
+                        .setMinScore(2);
+                //聚合搜索则将结果放入过滤条件
+                filterBuilder.must(functionScoreQueryBuilder);
             } else {
                 this.keywordSearch(filterBuilder, searchDTO.getKeyword());
             }
