@@ -16,7 +16,7 @@ import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.service.StoreDetailService;
-import cn.lili.modules.system.utils.OperationalJudgment;
+import cn.lili.common.security.OperationalJudgment;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;

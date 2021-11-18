@@ -1,4 +1,4 @@
-package cn.lili.modules.store.serviceimpl;
+package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.cache.Cache;
@@ -7,10 +7,10 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.modules.store.entity.dos.StoreGoodsLabel;
-import cn.lili.modules.store.entity.vos.StoreGoodsLabelVO;
-import cn.lili.modules.store.mapper.StoreGoodsLabelMapper;
-import cn.lili.modules.store.service.StoreGoodsLabelService;
+import cn.lili.modules.goods.entity.dos.StoreGoodsLabel;
+import cn.lili.modules.goods.entity.vos.StoreGoodsLabelVO;
+import cn.lili.modules.goods.mapper.StoreGoodsLabelMapper;
+import cn.lili.modules.goods.service.StoreGoodsLabelService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;

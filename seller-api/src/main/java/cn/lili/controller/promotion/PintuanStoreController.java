@@ -14,7 +14,7 @@ import cn.lili.modules.promotion.entity.vos.PintuanVO;
 import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.service.PintuanService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
-import cn.lili.modules.system.utils.OperationalJudgment;
+import cn.lili.common.security.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

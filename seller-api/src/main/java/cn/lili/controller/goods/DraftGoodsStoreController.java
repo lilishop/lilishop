@@ -10,7 +10,7 @@ import cn.lili.modules.goods.entity.dto.DraftGoodsDTO;
 import cn.lili.modules.goods.entity.dto.DraftGoodsSearchParams;
 import cn.lili.modules.goods.entity.vos.DraftGoodsVO;
 import cn.lili.modules.goods.service.DraftGoodsService;
-import cn.lili.modules.system.utils.OperationalJudgment;
+import cn.lili.common.security.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

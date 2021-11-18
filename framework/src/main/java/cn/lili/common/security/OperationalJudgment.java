@@ -1,4 +1,4 @@
-package cn.lili.modules.system.utils;
+package cn.lili.common.security;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;

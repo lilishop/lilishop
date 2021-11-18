@@ -1,6 +1,6 @@
-package cn.lili.modules.store.mapper;
+package cn.lili.modules.goods.mapper;
 
-import cn.lili.modules.store.entity.dos.StoreGoodsLabel;
+import cn.lili.modules.goods.entity.dos.StoreGoodsLabel;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

@@ -15,7 +15,7 @@ import cn.lili.modules.order.order.service.OrderPriceService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.payment.kit.plugin.bank.BankTransferPlugin;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
-import cn.lili.modules.system.utils.OperationalJudgment;
+import cn.lili.common.security.OperationalJudgment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-package cn.lili.modules.store.entity.vos;
+package cn.lili.modules.goods.entity.vos;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

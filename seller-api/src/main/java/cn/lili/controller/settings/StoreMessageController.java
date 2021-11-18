@@ -9,7 +9,7 @@ import cn.lili.modules.message.entity.dos.StoreMessage;
 import cn.lili.modules.message.entity.enums.MessageStatusEnum;
 import cn.lili.modules.message.entity.vos.StoreMessageQueryVO;
 import cn.lili.modules.message.service.StoreMessageService;
-import cn.lili.modules.system.utils.OperationalJudgment;
+import cn.lili.common.security.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;

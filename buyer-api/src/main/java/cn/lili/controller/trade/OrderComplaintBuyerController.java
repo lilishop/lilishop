@@ -13,7 +13,7 @@ import cn.lili.modules.order.order.entity.vo.OrderComplaintSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderComplaintVO;
 import cn.lili.modules.order.order.service.OrderComplaintCommunicationService;
 import cn.lili.modules.order.order.service.OrderComplaintService;
-import cn.lili.modules.system.utils.OperationalJudgment;
+import cn.lili.common.security.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
