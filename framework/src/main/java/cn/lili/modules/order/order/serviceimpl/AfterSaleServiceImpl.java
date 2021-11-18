@@ -12,6 +12,7 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.order.aop.AfterSaleLogPoint;
 import cn.lili.modules.order.order.entity.dos.AfterSale;
@@ -156,6 +157,8 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             afterSaleApplyVO.setReturnMoney(true);
             afterSaleApplyVO.setReturnGoods(true);
         }
+        //获取可售后商品数量（商品总数量-已退货数量）
+
 
         afterSaleApplyVO.setAccountType(order.getPaymentMethod());
         afterSaleApplyVO.setApplyRefundPrice(CurrencyUtil.div(orderItem.getFlowPrice(), orderItem.getNum()));
@@ -165,6 +168,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         afterSaleApplyVO.setImage(orderItem.getImage());
         afterSaleApplyVO.setGoodsPrice(orderItem.getGoodsPrice());
         afterSaleApplyVO.setSkuId(orderItem.getSkuId());
+        afterSaleApplyVO.setMemberId(order.getMemberId());
         return afterSaleApplyVO;
     }
 
@@ -222,8 +226,9 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         afterSale.setAuditRemark(remark);
 
         //根据售后编号修改售后单
-        updateAfterSale(afterSaleSn, afterSale);
-
+        this.updateAfterSale(afterSaleSn, afterSale);
+        //获取商品已完成售后或正在进行的售后订单。修改订单售后状态
+        this.getAfterSaleList(afterSale);
         //发送售后消息
         this.sendAfterSaleMessage(afterSale);
 
@@ -441,14 +446,54 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             double utilPrice = CurrencyUtil.div(orderItem.getPriceDetailDTO().getFlowPrice(), orderItem.getNum());
             afterSale.setApplyRefundPrice(CurrencyUtil.mul(afterSale.getNum(), utilPrice));
         }
+
+
         //添加售后
         this.save(afterSale);
         //发送售后消息
         this.sendAfterSaleMessage(afterSale);
-        //修改订单的售后状态
-        orderItemService.updateAfterSaleStatus(orderItem.getSn(), OrderItemAfterSaleStatusEnum.ALREADY_APPLIED);
+
+        //根据售后订单修改订单的售后状态
+        this.getAfterSaleList(afterSale);
+
         return afterSale;
     }
+
+    /**
+     * 获取当前商品已完成或正在进行中的售后记录修改订单的售后状态
+     *
+     * @author ftyy
+     * @Param afterSale
+     **/
+    private void getAfterSaleList(AfterSale afterSale) {
+
+        //根据商品id及订单sn获取子订单
+        OrderItem orderItem = orderItemService.getOne(new LambdaQueryWrapper<OrderItem>()
+                .eq(OrderItem::getOrderSn, afterSale.getOrderSn())
+                .eq(OrderItem::getGoodsId, afterSale.getGoodsId()));
+
+        //判断当前售后的状态---申请中
+        if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.APPLY.name())) {
+            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber()+afterSale.getNum());
+        }
+        //判断当前售后的状态---已拒绝
+        if(afterSale.getServiceStatus().equals(AfterSaleStatusEnum.REFUSE.name())){
+            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber()-afterSale.getNum());
+        }
+        //正在售后商品总数等于商品总数,修改订单售后状态为已申请
+        if (orderItem.getIsGoodsNumber().equals(orderItem.getNum())) {
+            //修改订单的售后状态--已申请
+            orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.ALREADY_APPLIED.name());
+        } else {
+            //修改订单的售后状态--部分售后
+            orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.PART_AFTER_SALE.name());
+        }
+        orderItemService.update(new LambdaUpdateWrapper<OrderItem>()
+                .eq(OrderItem::getSn, orderItem.getSn())
+                .set(OrderItem::getIsGoodsNumber, orderItem.getIsGoodsNumber())
+                .set(OrderItem::getAfterSaleStatus, orderItem.getAfterSaleStatus()));
+    }
+
 
     /**
      * 检查当前订单状态是否为可申请当前售后类型的状态
@@ -465,10 +510,16 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         //获取订单货物判断是否可申请售后
         OrderItem orderItem = orderItemService.getBySn(afterSaleDTO.getOrderItemSn());
 
-        //未申请售后订单货物才能进行申请
-        if (!orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name())) {
+        //未申请售后或部分售后订单货物才能进行申请
+        if (!orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name()) && !orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.PART_AFTER_SALE.name())) {
             throw new ServiceException(ResultCode.AFTER_SALES_BAN);
         }
+
+        //申请商品数量不能超过商品总数量
+        if (afterSaleDTO.getNum() > (orderItem.getNum() - orderItem.getIsGoodsNumber())) {
+            throw new ServiceException(ResultCode.AFTER_GOODS_NUMBER_ERROR);
+        }
+
 
         //获取售后类型
         Order order = orderService.getBySn(orderItem.getOrderSn());
@@ -531,9 +582,14 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
      * @param afterSale   售后单
      */
     private void updateAfterSale(String afterSaleSn, AfterSale afterSale) {
+        //修改售后单状态
         LambdaUpdateWrapper<AfterSale> queryWrapper = Wrappers.lambdaUpdate();
         queryWrapper.eq(AfterSale::getSn, afterSaleSn);
         this.update(afterSale, queryWrapper);
+    }
+
+    private void updateOrderItemAfterSaleStatus() {
+
     }
 
     /**

@@ -4,11 +4,14 @@ import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.SpringContextUtil;
 import cn.lili.modules.order.order.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
+import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.service.AfterSaleService;
+import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +44,11 @@ public class RefundSupport {
      */
     @Autowired
     private OrderService orderService;
+    /**
+     * 子订单
+     */
+    @Autowired
+    private OrderItemService orderItemService;
 
     /**
      * 售后退款
@@ -69,8 +77,30 @@ public class RefundSupport {
         afterSaleService.update(new LambdaUpdateWrapper<AfterSale>()
                 .eq(AfterSale::getId, afterSale.getId())
                 .set(AfterSale::getRefundTime, new Date()));
+        this.updateReturnGoodsNumber(afterSale);
+
         //记录退款流水
         storeFlowService.refundOrder(afterSale);
+    }
+
+    /**
+     * 功能描述: 修改子订单中已售后退款商品数量
+     * @Author ftyy
+     * @Description //TODO
+     * @Date 17:33 2021/11/18
+     * @Param [afterSale]
+     * @return void
+     **/
+    private void updateReturnGoodsNumber(AfterSale afterSale){
+        //根据商品id及订单sn获取子订单
+        OrderItem orderItem = orderItemService.getOne(new LambdaQueryWrapper<OrderItem>()
+                .eq(OrderItem::getOrderSn, afterSale.getOrderSn())
+                .eq(OrderItem::getGoodsId, afterSale.getGoodsId()));
+        //修改子订单订单中的退货数量
+        orderItemService.update(new LambdaUpdateWrapper<OrderItem>()
+                .eq(OrderItem::getOrderSn,afterSale.getOrderSn())
+                .eq(OrderItem::getGoodsId,afterSale.getGoodsId())
+                .set(OrderItem::getReturnGoodsNumber,(afterSale.getNum()+orderItem.getReturnGoodsNumber())));
     }
 
     /**
