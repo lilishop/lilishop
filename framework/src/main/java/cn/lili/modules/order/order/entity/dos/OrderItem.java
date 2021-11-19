@@ -118,6 +118,9 @@ public class OrderItem extends BaseEntity {
     @ApiModelProperty(value = "正在进行退货中的商品数量")
     private Integer isGoodsNumber;
 
+    @ApiModelProperty(value = "标识是否被4.2.4版本处理过的订单")
+    private String identificationStatus;
+
     public OrderItem(CartSkuVO cartSkuVO, CartVO cartVO, TradeDTO tradeDTO) {
         String oldId = this.getId();
         BeanUtil.copyProperties(cartSkuVO.getGoodsSku(), this);
