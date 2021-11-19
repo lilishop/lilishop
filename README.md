@@ -72,8 +72,8 @@ https://docs.pickmall.cn
 
 ![image-20210511171611793](https://pickmall.cn/assets/imgs/h5-qrcode.png)
 
-### 🚙 快速体验商城
-![点击跳转](https://docs.pickmall.cn/deploy/%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87.html)
+### 🚙 快速部署本地商城
+https://docs.pickmall.cn/deploy/%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87.html
 
 **商城数据库** 
 https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql 
