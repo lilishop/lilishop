@@ -227,7 +227,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
 
         //根据售后编号修改售后单
         this.updateAfterSale(afterSaleSn, afterSale);
-        //获取商品已完成售后或正在进行的售后订单。修改订单售后状态
+        //根据售后状态。修改OrderItem订单中正在售后商品数量及状态
         this.updateOrderItemAfterSaleStatus(afterSale);
         //发送售后消息
         this.sendAfterSaleMessage(afterSale);
@@ -309,7 +309,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
 
         //根据售后编号修改售后单
         this.updateAfterSale(afterSaleSn, afterSale);
-        //修改子订单中正在售后的商品数量及状态
+        //根据售后状态。修改OrderItem订单中正在售后商品数量及状态
         this.updateOrderItemAfterSaleStatus(afterSale);
         //发送售后消息
         this.sendAfterSaleMessage(afterSale);
@@ -359,7 +359,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
 
             //根据售后编号修改售后单
             this.updateAfterSale(afterSaleSn, afterSale);
-            //修改子订单正在售后商品数量及状态
+            //根据售后状态。修改OrderItem订单中正在售后商品数量及状态
             this.updateOrderItemAfterSaleStatus(afterSale);
             return afterSale;
         }
@@ -456,14 +456,14 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         //发送售后消息
         this.sendAfterSaleMessage(afterSale);
 
-        //根据售后订单修改订单的售后状态
+        //根据售后状态。修改OrderItem订单中正在售后商品数量及状态
         this.updateOrderItemAfterSaleStatus(afterSale);
 
         return afterSale;
     }
 
     /**
-     * 获取当前商品已完成或正在进行中的售后记录修改订单的售后状态
+     * 根据售后状态修改OrderItem订单中正在售后的商品数量及OrderItem订单状态
      *
      * @author ftyy
      * @Param afterSale
@@ -477,19 +477,19 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
 
         //判断当前售后的状态---申请中
         if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.APPLY.name())) {
-            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber()+afterSale.getNum());
+            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber() + afterSale.getNum());
         }
         //判断当前售后的状态---已拒绝
-        if(afterSale.getServiceStatus().equals(AfterSaleStatusEnum.REFUSE.name())){
-            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber()-afterSale.getNum());
+        if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.REFUSE.name())) {
+            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber() - afterSale.getNum());
         }
         //判断当前售后的状态---买家取消售后
-        if(afterSale.getServiceStatus().equals(AfterSaleStatusEnum.BUYER_CANCEL.name())){
-            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber()-afterSale.getNum());
+        if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.BUYER_CANCEL.name())) {
+            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber() - afterSale.getNum());
         }
         //判断当前售后的状态---卖家终止售后
-        if(afterSale.getServiceStatus().equals(AfterSaleStatusEnum.SELLER_TERMINATION.name())){
-            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber()-afterSale.getNum());
+        if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.SELLER_TERMINATION.name())) {
+            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber() - afterSale.getNum());
         }
 
         //正在售后商品总数等于商品总数,修改订单售后状态为已申请
