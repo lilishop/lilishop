@@ -228,7 +228,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         //根据售后编号修改售后单
         this.updateAfterSale(afterSaleSn, afterSale);
         //获取商品已完成售后或正在进行的售后订单。修改订单售后状态
-        this.getAfterSaleList(afterSale);
+        this.updateOrderItemAfterSaleStatus(afterSale);
         //发送售后消息
         this.sendAfterSaleMessage(afterSale);
 
@@ -309,7 +309,8 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
 
         //根据售后编号修改售后单
         this.updateAfterSale(afterSaleSn, afterSale);
-
+        //修改子订单中正在售后的商品数量及状态
+        this.updateOrderItemAfterSaleStatus(afterSale);
         //发送售后消息
         this.sendAfterSaleMessage(afterSale);
         return afterSale;
@@ -358,6 +359,8 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
 
             //根据售后编号修改售后单
             this.updateAfterSale(afterSaleSn, afterSale);
+            //修改子订单正在售后商品数量及状态
+            this.updateOrderItemAfterSaleStatus(afterSale);
             return afterSale;
         }
         throw new ServiceException(ResultCode.AFTER_SALES_CANCEL_ERROR);
@@ -454,7 +457,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         this.sendAfterSaleMessage(afterSale);
 
         //根据售后订单修改订单的售后状态
-        this.getAfterSaleList(afterSale);
+        this.updateOrderItemAfterSaleStatus(afterSale);
 
         return afterSale;
     }
@@ -465,7 +468,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
      * @author ftyy
      * @Param afterSale
      **/
-    private void getAfterSaleList(AfterSale afterSale) {
+    private void updateOrderItemAfterSaleStatus(AfterSale afterSale) {
 
         //根据商品id及订单sn获取子订单
         OrderItem orderItem = orderItemService.getOne(new LambdaQueryWrapper<OrderItem>()
@@ -480,6 +483,15 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         if(afterSale.getServiceStatus().equals(AfterSaleStatusEnum.REFUSE.name())){
             orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber()-afterSale.getNum());
         }
+        //判断当前售后的状态---买家取消售后
+        if(afterSale.getServiceStatus().equals(AfterSaleStatusEnum.BUYER_CANCEL.name())){
+            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber()-afterSale.getNum());
+        }
+        //判断当前售后的状态---卖家终止售后
+        if(afterSale.getServiceStatus().equals(AfterSaleStatusEnum.SELLER_TERMINATION.name())){
+            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber()-afterSale.getNum());
+        }
+
         //正在售后商品总数等于商品总数,修改订单售后状态为已申请
         if (orderItem.getIsGoodsNumber().equals(orderItem.getNum())) {
             //修改订单的售后状态--已申请
@@ -586,10 +598,6 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         LambdaUpdateWrapper<AfterSale> queryWrapper = Wrappers.lambdaUpdate();
         queryWrapper.eq(AfterSale::getSn, afterSaleSn);
         this.update(afterSale, queryWrapper);
-    }
-
-    private void updateOrderItemAfterSaleStatus() {
-
     }
 
     /**
