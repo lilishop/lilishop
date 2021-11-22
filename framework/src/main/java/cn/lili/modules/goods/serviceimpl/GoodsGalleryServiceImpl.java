@@ -1,7 +1,7 @@
 package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.modules.file.plugin.FileManagerPlugin;
+import cn.lili.modules.file.util.FileUtil;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
 import cn.lili.modules.goods.mapper.GoodsGalleryMapper;
 import cn.lili.modules.goods.service.GoodsGalleryService;
@@ -29,11 +29,6 @@ import java.util.List;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, GoodsGallery> implements GoodsGalleryService {
-    /**
-     * 文件
-     */
-    @Autowired
-    private FileManagerPlugin fileManagerPlugin;
     /**
      * 设置
      */
@@ -65,9 +60,9 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
         Setting setting = settingService.get(SettingEnum.GOODS_SETTING.name());
         GoodsSetting goodsSetting = JSONUtil.toBean(setting.getSettingValue(), GoodsSetting.class);
         //缩略图
-        String thumbnail = fileManagerPlugin.getUrl(origin, goodsSetting.getAbbreviationPictureWidth(), goodsSetting.getAbbreviationPictureHeight());
+        String thumbnail = FileUtil.getUrl(origin, goodsSetting.getAbbreviationPictureWidth(), goodsSetting.getAbbreviationPictureHeight());
         //小图
-        String small = fileManagerPlugin.getUrl(origin, goodsSetting.getSmallPictureWidth(), goodsSetting.getSmallPictureHeight());
+        String small = FileUtil.getUrl(origin, goodsSetting.getSmallPictureWidth(), goodsSetting.getSmallPictureHeight());
         //赋值
         goodsGallery.setSmall(small);
         goodsGallery.setThumbnail(thumbnail);
