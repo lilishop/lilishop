@@ -35,7 +35,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
      *
      * @todo 这里的参数应该更智能些，例如iv，前端的参数包含这两个字母就会放过，这是有问题的
      */
-    private static final String[] IGNORE_FIELD = {"logo", "url", "photo", "intro", "content", "name", "image", "encrypted", "iv","mail"};
+    private static final String[] IGNORE_FIELD = {"logo", "url", "photo", "intro", "content", "name", "image", "encrypted", "iv", "mail", "privateKey"};
 
     public XssHttpServletRequestWrapper(HttpServletRequest request) {
         super(request);
