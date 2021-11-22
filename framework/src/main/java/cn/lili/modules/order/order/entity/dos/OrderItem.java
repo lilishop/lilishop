@@ -9,6 +9,7 @@ import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
+import cn.lili.modules.order.order.entity.enums.IdentificationStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
 import cn.lili.modules.promotion.entity.vos.PromotionSkuVO;
@@ -134,6 +135,7 @@ public class OrderItem extends BaseEntity {
         this.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.NEW.name());
         this.setCommentStatus(CommentStatusEnum.NEW.name());
         this.setComplainStatus(OrderComplaintStatusEnum.NEW.name());
+        this.setIdentificationStatus(IdentificationStatusEnum.ALREADY_NOT_HANDLE.name());
         this.setPriceDetailDTO(cartSkuVO.getPriceDetailDTO());
         this.setOrderSn(cartVO.getSn());
         this.setTradeSn(tradeDTO.getSn());
