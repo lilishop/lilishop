@@ -228,7 +228,7 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
     @Override
     public IPage<PointsGoodsVO> getPointsGoodsByPage(PointsGoodsSearchParams searchParams, PageVO page) {
         IPage<PointsGoodsVO> pointsGoodsPage = new Page<>();
-        if (UserContext.getCurrentUser().getRole().equals(UserEnums.MEMBER)) {
+        if (UserContext.getCurrentUser() == null || UserContext.getCurrentUser().getRole().equals(UserEnums.MEMBER)) {
             searchParams.setPromotionStatus(PromotionStatusEnum.START.name());
         }
         Query query = searchParams.mongoQuery();
