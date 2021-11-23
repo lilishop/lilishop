@@ -1,4 +1,4 @@
-package cn.lili.modules.system.utils;
+package cn.lili.common.sensitive;
 
 import java.io.Serializable;
 import java.util.TreeSet;

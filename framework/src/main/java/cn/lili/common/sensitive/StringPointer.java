@@ -1,13 +1,14 @@
-package cn.lili.modules.system.utils;
+package cn.lili.common.sensitive;
 
 import java.io.Serializable;
 
 /**
+ * 字符指针
  *
  * @author Bulbasaur
  * @since 2020-02-25 14:10:16
  */
-public class StringPointer implements Serializable, CharSequence, Comparable<StringPointer>{
+public class StringPointer implements Serializable, CharSequence, Comparable<StringPointer> {
 
     private static final long serialVersionUID = 1L;
 
@@ -19,13 +20,13 @@ public class StringPointer implements Serializable, CharSequence, Comparable<Str
 
     private int hash = 0;
 
-    public StringPointer(String str){
+    public StringPointer(String str) {
         value = str.toCharArray();
         offset = 0;
         length = value.length;
     }
 
-    public StringPointer(char[] value, int offset, int length){
+    public StringPointer(char[] value, int offset, int length) {
         this.value = value;
         this.offset = offset;
         this.length = length;
@@ -34,10 +35,11 @@ public class StringPointer implements Serializable, CharSequence, Comparable<Str
 
     /**
      * 计算该位置后（包含）2个字符的hash值
+     *
      * @param i 从 0 到 length - 2
      * @return 从 0 到 length - 2
      */
-    public int nextTwoCharHash(int i){
+    public int nextTwoCharHash(int i) {
         return 31 * value[offset + i] + value[offset + i + 1];
     }
 
@@ -48,25 +50,25 @@ public class StringPointer implements Serializable, CharSequence, Comparable<Str
      * @param i 从 0 到 length - 2
      * @return int值
      */
-    public int nextTwoCharMix(int i){
+    public int nextTwoCharMix(int i) {
         return (value[offset + i] << 16) | value[offset + i + 1];
     }
 
     /**
      * 该位置后（包含）的字符串，是否以某个词（word）开头
      *
-     * @param i 从 0 到 length - 2
+     * @param i    从 0 到 length - 2
      * @param word 词
      * @return 是否？
      */
-    public boolean nextStartsWith(int i, StringPointer word){
+    public boolean nextStartsWith(int i, StringPointer word) {
         //是否长度超出
-        if(word.length > length - i){
+        if (word.length > length - i) {
             return false;
         }
         //从尾开始判断
-        for(int c =  word.length - 1; c >= 0; c --){
-            if(value[offset + i + c] != word.value[word.offset + c]){
+        for (int c = word.length - 1; c >= 0; c--) {
+            if (value[offset + i + c] != word.value[word.offset + c]) {
                 return false;
             }
         }
@@ -76,31 +78,31 @@ public class StringPointer implements Serializable, CharSequence, Comparable<Str
     /**
      * 填充（替换）
      *
-     * @param begin 从此位置开始（含）
-     * @param end 到此位置结束（不含）
+     * @param begin    从此位置开始（含）
+     * @param end      到此位置结束（不含）
      * @param fillWith 以此字符填充（替换）
      */
-    public void fill(int begin, int end, char fillWith){
-        for(int i = begin; i < end; i ++){
+    public void fill(int begin, int end, char fillWith) {
+        for (int i = begin; i < end; i++) {
             value[offset + i] = fillWith;
         }
     }
 
     @Override
-    public int length(){
+    public int length() {
         return length;
     }
 
     @Override
-    public char charAt(int i){
+    public char charAt(int i) {
         return value[offset + i];
     }
 
-    public StringPointer substring(int begin){
+    public StringPointer substring(int begin) {
         return new StringPointer(value, offset + begin, length - begin);
     }
 
-    public StringPointer substring(int begin, int end){
+    public StringPointer substring(int begin, int end) {
         return new StringPointer(value, offset + begin, end - begin);
     }
 
@@ -110,7 +112,7 @@ public class StringPointer implements Serializable, CharSequence, Comparable<Str
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return new String(value, offset, length);
     }
 
@@ -132,12 +134,12 @@ public class StringPointer implements Serializable, CharSequence, Comparable<Str
             return true;
         }
         if (anObject instanceof StringPointer) {
-            StringPointer that = (StringPointer)anObject;
+            StringPointer that = (StringPointer) anObject;
             if (length == that.length) {
                 char[] v1 = this.value;
                 char[] v2 = that.value;
-                for(int i = 0; i < this.length; i ++){
-                    if(v1[this.offset + i] != v2[that.offset + i]){
+                for (int i = 0; i < this.length; i++) {
+                    if (v1[this.offset + i] != v2[that.offset + i]) {
                         return false;
                     }
                 }

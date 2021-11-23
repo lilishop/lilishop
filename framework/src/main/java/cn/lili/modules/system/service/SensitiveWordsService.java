@@ -11,5 +11,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface SensitiveWordsService extends IService<SensitiveWords> {
 
+    /**
+     * 重新写入缓存
+     */
+    void resetCache();
 
 }

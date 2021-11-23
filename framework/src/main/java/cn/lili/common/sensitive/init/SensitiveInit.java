@@ -1,8 +1,9 @@
-package cn.lili.cache.impl;
+package cn.lili.common.sensitive.init;
 
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.sensitive.SensitiveWordsFilter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -18,6 +19,7 @@ import java.util.List;
  * 2021-11-23 12:08
  */
 @Component
+@Slf4j
 public class SensitiveInit implements ApplicationRunner {
 
     @Autowired
@@ -26,11 +28,12 @@ public class SensitiveInit implements ApplicationRunner {
     /**
      * 程序启动时，获取最新的需要过滤的敏感词
      *
-     * @param args
+     * @param args 启动参数
      */
     @Override
     public void run(ApplicationArguments args) {
         List<String> sensitives = cache.get(CachePrefix.SENSITIVE.getPrefix());
+        log.info("系统初始化敏感词");
         if (sensitives == null || sensitives.isEmpty()) {
             return;
         }

@@ -1,4 +1,4 @@
-package cn.lili.modules.system.utils;
+package cn.lili.common.sensitive;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,7 +34,12 @@ public class SensitiveWordsFilter implements Serializable {
      * 类似HashMap的桶，比较稀疏。
      * 使用2个字符的hash定位。
      */
-    protected static SensitiveWordsNode[] nodes;
+    protected static SensitiveWordsNode[] nodes = new SensitiveWordsNode[0];
+
+    /**
+     * 更新中的nodes，用于防止动态更新时，原有nodes被清空，导致无法正常写入过滤词
+     */
+    protected static SensitiveWordsNode[] nodesUpdate;
 
 
     /**
@@ -150,12 +155,13 @@ public class SensitiveWordsFilter implements Serializable {
      * 初始化敏感词
      */
     public static void init(List<String> words) {
-        nodes = new SensitiveWordsNode[DEFAULT_INITIAL_CAPACITY];
+        log.info("开始初始化敏感词");
+        nodesUpdate = new SensitiveWordsNode[DEFAULT_INITIAL_CAPACITY];
         for (String word : words) {
             put(word);
         }
+        nodes = nodesUpdate;
     }
-
 
     /**
      * 增加一个敏感词，如果词的长度（trim后）小于2，则丢弃<br/>
@@ -180,17 +186,17 @@ public class SensitiveWordsFilter implements Serializable {
         //计算头两个字符的mix表示（mix相同，两个字符相同）
         int mix = sp.nextTwoCharMix(0);
         //转为在hash桶中的位置
-        int index = hash & (nodes.length - 1);
+        int index = hash & (nodesUpdate.length - 1);
 
         //从桶里拿第一个节点
-        SensitiveWordsNode node = nodes[index];
+        SensitiveWordsNode node = nodesUpdate[index];
         if (node == null) {
             //如果没有节点，则放进去一个
             node = new SensitiveWordsNode(mix);
             //并添加词
             node.words.add(sp);
             //放入桶里
-            nodes[index] = node;
+            nodesUpdate[index] = node;
         } else {
             //如果已经有节点（1个或多个），找到正确的节点
             for (; node != null; node = node.next) {

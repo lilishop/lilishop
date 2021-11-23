@@ -1,4 +1,4 @@
-package cn.lili.modules.connect.util;
+package cn.lili.common.utils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ThreadLocalRandom;
