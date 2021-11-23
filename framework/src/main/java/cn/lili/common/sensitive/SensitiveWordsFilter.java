@@ -1,12 +1,6 @@
 package cn.lili.modules.system.utils;
 
-import cn.lili.modules.system.entity.dos.SensitiveWords;
-import cn.lili.modules.system.service.SensitiveWordsService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.List;
@@ -21,9 +15,12 @@ import java.util.NavigableSet;
  * 2020-02-25 14:10:16
  */
 @Slf4j
-@Component
-public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
+public class SensitiveWordsFilter implements Serializable {
 
+    /**
+     * 字符*
+     */
+    public final static char WILDCARD_STAR = '*';
 
     /**
      * 为2的n次方，考虑到敏感词大概在10k左右，
@@ -39,96 +36,20 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
      */
     protected static SensitiveWordsNode[] nodes;
 
-    @Autowired
-    private SensitiveWordsService sensitiveWordsService;
-
 
     /**
-     * 增加一个敏感词，如果词的长度（trim后）小于2，则丢弃<br/>
-     * 此方法（构建）并不是主要的性能优化点。
+     * 过滤铭感次
      *
-     * @param word 敏感词
-     * @return 操作结果
-     */
-    public static boolean put(String word) {
-
-        //长度小于2的不加入
-        if (word == null || word.trim().length() < 2) {
-            return false;
-        }
-        //两个字符的不考虑
-        if (word.length() == 2 && word.matches("\\w\\w")) {
-            return false;
-        }
-        StringPointer sp = new StringPointer(word.trim());
-        //计算头两个字符的hash
-        int hash = sp.nextTwoCharHash(0);
-        //计算头两个字符的mix表示（mix相同，两个字符相同）
-        int mix = sp.nextTwoCharMix(0);
-        //转为在hash桶中的位置
-        int index = hash & (nodes.length - 1);
-
-        //从桶里拿第一个节点
-        SensitiveWordsNode node = nodes[index];
-        if (node == null) {
-            //如果没有节点，则放进去一个
-            node = new SensitiveWordsNode(mix);
-            //并添加词
-            node.words.add(sp);
-            //放入桶里
-            nodes[index] = node;
-        } else {
-            //如果已经有节点（1个或多个），找到正确的节点
-            for (; node != null; node = node.next) {
-                //匹配节点
-                if (node.headTwoCharMix == mix) {
-                    node.words.add(sp);
-                    return true;
-                }
-                //如果匹配到最后仍然不成功，则追加一个节点
-                if (node.next == null) {
-                    new SensitiveWordsNode(mix, node).words.add(sp);
-                    return true;
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * 移除敏感词
-     *
-     * @param word
+     * @param sentence 过滤赐予
      * @return
      */
-    public static void remove(String word) {
-
-        StringPointer sp = new StringPointer(word.trim());
-        //计算头两个字符的hash
-        int hash = sp.nextTwoCharHash(0);
-        //计算头两个字符的mix表示（mix相同，两个字符相同）
-        int mix = sp.nextTwoCharMix(0);
-        //转为在hash桶中的位置
-        int index = hash & (nodes.length - 1);
-        SensitiveWordsNode node = nodes[index];
-
-        for (; node != null; node = node.next) {
-            //匹配节点
-            if (node.headTwoCharMix == mix) {
-                node.words.remove(sp);
-            }
-
-        }
+    public static String filter(String sentence) {
+        return filter(sentence, WILDCARD_STAR);
     }
 
     /**
      * 对句子进行敏感词过滤<br/>
-     * 如果无敏感词返回输入的sentence对象，即可以用下面的方式判断是否有敏感词：<br/><code>
-     * String result = filter.filter(sentence, CharacterConstant.WILDCARD_STAR);<br/>
-     * if(result != sentence){<br/>
-     * &nbsp;&nbsp;//有敏感词<br/>
-     * }
-     * </code>
+     * 如果无敏感词返回输入的sentence对象，即可以用下面的方式判断是否有敏感词：<br/>
      *
      * @param sentence 句子
      * @param replace  敏感词的替换字符
@@ -224,25 +145,95 @@ public class SensitiveWordsFilter implements Serializable, ApplicationRunner {
         }
     }
 
+
     /**
      * 初始化敏感词
-     *
-     * @param args
-     * @throws Exception
      */
-    @Override
-    public void run(ApplicationArguments args) {
-        try {
-            nodes = new SensitiveWordsNode[DEFAULT_INITIAL_CAPACITY];
-            //加入平台添加的敏感词
-            List<SensitiveWords> list = sensitiveWordsService.list();
-            if (list != null && list.size() > 0) {
-                for (SensitiveWords sensitiveWords : list) {
-                    put(sensitiveWords.getSensitiveWord());
-                }
-            }
-        } catch (Exception e) {
-            log.error("初始化敏感词错误", e);
+    public static void init(List<String> words) {
+        nodes = new SensitiveWordsNode[DEFAULT_INITIAL_CAPACITY];
+        for (String word : words) {
+            put(word);
         }
     }
+
+
+    /**
+     * 增加一个敏感词，如果词的长度（trim后）小于2，则丢弃<br/>
+     * 此方法（构建）并不是主要的性能优化点。
+     *
+     * @param word 敏感词
+     * @return 操作结果
+     */
+    public static boolean put(String word) {
+
+        //长度小于2的不加入
+        if (word == null || word.trim().length() < 2) {
+            return false;
+        }
+        //两个字符的不考虑
+        if (word.length() == 2 && word.matches("\\w\\w")) {
+            return false;
+        }
+        StringPointer sp = new StringPointer(word.trim());
+        //计算头两个字符的hash
+        int hash = sp.nextTwoCharHash(0);
+        //计算头两个字符的mix表示（mix相同，两个字符相同）
+        int mix = sp.nextTwoCharMix(0);
+        //转为在hash桶中的位置
+        int index = hash & (nodes.length - 1);
+
+        //从桶里拿第一个节点
+        SensitiveWordsNode node = nodes[index];
+        if (node == null) {
+            //如果没有节点，则放进去一个
+            node = new SensitiveWordsNode(mix);
+            //并添加词
+            node.words.add(sp);
+            //放入桶里
+            nodes[index] = node;
+        } else {
+            //如果已经有节点（1个或多个），找到正确的节点
+            for (; node != null; node = node.next) {
+                //匹配节点
+                if (node.headTwoCharMix == mix) {
+                    node.words.add(sp);
+                    return true;
+                }
+                //如果匹配到最后仍然不成功，则追加一个节点
+                if (node.next == null) {
+                    new SensitiveWordsNode(mix, node).words.add(sp);
+                    return true;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 移除敏感词
+     *
+     * @param word
+     * @return
+     */
+    public static void remove(String word) {
+
+        StringPointer sp = new StringPointer(word.trim());
+        //计算头两个字符的hash
+        int hash = sp.nextTwoCharHash(0);
+        //计算头两个字符的mix表示（mix相同，两个字符相同）
+        int mix = sp.nextTwoCharMix(0);
+        //转为在hash桶中的位置
+        int index = hash & (nodes.length - 1);
+        SensitiveWordsNode node = nodes[index];
+
+        for (; node != null; node = node.next) {
+            //匹配节点
+            if (node.headTwoCharMix == mix) {
+                node.words.remove(sp);
+            }
+
+        }
+    }
+
+
 }
