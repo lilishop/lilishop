@@ -1,7 +1,7 @@
 package cn.lili.event;
 
 
-import cn.lili.modules.order.order.entity.dos.AfterSale;
+import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 
 /**
  * 售后单改变状态

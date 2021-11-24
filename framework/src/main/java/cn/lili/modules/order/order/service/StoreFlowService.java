@@ -1,7 +1,7 @@
 package cn.lili.modules.order.order.service;
 
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.order.order.entity.dos.AfterSale;
+import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;

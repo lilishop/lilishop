@@ -8,7 +8,7 @@ import cn.lili.event.MemberWithdrawalEvent;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberSign;
 import cn.lili.modules.member.entity.dto.MemberPointMessage;
-import cn.lili.modules.member.entity.dto.MemberWithdrawalMessage;
+import cn.lili.modules.wallet.entity.dto.MemberWithdrawalMessage;
 import cn.lili.modules.member.service.MemberSignService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;

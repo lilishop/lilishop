@@ -1,7 +1,7 @@
 package cn.lili.modules.verification.aop.annotation;
 
 
-import cn.lili.modules.verification.enums.VerificationEnums;
+import cn.lili.modules.verification.entity.enums.VerificationEnums;
 
 import java.lang.annotation.*;
 

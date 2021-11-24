@@ -7,7 +7,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.SpringContextUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.enums.ClientTypeEnum;
-import cn.lili.modules.member.service.MemberWalletService;
+import cn.lili.modules.wallet.service.MemberWalletService;
 import cn.lili.modules.payment.kit.dto.PayParam;
 import cn.lili.modules.payment.entity.enums.PaymentClientEnum;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;

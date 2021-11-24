@@ -1,6 +1,6 @@
 package cn.lili.modules.distribution.entity.dos;
 
-import cn.lili.modules.member.entity.enums.WithdrawStatusEnum;
+import cn.lili.modules.wallet.entity.enums.WithdrawStatusEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
