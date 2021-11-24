@@ -66,8 +66,6 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      */
     @Autowired
     private StoreFlowService storeFlowService;
-    @Resource
-    private StoreFlowMapper storeFlowMapper;
 
     @Override
     public void createBill(String storeId, Date startTime, DateTime endTime) {
@@ -256,7 +254,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         lambdaQueryWrapper.eq(StoreFlow::getStoreId, bill.getStoreId());
         lambdaQueryWrapper.between(StoreFlow::getCreateTime, bill.getStartTime(), bill.getCreateTime());
         lambdaQueryWrapper.eq(StoreFlow::getFlowType, FlowTypeEnum.PAY.name());
-        List<StoreFlowPayDownloadVO> storeFlowList = storeFlowMapper.getStoreFlowPayDownloadVO(lambdaQueryWrapper);
+        List<StoreFlowPayDownloadVO> storeFlowList = storeFlowService.getStoreFlowPayDownloadVO(lambdaQueryWrapper);
         writer.write(storeFlowList, true);
 
         writer.setSheet("退款订单");
@@ -288,7 +286,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         storeFlowlambdaQueryWrapper.eq(StoreFlow::getStoreId, bill.getStoreId());
         storeFlowlambdaQueryWrapper.between(StoreFlow::getCreateTime, bill.getStartTime(), bill.getCreateTime());
         storeFlowlambdaQueryWrapper.eq(StoreFlow::getFlowType, FlowTypeEnum.PAY.name());
-        List<StoreFlowRefundDownloadVO> storeFlowRefundDownloadVOList = storeFlowMapper.getStoreFlowRefundDownloadVO(storeFlowlambdaQueryWrapper);
+        List<StoreFlowRefundDownloadVO> storeFlowRefundDownloadVOList = storeFlowService.getStoreFlowRefundDownloadVO(storeFlowlambdaQueryWrapper);
         writer.write(storeFlowRefundDownloadVOList, true);
 
         ServletOutputStream out = null;
