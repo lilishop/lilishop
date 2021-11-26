@@ -65,7 +65,7 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
         try {
             Map<String, Object> map = new HashMap<>(16);
             //获取未审核通过的签名列表
-            List<SmsSign> list = list(new LambdaQueryWrapper<SmsSign>().eq(SmsSign::getSignStatus, 0));
+            List<SmsSign> list = list(new LambdaQueryWrapper<SmsSign>().ne(SmsSign::getSignStatus, 1));
             //查询签名状态
             for (SmsSign smsSign : list) {
                 map = aliSmsUtil.querySmsSign(smsSign.getSignName());
