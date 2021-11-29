@@ -1,6 +1,6 @@
-## 🔥 Lilishop B2B2C商城系统
+## Lilishop B2B2C商城系统
 
-##### 🌹  开源不易，如有帮助请点Star 
+##### 开源不易，如有帮助请点Star 
 
 
 
@@ -20,47 +20,33 @@
 &nbsp;&nbsp;![github](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=#181717)
 
 
-### 🔥 商城介绍
+### 商城介绍
 **官网**：https://pickmall.cn
 
 Lilishop商城系统支持商家入驻，后端基于SpringBoot 研发，前端使用 Vue、uniapp开发， **系统全端全部代码开源**
 
-商城前后端分离，支持分布式部署，支持Docker，支持k8s,各个API独立，并且有独立的消费者。
+商城前后端分离，支持分布式部署，支持Docker，各个API独立，并且有独立的消费者。
 
 ### 商城 API/消费者 聚合版
 api不需要单独部署，只需启动一个jar包就可以正常运转 如有需要，可以点击跳转
 https://gitee.com/beijing_hongye_huicheng/lilishop-simplify
 
-### ☃️ 商城 开发/使用/常见问题 帮助文档
+### 商城 开发/使用/常见问题 帮助文档
 
 https://docs.pickmall.cn
 
-### 💧 开源商城项目地址(gitee)
+### 项目地址
 
-**API**：https://gitee.com/beijing_hongye_huicheng/lilishop.git
+gitee : https://gitee.com/beijing_hongye_huicheng
 
-**UI（平台管理端/商家端/买家PC端）**： https://gitee.com/beijing_hongye_huicheng/lilishop-ui.git
+github 镜像: https://github.com/lilishop?tab=repositories
 
-**uniapp（商城移动端，支持小程序/APP/H5）**：https://gitee.com/beijing_hongye_huicheng/lilishop-uniapp.git
-
-**docker脚本**：https://gitee.com/beijing_hongye_huicheng/docker.git
-
-### 💧 开源商城项目地址(github)
-
-**API**：https://github.com/hongyehuicheng/lilishop.git
-
-**UI（平台管理端/商家端/买家PC端）**： https://github.com/hongyehuicheng/lilishop-ui.git
-
-**uniapp（商城移动端，支持小程序/APP/H5）**：https://github.com/hongyehuicheng/lilishop-uniapp.git
-
-**docker脚本**：https://github.com/hongyehuicheng/docker.git
+商城UI 项目下3个文件夹 
+buyer：买家PC端，seller：商家端，manager：后台管理端
 
 
-
-☃️ 商城UI 项目下3个文件夹 buyer：买家PC端，seller：商家端，manager：后台管理端
-
-
-### 💧 演示地址(手机验证码为 ‘111111’)
+### 演示地址
+PS：手机验证码为 ‘111111’
 
 **平台管理端**：https://admin-b2b2c.pickmall.cn 账号：admin/123456
 
@@ -72,47 +58,50 @@ https://docs.pickmall.cn
 
 ![image-20210511171611793](https://pickmall.cn/assets/imgs/h5-qrcode.png)
 
-### 🚙 快速部署本地商城
-https://docs.pickmall.cn/deploy/%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87.html
+### 快速部署本地商城
 
-**商城数据库** 
-https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql 
+[点击跳转](https://docs.pickmall.cn/deploy/%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87.html)
+
+**商城数据库**
+[点击跳转](https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql)
+
+使用docker-compose部署，自动初始化数据库不需要额外处理
 
 这里有与tag版本一致的sql，根据tag获取sql，如果使用master代码
 
-### ⚾️ 功能列表
+### 功能列表
 
 
 
-#### 🥎 平台管理端功能
+#### 平台管理端功能
 
 ![平台管理端功能](https://pickmall.cn/assets/imgs/other/managerList.jpg)
 
 
 
-#### 🥎 卖家功能
+#### 卖家功能
 
 ![商家端功能](https://pickmall.cn/assets/imgs/other/storeList.jpg)
 
 
-### 🧩 商城前端功能展示
+### 商城前端功能展示
 
-#### ⚽️ 商城移动端
+#### 商城移动端
 
 <img src="https://pickmall.cn/assets/imgs/other/app.gif" alt="移动端功能展示" style="zoom:50%;" />
 
-#### ⚽️ 平台管理端
+#### 平台管理端
 
 ![管理端功能展示](https://pickmall.cn/assets/imgs/other/manager.gif)
 
 
 ### 技术选型
 
-#### 🥅 架构图
+#### 架构图
 
 ![技术选型](https://lili-system.oss-cn-beijing.aliyuncs.com/docs/%E6%9E%B6%E6%9E%84.png)
 
-##### 🕹 后台技术选型
+##### 后台技术选型
 
 | 说明           | 框架            | 说明           |               |
 | -------------- | --------------- | -------------- | ------------- |
@@ -126,7 +115,7 @@ https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql
 | 短信           | 阿里云短信      | 认证           | JWT           |
 | 日志处理       | Log4j           | 接口规范       | RESTful       |
 
-##### 🖥 前端-运营后台、店铺后台
+##### 前端-运营后台、店铺后台
 
 | 说明       | 框架       | 说明       | 框架    |
 | ---------- | ---------- | ---------- | ------- |
@@ -136,14 +125,14 @@ https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql
 | 基础UI库   | iView      | UI界面基于 | iView   |
 | 网络请求   | axios      |            |         |
 
-##### 📱前端-移动端
+##### 前端-移动端
 
 | 说明      | 架构    | 说明     | 架构    |
 | --------- | ------- | -------- | ------- |
 | 基础UI库  | uViewui | 基础框架 | uni-app |
 | CSS预处理 | scss    | 地图引擎 | amap    |
 
-### 🌟 版本升级
+### 版本升级
 
 ```
 商城后续会持续版本升级，修复bug，完善功能，覆盖更多业务场景 o2o/b2b/s2b2b2c/跨境电商
@@ -152,7 +141,7 @@ https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql
 ```
 
 
-### ⚠️ 开源须知
+### 开源须知
 1.仅允许用于个人学习研究使用.
 
 2.禁止将本开源的代码和资源进行任何形式任何名义的出售.
@@ -162,7 +151,7 @@ https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql
 4.限制商用，如果需要商业使用请联系我们。QQ3409056806.
 
 
-### 🐧 交流群
+### 交流群
 
 ##### 官方qq 1群 961316482（已满）
 ##### 官方qq 2群 875294241
