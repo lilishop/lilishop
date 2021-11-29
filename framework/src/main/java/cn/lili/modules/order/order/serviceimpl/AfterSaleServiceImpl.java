@@ -156,8 +156,6 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             afterSaleApplyVO.setReturnMoney(true);
             afterSaleApplyVO.setReturnGoods(true);
         }
-        //获取可售后商品数量（商品总数量-已退货数量）
-
 
         afterSaleApplyVO.setAccountType(order.getPaymentMethod());
         afterSaleApplyVO.setApplyRefundPrice(CurrencyUtil.div(orderItem.getFlowPrice(), orderItem.getNum()));
@@ -468,26 +466,27 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
      */
     private void updateOrderItemAfterSaleStatus(AfterSale afterSale) {
 
-        //根据商品id及订单sn获取子订单
+        //根据商品skuId及订单sn获取子订单
         OrderItem orderItem = orderItemService.getOne(new LambdaQueryWrapper<OrderItem>()
                 .eq(OrderItem::getOrderSn, afterSale.getOrderSn())
-                .eq(OrderItem::getGoodsId, afterSale.getGoodsId()));
+                .eq(OrderItem::getSkuId, afterSale.getSkuId()));
+        AfterSaleStatusEnum afterSaleStatusEnum = AfterSaleStatusEnum.valueOf(afterSale.getServiceStatus());
+        switch (afterSaleStatusEnum){
+            //判断当前售后的状态---申请中
+            case APPLY:{
+                orderItem.setReturnGoodsNumber(orderItem.getReturnGoodsNumber() + afterSale.getNum());
+                break;
+            }
 
-        //判断当前售后的状态---申请中
-        if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.APPLY.name())) {
-            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber() + afterSale.getNum());
-        }
-        //判断当前售后的状态---已拒绝
-        if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.REFUSE.name())) {
-            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber() - afterSale.getNum());
-        }
-        //判断当前售后的状态---买家取消售后
-        if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.BUYER_CANCEL.name())) {
-            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber() - afterSale.getNum());
-        }
-        //判断当前售后的状态---卖家终止售后
-        if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.SELLER_TERMINATION.name())) {
-            orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber() - afterSale.getNum());
+            //判断当前售后的状态---已拒绝,买家取消售后,卖家终止售后
+            case REFUSE:
+            case BUYER_CANCEL:
+            case SELLER_TERMINATION: {
+                orderItem.setReturnGoodsNumber(orderItem.getReturnGoodsNumber() - afterSale.getNum());
+                break;
+            }
+            default:
+
         }
         //修改orderItem订单
         this.updateOrderItem(orderItem);
@@ -514,8 +513,8 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             throw new ServiceException(ResultCode.AFTER_SALES_BAN);
         }
 
-        //申请商品数量不能超过商品总数量
-        if (afterSaleDTO.getNum() > (orderItem.getNum() - orderItem.getIsGoodsNumber())) {
+        //申请商品数量不能超过商品总数量-售后商品数量
+        if (afterSaleDTO.getNum() > (orderItem.getNum() - orderItem.getReturnGoodsNumber())) {
             throw new ServiceException(ResultCode.AFTER_GOODS_NUMBER_ERROR);
         }
 
@@ -659,7 +658,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
 
         if (!implementList.isEmpty()) {
             //遍历售后记录获取售后商品数量
-            implementList.forEach(a -> orderItem.setIsGoodsNumber(orderItem.getIsGoodsNumber() + a.getNum()));
+            implementList.forEach(a -> orderItem.setReturnGoodsNumber(orderItem.getReturnGoodsNumber() + a.getNum()));
         }
 
         //获取已完成售后订单数量
@@ -682,25 +681,33 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
      **/
     private void updateOrderItem(OrderItem orderItem) {
         //订单状态不能为新订单,已失效订单或未申请订单才可以去修改订单信息
-        if (!orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.NEW.name())
-                && !orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.EXPIRED.name())
-                && !orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name())) {
-
-            //正在售后商品总数等于商品总数,修改订单售后状态为已申请
-            if (orderItem.getIsGoodsNumber().equals(orderItem.getNum())) {
-                //修改订单的售后状态--已申请
-                orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.ALREADY_APPLIED.name());
-            } else {
-                //修改订单的售后状态--部分售后
-                orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.PART_AFTER_SALE.name());
+        OrderItemAfterSaleStatusEnum afterSaleTypeEnum = OrderItemAfterSaleStatusEnum.valueOf(orderItem.getAfterSaleStatus());
+        switch (afterSaleTypeEnum){
+            //售后状态为：未申请 部分售后 已申请
+            case NOT_APPLIED:
+            case PART_AFTER_SALE:
+            case ALREADY_APPLIED:{
+                //通过正在售后商品总数修改订单售后状态
+                if (orderItem.getReturnGoodsNumber().equals(orderItem.getNum())) {
+                    //修改订单的售后状态--已申请
+                    orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.ALREADY_APPLIED.name());
+                } else if(orderItem.getReturnGoodsNumber().equals(0)){
+                    //修改订单的售后状态--未申请
+                    orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name());
+                }else{
+                    //修改订单的售后状态--部分售后
+                    orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.PART_AFTER_SALE.name());
+                }
+                break;
             }
 
+            default:
         }
         orderItemService.update(new LambdaUpdateWrapper<OrderItem>()
                 .eq(OrderItem::getSn, orderItem.getSn())
-                .set(OrderItem::getIsGoodsNumber, orderItem.getIsGoodsNumber())
                 .set(OrderItem::getAfterSaleStatus, orderItem.getAfterSaleStatus())
-                .set(OrderItem::getIdentificationStatus,IdentificationStatusEnum.ALREADY_NOT_HANDLE.name()));
+                .set(OrderItem::getReturnGoodsNumber,orderItem.getReturnGoodsNumber())
+                .set(OrderItem::getIdentificationStatus, IdentificationStatusEnum.ALREADY_NOT_HANDLE.name()));
     }
 
 }

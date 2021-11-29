@@ -113,11 +113,8 @@ public class OrderItem extends BaseEntity {
     @ApiModelProperty(value = "交易投诉id")
     private String complainId;
 
-    @ApiModelProperty(value = "已退货商品数量")
+    @ApiModelProperty(value = "退货商品数量")
     private Integer returnGoodsNumber;
-
-    @ApiModelProperty(value = "正在进行退货中的商品数量")
-    private Integer isGoodsNumber;
 
     @ApiModelProperty(value = "标识是否被4.2.4版本处理过的订单")
     private String identificationStatus;
