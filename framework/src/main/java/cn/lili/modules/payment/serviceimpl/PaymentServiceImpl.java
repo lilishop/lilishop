@@ -2,6 +2,7 @@ package cn.lili.modules.payment.serviceimpl;
 
 import cn.lili.modules.order.order.entity.vo.PaymentLog;
 import cn.lili.modules.order.order.mapper.OrderMapper;
+import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.payment.kit.CashierSupport;
 import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
 import cn.lili.modules.payment.kit.params.CashierExecute;
@@ -33,7 +34,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     private CashierSupport cashierSupport;
     @Resource
-    private OrderMapper orderMapper;
+    private OrderService orderService;
 
     @Override
     public void success(PaymentSuccessParams paymentSuccessParams) {
@@ -63,6 +64,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public IPage<PaymentLog> page(Page<PaymentLog> initPage, QueryWrapper<PaymentLog> initWrapper) {
-        return orderMapper.queryPaymentLogs(initPage, initWrapper);
+        return orderService.queryPaymentLogs(initPage, initWrapper);
     }
 }
