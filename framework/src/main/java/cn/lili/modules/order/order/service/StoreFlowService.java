@@ -66,4 +66,25 @@ public interface StoreFlowService extends IService<StoreFlow> {
      */
     List<StoreFlowRefundDownloadVO> getStoreFlowRefundDownloadVO(Wrapper<StoreFlow> queryWrapper);
 
+
+    /**
+     * 根据结算单ID获取商家流水
+     *
+     * @param pageVO 分页
+     * @param id     结算单ID
+     * @param type   类型
+     * @return 商家流水
+     */
+    IPage<StoreFlow> getStoreFlow(String id, String type, PageVO pageVO);
+
+    /**
+     * 根据结算单ID获取商家流水
+     *
+     * @param pageVO 分页
+     * @param id     结算单ID
+     * @return 商家流水
+     */
+    IPage<StoreFlow> getDistributionFlow(String id, PageVO pageVO);
+
+
 }

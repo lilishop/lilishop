@@ -162,18 +162,6 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     }
 
     @Override
-    public IPage<StoreFlow> getStoreFlow(String id, String type, PageVO pageVO) {
-        Bill bill = this.getById(id);
-        return storeFlowService.getStoreFlow(bill.getStoreId(), type, false, pageVO, bill.getStartTime(), bill.getCreateTime());
-    }
-
-    @Override
-    public IPage<StoreFlow> getDistributionFlow(String id, PageVO pageVO) {
-        Bill bill = this.getById(id);
-        return storeFlowService.getStoreFlow(bill.getStoreId(), null, true, pageVO, bill.getStartTime(), bill.getCreateTime());
-    }
-
-    @Override
     public IPage<BillListVO> billPage(BillSearchParams billSearchParams) {
         QueryWrapper<BillListVO> queryWrapper = billSearchParams.queryWrapper();
         return this.baseMapper.queryBillPage(PageUtil.initPage(billSearchParams), queryWrapper);
@@ -282,11 +270,11 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         writer.setColumnWidth(12, 20);
 
         //存放入账列表
-        LambdaQueryWrapper<StoreFlow> storeFlowlambdaQueryWrapper = Wrappers.lambdaQuery();
-        storeFlowlambdaQueryWrapper.eq(StoreFlow::getStoreId, bill.getStoreId());
-        storeFlowlambdaQueryWrapper.between(StoreFlow::getCreateTime, bill.getStartTime(), bill.getCreateTime());
-        storeFlowlambdaQueryWrapper.eq(StoreFlow::getFlowType, FlowTypeEnum.PAY.name());
-        List<StoreFlowRefundDownloadVO> storeFlowRefundDownloadVOList = storeFlowService.getStoreFlowRefundDownloadVO(storeFlowlambdaQueryWrapper);
+        LambdaQueryWrapper<StoreFlow> storeFlowLambdaQueryWrapper = Wrappers.lambdaQuery();
+        storeFlowLambdaQueryWrapper.eq(StoreFlow::getStoreId, bill.getStoreId());
+        storeFlowLambdaQueryWrapper.between(StoreFlow::getCreateTime, bill.getStartTime(), bill.getCreateTime());
+        storeFlowLambdaQueryWrapper.eq(StoreFlow::getFlowType, FlowTypeEnum.PAY.name());
+        List<StoreFlowRefundDownloadVO> storeFlowRefundDownloadVOList = storeFlowService.getStoreFlowRefundDownloadVO(storeFlowLambdaQueryWrapper);
         writer.write(storeFlowRefundDownloadVOList, true);
 
         ServletOutputStream out = null;

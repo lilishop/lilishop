@@ -15,8 +15,10 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.service.RefundLogService;
+import cn.lili.modules.store.entity.dos.Bill;
 import cn.lili.modules.store.entity.vos.StoreFlowPayDownloadVO;
 import cn.lili.modules.store.entity.vos.StoreFlowRefundDownloadVO;
+import cn.lili.modules.store.service.BillService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -58,6 +60,9 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
      */
     @Autowired
     private RefundLogService refundLogService;
+
+    @Autowired
+    private BillService billService;
 
     @Override
     public void payOrder(String orderSn) {
@@ -180,4 +185,18 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
     public List<StoreFlowRefundDownloadVO> getStoreFlowRefundDownloadVO(Wrapper<StoreFlow> queryWrapper) {
         return baseMapper.getStoreFlowRefundDownloadVO(queryWrapper);
     }
+
+
+    @Override
+    public IPage<StoreFlow> getStoreFlow(String id, String type, PageVO pageVO) {
+        Bill bill = billService.getById(id);
+        return this.getStoreFlow(bill.getStoreId(), type, false, pageVO, bill.getStartTime(), bill.getCreateTime());
+    }
+
+    @Override
+    public IPage<StoreFlow> getDistributionFlow(String id, PageVO pageVO) {
+        Bill bill = billService.getById(id);
+        return this.getStoreFlow(bill.getStoreId(), null, true, pageVO, bill.getStartTime(), bill.getCreateTime());
+    }
+
 }

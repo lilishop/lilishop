@@ -6,6 +6,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
+import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.store.entity.dos.Bill;
 import cn.lili.modules.store.entity.dto.BillSearchParams;
 import cn.lili.modules.store.entity.vos.BillListVO;
@@ -36,6 +37,9 @@ public class BillStoreController {
     @Autowired
     private BillService billService;
 
+    @Autowired
+    private StoreFlowService storeFlowService;
+
     @ApiOperation(value = "获取结算单分页")
     @GetMapping(value = "/getByPage")
     public ResultMessage<IPage<BillListVO>> getByPage(BillSearchParams billSearchParams) {
@@ -59,7 +63,7 @@ public class BillStoreController {
     @GetMapping(value = "/{id}/getStoreFlow")
     public ResultMessage<IPage<StoreFlow>> getStoreFlow(@PathVariable String id, String flowType, PageVO pageVO) {
         OperationalJudgment.judgment(billService.getById(id));
-        return ResultUtil.data(billService.getStoreFlow(id, flowType, pageVO));
+        return ResultUtil.data(storeFlowService.getStoreFlow(id, flowType, pageVO));
     }
 
     @ApiOperation(value = "获取商家分销订单流水分页")
@@ -69,7 +73,7 @@ public class BillStoreController {
     @GetMapping(value = "/{id}/getDistributionFlow")
     public ResultMessage<IPage<StoreFlow>> getDistributionFlow(@PathVariable String id, PageVO pageVO) {
         OperationalJudgment.judgment(billService.getById(id));
-        return ResultUtil.data(billService.getDistributionFlow(id, pageVO));
+        return ResultUtil.data(storeFlowService.getDistributionFlow(id, pageVO));
     }
 
     @ApiOperation(value = "核对结算单")
@@ -81,13 +85,13 @@ public class BillStoreController {
         return ResultUtil.success();
     }
 
-    @ApiOperation(value = "下载结算单",produces="application/octet-stream")
+    @ApiOperation(value = "下载结算单", produces = "application/octet-stream")
     @ApiImplicitParam(name = "id", value = "结算单ID", required = true, paramType = "path", dataType = "String")
     @GetMapping(value = "/downLoad/{id}")
     public void downLoadDeliverExcel(@PathVariable String id) {
         OperationalJudgment.judgment(billService.getById(id));
         HttpServletResponse response = ThreadContextHolder.getHttpResponse();
-        billService.download(response,id);
+        billService.download(response, id);
 
     }
 
