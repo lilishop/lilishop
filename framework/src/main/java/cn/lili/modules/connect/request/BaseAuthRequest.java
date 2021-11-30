@@ -13,7 +13,7 @@ import cn.lili.modules.connect.entity.enums.AuthResponseStatus;
 import cn.lili.modules.connect.exception.AuthException;
 import cn.lili.modules.connect.util.AuthChecker;
 import cn.lili.common.utils.HttpUtils;
-import cn.lili.modules.connect.util.UuidUtils;
+import cn.lili.common.utils.UuidUtils;
 import com.xkcoding.http.util.UrlUtil;
 import lombok.extern.slf4j.Slf4j;
 

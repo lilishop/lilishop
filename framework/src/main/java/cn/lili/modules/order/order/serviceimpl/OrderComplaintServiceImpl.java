@@ -15,7 +15,7 @@ import cn.lili.modules.order.order.entity.dos.OrderComplaint;
 import cn.lili.modules.order.order.entity.dos.OrderComplaintCommunication;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dto.OrderComplaintDTO;
-import cn.lili.modules.order.order.entity.enums.ComplaintStatusEnum;
+import cn.lili.modules.order.aftersale.entity.enums.ComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.vo.*;
 import cn.lili.modules.order.order.mapper.OrderComplaintMapper;

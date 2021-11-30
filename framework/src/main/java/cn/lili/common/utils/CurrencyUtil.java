@@ -1,6 +1,7 @@
 package cn.lili.common.utils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * 金额计算工具
@@ -30,7 +31,7 @@ public final class CurrencyUtil {
     public static Double add(double v1, double v2) {
         BigDecimal b1 = new BigDecimal(v1);
         BigDecimal b2 = new BigDecimal(v2);
-        return b1.add(b2).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return b1.add(b2).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
     /**
@@ -43,7 +44,7 @@ public final class CurrencyUtil {
     public static double sub(double v1, double v2) {
         BigDecimal b1 = new BigDecimal(v1);
         BigDecimal b2 = new BigDecimal(v2);
-        return b1.subtract(b2).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return b1.subtract(b2).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
     /**
@@ -56,7 +57,7 @@ public final class CurrencyUtil {
     public static Double mul(double v1, double v2) {
         BigDecimal b1 = new BigDecimal(v1);
         BigDecimal b2 = new BigDecimal(v2);
-        return b1.multiply(b2).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return b1.multiply(b2).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
     /**
@@ -74,7 +75,7 @@ public final class CurrencyUtil {
         }
         BigDecimal b1 = new BigDecimal(v1);
         BigDecimal b2 = new BigDecimal(v2);
-        return b1.multiply(b2).setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return b1.multiply(b2).setScale(scale, RoundingMode.HALF_UP).doubleValue();
     }
 
     /**
@@ -107,7 +108,7 @@ public final class CurrencyUtil {
         }
         BigDecimal b1 = new BigDecimal(v1);
         BigDecimal b2 = new BigDecimal(v2);
-        return b1.divide(b2, scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return b1.divide(b2, scale, RoundingMode.HALF_UP).doubleValue();
     }
 
     /**
@@ -124,7 +125,7 @@ public final class CurrencyUtil {
         }
         BigDecimal b = new BigDecimal(v);
         BigDecimal one = new BigDecimal("1");
-        return b.divide(one, scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return b.divide(one, scale, RoundingMode.HALF_UP).doubleValue();
     }
 
     /**
@@ -145,7 +146,6 @@ public final class CurrencyUtil {
      * @return double类型分
      */
     public static double reversalFen(Double money) {
-        double price = div(money, 100);
-        return price;
+        return div(money, 100);
     }
 }

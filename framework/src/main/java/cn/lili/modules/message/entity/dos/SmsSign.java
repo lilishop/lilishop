@@ -1,5 +1,6 @@
 package cn.lili.modules.message.entity.dos;
 
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -15,7 +16,7 @@ import lombok.Data;
 @Data
 @TableName("li_sms_sign")
 @ApiModel(value = "短信签名")
-public class SmsSign {
+public class SmsSign extends BaseIdEntity {
 
     @ApiModelProperty(value = "签名名称", required = true)
     private String signName;

@@ -6,7 +6,7 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.system.entity.dos.SensitiveWords;
 import cn.lili.modules.system.service.SensitiveWordsService;
-import cn.lili.modules.system.utils.SensitiveWordsFilter;
+import cn.lili.common.sensitive.SensitiveWordsFilter;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -48,7 +48,7 @@ public class SensitiveWordsManagerController {
     @PostMapping
     public ResultMessage<SensitiveWords> add(@Valid SensitiveWords sensitiveWords) {
         sensitiveWordsService.save(sensitiveWords);
-        SensitiveWordsFilter.put(sensitiveWords.getSensitiveWord());
+        sensitiveWordsService.resetCache();
         return ResultUtil.data(sensitiveWords);
     }
 
@@ -58,7 +58,7 @@ public class SensitiveWordsManagerController {
     public ResultMessage<SensitiveWords> edit(@PathVariable String id, SensitiveWords sensitiveWords) {
         sensitiveWords.setId(id);
         sensitiveWordsService.updateById(sensitiveWords);
-        SensitiveWordsFilter.put(sensitiveWords.getSensitiveWord());
+        sensitiveWordsService.resetCache();
         return ResultUtil.data(sensitiveWords);
     }
 
@@ -66,12 +66,8 @@ public class SensitiveWordsManagerController {
     @ApiImplicitParam(name = "ids", value = "敏感词ID", required = true, dataType = "String", allowMultiple = true, paramType = "path")
     @DeleteMapping(value = "/delByIds/{ids}")
     public ResultMessage<Object> delAllByIds(@PathVariable List<String> ids) {
-        for (String id : ids) {
-            String name = sensitiveWordsService.getById(id).getSensitiveWord();
-            SensitiveWordsFilter.remove(name);
-            sensitiveWordsService.removeById(id);
-        }
+        sensitiveWordsService.removeByIds(ids);
+        sensitiveWordsService.resetCache();
         return ResultUtil.success();
-
     }
 }

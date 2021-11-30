@@ -73,11 +73,6 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     @Autowired
     private StoreDetailService storeDetailService;
     /**
-     * 页面
-     */
-    @Autowired
-    private PageDataService pageDataService;
-    /**
      * 店铺收藏
      */
     @Autowired
@@ -188,8 +183,6 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         }
         if (passed == 0) {
             store.setStoreDisable(StoreStatusEnum.OPEN.value());
-            //添加店铺页面
-            pageDataService.addStorePageData(store.getId());
             //修改会员 表示已有店铺
             Member member = memberService.getById(store.getMemberId());
             member.setHaveStore(true);

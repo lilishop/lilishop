@@ -31,6 +31,7 @@ import cn.lili.modules.order.order.entity.enums.*;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.entity.vo.OrderVO;
+import cn.lili.modules.order.order.entity.vo.PaymentLog;
 import cn.lili.modules.order.order.mapper.OrderItemMapper;
 import cn.lili.modules.order.order.mapper.OrderMapper;
 import cn.lili.modules.order.order.service.*;
@@ -56,6 +57,7 @@ import cn.lili.trigger.message.PintuanOrderMessage;
 import cn.lili.trigger.model.TimeExecuteConstant;
 import cn.lili.trigger.model.TimeTriggerMsg;
 import cn.lili.trigger.util.DelayQueueTools;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -596,6 +598,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             return trade.getFlowPrice();
         }
         return order.getFlowPrice();
+    }
+
+    @Override
+    public IPage<PaymentLog> queryPaymentLogs(IPage<PaymentLog> page, Wrapper<PaymentLog> queryWrapper) {
+        return baseMapper.queryPaymentLogs(page, queryWrapper);
     }
 
     /**

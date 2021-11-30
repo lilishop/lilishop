@@ -12,7 +12,7 @@ import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.member.service.MemberEvaluationService;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
-import cn.lili.modules.order.order.service.AfterSaleService;
+import cn.lili.modules.order.aftersale.service.AfterSaleService;
 import cn.lili.modules.order.order.service.OrderComplaintService;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleTypeEnum;
 import cn.lili.modules.promotion.service.SeckillService;

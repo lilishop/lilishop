@@ -1,6 +1,6 @@
 package cn.lili.modules.system.sms;
 
-import cn.lili.modules.verification.enums.VerificationEnums;
+import cn.lili.modules.verification.entity.enums.VerificationEnums;
 
 import java.util.List;
 import java.util.Map;

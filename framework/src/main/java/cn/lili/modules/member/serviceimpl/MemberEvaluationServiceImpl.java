@@ -31,8 +31,7 @@ import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.modules.system.utils.CharacterConstant;
-import cn.lili.modules.system.utils.SensitiveWordsFilter;
+import cn.lili.common.sensitive.SensitiveWordsFilter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -121,7 +120,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         //新增用户评价
         MemberEvaluation memberEvaluation = new MemberEvaluation(memberEvaluationDTO, goodsSku, member, order);
         //过滤商品咨询敏感词
-        memberEvaluation.setContent(SensitiveWordsFilter.filter(memberEvaluation.getContent(), CharacterConstant.WILDCARD_STAR));
+        memberEvaluation.setContent(SensitiveWordsFilter.filter(memberEvaluation.getContent()));
         //添加评价
         this.save(memberEvaluation);
 

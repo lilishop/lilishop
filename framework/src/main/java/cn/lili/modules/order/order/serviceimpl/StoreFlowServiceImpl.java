@@ -2,7 +2,7 @@ package cn.lili.modules.order.order.serviceimpl;
 
 import cn.lili.common.utils.*;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.order.order.entity.dos.AfterSale;
+import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
@@ -15,7 +15,10 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.service.RefundLogService;
+import cn.lili.modules.store.entity.vos.StoreFlowPayDownloadVO;
+import cn.lili.modules.store.entity.vos.StoreFlowRefundDownloadVO;
 import cn.lili.mybatis.util.PageUtil;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -167,5 +170,15 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         lambdaQueryWrapper.between(StoreFlow::getCreateTime, startTime, endTime);
         lambdaQueryWrapper.eq(StringUtils.isNotEmpty(type), StoreFlow::getFlowType, type);
         return this.page(PageUtil.initPage(pageVO), lambdaQueryWrapper);
+    }
+
+    @Override
+    public List<StoreFlowPayDownloadVO> getStoreFlowPayDownloadVO(Wrapper<StoreFlow> queryWrapper) {
+        return baseMapper.getStoreFlowPayDownloadVO(queryWrapper);
+    }
+
+    @Override
+    public List<StoreFlowRefundDownloadVO> getStoreFlowRefundDownloadVO(Wrapper<StoreFlow> queryWrapper) {
+        return baseMapper.getStoreFlowRefundDownloadVO(queryWrapper);
     }
 }

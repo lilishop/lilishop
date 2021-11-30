@@ -11,7 +11,7 @@ import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.request.AuthRequest;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.connect.util.ConnectUtil;
-import cn.lili.modules.connect.util.UuidUtils;
+import cn.lili.common.utils.UuidUtils;
 import cn.lili.modules.member.service.MemberService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
