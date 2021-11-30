@@ -3,6 +3,8 @@ package cn.lili.modules.member.serviceimpl;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.modules.member.entity.dto.CollectionDTO;
+import cn.lili.modules.store.service.StoreService;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.StoreCollection;
@@ -13,6 +15,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -25,6 +28,10 @@ import java.util.Optional;
  */
 @Service
 public class StoreCollectionServiceImpl extends ServiceImpl<StoreCollectionMapper, StoreCollection> implements StoreCollectionService {
+
+
+    @Autowired
+    private StoreService storeService;
 
     @Override
     public IPage<StoreCollectionVO> storeCollection(PageVO pageVo) {
@@ -49,6 +56,7 @@ public class StoreCollectionServiceImpl extends ServiceImpl<StoreCollectionMappe
                 .eq(StoreCollection::getStoreId, storeId)) == null) {
             StoreCollection storeCollection = new StoreCollection(UserContext.getCurrentUser().getId(), storeId);
             this.save(storeCollection);
+            storeService.updateStoreCollectionNum(new CollectionDTO(storeId, 1));
             return storeCollection;
         }
         throw new ServiceException(ResultCode.USER_COLLECTION_EXIST);
@@ -59,6 +67,7 @@ public class StoreCollectionServiceImpl extends ServiceImpl<StoreCollectionMappe
         QueryWrapper<StoreCollection> queryWrapper = new QueryWrapper();
         queryWrapper.eq("member_id", UserContext.getCurrentUser().getId());
         queryWrapper.eq("store_id", storeId);
+        storeService.updateStoreCollectionNum(new CollectionDTO(storeId, -1));
         return this.remove(queryWrapper);
     }
 }

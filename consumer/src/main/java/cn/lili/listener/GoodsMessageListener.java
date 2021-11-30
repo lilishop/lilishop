@@ -25,6 +25,7 @@ import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
+import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.member.service.FootprintService;
 import cn.lili.modules.member.service.GoodsCollectionService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
@@ -197,10 +198,6 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 String message = new String(messageExt.getBody());
                 List<String> skuIds = JSONUtil.toList(message, String.class);
                 goodsCollectionService.deleteSkuCollection(skuIds);
-                break;
-            //收藏商品
-            case GOODS_COLLECTION:
-                storeService.updateStoreCollectionNum(new String(messageExt.getBody()));
                 break;
             //商品评价
             case GOODS_COMMENT_COMPLETE:

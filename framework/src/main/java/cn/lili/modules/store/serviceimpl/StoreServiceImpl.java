@@ -16,6 +16,7 @@ import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.StoreCollection;
+import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.member.service.StoreCollectionService;
 import cn.lili.modules.page.service.PageDataService;
@@ -319,15 +320,8 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     }
 
     @Override
-    public void updateStoreCollectionNum(String goodsId) {
-        String storeId = goodsSkuService.getById(goodsId).getStoreId();
-        //获取店铺收藏数量
-        Integer collectionNum = storeCollectionService.count(new LambdaQueryWrapper<StoreCollection>()
-                .eq(StoreCollection::getStoreId, storeId));
-        //修改店铺收藏数量
-        this.update(new LambdaUpdateWrapper<Store>()
-                .set(Store::getCollectionNum, collectionNum)
-                .eq(Store::getId, storeId));
+    public void updateStoreCollectionNum(CollectionDTO collectionDTO) {
+        baseMapper.updateCollection(collectionDTO.getId(), collectionDTO.getNum());
     }
 
     /**

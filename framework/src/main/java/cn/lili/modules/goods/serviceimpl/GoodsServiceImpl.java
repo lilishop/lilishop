@@ -27,6 +27,7 @@ import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.mapper.GoodsMapper;
 import cn.lili.modules.goods.service.*;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
+import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
 import cn.lili.modules.store.entity.dos.FreightTemplate;
