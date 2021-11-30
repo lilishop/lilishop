@@ -369,9 +369,8 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
      */
     private void updateGoodsNum(MessageExt messageExt) {
 
-        Goods goods;
         try {
-            goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
+            Goods goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
             //更新店铺商品数量
             assert goods != null;
             storeService.updateStoreGoodsNum(goods.getStoreId());

@@ -65,9 +65,6 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
     private GoodsService goodsService;
 
     @Autowired
-    private GoodsSkuService goodsSkuService;
-
-    @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Autowired
@@ -104,16 +101,10 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
         return result;
     }
 
+    @Override
     public void updateStoreGoodsInfo(Store store) {
 
-        goodsService.update(new LambdaUpdateWrapper<Goods>()
-                .eq(Goods::getStoreId, store.getId())
-                .set(Goods::getStoreName, store.getStoreName())
-                .set(Goods::getSelfOperated, store.getSelfOperated()));
-        goodsSkuService.update(new LambdaUpdateWrapper<GoodsSku>()
-                .eq(GoodsSku::getStoreId, store.getId())
-                .set(GoodsSku::getStoreName, store.getStoreName())
-                .set(GoodsSku::getSelfOperated, store.getSelfOperated()));
+        goodsService.updateStoreDetail(store);
 
         Map<String, Object> updateIndexFieldsMap = EsIndexUtil.getUpdateIndexFieldsMap(
                 MapUtil.builder().put("storeId", store.getId()).build(),
