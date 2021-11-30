@@ -6,7 +6,7 @@ import cn.lili.modules.permission.entity.dos.Menu;
 import cn.lili.modules.permission.entity.dto.MenuSearchParams;
 import cn.lili.modules.permission.entity.vo.MenuVO;
 import cn.lili.modules.permission.service.MenuService;
-import cn.lili.modules.system.aspect.annotation.DemoSite;
+import cn.lili.common.aop.annotation.DemoSite;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
