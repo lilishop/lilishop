@@ -464,7 +464,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     }
 
     /**
-     * 根据售后状态修改OrderItem订单中正在售后的商品数量及OrderItem订单状态
+     * 修改OrderItem订单中正在售后的商品数量及OrderItem订单状态
      *
      * @author ftyy
      */
@@ -475,6 +475,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
                 .eq(OrderItem::getOrderSn, afterSale.getOrderSn())
                 .eq(OrderItem::getSkuId, afterSale.getSkuId()));
         AfterSaleStatusEnum afterSaleStatusEnum = AfterSaleStatusEnum.valueOf(afterSale.getServiceStatus());
+
         switch (afterSaleStatusEnum){
             //判断当前售后的状态---申请中
             case APPLY:{
@@ -603,47 +604,6 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     }
 
     /**
-     * 功能描述: 处理4.24之前未标识订单。
-     *
-     * @return void
-     * @Author ftyy
-     **/
-    @PostConstruct
-    private void initializationOrderItemState() {
-        //获取所有未处理过的订单
-        List<OrderItem> orderItemList = orderItemService.list(new LambdaQueryWrapper<OrderItem>()
-                .isNull(OrderItem::getIdentificationStatus).or()
-                .eq(OrderItem::getIdentificationStatus, IdentificationStatusEnum.NOT_HANDLE.name()));
-
-        //不为空时对订单数据进行部分售后逻辑处理
-        if (!orderItemList.isEmpty()) {
-
-            //遍历订单查询每一个订单下的售后记录
-            orderItemList.forEach(orderItem -> {
-
-                //订单状态不能为新订单,已失效订单或未申请订单才可以去修改订单信息
-                if (!orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.NEW.name())
-                        && !orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.EXPIRED.name())
-                        && !orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name())) {
-
-                    //查询订单下的售后记录
-                    List<AfterSale> afterSaleList = this.list(new LambdaQueryWrapper<AfterSale>()
-                            .eq(AfterSale::getOrderSn, orderItem.getOrderSn())
-                            .eq(AfterSale::getGoodsId, orderItem.getGoodsId()));
-
-                    //获取售后商品数量及已完成售后商品数量修改orderItem订单
-                    this.updateOrderItemGoodsNumber(orderItem, afterSaleList);
-                }
-
-                //修改orderItem订单
-                this.updateOrderItem(orderItem);
-            });
-
-        }
-
-    }
-
-    /**
      * 功能描述: 获取售后商品数量及已完成售后商品数量修改orderItem订单
      *
      * @param orderItem,afterSaleList
@@ -711,8 +671,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         orderItemService.update(new LambdaUpdateWrapper<OrderItem>()
                 .eq(OrderItem::getSn, orderItem.getSn())
                 .set(OrderItem::getAfterSaleStatus, orderItem.getAfterSaleStatus())
-                .set(OrderItem::getReturnGoodsNumber,orderItem.getReturnGoodsNumber())
-                .set(OrderItem::getIdentificationStatus, IdentificationStatusEnum.ALREADY_NOT_HANDLE.name()));
+                .set(OrderItem::getReturnGoodsNumber,orderItem.getReturnGoodsNumber()));
     }
 
 }
