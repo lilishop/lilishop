@@ -3,6 +3,7 @@ package cn.lili.modules.member.serviceimpl;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import cn.lili.common.security.context.UserContext;
@@ -73,10 +74,6 @@ public class GoodsCollectionServiceImpl extends ServiceImpl<GoodsCollectionMappe
             goodsCollection = new GoodsCollection(UserContext.getCurrentUser().getId(), skuId);
 
             this.save(goodsCollection);
-            //商品收藏消息
-            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_COLLECTION.name();
-            //发送mq消息
-            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(skuId), RocketmqSendCallbackBuilder.commonCallback());
             return goodsCollection;
         }
         throw new ServiceException(ResultCode.USER_COLLECTION_EXIST);
