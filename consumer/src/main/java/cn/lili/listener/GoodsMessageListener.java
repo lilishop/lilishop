@@ -25,6 +25,7 @@ import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
+import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.member.service.FootprintService;
 import cn.lili.modules.member.service.GoodsCollectionService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
@@ -198,10 +199,6 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 List<String> skuIds = JSONUtil.toList(message, String.class);
                 goodsCollectionService.deleteSkuCollection(skuIds);
                 break;
-            //收藏商品
-            case GOODS_COLLECTION:
-                storeService.updateStoreCollectionNum(new String(messageExt.getBody()));
-                break;
             //商品评价
             case GOODS_COMMENT_COMPLETE:
                 MemberEvaluation memberEvaluation = JSONUtil.toBean(new String(messageExt.getBody()), MemberEvaluation.class);
@@ -369,9 +366,8 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
      */
     private void updateGoodsNum(MessageExt messageExt) {
 
-        Goods goods;
         try {
-            goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
+            Goods goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
             //更新店铺商品数量
             assert goods != null;
             storeService.updateStoreGoodsNum(goods.getStoreId());

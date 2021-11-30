@@ -1,6 +1,7 @@
 package cn.lili.modules.store.service;
 
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dto.*;
 import cn.lili.modules.store.entity.vos.StoreSearchParams;
@@ -132,7 +133,7 @@ public interface StoreService extends IService<Store> {
     /**
      * 更新店铺收藏数量
      *
-     * @param goodsId 店铺ID
+     * @param collectionDTO 收藏信息
      */
-    void updateStoreCollectionNum(String goodsId);
+    void updateStoreCollectionNum(CollectionDTO collectionDTO);
 }
