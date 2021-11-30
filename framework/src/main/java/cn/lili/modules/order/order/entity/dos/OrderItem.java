@@ -9,7 +9,6 @@ import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
-import cn.lili.modules.order.order.entity.enums.IdentificationStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
 import cn.lili.modules.promotion.entity.vos.PromotionSkuVO;
@@ -116,8 +115,6 @@ public class OrderItem extends BaseEntity {
     @ApiModelProperty(value = "退货商品数量")
     private Integer returnGoodsNumber;
 
-    @ApiModelProperty(value = "标识是否被4.2.4版本处理过的订单")
-    private String identificationStatus;
 
     public OrderItem(CartSkuVO cartSkuVO, CartVO cartVO, TradeDTO tradeDTO) {
         String oldId = this.getId();
@@ -132,7 +129,6 @@ public class OrderItem extends BaseEntity {
         this.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.NEW.name());
         this.setCommentStatus(CommentStatusEnum.NEW.name());
         this.setComplainStatus(OrderComplaintStatusEnum.NEW.name());
-        this.setIdentificationStatus(IdentificationStatusEnum.ALREADY_NOT_HANDLE.name());
         this.setPriceDetailDTO(cartSkuVO.getPriceDetailDTO());
         this.setOrderSn(cartVO.getSn());
         this.setTradeSn(tradeDTO.getSn());
