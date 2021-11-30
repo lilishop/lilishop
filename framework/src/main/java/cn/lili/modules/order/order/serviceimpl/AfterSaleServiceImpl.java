@@ -486,7 +486,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
                 break;
             }
             default:
-
+                break;
         }
         //修改orderItem订单
         this.updateOrderItem(orderItem);
@@ -702,6 +702,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             }
 
             default:
+                break;
         }
         orderItemService.update(new LambdaUpdateWrapper<OrderItem>()
                 .eq(OrderItem::getSn, orderItem.getSn())
