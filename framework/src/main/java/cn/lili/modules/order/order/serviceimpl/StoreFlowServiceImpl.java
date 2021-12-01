@@ -147,7 +147,8 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
 
 
         //获取付款信息
-        StoreFlow payStoreFlow = this.getOne(new LambdaUpdateWrapper<StoreFlow>().eq(StoreFlow::getOrderItemSn, afterSale.getOrderItemSn()));
+        StoreFlow payStoreFlow = this.getOne(new LambdaUpdateWrapper<StoreFlow>().eq(StoreFlow::getOrderItemSn, afterSale.getOrderItemSn())
+                .eq(StoreFlow::getFlowType,FlowTypeEnum.PAY));
         storeFlow.setNum(afterSale.getNum());
         storeFlow.setCategoryId(payStoreFlow.getCategoryId());
         //佣金

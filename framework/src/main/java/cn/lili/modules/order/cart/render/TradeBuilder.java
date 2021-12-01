@@ -97,7 +97,7 @@ public class TradeBuilder {
             renderCartBySteps(tradeDTO, RenderStepStatement.tradeRender);
         }
 
-
+        //添加order订单及order_item子订单并返回
         return tradeService.createTrade(tradeDTO);
     }
 

@@ -54,5 +54,10 @@ public class AfterSaleApplyVO {
     @ApiModelProperty(value = "是否支持退款")
     private Boolean returnMoney;
 
+    @ApiModelProperty(value = "会员ID")
+    private String memberId;
+
+
+
 
 }
