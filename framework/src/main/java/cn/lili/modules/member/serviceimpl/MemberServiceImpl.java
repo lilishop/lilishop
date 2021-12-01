@@ -21,14 +21,12 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
+import cn.lili.modules.connect.entity.enums.ConnectEnum;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.common.utils.UuidUtils;
 import cn.lili.modules.member.aop.annotation.PointLogPoint;
 import cn.lili.modules.member.entity.dos.Member;
-import cn.lili.modules.member.entity.dto.ManagerMemberEditDTO;
-import cn.lili.modules.member.entity.dto.MemberAddDTO;
-import cn.lili.modules.member.entity.dto.MemberEditDTO;
-import cn.lili.modules.member.entity.dto.MemberPointMessage;
+import cn.lili.modules.member.entity.dto.*;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.entity.vo.MemberDistributionVO;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
@@ -469,10 +467,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
      * @param type    状态
      */
     private void loginBindUser(Member member, String unionId, String type) {
-        LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Connect::getUnionId, unionId);
-        queryWrapper.eq(Connect::getUnionType, type);
-        Connect connect = connectService.getOne(queryWrapper);
+        Connect connect = connectService.queryConnect(
+                ConnectQueryDTO.builder().unionId(unionId).unionType(type).build()
+        );
         if (connect == null) {
             connect = new Connect(member.getId(), unionId, type);
             connectService.save(connect);
@@ -496,11 +493,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 if (connectAuthUser == null) {
                     return;
                 }
-                //检测是否已经绑定过用户
-                LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
-                queryWrapper.eq(Connect::getUnionId, connectAuthUser.getUuid());
-                queryWrapper.eq(Connect::getUnionType, connectType);
-                Connect connect = connectService.getOne(queryWrapper);
+                Connect connect = connectService.queryConnect(
+                        ConnectQueryDTO.builder().unionId(connectAuthUser.getUuid()).unionType(connectType).build()
+                );
                 if (connect == null) {
                     connect = new Connect(member.getId(), connectAuthUser.getUuid(), connectType);
                     connectService.save(connect);
@@ -543,9 +538,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 }
                 //检测是否已经绑定过用户
                 LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
-                queryWrapper.eq(Connect::getUnionId, connectAuthUser.getUuid());
-                queryWrapper.eq(Connect::getUnionType, connectType);
-                Connect connect = connectService.getOne(queryWrapper);
+                Connect connect = connectService.queryConnect(
+                        ConnectQueryDTO.builder().unionType(connectType).unionId(connectAuthUser.getUuid()).build()
+                );
                 //没有关联则返回true，表示可以继续绑定
                 if (connect == null) {
                     connectAuthUser.setConnectEnum(authInterface);
