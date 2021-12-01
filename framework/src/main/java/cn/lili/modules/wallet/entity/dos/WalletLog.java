@@ -1,5 +1,6 @@
 package cn.lili.modules.wallet.entity.dos;
 
+import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
 import cn.lili.modules.wallet.entity.enums.DepositServiceTypeEnum;
 import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
@@ -64,17 +65,30 @@ public class WalletLog extends BaseIdEntity {
     /**
      * 构建新的预存款日志对象
      *
-     * @param memberId   会员id
-     * @param memberName 会员名称
-     * @param money      金额
-     * @param detail     备注
+     * @param memberName            会员名称
+     * @param memberWalletUpdateDTO 变动模型
      */
-    public WalletLog(String memberId, String memberName, Double money, String detail, String serviceType) {
-        this.setMemberId(memberId);
+    public WalletLog(String memberName, MemberWalletUpdateDTO memberWalletUpdateDTO) {
+        this.setMemberId(memberWalletUpdateDTO.getMemberId());
         this.setMemberName(memberName);
-        this.setMoney(money);
-        this.setDetail(detail);
-        this.setServiceType(serviceType);
+        this.setMoney(memberWalletUpdateDTO.getMoney());
+        this.setDetail(memberWalletUpdateDTO.getDetail());
+        this.setServiceType(memberWalletUpdateDTO.getServiceType());
+    }
+
+    /**
+     * 构建新的预存款日志对象
+     *
+     * @param memberName            会员名称
+     * @param memberWalletUpdateDTO 变动模型
+     * @param isReduce              是否是消费
+     */
+    public WalletLog(String memberName, MemberWalletUpdateDTO memberWalletUpdateDTO, boolean isReduce) {
+        this.setMemberId(memberWalletUpdateDTO.getMemberId());
+        this.setMemberName(memberName);
+        this.setMoney(isReduce ? -memberWalletUpdateDTO.getMoney() : memberWalletUpdateDTO.getMoney());
+        this.setDetail(memberWalletUpdateDTO.getDetail());
+        this.setServiceType(memberWalletUpdateDTO.getServiceType());
     }
 
 }

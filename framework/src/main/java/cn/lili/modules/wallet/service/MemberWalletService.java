@@ -4,6 +4,7 @@ package cn.lili.modules.wallet.service;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.wallet.entity.dos.MemberWallet;
 import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
+import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
 import cn.lili.modules.wallet.entity.vo.MemberWalletVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -26,57 +27,42 @@ public interface MemberWalletService extends IService<MemberWallet> {
     /**
      * 增加用户预存款余额
      *
-     * @param money       金额
-     * @param memberId    会员id
-     * @param serviceType 业务类型 @see DepositServiceTypeEnum
-     * @param detail      操作描述
-     * @return 返回增加结果    true:增加成功    false:增加失败
+     * @param memberWalletUpdateDTO 变动模型
+     * @return 返回增加结果    true:成功    false:失败
      */
-    Boolean increase(Double money, String memberId, String detail, String serviceType);
+    Boolean increase(MemberWalletUpdateDTO memberWalletUpdateDTO);
 
     /**
      * 从冻结金额到余额
      *
-     * @param money       金额
-     * @param memberId    会员id
-     * @param serviceType 业务类型 @see DepositServiceTypeEnum
-     * @param detail      操作描述
-     * @return 返回增加结果    true:增加成功    false:增加失败
+     * @param memberWalletUpdateDTO 变动模型
+     * @return 返回冻结结果    true:成功    false:失败
      */
-    Boolean increaseWithdrawal(Double money, String memberId, String detail, String serviceType);
+    Boolean increaseWithdrawal(MemberWalletUpdateDTO memberWalletUpdateDTO);
 
     /**
      * 扣减用户预存款余额
      *
-     * @param money       金额
-     * @param memberId    会员id
-     * @param detail      操作描述
-     * @param serviceType 业务类型 @see DepositServiceTypeEnum
-     * @return 操作状态
+     * @param memberWalletUpdateDTO 变动模型
+     * @return 操作状态 true:成功    false:失败
      */
-    Boolean reduce(Double money, String memberId, String detail, String serviceType);
+    Boolean reduce(MemberWalletUpdateDTO memberWalletUpdateDTO);
 
     /**
      * 提现扣减余额到冻结金额
      *
-     * @param money       金额
-     * @param memberId    会员id
-     * @param detail      操作描述
-     * @param serviceType 业务类型 @see DepositServiceTypeEnum
-     * @return 操作状态
+     * @param memberWalletUpdateDTO 变动模型
+     * @return 操作状态 true:成功    false:失败
      */
-    Boolean reduceWithdrawal(Double money, String memberId, String detail, String serviceType);
+    Boolean reduceWithdrawal(MemberWalletUpdateDTO memberWalletUpdateDTO);
 
     /**
      * 提现扣减冻结金额
      *
-     * @param money       金额
-     * @param memberId    会员id
-     * @param detail      操作描述
-     * @param serviceType 类型
+     * @param memberWalletUpdateDTO 变动模型
      * @return 操作状态
      */
-    Boolean reduceFrozen(Double money, String memberId, String detail, String serviceType);
+    Boolean reduceFrozen(MemberWalletUpdateDTO memberWalletUpdateDTO);
 
     /**
      * 设置支付密码
