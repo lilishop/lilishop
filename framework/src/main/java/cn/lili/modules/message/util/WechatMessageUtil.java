@@ -11,6 +11,7 @@ import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.enums.ConnectEnum;
 import cn.lili.modules.connect.service.ConnectService;
+import cn.lili.modules.member.entity.dto.ConnectQueryDTO;
 import cn.lili.modules.message.entity.dos.WechatMPMessage;
 import cn.lili.modules.message.entity.dos.WechatMessage;
 import cn.lili.modules.message.entity.enums.WechatMessageItemEnums;
@@ -87,11 +88,9 @@ public class WechatMessageUtil {
             return;
         }
 
-        QueryWrapper<Connect> queryWrapper = new QueryWrapper();
-        queryWrapper.eq("user_id", order.getMemberId());
-        queryWrapper.eq("union_type", ConnectEnum.WECHAT.name());
-
-        Connect connect = connectService.getOne(queryWrapper);
+        Connect connect = connectService.queryConnect(
+                ConnectQueryDTO.builder().userId(order.getMemberId()).unionType(ConnectEnum.WECHAT.name()).build()
+        );
         if (connect == null) {
             return;
         }
@@ -147,11 +146,9 @@ public class WechatMessageUtil {
             return;
         }
 
-        QueryWrapper<Connect> queryWrapper = new QueryWrapper();
-        queryWrapper.eq("user_id", order.getMemberId());
-        queryWrapper.eq("union_type", ConnectEnum.WECHAT_MP_OPEN_ID.name());
-
-        Connect connect = connectService.getOne(queryWrapper);
+        Connect connect = connectService.queryConnect(
+                ConnectQueryDTO.builder().userId(order.getMemberId()).unionType(ConnectEnum.WECHAT_MP_OPEN_ID.name()).build()
+        );
         if (connect == null) {
             return;
         }

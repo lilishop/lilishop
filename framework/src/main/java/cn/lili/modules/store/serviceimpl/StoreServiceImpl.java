@@ -15,11 +15,9 @@ import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.Member;
-import cn.lili.modules.member.entity.dos.StoreCollection;
 import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.member.service.StoreCollectionService;
-import cn.lili.modules.page.service.PageDataService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.entity.dto.*;
@@ -64,20 +62,10 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     @Autowired
     private GoodsService goodsService;
     /**
-     * 商品SKU
-     */
-    @Autowired
-    private GoodsSkuService goodsSkuService;
-    /**
      * 店铺详情
      */
     @Autowired
     private StoreDetailService storeDetailService;
-    /**
-     * 店铺收藏
-     */
-    @Autowired
-    private StoreCollectionService storeCollectionService;
 
     @Override
     public IPage<StoreVO> findByConditionPage(StoreSearchParams storeSearchParams, PageVO page) {

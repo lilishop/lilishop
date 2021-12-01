@@ -12,6 +12,7 @@ import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.wallet.entity.dos.MemberWallet;
 import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
+import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
 import cn.lili.modules.wallet.entity.dto.MemberWithdrawalMessage;
 import cn.lili.modules.wallet.entity.enums.MemberWithdrawalDestinationEnum;
 import cn.lili.modules.wallet.entity.enums.WithdrawStatusEnum;
@@ -94,82 +95,82 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
     }
 
     @Override
-    public Boolean increaseWithdrawal(Double money, String memberId, String detail, String serviceType) {
+    public Boolean increaseWithdrawal(MemberWalletUpdateDTO memberWalletUpdateDTO) {
         //检测会员预存款讯息是否存在，如果不存在则新建
-        MemberWallet memberWallet = this.checkMemberWallet(memberId);
+        MemberWallet memberWallet = this.checkMemberWallet(memberWalletUpdateDTO.getMemberId());
         //余额变动
-        memberWallet.setMemberWallet(CurrencyUtil.add(memberWallet.getMemberWallet(), money));
-        memberWallet.setMemberFrozenWallet(CurrencyUtil.sub(memberWallet.getMemberFrozenWallet(), money));
+        memberWallet.setMemberWallet(CurrencyUtil.add(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney()));
+        memberWallet.setMemberFrozenWallet(CurrencyUtil.sub(memberWallet.getMemberFrozenWallet(), memberWalletUpdateDTO.getMoney()));
         this.updateById(memberWallet);
         //新增预存款日志
-        WalletLog walletLog = new WalletLog(memberWallet.getMemberId(), memberWallet.getMemberName(), money, detail, serviceType);
+        WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO);
         walletLogService.save(walletLog);
         return true;
     }
 
     @Override
-    public Boolean increase(Double money, String memberId, String detail, String serviceType) {
+    public Boolean increase(MemberWalletUpdateDTO memberWalletUpdateDTO) {
         //检测会员预存款讯息是否存在，如果不存在则新建
-        MemberWallet memberWallet = this.checkMemberWallet(memberId);
+        MemberWallet memberWallet = this.checkMemberWallet(memberWalletUpdateDTO.getMemberId());
         //新增预存款
-        memberWallet.setMemberWallet(CurrencyUtil.add(memberWallet.getMemberWallet(), money));
+        memberWallet.setMemberWallet(CurrencyUtil.add(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney()));
         this.baseMapper.updateById(memberWallet);
         //新增预存款日志
-        WalletLog walletLog = new WalletLog(memberWallet.getMemberId(), memberWallet.getMemberName(), money, detail, serviceType);
+        WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO);
         walletLogService.save(walletLog);
         return true;
     }
 
 
     @Override
-    public Boolean reduce(Double money, String memberId, String detail, String serviceType) {
+    public Boolean reduce(MemberWalletUpdateDTO memberWalletUpdateDTO) {
         //检测会员预存款讯息是否存在，如果不存在则新建
-        MemberWallet memberWallet = this.checkMemberWallet(memberId);
+        MemberWallet memberWallet = this.checkMemberWallet(memberWalletUpdateDTO.getMemberId());
         //减少预存款，需要校验 如果不够扣减预存款
-        if (0 > CurrencyUtil.sub(memberWallet.getMemberWallet(), money)) {
+        if (0 > CurrencyUtil.sub(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney())) {
             return false;
         }
-        memberWallet.setMemberWallet(CurrencyUtil.sub(memberWallet.getMemberWallet(), money));
+        memberWallet.setMemberWallet(CurrencyUtil.sub(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney()));
         //保存记录
         this.updateById(memberWallet);
         //新增预存款日志
-        WalletLog walletLog = new WalletLog(memberWallet.getMemberId(), memberWallet.getMemberName(), -money, detail, serviceType);
+        WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO, true);
         walletLogService.save(walletLog);
         return true;
     }
 
 
     @Override
-    public Boolean reduceWithdrawal(Double money, String memberId, String detail, String serviceType) {
+    public Boolean reduceWithdrawal(MemberWalletUpdateDTO memberWalletUpdateDTO) {
         //检测会员预存款讯息是否存在，如果不存在则新建
-        MemberWallet memberWallet = this.checkMemberWallet(memberId);
+        MemberWallet memberWallet = this.checkMemberWallet(memberWalletUpdateDTO.getMemberId());
         //减少预存款，需要校验 如果不够扣减预存款
-        if (0 > CurrencyUtil.sub(memberWallet.getMemberWallet(), money)) {
+        if (0 > CurrencyUtil.sub(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney())) {
             throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_INSUFFICIENT);
         }
-        memberWallet.setMemberWallet(CurrencyUtil.sub(memberWallet.getMemberWallet(), money));
-        memberWallet.setMemberFrozenWallet(CurrencyUtil.add(memberWallet.getMemberFrozenWallet(), money));
+        memberWallet.setMemberWallet(CurrencyUtil.sub(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney()));
+        memberWallet.setMemberFrozenWallet(CurrencyUtil.add(memberWallet.getMemberFrozenWallet(), memberWalletUpdateDTO.getMoney()));
         //修改余额
         this.updateById(memberWallet);
         //新增预存款日志
-        WalletLog walletLog = new WalletLog(memberWallet.getMemberId(), memberWallet.getMemberName(), -money, detail, serviceType);
+        WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO, true);
         walletLogService.save(walletLog);
         return true;
 
     }
 
     @Override
-    public Boolean reduceFrozen(Double money, String memberId, String detail, String serviceType) {
+    public Boolean reduceFrozen(MemberWalletUpdateDTO memberWalletUpdateDTO) {
         //检测会员预存款讯息是否存在，如果不存在则新建
-        MemberWallet memberWallet = this.checkMemberWallet(memberId);
+        MemberWallet memberWallet = this.checkMemberWallet(memberWalletUpdateDTO.getMemberId());
         //校验此金额是否超过冻结金额
-        if (0 > CurrencyUtil.sub(memberWallet.getMemberWallet(), money)) {
+        if (0 > CurrencyUtil.sub(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney())) {
             throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_INSUFFICIENT);
         }
-        memberWallet.setMemberFrozenWallet(CurrencyUtil.sub(memberWallet.getMemberFrozenWallet(), money));
+        memberWallet.setMemberFrozenWallet(CurrencyUtil.sub(memberWallet.getMemberFrozenWallet(), memberWalletUpdateDTO.getMoney()));
         this.updateById(memberWallet);
         //新增预存款日志
-        WalletLog walletLog = new WalletLog(memberWallet.getMemberId(), memberWallet.getMemberName(), -money, "提现金额已冻结，审核通过提现成功", serviceType);
+        WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO, true);
         walletLogService.save(walletLog);
         return true;
     }
@@ -273,12 +274,12 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
                 //微信零钱提现
                 Boolean result = withdrawal(memberWithdrawApply);
                 if (result) {
-                    this.reduce(price, authUser.getId(), "余额提现成功", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name());
+                    this.reduce(new MemberWalletUpdateDTO(price, authUser.getId(), "余额提现成功", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
                 }
             } else {
                 memberWithdrawalMessage.setStatus(WithdrawStatusEnum.APPLY.name());
                 //扣减余额到冻结金额
-                this.reduceWithdrawal(price, authUser.getId(), "提现金额已冻结，审核成功后到账", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name());
+                this.reduceWithdrawal(new MemberWalletUpdateDTO(price, authUser.getId(), "提现金额已冻结，审核成功后到账", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
             }
             //发送余额提现申请消息
 

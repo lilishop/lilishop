@@ -20,6 +20,7 @@ import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.enums.ConnectEnum;
 import cn.lili.modules.connect.service.ConnectService;
+import cn.lili.modules.member.entity.dto.ConnectQueryDTO;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.kit.CashierSupport;
@@ -166,10 +167,9 @@ public class WechatPlugin implements Payment {
     public ResultMessage<Object> jsApiPay(HttpServletRequest request, PayParam payParam) {
 
         try {
-            LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(Connect::getUserId, UserContext.getCurrentUser().getId())
-                    .eq(Connect::getUnionType, ConnectEnum.WECHAT.name());
-            Connect connect = connectService.getOne(queryWrapper);
+            Connect connect = connectService.queryConnect(
+                    ConnectQueryDTO.builder().userId(UserContext.getCurrentUser().getId()).unionType(ConnectEnum.WECHAT.name()).build()
+            );
             if (connect == null) {
                 return null;
             }
@@ -359,10 +359,9 @@ public class WechatPlugin implements Payment {
     public ResultMessage<Object> mpPay(HttpServletRequest request, PayParam payParam) {
 
         try {
-            LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(Connect::getUserId, UserContext.getCurrentUser().getId())
-                    .eq(Connect::getUnionType, ConnectEnum.WECHAT_MP_OPEN_ID.name());
-            Connect connect = connectService.getOne(queryWrapper);
+            Connect connect = connectService.queryConnect(
+                    ConnectQueryDTO.builder().userId(UserContext.getCurrentUser().getId()).unionType(ConnectEnum.WECHAT_MP_OPEN_ID.name()).build()
+            );
             if (connect == null) {
                 return null;
             }

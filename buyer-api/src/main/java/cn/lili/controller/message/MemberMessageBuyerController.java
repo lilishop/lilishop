@@ -1,4 +1,4 @@
-package cn.lili.controller.system;
+package cn.lili.controller.message;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;

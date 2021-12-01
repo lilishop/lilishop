@@ -34,19 +34,8 @@ import java.util.Optional;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-
 public class GoodsCollectionServiceImpl extends ServiceImpl<GoodsCollectionMapper, GoodsCollection> implements GoodsCollectionService {
 
-    /**
-     * rocketMq
-     */
-    @Autowired
-    private RocketMQTemplate rocketMQTemplate;
-    /**
-     * rocketMq配置
-     */
-    @Autowired
-    private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Override
     public IPage<GoodsCollectionVO> goodsCollection(PageVO pageVo) {

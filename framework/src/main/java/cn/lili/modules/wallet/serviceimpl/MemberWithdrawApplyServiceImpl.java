@@ -4,6 +4,7 @@ package cn.lili.modules.wallet.serviceimpl;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
 import cn.lili.modules.wallet.entity.dto.MemberWithdrawalMessage;
 import cn.lili.modules.wallet.entity.enums.MemberWithdrawalDestinationEnum;
 import cn.lili.mybatis.util.PageUtil;
@@ -75,7 +76,9 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
                     //保存修改审核记录
                     this.updateById(memberWithdrawApply);
                     //记录日志
-                    memberWalletService.reduceFrozen(memberWithdrawApply.getApplyMoney(), memberWithdrawApply.getMemberId(), "审核通过，余额提现", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name());
+                    memberWalletService.reduceFrozen(
+                            new MemberWalletUpdateDTO(memberWithdrawApply.getApplyMoney(), memberWithdrawApply.getMemberId(), "审核通过，余额提现", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()))
+                    ;
                 } else {
                     //如果提现失败则无法审核
                     throw new ServiceException(ResultCode.WALLET_APPLY_ERROR);
@@ -90,7 +93,7 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
                 //保存修改审核记录
                 this.updateById(memberWithdrawApply);
                 //需要从冻结金额扣减到余额
-                memberWalletService.increaseWithdrawal(memberWithdrawApply.getApplyMoney(), memberWithdrawApply.getMemberId(), "审核拒绝，提现金额解冻到余额", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name());
+                memberWalletService.increaseWithdrawal(new MemberWalletUpdateDTO(memberWithdrawApply.getApplyMoney(), memberWithdrawApply.getMemberId(), "审核拒绝，提现金额解冻到余额", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
             }
             //发送审核消息
             memberWithdrawalMessage.setMemberId(memberWithdrawApply.getMemberId());
