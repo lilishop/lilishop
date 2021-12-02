@@ -1,7 +1,6 @@
 package cn.lili.modules.order.aftersale.entity.vo;
 
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
-import jdk.nashorn.internal.objects.annotations.Getter;
 import lombok.Data;
 
 /**
@@ -15,7 +14,6 @@ public class AfterSaleVO extends AfterSale {
     /**
      * 初始化自身状态
      */
-    @Getter
     public AfterSaleAllowOperation getAfterSaleAllowOperationVO() {
 
         //设置订单的可操作状态
