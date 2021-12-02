@@ -10,4 +10,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2020-12-19 09:25
  */
 public interface RefundLogService extends IService<RefundLog> {
+    /**
+     * 根据售后sn查询退款日志
+     * @param sn
+     * @return
+     */
+    RefundLog queryByAfterSaleSn(String sn);
 }

@@ -50,7 +50,7 @@ import cn.lili.common.security.OperationalJudgment;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
-import cn.lili.rocketmq.tags.MqOrderTagsEnum;
+import cn.lili.rocketmq.tags.OrderTagsEnum;
 import cn.lili.trigger.enums.DelayTypeEnums;
 import cn.lili.trigger.interfaces.TimeTrigger;
 import cn.lili.trigger.message.PintuanOrderMessage;
@@ -461,7 +461,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public void sendUpdateStatusMessage(OrderMessage orderMessage) {
-        String destination = rocketmqCustomProperties.getOrderTopic() + ":" + MqOrderTagsEnum.STATUS_CHANGE.name();
+        String destination = rocketmqCustomProperties.getOrderTopic() + ":" + OrderTagsEnum.STATUS_CHANGE.name();
         //发送订单变更mq消息
         rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(orderMessage), RocketmqSendCallbackBuilder.commonCallback());
     }

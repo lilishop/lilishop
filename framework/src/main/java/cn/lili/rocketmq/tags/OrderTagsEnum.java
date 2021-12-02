@@ -6,7 +6,7 @@ package cn.lili.rocketmq.tags;
  * @author paulG
  * @since 2020/12/9
  **/
-public enum MqOrderTagsEnum {
+public enum OrderTagsEnum {
 
     /**
      * 订单创建
@@ -20,7 +20,7 @@ public enum MqOrderTagsEnum {
 
     private final String description;
 
-    MqOrderTagsEnum(String description) {
+    OrderTagsEnum(String description) {
         this.description = description;
     }
 
