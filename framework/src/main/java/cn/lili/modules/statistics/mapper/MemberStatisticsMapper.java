@@ -13,7 +13,7 @@ import org.apache.ibatis.annotations.Select;
  * @author Bulbasaur
  * @since 2020/11/17 7:34 下午
  */
-public interface MemberStatisticsDataMapper extends BaseMapper<MemberStatisticsData> {
+public interface MemberStatisticsMapper extends BaseMapper<MemberStatisticsData> {
 
     /**
      * 获取会员统计数量

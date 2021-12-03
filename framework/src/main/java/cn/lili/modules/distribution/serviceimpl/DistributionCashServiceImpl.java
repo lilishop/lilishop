@@ -157,11 +157,4 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
         throw new ServiceException(ResultCode.DISTRIBUTION_CASH_NOT_EXIST);
 
     }
-
-    @Override
-    public Integer newDistributionCash() {
-        QueryWrapper queryWrapper = Wrappers.query();
-        queryWrapper.eq("distribution_cash_status", WithdrawStatusEnum.APPLY.name());
-        return this.count(queryWrapper);
-    }
 }

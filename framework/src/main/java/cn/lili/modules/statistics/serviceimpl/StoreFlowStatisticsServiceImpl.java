@@ -3,12 +3,13 @@ package cn.lili.modules.statistics.serviceimpl;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
-import cn.lili.modules.statistics.mapper.GoodsStatisticsDataMapper;
 import cn.lili.modules.statistics.entity.dto.GoodsStatisticsQueryParam;
 import cn.lili.modules.statistics.entity.enums.StatisticsQuery;
 import cn.lili.modules.statistics.entity.vo.CategoryStatisticsDataVO;
 import cn.lili.modules.statistics.entity.vo.GoodsStatisticsDataVO;
-import cn.lili.modules.statistics.service.GoodsStatisticsDataService;
+import cn.lili.modules.statistics.entity.vo.StoreStatisticsDataVO;
+import cn.lili.modules.statistics.mapper.StoreFlowStatisticsMapper;
+import cn.lili.modules.statistics.service.StoreFlowStatisticsService;
 import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -26,7 +27,7 @@ import java.util.List;
  * @since 2020/12/9 11:30
  */
 @Service
-public class GoodsStatisticsDataServiceImpl extends ServiceImpl<GoodsStatisticsDataMapper, StoreFlow> implements GoodsStatisticsDataService {
+public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatisticsMapper, StoreFlow> implements StoreFlowStatisticsService {
 
     @Override
     public List<GoodsStatisticsDataVO> getGoodsStatisticsData(GoodsStatisticsQueryParam goodsStatisticsQueryParam, Integer num) {
@@ -51,7 +52,17 @@ public class GoodsStatisticsDataServiceImpl extends ServiceImpl<GoodsStatisticsD
         return this.baseMapper.getCateGoryStatisticsData(queryWrapper);
     }
 
+    @Override
+    public List<StoreStatisticsDataVO> getStoreStatisticsData(Page page, QueryWrapper queryWrapper) {
+        return this.baseMapper.getStoreStatisticsData(page, queryWrapper);
+    }
 
+    /**
+     * 组织查询条件
+     *
+     * @param goodsStatisticsQueryParam
+     * @return
+     */
     private QueryWrapper getQueryWrapper(GoodsStatisticsQueryParam goodsStatisticsQueryParam) {
 
         QueryWrapper queryWrapper = Wrappers.query();

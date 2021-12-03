@@ -15,7 +15,7 @@ import java.util.Map;
  * @author Bulbasaur
  * @since 2020/12/9 11:06
  */
-public interface OrderStatisticsDataService extends IService<StoreFlow> {
+public interface OrderStatisticsService extends IService<StoreFlow> {
 
     /**
      * 订单统计概览

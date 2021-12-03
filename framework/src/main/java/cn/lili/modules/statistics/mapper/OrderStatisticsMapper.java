@@ -16,7 +16,7 @@ import java.util.List;
  * @author Bulbasaur
  * @since 2020/11/17 7:34 下午
  */
-public interface OrderStatisticsDataMapper extends BaseMapper<StoreFlow> {
+public interface OrderStatisticsMapper extends BaseMapper<StoreFlow> {
 
     /**
      * 获取订单统计数据

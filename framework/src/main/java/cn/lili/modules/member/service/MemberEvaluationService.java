@@ -88,18 +88,5 @@ public interface MemberEvaluationService extends IService<MemberEvaluation> {
      */
     EvaluationNumberVO getEvaluationNumber(String goodsId);
 
-    /**
-     * 获取今天新增的评价数量
-     *
-     * @return 今日评价数量
-     */
-    Integer todayMemberEvaluation();
-
-    /**
-     * 获取等待回复评价数量
-     *
-     * @return 等待回复评价数量
-     */
-    Integer getWaitReplyNum();
 
 }

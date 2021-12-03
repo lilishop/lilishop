@@ -10,13 +10,13 @@ import cn.lili.common.properties.StatisticsProperties;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.member.entity.vo.MemberDistributionVO;
 import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.statistics.mapper.PlatformViewDataMapper;
+import cn.lili.modules.statistics.mapper.PlatformViewMapper;
 import cn.lili.modules.statistics.entity.dos.PlatformViewData;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.enums.SearchTypeEnum;
 import cn.lili.modules.statistics.entity.vo.OnlineMemberVO;
 import cn.lili.modules.statistics.entity.vo.PlatformViewVO;
-import cn.lili.modules.statistics.service.PlatformViewDataService;
+import cn.lili.modules.statistics.service.PlatformViewService;
 import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import cn.lili.modules.statistics.util.StatisticsSuffix;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -42,7 +42,7 @@ import java.util.List;
  * 2021/1/18 12:07
  */
 @Service
-public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMapper, PlatformViewData> implements PlatformViewDataService {
+public class PlatformViewServiceImpl extends ServiceImpl<PlatformViewMapper, PlatformViewData> implements PlatformViewService {
     /**
      * 在线人数统计
      */
@@ -62,7 +62,7 @@ public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMap
      * 平台流量统计
      */
     @Resource
-    private PlatformViewDataMapper platformViewDataMapper;
+    private PlatformViewMapper platformViewMapper;
 
     @Override
     public Long online() {
@@ -249,7 +249,7 @@ public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMap
             } else {
                 queryWrapper.eq("store_id", -1);
             }
-            return platformViewDataMapper.count(queryWrapper);
+            return platformViewMapper.count(queryWrapper);
         }
     }
 

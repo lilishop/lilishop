@@ -13,7 +13,7 @@ import java.util.List;
  * @author Bulbasaur
  * @since 2020/12/9 11:06
  */
-public interface MemberStatisticsDataService extends IService<MemberStatisticsData> {
+public interface MemberStatisticsService extends IService<MemberStatisticsData> {
 
     /**
      * 获取会员数量

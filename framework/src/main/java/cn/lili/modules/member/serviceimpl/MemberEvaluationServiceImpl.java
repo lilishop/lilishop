@@ -195,20 +195,6 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         return evaluationNumberVO;
     }
 
-    @Override
-    public Integer todayMemberEvaluation() {
-        return this.count(new LambdaQueryWrapper<MemberEvaluation>().ge(MemberEvaluation::getCreateTime, DateUtil.beginOfDay(new DateTime())));
-    }
-
-    @Override
-    public Integer getWaitReplyNum() {
-        QueryWrapper<MemberEvaluation> queryWrapper = Wrappers.query();
-        queryWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
-                "store_id", UserContext.getCurrentUser().getStoreId());
-        queryWrapper.eq("reply_status", false);
-        return this.count(queryWrapper);
-    }
-
     /**
      * 检测会员评价
      *

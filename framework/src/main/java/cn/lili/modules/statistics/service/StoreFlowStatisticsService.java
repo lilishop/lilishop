@@ -1,20 +1,26 @@
 package cn.lili.modules.statistics.service;
 
+import cn.lili.modules.goods.entity.dos.Goods;
+import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
+import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.statistics.entity.dto.GoodsStatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.CategoryStatisticsDataVO;
 import cn.lili.modules.statistics.entity.vo.GoodsStatisticsDataVO;
+import cn.lili.modules.statistics.entity.vo.StoreStatisticsDataVO;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
 /**
- * 商品统计业务层
+ * 流水统计业务层
  *
  * @author Bulbasaur
  * @since 2020/12/9 11:06
  */
-public interface GoodsStatisticsDataService extends IService<StoreFlow> {
+public interface StoreFlowStatisticsService extends IService<StoreFlow> {
 
     /**
      * 查询热卖商品
@@ -35,4 +41,11 @@ public interface GoodsStatisticsDataService extends IService<StoreFlow> {
      */
     List<CategoryStatisticsDataVO> getCategoryStatisticsData(GoodsStatisticsQueryParam goodsStatisticsQueryParam);
 
+    /**
+     * 店铺流水 根据店铺 统计
+     * @param page
+     * @param queryWrapper
+     * @return
+     */
+    List<StoreStatisticsDataVO> getStoreStatisticsData(Page page, QueryWrapper queryWrapper);
 }

@@ -15,7 +15,7 @@ import org.apache.ibatis.annotations.Select;
  * @author Bulbasaur
  * @since 2020/12/10 11:22
  */
-public interface RefundOrderStatisticsDataMapper extends BaseMapper<StoreFlow> {
+public interface RefundOrderStatisticsMapper extends BaseMapper<StoreFlow> {
 
     /**
      * 退款统计

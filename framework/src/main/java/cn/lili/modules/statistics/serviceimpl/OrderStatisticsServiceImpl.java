@@ -11,12 +11,12 @@ import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.modules.statistics.mapper.OrderStatisticsDataMapper;
+import cn.lili.modules.statistics.mapper.OrderStatisticsMapper;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.OrderOverviewVO;
 import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
-import cn.lili.modules.statistics.service.OrderStatisticsDataService;
-import cn.lili.modules.statistics.service.PlatformViewDataService;
+import cn.lili.modules.statistics.service.OrderStatisticsService;
+import cn.lili.modules.statistics.service.PlatformViewService;
 import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -34,12 +34,12 @@ import java.util.*;
  * @since 2020/12/9 17:16
  */
 @Service
-public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsDataMapper, StoreFlow> implements OrderStatisticsDataService {
+public class OrderStatisticsServiceImpl extends ServiceImpl<OrderStatisticsMapper, StoreFlow> implements OrderStatisticsService {
     /**
      * 平台PV统计
      */
     @Autowired
-    private PlatformViewDataService platformViewDataService;
+    private PlatformViewService platformViewService;
     /**
      * 订单
      */
@@ -52,7 +52,7 @@ public class OrderStatisticsDataServiceImpl extends ServiceImpl<OrderStatisticsD
 
         OrderOverviewVO orderOverviewVO = new OrderOverviewVO();
         //访客数
-        orderOverviewVO.setUvNum(platformViewDataService.countUv(statisticsQueryParam));
+        orderOverviewVO.setUvNum(platformViewService.countUv(statisticsQueryParam));
 
         //下单统计
         initOrder(dates, orderOverviewVO, statisticsQueryParam);

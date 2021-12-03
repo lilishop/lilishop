@@ -6,7 +6,7 @@ import cn.lili.modules.member.entity.vo.MemberDistributionVO;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.OnlineMemberVO;
 import cn.lili.modules.statistics.entity.vo.PlatformViewVO;
-import cn.lili.modules.statistics.service.PlatformViewDataService;
+import cn.lili.modules.statistics.service.PlatformViewService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,31 +27,31 @@ import java.util.List;
 @RequestMapping("/manager/statistics/view")
 public class ViewStatisticsManagerController {
     @Autowired
-    private PlatformViewDataService platformViewDataService;
+    private PlatformViewService platformViewService;
 
     @ApiOperation(value = "流量数据 表单获取")
     @GetMapping("/list")
     public ResultMessage<List<PlatformViewVO>> getByPage(StatisticsQueryParam queryParam) {
-        return ResultUtil.data(platformViewDataService.list(queryParam));
+        return ResultUtil.data(platformViewService.list(queryParam));
     }
 
     @ApiOperation(value = "当前在线人数")
     @GetMapping("/online/current")
     public ResultMessage<Long> currentNumberPeopleOnline() {
-        return ResultUtil.data(platformViewDataService.online());
+        return ResultUtil.data(platformViewService.online());
     }
 
 
     @ApiOperation(value = "会员分布")
     @GetMapping("/online/distribution")
     public ResultMessage<List<MemberDistributionVO>> memberDistribution() {
-        return ResultUtil.data(platformViewDataService.memberDistribution());
+        return ResultUtil.data(platformViewService.memberDistribution());
     }
 
     @ApiOperation(value = "在线人数历史（默认48小时）")
     @GetMapping("/online/history")
     public ResultMessage<List<OnlineMemberVO>> history() {
-        return ResultUtil.data(platformViewDataService.statisticsOnline());
+        return ResultUtil.data(platformViewService.statisticsOnline());
     }
 
 }

@@ -368,17 +368,6 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     }
 
     @Override
-    public Integer applyNum(String serviceType) {
-        AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        LambdaQueryWrapper<AfterSale> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(AfterSale::getServiceStatus, AfterSaleStatusEnum.APPLY.name());
-        queryWrapper.eq(CharSequenceUtil.isNotEmpty(serviceType), AfterSale::getServiceType, serviceType);
-        queryWrapper.eq(CharSequenceUtil.equals(authUser.getRole().name(), UserEnums.STORE.name()),
-                AfterSale::getStoreId, authUser.getStoreId());
-        return this.count(queryWrapper);
-    }
-
-    @Override
     public StoreAfterSaleAddressDTO getStoreAfterSaleAddressDTO(String sn) {
         return storeDetailService.getStoreAfterSaleAddressDTO(OperationalJudgment.judgment(this.getBySn(sn)).getStoreId());
     }

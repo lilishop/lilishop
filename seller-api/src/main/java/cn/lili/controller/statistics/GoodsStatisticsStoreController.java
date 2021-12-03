@@ -5,7 +5,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.statistics.entity.dto.GoodsStatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.GoodsStatisticsDataVO;
-import cn.lili.modules.statistics.service.GoodsStatisticsDataService;
+import cn.lili.modules.statistics.service.StoreFlowStatisticsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +31,13 @@ public class GoodsStatisticsStoreController {
      * 商品统计
      */
     @Autowired
-    private GoodsStatisticsDataService goodsStatisticsDataService;
+    private StoreFlowStatisticsService storeFlowStatisticsService;
 
     @ApiOperation(value = "获取统计列表,排行前一百的数据")
     @GetMapping
     public ResultMessage<List<GoodsStatisticsDataVO>> getByPage(GoodsStatisticsQueryParam statisticsQueryParam) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         statisticsQueryParam.setStoreId(storeId);
-        return ResultUtil.data(goodsStatisticsDataService.getGoodsStatisticsData(statisticsQueryParam, 100));
+        return ResultUtil.data(storeFlowStatisticsService.getGoodsStatisticsData(statisticsQueryParam, 100));
     }
 }

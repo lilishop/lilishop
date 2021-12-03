@@ -10,7 +10,7 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.OrderOverviewVO;
 import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
-import cn.lili.modules.statistics.service.OrderStatisticsDataService;
+import cn.lili.modules.statistics.service.OrderStatisticsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,7 +34,7 @@ import java.util.List;
 @RequestMapping("/manager/statistics/order")
 public class OrderStatisticsManagerController {
     @Autowired
-    private OrderStatisticsDataService orderStatisticsDataService;
+    private OrderStatisticsService orderStatisticsService;
     @Autowired
     private OrderService orderService;
     @Autowired
@@ -44,7 +44,7 @@ public class OrderStatisticsManagerController {
     @GetMapping("/overview")
     public ResultMessage<OrderOverviewVO> overview(StatisticsQueryParam statisticsQueryParam) {
         try {
-            return ResultUtil.data(orderStatisticsDataService.overview(statisticsQueryParam));
+            return ResultUtil.data(orderStatisticsService.overview(statisticsQueryParam));
         } catch (Exception e) {
             log.error("订单概览统计错误",e);
         }
@@ -55,7 +55,7 @@ public class OrderStatisticsManagerController {
     @GetMapping
     public ResultMessage<List<OrderStatisticsDataVO>> statisticsChart(StatisticsQueryParam statisticsQueryParam) {
         try {
-            return ResultUtil.data(orderStatisticsDataService.statisticsChart(statisticsQueryParam));
+            return ResultUtil.data(orderStatisticsService.statisticsChart(statisticsQueryParam));
         } catch (Exception e) {
             log.error("订单图表统计",e);
         }

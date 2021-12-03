@@ -15,7 +15,7 @@ import java.util.List;
  * @author Bulbasaur
  * @since 2020/12/9 11:06
  */
-public interface PlatformViewDataService extends IService<PlatformViewData> {
+public interface PlatformViewService extends IService<PlatformViewData> {
 
 
     /**

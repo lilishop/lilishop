@@ -49,10 +49,4 @@ public interface DistributionCashService extends IService<DistributionCash> {
      */
     DistributionCash audit(@PathVariable String id, @RequestParam String result);
 
-    /**
-     * 待处理分销员提现申请数量
-     *
-     * @return 待处理分销员提现申请数量
-     */
-    Integer newDistributionCash();
 }

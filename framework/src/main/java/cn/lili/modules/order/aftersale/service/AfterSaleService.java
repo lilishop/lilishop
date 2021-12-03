@@ -129,13 +129,6 @@ public interface AfterSaleService extends IService<AfterSale> {
      */
     AfterSale cancel(String afterSaleSn);
 
-    /**
-     * 获取待处理售后数量
-     *
-     * @param serviceType 售后类型
-     * @return 待处理售后数量
-     */
-    Integer applyNum(String serviceType);
 
     /**
      * 根据售后单号获取店铺退货收货地址信息
