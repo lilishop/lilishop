@@ -21,7 +21,6 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
-import cn.lili.modules.connect.entity.enums.ConnectEnum;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.common.utils.UuidUtils;
 import cn.lili.modules.member.aop.annotation.PointLogPoint;
@@ -42,7 +41,6 @@ import cn.lili.common.sensitive.SensitiveWordsFilter;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -537,7 +535,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                     throw new ServiceException(ResultCode.USER_OVERDUE_CONNECT_ERROR);
                 }
                 //检测是否已经绑定过用户
-                LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
                 Connect connect = connectService.queryConnect(
                         ConnectQueryDTO.builder().unionType(connectType).unionId(connectAuthUser.getUuid()).build()
                 );
