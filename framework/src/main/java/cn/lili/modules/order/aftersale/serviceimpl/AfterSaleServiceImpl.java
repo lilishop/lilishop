@@ -368,30 +368,8 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     }
 
     @Override
-    public Integer applyNum(String serviceType) {
-        AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        LambdaQueryWrapper<AfterSale> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(AfterSale::getServiceStatus, AfterSaleStatusEnum.APPLY.name());
-        queryWrapper.eq(CharSequenceUtil.isNotEmpty(serviceType), AfterSale::getServiceType, serviceType);
-        queryWrapper.eq(CharSequenceUtil.equals(authUser.getRole().name(), UserEnums.STORE.name()),
-                AfterSale::getStoreId, authUser.getStoreId());
-        return this.count(queryWrapper);
-    }
-
-    @Override
     public StoreAfterSaleAddressDTO getStoreAfterSaleAddressDTO(String sn) {
         return storeDetailService.getStoreAfterSaleAddressDTO(OperationalJudgment.judgment(this.getBySn(sn)).getStoreId());
-    }
-
-    @Override
-    public IPage<AfterSale> getStatistics(StatisticsQueryParam statisticsQueryParam, PageVO pageVO) {
-
-        LambdaQueryWrapper<AfterSale> queryWrapper = new LambdaQueryWrapper<>();
-        Date[] dates = StatisticsDateUtil.getDateArray(statisticsQueryParam);
-        queryWrapper.between(AfterSale::getCreateTime, dates[0], dates[1]);
-        queryWrapper.eq(CharSequenceUtil.isNotEmpty(statisticsQueryParam.getStoreId()), AfterSale::getStoreId, statisticsQueryParam.getStoreId());
-
-        return this.page(PageUtil.initPage(pageVO), queryWrapper);
     }
 
     /**

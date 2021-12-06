@@ -6,7 +6,7 @@ import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
-import cn.lili.modules.statistics.mapper.RefundOrderStatisticsDataMapper;
+import cn.lili.modules.statistics.mapper.RefundOrderStatisticsMapper;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.enums.TimeTypeEnum;
 import cn.lili.modules.statistics.entity.vo.RefundOrderStatisticsDataVO;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
  * @since 2020/12/10 11:30
  */
 @Service
-public class RefundOrderStatisticsServiceImpl extends ServiceImpl<RefundOrderStatisticsDataMapper, StoreFlow> implements RefundOrderStatisticsService {
+public class RefundOrderStatisticsServiceImpl extends ServiceImpl<RefundOrderStatisticsMapper, StoreFlow> implements RefundOrderStatisticsService {
 
     @Override
     public IPage<RefundOrderStatisticsDataVO> getRefundOrderStatisticsData(PageVO pageVO, StatisticsQueryParam statisticsQueryParam) {

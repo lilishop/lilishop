@@ -102,26 +102,6 @@ public interface StoreService extends IService<Store> {
      */
     boolean applyThirdStep(StoreOtherInfoDTO storeOtherInfoDTO);
 
-    /**
-     * 获取待审核店铺数量
-     *
-     * @return 待审核店铺数量
-     */
-    Integer auditNum();
-
-    /**
-     * 获取所有店铺数量
-     *
-     * @return 店铺总数
-     */
-    Integer storeNum();
-
-    /**
-     * 获取今天的店铺数量
-     *
-     * @return 今天的店铺数量
-     */
-    Integer todayStoreNum();
 
     /**
      * 更新店铺商品数量

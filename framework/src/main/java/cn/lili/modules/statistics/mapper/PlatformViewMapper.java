@@ -13,7 +13,7 @@ import org.apache.ibatis.annotations.Select;
  * @author Bulbasaur
  * @since 2020/11/17 7:34 下午
  */
-public interface PlatformViewDataMapper extends BaseMapper<PlatformViewData> {
+public interface PlatformViewMapper extends BaseMapper<PlatformViewData> {
     /**
      * UV流量统计
      *

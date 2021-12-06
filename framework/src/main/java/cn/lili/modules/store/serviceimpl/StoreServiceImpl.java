@@ -272,29 +272,6 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         store.setStoreLogo(storeOtherInfoDTO.getStoreLogo());
         return this.updateById(store);
     }
-
-    @Override
-    public Integer auditNum() {
-        LambdaQueryWrapper<Store> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(Store::getStoreDisable, StoreStatusEnum.APPLYING.name());
-        return this.count(queryWrapper);
-    }
-
-    @Override
-    public Integer storeNum() {
-        LambdaQueryWrapper<Store> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(Store::getStoreDisable, StoreStatusEnum.OPEN.name());
-        return this.count(queryWrapper);
-    }
-
-    @Override
-    public Integer todayStoreNum() {
-        LambdaQueryWrapper<Store> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(Store::getStoreDisable, StoreStatusEnum.OPEN.name());
-        queryWrapper.ge(Store::getCreateTime, DateUtil.beginOfDay(new DateTime()));
-        return this.count(queryWrapper);
-    }
-
     @Override
     public void updateStoreGoodsNum(String storeId) {
         //获取店铺已上架已审核通过商品数量

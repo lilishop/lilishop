@@ -5,7 +5,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.PlatformViewVO;
-import cn.lili.modules.statistics.service.PlatformViewDataService;
+import cn.lili.modules.statistics.service.PlatformViewService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +27,13 @@ import java.util.Objects;
 @RequestMapping("/store/statistics/view")
 public class ViewStatisticsStoreController {
     @Autowired
-    private PlatformViewDataService platformViewDataService;
+    private PlatformViewService platformViewService;
 
     @ApiOperation(value = "流量数据 表单获取")
     @GetMapping("/list")
     public ResultMessage<List<PlatformViewVO>> getByPage(StatisticsQueryParam queryParam) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         queryParam.setStoreId(storeId);
-        return ResultUtil.data(platformViewDataService.list(queryParam));
+        return ResultUtil.data(platformViewService.list(queryParam));
     }
 }

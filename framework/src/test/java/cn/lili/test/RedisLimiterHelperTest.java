@@ -2,7 +2,7 @@ package cn.lili.test;
 
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.service.OrderItemService;
-import cn.lili.modules.statistics.serviceimpl.OrderStatisticsDataServiceImpl;
+import cn.lili.modules.statistics.serviceimpl.OrderStatisticsServiceImpl;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class RedisLimiterHelperTest {
     private OrderItemService orderItemService;
 
     @Autowired
-    private OrderStatisticsDataServiceImpl orderStatisticsDataService;
+    private OrderStatisticsServiceImpl orderStatisticsDataService;
 
 
     @Test

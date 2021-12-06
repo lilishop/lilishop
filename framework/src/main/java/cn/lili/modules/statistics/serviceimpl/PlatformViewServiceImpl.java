@@ -2,21 +2,21 @@ package cn.lili.modules.statistics.serviceimpl;
 
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.properties.StatisticsProperties;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.common.properties.StatisticsProperties;
-import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.member.entity.vo.MemberDistributionVO;
-import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.statistics.mapper.PlatformViewDataMapper;
 import cn.lili.modules.statistics.entity.dos.PlatformViewData;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.enums.SearchTypeEnum;
 import cn.lili.modules.statistics.entity.vo.OnlineMemberVO;
 import cn.lili.modules.statistics.entity.vo.PlatformViewVO;
-import cn.lili.modules.statistics.service.PlatformViewDataService;
+import cn.lili.modules.statistics.mapper.PlatformViewMapper;
+import cn.lili.modules.statistics.service.MemberStatisticsService;
+import cn.lili.modules.statistics.service.PlatformViewService;
 import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import cn.lili.modules.statistics.util.StatisticsSuffix;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -42,7 +42,8 @@ import java.util.List;
  * 2021/1/18 12:07
  */
 @Service
-public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMapper, PlatformViewData> implements PlatformViewDataService {
+public class PlatformViewServiceImpl extends ServiceImpl<PlatformViewMapper, PlatformViewData> implements PlatformViewService {
+
     /**
      * 在线人数统计
      */
@@ -52,7 +53,7 @@ public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMap
      * 会员
      */
     @Autowired
-    private MemberService memberService;
+    private MemberStatisticsService memberStatisticsService;
     /**
      * 缓存
      */
@@ -62,7 +63,7 @@ public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMap
      * 平台流量统计
      */
     @Resource
-    private PlatformViewDataMapper platformViewDataMapper;
+    private PlatformViewMapper platformViewMapper;
 
     @Override
     public Long online() {
@@ -84,7 +85,7 @@ public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMap
         if (null != object) {
             return (List<MemberDistributionVO>) cache.get(CachePrefix.MEMBER_DISTRIBUTION.getPrefix());
         }
-        List<MemberDistributionVO> memberDistributionVOS = memberService.distribution();
+        List<MemberDistributionVO> memberDistributionVOS = memberStatisticsService.distribution();
 
         //统计总数
         int count = 0;
@@ -249,7 +250,7 @@ public class PlatformViewDataServiceImpl extends ServiceImpl<PlatformViewDataMap
             } else {
                 queryWrapper.eq("store_id", -1);
             }
-            return platformViewDataMapper.count(queryWrapper);
+            return platformViewMapper.count(queryWrapper);
         }
     }
 

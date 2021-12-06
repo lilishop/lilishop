@@ -423,13 +423,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
         return this.update(updateWrapper);
     }
-
-    @Override
-    public List<MemberDistributionVO> distribution() {
-        List<MemberDistributionVO> memberDistributionVOS = this.baseMapper.distribution();
-        return memberDistributionVOS;
-    }
-
     /**
      * 根据手机号获取会员
      *

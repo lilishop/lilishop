@@ -198,13 +198,6 @@ public interface MemberService extends IService<Member> {
     Boolean updateMemberStatus(List<String> memberIds, Boolean status);
 
     /**
-     * 查看会员数据分布
-     *
-     * @return 会员数据分布
-     */
-    List<MemberDistributionVO> distribution();
-
-    /**
      * 根据条件查询会员总数
      *
      * @param memberSearchVO

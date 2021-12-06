@@ -5,7 +5,7 @@ import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.statistics.entity.dos.PlatformViewData;
-import cn.lili.modules.statistics.service.PlatformViewDataService;
+import cn.lili.modules.statistics.service.PlatformViewService;
 import cn.lili.timetask.handler.EveryDayExecute;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ public class PageViewStatisticsExecute implements EveryDayExecute {
      * 平台PV统计
      */
     @Autowired
-    private PlatformViewDataService platformViewDataService;
+    private PlatformViewService platformViewService;
 
     @Override
     public void execute() {
@@ -123,7 +123,7 @@ public class PageViewStatisticsExecute implements EveryDayExecute {
     @Transactional(rollbackFor = Exception.class)
     void batchSave(List<String> pvKeys, List<String> uvKeys, List<PlatformViewData> platformViewData) {
         log.debug("批量保存流量数据，共计【{}】条", platformViewData.size());
-        platformViewDataService.saveBatch(platformViewData);
+        platformViewService.saveBatch(platformViewData);
         //批量删除缓存key
         cache.multiDel(pvKeys);
         cache.multiDel(uvKeys);
