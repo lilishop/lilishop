@@ -14,12 +14,14 @@ import cn.lili.modules.statistics.entity.vo.GoodsStatisticsDataVO;
 import cn.lili.modules.statistics.entity.vo.OrderOverviewVO;
 import cn.lili.modules.statistics.entity.vo.StoreStatisticsDataVO;
 import cn.lili.modules.statistics.mapper.StoreFlowStatisticsMapper;
+import cn.lili.modules.statistics.service.OrderStatisticsService;
 import cn.lili.modules.statistics.service.StoreFlowStatisticsService;
 import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -35,6 +37,9 @@ import java.util.Map;
 @Service
 public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatisticsMapper, StoreFlow> implements StoreFlowStatisticsService {
 
+
+    @Autowired
+    private OrderStatisticsService orderStatisticsService;
     @Override
     public List<GoodsStatisticsDataVO> getGoodsStatisticsData(GoodsStatisticsQueryParam goodsStatisticsQueryParam, Integer num) {
         //获取查询条件
@@ -112,7 +117,7 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
         //查询流水金额和订单数量
         queryWrapper.select("SUM(flow_price) AS price , COUNT(0) AS num");
         //获取查询结果
-        Map order = this.getMap(queryWrapper);
+        Map order = orderStatisticsService.getMap(queryWrapper);
         //赋予订单数和流水金额
         orderOverviewVO.setOrderNum(order != null && order.containsKey("num") ? (Long) order.get("num") : 0L);
         orderOverviewVO.setOrderAmount(order != null && order.containsKey("price") ? (double) order.get("price") : 0L);
