@@ -1,4 +1,4 @@
-package cn.lili.modules.system.sms;
+package cn.lili.modules.sms;
 
 import cn.lili.modules.sms.entity.dos.SmsSign;
 import cn.lili.modules.sms.entity.dos.SmsTemplate;

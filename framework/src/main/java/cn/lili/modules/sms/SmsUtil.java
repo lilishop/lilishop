@@ -1,4 +1,4 @@
-package cn.lili.modules.system.sms;
+package cn.lili.modules.sms;
 
 import cn.lili.modules.verification.entity.enums.VerificationEnums;
 

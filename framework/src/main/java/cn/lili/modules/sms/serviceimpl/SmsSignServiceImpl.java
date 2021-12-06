@@ -2,7 +2,7 @@ package cn.lili.modules.sms.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.system.sms.AliSmsUtil;
+import cn.lili.modules.sms.AliSmsUtil;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.sms.entity.dos.SmsSign;

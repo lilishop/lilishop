@@ -1,4 +1,4 @@
-package cn.lili.controller.setting;
+package cn.lili.controller.sms;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;

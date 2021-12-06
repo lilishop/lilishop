@@ -1,4 +1,4 @@
-package cn.lili.modules.system.sms.impl;
+package cn.lili.modules.sms.impl;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -7,8 +7,8 @@ import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.modules.system.sms.AliSmsUtil;
-import cn.lili.modules.system.sms.SmsUtil;
+import cn.lili.modules.sms.AliSmsUtil;
+import cn.lili.modules.sms.SmsUtil;
 import cn.lili.common.utils.CommonUtil;
 import cn.lili.modules.verification.entity.enums.VerificationEnums;
 import cn.lili.common.properties.SmsTemplateProperties;

@@ -18,7 +18,7 @@ import cn.lili.modules.message.service.MemberMessageService;
 import cn.lili.modules.message.service.StoreMessageService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.service.StoreService;
-import cn.lili.modules.system.sms.SmsUtil;
+import cn.lili.modules.sms.SmsUtil;
 import cn.lili.rocketmq.tags.OtherTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
