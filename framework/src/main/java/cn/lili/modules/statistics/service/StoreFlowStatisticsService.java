@@ -2,14 +2,18 @@ package cn.lili.modules.statistics.service;
 
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.statistics.entity.dto.GoodsStatisticsQueryParam;
+import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.CategoryStatisticsDataVO;
 import cn.lili.modules.statistics.entity.vo.GoodsStatisticsDataVO;
+import cn.lili.modules.statistics.entity.vo.OrderOverviewVO;
 import cn.lili.modules.statistics.entity.vo.StoreStatisticsDataVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 流水统计业务层
@@ -46,4 +50,20 @@ public interface StoreFlowStatisticsService extends IService<StoreFlow> {
      * @return
      */
     List<StoreStatisticsDataVO> getStoreStatisticsData(Page page, QueryWrapper queryWrapper);
+
+    /**
+     * 查询今日付款统计
+     *
+     * @return 订单统计金额
+     */
+    Map<String, Object> getOrderStatisticsPrice();
+
+    /**
+     * 订单统计，数据概览
+     *
+     * @param dates
+     * @param orderOverviewVO
+     * @param statisticsQueryParam
+     */
+    void overview(Date[] dates, OrderOverviewVO orderOverviewVO, StatisticsQueryParam statisticsQueryParam);
 }

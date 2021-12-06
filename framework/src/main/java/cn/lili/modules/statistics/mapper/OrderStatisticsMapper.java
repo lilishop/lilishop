@@ -1,6 +1,6 @@
 package cn.lili.modules.statistics.mapper;
 
-import cn.lili.modules.order.order.entity.dos.StoreFlow;
+import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -18,10 +18,11 @@ import java.util.List;
  * @author Bulbasaur
  * @since 2020/11/17 7:34 下午
  */
-public interface OrderStatisticsMapper extends BaseMapper<StoreFlow> {
+public interface OrderStatisticsMapper extends BaseMapper<Order> {
 
     /**
      * 获取订单统计数据
+     *
      * @param queryWrapper 查询条件
      * @return 订单统计列表
      */
@@ -31,6 +32,7 @@ public interface OrderStatisticsMapper extends BaseMapper<StoreFlow> {
 
     /**
      * 订单数量
+     *
      * @param queryWrapper 查询条件
      * @return 订单数量
      */

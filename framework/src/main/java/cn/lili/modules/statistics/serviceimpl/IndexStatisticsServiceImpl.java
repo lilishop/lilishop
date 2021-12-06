@@ -133,7 +133,7 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         indexStatisticsVO.setStoreNum(storeStatisticsService.storeNum());
 
         //下单统计
-        Map<String, Object> map = orderStatisticsService.getOrderStatisticsPrice();
+        Map<String, Object> map = storeFlowStatisticsService.getOrderStatisticsPrice();
         //今日下单数
         indexStatisticsVO.setTodayOrderNum(map.get("num") == null ? 0L : (Long) map.get("num"));
         //今日下单金额
