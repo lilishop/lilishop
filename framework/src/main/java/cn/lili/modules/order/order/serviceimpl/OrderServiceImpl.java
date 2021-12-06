@@ -482,21 +482,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    public IPage<OrderSimpleVO> getStatistics(StatisticsQueryParam statisticsQueryParam, PageVO pageVO) {
-
-        QueryWrapper<OrderSimpleVO> queryWrapper = new QueryWrapper<>();
-        Date[] dates = StatisticsDateUtil.getDateArray(statisticsQueryParam);
-        queryWrapper.between("o.create_time", dates[0], dates[1]);
-        queryWrapper.eq(StringUtils.isNotEmpty(statisticsQueryParam.getStoreId()),
-                "o.store_id", statisticsQueryParam.getStoreId());
-
-        queryWrapper.eq("o.delete_flag", false);
-        queryWrapper.groupBy("o.id");
-        queryWrapper.orderByDesc("o.id");
-        return this.baseMapper.queryByParams(PageUtil.initPage(pageVO), queryWrapper);
-    }
-
-    @Override
     public Boolean invoice(String sn) {
         //根据订单号查询发票信息
         Receipt receipt = receiptService.getByOrderSn(sn);

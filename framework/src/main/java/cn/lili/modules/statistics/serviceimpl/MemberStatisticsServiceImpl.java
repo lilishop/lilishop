@@ -1,11 +1,12 @@
 package cn.lili.modules.statistics.serviceimpl;
 
 import cn.hutool.core.date.DateUtil;
-import cn.lili.modules.statistics.mapper.MemberStatisticsDataMapper;
+import cn.lili.modules.member.entity.vo.MemberDistributionVO;
 import cn.lili.modules.statistics.entity.dos.MemberStatisticsData;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.enums.SearchTypeEnum;
-import cn.lili.modules.statistics.service.MemberStatisticsDataService;
+import cn.lili.modules.statistics.mapper.MemberStatisticsMapper;
+import cn.lili.modules.statistics.service.MemberStatisticsService;
 import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -23,7 +24,7 @@ import java.util.List;
  * @since 2020/12/9 18:33
  */
 @Service
-public class MemberStatisticsDataServiceImpl extends ServiceImpl<MemberStatisticsDataMapper, MemberStatisticsData> implements MemberStatisticsDataService {
+public class MemberStatisticsServiceImpl extends ServiceImpl<MemberStatisticsMapper, MemberStatisticsData> implements MemberStatisticsService {
 
     @Override
     public Integer getMemberCount() {
@@ -85,4 +86,13 @@ public class MemberStatisticsDataServiceImpl extends ServiceImpl<MemberStatistic
 
         return list(queryWrapper);
     }
+
+
+
+    @Override
+    public List<MemberDistributionVO> distribution() {
+        List<MemberDistributionVO> memberDistributionVOS = this.baseMapper.distribution();
+        return memberDistributionVOS;
+    }
+
 }

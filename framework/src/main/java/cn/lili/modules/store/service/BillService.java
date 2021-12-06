@@ -67,14 +67,6 @@ public interface BillService extends IService<Bill> {
     boolean complete(String id);
 
     /**
-     * 商家待结算数量
-     *
-     * @param billStatusEnum 结算单类型
-     * @return 待结算商家数量
-     */
-    Integer billNum(BillStatusEnum billStatusEnum);
-
-    /**
      * 下载结算单
      * @response response
      * @param id 结算单ID

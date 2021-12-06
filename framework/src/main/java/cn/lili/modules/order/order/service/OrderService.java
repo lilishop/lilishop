@@ -1,6 +1,5 @@
 package cn.lili.modules.order.order.service;
 
-import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
@@ -10,13 +9,10 @@ import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.entity.vo.PaymentLog;
-import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.system.entity.vo.Traces;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -189,16 +185,6 @@ public interface OrderService extends IService<Order> {
      * @param sn 订单sn
      */
     void deleteOrder(String sn);
-
-    /**
-     * 获取统计的订单
-     *
-     * @param statisticsQueryParam
-     * @param pageVO
-     * @return
-     */
-    IPage<OrderSimpleVO> getStatistics(StatisticsQueryParam statisticsQueryParam, PageVO pageVO);
-
 
     /**
      * 开具发票

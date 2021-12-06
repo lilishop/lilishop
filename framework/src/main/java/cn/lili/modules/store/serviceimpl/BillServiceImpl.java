@@ -202,15 +202,6 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     }
 
     @Override
-    public Integer billNum(BillStatusEnum billStatusEnum) {
-        LambdaUpdateWrapper<Bill> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.eq(Bill::getBillStatus, billStatusEnum.name());
-        lambdaUpdateWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
-                Bill::getStoreId, UserContext.getCurrentUser().getStoreId());
-        return this.count(lambdaUpdateWrapper);
-    }
-
-    @Override
     public void download(HttpServletResponse response, String id) {
 
         Bill bill = this.getById(id);

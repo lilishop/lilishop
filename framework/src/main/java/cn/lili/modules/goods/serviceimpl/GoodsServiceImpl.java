@@ -278,33 +278,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
-    public Integer goodsNum(GoodsStatusEnum goodsStatusEnum, GoodsAuthEnum goodsAuthEnum) {
-        LambdaQueryWrapper<Goods> queryWrapper = Wrappers.lambdaQuery();
-
-        queryWrapper.eq(Goods::getDeleteFlag, false);
-
-        if (goodsStatusEnum != null) {
-            queryWrapper.eq(Goods::getMarketEnable, goodsStatusEnum.name());
-        }
-        if (goodsAuthEnum != null) {
-            queryWrapper.eq(Goods::getIsAuth, goodsAuthEnum.name());
-        }
-        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        queryWrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.STORE.name()),
-                Goods::getStoreId, currentUser.getStoreId());
-
-        return this.count(queryWrapper);
-    }
-
-    @Override
-    public Integer todayUpperNum() {
-        LambdaQueryWrapper<Goods> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name());
-        queryWrapper.ge(Goods::getCreateTime, DateUtil.beginOfDay(new DateTime()));
-        return this.count(queryWrapper);
-    }
-
-    @Override
     public Boolean updateGoodsMarketAble(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, String underReason) {
         boolean result;
 

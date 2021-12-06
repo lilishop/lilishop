@@ -1,57 +1,43 @@
-package cn.lili.modules.order.order.mapper;
+package cn.lili.modules.statistics.mapper;
 
 import cn.lili.modules.order.order.entity.dos.Order;
-import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
-import cn.lili.modules.order.order.entity.vo.PaymentLog;
+import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
 /**
- * 订单数据处理层
+ * 订单统计数据处理层
  *
- * @author Chopper
- * @since 2020/11/17 7:35 下午
+ * @author Bulbasaur
+ * @since 2020/11/17 7:34 下午
  */
-public interface OrderMapper extends BaseMapper<Order> {
+public interface OrderStatisticsMapper extends BaseMapper<Order> {
 
     /**
-     * 修改订单状态
-     *
-     * @param status  状态
-     * @param orderSn 订单编号
-     */
-    @Update({"update li_order set order_status = #{status} where sn = #{orderSn}"})
-    void updateStatus(String status, String orderSn);
-
-    /**
-     * 查询导出订单DTO列表
+     * 获取订单统计数据
      *
      * @param queryWrapper 查询条件
-     * @return 导出订单DTO列表
+     * @return 订单统计列表
      */
-    @Select("SELECT o.sn,o.create_time,o.member_name,o.consignee_name,o.consignee_mobile,o.consignee_address_path,o.consignee_detail," +
-            "o.payment_method, o.logistics_name,o.freight_price,o.goods_price,o.discount_price,o.flow_price,oi.goods_name,oi.num," +
-            "o.remark,o.order_status,o.pay_status,o.deliver_status,o.need_receipt,o.store_name FROM li_order o LEFT JOIN li_order_item oi " +
-            "ON oi.order_sn=o.sn ${ew.customSqlSegment}")
-    List<OrderExportDTO> queryExportOrder(@Param(Constants.WRAPPER) Wrapper<OrderSimpleVO> queryWrapper);
+    @Select("SELECT DATE_FORMAT(create_time,'%Y-%m-%d') AS create_time,sum(flow_price) AS price FROM li_order " +
+            " ${ew.customSqlSegment}")
+    List<OrderStatisticsDataVO> getOrderStatisticsData(@Param(Constants.WRAPPER) Wrapper queryWrapper);
 
     /**
-     * 查询订单支付记录
+     * 订单数量
      *
-     * @param page         分页
      * @param queryWrapper 查询条件
-     * @return 订单支付记录分页
+     * @return 订单数量
      */
-    @Select("select * from li_order ${ew.customSqlSegment} ")
-    IPage<PaymentLog> queryPaymentLogs(IPage<PaymentLog> page, @Param(Constants.WRAPPER) Wrapper<PaymentLog> queryWrapper);
+    @Select("SELECT count(0) FROM li_order ${ew.customSqlSegment}")
+    Integer count(@Param(Constants.WRAPPER) Wrapper queryWrapper);
 
     /**
      * 查询订单简短信息分页
