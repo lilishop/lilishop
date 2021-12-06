@@ -105,8 +105,9 @@ public class WechatMediaUtil {
         } catch (Exception e) {
             log.error("微信媒体上传失败", e);
         }
+        assert resultStr != null;
         JSONObject jsonObject = new JSONObject(resultStr.toString());
-        log.info("微信媒体上传:" + jsonObject.toString());
+        log.info("微信媒体上传:" + jsonObject);
         //判断是否传递成功，如果token过期则重新获取
         if (jsonObject.get("errcode") != null && ("40001").equals(jsonObject.get("errcode"))) {
             wechatAccessTokenUtil.removeAccessToken(ClientTypeEnum.WECHAT_MP);

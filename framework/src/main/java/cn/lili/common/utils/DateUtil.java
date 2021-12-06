@@ -273,7 +273,7 @@ public class DateUtil {
      * @return 时间戳
      */
     public static long getDateline(String date) {
-        return toDate(date, STANDARD_DATE_FORMAT).getTime() / 1000;
+        return Objects.requireNonNull(toDate(date, STANDARD_DATE_FORMAT)).getTime() / 1000;
     }
 
     /**
@@ -311,7 +311,7 @@ public class DateUtil {
      * @return 时间戳
      */
     public static long getDateline(String date, String pattern) {
-        return toDate(date, pattern).getTime() / 1000;
+        return Objects.requireNonNull(toDate(date, pattern)).getTime() / 1000;
     }
 
     /**
