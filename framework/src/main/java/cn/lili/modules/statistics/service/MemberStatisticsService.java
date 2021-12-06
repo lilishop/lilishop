@@ -1,5 +1,6 @@
 package cn.lili.modules.statistics.service;
 
+import cn.lili.modules.member.entity.vo.MemberDistributionVO;
 import cn.lili.modules.statistics.entity.dos.MemberStatisticsData;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -61,4 +62,13 @@ public interface MemberStatisticsService extends IService<MemberStatisticsData> 
      * @return
      */
     List<MemberStatisticsData> statistics(StatisticsQueryParam statisticsQueryParam);
+
+
+    /**
+     * 查看会员数据分布
+     *
+     * @return 会员数据分布
+     */
+    List<MemberDistributionVO> distribution();
+
 }
