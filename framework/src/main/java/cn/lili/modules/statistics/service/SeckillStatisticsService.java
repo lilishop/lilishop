@@ -1,10 +1,6 @@
 package cn.lili.modules.statistics.service;
 
-import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.Seckill;
-import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
-import cn.lili.modules.promotion.entity.vos.SeckillVO;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

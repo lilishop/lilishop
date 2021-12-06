@@ -1,12 +1,6 @@
 package cn.lili.modules.statistics.service;
 
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
-import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
-import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
-import cn.lili.modules.member.entity.vo.EvaluationNumberVO;
-import cn.lili.modules.member.entity.vo.MemberEvaluationListVO;
-import cn.lili.modules.member.entity.vo.MemberEvaluationVO;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

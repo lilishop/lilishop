@@ -3,7 +3,6 @@ package cn.lili.modules.statistics.service;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
-import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.statistics.entity.dto.GoodsStatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.CategoryStatisticsDataVO;
 import cn.lili.modules.statistics.entity.vo.GoodsStatisticsDataVO;

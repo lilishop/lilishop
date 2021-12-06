@@ -35,6 +35,7 @@ import java.util.*;
  */
 @Service
 public class OrderStatisticsServiceImpl extends ServiceImpl<OrderStatisticsMapper, StoreFlow> implements OrderStatisticsService {
+
     /**
      * 平台PV统计
      */

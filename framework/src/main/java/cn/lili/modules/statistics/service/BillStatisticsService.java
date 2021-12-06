@@ -1,16 +1,8 @@
 package cn.lili.modules.statistics.service;
 
-import cn.hutool.core.date.DateTime;
 import cn.lili.modules.store.entity.dos.Bill;
-import cn.lili.modules.store.entity.dto.BillSearchParams;
 import cn.lili.modules.store.entity.enums.BillStatusEnum;
-import cn.lili.modules.store.entity.vos.BillListVO;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.springframework.cache.annotation.CacheConfig;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
 
 /**
  * 结算单统计

@@ -43,6 +43,7 @@ import java.util.List;
  */
 @Service
 public class PlatformViewServiceImpl extends ServiceImpl<PlatformViewMapper, PlatformViewData> implements PlatformViewService {
+
     /**
      * 在线人数统计
      */
