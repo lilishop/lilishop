@@ -6,20 +6,24 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.StringUtils;
+import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
+import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.modules.statistics.mapper.OrderStatisticsMapper;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.OrderOverviewVO;
 import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
+import cn.lili.modules.statistics.mapper.OrderStatisticsMapper;
 import cn.lili.modules.statistics.service.OrderStatisticsService;
 import cn.lili.modules.statistics.service.PlatformViewService;
 import cn.lili.modules.statistics.util.StatisticsDateUtil;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -268,6 +272,20 @@ public class OrderStatisticsServiceImpl extends ServiceImpl<OrderStatisticsMappe
         return result;
     }
 
+    @Override
+    public IPage<OrderSimpleVO> getStatistics(StatisticsQueryParam statisticsQueryParam, PageVO pageVO) {
+
+        QueryWrapper<OrderSimpleVO> queryWrapper = new QueryWrapper<>();
+        Date[] dates = StatisticsDateUtil.getDateArray(statisticsQueryParam);
+        queryWrapper.between("o.create_time", dates[0], dates[1]);
+        queryWrapper.eq(StringUtils.isNotEmpty(statisticsQueryParam.getStoreId()),
+                "o.store_id", statisticsQueryParam.getStoreId());
+
+        queryWrapper.eq("o.delete_flag", false);
+        queryWrapper.groupBy("o.id");
+        queryWrapper.orderByDesc("o.id");
+        return this.baseMapper.queryByParams(PageUtil.initPage(pageVO), queryWrapper);
+    }
     private QueryWrapper getQueryWrapper(StatisticsQueryParam statisticsQueryParam) {
 
         QueryWrapper queryWrapper = Wrappers.query();

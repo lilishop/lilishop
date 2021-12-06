@@ -1,6 +1,9 @@
 package cn.lili.modules.statistics.service;
 
+import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
+import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -18,4 +21,13 @@ public interface AfterSaleStatisticsService extends IService<AfterSale> {
      * @return 待处理售后数量
      */
     Integer applyNum(String serviceType);
+
+    /**
+     * 获取统计的售后
+     *
+     * @param statisticsQueryParam 统计搜索参数
+     * @param pageVO               分页
+     * @return 售后分页列表
+     */
+    IPage<AfterSale> getStatistics(StatisticsQueryParam statisticsQueryParam, PageVO pageVO);
 }

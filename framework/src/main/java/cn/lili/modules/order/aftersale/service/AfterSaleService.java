@@ -138,12 +138,4 @@ public interface AfterSaleService extends IService<AfterSale> {
      */
     StoreAfterSaleAddressDTO getStoreAfterSaleAddressDTO(String sn);
 
-    /**
-     * 获取统计的售后
-     *
-     * @param statisticsQueryParam 统计搜索参数
-     * @param pageVO               分页
-     * @return 售后分页列表
-     */
-    IPage<AfterSale> getStatistics(StatisticsQueryParam statisticsQueryParam, PageVO pageVO);
 }

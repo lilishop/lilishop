@@ -1,9 +1,12 @@
 package cn.lili.modules.statistics.service;
 
+import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
+import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.OrderOverviewVO;
 import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -56,4 +59,12 @@ public interface OrderStatisticsService extends IService<StoreFlow> {
      */
     List<OrderStatisticsDataVO> statisticsChart(StatisticsQueryParam statisticsQueryParam);
 
+    /**
+     * 获取统计的订单
+     *
+     * @param statisticsQueryParam
+     * @param pageVO
+     * @return
+     */
+    IPage<OrderSimpleVO> getStatistics(StatisticsQueryParam statisticsQueryParam, PageVO pageVO);
 }

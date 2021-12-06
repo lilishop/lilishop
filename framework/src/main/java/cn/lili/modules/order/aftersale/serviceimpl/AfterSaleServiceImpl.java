@@ -372,17 +372,6 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         return storeDetailService.getStoreAfterSaleAddressDTO(OperationalJudgment.judgment(this.getBySn(sn)).getStoreId());
     }
 
-    @Override
-    public IPage<AfterSale> getStatistics(StatisticsQueryParam statisticsQueryParam, PageVO pageVO) {
-
-        LambdaQueryWrapper<AfterSale> queryWrapper = new LambdaQueryWrapper<>();
-        Date[] dates = StatisticsDateUtil.getDateArray(statisticsQueryParam);
-        queryWrapper.between(AfterSale::getCreateTime, dates[0], dates[1]);
-        queryWrapper.eq(CharSequenceUtil.isNotEmpty(statisticsQueryParam.getStoreId()), AfterSale::getStoreId, statisticsQueryParam.getStoreId());
-
-        return this.page(PageUtil.initPage(pageVO), queryWrapper);
-    }
-
     /**
      * 创建售后
      *

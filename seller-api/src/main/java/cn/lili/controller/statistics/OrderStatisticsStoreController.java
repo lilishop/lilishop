@@ -6,11 +6,10 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
-import cn.lili.modules.order.aftersale.service.AfterSaleService;
-import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.OrderOverviewVO;
 import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
+import cn.lili.modules.statistics.service.AfterSaleStatisticsService;
 import cn.lili.modules.statistics.service.OrderStatisticsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
@@ -37,15 +36,10 @@ import java.util.Objects;
 public class OrderStatisticsStoreController {
 
     /**
-     * 订单
-     */
-    @Autowired
-    private OrderService orderService;
-    /**
      * 售后
      */
     @Autowired
-    private AfterSaleService afterSaleService;
+    private AfterSaleStatisticsService afterSaleStatisticsService;
     /**
      * 订单统计
      */
@@ -85,7 +79,7 @@ public class OrderStatisticsStoreController {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         try {
             statisticsQueryParam.setStoreId(storeId);
-            return ResultUtil.data(orderService.getStatistics(statisticsQueryParam, pageVO));
+            return ResultUtil.data(orderStatisticsService.getStatistics(statisticsQueryParam, pageVO));
         } catch (Exception e) {
             log.error("订单统计错误", e);
         }
@@ -98,6 +92,6 @@ public class OrderStatisticsStoreController {
     public ResultMessage<IPage<AfterSale>> refund(StatisticsQueryParam statisticsQueryParam, PageVO pageVO) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         statisticsQueryParam.setStoreId(storeId);
-        return ResultUtil.data(afterSaleService.getStatistics(statisticsQueryParam, pageVO));
+        return ResultUtil.data(afterSaleStatisticsService.getStatistics(statisticsQueryParam, pageVO));
     }
 }
