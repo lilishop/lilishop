@@ -55,7 +55,7 @@ public class PintuanSearchParams {
             queryWrapper.like("store_name", storeName);
         }
         if (!StringUtils.isEmpty(storeId)) {
-            queryWrapper.eq("store_id", storeName);
+            queryWrapper.eq("store_id", storeId);
         }
         if (startTime != null) {
             queryWrapper.ge("start_time", new Date(startTime));
