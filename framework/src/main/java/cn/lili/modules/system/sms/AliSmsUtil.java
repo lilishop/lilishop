@@ -1,7 +1,7 @@
 package cn.lili.modules.system.sms;
 
-import cn.lili.modules.message.entity.dos.SmsSign;
-import cn.lili.modules.message.entity.dos.SmsTemplate;
+import cn.lili.modules.sms.entity.dos.SmsSign;
+import cn.lili.modules.sms.entity.dos.SmsTemplate;
 
 import java.util.Map;
 

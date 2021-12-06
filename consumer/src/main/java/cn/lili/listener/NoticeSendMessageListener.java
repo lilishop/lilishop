@@ -10,7 +10,7 @@ import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.message.entity.dos.MemberMessage;
 import cn.lili.modules.message.entity.dos.Message;
 import cn.lili.modules.message.entity.dos.StoreMessage;
-import cn.lili.modules.message.entity.dto.SmsReachDTO;
+import cn.lili.modules.sms.entity.dto.SmsReachDTO;
 import cn.lili.modules.message.entity.enums.MessageSendClient;
 import cn.lili.modules.message.entity.enums.MessageStatusEnum;
 import cn.lili.modules.message.entity.enums.RangeEnum;
