@@ -1,4 +1,4 @@
-package cn.lili.modules.system.mapper;
+package cn.lili.modules.member.mapper;
 
 import cn.lili.modules.store.entity.dos.StoreLogistics;
 import cn.lili.modules.system.entity.vo.StoreLogisticsVO;

@@ -1,4 +1,4 @@
-package cn.lili.controller.trade;
+package cn.lili.controller.order;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;

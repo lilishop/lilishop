@@ -1,4 +1,4 @@
-package cn.lili.controller.trade;
+package cn.lili.controller.member;
 
 import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultUtil;

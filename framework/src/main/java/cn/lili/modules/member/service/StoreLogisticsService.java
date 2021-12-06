@@ -1,4 +1,4 @@
-package cn.lili.modules.system.service;
+package cn.lili.modules.member.service;
 
 import cn.lili.modules.store.entity.dos.StoreLogistics;
 import cn.lili.modules.system.entity.vo.StoreLogisticsVO;

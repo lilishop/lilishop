@@ -1,4 +1,4 @@
-package cn.lili.controller.trade;
+package cn.lili.controller.order;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.AuthUser;
@@ -6,14 +6,14 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.order.entity.dos.OrderComplaint;
-import cn.lili.modules.order.order.entity.dto.OrderComplaintDTO;
 import cn.lili.modules.order.order.entity.enums.CommunicationOwnerEnum;
+import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.vo.OrderComplaintCommunicationVO;
+import cn.lili.modules.order.order.entity.vo.OrderComplaintOperationParams;
 import cn.lili.modules.order.order.entity.vo.OrderComplaintSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderComplaintVO;
 import cn.lili.modules.order.order.service.OrderComplaintCommunicationService;
 import cn.lili.modules.order.order.service.OrderComplaintService;
-import cn.lili.common.security.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -22,19 +22,16 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import java.util.Objects;
-
 /**
- * 买家端,交易投诉接口
+ * 管理端,交易投诉接口
  *
  * @author paulG
- * @since 2020/12/7
- **/
+ * @since 2020/12/5
+ */
 @RestController
-@Api(tags = "买家端,交易投诉接口")
-@RequestMapping("/buyer/complain")
-public class OrderComplaintBuyerController {
+@Api(tags = "管理端,交易投诉接口")
+@RequestMapping("/manager/complain")
+public class OrderComplaintManagerController {
 
     /**
      * 交易投诉
@@ -48,28 +45,25 @@ public class OrderComplaintBuyerController {
     @Autowired
     private OrderComplaintCommunicationService orderComplaintCommunicationService;
 
-
     @ApiOperation(value = "通过id获取")
     @ApiImplicitParam(name = "id", value = "投诉单ID", required = true, paramType = "path")
     @GetMapping(value = "/{id}")
     public ResultMessage<OrderComplaintVO> get(@PathVariable String id) {
-        OrderComplaintVO orderComplaintVO = OperationalJudgment.judgment(orderComplaintService.getOrderComplainById(id));
-        return ResultUtil.data(orderComplaintVO);
+        return ResultUtil.data(orderComplaintService.getOrderComplainById(id));
     }
 
     @ApiOperation(value = "分页获取")
     @GetMapping
     public ResultMessage<IPage<OrderComplaint>> get(OrderComplaintSearchParams searchParams, PageVO pageVO) {
-        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        searchParams.setMemberId(currentUser.getId());
         return ResultUtil.data(orderComplaintService.getOrderComplainByPage(searchParams, pageVO));
-
     }
 
-    @ApiOperation(value = "添加交易投诉")
-    @PostMapping
-    public ResultMessage<OrderComplaint> add(@Valid OrderComplaintDTO orderComplaintDTO) {
-        return ResultUtil.data(orderComplaintService.addOrderComplain(orderComplaintDTO));
+    @ApiOperation(value = "更新数据")
+    @PutMapping
+    public ResultMessage<OrderComplaintVO> update(OrderComplaintVO orderComplainVO) {
+        orderComplaintService.updateOrderComplain(orderComplainVO);
+        return ResultUtil.data(orderComplainVO);
+
     }
 
     @ApiOperation(value = "添加交易投诉对话")
@@ -79,19 +73,35 @@ public class OrderComplaintBuyerController {
     })
     @PostMapping("/communication")
     public ResultMessage<OrderComplaintCommunicationVO> addCommunication(@RequestParam String complainId, @RequestParam String content) {
-        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        OrderComplaintCommunicationVO communicationVO = new OrderComplaintCommunicationVO(complainId, content, CommunicationOwnerEnum.BUYER.name(), currentUser.getId(), currentUser.getNickName());
+        AuthUser currentUser = UserContext.getCurrentUser();
+        OrderComplaintCommunicationVO communicationVO = new OrderComplaintCommunicationVO(complainId, content, CommunicationOwnerEnum.PLATFORM.name(), currentUser.getId(), currentUser.getUsername());
         orderComplaintCommunicationService.addCommunication(communicationVO);
         return ResultUtil.data(communicationVO);
     }
 
-    @ApiOperation(value = "取消售后")
-    @ApiImplicitParam(name = "id", value = "投诉单ID", required = true, paramType = "path")
-    @PutMapping(value = "/status/{id}")
-    public ResultMessage<Object> cancel(@PathVariable String id) {
-        orderComplaintService.cancel(id);
+    @ApiOperation(value = "修改状态")
+    @PutMapping(value = "/status")
+    public ResultMessage<Object> updateStatus(OrderComplaintOperationParams orderComplainVO) {
+        orderComplaintService.updateOrderComplainByStatus(orderComplainVO);
         return ResultUtil.success();
     }
 
 
+    @ApiOperation(value = "仲裁")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "投诉单ID", required = true, paramType = "path"),
+            @ApiImplicitParam(name = "arbitrationResult", value = "仲裁结果", required = true, paramType = "query")
+    })
+    @PutMapping(value = "/complete/{id}")
+    public ResultMessage<Object> complete(@PathVariable String id, String arbitrationResult) {
+        //新建对象
+        OrderComplaintOperationParams orderComplaintOperationParams = new OrderComplaintOperationParams();
+        orderComplaintOperationParams.setComplainId(id);
+        orderComplaintOperationParams.setArbitrationResult(arbitrationResult);
+        orderComplaintOperationParams.setComplainStatus(OrderComplaintStatusEnum.COMPLETE.name());
+
+        //修改状态
+        orderComplaintService.updateOrderComplainByStatus(orderComplaintOperationParams);
+        return ResultUtil.success();
+    }
 }

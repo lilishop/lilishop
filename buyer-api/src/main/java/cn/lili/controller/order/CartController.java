@@ -1,4 +1,4 @@
-package cn.lili.controller.trade;
+package cn.lili.controller.order;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;

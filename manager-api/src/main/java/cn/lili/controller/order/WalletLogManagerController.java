@@ -1,11 +1,11 @@
-package cn.lili.controller.trade;
+package cn.lili.controller.order;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.wallet.entity.dos.Recharge;
-import cn.lili.modules.order.trade.entity.vo.RechargeQueryVO;
-import cn.lili.modules.wallet.service.RechargeService;
+import cn.lili.modules.wallet.entity.dos.WalletLog;
+import cn.lili.modules.order.trade.entity.vo.DepositQueryVO;
+import cn.lili.modules.wallet.service.WalletLogService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 /**
  * 管理端,预存款充值记录接口
  *
@@ -24,18 +23,17 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "管理端,预存款充值记录接口")
-@RequestMapping("/manager/recharge")
+@RequestMapping("/manager/wallet/log")
 @Transactional(rollbackFor = Exception.class)
-public class RechargeManagerController {
+public class WalletLogManagerController {
     @Autowired
-    private RechargeService rechargeService;
+    private WalletLogService walletLogService;
 
     @ApiOperation(value = "分页获取预存款充值记录")
     @GetMapping
-    public ResultMessage<IPage<Recharge>> getByPage(PageVO page, RechargeQueryVO rechargeQueryVO) {
+    public ResultMessage<IPage<WalletLog>> getByPage(PageVO page, DepositQueryVO depositQueryVO) {
         //构建查询 返回数据
-        IPage<Recharge> rechargePage = rechargeService.rechargePage(page, rechargeQueryVO);
-        return ResultUtil.data(rechargePage);
+        IPage<WalletLog> depositLogPage = walletLogService.depositLogPage(page, depositQueryVO);
+        return ResultUtil.data(depositLogPage);
     }
-
 }
