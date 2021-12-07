@@ -183,7 +183,7 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         //商品总数量
         storeIndexStatisticsVO.setGoodsNum(goodsStatisticsService.goodsNum(GoodsStatusEnum.UPPER, null));
         //订单总数量、订单总金额
-        Map<String, Object> map = orderStatisticsService.getStoreOrderStatisticsPrice();
+        Map<String, Object> map = storeFlowStatisticsService.getOrderStatisticsPrice();
         storeIndexStatisticsVO.setOrderNum(Convert.toInt(map.get("num").toString()));
         storeIndexStatisticsVO.setOrderPrice(map.get("price") != null ? Double.parseDouble(map.get("price").toString()) : 0.0);
 
