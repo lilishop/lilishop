@@ -78,9 +78,7 @@ public class FileController {
                 }
                 throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
             case MANAGER:
-                if (file.getUserEnums().equals(authUser.getRole().name())) {
-                    break;
-                }
+                break;
             default:
                 throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
