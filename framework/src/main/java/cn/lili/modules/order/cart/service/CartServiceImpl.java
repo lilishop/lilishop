@@ -396,11 +396,8 @@ public class CartServiceImpl implements CartService {
     private void checkSetGoodsQuantity(CartSkuVO cartSkuVO, String skuId, Integer num) {
         Integer enableStock = goodsSkuService.getStock(skuId);
 
-        //读取sku的可用库存
-        Integer enableQuantity = goodsSkuService.getStock(skuId);
-
         //如果sku的可用库存小于等于0或者小于用户购买的数量，则不允许购买
-        if (enableQuantity <= 0 || enableQuantity < num) {
+        if (enableStock <= 0 || enableStock < num) {
             throw new ServiceException(ResultCode.GOODS_SKU_QUANTITY_NOT_ENOUGH);
         }
 

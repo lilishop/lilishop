@@ -7,7 +7,7 @@ import cn.lili.common.utils.HttpUtils;
 import cn.lili.modules.goods.entity.dos.Commodity;
 import cn.lili.modules.goods.entity.dos.Studio;
 import cn.lili.modules.goods.entity.dto.GoodsInfo;
-import cn.lili.modules.message.util.WechatAccessTokenUtil;
+import cn.lili.modules.wechat.util.WechatAccessTokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

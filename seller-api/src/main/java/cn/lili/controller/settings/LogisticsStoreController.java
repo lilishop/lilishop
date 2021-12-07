@@ -6,7 +6,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.store.entity.dos.StoreLogistics;
 import cn.lili.modules.system.entity.vo.StoreLogisticsVO;
-import cn.lili.modules.system.service.StoreLogisticsService;
+import cn.lili.modules.member.service.StoreLogisticsService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
