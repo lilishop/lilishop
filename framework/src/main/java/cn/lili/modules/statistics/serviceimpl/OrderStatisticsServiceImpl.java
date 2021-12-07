@@ -95,16 +95,6 @@ public class OrderStatisticsServiceImpl extends ServiceImpl<OrderStatisticsMappe
     }
 
     @Override
-    public Map<String, Object> getStoreOrderStatisticsPrice() {
-        QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
-                "store_id", UserContext.getCurrentUser().getStoreId());
-        queryWrapper.select("SUM(final_price) AS price , COUNT(0) AS num");
-        return this.getMap(queryWrapper);
-    }
-
-
-    @Override
     public Integer orderNum(String orderStatus) {
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper();
         queryWrapper.eq(StringUtils.isNotEmpty(orderStatus), Order::getOrderStatus, orderStatus);

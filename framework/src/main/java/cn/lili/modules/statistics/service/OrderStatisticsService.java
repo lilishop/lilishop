@@ -29,13 +29,6 @@ public interface OrderStatisticsService extends IService<Order> {
     OrderOverviewVO overview(StatisticsQueryParam statisticsQueryParam);
 
     /**
-     * 查询订单统计金额
-     *
-     * @return 订单统计
-     */
-    Map<String, Object> getStoreOrderStatisticsPrice();
-
-    /**
      * 获取订单总数量
      *
      * @param orderStatus 订单状态
