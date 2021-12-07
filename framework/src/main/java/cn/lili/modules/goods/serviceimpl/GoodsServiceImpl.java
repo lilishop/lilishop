@@ -1,7 +1,5 @@
 package cn.lili.modules.goods.serviceimpl;
 
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONUtil;
@@ -16,7 +14,6 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
-import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
@@ -27,7 +24,6 @@ import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.mapper.GoodsMapper;
 import cn.lili.modules.goods.service.*;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
-import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
 import cn.lili.modules.store.entity.dos.FreightTemplate;
@@ -477,12 +473,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
      */
     private AuthUser checkStoreAuthority() {
         AuthUser currentUser = UserContext.getCurrentUser();
-        if (currentUser == null || (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() == null)) {
-            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
-        } else if (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() != null) {
+        //如果当前会员不为空，且为店铺角色
+        if (currentUser != null && (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() != null)) {
             return currentUser;
+        } else {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
-        return null;
     }
 
     /**
