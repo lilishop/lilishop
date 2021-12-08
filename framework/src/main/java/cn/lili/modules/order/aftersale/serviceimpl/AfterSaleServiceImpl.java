@@ -7,27 +7,25 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
+import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
-import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.aftersale.aop.AfterSaleLogPoint;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
-import cn.lili.modules.order.order.entity.dos.Order;
-import cn.lili.modules.order.order.entity.dos.OrderItem;
-import cn.lili.modules.order.order.entity.enums.*;
 import cn.lili.modules.order.aftersale.entity.dto.AfterSaleDTO;
-import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
-import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.aftersale.entity.vo.AfterSaleApplyVO;
 import cn.lili.modules.order.aftersale.entity.vo.AfterSaleSearchParams;
 import cn.lili.modules.order.aftersale.entity.vo.AfterSaleVO;
 import cn.lili.modules.order.aftersale.mapper.AfterSaleMapper;
 import cn.lili.modules.order.aftersale.service.AfterSaleService;
+import cn.lili.modules.order.order.entity.dos.Order;
+import cn.lili.modules.order.order.entity.dos.OrderItem;
+import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
+import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
+import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
+import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleRefundWayEnum;
@@ -35,15 +33,12 @@ import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleTypeEnum;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.RefundSupport;
-import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
-import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.entity.dos.Logistics;
 import cn.lili.modules.system.entity.vo.Traces;
 import cn.lili.modules.system.service.LogisticsService;
-import cn.lili.common.security.OperationalJudgment;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.AfterSaleTagsEnum;
@@ -58,12 +53,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 售后业务层实现
@@ -197,7 +190,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             throw new ServiceException(ResultCode.AFTER_SALES_DOUBLE_ERROR);
         }
         //判断退款金额与付款金额是否正确,退款金额不能大于付款金额
-        if (NumberUtil.compare(afterSale.getFlowPrice(), actualRefundPrice) == -1) {
+        if (NumberUtil.compare(afterSale.getFlowPrice(), actualRefundPrice) < 0) {
             throw new ServiceException(ResultCode.AFTER_SALES_PRICE_ERROR);
         }
 
@@ -213,6 +206,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
                 if (afterSale.getRefundWay().equals(AfterSaleRefundWayEnum.ORIGINAL.name())) {
                     //如果为退款操作 && 在线支付 则直接进行退款
                     refundSupport.refund(afterSale);
+                    afterSale.setRefundTime(new Date());
                     afterSaleStatusEnum = AfterSaleStatusEnum.COMPLETE;
                 } else {
                     afterSaleStatusEnum = AfterSaleStatusEnum.WAIT_REFUND;
@@ -454,9 +448,9 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
                 .eq(OrderItem::getSkuId, afterSale.getSkuId()));
         AfterSaleStatusEnum afterSaleStatusEnum = AfterSaleStatusEnum.valueOf(afterSale.getServiceStatus());
 
-        switch (afterSaleStatusEnum){
+        switch (afterSaleStatusEnum) {
             //判断当前售后的状态---申请中
-            case APPLY:{
+            case APPLY: {
                 orderItem.setReturnGoodsNumber(orderItem.getReturnGoodsNumber() + afterSale.getNum());
                 break;
             }
@@ -624,19 +618,19 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     private void updateOrderItem(OrderItem orderItem) {
         //订单状态不能为新订单,已失效订单或未申请订单才可以去修改订单信息
         OrderItemAfterSaleStatusEnum afterSaleTypeEnum = OrderItemAfterSaleStatusEnum.valueOf(orderItem.getAfterSaleStatus());
-        switch (afterSaleTypeEnum){
+        switch (afterSaleTypeEnum) {
             //售后状态为：未申请 部分售后 已申请
             case NOT_APPLIED:
             case PART_AFTER_SALE:
-            case ALREADY_APPLIED:{
+            case ALREADY_APPLIED: {
                 //通过正在售后商品总数修改订单售后状态
                 if (orderItem.getReturnGoodsNumber().equals(orderItem.getNum())) {
                     //修改订单的售后状态--已申请
                     orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.ALREADY_APPLIED.name());
-                } else if(orderItem.getReturnGoodsNumber().equals(0)){
+                } else if (orderItem.getReturnGoodsNumber().equals(0)) {
                     //修改订单的售后状态--未申请
                     orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name());
-                }else{
+                } else {
                     //修改订单的售后状态--部分售后
                     orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.PART_AFTER_SALE.name());
                 }
@@ -649,7 +643,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         orderItemService.update(new LambdaUpdateWrapper<OrderItem>()
                 .eq(OrderItem::getSn, orderItem.getSn())
                 .set(OrderItem::getAfterSaleStatus, orderItem.getAfterSaleStatus())
-                .set(OrderItem::getReturnGoodsNumber,orderItem.getReturnGoodsNumber()));
+                .set(OrderItem::getReturnGoodsNumber, orderItem.getReturnGoodsNumber()));
     }
 
 }

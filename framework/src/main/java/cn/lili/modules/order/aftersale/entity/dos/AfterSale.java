@@ -142,7 +142,7 @@ public class AfterSale extends BaseEntity {
     private String mLogisticsName;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd")
-  @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "买家发货时间")
     private Date mDeliverTime;
 
