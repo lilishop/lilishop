@@ -3,16 +3,12 @@ package cn.lili.modules.order.order.service;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
+import cn.lili.modules.order.order.entity.dto.StoreFlowQueryDTO;
 import cn.lili.modules.store.entity.vos.StoreFlowPayDownloadVO;
 import cn.lili.modules.store.entity.vos.StoreFlowRefundDownloadVO;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -40,31 +36,26 @@ public interface StoreFlowService extends IService<StoreFlow> {
     /**
      * 获取商家流水
      *
-     * @param storeId      商家ID
-     * @param type         收入、退款
-     * @param distribution 是否查看分销相关数据
-     * @param pageVO       分页
-     * @param startTime    开始时间
-     * @param endTime      结束时间
-     * @return
+     * @param storeFlowQueryDTO 查询参数
+     * @return 返回分页
      */
-    IPage<StoreFlow> getStoreFlow(String storeId, String type, boolean distribution, PageVO pageVO, Date startTime, Date endTime);
+    IPage<StoreFlow> getStoreFlow(StoreFlowQueryDTO storeFlowQueryDTO);
 
     /**
-     * 获取结算单的入账流水
+     * 获取结算单地入账流水
      *
-     * @param queryWrapper 查询条件
+     * @param storeFlowQueryDTO 查询条件
      * @return 入账流水
      */
-    List<StoreFlowPayDownloadVO> getStoreFlowPayDownloadVO(Wrapper<StoreFlow> queryWrapper);
+    List<StoreFlowPayDownloadVO> getStoreFlowPayDownloadVO(StoreFlowQueryDTO storeFlowQueryDTO);
 
     /**
      * 获取结算单的退款流水
      *
-     * @param queryWrapper 查询条件
+     * @param storeFlowQueryDTO 查询条件
      * @return 退款流水
      */
-    List<StoreFlowRefundDownloadVO> getStoreFlowRefundDownloadVO(Wrapper<StoreFlow> queryWrapper);
+    List<StoreFlowRefundDownloadVO> getStoreFlowRefundDownloadVO(StoreFlowQueryDTO storeFlowQueryDTO);
 
 
     /**
