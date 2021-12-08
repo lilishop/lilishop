@@ -42,6 +42,14 @@ public interface StoreFlowService extends IService<StoreFlow> {
     IPage<StoreFlow> getStoreFlow(StoreFlowQueryDTO storeFlowQueryDTO);
 
     /**
+     * 根据参数查询一条数据
+     *
+     * @param storeFlowQueryDTO 查询参数
+     * @return 返回分页
+     */
+    StoreFlow queryOne(StoreFlowQueryDTO storeFlowQueryDTO);
+
+    /**
      * 获取结算单地入账流水
      *
      * @param storeFlowQueryDTO 查询条件
@@ -78,4 +86,11 @@ public interface StoreFlowService extends IService<StoreFlow> {
     IPage<StoreFlow> getDistributionFlow(String id, PageVO pageVO);
 
 
+    /**
+     * 获取店铺流水
+     *
+     * @param storeFlowQueryDTO 店铺流水查询参数
+     * @return 商家流水集合
+     */
+    List<StoreFlow> listStoreFlow(StoreFlowQueryDTO storeFlowQueryDTO);
 }

@@ -20,6 +20,12 @@ public class StoreFlowQueryDTO {
     @ApiModelProperty(value = "类型")
     private String type;
 
+    @ApiModelProperty(value = "售后编号")
+    private String refundSn;
+
+    @ApiModelProperty(value = "售后编号")
+    private String orderSn;
+
     @ApiModelProperty(value = "过滤只看分销订单")
     private Boolean justDistribution;
 

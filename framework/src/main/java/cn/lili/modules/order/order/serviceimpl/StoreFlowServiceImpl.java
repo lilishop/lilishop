@@ -174,6 +174,10 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         return this.page(PageUtil.initPage(storeFlowQueryDTO.getPageVO()), generatorQueryWrapper(storeFlowQueryDTO));
     }
 
+    @Override
+    public StoreFlow queryOne(StoreFlowQueryDTO storeFlowQueryDTO) {
+        return this.getOne(generatorQueryWrapper(storeFlowQueryDTO));
+    }
 
     @Override
     public List<StoreFlowPayDownloadVO> getStoreFlowPayDownloadVO(StoreFlowQueryDTO storeFlowQueryDTO) {
@@ -198,11 +202,16 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         return this.getStoreFlow(StoreFlowQueryDTO.builder().pageVO(pageVO).bill(bill).build());
     }
 
+    @Override
+    public List<StoreFlow> listStoreFlow(StoreFlowQueryDTO storeFlowQueryDTO) {
+        return this.list(generatorQueryWrapper(storeFlowQueryDTO));
+    }
+
     /**
      * 生成查询wrapper
      *
-     * @param storeFlowQueryDTO
-     * @return
+     * @param storeFlowQueryDTO 搜索参数
+     * @return 查询wrapper
      */
     private LambdaQueryWrapper generatorQueryWrapper(StoreFlowQueryDTO storeFlowQueryDTO) {
 
@@ -215,6 +224,14 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         //流水类型判定
         lambdaQueryWrapper.eq(StringUtils.isNotEmpty(storeFlowQueryDTO.getType()),
                 StoreFlow::getFlowType, storeFlowQueryDTO.getType());
+
+        //售后编号判定
+        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(storeFlowQueryDTO.getRefundSn()),
+                StoreFlow::getRefundSn, storeFlowQueryDTO.getRefundSn());
+
+        //售后编号判定
+        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(storeFlowQueryDTO.getOrderSn()),
+                StoreFlow::getOrderSn, storeFlowQueryDTO.getOrderSn());
 
         //结算单非空，则校对结算单参数
         if (storeFlowQueryDTO.getBill() != null) {
