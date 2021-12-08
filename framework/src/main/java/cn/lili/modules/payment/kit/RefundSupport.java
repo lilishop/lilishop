@@ -3,7 +3,6 @@ package cn.lili.modules.payment.kit;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.SpringContextUtil;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
-import cn.lili.modules.order.aftersale.service.AfterSaleService;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.service.OrderItemService;
@@ -31,11 +30,6 @@ public class RefundSupport {
      */
     @Autowired
     private StoreFlowService storeFlowService;
-    /**
-     * 售后
-     */
-    @Autowired
-    private AfterSaleService afterSaleService;
     /**
      * 订单
      */
