@@ -1,6 +1,7 @@
 package cn.lili.security;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.security.AuthUser;
@@ -94,16 +95,16 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
                         match(permission.get(PermissionEnum.QUERY.name()), requestUrl)) {
                 } else {
                     ResponseUtil.output(response, ResponseUtil.resultMap(false, 400, "权限不足"));
-                    log.error("当前请求路径：{},所拥有权限：{}", requestUrl, permission);
-                    throw new NoPermissionException("权限不足-" + requestUrl);
+                    log.error("当前请求路径：{},所拥有权限：{}", requestUrl, JSONUtil.toJsonStr(permission));
+                    throw new NoPermissionException("权限不足");
                 }
             }
             //非get请求（数据操作） 判定鉴权
             else {
                 if (!match(permission.get(PermissionEnum.SUPER.name()), requestUrl)) {
                     ResponseUtil.output(response, ResponseUtil.resultMap(false, 400, "权限不足"));
-                    log.error("当前请求路径：{},所拥有权限：{}", requestUrl, permission);
-                    throw new NoPermissionException("权限不足-" + requestUrl);
+                    log.error("当前请求路径：{},所拥有权限：{}", requestUrl, JSONUtil.toJsonStr(permission));
+                    throw new NoPermissionException("权限不足");
                 }
             }
         }
