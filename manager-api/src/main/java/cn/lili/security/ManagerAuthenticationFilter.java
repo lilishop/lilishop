@@ -90,8 +90,8 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
             //获取数据(GET 请求)权限
             if (request.getMethod().equals(RequestMethod.GET.name())) {
                 //如果用户的超级权限和查阅权限都不包含当前请求的api
-                if (PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.SUPER.name()).toArray(new String[0]), requestUrl)
-                        || PatternMatchUtils.simpleMatch(permission.get(PermissionEnum.QUERY.name()).toArray(new String[0]), requestUrl)) {
+                if (match(permission.get(PermissionEnum.SUPER.name()), requestUrl) ||
+                        match(permission.get(PermissionEnum.QUERY.name()), requestUrl)) {
                 } else {
                     ResponseUtil.output(response, ResponseUtil.resultMap(false, 400, "权限不足"));
                     throw new NoPermissionException("权限不足");
@@ -107,6 +107,20 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
                 }
             }
         }
+    }
+
+    /**
+     * 校验权限
+     *
+     * @param permissions 权限集合
+     * @param url         请求地址
+     * @return 是否拥有权限
+     */
+    boolean match(List<String> permissions, String url) {
+        if (permissions.isEmpty()) {
+            return false;
+        }
+        return PatternMatchUtils.simpleMatch(permissions.toArray(new String[0]), url);
     }
 
     /**
