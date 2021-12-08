@@ -117,7 +117,7 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
      * @return 是否拥有权限
      */
     boolean match(List<String> permissions, String url) {
-        if (permissions.isEmpty()) {
+        if (permissions == null || permissions.isEmpty()) {
             return false;
         }
         return PatternMatchUtils.simpleMatch(permissions.toArray(new String[0]), url);
