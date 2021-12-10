@@ -5,6 +5,8 @@ import cn.lili.modules.promotion.entity.dos.FullDiscount;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.BeanUtils;
 
 import java.util.List;
 
@@ -16,13 +18,16 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@NoArgsConstructor
 public class FullDiscountVO extends FullDiscount {
 
     private static final long serialVersionUID = -2330552735874105354L;
+
     /**
      * 促销关联的商品
      */
     private List<PromotionGoods> promotionGoodsList;
+
     /**
      * 赠品信息
      */
@@ -32,6 +37,10 @@ public class FullDiscountVO extends FullDiscount {
      * 参与商品，为-1则代表所有商品参加
      */
     private Integer number;
+
+    public FullDiscountVO(FullDiscount fullDiscount) {
+        BeanUtils.copyProperties(fullDiscount, this);
+    }
 
     public String notice() {
         StringBuilder stringBuffer = new StringBuilder();

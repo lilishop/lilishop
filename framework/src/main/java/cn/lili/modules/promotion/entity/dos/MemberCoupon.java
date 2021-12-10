@@ -3,14 +3,16 @@ package cn.lili.modules.promotion.entity.dos;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.lili.mybatis.BaseEntity;
 import cn.lili.modules.promotion.entity.enums.CouponRangeDayEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
@@ -20,6 +22,7 @@ import java.util.Date;
  * @author Chopper
  * @since 2020-03-19 10:44 上午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("li_member_coupon")
 @ApiModel(value = "会员优惠券")
@@ -52,7 +55,7 @@ public class MemberCoupon extends BaseEntity {
     private String memberId;
 
     /**
-     * @see cn.lili.modules.promotion.entity.enums.CouponScopeTypeEnum
+     * @see PromotionsScopeTypeEnum
      */
     @ApiModelProperty(value = "关联范围类型")
     private String scopeType;

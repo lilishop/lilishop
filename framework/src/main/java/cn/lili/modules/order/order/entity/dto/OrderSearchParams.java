@@ -6,10 +6,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderTagEnum;
-import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
+import cn.lili.modules.order.order.entity.enums.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
@@ -104,6 +101,18 @@ public class OrderSearchParams extends PageVO {
     @ApiModelProperty(value = "评论状态:未评论(UNFINISHED),待追评(WAIT_CHASE),评论完成(FINISHED)，")
     private String commentStatus;
 
+    @ApiModelProperty(value = "是否为其他订单下的订单，如果是则为依赖订单的sn，否则为空")
+    private String parentOrderSn;
+
+    @ApiModelProperty(value = "是否为某订单类型的订单，如果是则为订单类型的id，否则为空")
+    private String promotionId;
+
+    /**
+     * @see OrderPromotionTypeEnum
+     */
+    @ApiModelProperty(value = "订单促销类型")
+    private String orderPromotionType;
+
     public <T> QueryWrapper<T> queryWrapper() {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         QueryWrapper<T> wrapper = new QueryWrapper<>();
@@ -192,6 +201,12 @@ public class OrderSearchParams extends PageVO {
             }
         }
 
+        // 依赖订单
+        wrapper.eq(CharSequenceUtil.isNotEmpty(parentOrderSn), "o.parent_order_sn", parentOrderSn);
+        // 促销活动id
+        wrapper.eq(CharSequenceUtil.isNotEmpty(promotionId), "o.promotion_id", promotionId);
+
+        wrapper.eq(CharSequenceUtil.isNotEmpty(orderPromotionType), "o.order_promotion_type", orderPromotionType);
 
         wrapper.eq("o.delete_flag", false);
         return wrapper;

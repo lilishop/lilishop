@@ -2,10 +2,7 @@ package cn.lili.modules.promotion.service;
 
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.promotion.entity.dos.CouponActivity;
-import cn.lili.modules.promotion.entity.dto.CouponActivityDTO;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
-import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
@@ -15,23 +12,8 @@ import java.util.List;
  * @author Bulbasaur
  * @since 2021/5/20 6:10 下午
  */
-public interface CouponActivityService extends IService<CouponActivity> {
+public interface CouponActivityService extends AbstractPromotionsService<CouponActivity> {
 
-    /**
-     * 创建优惠券活动--精准发券、新人赠券
-     *
-     * @param couponActivityDTO 优惠券活动DTO
-     * @return 优惠券活动DTO
-     */
-    CouponActivityDTO addCouponActivity(CouponActivityDTO couponActivityDTO);
-
-    /**
-     * 修改优惠券活动--精准发券、新人赠券
-     *
-     * @param couponActivityDTO 优惠券活动DTO
-     * @return 优惠券活动DTO
-     */
-    CouponActivityDTO updateCouponActivity(CouponActivityDTO couponActivityDTO);
 
     /**
      * 获取优惠券活动VO
@@ -57,13 +39,4 @@ public interface CouponActivityService extends IService<CouponActivity> {
      */
     void registered(List<CouponActivity> couponActivityList, Member member);
 
-
-    /**
-     * 修改优惠券活动状态
-     *
-     * @param id              活动ID
-     * @param promotionStatus 活动状态
-     * @return 操作状态
-     */
-    boolean updateCouponActivityStatus(String id, PromotionStatusEnum promotionStatus);
 }

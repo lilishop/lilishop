@@ -52,6 +52,46 @@ public interface OrderService extends IService<Order> {
     IPage<OrderSimpleVO> queryByParams(OrderSearchParams orderSearchParams);
 
     /**
+     * 订单信息
+     *
+     * @param orderSearchParams 查询参数
+     * @return 订单信息
+     */
+    List<Order> queryListByParams(OrderSearchParams orderSearchParams);
+
+    /**
+     * 根据促销查询订单
+     *
+     * @param orderPromotionType 订单类型
+     * @param payStatus 支付状态
+     * @param parentOrderSn 依赖订单编号
+     * @param orderSn 订单编号
+     * @return 订单信息
+     */
+    List<Order> queryListByPromotion(String orderPromotionType, String payStatus, String parentOrderSn, String orderSn);
+
+    /**
+     * 根据促销查询订单
+     *
+     * @param orderPromotionType 订单类型
+     * @param payStatus 支付状态
+     * @param parentOrderSn 依赖订单编号
+     * @param orderSn 订单编号
+     * @return 订单信息
+     */
+    Integer queryCountByPromotion(String orderPromotionType, String payStatus, String parentOrderSn, String orderSn);
+
+    /**
+     * 父级拼团订单分组
+     *
+     * @param pintuanId 拼团id
+     * @return 拼团订单信息
+     */
+    List<Order> queryListByPromotion(String pintuanId);
+
+
+
+    /**
      * 查询导出订单列表
      *
      * @param orderSearchParams 查询参数

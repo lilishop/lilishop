@@ -57,4 +57,12 @@ public interface EsGoodsSearchService {
      * @return ES商品列表
      */
     List<EsGoodsIndex> getEsGoodsBySkuIds(List<String> skuIds);
+
+    /**
+     * 根据id获取商品索引
+     *
+     * @param id 商品skuId
+     * @return 商品索引
+     */
+    EsGoodsIndex getEsGoodsById(String id);
 }

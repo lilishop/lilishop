@@ -1,6 +1,6 @@
 package cn.lili.modules.promotion.entity.dos;
 
-import cn.lili.modules.promotion.entity.dto.BasePromotion;
+import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @TableName("li_full_discount")
 @ApiModel(value = "满优惠活动")
-public class FullDiscount extends BasePromotion {
+public class FullDiscount extends BasePromotions {
 
     private static final long serialVersionUID = 430433787214894166L;
 

@@ -2,16 +2,15 @@ package cn.lili.modules.promotion.entity.vos;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.modules.promotion.entity.enums.*;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
-import java.util.regex.Pattern;
 
 /**
  * 优惠券查询通用类
@@ -19,11 +18,14 @@ import java.util.regex.Pattern;
  * @author paulG
  * @since 2020/8/14
  **/
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class CouponSearchParams implements Serializable {
+public class CouponSearchParams extends BasePromotionsSearchParams implements Serializable {
 
     private static final long serialVersionUID = 4566880169478260409L;
+
     private static final String PRICE_COLUMN = "price";
+    private static final String RANGE_DAY_TYPE_COLUMN = "range_day_type";
 
     @ApiModelProperty(value = "店铺编号")
     private String storeId;
@@ -41,7 +43,7 @@ public class CouponSearchParams implements Serializable {
     @ApiModelProperty(value = "活动类型")
     private String couponType;
     /**
-     * @see cn.lili.modules.promotion.entity.enums.CouponScopeTypeEnum
+     * @see PromotionsScopeTypeEnum
      */
     @ApiModelProperty(value = "关联范围类型")
     private String scopeType;
@@ -58,27 +60,17 @@ public class CouponSearchParams implements Serializable {
      */
     @ApiModelProperty(value = "优惠券类型，分为免费领取和活动赠送")
     private String getType;
-
-    @ApiModelProperty(value = "活动开始时间")
-    private Long startTime;
-
-    @ApiModelProperty(value = "活动结束时间")
-    private Long endTime;
     /**
      * @see MemberCouponStatusEnum
      */
     @ApiModelProperty(value = "会员优惠券状态")
     private String memberCouponStatus;
-    /**
-     * @see PromotionStatusEnum
-     */
-    @ApiModelProperty(value = "活动状态")
-    private String promotionStatus;
 
-    public <T> QueryWrapper<T> wrapper() {
+    @Override
+    public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
         if (storeId != null) {
-            queryWrapper.in("store_id", Arrays.asList(storeId));
+            queryWrapper.in("store_id", Collections.singletonList(storeId));
         }
         if (CharSequenceUtil.isNotEmpty(couponName)) {
             queryWrapper.like("coupon_name", couponName);
@@ -90,7 +82,7 @@ public class CouponSearchParams implements Serializable {
             queryWrapper.eq("coupon_type", CouponTypeEnum.valueOf(couponType).name());
         }
         if (CharSequenceUtil.isNotEmpty(scopeType)) {
-            queryWrapper.eq("scope_type", CouponScopeTypeEnum.valueOf(scopeType).name());
+            queryWrapper.eq("scope_type", PromotionsScopeTypeEnum.valueOf(scopeType).name());
         }
         if (CharSequenceUtil.isNotEmpty(scopeId)) {
             queryWrapper.eq("scope_id", scopeId);
@@ -98,20 +90,38 @@ public class CouponSearchParams implements Serializable {
         if (CharSequenceUtil.isNotEmpty(getType)) {
             queryWrapper.eq("get_type", CouponGetEnum.valueOf(getType).name());
         }
-        if (startTime != null) {
-            queryWrapper.ge("start_time", new Date(startTime));
-        }
-        if (endTime != null) {
-            queryWrapper.le("end_time", new Date(endTime));
-        }
         if (CharSequenceUtil.isNotEmpty(memberCouponStatus)) {
             queryWrapper.eq("member_coupon_status", MemberCouponStatusEnum.valueOf(memberCouponStatus).name());
         }
-        if (CharSequenceUtil.isNotEmpty(promotionStatus)) {
-            queryWrapper.eq("promotion_status", PromotionStatusEnum.valueOf(promotionStatus).name());
+        if (CharSequenceUtil.isNotEmpty(this.getPromotionStatus())) {
+            switch (PromotionsStatusEnum.valueOf(this.getPromotionStatus())) {
+                case NEW:
+                    queryWrapper.nested(i -> i.gt(PromotionTools.START_TIME_COLUMN, new Date()).gt(PromotionTools.END_TIME_COLUMN, new Date()))
+                    ;
+                    break;
+                case START:
+                    queryWrapper.nested(i -> i.le(PromotionTools.START_TIME_COLUMN, new Date()).ge(PromotionTools.END_TIME_COLUMN, new Date()))
+                            .or(i -> i.gt("effective_days", 0).eq(RANGE_DAY_TYPE_COLUMN, CouponRangeDayEnum.DYNAMICTIME.name()));
+                    break;
+                case END:
+                    queryWrapper.nested(i -> i.lt(PromotionTools.START_TIME_COLUMN, new Date()).lt(PromotionTools.END_TIME_COLUMN, new Date()));
+                    break;
+                case CLOSE:
+                    queryWrapper.nested(n -> n.nested(i -> i.isNull(PromotionTools.START_TIME_COLUMN).isNull(PromotionTools.END_TIME_COLUMN)
+                                    .eq(RANGE_DAY_TYPE_COLUMN, CouponRangeDayEnum.FIXEDTIME.name())).
+                            or(i -> i.le("effective_days", 0).eq(RANGE_DAY_TYPE_COLUMN, CouponRangeDayEnum.DYNAMICTIME.name())));
+                    break;
+                default:
+            }
         }
-        this.betweenWrapper(queryWrapper);
+        if (this.getStartTime() != null) {
+            queryWrapper.ge("start_time", new Date(this.getEndTime()));
+        }
+        if (this.getEndTime() != null) {
+            queryWrapper.le("end_time", new Date(this.getEndTime()));
+        }
         queryWrapper.eq("delete_flag", false);
+        this.betweenWrapper(queryWrapper);
         queryWrapper.orderByDesc("create_time");
         return queryWrapper;
     }
@@ -139,74 +149,6 @@ public class CouponSearchParams implements Serializable {
                 queryWrapper.ge("received_num", s[1]);
             } else {
                 queryWrapper.le("received_num", s[0]);
-            }
-        }
-    }
-
-    public Query mongoQuery() {
-        Query query = new Query();
-        if (storeId != null) {
-            query.addCriteria(Criteria.where("storeId").in(Arrays.asList(storeId)));
-        }
-        if (CharSequenceUtil.isNotEmpty(couponName)) {
-            Pattern pattern = Pattern.compile("^.*" + couponName + ".*$", Pattern.CASE_INSENSITIVE);
-            query.addCriteria(Criteria.where("couponName").regex(pattern));
-        }
-        if (memberId != null) {
-            query.addCriteria(Criteria.where("memberId").is(memberId));
-        }
-        if (CharSequenceUtil.isNotEmpty(couponType)) {
-            query.addCriteria(Criteria.where("couponType").is(CouponTypeEnum.valueOf(couponType).name()));
-        }
-        if (CharSequenceUtil.isNotEmpty(scopeType)) {
-            query.addCriteria(Criteria.where("scopeType").is(CouponScopeTypeEnum.valueOf(scopeType).name()));
-        }
-        if (CharSequenceUtil.isNotEmpty(scopeId)) {
-            query.addCriteria(Criteria.where("scopeId").is(scopeId));
-        }
-        if (CharSequenceUtil.isNotEmpty(getType)) {
-            query.addCriteria(Criteria.where("getType").is(CouponGetEnum.valueOf(getType).name()));
-        }
-        if (startTime != null) {
-            query.addCriteria(Criteria.where("startTime").gte(new Date(startTime)));
-        }
-        if (endTime != null) {
-            query.addCriteria(Criteria.where("endTime").lte(new Date(endTime)));
-        }
-        if (CharSequenceUtil.isNotEmpty(memberCouponStatus)) {
-            query.addCriteria(Criteria.where("memberCouponStatus").is(MemberCouponStatusEnum.valueOf(memberCouponStatus).name()));
-        }
-        if (CharSequenceUtil.isNotEmpty(promotionStatus)) {
-            query.addCriteria(Criteria.where("promotionStatus").is(PromotionStatusEnum.valueOf(promotionStatus).name()));
-        }
-        query.addCriteria(Criteria.where("deleteFlag").is(false));
-        betweenQuery(query);
-        return query;
-    }
-
-    private void betweenQuery(Query query) {
-        if (CharSequenceUtil.isNotEmpty(price)) {
-            String[] s = price.split("_");
-            if (s.length > 1) {
-                query.addCriteria(Criteria.where(PRICE_COLUMN).gte(s[1]));
-            } else {
-                query.addCriteria(Criteria.where(PRICE_COLUMN).lte(s[0]));
-            }
-        }
-        if (CharSequenceUtil.isNotEmpty(publishNum)) {
-            String[] s = publishNum.split("_");
-            if (s.length > 1) {
-                query.addCriteria(Criteria.where("publishNum").gte(s[1]));
-            } else {
-                query.addCriteria(Criteria.where("publishNum").lte(s[0]));
-            }
-        }
-        if (CharSequenceUtil.isNotEmpty(receivedNum)) {
-            String[] s = receivedNum.split("_");
-            if (s.length > 1) {
-                query.addCriteria(Criteria.where("receivedNum").gte(s[1]));
-            } else {
-                query.addCriteria(Criteria.where("receivedNum").lte(s[0]));
             }
         }
     }

@@ -131,6 +131,7 @@ ignored:
     - /manager/user/login
     - /manager/user/refresh/**
     - /manager/elasticsearch
+    - /manager/custom-words
     - /druid/**
     - /swagger-ui.html
     - /doc.html

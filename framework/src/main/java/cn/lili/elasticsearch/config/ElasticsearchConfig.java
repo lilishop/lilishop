@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
@@ -66,6 +67,11 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
 
         client = new RestHighLevelClient(restBuilder);
         return client;
+    }
+
+    @Bean("elasticsearchRestTemplate")
+    public ElasticsearchRestTemplate elasticsearchRestTemplate() {
+        return new ElasticsearchRestTemplate(elasticsearchClient());
     }
 
     private HttpHost[] getHttpHosts() {

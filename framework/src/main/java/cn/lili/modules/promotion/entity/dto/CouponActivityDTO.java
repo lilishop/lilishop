@@ -4,6 +4,7 @@ import cn.lili.modules.promotion.entity.dos.CouponActivity;
 import cn.lili.modules.promotion.entity.dos.CouponActivityItem;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
  * @author Bulbasaur
  * @since 2021/5/21 7:16 下午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class CouponActivityDTO extends CouponActivity {
 

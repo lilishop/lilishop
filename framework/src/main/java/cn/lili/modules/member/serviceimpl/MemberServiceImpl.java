@@ -59,6 +59,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -574,6 +575,20 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 memberSearchVO.getDisabled().equals(SwitchEnum.OPEN.name()) ? 1 : 0);
         queryWrapper.orderByDesc("create_time");
         return this.count(queryWrapper);
+    }
+
+    /**
+     * 获取指定会员数据
+     *
+     * @param columns   指定获取的列
+     * @param memberIds 会员ids
+     * @return 指定会员数据
+     */
+    @Override
+    public List<Map<String, Object>> listFieldsByMemberIds(String columns, List<String> memberIds) {
+        return this.listMaps(new QueryWrapper<Member>()
+                .select(columns)
+                .in(memberIds != null && !memberIds.isEmpty(), "id", memberIds));
     }
 
     /**

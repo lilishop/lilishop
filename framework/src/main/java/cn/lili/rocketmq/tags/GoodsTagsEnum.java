@@ -14,6 +14,14 @@ public enum GoodsTagsEnum {
      * "更新商品索引"
      */
     UPDATE_GOODS_INDEX("更新商品索引"),
+    /**
+     * "更新商品索引促销信息"
+     */
+    UPDATE_GOODS_INDEX_PROMOTIONS("更新商品索引促销信息"),
+    /**
+     * "更新商品索引促销信息"
+     */
+    DELETE_GOODS_INDEX_PROMOTIONS("更新商品索引促销信息"),
 
     /**
      * "更新商品索引部分字段"

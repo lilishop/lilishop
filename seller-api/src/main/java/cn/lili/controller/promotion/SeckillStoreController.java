@@ -8,7 +8,6 @@ import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
 import cn.lili.modules.promotion.entity.vos.SeckillApplyVO;
 import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
-import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.service.SeckillService;
 import cn.lili.modules.system.utils.OperationalJudgment;
@@ -38,8 +37,8 @@ public class SeckillStoreController {
 
     @GetMapping
     @ApiOperation(value = "获取秒杀活动列表")
-    public ResultMessage<IPage<SeckillVO>> getSeckillPage(SeckillSearchParams queryParam, PageVO pageVo) {
-        IPage<SeckillVO> seckillPage = seckillService.getSeckillByPageFromMongo(queryParam, pageVo);
+    public ResultMessage<IPage<Seckill>> getSeckillPage(SeckillSearchParams queryParam, PageVO pageVo) {
+        IPage<Seckill> seckillPage = seckillService.pageFindAll(queryParam, pageVo);
         return ResultUtil.data(seckillPage);
     }
 
@@ -48,14 +47,14 @@ public class SeckillStoreController {
     public ResultMessage<IPage<SeckillApply>> getSeckillApplyPage(SeckillSearchParams queryParam, PageVO pageVo) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         queryParam.setStoreId(storeId);
-        IPage<SeckillApply> seckillPage = seckillApplyService.getSeckillApplyFromMongo(queryParam, pageVo);
+        IPage<SeckillApply> seckillPage = seckillApplyService.getSeckillApply(queryParam, pageVo);
         return ResultUtil.data(seckillPage);
     }
 
     @GetMapping("/{seckillId}")
-    @ApiOperation(value = "获取秒杀活动")
+    @ApiOperation(value = "获取秒杀活动信息")
     public ResultMessage<Seckill> getSeckill(@PathVariable String seckillId) {
-        return ResultUtil.data(seckillService.getSeckillByIdFromMongo(seckillId));
+        return ResultUtil.data(seckillService.getById(seckillId));
     }
 
     @GetMapping("/apply/{seckillApplyId}")

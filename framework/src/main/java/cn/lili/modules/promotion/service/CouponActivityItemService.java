@@ -28,4 +28,11 @@ public interface CouponActivityItemService extends IService<CouponActivityItem> 
      * @return 优惠券关联优惠券列表
      */
     List<CouponActivityItemVO> getCouponActivityItemListVO(String activityId);
+
+    /**
+     * 根据优惠券id删除优惠活动关联信息项
+     *
+     * @param couponIds 优惠券id集合
+     */
+    void removeByCouponId(List<String> couponIds);
 }

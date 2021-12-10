@@ -9,7 +9,7 @@ import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
-import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
+import cn.lili.modules.promotion.entity.dos.KanjiaActivityGoods;
 import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
 import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
 import cn.lili.modules.promotion.service.PointsGoodsService;
@@ -79,13 +79,13 @@ public class CommissionRender implements CartRenderStep {
 
                 //如果积分订单 积分订单，单独操作订单结算金额和商家结算字段
                 if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.POINTS)) {
-                    PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsVOByMongo(cartSkuVO.getGoodsSku().getId());
+                    PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsDetailBySkuId(cartSkuVO.getGoodsSku().getId());
                     priceDetailDTO.setSettlementPrice(pointsGoodsVO.getSettlementPrice());
                 }
                 //如果砍价订单 计算金额，单独操作订单结算金额和商家结算字段
                 else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.KANJIA)) {
-                    KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO = kanjiaActivityGoodsService.getKanJiaGoodsBySku(cartSkuVO.getGoodsSku().getId());
-                    priceDetailDTO.setSettlementPrice(kanjiaActivityGoodsDTO.getSettlementPrice());
+                    KanjiaActivityGoods kanjiaActivityGoods = kanjiaActivityGoodsService.getKanjiaGoodsBySkuId(cartSkuVO.getGoodsSku().getId());
+                    priceDetailDTO.setSettlementPrice(kanjiaActivityGoods.getSettlementPrice());
                 }
             }
         }

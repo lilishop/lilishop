@@ -7,6 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
@@ -30,6 +31,7 @@ import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
+import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
 import cn.lili.modules.search.entity.dos.EsGoodsAttribute;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
@@ -253,9 +255,24 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //商品规格
         GoodsSkuVO goodsSkuDetail = this.getGoodsSkuVO(goodsSku);
 
+        Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
         //设置当前商品的促销价格
-        if (goodsIndex.getPromotionMap() != null && !goodsIndex.getPromotionMap().isEmpty() && goodsIndex.getPromotionPrice() != null) {
+        if (promotionMap != null && !promotionMap.isEmpty() && goodsIndex.getPromotionPrice() != null) {
             goodsSkuDetail.setPromotionPrice(goodsIndex.getPromotionPrice());
+        }
+        if (promotionMap != null && !promotionMap.isEmpty()) {
+            promotionMap = promotionMap.entrySet().stream().parallel().filter(i -> {
+                JSONObject jsonObject = JSONUtil.parseObj(i.getValue());
+                return (jsonObject.get("getType") == null || jsonObject.get("getType").toString().equals(CouponGetEnum.FREE.name())) &&
+                        (jsonObject.get("startTime") != null && jsonObject.get("startTime", Date.class).before(new Date()));
+            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            for (String s : promotionMap.keySet()) {
+                if (!s.contains(PromotionTypeEnum.SECKILL.name()) || !s.contains(PromotionTypeEnum.PINTUAN.name())) {
+                    goodsSkuDetail.setPromotionPrice(null);
+                    break;
+                }
+            }
+
         }
         map.put("data", goodsSkuDetail);
 
@@ -265,10 +282,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
         //获取规格信息
         map.put("specs", this.groupBySkuAndSpec(goodsVO.getSkuList()));
-        map.put("promotionMap", goodsIndex.getPromotionMap());
+        map.put("promotionMap", promotionMap);
 
         //获取参数信息
-        if (goodsVO.getGoodsParamsDTOList() != null && goodsVO.getGoodsParamsDTOList().size() > 0) {
+        if (goodsVO.getGoodsParamsDTOList() != null && !goodsVO.getGoodsParamsDTOList().isEmpty()) {
             map.put("goodsParamsDTOList", goodsVO.getGoodsParamsDTOList());
         }
 
@@ -385,6 +402,17 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         return this.page(PageUtil.initPage(searchParams), searchParams.queryWrapper());
     }
 
+    /**
+     * 列表查询商品sku信息
+     *
+     * @param searchParams 查询参数
+     * @return 商品sku信息
+     */
+    @Override
+    public List<GoodsSku> getGoodsSkuByList(GoodsSearchParams searchParams) {
+        return this.list(searchParams.queryWrapper());
+    }
+
     @Override
     public void updateStocks(List<GoodsSkuStockDTO> goodsSkuStockDTOS) {
         for (GoodsSkuStockDTO goodsSkuStockDTO : goodsSkuStockDTOS) {
@@ -484,6 +512,22 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
         //修改商品的评价数量
         goodsService.updateGoodsCommentNum(goodsSku.getGoodsId());
+    }
+
+    /**
+     * 更新商品sku促销价格
+     *
+     * @param skuId          skuId
+     * @param promotionPrice 促销价格
+     */
+    @Override
+    public void updateGoodsSkuPromotion(String skuId, Double promotionPrice) {
+        LambdaUpdateWrapper<GoodsSku> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(GoodsSku::getId, skuId);
+        updateWrapper.set(GoodsSku::getPromotionPrice, promotionPrice);
+        updateWrapper.set(GoodsSku::getIsPromotion, true);
+        this.update(updateWrapper);
+        cache.remove(GoodsSkuService.getCacheKeys(skuId));
     }
 
     /**

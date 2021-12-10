@@ -34,6 +34,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
@@ -70,6 +71,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
      * ES
      */
     @Autowired
+    @Qualifier("elasticsearchRestTemplate")
     private ElasticsearchRestTemplate restTemplate;
     /**
      * 缓存
@@ -143,6 +145,17 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         NativeSearchQuery build = searchQueryBuilder.build();
         build.setIds(skuIds);
         return restTemplate.multiGet(build, EsGoodsIndex.class, restTemplate.getIndexCoordinatesFor(EsGoodsIndex.class));
+    }
+
+    /**
+     * 根据id获取商品索引
+     *
+     * @param id 商品skuId
+     * @return 商品索引
+     */
+    @Override
+    public EsGoodsIndex getEsGoodsById(String id) {
+        return this.restTemplate.get(id, EsGoodsIndex.class);
     }
 
     /**

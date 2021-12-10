@@ -36,18 +36,26 @@ public interface SeckillApplyService extends IService<SeckillApply> {
     List<SeckillGoodsVO> getSeckillGoods(Integer timeline);
 
     /**
-     * 从mongo中分页查询限时请购申请列表
+     * 分页查询限时请购申请列表
      *
      * @param queryParam 秒杀活动申请查询参数
      * @param pageVo     分页参数
      * @return 限时请购申请列表
      */
-    IPage<SeckillApply> getSeckillApplyFromMongo(SeckillSearchParams queryParam, PageVO pageVo);
+    IPage<SeckillApply> getSeckillApply(SeckillSearchParams queryParam, PageVO pageVo);
+
+    /**
+     * 分页查询限时请购申请列表
+     *
+     * @param queryParam 秒杀活动申请查询参数
+     * @return 限时请购申请列表
+     */
+    List<SeckillApply> getSeckillApply(SeckillSearchParams queryParam);
 
     /**
      * 添加秒杀活动申请
      * 检测是否商品是否同时参加多个活动
-     * 将秒杀商品信息存入秒杀活动中，更新mogo信息
+     * 将秒杀商品信息存入秒杀活动中
      * 保存秒杀活动商品，促销商品信息
      *
      * @param seckillId        秒杀活动编号
@@ -60,7 +68,8 @@ public interface SeckillApplyService extends IService<SeckillApply> {
      * 批量删除秒杀活动商品
      *
      * @param seckillId 秒杀活动活动id
-     * @param id       秒杀活动商品
+     * @param id        秒杀活动商品
      */
-    void removeSeckillApply(String seckillId, String id );
+    void removeSeckillApply(String seckillId, String id);
+
 }
