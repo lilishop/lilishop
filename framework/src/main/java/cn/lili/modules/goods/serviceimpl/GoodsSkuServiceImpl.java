@@ -535,6 +535,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      *
      * @param goods 商品信息
      */
+    @Override
     public void generateEs(Goods goods) {
         String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GENERATOR_GOODS_INDEX.name();
         //发送mq消息

@@ -26,6 +26,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--定时任务-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-quartz</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -80,11 +86,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
-<!--        &lt;!&ndash; Websocket &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-websocket</artifactId>-->
-<!--        </dependency>-->
+        <!--        &lt;!&ndash; Websocket &ndash;&gt;-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-starter-websocket</artifactId>-->
+        <!--        </dependency>-->
         <!-- MybatisPlus -->
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -271,11 +277,11 @@
             <artifactId>logstash-logback-encoder</artifactId>
             <version>${logstash-logback-encoder}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>javax.interceptor</groupId>-->
-<!--            <artifactId>javax.interceptor-api</artifactId>-->
-<!--            <version>${interceptor-api}</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>javax.interceptor</groupId>-->
+        <!--            <artifactId>javax.interceptor-api</artifactId>-->
+        <!--            <version>${interceptor-api}</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>de.codecentric</groupId>
             <artifactId>spring-boot-admin-starter-client</artifactId>

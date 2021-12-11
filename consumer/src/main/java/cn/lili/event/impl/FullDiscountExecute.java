@@ -26,7 +26,7 @@ import cn.lili.modules.order.trade.entity.dos.OrderLog;
 import cn.lili.modules.order.trade.service.OrderLogService;
 import cn.lili.modules.promotion.service.MemberCouponService;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.rocketmq.tags.MqOrderTagsEnum;
+import cn.lili.rocketmq.tags.OrderTagsEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -190,7 +190,7 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
         orderMessage.setPaymentMethod(order.getPaymentMethod());
         orderMessage.setNewStatus(OrderStatusEnum.PAID);
 
-        String destination = rocketmqCustomProperties.getOrderTopic() + ":" + MqOrderTagsEnum.STATUS_CHANGE.name();
+        String destination = rocketmqCustomProperties.getOrderTopic() + ":" + OrderTagsEnum.STATUS_CHANGE.name();
         //发送订单变更mq消息
         rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(orderMessage), RocketmqSendCallbackBuilder.commonCallback());
 

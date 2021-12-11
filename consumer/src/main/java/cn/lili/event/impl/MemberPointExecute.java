@@ -1,7 +1,6 @@
 package cn.lili.event.impl;
 
 
-import cn.hutool.core.convert.Convert;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.event.AfterSaleStatusChangeEvent;
@@ -12,11 +11,10 @@ import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.order.order.entity.dos.AfterSale;
+import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
-import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;

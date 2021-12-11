@@ -210,6 +210,7 @@ public enum ResultCode {
     AFTER_STATUS_ERROR(33006, "售后状态错误，请刷新页面"),
     RETURN_MONEY_OFFLINE_BANK_ERROR(33007, "当账号类型为银行转账时，银行信息不能为空"),
     AFTER_SALES_PRICE_ERROR(33004, "申请退款金额错误"),
+    AFTER_GOODS_NUMBER_ERROR(33008, "申请售后商品数量错误"),
 
     /**
      * 投诉

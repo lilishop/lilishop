@@ -1,11 +1,15 @@
 package cn.lili.modules.order.order.serviceimpl;
 
-import cn.lili.common.utils.*;
+import cn.lili.common.utils.BeanUtil;
+import cn.lili.common.utils.CurrencyUtil;
+import cn.lili.common.utils.SnowFlake;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.order.order.entity.dos.AfterSale;
+import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
+import cn.lili.modules.order.order.entity.dto.StoreFlowQueryDTO;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
@@ -15,6 +19,10 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.service.RefundLogService;
+import cn.lili.modules.store.entity.dos.Bill;
+import cn.lili.modules.store.entity.vos.StoreFlowPayDownloadVO;
+import cn.lili.modules.store.entity.vos.StoreFlowRefundDownloadVO;
+import cn.lili.modules.store.service.BillService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -26,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -55,6 +62,9 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
      */
     @Autowired
     private RefundLogService refundLogService;
+
+    @Autowired
+    private BillService billService;
 
     @Override
     public void payOrder(String orderSn) {
@@ -139,7 +149,8 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
 
 
         //获取付款信息
-        StoreFlow payStoreFlow = this.getOne(new LambdaUpdateWrapper<StoreFlow>().eq(StoreFlow::getOrderItemSn, afterSale.getOrderItemSn()));
+        StoreFlow payStoreFlow = this.getOne(new LambdaUpdateWrapper<StoreFlow>().eq(StoreFlow::getOrderItemSn, afterSale.getOrderItemSn())
+                .eq(StoreFlow::getFlowType, FlowTypeEnum.PAY));
         storeFlow.setNum(afterSale.getNum());
         storeFlow.setCategoryId(payStoreFlow.getCategoryId());
         //佣金
@@ -151,20 +162,84 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         //最终结算金额
         storeFlow.setBillPrice(CurrencyUtil.add(CurrencyUtil.add(storeFlow.getFinalPrice(), storeFlow.getDistributionRebate()), storeFlow.getCommissionPrice()));
         //获取第三方支付流水号
-        RefundLog refundLog = refundLogService.getOne(new LambdaQueryWrapper<RefundLog>().eq(RefundLog::getAfterSaleNo, afterSale.getSn()));
+        RefundLog refundLog = refundLogService.queryByAfterSaleSn(afterSale.getSn());
         storeFlow.setTransactionId(refundLog.getReceivableNo());
         storeFlow.setPaymentName(refundLog.getPaymentName());
         this.save(storeFlow);
     }
 
     @Override
-    public IPage<StoreFlow> getStoreFlow(String storeId, String type, boolean distribution, PageVO pageVO, Date startTime, Date endTime) {
+    public IPage<StoreFlow> getStoreFlow(StoreFlowQueryDTO storeFlowQueryDTO) {
+
+        return this.page(PageUtil.initPage(storeFlowQueryDTO.getPageVO()), generatorQueryWrapper(storeFlowQueryDTO));
+    }
+
+    @Override
+    public StoreFlow queryOne(StoreFlowQueryDTO storeFlowQueryDTO) {
+        return this.getOne(generatorQueryWrapper(storeFlowQueryDTO));
+    }
+
+    @Override
+    public List<StoreFlowPayDownloadVO> getStoreFlowPayDownloadVO(StoreFlowQueryDTO storeFlowQueryDTO) {
+        return baseMapper.getStoreFlowPayDownloadVO(generatorQueryWrapper(storeFlowQueryDTO));
+    }
+
+    @Override
+    public List<StoreFlowRefundDownloadVO> getStoreFlowRefundDownloadVO(StoreFlowQueryDTO storeFlowQueryDTO) {
+        return baseMapper.getStoreFlowRefundDownloadVO(generatorQueryWrapper(storeFlowQueryDTO));
+    }
+
+
+    @Override
+    public IPage<StoreFlow> getStoreFlow(String id, String type, PageVO pageVO) {
+        Bill bill = billService.getById(id);
+        return this.getStoreFlow(StoreFlowQueryDTO.builder().type(type).pageVO(pageVO).bill(bill).build());
+    }
+
+    @Override
+    public IPage<StoreFlow> getDistributionFlow(String id, PageVO pageVO) {
+        Bill bill = billService.getById(id);
+        return this.getStoreFlow(StoreFlowQueryDTO.builder().pageVO(pageVO).bill(bill).build());
+    }
+
+    @Override
+    public List<StoreFlow> listStoreFlow(StoreFlowQueryDTO storeFlowQueryDTO) {
+        return this.list(generatorQueryWrapper(storeFlowQueryDTO));
+    }
+
+    /**
+     * 生成查询wrapper
+     *
+     * @param storeFlowQueryDTO 搜索参数
+     * @return 查询wrapper
+     */
+    private LambdaQueryWrapper generatorQueryWrapper(StoreFlowQueryDTO storeFlowQueryDTO) {
+
 
         LambdaQueryWrapper<StoreFlow> lambdaQueryWrapper = Wrappers.lambdaQuery();
-        lambdaQueryWrapper.eq(StoreFlow::getStoreId, storeId);
-        lambdaQueryWrapper.isNotNull(distribution, StoreFlow::getDistributionRebate);
-        lambdaQueryWrapper.between(StoreFlow::getCreateTime, startTime, endTime);
-        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(type), StoreFlow::getFlowType, type);
-        return this.page(PageUtil.initPage(pageVO), lambdaQueryWrapper);
+        //分销订单过滤是否判定
+        lambdaQueryWrapper.isNotNull(storeFlowQueryDTO.getJustDistribution() != null && storeFlowQueryDTO.getJustDistribution(),
+                StoreFlow::getDistributionRebate);
+
+        //流水类型判定
+        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(storeFlowQueryDTO.getType()),
+                StoreFlow::getFlowType, storeFlowQueryDTO.getType());
+
+        //售后编号判定
+        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(storeFlowQueryDTO.getRefundSn()),
+                StoreFlow::getRefundSn, storeFlowQueryDTO.getRefundSn());
+
+        //售后编号判定
+        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(storeFlowQueryDTO.getOrderSn()),
+                StoreFlow::getOrderSn, storeFlowQueryDTO.getOrderSn());
+
+        //结算单非空，则校对结算单参数
+        if (storeFlowQueryDTO.getBill() != null) {
+            Bill bill = storeFlowQueryDTO.getBill();
+            lambdaQueryWrapper.eq(StringUtils.isNotEmpty(bill.getStoreId()), StoreFlow::getStoreId, bill.getStoreId());
+            lambdaQueryWrapper.between(bill.getStartTime() != null && bill.getEndTime() != null,
+                    StoreFlow::getCreateTime, bill.getStartTime(), bill.getEndTime());
+        }
+        return lambdaQueryWrapper;
     }
 }

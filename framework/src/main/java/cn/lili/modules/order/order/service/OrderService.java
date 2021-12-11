@@ -1,6 +1,5 @@
 package cn.lili.modules.order.order.service;
 
-import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
@@ -9,8 +8,9 @@ import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
-import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
+import cn.lili.modules.order.order.entity.vo.PaymentLog;
 import cn.lili.modules.system.entity.vo.Traces;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.multipart.MultipartFile;
@@ -227,16 +227,6 @@ public interface OrderService extends IService<Order> {
     void deleteOrder(String sn);
 
     /**
-     * 获取统计的订单
-     *
-     * @param statisticsQueryParam
-     * @param pageVO
-     * @return
-     */
-    IPage<OrderSimpleVO> getStatistics(StatisticsQueryParam statisticsQueryParam, PageVO pageVO);
-
-
-    /**
      * 开具发票
      *
      * @param sn 订单sn
@@ -275,4 +265,13 @@ public interface OrderService extends IService<Order> {
      * @return 金额
      */
     Double getPaymentTotal(String orderSn);
+
+    /**
+     * 查询订单支付记录
+     *
+     * @param page         分页
+     * @param queryWrapper 查询条件
+     * @return 订单支付记录分页
+     */
+    IPage<PaymentLog> queryPaymentLogs(IPage<PaymentLog> page, Wrapper<PaymentLog> queryWrapper);
 }

@@ -2,20 +2,19 @@ package cn.lili.modules.payment.kit;
 
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.SpringContextUtil;
-import cn.lili.modules.order.order.entity.dos.AfterSale;
+import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
-import cn.lili.modules.order.order.service.AfterSaleService;
+import cn.lili.modules.order.order.entity.dos.OrderItem;
+import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 
 /**
  * 退款支持
@@ -32,15 +31,15 @@ public class RefundSupport {
     @Autowired
     private StoreFlowService storeFlowService;
     /**
-     * 售后
-     */
-    @Autowired
-    private AfterSaleService afterSaleService;
-    /**
      * 订单
      */
     @Autowired
     private OrderService orderService;
+    /**
+     * 子订单
+     */
+    @Autowired
+    private OrderItemService orderItemService;
 
     /**
      * 售后退款
@@ -65,12 +64,29 @@ public class RefundSupport {
         Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
         payment.refund(refundLog);
 
-        //记录售后单中的退款金额
-        afterSaleService.update(new LambdaUpdateWrapper<AfterSale>()
-                .eq(AfterSale::getId, afterSale.getId())
-                .set(AfterSale::getRefundTime, new Date()));
+        this.updateReturnGoodsNumber(afterSale);
+
         //记录退款流水
         storeFlowService.refundOrder(afterSale);
+    }
+
+    /**
+     * 功能描述: 修改子订单中已售后退款商品数量
+     *
+     * @return void
+     * @Author ftyy
+     * @Description //TODO
+     * @Date 17:33 2021/11/18
+     * @Param [afterSale]
+     **/
+    private void updateReturnGoodsNumber(AfterSale afterSale) {
+        //根据商品id及订单sn获取子订单
+        OrderItem orderItem = orderItemService.getByOrderSnAndSkuId(afterSale.getOrderSn(), afterSale.getGoodsId());
+
+        orderItem.setReturnGoodsNumber(afterSale.getNum() + orderItem.getReturnGoodsNumber());
+
+        //修改子订单订单中的退货数量
+        orderItemService.updateById(orderItem);
     }
 
     /**

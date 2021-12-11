@@ -1,7 +1,5 @@
 package cn.lili.modules.goods.serviceimpl;
 
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONUtil;
@@ -29,6 +27,7 @@ import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
 import cn.lili.modules.store.entity.dos.FreightTemplate;
+import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.service.FreightTemplateService;
 import cn.lili.modules.store.service.StoreService;
@@ -42,6 +41,7 @@ import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -121,8 +121,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     public List<Goods> getByBrandIds(List<String> brandIds) {
-        LambdaQueryWrapper<Goods> lambdaQueryWrapper = new LambdaQueryWrapper<Goods> ();
-        lambdaQueryWrapper.in(Goods::getBrandId,brandIds);
+        LambdaQueryWrapper<Goods> lambdaQueryWrapper = new LambdaQueryWrapper<Goods>();
+        lambdaQueryWrapper.in(Goods::getBrandId, brandIds);
         return list(lambdaQueryWrapper);
     }
 
@@ -274,33 +274,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
-    public Integer goodsNum(GoodsStatusEnum goodsStatusEnum, GoodsAuthEnum goodsAuthEnum) {
-        LambdaQueryWrapper<Goods> queryWrapper = Wrappers.lambdaQuery();
-
-        queryWrapper.eq(Goods::getDeleteFlag, false);
-
-        if (goodsStatusEnum != null) {
-            queryWrapper.eq(Goods::getMarketEnable, goodsStatusEnum.name());
-        }
-        if (goodsAuthEnum != null) {
-            queryWrapper.eq(Goods::getIsAuth, goodsAuthEnum.name());
-        }
-        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        queryWrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.STORE.name()),
-                Goods::getStoreId, currentUser.getStoreId());
-
-        return this.count(queryWrapper);
-    }
-
-    @Override
-    public Integer todayUpperNum() {
-        LambdaQueryWrapper<Goods> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name());
-        queryWrapper.ge(Goods::getCreateTime, DateUtil.beginOfDay(new DateTime()));
-        return this.count(queryWrapper);
-    }
-
-    @Override
     public Boolean updateGoodsMarketAble(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, String underReason) {
         boolean result;
 
@@ -394,6 +367,25 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         double grade = NumberUtil.mul(NumberUtil.div(highPraiseNum, goods.getCommentNum().doubleValue(), 2), 100);
         goods.setGrade(grade);
         this.updateById(goods);
+    }
+
+    @Override
+    public void updateStoreDetail(Store store) {
+        UpdateWrapper updateWrapper = new UpdateWrapper<>()
+                .eq("store_id", store.getId())
+                .set("store_name", store.getStoreName())
+                .set("self_operated", store.getSelfOperated());
+        this.update(updateWrapper);
+        goodsSkuService.update(updateWrapper);
+    }
+
+    @Override
+    public Integer countStoreGoodsNum(String storeId) {
+        return this.count(
+                new LambdaQueryWrapper<Goods>()
+                        .eq(Goods::getStoreId, storeId)
+                        .eq(Goods::getIsAuth, GoodsAuthEnum.PASS.name())
+                        .eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name()));
     }
 
     /**
@@ -490,12 +482,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
      */
     private AuthUser checkStoreAuthority() {
         AuthUser currentUser = UserContext.getCurrentUser();
-        if (currentUser == null || (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() == null)) {
-            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
-        } else if (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() != null) {
+        //如果当前会员不为空，且为店铺角色
+        if (currentUser != null && (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() != null)) {
             return currentUser;
+        } else {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
-        return null;
     }
 
     /**

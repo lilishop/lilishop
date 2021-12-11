@@ -14,23 +14,20 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.Token;
+import cn.lili.common.sensitive.SensitiveWordsFilter;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CookieUtil;
 import cn.lili.common.utils.StringUtils;
+import cn.lili.common.utils.UuidUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.service.ConnectService;
-import cn.lili.modules.connect.util.UuidUtils;
 import cn.lili.modules.member.aop.annotation.PointLogPoint;
 import cn.lili.modules.member.entity.dos.Member;
-import cn.lili.modules.member.entity.dto.ManagerMemberEditDTO;
-import cn.lili.modules.member.entity.dto.MemberAddDTO;
-import cn.lili.modules.member.entity.dto.MemberEditDTO;
-import cn.lili.modules.member.entity.dto.MemberPointMessage;
+import cn.lili.modules.member.entity.dto.*;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
-import cn.lili.modules.member.entity.vo.MemberDistributionVO;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
 import cn.lili.modules.member.entity.vo.MemberVO;
 import cn.lili.modules.member.mapper.MemberMapper;
@@ -40,12 +37,9 @@ import cn.lili.modules.member.token.StoreTokenGenerate;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.enums.StoreStatusEnum;
 import cn.lili.modules.store.service.StoreService;
-import cn.lili.modules.system.utils.CharacterConstant;
-import cn.lili.modules.system.utils.SensitiveWordsFilter;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -352,7 +346,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         }
         //过滤会员昵称敏感词
         if (com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank(managerMemberEditDTO.getNickName())) {
-            managerMemberEditDTO.setNickName(SensitiveWordsFilter.filter(managerMemberEditDTO.getNickName(), CharacterConstant.WILDCARD_STAR));
+            managerMemberEditDTO.setNickName(SensitiveWordsFilter.filter(managerMemberEditDTO.getNickName()));
         }
         //如果密码不为空则加密密码
         if (com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank(managerMemberEditDTO.getPassword())) {
@@ -429,13 +423,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
         return this.update(updateWrapper);
     }
-
-    @Override
-    public List<MemberDistributionVO> distribution() {
-        List<MemberDistributionVO> memberDistributionVOS = this.baseMapper.distribution();
-        return memberDistributionVOS;
-    }
-
     /**
      * 根据手机号获取会员
      *
@@ -471,10 +458,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
      * @param type    状态
      */
     private void loginBindUser(Member member, String unionId, String type) {
-        LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Connect::getUnionId, unionId);
-        queryWrapper.eq(Connect::getUnionType, type);
-        Connect connect = connectService.getOne(queryWrapper);
+        Connect connect = connectService.queryConnect(
+                ConnectQueryDTO.builder().unionId(unionId).unionType(type).build()
+        );
         if (connect == null) {
             connect = new Connect(member.getId(), unionId, type);
             connectService.save(connect);
@@ -498,11 +484,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 if (connectAuthUser == null) {
                     return;
                 }
-                //检测是否已经绑定过用户
-                LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
-                queryWrapper.eq(Connect::getUnionId, connectAuthUser.getUuid());
-                queryWrapper.eq(Connect::getUnionType, connectType);
-                Connect connect = connectService.getOne(queryWrapper);
+                Connect connect = connectService.queryConnect(
+                        ConnectQueryDTO.builder().unionId(connectAuthUser.getUuid()).unionType(connectType).build()
+                );
                 if (connect == null) {
                     connect = new Connect(member.getId(), connectAuthUser.getUuid(), connectType);
                     connectService.save(connect);
@@ -544,10 +528,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                     throw new ServiceException(ResultCode.USER_OVERDUE_CONNECT_ERROR);
                 }
                 //检测是否已经绑定过用户
-                LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
-                queryWrapper.eq(Connect::getUnionId, connectAuthUser.getUuid());
-                queryWrapper.eq(Connect::getUnionType, connectType);
-                Connect connect = connectService.getOne(queryWrapper);
+                Connect connect = connectService.queryConnect(
+                        ConnectQueryDTO.builder().unionType(connectType).unionId(connectAuthUser.getUuid()).build()
+                );
                 //没有关联则返回true，表示可以继续绑定
                 if (connect == null) {
                     connectAuthUser.setConnectEnum(authInterface);

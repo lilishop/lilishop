@@ -12,10 +12,10 @@ import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -32,6 +32,7 @@ import cn.lili.modules.order.order.entity.enums.*;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.entity.vo.OrderVO;
+import cn.lili.modules.order.order.entity.vo.PaymentLog;
 import cn.lili.modules.order.order.mapper.OrderItemMapper;
 import cn.lili.modules.order.order.mapper.OrderMapper;
 import cn.lili.modules.order.order.service.*;
@@ -40,23 +41,21 @@ import cn.lili.modules.order.trade.service.OrderLogService;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.service.PintuanService;
-import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
-import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.entity.dos.Logistics;
 import cn.lili.modules.system.entity.vo.Traces;
 import cn.lili.modules.system.service.LogisticsService;
-import cn.lili.modules.system.utils.OperationalJudgment;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
-import cn.lili.rocketmq.tags.MqOrderTagsEnum;
+import cn.lili.rocketmq.tags.OrderTagsEnum;
 import cn.lili.trigger.enums.DelayTypeEnums;
 import cn.lili.trigger.interfaces.TimeTrigger;
 import cn.lili.trigger.message.PintuanOrderMessage;
 import cn.lili.trigger.model.TimeExecuteConstant;
 import cn.lili.trigger.model.TimeTriggerMsg;
 import cn.lili.trigger.util.DelayQueueTools;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -524,7 +523,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public void sendUpdateStatusMessage(OrderMessage orderMessage) {
-        String destination = rocketmqCustomProperties.getOrderTopic() + ":" + MqOrderTagsEnum.STATUS_CHANGE.name();
+        String destination = rocketmqCustomProperties.getOrderTopic() + ":" + OrderTagsEnum.STATUS_CHANGE.name();
         //发送订单变更mq消息
         rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(orderMessage), RocketmqSendCallbackBuilder.commonCallback());
     }
@@ -542,21 +541,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         LambdaUpdateWrapper<OrderItem> orderItemLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
         orderItemLambdaUpdateWrapper.eq(OrderItem::getOrderSn, sn).set(OrderItem::getDeleteFlag, true);
         this.orderItemService.update(orderItemLambdaUpdateWrapper);
-    }
-
-    @Override
-    public IPage<OrderSimpleVO> getStatistics(StatisticsQueryParam statisticsQueryParam, PageVO pageVO) {
-
-        QueryWrapper<OrderSimpleVO> queryWrapper = new QueryWrapper<>();
-        Date[] dates = StatisticsDateUtil.getDateArray(statisticsQueryParam);
-        queryWrapper.between("o.create_time", dates[0], dates[1]);
-        queryWrapper.eq(StringUtils.isNotEmpty(statisticsQueryParam.getStoreId()),
-                "o.store_id", statisticsQueryParam.getStoreId());
-
-        queryWrapper.eq("o.delete_flag", false);
-        queryWrapper.groupBy("o.id");
-        queryWrapper.orderByDesc("o.id");
-        return this.baseMapper.queryByParams(PageUtil.initPage(pageVO), queryWrapper);
     }
 
     @Override
@@ -661,6 +645,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             return trade.getFlowPrice();
         }
         return order.getFlowPrice();
+    }
+
+    @Override
+    public IPage<PaymentLog> queryPaymentLogs(IPage<PaymentLog> page, Wrapper<PaymentLog> queryWrapper) {
+        return baseMapper.queryPaymentLogs(page, queryWrapper);
     }
 
     /**

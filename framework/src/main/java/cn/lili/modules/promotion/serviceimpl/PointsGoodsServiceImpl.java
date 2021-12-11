@@ -209,12 +209,7 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
         this.goodsIndexService.updateIndex(query, update);
     }
 
-    /**
-     * 当前促销类型
-     *
-     * @return 当前促销类型
-     */
-    @Override
+
     public PromotionTypeEnum getPromotionType() {
         return PromotionTypeEnum.POINTS_GOODS;
     }

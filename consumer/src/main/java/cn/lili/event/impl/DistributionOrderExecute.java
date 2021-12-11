@@ -7,7 +7,7 @@ import cn.lili.modules.distribution.entity.dos.DistributionOrder;
 import cn.lili.modules.distribution.entity.enums.DistributionOrderStatusEnum;
 import cn.lili.modules.distribution.mapper.DistributionOrderMapper;
 import cn.lili.modules.distribution.service.DistributionOrderService;
-import cn.lili.modules.order.order.entity.dos.AfterSale;
+import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.timetask.handler.EveryDayExecute;

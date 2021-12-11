@@ -1,6 +1,6 @@
 package cn.lili.modules.verification.service;
 
-import cn.lili.modules.verification.enums.VerificationEnums;
+import cn.lili.modules.verification.entity.enums.VerificationEnums;
 
 import java.io.IOException;
 import java.util.Map;

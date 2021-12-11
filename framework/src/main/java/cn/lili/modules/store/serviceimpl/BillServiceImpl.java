@@ -11,11 +11,8 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
-import cn.lili.common.utils.StringUtils;
-import cn.lili.common.vo.PageVO;
-import cn.lili.modules.order.order.entity.dos.StoreFlow;
+import cn.lili.modules.order.order.entity.dto.StoreFlowQueryDTO;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
-import cn.lili.modules.order.order.mapper.StoreFlowMapper;
 import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.store.entity.dos.Bill;
 import cn.lili.modules.store.entity.dto.BillSearchParams;
@@ -28,7 +25,6 @@ import cn.lili.modules.store.mapper.BillMapper;
 import cn.lili.modules.store.service.BillService;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.mybatis.util.PageUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -39,7 +35,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
@@ -66,8 +61,6 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
      */
     @Autowired
     private StoreFlowService storeFlowService;
-    @Resource
-    private StoreFlowMapper storeFlowMapper;
 
     @Override
     public void createBill(String storeId, Date startTime, DateTime endTime) {
@@ -164,18 +157,6 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     }
 
     @Override
-    public IPage<StoreFlow> getStoreFlow(String id, String type, PageVO pageVO) {
-        Bill bill = this.getById(id);
-        return storeFlowService.getStoreFlow(bill.getStoreId(), type, false, pageVO, bill.getStartTime(), bill.getCreateTime());
-    }
-
-    @Override
-    public IPage<StoreFlow> getDistributionFlow(String id, PageVO pageVO) {
-        Bill bill = this.getById(id);
-        return storeFlowService.getStoreFlow(bill.getStoreId(), null, true, pageVO, bill.getStartTime(), bill.getCreateTime());
-    }
-
-    @Override
     public IPage<BillListVO> billPage(BillSearchParams billSearchParams) {
         QueryWrapper<BillListVO> queryWrapper = billSearchParams.queryWrapper();
         return this.baseMapper.queryBillPage(PageUtil.initPage(billSearchParams), queryWrapper);
@@ -216,15 +197,6 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     }
 
     @Override
-    public Integer billNum(BillStatusEnum billStatusEnum) {
-        LambdaUpdateWrapper<Bill> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.eq(Bill::getBillStatus, billStatusEnum.name());
-        lambdaUpdateWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
-                Bill::getStoreId, UserContext.getCurrentUser().getStoreId());
-        return this.count(lambdaUpdateWrapper);
-    }
-
-    @Override
     public void download(HttpServletResponse response, String id) {
 
         Bill bill = this.getById(id);
@@ -251,12 +223,8 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         writer.addHeaderAlias("billPrice", "应结金额");
         writer.setColumnWidth(11, 20);
 
-        //存放入账列表
-        LambdaQueryWrapper<StoreFlow> lambdaQueryWrapper = Wrappers.lambdaQuery();
-        lambdaQueryWrapper.eq(StoreFlow::getStoreId, bill.getStoreId());
-        lambdaQueryWrapper.between(StoreFlow::getCreateTime, bill.getStartTime(), bill.getCreateTime());
-        lambdaQueryWrapper.eq(StoreFlow::getFlowType, FlowTypeEnum.PAY.name());
-        List<StoreFlowPayDownloadVO> storeFlowList = storeFlowMapper.getStoreFlowPayDownloadVO(lambdaQueryWrapper);
+
+        List<StoreFlowPayDownloadVO> storeFlowList = storeFlowService.getStoreFlowPayDownloadVO(StoreFlowQueryDTO.builder().type(FlowTypeEnum.PAY.name()).bill(bill).build());
         writer.write(storeFlowList, true);
 
         writer.setSheet("退款订单");
@@ -283,12 +251,10 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         writer.addHeaderAlias("billPrice", "结算金额");
         writer.setColumnWidth(12, 20);
 
-        //存放入账列表
-        LambdaQueryWrapper<StoreFlow> storeFlowlambdaQueryWrapper = Wrappers.lambdaQuery();
-        storeFlowlambdaQueryWrapper.eq(StoreFlow::getStoreId, bill.getStoreId());
-        storeFlowlambdaQueryWrapper.between(StoreFlow::getCreateTime, bill.getStartTime(), bill.getCreateTime());
-        storeFlowlambdaQueryWrapper.eq(StoreFlow::getFlowType, FlowTypeEnum.PAY.name());
-        List<StoreFlowRefundDownloadVO> storeFlowRefundDownloadVOList = storeFlowMapper.getStoreFlowRefundDownloadVO(storeFlowlambdaQueryWrapper);
+
+        List<StoreFlowRefundDownloadVO> storeFlowRefundDownloadVOList = storeFlowService.getStoreFlowRefundDownloadVO(
+                StoreFlowQueryDTO.builder().type(FlowTypeEnum.REFUND.name()).bill(bill).build()
+        );
         writer.write(storeFlowRefundDownloadVOList, true);
 
         ServletOutputStream out = null;

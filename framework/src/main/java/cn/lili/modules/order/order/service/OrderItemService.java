@@ -58,4 +58,12 @@ public interface OrderItemService extends IService<OrderItem> {
      */
     List<OrderItem> getByOrderSn(String orderSn);
 
+    /**
+     * 子订单查询
+     *
+     * @param orderSn 订单编号
+     * @param skuId   skuid
+     * @return 子订单
+     */
+    OrderItem getByOrderSnAndSkuId(String orderSn, String skuId);
 }

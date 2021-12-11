@@ -112,6 +112,10 @@ public class OrderItem extends BaseEntity {
     @ApiModelProperty(value = "交易投诉id")
     private String complainId;
 
+    @ApiModelProperty(value = "退货商品数量")
+    private Integer returnGoodsNumber;
+
+
     public OrderItem(CartSkuVO cartSkuVO, CartVO cartVO, TradeDTO tradeDTO) {
         String oldId = this.getId();
         BeanUtil.copyProperties(cartSkuVO.getGoodsSku(), this);

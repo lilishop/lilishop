@@ -68,40 +68,40 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
      */
     private Map<String, List<String>> permissionList(List<UserMenuVO> userMenuVOList) {
         Map<String, List<String>> permission = new HashMap<>(2);
-        if (userMenuVOList == null || userMenuVOList.size() == 0) {
-            return permission;
-        }
+
         List<String> superPermissions = new ArrayList<>();
         List<String> queryPermissions = new ArrayList<>();
         initPermission(superPermissions, queryPermissions);
 
         //循环权限菜单
-        userMenuVOList.forEach(menu -> {
-            //循环菜单，赋予用户权限
-            if (StrUtil.isNotEmpty(menu.getPermission())) {
-                //获取路径集合
-                String[] permissionUrl = menu.getPermission().split(",");
-                //for循环路径集合
-                for (String url : permissionUrl) {
-                    //如果是超级权限 则计入超级权限
-                    if (menu.getSuper()) {
-                        //如果已有超级权限，则这里就不做权限的累加
-                        if (!superPermissions.contains(url)) {
-                            superPermissions.add(url);
+        if (userMenuVOList == null || userMenuVOList.isEmpty()) {
+            userMenuVOList.forEach(menu -> {
+                //循环菜单，赋予用户权限
+                if (StrUtil.isNotEmpty(menu.getPermission())) {
+                    //获取路径集合
+                    String[] permissionUrl = menu.getPermission().split(",");
+                    //for循环路径集合
+                    for (String url : permissionUrl) {
+                        //如果是超级权限 则计入超级权限
+                        if (menu.getSuper()) {
+                            //如果已有超级权限，则这里就不做权限的累加
+                            if (!superPermissions.contains(url)) {
+                                superPermissions.add(url);
+                            }
                         }
-                    }
-                    //否则计入浏览权限
-                    else {
-                        //没有权限，则累加。
-                        if (!queryPermissions.contains(url)) {
-                            queryPermissions.add(url);
+                        //否则计入浏览权限
+                        else {
+                            //没有权限，则累加。
+                            if (!queryPermissions.contains(url)) {
+                                queryPermissions.add(url);
+                            }
                         }
                     }
                 }
-            }
-            //去除重复的权限
-            queryPermissions.removeAll(superPermissions);
-        });
+                //去除重复的权限
+                queryPermissions.removeAll(superPermissions);
+            });
+        }
         permission.put(PermissionEnum.SUPER.name(), superPermissions);
         permission.put(PermissionEnum.QUERY.name(), queryPermissions);
         return permission;

@@ -11,19 +11,13 @@ import cn.lili.modules.distribution.entity.dos.DistributionGoods;
 import cn.lili.modules.distribution.entity.dos.DistributionSelectedGoods;
 import cn.lili.modules.distribution.service.DistributionGoodsService;
 import cn.lili.modules.distribution.service.DistributionSelectedGoodsService;
-import cn.lili.modules.goods.entity.dos.Brand;
-import cn.lili.modules.goods.entity.dos.Category;
-import cn.lili.modules.goods.entity.dos.Goods;
-import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dos.*;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
-import cn.lili.modules.goods.service.BrandService;
-import cn.lili.modules.goods.service.CategoryService;
-import cn.lili.modules.goods.service.GoodsService;
-import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.service.*;
 import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.service.FootprintService;
@@ -35,8 +29,6 @@ import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
-import cn.lili.modules.store.entity.dos.StoreGoodsLabel;
-import cn.lili.modules.store.service.StoreGoodsLabelService;
 import cn.lili.modules.store.service.StoreService;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -196,10 +188,6 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 String message = new String(messageExt.getBody());
                 List<String> skuIds = JSONUtil.toList(message, String.class);
                 goodsCollectionService.deleteSkuCollection(skuIds);
-                break;
-            //收藏商品
-            case GOODS_COLLECTION:
-                storeService.updateStoreCollectionNum(new String(messageExt.getBody()));
                 break;
             //商品评价
             case GOODS_COMMENT_COMPLETE:
@@ -394,9 +382,8 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
      */
     private void updateGoodsNum(MessageExt messageExt) {
 
-        Goods goods;
         try {
-            goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
+            Goods goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
             //更新店铺商品数量
             assert goods != null;
             storeService.updateStoreGoodsNum(goods.getStoreId());

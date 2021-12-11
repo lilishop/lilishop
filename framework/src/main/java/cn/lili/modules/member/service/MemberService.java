@@ -9,7 +9,6 @@ import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dto.ManagerMemberEditDTO;
 import cn.lili.modules.member.entity.dto.MemberAddDTO;
 import cn.lili.modules.member.entity.dto.MemberEditDTO;
-import cn.lili.modules.member.entity.vo.MemberDistributionVO;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
 import cn.lili.modules.member.entity.vo.MemberVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -197,13 +196,6 @@ public interface MemberService extends IService<Member> {
      * @return 修改结果
      */
     Boolean updateMemberStatus(List<String> memberIds, Boolean status);
-
-    /**
-     * 查看会员数据分布
-     *
-     * @return 会员数据分布
-     */
-    List<MemberDistributionVO> distribution();
 
     /**
      * 根据条件查询会员总数

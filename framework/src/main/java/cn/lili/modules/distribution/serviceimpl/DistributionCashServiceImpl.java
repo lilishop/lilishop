@@ -2,14 +2,10 @@ package cn.lili.modules.distribution.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.member.entity.enums.WithdrawStatusEnum;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.rocketmq.tags.MemberTagsEnum;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.vo.PageVO;
-import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dos.DistributionCash;
 import cn.lili.modules.distribution.entity.enums.DistributionStatusEnum;
@@ -17,13 +13,17 @@ import cn.lili.modules.distribution.entity.vos.DistributionCashSearchParams;
 import cn.lili.modules.distribution.mapper.DistributionCashMapper;
 import cn.lili.modules.distribution.service.DistributionCashService;
 import cn.lili.modules.distribution.service.DistributionService;
-import cn.lili.modules.member.entity.dto.MemberWithdrawalMessage;
-import cn.lili.modules.member.entity.enums.MemberWithdrawalDestinationEnum;
-import cn.lili.modules.member.service.MemberWalletService;
-import cn.lili.modules.order.trade.entity.enums.DepositServiceTypeEnum;
+import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
+import cn.lili.modules.wallet.entity.dto.MemberWithdrawalMessage;
+import cn.lili.modules.wallet.entity.enums.DepositServiceTypeEnum;
+import cn.lili.modules.wallet.entity.enums.MemberWithdrawalDestinationEnum;
+import cn.lili.modules.wallet.entity.enums.WithdrawStatusEnum;
+import cn.lili.modules.wallet.service.MemberWalletService;
+import cn.lili.mybatis.util.PageUtil;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +130,7 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
                     distributorCash.setDistributionCashStatus(WithdrawStatusEnum.VIA_AUDITING.name());
                     distributorCash.setPayTime(new Date());
                     //提现到余额
-                    memberWalletService.increase(distributorCash.getPrice(), distribution.getMemberId(), "分销[" + distributorCash.getSn() + "]佣金提现到余额[" + distributorCash.getPrice() + "]", DepositServiceTypeEnum.WALLET_COMMISSION.name());
+                    memberWalletService.increase(new MemberWalletUpdateDTO(distributorCash.getPrice(), distribution.getMemberId(), "分销[" + distributorCash.getSn() + "]佣金提现到余额[" + distributorCash.getPrice() + "]", DepositServiceTypeEnum.WALLET_COMMISSION.name()));
                 } else {
                     memberWithdrawalMessage.setStatus(WithdrawStatusEnum.FAIL_AUDITING.name());
                     //分销员可提现金额退回
@@ -155,12 +155,5 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
         }
         throw new ServiceException(ResultCode.DISTRIBUTION_CASH_NOT_EXIST);
 
-    }
-
-    @Override
-    public Integer newDistributionCash() {
-        QueryWrapper queryWrapper = Wrappers.query();
-        queryWrapper.eq("distribution_cash_status", WithdrawStatusEnum.APPLY.name());
-        return this.count(queryWrapper);
     }
 }

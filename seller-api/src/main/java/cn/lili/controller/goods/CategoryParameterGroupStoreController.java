@@ -2,7 +2,6 @@ package cn.lili.controller.goods;
 
 import cn.lili.modules.goods.entity.vos.ParameterGroupVO;
 import cn.lili.modules.goods.service.CategoryParameterGroupService;
-import cn.lili.modules.goods.service.ParametersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -27,8 +26,6 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class CategoryParameterGroupStoreController {
 
-    @Autowired
-    private ParametersService parametersService;
 
     @Autowired
     private CategoryParameterGroupService categoryParameterGroupService;

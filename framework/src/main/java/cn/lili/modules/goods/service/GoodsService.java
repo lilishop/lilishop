@@ -6,6 +6,7 @@ import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
+import cn.lili.modules.store.entity.dos.Store;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -91,21 +92,6 @@ public interface GoodsService extends IService<Goods> {
      */
     boolean auditGoods(List<String> goodsIds, GoodsAuthEnum goodsAuthEnum);
 
-    /**
-     * 获取所有的已上架的商品数量
-     *
-     * @param goodsAuthEnum   商品审核枚举
-     * @param goodsStatusEnum 商品状态枚举
-     * @return 所有的已上架的商品数量
-     */
-    Integer goodsNum(GoodsStatusEnum goodsStatusEnum, GoodsAuthEnum goodsAuthEnum);
-
-    /**
-     * 获取今天的已上架的商品数量
-     *
-     * @return 今天的已上架的商品数量
-     */
-    Integer todayUpperNum();
 
     /**
      * 更新商品上架状态状态
@@ -148,4 +134,16 @@ public interface GoodsService extends IService<Goods> {
      * @param goodsId 商品ID
      */
     void updateGoodsCommentNum(String goodsId);
+
+    /**
+     * 批量更新商品的店铺信息
+     * @param store
+     */
+    void updateStoreDetail(Store store);
+    /**
+     * 统计店铺的商品数量
+     * @param storeId 店铺id
+     */
+    Integer countStoreGoodsNum(String storeId);
+
 }

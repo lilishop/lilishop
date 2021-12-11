@@ -1,9 +1,9 @@
 package cn.lili.listener;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.rocketmq.tags.AfterSaleTagsEnum;
 import cn.lili.event.AfterSaleStatusChangeEvent;
-import cn.lili.modules.order.order.entity.dos.AfterSale;
+import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
+import cn.lili.rocketmq.tags.AfterSaleTagsEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -17,7 +17,6 @@ import java.util.List;
  * 售后通知
  *
  * @author paulG
- * @since 2020/12/9
  */
 @Slf4j
 @Component

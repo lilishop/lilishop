@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * 店铺数据处理层
@@ -36,5 +37,14 @@ public interface StoreMapper extends BaseMapper<Store> {
     @Select("select s.* from li_store as s ${ew.customSqlSegment}")
     IPage<StoreVO> getStoreList(IPage<StoreVO> page, @Param(Constants.WRAPPER) Wrapper<StoreVO> queryWrapper);
 
+
+    /**
+     * 修改店铺收藏数据
+     *
+     * @param storeId 店铺id
+     * @param num     收藏数量
+     */
+    @Update("update li_store set collection_num = collection_num + #{num} where id = #{storeId}")
+    void updateCollection(String storeId, Integer num);
 
 }
