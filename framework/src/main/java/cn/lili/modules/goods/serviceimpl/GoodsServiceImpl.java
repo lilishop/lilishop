@@ -379,6 +379,15 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         goodsSkuService.update(updateWrapper);
     }
 
+    @Override
+    public Integer countStoreGoodsNum(String storeId) {
+        return this.count(
+                new LambdaQueryWrapper<Goods>()
+                        .eq(Goods::getStoreId, storeId)
+                        .eq(Goods::getIsAuth, GoodsAuthEnum.PASS.name())
+                        .eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name()));
+    }
+
     /**
      * 添加商品默认图片
      *

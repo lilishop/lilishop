@@ -1,12 +1,11 @@
 package cn.lili.modules.wechat.util;
 
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.message.entity.dos.ShortLink;
 import cn.lili.modules.message.service.ShortLinkService;
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
@@ -100,16 +99,14 @@ public class WechatMpCodeUtil {
 
             //短链接存储
             ShortLink shortLink = new ShortLink();
-            //已经保存过则不再保存
-            LambdaQueryWrapper<ShortLink> queryWrapper = new LambdaQueryWrapper();
-            queryWrapper.eq(ShortLink::getOriginalParams, scene);
-            List<ShortLink> shortLinks = shortLinkService.list(queryWrapper);
+            shortLink.setOriginalParams(scene);
+            List<ShortLink> shortLinks = shortLinkService.queryShortLinks(shortLink);
             if (shortLinks.size() > 0) {
                 shortLink = shortLinks.get(0);
             } else {
                 shortLink.setOriginalParams(scene);
                 shortLinkService.save(shortLink);
-                shortLink = shortLinkService.getOne(queryWrapper);
+                shortLink = shortLinkService.queryShortLinks(shortLink).get(0);
             }
             String accessToken = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
             Map<String, String> params = new HashMap<>(4);

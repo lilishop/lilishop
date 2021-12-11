@@ -113,4 +113,11 @@ public interface StoreDetailService extends IService<StoreDetail> {
      * @param store 店铺信息
      */
     void updateStoreGoodsInfo(Store store);
+
+    /**
+     * 修改店铺udesk字段设置
+     *
+     * @param merchantEuid 店铺客服信息
+     */
+    Boolean editMerchantEuid(String merchantEuid);
 }

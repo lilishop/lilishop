@@ -6,7 +6,6 @@ import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
-import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.store.entity.dos.Store;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -141,5 +140,10 @@ public interface GoodsService extends IService<Goods> {
      * @param store
      */
     void updateStoreDetail(Store store);
+    /**
+     * 统计店铺的商品数量
+     * @param storeId 店铺id
+     */
+    Integer countStoreGoodsNum(String storeId);
 
 }

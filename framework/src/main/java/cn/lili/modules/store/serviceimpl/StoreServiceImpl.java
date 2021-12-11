@@ -1,7 +1,6 @@
 package cn.lili.modules.store.serviceimpl;
 
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -9,15 +8,10 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.goods.entity.dos.Goods;
-import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
-import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsService;
-import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.member.service.StoreCollectionService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.entity.dto.*;
@@ -275,10 +269,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     @Override
     public void updateStoreGoodsNum(String storeId) {
         //获取店铺已上架已审核通过商品数量
-        Integer goodsNum = goodsService.count(new LambdaQueryWrapper<Goods>()
-                .eq(Goods::getStoreId, storeId)
-                .eq(Goods::getIsAuth, GoodsAuthEnum.PASS.name())
-                .eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name()));
+        Integer goodsNum = goodsService.countStoreGoodsNum(storeId);
         //修改店铺商品数量
         this.update(new LambdaUpdateWrapper<Store>()
                 .set(Store::getGoodsNum, goodsNum)
