@@ -70,7 +70,7 @@ public class PlatformViewServiceImpl extends ServiceImpl<PlatformViewMapper, Pla
         Object object = cache.get(CachePrefix.ONLINE_NUM.getPrefix());
 
         if (null != object) {
-            return (Long) cache.get(CachePrefix.ONLINE_NUM.getPrefix());
+            return (Long) object;
         }
         //这里统计的是有效的accessToken ，如果需要数据精确，需要调整accessToken的有效时间，开发人员建议2小时误差较为合适
         Long num = Long.valueOf(cache.keys(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MEMBER) + "*").size());
@@ -83,7 +83,7 @@ public class PlatformViewServiceImpl extends ServiceImpl<PlatformViewMapper, Pla
         Object object = cache.get(CachePrefix.MEMBER_DISTRIBUTION.getPrefix());
 
         if (null != object) {
-            return (List<MemberDistributionVO>) cache.get(CachePrefix.MEMBER_DISTRIBUTION.getPrefix());
+            return (List<MemberDistributionVO>) object;
         }
         List<MemberDistributionVO> memberDistributionVOS = memberStatisticsService.distribution();
 
