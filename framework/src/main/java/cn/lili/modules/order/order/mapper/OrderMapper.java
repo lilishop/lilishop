@@ -74,4 +74,15 @@ public interface OrderMapper extends BaseMapper<Order> {
             " FROM li_order o INNER JOIN li_order_item AS oi on o.sn = oi.order_sn ${ew.customSqlSegment} ")
     IPage<OrderSimpleVO> queryByParams(IPage<OrderSimpleVO> page, @Param(Constants.WRAPPER) Wrapper<OrderSimpleVO> queryWrapper);
 
+    /**
+     * 查询订单信息
+     *
+     * @param queryWrapper 查询条件
+     * @return 简短订单分页
+     */
+    @Select("select o.* " +
+            " FROM li_order o INNER JOIN li_order_item AS oi on o.sn = oi.order_sn ${ew.customSqlSegment} ")
+    List<Order> queryListByParams(@Param(Constants.WRAPPER) Wrapper<Order> queryWrapper);
+
+
 }

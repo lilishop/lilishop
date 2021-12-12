@@ -31,4 +31,14 @@ public class CouponActivityItemServiceImpl extends ServiceImpl<CouponActivityIte
         return this.baseMapper.getCouponActivityItemListVO(activityId);
     }
 
+    /**
+     * 根据优惠券id删除优惠活动关联信息项
+     *
+     * @param couponIds 优惠券id集合
+     */
+    @Override
+    public void removeByCouponId(List<String> couponIds) {
+        this.remove(new LambdaQueryWrapper<CouponActivityItem>()
+                .in(CouponActivityItem::getCouponId, couponIds));
+    }
 }

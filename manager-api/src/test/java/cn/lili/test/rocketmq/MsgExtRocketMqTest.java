@@ -1,8 +1,8 @@
 package cn.lili.test.rocketmq;
 
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.OrderTagsEnum;
-import cn.lili.common.properties.RocketmqCustomProperties;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

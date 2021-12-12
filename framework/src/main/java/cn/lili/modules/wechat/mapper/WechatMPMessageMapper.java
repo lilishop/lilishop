@@ -1,7 +1,7 @@
 package cn.lili.modules.wechat.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import cn.lili.modules.wechat.entity.dos.WechatMPMessage;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
 
 /**

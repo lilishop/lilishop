@@ -1,6 +1,8 @@
 package cn.lili.controller.other;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
@@ -57,7 +59,8 @@ public class CustomWordsController {
             return "";
         }
 
-        if (!setting.getSettingValue().equals(secretKey)) {
+        JSONObject jsonObject = JSONUtil.parseObj(setting.getSettingValue());
+        if (!secretKey.equals(jsonObject.get("secretKey"))) {
             throw new ServiceException(ResultCode.CUSTOM_WORDS_SECRET_KEY_ERROR);
         }
 

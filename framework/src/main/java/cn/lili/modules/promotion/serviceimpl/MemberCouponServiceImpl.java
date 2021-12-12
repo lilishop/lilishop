@@ -2,18 +2,20 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
-import cn.lili.modules.promotion.entity.enums.CouponScopeTypeEnum;
+import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.CouponSearchParams;
 import cn.lili.modules.promotion.mapper.MemberCouponMapper;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -24,10 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 会员优惠券业务层实现
@@ -52,7 +51,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
                 .eq(MemberCoupon::getCouponId, couponId)
                 .eq(MemberCoupon::getMemberId, memberId);
         int haveCoupons = this.count(queryWrapper);
-        if (!PromotionStatusEnum.START.name().equals(coupon.getPromotionStatus())) {
+        if (!PromotionsStatusEnum.START.name().equals(coupon.getPromotionStatus())) {
             throw new ServiceException(ResultCode.COUPON_RECEIVE_ERROR);
         }
         if (coupon.getPublishNum() != 0 && coupon.getReceivedNum() >= coupon.getPublishNum()) {
@@ -63,18 +62,29 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         }
     }
 
+    /**
+     * 领取优惠券
+     *
+     * @param couponId   优惠券编号
+     * @param memberId   会员
+     * @param memberName 会员名称
+     */
+    @Override
+    public void receiveBuyerCoupon(String couponId, String memberId, String memberName) {
+        Coupon coupon = couponService.getById(couponId);
+        if (coupon != null && !CouponGetEnum.FREE.name().equals(coupon.getGetType())) {
+            throw new ServiceException(ResultCode.COUPON_DO_NOT_RECEIVER);
+        } else if (coupon != null) {
+            this.receiverCoupon(couponId, memberId, memberName, coupon);
+        }
+
+    }
+
     @Override
     public void receiveCoupon(String couponId, String memberId, String memberName) {
-        Coupon coupon = couponService.getCouponDetailFromMongo(couponId);
+        Coupon coupon = couponService.getById(couponId);
         if (coupon != null) {
-            this.checkCouponLimit(couponId, memberId);
-            MemberCoupon memberCoupon = new MemberCoupon(coupon);
-            memberCoupon.setMemberId(memberId);
-            memberCoupon.setMemberName(memberName);
-            memberCoupon.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
-            memberCoupon.setIsPlatform(("platform").equals(coupon.getStoreId()));
-            this.save(memberCoupon);
-            couponService.receiveCoupon(couponId, 1);
+            this.receiverCoupon(couponId, memberId, memberName, coupon);
         } else {
             throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
         }
@@ -82,18 +92,19 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
 
     @Override
     public IPage<MemberCoupon> getMemberCoupons(CouponSearchParams param, PageVO pageVo) {
-        QueryWrapper<MemberCoupon> queryWrapper = param.wrapper();
+        QueryWrapper<MemberCoupon> queryWrapper = param.queryWrapper();
         return this.page(PageUtil.initPage(pageVo), queryWrapper);
     }
 
     @Override
     public List<MemberCoupon> getMemberCoupons() {
-        LambdaQueryWrapper<MemberCoupon> LambdaQueryWrapper = new LambdaQueryWrapper<>();
-        LambdaQueryWrapper.eq(MemberCoupon::getMemberId,UserContext.getCurrentUser().getId());
-        LambdaQueryWrapper.eq(MemberCoupon::getMemberCouponStatus,MemberCouponStatusEnum.NEW.name());
-        LambdaQueryWrapper.le(MemberCoupon::getStartTime,new Date());
-        LambdaQueryWrapper.ge(MemberCoupon::getEndTime,new Date());
-        return this.list(LambdaQueryWrapper);
+        AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MemberCoupon::getMemberId, authUser.getId());
+        queryWrapper.eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name());
+        queryWrapper.le(MemberCoupon::getStartTime, new Date());
+        queryWrapper.ge(MemberCoupon::getEndTime, new Date());
+        return this.list(queryWrapper);
     }
 
     /**
@@ -112,7 +123,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         queryWrapper.eq(MemberCoupon::getMemberId, param.getMemberId());
         queryWrapper.and(
                 i -> i.like(MemberCoupon::getScopeId, param.getScopeId())
-                        .or(j -> j.eq(MemberCoupon::getScopeType, CouponScopeTypeEnum.ALL.name())));
+                        .or(j -> j.eq(MemberCoupon::getScopeType, PromotionsScopeTypeEnum.ALL.name())));
         queryWrapper.eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name());
         queryWrapper.le(MemberCoupon::getConsumeThreshold, totalPrice);
         queryWrapper.ge(MemberCoupon::getEndTime, new Date());
@@ -132,7 +143,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         queryWrapper.eq(MemberCoupon::getMemberId, memberId);
         queryWrapper.eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name());
         queryWrapper.in(MemberCoupon::getCouponId, couponIds);
-        queryWrapper.ne(MemberCoupon::getScopeType, CouponScopeTypeEnum.ALL.name());
+        queryWrapper.ne(MemberCoupon::getScopeType, PromotionsScopeTypeEnum.ALL.name());
         queryWrapper.le(MemberCoupon::getConsumeThreshold, totalPrice);
         queryWrapper.ge(MemberCoupon::getEndTime, new Date());
         return this.list(queryWrapper);
@@ -150,15 +161,16 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(MemberCoupon::getMemberId, memberId);
         queryWrapper.eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name());
-        queryWrapper.eq(MemberCoupon::getScopeType, CouponScopeTypeEnum.ALL.name());
+        queryWrapper.eq(MemberCoupon::getScopeType, PromotionsScopeTypeEnum.ALL.name());
         queryWrapper.ge(MemberCoupon::getEndTime, new Date()).and(i -> i.in(MemberCoupon::getStoreId, storeId).or(j -> j.eq(MemberCoupon::getIsPlatform, true)));
         return this.list(queryWrapper);
     }
 
     @Override
     public Integer getMemberCouponsNum() {
+        AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
         QueryWrapper<MemberCoupon> queryWrapper = Wrappers.query();
-        queryWrapper.eq("member_id", UserContext.getCurrentUser().getId());
+        queryWrapper.eq("member_id", authUser.getId());
         queryWrapper.eq("member_coupon_status", MemberCouponStatusEnum.NEW.name());
         queryWrapper.eq("delete_flag", false);
         return this.count(queryWrapper);
@@ -222,4 +234,27 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         this.update(updateWrapper);
     }
 
+    /**
+     * 关闭会员优惠券
+     *
+     * @param couponIds 优惠券id集合
+     */
+    @Override
+    public void closeMemberCoupon(List<String> couponIds) {
+        LambdaUpdateWrapper<MemberCoupon> memberCouponLambdaUpdateWrapper = new LambdaUpdateWrapper<MemberCoupon>()
+                .in(MemberCoupon::getCouponId, couponIds)
+                .set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.CLOSED.name());
+        this.update(memberCouponLambdaUpdateWrapper);
+    }
+
+    private void receiverCoupon(String couponId, String memberId, String memberName, Coupon coupon) {
+        this.checkCouponLimit(couponId, memberId);
+        MemberCoupon memberCoupon = new MemberCoupon(coupon);
+        memberCoupon.setMemberId(memberId);
+        memberCoupon.setMemberName(memberName);
+        memberCoupon.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
+        memberCoupon.setIsPlatform(("platform").equals(coupon.getStoreId()));
+        this.save(memberCoupon);
+        couponService.receiveCoupon(couponId, 1);
+    }
 }

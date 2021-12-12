@@ -1,8 +1,5 @@
 package cn.lili.modules.statistics.service;
 
-import cn.lili.modules.goods.entity.dos.Goods;
-import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
-import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.store.entity.dos.Store;
 import com.baomidou.mybatisplus.extension.service.IService;
 

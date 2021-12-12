@@ -80,14 +80,14 @@ public class CheckDataRender implements CartRenderStep {
     /**
      * 校验商品属性
      *
-     * @param tradeDTO
+     * @param tradeDTO 购物车视图
      */
     private void checkData(TradeDTO tradeDTO) {
         //循环购物车中的商品
         for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
 
             //如果失效，确认sku为未选中状态
-            if (cartSkuVO.getInvalid()) {
+            if (Boolean.TRUE.equals(cartSkuVO.getInvalid())) {
                 //设置购物车未选中
                 cartSkuVO.setChecked(false);
             }
@@ -172,7 +172,7 @@ public class CheckDataRender implements CartRenderStep {
             //判断拼团商品的限购数量
             Optional<String> pintuanId = tradeDTO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
             if (pintuanId.isPresent()) {
-                Pintuan pintuan = pintuanService.getPintuanById(pintuanId.get());
+                Pintuan pintuan = pintuanService.getById(pintuanId.get());
                 Integer limitNum = pintuan.getLimitNum();
                 for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
                     if (limitNum != 0 && cartSkuVO.getNum() > limitNum) {
@@ -184,7 +184,7 @@ public class CheckDataRender implements CartRenderStep {
         } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.POINTS)) {
             String skuId = tradeDTO.getSkuList().get(0).getGoodsSku().getId();
             //获取积分商品VO
-            PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsVOByMongo(skuId);
+            PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsDetailBySkuId(skuId);
             if (pointsGoodsVO == null) {
                 throw new ServiceException(ResultCode.POINT_GOODS_ERROR);
             }

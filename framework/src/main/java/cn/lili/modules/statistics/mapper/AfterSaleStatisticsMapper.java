@@ -1,6 +1,5 @@
 package cn.lili.modules.statistics.mapper;
 
-import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 

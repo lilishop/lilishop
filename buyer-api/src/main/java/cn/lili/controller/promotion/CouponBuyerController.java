@@ -1,16 +1,18 @@
-package cn.lili.controller.member;
+package cn.lili.controller.promotion;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.AuthUser;
+import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.CouponSearchParams;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
-import cn.lili.common.security.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -51,7 +53,9 @@ public class CouponBuyerController {
     @GetMapping
     @ApiOperation(value = "获取可领取优惠券列表")
     public ResultMessage<IPage<CouponVO>> getCouponList(CouponSearchParams queryParam, PageVO page) {
-        IPage<CouponVO> canUseCoupons = couponService.getCanReceiveCoupons(queryParam, page);
+        queryParam.setPromotionStatus(PromotionsStatusEnum.START.name());
+        queryParam.setGetType(CouponGetEnum.FREE.name());
+        IPage<CouponVO> canUseCoupons = couponService.pageVOFindAll(queryParam, page);
         return ResultUtil.data(canUseCoupons);
     }
 
@@ -84,8 +88,7 @@ public class CouponBuyerController {
     @GetMapping("/receive/{couponId}")
     public ResultMessage<Object> receiveCoupon(@NotNull(message = "优惠券ID不能为空") @PathVariable("couponId") String couponId) {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        memberCouponService.checkCouponLimit(couponId, currentUser.getId());
-        memberCouponService.receiveCoupon(couponId, currentUser.getId(), currentUser.getNickName());
+        memberCouponService.receiveBuyerCoupon(couponId, currentUser.getId(), currentUser.getNickName());
         return ResultUtil.success();
     }
 

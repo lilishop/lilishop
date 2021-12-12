@@ -1,7 +1,7 @@
 package cn.lili.modules.statistics.serviceimpl;
 
 import cn.lili.modules.promotion.entity.dos.Seckill;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.statistics.mapper.SeckillStatisticsMapper;
 import cn.lili.modules.statistics.service.SeckillStatisticsService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -26,7 +26,7 @@ public class SeckillStatisticsServiceImpl extends ServiceImpl<SeckillStatisticsM
         LambdaQueryWrapper<Seckill> queryWrapper = Wrappers.lambdaQuery();
         //秒杀申请时间未超过当前时间
         queryWrapper.ge(Seckill::getApplyEndTime, cn.hutool.core.date.DateUtil.date());
-        queryWrapper.eq(Seckill::getPromotionStatus, PromotionStatusEnum.NEW.name());
+        queryWrapper.eq(Seckill::getPromotionStatus, PromotionsStatusEnum.NEW.name());
         return this.count(queryWrapper);
     }
 

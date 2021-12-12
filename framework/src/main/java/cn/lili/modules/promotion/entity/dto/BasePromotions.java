@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.entity.dto;
 
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
@@ -18,7 +19,7 @@ import java.util.Date;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class BasePromotion extends BaseEntity {
+public class BasePromotions extends BaseEntity {
 
     private static final long serialVersionUID = 7814832369110695758L;
 
@@ -41,8 +42,32 @@ public class BasePromotion extends BaseEntity {
     private Date endTime;
 
     /**
-     * @see PromotionStatusEnum
+     * @see PromotionsScopeTypeEnum
      */
-    @ApiModelProperty(value = "活动状态")
-    private String promotionStatus;
+    @ApiModelProperty(value = "关联范围类型")
+    private String scopeType = PromotionsScopeTypeEnum.PORTION_GOODS.name();
+
+
+    @ApiModelProperty(value = "范围关联的id")
+    private String scopeId;
+
+
+    /**
+     * @return 促销状态
+     * @see PromotionsStatusEnum
+     */
+    public String getPromotionStatus() {
+        if (endTime == null) {
+            return startTime != null ? PromotionsStatusEnum.START.name() : PromotionsStatusEnum.CLOSE.name();
+        }
+        Date now = new Date();
+        if (now.before(startTime)) {
+            return PromotionsStatusEnum.NEW.name();
+        } else if (endTime.before(now)) {
+            return PromotionsStatusEnum.END.name();
+        } else if (now.before(endTime)) {
+            return PromotionsStatusEnum.START.name();
+        }
+        return PromotionsStatusEnum.CLOSE.name();
+    }
 }

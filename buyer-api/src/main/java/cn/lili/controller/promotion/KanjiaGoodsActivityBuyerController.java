@@ -9,7 +9,7 @@ import cn.lili.modules.promotion.entity.dos.KanjiaActivity;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivityLog;
 import cn.lili.modules.promotion.entity.dto.KanJiaActivityLogQuery;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityQuery;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.kanjia.*;
 import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
 import cn.lili.modules.promotion.service.KanjiaActivityLogService;
@@ -52,7 +52,7 @@ public class KanjiaGoodsActivityBuyerController {
     @ApiOperation(value = "分页获取砍价商品")
     public ResultMessage<IPage<KanjiaActivityGoodsListVO>> kanjiaActivityGoodsPage(KanjiaActivityGoodsParams kanjiaActivityGoodsParams, PageVO page) {
         // 会员端查询到的肯定是已经开始的活动商品
-        kanjiaActivityGoodsParams.setPromotionStatus(PromotionStatusEnum.START.name());
+        kanjiaActivityGoodsParams.setPromotionStatus(PromotionsStatusEnum.START.name());
         kanjiaActivityGoodsParams.setStartTime(System.currentTimeMillis());
         kanjiaActivityGoodsParams.setEndTime(System.currentTimeMillis());
         return ResultUtil.data(kanJiaActivityGoodsService.kanjiaGoodsVOPage(kanjiaActivityGoodsParams, page));

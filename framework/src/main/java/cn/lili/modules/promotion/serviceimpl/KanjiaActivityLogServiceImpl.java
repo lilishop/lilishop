@@ -11,7 +11,7 @@ import cn.lili.modules.promotion.entity.dos.KanjiaActivityGoods;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivityLog;
 import cn.lili.modules.promotion.entity.dto.KanJiaActivityLogQuery;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityDTO;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.mapper.KanJiaActivityLogMapper;
 import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
 import cn.lili.modules.promotion.service.KanjiaActivityLogService;
@@ -62,7 +62,7 @@ public class KanjiaActivityLogServiceImpl extends ServiceImpl<KanJiaActivityLogM
         //校验当前砍价商品是否有效
         KanjiaActivityGoods kanjiaActivityGoods = kanJiaActivityGoodsService.getById(kanjiaActivityDTO.getKanjiaActivityGoodsId());
         //如果当前活动不为空且还在活动时间内 才可以参与砍价活动
-        if (kanjiaActivityGoods != null && kanjiaActivityGoods.getPromotionStatus().equals(PromotionStatusEnum.START.name())) {
+        if (kanjiaActivityGoods != null && kanjiaActivityGoods.getPromotionStatus().equals(PromotionsStatusEnum.START.name())) {
             //获取砍价参与者记录
             KanjiaActivity kanjiaActivity = kanJiaActivityService.getById(kanjiaActivityDTO.getKanjiaActivityId());
             if (kanjiaActivity != null) {

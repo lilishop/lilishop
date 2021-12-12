@@ -8,13 +8,14 @@ import cn.hutool.json.JSONUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -40,13 +41,10 @@ import cn.lili.modules.order.trade.service.OrderLogService;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.service.PintuanService;
-import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
-import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.entity.dos.Logistics;
 import cn.lili.modules.system.entity.vo.Traces;
 import cn.lili.modules.system.service.LogisticsService;
-import cn.lili.common.security.OperationalJudgment;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
@@ -193,6 +191,70 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         queryWrapper.groupBy("o.id");
         queryWrapper.orderByDesc("o.id");
         return this.baseMapper.queryByParams(PageUtil.initPage(orderSearchParams), queryWrapper);
+    }
+
+    /**
+     * 订单信息
+     *
+     * @param orderSearchParams 查询参数
+     * @return 订单信息
+     */
+    @Override
+    public List<Order> queryListByParams(OrderSearchParams orderSearchParams) {
+        return this.baseMapper.queryListByParams(orderSearchParams.queryWrapper());
+    }
+
+    /**
+     * 根据促销查询订单
+     *
+     * @param orderPromotionType 订单类型
+     * @param payStatus          支付状态
+     * @param parentOrderSn      依赖订单编号
+     * @param orderSn            订单编号
+     * @return 订单信息
+     */
+    @Override
+    public List<Order> queryListByPromotion(String orderPromotionType, String payStatus, String parentOrderSn, String orderSn) {
+        LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
+        //查找团长订单和已和当前拼团订单拼团的订单
+        queryWrapper.eq(Order::getOrderPromotionType, orderPromotionType)
+                .eq(Order::getPayStatus, payStatus)
+                .and(i -> i.eq(Order::getParentOrderSn, parentOrderSn).or(j -> j.eq(Order::getSn, orderSn)));
+        return this.list(queryWrapper);
+    }
+
+    /**
+     * 根据促销查询订单
+     *
+     * @param orderPromotionType 订单类型
+     * @param payStatus          支付状态
+     * @param parentOrderSn      依赖订单编号
+     * @param orderSn            订单编号
+     * @return 订单信息
+     */
+    @Override
+    public Integer queryCountByPromotion(String orderPromotionType, String payStatus, String parentOrderSn, String orderSn) {
+        LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
+        //查找团长订单和已和当前拼团订单拼团的订单
+        queryWrapper.eq(Order::getOrderPromotionType, orderPromotionType)
+                .eq(Order::getPayStatus, payStatus)
+                .and(i -> i.eq(Order::getParentOrderSn, parentOrderSn).or(j -> j.eq(Order::getSn, orderSn)));
+        return this.count(queryWrapper);
+    }
+
+    /**
+     * 父级拼团订单
+     *
+     * @param pintuanId 拼团id
+     * @return 拼团订单信息
+     */
+    @Override
+    public List<Order> queryListByPromotion(String pintuanId) {
+        LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Order::getOrderPromotionType, PromotionTypeEnum.PINTUAN.name());
+        queryWrapper.eq(Order::getPromotionId, pintuanId);
+        queryWrapper.nested(i -> i.eq(Order::getPayStatus, PayStatusEnum.PAID.name()).or().eq(Order::getOrderStatus, OrderStatusEnum.PAID.name()));
+        return this.list(queryWrapper);
     }
 
     @Override
@@ -502,7 +564,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public void agglomeratePintuanOrder(String pintuanId, String parentOrderSn) {
         //获取拼团配置
-        Pintuan pintuan = pintuanService.getPintuanById(pintuanId);
+        Pintuan pintuan = pintuanService.getById(pintuanId);
         List<Order> list = this.getPintuanOrder(pintuanId, parentOrderSn);
         if (Boolean.TRUE.equals(pintuan.getFictitious()) && pintuan.getRequiredNum() > list.size()) {
             //如果开启虚拟成团且当前订单数量不足成团数量，则认为拼团成功
@@ -659,7 +721,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             return;
         }
         //获取拼团配置
-        Pintuan pintuan = pintuanService.getPintuanById(pintuanId);
+        Pintuan pintuan = pintuanService.getById(pintuanId);
         List<Order> list = this.getPintuanOrder(pintuanId, parentOrderSn);
         int count = list.size();
         if (count == 1) {
@@ -726,7 +788,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private void pintuanOrderFailed(List<Order> list) {
         for (Order order : list) {
             try {
-                this.cancel(order.getSn(), "拼团人数不足，拼团失败！");
+                this.systemCancel(order.getSn(), "拼团人数不足，拼团失败！");
             } catch (Exception e) {
                 log.error("拼团订单取消失败", e);
             }
@@ -758,7 +820,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private void checkOrder(Order order) {
         //订单类型为拼团订单，检测购买数量是否超过了限购数量
         if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderType())) {
-            Pintuan pintuan = pintuanService.getPintuanById(order.getPromotionId());
+            Pintuan pintuan = pintuanService.getById(order.getPromotionId());
             Integer limitNum = pintuan.getLimitNum();
             if (limitNum != 0 && order.getGoodsNum() > limitNum) {
                 throw new ServiceException(ResultCode.PINTUAN_LIMIT_NUM_ERROR);

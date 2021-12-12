@@ -14,20 +14,20 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.Token;
+import cn.lili.common.sensitive.SensitiveWordsFilter;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CookieUtil;
 import cn.lili.common.utils.StringUtils;
+import cn.lili.common.utils.UuidUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.service.ConnectService;
-import cn.lili.common.utils.UuidUtils;
 import cn.lili.modules.member.aop.annotation.PointLogPoint;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dto.*;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
-import cn.lili.modules.member.entity.vo.MemberDistributionVO;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
 import cn.lili.modules.member.entity.vo.MemberVO;
 import cn.lili.modules.member.mapper.MemberMapper;
@@ -37,7 +37,6 @@ import cn.lili.modules.member.token.StoreTokenGenerate;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.enums.StoreStatusEnum;
 import cn.lili.modules.store.service.StoreService;
-import cn.lili.common.sensitive.SensitiveWordsFilter;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
@@ -54,6 +53,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -558,6 +558,20 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 memberSearchVO.getDisabled().equals(SwitchEnum.OPEN.name()) ? 1 : 0);
         queryWrapper.orderByDesc("create_time");
         return this.count(queryWrapper);
+    }
+
+    /**
+     * 获取指定会员数据
+     *
+     * @param columns   指定获取的列
+     * @param memberIds 会员ids
+     * @return 指定会员数据
+     */
+    @Override
+    public List<Map<String, Object>> listFieldsByMemberIds(String columns, List<String> memberIds) {
+        return this.listMaps(new QueryWrapper<Member>()
+                .select(columns)
+                .in(memberIds != null && !memberIds.isEmpty(), "id", memberIds));
     }
 
     /**

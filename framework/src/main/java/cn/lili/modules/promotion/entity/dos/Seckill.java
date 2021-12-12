@@ -3,8 +3,8 @@ package cn.lili.modules.promotion.entity.dos;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.lili.modules.promotion.entity.dto.BasePromotion;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.modules.promotion.entity.dto.BasePromotions;
+import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.BeanUtils;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -27,7 +28,7 @@ import java.util.Date;
 @TableName("li_seckill")
 @ApiModel(value = "秒杀活动活动")
 @NoArgsConstructor
-public class Seckill extends BasePromotion {
+public class Seckill extends BasePromotions {
 
     private static final long serialVersionUID = -9116425737163730836L;
 
@@ -52,21 +53,22 @@ public class Seckill extends BasePromotion {
     @ApiModelProperty(value = "商品数量")
     private Integer goodsNum;
 
-    public Seckill(int day,String hours,String seckillRule){
+    public Seckill(int day, String hours, String seckillRule) {
         //默认创建*天后的秒杀活动
-        DateTime dateTime= DateUtil.beginOfDay(DateUtil.offset(new DateTime(), DateField.DAY_OF_YEAR, day));
-        this.applyEndTime=dateTime;
-        this.hours=hours;
-        this.seckillRule=seckillRule;
-        this.goodsNum=0;
-
+        DateTime dateTime = DateUtil.beginOfDay(DateUtil.offset(new DateTime(), DateField.DAY_OF_YEAR, day));
+        this.applyEndTime = dateTime;
+        this.hours = hours;
+        this.seckillRule = seckillRule;
+        this.goodsNum = 0;
         //BasePromotion
-        setStoreName("platform");
-        setStoreId("platform");
-        setPromotionName(DateUtil.formatDate(dateTime)+" 秒杀活动");
-        setStartTime(dateTime);
-        setEndTime(DateUtil.endOfDay(dateTime));
-        setPromotionStatus(PromotionStatusEnum.NEW.name());
+        this.setStoreName("platform");
+        this.setStoreId("platform");
+        this.setPromotionName(DateUtil.formatDate(dateTime) + " 秒杀活动");
+        this.setStartTime(dateTime);
+        this.setEndTime(DateUtil.endOfDay(dateTime));
+    }
 
+    public Seckill(SeckillVO seckillVO) {
+        BeanUtils.copyProperties(seckillVO, this);
     }
 }

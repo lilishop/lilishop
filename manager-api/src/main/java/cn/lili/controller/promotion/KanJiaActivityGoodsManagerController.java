@@ -6,6 +6,7 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.promotion.entity.dos.KanjiaActivityGoods;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsOperationDTO;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsParams;
@@ -43,7 +44,7 @@ public class KanJiaActivityGoodsManagerController {
 
     @ApiOperation(value = "获取砍价活动分页")
     @GetMapping
-    public ResultMessage<IPage<KanjiaActivityGoodsDTO>> getKanJiaActivityPage(KanjiaActivityGoodsParams KanJiaActivityParams, PageVO page) {
+    public ResultMessage<IPage<KanjiaActivityGoods>> getKanJiaActivityPage(KanjiaActivityGoodsParams KanJiaActivityParams, PageVO page) {
         return ResultUtil.data(kanJiaActivityGoodsService.getForPage(KanJiaActivityParams, page));
     }
 

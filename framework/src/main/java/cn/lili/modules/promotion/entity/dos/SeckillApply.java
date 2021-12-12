@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.entity.dos;
 
+import cn.lili.modules.promotion.entity.enums.PromotionsApplyStatusEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -58,7 +59,7 @@ public class SeckillApply extends BaseEntity {
     private Integer quantity;
 
     /**
-     * @see cn.lili.modules.promotion.entity.enums.PromotionApplyStatusEnum
+     * @see PromotionsApplyStatusEnum
      */
     @ApiModelProperty(value = "APPLY(\"申请\"), PASS(\"通过\"), REFUSE(\"拒绝\")")
     private String promotionApplyStatus;

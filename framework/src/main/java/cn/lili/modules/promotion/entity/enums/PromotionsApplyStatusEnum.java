@@ -1,24 +1,21 @@
 package cn.lili.modules.promotion.entity.enums;
 
 /**
- * 优惠券适用范围类型枚举
+ * 促销活动申请状态枚举
  *
  * @author Chopper
  * @since 2020-03-19 9:36 上午
  */
-public enum CouponScopeTypeEnum {
+public enum PromotionsApplyStatusEnum {
 
     /**
      * 枚举
      */
-    ALL("全品类"),
-    PORTION_GOODS_CATEGORY("部分商品分类"),
-    PORTION_SHOP_CATEGORY("部分店铺分类"),
-    PORTION_GOODS("指定商品");
+    APPLY("申请"), PASS("通过"), REFUSE("拒绝");
 
     private final String description;
 
-    CouponScopeTypeEnum(String str) {
+    PromotionsApplyStatusEnum(String str) {
         this.description = str;
     }
 

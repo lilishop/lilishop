@@ -1,7 +1,7 @@
 package cn.lili.modules.message.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import cn.lili.modules.message.entity.dos.ShortLink;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 

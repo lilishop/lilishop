@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 优惠券活动实体类
@@ -12,6 +13,7 @@ import lombok.Data;
  * @author Bulbasaur
  * @since 2020-03-19 10:44 上午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("li_coupon_activity_item")
 @ApiModel(value = "优惠券活动-优惠券关联实体类")

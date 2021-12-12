@@ -13,6 +13,7 @@ import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.cart.render.util.PromotionPriceUtil;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.service.FullDiscountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,30 +56,30 @@ public class FullDiscountRender implements CartRenderStep {
         List<String> storeIds = tradeDTO.getCartList().stream().map(CartVO::getStoreId).collect(Collectors.toList());
         //获取当前店铺进行到满减活动
         List<FullDiscountVO> fullDiscounts = fullDiscountService.currentPromotion(storeIds);
-        if (fullDiscounts == null || fullDiscounts.size() == 0) {
+        if (fullDiscounts == null || fullDiscounts.isEmpty()) {
             return;
         }
 
         //循环满减信息
         for (FullDiscountVO fullDiscount : fullDiscounts) {
             //判定参与活动的商品 全品类参与或者部分商品参与，则进行云散
-            if (fullDiscount.getNumber() == -1 || fullDiscount.getPromotionGoodsList() != null) {
-                //循环店铺购物车
-                for (CartVO cart : cartList) {
-                    //如果购物车中的店铺id与活动店铺id相等，则进行促销计算
-                    if (fullDiscount.getStoreId().equals(cart.getStoreId())) {
+            //循环店铺购物车
+            for (CartVO cart : cartList) {
+                //如果购物车中的店铺id与活动店铺id相等，则进行促销计算
+                if (fullDiscount.getStoreId().equals(cart.getStoreId())) {
 
-                        //如果有赠品，则将赠品信息写入
-                        if (fullDiscount.getIsGift()) {
-                            GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(fullDiscount.getGiftId());
-                            fullDiscount.setGiftSku(goodsSku);
-                        }
+                    //如果有赠品，则将赠品信息写入
+                    if (Boolean.TRUE.equals(fullDiscount.getIsGift())) {
+                        GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(fullDiscount.getGiftId());
+                        fullDiscount.setGiftSku(goodsSku);
+                    }
 
-                        //写入满减活动
-                        cart.setFullDiscount(fullDiscount);
-                        Map<String, Double> skuPriceDetail;
-                        //参与活动的sku判定
-                        skuPriceDetail = initFullDiscountGoods(fullDiscount, cart.getCheckedSkuList());
+                    //写入满减活动
+                    cart.setFullDiscount(fullDiscount);
+                    Map<String, Double> skuPriceDetail;
+                    //参与活动的sku判定
+                    skuPriceDetail = initFullDiscountGoods(fullDiscount, cart.getCheckedSkuList());
+                    if (!skuPriceDetail.isEmpty()) {
                         //记录参与满减活动的sku
                         cart.setFullDiscountSkuIds(new ArrayList<>(skuPriceDetail.keySet()));
 
@@ -87,11 +88,11 @@ public class FullDiscountRender implements CartRenderStep {
 
                         if (isFull(countPrice, cart)) {
                             //如果减现金
-                            if (fullDiscount.getIsFullMinus()) {
+                            if (Boolean.TRUE.equals(fullDiscount.getIsFullMinus())) {
                                 promotionPriceUtil.recountPrice(tradeDTO, skuPriceDetail, fullDiscount.getFullMinus(), PromotionTypeEnum.FULL_DISCOUNT);
                             }
                             //打折
-                            else if (fullDiscount.getIsFullRate()) {
+                            else if (Boolean.TRUE.equals(fullDiscount.getIsFullRate())) {
                                 this.renderFullRate(cart, skuPriceDetail, CurrencyUtil.div(fullDiscount.getFullRate(), 10));
                             }
                             //渲染满优惠
@@ -100,6 +101,7 @@ public class FullDiscountRender implements CartRenderStep {
                     }
 
                 }
+
             }
         }
 
@@ -145,19 +147,17 @@ public class FullDiscountRender implements CartRenderStep {
         Map<String, Double> skuPriceDetail = new HashMap<>(16);
 
         //全品类参与
-        if (fullDiscount.getNumber() == -1) {
+        if (PromotionsScopeTypeEnum.ALL.name().equals(fullDiscount.getScopeType())) {
             for (CartSkuVO cartSkuVO : cartSkuVOS) {
                 skuPriceDetail.put(cartSkuVO.getGoodsSku().getId(), cartSkuVO.getPriceDetailDTO().getGoodsPrice());
             }
         } else {
-            //判定参与活动的商品
-            for (PromotionGoods promotionGoods : fullDiscount.getPromotionGoodsList()) {
-                //sku 集合判定
-                for (CartSkuVO cartSkuVO : cartSkuVOS) {
-                    // 如果参加满减，并且购物车选中状态 ，则记录商品sku
-                    if (cartSkuVO.getChecked() && cartSkuVO.getGoodsSku().getId().equals(promotionGoods.getSkuId())) {
-                        skuPriceDetail.put(cartSkuVO.getGoodsSku().getId(), cartSkuVO.getPriceDetailDTO().getGoodsPrice());
-                    }
+            List<String> collect = fullDiscount.getPromotionGoodsList().stream().map(PromotionGoods::getSkuId).collect(Collectors.toList());
+            //sku 集合判定
+            for (CartSkuVO cartSkuVO : cartSkuVOS) {
+                // 如果参加满减，并且购物车选中状态 ，则记录商品sku
+                if (Boolean.TRUE.equals(cartSkuVO.getChecked()) && collect.contains(cartSkuVO.getGoodsSku().getId())) {
+                    skuPriceDetail.put(cartSkuVO.getGoodsSku().getId(), cartSkuVO.getPriceDetailDTO().getGoodsPrice());
                 }
             }
         }
@@ -173,17 +173,17 @@ public class FullDiscountRender implements CartRenderStep {
         //获取参与活动的商品总价
         FullDiscountVO fullDiscount = cartVO.getFullDiscount();
 
-        if (fullDiscount.getIsCoupon()) {
+        if (Boolean.TRUE.equals(fullDiscount.getIsCoupon())) {
             cartVO.getGiftCouponList().add(fullDiscount.getCouponId());
         }
-        if (fullDiscount.getIsGift()) {
+        if (Boolean.TRUE.equals(fullDiscount.getIsGift())) {
             cartVO.setGiftList(Arrays.asList(fullDiscount.getGiftId().split(",")));
         }
-        if (fullDiscount.getIsPoint()) {
+        if (Boolean.TRUE.equals(fullDiscount.getIsPoint())) {
             cartVO.setGiftPoint(fullDiscount.getPoint());
         }
         //如果满足，判定是否免邮，免邮的话需要渲染一边sku
-        if (fullDiscount.getIsFreeFreight()) {
+        if (Boolean.TRUE.equals(fullDiscount.getIsFreeFreight())) {
             for (CartSkuVO skuVO : cartVO.getCheckedSkuList()) {
                 skuVO.setIsFreeFreight(true);
             }
@@ -214,7 +214,7 @@ public class FullDiscountRender implements CartRenderStep {
      * @return 总价
      */
     private Double countPrice(Map<String, Double> skuPriceMap) {
-        Double count = 0d;
+        double count = 0d;
 
         for (Double price : skuPriceMap.values()) {
             count = CurrencyUtil.add(count, price);

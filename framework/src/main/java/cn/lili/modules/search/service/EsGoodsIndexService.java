@@ -4,7 +4,7 @@ import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.dto.BasePromotion;
+import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 
 import java.util.List;
@@ -94,7 +94,16 @@ public interface EsGoodsIndexService {
      * @param key       促销信息的key
      * @param price     促销价格
      */
-    void updateEsGoodsIndex(String id, BasePromotion promotion, String key, Double price);
+    void updateEsGoodsIndexPromotions(String id, BasePromotions promotion, String key, Double price);
+
+    /**
+     * 更新商品索引的促销信息
+     *
+     * @param ids        id(skuId)
+     * @param promotion 促销信息
+     * @param key       促销信息的key
+     */
+    void updateEsGoodsIndexPromotions(List<String> ids, BasePromotions promotion, String key);
 
     /**
      * 根据列表更新商品索引的促销信息
@@ -103,7 +112,7 @@ public interface EsGoodsIndexService {
      * @param promotion          促销信息
      * @param key                促销信息的key
      */
-    void updateEsGoodsIndexByList(List<PromotionGoods> promotionGoodsList, BasePromotion promotion, String key);
+    void updateEsGoodsIndexByList(List<PromotionGoods> promotionGoodsList, BasePromotions promotion, String key);
 
     /**
      * 更新全部商品索引的促销信息
@@ -111,7 +120,7 @@ public interface EsGoodsIndexService {
      * @param promotion 促销信息
      * @param key       促销信息的key
      */
-    void updateEsGoodsIndexAllByList(BasePromotion promotion, String key);
+    void updateEsGoodsIndexAllByList(BasePromotions promotion, String key);
 
     /**
      * 删除指定商品的促销信息

@@ -1,8 +1,8 @@
 package cn.lili.modules.wallet.service;
 
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.wallet.entity.dos.WalletLog;
 import cn.lili.modules.order.trade.entity.vo.DepositQueryVO;
+import cn.lili.modules.wallet.entity.dos.WalletLog;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 

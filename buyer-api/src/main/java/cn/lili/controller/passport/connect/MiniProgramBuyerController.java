@@ -1,12 +1,12 @@
 package cn.lili.controller.passport.connect;
 
-import cn.lili.common.security.token.Token;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.token.Token;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.connect.entity.dto.WechatMPLoginParams;
 import cn.lili.modules.connect.service.ConnectService;
-import cn.lili.modules.wechat.entity.dos.WechatMPMessage;
 import cn.lili.modules.message.service.ShortLinkService;
+import cn.lili.modules.wechat.entity.dos.WechatMPMessage;
 import cn.lili.modules.wechat.service.WechatMPMessageService;
 import cn.lili.modules.wechat.util.WechatMpCodeUtil;
 import io.swagger.annotations.Api;

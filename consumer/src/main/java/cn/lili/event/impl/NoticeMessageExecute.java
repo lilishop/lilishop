@@ -2,22 +2,22 @@ package cn.lili.event.impl;
 
 import cn.lili.event.*;
 import cn.lili.modules.member.entity.dto.MemberPointMessage;
-import cn.lili.modules.wallet.entity.dto.MemberWithdrawalMessage;
-import cn.lili.modules.wallet.entity.enums.MemberWithdrawalDestinationEnum;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
-import cn.lili.modules.wallet.entity.enums.WithdrawStatusEnum;
 import cn.lili.modules.message.entity.dto.NoticeMessageDTO;
 import cn.lili.modules.message.entity.enums.NoticeMessageNodeEnum;
 import cn.lili.modules.message.entity.enums.NoticeMessageParameterEnum;
 import cn.lili.modules.message.service.NoticeMessageService;
-import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
+import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleTypeEnum;
+import cn.lili.modules.wallet.entity.dto.MemberWithdrawalMessage;
+import cn.lili.modules.wallet.entity.enums.MemberWithdrawalDestinationEnum;
+import cn.lili.modules.wallet.entity.enums.WithdrawStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
