@@ -50,7 +50,7 @@ public class PromotionGoodsSearchParams extends BasePromotionsSearchParams {
         if (CharSequenceUtil.isEmpty(this.getScopeType())){
             this.setScopeType(PromotionsScopeTypeEnum.PORTION_GOODS.name());
         }
-            QueryWrapper<T> queryWrapper = super.queryWrapper();
+        QueryWrapper<T> queryWrapper = super.queryWrapper();
         if (CharSequenceUtil.isNotEmpty(promotionId)) {
             queryWrapper.eq("promotion_id", promotionId);
         }

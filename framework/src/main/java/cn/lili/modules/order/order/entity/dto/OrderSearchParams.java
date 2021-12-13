@@ -15,7 +15,6 @@ import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
-import java.util.Objects;
 
 /**
  * 订单查询参数
@@ -114,23 +113,25 @@ public class OrderSearchParams extends PageVO {
     private String orderPromotionType;
 
     public <T> QueryWrapper<T> queryWrapper() {
-        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        AuthUser currentUser = UserContext.getCurrentUser();
         QueryWrapper<T> wrapper = new QueryWrapper<>();
 
         //关键字查询
         if (CharSequenceUtil.isNotEmpty(keywords)) {
             wrapper.like("o.sn", keywords).or().like("oi.goods_name", keywords);
         }
-        //按卖家查询
-        wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.STORE.name()), "o.store_id", currentUser.getStoreId());
+        if (currentUser != null) {
+            //按卖家查询
+            wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.STORE.name()), "o.store_id", currentUser.getStoreId());
 
-        //店铺查询
-        wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.MANAGER.name())
-                && CharSequenceUtil.isNotEmpty(storeId), "o.store_id", storeId);
+            //店铺查询
+            wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.MANAGER.name())
+                    && CharSequenceUtil.isNotEmpty(storeId), "o.store_id", storeId);
 
-        //按买家查询
-        wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.MEMBER.name()), "o.member_id", currentUser.getId());
+            //按买家查询
+            wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.MEMBER.name()), "o.member_id", currentUser.getId());
 
+        }
         //按照买家查询
         wrapper.like(CharSequenceUtil.isNotEmpty(memberId), "o.member_id", memberId);
 
