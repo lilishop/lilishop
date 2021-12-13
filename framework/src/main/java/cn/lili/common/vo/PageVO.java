@@ -1,5 +1,6 @@
 package cn.lili.common.vo;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.utils.StringUtils;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -31,17 +32,8 @@ public class PageVO implements Serializable {
     @ApiModelProperty(value = "需要驼峰转换蛇形", notes = "一般不做处理，如果数据库中就是蛇形，则这块需要处理。")
     private Boolean notConvert;
 
-    public Integer getMongoPageNumber() {
-        int i = pageNumber - 1;
-        if (i < 0) {
-            return pageNumber;
-        } else {
-            return i;
-        }
-    }
-
     public String getSort() {
-        if (!StringUtils.isEmpty(sort)) {
+        if (CharSequenceUtil.isNotEmpty(sort)) {
             if (notConvert == null || Boolean.FALSE.equals(notConvert)) {
                 return StringUtils.camel2Underline(sort);
             } else {

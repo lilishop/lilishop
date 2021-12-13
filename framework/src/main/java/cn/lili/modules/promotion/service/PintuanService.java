@@ -25,7 +25,7 @@ public interface PintuanService extends AbstractPromotionsService<Pintuan> {
     List<PintuanMemberVO> getPintuanMember(String pintuanId);
 
     /**
-     * 从mongo中查询拼团活动详情
+     * 查询拼团活动详情
      *
      * @param id 拼团ID
      * @return 拼团活动详情

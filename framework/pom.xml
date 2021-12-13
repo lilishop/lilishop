@@ -81,11 +81,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
         </dependency>
-        <!--mongodb依赖配置-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>
         <!--        &lt;!&ndash; Websocket &ndash;&gt;-->
         <!--        <dependency>-->
         <!--            <groupId>org.springframework.boot</groupId>-->

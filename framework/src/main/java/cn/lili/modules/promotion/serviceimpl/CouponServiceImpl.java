@@ -89,7 +89,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
 
     @Override
     public boolean removePromotions(List<String> ids) {
-        //删除mongo优惠券信息
+        //删除优惠券信息
         this.memberCouponService.closeMemberCoupon(ids);
 
         //删除优惠券活动关联优惠券

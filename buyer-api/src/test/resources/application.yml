@@ -25,16 +25,6 @@ spring:
     admin:
       client:
         url: http://192.168.0.116:8000
-  # mongodb
-  data:
-    mongodb:
-      host: 192.168.0.116
-      port: 27017
-      database: lilishop
-      username: root
-      password: lilishop
-      authentication-database: admin
-  #      replica-set-name: mongoreplset
   cache:
     type: redis
   #amqp
@@ -186,7 +176,6 @@ logging:
     cn.lili: info
   #    org.hibernate: debug
   #    org.springframework: debug
-  #    org.springframework.data.mongodb.core: debug
   file:
     # 指定路径
     path: lili-logs

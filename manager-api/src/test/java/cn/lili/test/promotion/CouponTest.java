@@ -1,10 +1,8 @@
 package cn.lili.test.promotion;
 
 import cn.lili.common.enums.PromotionTypeEnum;
-import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
-import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
@@ -14,7 +12,6 @@ import cn.lili.modules.promotion.entity.vos.CouponSearchParams;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.service.CouponService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,15 +32,6 @@ class CouponTest {
 
     @Autowired
     private CouponService couponService;
-
-    @Autowired
-    private GoodsSkuService goodsSkuService;
-
-    @Autowired
-    private RocketMQTemplate rocketMQTemplate;
-
-    @Autowired
-    private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Test
     void addCoupon() {
@@ -161,19 +149,19 @@ class CouponTest {
         promotionGoodsList.add(promotionGoods);
 
         couponVO.setPromotionGoodsList(promotionGoodsList);
-        Assertions.assertNotNull(couponService.updatePromotions(couponVO));
+        Assertions.assertTrue(couponService.updatePromotions(couponVO));
     }
 
     @Test
-    void searchFromMongo() {
+    void search() {
         CouponSearchParams queryParam = new CouponSearchParams();
         queryParam.setStoreId("");
         PageVO pageVo = new PageVO();
         pageVo.setPageNumber(0);
         pageVo.setPageSize(10);
-        IPage<Coupon> couponsByPageFromMongo = couponService.pageFindAll(queryParam, pageVo);
-        Assertions.assertNotNull(couponsByPageFromMongo);
-        couponsByPageFromMongo.getRecords().forEach(System.out::println);
+        IPage<Coupon> couponsByPage = couponService.pageFindAll(queryParam, pageVo);
+        Assertions.assertNotNull(couponsByPage);
+        couponsByPage.getRecords().forEach(System.out::println);
     }
 
     @Test

