@@ -2,6 +2,7 @@ package cn.lili.modules.promotion.serviceimpl;
 
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
@@ -74,7 +75,12 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
             kanJiaActivityGoodsDTO.setGoodsName(goodsSku.getGoodsName());
             kanJiaActivityGoodsDTO.setOriginalPrice(goodsSku.getPrice());
             kanjiaActivityGoodsList.add(kanJiaActivityGoodsDTO);
-            promotionGoodsList.add(new PromotionGoods(kanJiaActivityGoodsDTO));
+            PromotionGoods promotionGoods = new PromotionGoods(kanJiaActivityGoodsDTO);
+            promotionGoods.setPromotionId(kanJiaActivityGoodsDTO.getId());
+            promotionGoods.setPromotionType(PromotionTypeEnum.KANJIA.name());
+            promotionGoods.setGoodsId(kanJiaActivityGoodsDTO.getGoodsId());
+            promotionGoods.setTitle(kanJiaActivityGoodsDTO.getPromotionName());
+            promotionGoodsList.add(promotionGoods);
         }
         this.promotionGoodsService.saveBatch(promotionGoodsList);
         return this.saveBatch(kanjiaActivityGoodsList);
