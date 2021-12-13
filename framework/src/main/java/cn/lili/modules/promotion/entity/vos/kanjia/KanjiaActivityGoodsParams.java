@@ -5,6 +5,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -48,7 +49,7 @@ public class KanjiaActivityGoodsParams implements Serializable {
             queryWrapper.like("goods_name", goodsName);
         }
         if (promotionStatus != null) {
-            queryWrapper.eq("promotion_status", promotionStatus);
+            queryWrapper.and(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.valueOf(promotionStatus)));
         }
         if (startTime != null) {
             queryWrapper.le("start_time", new Date(startTime));
@@ -57,7 +58,6 @@ public class KanjiaActivityGoodsParams implements Serializable {
             queryWrapper.ge("end_time", new Date(endTime));
         }
         if (UserContext.getCurrentUser() != null && UserContext.getCurrentUser().getRole().equals(UserEnums.MEMBER)) {
-
             queryWrapper.gt("stock", 0);
         }
         queryWrapper.eq("delete_flag", false);
