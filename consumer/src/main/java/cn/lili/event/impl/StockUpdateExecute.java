@@ -16,10 +16,12 @@ import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
 import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
-import cn.lili.modules.promotion.service.*;
+import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
+import cn.lili.modules.promotion.service.KanjiaActivityService;
+import cn.lili.modules.promotion.service.PointsGoodsService;
+import cn.lili.modules.promotion.service.PromotionGoodsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -64,11 +66,6 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
     @Autowired
     private PromotionGoodsService promotionGoodsService;
     /**
-     * 促销商品
-     */
-    @Autowired
-    private SeckillApplyService seckillApplyService;
-    /**
      * 缓存
      */
     @Autowired
@@ -80,8 +77,6 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
     private KanjiaActivityGoodsService kanjiaActivityGoodsService;
     @Autowired
     private PointsGoodsService pointsGoodsService;
-    @Autowired
-    private MongoTemplate mongoTemplate;
 
     @Override
     public void orderChange(OrderMessage orderMessage) {
@@ -295,14 +290,12 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                     kanjiaActivityGoodsDTO.setStock(stock);
 
                     kanjiaActivityGoodsService.updateById(kanjiaActivityGoodsDTO);
-                    this.mongoTemplate.save(kanjiaActivityGoodsDTO);
                     //修改积分商品库存
                 } else if (promotionTypeEnum.equals(PromotionTypeEnum.POINTS_GOODS)) {
                     PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsDetail(orderItem.getPromotionId());
                     Integer stock = Integer.parseInt(cache.get(PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, orderItem.getPromotionId(), orderItem.getSkuId())).toString());
                     pointsGoodsVO.setActiveStock(stock);
                     pointsGoodsService.updateById(pointsGoodsVO);
-                    this.mongoTemplate.save(pointsGoodsVO);
                 } else {
                     PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
                     searchParams.setPromotionStatus(promotionTypeEnum.name());

@@ -87,6 +87,7 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
         searchParams.setPromotionId(pintuanId);
         searchParams.setOrderPromotionType(PromotionTypeEnum.PINTUAN.name());
         searchParams.setParentOrderSn("");
+        searchParams.setMemberId("");
         List<Order> orders = orderService.queryListByParams(searchParams);
         //遍历订单状态为已支付，为团长的拼团订单
         for (Order order : orders) {
