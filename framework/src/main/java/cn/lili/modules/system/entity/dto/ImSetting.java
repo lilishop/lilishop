@@ -20,7 +20,7 @@ public class ImSetting implements Serializable {
 
 
     @ApiModelProperty(value = "平台ID")
-    private Integer tenantId;
+    private String tenantId;
 
 
 }
