@@ -204,14 +204,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //获取商品库存
         Integer integer = (Integer) cache.get(GoodsSkuService.getStockCacheKey(id));
 
-        //库存不为空
-        if (integer != null) {
-            //库存与缓存中不一致，
-            if (!goodsSku.getQuantity().equals(integer)) {
-                //写入最新的库存信息
-                goodsSku.setQuantity(integer);
-                cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
-            }
+        //库存不为空,库存与缓存中不一致
+        if (integer != null && !goodsSku.getQuantity().equals(integer)) {
+            //写入最新的库存信息
+            goodsSku.setQuantity(integer);
+            cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
         }
         return goodsSku;
     }
@@ -263,14 +260,17 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         if (promotionMap != null && !promotionMap.isEmpty()) {
             promotionMap = promotionMap.entrySet().stream().parallel().filter(i -> {
                 JSONObject jsonObject = JSONUtil.parseObj(i.getValue());
+                // 过滤活动赠送优惠券和无效时间的活动
                 return (jsonObject.get("getType") == null || jsonObject.get("getType").toString().equals(CouponGetEnum.FREE.name())) &&
-                        (jsonObject.get("startTime") != null && jsonObject.get("startTime", Date.class).before(new Date()));
+                        (jsonObject.get("startTime") != null && jsonObject.get("startTime", Date.class).getTime() <= System.currentTimeMillis()) &&
+                        (jsonObject.get("endTime") == null || jsonObject.get("endTime", Date.class).getTime() >= System.currentTimeMillis());
             }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-            for (String s : promotionMap.keySet()) {
-                if (!s.contains(PromotionTypeEnum.SECKILL.name()) || !s.contains(PromotionTypeEnum.PINTUAN.name())) {
-                    goodsSkuDetail.setPromotionPrice(null);
-                    break;
-                }
+
+            boolean containsPromotion = promotionMap.keySet().stream().anyMatch(i ->
+                    i.contains(PromotionTypeEnum.SECKILL.name()) || i.contains(PromotionTypeEnum.PINTUAN.name()));
+            if (containsPromotion && goodsIndex.getPromotionPrice() != null) {
+                goodsSkuDetail.setPromotionPrice(goodsIndex.getPromotionPrice());
+
             }
 
         }

@@ -118,12 +118,7 @@ public class CartServiceImpl implements CartService {
             throw new ServiceException(ResultCode.CART_NUM_ERROR);
         }
         CartTypeEnum cartTypeEnum = getCartType(cartType);
-        GoodsSku dataSku = checkGoods(skuId);
-        Double validPromotionsGoodsPrice = promotionGoodsService.getValidPromotionsGoodsPrice(skuId, Arrays.asList(PromotionTypeEnum.SECKILL.name(), PromotionTypeEnum.PINTUAN.name()));
-        if (validPromotionsGoodsPrice != null) {
-            dataSku.setIsPromotion(true);
-            dataSku.setPromotionPrice(validPromotionsGoodsPrice);
-        }
+        GoodsSku dataSku = checkGoods(skuId, cartType);
         try {
             //购物车方式购买需要保存之前的选择，其他方式购买，则直接抹除掉之前的记录
             TradeDTO tradeDTO;
@@ -372,17 +367,28 @@ public class CartServiceImpl implements CartService {
     }
 
     /**
-     * 校验商品有效性，判定失效和库存
+     * 校验商品有效性，判定失效和库存，促销活动价格
      *
      * @param skuId 商品skuId
+     * @param cartType 购物车类型
      */
-    private GoodsSku checkGoods(String skuId) {
+    private GoodsSku checkGoods(String skuId, String cartType) {
         GoodsSku dataSku = this.goodsSkuService.getGoodsSkuByIdFromCache(skuId);
         if (dataSku == null) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
         if (!GoodsAuthEnum.PASS.name().equals(dataSku.getIsAuth()) || !GoodsStatusEnum.UPPER.name().equals(dataSku.getMarketEnable())) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+        }
+        Double validSeckillGoodsPrice = promotionGoodsService.getValidPromotionsGoodsPrice(skuId, Collections.singletonList(PromotionTypeEnum.SECKILL.name()));
+        if (validSeckillGoodsPrice != null) {
+            dataSku.setIsPromotion(true);
+            dataSku.setPromotionPrice(validSeckillGoodsPrice);
+        }
+        Double validPintuanGoodsPrice = promotionGoodsService.getValidPromotionsGoodsPrice(skuId, Collections.singletonList(PromotionTypeEnum.PINTUAN.name()));
+        if (validPintuanGoodsPrice != null && CartTypeEnum.PINTUAN.name().equals(cartType)) {
+            dataSku.setIsPromotion(true);
+            dataSku.setPromotionPrice(validPintuanGoodsPrice);
         }
         return dataSku;
     }

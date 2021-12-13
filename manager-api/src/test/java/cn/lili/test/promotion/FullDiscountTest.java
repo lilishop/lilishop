@@ -71,7 +71,7 @@ class FullDiscountTest {
     }
 
     @Test
-    void searchFromMongo() {
+    void search() {
         PageVO pageVo = new PageVO();
         pageVo.setPageSize(10);
         pageVo.setPageNumber(0);
@@ -79,9 +79,9 @@ class FullDiscountTest {
         pageVo.setSort("startTime");
         pageVo.setOrder("asc");
 
-        IPage<FullDiscount> fullDiscountByPageFromMongo = fullDiscountService.pageFindAll(new FullDiscountSearchParams(), null);
+        IPage<FullDiscount> fullDiscountByPage = fullDiscountService.pageFindAll(new FullDiscountSearchParams(), null);
 
-        Assertions.assertNotNull(fullDiscountByPageFromMongo);
+        Assertions.assertNotNull(fullDiscountByPage);
     }
 
     @Test

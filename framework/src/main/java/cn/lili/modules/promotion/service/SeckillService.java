@@ -20,7 +20,7 @@ public interface SeckillService extends AbstractPromotionsService<Seckill> {
     Integer PRE_CREATION = 7;
 
     /**
-     * 从mongo中获取秒杀活动信息
+     * 获取秒杀活动信息
      *
      * @param id 秒杀活动id
      * @return 秒杀活动信息

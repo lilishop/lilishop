@@ -2,18 +2,13 @@ package cn.lili.modules.promotion.tools;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -161,19 +156,6 @@ public class PromotionTools {
         return originList;
     }
 
-    /**
-     * 为mongoQuery组织分页排序参数
-     *
-     * @param query 查询条件
-     * @param page  分页排序参数
-     */
-    public static void mongoQueryPageParam(Query query, PageVO page) {
-        page.setNotConvert(true);
-        query.with(PageRequest.of(page.getMongoPageNumber(), page.getPageSize()));
-        if (!CharSequenceUtil.isEmpty(page.getOrder()) && !CharSequenceUtil.isEmpty(page.getSort())) {
-            query.with(Sort.by(Sort.Direction.valueOf(page.getOrder().toUpperCase()), page.getSort()));
-        }
-    }
 
     public static int nextHour(String[] totalHours, Integer timeline) {
         int nextHour = 23;

@@ -46,8 +46,8 @@ public class PintuanManagerController {
     @GetMapping
     @ApiOperation(value = "根据条件分页查询拼团活动列表")
     public ResultMessage<IPage<Pintuan>> getPintuanByPage(PintuanSearchParams queryParam, PageVO pageVo) {
-        IPage<Pintuan> pintuanByPageFromMongo = pintuanService.pageFindAll(queryParam, pageVo);
-        return ResultUtil.data(pintuanByPageFromMongo);
+        IPage<Pintuan> pintuanIPage = pintuanService.pageFindAll(queryParam, pageVo);
+        return ResultUtil.data(pintuanIPage);
     }
 
     @GetMapping("/goods/{pintuanId}")
