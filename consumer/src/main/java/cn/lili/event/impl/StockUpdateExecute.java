@@ -15,6 +15,7 @@ import cn.lili.modules.promotion.entity.dos.KanjiaActivity;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
+import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -202,10 +203,10 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
 
                     switch (promotionTypeEnum) {
                         case KANJIA:
-                            cache.put(cacheKey, kanjiaActivityGoodsService.getKanJiaGoodsBySku(orderItem.getSkuId()).getStock().intValue());
+                            cache.put(cacheKey, kanjiaActivityGoodsService.getKanjiaGoodsBySkuId(orderItem.getSkuId()).getStock());
                             return;
                         case POINTS_GOODS:
-                            cache.put(cacheKey, pointsGoodsService.getPointsGoodsVOByMongo(orderItem.getSkuId()).getActiveStock().intValue());
+                            cache.put(cacheKey, pointsGoodsService.getPointsGoodsDetailBySkuId(orderItem.getSkuId()).getActiveStock());
                             return;
                         case SECKILL:
                         case PINTUAN:
@@ -303,14 +304,20 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                     pointsGoodsService.updateById(pointsGoodsVO);
                     this.mongoTemplate.save(pointsGoodsVO);
                 } else {
-                    PromotionGoods pGoods = promotionGoodsService.getPromotionGoods(promotionTypeEnum, orderItem.getPromotionId(), orderItem.getSkuId());
+                    PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
+                    searchParams.setPromotionStatus(promotionTypeEnum.name());
+                    searchParams.setPromotionId(orderItem.getPromotionId());
+                    searchParams.setSkuId(orderItem.getSkuId());
+                    PromotionGoods pGoods = promotionGoodsService.getPromotionsGoods(searchParams);
                     //记录需要更新的促销库存信息
                     promotionKey.add(
                             PromotionGoodsService.getPromotionGoodsStockCacheKey(
                                     promotionTypeEnum,
                                     orderItem.getPromotionId(), orderItem.getSkuId())
                     );
-                    promotionGoods.add(pGoods);
+                    if (pGoods != null) {
+                        promotionGoods.add(pGoods);
+                    }
                 }
             }
             goodsSkus.add(goodsSku);

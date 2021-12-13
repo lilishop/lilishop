@@ -137,6 +137,14 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     IPage<GoodsSku> getGoodsSkuByPage(GoodsSearchParams searchParams);
 
     /**
+     * 列表查询商品sku信息
+     *
+     * @param searchParams 查询参数
+     * @return 商品sku信息
+     */
+    List<GoodsSku> getGoodsSkuByList(GoodsSearchParams searchParams);
+
+    /**
      * 更新商品sku状态
      *
      * @param goods 商品信息(Id,MarketEnable/IsAuth)
@@ -186,4 +194,12 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * @param skuId SKUId
      */
     void updateGoodsSkuCommentNum(String skuId);
+
+    /**
+     * 更新商品sku促销价格
+     *
+     * @param skuId skuId
+     * @param promotionPrice 促销价格
+     */
+    void updateGoodsSkuPromotion(String skuId, Double promotionPrice);
 }

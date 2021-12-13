@@ -1,7 +1,7 @@
 package cn.lili.modules.order.aftersale.entity.dto;
 
 
-import cn.lili.modules.promotion.entity.dto.BasePromotion;
+import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -74,7 +74,7 @@ public class AfterSalePriceDetailDTO implements Serializable {
      * 参与的促销活动
      */
     @ApiModelProperty(value = "参与的促销活动")
-    private List<BasePromotion> joinPromotion;
+    private List<BasePromotions> joinPromotion;
 
 
     public AfterSalePriceDetailDTO() {

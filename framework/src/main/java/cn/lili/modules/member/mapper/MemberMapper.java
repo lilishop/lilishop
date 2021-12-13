@@ -2,7 +2,6 @@ package cn.lili.modules.member.mapper;
 
 
 import cn.lili.modules.member.entity.dos.Member;
-import cn.lili.modules.member.entity.vo.MemberDistributionVO;
 import cn.lili.modules.member.entity.vo.MemberVO;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;

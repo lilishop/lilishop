@@ -6,7 +6,7 @@ package cn.lili.modules.promotion.entity.enums;
  * @author Chopper
  * @since 2020-03-19 3:53 下午
  */
-public enum PromotionStatusEnum {
+public enum PromotionsStatusEnum {
 
     /**
      * 新建
@@ -27,7 +27,7 @@ public enum PromotionStatusEnum {
 
     private final String description;
 
-    PromotionStatusEnum(String str) {
+    PromotionsStatusEnum(String str) {
         this.description = str;
     }
 

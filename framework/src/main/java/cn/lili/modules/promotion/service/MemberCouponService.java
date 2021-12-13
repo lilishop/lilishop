@@ -25,6 +25,14 @@ public interface MemberCouponService extends IService<MemberCoupon> {
      */
     void checkCouponLimit(String couponId, String memberId);
 
+    /**
+     * 领取优惠券
+     *
+     * @param couponId   优惠券编号
+     * @param memberId   会员
+     * @param memberName 会员名称
+     */
+    void receiveBuyerCoupon(String couponId, String memberId, String memberName);
 
     /**
      * 领取优惠券
@@ -108,5 +116,12 @@ public interface MemberCouponService extends IService<MemberCoupon> {
      * @param id id
      */
     void cancellation(String id);
+
+    /**
+     * 关闭会员优惠券
+     *
+     * @param couponIds 优惠券id集合
+     */
+    void closeMemberCoupon(List<String> couponIds);
 
 }

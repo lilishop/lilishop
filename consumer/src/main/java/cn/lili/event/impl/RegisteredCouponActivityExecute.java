@@ -4,7 +4,7 @@ import cn.lili.event.MemberRegisterEvent;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.promotion.entity.dos.CouponActivity;
 import cn.lili.modules.promotion.entity.enums.CouponActivityTypeEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.service.CouponActivityService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class RegisteredCouponActivityExecute implements MemberRegisterEvent {
     public void memberRegister(Member member) {
         List<CouponActivity> couponActivities = couponActivityService.list(new LambdaQueryWrapper<CouponActivity>()
                 .eq(CouponActivity::getCouponActivityType, CouponActivityTypeEnum.REGISTERED.name())
-                .eq(CouponActivity::getPromotionStatus, PromotionStatusEnum.START.name()));
+                .eq(CouponActivity::getPromotionStatus, PromotionsStatusEnum.START.name()));
         couponActivityService.registered(couponActivities, member);
 
     }

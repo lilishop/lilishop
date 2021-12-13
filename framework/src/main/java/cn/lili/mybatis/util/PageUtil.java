@@ -7,6 +7,7 @@ import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
@@ -150,4 +151,25 @@ public class PageUtil {
             return list.subList(fromIndex, toIndex);
         }
     }
+
+    /**
+     * 转换分页类型
+     *
+     * @param originPage 原分页
+     * @param records 新分页数据
+     * @param <T> 新类型
+     * @return 新类型分页
+     */
+    public static <T> IPage<T> convertPage(IPage originPage, List<T> records) {
+        IPage<T> resultPage = new Page<>();
+        if (originPage != null) {
+            resultPage.setCurrent(originPage.getCurrent());
+            resultPage.setPages(originPage.getPages());
+            resultPage.setTotal(originPage.getTotal());
+            resultPage.setSize(originPage.getSize());
+            resultPage.setRecords(records);
+        }
+        return resultPage;
+    }
+
 }

@@ -1,12 +1,14 @@
 package cn.lili.modules.promotion.entity.vos;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.util.Date;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 促销商品查询通用类
@@ -14,8 +16,9 @@ import java.util.Date;
  * @author paulG
  * @since 2021/2/21
  **/
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class PromotionGoodsSearchParams {
+public class PromotionGoodsSearchParams extends BasePromotionsSearchParams {
 
     @ApiModelProperty(value = "促销活动id")
     private String promotionId;
@@ -23,10 +26,7 @@ public class PromotionGoodsSearchParams {
     @ApiModelProperty(value = "促销类型")
     private String promotionType;
 
-    @ApiModelProperty(value = "促销状态")
-    private String promotionStatus;
-
-    @ApiModelProperty(value = "促销活动id")
+    @ApiModelProperty(value = "商品活动id")
     private String storeId;
 
     @ApiModelProperty(value = "商品名称")
@@ -35,40 +35,46 @@ public class PromotionGoodsSearchParams {
     @ApiModelProperty(value = "商品分类路径")
     private String categoryPath;
 
-    @ApiModelProperty(value = "开始时间")
-    private Long startTime;
+    @ApiModelProperty(value = "商品SkuId")
+    private String skuId;
 
-    @ApiModelProperty(value = "结束时间")
-    private Long endTime;
+    @ApiModelProperty(value = "商品SkuIds")
+    private List<String> skuIds;
+
+    @ApiModelProperty(value = "促销活动id")
+    private List<String> promotionIds;
 
 
-    public LambdaQueryWrapper<PromotionGoods> queryWrapper() {
-        LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();
+    @Override
+    public <T> QueryWrapper<T> queryWrapper() {
+        if (CharSequenceUtil.isEmpty(this.getScopeType())){
+            this.setScopeType(PromotionsScopeTypeEnum.PORTION_GOODS.name());
+        }
+            QueryWrapper<T> queryWrapper = super.queryWrapper();
         if (CharSequenceUtil.isNotEmpty(promotionId)) {
-            queryWrapper.eq(PromotionGoods::getPromotionId, promotionId);
+            queryWrapper.eq("promotion_id", promotionId);
         }
         if (CharSequenceUtil.isNotEmpty(goodsName)) {
-            queryWrapper.like(PromotionGoods::getGoodsName, goodsName);
+            queryWrapper.like("goods_name", goodsName);
         }
         if (CharSequenceUtil.isNotEmpty(promotionType)) {
-            queryWrapper.eq(PromotionGoods::getPromotionType, promotionType);
-        }
-        if (CharSequenceUtil.isNotEmpty(promotionStatus)) {
-            queryWrapper.eq(PromotionGoods::getPromotionStatus, promotionStatus);
+            queryWrapper.eq("promotion_type", promotionType);
         }
         if (CharSequenceUtil.isNotEmpty(categoryPath)) {
-            queryWrapper.like(PromotionGoods::getCategoryPath, categoryPath);
-        }
-        if (startTime != null) {
-            queryWrapper.ge(PromotionGoods::getStartTime, new Date(startTime));
-        }
-        if (endTime != null) {
-            queryWrapper.ge(PromotionGoods::getEndTime, new Date(endTime));
+            queryWrapper.like("category_path", categoryPath);
         }
         if (CharSequenceUtil.isNotEmpty(storeId)) {
-            queryWrapper.eq(PromotionGoods::getStoreId, storeId);
+            queryWrapper.in("store_id", Arrays.asList(storeId.split(",")));
         }
-        queryWrapper.eq(PromotionGoods::getDeleteFlag, false);
+        if (CharSequenceUtil.isNotEmpty(skuId)) {
+            queryWrapper.in("sku_id", Arrays.asList(skuId.split(",")));
+        }
+        if (skuIds != null && !skuIds.isEmpty()) {
+            queryWrapper.in("sku_id", skuIds);
+        }
+        if (promotionIds != null && promotionIds.isEmpty()) {
+            queryWrapper.in("promotion_id", promotionIds);
+        }
         return queryWrapper;
     }
 

@@ -1,12 +1,12 @@
 package cn.lili.controller.permission;
 
+import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.permission.entity.dos.Menu;
 import cn.lili.modules.permission.entity.dto.MenuSearchParams;
 import cn.lili.modules.permission.entity.vo.MenuVO;
 import cn.lili.modules.permission.service.MenuService;
-import cn.lili.common.aop.annotation.DemoSite;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;

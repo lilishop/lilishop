@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class QuartzConfig {
+
     @Bean
     public JobDetail sensitiveQuartzDetail() {
         return JobBuilder.newJob(SensitiveQuartz.class).withIdentity("sensitiveQuartz").storeDurably().build();

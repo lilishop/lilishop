@@ -1,9 +1,9 @@
 package cn.lili.common.aop.interceptor;
 
+import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.SystemSettingProperties;
-import cn.lili.common.aop.annotation.DemoSite;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;

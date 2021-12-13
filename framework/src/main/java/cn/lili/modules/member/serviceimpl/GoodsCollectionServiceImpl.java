@@ -1,25 +1,18 @@
 package cn.lili.modules.member.serviceimpl;
 
-import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.member.entity.dto.CollectionDTO;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.member.entity.dos.GoodsCollection;
 import cn.lili.modules.member.entity.vo.GoodsCollectionVO;
 import cn.lili.modules.member.mapper.GoodsCollectionMapper;
 import cn.lili.modules.member.service.GoodsCollectionService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

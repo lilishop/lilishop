@@ -22,18 +22,17 @@ import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.enums.GoodsWordsTypeEnum;
 import cn.lili.modules.goods.service.*;
+import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.dto.BasePromotion;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.modules.promotion.entity.dos.Seckill;
+import cn.lili.modules.promotion.entity.dto.BasePromotions;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.service.PromotionService;
-import cn.lili.modules.search.entity.dos.EsGoodsAttribute;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
 import cn.lili.modules.search.repository.EsGoodsIndexRepository;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.search.service.EsGoodsSearchService;
-import cn.lili.modules.goods.entity.dos.StoreGoodsLabel;
-import cn.lili.modules.goods.service.StoreGoodsLabelService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.IterableUtil;
@@ -41,8 +40,6 @@ import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.indices.AnalyzeRequest;
-import org.elasticsearch.client.indices.AnalyzeResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
@@ -165,7 +162,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     public Map<String, Integer> getProgress() {
         Map<String, Integer> map = (Map<String, Integer>) cache.get(CachePrefix.INIT_INDEX_PROCESS.getPrefix());
         if (map == null) {
-            return null;
+            return Collections.emptyMap();
         }
         Boolean flag = (Boolean) cache.get(CachePrefix.INIT_INDEX_FLAG.getPrefix());
         map.put("flag", Boolean.TRUE.equals(flag) ? 1 : 0);
@@ -176,24 +173,24 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     public void addIndex(EsGoodsIndex goods) {
         try {
             //分词器分词
-            AnalyzeRequest analyzeRequest = AnalyzeRequest.withIndexAnalyzer(getIndexName(), "ik_max_word", goods.getGoodsName());
-            AnalyzeResponse analyze = client.indices().analyze(analyzeRequest, RequestOptions.DEFAULT);
-            List<AnalyzeResponse.AnalyzeToken> tokens = analyze.getTokens();
+//            AnalyzeRequest analyzeRequest = AnalyzeRequest.withIndexAnalyzer(getIndexName(), "ik_max_word", goods.getGoodsName());
+//            AnalyzeResponse analyze = client.indices().analyze(analyzeRequest, RequestOptions.DEFAULT);
+//            List<AnalyzeResponse.AnalyzeToken> tokens = analyze.getTokens();
 
-            if (goods.getAttrList() != null && !goods.getAttrList().isEmpty()) {
-                //保存分词
-                for (EsGoodsAttribute esGoodsAttribute : goods.getAttrList()) {
-                    wordsToDb(esGoodsAttribute.getValue());
-                }
-            }
-            //分析词条
-            for (AnalyzeResponse.AnalyzeToken token : tokens) {
-                //保存词条进入数据库
-                wordsToDb(token.getTerm());
-            }
+//            if (goods.getAttrList() != null && !goods.getAttrList().isEmpty()) {
+//                //保存分词
+//                for (EsGoodsAttribute esGoodsAttribute : goods.getAttrList()) {
+//                    wordsToDb(esGoodsAttribute.getValue());
+//                }
+//            }
+//            //分析词条
+//            for (AnalyzeResponse.AnalyzeToken token : tokens) {
+//                //保存词条进入数据库
+//                wordsToDb(token.getTerm());
+//            }
             //生成索引
             goodsIndexRepository.save(goods);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("为商品[" + goods.getGoodsName() + "]生成索引异常", e);
         }
     }
@@ -337,11 +334,11 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     }
 
     @Override
-    public void updateEsGoodsIndex(String id, BasePromotion promotion, String key, Double price) {
+    public void updateEsGoodsIndexPromotions(String id, BasePromotions promotion, String key, Double price) {
         EsGoodsIndex goodsIndex = findById(id);
         if (goodsIndex != null) {
             //如果有促销活动开始，则将促销金额写入
-            if (promotion.getPromotionStatus().equals(PromotionStatusEnum.START.name()) && price != null) {
+            if (price != null) {
                 goodsIndex.setPromotionPrice(price);
             } else {
                 //否则促销金额为商品原价
@@ -354,12 +351,30 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         }
     }
 
+    /**
+     * 更新商品索引的促销信息
+     *
+     * @param ids       skuId集合
+     * @param promotion 促销信息
+     * @param key       促销信息的key
+     */
     @Override
-    public void updateEsGoodsIndexByList(List<PromotionGoods> promotionGoodsList, BasePromotion promotion, String key) {
+    public void updateEsGoodsIndexPromotions(List<String> ids, BasePromotions promotion, String key) {
+        for (String id : ids) {
+            this.updateEsGoodsIndexPromotions(id, promotion, key, null);
+        }
+    }
+
+    @Override
+    public void updateEsGoodsIndexByList(List<PromotionGoods> promotionGoodsList, BasePromotions promotion, String key) {
         if (promotionGoodsList != null) {
             //循环更新 促销商品索引
             for (PromotionGoods promotionGoods : promotionGoodsList) {
-                updateEsGoodsIndex(promotionGoods.getSkuId(), promotion, key, promotionGoods.getPrice());
+                Double price = null;
+                if (promotion instanceof Seckill || promotion instanceof Pintuan) {
+                    price = promotionGoods.getPrice();
+                }
+                this.updateEsGoodsIndexPromotions(promotionGoods.getSkuId(), promotion, key, price);
             }
         }
 
@@ -372,7 +387,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      * @param key       促销信息的key
      */
     @Override
-    public void updateEsGoodsIndexAllByList(BasePromotion promotion, String key) {
+    public void updateEsGoodsIndexAllByList(BasePromotions promotion, String key) {
         List<EsGoodsIndex> goodsIndices = new ArrayList<>();
         //如果storeId不为空，则表示是店铺活动
         if (promotion.getStoreId() != null) {
@@ -463,11 +478,15 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             if (promotionMap != null && !promotionMap.isEmpty()) {
                 //促销不为空则进行清洗
                 for (Map.Entry<String, Object> entry : promotionMap.entrySet()) {
-                    BasePromotion promotion = (BasePromotion) entry.getValue();
+                    BasePromotions promotion = (BasePromotions) entry.getValue();
                     //判定条件为活动已结束
-                    if (promotion.getEndTime().getTime() > DateUtil.date().getTime()) {
+                    if (promotion.getEndTime().getTime() < DateUtil.date().getTime()) {
+                        if (entry.getKey().contains(PromotionTypeEnum.SECKILL.name()) || entry.getKey().contains(PromotionTypeEnum.PINTUAN.name())) {
+                            goodsIndex.setPromotionPrice(goodsIndex.getPrice());
+                        }
                         promotionMap.remove(entry.getKey());
                     }
+
                 }
             }
         }
@@ -524,7 +543,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         List<String> promotionIds = new ArrayList<>();
         //写入促销id
         for (String key : keyCollect) {
-            BasePromotion promotion = (BasePromotion) promotionMap.get(key);
+            BasePromotions promotion = (BasePromotions) promotionMap.get(key);
             promotionIds.add(promotion.getId());
         }
         return promotionIds;
@@ -554,7 +573,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      * @param key        关键字
      * @param promotion  活动
      */
-    private void updateGoodsIndexPromotion(EsGoodsIndex goodsIndex, String key, BasePromotion promotion) {
+    private void updateGoodsIndexPromotion(EsGoodsIndex goodsIndex, String key, BasePromotions promotion) {
         log.info("修改商品活动索引");
         log.info("商品索引: {}", goodsIndex);
         log.info("关键字: {}", key);
@@ -567,7 +586,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             promotionMap = goodsIndex.getPromotionMap();
         }
         //如果活动已结束
-        if (promotion.getPromotionStatus().equals(PromotionStatusEnum.END.name()) || promotion.getPromotionStatus().equals(PromotionStatusEnum.CLOSE.name())) {
+        if (promotion.getPromotionStatus().equals(PromotionsStatusEnum.END.name()) || promotion.getPromotionStatus().equals(PromotionsStatusEnum.CLOSE.name())) {
             //如果存在活动
             if (promotionMap.containsKey(key)) {
                 //删除活动

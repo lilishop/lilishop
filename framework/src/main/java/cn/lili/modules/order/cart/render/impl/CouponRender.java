@@ -12,8 +12,8 @@ import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.cart.render.util.PromotionPriceUtil;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
-import cn.lili.modules.promotion.entity.enums.CouponScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.CouponTypeEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
 import cn.lili.modules.promotion.service.MemberCouponService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,7 +147,7 @@ public class CouponRender implements CartRenderStep {
             return Collections.emptyList();
         }
         //优惠券类型判定
-        switch (CouponScopeTypeEnum.valueOf(memberCoupon.getScopeType())) {
+        switch (PromotionsScopeTypeEnum.valueOf(memberCoupon.getScopeType())) {
             case ALL:
                 return filterSku;
             case PORTION_GOODS:

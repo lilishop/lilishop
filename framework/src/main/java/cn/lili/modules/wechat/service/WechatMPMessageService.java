@@ -1,7 +1,7 @@
 package cn.lili.modules.wechat.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import cn.lili.modules.wechat.entity.dos.WechatMPMessage;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * 微信小程序消息订阅 业务层

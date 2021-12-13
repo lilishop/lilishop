@@ -246,7 +246,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (CharSequenceUtil.isNotEmpty(goods.getParams())) {
             goodsVO.setGoodsParamsDTOList(JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class));
         }
-
+        cache.put(CachePrefix.GOODS.getPrefix() + goodsId, goodsVO);
         return goodsVO;
     }
 

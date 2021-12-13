@@ -3,10 +3,9 @@ package cn.lili.common.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
 import java.util.Base64;
 import java.util.Base64.Decoder;
-
-import java.io.*;
 
 /**
  * base64转为multipartFile工具类
