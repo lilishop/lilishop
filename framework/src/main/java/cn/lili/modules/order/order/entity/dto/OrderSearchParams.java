@@ -129,7 +129,7 @@ public class OrderSearchParams extends PageVO {
                     && CharSequenceUtil.isNotEmpty(storeId), "o.store_id", storeId);
 
             //按买家查询
-            wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.MEMBER.name()), "o.member_id", currentUser.getId());
+            wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.MEMBER.name()) && CharSequenceUtil.isEmpty(memberId), "o.member_id", currentUser.getId());
 
         }
         //按照买家查询
@@ -203,7 +203,7 @@ public class OrderSearchParams extends PageVO {
         }
 
         // 依赖订单
-        wrapper.eq(CharSequenceUtil.isNotEmpty(parentOrderSn), "o.parent_order_sn", parentOrderSn);
+        wrapper.eq(parentOrderSn != null, "o.parent_order_sn", parentOrderSn);
         // 促销活动id
         wrapper.eq(CharSequenceUtil.isNotEmpty(promotionId), "o.promotion_id", promotionId);
 
