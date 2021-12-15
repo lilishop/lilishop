@@ -309,10 +309,8 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
         //未付款订单自动取消
         if (unpaidOrders != null && !unpaidOrders.isEmpty()) {
             for (Order unpaidOrder : unpaidOrders) {
-                unpaidOrder.setOrderStatus(OrderStatusEnum.CANCELLED.name());
-                unpaidOrder.setCancelReason("拼团活动结束订单未付款，系统自动取消订单");
+                orderService.systemCancel(unpaidOrder.getSn(), "拼团活动结束订单未付款，系统自动取消订单");
             }
-            orderService.updateBatchById(unpaidOrders);
         }
         List<Order> paidOrders = listMap.get(PayStatusEnum.PAID.name());
         //如待参团人数大于0，并已开启虚拟成团

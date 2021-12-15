@@ -25,9 +25,6 @@ public class PointsGoodsSearchParams extends BasePromotionsSearchParams {
     @ApiModelProperty(value = "积分商品分类编号")
     private String pointsGoodsCategoryId;
 
-    @ApiModelProperty(value = "是否为推荐商品")
-    private Boolean recommend;
-
     @ApiModelProperty(value = "积分,可以为范围，如10_1000")
     private String points;
 
@@ -36,24 +33,21 @@ public class PointsGoodsSearchParams extends BasePromotionsSearchParams {
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = super.queryWrapper();
         if (CharSequenceUtil.isNotEmpty(goodsName)) {
-            queryWrapper.eq("gs.goods_name", goodsName);
+            queryWrapper.like("goods_name", goodsName);
         }
         if (CharSequenceUtil.isNotEmpty(skuId)) {
-            queryWrapper.eq("pg.sku_id", skuId);
+            queryWrapper.eq("sku_id", skuId);
         }
         if (CharSequenceUtil.isNotEmpty(pointsGoodsCategoryId)) {
-            queryWrapper.eq("pg.points_goods_category_id", pointsGoodsCategoryId);
+            queryWrapper.eq("points_goods_category_id", pointsGoodsCategoryId);
         }
         if (CharSequenceUtil.isNotEmpty(points)) {
             String[] s = points.split("_");
             if (s.length > 1) {
-                queryWrapper.between("pg.points", s[0], s[1]);
+                queryWrapper.between("points", s[0], s[1]);
             } else {
-                queryWrapper.eq("pg.points", s[0]);
+                queryWrapper.eq("points", s[0]);
             }
-        }
-        if (recommend != null) {
-            queryWrapper.eq("gs.recommend", recommend);
         }
         return queryWrapper;
     }
