@@ -28,7 +28,7 @@ import java.util.Objects;
 public class GoodsStatisticsServiceImpl extends ServiceImpl<GoodsStatisticsMapper, Goods> implements GoodsStatisticsService {
 
     @Override
-    public Integer goodsNum(GoodsStatusEnum goodsStatusEnum, GoodsAuthEnum goodsAuthEnum) {
+    public long goodsNum(GoodsStatusEnum goodsStatusEnum, GoodsAuthEnum goodsAuthEnum) {
         LambdaQueryWrapper<Goods> queryWrapper = Wrappers.lambdaQuery();
 
         queryWrapper.eq(Goods::getDeleteFlag, false);
@@ -47,7 +47,7 @@ public class GoodsStatisticsServiceImpl extends ServiceImpl<GoodsStatisticsMappe
     }
 
     @Override
-    public Integer todayUpperNum() {
+    public long todayUpperNum() {
         LambdaQueryWrapper<Goods> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name());
         queryWrapper.ge(Goods::getCreateTime, DateUtil.beginOfDay(new DateTime()));

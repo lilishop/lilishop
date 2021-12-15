@@ -22,21 +22,21 @@ public class StoreStatisticsServiceImpl extends ServiceImpl<StoreStatisticsMappe
 
 
     @Override
-    public Integer auditNum() {
+    public long auditNum() {
         LambdaQueryWrapper<Store> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(Store::getStoreDisable, StoreStatusEnum.APPLYING.name());
         return this.count(queryWrapper);
     }
 
     @Override
-    public Integer storeNum() {
+    public long storeNum() {
         LambdaQueryWrapper<Store> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(Store::getStoreDisable, StoreStatusEnum.OPEN.name());
         return this.count(queryWrapper);
     }
 
     @Override
-    public Integer todayStoreNum() {
+    public long todayStoreNum() {
         LambdaQueryWrapper<Store> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(Store::getStoreDisable, StoreStatusEnum.OPEN.name());
         queryWrapper.ge(Store::getCreateTime, DateUtil.beginOfDay(new DateTime()));

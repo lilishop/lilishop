@@ -93,7 +93,7 @@ public interface MemberCouponService extends IService<MemberCoupon> {
      *
      * @return 会员优惠券数量
      */
-    Integer getMemberCouponsNum();
+    long getMemberCouponsNum();
 
     /**
      * 更新会员优惠券状态

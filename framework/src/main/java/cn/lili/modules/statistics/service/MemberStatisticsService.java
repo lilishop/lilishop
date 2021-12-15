@@ -21,14 +21,14 @@ public interface MemberStatisticsService extends IService<MemberStatisticsData> 
      *
      * @return 会员统计
      */
-    Integer getMemberCount();
+    long getMemberCount();
 
     /**
      * 获取今日新增会员数量
      *
      * @return 今日新增会员数量
      */
-    Integer todayMemberNum();
+    long todayMemberNum();
 
     /**
      * 获取指定结束时间前的会员数量
@@ -36,7 +36,7 @@ public interface MemberStatisticsService extends IService<MemberStatisticsData> 
      * @param endTime
      * @return
      */
-    Integer memberCount(Date endTime);
+    long memberCount(Date endTime);
 
     /**
      * 当天活跃会员数量
@@ -44,7 +44,7 @@ public interface MemberStatisticsService extends IService<MemberStatisticsData> 
      * @param startTime
      * @return
      */
-    Integer activeQuantity(Date startTime);
+    long activeQuantity(Date startTime);
 
     /**
      * 时间段内新增会员数量
@@ -53,7 +53,7 @@ public interface MemberStatisticsService extends IService<MemberStatisticsData> 
      * @param startTime
      * @return
      */
-    Integer newlyAdded(Date endTime, Date startTime);
+    long newlyAdded(Date endTime, Date startTime);
 
     /**
      * 根据参数，查询这段时间的会员统计

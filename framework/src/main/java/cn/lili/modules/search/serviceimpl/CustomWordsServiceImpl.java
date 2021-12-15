@@ -118,7 +118,7 @@ public class CustomWordsServiceImpl extends ServiceImpl<CustomWordsMapper, Custo
     @Override
     public boolean existWords(String words) {
         LambdaQueryWrapper<CustomWords> queryWrapper = new LambdaQueryWrapper<CustomWords>().eq(CustomWords::getName, words);
-        int count = count(queryWrapper);
+        long count = count(queryWrapper);
         return count > 0;
     }
 }

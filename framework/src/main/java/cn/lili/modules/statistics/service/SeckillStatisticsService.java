@@ -17,6 +17,6 @@ public interface SeckillStatisticsService extends IService<Seckill> {
      *
      * @return 可参与活动数量
      */
-    Integer getApplyNum();
+    long getApplyNum();
 
 }

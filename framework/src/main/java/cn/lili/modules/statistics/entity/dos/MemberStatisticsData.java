@@ -27,13 +27,13 @@ public class MemberStatisticsData extends BaseIdEntity {
     private Date createDate;
 
     @ApiModelProperty(value = "当前会员数量")
-    private Integer memberCount;
+    private Long memberCount;
 
     @ApiModelProperty(value = "新增会员数量")
-    private Integer newlyAdded;
+    private Long newlyAdded;
 
     @ApiModelProperty(value = "当日活跃数量")
-    private Integer activeQuantity;
+    private Long activeQuantity;
 
 
 }

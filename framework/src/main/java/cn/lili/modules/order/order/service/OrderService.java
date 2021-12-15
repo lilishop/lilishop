@@ -79,7 +79,7 @@ public interface OrderService extends IService<Order> {
      * @param orderSn 订单编号
      * @return 订单信息
      */
-    Integer queryCountByPromotion(String orderPromotionType, String payStatus, String parentOrderSn, String orderSn);
+    long queryCountByPromotion(String orderPromotionType, String payStatus, String parentOrderSn, String orderSn);
 
     /**
      * 父级拼团订单分组

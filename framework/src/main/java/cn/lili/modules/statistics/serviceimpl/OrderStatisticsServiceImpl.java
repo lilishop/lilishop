@@ -1,5 +1,6 @@
 package cn.lili.modules.statistics.serviceimpl;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.CurrencyUtil;
@@ -26,10 +27,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 订单统计业务层实现
@@ -98,10 +96,10 @@ public class OrderStatisticsServiceImpl extends ServiceImpl<OrderStatisticsMappe
     }
 
     @Override
-    public Integer orderNum(String orderStatus) {
-        LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper();
-        queryWrapper.eq(StringUtils.isNotEmpty(orderStatus), Order::getOrderStatus, orderStatus);
-        queryWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
+    public long orderNum(String orderStatus) {
+        LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(orderStatus), Order::getOrderStatus, orderStatus);
+        queryWrapper.eq(CharSequenceUtil.equals(Objects.requireNonNull(UserContext.getCurrentUser()).getRole().name(), UserEnums.STORE.name()),
                 Order::getStoreId, UserContext.getCurrentUser().getStoreId());
         return this.count(queryWrapper);
     }

@@ -27,28 +27,28 @@ import java.util.List;
 public class MemberStatisticsServiceImpl extends ServiceImpl<MemberStatisticsMapper, MemberStatisticsData> implements MemberStatisticsService {
 
     @Override
-    public Integer getMemberCount() {
+    public long getMemberCount() {
         QueryWrapper queryWrapper = new QueryWrapper();
         queryWrapper.eq("disabled", true);
         return this.baseMapper.customSqlQuery(queryWrapper);
     }
 
     @Override
-    public Integer todayMemberNum() {
+    public long todayMemberNum() {
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.ge("create_time", DateUtil.beginOfDay(new Date()));
         return this.baseMapper.customSqlQuery(queryWrapper);
     }
 
     @Override
-    public Integer memberCount(Date endTime) {
+    public long memberCount(Date endTime) {
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.le("create_time", endTime);
         return this.baseMapper.customSqlQuery(queryWrapper);
     }
 
     @Override
-    public Integer activeQuantity(Date startTime) {
+    public long activeQuantity(Date startTime) {
 
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.ge("last_login_date", startTime);
@@ -56,7 +56,7 @@ public class MemberStatisticsServiceImpl extends ServiceImpl<MemberStatisticsMap
     }
 
     @Override
-    public Integer newlyAdded(Date startTime, Date endTime) {
+    public long newlyAdded(Date startTime, Date endTime) {
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.between("create_time", startTime, endTime);
         return this.baseMapper.customSqlQuery(queryWrapper);
@@ -66,10 +66,11 @@ public class MemberStatisticsServiceImpl extends ServiceImpl<MemberStatisticsMap
     public List<MemberStatisticsData> statistics(StatisticsQueryParam statisticsQueryParam) {
 
         Date[] dates = StatisticsDateUtil.getDateArray(statisticsQueryParam);
-        Date startTime = dates[0], endTime = dates[1];
+        Date startTime = dates[0];
+        Date endTime = dates[1];
 
         //如果统计今天，则自行构造数据
-        if(statisticsQueryParam.getSearchType().equals(SearchTypeEnum.TODAY.name())){
+        if (statisticsQueryParam.getSearchType().equals(SearchTypeEnum.TODAY.name())) {
             //构建数据，然后返回集合，提供给前端展示
             MemberStatisticsData memberStatisticsData = new MemberStatisticsData();
             memberStatisticsData.setMemberCount(this.memberCount(endTime));
@@ -88,11 +89,9 @@ public class MemberStatisticsServiceImpl extends ServiceImpl<MemberStatisticsMap
     }
 
 
-
     @Override
     public List<MemberDistributionVO> distribution() {
-        List<MemberDistributionVO> memberDistributionVOS = this.baseMapper.distribution();
-        return memberDistributionVOS;
+        return this.baseMapper.distribution();
     }
 
 }

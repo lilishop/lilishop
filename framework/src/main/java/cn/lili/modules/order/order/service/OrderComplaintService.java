@@ -72,7 +72,7 @@ public interface OrderComplaintService extends IService<OrderComplaint> {
      *
      * @return 待处理投诉数量
      */
-    Integer waitComplainNum();
+    long waitComplainNum();
 
     /**
      * 取消交易投诉

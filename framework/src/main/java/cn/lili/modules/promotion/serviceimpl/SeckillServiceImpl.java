@@ -90,7 +90,7 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
     }
 
     @Override
-    public Integer getApplyNum() {
+    public long getApplyNum() {
         DateTime now = DateUtil.date();
         LambdaQueryWrapper<Seckill> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.ge(Seckill::getApplyEndTime, now);
@@ -194,7 +194,7 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
         if (promotions.getStartTime() != null && promotions.getEndTime() != null) {
             //同一时间段内相同的活动
             QueryWrapper<Seckill> queryWrapper = PromotionTools.checkActiveTime(promotions.getStartTime(), promotions.getEndTime(), PromotionTypeEnum.SECKILL, null, promotions.getId());
-            int sameNum = this.count(queryWrapper);
+            long sameNum = this.count(queryWrapper);
             //当前时间段是否存在同类活动
             if (sameNum > 0) {
                 throw new ServiceException(ResultCode.PROMOTION_SAME_ACTIVE_EXIST);

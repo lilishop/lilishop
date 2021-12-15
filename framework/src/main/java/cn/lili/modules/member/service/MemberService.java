@@ -203,7 +203,7 @@ public interface MemberService extends IService<Member> {
      * @param memberSearchVO
      * @return 会员总数
      */
-    Integer getMemberNum(MemberSearchVO memberSearchVO);
+    long getMemberNum(MemberSearchVO memberSearchVO);
 
     /**
      * 获取指定会员数据

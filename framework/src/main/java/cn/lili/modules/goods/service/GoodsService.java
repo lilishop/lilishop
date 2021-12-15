@@ -49,7 +49,7 @@ public interface GoodsService extends IService<Goods> {
      * @param categoryId 分类ID
      * @return 商品数量
      */
-    Integer getGoodsCountByCategory(String categoryId);
+    long getGoodsCountByCategory(String categoryId);
 
     /**
      * 添加商品
@@ -143,7 +143,8 @@ public interface GoodsService extends IService<Goods> {
     /**
      * 统计店铺的商品数量
      * @param storeId 店铺id
+     * @return
      */
-    Integer countStoreGoodsNum(String storeId);
+    long countStoreGoodsNum(String storeId);
 
 }

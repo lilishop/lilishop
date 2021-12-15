@@ -18,5 +18,5 @@ public interface BillStatisticsService extends IService<Bill> {
      * @param billStatusEnum 结算单类型
      * @return 待结算商家数量
      */
-    Integer billNum(BillStatusEnum billStatusEnum);
+    long billNum(BillStatusEnum billStatusEnum);
 }
