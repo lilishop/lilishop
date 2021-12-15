@@ -192,6 +192,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         }
         LambdaUpdateWrapper<Bill> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.eq(Bill::getId, id);
+        lambdaUpdateWrapper.set(Bill::getPayTime, new Date());
         lambdaUpdateWrapper.set(Bill::getBillStatus, BillStatusEnum.COMPLETE.name());
         return this.update(lambdaUpdateWrapper);
     }
