@@ -31,7 +31,7 @@ import java.util.Objects;
  */
 @RestController
 @Api(tags = "店铺端,页面接口")
-@RequestMapping("/store/pageData")
+@RequestMapping("/store/settings/pageData")
 public class StorePageDataController {
     @Autowired
     private PageDataService pageDataService;

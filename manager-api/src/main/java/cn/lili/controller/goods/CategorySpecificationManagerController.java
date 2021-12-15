@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,商品分类规格接口")
-@RequestMapping("/manager/goods/category/spec")
+@RequestMapping("/manager/goods/categorySpec")
 public class CategorySpecificationManagerController {
 
     /**

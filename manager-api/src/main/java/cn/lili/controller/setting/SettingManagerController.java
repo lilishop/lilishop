@@ -32,7 +32,7 @@ import java.util.Collections;
  */
 @RestController
 @Api(tags = "管理端,系统设置接口")
-@RequestMapping("/manager/system/setting")
+@RequestMapping("/manager/setting/setting")
 public class SettingManagerController {
     @Autowired
     private SettingService settingService;

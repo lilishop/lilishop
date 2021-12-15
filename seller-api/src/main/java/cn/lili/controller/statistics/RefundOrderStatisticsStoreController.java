@@ -25,7 +25,7 @@ import java.util.Objects;
  */
 @Api(tags = "店铺端,退款统计接口")
 @RestController
-@RequestMapping("/store/statistics/refund/order")
+@RequestMapping("/store/statistics/refundOrder")
 public class RefundOrderStatisticsStoreController {
 
     @Autowired

@@ -21,7 +21,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,角色菜单接口")
-@RequestMapping("/manager/roleMenu")
+@RequestMapping("/manager/permission/roleMenu")
 public class RoleMenuManagerController {
     @Autowired
     private RoleMenuService roleMenuService;

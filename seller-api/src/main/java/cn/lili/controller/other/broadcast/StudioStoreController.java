@@ -29,7 +29,7 @@ import java.util.Objects;
  */
 @RestController
 @Api(tags = "店铺端,直播间接口")
-@RequestMapping("/store/broadcast/studio")
+@RequestMapping("/store/other/broadcast/studio")
 public class StudioStoreController {
 
     @Autowired

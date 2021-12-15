@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Transactional(rollbackFor = Exception.class)
 @Api(tags = "管理端,订单日志管理接口")
-@RequestMapping("/manager/orderLog")
+@RequestMapping("/manager/order/orderLog")
 public class OrderLogManagerController {
     @Autowired
     private OrderLogService orderLogService;

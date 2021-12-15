@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @Api(tags = "短信验证码接口")
-@RequestMapping("/common/sms")
+@RequestMapping("/common/common/sms")
 public class SmsController {
 
     @Autowired

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("/common/slider")
+@RequestMapping("/common/common/slider")
 @Api(tags = "滑块验证码接口")
 public class SliderImageController {
 

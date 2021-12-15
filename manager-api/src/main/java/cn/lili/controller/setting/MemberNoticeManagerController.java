@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,会员站内信管理API")
-@RequestMapping("/manager/member/notice")
+@RequestMapping("/manager/message/memberNotice")
 public class MemberNoticeManagerController {
     @Autowired
     private MemberNoticeService memberNoticeService;

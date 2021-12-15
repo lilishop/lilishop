@@ -29,7 +29,7 @@ import javax.validation.constraints.NotNull;
  */
 @RestController
 @Api(tags = "买家端,分销商品接口")
-@RequestMapping("/buyer/distributionGoods")
+@RequestMapping("/buyer/distribution/goods")
 public class DistributionGoodsBuyerController {
 
     /**

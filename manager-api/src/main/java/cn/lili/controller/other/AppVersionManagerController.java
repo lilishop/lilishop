@@ -1,4 +1,4 @@
-package cn.lili.controller.setting;
+package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -28,7 +28,7 @@ import javax.validation.Valid;
  */
 @RestController
 @Api("管理端,app版本控制器")
-@RequestMapping("/manager/systems/app/version")
+@RequestMapping("/manager/other/appVersion")
 public class AppVersionManagerController {
     @Autowired
     private AppVersionService appVersionService;

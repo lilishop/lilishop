@@ -22,7 +22,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "店铺端,商品分类规格接口")
-@RequestMapping("/store/goods/category/spec")
+@RequestMapping("/store/goods/categorySpec")
 @Transactional(rollbackFor = Exception.class)
 public class CategorySpecificationStoreController {
     @Autowired

@@ -24,7 +24,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,服务订阅消息接口")
-@RequestMapping("/manager/admin/notice")
+@RequestMapping("/manager/message/serviceNotice")
 public class ServiceNoticeManagerController {
     @Autowired
     private ServiceNoticeService serviceNoticeService;

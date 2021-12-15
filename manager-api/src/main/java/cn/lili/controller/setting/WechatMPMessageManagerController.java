@@ -22,7 +22,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "微信小程序消息订阅接口")
-@RequestMapping("/manager/message/wechatMPMessage")
+@RequestMapping("/manager/wechat/wechatMPMessage")
 @Transactional(rollbackFor = Exception.class)
 public class WechatMPMessageManagerController {
     @Autowired

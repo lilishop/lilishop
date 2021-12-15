@@ -29,7 +29,7 @@ import java.util.Objects;
  */
 @RestController
 @Api(tags = "店铺端,分销商品接口")
-@RequestMapping("/store/distributionGoods")
+@RequestMapping("/store/distribution/goods")
 public class DistributionGoodsStoreController {
 
     /**

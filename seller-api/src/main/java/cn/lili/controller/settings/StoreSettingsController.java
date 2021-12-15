@@ -27,7 +27,7 @@ import javax.validation.Valid;
  */
 @RestController
 @Api(tags = "店铺端,店铺设置接口")
-@RequestMapping("/store/settings")
+@RequestMapping("/store/settings/storeSettings")
 public class StoreSettingsController {
 
     /**

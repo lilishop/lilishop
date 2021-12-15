@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @Api(tags = "买家端,分销员接口")
-@RequestMapping("/buyer/distribution")
+@RequestMapping("/buyer/distribution/distribution")
 public class DistributionBuyerController {
 
     /**

@@ -27,7 +27,7 @@ import java.util.List;
  */
 @Api(tags = "管理端,采购接口")
 @RestController
-@RequestMapping("/manager/purchase")
+@RequestMapping("/manager/other/purchase/purchase")
 public class PurchaseManagerController {
 
     /**

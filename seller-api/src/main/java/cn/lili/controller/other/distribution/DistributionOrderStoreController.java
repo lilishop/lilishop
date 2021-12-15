@@ -24,7 +24,7 @@ import java.util.Objects;
  */
 @RestController
 @Api(tags = "店铺端,分销订单接口")
-@RequestMapping("/store/distributionOrder")
+@RequestMapping("/store/distribution/order")
 public class DistributionOrderStoreController {
 
     /**

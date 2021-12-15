@@ -24,7 +24,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,分类品牌接口")
-@RequestMapping("/manager/category/brand")
+@RequestMapping("/manager/goods/categoryBrand")
 public class CategoryBrandManagerController {
 
     /**

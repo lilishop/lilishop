@@ -23,7 +23,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "买家端,浏览历史接口")
-@RequestMapping("/buyer/footprint")
+@RequestMapping("/buyer/member/footprint")
 public class FootprintController {
 
     /**

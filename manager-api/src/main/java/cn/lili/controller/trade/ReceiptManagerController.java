@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  **/
 @RestController
 @Api(tags = "管理端,发票记录接口")
-@RequestMapping("/manager/receipt")
+@RequestMapping("/manager/trade/receipt")
 public class ReceiptManagerController {
 
     @Autowired

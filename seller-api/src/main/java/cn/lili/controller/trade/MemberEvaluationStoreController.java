@@ -26,7 +26,7 @@ import java.util.Objects;
  */
 @RestController
 @Api(tags = "店铺端,商品评价管理接口")
-@RequestMapping("/store/memberEvaluation")
+@RequestMapping("/store/member/evaluation")
 public class MemberEvaluationStoreController {
 
     @Autowired

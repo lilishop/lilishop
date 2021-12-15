@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @Api(tags = "买家端,会员站内消息接口")
-@RequestMapping("/buyer/member/message")
+@RequestMapping("/buyer/message/member")
 public class MemberMessageBuyerController {
 
     /**

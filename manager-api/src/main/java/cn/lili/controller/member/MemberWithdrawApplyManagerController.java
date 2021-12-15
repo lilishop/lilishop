@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "管理端,余额提现记录接口")
-@RequestMapping("/manager/members/withdraw-apply")
+@RequestMapping("/manager/wallet/withdrawApply")
 @Transactional(rollbackFor = Exception.class)
 public class MemberWithdrawApplyManagerController {
     @Autowired

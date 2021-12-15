@@ -27,7 +27,7 @@ import java.util.Objects;
 @RestController
 @Transactional(rollbackFor = Exception.class)
 @Api(tags = "店铺端,日志管理接口")
-@RequestMapping("/store/log")
+@RequestMapping("/store/settings/log")
 public class LogStoreController {
     @Autowired
     private SystemLogService systemLogService;

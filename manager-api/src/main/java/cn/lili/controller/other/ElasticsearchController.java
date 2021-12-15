@@ -21,7 +21,7 @@ import java.util.Map;
  */
 @RestController
 @Api(tags = "ES初始化接口")
-@RequestMapping("/manager/elasticsearch")
+@RequestMapping("/manager/other/elasticsearch")
 public class ElasticsearchController {
 
     @Autowired

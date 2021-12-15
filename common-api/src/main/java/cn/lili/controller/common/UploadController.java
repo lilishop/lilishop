@@ -40,7 +40,7 @@ import java.util.Objects;
 @Slf4j
 @RestController
 @Api(tags = "文件上传接口")
-@RequestMapping("/common/upload")
+@RequestMapping("/common/common/upload")
 public class UploadController {
 
     @Autowired

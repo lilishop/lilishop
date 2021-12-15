@@ -45,7 +45,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @Api(tags = "管理员")
-@RequestMapping("/manager/user")
+@RequestMapping("/manager/passport/user")
 @Transactional(rollbackFor = Exception.class)
 @Validated
 public class AdminUserManagerController {

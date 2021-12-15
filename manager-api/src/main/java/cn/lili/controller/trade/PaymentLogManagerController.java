@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "管理端,收款日志接口")
-@RequestMapping("/manager/paymentLog")
+@RequestMapping("/manager/order/paymentLog")
 @Transactional(rollbackFor = Exception.class)
 public class PaymentLogManagerController {
 

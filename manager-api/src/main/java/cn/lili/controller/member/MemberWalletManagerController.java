@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "管理端,预存款接口")
-@RequestMapping("/manager/members/wallet")
+@RequestMapping("/manager/wallet/wallet")
 public class MemberWalletManagerController {
     @Autowired
     private MemberWalletService memberWalletService;

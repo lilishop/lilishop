@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "买家端,商品分类接口")
-@RequestMapping("/buyer/category")
+@RequestMapping("/buyer/goods/category")
 public class CategoryBuyerController {
     /**
      * 商品分类

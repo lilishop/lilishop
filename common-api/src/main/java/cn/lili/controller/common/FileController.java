@@ -30,8 +30,8 @@ import java.util.List;
  * @since 2020/11/26 15:41
  */
 @RestController
-@Api(tags = "文件管理管理接口")
-@RequestMapping("/common/file")
+@Api(tags = "文件管理接口")
+@RequestMapping("/common/common/file")
 public class FileController {
 
     @Autowired

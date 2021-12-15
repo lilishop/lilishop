@@ -26,8 +26,8 @@ import javax.validation.constraints.NotNull;
  * @since 2021/5/28 11:56 上午
  */
 @RestController
-@Api(tags = "店铺端,直播间接口")
-@RequestMapping("/manager/broadcast/studio")
+@Api(tags = "管理端,直播间接口")
+@RequestMapping("/manager/other/broadcast/studio")
 public class StudioManagerController {
 
     @Autowired

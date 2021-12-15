@@ -26,7 +26,7 @@ import java.util.Objects;
  */
 @RestController
 @Api(tags = "买家端,会员地址接口")
-@RequestMapping("/buyer/memberAddress")
+@RequestMapping("/buyer/member/address")
 public class MemberAddressBuyerController {
 
     /**

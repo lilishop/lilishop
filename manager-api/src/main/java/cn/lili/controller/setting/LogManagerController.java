@@ -25,7 +25,7 @@ import java.util.List;
 @RestController
 @Transactional(rollbackFor = Exception.class)
 @Api(tags = "日志管理接口")
-@RequestMapping("/manager/log")
+@RequestMapping("/manager/setting/log")
 public class LogManagerController {
     @Autowired
     private SystemLogService systemLogService;

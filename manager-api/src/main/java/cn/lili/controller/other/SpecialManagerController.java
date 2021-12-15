@@ -24,7 +24,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,专题活动接口")
-@RequestMapping("/manager/special")
+@RequestMapping("/manager/order/special")
 public class SpecialManagerController {
 
     @Autowired

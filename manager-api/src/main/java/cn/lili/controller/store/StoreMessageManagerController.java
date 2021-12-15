@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Transactional(rollbackFor = Exception.class)
-@Api(tags = "管理端,店铺消息消息管理接口")
-@RequestMapping("/manager/message/store")
+@Api(tags = "管理端,店铺消息管理接口")
+@RequestMapping("/manager/store/storeMessage")
 public class StoreMessageManagerController {
 
     @Autowired

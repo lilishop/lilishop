@@ -29,7 +29,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "买家端,文章接口")
-@RequestMapping("/buyer/article")
+@RequestMapping("/buyer/other/article")
 public class ArticleBuyerController {
 
     /**
