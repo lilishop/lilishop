@@ -24,7 +24,7 @@ public interface PointsGoodsMapper extends BaseMapper<PointsGoods> {
      * @param queryWrapper 查询条件
      * @return 积分商品分页
      */
-    @Select("select * from points_goods pg left join goods_sku gs on pg.sku_id = gs.id ${ew.customSqlSegment}")
+    @Select("select * from li_points_goods pg left join li_goods_sku gs on pg.sku_id = gs.id ${ew.customSqlSegment}")
     IPage<PointsGoodsVO> getPointsGoodsVO(IPage<PointsGoodsVO> page, @Param(Constants.WRAPPER) Wrapper<PointsGoodsVO> queryWrapper);
 
 }
