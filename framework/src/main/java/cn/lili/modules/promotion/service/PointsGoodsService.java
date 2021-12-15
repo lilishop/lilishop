@@ -1,7 +1,10 @@
 package cn.lili.modules.promotion.service;
 
+import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.PointsGoods;
+import cn.lili.modules.promotion.entity.vos.PointsGoodsSearchParams;
 import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 
 import java.util.List;
 
@@ -37,4 +40,12 @@ public interface PointsGoodsService extends AbstractPromotionsService<PointsGood
      */
     PointsGoodsVO getPointsGoodsDetailBySkuId(String skuId);
 
+    /**
+     * 获取积分商品vo
+     *
+     * @param searchParams 查询参数
+     * @param pageVO 分页参数
+     * @return 积分商品vo
+     */
+    IPage<PointsGoodsVO> pageFindAllVO(PointsGoodsSearchParams searchParams, PageVO pageVO);
 }
