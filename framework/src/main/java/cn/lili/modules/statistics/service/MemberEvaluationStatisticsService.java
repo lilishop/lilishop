@@ -16,13 +16,13 @@ public interface MemberEvaluationStatisticsService extends IService<MemberEvalua
      *
      * @return 今日评价数量
      */
-    Integer todayMemberEvaluation();
+    long todayMemberEvaluation();
 
     /**
      * 获取等待回复评价数量
      *
      * @return 等待回复评价数量
      */
-    Integer getWaitReplyNum();
+    long getWaitReplyNum();
 
 }

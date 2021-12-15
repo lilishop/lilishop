@@ -1,6 +1,6 @@
 package cn.lili.modules.order.order.serviceimpl;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
@@ -8,7 +8,6 @@ import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
@@ -206,10 +205,10 @@ public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper,
     }
 
     @Override
-    public Integer waitComplainNum() {
+    public long waitComplainNum() {
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.ne("complain_status", ComplaintStatusEnum.COMPLETE.name());
-        queryWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
+        queryWrapper.eq(CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
                 "store_id", UserContext.getCurrentUser().getStoreId());
         return this.count(queryWrapper);
     }
@@ -218,7 +217,7 @@ public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper,
     public boolean cancel(String id) {
         OrderComplaint orderComplaint = OperationalJudgment.judgment(this.getById(id));
         //如果以及仲裁，则不可以进行申诉取消
-        if(orderComplaint.getComplainStatus().equals(ComplaintStatusEnum.COMPLETE.name())){
+        if (orderComplaint.getComplainStatus().equals(ComplaintStatusEnum.COMPLETE.name())) {
             throw new ServiceException(ResultCode.COMPLAINT_CANCEL_ERROR);
         }
         LambdaUpdateWrapper<OrderComplaint> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
@@ -250,12 +249,12 @@ public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper,
     private void checkOperationParams(OrderComplaintOperationParams operationParam, OrderComplaint orderComplaint) {
         ComplaintStatusEnum complaintStatusEnum = ComplaintStatusEnum.valueOf(operationParam.getComplainStatus());
         if (complaintStatusEnum == ComplaintStatusEnum.COMPLETE) {
-            if (StrUtil.isEmpty(operationParam.getArbitrationResult())) {
+            if (CharSequenceUtil.isEmpty(operationParam.getArbitrationResult())) {
                 throw new ServiceException(ResultCode.COMPLAINT_ARBITRATION_RESULT_ERROR);
             }
             orderComplaint.setArbitrationResult(operationParam.getArbitrationResult());
         } else if (complaintStatusEnum == ComplaintStatusEnum.COMMUNICATION) {
-            if (StrUtil.isEmpty(operationParam.getAppealContent()) || operationParam.getImages() == null) {
+            if (CharSequenceUtil.isEmpty(operationParam.getAppealContent()) || operationParam.getImages() == null) {
                 throw new ServiceException(ResultCode.COMPLAINT_APPEAL_CONTENT_ERROR);
             }
             orderComplaint.setContent(operationParam.getAppealContent());

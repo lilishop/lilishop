@@ -33,13 +33,13 @@ public class PintuanMemberVO {
     private String orderSn;
 
     @ApiModelProperty(value = "已参团人数")
-    private Integer groupedNum;
+    private long groupedNum;
 
     @ApiModelProperty(value = "待参团人数")
-    private Integer toBeGroupedNum;
+    private long toBeGroupedNum;
 
     @ApiModelProperty(value = "成团人数")
-    private Integer groupNum;
+    private long groupNum;
 
     public PintuanMemberVO(Member member) {
         this.memberId = member.getId();

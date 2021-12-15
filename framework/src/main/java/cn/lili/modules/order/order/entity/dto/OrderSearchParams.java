@@ -129,7 +129,7 @@ public class OrderSearchParams extends PageVO {
                     && CharSequenceUtil.isNotEmpty(storeId), "o.store_id", storeId);
 
             //按买家查询
-            wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.MEMBER.name()) && CharSequenceUtil.isEmpty(memberId), "o.member_id", currentUser.getId());
+            wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.MEMBER.name()) && memberId == null, "o.member_id", currentUser.getId());
 
         }
         //按照买家查询

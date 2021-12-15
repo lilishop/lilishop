@@ -233,7 +233,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @return 订单信息
      */
     @Override
-    public Integer queryCountByPromotion(String orderPromotionType, String payStatus, String parentOrderSn, String orderSn) {
+    public long queryCountByPromotion(String orderPromotionType, String payStatus, String parentOrderSn, String orderSn) {
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
         //查找团长订单和已和当前拼团订单拼团的订单
         queryWrapper.eq(Order::getOrderPromotionType, orderPromotionType)

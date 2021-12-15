@@ -23,7 +23,7 @@ public class SeckillStatisticsServiceImpl extends ServiceImpl<SeckillStatisticsM
 
 
     @Override
-    public Integer getApplyNum() {
+    public long getApplyNum() {
         QueryWrapper<Seckill> queryWrapper = Wrappers.query();
         //秒杀申请时间未超过当前时间
         queryWrapper.ge("apply_end_time", cn.hutool.core.date.DateUtil.date());

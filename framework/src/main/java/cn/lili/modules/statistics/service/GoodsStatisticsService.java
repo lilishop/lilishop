@@ -16,16 +16,16 @@ public interface GoodsStatisticsService extends IService<Goods> {
     /**
      * 获取所有的已上架的商品数量
      *
-     * @param goodsAuthEnum   商品审核枚举
      * @param goodsStatusEnum 商品状态枚举
+     * @param goodsAuthEnum   商品审核枚举
      * @return 所有的已上架的商品数量
      */
-    Integer goodsNum(GoodsStatusEnum goodsStatusEnum, GoodsAuthEnum goodsAuthEnum);
+    long goodsNum(GoodsStatusEnum goodsStatusEnum, GoodsAuthEnum goodsAuthEnum);
 
     /**
      * 获取今天的已上架的商品数量
      *
      * @return 今天的已上架的商品数量
      */
-    Integer todayUpperNum();
+    long todayUpperNum();
 }

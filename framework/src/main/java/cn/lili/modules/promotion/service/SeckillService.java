@@ -37,7 +37,7 @@ public interface SeckillService extends AbstractPromotionsService<Seckill> {
      *
      * @return 可参与活动数量
      */
-    Integer getApplyNum();
+    long getApplyNum();
 
     /**
      * 更新秒杀活动的商品数量

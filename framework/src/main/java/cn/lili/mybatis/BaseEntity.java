@@ -36,7 +36,6 @@ public abstract class BaseEntity implements Serializable {
 
 
     @TableId
-    @TableField
     @ApiModelProperty(value = "唯一标识", hidden = true)
     private String id;
 

@@ -78,7 +78,7 @@ public class MemberManagerController {
 
     @ApiOperation(value = "根据条件查询会员总数")
     @GetMapping("/num")
-    public ResultMessage<Integer> getByPage(MemberSearchVO memberSearchVO) {
+    public ResultMessage<Long> getByPage(MemberSearchVO memberSearchVO) {
         return ResultUtil.data(memberService.getMemberNum(memberSearchVO));
     }
 

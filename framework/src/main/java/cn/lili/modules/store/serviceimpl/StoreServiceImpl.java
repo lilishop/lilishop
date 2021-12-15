@@ -266,10 +266,11 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         store.setStoreLogo(storeOtherInfoDTO.getStoreLogo());
         return this.updateById(store);
     }
+
     @Override
     public void updateStoreGoodsNum(String storeId) {
         //获取店铺已上架已审核通过商品数量
-        Integer goodsNum = goodsService.countStoreGoodsNum(storeId);
+        long goodsNum = goodsService.countStoreGoodsNum(storeId);
         //修改店铺商品数量
         this.update(new LambdaUpdateWrapper<Store>()
                 .set(Store::getGoodsNum, goodsNum)
@@ -287,10 +288,11 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
      * @return 店铺信息
      */
     private Store getStoreByMember() {
-        AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        LambdaQueryWrapper<Store> lambdaQueryWrapper = Wrappers.lambdaQuery();
-        lambdaQueryWrapper.eq(Store::getMemberId, authUser.getId());
-        return this.getOne(lambdaQueryWrapper);
+        LambdaQueryWrapper<Store> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        if (UserContext.getCurrentUser() != null) {
+            lambdaQueryWrapper.eq(Store::getMemberId, UserContext.getCurrentUser().getId());
+        }
+        return this.getOne(lambdaQueryWrapper, false);
     }
 
 }

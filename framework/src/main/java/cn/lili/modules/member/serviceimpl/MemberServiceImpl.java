@@ -17,7 +17,6 @@ import cn.lili.common.security.token.Token;
 import cn.lili.common.sensitive.SensitiveWordsFilter;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CookieUtil;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.utils.UuidUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
@@ -104,7 +103,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public Member findByUsername(String userName) {
-        QueryWrapper<Member> queryWrapper = new QueryWrapper();
+        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", userName);
         return this.baseMapper.selectOne(queryWrapper);
     }
@@ -121,7 +120,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public boolean findByMobile(String uuid, String mobile) {
-        QueryWrapper<Member> queryWrapper = new QueryWrapper();
+        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("mobile", mobile);
         Member member = this.baseMapper.selectOne(queryWrapper);
         if (member == null) {
@@ -160,7 +159,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             throw new ServiceException(ResultCode.USER_PASSWORD_ERROR);
         }
         //对店铺状态的判定处理
-        if (member.getHaveStore()) {
+        if (Boolean.TRUE.equals(member.getHaveStore())) {
             Store store = storeService.getById(member.getStoreId());
             if (!store.getStoreDisable().equals(StoreStatusEnum.OPEN.name())) {
                 throw new ServiceException(ResultCode.STORE_CLOSE_ERROR);
@@ -175,11 +174,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     /**
      * 传递手机号或者用户名
      *
-     * @param userName
-     * @return
+     * @param userName 手机号或者用户名
+     * @return 会员信息
      */
     private Member findMember(String userName) {
-        QueryWrapper<Member> queryWrapper = new QueryWrapper();
+        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", userName).or().eq("mobile", userName);
         return this.getOne(queryWrapper);
     }
@@ -187,10 +186,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Override
     public Token autoRegister(ConnectAuthUser authUser) {
 
-        if (StringUtils.isEmpty(authUser.getNickname())) {
+        if (CharSequenceUtil.isEmpty(authUser.getNickname())) {
             authUser.setNickname("临时昵称");
         }
-        if (StringUtils.isEmpty(authUser.getAvatar())) {
+        if (CharSequenceUtil.isEmpty(authUser.getAvatar())) {
             authUser.setAvatar("https://i.loli.net/2020/11/19/LyN6JF7zZRskdIe.png");
         }
         try {
@@ -364,13 +363,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public IPage<MemberVO> getMemberPage(MemberSearchVO memberSearchVO, PageVO page) {
         QueryWrapper<Member> queryWrapper = Wrappers.query();
         //用户名查询
-        queryWrapper.like(StringUtils.isNotBlank(memberSearchVO.getUsername()), "username", memberSearchVO.getUsername());
+        queryWrapper.like(CharSequenceUtil.isNotBlank(memberSearchVO.getUsername()), "username", memberSearchVO.getUsername());
         //用户名查询
-        queryWrapper.like(StringUtils.isNotBlank(memberSearchVO.getNickName()), "nick_name", memberSearchVO.getNickName());
+        queryWrapper.like(CharSequenceUtil.isNotBlank(memberSearchVO.getNickName()), "nick_name", memberSearchVO.getNickName());
         //按照电话号码查询
-        queryWrapper.like(StringUtils.isNotBlank(memberSearchVO.getMobile()), "mobile", memberSearchVO.getMobile());
+        queryWrapper.like(CharSequenceUtil.isNotBlank(memberSearchVO.getMobile()), "mobile", memberSearchVO.getMobile());
         //按照会员状态查询
-        queryWrapper.eq(StringUtils.isNotBlank(memberSearchVO.getDisabled()), "disabled",
+        queryWrapper.eq(CharSequenceUtil.isNotBlank(memberSearchVO.getDisabled()), "disabled",
                 memberSearchVO.getDisabled().equals(SwitchEnum.OPEN.name()) ? 1 : 0);
         queryWrapper.orderByDesc("create_time");
         return this.baseMapper.pageByMemberVO(PageUtil.initPage(page), queryWrapper);
@@ -398,7 +397,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             }
             member.setPoint(currentPoint);
             member.setTotalPoint(totalPoint);
-            Boolean result = this.updateById(member);
+            boolean result = this.updateById(member);
             if (result) {
                 //发送会员消息
                 MemberPointMessage memberPointMessage = new MemberPointMessage();
@@ -423,6 +422,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
         return this.update(updateWrapper);
     }
+
     /**
      * 根据手机号获取会员
      *
@@ -430,7 +430,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
      * @return 会员
      */
     private Member findByPhone(String mobilePhone) {
-        QueryWrapper<Member> queryWrapper = new QueryWrapper();
+        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("mobile", mobilePhone);
         return this.baseMapper.selectOne(queryWrapper);
     }
@@ -440,7 +440,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
      *
      * @param uuid uuid
      * @param type 状态
-     * @return
+     * @return cookie中的联合登录对象
      */
     private ConnectAuthUser getConnectAuthUser(String uuid, String type) {
         Object context = cache.get(ConnectService.cacheKey(type, uuid));
@@ -477,7 +477,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         String uuid = CookieUtil.getCookie(ConnectService.CONNECT_COOKIE, ThreadContextHolder.getHttpRequest());
         String connectType = CookieUtil.getCookie(ConnectService.CONNECT_TYPE, ThreadContextHolder.getHttpRequest());
         //如果联合登陆存储了信息
-        if (StringUtils.isNotEmpty(uuid) && StringUtils.isNotEmpty(connectType)) {
+        if (CharSequenceUtil.isNotEmpty(uuid) && CharSequenceUtil.isNotEmpty(connectType)) {
             try {
                 //获取信息
                 ConnectAuthUser connectAuthUser = getConnectAuthUser(uuid, connectType);
@@ -518,28 +518,24 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         String connectType = CookieUtil.getCookie(ConnectService.CONNECT_TYPE, ThreadContextHolder.getHttpRequest());
 
         //如果联合登陆存储了信息
-        if (StringUtils.isNotEmpty(uuid) && StringUtils.isNotEmpty(connectType)) {
-            try {
-                //枚举 联合登陆类型获取
-                ConnectAuthEnum authInterface = ConnectAuthEnum.valueOf(connectType);
+        if (CharSequenceUtil.isNotEmpty(uuid) && CharSequenceUtil.isNotEmpty(connectType)) {
+            //枚举 联合登陆类型获取
+            ConnectAuthEnum authInterface = ConnectAuthEnum.valueOf(connectType);
 
-                ConnectAuthUser connectAuthUser = getConnectAuthUser(uuid, connectType);
-                if (connectAuthUser == null) {
-                    throw new ServiceException(ResultCode.USER_OVERDUE_CONNECT_ERROR);
-                }
-                //检测是否已经绑定过用户
-                Connect connect = connectService.queryConnect(
-                        ConnectQueryDTO.builder().unionType(connectType).unionId(connectAuthUser.getUuid()).build()
-                );
-                //没有关联则返回true，表示可以继续绑定
-                if (connect == null) {
-                    connectAuthUser.setConnectEnum(authInterface);
-                    return connectAuthUser;
-                } else {
-                    throw new ServiceException(ResultCode.USER_CONNECT_BANDING_ERROR);
-                }
-            } catch (Exception e) {
-                throw e;
+            ConnectAuthUser connectAuthUser = getConnectAuthUser(uuid, connectType);
+            if (connectAuthUser == null) {
+                throw new ServiceException(ResultCode.USER_OVERDUE_CONNECT_ERROR);
+            }
+            //检测是否已经绑定过用户
+            Connect connect = connectService.queryConnect(
+                    ConnectQueryDTO.builder().unionType(connectType).unionId(connectAuthUser.getUuid()).build()
+            );
+            //没有关联则返回true，表示可以继续绑定
+            if (connect == null) {
+                connectAuthUser.setConnectEnum(authInterface);
+                return connectAuthUser;
+            } else {
+                throw new ServiceException(ResultCode.USER_CONNECT_BANDING_ERROR);
             }
         } else {
             throw new ServiceException(ResultCode.USER_CONNECT_NOT_EXIST_ERROR);
@@ -547,14 +543,14 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @Override
-    public Integer getMemberNum(MemberSearchVO memberSearchVO) {
+    public long getMemberNum(MemberSearchVO memberSearchVO) {
         QueryWrapper<Member> queryWrapper = Wrappers.query();
         //用户名查询
-        queryWrapper.like(StringUtils.isNotBlank(memberSearchVO.getUsername()), "username", memberSearchVO.getUsername());
+        queryWrapper.like(CharSequenceUtil.isNotBlank(memberSearchVO.getUsername()), "username", memberSearchVO.getUsername());
         //按照电话号码查询
-        queryWrapper.like(StringUtils.isNotBlank(memberSearchVO.getMobile()), "mobile", memberSearchVO.getMobile());
+        queryWrapper.like(CharSequenceUtil.isNotBlank(memberSearchVO.getMobile()), "mobile", memberSearchVO.getMobile());
         //按照状态查询
-        queryWrapper.eq(StringUtils.isNotBlank(memberSearchVO.getDisabled()), "disabled",
+        queryWrapper.eq(CharSequenceUtil.isNotBlank(memberSearchVO.getDisabled()), "disabled",
                 memberSearchVO.getDisabled().equals(SwitchEnum.OPEN.name()) ? 1 : 0);
         queryWrapper.orderByDesc("create_time");
         return this.count(queryWrapper);

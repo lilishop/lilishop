@@ -16,5 +16,5 @@ public interface OrderComplaintStatisticsService extends IService<OrderComplaint
      *
      * @return 待处理投诉数量
      */
-    Integer waitComplainNum();
+    long waitComplainNum();
 }

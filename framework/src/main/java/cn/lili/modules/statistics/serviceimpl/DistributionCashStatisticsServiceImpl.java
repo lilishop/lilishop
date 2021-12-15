@@ -24,7 +24,7 @@ public class DistributionCashStatisticsServiceImpl extends ServiceImpl<Distribut
 
 
     @Override
-    public Integer newDistributionCash() {
+    public long newDistributionCash() {
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.eq("distribution_cash_status", WithdrawStatusEnum.APPLY.name());
         return this.count(queryWrapper);

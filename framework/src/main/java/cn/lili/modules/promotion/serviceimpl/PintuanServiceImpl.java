@@ -158,7 +158,7 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
             for (String id : ids) {
                 Pintuan pintuan = this.getById(id);
                 QueryWrapper<Pintuan> queryWrapper = PromotionTools.checkActiveTime(new Date(startTime), new Date(endTime), PromotionTypeEnum.PINTUAN, pintuan.getStoreId(), id);
-                int sameNum = this.count(queryWrapper);
+                long sameNum = this.count(queryWrapper);
                 //当前时间段是否存在同类活动
                 if (sameNum > 0) {
                     throw new ServiceException(ResultCode.PROMOTION_SAME_ACTIVE_EXIST);
@@ -177,7 +177,7 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
     @Override
     public void checkPromotions(Pintuan promotions) {
         QueryWrapper<Pintuan> queryWrapper = PromotionTools.checkActiveTime(promotions.getStartTime(), promotions.getEndTime(), PromotionTypeEnum.PINTUAN, promotions.getStoreId(), promotions.getId());
-        int sameNum = this.count(queryWrapper);
+        long sameNum = this.count(queryWrapper);
         //当前时间段是否存在同类活动
         if (sameNum > 0) {
             throw new ServiceException(ResultCode.PROMOTION_SAME_ACTIVE_EXIST);
@@ -260,9 +260,9 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
     }
 
     private void setMemberVONum(PintuanMemberVO memberVO, Integer requiredNum, String orderSn) {
-        int count = this.orderService.queryCountByPromotion(PromotionTypeEnum.PINTUAN.name(), PayStatusEnum.PAID.name(), orderSn, orderSn);
+        long count = this.orderService.queryCountByPromotion(PromotionTypeEnum.PINTUAN.name(), PayStatusEnum.PAID.name(), orderSn, orderSn);
         //获取待参团人数
-        int toBoGrouped = requiredNum - count;
+        long toBoGrouped = requiredNum - count;
         memberVO.setGroupNum(requiredNum);
         memberVO.setGroupedNum(count);
         memberVO.setToBeGroupedNum(toBoGrouped);

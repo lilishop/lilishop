@@ -1,6 +1,5 @@
 package cn.lili.mybatis;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModelProperty;
@@ -28,7 +27,6 @@ public abstract class BaseIdEntity implements Serializable {
 
 
     @TableId
-    @TableField
     @ApiModelProperty(value = "唯一标识", hidden = true)
     private String id;
 

@@ -3,7 +3,6 @@ package cn.lili.modules.member.entity.dos;
 import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -26,11 +25,6 @@ import java.util.Date;
 public class MemberReceipt extends BaseIdEntity {
 
     private static final long serialVersionUID = -8210927482915675995L;
-
-    @TableId
-    @TableField
-    @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id;
 
     @ApiModelProperty(value = "发票抬头")
     private String receiptTitle;

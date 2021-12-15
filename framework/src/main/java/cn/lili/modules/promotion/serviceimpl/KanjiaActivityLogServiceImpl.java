@@ -55,7 +55,7 @@ public class KanjiaActivityLogServiceImpl extends ServiceImpl<KanJiaActivityLogM
         LambdaQueryWrapper<KanjiaActivityLog> queryWrapper = new LambdaQueryWrapper<KanjiaActivityLog>();
         queryWrapper.eq(kanjiaActivityDTO.getKanjiaActivityId() != null, KanjiaActivityLog::getKanjiaActivityId, kanjiaActivityDTO.getKanjiaActivityId());
         queryWrapper.eq( KanjiaActivityLog::getKanjiaMemberId, UserContext.getCurrentUser().getId());
-        Integer count = this.baseMapper.selectCount(queryWrapper);
+        long count = this.baseMapper.selectCount(queryWrapper);
         if (count > 0) {
             throw new ServiceException(ResultCode.KANJIA_ACTIVITY_LOG_MEMBER_ERROR);
         }

@@ -25,7 +25,7 @@ public interface MemberStatisticsMapper extends BaseMapper<MemberStatisticsData>
      * @return 会员统计数量
      */
     @Select("SELECT  COUNT(0)  FROM li_member  ${ew.customSqlSegment}")
-    Integer customSqlQuery(@Param(Constants.WRAPPER) Wrapper queryWrapper);
+    long customSqlQuery(@Param(Constants.WRAPPER) Wrapper queryWrapper);
 
 
     /**

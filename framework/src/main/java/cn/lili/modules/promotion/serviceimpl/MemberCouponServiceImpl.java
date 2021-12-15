@@ -50,7 +50,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<MemberCoupon>()
                 .eq(MemberCoupon::getCouponId, couponId)
                 .eq(MemberCoupon::getMemberId, memberId);
-        int haveCoupons = this.count(queryWrapper);
+        long haveCoupons = this.count(queryWrapper);
         if (!PromotionsStatusEnum.START.name().equals(coupon.getPromotionStatus())) {
             throw new ServiceException(ResultCode.COUPON_RECEIVE_ERROR);
         }
@@ -167,7 +167,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     }
 
     @Override
-    public Integer getMemberCouponsNum() {
+    public long getMemberCouponsNum() {
         AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
         QueryWrapper<MemberCoupon> queryWrapper = Wrappers.query();
         queryWrapper.eq("member_id", authUser.getId());

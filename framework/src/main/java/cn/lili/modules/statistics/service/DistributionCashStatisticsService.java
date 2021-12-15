@@ -16,5 +16,5 @@ public interface DistributionCashStatisticsService extends IService<Distribution
      *
      * @return 待处理分销员提现申请数量
      */
-    Integer newDistributionCash();
+    long newDistributionCash();
 }

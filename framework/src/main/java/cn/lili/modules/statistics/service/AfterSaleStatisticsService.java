@@ -20,7 +20,7 @@ public interface AfterSaleStatisticsService extends IService<AfterSale> {
      * @param serviceType 售后类型
      * @return 待处理售后数量
      */
-    Integer applyNum(String serviceType);
+    long applyNum(String serviceType);
 
     /**
      * 获取统计的售后

@@ -16,19 +16,19 @@ public interface StoreStatisticsService extends IService<Store> {
      *
      * @return 待审核店铺数量
      */
-    Integer auditNum();
+    long auditNum();
 
     /**
      * 获取所有店铺数量
      *
      * @return 店铺总数
      */
-    Integer storeNum();
+    long storeNum();
 
     /**
      * 获取今天的店铺数量
      *
      * @return 今天的店铺数量
      */
-    Integer todayStoreNum();
+    long todayStoreNum();
 }

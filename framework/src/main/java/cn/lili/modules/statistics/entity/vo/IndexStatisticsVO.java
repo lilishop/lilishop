@@ -13,13 +13,13 @@ import lombok.Data;
 public class IndexStatisticsVO {
 
     @ApiModelProperty(value = "订单总数量")
-    private Integer orderNum;
+    private Long orderNum;
     @ApiModelProperty(value = "商品总数量")
-    private Integer goodsNum;
+    private Long goodsNum;
     @ApiModelProperty(value = "会员总数量")
-    private Integer memberNum;
+    private Long memberNum;
     @ApiModelProperty(value = "店铺总数量")
-    private Integer storeNum;
+    private Long storeNum;
 
     /**
      * 流量概括
@@ -41,13 +41,13 @@ public class IndexStatisticsVO {
     @ApiModelProperty(value = "今日下单金额")
     private Double todayOrderPrice;
     @ApiModelProperty(value = "今日新增会员数量")
-    private Integer todayMemberNum;
+    private Long todayMemberNum;
     @ApiModelProperty(value = "今日新增商品数量")
-    private Integer todayGoodsNum;
+    private Long todayGoodsNum;
     @ApiModelProperty(value = "今日新增店铺数量")
-    private Integer todayStoreNum;
+    private Long todayStoreNum;
     @ApiModelProperty(value = "今日新增评论数量")
-    private Integer todayMemberEvaluation;
+    private Long todayMemberEvaluation;
     @ApiModelProperty(value = "当前在线人数")
     private Long currentNumberPeopleOnline;
 }

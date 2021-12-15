@@ -32,7 +32,7 @@ public class AfterSaleStatisticsServiceImpl extends ServiceImpl<AfterSaleStatist
 
 
     @Override
-    public Integer applyNum(String serviceType) {
+    public long applyNum(String serviceType) {
         AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
         LambdaQueryWrapper<AfterSale> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(AfterSale::getServiceStatus, AfterSaleStatusEnum.APPLY.name());

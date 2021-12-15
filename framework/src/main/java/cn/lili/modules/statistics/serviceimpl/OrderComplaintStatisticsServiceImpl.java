@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 public class OrderComplaintStatisticsServiceImpl extends ServiceImpl<OrderComplaintStatisticsMapper, OrderComplaint> implements OrderComplaintStatisticsService {
 
     @Override
-    public Integer waitComplainNum() {
+    public long waitComplainNum() {
         QueryWrapper queryWrapper = Wrappers.query();
         queryWrapper.ne("complain_status", ComplaintStatusEnum.COMPLETE.name());
         queryWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),

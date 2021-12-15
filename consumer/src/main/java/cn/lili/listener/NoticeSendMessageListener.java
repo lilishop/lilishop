@@ -158,12 +158,12 @@ public class NoticeSendMessageListener implements RocketMQListener<MessageExt> {
             //查询所有会员总数，因为会员总数比较大 如果一次性查出来会占用数据库资源，所以要分页查询
             MemberSearchVO memberSearchVO = new MemberSearchVO();
             memberSearchVO.setDisabled(SwitchEnum.OPEN.name());
-            Integer memberNum = memberService.getMemberNum(memberSearchVO);
+            long memberNum = memberService.getMemberNum(memberSearchVO);
             //构建分页查询参数
             //100条查一次
-            Integer pageSize = 100;
-            Integer pageCount = 0;
-            pageCount = memberNum / pageSize;
+            int pageSize = 100;
+            int pageCount;
+            pageCount = (int) (memberNum / pageSize);
             pageCount = memberNum % pageSize > 0 ? pageCount + 1 : pageCount;
             for (int i = 1; i <= pageCount; i++) {
                 PageVO pageVO = new PageVO();

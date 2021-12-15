@@ -33,7 +33,7 @@ public interface OrderStatisticsService extends IService<Order> {
      * @param orderStatus 订单状态
      * @return 订单总数量
      */
-    Integer orderNum(String orderStatus);
+    long orderNum(String orderStatus);
 
     /**
      * 图表统计
