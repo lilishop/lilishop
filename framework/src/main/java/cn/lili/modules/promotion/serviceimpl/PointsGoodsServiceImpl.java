@@ -5,19 +5,23 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.entity.dos.PointsGoods;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
+import cn.lili.modules.promotion.entity.vos.PointsGoodsSearchParams;
 import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
 import cn.lili.modules.promotion.mapper.PointsGoodsMapper;
 import cn.lili.modules.promotion.service.PointsGoodsService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.modules.search.service.EsGoodsIndexService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -161,6 +165,17 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
         return pointsGoodsVO;
     }
 
+    /**
+     * 获取积分商品vo
+     *
+     * @param searchParams 查询参数
+     * @param pageVO       分页参数
+     * @return 积分商品vo
+     */
+    @Override
+    public IPage<PointsGoodsVO> pageFindAllVO(PointsGoodsSearchParams searchParams, PageVO pageVO) {
+        return this.baseMapper.getPointsGoodsVO(PageUtil.initPage(pageVO), searchParams.queryWrapper());
+    }
 
     /**
      * 检查促销参数
@@ -210,6 +225,7 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
     }
 
 
+    @Override
     public PromotionTypeEnum getPromotionType() {
         return PromotionTypeEnum.POINTS_GOODS;
     }
