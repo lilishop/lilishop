@@ -63,11 +63,11 @@ PS：手机验证码为 ‘111111’
 [点击跳转](https://docs.pickmall.cn/deploy/%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87.html)
 
 **商城数据库**
-[点击跳转](https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql)
+使用docker-compose部署数据库，自动初始化数据库，不需要手动下载等操作
 
-使用docker-compose部署，自动初始化数据库不需要额外处理
+如果手动部署，才需要获取sql [点击跳转](https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql) （PS：这里有与tag版本一致的sql，如果是历史版本，则docker项目也切换至历史版本获取sql即可，历史版本升级则根据java相聚的根目录DB目录下的升级sql，按需执行）。
 
-这里有与tag版本一致的sql，根据tag获取sql，如果使用master代码
+
 
 ### 功能列表
 
