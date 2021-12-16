@@ -274,4 +274,14 @@ public interface OrderService extends IService<Order> {
      * @return 订单支付记录分页
      */
     IPage<PaymentLog> queryPaymentLogs(IPage<PaymentLog> page, Wrapper<PaymentLog> queryWrapper);
+
+    /**
+     * 检查是否开始虚拟成团
+     *
+     * @param pintuanId 拼团活动id
+     * @param requiredNum 成团人数
+     * @param fictitious 是否开启成团
+     * @return 是否成功
+     */
+    boolean checkFictitiousOrder(String pintuanId, Integer requiredNum, Boolean fictitious);
 }

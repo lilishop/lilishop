@@ -2,7 +2,6 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
@@ -32,7 +31,7 @@ import java.util.*;
  * @author paulG
  * @since 2021/11/30
  **/
-public class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T extends BasePromotions> extends ServiceImpl<M, T> implements AbstractPromotionsService<T> {
+public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T extends BasePromotions> extends ServiceImpl<M, T> implements AbstractPromotionsService<T> {
 
     /**
      * 促销商品
@@ -264,13 +263,4 @@ public class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T extends Ba
         }
     }
 
-    /**
-     * 当前促销类型
-     *
-     * @return 当前促销类型
-     */
-    @Override
-    public PromotionTypeEnum getPromotionType() {
-        return null;
-    }
 }

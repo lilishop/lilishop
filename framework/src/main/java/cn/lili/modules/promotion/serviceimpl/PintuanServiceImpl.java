@@ -1,6 +1,5 @@
 package cn.lili.modules.promotion.serviceimpl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
@@ -34,8 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 拼团业务层实现
@@ -201,10 +198,7 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
         }
         if (promotions.getEndTime() == null && promotions.getStartTime() == null) {
             //过滤父级拼团订单，根据父级拼团订单分组
-            Map<String, List<Order>> collect = orderService.queryListByPromotion(promotions.getId())
-                    .stream().filter(i -> CharSequenceUtil.isNotEmpty(i.getParentOrderSn()))
-                    .collect(Collectors.groupingBy(Order::getParentOrderSn));
-            this.isOpenFictitiousPintuan(promotions, collect);
+            this.orderService.checkFictitiousOrder(promotions.getId(), promotions.getRequiredNum(), promotions.getFictitious());
         }
     }
 
@@ -266,71 +260,6 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
         memberVO.setGroupNum(requiredNum);
         memberVO.setGroupedNum(count);
         memberVO.setToBeGroupedNum(toBoGrouped);
-    }
-
-    /**
-     * 从指定订单列表中检查是否开始虚拟成团
-     *
-     * @param pintuan 拼团活动信息
-     * @param collect 检查的订单列表
-     */
-    private void isOpenFictitiousPintuan(Pintuan pintuan, Map<String, List<Order>> collect) {
-        //成团人数
-        Integer requiredNum = pintuan.getRequiredNum();
-
-        for (Map.Entry<String, List<Order>> entry : collect.entrySet()) {
-            //是否开启虚拟成团
-            if (Boolean.FALSE.equals(pintuan.getFictitious()) && entry.getValue().size() < requiredNum) {
-                //如果未开启虚拟成团且已参团人数小于成团人数，则自动取消订单
-                String reason = "拼团活动结束订单未付款，系统自动取消订单";
-                if (CharSequenceUtil.isNotEmpty(entry.getKey())) {
-                    this.orderService.systemCancel(entry.getKey(), reason);
-                } else {
-                    for (Order order : entry.getValue()) {
-                        this.orderService.systemCancel(order.getSn(), reason);
-                    }
-                }
-            } else if (Boolean.TRUE.equals(pintuan.getFictitious())) {
-                this.fictitiousPintuan(entry, requiredNum);
-            }
-        }
-    }
-
-    /**
-     * 虚拟成团
-     *
-     * @param entry       订单列表
-     * @param requiredNum 必须参团人数
-     */
-    private void fictitiousPintuan(Map.Entry<String, List<Order>> entry, Integer requiredNum) {
-        Map<String, List<Order>> listMap = entry.getValue().stream().collect(Collectors.groupingBy(Order::getPayStatus));
-        //未付款订单
-        List<Order> unpaidOrders = listMap.get(PayStatusEnum.UNPAID.name());
-        //未付款订单自动取消
-        if (unpaidOrders != null && !unpaidOrders.isEmpty()) {
-            for (Order unpaidOrder : unpaidOrders) {
-                orderService.systemCancel(unpaidOrder.getSn(), "拼团活动结束订单未付款，系统自动取消订单");
-            }
-        }
-        List<Order> paidOrders = listMap.get(PayStatusEnum.PAID.name());
-        //如待参团人数大于0，并已开启虚拟成团
-        if (!paidOrders.isEmpty()) {
-            //待参团人数
-            int waitNum = requiredNum - paidOrders.size();
-            //添加虚拟成团
-            for (int i = 0; i < waitNum; i++) {
-                Order order = new Order();
-                BeanUtil.copyProperties(paidOrders.get(0), order);
-                order.setMemberId("-1");
-                order.setMemberName("参团人员");
-                orderService.save(order);
-                paidOrders.add(order);
-            }
-            for (Order paidOrder : paidOrders) {
-                paidOrder.setOrderStatus(OrderStatusEnum.UNDELIVERED.name());
-            }
-            orderService.updateBatchById(paidOrders);
-        }
     }
 
     /**

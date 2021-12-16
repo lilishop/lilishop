@@ -81,7 +81,7 @@ public class SeckillManagerController {
     @ApiOperation(value = "获取秒杀活动申请列表")
     @GetMapping("/apply")
     public ResultMessage<IPage<SeckillApply>> getSeckillApply(SeckillSearchParams param, PageVO pageVo) {
-        IPage<SeckillApply> seckillApply = seckillApplyService.getSeckillApply(param, pageVo);
+        IPage<SeckillApply> seckillApply = seckillApplyService.getSeckillApplyPage(param, pageVo);
         return ResultUtil.data(seckillApply);
     }
 

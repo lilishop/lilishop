@@ -42,15 +42,31 @@ public interface SeckillApplyService extends IService<SeckillApply> {
      * @param pageVo     分页参数
      * @return 限时请购申请列表
      */
-    IPage<SeckillApply> getSeckillApply(SeckillSearchParams queryParam, PageVO pageVo);
+    IPage<SeckillApply> getSeckillApplyPage(SeckillSearchParams queryParam, PageVO pageVo);
 
     /**
-     * 分页查询限时请购申请列表
+     * 查询限时请购申请列表
      *
      * @param queryParam 秒杀活动申请查询参数
      * @return 限时请购申请列表
      */
-    List<SeckillApply> getSeckillApply(SeckillSearchParams queryParam);
+    List<SeckillApply> getSeckillApplyList(SeckillSearchParams queryParam);
+
+    /**
+     * 查询限时请购申请列表总数
+     *
+     * @param queryParam 查询条件
+     * @return 限时请购申请列表总数
+     */
+    long getSeckillApplyCount(SeckillSearchParams queryParam);
+
+    /**
+     * 查询限时请购申请
+     *
+     * @param queryParam 秒杀活动申请查询参数
+     * @return 限时请购申请
+     */
+    SeckillApply getSeckillApply(SeckillSearchParams queryParam);
 
     /**
      * 添加秒杀活动申请
@@ -71,5 +87,14 @@ public interface SeckillApplyService extends IService<SeckillApply> {
      * @param id        秒杀活动商品
      */
     void removeSeckillApply(String seckillId, String id);
+
+    /**
+     * 更新秒杀商品库存
+     *
+     * @param seckillId 秒杀活动id
+     * @param skuId 商品skuId
+     * @param quantity 库存
+     */
+    void updateSeckillApplyQuantity(String seckillId, String skuId, Integer quantity);
 
 }

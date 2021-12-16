@@ -2,9 +2,11 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.entity.dos.PointsGoods;
@@ -15,10 +17,13 @@ import cn.lili.modules.promotion.mapper.PointsGoodsMapper;
 import cn.lili.modules.promotion.service.PointsGoodsService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.tools.PromotionTools;
-import cn.lili.modules.search.service.EsGoodsIndexService;
+import cn.lili.modules.search.utils.EsIndexUtil;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,14 +56,22 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
     @Autowired
     private GoodsSkuService goodsSkuService;
 
+    /**
+     * rocketMq配置
+     */
     @Autowired
-    private EsGoodsIndexService goodsIndexService;
+    private RocketmqCustomProperties rocketmqCustomProperties;
+
+    /**
+     * rocketMq
+     */
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
 
 
     @Override
     public boolean savePointsGoodsBatch(List<PointsGoods> promotionsList) {
         List<PromotionGoods> promotionGoodsList = new ArrayList<>();
-        Map<String, Long> skuPoints = new HashMap<>();
         for (PointsGoods pointsGoods : promotionsList) {
             this.initPromotion(pointsGoods);
             this.checkPromotions(pointsGoods);
@@ -73,16 +86,13 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
             PromotionGoods promotionGoods = new PromotionGoods(pointsGoods, goodsSku);
             promotionGoods.setPromotionType(PromotionTypeEnum.POINTS_GOODS.name());
             promotionGoodsList.add(promotionGoods);
-            skuPoints.put(pointsGoods.getSkuId(), pointsGoods.getPoints());
 
         }
         boolean saveBatch = this.saveBatch(promotionsList);
         if (saveBatch) {
             this.promotionGoodsService.saveOrUpdateBatch(promotionGoodsList);
-            for (Map.Entry<String, Long> entry : skuPoints.entrySet()) {
-                Map<String, Object> query = MapUtil.builder(new HashMap<String, Object>()).put("id", entry.getKey()).build();
-                Map<String, Object> update = MapUtil.builder(new HashMap<String, Object>()).put("points", entry.getValue()).build();
-                this.goodsIndexService.updateIndex(query, update);
+            for (PointsGoods pointsGoods : promotionsList) {
+                this.updateEsGoodsIndex(pointsGoods);
             }
 
         }
@@ -205,7 +215,10 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
     public void updateEsGoodsIndex(PointsGoods promotions) {
         Map<String, Object> query = MapUtil.builder(new HashMap<String, Object>()).put("id", promotions.getSkuId()).build();
         Map<String, Object> update = MapUtil.builder(new HashMap<String, Object>()).put("points", promotions.getPoints()).build();
-        this.goodsIndexService.updateIndex(query, update);
+        //修改规格索引,发送mq消息
+        Map<String, Object> updateIndexFieldsMap = EsIndexUtil.getUpdateIndexFieldsMap(query, update);
+        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX_FIELD.name();
+        rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(updateIndexFieldsMap), RocketmqSendCallbackBuilder.commonCallback());
     }
 
 
