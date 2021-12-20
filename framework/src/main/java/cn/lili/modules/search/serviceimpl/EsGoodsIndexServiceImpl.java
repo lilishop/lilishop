@@ -291,6 +291,9 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Override
     public void initIndex(List<EsGoodsIndex> goodsIndexList) {
         if (goodsIndexList == null || goodsIndexList.isEmpty()) {
+            //初始化标识
+            cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), null);
+            cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false);
             return;
         }
         //索引名称拼接
