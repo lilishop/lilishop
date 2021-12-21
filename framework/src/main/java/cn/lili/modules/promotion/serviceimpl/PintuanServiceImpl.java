@@ -243,7 +243,7 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
             if (CharSequenceUtil.isEmpty(order.getParentOrderSn())) {
                 memberVO.setOrderSn("");
                 PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
-                searchParams.setPromotionStatus(PromotionTypeEnum.PINTUAN.name());
+                searchParams.setPromotionType(PromotionTypeEnum.PINTUAN.name());
                 searchParams.setPromotionId(order.getPromotionId());
                 searchParams.setSkuId(skuId);
                 PromotionGoods promotionGoods = promotionGoodsService.getPromotionsGoods(searchParams);
