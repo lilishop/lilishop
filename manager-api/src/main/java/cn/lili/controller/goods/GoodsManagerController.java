@@ -73,7 +73,7 @@ public class GoodsManagerController {
     @PutMapping(value = "/{goodsId}/under")
     public ResultMessage<Object> underGoods(@PathVariable String goodsId, @NotEmpty(message = "下架原因不能为空") @RequestParam String reason) {
         List<String> goodsIds = Arrays.asList(goodsId.split(","));
-        if (Boolean.TRUE.equals(goodsService.updateGoodsMarketAble(goodsIds, GoodsStatusEnum.DOWN, reason))) {
+        if (Boolean.TRUE.equals(goodsService.managerUpdateGoodsMarketAble(goodsIds, GoodsStatusEnum.DOWN, reason))) {
             return ResultUtil.success();
         }
         throw new ServiceException(ResultCode.GOODS_UNDER_ERROR);

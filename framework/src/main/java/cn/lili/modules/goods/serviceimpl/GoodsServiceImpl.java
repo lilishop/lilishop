@@ -299,6 +299,34 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    public Boolean managerUpdateGoodsMarketAble(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, String underReason) {
+        boolean result;
+
+        //如果商品为空，直接返回
+        if (goodsIds == null || goodsIds.isEmpty()) {
+            return true;
+        }
+
+        //检测管理员权限
+        this.checkManagerAuthority();
+
+        LambdaUpdateWrapper<Goods> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(Goods::getMarketEnable, goodsStatusEnum.name());
+        updateWrapper.set(Goods::getUnderMessage, underReason);
+        updateWrapper.in(Goods::getId, goodsIds);
+        result = this.update(updateWrapper);
+
+        //修改规格商品
+        LambdaQueryWrapper<Goods> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Goods::getId, goodsIds);
+        List<Goods> goodsList = this.list(queryWrapper);
+        for (Goods goods : goodsList) {
+            goodsSkuService.updateGoodsSkuStatus(goods);
+        }
+        return result;
+    }
+
+    @Override
     public Boolean deleteGoods(List<String> goodsIds) {
 
         LambdaUpdateWrapper<Goods> updateWrapper = this.getUpdateWrapperByStoreAuthority();
@@ -475,6 +503,20 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         return goods;
     }
 
+
+    /**
+     * 获取UpdateWrapper（检查用户越权）
+     *
+     * @return updateWrapper
+     */
+    private LambdaUpdateWrapper<Goods> getUpdateWrapperByStoreAuthority() {
+        LambdaUpdateWrapper<Goods> updateWrapper = new LambdaUpdateWrapper<>();
+        AuthUser authUser = this.checkStoreAuthority();
+        updateWrapper.eq(Goods::getStoreId, authUser.getStoreId());
+        return updateWrapper;
+    }
+
+
     /**
      * 检查当前登录的店铺
      *
@@ -491,16 +533,29 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     /**
+     * 检查当前登录的店铺
+     *
+     * @return 当前登录的店铺
+     */
+    private AuthUser checkManagerAuthority() {
+        AuthUser currentUser = UserContext.getCurrentUser();
+        //如果当前会员不为空，且为店铺角色
+        if (currentUser != null && (currentUser.getRole().equals(UserEnums.MANAGER))) {
+            return currentUser;
+        } else {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        }
+    }
+
+    /**
      * 获取UpdateWrapper（检查用户越权）
      *
      * @return updateWrapper
      */
-    private LambdaUpdateWrapper<Goods> getUpdateWrapperByStoreAuthority() {
+    private LambdaUpdateWrapper<Goods> getUpdateWrapperByManagerAuthority() {
         LambdaUpdateWrapper<Goods> updateWrapper = new LambdaUpdateWrapper<>();
         AuthUser authUser = this.checkStoreAuthority();
-        if (authUser != null) {
-            updateWrapper.eq(Goods::getStoreId, authUser.getStoreId());
-        }
+        updateWrapper.eq(Goods::getStoreId, authUser.getStoreId());
         return updateWrapper;
     }
 
@@ -512,9 +567,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     private LambdaQueryWrapper<Goods> getQueryWrapperByStoreAuthority() {
         LambdaQueryWrapper<Goods> queryWrapper = new LambdaQueryWrapper<>();
         AuthUser authUser = this.checkStoreAuthority();
-        if (authUser != null) {
-            queryWrapper.eq(Goods::getStoreId, authUser.getStoreId());
-        }
+        queryWrapper.eq(Goods::getStoreId, authUser.getStoreId());
         return queryWrapper;
     }
 
