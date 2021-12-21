@@ -83,6 +83,15 @@ public interface GoodsService extends IService<Goods> {
      */
     IPage<Goods> queryByParams(GoodsSearchParams goodsSearchParams);
 
+
+    /**
+     * 商品查询
+     *
+     * @param goodsSearchParams 查询参数
+     * @return 商品信息
+     */
+    List<Goods> queryListByParams(GoodsSearchParams goodsSearchParams);
+
     /**
      * 批量审核商品
      *

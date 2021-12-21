@@ -37,7 +37,7 @@ public class GoodsStatisticsServiceImpl extends ServiceImpl<GoodsStatisticsMappe
             queryWrapper.eq(Goods::getMarketEnable, goodsStatusEnum.name());
         }
         if (goodsAuthEnum != null) {
-            queryWrapper.eq(Goods::getIsAuth, goodsAuthEnum.name());
+            queryWrapper.eq(Goods::getAuthFlag, goodsAuthEnum.name());
         }
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         queryWrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.STORE.name()),

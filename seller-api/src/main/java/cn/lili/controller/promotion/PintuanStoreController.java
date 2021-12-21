@@ -1,5 +1,6 @@
 package cn.lili.controller.promotion;
 
+import cn.hutool.core.util.ArrayUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
@@ -24,7 +25,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 店铺端,拼团管理接口
@@ -88,6 +91,12 @@ public class PintuanStoreController {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         pintuan.setStoreId(currentUser.getStoreId());
         pintuan.setStoreName(currentUser.getStoreName());
+        if (pintuan.getPromotionGoodsList() != null && !pintuan.getPromotionGoodsList().isEmpty()) {
+            List<String> skuIds = pintuan.getPromotionGoodsList().stream().map(PromotionGoods::getSkuId).collect(Collectors.toList());
+            pintuan.setScopeId(ArrayUtil.join(skuIds.toArray(), ","));
+        } else {
+            pintuan.setScopeId(null);
+        }
         if (pintuanService.updatePromotions(pintuan)) {
             return ResultUtil.success(ResultCode.PINTUAN_EDIT_SUCCESS);
         }

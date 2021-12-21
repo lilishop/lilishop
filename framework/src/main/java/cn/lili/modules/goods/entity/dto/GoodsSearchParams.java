@@ -9,6 +9,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.Arrays;
+
 /**
  * 商品查询条件
  *
@@ -58,7 +60,7 @@ public class GoodsSearchParams extends PageVO {
      * @see GoodsAuthEnum
      */
     @ApiModelProperty(value = "审核状态")
-    private String isAuth;
+    private String authFlag;
 
     @ApiModelProperty(value = "库存数量")
     private Integer quantity;
@@ -81,7 +83,7 @@ public class GoodsSearchParams extends PageVO {
             queryWrapper.like("goods_name", goodsName);
         }
         if (CharSequenceUtil.isNotEmpty(id)) {
-            queryWrapper.eq("id", id);
+            queryWrapper.in("id", Arrays.asList(id.split(",")));
         }
         if (CharSequenceUtil.isNotEmpty(storeId)) {
             queryWrapper.eq("store_id", storeId);
@@ -101,8 +103,8 @@ public class GoodsSearchParams extends PageVO {
         if (CharSequenceUtil.isNotEmpty(marketEnable)) {
             queryWrapper.eq("market_enable", marketEnable);
         }
-        if (CharSequenceUtil.isNotEmpty(isAuth)) {
-            queryWrapper.eq("is_auth", isAuth);
+        if (CharSequenceUtil.isNotEmpty(authFlag)) {
+            queryWrapper.eq("auth_flag", authFlag);
         }
         if (quantity != null) {
             queryWrapper.le("quantity", quantity);

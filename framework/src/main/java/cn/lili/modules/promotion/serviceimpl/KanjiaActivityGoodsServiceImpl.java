@@ -13,8 +13,8 @@ import cn.lili.modules.promotion.entity.dos.KanjiaActivityGoods;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsOperationDTO;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
-import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsListVO;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsParams;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsVO;
@@ -25,13 +25,13 @@ import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,7 +42,7 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGoodsMapper, KanjiaActivityGoods> implements KanjiaActivityGoodsService {
+public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImpl<KanJiaActivityGoodsMapper, KanjiaActivityGoods> implements KanjiaActivityGoodsService {
 
     /**
      * 规格商品
@@ -70,32 +70,44 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
             if (this.checkSkuDuplicate(goodsSku.getId(), kanJiaActivityGoodsDTO) != null) {
                 throw new ServiceException("商品id为" + goodsSku.getId() + "的商品已参加砍价商品活动！");
             }
+            kanJiaActivityGoodsDTO.setGoodsSku(goodsSku);
+            kanJiaActivityGoodsDTO.setGoodsId(goodsSku.getGoodsId());
             kanJiaActivityGoodsDTO.setSkuId(kanJiaActivityGoodsDTO.getSkuId());
             kanJiaActivityGoodsDTO.setThumbnail(goodsSku.getThumbnail());
             kanJiaActivityGoodsDTO.setGoodsName(goodsSku.getGoodsName());
             kanJiaActivityGoodsDTO.setOriginalPrice(goodsSku.getPrice());
+            kanJiaActivityGoodsDTO.setScopeId(goodsSku.getId());
             kanjiaActivityGoodsList.add(kanJiaActivityGoodsDTO);
-            PromotionGoods promotionGoods = new PromotionGoods(kanJiaActivityGoodsDTO);
-            promotionGoods.setPromotionId(kanJiaActivityGoodsDTO.getId());
-            promotionGoods.setPromotionType(PromotionTypeEnum.KANJIA.name());
-            promotionGoods.setGoodsId(kanJiaActivityGoodsDTO.getGoodsId());
-            promotionGoods.setTitle(kanJiaActivityGoodsDTO.getPromotionName());
-            promotionGoodsList.add(promotionGoods);
         }
-        this.promotionGoodsService.saveBatch(promotionGoodsList);
-        return this.saveBatch(kanjiaActivityGoodsList);
+        boolean result = this.saveBatch(kanjiaActivityGoodsList);
+        if (result) {
+            for (KanjiaActivityGoods kanjiaActivityGoods : kanjiaActivityGoodsList) {
+                PromotionGoods promotionGoods = new PromotionGoods();
+                BeanUtils.copyProperties(kanjiaActivityGoods, promotionGoods);
+                promotionGoods.setQuantity(kanjiaActivityGoods.getStock());
+                promotionGoods.setPromotionId(kanjiaActivityGoods.getId());
+                promotionGoods.setPromotionType(PromotionTypeEnum.KANJIA.name());
+                promotionGoods.setTitle(PromotionTypeEnum.KANJIA.name() + "-" + kanjiaActivityGoods.getGoodsName());
+                promotionGoods.setScopeType(PromotionsScopeTypeEnum.PORTION_GOODS.name());
+                promotionGoods.setScopeId(kanjiaActivityGoods.getSkuId());
+                promotionGoods.setPromotionType(PromotionTypeEnum.KANJIA.name());
+                promotionGoodsList.add(promotionGoods);
+            }
+            boolean saveBatch = this.promotionGoodsService.saveBatch(promotionGoodsList);
+            if (saveBatch) {
+                for (KanjiaActivityGoods kanjiaActivityGoods : kanjiaActivityGoodsList) {
+                    this.updateEsGoodsIndex(kanjiaActivityGoods);
+                }
+            }
+        }
+
+        return result;
     }
 
-
-    @Override
-    public IPage<KanjiaActivityGoods> getForPage(KanjiaActivityGoodsParams kanJiaActivityGoodsParams, PageVO pageVO) {
-        return this.page(PageUtil.initPage(pageVO), kanJiaActivityGoodsParams.wrapper());
-
-    }
 
     @Override
     public IPage<KanjiaActivityGoodsListVO> kanjiaGoodsVOPage(KanjiaActivityGoodsParams kanjiaActivityGoodsParams, PageVO pageVO) {
-        return this.baseMapper.kanjiaActivityGoodsVOPage(PageUtil.initPage(pageVO), kanjiaActivityGoodsParams.wrapper());
+        return this.baseMapper.kanjiaActivityGoodsVOPage(PageUtil.initPage(pageVO), kanjiaActivityGoodsParams.queryWrapper());
     }
 
 
@@ -248,15 +260,20 @@ public class KanjiaActivityGoodsServiceImpl extends ServiceImpl<KanJiaActivityGo
         if (this.checkSkuDuplicate(goodsSku.getId(), kanJiaActivityGoodsDTO) != null) {
             throw new ServiceException("商品id为" + goodsSku.getId() + "的商品已参加砍价商品活动！");
         }
+        this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(kanJiaActivityGoodsDTO.getId()));
+        this.updatePromotionsGoods(kanJiaActivityGoodsDTO);
+        this.updateEsGoodsIndex(kanJiaActivityGoodsDTO);
         //修改数据库
         return this.updateById(kanJiaActivityGoodsDTO);
     }
 
+    /**
+     * 当前促销类型
+     *
+     * @return 当前促销类型
+     */
     @Override
-    public boolean deleteKanJiaGoods(List<String> ids) {
-        PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
-        searchParams.setPromotionIds(ids);
-        this.promotionGoodsService.deletePromotionGoods(searchParams);
-        return this.removeByIds(ids);
+    public PromotionTypeEnum getPromotionType() {
+        return PromotionTypeEnum.KANJIA;
     }
 }

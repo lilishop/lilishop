@@ -27,27 +27,6 @@ public class PromotionTools {
     public static final String START_TIME_COLUMN = "start_time";
     public static final String END_TIME_COLUMN = "end_time";
 
-
-    /**
-     * 参数验证
-     * 1、活动起始时间必须大于当前时间
-     * 2、验证活动开始时间是否大于活动结束时间
-     *
-     * @param startTime 活动开始时间
-     * @param endTime   活动结束时间
-     * @param num       参与活动商品数量
-     * @param goodsList 选择的商品
-     */
-    public static void paramValid(Date startTime, Date endTime, int num, List<PromotionGoods> goodsList) {
-
-        checkPromotionTime(startTime, endTime);
-
-        //如果促销活动选择的是部分商品参加活动
-        if (num != -1 && goodsList == null) {
-            throw new ServiceException(ResultCode.PROMOTION_GOODS_ERROR);
-        }
-    }
-
     /**
      * 参数验证
      * 1、活动起始时间必须大于当前时间

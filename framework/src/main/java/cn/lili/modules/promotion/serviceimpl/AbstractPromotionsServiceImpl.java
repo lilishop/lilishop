@@ -2,7 +2,6 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
@@ -32,7 +31,7 @@ import java.util.*;
  * @author paulG
  * @since 2021/11/30
  **/
-public class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T extends BasePromotions> extends ServiceImpl<M, T> implements AbstractPromotionsService<T> {
+public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T extends BasePromotions> extends ServiceImpl<M, T> implements AbstractPromotionsService<T> {
 
     /**
      * 促销商品
@@ -142,10 +141,11 @@ public class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T extends Ba
         for (String id : ids) {
             T promotions = this.getById(id);
             this.checkStatus(promotions);
-            promotions.setDeleteFlag(true);
-            this.updatePromotionsGoods(promotions);
+            promotions.setStartTime(null);
+            promotions.setEndTime(null);
             this.updateEsGoodsIndex(promotions);
         }
+        this.promotionGoodsService.deletePromotionGoods(ids);
         return this.removeByIds(ids);
     }
 
@@ -246,7 +246,7 @@ public class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T extends Ba
             //删除商品促销消息
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.DELETE_GOODS_INDEX_PROMOTIONS.name();
             //发送mq消息
-            rocketMQTemplate.asyncSend(destination, promotions.getId(), RocketmqSendCallbackBuilder.commonCallback());
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(promotions), RocketmqSendCallbackBuilder.commonCallback());
         } else {
 
             String esPromotionKey = this.getPromotionType().name() + "-" + promotions.getId();
@@ -264,13 +264,4 @@ public class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T extends Ba
         }
     }
 
-    /**
-     * 当前促销类型
-     *
-     * @return 当前促销类型
-     */
-    @Override
-    public PromotionTypeEnum getPromotionType() {
-        return null;
-    }
 }

@@ -225,7 +225,7 @@ public class EsGoodsIndex implements Serializable {
      */
     @Field(type = FieldType.Text)
     @ApiModelProperty("审核状态")
-    private String isAuth;
+    private String authFlag;
 
     /**
      * 卖点
@@ -305,7 +305,7 @@ public class EsGoodsIndex implements Serializable {
             this.selfOperated = sku.getSelfOperated();
             this.salesModel = sku.getSalesModel();
             this.marketEnable = sku.getMarketEnable();
-            this.isAuth = sku.getIsAuth();
+            this.authFlag = sku.getAuthFlag();
             this.intro = sku.getIntro();
             this.grade = sku.getGrade();
             this.recommend = sku.getRecommend();
@@ -371,7 +371,7 @@ public class EsGoodsIndex implements Serializable {
             this.selfOperated = sku.getSelfOperated();
             this.salesModel = sku.getSalesModel();
             this.marketEnable = sku.getMarketEnable();
-            this.isAuth = sku.getIsAuth();
+            this.authFlag = sku.getAuthFlag();
             this.intro = sku.getIntro();
             this.grade = sku.getGrade();
             this.releaseTime = new Date();

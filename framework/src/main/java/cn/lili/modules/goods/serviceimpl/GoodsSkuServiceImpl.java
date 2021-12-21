@@ -154,7 +154,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 skuInfo(sku, goods, map, null);
                 newSkuList.add(sku);
                 //如果商品状态值不对，则es索引移除
-                if (goods.getIsAuth().equals(GoodsAuthEnum.PASS.name()) && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())) {
+                if (goods.getAuthFlag().equals(GoodsAuthEnum.PASS.name()) && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())) {
                     goodsIndexService.deleteIndexById(sku.getId());
                     this.clearCache(sku.getId());
                 }
@@ -234,7 +234,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
         //商品为空||商品下架||商品未审核通过||商品删除，则提示：商品已下架
         if (goodsVO == null || goodsVO.getMarketEnable().equals(GoodsStatusEnum.DOWN.name())
-                || !goodsVO.getIsAuth().equals(GoodsAuthEnum.PASS.name())
+                || !goodsVO.getAuthFlag().equals(GoodsAuthEnum.PASS.name())
                 || Boolean.TRUE.equals(goodsVO.getDeleteFlag())) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
@@ -269,8 +269,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             boolean containsPromotion = promotionMap.keySet().stream().anyMatch(i ->
                     i.contains(PromotionTypeEnum.SECKILL.name()) || i.contains(PromotionTypeEnum.PINTUAN.name()));
             if (containsPromotion && goodsIndex.getPromotionPrice() != null) {
+                goodsSkuDetail.setPromotionFlag(true);
                 goodsSkuDetail.setPromotionPrice(goodsIndex.getPromotionPrice());
-
+            } else {
+                goodsSkuDetail.setPromotionFlag(false);
+                goodsSkuDetail.setPromotionPrice(null);
             }
 
         }
@@ -301,14 +304,14 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     /**
      * 更新商品sku状态
      *
-     * @param goods 商品信息(Id,MarketEnable/IsAuth)
+     * @param goods 商品信息(Id,MarketEnable/AuthFlag)
      */
     @Override
     public void updateGoodsSkuStatus(Goods goods) {
         LambdaUpdateWrapper<GoodsSku> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(GoodsSku::getGoodsId, goods.getId());
         updateWrapper.set(GoodsSku::getMarketEnable, goods.getMarketEnable());
-        updateWrapper.set(GoodsSku::getIsAuth, goods.getIsAuth());
+        updateWrapper.set(GoodsSku::getAuthFlag, goods.getAuthFlag());
         updateWrapper.set(GoodsSku::getDeleteFlag, goods.getDeleteFlag());
         boolean update = this.update(updateWrapper);
         if (Boolean.TRUE.equals(update)) {
@@ -504,8 +507,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
         //修改规格索引,发送mq消息
         Map<String, Object> updateIndexFieldsMap = EsIndexUtil.getUpdateIndexFieldsMap(
-                MapUtil.builder().put("id", goodsSku.getId()).build(),
-                MapUtil.builder().put("commentNum", goodsSku.getCommentNum()).put("highPraiseNum", highPraiseNum)
+                MapUtil.builder(new HashMap<String, Object>()).put("id", goodsSku.getId()).build(),
+                MapUtil.builder(new HashMap<String, Object>()).put("commentNum", goodsSku.getCommentNum()).put("highPraiseNum", highPraiseNum)
                         .put("grade", grade).build());
         String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX_FIELD.name();
         rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(updateIndexFieldsMap), RocketmqSendCallbackBuilder.commonCallback());
@@ -525,7 +528,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         LambdaUpdateWrapper<GoodsSku> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(GoodsSku::getId, skuId);
         updateWrapper.set(GoodsSku::getPromotionPrice, promotionPrice);
-        updateWrapper.set(GoodsSku::getIsPromotion, true);
+        updateWrapper.set(GoodsSku::getPromotionFlag, true);
         this.update(updateWrapper);
         cache.remove(GoodsSkuService.getCacheKeys(skuId));
     }
@@ -625,7 +628,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         sku.setGoodsUnit(goods.getGoodsUnit());
         sku.setGrade(100D);
         //商品状态
-        sku.setIsAuth(goods.getIsAuth());
+        sku.setAuthFlag(goods.getAuthFlag());
         sku.setSalesModel(goods.getSalesModel());
         //卖家信息
         sku.setStoreId(goods.getStoreId());

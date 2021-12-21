@@ -162,7 +162,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         queryWrapper.eq(MemberCoupon::getMemberId, memberId);
         queryWrapper.eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name());
         queryWrapper.eq(MemberCoupon::getScopeType, PromotionsScopeTypeEnum.ALL.name());
-        queryWrapper.ge(MemberCoupon::getEndTime, new Date()).and(i -> i.in(MemberCoupon::getStoreId, storeId).or(j -> j.eq(MemberCoupon::getIsPlatform, true)));
+        queryWrapper.ge(MemberCoupon::getEndTime, new Date()).and(i -> i.in(MemberCoupon::getStoreId, storeId).or(j -> j.eq(MemberCoupon::getPlatformFlag, true)));
         return this.list(queryWrapper);
     }
 
@@ -253,7 +253,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         memberCoupon.setMemberId(memberId);
         memberCoupon.setMemberName(memberName);
         memberCoupon.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
-        memberCoupon.setIsPlatform(("platform").equals(coupon.getStoreId()));
+        memberCoupon.setPlatformFlag(("platform").equals(coupon.getStoreId()));
         this.save(memberCoupon);
         couponService.receiveCoupon(couponId, 1);
     }

@@ -21,10 +21,8 @@ import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
-import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
-import cn.lili.modules.promotion.service.PintuanService;
-import cn.lili.modules.promotion.service.PointsGoodsService;
+import cn.lili.modules.promotion.entity.dos.PointsGoods;
+import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,13 +48,7 @@ public class CheckDataRender implements CartRenderStep {
     private OrderService orderService;
 
     @Autowired
-    private PintuanService pintuanService;
-
-    @Autowired
     private MemberService memberService;
-
-    @Autowired
-    private PointsGoodsService pointsGoodsService;
 
 
     @Override
@@ -105,7 +97,7 @@ public class CheckDataRender implements CartRenderStep {
                 continue;
             }
             //商品上架状态判定
-            if (!GoodsAuthEnum.PASS.name().equals(dataSku.getIsAuth()) || !GoodsStatusEnum.UPPER.name().equals(dataSku.getMarketEnable())) {
+            if (!GoodsAuthEnum.PASS.name().equals(dataSku.getAuthFlag()) || !GoodsStatusEnum.UPPER.name().equals(dataSku.getMarketEnable())) {
                 //设置购物车未选中
                 cartSkuVO.setChecked(false);
                 //设置购物车此sku商品已失效
@@ -121,6 +113,14 @@ public class CheckDataRender implements CartRenderStep {
                 //设置失效消息
                 cartSkuVO.setErrorMessage("商品库存不足,现有库存数量[" + dataSku.getQuantity() + "]");
             }
+            //移除无效促销活动
+            cartSkuVO.setPromotionMap(cartSkuVO.getPromotionMap().entrySet().stream().filter(i -> {
+                BasePromotions basePromotions = (BasePromotions) i.getValue();
+                if (basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
+                    return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
+                }
+                return true;
+            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         }
     }
 
@@ -134,7 +134,7 @@ public class CheckDataRender implements CartRenderStep {
         List<CartVO> cartList = new ArrayList<>();
 
         //根据店铺分组
-        Map<String, List<CartSkuVO>> storeCollect = tradeDTO.getSkuList().parallelStream().collect(Collectors.groupingBy(CartSkuVO::getStoreId));
+        Map<String, List<CartSkuVO>> storeCollect = tradeDTO.getSkuList().stream().collect(Collectors.groupingBy(CartSkuVO::getStoreId));
         for (Map.Entry<String, List<CartSkuVO>> storeCart : storeCollect.entrySet()) {
             if (!storeCart.getValue().isEmpty()) {
                 CartVO cartVO = new CartVO(storeCart.getValue().get(0));
@@ -170,9 +170,9 @@ public class CheckDataRender implements CartRenderStep {
                 }
             }
             //判断拼团商品的限购数量
-            Optional<String> pintuanId = tradeDTO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
-            if (pintuanId.isPresent()) {
-                Pintuan pintuan = pintuanService.getById(pintuanId.get());
+            Optional<Map.Entry<String, Object>> pintuanPromotions = tradeDTO.getSkuList().get(0).getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.PINTUAN.name())).findFirst();
+            if (pintuanPromotions.isPresent()) {
+                Pintuan pintuan = (Pintuan) pintuanPromotions.get().getValue();
                 Integer limitNum = pintuan.getLimitNum();
                 for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
                     if (limitNum != 0 && cartSkuVO.getNum() > limitNum) {
@@ -182,16 +182,19 @@ public class CheckDataRender implements CartRenderStep {
             }
             //积分商品，判断用户积分是否满足
         } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.POINTS)) {
-            String skuId = tradeDTO.getSkuList().get(0).getGoodsSku().getId();
             //获取积分商品VO
-            PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsDetailBySkuId(skuId);
-            if (pointsGoodsVO == null) {
-                throw new ServiceException(ResultCode.POINT_GOODS_ERROR);
+            Optional<Map.Entry<String, Object>> pointsPromotions = tradeDTO.getSkuList().get(0).getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.POINTS_GOODS.name())).findFirst();
+            if (pointsPromotions.isPresent()) {
+                PointsGoods pointsGoods = (PointsGoods) pointsPromotions.get().getValue();
+                if (pointsGoods == null) {
+                    throw new ServiceException(ResultCode.POINT_GOODS_ERROR);
+                }
+                Member member = memberService.getUserInfo();
+                if (member.getPoint() < pointsGoods.getPoints()) {
+                    throw new ServiceException(ResultCode.USER_POINTS_ERROR);
+                }
             }
-            Member member = memberService.getUserInfo();
-            if (member.getPoint() < pointsGoodsVO.getPoints()) {
-                throw new ServiceException(ResultCode.USER_POINTS_ERROR);
-            }
+
         }
 
     }

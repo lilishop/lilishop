@@ -93,7 +93,7 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
         if (promotions instanceof FullDiscountVO) {
             FullDiscountVO fullDiscountVO = (FullDiscountVO) promotions;
             //验证是否是有效参数
-            PromotionTools.paramValid(fullDiscountVO.getStartTime(), fullDiscountVO.getEndTime(), fullDiscountVO.getNumber(), fullDiscountVO.getPromotionGoodsList());
+            PromotionTools.checkPromotionTime(fullDiscountVO.getStartTime(), fullDiscountVO.getEndTime());
         }
 
         //当前时间段是否存在同类活动
@@ -164,17 +164,17 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
      * @param fullDiscount 满减参数信息
      */
     private void checkFullDiscount(FullDiscount fullDiscount) {
-        if (fullDiscount.getIsFullMinus() == null && fullDiscount.getIsCoupon() == null && fullDiscount.getIsGift() == null
-                && fullDiscount.getIsPoint() == null && fullDiscount.getIsFullRate() == null) {
+        if (fullDiscount.getFullMinusFlag() == null && fullDiscount.getCouponFlag() == null && fullDiscount.getGiftFlag() == null
+                && fullDiscount.getPointFlag() == null && fullDiscount.getFullRateFlag() == null) {
             throw new ServiceException(ResultCode.FULL_DISCOUNT_WAY_ERROR);
         }
         //如果优惠方式是满减
-        if (Boolean.TRUE.equals(fullDiscount.getIsFullMinus())) {
+        if (Boolean.TRUE.equals(fullDiscount.getFullMinusFlag())) {
             this.checkFullMinus(fullDiscount.getFullMinus(), fullDiscount.getFullMoney());
             fullDiscount.setTitle("满" + fullDiscount.getFullMoney() + " 减" + fullDiscount.getFullMinus());
         }
         //如果优惠方式是赠品
-        if (Boolean.TRUE.equals(fullDiscount.getIsGift())) {
+        if (Boolean.TRUE.equals(fullDiscount.getGiftFlag())) {
             //是否没有选择赠品
             boolean noGiftSelected = fullDiscount.getGiftId() == null;
             if (noGiftSelected) {
@@ -184,13 +184,13 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
             fullDiscount.setGiftId(null);
         }
         //如果优惠方式是赠优惠券
-        if (Boolean.TRUE.equals(fullDiscount.getIsCoupon())) {
+        if (Boolean.TRUE.equals(fullDiscount.getCouponFlag())) {
             this.checkCoupon(fullDiscount.getCouponId());
         } else {
             fullDiscount.setCouponId(null);
         }
         //如果优惠方式是折扣
-        if (Boolean.TRUE.equals(fullDiscount.getIsFullRate())) {
+        if (Boolean.TRUE.equals(fullDiscount.getFullRateFlag())) {
             this.checkFullRate(fullDiscount.getFullRate());
             fullDiscount.setTitle("满" + fullDiscount.getFullMoney() + " 打" + fullDiscount.getFullRate() + "折");
         }

@@ -147,7 +147,7 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     /**
      * 更新商品sku状态
      *
-     * @param goods 商品信息(Id,MarketEnable/IsAuth)
+     * @param goods 商品信息(Id,MarketEnable/AuthFlag)
      */
     void updateGoodsSkuStatus(Goods goods);
 

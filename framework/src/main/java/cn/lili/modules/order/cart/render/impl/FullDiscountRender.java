@@ -12,9 +12,7 @@ import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.cart.render.util.PromotionPriceUtil;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
-import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
-import cn.lili.modules.promotion.service.FullDiscountService;
+import cn.lili.modules.promotion.entity.dos.FullDiscount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,9 +29,6 @@ import java.util.stream.Collectors;
 public class FullDiscountRender implements CartRenderStep {
 
     @Autowired
-    private FullDiscountService fullDiscountService;
-
-    @Autowired
     private PromotionPriceUtil promotionPriceUtil;
 
     @Autowired
@@ -47,38 +42,35 @@ public class FullDiscountRender implements CartRenderStep {
     @Override
     public void render(TradeDTO tradeDTO) {
 
-
         //店铺集合
         List<CartVO> cartList = tradeDTO.getCartList();
 
+        //循环店铺购物车
+        for (CartVO cart : cartList) {
+            List<CartSkuVO> fullDiscountSkuList = cart.getSkuList().stream()
+                    .filter(i -> i.getPromotionMap().keySet().stream().anyMatch(j -> j.contains(PromotionTypeEnum.FULL_DISCOUNT.name())))
+                    .collect(Collectors.toList());
 
-        //店铺id集合
-        List<String> storeIds = tradeDTO.getCartList().stream().map(CartVO::getStoreId).collect(Collectors.toList());
-        //获取当前店铺进行到满减活动
-        List<FullDiscountVO> fullDiscounts = fullDiscountService.currentPromotion(storeIds);
-        if (fullDiscounts == null || fullDiscounts.isEmpty()) {
-            return;
-        }
+            if (!fullDiscountSkuList.isEmpty()) {
+                Optional<Map.Entry<String, Object>> fullDiscountOptional = fullDiscountSkuList.get(0).getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.FULL_DISCOUNT.name())).findFirst();
 
-        //循环满减信息
-        for (FullDiscountVO fullDiscount : fullDiscounts) {
-            //判定参与活动的商品 全品类参与或者部分商品参与，则进行云散
-            //循环店铺购物车
-            for (CartVO cart : cartList) {
-                //如果购物车中的店铺id与活动店铺id相等，则进行促销计算
-                if (fullDiscount.getStoreId().equals(cart.getStoreId())) {
+                if (fullDiscountOptional.isPresent()) {
+                    FullDiscount fullDiscount = (FullDiscount) fullDiscountOptional.get().getValue();
+                    FullDiscountVO fullDiscountVO = new FullDiscountVO(fullDiscount);
 
                     //如果有赠品，则将赠品信息写入
-                    if (Boolean.TRUE.equals(fullDiscount.getIsGift())) {
+                    if (Boolean.TRUE.equals(fullDiscount.getGiftFlag())) {
                         GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(fullDiscount.getGiftId());
-                        fullDiscount.setGiftSku(goodsSku);
+                        fullDiscountVO.setGiftSkuId(fullDiscount.getGiftId());
+                        fullDiscountVO.setGiftSkuName(goodsSku.getGoodsName());
                     }
 
                     //写入满减活动
-                    cart.setFullDiscount(fullDiscount);
-                    Map<String, Double> skuPriceDetail;
-                    //参与活动的sku判定
-                    skuPriceDetail = initFullDiscountGoods(fullDiscount, cart.getCheckedSkuList());
+                    cart.setFullDiscount(fullDiscountVO);
+                    Map<String, Double> skuPriceDetail = new HashMap<>(16);
+                    for (CartSkuVO cartSkuVO : cart.getSkuList()) {
+                        skuPriceDetail.put(cartSkuVO.getGoodsSku().getId(), cartSkuVO.getPriceDetailDTO().getGoodsPrice());
+                    }
                     if (!skuPriceDetail.isEmpty()) {
                         //记录参与满减活动的sku
                         cart.setFullDiscountSkuIds(new ArrayList<>(skuPriceDetail.keySet()));
@@ -88,21 +80,20 @@ public class FullDiscountRender implements CartRenderStep {
 
                         if (isFull(countPrice, cart)) {
                             //如果减现金
-                            if (Boolean.TRUE.equals(fullDiscount.getIsFullMinus())) {
+                            if (Boolean.TRUE.equals(fullDiscount.getFullMinusFlag())) {
                                 promotionPriceUtil.recountPrice(tradeDTO, skuPriceDetail, fullDiscount.getFullMinus(), PromotionTypeEnum.FULL_DISCOUNT);
                             }
                             //打折
-                            else if (Boolean.TRUE.equals(fullDiscount.getIsFullRate())) {
+                            else if (Boolean.TRUE.equals(fullDiscount.getFullRateFlag())) {
                                 this.renderFullRate(cart, skuPriceDetail, CurrencyUtil.div(fullDiscount.getFullRate(), 10));
                             }
                             //渲染满优惠
                             renderFullMinus(cart);
                         }
                     }
-
                 }
-
             }
+
         }
 
     }
@@ -115,9 +106,7 @@ public class FullDiscountRender implements CartRenderStep {
      */
     private void renderFullRate(CartVO cart, Map<String, Double> skuPriceDetail, Double rate) {
 
-        List<CartSkuVO> cartSkuVOS = cart.getCheckedSkuList().stream().filter(cartSkuVO -> {
-            return skuPriceDetail.containsKey(cartSkuVO.getGoodsSku().getId());
-        }).collect(Collectors.toList());
+        List<CartSkuVO> cartSkuVOS = cart.getCheckedSkuList().stream().filter(cartSkuVO -> skuPriceDetail.containsKey(cartSkuVO.getGoodsSku().getId())).collect(Collectors.toList());
 
         // 循环计算扣减金额
         cartSkuVOS.forEach(cartSkuVO -> {
@@ -137,34 +126,6 @@ public class FullDiscountRender implements CartRenderStep {
     }
 
     /**
-     * 获取参与满优惠的商品id
-     *
-     * @param fullDiscount 满优惠信息
-     * @param cartSkuVOS   购物车商品sku信息
-     * @return 参与满优惠的商品id
-     */
-    public Map<String, Double> initFullDiscountGoods(FullDiscountVO fullDiscount, List<CartSkuVO> cartSkuVOS) {
-        Map<String, Double> skuPriceDetail = new HashMap<>(16);
-
-        //全品类参与
-        if (PromotionsScopeTypeEnum.ALL.name().equals(fullDiscount.getScopeType())) {
-            for (CartSkuVO cartSkuVO : cartSkuVOS) {
-                skuPriceDetail.put(cartSkuVO.getGoodsSku().getId(), cartSkuVO.getPriceDetailDTO().getGoodsPrice());
-            }
-        } else {
-            List<String> collect = fullDiscount.getPromotionGoodsList().stream().map(PromotionGoods::getSkuId).collect(Collectors.toList());
-            //sku 集合判定
-            for (CartSkuVO cartSkuVO : cartSkuVOS) {
-                // 如果参加满减，并且购物车选中状态 ，则记录商品sku
-                if (Boolean.TRUE.equals(cartSkuVO.getChecked()) && collect.contains(cartSkuVO.getGoodsSku().getId())) {
-                    skuPriceDetail.put(cartSkuVO.getGoodsSku().getId(), cartSkuVO.getPriceDetailDTO().getGoodsPrice());
-                }
-            }
-        }
-        return skuPriceDetail;
-    }
-
-    /**
      * 渲染满减优惠
      *
      * @param cartVO 购物车满优惠渲染
@@ -173,17 +134,17 @@ public class FullDiscountRender implements CartRenderStep {
         //获取参与活动的商品总价
         FullDiscountVO fullDiscount = cartVO.getFullDiscount();
 
-        if (Boolean.TRUE.equals(fullDiscount.getIsCoupon())) {
+        if (Boolean.TRUE.equals(fullDiscount.getCouponFlag())) {
             cartVO.getGiftCouponList().add(fullDiscount.getCouponId());
         }
-        if (Boolean.TRUE.equals(fullDiscount.getIsGift())) {
+        if (Boolean.TRUE.equals(fullDiscount.getGiftFlag())) {
             cartVO.setGiftList(Arrays.asList(fullDiscount.getGiftId().split(",")));
         }
-        if (Boolean.TRUE.equals(fullDiscount.getIsPoint())) {
+        if (Boolean.TRUE.equals(fullDiscount.getPointFlag())) {
             cartVO.setGiftPoint(fullDiscount.getPoint());
         }
         //如果满足，判定是否免邮，免邮的话需要渲染一边sku
-        if (Boolean.TRUE.equals(fullDiscount.getIsFreeFreight())) {
+        if (Boolean.TRUE.equals(fullDiscount.getFreeFreightFlag())) {
             for (CartSkuVO skuVO : cartVO.getCheckedSkuList()) {
                 skuVO.setIsFreeFreight(true);
             }

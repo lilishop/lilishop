@@ -63,14 +63,12 @@ public class DistributionPriceRender implements CartRenderStep {
         }).collect(Collectors.toList());
         //是否包含分销商品
         List<DistributionGoods> distributionGoods = distributionGoodsService.distributionGoods(skuIds);
-        if (distributionGoods != null && distributionGoods.size() > 0) {
-            distributionGoods.forEach(dg -> {
-                tradeDTO.getCheckedSkuList().forEach(cartSkuVO -> {
-                    if (cartSkuVO.getGoodsSku().getId().equals(dg.getSkuId())) {
-                        cartSkuVO.setDistributionGoods(dg);
-                    }
-                });
-            });
+        if (distributionGoods != null && !distributionGoods.isEmpty()) {
+            distributionGoods.forEach(dg -> tradeDTO.getCheckedSkuList().forEach(cartSkuVO -> {
+                if (cartSkuVO.getGoodsSku().getId().equals(dg.getSkuId())) {
+                    cartSkuVO.setDistributionGoods(dg);
+                }
+            }));
         }
 
         for (CartSkuVO cartSkuVO : tradeDTO.getCheckedSkuList()) {

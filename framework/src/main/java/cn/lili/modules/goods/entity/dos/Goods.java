@@ -107,7 +107,7 @@ public class Goods extends BaseEntity {
     private String templateId;
 
     @ApiModelProperty(value = "审核状态")
-    private String isAuth;
+    private String authFlag;
 
     @ApiModelProperty(value = "审核信息")
     private String authMessage;

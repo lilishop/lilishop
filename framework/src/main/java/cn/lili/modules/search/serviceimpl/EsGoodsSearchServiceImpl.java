@@ -372,7 +372,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             //未上架的商品不显示
             filterBuilder.must(QueryBuilders.matchQuery("marketEnable", GoodsStatusEnum.UPPER.name()));
             //待审核和审核不通过的商品不显示
-            filterBuilder.must(QueryBuilders.matchQuery("isAuth", GoodsAuthEnum.PASS.name()));
+            filterBuilder.must(QueryBuilders.matchQuery("authFlag", GoodsAuthEnum.PASS.name()));
 
 
             //关键字检索

@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -70,7 +70,7 @@ public class CouponSearchParams extends BasePromotionsSearchParams implements Se
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
         if (storeId != null) {
-            queryWrapper.in("store_id", Collections.singletonList(storeId));
+            queryWrapper.in("store_id", Arrays.asList(storeId.split(",")));
         }
         if (CharSequenceUtil.isNotEmpty(couponName)) {
             queryWrapper.like("coupon_name", couponName);
