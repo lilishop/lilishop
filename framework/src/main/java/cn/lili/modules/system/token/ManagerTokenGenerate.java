@@ -74,7 +74,7 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
         initPermission(superPermissions, queryPermissions);
 
         //循环权限菜单
-        if (userMenuVOList == null || userMenuVOList.isEmpty()) {
+        if (userMenuVOList != null) {
             userMenuVOList.forEach(menu -> {
                 //循环菜单，赋予用户权限
                 if (StrUtil.isNotEmpty(menu.getPermission())) {
