@@ -57,7 +57,7 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
                             .setDefaultCredentialsProvider(credential)
                             .setKeepAliveStrategy(getConnectionKeepAliveStrategy())
                             .setMaxConnPerRoute(10)
-                            .setDefaultIOReactorConfig(IOReactorConfig.custom().setIoThreadCount(1).build()));
+                            .setDefaultIOReactorConfig(IOReactorConfig.custom().setIoThreadCount(Runtime.getRuntime().availableProcessors()).build()));
         }
 
         restBuilder.setRequestConfigCallback(requestConfigBuilder ->

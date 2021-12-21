@@ -211,7 +211,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
     public void checkStatus(Coupon promotions) {
         super.checkStatus(promotions);
         FullDiscountSearchParams searchParams = new FullDiscountSearchParams();
-        searchParams.setIsCoupon(true);
+        searchParams.setCouponFlag(true);
         searchParams.setCouponId(promotions.getId());
         List<FullDiscount> fullDiscounts = fullDiscountService.listFindAll(searchParams);
         if (fullDiscounts != null && !fullDiscounts.isEmpty()) {

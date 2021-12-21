@@ -1,8 +1,8 @@
 package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -61,7 +61,7 @@ public class GoodsManagerController {
     @GetMapping(value = "/auth/list")
     public IPage<Goods> getAuthPage(GoodsSearchParams goodsSearchParams) {
 
-        goodsSearchParams.setIsAuth(GoodsAuthEnum.TOBEAUDITED.name());
+        goodsSearchParams.setAuthFlag(GoodsAuthEnum.TOBEAUDITED.name());
         return goodsService.queryByParams(goodsSearchParams);
     }
 
@@ -82,12 +82,12 @@ public class GoodsManagerController {
     @ApiOperation(value = "管理员审核商品", notes = "管理员审核商品")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "goodsIds", value = "商品ID", required = true, paramType = "path", allowMultiple = true, dataType = "int"),
-            @ApiImplicitParam(name = "isAuth", value = "审核结果", required = true, paramType = "query", dataType = "string")
+            @ApiImplicitParam(name = "authFlag", value = "审核结果", required = true, paramType = "query", dataType = "string")
     })
     @PutMapping(value = "{goodsIds}/auth")
-    public ResultMessage<Object> auth(@PathVariable List<String> goodsIds, @RequestParam String isAuth) {
+    public ResultMessage<Object> auth(@PathVariable List<String> goodsIds, @RequestParam String authFlag) {
         //校验商品是否存在
-        if (goodsService.auditGoods(goodsIds, GoodsAuthEnum.valueOf(isAuth))) {
+        if (goodsService.auditGoods(goodsIds, GoodsAuthEnum.valueOf(authFlag))) {
             return ResultUtil.success();
         }
         throw new ServiceException(ResultCode.GOODS_AUTH_ERROR);

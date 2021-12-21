@@ -9,9 +9,6 @@ import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsListVO;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsParams;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.util.List;
 
 
 /**
@@ -20,7 +17,7 @@ import java.util.List;
  * @author qiuqiu
  * @date 2021/7/1 9:45 上午
  */
-public interface KanjiaActivityGoodsService extends IService<KanjiaActivityGoods> {
+public interface KanjiaActivityGoodsService extends AbstractPromotionsService<KanjiaActivityGoods> {
 
 
     /**
@@ -30,15 +27,6 @@ public interface KanjiaActivityGoodsService extends IService<KanjiaActivityGoods
      * @return 是否添加成功
      */
     Boolean add(KanjiaActivityGoodsOperationDTO kanJiaActivityGoodsDTOS);
-
-    /**
-     * 查询砍价活动商品分页信息
-     *
-     * @param kanJiaActivityGoodsParams 砍价活动商品
-     * @param pageVO                    分页信息
-     * @return 砍价商品
-     */
-    IPage<KanjiaActivityGoods> getForPage(KanjiaActivityGoodsParams kanJiaActivityGoodsParams, PageVO pageVO);
 
     /**
      * 查询砍价活动商品分页信息
@@ -59,6 +47,7 @@ public interface KanjiaActivityGoodsService extends IService<KanjiaActivityGoods
 
     /**
      * 根据SkuId获取正在进行中的砍价商品
+     *
      * @param skuId 商品规格Id
      * @return 砍价商品
      */
@@ -66,6 +55,7 @@ public interface KanjiaActivityGoodsService extends IService<KanjiaActivityGoods
 
     /**
      * 查询砍价活动商品VO
+     *
      * @param id 砍价活动商品ID
      * @return 砍价活动商品
      */
@@ -78,13 +68,5 @@ public interface KanjiaActivityGoodsService extends IService<KanjiaActivityGoods
      * @return 是否修改成功
      */
     boolean updateKanjiaActivityGoods(KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO);
-
-    /**
-     * 删除砍价商品
-     *
-     * @param ids 砍价商品ids
-     * @return 是否删除成功
-     */
-    boolean deleteKanJiaGoods(List<String> ids);
 
 }

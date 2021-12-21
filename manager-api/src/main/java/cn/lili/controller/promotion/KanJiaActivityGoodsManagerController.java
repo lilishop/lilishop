@@ -24,7 +24,7 @@ import java.util.Arrays;
  * 管理端,促销接口
  *
  * @author qiuqiu
- * @date 2021/7/2
+ * @since 2021/7/2
  **/
 @RestController
 @Api(tags = "管理端,砍价促销接口")
@@ -44,8 +44,8 @@ public class KanJiaActivityGoodsManagerController {
 
     @ApiOperation(value = "获取砍价活动分页")
     @GetMapping
-    public ResultMessage<IPage<KanjiaActivityGoods>> getKanJiaActivityPage(KanjiaActivityGoodsParams KanJiaActivityParams, PageVO page) {
-        return ResultUtil.data(kanJiaActivityGoodsService.getForPage(KanJiaActivityParams, page));
+    public ResultMessage<IPage<KanjiaActivityGoods>> getKanJiaActivityPage(KanjiaActivityGoodsParams kanJiaParams, PageVO page) {
+        return ResultUtil.data(kanJiaActivityGoodsService.pageFindAll(kanJiaParams, page));
     }
 
 
@@ -60,7 +60,9 @@ public class KanJiaActivityGoodsManagerController {
     @PutMapping
     @ApiOperation(value = "修改砍价商品")
     public ResultMessage<Object> updatePointsGoods(@RequestBody KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO) {
-        kanJiaActivityGoodsService.updateKanjiaActivityGoods(kanJiaActivityGoodsDTO);
+        if (!kanJiaActivityGoodsService.updateKanjiaActivityGoods(kanJiaActivityGoodsDTO)) {
+            return ResultUtil.error(ResultCode.KANJIA_GOODS_UPDATE_ERROR);
+        }
         return ResultUtil.success();
     }
 
@@ -68,7 +70,7 @@ public class KanJiaActivityGoodsManagerController {
     @DeleteMapping("/{ids}")
     @ApiOperation(value = "删除砍价商品")
     public ResultMessage<Object> delete(@PathVariable String ids) {
-        if (kanJiaActivityGoodsService.deleteKanJiaGoods(Arrays.asList(ids.split(",")))) {
+        if (kanJiaActivityGoodsService.removePromotions(Arrays.asList(ids.split(",")))) {
             return ResultUtil.success();
         }
         throw new ServiceException(ResultCode.KANJIA_GOODS_DELETE_ERROR);

@@ -83,16 +83,22 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
             GoodsSku goodsSku = this.checkSkuExist(pointsGoods.getSkuId());
             pointsGoods.setStoreId(goodsSku.getStoreId());
             pointsGoods.setStoreName(goodsSku.getStoreName());
-            PromotionGoods promotionGoods = new PromotionGoods(pointsGoods, goodsSku);
-            promotionGoods.setPromotionType(PromotionTypeEnum.POINTS_GOODS.name());
-            promotionGoodsList.add(promotionGoods);
 
         }
         boolean saveBatch = this.saveBatch(promotionsList);
         if (saveBatch) {
-            this.promotionGoodsService.saveOrUpdateBatch(promotionGoodsList);
             for (PointsGoods pointsGoods : promotionsList) {
-                this.updateEsGoodsIndex(pointsGoods);
+                GoodsSku goodsSku = this.checkSkuExist(pointsGoods.getSkuId());
+                PromotionGoods promotionGoods = new PromotionGoods(pointsGoods, goodsSku);
+                promotionGoods.setPromotionType(PromotionTypeEnum.POINTS_GOODS.name());
+                promotionGoods.setScopeId(pointsGoods.getSkuId());
+                promotionGoodsList.add(promotionGoods);
+            }
+            boolean saveOrUpdateBatch = this.promotionGoodsService.saveOrUpdateBatch(promotionGoodsList);
+            if (saveOrUpdateBatch) {
+                for (PointsGoods pointsGoods : promotionsList) {
+                    this.updateEsGoodsIndex(pointsGoods);
+                }
             }
 
         }

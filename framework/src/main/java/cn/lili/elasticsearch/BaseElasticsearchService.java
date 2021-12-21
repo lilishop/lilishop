@@ -244,7 +244,7 @@ public abstract class BaseElasticsearchService {
                         "          }\n" +
                         "        }\n" +
                         "      },\n" +
-                        "      \"isAuth\": {\n" +
+                        "      \"authFlag\": {\n" +
                         "        \"type\": \"text\",\n" +
                         "        \"fields\": {\n" +
                         "          \"keyword\": {\n" +

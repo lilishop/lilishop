@@ -124,6 +124,8 @@ public class PromotionGoods extends BaseEntity {
         }
     }
 
+
+
     public PromotionGoods(KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO) {
         if (kanjiaActivityGoodsDTO != null) {
             BeanUtil.copyProperties(kanjiaActivityGoodsDTO, this, "id");

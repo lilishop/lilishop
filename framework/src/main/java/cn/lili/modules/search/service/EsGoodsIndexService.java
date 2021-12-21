@@ -133,10 +133,10 @@ public interface EsGoodsIndexService {
     /**
      * 删除索引中指定的促销活动id的促销活动
      *
-     * @param skuId       商品skuId
+     * @param skuIds       商品skuId
      * @param promotionId 促销活动Id
      */
-    void deleteEsGoodsPromotionByPromotionId(String skuId, String promotionId);
+    void deleteEsGoodsPromotionByPromotionId(List<String> skuIds, String promotionId);
 
     /**
      * 清除所以商品索引的无效促销活动

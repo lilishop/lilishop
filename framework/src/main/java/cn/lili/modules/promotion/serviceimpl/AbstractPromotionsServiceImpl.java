@@ -141,10 +141,11 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
         for (String id : ids) {
             T promotions = this.getById(id);
             this.checkStatus(promotions);
-            promotions.setDeleteFlag(true);
-            this.updatePromotionsGoods(promotions);
+            promotions.setStartTime(null);
+            promotions.setEndTime(null);
             this.updateEsGoodsIndex(promotions);
         }
+        this.promotionGoodsService.deletePromotionGoods(ids);
         return this.removeByIds(ids);
     }
 
@@ -245,7 +246,7 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
             //删除商品促销消息
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.DELETE_GOODS_INDEX_PROMOTIONS.name();
             //发送mq消息
-            rocketMQTemplate.asyncSend(destination, promotions.getId(), RocketmqSendCallbackBuilder.commonCallback());
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(promotions), RocketmqSendCallbackBuilder.commonCallback());
         } else {
 
             String esPromotionKey = this.getPromotionType().name() + "-" + promotions.getId();

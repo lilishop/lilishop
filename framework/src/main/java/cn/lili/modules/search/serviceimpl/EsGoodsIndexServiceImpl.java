@@ -120,19 +120,19 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             try {
                 //查询商品信息
                 LambdaQueryWrapper<GoodsSku> queryWrapper = new LambdaQueryWrapper<>();
-                queryWrapper.eq(GoodsSku::getIsAuth, GoodsAuthEnum.PASS.name());
+                queryWrapper.eq(GoodsSku::getAuthFlag, GoodsAuthEnum.PASS.name());
                 queryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
 
                 List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
 
                 LambdaQueryWrapper<Goods> goodsQueryWrapper = new LambdaQueryWrapper<>();
-                goodsQueryWrapper.eq(Goods::getIsAuth, GoodsAuthEnum.PASS.name());
+                goodsQueryWrapper.eq(Goods::getAuthFlag, GoodsAuthEnum.PASS.name());
                 goodsQueryWrapper.eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name());
 
                 for (Goods goods : goodsService.list(goodsQueryWrapper)) {
                     LambdaQueryWrapper<GoodsSku> skuQueryWrapper = new LambdaQueryWrapper<>();
                     skuQueryWrapper.eq(GoodsSku::getGoodsId, goods.getId());
-                    skuQueryWrapper.eq(GoodsSku::getIsAuth, GoodsAuthEnum.PASS.name());
+                    skuQueryWrapper.eq(GoodsSku::getAuthFlag, GoodsAuthEnum.PASS.name());
                     skuQueryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
 
                     List<GoodsSku> goodsSkuList = goodsSkuService.list(skuQueryWrapper);
@@ -420,7 +420,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
                 if (promotionMap != null && !promotionMap.isEmpty()) {
                     //如果存在同类型促销活动删除
-                    List<String> collect = promotionMap.keySet().parallelStream().filter(i -> i.contains(promotionType.name())).collect(Collectors.toList());
+                    List<String> collect = promotionMap.keySet().stream().filter(i -> i.contains(promotionType.name())).collect(Collectors.toList());
                     collect.forEach(promotionMap::remove);
                     goodsIndex.setPromotionMap(promotionMap);
                     updateIndex(goodsIndex);
@@ -432,14 +432,16 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     }
 
     @Override
-    public void deleteEsGoodsPromotionByPromotionId(String skuId, String promotionId) {
-        if (skuId != null) {
-            EsGoodsIndex goodsIndex = findById(skuId);
-            //商品索引不为空
-            if (goodsIndex != null) {
-                this.removePromotionByPromotionId(goodsIndex, promotionId);
-            } else {
-                log.error("更新索引商品促销信息失败！skuId 为 【{}】的索引不存在！", skuId);
+    public void deleteEsGoodsPromotionByPromotionId(List<String> skuIds, String promotionId) {
+        if (skuIds != null && !skuIds.isEmpty()) {
+            for (String skuId : skuIds) {
+                EsGoodsIndex goodsIndex = findById(skuId);
+                //商品索引不为空
+                if (goodsIndex != null) {
+                    this.removePromotionByPromotionId(goodsIndex, promotionId);
+                } else {
+                    log.error("更新索引商品促销信息失败！skuId 为 【{}】的索引不存在！", skuId);
+                }
             }
         } else {
             for (EsGoodsIndex goodsIndex : this.goodsIndexRepository.findAll()) {
@@ -480,7 +482,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 for (Map.Entry<String, Object> entry : promotionMap.entrySet()) {
                     BasePromotions promotion = (BasePromotions) entry.getValue();
                     //判定条件为活动已结束
-                    if (promotion.getEndTime().getTime() < DateUtil.date().getTime()) {
+                    if (promotion.getEndTime() != null && promotion.getEndTime().getTime() < DateUtil.date().getTime()) {
                         if (entry.getKey().contains(PromotionTypeEnum.SECKILL.name()) || entry.getKey().contains(PromotionTypeEnum.PINTUAN.name())) {
                             goodsIndex.setPromotionPrice(goodsIndex.getPrice());
                         }

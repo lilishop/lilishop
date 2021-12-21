@@ -29,7 +29,7 @@ public class FullDiscountSearchParams extends BasePromotionsSearchParams impleme
     private String storeId;
 
     @ApiModelProperty(value = "是否赠优惠券")
-    private Boolean isCoupon;
+    private Boolean couponFlag;
 
     @ApiModelProperty(value = "优惠券id")
     private String couponId;
@@ -43,8 +43,8 @@ public class FullDiscountSearchParams extends BasePromotionsSearchParams impleme
         if (storeId != null) {
             queryWrapper.in("store_id", Arrays.asList(storeId.split(",")));
         }
-        if (isCoupon != null) {
-            queryWrapper.eq("is_coupon", isCoupon);
+        if (couponFlag != null) {
+            queryWrapper.eq("coupon_flag", couponFlag);
         }
         if (CharSequenceUtil.isNotEmpty(couponId)) {
             queryWrapper.eq("coupon_id", couponId);

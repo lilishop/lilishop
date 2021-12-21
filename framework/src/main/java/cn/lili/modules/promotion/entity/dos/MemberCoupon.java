@@ -86,7 +86,7 @@ public class MemberCoupon extends BaseEntity {
     private String getType;
 
     @ApiModelProperty(value = "是否是平台优惠券")
-    private Boolean isPlatform;
+    private Boolean platformFlag;
 
     @ApiModelProperty(value = "店铺承担比例")
     private Double storeCommission;

@@ -15,6 +15,7 @@ import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
+import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
@@ -251,7 +252,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Order::getOrderPromotionType, PromotionTypeEnum.PINTUAN.name());
         queryWrapper.eq(Order::getPromotionId, pintuanId);
-        queryWrapper.nested(i -> i.eq(Order::getPayStatus, PayStatusEnum.PAID.name()).or().eq(Order::getOrderStatus, OrderStatusEnum.PAID.name()));
+        queryWrapper.nested(i -> i.eq(Order::getPayStatus, PayStatusEnum.PAID.name()).or(j -> j.eq(Order::getOrderStatus, OrderStatusEnum.PAID.name())));
         return this.list(queryWrapper);
     }
 
@@ -693,12 +694,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public boolean checkFictitiousOrder(String pintuanId, Integer requiredNum, Boolean fictitious) {
         Map<String, List<Order>> collect = this.queryListByPromotion(pintuanId)
-                .stream().filter(i -> CharSequenceUtil.isNotEmpty(i.getParentOrderSn()))
-                .collect(Collectors.groupingBy(Order::getParentOrderSn));
+                .stream().collect(Collectors.groupingBy(Order::getParentOrderSn));
 
         for (Map.Entry<String, List<Order>> entry : collect.entrySet()) {
             //是否开启虚拟成团
-            if (Boolean.FALSE.equals(fictitious) && entry.getValue().size() < requiredNum) {
+            if (Boolean.FALSE.equals(fictitious) && CharSequenceUtil.isNotEmpty(entry.getKey()) && entry.getValue().size() < requiredNum) {
                 //如果未开启虚拟成团且已参团人数小于成团人数，则自动取消订单
                 String reason = "拼团活动结束订单未付款，系统自动取消订单";
                 if (CharSequenceUtil.isNotEmpty(entry.getKey())) {
@@ -739,7 +739,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             //添加虚拟成团
             for (int i = 0; i < waitNum; i++) {
                 Order order = new Order();
-                BeanUtil.copyProperties(paidOrders.get(0), order);
+                BeanUtil.copyProperties(paidOrders.get(0), order, "id", "sn");
+                order.setSn(SnowFlake.createStr("G"));
+                order.setParentOrderSn(paidOrders.get(0).getParentOrderSn());
                 order.setMemberId("-1");
                 order.setMemberName("参团人员");
                 order.setDeleteFlag(true);
@@ -748,6 +750,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             }
             for (Order paidOrder : paidOrders) {
                 paidOrder.setOrderStatus(OrderStatusEnum.UNDELIVERED.name());
+                this.updateById(paidOrder);
                 orderStatusMessage(paidOrder);
             }
         }

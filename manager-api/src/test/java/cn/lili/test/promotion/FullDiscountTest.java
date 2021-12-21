@@ -42,10 +42,10 @@ class FullDiscountTest {
         fullDiscountVO.setStoreId("131");
         fullDiscountVO.setStoreName("小米自营旗舰店");
         fullDiscountVO.setDescription("full discount test " + RandomUtil.randomNumber());
-        fullDiscountVO.setIsFullMinus(true);
+        fullDiscountVO.setFullMinusFlag(true);
         fullDiscountVO.setFullMoney(130D);
         fullDiscountVO.setFullMinus(100D);
-        fullDiscountVO.setIsFreeFreight(true);
+        fullDiscountVO.setFreeFreightFlag(true);
 
         fullDiscountVO.setPromotionName("FullDiscount-" + fullDiscountVO.getId());
         fullDiscountVO.setTitle("满" + fullDiscountVO.getFullMoney() + "减" + fullDiscountVO.getFullMinus());
@@ -91,10 +91,10 @@ class FullDiscountTest {
         fullDiscountVO.setStoreId("132");
         fullDiscountVO.setStoreName("联想自营旗舰店");
         fullDiscountVO.setDescription("Not worth");
-        fullDiscountVO.setIsFullMinus(true);
+        fullDiscountVO.setFullMinusFlag(true);
         fullDiscountVO.setFullMoney(100D);
         fullDiscountVO.setFullMinus(80D);
-        fullDiscountVO.setIsFreeFreight(true);
+        fullDiscountVO.setFreeFreightFlag(true);
 
         fullDiscountVO.setPromotionName("FullDiscount-" + fullDiscountVO.getId());
         fullDiscountVO.setTitle("满" + fullDiscountVO.getFullMoney() + "减" + fullDiscountVO.getFullMinus());

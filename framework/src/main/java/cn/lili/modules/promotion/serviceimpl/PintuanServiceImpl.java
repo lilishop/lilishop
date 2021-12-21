@@ -5,6 +5,7 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
@@ -25,6 +26,11 @@ import cn.lili.modules.promotion.mapper.PintuanMapper;
 import cn.lili.modules.promotion.service.PintuanService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.tools.PromotionTools;
+import cn.lili.trigger.enums.DelayTypeEnums;
+import cn.lili.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.model.TimeExecuteConstant;
+import cn.lili.trigger.model.TimeTriggerMsg;
+import cn.lili.trigger.util.DelayQueueTools;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,6 +70,18 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
      */
     @Autowired
     private OrderService orderService;
+
+    /**
+     * 延时任务
+     */
+    @Autowired
+    private TimeTrigger timeTrigger;
+
+    /**
+     * RocketMQ
+     */
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
 
     /**
      * 获取当前拼团的会员
@@ -195,6 +213,13 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
                 && promotions instanceof PintuanVO) {
             PintuanVO pintuanVO = (PintuanVO) promotions;
             this.updatePintuanPromotionGoods(pintuanVO);
+            TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
+                    promotions.getEndTime().getTime(),
+                    promotions,
+                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PINTUAN_ORDER, (promotions.getId())),
+                    rocketmqCustomProperties.getPromotionTopic());
+            //发送促销活动开始的延时任务
+            this.timeTrigger.addDelay(timeTriggerMsg);
         }
         if (promotions.getEndTime() == null && promotions.getStartTime() == null) {
             //过滤父级拼团订单，根据父级拼团订单分组
@@ -237,7 +262,7 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
             if (CharSequenceUtil.isEmpty(order.getParentOrderSn())) {
                 memberVO.setOrderSn("");
                 PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
-                searchParams.setPromotionStatus(PromotionTypeEnum.PINTUAN.name());
+                searchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
                 searchParams.setPromotionId(order.getPromotionId());
                 searchParams.setSkuId(skuId);
                 PromotionGoods promotionGoods = promotionGoodsService.getPromotionsGoods(searchParams);

@@ -4,6 +4,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
@@ -27,6 +28,7 @@ import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -39,6 +41,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 秒杀活动业务层实现
@@ -138,6 +141,13 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
     @Override
     public void updateEsGoodsSeckill(Seckill seckill, List<SeckillApply> seckillApplies) {
         if (seckillApplies != null && !seckillApplies.isEmpty()) {
+            // 更新促销范围
+            List<String> skuIds = seckillApplies.stream().map(SeckillApply::getSkuId).collect(Collectors.toList());
+            seckill.setScopeId(ArrayUtil.join(skuIds.toArray(), ","));
+            UpdateWrapper<Seckill> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("id", seckill.getId());
+            updateWrapper.set("scope_id", seckill.getScopeId());
+            this.update(updateWrapper);
             //循环秒杀商品数据，将数据按照时间段进行存储
             for (SeckillApply seckillApply : seckillApplies) {
                 if (seckillApply.getPromotionApplyStatus().equals(PromotionsApplyStatusEnum.PASS.name())) {
