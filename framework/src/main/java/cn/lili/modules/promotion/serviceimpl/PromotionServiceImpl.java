@@ -1,7 +1,6 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.lili.common.enums.PromotionTypeEnum;
-import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.entity.dos.*;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
@@ -63,9 +62,6 @@ public class PromotionServiceImpl implements PromotionService {
      */
     @Autowired
     private PointsGoodsService pointsGoodsService;
-
-    @Autowired
-    private GoodsSkuService goodsSkuService;
 
 
     /**
@@ -176,7 +172,7 @@ public class PromotionServiceImpl implements PromotionService {
         SeckillSearchParams searchParams = new SeckillSearchParams();
         searchParams.setSeckillId(promotionGoods.getPromotionId());
         searchParams.setSkuId(promotionGoods.getSkuId());
-        List<SeckillApply> seckillApplyList = seckillApplyService.getSeckillApply(searchParams);
+        List<SeckillApply> seckillApplyList = seckillApplyService.getSeckillApplyList(searchParams);
         if (seckillApplyList != null && !seckillApplyList.isEmpty()) {
             SeckillApply seckillApply = seckillApplyList.get(0);
             int nextHour = 23;

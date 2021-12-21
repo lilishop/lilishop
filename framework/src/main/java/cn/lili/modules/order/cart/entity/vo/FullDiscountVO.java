@@ -1,6 +1,6 @@
 package cn.lili.modules.order.cart.entity.vo;
 
-import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.modules.promotion.entity.dos.FullDiscount;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import lombok.Data;
@@ -29,14 +29,20 @@ public class FullDiscountVO extends FullDiscount {
     private List<PromotionGoods> promotionGoodsList;
 
     /**
-     * 赠品信息
+     * 赠品skuId
      */
-    private GoodsSku giftSku;
+    private String giftSkuId;
 
     /**
-     * 参与商品，为-1则代表所有商品参加
+     * 赠品名称
      */
-    private Integer number;
+    private String giftSkuName;
+
+    /**
+     * 赠品路径
+     */
+    private String giftSkuThumbnail;
+
 
     public FullDiscountVO(FullDiscount fullDiscount) {
         BeanUtils.copyProperties(fullDiscount, this);
@@ -44,25 +50,25 @@ public class FullDiscountVO extends FullDiscount {
 
     public String notice() {
         StringBuilder stringBuffer = new StringBuilder();
-        if (Boolean.TRUE.equals(this.getIsFullMinus())) {
+        if (Boolean.TRUE.equals(this.getFullMinusFlag())) {
             stringBuffer.append(" 减").append(this.getFullMinus()).append("元 ");
         }
-        if (Boolean.TRUE.equals(this.getIsFullRate())) {
+        if (Boolean.TRUE.equals(this.getFullRateFlag())) {
             stringBuffer.append(" 打").append(this.getFullRate()).append("折 ");
         }
 
-        if (Boolean.TRUE.equals(this.getIsFreeFreight())) {
+        if (Boolean.TRUE.equals(this.getFreeFreightFlag())) {
             stringBuffer.append(" 免运费 ");
         }
 
-        if (Boolean.TRUE.equals(this.getIsPoint())) {
+        if (Boolean.TRUE.equals(this.getPointFlag())) {
             stringBuffer.append(" 赠").append(this.getPoint()).append("积分 ");
         }
-        if (Boolean.TRUE.equals(this.getIsCoupon())) {
+        if (Boolean.TRUE.equals(this.getCouponFlag())) {
             stringBuffer.append(" 赠").append("优惠券 ");
         }
-        if (Boolean.TRUE.equals(this.getIsGift() && giftSku != null)) {
-            stringBuffer.append(" 赠品[").append(giftSku.getGoodsName()).append("]");
+        if (Boolean.TRUE.equals(this.getGiftFlag() && CharSequenceUtil.isNotEmpty(giftSkuName))) {
+            stringBuffer.append(" 赠品[").append(giftSkuName).append("]");
         }
 
         return stringBuffer.toString();

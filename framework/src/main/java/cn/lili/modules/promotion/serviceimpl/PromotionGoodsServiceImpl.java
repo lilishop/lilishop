@@ -18,6 +18,7 @@ import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.BasePromotionsSearchParams;
 import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
+import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
 import cn.lili.modules.promotion.mapper.PromotionGoodsMapper;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.FullDiscountService;
@@ -264,16 +265,14 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     public void updatePromotionGoodsStock(PromotionTypeEnum typeEnum, String promotionId, String skuId, Integer quantity) {
         String promotionStockKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(typeEnum, promotionId, skuId);
         if (typeEnum.equals(PromotionTypeEnum.SECKILL)) {
-            LambdaQueryWrapper<SeckillApply> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(SeckillApply::getSeckillId, promotionId).eq(SeckillApply::getSkuId, skuId);
-            SeckillApply seckillApply = this.seckillApplyService.getOne(queryWrapper, false);
+            SeckillSearchParams searchParams = new SeckillSearchParams();
+            searchParams.setSeckillId(promotionId);
+            searchParams.setSkuId(skuId);
+            SeckillApply seckillApply = this.seckillApplyService.getSeckillApply(searchParams);
             if (seckillApply == null) {
                 throw new ServiceException(ResultCode.SECKILL_NOT_EXIST_ERROR);
             }
-            LambdaUpdateWrapper<SeckillApply> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(SeckillApply::getSeckillId, promotionId).eq(SeckillApply::getSkuId, skuId);
-            updateWrapper.set(SeckillApply::getQuantity, quantity);
-            seckillApplyService.update(updateWrapper);
+            seckillApplyService.updateSeckillApplyQuantity(promotionId, skuId, quantity);
         } else {
             LambdaUpdateWrapper<PromotionGoods> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(PromotionGoods::getPromotionType, typeEnum.name()).eq(PromotionGoods::getPromotionId, promotionId).eq(PromotionGoods::getSkuId, skuId);

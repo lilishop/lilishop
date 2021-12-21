@@ -246,7 +246,7 @@ public class CartController {
             throw se;
         } catch (Exception e) {
             log.error(ResultCode.ORDER_ERROR.message(), e);
-            throw new ServiceException(ResultCode.ORDER_ERROR);
+            throw e;
         }
     }
 }

@@ -32,10 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 店铺详细业务层实现
@@ -103,8 +100,8 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
         goodsService.updateStoreDetail(store);
 
         Map<String, Object> updateIndexFieldsMap = EsIndexUtil.getUpdateIndexFieldsMap(
-                MapUtil.builder().put("storeId", store.getId()).build(),
-                MapUtil.builder().put("storeName", store.getStoreName()).put("selfOperated", store.getSelfOperated()).build());
+                MapUtil.builder(new HashMap<String, Object>()).put("storeId", store.getId()).build(),
+                MapUtil.builder(new HashMap<String, Object>()).put("storeName", store.getStoreName()).put("selfOperated", store.getSelfOperated()).build());
         String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX_FIELD.name();
         //发送mq消息
         rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(updateIndexFieldsMap), RocketmqSendCallbackBuilder.commonCallback());

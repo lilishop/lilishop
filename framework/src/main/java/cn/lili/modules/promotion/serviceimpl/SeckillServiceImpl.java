@@ -4,34 +4,44 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
 import cn.lili.modules.promotion.entity.enums.PromotionsApplyStatusEnum;
+import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.mapper.SeckillMapper;
 import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.service.SeckillService;
 import cn.lili.modules.promotion.tools.PromotionTools;
-import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.SeckillSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 秒杀活动业务层实现
@@ -45,11 +55,6 @@ import java.util.List;
 public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMapper, Seckill> implements SeckillService {
 
     /**
-     * 商品索引
-     */
-    @Autowired
-    private EsGoodsIndexService goodsIndexService;
-    /**
      * 设置
      */
     @Autowired
@@ -58,13 +63,27 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
     @Autowired
     private SeckillApplyService seckillApplyService;
 
+    /**
+     * rocketMq配置
+     */
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
+
+    /**
+     * rocketMq
+     */
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
+
 
     @Override
     public SeckillVO getSeckillDetail(String id) {
         Seckill seckill = this.checkSeckillExist(id);
         SeckillVO seckillVO = new SeckillVO();
         BeanUtils.copyProperties(seckill, seckillVO);
-        seckillVO.setSeckillApplyList(this.seckillApplyService.list(new LambdaQueryWrapper<SeckillApply>().eq(SeckillApply::getSeckillId, id)));
+        SeckillSearchParams searchParams = new SeckillSearchParams();
+        searchParams.setSeckillId(id);
+        seckillVO.setSeckillApplyList(this.seckillApplyService.getSeckillApplyList(searchParams));
         return seckillVO;
     }
 
@@ -76,7 +95,7 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
         for (Seckill seckill : seckillList) {
             seckill.setStartTime(null);
             seckill.setEndTime(null);
-            this.goodsIndexService.updateEsGoodsIndexAllByList(seckill, PromotionTypeEnum.SECKILL.name() + "-" + seckill.getId());
+            this.updateEsGoodsIndex(seckill);
         }
         this.remove(new QueryWrapper<>());
 
@@ -103,10 +122,12 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
     public void updateSeckillGoodsNum(String seckillId) {
         Seckill seckill = this.getById(seckillId);
         if (seckill != null) {
+            SeckillSearchParams searchParams = new SeckillSearchParams();
+            searchParams.setSeckillId(seckillId);
             LambdaUpdateWrapper<Seckill> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(Seckill::getId, seckillId);
             updateWrapper.set(Seckill::getGoodsNum,
-                    this.seckillApplyService.count(new LambdaQueryWrapper<SeckillApply>().eq(SeckillApply::getSeckillId, seckillId)));
+                    this.seckillApplyService.getSeckillApplyCount(searchParams));
             this.update(updateWrapper);
 
         }
@@ -120,13 +141,30 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
     @Override
     public void updateEsGoodsSeckill(Seckill seckill, List<SeckillApply> seckillApplies) {
         if (seckillApplies != null && !seckillApplies.isEmpty()) {
+            // 更新促销范围
+            List<String> skuIds = seckillApplies.stream().map(SeckillApply::getSkuId).collect(Collectors.toList());
+            seckill.setScopeId(ArrayUtil.join(skuIds.toArray(), ","));
+            UpdateWrapper<Seckill> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("id", seckill.getId());
+            updateWrapper.set("scope_id", seckill.getScopeId());
+            this.update(updateWrapper);
             //循环秒杀商品数据，将数据按照时间段进行存储
             for (SeckillApply seckillApply : seckillApplies) {
                 if (seckillApply.getPromotionApplyStatus().equals(PromotionsApplyStatusEnum.PASS.name())) {
                     this.setSeckillApplyTime(seckill, seckillApply);
                     log.info("更新限时抢购商品状态:{}", seckill);
                     String promotionKey = PromotionTypeEnum.SECKILL.name() + "-" + seckillApply.getTimeLine();
-                    this.goodsIndexService.updateEsGoodsIndexPromotions(seckillApply.getSkuId(), seckill, promotionKey, seckillApply.getPrice());
+                    Map<String, Object> map = new HashMap<>();
+                    // es促销key
+                    map.put("esPromotionKey", promotionKey);
+                    // 促销类型全路径名
+                    map.put("promotionsType", Seckill.class.getName());
+                    // 促销实体
+                    map.put("promotions", seckill);
+                    //更新商品促销消息
+                    String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX_PROMOTIONS.name();
+                    //发送mq消息
+                    rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(map), RocketmqSendCallbackBuilder.commonCallback());
                 }
             }
         }

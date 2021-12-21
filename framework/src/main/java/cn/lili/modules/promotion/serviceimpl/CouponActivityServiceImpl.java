@@ -203,7 +203,7 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
                         memberCoupon.setMemberId(map.get("id").toString());
                         memberCoupon.setMemberName(map.get("nick_name").toString());
                         memberCoupon.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
-                        memberCoupon.setIsPlatform("platform".equals(coupon.getStoreId()));
+                        memberCoupon.setPlatformFlag("platform".equals(coupon.getStoreId()));
                         memberCouponList.add(memberCoupon);
                     }
                 }

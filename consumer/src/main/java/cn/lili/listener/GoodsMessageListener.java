@@ -141,12 +141,20 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 this.updateGoodsIndexPromotions(new String(messageExt.getBody()));
                 break;
             case DELETE_GOODS_INDEX_PROMOTIONS:
-                this.goodsIndexService.deleteEsGoodsPromotionByPromotionId(null, new String(messageExt.getBody()));
+                BasePromotions promotions = JSONUtil.toBean(new String(messageExt.getBody()), BasePromotions.class);
+                log.info("删除索引信息: {}", promotions);
+                if (CharSequenceUtil.isNotEmpty(promotions.getScopeId())) {
+                    this.goodsIndexService.deleteEsGoodsPromotionByPromotionId(Arrays.asList(promotions.getScopeId().split(",")), promotions.getId());
+                } else {
+                    this.goodsIndexService.deleteEsGoodsPromotionByPromotionId(null, promotions.getId());
+                }
                 break;
             case UPDATE_GOODS_INDEX:
                 try {
                     String goodsIdsJsonStr = new String(messageExt.getBody());
-                    List<Goods> goodsList = goodsService.list(new LambdaQueryWrapper<Goods>().in(Goods::getId, JSONUtil.toList(goodsIdsJsonStr, String.class)));
+                    GoodsSearchParams searchParams = new GoodsSearchParams();
+                    searchParams.setId(ArrayUtil.join(JSONUtil.toList(goodsIdsJsonStr, String.class).toArray(), ","));
+                    List<Goods> goodsList = goodsService.queryListByParams(searchParams);
                     this.updateGoodsIndex(goodsList);
                 } catch (Exception e) {
                     log.error("更新商品索引事件执行异常，商品信息 {}", new String(messageExt.getBody()));
@@ -224,6 +232,8 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
                 searchParams.setPromotionId(promotions.getId());
                 List<PromotionGoods> promotionGoodsList = this.promotionGoodsService.listFindAll(searchParams);
+                List<String> skuIds = promotionGoodsList.stream().map(PromotionGoods::getSkuId).collect(Collectors.toList());
+                this.goodsIndexService.deleteEsGoodsPromotionByPromotionId(skuIds, promotions.getId());
                 this.goodsIndexService.updateEsGoodsIndexByList(promotionGoodsList, promotions, esPromotionKey);
             } else if (PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name().equals(promotions.getScopeType())) {
                 GoodsSearchParams searchParams = new GoodsSearchParams();
@@ -249,7 +259,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
         for (Goods goods : goodsList) {
             //如果商品通过审核&&并且已上架
             List<GoodsSku> goodsSkuList = this.goodsSkuService.list(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goods.getId()).gt(GoodsSku::getQuantity, 0));
-            if (goods.getIsAuth().equals(GoodsAuthEnum.PASS.name())
+            if (goods.getAuthFlag().equals(GoodsAuthEnum.PASS.name())
                     && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())
                     && Boolean.FALSE.equals(goods.getDeleteFlag())) {
                 goodsSkuList.forEach(goodsSku -> {
@@ -278,7 +288,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
     private void updateGoodsIndex(Goods goods) {
         //如果商品通过审核&&并且已上架
         List<GoodsSku> goodsSkuList = this.goodsSkuService.list(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goods.getId()));
-        if (goods.getIsAuth().equals(GoodsAuthEnum.PASS.name())
+        if (goods.getAuthFlag().equals(GoodsAuthEnum.PASS.name())
                 && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())
                 && Boolean.FALSE.equals(goods.getDeleteFlag())) {
             this.generatorGoodsIndex(goods, goodsSkuList);
@@ -322,7 +332,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
             List<GoodsParamsDTO> goodsParamDTOS = JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class);
             goodsIndex = new EsGoodsIndex(goodsSku, goodsParamDTOS);
         }
-        goodsIndex.setIsAuth(goods.getIsAuth());
+        goodsIndex.setAuthFlag(goods.getAuthFlag());
         goodsIndex.setMarketEnable(goods.getMarketEnable());
         this.settingUpGoodsIndexOtherParam(goodsIndex);
         return goodsIndex;

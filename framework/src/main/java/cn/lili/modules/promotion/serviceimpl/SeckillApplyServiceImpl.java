@@ -27,6 +27,7 @@ import cn.lili.modules.promotion.tools.PromotionCacheKeys;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -100,7 +101,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     }
 
     @Override
-    public IPage<SeckillApply> getSeckillApply(SeckillSearchParams queryParam, PageVO pageVo) {
+    public IPage<SeckillApply> getSeckillApplyPage(SeckillSearchParams queryParam, PageVO pageVo) {
         IPage<SeckillApply> seckillApplyPage = this.page(PageUtil.initPage(pageVo), queryParam.queryWrapper());
         if (seckillApplyPage != null && !seckillApplyPage.getRecords().isEmpty()) {
 
@@ -126,8 +127,30 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
      * @return 限时请购申请列表
      */
     @Override
-    public List<SeckillApply> getSeckillApply(SeckillSearchParams queryParam) {
+    public List<SeckillApply> getSeckillApplyList(SeckillSearchParams queryParam) {
         return this.list(queryParam.queryWrapper());
+    }
+
+    /**
+     * 查询限时请购申请列表总数
+     *
+     * @param queryParam 查询条件
+     * @return 限时请购申请列表总数
+     */
+    @Override
+    public long getSeckillApplyCount(SeckillSearchParams queryParam) {
+        return this.count(queryParam.queryWrapper());
+    }
+
+    /**
+     * 查询限时请购申请
+     *
+     * @param queryParam 秒杀活动申请查询参数
+     * @return 限时请购申请
+     */
+    @Override
+    public SeckillApply getSeckillApply(SeckillSearchParams queryParam) {
+        return this.getOne(queryParam.queryWrapper(), false);
     }
 
     @Override
@@ -187,7 +210,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
      * 批量删除秒杀活动申请
      *
      * @param seckillId 秒杀活动活动id
-     * @param id    id
+     * @param id        id
      */
     @Override
     public void removeSeckillApply(String seckillId, String id) {
@@ -208,6 +231,21 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
 
         //删除促销商品
         this.promotionGoodsService.deletePromotionGoods(seckillId, Collections.singletonList(seckillApply.getSkuId()));
+    }
+
+    /**
+     * 更新秒杀商品库存
+     *
+     * @param seckillId 秒杀活动id
+     * @param skuId     商品skuId
+     * @param quantity  库存
+     */
+    @Override
+    public void updateSeckillApplyQuantity(String seckillId, String skuId, Integer quantity) {
+        LambdaUpdateWrapper<SeckillApply> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(SeckillApply::getSeckillId, seckillId).eq(SeckillApply::getSkuId, skuId);
+        updateWrapper.set(SeckillApply::getQuantity, quantity);
+        this.update(updateWrapper);
     }
 
     /**

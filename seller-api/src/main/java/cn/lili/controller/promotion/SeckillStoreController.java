@@ -47,7 +47,7 @@ public class SeckillStoreController {
     public ResultMessage<IPage<SeckillApply>> getSeckillApplyPage(SeckillSearchParams queryParam, PageVO pageVo) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         queryParam.setStoreId(storeId);
-        IPage<SeckillApply> seckillPage = seckillApplyService.getSeckillApply(queryParam, pageVo);
+        IPage<SeckillApply> seckillPage = seckillApplyService.getSeckillApplyPage(queryParam, pageVo);
         return ResultUtil.data(seckillPage);
     }
 

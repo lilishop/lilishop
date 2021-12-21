@@ -15,6 +15,7 @@ import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
+import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
@@ -74,10 +75,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 子订单业务层实现
@@ -253,7 +252,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Order::getOrderPromotionType, PromotionTypeEnum.PINTUAN.name());
         queryWrapper.eq(Order::getPromotionId, pintuanId);
-        queryWrapper.nested(i -> i.eq(Order::getPayStatus, PayStatusEnum.PAID.name()).or().eq(Order::getOrderStatus, OrderStatusEnum.PAID.name()));
+        queryWrapper.nested(i -> i.eq(Order::getPayStatus, PayStatusEnum.PAID.name()).or(j -> j.eq(Order::getOrderStatus, OrderStatusEnum.PAID.name())));
         return this.list(queryWrapper);
     }
 
@@ -682,6 +681,79 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
 
 
+    }
+
+    /**
+     * 检查是否开始虚拟成团
+     *
+     * @param pintuanId   拼团活动id
+     * @param requiredNum 成团人数
+     * @param fictitious  是否开启成团
+     * @return 是否成功
+     */
+    @Override
+    public boolean checkFictitiousOrder(String pintuanId, Integer requiredNum, Boolean fictitious) {
+        Map<String, List<Order>> collect = this.queryListByPromotion(pintuanId)
+                .stream().collect(Collectors.groupingBy(Order::getParentOrderSn));
+
+        for (Map.Entry<String, List<Order>> entry : collect.entrySet()) {
+            //是否开启虚拟成团
+            if (Boolean.FALSE.equals(fictitious) && CharSequenceUtil.isNotEmpty(entry.getKey()) && entry.getValue().size() < requiredNum) {
+                //如果未开启虚拟成团且已参团人数小于成团人数，则自动取消订单
+                String reason = "拼团活动结束订单未付款，系统自动取消订单";
+                if (CharSequenceUtil.isNotEmpty(entry.getKey())) {
+                    this.systemCancel(entry.getKey(), reason);
+                } else {
+                    for (Order order : entry.getValue()) {
+                        this.systemCancel(order.getSn(), reason);
+                    }
+                }
+            } else if (Boolean.TRUE.equals(fictitious)) {
+                this.fictitiousPintuan(entry, requiredNum);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 虚拟成团
+     *
+     * @param entry       订单列表
+     * @param requiredNum 必须参团人数
+     */
+    private void fictitiousPintuan(Map.Entry<String, List<Order>> entry, Integer requiredNum) {
+        Map<String, List<Order>> listMap = entry.getValue().stream().collect(Collectors.groupingBy(Order::getPayStatus));
+        //未付款订单
+        List<Order> unpaidOrders = listMap.get(PayStatusEnum.UNPAID.name());
+        //未付款订单自动取消
+        if (unpaidOrders != null && !unpaidOrders.isEmpty()) {
+            for (Order unpaidOrder : unpaidOrders) {
+                this.systemCancel(unpaidOrder.getSn(), "拼团活动结束订单未付款，系统自动取消订单");
+            }
+        }
+        List<Order> paidOrders = listMap.get(PayStatusEnum.PAID.name());
+        //如待参团人数大于0，并已开启虚拟成团
+        if (!paidOrders.isEmpty()) {
+            //待参团人数
+            int waitNum = requiredNum - paidOrders.size();
+            //添加虚拟成团
+            for (int i = 0; i < waitNum; i++) {
+                Order order = new Order();
+                BeanUtil.copyProperties(paidOrders.get(0), order, "id", "sn");
+                order.setSn(SnowFlake.createStr("G"));
+                order.setParentOrderSn(paidOrders.get(0).getParentOrderSn());
+                order.setMemberId("-1");
+                order.setMemberName("参团人员");
+                order.setDeleteFlag(true);
+                this.save(order);
+                paidOrders.add(order);
+            }
+            for (Order paidOrder : paidOrders) {
+                paidOrder.setOrderStatus(OrderStatusEnum.UNDELIVERED.name());
+                this.updateById(paidOrder);
+                orderStatusMessage(paidOrder);
+            }
+        }
     }
 
     /**
