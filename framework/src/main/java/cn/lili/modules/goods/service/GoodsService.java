@@ -113,6 +113,15 @@ public interface GoodsService extends IService<Goods> {
     Boolean updateGoodsMarketAble(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, String underReason);
 
     /**
+     * 更新商品上架状态状态
+     *
+     * @param goodsIds        商品ID集合
+     * @param goodsStatusEnum 更新的商品状态
+     * @param underReason     下架原因
+     * @return 更新结果
+     */
+    Boolean managerUpdateGoodsMarketAble(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, String underReason);
+    /**
      * 删除商品
      *
      * @param goodsIds 商品ID
