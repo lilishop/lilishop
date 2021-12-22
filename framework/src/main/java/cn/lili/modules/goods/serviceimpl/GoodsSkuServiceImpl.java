@@ -226,13 +226,13 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //从缓存拿商品Sku
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
         //如果使用商品ID无法查询SKU则返回错误
-        if (goodsVO == null | goodsSku == null) {
+        if (goodsVO == null || goodsSku == null) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
 
         //商品下架||商品未审核通过||商品删除，则提示：商品已下架
-        if (goodsVO.getMarketEnable().equals(GoodsStatusEnum.DOWN.name())
-                || !goodsVO.getAuthFlag().equals(GoodsAuthEnum.PASS.name())
+        if (GoodsStatusEnum.DOWN.name().equals(goodsVO.getMarketEnable())
+                || !GoodsAuthEnum.PASS.name().equals(goodsVO.getAuthFlag())
                 || Boolean.TRUE.equals(goodsVO.getDeleteFlag())) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
