@@ -226,7 +226,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //从缓存拿商品Sku
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
         //如果使用商品ID无法查询SKU则返回错误
-        if (goodsSku == null) {
+        if (goodsVO == null | goodsSku == null) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
 
