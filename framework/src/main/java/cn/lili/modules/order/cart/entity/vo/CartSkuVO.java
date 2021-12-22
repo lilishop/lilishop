@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -121,5 +122,12 @@ public class CartSkuVO extends CartBase implements Serializable {
         if (promotionMap != null && !promotionMap.isEmpty()) {
             this.promotionMap = promotionMap;
         }
+    }
+
+    public Map<String, Object> getPromotionMap() {
+        if (this.promotionMap == null) {
+            return new HashMap<>();
+        }
+        return promotionMap;
     }
 }
