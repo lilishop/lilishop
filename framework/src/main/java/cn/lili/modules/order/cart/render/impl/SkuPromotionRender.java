@@ -9,7 +9,6 @@ import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
-import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
 import cn.lili.modules.promotion.entity.vos.PromotionSkuVO;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivitySearchParams;
@@ -122,18 +121,19 @@ public class SkuPromotionRender implements CartRenderStep {
                 for (CartVO cartVO : tradeDTO.getCartList()) {
                     //循环sku
                     for (CartSkuVO cartSkuVO : cartVO.getCheckedSkuList()) {
-                        //赋予商品促销信息
-                        for (Map.Entry<String, Object> entry : cartSkuVO.getPromotionMap().entrySet()) {
-                            // 忽略拼团活动
-                            if (entry.getKey().contains(PromotionTypeEnum.PINTUAN.name())) {
-                                continue;
+                        if (cartSkuVO.getPromotionMap() != null && !cartSkuVO.getPromotionMap().isEmpty()) {
+                            //赋予商品促销信息
+                            for (Map.Entry<String, Object> entry : cartSkuVO.getPromotionMap().entrySet()) {
+                                // 忽略拼团活动
+                                if (entry.getKey().contains(PromotionTypeEnum.PINTUAN.name())) {
+                                    continue;
+                                }
+//                            BasePromotions basePromotions = (BasePromotions) entry.getValue();
+//                            PromotionSkuVO promotionSkuVO = new PromotionSkuVO(entry.getKey().split("-")[0], basePromotions.getId());
+                                cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
+                                cartSkuVO.getPriceDetailDTO().setGoodsPrice(cartSkuVO.getSubTotal());
+//                            cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
                             }
-                            BasePromotions basePromotions = (BasePromotions) entry.getValue();
-                            PromotionSkuVO promotionSkuVO = new PromotionSkuVO(entry.getKey().split("-")[0], basePromotions.getId());
-                            cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
-                            cartSkuVO.getPriceDetailDTO().setGoodsPrice(cartSkuVO.getSubTotal());
-
-                            cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
                         }
                     }
                 }

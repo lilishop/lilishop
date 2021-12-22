@@ -272,7 +272,7 @@ public class Order extends BaseEntity {
             this.setOrderPromotionType(tradeDTO.getCartTypeEnum().name());
 
             //判断是否为拼团订单，如果为拼团订单获取拼团ID，判断是否为主订单
-            if (tradeDTO.getCartTypeEnum().name().equals(PromotionTypeEnum.PINTUAN.name())) {
+            if (tradeDTO.getCartTypeEnum().name().equals(PromotionTypeEnum.PINTUAN.name()) && cartVO.getCheckedSkuList().get(0).getPromotionMap() != null && !cartVO.getCheckedSkuList().get(0).getPromotionMap().isEmpty()) {
                 Optional<String> pintuanPromotions = cartVO.getCheckedSkuList().get(0).getPromotionMap().keySet().stream().filter(i -> i.contains(PromotionTypeEnum.PINTUAN.name())).findFirst();
                 pintuanPromotions.ifPresent(s -> promotionId = s.split("-")[1]);
             }
