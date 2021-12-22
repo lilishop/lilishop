@@ -114,13 +114,15 @@ public class CheckDataRender implements CartRenderStep {
                 cartSkuVO.setErrorMessage("商品库存不足,现有库存数量[" + dataSku.getQuantity() + "]");
             }
             //移除无效促销活动
-            cartSkuVO.setPromotionMap(cartSkuVO.getPromotionMap().entrySet().stream().filter(i -> {
-                BasePromotions basePromotions = (BasePromotions) i.getValue();
-                if (basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
-                    return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
-                }
-                return true;
-            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            if (cartSkuVO.getPromotionMap() != null && !cartSkuVO.getPromotionMap().isEmpty()) {
+                cartSkuVO.setPromotionMap(cartSkuVO.getPromotionMap().entrySet().stream().filter(i -> {
+                    BasePromotions basePromotions = (BasePromotions) i.getValue();
+                    if (basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
+                        return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
+                    }
+                    return true;
+                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            }
         }
     }
 
