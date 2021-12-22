@@ -48,7 +48,7 @@ public class FullDiscountRender implements CartRenderStep {
         //循环店铺购物车
         for (CartVO cart : cartList) {
             List<CartSkuVO> fullDiscountSkuList = cart.getSkuList().stream()
-                    .filter(i -> i.getPromotionMap().keySet().stream().anyMatch(j -> j.contains(PromotionTypeEnum.FULL_DISCOUNT.name())))
+                    .filter(i -> i.getPromotionMap() != null && !i.getPromotionMap().isEmpty() && i.getPromotionMap().keySet().stream().anyMatch(j -> j.contains(PromotionTypeEnum.FULL_DISCOUNT.name())))
                     .collect(Collectors.toList());
 
             if (!fullDiscountSkuList.isEmpty()) {
