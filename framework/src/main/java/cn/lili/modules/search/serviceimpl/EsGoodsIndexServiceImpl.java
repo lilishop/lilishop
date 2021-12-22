@@ -118,22 +118,19 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
         ThreadUtil.execAsync(() -> {
             try {
-                //查询商品信息
-                LambdaQueryWrapper<GoodsSku> queryWrapper = new LambdaQueryWrapper<>();
-                queryWrapper.eq(GoodsSku::getAuthFlag, GoodsAuthEnum.PASS.name());
-                queryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
-
                 List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
 
                 LambdaQueryWrapper<Goods> goodsQueryWrapper = new LambdaQueryWrapper<>();
                 goodsQueryWrapper.eq(Goods::getAuthFlag, GoodsAuthEnum.PASS.name());
                 goodsQueryWrapper.eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name());
+                goodsQueryWrapper.eq(Goods::getDeleteFlag, false);
 
                 for (Goods goods : goodsService.list(goodsQueryWrapper)) {
                     LambdaQueryWrapper<GoodsSku> skuQueryWrapper = new LambdaQueryWrapper<>();
                     skuQueryWrapper.eq(GoodsSku::getGoodsId, goods.getId());
                     skuQueryWrapper.eq(GoodsSku::getAuthFlag, GoodsAuthEnum.PASS.name());
                     skuQueryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
+                    skuQueryWrapper.eq(GoodsSku::getDeleteFlag, false);
 
                     List<GoodsSku> goodsSkuList = goodsSkuService.list(skuQueryWrapper);
                     int skuSource = 100;
