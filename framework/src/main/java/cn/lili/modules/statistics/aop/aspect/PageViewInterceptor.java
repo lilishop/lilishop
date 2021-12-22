@@ -62,7 +62,12 @@ public class PageViewInterceptor {
                     break;
                 }
             case STORE:
-                Map<String, String> map = spelFormat(point);
+                Map<String, String> map = null;
+                try {
+                    map = spelFormat(point);
+                } catch (Exception e) {
+                    return;
+                }
                 storeId = map.get("id");
                 break;
             default:
