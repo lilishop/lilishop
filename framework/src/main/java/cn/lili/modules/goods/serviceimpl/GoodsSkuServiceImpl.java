@@ -12,6 +12,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
@@ -218,22 +219,19 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         Map<String, Object> map = new HashMap<>(16);
         //获取商品VO
         GoodsVO goodsVO = goodsService.getGoodsVO(goodsId);
+        //如果skuid为空，则使用商品VO中sku信息获取
+        if (StringUtils.isEmpty(skuId) || "undefined".equals(skuId)) {
+            skuId = goodsVO.getSkuList().get(0).getId();
+        }
         //从缓存拿商品Sku
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
-
-
-        //如果规格为空则使用商品ID进行查询
+        //如果使用商品ID无法查询SKU则返回错误
         if (goodsSku == null) {
-            skuId = goodsVO.getSkuList().get(0).getId();
-            goodsSku = this.getGoodsSkuByIdFromCache(skuId);
-            //如果使用商品ID无法查询SKU则返回错误
-            if (goodsSku == null) {
-                throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
-            }
+            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
 
-        //商品为空||商品下架||商品未审核通过||商品删除，则提示：商品已下架
-        if (goodsVO == null || goodsVO.getMarketEnable().equals(GoodsStatusEnum.DOWN.name())
+        //商品下架||商品未审核通过||商品删除，则提示：商品已下架
+        if (goodsVO.getMarketEnable().equals(GoodsStatusEnum.DOWN.name())
                 || !goodsVO.getAuthFlag().equals(GoodsAuthEnum.PASS.name())
                 || Boolean.TRUE.equals(goodsVO.getDeleteFlag())) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
