@@ -2,6 +2,7 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.dos.*;
+import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.*;
@@ -125,6 +126,7 @@ public class PromotionServiceImpl implements PromotionService {
         CouponSearchParams couponSearchParams = new CouponSearchParams();
         couponSearchParams.setScopeType(PromotionsScopeTypeEnum.ALL.name());
         couponSearchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
+        couponSearchParams.setGetType(CouponGetEnum.FREE.name());
         List<Coupon> couponVOS = this.couponService.listFindAll(couponSearchParams);
         for (Coupon coupon : couponVOS) {
             if (("platform").equals(coupon.getStoreId()) || index.getStoreId().equals(coupon.getStoreId())) {

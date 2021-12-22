@@ -116,7 +116,6 @@ public class SkuPromotionRender implements CartRenderStep {
                 return;
             case CART:
             case BUY_NOW:
-                return;
             case VIRTUAL:
                 //循环购物车
                 for (CartVO cartVO : tradeDTO.getCartList()) {
@@ -124,10 +123,10 @@ public class SkuPromotionRender implements CartRenderStep {
                     for (CartSkuVO cartSkuVO : cartVO.getCheckedSkuList()) {
                         //赋予商品促销信息
                         for (Map.Entry<String, Object> entry : cartSkuVO.getPromotionMap().entrySet()) {
-                            // 忽略拼团活动
-                            if (entry.getKey().contains(PromotionTypeEnum.PINTUAN.name())) {
+                            if (ignorePromotion(entry.getKey())) {
                                 continue;
                             }
+
                             BasePromotions basePromotions = (BasePromotions) entry.getValue();
                             PromotionSkuVO promotionSkuVO = new PromotionSkuVO(entry.getKey().split("-")[0], basePromotions.getId());
                             cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
@@ -142,5 +141,19 @@ public class SkuPromotionRender implements CartRenderStep {
         }
     }
 
+    /**
+     * 购物车促销类型
+     */
+    private Boolean ignorePromotion(String promotionKey) {
+
+        // 忽略积分活动活动 忽略砍价活动 忽略优惠券活动 忽略拼团活动
+        if (promotionKey.contains(PromotionTypeEnum.POINTS_GOODS.name())
+                || promotionKey.contains(PromotionTypeEnum.KANJIA.name())
+                || promotionKey.contains(PromotionTypeEnum.COUPON.name())
+                || promotionKey.contains(PromotionTypeEnum.PINTUAN.name())) {
+            return true;
+        }
+        return false;
+    }
 
 }

@@ -66,6 +66,7 @@ public class CouponSearchParams extends BasePromotionsSearchParams implements Se
     @ApiModelProperty(value = "会员优惠券状态")
     private String memberCouponStatus;
 
+
     @Override
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
@@ -96,12 +97,11 @@ public class CouponSearchParams extends BasePromotionsSearchParams implements Se
         if (CharSequenceUtil.isNotEmpty(this.getPromotionStatus())) {
             switch (PromotionsStatusEnum.valueOf(this.getPromotionStatus())) {
                 case NEW:
-                    queryWrapper.nested(i -> i.gt(PromotionTools.START_TIME_COLUMN, new Date()).gt(PromotionTools.END_TIME_COLUMN, new Date()))
-                    ;
+                    queryWrapper.nested(i -> i.gt(PromotionTools.START_TIME_COLUMN, new Date()).gt(PromotionTools.END_TIME_COLUMN, new Date()));
                     break;
                 case START:
-                    queryWrapper.nested(i -> i.le(PromotionTools.START_TIME_COLUMN, new Date()).ge(PromotionTools.END_TIME_COLUMN, new Date()))
-                            .or(i -> i.gt("effective_days", 0).eq(RANGE_DAY_TYPE_COLUMN, CouponRangeDayEnum.DYNAMICTIME.name()));
+                    queryWrapper.nested(i -> i.le(PromotionTools.START_TIME_COLUMN, new Date()).ge(PromotionTools.END_TIME_COLUMN, new Date()));
+//                            .or(i -> i.gt("effective_days", 0).eq(RANGE_DAY_TYPE_COLUMN, CouponRangeDayEnum.DYNAMICTIME.name()));
                     break;
                 case END:
                     queryWrapper.nested(i -> i.lt(PromotionTools.START_TIME_COLUMN, new Date()).lt(PromotionTools.END_TIME_COLUMN, new Date()));
