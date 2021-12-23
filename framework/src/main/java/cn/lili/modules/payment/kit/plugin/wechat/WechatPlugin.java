@@ -7,7 +7,6 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
-import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
@@ -40,7 +39,6 @@ import cn.lili.modules.payment.kit.plugin.wechat.model.*;
 import cn.lili.modules.payment.service.PaymentService;
 import cn.lili.modules.payment.service.RefundLogService;
 import cn.lili.modules.system.entity.dos.Setting;
-import cn.lili.modules.system.entity.dto.connect.WechatConnectSetting;
 import cn.lili.modules.system.entity.dto.connect.dto.WechatConnectSettingItem;
 import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -133,9 +131,14 @@ public class WechatPlugin implements Payment {
             //回传数据
             String attach = URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
 
+
             WechatPaymentSetting setting = wechatPaymentSetting();
+            String appid = setting.getServiceAppId();
+            if (appid == null) {
+                throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
+            }
             UnifiedOrderModel unifiedOrderModel = new UnifiedOrderModel()
-                    .setAppid(setting.getAppId())
+                    .setAppid(appid)
                     .setMchid(setting.getMchId())
                     .setDescription(cashierParam.getDetail())
                     .setOut_trade_no(outOrderNo)
@@ -189,8 +192,12 @@ public class WechatPlugin implements Payment {
             String attach = URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
 
             WechatPaymentSetting setting = wechatPaymentSetting();
+            String appid = setting.getServiceAppId();
+            if (appid == null) {
+                throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
+            }
             UnifiedOrderModel unifiedOrderModel = new UnifiedOrderModel()
-                    .setAppid(setting.getAppId())
+                    .setAppid(appid)
                     .setMchid(setting.getMchId())
                     .setDescription(cashierParam.getDetail())
                     .setOut_trade_no(outOrderNo)
@@ -220,7 +227,7 @@ public class WechatPlugin implements Payment {
                 String body = response.getBody();
                 JSONObject jsonObject = JSONUtil.parseObj(body);
                 String prepayId = jsonObject.getStr("prepay_id");
-                Map<String, String> map = WxPayKit.jsApiCreateSign(setting.getAppId(), prepayId, setting.getApiclient_key());
+                Map<String, String> map = WxPayKit.jsApiCreateSign(appid, prepayId, setting.getApiclient_key());
                 log.info("唤起支付参数:{}", map);
 
                 return ResultUtil.data(map);
@@ -250,8 +257,12 @@ public class WechatPlugin implements Payment {
             String attach = URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
 
             WechatPaymentSetting setting = wechatPaymentSetting();
+            String appid = setting.getAppId();
+            if (appid == null) {
+                throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
+            }
             UnifiedOrderModel unifiedOrderModel = new UnifiedOrderModel()
-                    .setAppid(setting.getAppId())
+                    .setAppid(appid)
                     .setMchid(setting.getMchId())
                     .setDescription(cashierParam.getDetail())
                     .setOut_trade_no(outOrderNo)
@@ -280,7 +291,7 @@ public class WechatPlugin implements Payment {
             if (verifySignature) {
                 JSONObject jsonObject = JSONUtil.parseObj(response.getBody());
                 String prepayId = jsonObject.getStr("prepay_id");
-                Map<String, String> map = WxPayKit.appPrepayIdCreateSign(setting.getAppId(),
+                Map<String, String> map = WxPayKit.appPrepayIdCreateSign(appid,
                         setting.getMchId(),
                         prepayId,
                         setting.getApiclient_key(), SignType.HMACSHA256);
@@ -313,8 +324,13 @@ public class WechatPlugin implements Payment {
             String attach = URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
 
             WechatPaymentSetting setting = wechatPaymentSetting();
+
+            String appid = setting.getServiceAppId();
+            if (appid == null) {
+                throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
+            }
             UnifiedOrderModel unifiedOrderModel = new UnifiedOrderModel()
-                    .setAppid(setting.getAppId())
+                    .setAppid(appid)
                     .setMchid(setting.getMchId())
                     .setDescription(cashierParam.getDetail())
                     .setOut_trade_no(outOrderNo)
@@ -380,10 +396,9 @@ public class WechatPlugin implements Payment {
 
             //微信小程序，appid 需要单独获取，这里读取了联合登陆配置的appid ，实际场景小程序自动登录，所以这个appid是最为保险的做法
             //如果有2开需求，这里需要调整，修改这个appid的获取途径即可
-            WechatConnectSettingItem wechatConnectSettingItem = getWechatMPSetting();
-            String appid = null;
-            if (wechatConnectSettingItem != null) {
-                appid = getWechatMPSetting().getAppId();
+            String appid = wechatPaymentSetting().getMpAppId();
+            if (appid == null) {
+                throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
             }
 
             String attach = URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
@@ -684,29 +699,5 @@ public class WechatPlugin implements Payment {
                 nonce.getBytes(StandardCharsets.UTF_8),
                 cipherText
         );
-    }
-
-
-    /**
-     * 获取微信小程序配置
-     *
-     * @return
-     */
-    private WechatConnectSettingItem getWechatMPSetting() {
-        Setting setting = settingService.get(SettingEnum.WECHAT_CONNECT.name());
-
-        WechatConnectSetting wechatConnectSetting = JSONUtil.toBean(setting.getSettingValue(), WechatConnectSetting.class);
-
-        if (wechatConnectSetting == null) {
-            throw new ServiceException(ResultCode.WECHAT_CONNECT_NOT_EXIST);
-        }
-        //寻找对应对微信小程序登录配置
-        for (WechatConnectSettingItem wechatConnectSettingItem : wechatConnectSetting.getWechatConnectSettingItems()) {
-            if (wechatConnectSettingItem.getClientType().equals(ClientTypeEnum.WECHAT_MP.name())) {
-                return wechatConnectSettingItem;
-            }
-        }
-
-        throw new ServiceException(ResultCode.WECHAT_CONNECT_NOT_EXIST);
     }
 }
