@@ -48,7 +48,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             "encrypted",
             "iv",
             "mail",
-            "seller",
+            "sell",
             "privateKey",
             "wechatpay",
     };
