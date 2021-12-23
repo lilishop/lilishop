@@ -81,7 +81,7 @@ public class RefundSupport {
      **/
     private void updateReturnGoodsNumber(AfterSale afterSale) {
         //根据商品id及订单sn获取子订单
-        OrderItem orderItem = orderItemService.getByOrderSnAndSkuId(afterSale.getOrderSn(), afterSale.getGoodsId());
+        OrderItem orderItem = orderItemService.getByOrderSnAndSkuId(afterSale.getOrderSn(), afterSale.getSkuId());
 
         orderItem.setReturnGoodsNumber(afterSale.getNum() + orderItem.getReturnGoodsNumber());
 
