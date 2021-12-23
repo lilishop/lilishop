@@ -15,6 +15,7 @@ import cn.lili.modules.search.entity.dto.HotWordsDTO;
 import cn.lili.modules.search.entity.dto.ParamOptions;
 import cn.lili.modules.search.entity.dto.SelectorOptions;
 import cn.lili.modules.search.service.EsGoodsSearchService;
+import com.alibaba.druid.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.lucene.search.function.FieldValueFactorFunction;
@@ -212,6 +213,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         for (int i = 0; i < brandBuckets.size(); i++) {
             String brandId = brandBuckets.get(i).getKey().toString();
             //当商品品牌id为0时，代表商品没有选择品牌，所以过滤掉品牌选择器
+            //当品牌id为空并且
             if (brandId.equals("0") ||
                     (CharSequenceUtil.isNotEmpty(goodsSearch.getBrandId())
                             && Arrays.asList(goodsSearch.getBrandId().split("@")).contains(brandId))) {
@@ -221,6 +223,9 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             String brandName = "";
             if (brandBuckets.get(i).getAggregations() != null && brandBuckets.get(i).getAggregations().get(ATTR_BRAND_NAME) != null) {
                 brandName = this.getAggregationsBrandOptions(brandBuckets.get(i).getAggregations().get(ATTR_BRAND_NAME));
+                if (StringUtils.isEmpty(brandName)) {
+                    continue;
+                }
             }
 
             String brandUrl = "";
@@ -228,6 +233,9 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
                     brandUrlBuckets.get(i).getAggregations() != null &&
                     brandUrlBuckets.get(i).getAggregations().get(ATTR_BRAND_URL) != null) {
                 brandUrl = this.getAggregationsBrandOptions(brandUrlBuckets.get(i).getAggregations().get(ATTR_BRAND_URL));
+                if (StringUtils.isEmpty(brandUrl)) {
+                    continue;
+                }
             }
             SelectorOptions so = new SelectorOptions();
             so.setName(brandName);
