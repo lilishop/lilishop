@@ -84,7 +84,7 @@ public class GoodsStoreController {
         StoreDetail storeDetail = OperationalJudgment.judgment(storeDetailService.getStoreDetail(storeId));
         Integer stockWarnNum = storeDetail.getStockWarning();
         goodsSearchParams.setStoreId(storeId);
-        goodsSearchParams.setQuantity(stockWarnNum);
+        goodsSearchParams.setLeQuantity(stockWarnNum);
         goodsSearchParams.setMarketEnable(GoodsStatusEnum.UPPER.name());
         IPage<GoodsSku> goodsSku = goodsSkuService.getGoodsSkuByPage(goodsSearchParams);
         StockWarningVO stockWarning = new StockWarningVO(stockWarnNum, goodsSku);

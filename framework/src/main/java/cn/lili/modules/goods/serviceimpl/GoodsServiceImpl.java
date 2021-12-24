@@ -406,6 +406,19 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         this.updateById(goods);
     }
 
+    /**
+     * 更新商品的购买数量
+     *
+     * @param goodsId  商品ID
+     * @param buyCount 购买数量
+     */
+    @Override
+    public void updateGoodsBuyCount(String goodsId, int buyCount) {
+        this.update(new LambdaUpdateWrapper<Goods>()
+                .eq(Goods::getId, goodsId)
+                .set(Goods::getBuyCount, buyCount));
+    }
+
     @Override
     public void updateStoreDetail(Store store) {
         UpdateWrapper updateWrapper = new UpdateWrapper<>()
