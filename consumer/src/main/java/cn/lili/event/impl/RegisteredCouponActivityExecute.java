@@ -1,8 +1,10 @@
 package cn.lili.event.impl;
 
+import cn.hutool.core.date.DateUtil;
 import cn.lili.event.MemberRegisterEvent;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.promotion.entity.dos.CouponActivity;
+import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import cn.lili.modules.promotion.entity.enums.CouponActivityTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.service.CouponActivityService;
@@ -10,6 +12,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -34,8 +37,8 @@ public class RegisteredCouponActivityExecute implements MemberRegisterEvent {
     public void memberRegister(Member member) {
         List<CouponActivity> couponActivities = couponActivityService.list(new LambdaQueryWrapper<CouponActivity>()
                 .eq(CouponActivity::getCouponActivityType, CouponActivityTypeEnum.REGISTERED.name())
-                .eq(CouponActivity::getPromotionStatus, PromotionsStatusEnum.START.name()));
+                .ge(BasePromotions::getEndTime, new Date())
+                .le(BasePromotions::getStartTime, new Date()));
         couponActivityService.registered(couponActivities, member);
-
     }
 }
