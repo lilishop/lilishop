@@ -42,6 +42,13 @@ public interface EsGoodsSearchService {
     void setHotWords(HotWordsDTO hotWords);
 
     /**
+     * 删除热门关键词
+     *
+     * @param keywords 热词
+     */
+    void deleteHotWords(String keywords);
+
+    /**
      * 获取筛选器
      *
      * @param goodsSearch 搜索条件

@@ -78,7 +78,6 @@ public class StoreEditDTO {
     @ApiModelProperty(value = "营业执照号")
     private String licenseNum;
 
-    @Size(min = 1, max = 200, message = "法定经营范围长度为1-200位字符")
     @ApiModelProperty(value = "法定经营范围")
     private String scope;
 

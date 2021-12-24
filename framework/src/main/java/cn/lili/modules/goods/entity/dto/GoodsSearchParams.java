@@ -63,7 +63,10 @@ public class GoodsSearchParams extends PageVO {
     private String authFlag;
 
     @ApiModelProperty(value = "库存数量")
-    private Integer quantity;
+    private Integer leQuantity;
+
+    @ApiModelProperty(value = "库存数量")
+    private Integer geQuantity;
 
     @ApiModelProperty(value = "是否为推荐商品")
     private Boolean recommend;
@@ -106,8 +109,11 @@ public class GoodsSearchParams extends PageVO {
         if (CharSequenceUtil.isNotEmpty(authFlag)) {
             queryWrapper.eq("auth_flag", authFlag);
         }
-        if (quantity != null) {
-            queryWrapper.le("quantity", quantity);
+        if (leQuantity != null) {
+            queryWrapper.le("quantity", leQuantity);
+        }
+        if (geQuantity != null) {
+            queryWrapper.ge("quantity", geQuantity);
         }
         if (recommend != null) {
             queryWrapper.le("recommend", recommend);
