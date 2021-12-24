@@ -2,7 +2,6 @@ package cn.lili.common.security.filter;
 
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.http.HtmlUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.owasp.html.Sanitizers;
@@ -48,6 +47,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             "encrypted",
             "iv",
             "mail",
+            "sell",
             "privateKey",
             "wechatpay",
     };
@@ -267,7 +267,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     private String filterXss(String name, String value) {
         if (CharSequenceUtil.containsAny(name.toLowerCase(Locale.ROOT), IGNORE_FIELD)) {
             // 忽略的处理，（过滤敏感字符）
-            return HtmlUtil.unescape(HtmlUtil.filter(value));
+            return value;
         } else {
             return cleanXSS(value);
         }
