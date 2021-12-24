@@ -11,6 +11,7 @@ import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivityGoods;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsOperationDTO;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
@@ -23,6 +24,7 @@ import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.mybatis.util.PageUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.BeanUtils;
@@ -32,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -214,7 +217,11 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
 
     @Override
     public KanjiaActivityGoods getKanjiaGoodsBySkuId(String skuId) {
-        KanjiaActivityGoods kanjiaActivityGoods = this.getOne(new QueryWrapper<KanjiaActivityGoods>().eq("sku_id", skuId), false);
+        KanjiaActivityGoods kanjiaActivityGoods = this.getOne(
+                new LambdaQueryWrapper<KanjiaActivityGoods>()
+                        .eq(KanjiaActivityGoods::getSkuId, skuId)
+                        .ge(KanjiaActivityGoods::getEndTime, new Date())
+                        .le(KanjiaActivityGoods::getStartTime, new Date()));
         if (kanjiaActivityGoods != null && PromotionsStatusEnum.START.name().equals(kanjiaActivityGoods.getPromotionStatus())) {
             return kanjiaActivityGoods;
         }
