@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,文件管理接口")
-@RequestMapping("/manager/file/file")
+@RequestMapping("/manager/common/file")
 public class FileManagerController {
 
     @Autowired
