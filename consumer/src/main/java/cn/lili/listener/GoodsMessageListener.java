@@ -27,6 +27,7 @@ import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
+import cn.lili.modules.promotion.service.PromotionService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.store.service.StoreService;
@@ -112,6 +113,9 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
      */
     @Autowired
     private StoreGoodsLabelService storeGoodsLabelService;
+
+    @Autowired
+    private PromotionService promotionService;
 
     @Autowired
     private PromotionGoodsService promotionGoodsService;
@@ -361,6 +365,11 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
             if (!storeGoodsLabels.isEmpty()) {
                 goodsIndex.setStoreCategoryNamePath(ArrayUtil.join(storeGoodsLabels.stream().map(StoreGoodsLabel::getLabelName).toArray(), ","));
             }
+        }
+
+        if (goodsIndex.getPromotionMap() == null || goodsIndex.getPromotionMap().isEmpty()) {
+            Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsPromotionMap(goodsIndex);
+            goodsIndex.setPromotionMap(goodsCurrentPromotionMap);
         }
     }
 

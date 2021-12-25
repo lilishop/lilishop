@@ -19,6 +19,7 @@ import cn.lili.modules.promotion.service.CouponActivityItemService;
 import cn.lili.modules.promotion.service.CouponActivityService;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import groovy.util.logging.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -203,7 +204,7 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
                         memberCoupon.setMemberId(map.get("id").toString());
                         memberCoupon.setMemberName(map.get("nick_name").toString());
                         memberCoupon.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
-                        memberCoupon.setPlatformFlag("platform".equals(coupon.getStoreId()));
+                        memberCoupon.setPlatformFlag(PromotionTools.PLATFORM_ID.equals(coupon.getStoreId()));
                         memberCouponList.add(memberCoupon);
                     }
                 }

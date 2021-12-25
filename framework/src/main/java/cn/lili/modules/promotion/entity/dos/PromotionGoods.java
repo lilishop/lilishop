@@ -125,11 +125,16 @@ public class PromotionGoods extends BaseEntity {
     }
 
 
-
     public PromotionGoods(KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO) {
         if (kanjiaActivityGoodsDTO != null) {
             BeanUtil.copyProperties(kanjiaActivityGoodsDTO, this, "id");
             BeanUtil.copyProperties(kanjiaActivityGoodsDTO.getGoodsSku(), this, "id");
+            this.setQuantity(kanjiaActivityGoodsDTO.getStock());
+            this.setPromotionId(kanjiaActivityGoodsDTO.getId());
+            this.setPromotionType(PromotionTypeEnum.KANJIA.name());
+            this.setTitle(PromotionTypeEnum.KANJIA.name() + "-" + kanjiaActivityGoodsDTO.getGoodsName());
+            this.setScopeType(PromotionsScopeTypeEnum.PORTION_GOODS.name());
+            this.setPromotionType(PromotionTypeEnum.KANJIA.name());
         }
     }
 }

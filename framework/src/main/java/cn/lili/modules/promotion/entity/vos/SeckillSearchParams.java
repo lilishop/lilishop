@@ -34,9 +34,6 @@ public class SeckillSearchParams extends BasePromotionsSearchParams implements S
     @ApiModelProperty(value = "商家id")
     private String[] storeIds;
 
-    @ApiModelProperty(value = "商家编号")
-    private String storeId;
-
     @ApiModelProperty(value = "商品名称")
     private String goodsName;
 

@@ -20,9 +20,12 @@ import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dos.PointsGoods;
 import cn.lili.modules.promotion.entity.dto.BasePromotions;
+import cn.lili.modules.promotion.entity.vos.CouponVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +42,7 @@ import java.util.stream.Collectors;
  * @since 2020-07-02 14:47
  */
 @Service
+@Slf4j
 public class CheckDataRender implements CartRenderStep {
 
     @Autowired
@@ -144,6 +148,16 @@ public class CheckDataRender implements CartRenderStep {
                     cartVO.setDeliveryMethod(DeliveryMethodEnum.LOGISTICS.name());
                 }
                 cartVO.setSkuList(storeCart.getValue());
+                try {
+                    //筛选属于当前店铺的优惠券
+                    storeCart.getValue().forEach(i -> i.getPromotionMap().forEach((key, value) -> {
+                        if (key.contains(PromotionTypeEnum.COUPON.name()) && ((Coupon) value).getStoreId().equals(storeCart.getKey())) {
+                            cartVO.getCanReceiveCoupon().add(new CouponVO((Coupon) value));
+                        }
+                    }));
+                } catch (Exception e) {
+                    log.error("筛选属于当前店铺的优惠券发生异常！", e);
+                }
                 storeCart.getValue().stream().filter(i -> Boolean.TRUE.equals(i.getChecked())).findFirst().ifPresent(cartSkuVO -> cartVO.setChecked(true));
                 cartList.add(cartVO);
             }

@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.PointsGoodsCategory;
@@ -96,7 +97,7 @@ public class PointsGoodsCategoryServiceImpl extends ServiceImpl<PointsGoodsCateg
         }
         if (this.getOne(queryWrapper) != null) {
             log.error("当前积分商品分类名称" + name + "已存在！");
-            throw new ServiceException();
+            throw new ServiceException(ResultCode.POINT_GOODS_CATEGORY_EXIST);
         }
     }
 

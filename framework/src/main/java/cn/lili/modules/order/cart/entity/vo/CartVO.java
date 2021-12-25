@@ -85,6 +85,7 @@ public class CartVO extends CartBase implements Serializable {
         this.setCouponList(new ArrayList<>());
         this.setGiftList(new ArrayList<>());
         this.setGiftCouponList(new ArrayList<>());
+        this.setCanReceiveCoupon(new ArrayList<>());
         this.setChecked(false);
         this.isFull = false;
         this.weight = 0d;

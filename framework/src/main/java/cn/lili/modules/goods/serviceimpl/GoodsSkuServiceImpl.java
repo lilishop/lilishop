@@ -241,7 +241,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //获取当前商品的索引信息
         EsGoodsIndex goodsIndex = goodsIndexService.findById(skuId);
         if (goodsIndex == null) {
-            goodsIndex = goodsIndexService.resetEsGoodsIndex(goodsSku, goodsVO.getGoodsParamsDTOList());
+            goodsIndex = goodsIndexService.getTempEsGoodsIndex(goodsSku, goodsVO.getGoodsParamsDTOList());
 
             //发送mq消息
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.RESET_GOODS_INDEX.name();

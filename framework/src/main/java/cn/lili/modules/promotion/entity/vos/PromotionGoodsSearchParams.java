@@ -26,9 +26,6 @@ public class PromotionGoodsSearchParams extends BasePromotionsSearchParams {
     @ApiModelProperty(value = "促销类型")
     private String promotionType;
 
-    @ApiModelProperty(value = "商品活动id")
-    private String storeId;
-
     @ApiModelProperty(value = "商品名称")
     private String goodsName;
 
@@ -62,9 +59,6 @@ public class PromotionGoodsSearchParams extends BasePromotionsSearchParams {
         }
         if (CharSequenceUtil.isNotEmpty(categoryPath)) {
             queryWrapper.like("category_path", categoryPath);
-        }
-        if (CharSequenceUtil.isNotEmpty(storeId)) {
-            queryWrapper.in("store_id", Arrays.asList(storeId.split(",")));
         }
         if (CharSequenceUtil.isNotEmpty(skuId)) {
             queryWrapper.in("sku_id", Arrays.asList(skuId.split(",")));

@@ -13,6 +13,7 @@ import cn.lili.modules.promotion.entity.vos.CouponSearchParams;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -42,7 +43,7 @@ public class CouponManagerController {
     @ApiOperation(value = "获取优惠券列表")
     @GetMapping
     public ResultMessage<IPage<CouponVO>> getCouponList(CouponSearchParams queryParam, PageVO page) {
-        queryParam.setStoreId("platform");
+        queryParam.setStoreId(PromotionTools.PLATFORM_ID);
         return ResultUtil.data(couponService.pageVOFindAll(queryParam, page));
     }
 
@@ -111,8 +112,8 @@ public class CouponManagerController {
         if (currentUser == null) {
             throw new ServiceException(ResultCode.USER_NOT_EXIST);
         }
-        couponVO.setStoreId("platform");
-        couponVO.setStoreName("platform");
+        couponVO.setStoreId(PromotionTools.PLATFORM_ID);
+        couponVO.setStoreName(PromotionTools.PLATFORM_NAME);
     }
 
 }

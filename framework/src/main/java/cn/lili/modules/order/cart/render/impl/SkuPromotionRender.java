@@ -1,8 +1,12 @@
 package cn.lili.modules.order.cart.render.impl;
 
 import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
+import cn.lili.modules.member.entity.dos.Member;
+import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
@@ -33,6 +37,9 @@ public class SkuPromotionRender implements CartRenderStep {
 
     @Autowired
     private KanjiaActivityService kanjiaActivityService;
+
+    @Autowired
+    private MemberService memberService;
 
     @Override
     public RenderStepEnums step() {
@@ -76,13 +83,19 @@ public class SkuPromotionRender implements CartRenderStep {
 
             //这里是双重循环，但是实际积分购买或者是砍价购买时，购物车只有一个商品，所以没有循环操作数据库或者其他的问题
             case POINTS:
+                Member userInfo = memberService.getUserInfo();
+                long totalPayPoints = 0;
                 //处理积分商品购买
                 for (CartVO cartVO : tradeDTO.getCartList()) {
                     for (CartSkuVO cartSkuVO : cartVO.getCheckedSkuList()) {
                         cartSkuVO.getPriceDetailDTO().setPayPoint(cartSkuVO.getPoint());
                         PromotionSkuVO promotionSkuVO = new PromotionSkuVO(PromotionTypeEnum.POINTS_GOODS.name(), cartSkuVO.getPointsId());
                         cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
+                        totalPayPoints += cartSkuVO.getPoint();
                     }
+                }
+                if (userInfo.getPoint() < totalPayPoints) {
+                    throw new ServiceException(ResultCode.POINT_NOT_ENOUGH);
                 }
                 return;
             case KANJIA:

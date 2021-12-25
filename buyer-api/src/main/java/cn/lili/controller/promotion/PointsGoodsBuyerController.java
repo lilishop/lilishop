@@ -5,6 +5,7 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.PointsGoods;
 import cn.lili.modules.promotion.entity.dos.PointsGoodsCategory;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.PointsGoodsSearchParams;
 import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
 import cn.lili.modules.promotion.service.PointsGoodsCategoryService;
@@ -37,6 +38,7 @@ public class PointsGoodsBuyerController {
     @GetMapping
     @ApiOperation(value = "分页获取积分商品")
     public ResultMessage<IPage<PointsGoods>> getPointsGoodsPage(PointsGoodsSearchParams searchParams, PageVO page) {
+        searchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
         IPage<PointsGoods> pointsGoodsByPage = pointsGoodsService.pageFindAll(searchParams, page);
         return ResultUtil.data(pointsGoodsByPage);
     }

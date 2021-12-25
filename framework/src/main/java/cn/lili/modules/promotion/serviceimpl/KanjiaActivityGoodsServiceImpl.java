@@ -261,7 +261,8 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
             throw new ServiceException("商品id为" + goodsSku.getId() + "的商品已参加砍价商品活动！");
         }
         this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(kanJiaActivityGoodsDTO.getId()));
-        this.updatePromotionsGoods(kanJiaActivityGoodsDTO);
+        PromotionGoods promotionGoods = new PromotionGoods(kanJiaActivityGoodsDTO);
+        this.promotionGoodsService.save(promotionGoods);
         this.updateEsGoodsIndex(kanJiaActivityGoodsDTO);
         //修改数据库
         return this.updateById(kanJiaActivityGoodsDTO);

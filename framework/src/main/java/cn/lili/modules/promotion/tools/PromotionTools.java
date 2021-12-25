@@ -2,6 +2,7 @@ package cn.lili.modules.promotion.tools;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -26,6 +27,8 @@ public class PromotionTools {
 
     public static final String START_TIME_COLUMN = "start_time";
     public static final String END_TIME_COLUMN = "end_time";
+    public static final String PLATFORM_ID = "platform";
+    public static final String PLATFORM_NAME = "platform";
 
     /**
      * 参数验证
@@ -119,7 +122,12 @@ public class PromotionTools {
             //本次促销商品入库
             for (PromotionGoods promotionGoods : originList) {
                 promotionGoods.setPromotionId(promotion.getId());
-                promotionGoods.setStoreName(promotion.getStoreName());
+                if (CharSequenceUtil.isEmpty(promotionGoods.getStoreId())) {
+                    promotionGoods.setStoreId(promotion.getStoreId());
+                }
+                if (CharSequenceUtil.isEmpty(promotionGoods.getStoreName())) {
+                    promotionGoods.setStoreName(promotion.getStoreName());
+                }
                 promotionGoods.setTitle(promotion.getPromotionName());
                 if (promotionGoods.getStartTime() == null) {
                     promotionGoods.setStartTime(promotion.getStartTime());

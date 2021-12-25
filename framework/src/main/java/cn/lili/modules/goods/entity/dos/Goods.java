@@ -8,6 +8,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -181,7 +182,7 @@ public class Goods extends BaseEntity {
                 throw new ServiceException(ResultCode.GOODS_SKU_COST_ERROR);
             }
             //虚拟商品没有重量字段
-            if (!sku.containsKey("weight") || sku.containsKey("weight") && (StringUtil.isEmpty(sku.get("weight").toString()) || Convert.toDouble(sku.get("weight").toString()) < 0)) {
+            if (this.goodsType.equals(GoodsTypeEnum.PHYSICAL_GOODS.name()) && (!sku.containsKey("weight") || sku.containsKey("weight") && (StringUtil.isEmpty(sku.get("weight").toString()) || Convert.toDouble(sku.get("weight").toString()) < 0))) {
                 throw new ServiceException(ResultCode.GOODS_SKU_WEIGHT_ERROR);
             }
             if (!sku.containsKey("quantity") || StringUtil.isEmpty(sku.get("quantity").toString()) || Convert.toInt(sku.get("quantity").toString()) < 0) {

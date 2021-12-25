@@ -220,8 +220,9 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
             this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(promotions.getId()));
             return;
         }
-        if (PromotionsScopeTypeEnum.ALL.name().equals(promotions.getScopeType())) {
+        if (CharSequenceUtil.equalsAny(promotions.getScopeType(), PromotionsScopeTypeEnum.ALL.name(), PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name())) {
             PromotionGoods promotionGoods = new PromotionGoods();
+            promotionGoods.setScopeId(promotions.getScopeId());
             promotionGoods.setScopeType(promotions.getScopeType());
             promotionGoods.setPromotionId(promotions.getId());
             promotionGoods.setStoreId(promotions.getStoreId());
