@@ -8,10 +8,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 管理端,app版本控制器
@@ -29,15 +26,21 @@ public class HotWordsManagerController {
 
     @ApiOperation(value = "获取热词")
     @GetMapping
-    public ResultMessage getHotWords() {
+    public ResultMessage<Object> getHotWords() {
         return ResultUtil.data(esGoodsSearchService.getHotWords(100));
     }
 
     @ApiOperation(value = "设置热词")
     @PostMapping
-    public ResultMessage paymentForm(@Validated HotWordsDTO hotWords) {
-
+    public ResultMessage<Object> paymentForm(@Validated HotWordsDTO hotWords) {
         esGoodsSearchService.setHotWords(hotWords);
+        return ResultUtil.success();
+    }
+
+    @ApiOperation(value = "设置热词")
+    @DeleteMapping("/{words}")
+    public ResultMessage<Object> deleteWords(@PathVariable String words) {
+        esGoodsSearchService.deleteHotWords(words);
         return ResultUtil.success();
     }
 

@@ -115,6 +115,16 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), hotWords.getKeywords(), hotWords.getPoint());
     }
 
+    /**
+     * 删除热门关键词
+     *
+     * @param keywords 热词
+     */
+    @Override
+    public void deleteHotWords(String keywords) {
+        cache.zRemove(CachePrefix.HOT_WORD.getPrefix(), keywords);
+    }
+
     @Override
     public EsGoodsRelatedInfo getSelector(EsGoodsSearchDTO goodsSearch, PageVO pageVo) {
         NativeSearchQueryBuilder builder = createSearchQueryBuilder(goodsSearch, null);
