@@ -121,6 +121,8 @@ public class PromotionGoods extends BaseEntity {
             this.promotionId = pointsGoods.getId();
             this.quantity = pointsGoods.getActiveStock();
             this.originalPrice = sku.getPrice();
+            this.promotionType = PromotionTypeEnum.POINTS_GOODS.name();
+            this.scopeId = sku.getId();
         }
     }
 

@@ -151,7 +151,7 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
                 if (seckillApply.getPromotionApplyStatus().equals(PromotionsApplyStatusEnum.PASS.name())) {
                     this.setSeckillApplyTime(seckill, seckillApply);
                     log.info("更新限时抢购商品状态:{}", seckill);
-                    String promotionKey = PromotionTypeEnum.SECKILL.name() + "-" + seckillApply.getTimeLine();
+                    String promotionKey = PromotionTypeEnum.SECKILL.name() + "-" + seckill.getId();
                     Map<String, Object> map = new HashMap<>();
                     // es促销key
                     map.put("esPromotionKey", promotionKey);

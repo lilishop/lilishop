@@ -37,6 +37,5 @@ public class RegisteredCouponActivityExecute implements MemberRegisterEvent {
                 .eq("coupon_activity_type", CouponActivityTypeEnum.REGISTERED.name())
                 .and(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START)));
         couponActivityService.registered(couponActivities, member);
-
     }
 }
