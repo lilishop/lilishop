@@ -18,9 +18,6 @@ import javax.validation.constraints.NotEmpty;
 @Data
 public class PintuanSearchParams extends BasePromotionsSearchParams {
 
-    @ApiModelProperty(value = "商家id")
-    private String storeId;
-
     @ApiModelProperty(value = "商家名称，如果是平台，这个值为 platform")
     private String storeName;
 
@@ -37,9 +34,6 @@ public class PintuanSearchParams extends BasePromotionsSearchParams {
         }
         if (CharSequenceUtil.isNotEmpty(storeName)) {
             queryWrapper.like("store_name", storeName);
-        }
-        if (CharSequenceUtil.isNotEmpty(storeId)) {
-            queryWrapper.eq("store_id", storeId);
         }
         return queryWrapper;
     }

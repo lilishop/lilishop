@@ -16,8 +16,10 @@ import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.member.service.MemberAddressService;
+import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.cart.entity.dto.MemberCouponDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
@@ -127,34 +129,19 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private TradeBuilder tradeBuilder;
 
+    @Autowired
+    private MemberService memberService;
+
     @Override
     public void add(String skuId, Integer num, String cartType, Boolean cover) {
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         if (num <= 0) {
             throw new ServiceException(ResultCode.CART_NUM_ERROR);
         }
         CartTypeEnum cartTypeEnum = getCartType(cartType);
         GoodsSku dataSku = checkGoods(skuId);
-        Map<String, Object> promotionMap;
-        EsGoodsIndex goodsIndex = goodsIndexService.findById(skuId);
-        if (goodsIndex == null) {
-            GoodsVO goodsVO = this.goodsService.getGoodsVO(dataSku.getGoodsId());
-            goodsIndex = goodsIndexService.resetEsGoodsIndex(dataSku, goodsVO.getGoodsParamsDTOList());
+        Map<String, Object> promotionMap = this.getCurrentGoodsPromotion(dataSku, cartType);
 
-            //发送mq消息
-            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.RESET_GOODS_INDEX.name();
-            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(Collections.singletonList(goodsIndex)), RocketmqSendCallbackBuilder.commonCallback());
-        }
-        if (goodsIndex.getPromotionMap() != null && !goodsIndex.getPromotionMap().isEmpty()) {
-            if (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.SECKILL.name())) ||
-                    (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.PINTUAN.name()))
-                            && CartTypeEnum.PINTUAN.name().equals(cartType))) {
-                dataSku.setPromotionFlag(true);
-                dataSku.setPromotionPrice(goodsIndex.getPromotionPrice());
-            }
-            promotionMap = goodsIndex.getPromotionMap();
-        } else {
-            promotionMap = null;
-        }
         try {
             //购物车方式购买需要保存之前的选择，其他方式购买，则直接抹除掉之前的记录
             TradeDTO tradeDTO;
@@ -200,7 +187,6 @@ public class CartServiceImpl implements CartService {
                 cartSkuVO.setChecked(true);
             } else {
                 tradeDTO = new TradeDTO(cartTypeEnum);
-                AuthUser currentUser = UserContext.getCurrentUser();
                 tradeDTO.setMemberId(currentUser.getId());
                 tradeDTO.setMemberName(currentUser.getUsername());
                 List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
@@ -569,6 +555,31 @@ public class CartServiceImpl implements CartService {
         return trade;
     }
 
+    private Map<String, Object> getCurrentGoodsPromotion(GoodsSku dataSku, String cartType) {
+        Map<String, Object> promotionMap;
+        EsGoodsIndex goodsIndex = goodsIndexService.findById(dataSku.getId());
+        if (goodsIndex == null) {
+            GoodsVO goodsVO = this.goodsService.getGoodsVO(dataSku.getGoodsId());
+            goodsIndex = goodsIndexService.getTempEsGoodsIndex(dataSku, goodsVO.getGoodsParamsDTOList());
+
+            //发送mq消息
+            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.RESET_GOODS_INDEX.name();
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(Collections.singletonList(goodsIndex)), RocketmqSendCallbackBuilder.commonCallback());
+        }
+        if (goodsIndex.getPromotionMap() != null && !goodsIndex.getPromotionMap().isEmpty()) {
+            if (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.SECKILL.name())) ||
+                    (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.PINTUAN.name()))
+                            && CartTypeEnum.PINTUAN.name().equals(cartType))) {
+                dataSku.setPromotionFlag(true);
+                dataSku.setPromotionPrice(goodsIndex.getPromotionPrice());
+            }
+            promotionMap = goodsIndex.getPromotionMap();
+        } else {
+            promotionMap = null;
+        }
+        return promotionMap;
+    }
+
 
     /**
      * 获取购物车类型
@@ -763,7 +774,10 @@ public class CartServiceImpl implements CartService {
         PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsDetailBySkuId(cartSkuVO.getGoodsSku().getId());
 
         if (pointsGoodsVO != null) {
-
+            Member userInfo = memberService.getUserInfo();
+            if (userInfo.getPoint() < pointsGoodsVO.getPoints()) {
+                throw new ServiceException(ResultCode.POINT_NOT_ENOUGH);
+            }
             if (pointsGoodsVO.getActiveStock() < 1) {
                 throw new ServiceException(ResultCode.POINT_GOODS_ACTIVE_STOCK_INSUFFICIENT);
             }

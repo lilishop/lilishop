@@ -2,11 +2,12 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.dos.*;
-import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
-import cn.lili.modules.promotion.entity.vos.*;
+import cn.lili.modules.promotion.entity.vos.FullDiscountSearchParams;
+import cn.lili.modules.promotion.entity.vos.PintuanSearchParams;
+import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
 import cn.lili.modules.promotion.service.*;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,33 +112,10 @@ public class PromotionServiceImpl implements PromotionService {
      * @return 当前促销活动集合
      */
     @Override
-    public Map<String, Object> getGoodsCurrentPromotionMap(EsGoodsIndex index) {
+    public Map<String, Object> getGoodsPromotionMap(EsGoodsIndex index) {
+        String storeIds = index.getStoreId() + "," + PromotionTools.PLATFORM_ID;
         Map<String, Object> promotionMap = new HashMap<>();
-        FullDiscountSearchParams fullDiscountSearchParams = new FullDiscountSearchParams();
-        fullDiscountSearchParams.setScopeType(PromotionsScopeTypeEnum.ALL.name());
-        fullDiscountSearchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
-        List<FullDiscount> fullDiscountVOS = this.fullDiscountService.listFindAll(fullDiscountSearchParams);
-        for (FullDiscount fullDiscount : fullDiscountVOS) {
-            if (index.getStoreId().equals(fullDiscount.getStoreId())) {
-                String fullDiscountKey = PromotionTypeEnum.FULL_DISCOUNT.name() + "-" + fullDiscount.getId();
-                promotionMap.put(fullDiscountKey, fullDiscount);
-            }
-        }
-        CouponSearchParams couponSearchParams = new CouponSearchParams();
-        couponSearchParams.setScopeType(PromotionsScopeTypeEnum.ALL.name());
-        couponSearchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
-        couponSearchParams.setGetType(CouponGetEnum.FREE.name());
-        List<Coupon> couponVOS = this.couponService.listFindAll(couponSearchParams);
-        for (Coupon coupon : couponVOS) {
-            if (("platform").equals(coupon.getStoreId()) || index.getStoreId().equals(coupon.getStoreId())) {
-                String couponKey = PromotionTypeEnum.COUPON.name() + "-" + coupon.getId();
-                promotionMap.put(couponKey, coupon);
-            }
-        }
-        PromotionGoodsSearchParams promotionGoodsSearchParams = new PromotionGoodsSearchParams();
-        promotionGoodsSearchParams.setSkuId(index.getId());
-        promotionGoodsSearchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
-        List<PromotionGoods> promotionGoodsList = promotionGoodsService.listFindAll(promotionGoodsSearchParams);
+        List<PromotionGoods> promotionGoodsList = promotionGoodsService.findSkuValidPromotion(index.getId(), storeIds);
         for (PromotionGoods promotionGoods : promotionGoodsList) {
             String esPromotionKey = promotionGoods.getPromotionType() + "-" + promotionGoods.getPromotionId();
             switch (PromotionTypeEnum.valueOf(promotionGoods.getPromotionType())) {

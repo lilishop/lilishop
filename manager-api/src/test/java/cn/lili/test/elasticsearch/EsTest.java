@@ -136,7 +136,7 @@ class EsTest {
         List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
         for (GoodsSku goodsSku : list) {
             EsGoodsIndex index = new EsGoodsIndex(goodsSku);
-            Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
+            Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsPromotionMap(index);
             index.setPromotionMap(goodsCurrentPromotionMap);
             esGoodsIndices.add(index);
             cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());

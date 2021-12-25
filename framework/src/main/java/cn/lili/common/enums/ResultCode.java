@@ -67,6 +67,7 @@ public enum ResultCode {
     GOODS_AUTH_ERROR(11005, "商品审核失败"),
     POINT_GOODS_ERROR(11006, "积分商品业务异常，请稍后重试"),
     POINT_GOODS_NOT_EXIST(11020, "积分商品不存在"),
+    POINT_GOODS_CATEGORY_EXIST(11021, "当前积分商品分类已存在"),
     GOODS_SKU_SN_ERROR(11007, "商品SKU货号不能为空"),
     GOODS_SKU_PRICE_ERROR(11008, "商品SKU价格不能小于等于0"),
     GOODS_SKU_COST_ERROR(11009, "商品SKU成本价不能小于等于0"),
@@ -179,6 +180,7 @@ public enum ResultCode {
     ORDER_CAN_NOT_CANCEL(31012, "当前订单状态不可取消"),
     ORDER_BATCH_DELIVER_ERROR(31013, "批量发货,文件读取失败"),
     ORDER_ITEM_NOT_EXIST(31014, "当前订单项不存在！"),
+    POINT_NOT_ENOUGH(31015, "当前会员积分不足购买当前积分商品！"),
 
 
     /**

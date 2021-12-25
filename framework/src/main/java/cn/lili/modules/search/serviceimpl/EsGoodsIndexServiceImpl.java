@@ -28,6 +28,7 @@ import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.service.PromotionService;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
 import cn.lili.modules.search.repository.EsGoodsIndexRepository;
@@ -390,7 +391,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     public void updateEsGoodsIndexAllByList(BasePromotions promotion, String key) {
         List<EsGoodsIndex> goodsIndices = new ArrayList<>();
         //如果storeId不为空，则表示是店铺活动
-        if (promotion.getStoreId() != null) {
+        if (promotion.getStoreId() != null && !promotion.getStoreId().equals(PromotionTools.PLATFORM_ID)) {
             EsGoodsSearchDTO searchDTO = new EsGoodsSearchDTO();
             searchDTO.setStoreId(promotion.getStoreId());
             //查询出店铺商品
@@ -552,17 +553,17 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     }
 
     /**
-     * 重置当前商品索引
+     * 获取临时拼装的商品索引
      *
      * @param goodsSku       商品sku信息
      * @param goodsParamDTOS 商品参数
      * @return 商品索引
      */
     @Override
-    public EsGoodsIndex resetEsGoodsIndex(GoodsSku goodsSku, List<GoodsParamsDTO> goodsParamDTOS) {
+    public EsGoodsIndex getTempEsGoodsIndex(GoodsSku goodsSku, List<GoodsParamsDTO> goodsParamDTOS) {
         EsGoodsIndex index = new EsGoodsIndex(goodsSku, goodsParamDTOS);
         //获取活动信息
-        Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
+        Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsPromotionMap(index);
         //写入促销信息
         index.setPromotionMap(goodsCurrentPromotionMap);
         return index;
@@ -588,18 +589,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             promotionMap = goodsIndex.getPromotionMap();
         }
         //如果活动已结束
-        if (promotion.getPromotionStatus().equals(PromotionsStatusEnum.END.name()) || promotion.getPromotionStatus().equals(PromotionsStatusEnum.CLOSE.name())) {
-            //如果存在活动
-            if (promotionMap.containsKey(key)) {
-                //删除活动
-                promotionMap.remove(key);
-            } else {
-                //不存在则说明是秒杀活动，尝试删除秒杀信息
-                this.removePromotionKey(key, promotionMap, PromotionTypeEnum.SECKILL.name());
-            }
+        if (promotion.getPromotionStatus().equals(PromotionsStatusEnum.END.name()) || promotion.getPromotionStatus().equals(PromotionsStatusEnum.CLOSE.name())) {//如果存在活动
+            //删除活动
+            promotionMap.remove(key);
         } else {
-            //添加促销活动前，如果是同一时间只可以有一个的活动，但商品索引的促销活动里存在其他（同一时间只可以有一个）的活动，则清除
-            this.removePromotionKey(key, promotionMap, PromotionTypeEnum.PINTUAN.name(), PromotionTypeEnum.SECKILL.name(), PromotionTypeEnum.FULL_DISCOUNT.name());
             promotionMap.put(key, promotion);
         }
         goodsIndex.setPromotionMap(promotionMap);
@@ -695,7 +688,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             }
         }
         //促销索引
-        Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
+        Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsPromotionMap(index);
         index.setPromotionMap(goodsCurrentPromotionMap);
         return index;
     }

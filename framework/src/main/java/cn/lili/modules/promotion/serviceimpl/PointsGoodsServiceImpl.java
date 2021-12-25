@@ -20,7 +20,6 @@ import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.modules.search.utils.EsIndexUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -29,10 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 积分商品业务层实现
@@ -166,7 +162,9 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
      */
     @Override
     public PointsGoodsVO getPointsGoodsDetailBySkuId(String skuId) {
-        PointsGoods pointsGoods = this.getOne(new LambdaQueryWrapper<PointsGoods>().eq(PointsGoods::getSkuId, skuId), false);
+        QueryWrapper<PointsGoods> queryWrapper = new QueryWrapper<PointsGoods>().eq("sku_id", skuId);
+        queryWrapper.and(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START));
+        PointsGoods pointsGoods = this.getOne(queryWrapper, false);
         if (pointsGoods == null) {
             log.error("skuId为" + skuId + "的积分商品不存在！");
             throw new ServiceException();
@@ -208,7 +206,7 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
      */
     @Override
     public void updatePromotionsGoods(PointsGoods promotions) {
-        this.promotionGoodsService.remove(new LambdaQueryWrapper<PromotionGoods>().eq(PromotionGoods::getPromotionId, promotions.getId()));
+        this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(promotions.getId()));
         this.promotionGoodsService.save(new PromotionGoods(promotions, this.checkSkuExist(promotions.getSkuId())));
     }
 

@@ -213,6 +213,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
         FullDiscountSearchParams searchParams = new FullDiscountSearchParams();
         searchParams.setCouponFlag(true);
         searchParams.setCouponId(promotions.getId());
+        searchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
         List<FullDiscount> fullDiscounts = fullDiscountService.listFindAll(searchParams);
         if (fullDiscounts != null && !fullDiscounts.isEmpty()) {
             throw new ServiceException("当前优惠券参与了促销活动【" + fullDiscounts.get(0).getPromotionName() + "】不能进行编辑删除操作");
@@ -228,6 +229,10 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
             CouponVO couponVO = (CouponVO) promotions;
             this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(promotions.getId()));
             List<PromotionGoods> promotionGoodsList = PromotionTools.promotionGoodsInit(couponVO.getPromotionGoodsList(), couponVO, this.getPromotionType());
+            for (PromotionGoods promotionGoods : promotionGoodsList) {
+                promotionGoods.setStoreId(promotions.getStoreId());
+                promotionGoods.setStoreName(promotions.getStoreName());
+            }
             //促销活动商品更新
             this.promotionGoodsService.saveBatch(promotionGoodsList);
         }

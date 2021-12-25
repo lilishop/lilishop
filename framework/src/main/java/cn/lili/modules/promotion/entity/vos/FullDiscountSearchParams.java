@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 /**
  * 满优惠查询通用类
@@ -25,9 +24,6 @@ public class FullDiscountSearchParams extends BasePromotionsSearchParams impleme
     @ApiModelProperty(value = "活动名称")
     private String promotionName;
 
-    @ApiModelProperty(value = "店铺编号 如有多个','分割")
-    private String storeId;
-
     @ApiModelProperty(value = "是否赠优惠券")
     private Boolean couponFlag;
 
@@ -39,9 +35,6 @@ public class FullDiscountSearchParams extends BasePromotionsSearchParams impleme
         QueryWrapper<T> queryWrapper = super.queryWrapper();
         if (CharSequenceUtil.isNotEmpty(promotionName)) {
             queryWrapper.like("title", promotionName);
-        }
-        if (storeId != null) {
-            queryWrapper.in("store_id", Arrays.asList(storeId.split(",")));
         }
         if (couponFlag != null) {
             queryWrapper.eq("coupon_flag", couponFlag);

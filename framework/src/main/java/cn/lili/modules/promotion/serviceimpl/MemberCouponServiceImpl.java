@@ -15,6 +15,7 @@ import cn.lili.modules.promotion.entity.vos.CouponSearchParams;
 import cn.lili.modules.promotion.mapper.MemberCouponMapper;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -118,7 +119,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     public IPage<MemberCoupon> getMemberCouponsByCanUse(CouponSearchParams param, Double totalPrice, PageVO pageVo) {
         LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<>();
         List<String> storeIds = new ArrayList<>(Arrays.asList(param.getStoreId().split(",")));
-        storeIds.add("platform");
+        storeIds.add(PromotionTools.PLATFORM_ID);
         queryWrapper.in(MemberCoupon::getStoreId, storeIds);
         queryWrapper.eq(MemberCoupon::getMemberId, param.getMemberId());
         queryWrapper.and(
@@ -253,7 +254,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         memberCoupon.setMemberId(memberId);
         memberCoupon.setMemberName(memberName);
         memberCoupon.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
-        memberCoupon.setPlatformFlag(("platform").equals(coupon.getStoreId()));
+        memberCoupon.setPlatformFlag((PromotionTools.PLATFORM_ID).equals(coupon.getStoreId()));
         this.save(memberCoupon);
         couponService.receiveCoupon(couponId, 1);
     }

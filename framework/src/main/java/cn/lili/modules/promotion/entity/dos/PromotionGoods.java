@@ -121,15 +121,22 @@ public class PromotionGoods extends BaseEntity {
             this.promotionId = pointsGoods.getId();
             this.quantity = pointsGoods.getActiveStock();
             this.originalPrice = sku.getPrice();
+            this.promotionType = PromotionTypeEnum.POINTS_GOODS.name();
+            this.scopeId = sku.getId();
         }
     }
-
 
 
     public PromotionGoods(KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO) {
         if (kanjiaActivityGoodsDTO != null) {
             BeanUtil.copyProperties(kanjiaActivityGoodsDTO, this, "id");
             BeanUtil.copyProperties(kanjiaActivityGoodsDTO.getGoodsSku(), this, "id");
+            this.setQuantity(kanjiaActivityGoodsDTO.getStock());
+            this.setPromotionId(kanjiaActivityGoodsDTO.getId());
+            this.setPromotionType(PromotionTypeEnum.KANJIA.name());
+            this.setTitle(PromotionTypeEnum.KANJIA.name() + "-" + kanjiaActivityGoodsDTO.getGoodsName());
+            this.setScopeType(PromotionsScopeTypeEnum.PORTION_GOODS.name());
+            this.setPromotionType(PromotionTypeEnum.KANJIA.name());
         }
     }
 }

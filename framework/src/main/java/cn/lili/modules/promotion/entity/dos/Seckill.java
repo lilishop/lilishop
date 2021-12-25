@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -61,8 +62,8 @@ public class Seckill extends BasePromotions {
         this.seckillRule = seckillRule;
         this.goodsNum = 0;
         //BasePromotion
-        this.setStoreName("platform");
-        this.setStoreId("platform");
+        this.setStoreName(PromotionTools.PLATFORM_NAME);
+        this.setStoreId(PromotionTools.PLATFORM_ID);
         this.setPromotionName(DateUtil.formatDate(dateTime) + " 秒杀活动");
         this.setStartTime(dateTime);
         this.setEndTime(DateUtil.endOfDay(dateTime));

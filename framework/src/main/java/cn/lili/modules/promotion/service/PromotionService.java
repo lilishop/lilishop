@@ -25,6 +25,6 @@ public interface PromotionService {
      * @param index 商品索引
      * @return 当前促销活动集合
      */
-    Map<String, Object> getGoodsCurrentPromotionMap(EsGoodsIndex index);
+    Map<String, Object> getGoodsPromotionMap(EsGoodsIndex index);
 
 }

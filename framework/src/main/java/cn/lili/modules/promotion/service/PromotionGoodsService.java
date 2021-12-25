@@ -3,7 +3,6 @@ package cn.lili.modules.promotion.service;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -34,19 +33,13 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
     }
 
     /**
-     * 更新促销活动
-     *
-     * @param cartSkuVO 购物车中的产品
-     */
-    void updatePromotion(CartSkuVO cartSkuVO);
-
-    /**
-     * 获取某sku当日所有活动
+     * 获取某sku所有有效活动
      *
      * @param skuId 商品skuId
+     * @param storeIds 店铺id
      * @return 促销商品集合
      */
-    List<PromotionGoods> findNowSkuPromotion(String skuId);
+    List<PromotionGoods> findSkuValidPromotion(String skuId, String storeIds);
 
     /**
      * 分页获取促销商品信息

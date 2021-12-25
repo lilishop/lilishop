@@ -189,7 +189,6 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         }
         this.remove(new LambdaQueryWrapper<SeckillApply>().eq(SeckillApply::getSeckillId, seckillId).in(SeckillApply::getSkuId, skuIds));
         this.saveBatch(originList);
-        this.seckillService.updateEsGoodsSeckill(seckill, originList);
         //保存促销活动商品信息
         if (!promotionGoodsList.isEmpty()) {
             PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
@@ -203,6 +202,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         //设置秒杀活动的商品数量、店铺数量
         seckillService.updateSeckillGoodsNum(seckillId);
         cache.vagueDel(CachePrefix.STORE_ID_SECKILL);
+        this.seckillService.updateEsGoodsSeckill(seckill, originList);
     }
 
 

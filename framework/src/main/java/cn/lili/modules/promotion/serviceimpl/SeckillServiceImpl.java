@@ -41,7 +41,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 秒杀活动业务层实现
@@ -142,8 +141,7 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
     public void updateEsGoodsSeckill(Seckill seckill, List<SeckillApply> seckillApplies) {
         if (seckillApplies != null && !seckillApplies.isEmpty()) {
             // 更新促销范围
-            List<String> skuIds = seckillApplies.stream().map(SeckillApply::getSkuId).collect(Collectors.toList());
-            seckill.setScopeId(ArrayUtil.join(skuIds.toArray(), ","));
+            seckill.setScopeId(ArrayUtil.join(seckillApplies.stream().map(SeckillApply::getSkuId).toArray(), ","));
             UpdateWrapper<Seckill> updateWrapper = new UpdateWrapper<>();
             updateWrapper.eq("id", seckill.getId());
             updateWrapper.set("scope_id", seckill.getScopeId());
@@ -153,7 +151,7 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
                 if (seckillApply.getPromotionApplyStatus().equals(PromotionsApplyStatusEnum.PASS.name())) {
                     this.setSeckillApplyTime(seckill, seckillApply);
                     log.info("更新限时抢购商品状态:{}", seckill);
-                    String promotionKey = PromotionTypeEnum.SECKILL.name() + "-" + seckillApply.getTimeLine();
+                    String promotionKey = PromotionTypeEnum.SECKILL.name() + "-" + seckill.getId();
                     Map<String, Object> map = new HashMap<>();
                     // es促销key
                     map.put("esPromotionKey", promotionKey);

@@ -11,7 +11,6 @@ import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivityGoods;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsOperationDTO;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
@@ -268,7 +267,8 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
             throw new ServiceException("商品id为" + goodsSku.getId() + "的商品已参加砍价商品活动！");
         }
         this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(kanJiaActivityGoodsDTO.getId()));
-        this.updatePromotionsGoods(kanJiaActivityGoodsDTO);
+        PromotionGoods promotionGoods = new PromotionGoods(kanJiaActivityGoodsDTO);
+        this.promotionGoodsService.save(promotionGoods);
         this.updateEsGoodsIndex(kanJiaActivityGoodsDTO);
         //修改数据库
         return this.updateById(kanJiaActivityGoodsDTO);

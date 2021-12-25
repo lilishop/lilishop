@@ -44,6 +44,7 @@ public class RenderStepStatement {
     public static RenderStepEnums[] checkedSingleRender = {
             RenderStepEnums.CHECK_DATA,
             RenderStepEnums.SKU_PROMOTION,
+            RenderStepEnums.COUPON,
             RenderStepEnums.SKU_FREIGHT,
             RenderStepEnums.CART_PRICE
     };
