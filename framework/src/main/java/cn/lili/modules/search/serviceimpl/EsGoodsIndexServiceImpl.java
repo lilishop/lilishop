@@ -49,8 +49,11 @@ import org.elasticsearch.index.reindex.UpdateByQueryRequest;
 import org.elasticsearch.script.Script;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -99,6 +102,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     private StoreGoodsLabelService storeGoodsLabelService;
     @Autowired
     private Cache<Object> cache;
+
+    @Autowired
+    @Qualifier("elasticsearchRestTemplate")
+    private ElasticsearchRestTemplate restTemplate;
 
     @Override
     public void init() {
@@ -284,6 +291,19 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Override
     public void deleteIndexById(String id) {
         goodsIndexRepository.deleteById(id);
+    }
+
+    /**
+     * 删除索引
+     *
+     * @param ids 商品索引id集合
+     */
+    @Override
+    public void deleteIndexByIds(List<String> ids) {
+        NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+        queryBuilder.withQuery(QueryBuilders.termsQuery("id", ids.toArray()));
+        this.restTemplate.delete(queryBuilder.build(), EsGoodsIndex.class);
+
     }
 
     @Override
@@ -480,17 +500,13 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             //获取商品索引
             if (promotionMap != null && !promotionMap.isEmpty()) {
                 //促销不为空则进行清洗
-                for (Map.Entry<String, Object> entry : promotionMap.entrySet()) {
-                    BasePromotions promotion = (BasePromotions) entry.getValue();
-                    //判定条件为活动已结束
-                    if (promotion.getEndTime() != null && promotion.getEndTime().getTime() < DateUtil.date().getTime()) {
-                        if (entry.getKey().contains(PromotionTypeEnum.SECKILL.name()) || entry.getKey().contains(PromotionTypeEnum.PINTUAN.name())) {
-                            goodsIndex.setPromotionPrice(goodsIndex.getPrice());
-                        }
-                        promotionMap.remove(entry.getKey());
+                promotionMap.entrySet().removeIf(i -> {
+                    BasePromotions promotion = (BasePromotions) i.getValue();
+                    if (i.getKey().contains(PromotionTypeEnum.SECKILL.name()) || i.getKey().contains(PromotionTypeEnum.PINTUAN.name())) {
+                        goodsIndex.setPromotionPrice(goodsIndex.getPrice());
                     }
-
-                }
+                    return promotion.getEndTime() != null && promotion.getEndTime().getTime() < DateUtil.date().getTime();
+                });
             }
         }
         goodsIndexRepository.saveAll(all);

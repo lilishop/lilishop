@@ -202,4 +202,12 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * @param promotionPrice 促销价格
      */
     void updateGoodsSkuPromotion(String skuId, Double promotionPrice);
+
+    /**
+     * 根据商品id获取全部skuId的集合
+     *
+     * @param goodsId goodsId
+     * @return 全部skuId的集合
+     */
+    List<String> getSkuIdsByGoodsId(String goodsId);
 }

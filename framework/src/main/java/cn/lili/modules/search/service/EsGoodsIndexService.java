@@ -80,6 +80,13 @@ public interface EsGoodsIndexService {
     void deleteIndexById(String id);
 
     /**
+     * 删除索引
+     *
+     * @param ids 商品索引id集合
+     */
+    void deleteIndexByIds(List<String> ids);
+
+    /**
      * 初始化商品索引
      *
      * @param goodsIndexList 商品索引列表

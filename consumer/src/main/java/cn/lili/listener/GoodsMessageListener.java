@@ -186,12 +186,28 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 break;
             //审核商品
             case GOODS_AUDIT:
-                updateGoodsNum(messageExt);
+                Goods goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
+                updateGoodsNum(goods);
                 break;
             //删除商品
             case GOODS_DELETE:
-                deleteGoods(messageExt);
-                updateGoodsNum(messageExt);
+                try {
+                    String goodsIdsJsonStr = new String(messageExt.getBody());
+                    for (String goodsId : JSONUtil.toList(goodsIdsJsonStr, String.class)) {
+                        Goods goodsById = this.goodsService.getById(goodsId);
+                        if (goodsById != null) {
+                            this.deleteGoods(goodsById);
+                            this.updateGoodsNum(goodsById);
+                            List<String> skuIdsByGoodsId = this.goodsSkuService.getSkuIdsByGoodsId(goodsId);
+                            if (skuIdsByGoodsId != null && !skuIdsByGoodsId.isEmpty()) {
+                                this.goodsIndexService.deleteIndexByIds(skuIdsByGoodsId);
+                            }
+                        }
+                    }
+
+                } catch (Exception e) {
+                    log.error("删除商品索引事件执行异常，商品信息 {}", new String(messageExt.getBody()));
+                }
                 break;
             //规格删除
             case SKU_DELETE:
@@ -380,10 +396,9 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
      * 2.删除分销员-分销商品绑定关系
      * 3.删除分销商品
      *
-     * @param messageExt 消息
+     * @param goods 消息
      */
-    private void deleteGoods(MessageExt messageExt) {
-        Goods goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
+    private void deleteGoods(Goods goods) {
 
         DistributionGoodsSearchParams searchParams = new DistributionGoodsSearchParams();
         searchParams.setGoodsId(goods.getId());
@@ -403,17 +418,15 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
     /**
      * 修改商品数量
      *
-     * @param messageExt 信息体
+     * @param goods 信息体
      */
-    private void updateGoodsNum(MessageExt messageExt) {
-
+    private void updateGoodsNum(Goods goods) {
         try {
-            Goods goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
             //更新店铺商品数量
             assert goods != null;
             storeService.updateStoreGoodsNum(goods.getStoreId());
         } catch (Exception e) {
-            log.error("商品MQ信息错误：{}", messageExt.toString());
+            log.error("修改商品数量错误");
         }
     }
 

@@ -44,7 +44,7 @@ public class PromotionEverydayExecute implements EveryDayExecute {
      */
     @Override
     public void execute() {
-        //查询条件
+        //清除所以商品索引的无效促销活动
         this.esGoodsIndexService.cleanInvalidPromotion();
         //定时创建活动
         addSeckill();
