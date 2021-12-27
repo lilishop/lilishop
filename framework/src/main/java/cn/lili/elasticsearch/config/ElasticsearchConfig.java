@@ -71,7 +71,7 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
 
     @Bean("elasticsearchRestTemplate")
     public ElasticsearchRestTemplate elasticsearchRestTemplate() {
-        return new ElasticsearchRestTemplate(elasticsearchClient());
+        return new ElasticsearchRestTemplate(this.client);
     }
 
     private HttpHost[] getHttpHosts() {

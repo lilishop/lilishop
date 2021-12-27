@@ -15,8 +15,6 @@ import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
 import cn.lili.modules.promotion.mapper.PromotionGoodsMapper;
-import cn.lili.modules.promotion.service.CouponService;
-import cn.lili.modules.promotion.service.FullDiscountService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.tools.PromotionTools;
@@ -46,6 +44,8 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper, PromotionGoods> implements PromotionGoodsService {
 
+    private static final String SKU_ID_COLUMN = "sku_id";
+
     /**
      * Redis
      */
@@ -62,12 +62,6 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     @Autowired
     private GoodsSkuService goodsSkuService;
 
-    @Autowired
-    private FullDiscountService fullDiscountService;
-
-    @Autowired
-    private CouponService couponService;
-
     @Override
     public List<PromotionGoods> findSkuValidPromotion(String skuId, String storeIds) {
 
@@ -77,7 +71,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         }
         QueryWrapper<PromotionGoods> queryWrapper = new QueryWrapper<>();
 
-        queryWrapper.and(i -> i.or(j -> j.eq("sku_id", skuId))
+        queryWrapper.and(i -> i.or(j -> j.eq(SKU_ID_COLUMN, skuId))
                 .or(n -> n.eq("scope_type", PromotionsScopeTypeEnum.ALL.name()))
                 .or(n -> n.and(k -> k.eq("scope_type", PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name())
                         .and(l -> l.like("scope_id", sku.getCategoryPath())))));
@@ -123,7 +117,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     @Override
     public PromotionGoods getValidPromotionsGoods(String skuId, List<String> promotionTypes) {
         QueryWrapper<PromotionGoods> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("sku_id", skuId);
+        queryWrapper.eq(SKU_ID_COLUMN, skuId);
         queryWrapper.in("promotion_type", promotionTypes);
         queryWrapper.and(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START));
         return this.getOne(queryWrapper, false);
@@ -139,7 +133,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     @Override
     public Double getValidPromotionsGoodsPrice(String skuId, List<String> promotionTypes) {
         QueryWrapper<PromotionGoods> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("sku_id", skuId);
+        queryWrapper.eq(SKU_ID_COLUMN, skuId);
         queryWrapper.in("promotion_type", promotionTypes);
         queryWrapper.and(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START));
         return this.baseMapper.selectPromotionsGoodsPrice(queryWrapper);

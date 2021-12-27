@@ -81,6 +81,12 @@ class EsTest {
     }
 
     @Test
+    void cleanInvalidPromotion() {
+        this.esGoodsIndexService.cleanInvalidPromotion();
+        Assertions.assertTrue(true);
+    }
+
+    @Test
     void searchGoods() {
         EsGoodsSearchDTO goodsSearchDTO = new EsGoodsSearchDTO();
 //       goodsSearchDTO.setKeyword("黄");

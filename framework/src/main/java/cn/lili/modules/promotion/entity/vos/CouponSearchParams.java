@@ -93,8 +93,8 @@ public class CouponSearchParams extends BasePromotionsSearchParams implements Se
                     queryWrapper.nested(i -> i.gt(PromotionTools.START_TIME_COLUMN, new Date()).gt(PromotionTools.END_TIME_COLUMN, new Date()));
                     break;
                 case START:
-                    queryWrapper.nested(i -> i.le(PromotionTools.START_TIME_COLUMN, new Date()).ge(PromotionTools.END_TIME_COLUMN, new Date()));
-//                            .or(i -> i.gt("effective_days", 0).eq(RANGE_DAY_TYPE_COLUMN, CouponRangeDayEnum.DYNAMICTIME.name()));
+                    queryWrapper.nested(i -> i.le(PromotionTools.START_TIME_COLUMN, new Date()).ge(PromotionTools.END_TIME_COLUMN, new Date()))
+                            .or(i -> i.gt("effective_days", 0).eq(RANGE_DAY_TYPE_COLUMN, CouponRangeDayEnum.DYNAMICTIME.name()));
                     break;
                 case END:
                     queryWrapper.nested(i -> i.lt(PromotionTools.START_TIME_COLUMN, new Date()).lt(PromotionTools.END_TIME_COLUMN, new Date()));

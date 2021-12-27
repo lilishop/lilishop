@@ -21,6 +21,7 @@ public class MemberWalletExecute implements MemberRegisterEvent {
 
     @Override
     public void memberRegister(Member member) {
-        memberWalletService.save(member.getId(),member.getUsername());
+        // 有些情况下，会同时创建一个member_id的两条数据
+//        memberWalletService.save(member.getId(),member.getUsername());
     }
 }

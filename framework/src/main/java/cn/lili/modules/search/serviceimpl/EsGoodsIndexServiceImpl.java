@@ -480,17 +480,13 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             //获取商品索引
             if (promotionMap != null && !promotionMap.isEmpty()) {
                 //促销不为空则进行清洗
-                for (Map.Entry<String, Object> entry : promotionMap.entrySet()) {
-                    BasePromotions promotion = (BasePromotions) entry.getValue();
-                    //判定条件为活动已结束
-                    if (promotion.getEndTime() != null && promotion.getEndTime().getTime() < DateUtil.date().getTime()) {
-                        if (entry.getKey().contains(PromotionTypeEnum.SECKILL.name()) || entry.getKey().contains(PromotionTypeEnum.PINTUAN.name())) {
-                            goodsIndex.setPromotionPrice(goodsIndex.getPrice());
-                        }
-                        promotionMap.remove(entry.getKey());
+                promotionMap.entrySet().removeIf(i -> {
+                    BasePromotions promotion = (BasePromotions) i.getValue();
+                    if (i.getKey().contains(PromotionTypeEnum.SECKILL.name()) || i.getKey().contains(PromotionTypeEnum.PINTUAN.name())) {
+                        goodsIndex.setPromotionPrice(goodsIndex.getPrice());
                     }
-
-                }
+                    return promotion.getEndTime() != null && promotion.getEndTime().getTime() < DateUtil.date().getTime();
+                });
             }
         }
         goodsIndexRepository.saveAll(all);
