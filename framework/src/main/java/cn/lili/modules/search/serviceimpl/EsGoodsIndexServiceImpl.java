@@ -49,8 +49,11 @@ import org.elasticsearch.index.reindex.UpdateByQueryRequest;
 import org.elasticsearch.script.Script;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -99,6 +102,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     private StoreGoodsLabelService storeGoodsLabelService;
     @Autowired
     private Cache<Object> cache;
+
+    @Autowired
+    @Qualifier("elasticsearchRestTemplate")
+    private ElasticsearchRestTemplate restTemplate;
 
     @Override
     public void init() {
@@ -284,6 +291,19 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Override
     public void deleteIndexById(String id) {
         goodsIndexRepository.deleteById(id);
+    }
+
+    /**
+     * 删除索引
+     *
+     * @param ids 商品索引id集合
+     */
+    @Override
+    public void deleteIndexByIds(List<String> ids) {
+        NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+        queryBuilder.withQuery(QueryBuilders.termsQuery("id", ids.toArray()));
+        this.restTemplate.delete(queryBuilder.build(), EsGoodsIndex.class);
+
     }
 
     @Override

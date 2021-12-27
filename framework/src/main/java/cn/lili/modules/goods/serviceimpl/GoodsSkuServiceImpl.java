@@ -2,6 +2,7 @@ package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
@@ -13,7 +14,6 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
@@ -221,7 +221,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //获取商品VO
         GoodsVO goodsVO = goodsService.getGoodsVO(goodsId);
         //如果skuid为空，则使用商品VO中sku信息获取
-        if (StringUtils.isEmpty(skuId) || "undefined".equals(skuId)) {
+        if (CharSequenceUtil.isEmpty(skuId) || "undefined".equals(skuId)) {
             skuId = goodsVO.getSkuList().get(0).getId();
         }
         //从缓存拿商品Sku
@@ -533,12 +533,27 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     /**
+     * 根据商品id获取全部skuId的集合
+     *
+     * @param goodsId goodsId
+     * @return 全部skuId的集合
+     */
+    @Override
+    public List<String> getSkuIdsByGoodsId(String goodsId) {
+        return this.baseMapper.getGoodsSkuIdByGoodsId(goodsId);
+    }
+
+    /**
      * 发送生成ES商品索引
      *
      * @param goods 商品信息
      */
     @Override
     public void generateEs(Goods goods) {
+        // 不生成没有审核通过且没有上架的商品
+        if (!GoodsStatusEnum.UPPER.name().equals(goods.getMarketEnable()) || !GoodsAuthEnum.PASS.name().equals(goods.getAuthFlag())) {
+            return;
+        }
         ThreadUtil.execAsync(() -> {
             try {
                 // 延时执行，防止商品未保存完成就去生成商品索引导致生成索引时找不到商品问题

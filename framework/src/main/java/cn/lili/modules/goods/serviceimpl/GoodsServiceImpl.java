@@ -304,6 +304,14 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         for (Goods goods : goodsList) {
             goodsSkuService.updateGoodsSkuStatus(goods);
         }
+
+        if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
+
+            //商品删除消息
+            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_DELETE.name();
+            //发送mq消息
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goodsIds), RocketmqSendCallbackBuilder.commonCallback());
+        }
         return result;
     }
 
@@ -351,11 +359,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         for (Goods goods : goodsList) {
             //修改SKU状态
             goodsSkuService.updateGoodsSkuStatus(goods);
-            //商品删除消息
-            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_DELETE.name();
-            //发送mq消息
-            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goods), RocketmqSendCallbackBuilder.commonCallback());
         }
+
+        //商品删除消息
+        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_DELETE.name();
+        //发送mq消息
+        rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goodsIds), RocketmqSendCallbackBuilder.commonCallback());
 
         return true;
     }

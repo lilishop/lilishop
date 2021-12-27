@@ -62,7 +62,7 @@ public class OrderMessageListener implements RocketMQListener<MessageExt> {
             //订单创建
             case ORDER_CREATE:
                 String key = new String(messageExt.getBody());
-                TradeDTO tradeDTO = (TradeDTO) cache.get(key);
+                TradeDTO tradeDTO = JSONUtil.toBean(cache.getString(key), TradeDTO.class);
                 boolean result = true;
                 for (TradeEvent event : tradeEvent) {
                     try {
