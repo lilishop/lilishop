@@ -489,6 +489,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //修改订单货物可以进行评价
         orderItemService.update(new UpdateWrapper<OrderItem>().eq(ORDER_SN_COLUMN, orderSn)
                 .set("comment_status", CommentStatusEnum.UNFINISHED));
+        this.update(new LambdaUpdateWrapper<Order>().eq(Order::getSn, orderSn).set(Order::getCompleteTime, new Date()));
         //发送订单状态改变消息
         OrderMessage orderMessage = new OrderMessage();
         orderMessage.setNewStatus(OrderStatusEnum.COMPLETED);
