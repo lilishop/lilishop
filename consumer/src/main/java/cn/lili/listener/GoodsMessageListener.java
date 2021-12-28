@@ -2,6 +2,7 @@ package cn.lili.listener;
 
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ClassLoaderUtil;
 import cn.hutool.json.JSONObject;
@@ -140,7 +141,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 }
                 break;
             case UPDATE_GOODS_INDEX_PROMOTIONS:
-                this.updateGoodsIndexPromotions(new String(messageExt.getBody()));
+                ThreadUtil.execAsync(() -> this.updateGoodsIndexPromotions(new String(messageExt.getBody())));
                 break;
             case DELETE_GOODS_INDEX_PROMOTIONS:
                 BasePromotions promotions = JSONUtil.toBean(new String(messageExt.getBody()), BasePromotions.class);
