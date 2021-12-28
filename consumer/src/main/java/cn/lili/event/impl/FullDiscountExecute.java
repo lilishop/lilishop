@@ -82,7 +82,7 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
                     if ((cartVO.getGiftList() != null && !cartVO.getGiftList().isEmpty())
                             || (cartVO.getGiftPoint() != null && cartVO.getGiftPoint() > 0)
                             || (cartVO.getGiftCouponList() != null && !cartVO.getGiftCouponList().isEmpty())) {
-                        cache.put(CachePrefix.ORDER.getPrefix() + cartVO.getSn(), cartVO);
+                        cache.put(CachePrefix.ORDER.getPrefix() + cartVO.getSn(), JSONUtil.toJsonStr(cartVO));
                     }
                 }
         );
@@ -92,7 +92,7 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
     public void orderChange(OrderMessage orderMessage) {
         if (orderMessage.getNewStatus().equals(OrderStatusEnum.PAID)) {
             log.debug("满减活动，订单状态操作 {}", CachePrefix.ORDER.getPrefix() + orderMessage.getOrderSn());
-            renderGift((CartVO) cache.get(CachePrefix.ORDER.getPrefix() + orderMessage.getOrderSn()), orderMessage);
+            renderGift(JSONUtil.toBean(cache.getString(CachePrefix.ORDER.getPrefix() + orderMessage.getOrderSn()), CartVO.class), orderMessage);
         }
     }
 
