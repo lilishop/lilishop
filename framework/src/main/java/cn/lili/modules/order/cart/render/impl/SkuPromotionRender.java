@@ -1,5 +1,7 @@
 package cn.lili.modules.order.cart.render.impl;
 
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -13,7 +15,6 @@ import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
-import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dto.search.KanjiaActivitySearchParams;
 import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
 import cn.lili.modules.promotion.entity.vos.PromotionSkuVO;
@@ -140,8 +141,8 @@ public class SkuPromotionRender implements CartRenderStep {
                                 continue;
                             }
 
-                            BasePromotions basePromotions = (BasePromotions) entry.getValue();
-                            PromotionSkuVO promotionSkuVO = new PromotionSkuVO(entry.getKey().split("-")[0], basePromotions.getId());
+                            JSONObject promotionsObj = JSONUtil.parseObj(entry.getValue());
+                            PromotionSkuVO promotionSkuVO = new PromotionSkuVO(entry.getKey().split("-")[0], promotionsObj.get("id", String.class));
                             cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
                             cartSkuVO.getPriceDetailDTO().setGoodsPrice(cartSkuVO.getSubTotal());
 

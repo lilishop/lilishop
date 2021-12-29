@@ -1,5 +1,7 @@
 package cn.lili.modules.order.cart.render.impl;
 
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -55,7 +57,8 @@ public class FullDiscountRender implements CartRenderStep {
                 Optional<Map.Entry<String, Object>> fullDiscountOptional = fullDiscountSkuList.get(0).getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.FULL_DISCOUNT.name())).findFirst();
 
                 if (fullDiscountOptional.isPresent()) {
-                    FullDiscount fullDiscount = (FullDiscount) fullDiscountOptional.get().getValue();
+                    JSONObject promotionsObj = JSONUtil.parseObj(fullDiscountOptional.get().getValue());
+                    FullDiscount fullDiscount = promotionsObj.toBean(FullDiscount.class);
                     FullDiscountVO fullDiscountVO = new FullDiscountVO(fullDiscount);
 
                     //如果有赠品，则将赠品信息写入

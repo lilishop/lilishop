@@ -1,6 +1,8 @@
 package cn.lili.modules.order.cart.render.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -72,7 +74,8 @@ public class CommissionRender implements CartRenderStep {
                 if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.POINTS) && tradeDTO.getSkuList().get(0).getPromotionMap() != null && !tradeDTO.getSkuList().get(0).getPromotionMap().isEmpty()) {
                     Optional<Map.Entry<String, Object>> pointsPromotions = tradeDTO.getSkuList().get(0).getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.POINTS_GOODS.name())).findFirst();
                     if (pointsPromotions.isPresent()) {
-                        PointsGoods pointsGoods = (PointsGoods) pointsPromotions.get().getValue();
+                        JSONObject promotionsObj = JSONUtil.parseObj(pointsPromotions.get().getValue());
+                        PointsGoods pointsGoods = JSONUtil.toBean(promotionsObj, PointsGoods.class);
                         priceDetailDTO.setSettlementPrice(pointsGoods.getSettlementPrice());
                     }
                 }
@@ -80,7 +83,8 @@ public class CommissionRender implements CartRenderStep {
                 else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.KANJIA) && tradeDTO.getSkuList().get(0).getPromotionMap() != null && !tradeDTO.getSkuList().get(0).getPromotionMap().isEmpty()) {
                     Optional<Map.Entry<String, Object>> kanjiaPromotions = tradeDTO.getSkuList().get(0).getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.KANJIA.name())).findFirst();
                     if (kanjiaPromotions.isPresent()) {
-                        KanjiaActivityGoods kanjiaActivityGoods = (KanjiaActivityGoods) kanjiaPromotions.get().getValue();
+                        JSONObject promotionsObj = JSONUtil.parseObj(kanjiaPromotions.get().getValue());
+                        KanjiaActivityGoods kanjiaActivityGoods = JSONUtil.toBean(promotionsObj, KanjiaActivityGoods.class);
                         priceDetailDTO.setSettlementPrice(kanjiaActivityGoods.getSettlementPrice());
                     }
                 }

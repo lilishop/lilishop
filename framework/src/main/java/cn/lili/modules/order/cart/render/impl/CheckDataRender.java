@@ -1,6 +1,8 @@
 package cn.lili.modules.order.cart.render.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -120,7 +122,8 @@ public class CheckDataRender implements CartRenderStep {
             //移除无效促销活动
             if (cartSkuVO.getPromotionMap() != null && !cartSkuVO.getPromotionMap().isEmpty()) {
                 cartSkuVO.setPromotionMap(cartSkuVO.getPromotionMap().entrySet().stream().filter(i -> {
-                    BasePromotions basePromotions = (BasePromotions) i.getValue();
+                    JSONObject promotionsObj = JSONUtil.parseObj(i.getValue());
+                    BasePromotions basePromotions = promotionsObj.toBean(BasePromotions.class);
                     if (basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
                         return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
                     }
@@ -189,7 +192,8 @@ public class CheckDataRender implements CartRenderStep {
             if (tradeDTO.getSkuList().get(0).getPromotionMap() != null && !tradeDTO.getSkuList().get(0).getPromotionMap().isEmpty()) {
                 Optional<Map.Entry<String, Object>> pintuanPromotions = tradeDTO.getSkuList().get(0).getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.PINTUAN.name())).findFirst();
                 if (pintuanPromotions.isPresent()) {
-                    Pintuan pintuan = (Pintuan) pintuanPromotions.get().getValue();
+                    JSONObject promotionsObj = JSONUtil.parseObj(pintuanPromotions.get().getValue());
+                    Pintuan pintuan = promotionsObj.toBean(Pintuan.class);
                     Integer limitNum = pintuan.getLimitNum();
                     for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
                         if (limitNum != 0 && cartSkuVO.getNum() > limitNum) {
@@ -203,7 +207,8 @@ public class CheckDataRender implements CartRenderStep {
             //获取积分商品VO
             Optional<Map.Entry<String, Object>> pointsPromotions = tradeDTO.getSkuList().get(0).getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.POINTS_GOODS.name())).findFirst();
             if (pointsPromotions.isPresent()) {
-                PointsGoods pointsGoods = (PointsGoods) pointsPromotions.get().getValue();
+                JSONObject promotionsObj = JSONUtil.parseObj(pointsPromotions.get().getValue());
+                PointsGoods pointsGoods = promotionsObj.toBean(PointsGoods.class);
                 if (pointsGoods == null) {
                     throw new ServiceException(ResultCode.POINT_GOODS_ERROR);
                 }

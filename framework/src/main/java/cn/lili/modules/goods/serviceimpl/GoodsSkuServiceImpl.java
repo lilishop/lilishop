@@ -33,7 +33,10 @@ import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
+import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
+import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.search.entity.dos.EsGoodsAttribute;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
@@ -103,6 +106,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      */
     @Autowired
     private EsGoodsIndexService goodsIndexService;
+
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
 
     @Override
     public void add(List<Map<String, Object>> skuList, Goods goods) {
@@ -253,9 +259,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
         Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
         //设置当前商品的促销价格
-        if (promotionMap != null && !promotionMap.isEmpty() && goodsIndex.getPromotionPrice() != null) {
-            goodsSkuDetail.setPromotionPrice(goodsIndex.getPromotionPrice());
-        }
         if (promotionMap != null && !promotionMap.isEmpty()) {
             promotionMap = promotionMap.entrySet().stream().parallel().filter(i -> {
                 JSONObject jsonObject = JSONUtil.parseObj(i.getValue());
@@ -265,11 +268,18 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                         (jsonObject.get("endTime") == null || jsonObject.get("endTime", Date.class).getTime() >= System.currentTimeMillis());
             }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-            boolean containsPromotion = promotionMap.keySet().stream().anyMatch(i ->
-                    i.contains(PromotionTypeEnum.SECKILL.name()) || i.contains(PromotionTypeEnum.PINTUAN.name()));
-            if (containsPromotion && goodsIndex.getPromotionPrice() != null) {
-                goodsSkuDetail.setPromotionFlag(true);
-                goodsSkuDetail.setPromotionPrice(goodsIndex.getPromotionPrice());
+            Optional<Map.Entry<String, Object>> containsPromotion = promotionMap.entrySet().stream().filter(i ->
+                    i.getKey().contains(PromotionTypeEnum.SECKILL.name()) || i.getKey().contains(PromotionTypeEnum.PINTUAN.name())).findFirst();
+            if (containsPromotion.isPresent()) {
+                JSONObject jsonObject = JSONUtil.parseObj(containsPromotion.get().getValue());
+                PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
+                searchParams.setSkuId(skuId);
+                searchParams.setPromotionId(jsonObject.get("id").toString());
+                PromotionGoods promotionsGoods = promotionGoodsService.getPromotionsGoods(searchParams);
+                if (promotionsGoods != null && promotionsGoods.getPrice() != null) {
+                    goodsSkuDetail.setPromotionFlag(true);
+                    goodsSkuDetail.setPromotionPrice(promotionsGoods.getPrice());
+                }
             } else {
                 goodsSkuDetail.setPromotionFlag(false);
                 goodsSkuDetail.setPromotionPrice(null);
