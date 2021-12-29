@@ -52,7 +52,7 @@ public class MemberTokenGenerate extends AbstractTokenGenerate {
         member.setClientEnum(clientTypeEnum.name());
         memberService.updateById(member);
 
-        AuthUser authUser = new AuthUser(member.getUsername(), member.getId(),member.getNickName(), UserEnums.MEMBER);
+        AuthUser authUser = new AuthUser(member.getUsername(), member.getId(), member.getNickName(), member.getFace(), UserEnums.MEMBER);
         //登陆成功生成token
         return tokenUtil.createToken(username, authUser, longTerm, UserEnums.MEMBER);
     }

@@ -26,6 +26,11 @@ public class AuthUser implements Serializable {
     private String nickName;
 
     /**
+     * 头像
+     */
+    private String face;
+
+    /**
      * id
      */
     private String id;
@@ -58,16 +63,18 @@ public class AuthUser implements Serializable {
      */
     private Boolean isSuper = false;
 
-    public AuthUser(String username, String id, String nickName, UserEnums role) {
+    public AuthUser(String username, String id, String nickName, String face, UserEnums role) {
         this.username = username;
+        this.face = face;
         this.id = id;
         this.role = role;
         this.nickName = nickName;
     }
 
-    public AuthUser(String username, String id, UserEnums manager, String nickName, Boolean isSuper) {
+    public AuthUser(String username, String id, String face, UserEnums manager, String nickName, Boolean isSuper) {
         this.username = username;
         this.id = id;
+        this.face = face;
         this.role = manager;
         this.isSuper = isSuper;
         this.nickName = nickName;
