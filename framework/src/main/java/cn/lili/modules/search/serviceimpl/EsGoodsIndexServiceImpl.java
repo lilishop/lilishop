@@ -619,7 +619,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     /**
      * 以更新部分字段的方式更新索引促销信息
      *
-     * @param id 索引id
+     * @param id           索引id
      * @param promotionMap 促销信息
      */
     private void updatePromotionsByScript(String id, Map<String, Object> promotionMap) {
@@ -628,10 +628,16 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         String s = jsonObject.toString();
         String promotionsStr = s.replace("{", "[").replace("}", "]");
 
-        UpdateByQueryRequest update = new UpdateByQueryRequest(getIndexName());
-        update.setQuery(QueryBuilders.boolQuery().filter(QueryBuilders.termsQuery("id", id)));
-        update.setScript(new Script("ctx._source." + "promotionMap" + "=" + promotionsStr + ";"));
-        client.updateByQueryAsync(update, RequestOptions.DEFAULT, this.actionListener());
+        UpdateRequest updateRequest = new UpdateRequest();
+        updateRequest.index(getIndexName());
+        updateRequest.id(id);
+        updateRequest.retryOnConflict(5);
+        updateRequest.script(new Script("ctx._source." + "promotionMap" + "=" + promotionsStr + ";"));
+        try {
+            client.update(updateRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            log.error("更新商品索引促销信息错误", e);
+        }
     }
 
     /**
