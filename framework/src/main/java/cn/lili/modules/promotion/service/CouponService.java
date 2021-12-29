@@ -2,7 +2,7 @@ package cn.lili.modules.promotion.service;
 
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.Coupon;
-import cn.lili.modules.promotion.entity.vos.CouponSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.CouponSearchParams;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 

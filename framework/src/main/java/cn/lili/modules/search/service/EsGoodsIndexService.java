@@ -3,8 +3,8 @@ package cn.lili.modules.search.service;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
+import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 
 import java.util.List;

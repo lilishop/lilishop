@@ -137,10 +137,11 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
      * 更新优惠券活动商品信息
      *
      * @param couponActivity 优惠券活动实体
+     * @return
      */
     @Override
-    public void updatePromotionsGoods(CouponActivity couponActivity) {
-        super.updatePromotionsGoods(couponActivity);
+    public boolean updatePromotionsGoods(CouponActivity couponActivity) {
+        boolean result = super.updatePromotionsGoods(couponActivity);
         if (couponActivity instanceof CouponActivityDTO
                 && !PromotionsStatusEnum.CLOSE.name().equals(couponActivity.getPromotionStatus())
                 && PromotionsScopeTypeEnum.PORTION_GOODS.name().equals(couponActivity.getScopeType())) {
@@ -150,8 +151,9 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
                 couponActivityItem.setActivityId(couponActivityDTO.getId());
             }
             // 更新优惠券活动项信息
-            couponActivityItemService.saveBatch(couponActivityDTO.getCouponActivityItems());
+            result = couponActivityItemService.saveBatch(couponActivityDTO.getCouponActivityItems());
         }
+        return result;
     }
 
     /**

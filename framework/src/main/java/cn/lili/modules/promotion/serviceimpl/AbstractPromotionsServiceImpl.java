@@ -6,10 +6,10 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.dto.BasePromotions;
+import cn.lili.modules.promotion.entity.dto.search.BasePromotionsSearchParams;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
-import cn.lili.modules.promotion.entity.vos.BasePromotionsSearchParams;
 import cn.lili.modules.promotion.service.AbstractPromotionsService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.tools.PromotionTools;
@@ -31,6 +31,7 @@ import java.util.*;
  * @author paulG
  * @since 2021/11/30
  **/
+@Transactional(rollbackFor = Exception.class)
 public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T extends BasePromotions> extends ServiceImpl<M, T> implements AbstractPromotionsService<T> {
 
     /**
@@ -69,8 +70,9 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
         this.initPromotion(promotions);
         this.checkPromotions(promotions);
         boolean save = this.save(promotions);
-        this.updatePromotionsGoods(promotions);
-        this.updateEsGoodsIndex(promotions);
+        if (this.updatePromotionsGoods(promotions)) {
+            this.updateEsGoodsIndex(promotions);
+        }
         return save;
     }
 
@@ -92,8 +94,9 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
         this.checkStatus(promotions);
         this.checkPromotions(promotions);
         boolean save = this.saveOrUpdate(promotions);
-        this.updatePromotionsGoods(promotions);
-        this.updateEsGoodsIndex(promotions);
+        if (this.updatePromotionsGoods(promotions)) {
+            this.updateEsGoodsIndex(promotions);
+        }
         return save;
     }
 
@@ -212,14 +215,16 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
      * 更新促销商品信息
      *
      * @param promotions 促销实体
+     * @return
      */
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public void updatePromotionsGoods(T promotions) {
+    public boolean updatePromotionsGoods(T promotions) {
         if (promotions.getStartTime() == null && promotions.getEndTime() == null) {
             this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(promotions.getId()));
-            return;
+            return true;
         }
+        boolean result = false;
         if (CharSequenceUtil.equalsAny(promotions.getScopeType(), PromotionsScopeTypeEnum.ALL.name(), PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name())) {
             PromotionGoods promotionGoods = new PromotionGoods();
             promotionGoods.setScopeId(promotions.getScopeId());
@@ -232,8 +237,9 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
             promotionGoods.setPromotionType(this.getPromotionType().name());
             promotionGoods.setTitle(promotions.getPromotionName());
             this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(promotions.getId()));
-            this.promotionGoodsService.save(promotionGoods);
+            result = this.promotionGoodsService.save(promotionGoods);
         }
+        return result;
     }
 
     /**

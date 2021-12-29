@@ -7,11 +7,11 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
 import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
-import cn.lili.modules.promotion.entity.vos.CouponSearchParams;
 import cn.lili.modules.promotion.mapper.MemberCouponMapper;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
@@ -92,20 +92,20 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     }
 
     @Override
-    public IPage<MemberCoupon> getMemberCoupons(CouponSearchParams param, PageVO pageVo) {
+    public IPage<MemberCoupon> getMemberCoupons(MemberCouponSearchParams param, PageVO pageVo) {
         QueryWrapper<MemberCoupon> queryWrapper = param.queryWrapper();
         return this.page(PageUtil.initPage(pageVo), queryWrapper);
     }
 
+    /**
+     * 获取会员优惠券列表
+     *
+     * @param param 查询参数
+     * @return 会员优惠券列表
+     */
     @Override
-    public List<MemberCoupon> getMemberCoupons() {
-        AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(MemberCoupon::getMemberId, authUser.getId());
-        queryWrapper.eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name());
-        queryWrapper.le(MemberCoupon::getStartTime, new Date());
-        queryWrapper.ge(MemberCoupon::getEndTime, new Date());
-        return this.list(queryWrapper);
+    public List<MemberCoupon> getMemberCoupons(MemberCouponSearchParams param) {
+        return this.list(param.queryWrapper());
     }
 
     /**
@@ -116,7 +116,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
      * @return 会员优惠券列表
      */
     @Override
-    public IPage<MemberCoupon> getMemberCouponsByCanUse(CouponSearchParams param, Double totalPrice, PageVO pageVo) {
+    public IPage<MemberCoupon> getMemberCouponsByCanUse(MemberCouponSearchParams param, Double totalPrice, PageVO pageVo) {
         LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<>();
         List<String> storeIds = new ArrayList<>(Arrays.asList(param.getStoreId().split(",")));
         storeIds.add(PromotionTools.PLATFORM_ID);

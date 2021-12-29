@@ -2,8 +2,8 @@ package cn.lili.modules.promotion.service;
 
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.promotion.entity.dto.BasePromotions;
-import cn.lili.modules.promotion.entity.vos.BasePromotionsSearchParams;
+import cn.lili.modules.promotion.entity.dos.BasePromotions;
+import cn.lili.modules.promotion.entity.dto.search.BasePromotionsSearchParams;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -110,8 +110,9 @@ public interface AbstractPromotionsService<T extends BasePromotions> extends ISe
      * 更新促销商品信息
      *
      * @param promotions 促销实体
+     * @return
      */
-    void updatePromotionsGoods(T promotions);
+    boolean updatePromotionsGoods(T promotions);
 
     /**
      * 更新促销信息到商品索引

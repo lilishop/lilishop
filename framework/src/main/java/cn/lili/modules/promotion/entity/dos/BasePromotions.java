@@ -1,4 +1,4 @@
-package cn.lili.modules.promotion.entity.dto;
+package cn.lili.modules.promotion.entity.dos;
 
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;

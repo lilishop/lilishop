@@ -7,7 +7,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.PointsGoods;
-import cn.lili.modules.promotion.entity.vos.PointsGoodsSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.PointsGoodsSearchParams;
 import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
 import cn.lili.modules.promotion.service.PointsGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;

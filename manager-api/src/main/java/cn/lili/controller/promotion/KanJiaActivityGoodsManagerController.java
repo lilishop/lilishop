@@ -9,7 +9,7 @@ import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivityGoods;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsOperationDTO;
-import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsParams;
+import cn.lili.modules.promotion.entity.dto.search.KanjiaActivityGoodsParams;
 import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;

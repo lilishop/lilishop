@@ -1,4 +1,4 @@
-package cn.lili.modules.promotion.entity.dto;
+package cn.lili.modules.promotion.entity.dto.search;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -15,20 +15,25 @@ import lombok.Data;
  */
 @Data
 @ApiModel(value = "砍价活动参与记录查询对象")
-public class KanJiaActivityLogQuery {
+public class KanjiaActivityQuery {
 
 
     private static final long serialVersionUID = -1583030890805926292L;
 
-    @ApiModelProperty(value = "砍价发起活动id")
-    private String kanJiaActivityId;
+    @ApiModelProperty(value = "货品名称")
+    private String goodsName;
 
+    @ApiModelProperty(value = "会员id", hidden = true)
+    private String memberId;
 
     public <T> QueryWrapper<T> wrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
 
-        if (CharSequenceUtil.isNotEmpty(kanJiaActivityId)) {
-            queryWrapper.like("kanjia_activity_id", kanJiaActivityId);
+        if (CharSequenceUtil.isNotEmpty(goodsName)) {
+            queryWrapper.like("goods_name", goodsName);
+        }
+        if (memberId != null) {
+            queryWrapper.eq("member_id", memberId);
         }
         queryWrapper.eq("delete_flag", false);
         queryWrapper.orderByDesc("create_time");
