@@ -45,7 +45,7 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
     public Token createToken(String username, Boolean longTerm) {
         //生成token
         AdminUser adminUser = adminUserService.findByUsername(username);
-        AuthUser user = new AuthUser(adminUser.getUsername(), adminUser.getId(), UserEnums.MANAGER, adminUser.getNickName(), adminUser.getIsSuper());
+        AuthUser user = new AuthUser(adminUser.getUsername(), adminUser.getId(), adminUser.getAvatar(), UserEnums.MANAGER, adminUser.getNickName(), adminUser.getIsSuper());
 
 
         List<UserMenuVO> userMenuVOList = roleMenuService.findAllMenu(user.getId());

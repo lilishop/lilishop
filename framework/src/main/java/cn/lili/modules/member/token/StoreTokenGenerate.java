@@ -38,10 +38,11 @@ public class StoreTokenGenerate extends AbstractTokenGenerate {
         if (!member.getHaveStore()) {
             throw new ServiceException(ResultCode.STORE_NOT_OPEN);
         }
-        AuthUser user = new AuthUser(member.getUsername(), member.getId(), member.getNickName(), UserEnums.STORE);
         LambdaQueryWrapper<Store> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Store::getMemberId, member.getId());
         Store store = storeService.getOne(queryWrapper);
+        AuthUser user = new AuthUser(member.getUsername(), member.getId(), member.getNickName(), store.getStoreLogo(), UserEnums.STORE);
+
         user.setStoreId(store.getId());
         user.setStoreName(store.getStoreName());
         return tokenUtil.createToken(username, user, longTerm, UserEnums.STORE);
