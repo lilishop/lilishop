@@ -1,6 +1,7 @@
 package cn.lili.modules.order.cart.service;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.common.enums.PromotionTypeEnum;
@@ -31,10 +32,10 @@ import cn.lili.modules.order.cart.render.TradeBuilder;
 import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.entity.vo.ReceiptVO;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivity;
-import cn.lili.modules.promotion.entity.dos.KanjiaActivityGoods;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
-import cn.lili.modules.promotion.entity.dos.Pintuan;
+import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.search.KanjiaActivitySearchParams;
+import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
@@ -42,6 +43,7 @@ import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
 import cn.lili.modules.promotion.service.KanjiaActivityService;
 import cn.lili.modules.promotion.service.MemberCouponService;
 import cn.lili.modules.promotion.service.PointsGoodsService;
+import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.search.service.EsGoodsSearchService;
@@ -131,6 +133,9 @@ public class CartServiceImpl implements CartService {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
 
     @Override
     public void add(String skuId, Integer num, String cartType, Boolean cover) {
@@ -570,8 +575,20 @@ public class CartServiceImpl implements CartService {
             if (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.SECKILL.name())) ||
                     (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.PINTUAN.name()))
                             && CartTypeEnum.PINTUAN.name().equals(cartType))) {
-                dataSku.setPromotionFlag(true);
-                dataSku.setPromotionPrice(goodsIndex.getPromotionPrice());
+
+                Optional<Map.Entry<String, Object>> containsPromotion = goodsIndex.getPromotionMap().entrySet().stream().filter(i ->
+                        i.getKey().contains(PromotionTypeEnum.SECKILL.name()) || i.getKey().contains(PromotionTypeEnum.PINTUAN.name())).findFirst();
+                if (containsPromotion.isPresent()) {
+                    JSONObject promotionsObj = JSONUtil.parseObj(containsPromotion.get().getValue());
+                    PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
+                    searchParams.setSkuId(dataSku.getId());
+                    searchParams.setPromotionId(promotionsObj.get("id").toString());
+                    PromotionGoods promotionsGoods = promotionGoodsService.getPromotionsGoods(searchParams);
+                    if (promotionsGoods != null && promotionsGoods.getPrice() != null) {
+                        dataSku.setPromotionFlag(true);
+                        dataSku.setPromotionPrice(promotionsGoods.getPrice());
+                    }
+                }
             }
             promotionMap = goodsIndex.getPromotionMap();
         } else {
@@ -718,11 +735,11 @@ public class CartServiceImpl implements CartService {
         if (cartSkuVO.getPromotionMap() != null && !cartSkuVO.getPromotionMap().isEmpty()) {
             Optional<Map.Entry<String, Object>> pintuanPromotions = cartSkuVO.getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.PINTUAN.name())).findFirst();
             if (pintuanPromotions.isPresent()) {
-                Pintuan pintuan = (Pintuan) pintuanPromotions.get().getValue();
+                JSONObject promotionsObj = JSONUtil.parseObj(pintuanPromotions.get().getValue());
                 //写入拼团信息
-                cartSkuVO.setPintuanId(pintuan.getId());
+                cartSkuVO.setPintuanId(promotionsObj.get("id").toString());
                 //检测拼团限购数量
-                Integer limitNum = pintuan.getLimitNum();
+                Integer limitNum = promotionsObj.get("limitNum", Integer.class);
                 if (limitNum != 0 && cartSkuVO.getNum() > limitNum) {
                     throw new ServiceException(ResultCode.CART_PINTUAN_LIMIT_ERROR);
                 }
@@ -739,10 +756,10 @@ public class CartServiceImpl implements CartService {
         if (cartSkuVO.getPromotionMap() != null && !cartSkuVO.getPromotionMap().isEmpty()) {
             Optional<Map.Entry<String, Object>> kanjiaPromotions = cartSkuVO.getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.KANJIA.name())).findFirst();
             if (kanjiaPromotions.isPresent()) {
-                KanjiaActivityGoods kanjiaActivityGoods = (KanjiaActivityGoods) kanjiaPromotions.get().getValue();
+                JSONObject promotionsObj = JSONUtil.parseObj(kanjiaPromotions.get().getValue());
                 //查找当前会员的砍价商品活动
                 KanjiaActivitySearchParams kanjiaActivitySearchParams = new KanjiaActivitySearchParams();
-                kanjiaActivitySearchParams.setKanjiaActivityGoodsId(kanjiaActivityGoods.getId());
+                kanjiaActivitySearchParams.setKanjiaActivityGoodsId(promotionsObj.get("id", String.class));
                 kanjiaActivitySearchParams.setMemberId(UserContext.getCurrentUser().getId());
                 kanjiaActivitySearchParams.setStatus(KanJiaStatusEnum.SUCCESS.name());
                 KanjiaActivity kanjiaActivity = kanjiaActivityService.getKanjiaActivity(kanjiaActivitySearchParams);
