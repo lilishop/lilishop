@@ -264,7 +264,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 this.goodsIndexService.updateEsGoodsIndexAllByList(promotions, esPromotionKey);
             }
         } catch (Exception e) {
-            log.error("生成商品索引促销信息执行异常，参数信息 {}", promotionsJsonStr);
+            log.error("生成商品索引促销信息执行异常",e);
         }
     }
 
