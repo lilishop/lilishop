@@ -1,4 +1,4 @@
-package cn.lili.modules.promotion.entity.vos;
+package cn.lili.modules.promotion.entity.dto.search;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.modules.promotion.entity.enums.*;
@@ -56,11 +56,6 @@ public class CouponSearchParams extends BasePromotionsSearchParams implements Se
      */
     @ApiModelProperty(value = "优惠券类型，分为免费领取和活动赠送")
     private String getType;
-    /**
-     * @see MemberCouponStatusEnum
-     */
-    @ApiModelProperty(value = "会员优惠券状态")
-    private String memberCouponStatus;
 
 
     @Override
@@ -83,9 +78,6 @@ public class CouponSearchParams extends BasePromotionsSearchParams implements Se
         }
         if (CharSequenceUtil.isNotEmpty(getType)) {
             queryWrapper.eq("get_type", CouponGetEnum.valueOf(getType).name());
-        }
-        if (CharSequenceUtil.isNotEmpty(memberCouponStatus)) {
-            queryWrapper.eq("member_coupon_status", MemberCouponStatusEnum.valueOf(memberCouponStatus).name());
         }
         if (CharSequenceUtil.isNotEmpty(this.getPromotionStatus())) {
             switch (PromotionsStatusEnum.valueOf(this.getPromotionStatus())) {

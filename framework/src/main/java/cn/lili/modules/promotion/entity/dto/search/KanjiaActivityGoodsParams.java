@@ -1,10 +1,9 @@
-package cn.lili.modules.promotion.entity.vos.kanjia;
+package cn.lili.modules.promotion.entity.dto.search;
 
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.modules.promotion.entity.vos.BasePromotionsSearchParams;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

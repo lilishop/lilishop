@@ -886,22 +886,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     /**
-     * 检查交易信息
-     *
-     * @param order 订单
-     */
-    private void checkOrder(Order order) {
-        //订单类型为拼团订单，检测购买数量是否超过了限购数量
-        if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderType())) {
-            Pintuan pintuan = pintuanService.getById(order.getPromotionId());
-            Integer limitNum = pintuan.getLimitNum();
-            if (limitNum != 0 && order.getGoodsNum() > limitNum) {
-                throw new ServiceException(ResultCode.PINTUAN_LIMIT_NUM_ERROR);
-            }
-        }
-    }
-
-    /**
      * 普通商品订单确认
      * 修改订单状态为待发货
      * 发送订单状态变更消息

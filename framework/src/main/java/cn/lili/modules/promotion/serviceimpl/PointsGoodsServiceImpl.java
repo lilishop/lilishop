@@ -114,8 +114,9 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
         this.checkPromotions(promotions);
         if (this.checkSkuDuplicate(promotions.getSkuId(), promotions.getId()) == null) {
             result = this.updateById(promotions);
-            this.updatePromotionsGoods(promotions);
-            this.updateEsGoodsIndex(promotions);
+            if (this.updatePromotionsGoods(promotions)) {
+                this.updateEsGoodsIndex(promotions);
+            }
         }
         return result;
     }
@@ -203,11 +204,12 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
      * 更新促销商品信息
      *
      * @param promotions 促销实体
+     * @return
      */
     @Override
-    public void updatePromotionsGoods(PointsGoods promotions) {
+    public boolean updatePromotionsGoods(PointsGoods promotions) {
         this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(promotions.getId()));
-        this.promotionGoodsService.save(new PromotionGoods(promotions, this.checkSkuExist(promotions.getSkuId())));
+        return this.promotionGoodsService.save(new PromotionGoods(promotions, this.checkSkuExist(promotions.getSkuId())));
     }
 
     /**

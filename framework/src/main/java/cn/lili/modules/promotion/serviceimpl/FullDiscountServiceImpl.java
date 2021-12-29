@@ -8,9 +8,9 @@ import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.FullDiscount;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
-import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.mapper.FullDiscountMapper;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.FullDiscountService;
@@ -107,10 +107,11 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
      * 更新促销商品信息
      *
      * @param promotions 促销实体
+     * @return
      */
     @Override
-    public void updatePromotionsGoods(FullDiscount promotions) {
-        super.updatePromotionsGoods(promotions);
+    public boolean updatePromotionsGoods(FullDiscount promotions) {
+        boolean result = super.updatePromotionsGoods(promotions);
         if (!PromotionsStatusEnum.CLOSE.name().equals(promotions.getPromotionStatus())
                 && PromotionsScopeTypeEnum.PORTION_GOODS.name().equals(promotions.getScopeType())
                 && promotions instanceof FullDiscountVO) {
@@ -118,8 +119,9 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
             List<PromotionGoods> promotionGoodsList = PromotionTools.promotionGoodsInit(fullDiscountVO.getPromotionGoodsList(), fullDiscountVO, PromotionTypeEnum.FULL_DISCOUNT);
             this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(promotions.getId()));
             //促销活动商品更新
-            this.promotionGoodsService.saveBatch(promotionGoodsList);
+            result = this.promotionGoodsService.saveBatch(promotionGoodsList);
         }
+        return result;
 
     }
 

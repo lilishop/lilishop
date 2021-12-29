@@ -8,7 +8,7 @@ import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.promotion.entity.dos.FullDiscount;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.vos.FullDiscountSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.FullDiscountSearchParams;
 import cn.lili.modules.promotion.service.FullDiscountService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.junit.jupiter.api.Assertions;

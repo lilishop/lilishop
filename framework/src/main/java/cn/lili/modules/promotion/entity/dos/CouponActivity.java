@@ -1,6 +1,5 @@
 package cn.lili.modules.promotion.entity.dos;
 
-import cn.lili.modules.promotion.entity.dto.BasePromotions;
 import cn.lili.modules.promotion.entity.enums.CouponActivitySendTypeEnum;
 import cn.lili.modules.promotion.entity.enums.CouponActivityTypeEnum;
 import com.baomidou.mybatisplus.annotation.TableName;

@@ -2,10 +2,10 @@ package cn.lili.modules.promotion.serviceimpl;
 
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.dos.*;
+import cn.lili.modules.promotion.entity.dto.search.FullDiscountSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.PintuanSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.SeckillSearchParams;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
-import cn.lili.modules.promotion.entity.vos.FullDiscountSearchParams;
-import cn.lili.modules.promotion.entity.vos.PintuanSearchParams;
-import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
 import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
