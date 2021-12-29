@@ -224,7 +224,7 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
             this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(promotions.getId()));
             return true;
         }
-        boolean result = false;
+        boolean result = true;
         if (CharSequenceUtil.equalsAny(promotions.getScopeType(), PromotionsScopeTypeEnum.ALL.name(), PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name())) {
             PromotionGoods promotionGoods = new PromotionGoods();
             promotionGoods.setScopeId(promotions.getScopeId());
