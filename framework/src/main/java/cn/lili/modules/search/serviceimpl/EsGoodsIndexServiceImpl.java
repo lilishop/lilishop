@@ -425,6 +425,8 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 //           查询出全部商品
             goodsIndices = new ArrayList<>(IterableUtil.toCollection(all));
         }
+        List<String> skuIds = goodsIndices.stream().map(EsGoodsIndex::getId).collect(Collectors.toList());
+        this.deleteEsGoodsPromotionByPromotionId(skuIds, promotion.getId());
         //更新商品索引
         for (EsGoodsIndex goodsIndex : goodsIndices) {
             this.updateGoodsIndexPromotion(goodsIndex, key, promotion);
@@ -481,11 +483,11 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     private void removePromotionByPromotionId(EsGoodsIndex goodsIndex, String promotionId) {
         Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
         if (promotionMap != null && !promotionMap.isEmpty()) {
-            //如果存在同类型促销活动删除
+            //如果存在同促销ID的活动删除
             List<String> collect = promotionMap.keySet().stream().filter(i -> i.split("-")[1].equals(promotionId)).collect(Collectors.toList());
             collect.forEach(promotionMap::remove);
             goodsIndex.setPromotionMap(promotionMap);
-            updateIndex(goodsIndex);
+            this.updatePromotionsByScript(goodsIndex.getId(), promotionMap);
         }
     }
 
@@ -611,8 +613,25 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         } else {
             promotionMap.put(key, promotion);
         }
-        goodsIndex.setPromotionMap(promotionMap);
-        updateIndex(goodsIndex);
+        this.updatePromotionsByScript(goodsIndex.getId(), promotionMap);
+    }
+
+    /**
+     * 以更新部分字段的方式更新索引促销信息
+     *
+     * @param id 索引id
+     * @param promotionMap 促销信息
+     */
+    private void updatePromotionsByScript(String id, Map<String, Object> promotionMap) {
+        JSONObject jsonObject = JSONUtil.parseObj(promotionMap);
+        jsonObject.setDateFormat("yyyy-MM-dd HH:mm:ss");
+        String s = jsonObject.toString();
+        String promotionsStr = s.replace("{", "[").replace("}", "]");
+
+        UpdateByQueryRequest update = new UpdateByQueryRequest(getIndexName());
+        update.setQuery(QueryBuilders.boolQuery().filter(QueryBuilders.termsQuery("id", id)));
+        update.setScript(new Script("ctx._source." + "promotionMap" + "=" + promotionsStr + ";"));
+        client.updateByQueryAsync(update, RequestOptions.DEFAULT, this.actionListener());
     }
 
     /**
