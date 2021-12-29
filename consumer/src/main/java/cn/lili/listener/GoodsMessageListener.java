@@ -259,6 +259,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 searchParams.setCategoryPath(promotions.getScopeId());
                 List<GoodsSku> goodsSkuByList = this.goodsSkuService.getGoodsSkuByList(searchParams);
                 List<String> skuIds = goodsSkuByList.stream().map(GoodsSku::getId).collect(Collectors.toList());
+                this.goodsIndexService.deleteEsGoodsPromotionByPromotionId(skuIds, promotions.getId());
                 this.goodsIndexService.updateEsGoodsIndexPromotions(skuIds, promotions, esPromotionKey);
             } else if (PromotionsScopeTypeEnum.ALL.name().equals(promotions.getScopeType())) {
                 this.goodsIndexService.updateEsGoodsIndexAllByList(promotions, esPromotionKey);
