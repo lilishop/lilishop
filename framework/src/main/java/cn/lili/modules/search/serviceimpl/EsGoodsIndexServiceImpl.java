@@ -732,7 +732,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         return new ActionListener<BulkByScrollResponse>() {
             @Override
             public void onResponse(BulkByScrollResponse bulkByScrollResponse) {
-                log.debug("UpdateByQueryResponse: {}", bulkByScrollResponse);
+                log.info("UpdateByQueryResponse: {}", bulkByScrollResponse);
             }
 
             @Override
