@@ -298,7 +298,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                     pointsGoodsService.updateById(pointsGoodsVO);
                 } else {
                     PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
-                    searchParams.setPromotionStatus(promotionTypeEnum.name());
+                    searchParams.setPromotionType(promotionTypeEnum.name());
                     searchParams.setPromotionId(orderItem.getPromotionId());
                     searchParams.setSkuId(orderItem.getSkuId());
                     PromotionGoods pGoods = promotionGoodsService.getPromotionsGoods(searchParams);
