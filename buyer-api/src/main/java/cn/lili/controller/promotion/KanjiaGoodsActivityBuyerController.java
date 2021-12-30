@@ -1,6 +1,6 @@
 package cn.lili.controller.promotion;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
@@ -79,7 +79,7 @@ public class KanjiaGoodsActivityBuyerController {
     @ApiOperation(value = "获取砍价活动")
     public ResultMessage<KanjiaActivityVO> getKanJiaActivity(KanjiaActivitySearchParams kanjiaActivitySearchParams) {
         //如果是非被邀请关系则填写会员ID
-        if (StrUtil.isEmpty(kanjiaActivitySearchParams.getKanjiaActivityId())) {
+        if (CharSequenceUtil.isEmpty(kanjiaActivitySearchParams.getKanjiaActivityId())) {
             kanjiaActivitySearchParams.setMemberId(UserContext.getCurrentUser().getId());
         }
         return ResultUtil.data(kanJiaActivityService.getKanjiaActivityVO(kanjiaActivitySearchParams));

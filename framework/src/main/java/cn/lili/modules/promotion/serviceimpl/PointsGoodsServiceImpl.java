@@ -204,7 +204,7 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
      * 更新促销商品信息
      *
      * @param promotions 促销实体
-     * @return
+     * @return 是否更新成功
      */
     @Override
     public boolean updatePromotionsGoods(PointsGoods promotions) {
