@@ -125,7 +125,7 @@ public class MemberWalletBuyerController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "price", value = "提现金额", required = true, dataType = "double", paramType = "query")
     })
-    public ResultMessage<Boolean> withdrawal(@Max(value = 1000, message = "充值金额单次最多允许提现1000元") @Min(value = 1, message = "充值金额单次最少提现金额为1元") Double price) {
+    public ResultMessage<Boolean> withdrawal(@Max(value = 9999, message = "充值金额单次最多允许提现9999元") @Min(value = 1, message = "充值金额单次最少提现金额为1元") Double price) {
         return ResultUtil.data(memberWalletService.applyWithdrawal(price));
     }
 

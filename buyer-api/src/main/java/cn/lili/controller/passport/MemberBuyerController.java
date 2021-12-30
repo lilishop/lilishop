@@ -1,6 +1,8 @@
 package cn.lili.controller.passport;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.Member;
@@ -66,8 +68,11 @@ public class MemberBuyerController {
     public ResultMessage<Object> smsLogin(@NotNull(message = "手机号为空") @RequestParam String mobile,
                                           @NotNull(message = "验证码为空") @RequestParam String code,
                                           @RequestHeader String uuid) {
-        smsUtil.verifyCode(mobile, VerificationEnums.LOGIN, uuid, code);
-        return ResultUtil.data(memberService.mobilePhoneLogin(mobile));
+        if (smsUtil.verifyCode(mobile, VerificationEnums.LOGIN, uuid, code)) {
+            return ResultUtil.data(memberService.mobilePhoneLogin(mobile));
+        } else {
+            throw new ServiceException(ResultCode.VERIFICATION_SMS_CHECKED_ERROR);
+        }
     }
 
     @ApiOperation(value = "注册用户")
@@ -84,8 +89,11 @@ public class MemberBuyerController {
                                           @RequestHeader String uuid,
                                           @NotNull(message = "验证码不能为空") @RequestParam String code) {
 
-        smsUtil.verifyCode(mobilePhone, VerificationEnums.REGISTER, uuid, code);
-        return ResultUtil.data(memberService.register(username, password, mobilePhone));
+        if (smsUtil.verifyCode(mobilePhone, VerificationEnums.REGISTER, uuid, code)) {
+            return ResultUtil.data(memberService.register(username, password, mobilePhone));
+        } else {
+            throw new ServiceException(ResultCode.VERIFICATION_SMS_CHECKED_ERROR);
+        }
 
     }
 
@@ -106,11 +114,13 @@ public class MemberBuyerController {
                                                @NotNull(message = "验证码为空") @RequestParam String code,
                                                @RequestHeader String uuid) {
         //校验短信验证码是否正确
-        smsUtil.verifyCode(mobile, VerificationEnums.FIND_USER, uuid, code);
-        //校验是否通过手机号可获取会员,存在则将会员信息存入缓存，有效时间3分钟
-        memberService.findByMobile(uuid, mobile);
-
-        return ResultUtil.success();
+        if (smsUtil.verifyCode(mobile, VerificationEnums.FIND_USER, uuid, code)) {
+            //校验是否通过手机号可获取会员,存在则将会员信息存入缓存，有效时间3分钟
+            memberService.findByMobile(uuid, mobile);
+            return ResultUtil.success();
+        } else {
+            throw new ServiceException(ResultCode.VERIFICATION_SMS_CHECKED_ERROR);
+        }
     }
 
     @ApiOperation(value = "修改密码")

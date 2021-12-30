@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,7 +53,7 @@ public class DistributionCashBuyerController {
             @ApiImplicitParam(name = "price", value = "申请金额", required = true, paramType = "query", dataType = "double")
     })
     @PostMapping
-    public ResultMessage<Object> cash(@Max(value = 1000, message = "提现金额单次最多允许提现1000元")
+    public ResultMessage<Object> cash(@Validated @Max(value = 9999, message = "提现金额单次最多允许提现9999元")
                                           @Min(value = 1, message = "提现金额单次最少提现金额为1元")
                                           @NotNull @ApiIgnore Double price) {
         if (distributionCashService.cash(price)) {
