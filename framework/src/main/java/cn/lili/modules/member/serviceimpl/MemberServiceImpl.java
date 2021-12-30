@@ -315,6 +315,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             LambdaUpdateWrapper<Member> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
             lambdaUpdateWrapper.eq(Member::getMobile, phone);
             lambdaUpdateWrapper.set(Member::getPassword, new BCryptPasswordEncoder().encode(password));
+            cache.remove(CachePrefix.FIND_MOBILE + uuid);
             return this.update(lambdaUpdateWrapper);
         } else {
             throw new ServiceException(ResultCode.USER_PHONE_NOT_EXIST);
