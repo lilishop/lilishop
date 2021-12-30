@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.PromotionTypeEnum;
@@ -27,7 +26,6 @@ import cn.lili.modules.promotion.mapper.SeckillApplyMapper;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.service.SeckillService;
-import cn.lili.modules.promotion.tools.PromotionCacheKeys;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -58,7 +56,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
      * 缓存
      */
     @Autowired
-    private Cache<List<SeckillTimelineVO>> cache;
+    private Cache<Object> cache;
     /**
      * 规格商品
      */
@@ -78,28 +76,17 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     @Override
     public List<SeckillTimelineVO> getSeckillTimeline() {
         //秒杀活动缓存key
-        return getSeckillTimelineToCache(null);
+        return getSeckillTimelineInfo();
     }
 
     @Override
     public List<SeckillGoodsVO> getSeckillGoods(Integer timeline) {
         List<SeckillGoodsVO> seckillGoodsVoS = new ArrayList<>();
-        //秒杀活动缓存key
-        String seckillCacheKey = PromotionCacheKeys.getSeckillTimelineKey(DateUtil.format(DateUtil.beginOfDay(new DateTime()), "yyyyMMdd"));
-        List<SeckillTimelineVO> cacheSeckill = cache.get(seckillCacheKey);
-        if (cacheSeckill == null || cacheSeckill.isEmpty()) {
-            //如缓存中不存在，则单独获取
-            List<SeckillTimelineVO> seckillTimelineToCache = getSeckillTimelineToCache(seckillCacheKey);
-            Optional<SeckillTimelineVO> first = seckillTimelineToCache.stream().filter(i -> i.getTimeLine().equals(timeline)).findFirst();
-            if (first.isPresent()) {
-                seckillGoodsVoS = first.get().getSeckillGoodsList();
-            }
-        } else {
-            //如缓存中存在，则取缓存中转为展示的信息
-            Optional<SeckillTimelineVO> first = cacheSeckill.stream().filter(i -> i.getTimeLine().equals(timeline)).findFirst();
-            if (first.isPresent()) {
-                seckillGoodsVoS = first.get().getSeckillGoodsList();
-            }
+        //获取
+        List<SeckillTimelineVO> seckillTimelineToCache = getSeckillTimelineInfo();
+        Optional<SeckillTimelineVO> first = seckillTimelineToCache.stream().filter(i -> i.getTimeLine().equals(timeline)).findFirst();
+        if (first.isPresent()) {
+            seckillGoodsVoS = first.get().getSeckillGoodsList();
         }
         return seckillGoodsVoS;
     }
@@ -191,6 +178,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             PromotionGoods promotionGoods = this.setSeckillGoods(goodsSku, seckillApply, seckill);
             promotionGoodsList.add(promotionGoods);
         }
+        boolean result = true;
         this.remove(new LambdaQueryWrapper<SeckillApply>().eq(SeckillApply::getSeckillId, seckillId).in(SeckillApply::getSkuId, skuIds));
         this.saveBatch(originList);
         //保存促销活动商品信息
@@ -201,12 +189,14 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             promotionGoodsService.deletePromotionGoods(searchParams);
             //初始化促销商品
             PromotionTools.promotionGoodsInit(promotionGoodsList, seckill, PromotionTypeEnum.SECKILL);
-            promotionGoodsService.saveBatch(promotionGoodsList);
+            result = promotionGoodsService.saveBatch(promotionGoodsList);
         }
         //设置秒杀活动的商品数量、店铺数量
         seckillService.updateSeckillGoodsNum(seckillId);
         cache.vagueDel(CachePrefix.STORE_ID_SECKILL);
-        this.seckillService.updateEsGoodsSeckill(seckill, originList);
+        if (result) {
+            this.seckillService.updateEsGoodsSeckill(seckill, originList);
+        }
     }
 
 
@@ -233,6 +223,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
                 .eq(SeckillApply::getSeckillId, seckillId)
                 .in(SeckillApply::getId, id));
 
+        this.seckillService.deleteEsGoodsSeckill(seckill, Collections.singletonList(seckillApply.getSkuId()));
         //删除促销商品
         this.promotionGoodsService.deletePromotionGoods(seckillId, Collections.singletonList(seckillApply.getSkuId()));
     }
@@ -281,12 +272,11 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     }
 
     /**
-     * 从缓存中获取秒杀活动信息
+     * 获取秒杀活动信息
      *
-     * @param seckillCacheKey 秒杀活动缓存键
      * @return 秒杀活动信息
      */
-    private List<SeckillTimelineVO> getSeckillTimelineToCache(String seckillCacheKey) {
+    private List<SeckillTimelineVO> getSeckillTimelineInfo() {
         List<SeckillTimelineVO> timelineList = new ArrayList<>();
         LambdaQueryWrapper<Seckill> queryWrapper = new LambdaQueryWrapper<>();
         //查询当天时间段内的秒杀活动活动
@@ -321,9 +311,6 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
                 }
             }
         }
-        if (CharSequenceUtil.isNotEmpty(seckillCacheKey)) {
-            cache.put(seckillCacheKey, timelineList);
-        }
         return timelineList;
     }
 
@@ -347,6 +334,13 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
                     goodsVO.setGoodsImage(goodsSku.getThumbnail());
                     goodsVO.setGoodsId(goodsSku.getGoodsId());
                     goodsVO.setGoodsName(goodsSku.getGoodsName());
+                    String promotionGoodsStockCacheKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(
+                            PromotionTypeEnum.SECKILL,
+                            seckillId, seckillApply.getSkuId());
+                    Object quantity = cache.get(promotionGoodsStockCacheKey);
+                    if (quantity != null) {
+                        goodsVO.setQuantity((Integer) quantity);
+                    }
                     seckillGoodsVoS.add(goodsVO);
                 }
             }

@@ -144,7 +144,6 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 break;
             case DELETE_GOODS_INDEX_PROMOTIONS:
                 BasePromotions promotions = JSONUtil.toBean(new String(messageExt.getBody()), BasePromotions.class);
-                log.info("删除索引信息: {}", promotions);
                 if (CharSequenceUtil.isNotEmpty(promotions.getScopeId())) {
                     this.goodsIndexService.deleteEsGoodsPromotionByPromotionId(Arrays.asList(promotions.getScopeId().split(",")), promotions.getId());
                 } else {
@@ -264,7 +263,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 this.goodsIndexService.updateEsGoodsIndexAllByList(promotions, esPromotionKey);
             }
         } catch (Exception e) {
-            log.error("生成商品索引促销信息执行异常",e);
+            log.error("生成商品索引促销信息执行异常", e);
         }
     }
 
