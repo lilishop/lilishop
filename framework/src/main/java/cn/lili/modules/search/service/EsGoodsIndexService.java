@@ -6,6 +6,7 @@ import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
+import org.elasticsearch.action.update.UpdateRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -25,9 +26,11 @@ public interface EsGoodsIndexService {
 
     /**
      * 获取es生成索引进度
+     *
      * @return
      */
     Map<String, Integer> getProgress();
+
     /**
      * 添加商品索引
      *
@@ -99,14 +102,13 @@ public interface EsGoodsIndexService {
      * @param id        id(skuId)
      * @param promotion 促销信息
      * @param key       促销信息的key
-     * @param price     促销价格
      */
-    void updateEsGoodsIndexPromotions(String id, BasePromotions promotion, String key, Double price);
+    UpdateRequest updateEsGoodsIndexPromotions(String id, BasePromotions promotion, String key);
 
     /**
      * 更新商品索引的促销信息
      *
-     * @param ids        id(skuId)
+     * @param ids       id(skuId)
      * @param promotion 促销信息
      * @param key       促销信息的key
      */
@@ -140,7 +142,7 @@ public interface EsGoodsIndexService {
     /**
      * 删除索引中指定的促销活动id的促销活动
      *
-     * @param skuIds       商品skuId
+     * @param skuIds      商品skuId
      * @param promotionId 促销活动Id
      */
     void deleteEsGoodsPromotionByPromotionId(List<String> skuIds, String promotionId);
