@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +34,7 @@ import javax.validation.constraints.NotNull;
 @RestController
 @Api(tags = "买家端,分销商品佣金提现接口")
 @RequestMapping("/buyer/distribution/cash")
+@Validated
 public class DistributionCashBuyerController {
 
     /**
@@ -55,7 +57,7 @@ public class DistributionCashBuyerController {
     public ResultMessage<Object> cash(@Max(value = 1000, message = "提现金额单次最多允许提现1000元")
                                           @Min(value = 1, message = "提现金额单次最少提现金额为1元")
                                           @NotNull @ApiIgnore Double price) {
-        if (distributionCashService.cash(price)) {
+        if (Boolean.TRUE.equals(distributionCashService.cash(price))) {
             return ResultUtil.success();
         }
         throw new ServiceException(ResultCode.ERROR);
