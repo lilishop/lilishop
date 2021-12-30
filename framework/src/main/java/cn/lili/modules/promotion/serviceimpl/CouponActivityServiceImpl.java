@@ -137,7 +137,7 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
      * 更新优惠券活动商品信息
      *
      * @param couponActivity 优惠券活动实体
-     * @return
+     * @return 是否更新成功
      */
     @Override
     public boolean updatePromotionsGoods(CouponActivity couponActivity) {
