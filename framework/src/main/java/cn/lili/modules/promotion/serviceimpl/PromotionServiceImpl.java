@@ -126,7 +126,6 @@ public class PromotionServiceImpl implements PromotionService {
                 case PINTUAN:
                     Pintuan pintuan = pintuanService.getById(promotionGoods.getPromotionId());
                     promotionMap.put(esPromotionKey, pintuan);
-                    index.setPromotionPrice(promotionGoods.getPrice());
                     break;
                 case FULL_DISCOUNT:
                     FullDiscount fullDiscount = fullDiscountService.getById(promotionGoods.getPromotionId());
@@ -168,7 +167,6 @@ public class PromotionServiceImpl implements PromotionService {
             seckill.setStartTime(promotionGoods.getStartTime());
             seckill.setEndTime(promotionGoods.getEndTime());
             promotionMap.put(seckillKey, seckill);
-            index.setPromotionPrice(promotionGoods.getPrice());
         }
 
     }

@@ -309,6 +309,7 @@ public class EsGoodsIndex implements Serializable {
             this.intro = sku.getIntro();
             this.grade = sku.getGrade();
             this.recommend = sku.getRecommend();
+            this.goodsType = sku.getGoodsType();
             this.releaseTime = new Date();
         }
     }
