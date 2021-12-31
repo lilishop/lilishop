@@ -587,6 +587,9 @@ public class CartServiceImpl implements CartService {
                     if (promotionsGoods != null && promotionsGoods.getPrice() != null) {
                         dataSku.setPromotionFlag(true);
                         dataSku.setPromotionPrice(promotionsGoods.getPrice());
+                    } else {
+                        dataSku.setPromotionFlag(false);
+                        dataSku.setPromotionPrice(null);
                     }
                 }
             }

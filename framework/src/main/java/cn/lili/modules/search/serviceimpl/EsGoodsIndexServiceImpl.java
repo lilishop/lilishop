@@ -522,9 +522,6 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 //促销不为空则进行清洗
                 promotionMap.entrySet().removeIf(i -> {
                     BasePromotions promotion = (BasePromotions) i.getValue();
-                    if (i.getKey().contains(PromotionTypeEnum.SECKILL.name()) || i.getKey().contains(PromotionTypeEnum.PINTUAN.name())) {
-                        goodsIndex.setPromotionPrice(goodsIndex.getPrice());
-                    }
                     return promotion.getEndTime() != null && promotion.getEndTime().getTime() < DateUtil.date().getTime();
                 });
             }

@@ -71,6 +71,8 @@ public class TradeBuilder {
         //需要对购物车渲染
         if (isSingle(checkedWay)) {
             renderCartBySteps(tradeDTO, RenderStepStatement.checkedSingleRender);
+        } else if (checkedWay.equals(CartTypeEnum.PINTUAN)) {
+            renderCartBySteps(tradeDTO, RenderStepStatement.pintuanTradeRender);
         } else {
             renderCartBySteps(tradeDTO, RenderStepStatement.checkedRender);
         }
@@ -93,7 +95,9 @@ public class TradeBuilder {
         //需要对购物车渲染
         if (isSingle(checkedWay)) {
             renderCartBySteps(tradeDTO, RenderStepStatement.singleTradeRender);
-        } else {
+        } else if (checkedWay.equals(CartTypeEnum.PINTUAN)) {
+            renderCartBySteps(tradeDTO, RenderStepStatement.pintuanTradeRender);
+        }  else {
             renderCartBySteps(tradeDTO, RenderStepStatement.tradeRender);
         }
 
@@ -110,7 +114,7 @@ public class TradeBuilder {
     private boolean isSingle(CartTypeEnum checkedWay) {
         //拼团   积分   砍价商品
 
-        return (checkedWay.equals(CartTypeEnum.PINTUAN) || checkedWay.equals(CartTypeEnum.POINTS) || checkedWay.equals(CartTypeEnum.KANJIA));
+        return (checkedWay.equals(CartTypeEnum.POINTS) || checkedWay.equals(CartTypeEnum.KANJIA));
     }
 
     /**
