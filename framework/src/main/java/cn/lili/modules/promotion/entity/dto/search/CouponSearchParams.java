@@ -115,25 +115,25 @@ public class CouponSearchParams extends BasePromotionsSearchParams implements Se
         if (CharSequenceUtil.isNotEmpty(publishNum)) {
             String[] s = publishNum.split("_");
             if (s.length > 1) {
-                queryWrapper.ge("publish_num", s[1]);
+                queryWrapper.between("publish_num", s[0], s[1]);
             } else {
-                queryWrapper.le("publish_num", publishNum);
+                queryWrapper.ge("publish_num", s[0]);
             }
         }
         if (CharSequenceUtil.isNotEmpty(price)) {
             String[] s = price.split("_");
             if (s.length > 1) {
-                queryWrapper.ge(PRICE_COLUMN, s[1]);
+                queryWrapper.between(PRICE_COLUMN, s[0], s[1]);
             } else {
-                queryWrapper.le(PRICE_COLUMN, s[0]);
+                queryWrapper.ge(PRICE_COLUMN, s[0]);
             }
         }
         if (CharSequenceUtil.isNotEmpty(receivedNum)) {
             String[] s = receivedNum.split("_");
             if (s.length > 1) {
-                queryWrapper.ge("received_num", s[1]);
+                queryWrapper.between("received_num", s[0], s[1]);
             } else {
-                queryWrapper.le("received_num", s[0]);
+                queryWrapper.ge("received_num", s[0]);
             }
         }
     }
