@@ -69,7 +69,7 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
             kanJiaActivityGoodsDTO.setStartTime(kanJiaActivityGoodsOperationDTO.getStartTime());
             kanJiaActivityGoodsDTO.setEndTime(kanJiaActivityGoodsOperationDTO.getEndTime());
             //检测同一时间段不能允许添加相同的商品
-            if (this.checkSkuDuplicate(goodsSku.getId(), kanJiaActivityGoodsDTO) != null) {
+            if (this.checkSkuDuplicate(kanJiaActivityGoodsDTO) != null) {
                 throw new ServiceException("商品id为" + goodsSku.getId() + "的商品已参加砍价商品活动！");
             }
             kanJiaActivityGoodsDTO.setGoodsSku(goodsSku);
@@ -172,13 +172,12 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
     /**
      * 检查砍价商品是否重复存在
      *
-     * @param skuId                  商品SkuId
      * @param kanJiaActivityGoodsDTO 砍价商品
      * @return 积分商品信息
      */
-    private KanjiaActivityGoods checkSkuDuplicate(String skuId, KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO) {
+    private KanjiaActivityGoods checkSkuDuplicate(KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO) {
         QueryWrapper<KanjiaActivityGoods> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("sku_id", skuId);
+        queryWrapper.eq("sku_id", kanJiaActivityGoodsDTO.getSkuId());
         if (kanJiaActivityGoodsDTO != null && CharSequenceUtil.isNotEmpty(kanJiaActivityGoodsDTO.getId())) {
             queryWrapper.ne("id", kanJiaActivityGoodsDTO.getId());
         }
@@ -263,7 +262,7 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
         //检测开始结束时间是否正确
         PromotionTools.checkPromotionTime(kanJiaActivityGoodsDTO.getStartTime(), kanJiaActivityGoodsDTO.getEndTime());
         //检测同一时间段不能允许添加相同的商品
-        if (this.checkSkuDuplicate(goodsSku.getId(), kanJiaActivityGoodsDTO) != null) {
+        if (this.checkSkuDuplicate(kanJiaActivityGoodsDTO) != null) {
             throw new ServiceException("商品id为" + goodsSku.getId() + "的商品已参加砍价商品活动！");
         }
         this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(kanJiaActivityGoodsDTO.getId()));

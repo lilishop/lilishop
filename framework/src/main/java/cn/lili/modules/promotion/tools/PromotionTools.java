@@ -3,6 +3,8 @@ package cn.lili.modules.promotion.tools;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -11,10 +13,9 @@ import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 
 /**
@@ -155,6 +156,21 @@ public class PromotionTools {
             }
         }
         return nextHour;
+    }
+
+    public static Map<String, Object> filterInvalidPromotionsMap(Map<String, Object> map) {
+        if (map == null) {
+            return new HashMap<>();
+        }
+        //移除无效促销活动
+        return map.entrySet().stream().filter(i -> {
+            JSONObject promotionsObj = JSONUtil.parseObj(i.getValue());
+            BasePromotions basePromotions = promotionsObj.toBean(BasePromotions.class);
+            if (basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
+                return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
+            }
+            return true;
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
 }

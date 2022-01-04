@@ -4,6 +4,7 @@ import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.elasticsearch.EsSuffix;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -377,5 +378,9 @@ public class EsGoodsIndex implements Serializable {
             this.grade = sku.getGrade();
             this.releaseTime = new Date();
         }
+    }
+
+    public Map<String, Object> getPromotionMap() {
+        return PromotionTools.filterInvalidPromotionsMap(this.promotionMap);
     }
 }
