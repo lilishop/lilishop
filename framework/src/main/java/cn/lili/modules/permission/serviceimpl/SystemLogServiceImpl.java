@@ -1,5 +1,6 @@
 package cn.lili.modules.permission.serviceimpl;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
@@ -101,11 +102,8 @@ public class SystemLogServiceImpl implements SystemLogService {
             //大于方法
             filterBuilder.must(
                     QueryBuilders.rangeQuery("createTime")
-                            .gte(searchVo.getConvertStartDate().getTime()));
-            //小于方法
-            filterBuilder.must(
-                    QueryBuilders.rangeQuery("createTime")
-                            .lt(searchVo.getConvertEndDate().getTime()));
+                            .gte(DateUtil.format(searchVo.getConvertStartDate(), "dd/MM/yyyy"))
+                            .lte(DateUtil.format(searchVo.getConvertEndDate(), "dd/MM/yyyy")).format("dd/MM/yyyy||yyyy"));
 
             nativeSearchQueryBuilder.withFilter(filterBuilder);
         }

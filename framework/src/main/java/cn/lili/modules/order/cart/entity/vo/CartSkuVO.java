@@ -3,12 +3,12 @@ package cn.lili.modules.order.cart.entity.vo;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -115,9 +115,6 @@ public class CartSkuVO extends CartBase implements Serializable {
     }
 
     public Map<String, Object> getPromotionMap() {
-        if (this.promotionMap == null) {
-            return new HashMap<>();
-        }
-        return promotionMap;
+        return PromotionTools.filterInvalidPromotionsMap(this.promotionMap);
     }
 }

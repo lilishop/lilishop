@@ -797,7 +797,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (count == 1) {
             //如果为开团订单，则发布一个一小时的延时任务，时间到达后，如果未成团则自动结束（未开启虚拟成团的情况下）
             PintuanOrderMessage pintuanOrderMessage = new PintuanOrderMessage();
-            long startTime = DateUtil.offsetHour(new Date(), 1).getTime();
+            //开团结束时间
+//            long startTime = DateUtil.offsetHour(new Date(), 1).getTime();
+            long startTime = DateUtil.offsetMinute(new Date(), 2).getTime();
             pintuanOrderMessage.setOrderSn(parentOrderSn);
             pintuanOrderMessage.setPintuanId(pintuanId);
             TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,

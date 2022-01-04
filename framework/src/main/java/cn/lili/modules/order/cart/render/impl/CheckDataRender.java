@@ -22,7 +22,6 @@ import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dos.PointsGoods;
@@ -118,17 +117,6 @@ public class CheckDataRender implements CartRenderStep {
                 cartSkuVO.setChecked(false);
                 //设置失效消息
                 cartSkuVO.setErrorMessage("商品库存不足,现有库存数量[" + dataSku.getQuantity() + "]");
-            }
-            //移除无效促销活动
-            if (cartSkuVO.getPromotionMap() != null && !cartSkuVO.getPromotionMap().isEmpty()) {
-                cartSkuVO.setPromotionMap(cartSkuVO.getPromotionMap().entrySet().stream().filter(i -> {
-                    JSONObject promotionsObj = JSONUtil.parseObj(i.getValue());
-                    BasePromotions basePromotions = promotionsObj.toBean(BasePromotions.class);
-                    if (basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
-                        return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
-                    }
-                    return true;
-                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
             }
         }
     }
