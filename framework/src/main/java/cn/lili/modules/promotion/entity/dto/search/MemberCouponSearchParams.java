@@ -84,9 +84,9 @@ public class MemberCouponSearchParams extends BasePromotionsSearchParams impleme
         if (CharSequenceUtil.isNotEmpty(price)) {
             String[] s = price.split("_");
             if (s.length > 1) {
-                queryWrapper.ge(PRICE_COLUMN, s[1]);
+                queryWrapper.between(PRICE_COLUMN, s[0], s[1]);
             } else {
-                queryWrapper.le(PRICE_COLUMN, s[0]);
+                queryWrapper.ge(PRICE_COLUMN, s[0]);
             }
         }
         if (this.getStartTime() != null) {
