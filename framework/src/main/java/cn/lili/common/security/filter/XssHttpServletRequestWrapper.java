@@ -2,6 +2,7 @@ package cn.lili.common.security.filter;
 
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.http.HtmlUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.owasp.html.Sanitizers;
@@ -17,7 +18,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -257,9 +257,16 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private String cleanXSS(String value) {
         if (value != null) {
-            value = Sanitizers.FORMATTING.and(Sanitizers.LINKS).sanitize(value);
+            // basic prepackaged policies for links, tables, integers, images, styles, blocks
+            value = Sanitizers.FORMATTING
+                    .and(Sanitizers.STYLES)
+                    .and(Sanitizers.IMAGES)
+                    .and(Sanitizers.LINKS)
+                    .and(Sanitizers.BLOCKS)
+                    .and(Sanitizers.TABLES)
+                    .sanitize(value);
         }
-        return value;
+        return HtmlUtil.unescape(value);
     }
 
     /**
@@ -270,12 +277,13 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
      * @return 参数值
      */
     private String filterXss(String name, String value) {
-        if (CharSequenceUtil.containsAny(name.toLowerCase(Locale.ROOT), IGNORE_FIELD)) {
-            // 忽略的处理，（过滤敏感字符）
-            return value;
-        } else {
-            return cleanXSS(value);
-        }
+//        if (CharSequenceUtil.containsAny(name.toLowerCase(Locale.ROOT), IGNORE_FIELD)) {
+//            // 忽略的处理，（过滤敏感字符）
+//            return value;
+//        } else {
+//            return cleanXSS(value);
+//        }
+        return cleanXSS(value);
     }
 
 }

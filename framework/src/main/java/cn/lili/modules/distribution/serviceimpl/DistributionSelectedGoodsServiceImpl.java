@@ -47,12 +47,6 @@ public class DistributionSelectedGoodsServiceImpl extends ServiceImpl<Distributi
                 .eq(DistributionSelectedGoods::getDistributionId, distributionId));
     }
 
-    /**
-     * 分销员添加分销商品
-     *
-     * @param distributionGoodsId 商品ID
-     * @return
-     */
     @Override
     public boolean deleteByDistributionGoodsId(String distributionGoodsId) {
         return this.remove(new LambdaQueryWrapper<DistributionSelectedGoods>()

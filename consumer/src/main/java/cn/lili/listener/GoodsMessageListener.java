@@ -133,6 +133,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
             case GENERATOR_GOODS_INDEX:
                 try {
                     String goodsId = new String(messageExt.getBody());
+                    log.info("生成索引: {}", goodsId);
                     Goods goods = this.goodsService.getById(goodsId);
                     updateGoodsIndex(goods);
                 } catch (Exception e) {
