@@ -312,6 +312,8 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
         GoodsSearchParams searchParams = new GoodsSearchParams();
         searchParams.setGoodsId(goods.getId());
         List<GoodsSku> goodsSkuList = this.goodsSkuService.getGoodsSkuByList(searchParams);
+        log.info("goods：{}", goods);
+        log.info("goodsSkuList：{}", goodsSkuList);
         if (goods.getAuthFlag().equals(GoodsAuthEnum.PASS.name())
                 && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())
                 && Boolean.FALSE.equals(goods.getDeleteFlag())) {
@@ -340,6 +342,8 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
             EsGoodsIndex esGoodsOld = goodsIndexService.findById(goodsSku.getId());
             EsGoodsIndex goodsIndex = this.settingUpGoodsIndexData(goods, goodsSku);
             goodsIndex.setSkuSource(skuSource--);
+            log.info("goodsSku：{}", goodsSku);
+            log.info("esGoodsOld：{}", esGoodsOld);
             //如果商品库存不为0，并且es中有数据
             if (goodsSku.getQuantity() > 0 && esGoodsOld == null) {
                 log.info("生成商品索引 {}", goodsIndex);

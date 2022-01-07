@@ -3,7 +3,6 @@ package cn.lili.modules.goods.serviceimpl;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
@@ -123,7 +122,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
 
         this.updateStock(newSkuList);
-        generateEs(goods);
+        if (!newSkuList.isEmpty()) {
+            generateEs(goods);
+        }
     }
 
     @Override
@@ -140,9 +141,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             //删除旧索引
             for (GoodsSkuVO goodsSkuVO : goodsListByGoodsId) {
                 oldSkuIds.add(goodsSkuVO.getId());
-                goodsIndexService.deleteIndexById(goodsSkuVO.getId());
                 cache.remove(GoodsSkuService.getCacheKeys(goodsSkuVO.getId()));
             }
+            goodsIndexService.deleteIndexByIds(oldSkuIds);
             this.removeByIds(oldSkuIds);
             //删除sku相册
             goodsGalleryService.removeByIds(oldSkuIds);
@@ -170,7 +171,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             this.updateBatchById(newSkuList);
         }
         this.updateStock(newSkuList);
-        generateEs(goods);
+        if (!newSkuList.isEmpty()) {
+            generateEs(goods);
+        }
     }
 
     /**
@@ -329,7 +332,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 cache.remove(GoodsSkuService.getCacheKeys(sku.getId()));
                 cache.put(GoodsSkuService.getCacheKeys(sku.getId()), sku);
             }
-            generateEs(goods);
+            if (!goodsSkus.isEmpty()) {
+                generateEs(goods);
+            }
         }
     }
 
@@ -564,18 +569,19 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         if (!GoodsStatusEnum.UPPER.name().equals(goods.getMarketEnable()) || !GoodsAuthEnum.PASS.name().equals(goods.getAuthFlag())) {
             return;
         }
-        ThreadUtil.execAsync(() -> {
-            try {
-                // 延时执行，防止商品未保存完成就去生成商品索引导致生成索引时找不到商品问题
-                Thread.sleep(2000);
-                String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GENERATOR_GOODS_INDEX.name();
-                //发送mq消息
-                rocketMQTemplate.asyncSend(destination, goods.getId(), RocketmqSendCallbackBuilder.commonCallback());
-            } catch (InterruptedException e) {
-                log.error("发送商品索引信息失败！", e);
-                Thread.currentThread().interrupt();
-            }
-        });
+        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GENERATOR_GOODS_INDEX.name();
+        //发送mq消息
+        rocketMQTemplate.asyncSend(destination, goods.getId(), RocketmqSendCallbackBuilder.commonCallback());
+//        ThreadUtil.execAsync(() -> {
+//            try {
+//                // 延时执行，防止商品未保存完成就去生成商品索引导致生成索引时找不到商品问题
+//                Thread.sleep(2000);
+//
+//            } catch (InterruptedException e) {
+//                log.error("发送商品索引信息失败！", e);
+//                Thread.currentThread().interrupt();
+//            }
+//        });
     }
 
     /**
