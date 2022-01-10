@@ -106,6 +106,20 @@ public class TradeDTO implements Serializable {
      */
     private MemberAddress memberAddress;
 
+    public MemberAddress getMemberAddress() {
+        MemberAddress memberAddress = new MemberAddress();
+        memberAddress.setId("1376445134773682176");
+        memberAddress.setConsigneeAddressIdPath("1371783040145031560,1371783040145031818,1371783040145031888,1371783040145031895");
+        memberAddress.setConsigneeAddressPath("河北省,廊坊市,三河市,燕郊镇");
+        memberAddress.setAlias("DEFAULT");
+        memberAddress.setMobile("13232323232");
+        memberAddress.setName("NMNNN");
+        memberAddress.setIsDefault(true);
+        memberAddress.setLat("131.13");
+        memberAddress.setLon("131.13");
+        return memberAddress;
+    }
+
     /**
      * 客户端类型
      */
