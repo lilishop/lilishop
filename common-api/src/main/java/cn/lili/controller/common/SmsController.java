@@ -30,7 +30,7 @@ public class SmsController {
     @Autowired
     private VerificationService verificationService;
 
-    @LimitPoint(name = "sms_send", key = "sms")
+//    @LimitPoint(name = "sms_send", key = "sms")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "path", dataType = "String", name = "mobile", value = "手机号"),
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "uuid", value = "uuid"),
