@@ -236,8 +236,8 @@ public class CartController {
 
 
     @ApiOperation(value = "创建交易")
-    @PostMapping(value = "/create/trade", consumes = "application/json", produces = "application/json")
-    public ResultMessage<Object> crateTrade(@RequestBody TradeParams tradeParams) {
+    @PostMapping(value = "/create/trade")
+    public ResultMessage<Object> crateTrade(TradeParams tradeParams) {
         try {
             //读取选中的列表
             return ResultUtil.data(this.cartService.createTrade(tradeParams));
