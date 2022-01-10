@@ -2,6 +2,7 @@ package cn.lili.common.utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Arrays;
 
 /**
  * 金额计算工具
@@ -24,27 +25,29 @@ public final class CurrencyUtil {
     /**
      * 提供精确的加法运算。
      *
-     * @param v1 被加数
-     * @param v2 加数
-     * @return 两个参数的和
+     * @return 累加之和
      */
-    public static Double add(double v1, double v2) {
-        BigDecimal b1 = BigDecimal.valueOf(v1);
-        BigDecimal b2 = BigDecimal.valueOf(v2);
-        return b1.add(b2).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    public static Double add(double... params) {
+        BigDecimal result = new BigDecimal("0");
+        for (double param : params) {
+            BigDecimal bigParam = BigDecimal.valueOf(param);
+            result = result.add(bigParam).setScale(2, RoundingMode.HALF_UP);
+        }
+        return result.doubleValue();
     }
-
     /**
-     * 提供精确的减法运算。
+     * 提供精确的加法运算。
      *
-     * @param v1 被减数
-     * @param v2 减数
-     * @return 两个参数的差
+     * @return 累加之和
      */
-    public static double sub(double v1, double v2) {
-        BigDecimal b1 = BigDecimal.valueOf(v1);
-        BigDecimal b2 = BigDecimal.valueOf(v2);
-        return b1.subtract(b2).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    public static Double sub(double... params) {
+        BigDecimal result = BigDecimal.valueOf(params[0]);
+        params = Arrays.stream(params).skip(1).toArray();
+        for (double param : params) {
+            BigDecimal bigParam = BigDecimal.valueOf(param);
+            result = result.subtract(bigParam).setScale(2, RoundingMode.HALF_UP);
+        }
+        return result.doubleValue();
     }
 
     /**
