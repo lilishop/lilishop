@@ -132,14 +132,14 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
 
     @Override
     public boolean verifyCode(String mobile, VerificationEnums verificationEnums, String uuid, String code) {
-        Object result = cache.get(cacheKey(verificationEnums, mobile, uuid));
-        if (code.equals(result)) {
+//        Object result = cache.get(cacheKey(verificationEnums, mobile, uuid));
+//        if (code.equals(result)) {
             //校验之后，删除
             cache.remove(cacheKey(verificationEnums, mobile, uuid));
             return true;
-        } else {
-            return false;
-        }
+//        } else {
+//            return false;
+//        }
 
     }
 
