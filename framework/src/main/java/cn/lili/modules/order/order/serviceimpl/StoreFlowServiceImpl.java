@@ -160,7 +160,7 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         //流水金额
         storeFlow.setFinalPrice(afterSale.getActualRefundPrice());
         //最终结算金额
-        storeFlow.setBillPrice(CurrencyUtil.add(CurrencyUtil.add(storeFlow.getFinalPrice(), storeFlow.getDistributionRebate()), storeFlow.getCommissionPrice()));
+        storeFlow.setBillPrice(CurrencyUtil.add(storeFlow.getFinalPrice(), storeFlow.getDistributionRebate(), storeFlow.getCommissionPrice()));
         //获取第三方支付流水号
         RefundLog refundLog = refundLogService.queryByAfterSaleSn(afterSale.getSn());
         storeFlow.setTransactionId(refundLog.getReceivableNo());

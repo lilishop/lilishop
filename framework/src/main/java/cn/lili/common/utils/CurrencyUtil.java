@@ -35,7 +35,6 @@ public final class CurrencyUtil {
         }
         return result.doubleValue();
     }
-
     /**
      * 提供精确的加法运算。
      *

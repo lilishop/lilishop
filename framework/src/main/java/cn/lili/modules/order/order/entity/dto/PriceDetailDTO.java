@@ -170,7 +170,7 @@ public class PriceDetailDTO implements Serializable {
             billPrice = settlementPrice;
         } else {
             //如果是普通订单最终结算金额 = flowPrice - platFormCommission - distributionCommission 流水金额-平台佣金-分销佣金
-            billPrice = CurrencyUtil.sub(CurrencyUtil.sub(flowPrice, platFormCommission), distributionCommission);
+            billPrice = CurrencyUtil.sub(flowPrice, platFormCommission, distributionCommission);
         }
     }
 
