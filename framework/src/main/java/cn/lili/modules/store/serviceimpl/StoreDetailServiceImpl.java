@@ -1,5 +1,6 @@
 package cn.lili.modules.store.serviceimpl;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.properties.RocketmqCustomProperties;
@@ -14,6 +15,7 @@ import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.store.entity.dto.StoreSettingDTO;
+import cn.lili.modules.store.entity.dto.StoreSettlementDay;
 import cn.lili.modules.store.entity.vos.StoreBasicInfoVO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
 import cn.lili.modules.store.entity.vos.StoreManagementCategoryVO;
@@ -113,6 +115,28 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
         Store store = storeService.getById(tokenUser.getStoreId());
         store.setMerchantEuid(merchantEuid);
         return storeService.updateById(store);
+    }
+
+    /**
+     * 获取待结算店铺列表
+     *
+     * @param day 结算日
+     * @return 待结算店铺列表
+     */
+    @Override
+    public List<StoreSettlementDay> getSettlementStore(int day) {
+        return this.baseMapper.getSettlementStore(day);
+    }
+
+    /**
+     * 修改店铺的结算日
+     *
+     * @param storeId  店铺ID
+     * @param dateTime 结算日
+     */
+    @Override
+    public void updateSettlementDay(String storeId, DateTime dateTime) {
+        this.baseMapper.updateSettlementDay(storeId, dateTime);
     }
 
     @Override
