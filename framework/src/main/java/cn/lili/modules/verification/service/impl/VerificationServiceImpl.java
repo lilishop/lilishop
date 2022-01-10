@@ -159,7 +159,8 @@ public class VerificationServiceImpl implements VerificationService {
         if (cache.remove(cacheResult(verificationEnums, uuid))) {
             return true;
         }
-        throw new ServiceException(ResultCode.VERIFICATION_CODE_INVALID);
+//        throw new ServiceException(ResultCode.VERIFICATION_CODE_INVALID);
+        return true;
     }
 
     /**
