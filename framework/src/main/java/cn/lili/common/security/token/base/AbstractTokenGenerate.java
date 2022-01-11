@@ -16,11 +16,11 @@ public abstract class AbstractTokenGenerate {
     /**
      * 生成token
      *
-     * @param username 用户名
+     * @param user 用户名
      * @param longTerm 是否长时间有效
      * @return TOKEN对象
      */
-    public abstract Token createToken(String username, Boolean longTerm);
+    public abstract Token createToken(Object user, Boolean longTerm);
 
     /**
      * 刷新token

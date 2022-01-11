@@ -119,7 +119,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
             throw new ServiceException(ResultCode.USER_PASSWORD_ERROR);
         }
         try {
-            return managerTokenGenerate.createToken(username, false);
+            return managerTokenGenerate.createToken(adminUser, false);
         } catch (Exception e) {
             log.error("管理员登录错误", e);
         }
