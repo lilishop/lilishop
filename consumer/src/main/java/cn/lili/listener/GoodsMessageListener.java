@@ -390,7 +390,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
 
         if (goodsIndex.getPromotionMap() == null || goodsIndex.getPromotionMap().isEmpty()) {
             Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsPromotionMap(goodsIndex);
-            goodsIndex.setPromotionMap(goodsCurrentPromotionMap);
+            goodsIndex.setPromotionMapJson(JSONUtil.toJsonStr(goodsCurrentPromotionMap));
         }
     }
 

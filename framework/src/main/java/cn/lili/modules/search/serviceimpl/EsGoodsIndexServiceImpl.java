@@ -46,6 +46,7 @@ import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.UpdateByQueryRequest;
 import org.elasticsearch.script.Script;
+import org.elasticsearch.script.ScriptType;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -451,7 +452,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                     //如果存在同类型促销活动删除
                     List<String> collect = promotionMap.keySet().stream().filter(i -> i.contains(promotionType.name())).collect(Collectors.toList());
                     collect.forEach(promotionMap::remove);
-                    goodsIndex.setPromotionMap(promotionMap);
+                    goodsIndex.setPromotionMapJson(JSONUtil.toJsonStr(promotionMap));
                     updateIndex(goodsIndex);
                 }
             } else {
@@ -503,7 +504,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             //如果存在同促销ID的活动删除
             List<String> collect = promotionMap.keySet().stream().filter(i -> i.split("-")[1].equals(promotionId)).collect(Collectors.toList());
             collect.forEach(promotionMap::remove);
-            goodsIndex.setPromotionMap(promotionMap);
+            goodsIndex.setPromotionMapJson(JSONUtil.toJsonStr(promotionMap));
             return this.getGoodsIndexPromotionUpdateRequest(goodsIndex.getId(), promotionMap);
         }
         return null;
@@ -598,7 +599,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         //获取活动信息
         Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsPromotionMap(index);
         //写入促销信息
-        index.setPromotionMap(goodsCurrentPromotionMap);
+        index.setPromotionMapJson(JSONUtil.toJsonStr(goodsCurrentPromotionMap));
         return index;
     }
 
@@ -634,16 +635,14 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      * @param promotionMap 促销信息
      */
     private UpdateRequest getGoodsIndexPromotionUpdateRequest(String id, Map<String, Object> promotionMap) {
-        JSONObject jsonObject = JSONUtil.parseObj(promotionMap);
-        jsonObject.setDateFormat("yyyy-MM-dd HH:mm:ss");
-        String s = jsonObject.toString();
-        String promotionsStr = s.replace("{", "[").replace("}", "]");
-
         UpdateRequest updateRequest = new UpdateRequest();
         updateRequest.index(getIndexName());
         updateRequest.id(id);
         updateRequest.retryOnConflict(5);
-        updateRequest.script(new Script("ctx._source." + "promotionMap" + "=" + promotionsStr + ";"));
+        Map<String, Object> params = new HashMap<>();
+        params.put("promotionMap", JSONUtil.toJsonStr(promotionMap));
+        Script script = new Script(ScriptType.INLINE, "painless", "ctx._source.promotionMapJson=params.promotionMap;", params);
+        updateRequest.script(script);
         return updateRequest;
     }
 
@@ -758,7 +757,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         }
         //促销索引
         Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsPromotionMap(index);
-        index.setPromotionMap(goodsCurrentPromotionMap);
+        index.setPromotionMapJson(JSONUtil.toJsonStr(goodsCurrentPromotionMap));
         return index;
     }
 
