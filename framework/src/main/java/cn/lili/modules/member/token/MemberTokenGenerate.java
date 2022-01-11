@@ -26,10 +26,7 @@ import java.util.Date;
  * @since 2020/11/16 10:50
  */
 @Component
-public class MemberTokenGenerate extends AbstractTokenGenerate {
-
-    @Autowired
-    private MemberService memberService;
+public class MemberTokenGenerate extends AbstractTokenGenerate<Member> {
     @Autowired
     private TokenUtil tokenUtil;
     @Autowired
@@ -39,9 +36,7 @@ public class MemberTokenGenerate extends AbstractTokenGenerate {
     private RocketMQTemplate rocketMQTemplate;
 
     @Override
-    public Token createToken(Object user, Boolean longTerm) {
-
-        Member member = (Member) user;
+    public Token createToken(Member member, Boolean longTerm) {
 
         //获取客户端类型
         String clientType = ThreadContextHolder.getHttpRequest().getHeader("clientType");

@@ -29,7 +29,7 @@ import java.util.Map;
  * @since 2020/11/16 10:51
  */
 @Component
-public class ManagerTokenGenerate extends AbstractTokenGenerate {
+public class ManagerTokenGenerate extends AbstractTokenGenerate<AdminUser> {
 
     @Autowired
     private TokenUtil tokenUtil;
@@ -40,9 +40,7 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
 
 
     @Override
-    public Token createToken(Object user, Boolean longTerm) {
-        //生成token
-        AdminUser adminUser = (AdminUser) user;
+    public Token createToken(AdminUser adminUser, Boolean longTerm) {
         AuthUser authUser = new AuthUser(adminUser.getUsername(), adminUser.getId(), adminUser.getAvatar(), UserEnums.MANAGER, adminUser.getNickName(), adminUser.getIsSuper());
 
 

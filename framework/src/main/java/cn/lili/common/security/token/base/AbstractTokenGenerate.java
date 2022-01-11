@@ -11,7 +11,7 @@ import cn.lili.common.security.token.Token;
  * @version v1.0
  * 2020-11-13 10:13
  */
-public abstract class AbstractTokenGenerate {
+public abstract class AbstractTokenGenerate<T> {
 
     /**
      * 生成token
@@ -20,7 +20,7 @@ public abstract class AbstractTokenGenerate {
      * @param longTerm 是否长时间有效
      * @return TOKEN对象
      */
-    public abstract Token createToken(Object user, Boolean longTerm);
+    public abstract Token createToken(T user, Boolean longTerm);
 
     /**
      * 刷新token

@@ -23,18 +23,14 @@ import org.springframework.stereotype.Component;
  * @since 2020/11/16 10:51
  */
 @Component
-public class StoreTokenGenerate extends AbstractTokenGenerate {
-    @Autowired
-    private MemberService memberService;
+public class StoreTokenGenerate extends AbstractTokenGenerate<Member> {
     @Autowired
     private StoreService storeService;
     @Autowired
     private TokenUtil tokenUtil;
 
     @Override
-    public Token createToken(Object user, Boolean longTerm) {
-        //生成token
-        Member member = (Member) user;
+    public Token createToken(Member member, Boolean longTerm) {
         if (!member.getHaveStore()) {
             throw new ServiceException(ResultCode.STORE_NOT_OPEN);
         }
