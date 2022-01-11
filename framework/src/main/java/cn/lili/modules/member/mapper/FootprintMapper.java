@@ -34,8 +34,9 @@ public interface FootprintMapper extends BaseMapper<FootPrint> {
      *
      * @param memberId 会员ID
      */
-    @Delete("DELETE FROM li_foot_print WHERE (SELECT COUNT(b.id) FROM ( SELECT * FROM li_foot_print WHERE member_id = #{memberId} ) b) >100 " +
-            " AND id =(SELECT a.id FROM ( SELECT * FROM li_foot_print WHERE member_id = #{memberId} ORDER BY create_time ASC LIMIT 1 ) AS a)")
+    @Delete("DELETE FROM li_foot_print l1 WHERE l1.id IN (" +
+            "SELECT l2.id FROM (" +
+            "SELECT l3.id FROM li_foot_print l3 WHERE l3.member_id=${memberId} ORDER BY id DESC LIMIT 100,100) l2)")
     void deleteLastFootPrint(String memberId);
 
 }
