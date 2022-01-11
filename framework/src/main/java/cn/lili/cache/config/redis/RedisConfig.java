@@ -78,6 +78,7 @@ public class RedisConfig extends CachingConfigurerSupport {
         可参考 https://blog.csdn.net/u012240455/article/details/80538540
          */
         ParserConfig.getGlobalInstance().addAccept("cn.lili.");
+        ParserConfig.getGlobalInstance().addAccept("cn.hutool.json.");
 
         return cacheManager;
     }

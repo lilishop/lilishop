@@ -4,7 +4,6 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
@@ -575,16 +574,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GENERATOR_GOODS_INDEX.name();
         //发送mq消息
         rocketMQTemplate.asyncSend(destination, goods.getId(), RocketmqSendCallbackBuilder.commonCallback());
-//        ThreadUtil.execAsync(() -> {
-//            try {
-//                // 延时执行，防止商品未保存完成就去生成商品索引导致生成索引时找不到商品问题
-//                Thread.sleep(2000);
-//
-//            } catch (InterruptedException e) {
-//                log.error("发送商品索引信息失败！", e);
-//                Thread.currentThread().interrupt();
-//            }
-//        });
     }
 
     /**
@@ -719,7 +708,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                     }
                     //设置规格商品缩略图
                     //如果规格没有图片，则用商品图片复盖。有则增加规格图片，放在商品图片集合之前
-                    if (spec.getValue() != null && StrUtil.isNotEmpty(spec.getValue().toString())) {
+                    if (CharSequenceUtil.isNotEmpty(spec.getValue().toString())) {
                         thumbnail = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getThumbnail();
                         small = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getSmall();
                     }
