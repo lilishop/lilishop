@@ -2,7 +2,6 @@ package cn.lili.modules.order.cart.render.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
-import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.order.cart.entity.dto.MemberCouponDTO;
@@ -13,11 +12,8 @@ import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.cart.render.util.PromotionPriceUtil;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
-import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
 import cn.lili.modules.promotion.entity.enums.CouponTypeEnum;
-import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
 import cn.lili.modules.promotion.service.MemberCouponService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,11 +60,7 @@ public class CouponRender implements CartRenderStep {
      * @param tradeDTO 交易dto
      */
     private void renderCouponRule(TradeDTO tradeDTO) {
-        MemberCouponSearchParams searchParams = new MemberCouponSearchParams();
-        searchParams.setMemberId(UserContext.getCurrentUser().getId());
-        searchParams.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
-        searchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
-        List<MemberCoupon> memberCouponList = memberCouponService.getMemberCoupons(searchParams);
+        List<MemberCoupon> memberCouponList = memberCouponService.getMemberCoupons(tradeDTO.getMemberId());
 
         if (!memberCouponList.isEmpty()) {
             this.checkMemberExistCoupon(tradeDTO, memberCouponList);
