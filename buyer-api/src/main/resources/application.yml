@@ -69,10 +69,10 @@ spring:
         url: jdbc:mysql://127.0.0.1:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
         password: lilishop
-        maxActive: 20
-        initialSize: 5
+        maxActive: 50
+        initialSize: 10
         maxWait: 60000
-        minIdle: 5
+        minIdle: 10
         timeBetweenEvictionRunsMillis: 60000
         minEvictableIdleTimeMillis: 300000
         validationQuery: SELECT 1 FROM DUAL

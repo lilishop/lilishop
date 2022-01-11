@@ -60,6 +60,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         return this.list(new LambdaQueryWrapper<Category>().eq(Category::getParentId, parentId));
     }
 
+    @Override
+    public Category getCategoryById(String id) {
+        return this.getById(id);
+    }
+
     /**
      * 根据分类id集合获取所有分类根据层级排序
      *

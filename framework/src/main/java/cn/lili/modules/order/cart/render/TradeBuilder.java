@@ -127,9 +127,7 @@ public class TradeBuilder {
             for (CartRenderStep render : cartRenderSteps) {
                 try {
                     if (render.step().equals(step)) {
-                        Date date = new Date();
                         render.render(tradeDTO);
-                        log.error(render.getClass().getName() + "-" + (System.currentTimeMillis() - date.getTime()));
                     }
                 } catch (ServiceException e) {
                     throw e;
