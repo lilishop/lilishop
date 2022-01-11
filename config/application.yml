@@ -183,7 +183,7 @@ mybatis-plus:
 logging:
   # 输出级别
   level:
-    cn.lili: info
+    root: error
   #    org.hibernate: debug
   #    org.springframework: debug
   #    org.springframework.data.mongodb.core: debug
