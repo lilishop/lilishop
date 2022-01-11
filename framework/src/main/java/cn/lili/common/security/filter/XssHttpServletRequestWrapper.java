@@ -5,6 +5,8 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.http.HtmlUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.owasp.html.HtmlPolicyBuilder;
+import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 
 import javax.servlet.ReadListener;
@@ -56,6 +58,24 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             "privateKey",
             "wechatpay",
     };
+
+    //允许的标签
+    private static final String[] allowedTags = {"h1", "h2", "h3", "h4", "h5", "h6",
+            "span", "strong",
+            "img", "video", "source", "iframe", "code",
+            "blockquote", "p", "div",
+            "ul", "ol", "li",
+            "table", "thead", "caption", "tbody", "tr", "th", "td", "br",
+            "a"
+    };
+
+    //需要转化的标签
+    private static final String[] needTransformTags = {"article", "aside", "command", "datalist", "details", "figcaption", "figure",
+            "footer", "header", "hgroup", "section", "summary"};
+
+    //带有超链接的标签
+    private static final String[] linkTags = {"img", "video", "source", "a", "iframe"};
+
 
     public XssHttpServletRequestWrapper(HttpServletRequest request) {
         super(request);
@@ -257,6 +277,17 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private String cleanXSS(String value) {
         if (value != null) {
+            // 自定义策略
+            PolicyFactory policy = new HtmlPolicyBuilder()
+                    .allowStandardUrlProtocols()
+                    //所有允许的标签
+                    .allowElements(allowedTags)
+                    //内容标签转化为div
+                    .allowElements((elementName, attributes) -> "div", needTransformTags)
+                    .allowAttributes("src", "href", "target", "width", "height").onElements(linkTags)
+                    //校验链接中的是否为http
+//                    .allowUrlProtocols("https")
+                    .toFactory();
             // basic prepackaged policies for links, tables, integers, images, styles, blocks
             value = Sanitizers.FORMATTING
                     .and(Sanitizers.STYLES)
@@ -264,6 +295,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
                     .and(Sanitizers.LINKS)
                     .and(Sanitizers.BLOCKS)
                     .and(Sanitizers.TABLES)
+                    .and(policy)
                     .sanitize(value);
         }
         return HtmlUtil.unescape(value);
