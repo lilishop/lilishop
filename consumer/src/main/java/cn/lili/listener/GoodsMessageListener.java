@@ -188,6 +188,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
             case GOODS_AUDIT:
                 Goods goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
                 updateGoodsNum(goods);
+                updateGoodsIndex(goods);
                 break;
             //删除商品
             case GOODS_DELETE:
