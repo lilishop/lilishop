@@ -37,13 +37,4 @@ public interface FileManagerPlugin {
      */
     void deleteFile(List<String> key);
 
-    /**
-     * 根据原图生成规定尺寸的图片
-     *
-     * @param url    连接
-     * @param width  宽
-     * @param height 高
-     * @return
-     */
-    String getUrl(String url, Integer width, Integer height);
 }

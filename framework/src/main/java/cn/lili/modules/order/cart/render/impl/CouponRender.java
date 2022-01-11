@@ -2,6 +2,7 @@ package cn.lili.modules.order.cart.render.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.order.cart.entity.dto.MemberCouponDTO;
@@ -12,8 +13,11 @@ import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.cart.render.util.PromotionPriceUtil;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
-import cn.lili.modules.promotion.entity.enums.CouponScopeTypeEnum;
+import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
 import cn.lili.modules.promotion.entity.enums.CouponTypeEnum;
+import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
 import cn.lili.modules.promotion.service.MemberCouponService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +64,11 @@ public class CouponRender implements CartRenderStep {
      * @param tradeDTO 交易dto
      */
     private void renderCouponRule(TradeDTO tradeDTO) {
-        List<MemberCoupon> memberCouponList = memberCouponService.getMemberCoupons();
+        MemberCouponSearchParams searchParams = new MemberCouponSearchParams();
+        searchParams.setMemberId(UserContext.getCurrentUser().getId());
+        searchParams.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
+        searchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
+        List<MemberCoupon> memberCouponList = memberCouponService.getMemberCoupons(searchParams);
 
         if (!memberCouponList.isEmpty()) {
             this.checkMemberExistCoupon(tradeDTO, memberCouponList);
@@ -79,14 +87,14 @@ public class CouponRender implements CartRenderStep {
      */
     private void checkMemberExistCoupon(TradeDTO tradeDTO, List<MemberCoupon> memberCouponList) {
         if (tradeDTO.getPlatformCoupon() != null && tradeDTO.getPlatformCoupon().getMemberCoupon() != null) {
-            boolean b = memberCouponList.parallelStream().anyMatch(i -> i.getId().equals(tradeDTO.getPlatformCoupon().getMemberCoupon().getId()));
+            boolean b = memberCouponList.stream().anyMatch(i -> i.getId().equals(tradeDTO.getPlatformCoupon().getMemberCoupon().getId()));
             if (!b) {
                 tradeDTO.setPlatformCoupon(null);
             }
         }
         if (!tradeDTO.getStoreCoupons().isEmpty()) {
             for (Map.Entry<String, MemberCouponDTO> entry : tradeDTO.getStoreCoupons().entrySet()) {
-                if (entry.getValue().getMemberCoupon() != null && memberCouponList.parallelStream().noneMatch(i -> i.getId().equals(entry.getValue().getMemberCoupon().getId()))) {
+                if (entry.getValue().getMemberCoupon() != null && memberCouponList.stream().noneMatch(i -> i.getId().equals(entry.getValue().getMemberCoupon().getId()))) {
                     tradeDTO.getStoreCoupons().remove(entry.getKey());
                 }
             }
@@ -138,7 +146,7 @@ public class CouponRender implements CartRenderStep {
 
         List<CartSkuVO> filterSku;
         //平台店铺过滤
-        if (Boolean.TRUE.equals(memberCoupon.getIsPlatform())) {
+        if (Boolean.TRUE.equals(memberCoupon.getPlatformFlag())) {
             filterSku = cartSkuVOS;
         } else {
             filterSku = cartSkuVOS.stream().filter(cartSkuVO -> cartSkuVO.getStoreId().equals(memberCoupon.getStoreId())).collect(Collectors.toList());
@@ -147,7 +155,7 @@ public class CouponRender implements CartRenderStep {
             return Collections.emptyList();
         }
         //优惠券类型判定
-        switch (CouponScopeTypeEnum.valueOf(memberCoupon.getScopeType())) {
+        switch (PromotionsScopeTypeEnum.valueOf(memberCoupon.getScopeType())) {
             case ALL:
                 return filterSku;
             case PORTION_GOODS:
@@ -263,10 +271,10 @@ public class CouponRender implements CartRenderStep {
     private void renderCouponPrice(Map<String, Double> couponMap, TradeDTO tradeDTO, MemberCoupon coupon, MemberCouponDTO memberCouponDTO) {
         //分发优惠券
         promotionPriceUtil.recountPrice(tradeDTO, memberCouponDTO.getSkuDetail(), memberCouponDTO.getMemberCoupon().getPrice(),
-                Boolean.TRUE.equals(coupon.getIsPlatform()) ?
+                Boolean.TRUE.equals(coupon.getPlatformFlag()) ?
                         PromotionTypeEnum.PLATFORM_COUPON : PromotionTypeEnum.COUPON);
         //如果是平台券 则需要计算商家承担比例
-        if (Boolean.TRUE.equals(coupon.getIsPlatform()) && coupon.getStoreCommission() > 0) {
+        if (Boolean.TRUE.equals(coupon.getPlatformFlag()) && coupon.getStoreCommission() > 0) {
 
             //循环所有优惠券
             for (String skuId : couponMap.keySet()) {
@@ -306,7 +314,7 @@ public class CouponRender implements CartRenderStep {
                             CurrencyUtil.sub(1, CurrencyUtil.div(coupon.getDiscount(), 10, 3)));
 
                     //平台券则写入店铺承担优惠券比例
-                    if (Boolean.TRUE.equals(coupon.getIsPlatform())) {
+                    if (Boolean.TRUE.equals(coupon.getPlatformFlag())) {
                         priceDetailDTO.setSiteCouponPrice(discountCouponPrice);
                         priceDetailDTO.setSiteCouponPoint(coupon.getStoreCommission());
                     }

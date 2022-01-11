@@ -16,8 +16,8 @@ public class EsIndexUtil {
     private static final String IGNORE_FIELD = "serialVersionUID,promotionMap,id,goodsId";
 
     public static Map<String, Object> getUpdateIndexFieldsMap(EsGoodsIndex queryGoodsIndex, EsGoodsIndex updateGoodsIndex) {
-        Map<Object, Object> queryFieldsMap = new HashMap<>();
-        Map<Object, Object> updateFieldsMap = new HashMap<>();
+        Map<String, Object> queryFieldsMap = new HashMap<>();
+        Map<String, Object> updateFieldsMap = new HashMap<>();
 
         for (Map.Entry<String, Field> entry : ReflectUtil.getFieldMap(EsGoodsIndex.class).entrySet()) {
             Object queryFieldValue = ReflectUtil.getFieldValue(queryGoodsIndex, entry.getValue());
@@ -33,7 +33,7 @@ public class EsIndexUtil {
         return getUpdateIndexFieldsMap(queryFieldsMap, updateFieldsMap);
     }
 
-    public static Map<String, Object> getUpdateIndexFieldsMap(Map<Object, Object> queryFieldsMap, Map<Object, Object> updateFieldsMap) {
+    public static Map<String, Object> getUpdateIndexFieldsMap(Map<String, Object> queryFieldsMap, Map<String, Object> updateFieldsMap) {
         Map<String, Object> updateIndexMap = new HashMap<>();
 
         updateIndexMap.put("queryFields", queryFieldsMap);

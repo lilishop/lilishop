@@ -13,21 +13,21 @@ import lombok.Data;
 public class IndexNoticeVO {
 
     @ApiModelProperty(value = "待处理商品审核")
-    private Integer goods;
+    private Long goods;
 
     @ApiModelProperty(value = "待处理店铺入驻审核")
-    private Integer store;
+    private Long store;
 
     @ApiModelProperty(value = "待处理售后申请")
-    private Integer refund;
+    private Long refund;
 
     @ApiModelProperty(value = "待处理投诉审核")
-    private Integer complain;
+    private Long complain;
 
     @ApiModelProperty(value = "待处理分销员提现申请")
-    private Integer distributionCash;
+    private Long distributionCash;
 
     @ApiModelProperty(value = "待处理商家结算")
-    private Integer waitPayBill;
+    private Long waitPayBill;
 
 }

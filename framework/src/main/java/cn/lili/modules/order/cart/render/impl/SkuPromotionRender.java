@@ -1,23 +1,30 @@
 package cn.lili.modules.order.cart.render.impl;
 
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
+import cn.lili.modules.member.entity.dos.Member;
+import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
-import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.dto.search.KanjiaActivitySearchParams;
 import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
 import cn.lili.modules.promotion.entity.vos.PromotionSkuVO;
-import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivitySearchParams;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityVO;
 import cn.lili.modules.promotion.service.KanjiaActivityService;
-import cn.lili.modules.promotion.service.PromotionGoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * 购物促销信息渲染实现
@@ -29,14 +36,11 @@ import org.springframework.stereotype.Service;
 public class SkuPromotionRender implements CartRenderStep {
 
 
-    /**
-     * 促销商品
-     */
-    @Autowired
-    private PromotionGoodsService promotionGoodsService;
-
     @Autowired
     private KanjiaActivityService kanjiaActivityService;
+
+    @Autowired
+    private MemberService memberService;
 
     @Override
     public RenderStepEnums step() {
@@ -80,13 +84,19 @@ public class SkuPromotionRender implements CartRenderStep {
 
             //这里是双重循环，但是实际积分购买或者是砍价购买时，购物车只有一个商品，所以没有循环操作数据库或者其他的问题
             case POINTS:
+                Member userInfo = memberService.getUserInfo();
+                long totalPayPoints = 0;
                 //处理积分商品购买
                 for (CartVO cartVO : tradeDTO.getCartList()) {
                     for (CartSkuVO cartSkuVO : cartVO.getCheckedSkuList()) {
                         cartSkuVO.getPriceDetailDTO().setPayPoint(cartSkuVO.getPoint());
                         PromotionSkuVO promotionSkuVO = new PromotionSkuVO(PromotionTypeEnum.POINTS_GOODS.name(), cartSkuVO.getPointsId());
                         cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
+                        totalPayPoints += cartSkuVO.getPoint();
                     }
+                }
+                if (userInfo.getPoint() < totalPayPoints) {
+                    throw new ServiceException(ResultCode.POINT_NOT_ENOUGH);
                 }
                 return;
             case KANJIA:
@@ -94,11 +104,11 @@ public class SkuPromotionRender implements CartRenderStep {
                     for (CartSkuVO cartSkuVO : cartVO.getCheckedSkuList()) {
                         KanjiaActivitySearchParams kanjiaActivitySearchParams = new KanjiaActivitySearchParams();
                         kanjiaActivitySearchParams.setGoodsSkuId(cartSkuVO.getGoodsSku().getId());
-                        kanjiaActivitySearchParams.setMemberId(UserContext.getCurrentUser().getId());
+                        kanjiaActivitySearchParams.setMemberId(Objects.requireNonNull(UserContext.getCurrentUser()).getId());
                         kanjiaActivitySearchParams.setStatus(KanJiaStatusEnum.SUCCESS.name());
                         KanjiaActivityVO kanjiaActivityVO = kanjiaActivityService.getKanjiaActivityVO(kanjiaActivitySearchParams);
                         //可以砍价金额购买，则处理信息
-                        if (kanjiaActivityVO.getPass()) {
+                        if (Boolean.TRUE.equals(kanjiaActivityVO.getPass())) {
                             cartSkuVO.setKanjiaId(kanjiaActivityVO.getId());
                             cartSkuVO.setPurchasePrice(kanjiaActivityVO.getPurchasePrice());
                             cartSkuVO.setSubTotal(kanjiaActivityVO.getPurchasePrice());
@@ -120,24 +130,20 @@ public class SkuPromotionRender implements CartRenderStep {
                 return;
             case CART:
             case BUY_NOW:
-                return;
             case VIRTUAL:
                 //循环购物车
                 for (CartVO cartVO : tradeDTO.getCartList()) {
                     //循环sku
                     for (CartSkuVO cartSkuVO : cartVO.getCheckedSkuList()) {
-                        //更新商品促销
-                        promotionGoodsService.updatePromotion(cartSkuVO);
                         //赋予商品促销信息
-                        for (PromotionGoods promotionGoods : cartSkuVO.getPromotions()) {
-
-                            // 忽略拼团活动
-                            if (promotionGoods.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())) {
+                        for (Map.Entry<String, Object> entry : cartSkuVO.getPromotionMap().entrySet()) {
+                            if (ignorePromotion(entry.getKey())) {
                                 continue;
                             }
-                            PromotionSkuVO promotionSkuVO = new PromotionSkuVO(promotionGoods.getPromotionType(), promotionGoods.getPromotionId());
-                            cartSkuVO.setPurchasePrice(promotionGoods.getPrice());
-                            cartSkuVO.setSubTotal(CurrencyUtil.mul(promotionGoods.getPrice(), cartSkuVO.getNum()));
+
+                            JSONObject promotionsObj = JSONUtil.parseObj(entry.getValue());
+                            PromotionSkuVO promotionSkuVO = new PromotionSkuVO(entry.getKey().split("-")[0], promotionsObj.get("id", String.class));
+                            cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
                             cartSkuVO.getPriceDetailDTO().setGoodsPrice(cartSkuVO.getSubTotal());
 
                             cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
@@ -149,5 +155,16 @@ public class SkuPromotionRender implements CartRenderStep {
         }
     }
 
+    /**
+     * 购物车促销类型
+     */
+    private boolean ignorePromotion(String promotionKey) {
+
+        // 忽略积分活动活动 忽略砍价活动 忽略优惠券活动 忽略拼团活动
+        return promotionKey.contains(PromotionTypeEnum.POINTS_GOODS.name())
+                || promotionKey.contains(PromotionTypeEnum.KANJIA.name())
+                || promotionKey.contains(PromotionTypeEnum.COUPON.name())
+                || promotionKey.contains(PromotionTypeEnum.PINTUAN.name());
+    }
 
 }

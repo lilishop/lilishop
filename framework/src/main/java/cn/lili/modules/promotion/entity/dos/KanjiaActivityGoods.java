@@ -1,10 +1,10 @@
 package cn.lili.modules.promotion.entity.dos;
 
-import cn.lili.modules.promotion.entity.dto.BasePromotion;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotEmpty;
 
@@ -14,10 +14,11 @@ import javax.validation.constraints.NotEmpty;
  * @author qiuqiu
  * @date 2020-7-1 10:44 上午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("li_kanjia_activity_goods")
 @ApiModel(value = "砍价活动商品对象")
-public class KanjiaActivityGoods extends BasePromotion {
+public class KanjiaActivityGoods extends BasePromotions {
 
     private static final long serialVersionUID = 6694714877345423488L;
 
@@ -34,6 +35,10 @@ public class KanjiaActivityGoods extends BasePromotion {
 
     @ApiModelProperty(value = "货品id")
     @NotEmpty(message = "货品id不能为空")
+    private String goodsId;
+
+    @ApiModelProperty(value = "货品SkuId")
+    @NotEmpty(message = "货品SkuId不能为空")
     private String skuId;
 
     @ApiModelProperty(value = "货品名称")

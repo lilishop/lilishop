@@ -66,6 +66,8 @@ public enum ResultCode {
     GOODS_UPPER_ERROR(11004, "商品上架失败"),
     GOODS_AUTH_ERROR(11005, "商品审核失败"),
     POINT_GOODS_ERROR(11006, "积分商品业务异常，请稍后重试"),
+    POINT_GOODS_NOT_EXIST(11020, "积分商品不存在"),
+    POINT_GOODS_CATEGORY_EXIST(11021, "当前积分商品分类已存在"),
     GOODS_SKU_SN_ERROR(11007, "商品SKU货号不能为空"),
     GOODS_SKU_PRICE_ERROR(11008, "商品SKU价格不能小于等于0"),
     GOODS_SKU_COST_ERROR(11009, "商品SKU成本价不能小于等于0"),
@@ -178,6 +180,7 @@ public enum ResultCode {
     ORDER_CAN_NOT_CANCEL(31012, "当前订单状态不可取消"),
     ORDER_BATCH_DELIVER_ERROR(31013, "批量发货,文件读取失败"),
     ORDER_ITEM_NOT_EXIST(31014, "当前订单项不存在！"),
+    POINT_NOT_ENOUGH(31015, "当前会员积分不足购买当前积分商品！"),
 
 
     /**
@@ -248,6 +251,7 @@ public enum ResultCode {
     PROMOTION_START_TIME_ERROR(40002, "活动起始时间不能小于当前时间"),
     PROMOTION_END_TIME_ERROR(40003, "活动结束时间不能小于当前时间"),
     PROMOTION_TIME_ERROR(40004, "活动起始时间必须大于结束时间"),
+    PROMOTION_TIME_NOT_EXIST(40011, "活动起始时间和活动结束时间不能为空"),
     PROMOTION_SAME_ERROR(40005, "当前时间段已存在相同活动！"),
     PROMOTION_GOODS_ERROR(40006, "请选择要参与活动的商品"),
     PROMOTION_STATUS_END(40007, "当前活动已停止"),
@@ -267,6 +271,11 @@ public enum ResultCode {
     COUPON_RECEIVE_ERROR(41005, "当前优惠券已经被领取完了，下次要早点来哦"),
     COUPON_NUM_INSUFFICIENT_ERROR(41006, "优惠券剩余领取数量不足"),
     COUPON_NOT_EXIST(41007, "当前优惠券不存在"),
+    COUPON_DO_NOT_RECEIVER(41030, "当前优惠券不允许主动领取"),
+    COUPON_ACTIVITY_NOT_EXIST(410022, "当前优惠券活动不存在"),
+    COUPON_SAVE_ERROR(41020, "保存优惠券失败"),
+    COUPON_ACTIVITY_SAVE_ERROR(41023, "保存优惠券活动失败"),
+    COUPON_DELETE_ERROR(41021, "删除优惠券失败"),
     COUPON_LIMIT_NUM_LESS_THAN_0(41008, "领取限制数量不能为负数"),
     COUPON_LIMIT_GREATER_THAN_PUBLISH(41009, "领取限制数量超出发行数量"),
     COUPON_DISCOUNT_ERROR(41010, "优惠券折扣必须小于10且大于0"),
@@ -294,7 +303,8 @@ public enum ResultCode {
     PINTUAN_DELETE_ERROR(42010, "删除拼团活动失败"),
     PINTUAN_JOIN_ERROR(42011, "不能参与自己发起的拼团活动！"),
     PINTUAN_LIMIT_NUM_ERROR(42012, "购买数量超过拼团活动限制数量！"),
-    PINTUAN_NOT_EXIST_ERROR(42013, "当前拼团商品不存在！"),
+    PINTUAN_NOT_EXIST_ERROR(42013, "当前拼团活动不存在！"),
+    PINTUAN_GOODS_NOT_EXIST_ERROR(42014, "当前拼团商品不存在！"),
 
     /**
      * 满额活动
@@ -321,10 +331,12 @@ public enum ResultCode {
      */
     SECKILL_NOT_START_ERROR(45000, "今日没有限时抢购活动，请明天再来看看吧。"),
     SECKILL_NOT_EXIST_ERROR(45001, "当前参与的秒杀活动不存在！"),
+    SECKILL_APPLY_NOT_EXIST_ERROR(45010, "当前参与的秒杀活动不存在！"),
     SECKILL_UPDATE_ERROR(45002, "当前秒杀活动活动已经开始，无法修改！"),
     SECKILL_PRICE_ERROR(45003, "活动价格不能大于商品原价"),
     SECKILL_TIME_ERROR(45004, "时刻参数异常"),
     SECKILL_DELETE_ERROR(45005, "该秒杀活动活动的状态不能删除"),
+    SECKILL_OPEN_ERROR(45010, "该秒杀活动活动的状态不能删除"),
     SECKILL_CLOSE_ERROR(45006, "该秒杀活动活动的状态不能关闭"),
 
 
@@ -354,6 +366,7 @@ public enum ResultCode {
     KANJIA_GOODS_ACTIVE_HIGHEST_LOWEST_PRICE_ERROR(48005, "最低砍价金额不能高于最高砍价金额"),
     KANJIA_GOODS_ACTIVE_SETTLEMENT_PRICE_ERROR(48006, "结算金额不能高于商品金额"),
     KANJIA_GOODS_DELETE_ERROR(48007, "删除砍价商品异常"),
+    KANJIA_GOODS_UPDATE_ERROR(48012, "更新砍价商品异常"),
     KANJIA_ACTIVITY_NOT_FOUND_ERROR(48008, "砍价记录不存在"),
     KANJIA_ACTIVITY_LOG_MEMBER_ERROR(48009, "当前会员已经帮砍"),
     KANJIA_ACTIVITY_MEMBER_ERROR(48010, "当前会员已经发起此砍价商品活动"),

@@ -3,14 +3,13 @@ package cn.lili.modules.order.cart.entity.vo;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
-import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
+import java.util.Map;
 
 /**
  * 购物车中的产品
@@ -79,11 +78,8 @@ public class CartSkuVO extends CartBase implements Serializable {
     @ApiModelProperty(value = "积分购买 积分数量")
     private Long point;
 
-    @ApiModelProperty(value = "可参与的单品活动")
-    private List<PromotionGoods> promotions;
-
-    @ApiModelProperty(value = "参与促销活动更新时间(一天更新一次) 例如时间为：2020-01-01  00：00：01")
-    private Date updatePromotionTime;
+    @ApiModelProperty("商品促销活动集合，key 为 促销活动类型，value 为 促销活动实体信息 ")
+    private Map<String, Object> promotionMap;
 
     /**
      * @see CartTypeEnum
@@ -99,13 +95,26 @@ public class CartSkuVO extends CartBase implements Serializable {
         this.checked = true;
         this.invalid = false;
         //默认时间为0，让系统为此商品更新缓存
-        this.updatePromotionTime = new Date(0);
         this.errorMessage = "";
         this.isShip = true;
-        this.purchasePrice = goodsSku.getIsPromotion() != null && goodsSku.getIsPromotion() ? goodsSku.getPromotionPrice() : goodsSku.getPrice();
+        this.purchasePrice = goodsSku.getPromotionFlag() != null && goodsSku.getPromotionFlag() ? goodsSku.getPromotionPrice() : goodsSku.getPrice();
         this.isFreeFreight = false;
-        this.utilPrice = 0D;
+        this.utilPrice = goodsSku.getPromotionFlag() != null && goodsSku.getPromotionFlag() ? goodsSku.getPromotionPrice() : goodsSku.getPrice();
         this.setStoreId(goodsSku.getStoreId());
         this.setStoreName(goodsSku.getStoreName());
+    }
+
+    /**
+     * 在构造器里初始化促销列表，规格列表
+     */
+    public CartSkuVO(GoodsSku goodsSku, Map<String, Object> promotionMap) {
+        this(goodsSku);
+        if (promotionMap != null && !promotionMap.isEmpty()) {
+            this.promotionMap = promotionMap;
+        }
+    }
+
+    public Map<String, Object> getPromotionMap() {
+        return PromotionTools.filterInvalidPromotionsMap(this.promotionMap);
     }
 }

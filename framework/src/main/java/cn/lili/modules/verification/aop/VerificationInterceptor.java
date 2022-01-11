@@ -3,7 +3,7 @@ package cn.lili.modules.verification.aop;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.verification.aop.annotation.Verification;
-import cn.lili.modules.verification.enums.VerificationEnums;
+import cn.lili.modules.verification.entity.enums.VerificationEnums;
 import cn.lili.modules.verification.service.VerificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;

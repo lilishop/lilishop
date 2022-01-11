@@ -480,7 +480,11 @@ public enum CachePrefix {
     /**
      * 订单暂时缓存
      */
-    ORDER;
+    ORDER,
+    /**
+     * 敏感词
+     */
+    SENSITIVE;
 
 
     public static String removePrefix(String str) {

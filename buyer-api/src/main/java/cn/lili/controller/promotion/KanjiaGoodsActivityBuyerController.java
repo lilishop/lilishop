@@ -1,16 +1,20 @@
 package cn.lili.controller.promotion;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivity;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivityLog;
-import cn.lili.modules.promotion.entity.dto.KanJiaActivityLogQuery;
-import cn.lili.modules.promotion.entity.dto.KanjiaActivityQuery;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.modules.promotion.entity.vos.kanjia.*;
+import cn.lili.modules.promotion.entity.dto.search.KanJiaActivityLogQuery;
+import cn.lili.modules.promotion.entity.dto.search.KanjiaActivityGoodsParams;
+import cn.lili.modules.promotion.entity.dto.search.KanjiaActivityQuery;
+import cn.lili.modules.promotion.entity.dto.search.KanjiaActivitySearchParams;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsListVO;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsVO;
+import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityVO;
 import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
 import cn.lili.modules.promotion.service.KanjiaActivityLogService;
 import cn.lili.modules.promotion.service.KanjiaActivityService;
@@ -52,9 +56,9 @@ public class KanjiaGoodsActivityBuyerController {
     @ApiOperation(value = "分页获取砍价商品")
     public ResultMessage<IPage<KanjiaActivityGoodsListVO>> kanjiaActivityGoodsPage(KanjiaActivityGoodsParams kanjiaActivityGoodsParams, PageVO page) {
         // 会员端查询到的肯定是已经开始的活动商品
-        kanjiaActivityGoodsParams.setPromotionStatus(PromotionStatusEnum.START.name());
-        kanjiaActivityGoodsParams.setStartTime(System.currentTimeMillis());
-        kanjiaActivityGoodsParams.setEndTime(System.currentTimeMillis());
+        kanjiaActivityGoodsParams.setPromotionStatus(PromotionsStatusEnum.START.name());
+//        kanjiaActivityGoodsParams.setStartTime(System.currentTimeMillis());
+//        kanjiaActivityGoodsParams.setEndTime(System.currentTimeMillis());
         return ResultUtil.data(kanJiaActivityGoodsService.kanjiaGoodsVOPage(kanjiaActivityGoodsParams, page));
     }
 
@@ -75,7 +79,7 @@ public class KanjiaGoodsActivityBuyerController {
     @ApiOperation(value = "获取砍价活动")
     public ResultMessage<KanjiaActivityVO> getKanJiaActivity(KanjiaActivitySearchParams kanjiaActivitySearchParams) {
         //如果是非被邀请关系则填写会员ID
-        if (StrUtil.isEmpty(kanjiaActivitySearchParams.getKanjiaActivityId())) {
+        if (CharSequenceUtil.isEmpty(kanjiaActivitySearchParams.getKanjiaActivityId())) {
             kanjiaActivitySearchParams.setMemberId(UserContext.getCurrentUser().getId());
         }
         return ResultUtil.data(kanJiaActivityService.getKanjiaActivityVO(kanjiaActivitySearchParams));

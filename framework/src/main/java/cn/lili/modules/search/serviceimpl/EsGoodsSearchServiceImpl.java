@@ -15,6 +15,7 @@ import cn.lili.modules.search.entity.dto.HotWordsDTO;
 import cn.lili.modules.search.entity.dto.ParamOptions;
 import cn.lili.modules.search.entity.dto.SelectorOptions;
 import cn.lili.modules.search.service.EsGoodsSearchService;
+import com.alibaba.druid.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.lucene.search.function.FieldValueFactorFunction;
@@ -34,6 +35,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
@@ -70,6 +72,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
      * ES
      */
     @Autowired
+    @Qualifier("elasticsearchRestTemplate")
     private ElasticsearchRestTemplate restTemplate;
     /**
      * 缓存
@@ -112,6 +115,16 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), hotWords.getKeywords(), hotWords.getPoint());
     }
 
+    /**
+     * 删除热门关键词
+     *
+     * @param keywords 热词
+     */
+    @Override
+    public void deleteHotWords(String keywords) {
+        cache.zRemove(CachePrefix.HOT_WORD.getPrefix(), keywords);
+    }
+
     @Override
     public EsGoodsRelatedInfo getSelector(EsGoodsSearchDTO goodsSearch, PageVO pageVo) {
         NativeSearchQueryBuilder builder = createSearchQueryBuilder(goodsSearch, null);
@@ -143,6 +156,17 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         NativeSearchQuery build = searchQueryBuilder.build();
         build.setIds(skuIds);
         return restTemplate.multiGet(build, EsGoodsIndex.class, restTemplate.getIndexCoordinatesFor(EsGoodsIndex.class));
+    }
+
+    /**
+     * 根据id获取商品索引
+     *
+     * @param id 商品skuId
+     * @return 商品索引
+     */
+    @Override
+    public EsGoodsIndex getEsGoodsById(String id) {
+        return this.restTemplate.get(id, EsGoodsIndex.class);
     }
 
     /**
@@ -199,6 +223,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         for (int i = 0; i < brandBuckets.size(); i++) {
             String brandId = brandBuckets.get(i).getKey().toString();
             //当商品品牌id为0时，代表商品没有选择品牌，所以过滤掉品牌选择器
+            //当品牌id为空并且
             if (brandId.equals("0") ||
                     (CharSequenceUtil.isNotEmpty(goodsSearch.getBrandId())
                             && Arrays.asList(goodsSearch.getBrandId().split("@")).contains(brandId))) {
@@ -208,6 +233,9 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             String brandName = "";
             if (brandBuckets.get(i).getAggregations() != null && brandBuckets.get(i).getAggregations().get(ATTR_BRAND_NAME) != null) {
                 brandName = this.getAggregationsBrandOptions(brandBuckets.get(i).getAggregations().get(ATTR_BRAND_NAME));
+                if (StringUtils.isEmpty(brandName)) {
+                    continue;
+                }
             }
 
             String brandUrl = "";
@@ -215,6 +243,9 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
                     brandUrlBuckets.get(i).getAggregations() != null &&
                     brandUrlBuckets.get(i).getAggregations().get(ATTR_BRAND_URL) != null) {
                 brandUrl = this.getAggregationsBrandOptions(brandUrlBuckets.get(i).getAggregations().get(ATTR_BRAND_URL));
+                if (StringUtils.isEmpty(brandUrl)) {
+                    continue;
+                }
             }
             SelectorOptions so = new SelectorOptions();
             so.setName(brandName);
@@ -359,7 +390,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             //未上架的商品不显示
             filterBuilder.must(QueryBuilders.matchQuery("marketEnable", GoodsStatusEnum.UPPER.name()));
             //待审核和审核不通过的商品不显示
-            filterBuilder.must(QueryBuilders.matchQuery("isAuth", GoodsAuthEnum.PASS.name()));
+            filterBuilder.must(QueryBuilders.matchQuery("authFlag", GoodsAuthEnum.PASS.name()));
 
 
             //关键字检索

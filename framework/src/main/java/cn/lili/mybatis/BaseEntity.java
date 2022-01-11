@@ -13,6 +13,9 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
@@ -36,7 +39,6 @@ public abstract class BaseEntity implements Serializable {
 
 
     @TableId
-    @TableField
     @ApiModelProperty(value = "唯一标识", hidden = true)
     private String id;
 
@@ -51,6 +53,7 @@ public abstract class BaseEntity implements Serializable {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty(value = "创建时间", hidden = true)
+    @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd HH:mm:ss || yyyy-MM-dd || yyyy/MM/dd HH:mm:ss|| yyyy/MM/dd ||epoch_millis")
     private Date createTime;
 
     @LastModifiedBy
@@ -63,6 +66,7 @@ public abstract class BaseEntity implements Serializable {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.UPDATE)
     @ApiModelProperty(value = "更新时间", hidden = true)
+    @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd HH:mm:ss || yyyy-MM-dd || yyyy/MM/dd HH:mm:ss|| yyyy/MM/dd ||epoch_millis")
     private Date updateTime;
 
     @TableField(fill = FieldFill.INSERT)

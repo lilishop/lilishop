@@ -244,7 +244,7 @@ public abstract class BaseElasticsearchService {
                         "          }\n" +
                         "        }\n" +
                         "      },\n" +
-                        "      \"isAuth\": {\n" +
+                        "      \"authFlag\": {\n" +
                         "        \"type\": \"text\",\n" +
                         "        \"fields\": {\n" +
                         "          \"keyword\": {\n" +
@@ -330,6 +330,9 @@ public abstract class BaseElasticsearchService {
                         "            \"ignore_above\": 256\n" +
                         "          }\n" +
                         "        }\n" +
+                        "      },\n" +
+                        "      \"promotionMapJson\": {\n" +
+                        "        \"type\": \"text\"\n" +
                         "      },\n" +
                         "      \"thumbnail\": {\n" +
                         "        \"type\": \"text\",\n" +

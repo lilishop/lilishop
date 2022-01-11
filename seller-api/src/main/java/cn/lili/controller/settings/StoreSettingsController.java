@@ -56,6 +56,14 @@ public class StoreSettingsController {
         return ResultUtil.data(result);
     }
 
+    @ApiOperation(value = "修改商家设置")
+    @PutMapping("/merchantEuid")
+    public ResultMessage<Object> edit(String merchantEuid) {
+        //修改UDESK设置
+        Boolean result = storeDetailService.editMerchantEuid(merchantEuid);
+        return ResultUtil.data(result);
+    }
+
     @ApiOperation(value = "修改店铺库存预警数量")
     @ApiImplicitParam(name = "stockWarning", value = "库存预警数量", required = true, dataType = "Integer", paramType = "query")
     @PutMapping("/updateStockWarning")

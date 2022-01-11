@@ -22,37 +22,38 @@ import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.enums.GoodsWordsTypeEnum;
 import cn.lili.modules.goods.service.*;
+import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.dto.BasePromotion;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.service.PromotionService;
-import cn.lili.modules.search.entity.dos.EsGoodsAttribute;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
 import cn.lili.modules.search.repository.EsGoodsIndexRepository;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.search.service.EsGoodsSearchService;
-import cn.lili.modules.goods.entity.dos.StoreGoodsLabel;
-import cn.lili.modules.goods.service.StoreGoodsLabelService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.IterableUtil;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.indices.AnalyzeRequest;
-import org.elasticsearch.client.indices.AnalyzeResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.UpdateByQueryRequest;
 import org.elasticsearch.script.Script;
+import org.elasticsearch.script.ScriptType;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -102,6 +103,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Autowired
     private Cache<Object> cache;
 
+    @Autowired
+    @Qualifier("elasticsearchRestTemplate")
+    private ElasticsearchRestTemplate restTemplate;
+
     @Override
     public void init() {
         //获取索引任务标识
@@ -121,22 +126,19 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
         ThreadUtil.execAsync(() -> {
             try {
-                //查询商品信息
-                LambdaQueryWrapper<GoodsSku> queryWrapper = new LambdaQueryWrapper<>();
-                queryWrapper.eq(GoodsSku::getIsAuth, GoodsAuthEnum.PASS.name());
-                queryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
-
                 List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
 
                 LambdaQueryWrapper<Goods> goodsQueryWrapper = new LambdaQueryWrapper<>();
-                goodsQueryWrapper.eq(Goods::getIsAuth, GoodsAuthEnum.PASS.name());
+                goodsQueryWrapper.eq(Goods::getAuthFlag, GoodsAuthEnum.PASS.name());
                 goodsQueryWrapper.eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name());
+                goodsQueryWrapper.eq(Goods::getDeleteFlag, false);
 
                 for (Goods goods : goodsService.list(goodsQueryWrapper)) {
                     LambdaQueryWrapper<GoodsSku> skuQueryWrapper = new LambdaQueryWrapper<>();
                     skuQueryWrapper.eq(GoodsSku::getGoodsId, goods.getId());
-                    skuQueryWrapper.eq(GoodsSku::getIsAuth, GoodsAuthEnum.PASS.name());
+                    skuQueryWrapper.eq(GoodsSku::getAuthFlag, GoodsAuthEnum.PASS.name());
                     skuQueryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
+                    skuQueryWrapper.eq(GoodsSku::getDeleteFlag, false);
 
                     List<GoodsSku> goodsSkuList = goodsSkuService.list(skuQueryWrapper);
                     int skuSource = 100;
@@ -165,7 +167,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     public Map<String, Integer> getProgress() {
         Map<String, Integer> map = (Map<String, Integer>) cache.get(CachePrefix.INIT_INDEX_PROCESS.getPrefix());
         if (map == null) {
-            return null;
+            return Collections.emptyMap();
         }
         Boolean flag = (Boolean) cache.get(CachePrefix.INIT_INDEX_FLAG.getPrefix());
         map.put("flag", Boolean.TRUE.equals(flag) ? 1 : 0);
@@ -176,24 +178,24 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     public void addIndex(EsGoodsIndex goods) {
         try {
             //分词器分词
-            AnalyzeRequest analyzeRequest = AnalyzeRequest.withIndexAnalyzer(getIndexName(), "ik_max_word", goods.getGoodsName());
-            AnalyzeResponse analyze = client.indices().analyze(analyzeRequest, RequestOptions.DEFAULT);
-            List<AnalyzeResponse.AnalyzeToken> tokens = analyze.getTokens();
+//            AnalyzeRequest analyzeRequest = AnalyzeRequest.withIndexAnalyzer(getIndexName(), "ik_max_word", goods.getGoodsName());
+//            AnalyzeResponse analyze = client.indices().analyze(analyzeRequest, RequestOptions.DEFAULT);
+//            List<AnalyzeResponse.AnalyzeToken> tokens = analyze.getTokens();
 
-            if (goods.getAttrList() != null && !goods.getAttrList().isEmpty()) {
-                //保存分词
-                for (EsGoodsAttribute esGoodsAttribute : goods.getAttrList()) {
-                    wordsToDb(esGoodsAttribute.getValue());
-                }
-            }
-            //分析词条
-            for (AnalyzeResponse.AnalyzeToken token : tokens) {
-                //保存词条进入数据库
-                wordsToDb(token.getTerm());
-            }
+//            if (goods.getAttrList() != null && !goods.getAttrList().isEmpty()) {
+//                //保存分词
+//                for (EsGoodsAttribute esGoodsAttribute : goods.getAttrList()) {
+//                    wordsToDb(esGoodsAttribute.getValue());
+//                }
+//            }
+//            //分析词条
+//            for (AnalyzeResponse.AnalyzeToken token : tokens) {
+//                //保存词条进入数据库
+//                wordsToDb(token.getTerm());
+//            }
             //生成索引
             goodsIndexRepository.save(goods);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("为商品[" + goods.getGoodsName() + "]生成索引异常", e);
         }
     }
@@ -291,6 +293,19 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         goodsIndexRepository.deleteById(id);
     }
 
+    /**
+     * 删除索引
+     *
+     * @param ids 商品索引id集合
+     */
+    @Override
+    public void deleteIndexByIds(List<String> ids) {
+        NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+        queryBuilder.withQuery(QueryBuilders.termsQuery("id", ids.toArray()));
+        this.restTemplate.delete(queryBuilder.build(), EsGoodsIndex.class);
+
+    }
+
     @Override
     public void initIndex(List<EsGoodsIndex> goodsIndexList) {
         if (goodsIndexList == null || goodsIndexList.isEmpty()) {
@@ -320,7 +335,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         resultMap.put(KEY_SUCCESS, 0);
         resultMap.put(KEY_FAIL, 0);
         resultMap.put(KEY_PROCESSED, 0);
-        cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix() + "", resultMap);
+        cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), resultMap);
         if (!goodsIndexList.isEmpty()) {
             goodsIndexRepository.deleteAll();
             for (EsGoodsIndex goodsIndex : goodsIndexList) {
@@ -340,32 +355,60 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     }
 
     @Override
-    public void updateEsGoodsIndex(String id, BasePromotion promotion, String key, Double price) {
+    public UpdateRequest updateEsGoodsIndexPromotions(String id, BasePromotions promotion, String key) {
         EsGoodsIndex goodsIndex = findById(id);
         if (goodsIndex != null) {
-            //如果有促销活动开始，则将促销金额写入
-            if (promotion.getPromotionStatus().equals(PromotionStatusEnum.START.name()) && price != null) {
-                goodsIndex.setPromotionPrice(price);
-            } else {
-                //否则促销金额为商品原价
-                goodsIndex.setPromotionPrice(goodsIndex.getPrice());
-            }
             //更新索引
-            this.updateGoodsIndexPromotion(goodsIndex, key, promotion);
+            return this.updateGoodsIndexPromotion(goodsIndex, key, promotion);
         } else {
             log.error("更新索引商品促销信息失败！skuId 为 {} 的索引不存在！", id);
+            return null;
         }
     }
 
+    /**
+     * 更新商品索引的促销信息
+     *
+     * @param ids       skuId集合
+     * @param promotion 促销信息
+     * @param key       促销信息的key
+     */
     @Override
-    public void updateEsGoodsIndexByList(List<PromotionGoods> promotionGoodsList, BasePromotion promotion, String key) {
+    public void updateEsGoodsIndexPromotions(List<String> ids, BasePromotions promotion, String key) {
+        BulkRequest bulkRequest = new BulkRequest();
+        log.info("修改商品活动索引");
+        log.info("商品ids: {}", ids);
+        log.info("活动关键字: {}", key);
+        log.info("活动: {}", promotion);
+        for (String id : ids) {
+            UpdateRequest updateRequest = this.updateEsGoodsIndexPromotions(id, promotion, key);
+            if (updateRequest != null) {
+                bulkRequest.add(updateRequest);
+            }
+        }
+        this.executeBulkUpdateRequest(bulkRequest);
+    }
+
+
+    @Override
+    public void updateEsGoodsIndexByList(List<PromotionGoods> promotionGoodsList, BasePromotions promotion, String key) {
+        BulkRequest bulkRequest = new BulkRequest();
+        log.info("修改商品活动索引");
+        log.info("促销商品信息: {}", promotionGoodsList);
+        log.info("活动关键字: {}", key);
+        log.info("活动: {}", promotion);
         if (promotionGoodsList != null) {
             //循环更新 促销商品索引
             for (PromotionGoods promotionGoods : promotionGoodsList) {
-                updateEsGoodsIndex(promotionGoods.getSkuId(), promotion, key, promotionGoods.getPrice());
+                promotion.setStartTime(promotionGoods.getStartTime());
+                promotion.setEndTime(promotionGoods.getEndTime());
+                UpdateRequest updateRequest = this.updateEsGoodsIndexPromotions(promotionGoods.getSkuId(), promotion, key);
+                if (updateRequest != null) {
+                    bulkRequest.add(updateRequest);
+                }
             }
         }
-
+        this.executeBulkUpdateRequest(bulkRequest);
     }
 
     /**
@@ -375,10 +418,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      * @param key       促销信息的key
      */
     @Override
-    public void updateEsGoodsIndexAllByList(BasePromotion promotion, String key) {
+    public void updateEsGoodsIndexAllByList(BasePromotions promotion, String key) {
         List<EsGoodsIndex> goodsIndices = new ArrayList<>();
         //如果storeId不为空，则表示是店铺活动
-        if (promotion.getStoreId() != null) {
+        if (promotion.getStoreId() != null && !promotion.getStoreId().equals(PromotionTools.PLATFORM_ID)) {
             EsGoodsSearchDTO searchDTO = new EsGoodsSearchDTO();
             searchDTO.setStoreId(promotion.getStoreId());
             //查询出店铺商品
@@ -389,13 +432,12 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         } else {
             //否则是平台活动
             Iterable<EsGoodsIndex> all = goodsIndexRepository.findAll();
-//           查询出全部商品
+            //查询出全部商品
             goodsIndices = new ArrayList<>(IterableUtil.toCollection(all));
         }
-        //更新商品索引
-        for (EsGoodsIndex goodsIndex : goodsIndices) {
-            this.updateGoodsIndexPromotion(goodsIndex, key, promotion);
-        }
+        List<String> skuIds = goodsIndices.stream().map(EsGoodsIndex::getId).collect(Collectors.toList());
+        this.deleteEsGoodsPromotionByPromotionId(skuIds, promotion.getId());
+        this.updateEsGoodsIndexPromotions(skuIds, promotion, key);
     }
 
     @Override
@@ -408,9 +450,9 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
                 if (promotionMap != null && !promotionMap.isEmpty()) {
                     //如果存在同类型促销活动删除
-                    List<String> collect = promotionMap.keySet().parallelStream().filter(i -> i.contains(promotionType.name())).collect(Collectors.toList());
+                    List<String> collect = promotionMap.keySet().stream().filter(i -> i.contains(promotionType.name())).collect(Collectors.toList());
                     collect.forEach(promotionMap::remove);
-                    goodsIndex.setPromotionMap(promotionMap);
+                    goodsIndex.setPromotionMapJson(JSONUtil.toJsonStr(promotionMap));
                     updateIndex(goodsIndex);
                 }
             } else {
@@ -420,20 +462,33 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     }
 
     @Override
-    public void deleteEsGoodsPromotionByPromotionId(String skuId, String promotionId) {
-        if (skuId != null) {
-            EsGoodsIndex goodsIndex = findById(skuId);
-            //商品索引不为空
-            if (goodsIndex != null) {
-                this.removePromotionByPromotionId(goodsIndex, promotionId);
-            } else {
-                log.error("更新索引商品促销信息失败！skuId 为 【{}】的索引不存在！", skuId);
+    public void deleteEsGoodsPromotionByPromotionId(List<String> skuIds, String promotionId) {
+        BulkRequest bulkRequest = new BulkRequest();
+        log.info("删除商品活动索引");
+        log.info("商品skuIds: {}", skuIds);
+        log.info("活动Id: {}", promotionId);
+        if (skuIds != null && !skuIds.isEmpty()) {
+            for (String skuId : skuIds) {
+                EsGoodsIndex goodsIndex = findById(skuId);
+                //商品索引不为空
+                if (goodsIndex != null) {
+                    UpdateRequest updateRequest = this.removePromotionByPromotionId(goodsIndex, promotionId);
+                    if (updateRequest != null) {
+                        bulkRequest.add(updateRequest);
+                    }
+                } else {
+                    log.error("更新索引商品促销信息失败！skuId 为 【{}】的索引不存在！", skuId);
+                }
             }
         } else {
             for (EsGoodsIndex goodsIndex : this.goodsIndexRepository.findAll()) {
-                this.removePromotionByPromotionId(goodsIndex, promotionId);
+                UpdateRequest updateRequest = this.removePromotionByPromotionId(goodsIndex, promotionId);
+                if (updateRequest != null) {
+                    bulkRequest.add(updateRequest);
+                }
             }
         }
+        this.executeBulkUpdateRequest(bulkRequest);
 
     }
 
@@ -443,15 +498,16 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      * @param goodsIndex  索引
      * @param promotionId 促销活动id
      */
-    private void removePromotionByPromotionId(EsGoodsIndex goodsIndex, String promotionId) {
+    private UpdateRequest removePromotionByPromotionId(EsGoodsIndex goodsIndex, String promotionId) {
         Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
         if (promotionMap != null && !promotionMap.isEmpty()) {
-            //如果存在同类型促销活动删除
+            //如果存在同促销ID的活动删除
             List<String> collect = promotionMap.keySet().stream().filter(i -> i.split("-")[1].equals(promotionId)).collect(Collectors.toList());
             collect.forEach(promotionMap::remove);
-            goodsIndex.setPromotionMap(promotionMap);
-            updateIndex(goodsIndex);
+            goodsIndex.setPromotionMapJson(JSONUtil.toJsonStr(promotionMap));
+            return this.getGoodsIndexPromotionUpdateRequest(goodsIndex.getId(), promotionMap);
         }
+        return null;
     }
 
     /**
@@ -465,13 +521,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             //获取商品索引
             if (promotionMap != null && !promotionMap.isEmpty()) {
                 //促销不为空则进行清洗
-                for (Map.Entry<String, Object> entry : promotionMap.entrySet()) {
-                    BasePromotion promotion = (BasePromotion) entry.getValue();
-                    //判定条件为活动已结束
-                    if (promotion.getEndTime().getTime() > DateUtil.date().getTime()) {
-                        promotionMap.remove(entry.getKey());
-                    }
-                }
+                promotionMap.entrySet().removeIf(i -> {
+                    BasePromotions promotion = (BasePromotions) i.getValue();
+                    return promotion.getEndTime() != null && promotion.getEndTime().getTime() < DateUtil.date().getTime();
+                });
             }
         }
         goodsIndexRepository.saveAll(all);
@@ -527,26 +580,26 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         List<String> promotionIds = new ArrayList<>();
         //写入促销id
         for (String key : keyCollect) {
-            BasePromotion promotion = (BasePromotion) promotionMap.get(key);
+            BasePromotions promotion = (BasePromotions) promotionMap.get(key);
             promotionIds.add(promotion.getId());
         }
         return promotionIds;
     }
 
     /**
-     * 重置当前商品索引
+     * 获取临时拼装的商品索引
      *
      * @param goodsSku       商品sku信息
      * @param goodsParamDTOS 商品参数
      * @return 商品索引
      */
     @Override
-    public EsGoodsIndex resetEsGoodsIndex(GoodsSku goodsSku, List<GoodsParamsDTO> goodsParamDTOS) {
+    public EsGoodsIndex getTempEsGoodsIndex(GoodsSku goodsSku, List<GoodsParamsDTO> goodsParamDTOS) {
         EsGoodsIndex index = new EsGoodsIndex(goodsSku, goodsParamDTOS);
         //获取活动信息
-        Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
+        Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsPromotionMap(index);
         //写入促销信息
-        index.setPromotionMap(goodsCurrentPromotionMap);
+        index.setPromotionMapJson(JSONUtil.toJsonStr(goodsCurrentPromotionMap));
         return index;
     }
 
@@ -557,11 +610,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      * @param key        关键字
      * @param promotion  活动
      */
-    private void updateGoodsIndexPromotion(EsGoodsIndex goodsIndex, String key, BasePromotion promotion) {
-        log.info("修改商品活动索引");
-        log.info("商品索引: {}", goodsIndex);
-        log.info("关键字: {}", key);
-        log.info("活动: {}", promotion);
+    private UpdateRequest updateGoodsIndexPromotion(EsGoodsIndex goodsIndex, String key, BasePromotions promotion) {
         Map<String, Object> promotionMap;
         //数据非空处理，如果空给一个新的信息
         if (goodsIndex.getPromotionMap() == null || goodsIndex.getPromotionMap().isEmpty()) {
@@ -570,22 +619,52 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             promotionMap = goodsIndex.getPromotionMap();
         }
         //如果活动已结束
-        if (promotion.getPromotionStatus().equals(PromotionStatusEnum.END.name()) || promotion.getPromotionStatus().equals(PromotionStatusEnum.CLOSE.name())) {
-            //如果存在活动
-            if (promotionMap.containsKey(key)) {
-                //删除活动
-                promotionMap.remove(key);
-            } else {
-                //不存在则说明是秒杀活动，尝试删除秒杀信息
-                this.removePromotionKey(key, promotionMap, PromotionTypeEnum.SECKILL.name());
-            }
+        if (promotion.getPromotionStatus().equals(PromotionsStatusEnum.END.name()) || promotion.getPromotionStatus().equals(PromotionsStatusEnum.CLOSE.name())) {//如果存在活动
+            //删除活动
+            promotionMap.remove(key);
         } else {
-            //添加促销活动前，如果是同一时间只可以有一个的活动，但商品索引的促销活动里存在其他（同一时间只可以有一个）的活动，则清除
-            this.removePromotionKey(key, promotionMap, PromotionTypeEnum.PINTUAN.name(), PromotionTypeEnum.SECKILL.name(), PromotionTypeEnum.FULL_DISCOUNT.name());
             promotionMap.put(key, promotion);
         }
-        goodsIndex.setPromotionMap(promotionMap);
-        updateIndex(goodsIndex);
+        return this.getGoodsIndexPromotionUpdateRequest(goodsIndex.getId(), promotionMap);
+    }
+
+    /**
+     * 以更新部分字段的方式更新索引促销信息
+     *
+     * @param id           索引id
+     * @param promotionMap 促销信息
+     */
+    private UpdateRequest getGoodsIndexPromotionUpdateRequest(String id, Map<String, Object> promotionMap) {
+        UpdateRequest updateRequest = new UpdateRequest();
+        updateRequest.index(getIndexName());
+        updateRequest.id(id);
+        updateRequest.retryOnConflict(5);
+        Map<String, Object> params = new HashMap<>();
+        params.put("promotionMap", JSONUtil.toJsonStr(promotionMap));
+        Script script = new Script(ScriptType.INLINE, "painless", "ctx._source.promotionMapJson=params.promotionMap;", params);
+        updateRequest.script(script);
+        return updateRequest;
+    }
+
+    /**
+     * 执行批量更新商品索引
+     *
+     * @param bulkRequest 批量请求
+     */
+    private void executeBulkUpdateRequest(BulkRequest bulkRequest) {
+        if (bulkRequest.requests().isEmpty()) {
+            return;
+        }
+        try {
+            BulkResponse responses = this.client.bulk(bulkRequest, RequestOptions.DEFAULT);
+            if (responses.hasFailures()) {
+                log.info("批量更新商品索引的促销信息中出现部分异常：{}", responses.buildFailureMessage());
+            } else {
+                log.info("批量更新商品索引的促销信息结果：{}", responses.status());
+            }
+        } catch (IOException e) {
+            log.error("批量更新商品索引的促销信息出现异常！", e);
+        }
     }
 
     /**
@@ -677,8 +756,8 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             }
         }
         //促销索引
-        Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
-        index.setPromotionMap(goodsCurrentPromotionMap);
+        Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsPromotionMap(index);
+        index.setPromotionMapJson(JSONUtil.toJsonStr(goodsCurrentPromotionMap));
         return index;
     }
 
@@ -686,7 +765,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         return new ActionListener<BulkByScrollResponse>() {
             @Override
             public void onResponse(BulkByScrollResponse bulkByScrollResponse) {
-                log.debug("UpdateByQueryResponse: {}", bulkByScrollResponse);
+                log.info("UpdateByQueryResponse: {}", bulkByScrollResponse);
             }
 
             @Override

@@ -9,14 +9,12 @@ import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
 import cn.lili.modules.order.order.mapper.OrderItemMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -80,4 +78,10 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         return this.list(lambdaQueryWrapper);
     }
 
+    @Override
+    public OrderItem getByOrderSnAndSkuId(String orderSn, String skuId) {
+        return this.getOne(new LambdaQueryWrapper<OrderItem>()
+                .eq(OrderItem::getOrderSn, orderSn)
+                .eq(OrderItem::getSkuId, skuId));
+    }
 }

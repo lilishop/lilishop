@@ -3,15 +3,14 @@ package cn.lili.controller.promotion;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.AuthUser;
+import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.promotion.entity.dos.FullDiscount;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.modules.promotion.entity.vos.FullDiscountSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.FullDiscountSearchParams;
 import cn.lili.modules.promotion.service.FullDiscountService;
-import cn.lili.common.security.OperationalJudgment;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -20,6 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -42,9 +42,10 @@ public class FullDiscountStoreController {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         fullDiscountVO.setStoreId(currentUser.getStoreId());
         fullDiscountVO.setStoreName(currentUser.getStoreName());
-        fullDiscountVO.setPromotionStatus(PromotionStatusEnum.NEW.name());
-        FullDiscount fullDiscount = fullDiscountService.addFullDiscount(fullDiscountVO);
-        return ResultUtil.data(fullDiscount);
+        if (!fullDiscountService.savePromotions(fullDiscountVO)) {
+            return ResultUtil.error(ResultCode.PINTUAN_ADD_ERROR);
+        }
+        return ResultUtil.data(fullDiscountVO);
     }
 
     @ApiOperation(value = "通过id获取")
@@ -56,10 +57,10 @@ public class FullDiscountStoreController {
 
     @ApiOperation(value = "根据条件分页查询满优惠活动")
     @GetMapping
-    public ResultMessage<IPage<FullDiscountVO>> getFullDiscountByPage(FullDiscountSearchParams searchParams, PageVO page) {
+    public ResultMessage<IPage<FullDiscount>> getFullDiscountByPage(FullDiscountSearchParams searchParams, PageVO page) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         searchParams.setStoreId(storeId);
-        IPage<FullDiscountVO> fullDiscountByPage = fullDiscountService.getFullDiscountByPageFromMongo(searchParams, page);
+        IPage<FullDiscount> fullDiscountByPage = fullDiscountService.pageFindAll(searchParams, page);
         return ResultUtil.data(fullDiscountByPage);
     }
 
@@ -70,15 +71,17 @@ public class FullDiscountStoreController {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         fullDiscountVO.setStoreId(currentUser.getStoreId());
         fullDiscountVO.setStoreName(currentUser.getStoreName());
-        fullDiscountService.modifyFullDiscount(fullDiscountVO);
+        if (!fullDiscountService.updatePromotions(fullDiscountVO)) {
+            return ResultUtil.error(ResultCode.PINTUAN_EDIT_ERROR);
+        }
         return ResultUtil.success(ResultCode.FULL_DISCOUNT_EDIT_SUCCESS);
     }
 
     @ApiOperation(value = "删除满优惠活动")
     @DeleteMapping("/{id}")
     public ResultMessage<String> deleteFullDiscount(@PathVariable String id) {
-        OperationalJudgment.judgment(fullDiscountService.getFullDiscount(id));
-        fullDiscountService.deleteFullDiscount(id);
+        OperationalJudgment.judgment(fullDiscountService.getById(id));
+        fullDiscountService.removePromotions(Collections.singletonList(id));
         return ResultUtil.success(ResultCode.FULL_DISCOUNT_EDIT_DELETE);
     }
 
@@ -88,10 +91,10 @@ public class FullDiscountStoreController {
             @ApiImplicitParam(name = "id", value = "满额活动ID", required = true, paramType = "path"),
             @ApiImplicitParam(name = "promotionStatus", value = "满额活动状态", required = true, paramType = "path")
     })
-    @PutMapping("/status/{id}/{promotionStatus}")
-    public ResultMessage<Object> updateCouponStatus(@PathVariable String id, @PathVariable String promotionStatus) {
+    @PutMapping("/status/{id}")
+    public ResultMessage<Object> updateCouponStatus(@PathVariable String id, Long startTime, Long endTime) {
         OperationalJudgment.judgment(fullDiscountService.getFullDiscount(id));
-        if (fullDiscountService.updateFullDiscountStatus(id, PromotionStatusEnum.valueOf(promotionStatus))) {
+        if (fullDiscountService.updateStatus(Collections.singletonList(id), startTime, endTime)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
         return ResultUtil.error(ResultCode.ERROR);

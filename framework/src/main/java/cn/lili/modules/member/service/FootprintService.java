@@ -51,5 +51,5 @@ public interface FootprintService extends IService<FootPrint> {
      *
      * @return 当前会员的浏览记录数量
      */
-    Integer getFootprintNum();
+    long getFootprintNum();
 }

@@ -44,6 +44,7 @@ public class RenderStepStatement {
     public static RenderStepEnums[] checkedSingleRender = {
             RenderStepEnums.CHECK_DATA,
             RenderStepEnums.SKU_PROMOTION,
+            RenderStepEnums.COUPON,
             RenderStepEnums.SKU_FREIGHT,
             RenderStepEnums.CART_PRICE
     };
@@ -61,6 +62,22 @@ public class RenderStepStatement {
             RenderStepEnums.DISTRIBUTION,
             RenderStepEnums.PLATFORM_COMMISSION
     };
+
+    /**
+     * 交易创建前渲染
+     * 渲染购物车 生成SN 》分销人员佣金渲染 》平台佣金渲染
+     */
+    public static RenderStepEnums[] pintuanTradeRender = {
+            RenderStepEnums.CHECK_DATA,
+            RenderStepEnums.SKU_PROMOTION,
+            RenderStepEnums.COUPON,
+            RenderStepEnums.SKU_FREIGHT,
+            RenderStepEnums.CART_PRICE,
+            RenderStepEnums.CART_SN,
+            RenderStepEnums.DISTRIBUTION,
+            RenderStepEnums.PLATFORM_COMMISSION
+    };
+
     /**
      * 交易创建前渲染
      * 渲染购物车 生成SN 》分销人员佣金渲染 》平台佣金渲染

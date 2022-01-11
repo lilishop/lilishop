@@ -3,8 +3,7 @@ package cn.lili.event.impl;
 
 import cn.lili.event.MemberRegisterEvent;
 import cn.lili.modules.member.entity.dos.Member;
-import cn.lili.modules.member.service.MemberWalletService;
-import lombok.RequiredArgsConstructor;
+import cn.lili.modules.wallet.service.MemberWalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +21,7 @@ public class MemberWalletExecute implements MemberRegisterEvent {
 
     @Override
     public void memberRegister(Member member) {
-        memberWalletService.save(member.getId(),member.getUsername());
+        // 有些情况下，会同时创建一个member_id的两条数据
+//        memberWalletService.save(member.getId(),member.getUsername());
     }
 }

@@ -46,4 +46,10 @@ public class DistributionSelectedGoodsServiceImpl extends ServiceImpl<Distributi
                 .eq(DistributionSelectedGoods::getDistributionGoodsId, distributionGoodsId)
                 .eq(DistributionSelectedGoods::getDistributionId, distributionId));
     }
+
+    @Override
+    public boolean deleteByDistributionGoodsId(String distributionGoodsId) {
+        return this.remove(new LambdaQueryWrapper<DistributionSelectedGoods>()
+                .eq(DistributionSelectedGoods::getDistributionGoodsId, distributionGoodsId));
+    }
 }

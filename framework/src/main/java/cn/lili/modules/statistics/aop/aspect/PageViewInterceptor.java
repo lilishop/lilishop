@@ -3,9 +3,9 @@ package cn.lili.modules.statistics.aop.aspect;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.context.ThreadContextHolder;
+import cn.lili.common.utils.IpUtils;
 import cn.lili.common.utils.SpelUtil;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.common.utils.IpUtils;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.statistics.aop.PageViewPoint;
 import cn.lili.modules.statistics.aop.enums.PageViewEnum;
@@ -62,7 +62,12 @@ public class PageViewInterceptor {
                     break;
                 }
             case STORE:
-                Map<String, String> map = spelFormat(point);
+                Map<String, String> map = null;
+                try {
+                    map = spelFormat(point);
+                } catch (Exception e) {
+                    return;
+                }
                 storeId = map.get("id");
                 break;
             default:

@@ -1,15 +1,14 @@
 package cn.lili.controller.promotion;
 
-import cn.hutool.core.date.DateUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.promotion.entity.dto.PromotionGoodsDTO;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.PintuanMemberVO;
 import cn.lili.modules.promotion.entity.vos.PintuanShareVO;
-import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.service.PintuanService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -40,14 +39,13 @@ public class PintuanBuyerController {
 
     @ApiOperation(value = "获取拼团商品")
     @GetMapping
-    public ResultMessage<IPage<PromotionGoodsDTO>> getPintuanCategory(String goodsName, String categoryPath, PageVO pageVo) {
+    public ResultMessage<IPage<PromotionGoods>> getPintuanCategory(String goodsName, String categoryPath, PageVO pageVo) {
         PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
         searchParams.setGoodsName(goodsName);
         searchParams.setPromotionType(PromotionTypeEnum.PINTUAN.name());
-        searchParams.setPromotionStatus(PromotionStatusEnum.START.name());
+        searchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
         searchParams.setCategoryPath(categoryPath);
-        searchParams.setEndTime(DateUtil.date().getTime());
-        return ResultUtil.data(promotionGoodsService.getPromotionGoods(searchParams, pageVo));
+        return ResultUtil.data(promotionGoodsService.pageFindAll(searchParams, pageVo));
     }
 
 

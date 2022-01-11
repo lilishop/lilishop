@@ -3,9 +3,10 @@ package cn.lili.modules.search.service;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
+import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.dto.BasePromotion;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
+import org.elasticsearch.action.update.UpdateRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -25,9 +26,11 @@ public interface EsGoodsIndexService {
 
     /**
      * 获取es生成索引进度
+     *
      * @return
      */
     Map<String, Integer> getProgress();
+
     /**
      * 添加商品索引
      *
@@ -80,6 +83,13 @@ public interface EsGoodsIndexService {
     void deleteIndexById(String id);
 
     /**
+     * 删除索引
+     *
+     * @param ids 商品索引id集合
+     */
+    void deleteIndexByIds(List<String> ids);
+
+    /**
      * 初始化商品索引
      *
      * @param goodsIndexList 商品索引列表
@@ -92,9 +102,17 @@ public interface EsGoodsIndexService {
      * @param id        id(skuId)
      * @param promotion 促销信息
      * @param key       促销信息的key
-     * @param price     促销价格
      */
-    void updateEsGoodsIndex(String id, BasePromotion promotion, String key, Double price);
+    UpdateRequest updateEsGoodsIndexPromotions(String id, BasePromotions promotion, String key);
+
+    /**
+     * 更新商品索引的促销信息
+     *
+     * @param ids       id(skuId)
+     * @param promotion 促销信息
+     * @param key       促销信息的key
+     */
+    void updateEsGoodsIndexPromotions(List<String> ids, BasePromotions promotion, String key);
 
     /**
      * 根据列表更新商品索引的促销信息
@@ -103,7 +121,7 @@ public interface EsGoodsIndexService {
      * @param promotion          促销信息
      * @param key                促销信息的key
      */
-    void updateEsGoodsIndexByList(List<PromotionGoods> promotionGoodsList, BasePromotion promotion, String key);
+    void updateEsGoodsIndexByList(List<PromotionGoods> promotionGoodsList, BasePromotions promotion, String key);
 
     /**
      * 更新全部商品索引的促销信息
@@ -111,7 +129,7 @@ public interface EsGoodsIndexService {
      * @param promotion 促销信息
      * @param key       促销信息的key
      */
-    void updateEsGoodsIndexAllByList(BasePromotion promotion, String key);
+    void updateEsGoodsIndexAllByList(BasePromotions promotion, String key);
 
     /**
      * 删除指定商品的促销信息
@@ -124,10 +142,10 @@ public interface EsGoodsIndexService {
     /**
      * 删除索引中指定的促销活动id的促销活动
      *
-     * @param skuId       商品skuId
+     * @param skuIds      商品skuId
      * @param promotionId 促销活动Id
      */
-    void deleteEsGoodsPromotionByPromotionId(String skuId, String promotionId);
+    void deleteEsGoodsPromotionByPromotionId(List<String> skuIds, String promotionId);
 
     /**
      * 清除所以商品索引的无效促销活动
@@ -160,11 +178,11 @@ public interface EsGoodsIndexService {
     List<String> getPromotionIdByPromotionType(String id, PromotionTypeEnum promotionTypeEnum);
 
     /**
-     * 重置当前商品索引
+     * 获取临时拼装的商品索引
      *
      * @param goodsSku       商品sku信息
      * @param goodsParamDTOS 商品参数
      * @return 商品索引
      */
-    EsGoodsIndex resetEsGoodsIndex(GoodsSku goodsSku, List<GoodsParamsDTO> goodsParamDTOS);
+    EsGoodsIndex getTempEsGoodsIndex(GoodsSku goodsSku, List<GoodsParamsDTO> goodsParamDTOS);
 }

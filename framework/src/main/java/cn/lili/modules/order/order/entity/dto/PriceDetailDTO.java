@@ -170,7 +170,7 @@ public class PriceDetailDTO implements Serializable {
             billPrice = settlementPrice;
         } else {
             //如果是普通订单最终结算金额 = flowPrice - platFormCommission - distributionCommission 流水金额-平台佣金-分销佣金
-            billPrice = CurrencyUtil.sub(CurrencyUtil.sub(flowPrice, platFormCommission), distributionCommission);
+            billPrice = CurrencyUtil.sub(flowPrice, platFormCommission, distributionCommission);
         }
     }
 
@@ -349,12 +349,28 @@ public class PriceDetailDTO implements Serializable {
 
     public void setDiscountPrice(Double discountPrice) {
         this.discountPrice = discountPrice;
+        promotionPriceHandler();
         this.recount();
     }
 
     public void setCouponPrice(Double couponPrice) {
         this.couponPrice = couponPrice;
+        promotionPriceHandler();
         this.recount();
+    }
+
+    /**
+     * 如果促销金额+优惠券金额大于商品金额问题处理
+     */
+    private void promotionPriceHandler() {
+        if (couponPrice == null || discountPrice == null) {
+            return;
+        }
+        //如果订单优惠总额>商品金额，则处理一下数据，使得两数相加<=商品金额
+        if (CurrencyUtil.add(couponPrice, discountPrice) > goodsPrice) {
+            couponPrice = CurrencyUtil.sub(goodsPrice, discountPrice);
+            this.setCouponPrice(couponPrice);
+        }
     }
 
     public void setDistributionCommission(Double distributionCommission) {

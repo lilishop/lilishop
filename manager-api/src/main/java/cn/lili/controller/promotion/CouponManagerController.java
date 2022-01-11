@@ -9,11 +9,11 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.modules.promotion.entity.vos.CouponSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.CouponSearchParams;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -43,14 +43,14 @@ public class CouponManagerController {
     @ApiOperation(value = "获取优惠券列表")
     @GetMapping
     public ResultMessage<IPage<CouponVO>> getCouponList(CouponSearchParams queryParam, PageVO page) {
-        queryParam.setStoreId("platform");
-        return ResultUtil.data(couponService.getCouponsByPageFromMongo(queryParam, page));
+        queryParam.setStoreId(PromotionTools.PLATFORM_ID);
+        return ResultUtil.data(couponService.pageVOFindAll(queryParam, page));
     }
 
     @ApiOperation(value = "获取优惠券详情")
     @GetMapping("/{couponId}")
     public ResultMessage<CouponVO> getCoupon(@PathVariable String couponId) {
-        CouponVO coupon = couponService.getCouponDetailFromMongo(couponId);
+        CouponVO coupon = couponService.getDetail(couponId);
         return ResultUtil.data(coupon);
     }
 
@@ -58,24 +58,24 @@ public class CouponManagerController {
     @PostMapping(consumes = "application/json", produces = "application/json")
     public ResultMessage<CouponVO> addCoupon(@RequestBody CouponVO couponVO) {
         this.setStoreInfo(couponVO);
-        couponService.add(couponVO);
+        couponService.savePromotions(couponVO);
         return ResultUtil.data(couponVO);
     }
 
     @ApiOperation(value = "修改优惠券")
     @PutMapping(consumes = "application/json", produces = "application/json")
     public ResultMessage<Coupon> updateCoupon(@RequestBody CouponVO couponVO) {
+        this.setStoreInfo(couponVO);
         Coupon coupon = couponService.getById(couponVO.getId());
-        couponVO.setPromotionStatus(PromotionStatusEnum.NEW.name());
-        couponService.updateCoupon(couponVO);
+        couponService.updatePromotions(couponVO);
         return ResultUtil.data(coupon);
     }
 
     @ApiOperation(value = "修改优惠券状态")
     @PutMapping("/status")
-    public ResultMessage<Object> updateCouponStatus(String couponIds, String promotionStatus) {
+    public ResultMessage<Object> updateCouponStatus(String couponIds, Long startTime, Long endTime) {
         String[] split = couponIds.split(",");
-        if (couponService.updateCouponStatus(Arrays.asList(split), PromotionStatusEnum.valueOf(promotionStatus))) {
+        if (couponService.updateStatus(Arrays.asList(split), startTime, endTime)) {
             return ResultUtil.success(ResultCode.COUPON_EDIT_STATUS_SUCCESS);
         }
         throw new ServiceException(ResultCode.COUPON_EDIT_STATUS_ERROR);
@@ -84,9 +84,7 @@ public class CouponManagerController {
     @ApiOperation(value = "批量删除")
     @DeleteMapping(value = "/{ids}")
     public ResultMessage<Object> delAllByIds(@PathVariable List<String> ids) {
-        for (String id : ids) {
-            couponService.deleteCoupon(id);
-        }
+        couponService.removePromotions(ids);
         return ResultUtil.success();
     }
 
@@ -114,8 +112,8 @@ public class CouponManagerController {
         if (currentUser == null) {
             throw new ServiceException(ResultCode.USER_NOT_EXIST);
         }
-        couponVO.setStoreId("platform");
-        couponVO.setStoreName("platform");
+        couponVO.setStoreId(PromotionTools.PLATFORM_ID);
+        couponVO.setStoreName(PromotionTools.PLATFORM_NAME);
     }
 
 }

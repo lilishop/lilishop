@@ -1,6 +1,9 @@
 package cn.lili.modules.order.cart.render.impl;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
@@ -9,14 +12,14 @@ import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
-import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
-import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
-import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
-import cn.lili.modules.promotion.service.PointsGoodsService;
+import cn.lili.modules.promotion.entity.dos.KanjiaActivityGoods;
+import cn.lili.modules.promotion.entity.dos.PointsGoods;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * 佣金计算
@@ -33,16 +36,6 @@ public class CommissionRender implements CartRenderStep {
      */
     @Autowired
     private CategoryService categoryService;
-    /**
-     * 积分商品
-     */
-    @Autowired
-    private PointsGoodsService pointsGoodsService;
-    /**
-     * 砍价商品
-     */
-    @Autowired
-    private KanjiaActivityGoodsService kanjiaActivityGoodsService;
 
     @Override
     public RenderStepEnums step() {
@@ -72,20 +65,28 @@ public class CommissionRender implements CartRenderStep {
                 //平台佣金根据分类计算
                 String categoryId = cartSkuVO.getGoodsSku().getCategoryPath()
                         .substring(cartSkuVO.getGoodsSku().getCategoryPath().lastIndexOf(",") + 1);
-                if (StrUtil.isNotEmpty(categoryId)) {
+                if (CharSequenceUtil.isNotEmpty(categoryId)) {
                     Double commissionRate = categoryService.getById(categoryId).getCommissionRate();
                     priceDetailDTO.setPlatFormCommissionPoint(commissionRate);
                 }
 
                 //如果积分订单 积分订单，单独操作订单结算金额和商家结算字段
-                if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.POINTS)) {
-                    PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsVOByMongo(cartSkuVO.getGoodsSku().getId());
-                    priceDetailDTO.setSettlementPrice(pointsGoodsVO.getSettlementPrice());
+                if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.POINTS) && tradeDTO.getSkuList().get(0).getPromotionMap() != null && !tradeDTO.getSkuList().get(0).getPromotionMap().isEmpty()) {
+                    Optional<Map.Entry<String, Object>> pointsPromotions = tradeDTO.getSkuList().get(0).getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.POINTS_GOODS.name())).findFirst();
+                    if (pointsPromotions.isPresent()) {
+                        JSONObject promotionsObj = JSONUtil.parseObj(pointsPromotions.get().getValue());
+                        PointsGoods pointsGoods = JSONUtil.toBean(promotionsObj, PointsGoods.class);
+                        priceDetailDTO.setSettlementPrice(pointsGoods.getSettlementPrice());
+                    }
                 }
                 //如果砍价订单 计算金额，单独操作订单结算金额和商家结算字段
-                else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.KANJIA)) {
-                    KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO = kanjiaActivityGoodsService.getKanJiaGoodsBySku(cartSkuVO.getGoodsSku().getId());
-                    priceDetailDTO.setSettlementPrice(kanjiaActivityGoodsDTO.getSettlementPrice());
+                else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.KANJIA) && tradeDTO.getSkuList().get(0).getPromotionMap() != null && !tradeDTO.getSkuList().get(0).getPromotionMap().isEmpty()) {
+                    Optional<Map.Entry<String, Object>> kanjiaPromotions = tradeDTO.getSkuList().get(0).getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.KANJIA.name())).findFirst();
+                    if (kanjiaPromotions.isPresent()) {
+                        JSONObject promotionsObj = JSONUtil.parseObj(kanjiaPromotions.get().getValue());
+                        KanjiaActivityGoods kanjiaActivityGoods = JSONUtil.toBean(promotionsObj, KanjiaActivityGoods.class);
+                        priceDetailDTO.setSettlementPrice(kanjiaActivityGoods.getSettlementPrice());
+                    }
                 }
             }
         }

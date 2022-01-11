@@ -6,9 +6,10 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.promotion.entity.dos.KanjiaActivityGoods;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsOperationDTO;
-import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsParams;
+import cn.lili.modules.promotion.entity.dto.search.KanjiaActivityGoodsParams;
 import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
@@ -23,7 +24,7 @@ import java.util.Arrays;
  * 管理端,促销接口
  *
  * @author qiuqiu
- * @date 2021/7/2
+ * @since 2021/7/2
  **/
 @RestController
 @Api(tags = "管理端,砍价促销接口")
@@ -43,8 +44,8 @@ public class KanJiaActivityGoodsManagerController {
 
     @ApiOperation(value = "获取砍价活动分页")
     @GetMapping
-    public ResultMessage<IPage<KanjiaActivityGoodsDTO>> getKanJiaActivityPage(KanjiaActivityGoodsParams KanJiaActivityParams, PageVO page) {
-        return ResultUtil.data(kanJiaActivityGoodsService.getForPage(KanJiaActivityParams, page));
+    public ResultMessage<IPage<KanjiaActivityGoods>> getKanJiaActivityPage(KanjiaActivityGoodsParams kanJiaParams, PageVO page) {
+        return ResultUtil.data(kanJiaActivityGoodsService.pageFindAll(kanJiaParams, page));
     }
 
 
@@ -59,7 +60,9 @@ public class KanJiaActivityGoodsManagerController {
     @PutMapping
     @ApiOperation(value = "修改砍价商品")
     public ResultMessage<Object> updatePointsGoods(@RequestBody KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO) {
-        kanJiaActivityGoodsService.updateKanjiaActivityGoods(kanJiaActivityGoodsDTO);
+        if (!kanJiaActivityGoodsService.updateKanjiaActivityGoods(kanJiaActivityGoodsDTO)) {
+            return ResultUtil.error(ResultCode.KANJIA_GOODS_UPDATE_ERROR);
+        }
         return ResultUtil.success();
     }
 
@@ -67,7 +70,7 @@ public class KanJiaActivityGoodsManagerController {
     @DeleteMapping("/{ids}")
     @ApiOperation(value = "删除砍价商品")
     public ResultMessage<Object> delete(@PathVariable String ids) {
-        if (kanJiaActivityGoodsService.deleteKanJiaGoods(Arrays.asList(ids.split(",")))) {
+        if (kanJiaActivityGoodsService.removePromotions(Arrays.asList(ids.split(",")))) {
             return ResultUtil.success();
         }
         throw new ServiceException(ResultCode.KANJIA_GOODS_DELETE_ERROR);

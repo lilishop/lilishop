@@ -13,4 +13,9 @@ public class EsSuffix {
      */
     public static final String GOODS_INDEX_NAME = "goods";
 
+    /**
+     * 日志索引后缀
+     */
+    public static final String LOGS_INDEX_NAME = "logs";
+
 }

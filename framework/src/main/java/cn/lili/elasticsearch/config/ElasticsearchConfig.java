@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
@@ -56,16 +57,21 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
                             .setDefaultCredentialsProvider(credential)
                             .setKeepAliveStrategy(getConnectionKeepAliveStrategy())
                             .setMaxConnPerRoute(10)
-                            .setDefaultIOReactorConfig(IOReactorConfig.custom().setIoThreadCount(1).build()));
+                            .setDefaultIOReactorConfig(IOReactorConfig.custom().setIoThreadCount(Runtime.getRuntime().availableProcessors()).build()));
         }
 
         restBuilder.setRequestConfigCallback(requestConfigBuilder ->
                 requestConfigBuilder.setConnectTimeout(1000) //time until a connection with the server is established.
                         .setSocketTimeout(12 * 1000) //time of inactivity to wait for packets[data] to receive.
-                        .setConnectionRequestTimeout(2 * 1000)); //time to fetch a connection from the connection pool 0 for infinite.
+                        .setConnectionRequestTimeout(-1)); //time to fetch a connection from the connection pool 0 for infinite.
 
         client = new RestHighLevelClient(restBuilder);
         return client;
+    }
+
+    @Bean("elasticsearchRestTemplate")
+    public ElasticsearchRestTemplate elasticsearchRestTemplate() {
+        return new ElasticsearchRestTemplate(this.client);
     }
 
     private HttpHost[] getHttpHosts() {

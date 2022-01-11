@@ -1,7 +1,5 @@
 package cn.lili.modules.goods.serviceimpl;
 
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONUtil;
@@ -24,11 +22,15 @@ import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.mapper.GoodsMapper;
-import cn.lili.modules.goods.service.*;
+import cn.lili.modules.goods.service.CategoryService;
+import cn.lili.modules.goods.service.GoodsGalleryService;
+import cn.lili.modules.goods.service.GoodsService;
+import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
 import cn.lili.modules.store.entity.dos.FreightTemplate;
+import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.service.FreightTemplateService;
 import cn.lili.modules.store.service.StoreService;
@@ -42,6 +44,7 @@ import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -51,10 +54,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 商品业务层实现
@@ -107,11 +107,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
      */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    /**
-     * 分类-参数
-     */
-    @Autowired
-    private CategoryParameterGroupService categoryParameterGroupService;
 
     @Autowired
     private FreightTemplateService freightTemplateService;
@@ -121,8 +116,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     public List<Goods> getByBrandIds(List<String> brandIds) {
-        LambdaQueryWrapper<Goods> lambdaQueryWrapper = new LambdaQueryWrapper<Goods> ();
-        lambdaQueryWrapper.in(Goods::getBrandId,brandIds);
+        LambdaQueryWrapper<Goods> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.in(Goods::getBrandId, brandIds);
         return list(lambdaQueryWrapper);
     }
 
@@ -149,7 +144,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
-    public final Integer getGoodsCountByCategory(String categoryId) {
+    public final long getGoodsCountByCategory(String categoryId) {
         QueryWrapper<Goods> queryWrapper = Wrappers.query();
         queryWrapper.like("category_path", categoryId);
         queryWrapper.eq("delete_flag", false);
@@ -199,6 +194,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (goodsOperationDTO.getGoodsGalleryList() != null && !goodsOperationDTO.getGoodsGalleryList().isEmpty()) {
             this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
         }
+        if (GoodsAuthEnum.TOBEAUDITED.name().equals(goods.getAuthFlag())) {
+            this.deleteEsGoods(Collections.singletonList(goodsId));
+        }
         cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
     }
 
@@ -246,7 +244,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (CharSequenceUtil.isNotEmpty(goods.getParams())) {
             goodsVO.setGoodsParamsDTOList(JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class));
         }
-
+        cache.put(CachePrefix.GOODS.getPrefix() + goodsId, goodsVO);
         return goodsVO;
     }
 
@@ -255,12 +253,23 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         return this.page(PageUtil.initPage(goodsSearchParams), goodsSearchParams.queryWrapper());
     }
 
+    /**
+     * 商品查询
+     *
+     * @param goodsSearchParams 查询参数
+     * @return 商品信息
+     */
+    @Override
+    public List<Goods> queryListByParams(GoodsSearchParams goodsSearchParams) {
+        return this.list(goodsSearchParams.queryWrapper());
+    }
+
     @Override
     public boolean auditGoods(List<String> goodsIds, GoodsAuthEnum goodsAuthEnum) {
         boolean result = false;
         for (String goodsId : goodsIds) {
             Goods goods = this.checkExist(goodsId);
-            goods.setIsAuth(goodsAuthEnum.name());
+            goods.setAuthFlag(goodsAuthEnum.name());
             result = this.updateById(goods);
             goodsSkuService.updateGoodsSkuStatus(goods);
             //删除之前的缓存
@@ -271,33 +280,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goods), RocketmqSendCallbackBuilder.commonCallback());
         }
         return result;
-    }
-
-    @Override
-    public Integer goodsNum(GoodsStatusEnum goodsStatusEnum, GoodsAuthEnum goodsAuthEnum) {
-        LambdaQueryWrapper<Goods> queryWrapper = Wrappers.lambdaQuery();
-
-        queryWrapper.eq(Goods::getDeleteFlag, false);
-
-        if (goodsStatusEnum != null) {
-            queryWrapper.eq(Goods::getMarketEnable, goodsStatusEnum.name());
-        }
-        if (goodsAuthEnum != null) {
-            queryWrapper.eq(Goods::getIsAuth, goodsAuthEnum.name());
-        }
-        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        queryWrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.STORE.name()),
-                Goods::getStoreId, currentUser.getStoreId());
-
-        return this.count(queryWrapper);
-    }
-
-    @Override
-    public Integer todayUpperNum() {
-        LambdaQueryWrapper<Goods> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name());
-        queryWrapper.ge(Goods::getCreateTime, DateUtil.beginOfDay(new DateTime()));
-        return this.count(queryWrapper);
     }
 
     @Override
@@ -322,6 +304,41 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         for (Goods goods : goodsList) {
             goodsSkuService.updateGoodsSkuStatus(goods);
         }
+
+        if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
+            this.deleteEsGoods(goodsIds);
+        }
+        return result;
+    }
+
+    @Override
+    public Boolean managerUpdateGoodsMarketAble(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, String underReason) {
+        boolean result;
+
+        //如果商品为空，直接返回
+        if (goodsIds == null || goodsIds.isEmpty()) {
+            return true;
+        }
+
+        //检测管理员权限
+        this.checkManagerAuthority();
+
+        LambdaUpdateWrapper<Goods> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(Goods::getMarketEnable, goodsStatusEnum.name());
+        updateWrapper.set(Goods::getUnderMessage, underReason);
+        updateWrapper.in(Goods::getId, goodsIds);
+        result = this.update(updateWrapper);
+
+        //修改规格商品
+        LambdaQueryWrapper<Goods> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Goods::getId, goodsIds);
+        List<Goods> goodsList = this.list(queryWrapper);
+        for (Goods goods : goodsList) {
+            goodsSkuService.updateGoodsSkuStatus(goods);
+        }
+        if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
+            this.deleteEsGoods(goodsIds);
+        }
         return result;
     }
 
@@ -341,11 +358,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         for (Goods goods : goodsList) {
             //修改SKU状态
             goodsSkuService.updateGoodsSkuStatus(goods);
-            //商品删除消息
-            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_DELETE.name();
-            //发送mq消息
-            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goods), RocketmqSendCallbackBuilder.commonCallback());
         }
+
+        this.deleteEsGoods(goodsIds);
 
         return true;
     }
@@ -389,11 +404,56 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         goodEvaluationQueryWrapper.eq(MemberEvaluation::getId, goodsId);
         goodEvaluationQueryWrapper.eq(MemberEvaluation::getGrade, EvaluationGradeEnum.GOOD.name());
         //好评数量
-        int highPraiseNum = memberEvaluationService.count(goodEvaluationQueryWrapper);
+        long highPraiseNum = memberEvaluationService.count(goodEvaluationQueryWrapper);
         //好评率
         double grade = NumberUtil.mul(NumberUtil.div(highPraiseNum, goods.getCommentNum().doubleValue(), 2), 100);
         goods.setGrade(grade);
         this.updateById(goods);
+    }
+
+    /**
+     * 更新商品的购买数量
+     *
+     * @param goodsId  商品ID
+     * @param buyCount 购买数量
+     */
+    @Override
+    public void updateGoodsBuyCount(String goodsId, int buyCount) {
+        this.update(new LambdaUpdateWrapper<Goods>()
+                .eq(Goods::getId, goodsId)
+                .set(Goods::getBuyCount, buyCount));
+    }
+
+    @Override
+    public void updateStoreDetail(Store store) {
+        UpdateWrapper updateWrapper = new UpdateWrapper<>()
+                .eq("store_id", store.getId())
+                .set("store_name", store.getStoreName())
+                .set("self_operated", store.getSelfOperated());
+        this.update(updateWrapper);
+        goodsSkuService.update(updateWrapper);
+    }
+
+    @Override
+    public long countStoreGoodsNum(String storeId) {
+        return this.count(
+                new LambdaQueryWrapper<Goods>()
+                        .eq(Goods::getStoreId, storeId)
+                        .eq(Goods::getAuthFlag, GoodsAuthEnum.PASS.name())
+                        .eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name()));
+    }
+
+
+    /**
+     * 发送删除es索引的信息
+     *
+     * @param goodsIds 商品id
+     */
+    private void deleteEsGoods(List<String> goodsIds) {
+        //商品删除消息
+        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_DELETE.name();
+        //发送mq消息
+        rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goodsIds), RocketmqSendCallbackBuilder.commonCallback());
     }
 
     /**
@@ -453,7 +513,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         Setting setting = settingService.get(SettingEnum.GOODS_SETTING.name());
         GoodsSetting goodsSetting = JSONUtil.toBean(setting.getSettingValue(), GoodsSetting.class);
         //是否需要审核
-        goods.setIsAuth(Boolean.TRUE.equals(goodsSetting.getGoodsCheck()) ? GoodsAuthEnum.TOBEAUDITED.name() : GoodsAuthEnum.PASS.name());
+        goods.setAuthFlag(Boolean.TRUE.equals(goodsSetting.getGoodsCheck()) ? GoodsAuthEnum.TOBEAUDITED.name() : GoodsAuthEnum.PASS.name());
         //判断当前用户是否为店铺
         if (Objects.requireNonNull(UserContext.getCurrentUser()).getRole().equals(UserEnums.STORE)) {
             StoreVO storeDetail = this.storeService.getStoreDetail();
@@ -471,8 +531,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     /**
      * 判断商品是否存在
      *
-     * @param goodsId
-     * @return
+     * @param goodsId 商品id
+     * @return 商品信息
      */
     private Goods checkExist(String goodsId) {
         Goods goods = getById(goodsId);
@@ -483,20 +543,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         return goods;
     }
 
-    /**
-     * 检查当前登录的店铺
-     *
-     * @return 当前登录的店铺
-     */
-    private AuthUser checkStoreAuthority() {
-        AuthUser currentUser = UserContext.getCurrentUser();
-        if (currentUser == null || (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() == null)) {
-            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
-        } else if (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() != null) {
-            return currentUser;
-        }
-        return null;
-    }
 
     /**
      * 获取UpdateWrapper（检查用户越权）
@@ -510,6 +556,36 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             updateWrapper.eq(Goods::getStoreId, authUser.getStoreId());
         }
         return updateWrapper;
+    }
+
+
+    /**
+     * 检查当前登录的店铺
+     *
+     * @return 当前登录的店铺
+     */
+    private AuthUser checkStoreAuthority() {
+        AuthUser currentUser = UserContext.getCurrentUser();
+        //如果当前会员不为空，且为店铺角色
+        if (currentUser != null && (currentUser.getRole().equals(UserEnums.STORE) && currentUser.getStoreId() != null)) {
+            return currentUser;
+        }
+        return null;
+    }
+
+    /**
+     * 检查当前登录的店铺
+     *
+     * @return 当前登录的店铺
+     */
+    private AuthUser checkManagerAuthority() {
+        AuthUser currentUser = UserContext.getCurrentUser();
+        //如果当前会员不为空，且为店铺角色
+        if (currentUser != null && (currentUser.getRole().equals(UserEnums.MANAGER))) {
+            return currentUser;
+        } else {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        }
     }
 
     /**

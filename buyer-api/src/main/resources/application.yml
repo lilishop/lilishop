@@ -43,16 +43,6 @@ spring:
       #关闭jackson 对json做解析
       fail-on-empty-beans: false
 
-  # mongodb
-  data:
-    mongodb:
-      uri: 127.0.0.1:27017
-      database: lilishop
-      username: root
-      password: lilishop
-      authentication-database: admin
-  #      replica-set-name: mongoreplset
-
   # Redis
   redis:
     host: 127.0.0.1
@@ -189,7 +179,6 @@ logging:
     cn.lili: debug
     org.hibernate: debug
 #    org.springframework: debug
-  #    org.springframework.data.mongodb.core: debug
   file:
     # 指定路径
     path: lili-logs

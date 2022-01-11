@@ -13,7 +13,7 @@ import lombok.Data;
 public class StoreIndexStatisticsVO {
 
     @ApiModelProperty(value = "商品总数量")
-    private Integer goodsNum;
+    private Long goodsNum;
     @ApiModelProperty(value = "订单总数量")
     private Integer orderNum;
     @ApiModelProperty(value = "订单总额")
@@ -22,30 +22,30 @@ public class StoreIndexStatisticsVO {
     private Integer storeUV;
 
     @ApiModelProperty(value = "待付款订单数量")
-    private Integer unPaidOrder;
+    private Long unPaidOrder;
     @ApiModelProperty(value = "待发货订单数量")
-    private Integer unDeliveredOrder;
+    private Long unDeliveredOrder;
     @ApiModelProperty(value = "待收货订单数量")
-    private Integer deliveredOrder;
+    private Long deliveredOrder;
 
     @ApiModelProperty(value = "待处理退货数量")
-    private Integer returnGoods;
+    private Long returnGoods;
     @ApiModelProperty(value = "待处理退款数量")
-    private Integer returnMoney;
+    private Long returnMoney;
     @ApiModelProperty(value = "待回复评价数量")
-    private Integer memberEvaluation;
+    private Long memberEvaluation;
     @ApiModelProperty(value = "待处理交易投诉数量")
-    private Integer complaint;
+    private Long complaint;
 
     @ApiModelProperty(value = "待上架商品数量")
-    private Integer waitUpper;
+    private Long waitUpper;
     @ApiModelProperty(value = "待审核商品数量")
-    private Integer waitAuth;
+    private Long waitAuth;
 
     @ApiModelProperty(value = "可参与秒杀活动数量")
-    private Integer seckillNum;
+    private Long seckillNum;
     @ApiModelProperty(value = "未对账结算单数量")
-    private Integer waitPayBill;
+    private Long waitPayBill;
 
 
 }

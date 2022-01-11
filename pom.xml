@@ -23,12 +23,12 @@
         <images-version>1</images-version>
         <alipay-sdk-version>4.13.40.ALL</alipay-sdk-version>
         <mysql-connector-version>5.1.48</mysql-connector-version>
-        <mybatis-plus-version>3.3.1.tmp</mybatis-plus-version>
-        <Hutool-version>5.5.8</Hutool-version>
+        <mybatis-plus-version>3.4.3.4</mybatis-plus-version>
+        <Hutool-version>5.7.16</Hutool-version>
         <TinyPinyin-verions>2.0.3.RELEASE</TinyPinyin-verions>
         <jasypt-version>3.0.0</jasypt-version>
         <neetl-version>2.9.10</neetl-version>
-        <lombok-version>1.18.20</lombok-version>
+        <lombok-version>1.18.22</lombok-version>
         <aliyun-version>4.5.18</aliyun-version>
         <aliyun-sdk-oss-version>3.11.1</aliyun-sdk-oss-version>
         <aliyun-sdk-dysms-version>2.0.1</aliyun-sdk-dysms-version>

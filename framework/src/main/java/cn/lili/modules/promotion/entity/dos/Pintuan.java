@@ -1,6 +1,5 @@
 package cn.lili.modules.promotion.entity.dos;
 
-import cn.lili.modules.promotion.entity.dto.BasePromotion;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -19,7 +18,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @TableName("li_pintuan")
 @ApiModel(value = "拼团")
-public class Pintuan extends BasePromotion {
+public class Pintuan extends BasePromotions {
 
 
     private static final long serialVersionUID = -8465716592648602604L;

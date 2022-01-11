@@ -1,9 +1,11 @@
 package cn.lili.modules.store.service;
 
+import cn.hutool.core.date.DateTime;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.store.entity.dto.StoreSettingDTO;
+import cn.lili.modules.store.entity.dto.StoreSettlementDay;
 import cn.lili.modules.store.entity.vos.StoreBasicInfoVO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
 import cn.lili.modules.store.entity.vos.StoreManagementCategoryVO;
@@ -113,4 +115,27 @@ public interface StoreDetailService extends IService<StoreDetail> {
      * @param store 店铺信息
      */
     void updateStoreGoodsInfo(Store store);
+
+    /**
+     * 修改店铺udesk字段设置
+     *
+     * @param merchantEuid 店铺客服信息
+     */
+    Boolean editMerchantEuid(String merchantEuid);
+
+    /**
+     * 获取待结算店铺列表
+     *
+     * @param day 结算日
+     * @return 待结算店铺列表
+     */
+    List<StoreSettlementDay> getSettlementStore(int day);
+
+    /**
+     * 修改店铺的结算日
+     *
+     * @param storeId  店铺ID
+     * @param dateTime 结算日
+     */
+    void updateSettlementDay(String storeId, DateTime dateTime);
 }

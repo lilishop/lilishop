@@ -1,9 +1,11 @@
 package cn.lili.modules.search.entity.dos;
 
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.elasticsearch.EsSuffix;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -225,7 +227,7 @@ public class EsGoodsIndex implements Serializable {
      */
     @Field(type = FieldType.Text)
     @ApiModelProperty("审核状态")
-    private String isAuth;
+    private String authFlag;
 
     /**
      * 卖点
@@ -259,9 +261,6 @@ public class EsGoodsIndex implements Serializable {
     @ApiModelProperty(value = "商品类型", required = true)
     private String goodsType;
 
-    /**
-     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
-     */
     @ApiModelProperty(value = "商品sku基础分数", required = true)
     private Integer skuSource;
 
@@ -279,8 +278,8 @@ public class EsGoodsIndex implements Serializable {
      * value 为 促销活动实体信息
      */
     @Field(type = FieldType.Nested)
-    @ApiModelProperty("商品促销活动集合，key 为 促销活动类型，value 为 促销活动实体信息 ")
-    private Map<String, Object> promotionMap;
+    @ApiModelProperty("商品促销活动集合JSON，key 为 促销活动类型，value 为 促销活动实体信息 ")
+    private String promotionMapJson;
 
 
     public EsGoodsIndex(GoodsSku sku) {
@@ -305,10 +304,11 @@ public class EsGoodsIndex implements Serializable {
             this.selfOperated = sku.getSelfOperated();
             this.salesModel = sku.getSalesModel();
             this.marketEnable = sku.getMarketEnable();
-            this.isAuth = sku.getIsAuth();
+            this.authFlag = sku.getAuthFlag();
             this.intro = sku.getIntro();
             this.grade = sku.getGrade();
             this.recommend = sku.getRecommend();
+            this.goodsType = sku.getGoodsType();
             this.releaseTime = new Date();
         }
     }
@@ -371,10 +371,14 @@ public class EsGoodsIndex implements Serializable {
             this.selfOperated = sku.getSelfOperated();
             this.salesModel = sku.getSalesModel();
             this.marketEnable = sku.getMarketEnable();
-            this.isAuth = sku.getIsAuth();
+            this.authFlag = sku.getAuthFlag();
             this.intro = sku.getIntro();
             this.grade = sku.getGrade();
             this.releaseTime = new Date();
         }
+    }
+
+    public Map<String, Object> getPromotionMap() {
+        return PromotionTools.filterInvalidPromotionsMap(JSONUtil.parseObj(this.promotionMapJson));
     }
 }

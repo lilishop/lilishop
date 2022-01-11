@@ -1,6 +1,5 @@
 package cn.lili.modules.order.order.service;
 
-import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
@@ -9,8 +8,9 @@ import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
-import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
+import cn.lili.modules.order.order.entity.vo.PaymentLog;
 import cn.lili.modules.system.entity.vo.Traces;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,6 +50,46 @@ public interface OrderService extends IService<Order> {
      * @return 简短订单分页
      */
     IPage<OrderSimpleVO> queryByParams(OrderSearchParams orderSearchParams);
+
+    /**
+     * 订单信息
+     *
+     * @param orderSearchParams 查询参数
+     * @return 订单信息
+     */
+    List<Order> queryListByParams(OrderSearchParams orderSearchParams);
+
+    /**
+     * 根据促销查询订单
+     *
+     * @param orderPromotionType 订单类型
+     * @param payStatus 支付状态
+     * @param parentOrderSn 依赖订单编号
+     * @param orderSn 订单编号
+     * @return 订单信息
+     */
+    List<Order> queryListByPromotion(String orderPromotionType, String payStatus, String parentOrderSn, String orderSn);
+
+    /**
+     * 根据促销查询订单
+     *
+     * @param orderPromotionType 订单类型
+     * @param payStatus 支付状态
+     * @param parentOrderSn 依赖订单编号
+     * @param orderSn 订单编号
+     * @return 订单信息
+     */
+    long queryCountByPromotion(String orderPromotionType, String payStatus, String parentOrderSn, String orderSn);
+
+    /**
+     * 父级拼团订单分组
+     *
+     * @param pintuanId 拼团id
+     * @return 拼团订单信息
+     */
+    List<Order> queryListByPromotion(String pintuanId);
+
+
 
     /**
      * 查询导出订单列表
@@ -187,16 +227,6 @@ public interface OrderService extends IService<Order> {
     void deleteOrder(String sn);
 
     /**
-     * 获取统计的订单
-     *
-     * @param statisticsQueryParam
-     * @param pageVO
-     * @return
-     */
-    IPage<OrderSimpleVO> getStatistics(StatisticsQueryParam statisticsQueryParam, PageVO pageVO);
-
-
-    /**
      * 开具发票
      *
      * @param sn 订单sn
@@ -235,4 +265,23 @@ public interface OrderService extends IService<Order> {
      * @return 金额
      */
     Double getPaymentTotal(String orderSn);
+
+    /**
+     * 查询订单支付记录
+     *
+     * @param page         分页
+     * @param queryWrapper 查询条件
+     * @return 订单支付记录分页
+     */
+    IPage<PaymentLog> queryPaymentLogs(IPage<PaymentLog> page, Wrapper<PaymentLog> queryWrapper);
+
+    /**
+     * 检查是否开始虚拟成团
+     *
+     * @param pintuanId 拼团活动id
+     * @param requiredNum 成团人数
+     * @param fictitious 是否开启成团
+     * @return 是否成功
+     */
+    boolean checkFictitiousOrder(String pintuanId, Integer requiredNum, Boolean fictitious);
 }

@@ -1,5 +1,6 @@
 package cn.lili.controller.passport;
 
+import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -9,7 +10,6 @@ import cn.lili.modules.member.entity.dto.MemberAddDTO;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
 import cn.lili.modules.member.entity.vo.MemberVO;
 import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.system.aspect.annotation.DemoSite;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -78,7 +78,7 @@ public class MemberManagerController {
 
     @ApiOperation(value = "根据条件查询会员总数")
     @GetMapping("/num")
-    public ResultMessage<Integer> getByPage(MemberSearchVO memberSearchVO) {
+    public ResultMessage<Long> getByPage(MemberSearchVO memberSearchVO) {
         return ResultUtil.data(memberService.getMemberNum(memberSearchVO));
     }
 

@@ -1,12 +1,12 @@
 package cn.lili.modules.promotion.entity.dos;
 
-import cn.lili.modules.promotion.entity.dto.BasePromotion;
 import cn.lili.modules.promotion.entity.enums.CouponActivitySendTypeEnum;
 import cn.lili.modules.promotion.entity.enums.CouponActivityTypeEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
 
@@ -16,10 +16,11 @@ import javax.validation.constraints.NotNull;
  * @author Bulbasaur
  * @since 2020-03-19 10:44 上午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("li_coupon_activity")
 @ApiModel(value = "优惠券活动实体类")
-public class CouponActivity extends BasePromotion {
+public class CouponActivity extends BasePromotions {
 
     /**
      * @see CouponActivityTypeEnum

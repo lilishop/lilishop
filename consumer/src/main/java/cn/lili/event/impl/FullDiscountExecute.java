@@ -26,7 +26,7 @@ import cn.lili.modules.order.trade.entity.dos.OrderLog;
 import cn.lili.modules.order.trade.service.OrderLogService;
 import cn.lili.modules.promotion.service.MemberCouponService;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.rocketmq.tags.MqOrderTagsEnum;
+import cn.lili.rocketmq.tags.OrderTagsEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +82,7 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
                     if ((cartVO.getGiftList() != null && !cartVO.getGiftList().isEmpty())
                             || (cartVO.getGiftPoint() != null && cartVO.getGiftPoint() > 0)
                             || (cartVO.getGiftCouponList() != null && !cartVO.getGiftCouponList().isEmpty())) {
-                        cache.put(CachePrefix.ORDER.getPrefix() + cartVO.getSn(), cartVO);
+                        cache.put(CachePrefix.ORDER.getPrefix() + cartVO.getSn(), JSONUtil.toJsonStr(cartVO));
                     }
                 }
         );
@@ -92,7 +92,7 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
     public void orderChange(OrderMessage orderMessage) {
         if (orderMessage.getNewStatus().equals(OrderStatusEnum.PAID)) {
             log.debug("满减活动，订单状态操作 {}", CachePrefix.ORDER.getPrefix() + orderMessage.getOrderSn());
-            renderGift((CartVO) cache.get(CachePrefix.ORDER.getPrefix() + orderMessage.getOrderSn()), orderMessage);
+            renderGift(JSONUtil.toBean(cache.getString(CachePrefix.ORDER.getPrefix() + orderMessage.getOrderSn()), CartVO.class), orderMessage);
         }
     }
 
@@ -190,7 +190,7 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
         orderMessage.setPaymentMethod(order.getPaymentMethod());
         orderMessage.setNewStatus(OrderStatusEnum.PAID);
 
-        String destination = rocketmqCustomProperties.getOrderTopic() + ":" + MqOrderTagsEnum.STATUS_CHANGE.name();
+        String destination = rocketmqCustomProperties.getOrderTopic() + ":" + OrderTagsEnum.STATUS_CHANGE.name();
         //发送订单变更mq消息
         rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(orderMessage), RocketmqSendCallbackBuilder.commonCallback());
 

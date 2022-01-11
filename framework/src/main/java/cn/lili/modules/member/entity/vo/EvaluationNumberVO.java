@@ -25,5 +25,5 @@ public class EvaluationNumberVO {
     private Integer worse;
 
     @ApiModelProperty(value = "有图数量")
-    private Integer haveImage;
+    private Long haveImage;
 }

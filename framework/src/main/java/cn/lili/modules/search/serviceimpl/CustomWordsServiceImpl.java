@@ -1,20 +1,21 @@
 package cn.lili.modules.search.serviceimpl;
 
+import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.modules.search.entity.dos.CustomWords;
 import cn.lili.modules.search.entity.vo.CustomWordsVO;
 import cn.lili.modules.search.mapper.CustomWordsMapper;
 import cn.lili.modules.search.service.CustomWordsService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -32,14 +33,13 @@ public class CustomWordsServiceImpl extends ServiceImpl<CustomWordsMapper, Custo
 
         HttpServletResponse response = ThreadContextHolder.getHttpResponse();
         StringBuilder builder = new StringBuilder();
-
         if (list != null && !list.isEmpty()) {
             boolean flag = true;
             for (CustomWords customWords : list) {
                 if (flag) {
                     try {
                         response.setHeader("Last-Modified", customWords.getCreateTime().toString());
-                        response.setHeader("ETag", customWords.getUpdateTime().toString());
+                        response.setHeader("ETag", Integer.toString(list.size()));
                     } catch (Exception e) {
                         log.error("自定义分词错误",e);
                     }
@@ -52,7 +52,7 @@ public class CustomWordsServiceImpl extends ServiceImpl<CustomWordsMapper, Custo
             }
         }
 
-        return builder.toString();
+        return new String(builder.toString().getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -63,9 +63,14 @@ public class CustomWordsServiceImpl extends ServiceImpl<CustomWordsMapper, Custo
      */
     @Override
     public boolean addCustomWords(CustomWordsVO customWordsVO) {
-        if (this.existWords(customWordsVO.getName())) {
+        LambdaQueryWrapper<CustomWords> queryWrapper = new LambdaQueryWrapper<CustomWords>().eq(CustomWords::getName, customWordsVO.getName());
+        CustomWords one = this.getOne(queryWrapper, false);
+        if (one != null && one.getDisabled().equals(1)) {
             throw new ServiceException(ResultCode.CUSTOM_WORDS_EXIST_ERROR);
+        } else if (one != null && !one.getDisabled().equals(1)) {
+            this.remove(queryWrapper);
         }
+        customWordsVO.setDisabled(1);
         return this.save(customWordsVO);
     }
 
@@ -113,7 +118,7 @@ public class CustomWordsServiceImpl extends ServiceImpl<CustomWordsMapper, Custo
     @Override
     public boolean existWords(String words) {
         LambdaQueryWrapper<CustomWords> queryWrapper = new LambdaQueryWrapper<CustomWords>().eq(CustomWords::getName, words);
-        int count = count(queryWrapper);
+        long count = count(queryWrapper);
         return count > 0;
     }
 }

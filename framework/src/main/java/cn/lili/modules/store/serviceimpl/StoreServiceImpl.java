@@ -1,7 +1,6 @@
 package cn.lili.modules.store.serviceimpl;
 
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -9,16 +8,10 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.goods.entity.dos.Goods;
-import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
-import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsService;
-import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.Member;
-import cn.lili.modules.member.entity.dos.StoreCollection;
+import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.member.service.StoreCollectionService;
-import cn.lili.modules.page.service.PageDataService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.entity.dto.*;
@@ -63,25 +56,10 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     @Autowired
     private GoodsService goodsService;
     /**
-     * 商品SKU
-     */
-    @Autowired
-    private GoodsSkuService goodsSkuService;
-    /**
      * 店铺详情
      */
     @Autowired
     private StoreDetailService storeDetailService;
-    /**
-     * 页面
-     */
-    @Autowired
-    private PageDataService pageDataService;
-    /**
-     * 店铺收藏
-     */
-    @Autowired
-    private StoreCollectionService storeCollectionService;
 
     @Override
     public IPage<StoreVO> findByConditionPage(StoreSearchParams storeSearchParams, PageVO page) {
@@ -188,8 +166,6 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         }
         if (passed == 0) {
             store.setStoreDisable(StoreStatusEnum.OPEN.value());
-            //添加店铺页面
-            pageDataService.addStorePageData(store.getId());
             //修改会员 表示已有店铺
             Member member = memberService.getById(store.getMemberId());
             member.setHaveStore(true);
@@ -292,34 +268,9 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     }
 
     @Override
-    public Integer auditNum() {
-        LambdaQueryWrapper<Store> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(Store::getStoreDisable, StoreStatusEnum.APPLYING.name());
-        return this.count(queryWrapper);
-    }
-
-    @Override
-    public Integer storeNum() {
-        LambdaQueryWrapper<Store> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(Store::getStoreDisable, StoreStatusEnum.OPEN.name());
-        return this.count(queryWrapper);
-    }
-
-    @Override
-    public Integer todayStoreNum() {
-        LambdaQueryWrapper<Store> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(Store::getStoreDisable, StoreStatusEnum.OPEN.name());
-        queryWrapper.ge(Store::getCreateTime, DateUtil.beginOfDay(new DateTime()));
-        return this.count(queryWrapper);
-    }
-
-    @Override
     public void updateStoreGoodsNum(String storeId) {
         //获取店铺已上架已审核通过商品数量
-        Integer goodsNum = goodsService.count(new LambdaQueryWrapper<Goods>()
-                .eq(Goods::getStoreId, storeId)
-                .eq(Goods::getIsAuth, GoodsAuthEnum.PASS.name())
-                .eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name()));
+        long goodsNum = goodsService.countStoreGoodsNum(storeId);
         //修改店铺商品数量
         this.update(new LambdaUpdateWrapper<Store>()
                 .set(Store::getGoodsNum, goodsNum)
@@ -327,15 +278,8 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     }
 
     @Override
-    public void updateStoreCollectionNum(String goodsId) {
-        String storeId = goodsSkuService.getById(goodsId).getStoreId();
-        //获取店铺收藏数量
-        Integer collectionNum = storeCollectionService.count(new LambdaQueryWrapper<StoreCollection>()
-                .eq(StoreCollection::getStoreId, storeId));
-        //修改店铺收藏数量
-        this.update(new LambdaUpdateWrapper<Store>()
-                .set(Store::getCollectionNum, collectionNum)
-                .eq(Store::getId, storeId));
+    public void updateStoreCollectionNum(CollectionDTO collectionDTO) {
+        baseMapper.updateCollection(collectionDTO.getId(), collectionDTO.getNum());
     }
 
     /**
@@ -344,10 +288,11 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
      * @return 店铺信息
      */
     private Store getStoreByMember() {
-        AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        LambdaQueryWrapper<Store> lambdaQueryWrapper = Wrappers.lambdaQuery();
-        lambdaQueryWrapper.eq(Store::getMemberId, authUser.getId());
-        return this.getOne(lambdaQueryWrapper);
+        LambdaQueryWrapper<Store> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        if (UserContext.getCurrentUser() != null) {
+            lambdaQueryWrapper.eq(Store::getMemberId, UserContext.getCurrentUser().getId());
+        }
+        return this.getOne(lambdaQueryWrapper, false);
     }
 
 }

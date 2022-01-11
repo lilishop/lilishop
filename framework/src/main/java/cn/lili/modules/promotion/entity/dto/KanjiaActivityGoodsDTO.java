@@ -5,6 +5,7 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivityGoods;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -12,8 +13,9 @@ import java.io.Serializable;
  * 砍价活动商品DTO
  *
  * @author qiuqiu
- * @date 2020/8/21
+ * @since 2020/8/21
  **/
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class KanjiaActivityGoodsDTO extends KanjiaActivityGoods implements Serializable {
 

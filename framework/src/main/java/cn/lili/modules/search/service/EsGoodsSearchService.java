@@ -42,6 +42,13 @@ public interface EsGoodsSearchService {
     void setHotWords(HotWordsDTO hotWords);
 
     /**
+     * 删除热门关键词
+     *
+     * @param keywords 热词
+     */
+    void deleteHotWords(String keywords);
+
+    /**
      * 获取筛选器
      *
      * @param goodsSearch 搜索条件
@@ -57,4 +64,12 @@ public interface EsGoodsSearchService {
      * @return ES商品列表
      */
     List<EsGoodsIndex> getEsGoodsBySkuIds(List<String> skuIds);
+
+    /**
+     * 根据id获取商品索引
+     *
+     * @param id 商品skuId
+     * @return 商品索引
+     */
+    EsGoodsIndex getEsGoodsById(String id);
 }

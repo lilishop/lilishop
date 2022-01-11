@@ -21,9 +21,33 @@ public interface DistributionGoodsService extends IService<DistributionGoods> {
      * 根据条件分页查询分销商品信息
      *
      * @param distributionGoodsSearchParams 商品条件
-     * @return
+     * @return 分页分销商品信息
      */
     IPage<DistributionGoodsVO> goodsPage(DistributionGoodsSearchParams distributionGoodsSearchParams);
+
+
+    /**
+     * 根据条件查询分销商品信息列表
+     *
+     * @param distributionGoodsSearchParams 条件
+     * @return 分销商品信息列表
+     */
+    List<DistributionGoods> getDistributionGoodsList(DistributionGoodsSearchParams distributionGoodsSearchParams);
+
+    /**
+     * 根据条件查询分销商品信息
+     *
+     * @param distributionGoodsSearchParams 条件
+     * @return 分销商品信息
+     */
+    DistributionGoods getDistributionGoods(DistributionGoodsSearchParams distributionGoodsSearchParams);
+
+    /**
+     * 根据条件删除分销商品
+     *
+     * @param distributionGoodsSearchParams 条件
+     */
+    boolean deleteDistributionGoods(DistributionGoodsSearchParams distributionGoodsSearchParams);
 
     /**
      * 获取分销商品

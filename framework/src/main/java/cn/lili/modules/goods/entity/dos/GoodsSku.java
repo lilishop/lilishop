@@ -42,7 +42,7 @@ public class GoodsSku extends BaseEntity {
     private String freightTemplateId;
 
     @ApiModelProperty(value = "是否是促销商品")
-    private Boolean isPromotion;
+    private Boolean promotionFlag;
 
     @ApiModelProperty(value = "促销价")
     private Double promotionPrice;
@@ -130,7 +130,7 @@ public class GoodsSku extends BaseEntity {
      * @see GoodsAuthEnum
      */
     @ApiModelProperty(value = "审核状态")
-    private String isAuth;
+    private String authFlag;
 
     @ApiModelProperty(value = "审核信息")
     private String authMessage;

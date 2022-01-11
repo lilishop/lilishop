@@ -1,8 +1,8 @@
 package cn.lili.test.rocketmq;
 
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.rocketmq.tags.MqOrderTagsEnum;
 import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.OrderTagsEnum;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ class MsgExtRocketMqTest {
 
     @Test
     void searchAll() {
-        String destination = rocketmqCustomProperties.getOrderTopic() + ":" + MqOrderTagsEnum.STATUS_CHANGE.name();
+        String destination = rocketmqCustomProperties.getOrderTopic() + ":" + OrderTagsEnum.STATUS_CHANGE.name();
         Message<String> message = MessageBuilder.withPayload("Context").build();
         rocketMQTemplate.asyncSend(destination, message, RocketmqSendCallbackBuilder.commonCallback());
         rocketMQTemplate.send(destination, message);

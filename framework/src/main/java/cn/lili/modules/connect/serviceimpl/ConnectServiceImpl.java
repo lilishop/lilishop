@@ -12,6 +12,7 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.utils.CookieUtil;
+import cn.lili.common.utils.HttpUtils;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
@@ -20,6 +21,7 @@ import cn.lili.modules.connect.entity.enums.ConnectEnum;
 import cn.lili.modules.connect.mapper.ConnectMapper;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.member.entity.dos.Member;
+import cn.lili.modules.member.entity.dto.ConnectQueryDTO;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.member.token.MemberTokenGenerate;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -27,7 +29,6 @@ import cn.lili.modules.system.entity.dto.connect.WechatConnectSetting;
 import cn.lili.modules.system.entity.dto.connect.dto.WechatConnectSettingItem;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
-import cn.lili.modules.system.utils.HttpUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -230,6 +231,16 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         newMember = memberService.findByUsername(newMember.getUsername());
         bindMpMember(openId, unionId, newMember);
         return memberTokenGenerate.createToken(newMember.getUsername(), true);
+    }
+
+    @Override
+    public Connect queryConnect(ConnectQueryDTO connectQueryDTO) {
+
+        LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(StringUtils.isNotEmpty(connectQueryDTO.getUserId()), Connect::getUserId, connectQueryDTO.getUserId())
+                .eq(StringUtils.isNotEmpty(connectQueryDTO.getUnionType()), Connect::getUnionType, connectQueryDTO.getUnionType())
+                .eq(StringUtils.isNotEmpty(connectQueryDTO.getUnionId()), Connect::getUnionId, connectQueryDTO.getUnionId());
+        return this.getOne(queryWrapper);
     }
 
     /**

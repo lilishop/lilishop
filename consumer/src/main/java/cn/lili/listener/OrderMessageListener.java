@@ -2,11 +2,11 @@ package cn.lili.listener;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
-import cn.lili.rocketmq.tags.MqOrderTagsEnum;
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.event.TradeEvent;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
+import cn.lili.rocketmq.tags.OrderTagsEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -58,11 +58,11 @@ public class OrderMessageListener implements RocketMQListener<MessageExt> {
      */
     public void orderStatusEvent(MessageExt messageExt) {
 
-        switch (MqOrderTagsEnum.valueOf(messageExt.getTags())) {
+        switch (OrderTagsEnum.valueOf(messageExt.getTags())) {
             //订单创建
             case ORDER_CREATE:
                 String key = new String(messageExt.getBody());
-                TradeDTO tradeDTO = (TradeDTO) cache.get(key);
+                TradeDTO tradeDTO = JSONUtil.toBean(cache.getString(key), TradeDTO.class);
                 boolean result = true;
                 for (TradeEvent event : tradeEvent) {
                     try {

@@ -1,43 +1,37 @@
 package cn.lili.modules.promotion.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.enums.PromotionTypeEnum;
-import cn.lili.trigger.enums.DelayTypeEnums;
-import cn.lili.trigger.interfaces.TimeTrigger;
-import cn.lili.trigger.message.PromotionMessage;
-import cn.lili.trigger.model.TimeExecuteConstant;
-import cn.lili.trigger.model.TimeTriggerMsg;
-import cn.lili.trigger.util.DelayQueueTools;
 import cn.lili.common.utils.DateUtil;
-import cn.lili.mybatis.util.PageUtil;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
-import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
-import cn.lili.modules.promotion.entity.dos.*;
-import cn.lili.modules.promotion.entity.enums.*;
-import cn.lili.modules.promotion.entity.vos.CouponSearchParams;
+import cn.lili.modules.promotion.entity.dos.Coupon;
+import cn.lili.modules.promotion.entity.dos.FullDiscount;
+import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.dto.search.CouponSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.FullDiscountSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
+import cn.lili.modules.promotion.entity.enums.CouponRangeDayEnum;
+import cn.lili.modules.promotion.entity.enums.CouponTypeEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.mapper.CouponMapper;
 import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.promotion.tools.PromotionTools;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,28 +43,13 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> implements CouponService {
+public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMapper, Coupon> implements CouponService {
 
-    /**
-     * 延时任务
-     */
-    @Autowired
-    private TimeTrigger timeTrigger;
-    /**
-     * Mongo
-     */
-    @Autowired
-    private MongoTemplate mongoTemplate;
     /**
      * 规格商品
      */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    /**
-     * Rocketmq
-     */
-    @Autowired
-    private RocketmqCustomProperties rocketmqCustomProperties;
     /**
      * 促销商品
      */
@@ -92,170 +71,6 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
     @Autowired
     private CouponActivityItemService couponActivityItemService;
 
-    @Override
-    public CouponVO add(CouponVO coupon) {
-        //检查参数
-        this.checkParam(coupon);
-        coupon.setUsedNum(0);
-        coupon.setReceivedNum(0);
-        //保存到MYSQL中
-        this.save(coupon);
-        //如果优惠券类型为部分商品则将促销活动商品更新
-        this.updateScopePromotionGoods(coupon);
-        //保存到MONGO中
-        this.mongoTemplate.save(coupon);
-        //如果优惠券是固定时间则添加延时任务
-        if (coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
-            PromotionMessage promotionMessage = new PromotionMessage(coupon.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), coupon.getStartTime(), coupon.getEndTime());
-            TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                    coupon.getStartTime().getTime(),
-                    promotionMessage,
-                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                    rocketmqCustomProperties.getPromotionTopic());
-            //发送促销活动开始的延时任务
-            this.timeTrigger.addDelay(timeTriggerMsg);
-        }
-
-        return coupon;
-    }
-
-    @Override
-    public CouponVO updateCoupon(CouponVO couponVO) {
-        CouponVO coupon = checkStatus(couponVO.getId());
-        //检查参数
-        this.checkParam(couponVO);
-        //更新到MYSQL中
-        this.updateById(couponVO);
-        //如果优惠券类型为部分商品则将促销活动商品更新
-        this.updateScopePromotionGoods(couponVO);
-        //保存到MONGO中
-        this.mongoTemplate.save(couponVO);
-        PromotionMessage promotionMessage = new PromotionMessage(couponVO.getId(), PromotionTypeEnum.COUPON.name(), PromotionStatusEnum.START.name(), coupon.getStartTime(), coupon.getEndTime());
-        //更新延时任务
-        this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                promotionMessage,
-                coupon.getStartTime().getTime(), couponVO.getStartTime().getTime(),
-                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                DateUtil.getDelayTime(couponVO.getStartTime().getTime()),
-                rocketmqCustomProperties.getPromotionTopic());
-        return couponVO;
-    }
-
-    @Override
-    public boolean updateCouponStatus(List<String> couponId, PromotionStatusEnum promotionStatus) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("id").in(couponId));
-        List<CouponVO> couponVOS = this.mongoTemplate.find(query, CouponVO.class);
-        couponVOS = couponVOS.parallelStream().filter(i -> Boolean.FALSE.equals(i.getDeleteFlag())).collect(Collectors.toList());
-        if (couponVOS.isEmpty()) {
-            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
-        }
-        for (CouponVO couponVO : couponVOS) {
-            if (promotionStatus.name().equals(PromotionStatusEnum.START.name())) {
-                this.checkParam(couponVO);
-            }
-            couponVO.setPromotionStatus(promotionStatus.name());
-            this.updateById(couponVO);
-            this.mongoTemplate.save(couponVO);
-            PromotionMessage promotionMessage = new PromotionMessage(couponVO.getId(), PromotionTypeEnum.COUPON.name(), promotionStatus.name(), couponVO.getStartTime(), couponVO.getEndTime());
-            //更新延时任务
-            this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                    promotionMessage,
-                    couponVO.getStartTime().getTime(), couponVO.getStartTime().getTime(),
-                    DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                    DateUtil.getDelayTime(couponVO.getStartTime().getTime()),
-                    rocketmqCustomProperties.getPromotionTopic());
-        }
-        return true;
-    }
-
-    @Override
-    public boolean deleteCoupon(String id) {
-        CouponVO couponVO = checkStatus(id);
-
-        //更新优惠券状态为关闭，标示删除标志
-        LambdaUpdateWrapper<Coupon> couponUpdateWrapper = new LambdaUpdateWrapper<Coupon>().eq(Coupon::getId, id)
-                .set(Coupon::getPromotionStatus, PromotionStatusEnum.CLOSE.name()).set(Coupon::getDeleteFlag, true);
-        boolean result = this.update(couponUpdateWrapper);
-
-        //更新促销商品记录信息为删除
-        LambdaUpdateWrapper<PromotionGoods> updateWrapper = new LambdaUpdateWrapper<PromotionGoods>()
-                .eq(PromotionGoods::getPromotionId, id)
-                .set(PromotionGoods::getPromotionStatus, PromotionStatusEnum.CLOSE.name())
-                .set(PromotionGoods::getDeleteFlag, true);
-        this.promotionGoodsService.update(updateWrapper);
-
-        //删除mongo优惠券信息
-        LambdaUpdateWrapper<MemberCoupon> memberCouponLambdaUpdateWrapper = new LambdaUpdateWrapper<MemberCoupon>()
-                .eq(MemberCoupon::getCouponId, id)
-                .set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.CLOSED.name());
-        memberCouponService.update(memberCouponLambdaUpdateWrapper);
-        this.mongoTemplate.remove(new Query().addCriteria(Criteria.where("id").is(id)), CouponVO.class);
-
-        //删除优惠券活动关联优惠券
-        couponActivityItemService.remove(new LambdaQueryWrapper<CouponActivityItem>()
-                .eq(CouponActivityItem::getCouponId, id));
-
-        //删除延时任务
-        this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                couponVO.getStartTime().getTime(),
-                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.PROMOTION, (PromotionTypeEnum.COUPON.name() + couponVO.getId())),
-                rocketmqCustomProperties.getPromotionTopic());
-        return result;
-    }
-
-    @Override
-    public IPage<CouponVO> getCouponsByPageFromMongo(CouponSearchParams param, PageVO page) {
-        Query query = param.mongoQuery();
-        IPage<CouponVO> coupons = new Page<>();
-        if (page != null) {
-            page.setNotConvert(true);
-            PromotionTools.mongoQueryPageParam(query, page);
-            coupons.setSize(page.getPageSize());
-            coupons.setCurrent(page.getPageNumber());
-        }
-        List<CouponVO> couponVOList = mongoTemplate.find(query, CouponVO.class);
-        coupons.setRecords(couponVOList);
-        coupons.setTotal(mongoTemplate.count(query, CouponVO.class));
-        return coupons;
-    }
-
-    /**
-     * 根据查询条件从mongo中获取优惠券信息列表
-     *
-     * @param param 查询参数
-     * @param page  分页参数
-     * @return 优惠券信息列表
-     */
-    @Override
-    public IPage<CouponVO> getCanReceiveCoupons(CouponSearchParams param, PageVO page) {
-        Query query = param.mongoQuery();
-        query.addCriteria(Criteria.where("promotionStatus").is(PromotionStatusEnum.START.name()));
-        query.addCriteria(Criteria.where("endTime").gte(new Date()));
-        IPage<CouponVO> coupons = new Page<>();
-        if (page != null) {
-            page.setNotConvert(true);
-            PromotionTools.mongoQueryPageParam(query, page);
-            coupons.setSize(page.getPageSize());
-            coupons.setCurrent(page.getPageNumber());
-        }
-        List<CouponVO> couponVOList = mongoTemplate.find(query, CouponVO.class);
-        coupons.setRecords(couponVOList);
-        coupons.setTotal(mongoTemplate.count(query, CouponVO.class));
-        return coupons;
-    }
-
-    @Override
-    public CouponVO getCouponDetailFromMongo(String id) {
-        return mongoTemplate.findById(id, CouponVO.class);
-    }
-
-    @Override
-    public IPage<Coupon> getCouponsByPage(CouponSearchParams param, PageVO page) {
-        QueryWrapper<Coupon> queryWrapper = param.wrapper();
-        return page(PageUtil.initPage(page), queryWrapper);
-    }
-
     /**
      * 领取优惠券
      *
@@ -264,13 +79,22 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
      */
     @Override
     public void receiveCoupon(String couponId, Integer receiveNum) {
-        CouponVO couponVO = this.mongoTemplate.findById(couponId, CouponVO.class);
-        couponVO.setReceivedNum(couponVO.getReceivedNum() + receiveNum);
-        LambdaUpdateWrapper<Coupon> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Coupon::getId, couponId);
-        updateWrapper.set(Coupon::getReceivedNum, couponVO.getReceivedNum());
-        this.update(updateWrapper);
-        this.mongoTemplate.save(couponVO);
+        Coupon coupon = this.getById(couponId);
+        if (coupon == null) {
+            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
+        }
+        this.update(new LambdaUpdateWrapper<Coupon>().eq(Coupon::getId, coupon.getId()).set(Coupon::getReceivedNum,
+                coupon.getReceivedNum() + receiveNum));
+    }
+
+    @Override
+    public boolean removePromotions(List<String> ids) {
+        //删除优惠券信息
+        this.memberCouponService.closeMemberCoupon(ids);
+
+        //删除优惠券活动关联优惠券
+        this.couponActivityItemService.removeByCouponId(ids);
+        return super.removePromotions(ids);
     }
 
     /**
@@ -281,51 +105,154 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
      */
     @Override
     public void usedCoupon(String couponId, Integer usedNum) {
-        CouponVO couponVO = this.mongoTemplate.findById(couponId, CouponVO.class);
-        couponVO.setUsedNum(couponVO.getUsedNum() + usedNum);
-        LambdaUpdateWrapper<Coupon> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Coupon::getId, couponId);
-        updateWrapper.set(Coupon::getUsedNum, couponVO.getUsedNum());
-        this.update(updateWrapper);
-        this.mongoTemplate.save(couponVO);
+        Coupon coupon = this.getById(couponId);
+        if (coupon == null) {
+            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
+        }
+
+        this.update(new LambdaUpdateWrapper<Coupon>().eq(Coupon::getId, coupon.getId()).set(Coupon::getUsedNum,
+                coupon.getUsedNum() + usedNum));
     }
 
     /**
-     * 检查优惠券信息是否合法
+     * 获取优惠券展示实体
      *
-     * @param coupon 优惠券信息
+     * @param searchParams 查询参数
+     * @param page         分页参数
+     * @return 优惠券展示实体列表
      */
-    private void checkParam(CouponVO coupon) {
+    @Override
+    public IPage<CouponVO> pageVOFindAll(CouponSearchParams searchParams, PageVO page) {
+        IPage<Coupon> couponIPage = super.pageFindAll(searchParams, page);
+        List<CouponVO> couponVOList = couponIPage.getRecords().stream().map(CouponVO::new).collect(Collectors.toList());
+        return PageUtil.convertPage(couponIPage, couponVOList);
+    }
 
+    /**
+     * 获取优惠券展示详情
+     *
+     * @param couponId 优惠券id
+     * @return 返回优惠券展示详情
+     */
+    @Override
+    public CouponVO getDetail(String couponId) {
+        CouponVO couponVO = new CouponVO(this.getById(couponId));
+        PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
+        searchParams.setPromotionId(couponId);
+        List<PromotionGoods> promotionsByPromotionId = this.promotionGoodsService.listFindAll(searchParams);
+        if (promotionsByPromotionId != null && !promotionsByPromotionId.isEmpty()) {
+            couponVO.setPromotionGoodsList(promotionsByPromotionId);
+        }
+        return couponVO;
+    }
+
+    /**
+     * 更新促销状态
+     * 如果要更新促销状态为关闭，startTime和endTime置为空即可
+     *
+     * @param ids       促销id集合
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 是否更新成功
+     */
+    @Override
+    public boolean updateStatus(List<String> ids, Long startTime, Long endTime) {
+        List<Coupon> list = this.list(new LambdaQueryWrapper<Coupon>().in(Coupon::getId, ids).eq(Coupon::getRangeDayType, CouponRangeDayEnum.DYNAMICTIME.name()));
+        if (!list.isEmpty()) {
+            LambdaUpdateWrapper<Coupon> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.in(Coupon::getId, list.stream().map(Coupon::getId).collect(Collectors.toList()));
+            updateWrapper.set(Coupon::getEffectiveDays, 0);
+            this.update(updateWrapper);
+        }
+
+        return super.updateStatus(ids, startTime, endTime);
+    }
+
+    @Override
+    public void initPromotion(Coupon promotions) {
+        promotions.setUsedNum(0);
+        promotions.setReceivedNum(0);
+    }
+
+    @Override
+    public void checkPromotions(Coupon promotions) {
+        if (promotions.getRangeDayType() == null) {
+            super.checkPromotions(promotions);
+        }
         //优惠券限制领取数量
-        if (coupon.getCouponLimitNum() < 0) {
+        if (promotions.getCouponLimitNum() < 0) {
             throw new ServiceException(ResultCode.COUPON_LIMIT_NUM_LESS_THAN_0);
         }
         //如果发行数量是0则判断领取限制数量
-        if (coupon.getPublishNum() != 0 && coupon.getCouponLimitNum() > coupon.getPublishNum()) {
+        if (promotions.getPublishNum() != 0 && promotions.getCouponLimitNum() > promotions.getPublishNum()) {
             throw new ServiceException(ResultCode.COUPON_LIMIT_GREATER_THAN_PUBLISH);
         }
         //打折优惠券大于10折
-        boolean discountCoupon = (coupon.getCouponType().equals(CouponTypeEnum.DISCOUNT.name())
-                && (coupon.getCouponDiscount() < 0 && coupon.getCouponDiscount() > 10));
+        boolean discountCoupon = (promotions.getCouponType().equals(CouponTypeEnum.DISCOUNT.name())
+                && (promotions.getCouponDiscount() < 0 && promotions.getCouponDiscount() > 10));
         if (discountCoupon) {
             throw new ServiceException(ResultCode.COUPON_DISCOUNT_ERROR);
         }
 
         //优惠券为固定时间类型
-        if (coupon.getRangeDayType() != null && coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
+        if (promotions.getRangeDayType() != null && promotions.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
             long nowTime = DateUtil.getDateline() * 1000;
             //固定时间的优惠券不能小于当前时间
-            if (coupon.getEndTime().getTime() < nowTime) {
+            if (promotions.getEndTime().getTime() < nowTime) {
                 throw new ServiceException(ResultCode.PROMOTION_END_TIME_ERROR);
             }
-            //促销通用时间校验
-            PromotionTools.checkPromotionTime(coupon.getStartTime().getTime(), coupon.getEndTime().getTime());
         }
 
-        this.checkCouponScope(coupon);
-        //对状态的处理.如果未传递状态则需要 根据当前时间来确认优惠券状态
-        this.promotionStatusEmpty(coupon);
+
+        this.checkCouponScope((CouponVO) promotions);
+    }
+
+    @Override
+    public void checkStatus(Coupon promotions) {
+        super.checkStatus(promotions);
+        FullDiscountSearchParams searchParams = new FullDiscountSearchParams();
+        searchParams.setCouponFlag(true);
+        searchParams.setCouponId(promotions.getId());
+        searchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
+        List<FullDiscount> fullDiscounts = fullDiscountService.listFindAll(searchParams);
+        if (fullDiscounts != null && !fullDiscounts.isEmpty()) {
+            throw new ServiceException("当前优惠券参与了促销活动【" + fullDiscounts.get(0).getPromotionName() + "】不能进行编辑删除操作");
+        }
+    }
+
+    @Override
+    public boolean updatePromotionsGoods(Coupon promotions) {
+        boolean result = super.updatePromotionsGoods(promotions);
+        if (!PromotionsStatusEnum.CLOSE.name().equals(promotions.getPromotionStatus()) &&
+                PromotionsScopeTypeEnum.PORTION_GOODS.name().equals(promotions.getScopeType()) &&
+                promotions instanceof CouponVO) {
+            CouponVO couponVO = (CouponVO) promotions;
+            this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(promotions.getId()));
+            List<PromotionGoods> promotionGoodsList = PromotionTools.promotionGoodsInit(couponVO.getPromotionGoodsList(), couponVO, this.getPromotionType());
+            for (PromotionGoods promotionGoods : promotionGoodsList) {
+                promotionGoods.setStoreId(promotions.getStoreId());
+                promotionGoods.setStoreName(promotions.getStoreName());
+            }
+            //促销活动商品更新
+            result = this.promotionGoodsService.saveBatch(promotionGoodsList);
+        }
+        return result;
+    }
+
+    /**
+     * 更新商品索引优惠券信息
+     *
+     * @param promotions 优惠券信息
+     */
+    @Override
+    public void updateEsGoodsIndex(Coupon promotions) {
+        Coupon coupon = JSONUtil.parse(promotions).toBean(Coupon.class);
+        super.updateEsGoodsIndex(coupon);
+    }
+
+    @Override
+    public PromotionTypeEnum getPromotionType() {
+        return PromotionTypeEnum.COUPON;
     }
 
     /**
@@ -334,82 +261,38 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
      * @param coupon 检查的优惠券对象
      */
     private void checkCouponScope(CouponVO coupon) {
-        boolean portionGoodsScope = (coupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS.name())
+        boolean portionGoodsScope = (coupon.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS.name())
                 && (coupon.getPromotionGoodsList() == null || coupon.getPromotionGoodsList().isEmpty()));
         if (portionGoodsScope) {
             throw new ServiceException(ResultCode.COUPON_SCOPE_TYPE_GOODS_ERROR);
-        } else if (coupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS.name()) && CharSequenceUtil.isEmpty(coupon.getScopeId())) {
+        } else if (coupon.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS.name()) && CharSequenceUtil.isEmpty(coupon.getScopeId())) {
             throw new ServiceException(ResultCode.COUPON_SCOPE_TYPE_GOODS_ERROR);
-        } else if (coupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS_CATEGORY.name()) && CharSequenceUtil.isEmpty(coupon.getScopeId())) {
+        } else if (coupon.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name()) && CharSequenceUtil.isEmpty(coupon.getScopeId())) {
             throw new ServiceException(ResultCode.COUPON_SCOPE_TYPE_CATEGORY_ERROR);
-        } else if (coupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_SHOP_CATEGORY.name()) && CharSequenceUtil.isEmpty(coupon.getScopeId())) {
+        } else if (coupon.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_SHOP_CATEGORY.name()) && CharSequenceUtil.isEmpty(coupon.getScopeId())) {
             throw new ServiceException(ResultCode.COUPON_SCOPE_TYPE_STORE_ERROR);
         }
 
-        if (coupon.getScopeType().equals(CouponScopeTypeEnum.PORTION_GOODS.name())) {
-            String[] split = coupon.getScopeId().split(",");
-            if (split.length <= 0) {
-                throw new ServiceException(ResultCode.COUPON_SCOPE_ERROR);
-            }
-            for (String id : split) {
-                GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(id);
-                if (goodsSku == null) {
-                    throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
-                }
-            }
+        if (coupon.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS.name())) {
+            this.checkCouponPortionGoods(coupon);
         }
     }
 
     /**
-     * 对状态的处理.如果未传递状态则需要 根据当前时间来确认优惠券状态
+     * 检查指定商品
      *
-     * @param coupon 优惠券参数
+     * @param coupon 优惠券信息
      */
-    private void promotionStatusEmpty(CouponVO coupon) {
-        if (StringUtils.isEmpty(coupon.getPromotionStatus()) && coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
-            //格式时间
-            long startTme = coupon.getStartTime().getTime() / 1000;
-            long endTime = coupon.getEndTime().getTime() / 1000;
-            //校验时间确定当前优惠券有效期
-            long currentTime = DateUtil.getDateline();
-            //如果未到时间点则为新建
-            if (startTme > currentTime) {
-                coupon.setPromotionStatus(PromotionStatusEnum.NEW.name());
-            }
-            //如果超过结束时间则为结束
-            if (endTime < currentTime) {
-                coupon.setPromotionStatus(PromotionStatusEnum.END.name());
-            }
-            //如果在使用时间内 则是开始状态
-            if (startTme <= currentTime && endTime > currentTime) {
-                coupon.setPromotionStatus(PromotionStatusEnum.START.name());
-            }
+    private void checkCouponPortionGoods(CouponVO coupon) {
+        String[] split = coupon.getScopeId().split(",");
+        if (split.length <= 0) {
+            throw new ServiceException(ResultCode.COUPON_SCOPE_ERROR);
         }
-    }
-
-    /**
-     * 检查优惠券状态是否可进行编辑删除
-     *
-     * @param id 优惠券id
-     * @return 优惠券信息
-     */
-    private CouponVO checkStatus(String id) {
-        CouponVO coupon = this.mongoTemplate.findById(id, CouponVO.class);
-        if (coupon == null) {
-            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
-        }
-        LambdaQueryWrapper<FullDiscount> queryWrapper = new LambdaQueryWrapper<FullDiscount>().eq(FullDiscount::getIsCoupon, true).eq(FullDiscount::getCouponId, id);
-        FullDiscount fullDiscount = fullDiscountService.getOne(queryWrapper);
-        if (fullDiscount != null) {
-            throw new ServiceException("当前优惠券参与了促销活动【" + fullDiscount.getPromotionName() + "】不能进行编辑删除操作");
-        }
-        return coupon;
-    }
-
-    private void updateScopePromotionGoods(CouponVO couponVO) {
-        //如果优惠券类型为部分商品则将促销活动更新至ES中
-        if (CouponScopeTypeEnum.PORTION_GOODS.name().equals(couponVO.getScopeType()) && !couponVO.getPromotionGoodsList().isEmpty()) {
-            PromotionTools.promotionGoodsInit(couponVO.getPromotionGoodsList(), couponVO, PromotionTypeEnum.COUPON);
+        for (String id : split) {
+            GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(id);
+            if (goodsSku == null) {
+                throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+            }
         }
     }
 

@@ -29,15 +29,6 @@ spring:
     admin:
       client:
         url: http://127.0.0.1:8000
-  # mongodb
-  data:
-    mongodb:
-      uri: 127.0.0.1:27017
-      database: lilishop
-      username: root
-      password: lilishop
-      authentication-database: admin
-  #      replica-set-name: mongoreplset
   cache:
     type: redis
   # Redis
@@ -131,6 +122,7 @@ ignored:
     - /manager/user/login
     - /manager/user/refresh/**
     - /manager/elasticsearch
+    - /manager/custom-words
     - /druid/**
     - /swagger-ui.html
     - /doc.html
@@ -173,7 +165,6 @@ logging:
     cn.lili: info
   #    org.hibernate: debug
   #    org.springframework: debug
-  #    org.springframework.data.mongodb.core: debug
   file:
     # 指定路径
     path: lili-logs

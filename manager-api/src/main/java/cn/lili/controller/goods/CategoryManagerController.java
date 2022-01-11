@@ -100,7 +100,7 @@ public class CategoryManagerController {
 
         }
         //查询某商品分类的商品数量
-        Integer count = goodsService.getGoodsCountByCategory(id);
+        long count = goodsService.getGoodsCountByCategory(id);
         if (count > 0) {
             throw new ServiceException(ResultCode.CATEGORY_HAS_GOODS);
         }

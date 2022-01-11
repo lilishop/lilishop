@@ -8,7 +8,7 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.verification.enums.VerificationEnums;
+import cn.lili.modules.verification.entity.enums.VerificationEnums;
 import cn.lili.modules.verification.service.VerificationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;

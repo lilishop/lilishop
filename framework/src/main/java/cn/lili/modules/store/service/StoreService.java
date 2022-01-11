@@ -1,6 +1,7 @@
 package cn.lili.modules.store.service;
 
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dto.*;
 import cn.lili.modules.store.entity.vos.StoreSearchParams;
@@ -21,7 +22,6 @@ public interface StoreService extends IService<Store> {
      * 用于展示店铺列表
      *
      * @param entity
-     * @param page
      * @return
      */
     IPage<StoreVO> findByConditionPage(StoreSearchParams entity, PageVO page);
@@ -101,26 +101,6 @@ public interface StoreService extends IService<Store> {
      */
     boolean applyThirdStep(StoreOtherInfoDTO storeOtherInfoDTO);
 
-    /**
-     * 获取待审核店铺数量
-     *
-     * @return 待审核店铺数量
-     */
-    Integer auditNum();
-
-    /**
-     * 获取所有店铺数量
-     *
-     * @return 店铺总数
-     */
-    Integer storeNum();
-
-    /**
-     * 获取今天的店铺数量
-     *
-     * @return 今天的店铺数量
-     */
-    Integer todayStoreNum();
 
     /**
      * 更新店铺商品数量
@@ -132,7 +112,7 @@ public interface StoreService extends IService<Store> {
     /**
      * 更新店铺收藏数量
      *
-     * @param goodsId 店铺ID
+     * @param collectionDTO 收藏信息
      */
-    void updateStoreCollectionNum(String goodsId);
+    void updateStoreCollectionNum(CollectionDTO collectionDTO);
 }

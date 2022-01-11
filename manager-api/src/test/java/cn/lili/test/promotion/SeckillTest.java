@@ -1,7 +1,7 @@
 package cn.lili.test.promotion;
 
 import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.promotion.entity.enums.PromotionApplyStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsApplyStatusEnum;
 import cn.lili.modules.promotion.entity.vos.SeckillApplyVO;
 import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.service.SeckillService;
@@ -60,7 +60,7 @@ class SeckillTest {
         seckillApplyVO.setSkuId("1387977574860193792");
         seckillApplyVO.setOriginalPrice(4000D);
         seckillApplyVO.setPrice(3600D);
-        seckillApplyVO.setPromotionApplyStatus(PromotionApplyStatusEnum.APPLY.name());
+        seckillApplyVO.setPromotionApplyStatus(PromotionsApplyStatusEnum.APPLY.name());
         seckillApplyVO.setQuantity(1);
         seckillApplyVO.setSalesNum(0);
         seckillApplyVO.setSeckillId("10000");
@@ -73,7 +73,7 @@ class SeckillTest {
         seckillApplyVO.setSkuId("1387977574864388096");
         seckillApplyVO.setOriginalPrice(4000D);
         seckillApplyVO.setPrice(3600D);
-        seckillApplyVO.setPromotionApplyStatus(PromotionApplyStatusEnum.APPLY.name());
+        seckillApplyVO.setPromotionApplyStatus(PromotionsApplyStatusEnum.APPLY.name());
         seckillApplyVO.setQuantity(1);
         seckillApplyVO.setSalesNum(0);
         seckillApplyVO.setSeckillId("10000");

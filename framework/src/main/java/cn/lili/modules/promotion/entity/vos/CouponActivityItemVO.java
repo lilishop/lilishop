@@ -3,6 +3,7 @@ package cn.lili.modules.promotion.entity.vos;
 import cn.lili.modules.promotion.entity.dos.CouponActivityItem;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 优惠券活动的优惠券VO
@@ -10,6 +11,7 @@ import lombok.Data;
  * @author Bulbasaur
  * @since 2021/6/18 11:00 上午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class CouponActivityItemVO extends CouponActivityItem {
 

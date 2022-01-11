@@ -1,6 +1,6 @@
 package cn.lili.event;
 
-import cn.lili.modules.member.entity.dto.MemberWithdrawalMessage;
+import cn.lili.modules.wallet.entity.dto.MemberWithdrawalMessage;
 
 /**
  * 会员提现消息

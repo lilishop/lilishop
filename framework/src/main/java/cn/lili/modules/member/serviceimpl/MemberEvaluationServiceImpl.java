@@ -1,18 +1,13 @@
 package cn.lili.modules.member.serviceimpl;
 
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.rocketmq.tags.GoodsTagsEnum;
-import cn.lili.common.security.context.UserContext;
-import cn.lili.common.security.enums.UserEnums;
-import cn.lili.mybatis.util.PageUtil;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.common.security.context.UserContext;
+import cn.lili.common.sensitive.SensitiveWordsFilter;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.Member;
@@ -31,9 +26,9 @@ import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.modules.system.utils.CharacterConstant;
-import cn.lili.modules.system.utils.SensitiveWordsFilter;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import cn.lili.mybatis.util.PageUtil;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -121,7 +116,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         //新增用户评价
         MemberEvaluation memberEvaluation = new MemberEvaluation(memberEvaluationDTO, goodsSku, member, order);
         //过滤商品咨询敏感词
-        memberEvaluation.setContent(SensitiveWordsFilter.filter(memberEvaluation.getContent(), CharacterConstant.WILDCARD_STAR));
+        memberEvaluation.setContent(SensitiveWordsFilter.filter(memberEvaluation.getContent()));
         //添加评价
         this.save(memberEvaluation);
 
@@ -194,20 +189,6 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
                 .eq("goods_id", goodsId)));
 
         return evaluationNumberVO;
-    }
-
-    @Override
-    public Integer todayMemberEvaluation() {
-        return this.count(new LambdaQueryWrapper<MemberEvaluation>().ge(MemberEvaluation::getCreateTime, DateUtil.beginOfDay(new DateTime())));
-    }
-
-    @Override
-    public Integer getWaitReplyNum() {
-        QueryWrapper<MemberEvaluation> queryWrapper = Wrappers.query();
-        queryWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
-                "store_id", UserContext.getCurrentUser().getStoreId());
-        queryWrapper.eq("reply_status", false);
-        return this.count(queryWrapper);
     }
 
     /**

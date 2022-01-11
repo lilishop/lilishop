@@ -4,7 +4,7 @@ package cn.lili.modules.promotion.service;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivityLog;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityDTO;
-import cn.lili.modules.promotion.entity.dto.KanJiaActivityLogQuery;
+import cn.lili.modules.promotion.entity.dto.search.KanJiaActivityLogQuery;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 

@@ -6,10 +6,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderTagEnum;
-import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
+import cn.lili.modules.order.order.entity.enums.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
@@ -18,7 +15,6 @@ import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
-import java.util.Objects;
 
 /**
  * 订单查询参数
@@ -104,24 +100,41 @@ public class OrderSearchParams extends PageVO {
     @ApiModelProperty(value = "评论状态:未评论(UNFINISHED),待追评(WAIT_CHASE),评论完成(FINISHED)，")
     private String commentStatus;
 
+    @ApiModelProperty(value = "是否为其他订单下的订单，如果是则为依赖订单的sn，否则为空")
+    private String parentOrderSn;
+
+    @ApiModelProperty(value = "是否为某订单类型的订单，如果是则为订单类型的id，否则为空")
+    private String promotionId;
+
+    @ApiModelProperty(value = "总价格,可以为范围，如10_1000")
+    private String flowPrice;
+
+    /**
+     * @see OrderPromotionTypeEnum
+     */
+    @ApiModelProperty(value = "订单促销类型")
+    private String orderPromotionType;
+
     public <T> QueryWrapper<T> queryWrapper() {
-        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        AuthUser currentUser = UserContext.getCurrentUser();
         QueryWrapper<T> wrapper = new QueryWrapper<>();
 
         //关键字查询
         if (CharSequenceUtil.isNotEmpty(keywords)) {
             wrapper.like("o.sn", keywords).or().like("oi.goods_name", keywords);
         }
-        //按卖家查询
-        wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.STORE.name()), "o.store_id", currentUser.getStoreId());
+        if (currentUser != null) {
+            //按卖家查询
+            wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.STORE.name()), "o.store_id", currentUser.getStoreId());
 
-        //店铺查询
-        wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.MANAGER.name())
-                && CharSequenceUtil.isNotEmpty(storeId), "o.store_id", storeId);
+            //店铺查询
+            wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.MANAGER.name())
+                    && CharSequenceUtil.isNotEmpty(storeId), "o.store_id", storeId);
 
-        //按买家查询
-        wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.MEMBER.name()), "o.member_id", currentUser.getId());
+            //按买家查询
+            wrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.MEMBER.name()) && memberId == null, "o.member_id", currentUser.getId());
 
+        }
         //按照买家查询
         wrapper.like(CharSequenceUtil.isNotEmpty(memberId), "o.member_id", memberId);
 
@@ -192,7 +205,21 @@ public class OrderSearchParams extends PageVO {
             }
         }
 
+        // 依赖订单
+        wrapper.eq(parentOrderSn != null, "o.parent_order_sn", parentOrderSn);
+        // 促销活动id
+        wrapper.eq(CharSequenceUtil.isNotEmpty(promotionId), "o.promotion_id", promotionId);
 
+        wrapper.eq(CharSequenceUtil.isNotEmpty(orderPromotionType), "o.order_promotion_type", orderPromotionType);
+
+        if (CharSequenceUtil.isNotEmpty(flowPrice)) {
+            String[] s = flowPrice.split("_");
+            if (s.length > 1) {
+                wrapper.between("o.flow_price", s[0], s[1]);
+            } else {
+                wrapper.ge("o.flow_price", s[0]);
+            }
+        }
         wrapper.eq("o.delete_flag", false);
         return wrapper;
     }

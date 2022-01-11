@@ -1,21 +1,21 @@
 package cn.lili.modules.promotion.tools;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.vo.PageVO;
+import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.dto.BasePromotion;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.query.Query;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 
 /**
@@ -26,6 +26,11 @@ import java.util.List;
  **/
 public class PromotionTools {
 
+    public static final String START_TIME_COLUMN = "start_time";
+    public static final String END_TIME_COLUMN = "end_time";
+    public static final String PLATFORM_ID = "platform";
+    public static final String PLATFORM_NAME = "platform";
+
     /**
      * 参数验证
      * 1、活动起始时间必须大于当前时间
@@ -33,38 +38,26 @@ public class PromotionTools {
      *
      * @param startTime 活动开始时间
      * @param endTime   活动结束时间
-     * @param num       参与活动商品数量
-     * @param goodsList 选择的商品
      */
-    public static void paramValid(Long startTime, Long endTime, int num, List<PromotionGoods> goodsList) {
+    public static void checkPromotionTime(Date startTime, Date endTime) {
 
-        checkPromotionTime(startTime, endTime);
-
-        //如果促销活动选择的是部分商品参加活动
-        if (num != -1 && goodsList == null) {
-            throw new ServiceException(ResultCode.PROMOTION_GOODS_ERROR);
+        if (startTime == null) {
+            throw new ServiceException(ResultCode.PROMOTION_TIME_NOT_EXIST);
         }
-    }
 
-    /**
-     * 参数验证
-     * 1、活动起始时间必须大于当前时间
-     * 2、验证活动开始时间是否大于活动结束时间
-     *
-     * @param startTime 活动开始时间
-     * @param endTime   活动结束时间
-     */
-    public static void checkPromotionTime(Long startTime, Long endTime) {
-
-        long nowTime = DateUtil.current();
+        DateTime now = DateUtil.date();
 
         //如果活动起始时间小于现在时间
-        if (startTime < nowTime || endTime < nowTime) {
+        if (now.after(startTime)) {
             throw new ServiceException(ResultCode.PROMOTION_START_TIME_ERROR);
+        }
+        //如果活动结束时间小于现在时间
+        if (endTime != null && now.after(endTime)) {
+            throw new ServiceException(ResultCode.PROMOTION_END_TIME_ERROR);
         }
 
         //开始时间不能大于结束时间
-        if (startTime > endTime) {
+        if (endTime != null && startTime.after(endTime)) {
             throw new ServiceException(ResultCode.PROMOTION_TIME_ERROR);
         }
     }
@@ -76,23 +69,20 @@ public class PromotionTools {
      * @param endTime    结束时间
      * @param typeEnum   促销类型
      * @param storeId    店铺id
-     * @param activityId 促销活动id
-     * @param <T>        促销类型
+     * @param activityId 排除的促销活动id
      * @return mybatis plus query wrapper对象
      */
-    public static <T extends BasePromotion> QueryWrapper<T> checkActiveTime(Date startTime, Date endTime, PromotionTypeEnum typeEnum, String storeId, String activityId) {
+    public static <T extends BasePromotions> QueryWrapper<T> checkActiveTime(Date startTime, Date endTime, PromotionTypeEnum typeEnum, String storeId, String activityId) {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
-        String startTimeColumn = "start_time";
-        String endTimeColumn = "end_time";
         if (PromotionTypeEnum.SECKILL != typeEnum) {
             queryWrapper.nested(i -> {
                 //新活动起始时间 大于 之前活动的起始时间 小于 之前活动的截止时间
-                i.nested(i2 -> i2.le(startTimeColumn, startTime).ge(endTimeColumn, startTime));
+                i.nested(i2 -> i2.le(START_TIME_COLUMN, startTime).ge(END_TIME_COLUMN, startTime));
                 //新活动结束时间 大于 之前活动的起始时间 小于 之前活动的截止时间
-                i.or(i1 -> i1.le(startTimeColumn, endTime).ge(endTimeColumn, endTime));
+                i.or(i1 -> i1.le(START_TIME_COLUMN, endTime).ge(END_TIME_COLUMN, endTime));
             });
         } else {
-            queryWrapper.ge(startTimeColumn, DateUtil.beginOfDay(startTime)).le(endTimeColumn, DateUtil.endOfDay(endTime));
+            queryWrapper.ge(START_TIME_COLUMN, DateUtil.beginOfDay(startTime)).le(END_TIME_COLUMN, DateUtil.endOfDay(endTime));
         }
         if (storeId != null) {
             queryWrapper.eq("store_id", storeId);
@@ -100,11 +90,25 @@ public class PromotionTools {
         if (activityId != null) {
             queryWrapper.ne("id", activityId);
         }
-        //忽略已作废和已关闭的活动
-        queryWrapper.ne("promotion_status", PromotionStatusEnum.END.name());
-        queryWrapper.ne("promotion_status", PromotionStatusEnum.CLOSE.name());
+        queryWrapper.and(i -> i.or(queryPromotionStatus(PromotionsStatusEnum.NEW)).or(queryPromotionStatus(PromotionsStatusEnum.START)));
         queryWrapper.eq("delete_flag", false);
         return queryWrapper;
+    }
+
+
+    public static <T> Consumer<QueryWrapper<T>> queryPromotionStatus(PromotionsStatusEnum promotionsStatusEnum) {
+        switch (promotionsStatusEnum) {
+            case NEW:
+                return (QueryWrapper<T> t) -> t.nested(i -> i.gt(START_TIME_COLUMN, new Date()).gt(END_TIME_COLUMN, new Date()));
+            case START:
+                return (QueryWrapper<T> t) -> t.nested(i -> i.le(START_TIME_COLUMN, new Date()).ge(END_TIME_COLUMN, new Date()));
+            case END:
+                return (QueryWrapper<T> t) -> t.nested(i -> i.lt(START_TIME_COLUMN, new Date()).lt(END_TIME_COLUMN, new Date()));
+            case CLOSE:
+                return (QueryWrapper<T> t) -> t.nested(i -> i.isNull(START_TIME_COLUMN).isNull(END_TIME_COLUMN));
+            default:
+                return null;
+        }
     }
 
     /**
@@ -114,37 +118,59 @@ public class PromotionTools {
      * @param promotion  促销信息
      * @return 促销商品列表
      */
-    public static List<PromotionGoods> promotionGoodsInit(List<PromotionGoods> originList, BasePromotion promotion, PromotionTypeEnum promotionTypeEnum) {
-        //本次促销商品入库
-        for (PromotionGoods promotionGoods : originList) {
-            promotionGoods.setPromotionId(promotion.getId());
-            promotionGoods.setStoreName(promotion.getStoreName());
-            promotionGoods.setTitle(promotion.getPromotionName());
-            if (promotionGoods.getStartTime() == null) {
-                promotionGoods.setStartTime(promotion.getStartTime());
+    public static List<PromotionGoods> promotionGoodsInit(List<PromotionGoods> originList, BasePromotions promotion, PromotionTypeEnum promotionTypeEnum) {
+        if (originList != null) {
+            //本次促销商品入库
+            for (PromotionGoods promotionGoods : originList) {
+                promotionGoods.setPromotionId(promotion.getId());
+                if (CharSequenceUtil.isEmpty(promotionGoods.getStoreId())) {
+                    promotionGoods.setStoreId(promotion.getStoreId());
+                }
+                if (CharSequenceUtil.isEmpty(promotionGoods.getStoreName())) {
+                    promotionGoods.setStoreName(promotion.getStoreName());
+                }
+                promotionGoods.setTitle(promotion.getPromotionName());
+                if (promotionGoods.getStartTime() == null) {
+                    promotionGoods.setStartTime(promotion.getStartTime());
+                }
+                if (promotionGoods.getEndTime() == null) {
+                    promotionGoods.setEndTime(promotion.getEndTime());
+                }
+                promotionGoods.setPromotionType(promotionTypeEnum.name());
+                promotionGoods.setNum(0);
+                promotionGoods.setDeleteFlag(promotion.getDeleteFlag());
             }
-            if (promotion.getEndTime() == null) {
-                promotionGoods.setEndTime(promotion.getEndTime());
-            }
-            promotionGoods.setPromotionType(promotionTypeEnum.name());
-            promotionGoods.setPromotionStatus(promotion.getPromotionStatus());
-            promotionGoods.setNum(0);
         }
         return originList;
     }
 
-    /**
-     * 为mongoQuery组织分页排序参数
-     *
-     * @param query 查询条件
-     * @param page  分页排序参数
-     */
-    public static void mongoQueryPageParam(Query query, PageVO page) {
-        page.setNotConvert(true);
-        query.with(PageRequest.of(page.getMongoPageNumber(), page.getPageSize()));
-        if (!CharSequenceUtil.isEmpty(page.getOrder()) && !CharSequenceUtil.isEmpty(page.getSort())) {
-            query.with(Sort.by(Sort.Direction.valueOf(page.getOrder().toUpperCase()), page.getSort()));
+
+    public static int nextHour(String[] totalHours, Integer timeline) {
+        int nextHour = 23;
+        int[] hoursSored = Arrays.stream(totalHours).mapToInt(Integer::parseInt).toArray();
+        Arrays.sort(hoursSored);
+        for (int i : hoursSored) {
+            if (timeline < i) {
+                nextHour = i;
+                break;
+            }
         }
+        return nextHour;
+    }
+
+    public static Map<String, Object> filterInvalidPromotionsMap(Map<String, Object> map) {
+        if (map == null) {
+            return new HashMap<>();
+        }
+        //移除无效促销活动
+        return map.entrySet().stream().filter(i -> {
+            JSONObject promotionsObj = JSONUtil.parseObj(i.getValue());
+            BasePromotions basePromotions = promotionsObj.toBean(BasePromotions.class);
+            if (basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
+                return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
+            }
+            return true;
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
 }

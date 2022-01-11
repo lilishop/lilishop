@@ -1,12 +1,13 @@
 package cn.lili.modules.promotion.serviceimpl;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.PointsGoodsCategory;
 import cn.lili.modules.promotion.mapper.PointsGoodsCategoryMapper;
 import cn.lili.modules.promotion.service.PointsGoodsCategoryService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -69,7 +70,7 @@ public class PointsGoodsCategoryServiceImpl extends ServiceImpl<PointsGoodsCateg
     @Override
     public IPage<PointsGoodsCategory> getCategoryByPage(String name, PageVO page) {
         LambdaQueryWrapper<PointsGoodsCategory> queryWrapper = new LambdaQueryWrapper<>();
-        if (StrUtil.isNotEmpty(name)) {
+        if (CharSequenceUtil.isNotEmpty(name)) {
             queryWrapper.like(PointsGoodsCategory::getName, name);
         }
         page.setOrder("ASC");
@@ -96,7 +97,7 @@ public class PointsGoodsCategoryServiceImpl extends ServiceImpl<PointsGoodsCateg
         }
         if (this.getOne(queryWrapper) != null) {
             log.error("当前积分商品分类名称" + name + "已存在！");
-            throw new ServiceException();
+            throw new ServiceException(ResultCode.POINT_GOODS_CATEGORY_EXIST);
         }
     }
 

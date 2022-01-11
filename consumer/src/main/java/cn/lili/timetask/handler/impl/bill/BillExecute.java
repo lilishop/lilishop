@@ -3,13 +3,12 @@ package cn.lili.timetask.handler.impl.bill;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.lili.modules.store.entity.dto.StoreSettlementDay;
-import cn.lili.modules.store.mapper.StoreDetailMapper;
 import cn.lili.modules.store.service.BillService;
+import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.timetask.handler.EveryDayExecute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -29,8 +28,8 @@ public class BillExecute implements EveryDayExecute {
     /**
      * 店铺详情
      */
-    @Resource
-    private StoreDetailMapper storeDetailMapper;
+    @Autowired
+    private StoreDetailService storeDetailService;
 
     /**
      * 1.查询今日待结算的商家
@@ -44,18 +43,18 @@ public class BillExecute implements EveryDayExecute {
         int day = DateUtil.date().dayOfMonth();
 
         //获取待结算商家列表
-        List<StoreSettlementDay> storeList = storeDetailMapper.getSettlementStore(day);
+        List<StoreSettlementDay> storeList = storeDetailService.getSettlementStore(day);
 
         //获取当前时间
-        DateTime endTime =DateUtil.date();
+        DateTime endTime = DateUtil.date();
         //批量商家结算
         for (StoreSettlementDay storeSettlementDay : storeList) {
 
             //生成结算单
-            billService.createBill(storeSettlementDay.getStoreId(), storeSettlementDay.getSettlementDay(),endTime);
+            billService.createBill(storeSettlementDay.getStoreId(), storeSettlementDay.getSettlementDay(), endTime);
 
             //修改店铺结算时间
-            storeDetailMapper.updateSettlementDay(storeSettlementDay.getStoreId(), endTime);
+            storeDetailService.updateSettlementDay(storeSettlementDay.getStoreId(), endTime);
         }
     }
 }
