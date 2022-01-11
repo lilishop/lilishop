@@ -1,5 +1,6 @@
 package cn.lili.modules.search.entity.dos;
 
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.elasticsearch.EsSuffix;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -260,9 +261,6 @@ public class EsGoodsIndex implements Serializable {
     @ApiModelProperty(value = "商品类型", required = true)
     private String goodsType;
 
-    /**
-     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
-     */
     @ApiModelProperty(value = "商品sku基础分数", required = true)
     private Integer skuSource;
 
@@ -280,8 +278,8 @@ public class EsGoodsIndex implements Serializable {
      * value 为 促销活动实体信息
      */
     @Field(type = FieldType.Nested)
-    @ApiModelProperty("商品促销活动集合，key 为 促销活动类型，value 为 促销活动实体信息 ")
-    private Map<String, Object> promotionMap;
+    @ApiModelProperty("商品促销活动集合JSON，key 为 促销活动类型，value 为 促销活动实体信息 ")
+    private String promotionMapJson;
 
 
     public EsGoodsIndex(GoodsSku sku) {
@@ -381,6 +379,6 @@ public class EsGoodsIndex implements Serializable {
     }
 
     public Map<String, Object> getPromotionMap() {
-        return PromotionTools.filterInvalidPromotionsMap(this.promotionMap);
+        return PromotionTools.filterInvalidPromotionsMap(JSONUtil.parseObj(this.promotionMapJson));
     }
 }

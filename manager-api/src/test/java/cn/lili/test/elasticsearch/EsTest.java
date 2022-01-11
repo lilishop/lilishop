@@ -26,7 +26,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author paulG
@@ -130,8 +129,6 @@ class EsTest {
         List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
         for (GoodsSku goodsSku : list) {
             EsGoodsIndex index = new EsGoodsIndex(goodsSku);
-            Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsPromotionMap(index);
-            index.setPromotionMap(goodsCurrentPromotionMap);
             esGoodsIndices.add(index);
             cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
         }
@@ -174,7 +171,6 @@ class EsTest {
     @Test
     void updateIndex() {
         EsGoodsIndex byId = esGoodsIndexService.findById("121");
-        byId.setPromotionMap(null);
         esGoodsIndexService.updateIndex(byId);
         Assertions.assertTrue(true);
     }

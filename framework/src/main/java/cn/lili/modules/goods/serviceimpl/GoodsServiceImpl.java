@@ -54,10 +54,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 商品业务层实现
@@ -196,6 +193,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         //添加相册
         if (goodsOperationDTO.getGoodsGalleryList() != null && !goodsOperationDTO.getGoodsGalleryList().isEmpty()) {
             this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
+        }
+        if (GoodsAuthEnum.TOBEAUDITED.name().equals(goods.getAuthFlag())) {
+            this.deleteEsGoods(Collections.singletonList(goodsId));
         }
         cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
     }
