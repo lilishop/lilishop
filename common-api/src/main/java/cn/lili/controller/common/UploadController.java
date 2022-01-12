@@ -52,9 +52,6 @@ public class UploadController {
     @Autowired
     private Cache cache;
 
-    @Autowired
-    private SystemSettingProperties systemSettingProperties;
-
     @ApiOperation(value = "文件上传")
     @PostMapping(value = "/file")
     public ResultMessage<Object> upload(MultipartFile file,
