@@ -28,7 +28,7 @@ import cn.lili.modules.goods.service.GoodsGalleryService;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.FootPrint;
-import cn.lili.modules.member.entity.dos.MemberEvaluation;
+import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
@@ -251,11 +251,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //获取当前商品的索引信息
         EsGoodsIndex goodsIndex = goodsIndexService.findById(skuId);
         if (goodsIndex == null) {
-            goodsIndex = goodsIndexService.getTempEsGoodsIndex(goodsSku, goodsVO.getGoodsParamsDTOList());
-
-            //发送mq消息
-            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.RESET_GOODS_INDEX.name();
-            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(Collections.singletonList(goodsIndex)), RocketmqSendCallbackBuilder.commonCallback());
+            goodsIndex = goodsIndexService.getResetEsGoodsIndex(goodsSku, goodsVO.getGoodsParamsDTOList());
         }
 
         //商品规格
@@ -503,12 +499,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //获取商品信息
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
 
-        LambdaQueryWrapper<MemberEvaluation> goodEvaluationQueryWrapper = new LambdaQueryWrapper<>();
-        goodEvaluationQueryWrapper.eq(MemberEvaluation::getSkuId, goodsSku.getId());
-        goodEvaluationQueryWrapper.eq(MemberEvaluation::getGrade, EvaluationGradeEnum.GOOD.name());
-
+        EvaluationQueryParams queryParams = new EvaluationQueryParams();
+        queryParams.setGrade(EvaluationGradeEnum.GOOD.name());
+        queryParams.setSkuId(goodsSku.getId());
         //好评数量
-        long highPraiseNum = memberEvaluationService.count(goodEvaluationQueryWrapper);
+        long highPraiseNum = memberEvaluationService.getEvaluationCount(queryParams);
 
         //更新商品评价数量
         goodsSku.setCommentNum(goodsSku.getCommentNum() != null ? goodsSku.getCommentNum() + 1 : 1);
@@ -530,22 +525,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
         //修改商品的评价数量
         goodsService.updateGoodsCommentNum(goodsSku.getGoodsId());
-    }
-
-    /**
-     * 更新商品sku促销价格
-     *
-     * @param skuId          skuId
-     * @param promotionPrice 促销价格
-     */
-    @Override
-    public void updateGoodsSkuPromotion(String skuId, Double promotionPrice) {
-        LambdaUpdateWrapper<GoodsSku> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(GoodsSku::getId, skuId);
-        updateWrapper.set(GoodsSku::getPromotionPrice, promotionPrice);
-        updateWrapper.set(GoodsSku::getPromotionFlag, true);
-        this.update(updateWrapper);
-        cache.remove(GoodsSkuService.getCacheKeys(skuId));
     }
 
     /**

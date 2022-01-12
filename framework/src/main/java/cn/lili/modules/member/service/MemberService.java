@@ -220,4 +220,11 @@ public interface MemberService extends IService<Member> {
      * @param userEnums token角色类型
      */
     void logout(UserEnums userEnums);
+
+    /**
+     * 获取所有会员的手机号
+     *
+     * @return 所有会员的手机号
+     */
+    List<String> getAllMemberMobile();
 }

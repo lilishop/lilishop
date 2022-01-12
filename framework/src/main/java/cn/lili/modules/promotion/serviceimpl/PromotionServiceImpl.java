@@ -8,7 +8,6 @@ import cn.lili.modules.promotion.entity.dto.search.SeckillSearchParams;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.promotion.tools.PromotionTools;
-import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -108,14 +107,14 @@ public class PromotionServiceImpl implements PromotionService {
     /**
      * 根据商品索引获取当前商品索引的所有促销活动信息
      *
-     * @param index 商品索引
+     * @param storeId 店铺id
+     * @param goodsSkuId 商品skuId
      * @return 当前促销活动集合
      */
-    @Override
-    public Map<String, Object> getGoodsPromotionMap(EsGoodsIndex index) {
-        String storeIds = index.getStoreId() + "," + PromotionTools.PLATFORM_ID;
+    public Map<String, Object> getGoodsSkuPromotionMap(String storeId, String goodsSkuId) {
+        String storeIds = storeId + "," + PromotionTools.PLATFORM_ID;
         Map<String, Object> promotionMap = new HashMap<>();
-        List<PromotionGoods> promotionGoodsList = promotionGoodsService.findSkuValidPromotion(index.getId(), storeIds);
+        List<PromotionGoods> promotionGoodsList = promotionGoodsService.findSkuValidPromotion(goodsSkuId, storeIds);
         for (PromotionGoods promotionGoods : promotionGoodsList) {
             String esPromotionKey = promotionGoods.getPromotionType() + "-" + promotionGoods.getPromotionId();
             switch (PromotionTypeEnum.valueOf(promotionGoods.getPromotionType())) {
@@ -132,7 +131,7 @@ public class PromotionServiceImpl implements PromotionService {
                     promotionMap.put(esPromotionKey, fullDiscount);
                     break;
                 case SECKILL:
-                    this.getGoodsCurrentSeckill(promotionGoods, promotionMap, index);
+                    this.getGoodsCurrentSeckill(promotionGoods, promotionMap);
                     break;
                 case POINTS_GOODS:
                     PointsGoods pointsGoods = pointsGoodsService.getById(promotionGoods.getPromotionId());
@@ -146,7 +145,7 @@ public class PromotionServiceImpl implements PromotionService {
     }
 
 
-    private void getGoodsCurrentSeckill(PromotionGoods promotionGoods, Map<String, Object> promotionMap, EsGoodsIndex index) {
+    private void getGoodsCurrentSeckill(PromotionGoods promotionGoods, Map<String, Object> promotionMap) {
         Seckill seckill = seckillService.getById(promotionGoods.getPromotionId());
         SeckillSearchParams searchParams = new SeckillSearchParams();
         searchParams.setSeckillId(promotionGoods.getPromotionId());

@@ -1,11 +1,15 @@
 package cn.lili.modules.member.serviceimpl;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.sensitive.SensitiveWordsFilter;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -29,6 +33,7 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -189,6 +194,31 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
                 .eq("goods_id", goodsId)));
 
         return evaluationNumberVO;
+    }
+
+    @Override
+    public long todayMemberEvaluation() {
+        return this.count(new LambdaQueryWrapper<MemberEvaluation>().ge(MemberEvaluation::getCreateTime, DateUtil.beginOfDay(new DateTime())));
+    }
+
+    @Override
+    public long getWaitReplyNum() {
+        QueryWrapper<MemberEvaluation> queryWrapper = Wrappers.query();
+        queryWrapper.eq(CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
+                "store_id", UserContext.getCurrentUser().getStoreId());
+        queryWrapper.eq("reply_status", false);
+        return this.count(queryWrapper);
+    }
+
+    /**
+     * 统计商品评价数量
+     *
+     * @param evaluationQueryParams 查询条件
+     * @return 商品评价数量
+     */
+    @Override
+    public long getEvaluationCount(EvaluationQueryParams evaluationQueryParams) {
+        return this.count(evaluationQueryParams.queryWrapper());
     }
 
     /**

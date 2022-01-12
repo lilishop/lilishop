@@ -1,7 +1,5 @@
 package cn.lili.modules.promotion.service;
 
-import cn.lili.modules.search.entity.dos.EsGoodsIndex;
-
 import java.util.Map;
 
 /**
@@ -22,9 +20,10 @@ public interface PromotionService {
     /**
      * 根据商品索引获取当前商品索引的所有促销活动信息
      *
-     * @param index 商品索引
+     * @param storeId 店铺id
+     * @param goodsSkuId 商品skuId
      * @return 当前促销活动集合
      */
-    Map<String, Object> getGoodsPromotionMap(EsGoodsIndex index);
+    Map<String, Object> getGoodsSkuPromotionMap(String storeId, String goodsSkuId);
 
 }
