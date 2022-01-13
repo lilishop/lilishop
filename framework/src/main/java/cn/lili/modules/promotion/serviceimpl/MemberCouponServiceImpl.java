@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
@@ -24,6 +25,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +41,7 @@ import java.util.*;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
+@CacheConfig(cacheNames = "{MemberCoupon}")
 public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, MemberCoupon> implements MemberCouponService {
 
     /**
@@ -44,6 +49,12 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
      */
     @Autowired
     private CouponService couponService;
+
+    /**
+     * 缓存
+     */
+    @Autowired
+    private Cache cache;
 
     @Override
     public void checkCouponLimit(String couponId, String memberId) {
@@ -71,6 +82,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
      * @param memberName 会员名称
      */
     @Override
+    @CacheEvict(key = "#memberId")
     public void receiveBuyerCoupon(String couponId, String memberId, String memberName) {
         Coupon coupon = couponService.getById(couponId);
         if (coupon != null && !CouponGetEnum.FREE.name().equals(coupon.getGetType())) {
@@ -82,6 +94,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     }
 
     @Override
+    @CacheEvict(key = "#memberId")
     public void receiveCoupon(String couponId, String memberId, String memberName) {
         Coupon coupon = couponService.getById(couponId);
         if (coupon != null) {
@@ -106,6 +119,22 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     @Override
     public List<MemberCoupon> getMemberCoupons(MemberCouponSearchParams param) {
         return this.list(param.queryWrapper());
+    }
+
+    /**
+     * 获取当前用户的优惠券列表（优先读取缓存）
+     *
+     * @param memberId 会员id
+     * @return 会员优惠券列表
+     */
+    @Override
+    @Cacheable(key = "#memberId")
+    public List<MemberCoupon> getMemberCoupons(String memberId) {
+        MemberCouponSearchParams searchParams = new MemberCouponSearchParams();
+        searchParams.setMemberId(Objects.requireNonNull(UserContext.getCurrentUser()).getId());
+        searchParams.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
+        searchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
+        return this.getMemberCoupons(searchParams);
     }
 
     /**
@@ -167,6 +196,17 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         return this.list(queryWrapper);
     }
 
+    /**
+     * 获取当前会员全品类优惠券
+     *
+     * @param param 查询参数
+     * @return 会员优惠券列表
+     */
+    @Override
+    public MemberCoupon getMemberCoupon(MemberCouponSearchParams param) {
+        return this.getOne(param.queryWrapper(), false);
+    }
+
     @Override
     public long getMemberCouponsNum() {
         AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
@@ -177,31 +217,10 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         return this.count(queryWrapper);
     }
 
-    /**
-     * 更新会员优惠券状态
-     *
-     * @param status 要变更的状态
-     * @param id     会员优惠券id
-     */
-    @Override
-    public void updateMemberCouponStatus(MemberCouponStatusEnum status, String id) {
-        MemberCoupon memberCoupon = this.getById(id);
-        if (memberCoupon == null) {
-            throw new ServiceException(ResultCode.COUPON_MEMBER_NOT_EXIST);
-        }
-        String memberCouponStatus = memberCoupon.getMemberCouponStatus();
-        if (memberCouponStatus.equals(MemberCouponStatusEnum.NEW.name()) || memberCouponStatus.equals(MemberCouponStatusEnum.USED.name())) {
-            LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(MemberCoupon::getId, id).set(MemberCoupon::getMemberCouponStatus, status.name());
-            this.update(updateWrapper);
-        } else {
-            throw new ServiceException(ResultCode.COUPON_MEMBER_STATUS_ERROR);
-        }
-    }
-
 
     @Override
-    public void used(List<String> ids) {
+    @CacheEvict(key = "#memberId")
+    public void used(String memberId, List<String> ids) {
         if (ids != null && !ids.isEmpty()) {
             List<MemberCoupon> memberCoupons = this.listByIds(ids);
 
@@ -228,7 +247,8 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
      * @param id id
      */
     @Override
-    public void cancellation(String id) {
+    @CacheEvict(key = "#memberId")
+    public void cancellation(String memberId, String id) {
         LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(MemberCoupon::getId, id);
         updateWrapper.set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.CLOSED.name());
@@ -245,6 +265,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         LambdaUpdateWrapper<MemberCoupon> memberCouponLambdaUpdateWrapper = new LambdaUpdateWrapper<MemberCoupon>()
                 .in(MemberCoupon::getCouponId, couponIds)
                 .set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.CLOSED.name());
+        this.cache.vagueDel("{MemberCoupon}");
         this.update(memberCouponLambdaUpdateWrapper);
     }
 

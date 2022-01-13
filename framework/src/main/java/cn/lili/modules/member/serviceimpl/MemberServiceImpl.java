@@ -583,6 +583,16 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     /**
+     * 获取所有会员的手机号
+     *
+     * @return 所有会员的手机号
+     */
+    @Override
+    public List<String> getAllMemberMobile() {
+        return this.baseMapper.getAllMemberMobile();
+    }
+
+    /**
      * 检测会员
      *
      * @param userName    会员名称
