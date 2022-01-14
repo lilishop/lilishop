@@ -1,4 +1,4 @@
-package cn.lili.controller.goods;
+package cn.lili.controller.hotwords;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;

@@ -1,4 +1,4 @@
-package cn.lili.controller.member;
+package cn.lili.controller.common;
 
 import cn.lili.common.utils.IpHelper;
 import cn.lili.common.enums.ResultUtil;
