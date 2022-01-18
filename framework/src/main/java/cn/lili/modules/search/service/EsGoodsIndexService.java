@@ -178,11 +178,11 @@ public interface EsGoodsIndexService {
     List<String> getPromotionIdByPromotionType(String id, PromotionTypeEnum promotionTypeEnum);
 
     /**
-     * 获取临时拼装的商品索引
+     * 获取重置的商品索引
      *
      * @param goodsSku       商品sku信息
      * @param goodsParamDTOS 商品参数
      * @return 商品索引
      */
-    EsGoodsIndex getTempEsGoodsIndex(GoodsSku goodsSku, List<GoodsParamsDTO> goodsParamDTOS);
+    EsGoodsIndex getResetEsGoodsIndex(GoodsSku goodsSku, List<GoodsParamsDTO> goodsParamDTOS);
 }

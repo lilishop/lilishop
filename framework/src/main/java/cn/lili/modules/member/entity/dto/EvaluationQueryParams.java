@@ -1,12 +1,11 @@
 package cn.lili.modules.member.entity.dto;
 
-import cn.lili.common.security.context.UserContext;
-import cn.lili.common.security.enums.UserEnums;
-import cn.lili.common.utils.StringUtils;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.vo.PageVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 评价查询条件
@@ -14,12 +13,18 @@ import lombok.Data;
  * @author Bulbasaur
  * @since 2020/11/30 14:52
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class EvaluationQueryParams extends PageVO {
 
+    @ApiModelProperty(value = "ID")
+    private String id;
 
     @ApiModelProperty(value = "买家ID")
     private String memberId;
+
+    @ApiModelProperty(value = "skuID")
+    private String skuId;
 
     @ApiModelProperty(value = "会员名称")
     private String memberName;
@@ -51,40 +56,42 @@ public class EvaluationQueryParams extends PageVO {
     @ApiModelProperty(value = "状态")
     private String status;
 
-    public EvaluationQueryParams() {
-
-    }
-
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
-        if (StringUtils.isNotEmpty(startTime) && StringUtils.isNotEmpty(endTime)) {
+        if (CharSequenceUtil.isNotEmpty(id)) {
+            queryWrapper.eq("id", id);
+        }
+        if (CharSequenceUtil.isNotEmpty(startTime) && CharSequenceUtil.isNotEmpty(endTime)) {
             queryWrapper.between("create_time", startTime, endTime);
         }
-        if (StringUtils.isNotEmpty(grade)) {
+        if (CharSequenceUtil.isNotEmpty(grade)) {
             queryWrapper.eq("grade", grade);
         }
-        if (StringUtils.isNotEmpty(goodsName)) {
+        if (CharSequenceUtil.isNotEmpty(goodsName)) {
             queryWrapper.like("goods_name", goodsName);
         }
-        if (StringUtils.isNotEmpty(storeName)) {
+        if (CharSequenceUtil.isNotEmpty(storeName)) {
             queryWrapper.like("store_name", storeName);
         }
-        if (StringUtils.isNotEmpty(memberName)) {
+        if (CharSequenceUtil.isNotEmpty(memberName)) {
             queryWrapper.like("member_name", memberName);
         }
-        if (StringUtils.isNotEmpty(goodsId)) {
+        if (CharSequenceUtil.isNotEmpty(goodsId)) {
             queryWrapper.eq("goods_id", goodsId);
         }
-        if (StringUtils.isNotEmpty(storeId)) {
+        if (CharSequenceUtil.isNotEmpty(skuId)) {
+            queryWrapper.eq("sku_id", skuId);
+        }
+        if (CharSequenceUtil.isNotEmpty(storeId)) {
             queryWrapper.eq("store_id", storeId);
         }
-        if (StringUtils.isNotEmpty(memberId)) {
+        if (CharSequenceUtil.isNotEmpty(memberId)) {
             queryWrapper.eq("member_id", memberId);
         }
-        if (StringUtils.isNotEmpty(haveImage)) {
+        if (CharSequenceUtil.isNotEmpty(haveImage)) {
             queryWrapper.eq("have_image", haveImage);
         }
-        if (StringUtils.isNotEmpty(status)) {
+        if (CharSequenceUtil.isNotEmpty(status)) {
             queryWrapper.eq("status", status);
         }
         queryWrapper.eq("delete_flag", false);

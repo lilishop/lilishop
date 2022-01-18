@@ -195,6 +195,17 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         return this.list(queryWrapper);
     }
 
+    /**
+     * 获取当前会员全品类优惠券
+     *
+     * @param param 查询参数
+     * @return 会员优惠券列表
+     */
+    @Override
+    public MemberCoupon getMemberCoupon(MemberCouponSearchParams param) {
+        return this.getOne(param.queryWrapper(), false);
+    }
+
     @Override
     public long getMemberCouponsNum() {
         AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());

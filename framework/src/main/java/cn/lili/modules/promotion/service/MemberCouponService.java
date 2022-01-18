@@ -97,6 +97,14 @@ public interface MemberCouponService extends IService<MemberCoupon> {
     List<MemberCoupon> getAllScopeMemberCoupon(String memberId, List<String> storeId);
 
     /**
+     * 获取会员优惠券
+     *
+     * @param param  查询参数
+     * @return 会员优惠券列表
+     */
+    MemberCoupon getMemberCoupon(MemberCouponSearchParams param);
+
+    /**
      * 获取会员优惠券数量
      *
      * @return 会员优惠券数量
