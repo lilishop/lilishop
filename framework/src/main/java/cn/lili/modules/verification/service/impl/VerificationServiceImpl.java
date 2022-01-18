@@ -10,6 +10,8 @@ import cn.lili.common.vo.SerializableStream;
 import cn.lili.modules.verification.SliderImageUtil;
 import cn.lili.modules.verification.entity.dos.VerificationSource;
 import cn.lili.modules.verification.entity.dto.VerificationDTO;
+import cn.lili.modules.verification.service.VerificationSourceService;
+import cn.lili.modules.verification.SliderImageUtil;
 import cn.lili.modules.verification.entity.enums.VerificationEnums;
 import cn.lili.modules.verification.service.VerificationService;
 import cn.lili.modules.verification.service.VerificationSourceService;
@@ -132,19 +134,18 @@ public class VerificationServiceImpl implements VerificationService {
      */
     @Override
     public boolean preCheck(Integer xPos, String uuid, VerificationEnums verificationEnums) {
-//        Integer randomX = (Integer) cache.get(cacheKey(verificationEnums, uuid));
-//        if (randomX == null) {
-//            throw new ServiceException(ResultCode.VERIFICATION_CODE_INVALID);
-//        }
-//        log.debug("{}{}", randomX, xPos);
-//        //验证结果正确 && 删除标记成功
-//        if (Math.abs(randomX - xPos) < verificationCodeProperties.getFaultTolerant() && cache.remove(cacheKey(verificationEnums, uuid))) {
-        //验证成功，则记录验证结果 验证有效时间与验证码创建有效时间一致
-        cache.remove(cacheKey(verificationEnums, uuid));
-        cache.put(cacheResult(verificationEnums, uuid), true, verificationCodeProperties.getEffectiveTime());
-        return true;
-//        }
-//        throw new ServiceException(ResultCode.VERIFICATION_ERROR);
+        Integer randomX = (Integer) cache.get(cacheKey(verificationEnums, uuid));
+        if (randomX == null) {
+            throw new ServiceException(ResultCode.VERIFICATION_CODE_INVALID);
+        }
+        log.debug("{}{}", randomX, xPos);
+        //验证结果正确 && 删除标记成功
+        if (Math.abs(randomX - xPos) < verificationCodeProperties.getFaultTolerant() && cache.remove(cacheKey(verificationEnums, uuid))) {
+            //验证成功，则记录验证结果 验证有效时间与验证码创建有效时间一致
+            cache.put(cacheResult(verificationEnums, uuid), true, verificationCodeProperties.getEffectiveTime());
+            return true;
+        }
+        throw new ServiceException(ResultCode.VERIFICATION_ERROR);
     }
 
     /**
@@ -160,8 +161,7 @@ public class VerificationServiceImpl implements VerificationService {
         if (cache.remove(cacheResult(verificationEnums, uuid))) {
             return true;
         }
-//        throw new ServiceException(ResultCode.VERIFICATION_CODE_INVALID);
-        return true;
+        throw new ServiceException(ResultCode.VERIFICATION_CODE_INVALID);
     }
 
     /**
@@ -187,3 +187,4 @@ public class VerificationServiceImpl implements VerificationService {
     }
 
 }
+

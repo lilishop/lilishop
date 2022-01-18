@@ -26,7 +26,7 @@ public class SliderImageController {
     @Autowired
     private VerificationService verificationService;
 
-//    @LimitPoint(name = "slider_image", key = "verification")
+    @LimitPoint(name = "slider_image", key = "verification")
     @GetMapping("/{verificationEnums}")
     @ApiOperation(value = "获取校验接口,一分钟同一个ip请求10次")
     public ResultMessage getSliderImage(@RequestHeader String uuid, @PathVariable VerificationEnums verificationEnums) {
@@ -34,7 +34,7 @@ public class SliderImageController {
 
     }
 
-//    @LimitPoint(name = "slider_image", key = "verification_pre_check", limit = 600)
+    @LimitPoint(name = "slider_image", key = "verification_pre_check", limit = 600)
     @PostMapping("/{verificationEnums}")
     @ApiOperation(value = "验证码预校验")
     public ResultMessage verificationImage(Integer xPos, @RequestHeader String uuid, @PathVariable VerificationEnums verificationEnums) {

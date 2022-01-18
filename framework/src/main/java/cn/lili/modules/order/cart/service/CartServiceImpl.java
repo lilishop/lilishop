@@ -215,9 +215,8 @@ public class CartServiceImpl implements CartService {
 
         //缓存key，默认使用购物车
         if (cartTypeEnum != null) {
-//            AuthUser currentUser = UserContext.getCurrentUser();
-//            return cartTypeEnum.getPrefix() + currentUser.getId();
-            return cartTypeEnum.getPrefix() + UserContext.getUuid();
+            AuthUser currentUser = UserContext.getCurrentUser();
+            return cartTypeEnum.getPrefix() + currentUser.getId();
         }
         throw new ServiceException(ResultCode.ERROR);
     }
