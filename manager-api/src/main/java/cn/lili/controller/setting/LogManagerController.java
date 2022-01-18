@@ -23,7 +23,6 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@Transactional(rollbackFor = Exception.class)
 @Api(tags = "日志管理接口")
 @RequestMapping("/manager/log")
 public class LogManagerController {

@@ -40,7 +40,6 @@ import java.util.*;
  * @since 2020/8/21
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 @CacheConfig(cacheNames = "{MemberCoupon}")
 public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, MemberCoupon> implements MemberCouponService {
 

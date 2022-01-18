@@ -27,7 +27,6 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class PromotionServiceImpl implements PromotionService {
     /**
      * 秒杀

@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "管理端,预存款充值记录接口")
 @RequestMapping("/manager/recharge")
-@Transactional(rollbackFor = Exception.class)
 public class RechargeManagerController {
     @Autowired
     private RechargeService rechargeService;

@@ -34,7 +34,6 @@ import java.util.List;
  * @since 2020/11/22 16:00
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class FreightTemplateServiceImpl extends ServiceImpl<FreightTemplateMapper, FreightTemplate> implements FreightTemplateService {
     /**
      * 配送子模板

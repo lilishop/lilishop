@@ -27,7 +27,6 @@ import java.util.*;
  * @since 2020/12/2 11:11
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> implements RegionService {
 
     /**

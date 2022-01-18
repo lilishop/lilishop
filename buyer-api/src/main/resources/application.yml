@@ -3,12 +3,19 @@ server:
 
   servlet:
     context-path: /
-
-  tomcat:
-    uri-encoding: UTF-8
-    threads:
-      min-spare: 50
-      max: 1000
+#
+#  tomcat:
+#    #最大链接数，默认不设置，默认是10000
+#    max-connections: 6500
+#    #最大等待队列长度，允许HTTP请求缓存到请求队列的最大个数，默认不限制
+#    accept-count: 1000
+#    threads:
+#      #最少闲置
+#      min-spare: 50
+#      #最大线程数  ，默认是200
+#      max: 800
+  netty:
+    connection-timeout:
 
 # 与Spring Boot 2一样，默认情况下，大多数端点都不通过http公开，我们公开了所有端点。对于生产，您应该仔细选择要公开的端点。
 management:

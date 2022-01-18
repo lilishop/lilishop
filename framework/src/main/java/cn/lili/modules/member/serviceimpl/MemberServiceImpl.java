@@ -63,7 +63,6 @@ import java.util.Objects;
  * @since 2021-03-29 14:10:16
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> implements MemberService {
 
     /**
@@ -433,11 +432,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
      * @param mobilePhone 手机号
      * @return 会员
      */
-    private List<Member> findMember(String mobilePhone, String userName) {
+    private Long findMember(String mobilePhone, String userName) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("mobile", mobilePhone)
                 .or().eq("username", userName);
-        return this.baseMapper.selectList(queryWrapper);
+        return this.baseMapper.selectCount(queryWrapper);
     }
 
     /**
@@ -593,9 +592,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
      * @param mobilePhone 手机号
      */
     private void checkMember(String userName, String mobilePhone) {
-        List<Member> members = findMember(userName, mobilePhone);
         //判断手机号是否存在
-        if (members != null && !members.isEmpty()) {
+        if (findMember(userName, mobilePhone) > 0) {
             throw new ServiceException(ResultCode.USER_EXIST);
         }
     }

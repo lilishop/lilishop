@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "管理端,预存款充值记录接口")
 @RequestMapping("/manager/wallet/log")
-@Transactional(rollbackFor = Exception.class)
 public class WalletLogManagerController {
     @Autowired
     private WalletLogService walletLogService;
