@@ -31,7 +31,6 @@ import java.util.*;
  * @author paulG
  * @since 2021/11/30
  **/
-@Transactional(rollbackFor = Exception.class)
 public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T extends BasePromotions> extends ServiceImpl<M, T> implements AbstractPromotionsService<T> {
 
     /**

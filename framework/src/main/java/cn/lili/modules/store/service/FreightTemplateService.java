@@ -5,6 +5,9 @@ import cn.lili.modules.store.entity.dos.FreightTemplate;
 import cn.lili.modules.store.entity.vos.FreightTemplateVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
 
@@ -14,6 +17,7 @@ import java.util.List;
  * @author Bulbasaur
  * @since 2020-03-07 09:24:33
  */
+@CacheConfig(cacheNames = "{freightTemplate}")
 public interface FreightTemplateService extends IService<FreightTemplate> {
 
     /**
@@ -38,6 +42,7 @@ public interface FreightTemplateService extends IService<FreightTemplate> {
      * @param id 运费模板ID
      * @return 运费模板
      */
+    @Cacheable(key = "#id")
     FreightTemplateVO getFreightTemplate(String id);
 
     /**
@@ -55,6 +60,7 @@ public interface FreightTemplateService extends IService<FreightTemplate> {
      * @param freightTemplateVO 运费模板
      * @return 运费模板
      */
+    @CacheEvict(key = "#freightTemplateVO.id")
     FreightTemplateVO editFreightTemplate(FreightTemplateVO freightTemplateVO);
 
     /**
@@ -64,6 +70,7 @@ public interface FreightTemplateService extends IService<FreightTemplate> {
      * @param id 运费模板ID
      * @return 操作状态
      */
+    @CacheEvict(key = "#freightTemplateVO.id")
     boolean removeFreightTemplate(String id);
 
 }

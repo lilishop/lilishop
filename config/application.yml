@@ -72,8 +72,8 @@ spring:
         url: jdbc:mysql://192.168.0.116:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
         password: lilishop
-        maxActive: 20
-        initialSize: 5
+        maxActive: 50
+        initialSize: 20
         maxWait: 60000
         minIdle: 5
         timeBetweenEvictionRunsMillis: 60000
@@ -183,7 +183,7 @@ mybatis-plus:
 logging:
   # 输出级别
   level:
-    cn.lili: info
+    root: error
   #    org.hibernate: debug
   #    org.springframework: debug
   #    org.springframework.data.mongodb.core: debug

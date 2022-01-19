@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "店铺端,商品计量单位接口")
 @RequestMapping("/store/goods/unit")
-@Transactional(rollbackFor = Exception.class)
 public class GoodsUnitStoreController {
     @Autowired
     private GoodsUnitService goodsUnitService;

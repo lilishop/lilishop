@@ -17,7 +17,6 @@ import java.util.List;
  * @since 2020/11/22 12:08
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class DepartmentRoleServiceImpl extends ServiceImpl<DepartmentRoleMapper, DepartmentRole> implements DepartmentRoleService {
 
 

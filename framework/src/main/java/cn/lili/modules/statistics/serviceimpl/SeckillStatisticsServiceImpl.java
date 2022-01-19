@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2020/8/21
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class SeckillStatisticsServiceImpl extends ServiceImpl<SeckillStatisticsMapper, Seckill> implements SeckillStatisticsService {
 
 

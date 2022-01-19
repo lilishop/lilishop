@@ -48,7 +48,6 @@ import java.util.Objects;
  * @since 2021/7/1
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper, KanjiaActivity> implements KanjiaActivityService {
 
     @Autowired

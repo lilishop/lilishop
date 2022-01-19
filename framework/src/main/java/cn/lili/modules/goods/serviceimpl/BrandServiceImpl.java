@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
  * @since 2020-02-18 16:18:56
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements BrandService {
 
     /**

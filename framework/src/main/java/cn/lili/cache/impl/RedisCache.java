@@ -80,7 +80,7 @@ public class RedisCache implements Cache {
     @Override
     public Boolean remove(Object key) {
 
-       return redisTemplate.delete(key);
+        return redisTemplate.delete(key);
     }
 
     /**
@@ -207,11 +207,17 @@ public class RedisCache implements Cache {
         RedisAtomicLong entityIdCounter = new RedisAtomicLong(key, redisTemplate.getConnectionFactory());
         Long increment = entityIdCounter.getAndIncrement();
         //初始设置过期时间
-        if ((null == increment || increment == 0) && liveTime > 0) {
+        if (increment == 0 && liveTime > 0) {
             entityIdCounter.expire(liveTime, TimeUnit.SECONDS);
         }
 
         return increment;
+    }
+
+    @Override
+    public Long incr(String key) {
+        RedisAtomicLong entityIdCounter = new RedisAtomicLong(key, redisTemplate.getConnectionFactory());
+        return entityIdCounter.getAndIncrement();
     }
 
     /**

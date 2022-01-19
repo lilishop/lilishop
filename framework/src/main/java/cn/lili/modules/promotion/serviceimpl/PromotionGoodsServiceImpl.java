@@ -41,7 +41,6 @@ import java.util.List;
  * @since 2021/3/18 9:22 上午
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper, PromotionGoods> implements PromotionGoodsService {
 
     private static final String SKU_ID_COLUMN = "sku_id";

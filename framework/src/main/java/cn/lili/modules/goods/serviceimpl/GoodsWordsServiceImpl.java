@@ -14,6 +14,5 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2020/10/15
  **/
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class GoodsWordsServiceImpl extends ServiceImpl<GoodsWordsMapper, GoodsWords> implements GoodsWordsService {
 }

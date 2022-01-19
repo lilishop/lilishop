@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
  * @since 2020-02-23 15:18:56
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryService {
 
     private static final String DELETE_FLAG_COLUMN = "delete_flag";
@@ -58,6 +57,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public List<Category> dbList(String parentId) {
         return this.list(new LambdaQueryWrapper<Category>().eq(Category::getParentId, parentId));
+    }
+
+    @Override
+    public Category getCategoryById(String id) {
+        return this.getById(id);
     }
 
     /**

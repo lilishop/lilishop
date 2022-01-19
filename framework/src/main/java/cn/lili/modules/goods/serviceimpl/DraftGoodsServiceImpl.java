@@ -33,7 +33,6 @@ import java.util.*;
  * @since 2020/12/19
  **/
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class DraftGoodsServiceImpl extends ServiceImpl<DraftGoodsMapper, DraftGoods> implements DraftGoodsService {
     /**
      * 分类

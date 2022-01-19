@@ -21,7 +21,6 @@ import java.util.List;
  * @since 2020/11/17 3:48 下午
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class VerificationSourceServiceImpl extends ServiceImpl<VerificationSourceMapper, VerificationSource> implements VerificationSourceService {
 
     @Autowired

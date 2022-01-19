@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "买家端,余额提现记录接口")
 @RequestMapping("/buyer/member/withdrawApply")
-@Transactional(rollbackFor = Exception.class)
 public class MemberWithdrawApplyBuyerController {
     @Autowired
     private MemberWithdrawApplyService memberWithdrawApplyService;

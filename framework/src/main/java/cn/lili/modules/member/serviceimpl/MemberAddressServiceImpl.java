@@ -23,7 +23,6 @@ import java.util.Objects;
  * @since 2020/11/18 9:44 上午
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, MemberAddress> implements MemberAddressService {
 
     @Override

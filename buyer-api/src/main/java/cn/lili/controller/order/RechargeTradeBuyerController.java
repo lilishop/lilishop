@@ -26,7 +26,6 @@ import javax.validation.constraints.Min;
 @RestController
 @Api(tags = "买家端,预存款充值记录接口")
 @RequestMapping("/buyer/trade/recharge")
-@Transactional(rollbackFor = Exception.class)
 public class RechargeTradeBuyerController {
 
     @Autowired

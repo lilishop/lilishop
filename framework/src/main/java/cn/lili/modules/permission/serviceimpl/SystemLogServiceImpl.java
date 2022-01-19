@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
  * @since 2020/11/17 3:45 下午
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class SystemLogServiceImpl implements SystemLogService {
 
     @Autowired

@@ -29,7 +29,6 @@ import java.util.List;
  * @since 2020-05-5 15:10:16
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMapper, ArticleCategory> implements ArticleCategoryService {
 
     /**

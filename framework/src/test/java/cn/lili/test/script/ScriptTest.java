@@ -29,7 +29,6 @@ import java.util.List;
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-@Transactional(rollbackFor = Exception.class)
 @Rollback()
 @ContextConfiguration
 @Configuration

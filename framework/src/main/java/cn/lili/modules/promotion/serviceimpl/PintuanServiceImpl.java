@@ -47,7 +47,6 @@ import java.util.List;
  * @since 2020/8/21
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMapper, Pintuan> implements PintuanService {
 
     /**

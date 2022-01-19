@@ -66,7 +66,7 @@ public class CommissionRender implements CartRenderStep {
                 String categoryId = cartSkuVO.getGoodsSku().getCategoryPath()
                         .substring(cartSkuVO.getGoodsSku().getCategoryPath().lastIndexOf(",") + 1);
                 if (CharSequenceUtil.isNotEmpty(categoryId)) {
-                    Double commissionRate = categoryService.getById(categoryId).getCommissionRate();
+                    Double commissionRate = categoryService.getCategoryById(categoryId).getCommissionRate();
                     priceDetailDTO.setPlatFormCommissionPoint(commissionRate);
                 }
 

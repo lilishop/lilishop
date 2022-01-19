@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2020/11/17 8:02 下午
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class AppVersionServiceImpl extends ServiceImpl<AppVersionMapper, AppVersion> implements AppVersionService {
 
     @Override

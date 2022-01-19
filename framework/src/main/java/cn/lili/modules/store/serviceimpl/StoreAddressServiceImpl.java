@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2020/11/22 16:00
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class StoreAddressServiceImpl extends ServiceImpl<StoreAddressMapper, StoreAddress> implements StoreAddressService {
 
     @Override

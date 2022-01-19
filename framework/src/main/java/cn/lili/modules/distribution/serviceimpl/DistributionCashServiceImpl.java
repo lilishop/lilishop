@@ -40,7 +40,6 @@ import java.util.Date;
  * @since 2020-03-126 18:04:56
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMapper, DistributionCash> implements DistributionCashService {
     /**
      * 分销员

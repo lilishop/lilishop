@@ -1,6 +1,7 @@
 package cn.lili.listener;
 
 import cn.hutool.json.JSONUtil;
+import cn.lili.event.MemberLoginEvent;
 import cn.lili.event.MemberPointChangeEvent;
 import cn.lili.event.MemberRegisterEvent;
 import cn.lili.event.MemberWithdrawalEvent;
@@ -51,6 +52,12 @@ public class MemberMessageListener implements RocketMQListener<MessageExt> {
     @Autowired
     private List<MemberRegisterEvent> memberSignEvents;
 
+    /**
+     * 会员注册
+     */
+    @Autowired
+    private List<MemberLoginEvent> memberLoginEvents;
+
 
     @Override
     public void onMessage(MessageExt messageExt) {
@@ -65,6 +72,21 @@ public class MemberMessageListener implements RocketMQListener<MessageExt> {
                         log.error("会员{},在{}业务中，状态修改事件执行异常",
                                 new String(messageExt.getBody()),
                                 memberRegisterEvent.getClass().getName(),
+                                e);
+                    }
+                }
+                break;
+
+            case MEMBER_LOGIN:
+
+                for (MemberLoginEvent memberLoginEvent : memberLoginEvents) {
+                    try {
+                        Member member = JSONUtil.toBean(new String(messageExt.getBody()), Member.class);
+                        memberLoginEvent.memberLogin(member);
+                    } catch (Exception e) {
+                        log.error("会员{},在{}业务中，状态修改事件执行异常",
+                                new String(messageExt.getBody()),
+                                memberLoginEvent.getClass().getName(),
                                 e);
                     }
                 }

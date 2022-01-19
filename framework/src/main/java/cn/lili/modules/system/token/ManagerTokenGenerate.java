@@ -29,10 +29,8 @@ import java.util.Map;
  * @since 2020/11/16 10:51
  */
 @Component
-public class ManagerTokenGenerate extends AbstractTokenGenerate {
+public class ManagerTokenGenerate extends AbstractTokenGenerate<AdminUser> {
 
-    @Autowired
-    private AdminUserService adminUserService;
     @Autowired
     private TokenUtil tokenUtil;
     @Autowired
@@ -42,17 +40,15 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
 
 
     @Override
-    public Token createToken(String username, Boolean longTerm) {
-        //生成token
-        AdminUser adminUser = adminUserService.findByUsername(username);
-        AuthUser user = new AuthUser(adminUser.getUsername(), adminUser.getId(), adminUser.getAvatar(), UserEnums.MANAGER, adminUser.getNickName(), adminUser.getIsSuper());
+    public Token createToken(AdminUser adminUser, Boolean longTerm) {
+        AuthUser authUser = new AuthUser(adminUser.getUsername(), adminUser.getId(), adminUser.getAvatar(), UserEnums.MANAGER, adminUser.getNickName(), adminUser.getIsSuper());
 
 
-        List<UserMenuVO> userMenuVOList = roleMenuService.findAllMenu(user.getId());
+        List<UserMenuVO> userMenuVOList = roleMenuService.findAllMenu(authUser.getId());
         //缓存权限列表
-        cache.put(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + user.getId(), this.permissionList(userMenuVOList));
+        cache.put(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + authUser.getId(), this.permissionList(userMenuVOList));
 
-        return tokenUtil.createToken(username, user, longTerm, UserEnums.MANAGER);
+        return tokenUtil.createToken(adminUser.getUsername(), authUser, longTerm, UserEnums.MANAGER);
     }
 
     @Override
