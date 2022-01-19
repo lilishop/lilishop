@@ -21,18 +21,18 @@
         <revision>4.2.3</revision>
         <docker-registry>registry.cn-beijing.aliyuncs.com/lili-images</docker-registry>
         <images-version>1</images-version>
-        <alipay-sdk-version>4.13.40.ALL</alipay-sdk-version>
-        <mysql-connector-version>5.1.48</mysql-connector-version>
+        <alipay-sdk-version>4.22.17.ALL</alipay-sdk-version>
+        <mysql-connector-version>8.0.27</mysql-connector-version>
         <mybatis-plus-version>3.4.3.4</mybatis-plus-version>
-        <Hutool-version>5.7.16</Hutool-version>
+        <Hutool-version>5.7.18</Hutool-version>
         <TinyPinyin-verions>2.0.3.RELEASE</TinyPinyin-verions>
         <jasypt-version>3.0.0</jasypt-version>
         <neetl-version>2.9.10</neetl-version>
         <lombok-version>1.18.22</lombok-version>
         <aliyun-version>4.5.18</aliyun-version>
         <aliyun-sdk-oss-version>3.11.1</aliyun-sdk-oss-version>
-        <aliyun-sdk-dysms-version>2.0.1</aliyun-sdk-dysms-version>
-        <rocketmq-version>2.1.1</rocketmq-version>
+        <aliyun-sdk-dysms-version>2.0.8</aliyun-sdk-dysms-version>
+        <rocketmq-version>2.2.1</rocketmq-version>
         <jwt-version>0.10.7</jwt-version>
         <antlr4-runtime-version>4.7.2</antlr4-runtime-version>
         <sharding-jdbc-version>4.0.0</sharding-jdbc-version>
@@ -48,12 +48,12 @@
         <de.codecentric>2.3.1</de.codecentric>
         <userAgentUtils>1.21</userAgentUtils>
         <interceptor-api>1.2</interceptor-api>
-        <poi-version>4.1.2</poi-version>
-        <poi-ooxml-version>4.1.2</poi-ooxml-version>
+        <poi-version>5.1.0</poi-version>
+        <poi-ooxml-version>5.1.0</poi-ooxml-version>
         <logstash-logback-encoder>6.6</logstash-logback-encoder>
         <zxing>3.4.1</zxing>
         <slf4j-api>1.7.28</slf4j-api>
-        <xk-time>2.2.0</xk-time>
+        <xk-time>3.2.3</xk-time>
         <commons-text>1.4</commons-text>
         <enjoy.version>4.3</enjoy.version>
         <xxl-job>2.3.0</xxl-job>

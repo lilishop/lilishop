@@ -109,6 +109,7 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
      * @return 是否更新成功
      */
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public boolean updatePromotionsGoods(FullDiscount promotions) {
         boolean result = super.updatePromotionsGoods(promotions);
         if (!PromotionsStatusEnum.CLOSE.name().equals(promotions.getPromotionStatus())

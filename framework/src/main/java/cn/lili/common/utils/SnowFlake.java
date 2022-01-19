@@ -33,7 +33,6 @@ public class SnowFlake {
      */
     public static void initialize(long workerId, long datacenterId) {
         snowflake = IdUtil.getSnowflake(workerId, datacenterId);
-        log.error(workerId+""+datacenterId);
     }
 
     public static long getId() {

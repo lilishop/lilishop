@@ -144,6 +144,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void addSeckillApply(String seckillId, String storeId, List<SeckillApplyVO> seckillApplyList) {
         Seckill seckill = this.seckillService.getById(seckillId);
         if (seckill == null) {
