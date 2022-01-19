@@ -18,7 +18,6 @@ import java.util.List;
  * @since 2020-03-07 09:24:33
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class FreightTemplateServiceChildImpl extends ServiceImpl<FreightTemplateChildMapper, FreightTemplateChild> implements FreightTemplateChildService {
 
     @Override

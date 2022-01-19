@@ -537,10 +537,8 @@ public class CartServiceImpl implements CartService {
         if (tradeDTO.getMemberAddress() == null) {
             throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
         }
-        //将购物车信息写入缓存，后续逻辑调用校验
-        this.resetTradeDTO(tradeDTO);
         //构建交易
-        Trade trade = tradeBuilder.createTrade(cartTypeEnum);
+        Trade trade = tradeBuilder.createTrade(tradeDTO);
         this.cleanChecked(tradeDTO);
         return trade;
     }

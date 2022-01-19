@@ -48,7 +48,6 @@ import java.util.List;
  * @since 2020/8/21
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 @Slf4j
 public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMapper, Seckill> implements SeckillService {
 

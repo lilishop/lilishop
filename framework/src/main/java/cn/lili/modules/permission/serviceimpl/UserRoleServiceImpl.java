@@ -20,7 +20,6 @@ import java.util.List;
  * @since 2020/11/17 3:52 下午
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> implements UserRoleService {
 
     @Override

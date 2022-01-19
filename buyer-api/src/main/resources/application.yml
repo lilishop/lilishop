@@ -3,12 +3,19 @@ server:
 
   servlet:
     context-path: /
-
-  tomcat:
-    uri-encoding: UTF-8
-    threads:
-      min-spare: 50
-      max: 1000
+#
+#  tomcat:
+#    #最大链接数，默认不设置，默认是10000
+#    max-connections: 6500
+#    #最大等待队列长度，允许HTTP请求缓存到请求队列的最大个数，默认不限制
+#    accept-count: 1000
+#    threads:
+#      #最少闲置
+#      min-spare: 50
+#      #最大线程数  ，默认是200
+#      max: 800
+  netty:
+    connection-timeout:
 
 # 与Spring Boot 2一样，默认情况下，大多数端点都不通过http公开，我们公开了所有端点。对于生产，您应该仔细选择要公开的端点。
 management:
@@ -69,10 +76,10 @@ spring:
         url: jdbc:mysql://127.0.0.1:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
         password: lilishop
-        maxActive: 20
-        initialSize: 5
+        maxActive: 50
+        initialSize: 10
         maxWait: 60000
-        minIdle: 5
+        minIdle: 10
         timeBetweenEvictionRunsMillis: 60000
         minEvictableIdleTimeMillis: 300000
         validationQuery: SELECT 1 FROM DUAL
@@ -110,7 +117,7 @@ spring:
     props:
       #是否打印逻辑SQL语句和实际SQL语句，建议调试时打印，在生产环境关闭
       sql:
-        show: true
+        show: false
 
 # 忽略TOKEN 鉴权 的url
 ignored:
@@ -176,8 +183,7 @@ logging:
   config: classpath:logback-spring.xml
   # 输出级别
   level:
-    cn.lili: debug
-    org.hibernate: debug
+    root: error
 #    org.springframework: debug
   file:
     # 指定路径

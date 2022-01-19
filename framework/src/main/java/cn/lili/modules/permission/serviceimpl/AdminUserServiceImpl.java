@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser> implements AdminUserService {
     @Autowired
     private UserRoleService userRoleService;
@@ -119,7 +118,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
             throw new ServiceException(ResultCode.USER_PASSWORD_ERROR);
         }
         try {
-            return managerTokenGenerate.createToken(username, false);
+            return managerTokenGenerate.createToken(adminUser, false);
         } catch (Exception e) {
             log.error("管理员登录错误", e);
         }

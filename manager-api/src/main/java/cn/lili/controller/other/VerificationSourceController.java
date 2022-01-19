@@ -27,7 +27,6 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,验证码资源维护接口")
 @RequestMapping("/manager/verificationSource")
-@Transactional(rollbackFor = Exception.class)
 public class VerificationSourceController {
 
     @Autowired

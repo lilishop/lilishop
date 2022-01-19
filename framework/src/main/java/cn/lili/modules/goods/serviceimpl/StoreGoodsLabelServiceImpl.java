@@ -30,7 +30,6 @@ import java.util.List;
  * @since 2020-03-07 16:18:56
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMapper, StoreGoodsLabel> implements StoreGoodsLabelService {
 
     /**

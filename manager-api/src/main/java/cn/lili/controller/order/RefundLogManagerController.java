@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "管理端,退款日志接口")
 @RequestMapping("/manager/refundLog")
-@Transactional(rollbackFor = Exception.class)
 public class RefundLogManagerController {
     @Autowired
     private RefundLogService refundLogService;

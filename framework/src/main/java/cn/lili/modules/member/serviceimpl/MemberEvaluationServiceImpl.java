@@ -56,7 +56,6 @@ import java.util.Map;
  * @since 2020-02-25 14:10:16
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMapper, MemberEvaluation> implements MemberEvaluationService {
 
     /**

@@ -23,29 +23,25 @@ import org.springframework.stereotype.Component;
  * @since 2020/11/16 10:51
  */
 @Component
-public class StoreTokenGenerate extends AbstractTokenGenerate {
-    @Autowired
-    private MemberService memberService;
+public class StoreTokenGenerate extends AbstractTokenGenerate<Member> {
     @Autowired
     private StoreService storeService;
     @Autowired
     private TokenUtil tokenUtil;
 
     @Override
-    public Token createToken(String username, Boolean longTerm) {
-        //生成token
-        Member member = memberService.findByUsername(username);
+    public Token createToken(Member member, Boolean longTerm) {
         if (!member.getHaveStore()) {
             throw new ServiceException(ResultCode.STORE_NOT_OPEN);
         }
         LambdaQueryWrapper<Store> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Store::getMemberId, member.getId());
         Store store = storeService.getOne(queryWrapper);
-        AuthUser user = new AuthUser(member.getUsername(), member.getId(), member.getNickName(), store.getStoreLogo(), UserEnums.STORE);
+        AuthUser authUser = new AuthUser(member.getUsername(), member.getId(), member.getNickName(), store.getStoreLogo(), UserEnums.STORE);
 
-        user.setStoreId(store.getId());
-        user.setStoreName(store.getStoreName());
-        return tokenUtil.createToken(username, user, longTerm, UserEnums.STORE);
+        authUser.setStoreId(store.getId());
+        authUser.setStoreName(store.getStoreName());
+        return tokenUtil.createToken(member.getUsername(), authUser, longTerm, UserEnums.STORE);
     }
 
     @Override

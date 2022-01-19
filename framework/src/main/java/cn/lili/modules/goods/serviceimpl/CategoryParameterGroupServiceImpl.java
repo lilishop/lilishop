@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
  * 2020-03-02 16:45:03
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class CategoryParameterGroupServiceImpl extends ServiceImpl<CategoryParameterGroupMapper, CategoryParameterGroup> implements CategoryParameterGroupService {
     /**
      * 商品参数

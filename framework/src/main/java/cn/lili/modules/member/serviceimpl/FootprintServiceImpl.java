@@ -27,7 +27,6 @@ import java.util.Objects;
  * @since 2020/11/18 10:46 上午
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint> implements FootprintService {
 
     /**

@@ -33,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2021/7/1
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class KanjiaActivityLogServiceImpl extends ServiceImpl<KanJiaActivityLogMapper, KanjiaActivityLog> implements KanjiaActivityLogService {
 
     @Autowired

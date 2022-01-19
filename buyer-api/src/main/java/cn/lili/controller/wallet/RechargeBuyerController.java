@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "买家端,预存款充值记录接口")
 @RequestMapping("/buyer/member/recharge")
-@Transactional(rollbackFor = Exception.class)
 public class RechargeBuyerController {
 
     @Autowired

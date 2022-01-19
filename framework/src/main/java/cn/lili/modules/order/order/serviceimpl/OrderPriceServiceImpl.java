@@ -30,7 +30,6 @@ import java.util.List;
  * @since 2020/11/17 7:36 下午
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class OrderPriceServiceImpl implements OrderPriceService {
 
     /**

@@ -38,7 +38,6 @@ import java.util.concurrent.TimeUnit;
  * @since 2020-03-14 23:04:56
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Distribution> implements DistributionService {
 
     /**

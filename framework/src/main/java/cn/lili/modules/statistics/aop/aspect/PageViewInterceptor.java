@@ -37,8 +37,6 @@ public class PageViewInterceptor {
     @Autowired
     private Cache cache;
 
-    @Autowired
-    private HttpServletRequest request;
 
 
     @AfterReturning(returning = "rvt", pointcut = "@annotation(cn.lili.modules.statistics.aop.PageViewPoint)")

@@ -26,7 +26,6 @@ import java.util.Optional;
  * @since 2020/11/18 2:25 下午
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class GoodsCollectionServiceImpl extends ServiceImpl<GoodsCollectionMapper, GoodsCollection> implements GoodsCollectionService {
 
 

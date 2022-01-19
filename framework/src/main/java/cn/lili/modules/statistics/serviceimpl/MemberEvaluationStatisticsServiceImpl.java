@@ -24,7 +24,6 @@ import java.util.Objects;
  * @since 2020-02-25 14:10:16
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class MemberEvaluationStatisticsServiceImpl extends ServiceImpl<MemberEvaluationStatisticsMapper, MemberEvaluation> implements MemberEvaluationStatisticsService {
 
 

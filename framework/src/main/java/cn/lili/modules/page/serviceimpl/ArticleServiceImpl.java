@@ -30,7 +30,6 @@ import java.util.List;
  * @since 2020/11/18 11:40 上午
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
 
     @Override

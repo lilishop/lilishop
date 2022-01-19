@@ -106,6 +106,7 @@ public class TradeDTO implements Serializable {
      */
     private MemberAddress memberAddress;
 
+
     /**
      * 客户端类型
      */

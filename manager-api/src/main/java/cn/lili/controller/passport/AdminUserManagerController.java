@@ -46,7 +46,6 @@ import java.util.List;
 @RestController
 @Api(tags = "管理员")
 @RequestMapping("/manager/user")
-@Transactional(rollbackFor = Exception.class)
 @Validated
 public class AdminUserManagerController {
     @Autowired

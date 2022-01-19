@@ -25,7 +25,6 @@ import java.util.Objects;
  * @since 2020/11/22 14:23
  */
 @RestController
-@Transactional(rollbackFor = Exception.class)
 @Api(tags = "店铺端,日志管理接口")
 @RequestMapping("/store/log")
 public class LogStoreController {
