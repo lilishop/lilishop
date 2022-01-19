@@ -29,7 +29,7 @@ public class UpdateEsGoodsIndexPromotionsListener {
     private RocketmqCustomProperties rocketmqCustomProperties;
 
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void updateEsGoodsIndexPromotions(UpdateEsGoodsIndexPromotionsEvent event) {
         //更新商品促销消息
         String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX_PROMOTIONS.name();

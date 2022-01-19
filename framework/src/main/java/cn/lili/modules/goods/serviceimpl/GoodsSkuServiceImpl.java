@@ -131,6 +131,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void update(List<Map<String, Object>> skuList, Goods goods, Boolean regeneratorSkuFlag) {
         // 是否存在规格
         if (skuList == null || skuList.isEmpty()) {
@@ -577,7 +578,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      * @param skuList sku列表
      * @param goods   商品信息
      */
-    private List<GoodsSku> addGoodsSku(List<Map<String, Object>> skuList, Goods goods) {
+    @Transactional(rollbackFor = Exception.class)
+    List<GoodsSku> addGoodsSku(List<Map<String, Object>> skuList, Goods goods) {
         List<GoodsSku> skus = new ArrayList<>();
         for (Map<String, Object> skuVO : skuList) {
             Map<String, Object> resultMap = this.add(skuVO, goods);

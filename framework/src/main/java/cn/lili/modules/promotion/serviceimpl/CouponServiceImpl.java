@@ -249,7 +249,6 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
      * @param promotions 优惠券信息
      */
     @Override
-    @Transactional(rollbackFor = {Exception.class})
     public void updateEsGoodsIndex(Coupon promotions) {
         Coupon coupon = JSONUtil.parse(promotions).toBean(Coupon.class);
         super.updateEsGoodsIndex(coupon);
