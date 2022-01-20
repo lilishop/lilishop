@@ -23,6 +23,7 @@ import cn.lili.modules.promotion.tools.PromotionTools;
 import groovy.util.logging.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -140,6 +141,7 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
      * @return 是否更新成功
      */
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public boolean updatePromotionsGoods(CouponActivity couponActivity) {
         boolean result = super.updatePromotionsGoods(couponActivity);
         if (couponActivity instanceof CouponActivityDTO
@@ -189,7 +191,8 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
      * @param memberList          用户列表
      * @param couponActivityItems 优惠券列表
      */
-    private void sendCoupon(List<Map<String, Object>> memberList, List<CouponActivityItem> couponActivityItems) {
+    @Transactional(rollbackFor = {Exception.class})
+    void sendCoupon(List<Map<String, Object>> memberList, List<CouponActivityItem> couponActivityItems) {
 
         for (CouponActivityItem couponActivityItem : couponActivityItems) {
             //获取优惠券

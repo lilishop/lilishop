@@ -77,6 +77,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
      * @param receiveNum 领取数量
      */
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public void receiveCoupon(String couponId, Integer receiveNum) {
         Coupon coupon = this.getById(couponId);
         if (coupon == null) {
@@ -87,6 +88,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
     }
 
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public boolean removePromotions(List<String> ids) {
         //删除优惠券信息
         this.memberCouponService.closeMemberCoupon(ids);
@@ -103,6 +105,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
      * @param usedNum  使用数量
      */
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public void usedCoupon(String couponId, Integer usedNum) {
         Coupon coupon = this.getById(couponId);
         if (coupon == null) {
@@ -155,6 +158,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
      * @return 是否更新成功
      */
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public boolean updateStatus(List<String> ids, Long startTime, Long endTime) {
         List<Coupon> list = this.list(new LambdaQueryWrapper<Coupon>().in(Coupon::getId, ids).eq(Coupon::getRangeDayType, CouponRangeDayEnum.DYNAMICTIME.name()));
         if (!list.isEmpty()) {
@@ -220,6 +224,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
     }
 
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public boolean updatePromotionsGoods(Coupon promotions) {
         boolean result = super.updatePromotionsGoods(promotions);
         if (!PromotionsStatusEnum.CLOSE.name().equals(promotions.getPromotionStatus()) &&
