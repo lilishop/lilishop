@@ -293,8 +293,9 @@ public class AliPayPlugin implements Payment {
             log.info("支付回调响应：{}", JSONUtil.toJsonStr(map));
             boolean verifyResult = AlipaySignature.rsaCertCheckV1(map, alipayPaymentSetting.getAlipayPublicCertPath(), "UTF-8",
                     "RSA2");
-            //支付完成
-            if (!"TRADE_FINISHED".equals(map.get("trade_status"))) {
+            //支付完成判定
+            if (!"TRADE_FINISHED".equals(map.get("trade_status")) &&
+                    !"TRADE_SUCCESS".equals(map.get("trade_status"))) {
                 return;
             }
             String payParamStr = map.get("passback_params");
