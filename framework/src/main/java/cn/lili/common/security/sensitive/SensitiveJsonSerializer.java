@@ -72,7 +72,7 @@ public class SensitiveJsonSerializer extends JsonSerializer<String>
         AuthUser authUser = UserContext.getCurrentUser();
         //默认脱敏
         if (authUser == null) {
-            return true;
+            return false;
         }
 
         //如果是店铺
