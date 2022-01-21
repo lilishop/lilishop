@@ -273,7 +273,7 @@ public class AliPayPlugin implements Payment {
                 log.info("支付回调通知：支付失败-参数：{}", map);
             }
 
-            ThreadContextHolder.getHttpResponse().sendRedirect(domainProperties.getWap()+"/pages/order/myOrder?status=0");
+            ThreadContextHolder.getHttpResponse().sendRedirect(domainProperties.getWap() + "/pages/order/myOrder?status=0");
         } catch (Exception e) {
             log.error("支付回调同步通知异常", e);
         }
@@ -293,7 +293,11 @@ public class AliPayPlugin implements Payment {
             log.info("支付回调响应：{}", JSONUtil.toJsonStr(map));
             boolean verifyResult = AlipaySignature.rsaCertCheckV1(map, alipayPaymentSetting.getAlipayPublicCertPath(), "UTF-8",
                     "RSA2");
-
+            //支付完成判定
+            if (!"TRADE_FINISHED".equals(map.get("trade_status")) &&
+                    !"TRADE_SUCCESS".equals(map.get("trade_status"))) {
+                return;
+            }
             String payParamStr = map.get("passback_params");
             String payParamJson = URLDecoder.decode(payParamStr, StandardCharsets.UTF_8);
             PayParam payParam = BeanUtil.formatKeyValuePair(payParamJson, new PayParam());

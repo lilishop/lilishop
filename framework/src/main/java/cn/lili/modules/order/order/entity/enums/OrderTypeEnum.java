@@ -16,5 +16,10 @@ public enum OrderTypeEnum {
     /**
      * 虚拟订单
      */
-    VIRTUAL
+    VIRTUAL,
+
+    /**
+     * 虚拟订单
+     */
+    E_COUPON,
 }
