@@ -23,8 +23,7 @@ public class ManagerApiApplication {
     @Primary
     @Bean
     public TaskExecutor primaryTask() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        return executor;
+        return new ThreadPoolTaskExecutor();
     }
 
     public static void main(String[] args) {
