@@ -1,8 +1,10 @@
 package cn.lili.modules.promotion.entity.dto.search;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.lili.modules.promotion.entity.enums.*;
-import cn.lili.modules.promotion.tools.PromotionTools;
+import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
+import cn.lili.modules.promotion.entity.enums.CouponTypeEnum;
+import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -77,9 +79,6 @@ public class MemberCouponSearchParams extends BasePromotionsSearchParams impleme
         }
         if (CharSequenceUtil.isNotEmpty(memberCouponStatus)) {
             queryWrapper.eq("member_coupon_status", MemberCouponStatusEnum.valueOf(memberCouponStatus).name());
-        }
-        if (CharSequenceUtil.isNotEmpty(this.getPromotionStatus())) {
-            queryWrapper.and(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.valueOf(getPromotionStatus())));
         }
         if (CharSequenceUtil.isNotEmpty(price)) {
             String[] s = price.split("_");

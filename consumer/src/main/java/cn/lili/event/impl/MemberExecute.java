@@ -20,6 +20,6 @@ public class MemberExecute implements MemberLoginEvent {
 
     @Override
     public void memberLogin(Member member) {
-        memberService.updateById(member);
+        memberService.updateMemberLoginTime(member.getId());
     }
 }

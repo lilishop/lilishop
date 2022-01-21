@@ -50,8 +50,8 @@ import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -593,6 +593,20 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Override
     public List<String> getAllMemberMobile() {
         return this.baseMapper.getAllMemberMobile();
+    }
+
+    /**
+     * 更新会员登录时间为最新时间
+     *
+     * @param memberId 会员id
+     * @return 是否更新成功
+     */
+    @Override
+    public boolean updateMemberLoginTime(String memberId) {
+        LambdaUpdateWrapper<Member> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(Member::getId, memberId);
+        updateWrapper.set(Member::getLastLoginDate, new Date());
+        return this.update(updateWrapper);
     }
 
     /**

@@ -227,4 +227,12 @@ public interface MemberService extends IService<Member> {
      * @return 所有会员的手机号
      */
     List<String> getAllMemberMobile();
+
+    /**
+     * 更新会员登录时间为最新时间
+     *
+     * @param memberId 会员id
+     * @return 是否更新成功
+     */
+    boolean updateMemberLoginTime(String memberId);
 }
