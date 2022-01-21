@@ -43,6 +43,19 @@ public class BasePromotionsSearchParams {
     private String storeId;
 
     public <T> QueryWrapper<T> queryWrapper() {
+        QueryWrapper<T> queryWrapper = this.baseQueryWrapper();
+
+        if (CharSequenceUtil.isNotEmpty(promotionStatus)) {
+            queryWrapper.and(i -> {
+                for (String status : promotionStatus.split(",")) {
+                    i.or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.valueOf(status)));
+                }
+            });
+        }
+        return queryWrapper;
+    }
+
+    public <T> QueryWrapper<T> baseQueryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
 
         if (CharSequenceUtil.isNotEmpty(id)) {
@@ -53,13 +66,6 @@ public class BasePromotionsSearchParams {
         }
         if (endTime != null) {
             queryWrapper.le("end_time", new Date(endTime));
-        }
-        if (CharSequenceUtil.isNotEmpty(promotionStatus)) {
-            queryWrapper.and(i -> {
-                for (String status : promotionStatus.split(",")) {
-                    i.or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.valueOf(status)));
-                }
-            });
         }
         if (CharSequenceUtil.isNotEmpty(scopeType)) {
             queryWrapper.eq("scope_type", scopeType);
