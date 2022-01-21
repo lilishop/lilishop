@@ -20,6 +20,17 @@ public class PointSettingItem implements Comparable<PointSettingItem> {
     @ApiModelProperty(value = "赠送积分")
     private Integer point;
 
+    public Integer getPoint() {
+        if (point != null || point < 0) {
+            return 0;
+        }
+        return point;
+    }
+
+    public void setPoint(Integer point) {
+        this.point = point;
+    }
+
     @Override
     public int compareTo(PointSettingItem pointSettingItem) {
         return this.day - pointSettingItem.getDay();
