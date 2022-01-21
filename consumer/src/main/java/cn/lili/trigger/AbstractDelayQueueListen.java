@@ -5,10 +5,10 @@ import cn.lili.cache.Cache;
 import cn.lili.common.utils.ThreadPoolUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * @since 2020/11/7
  **/
 @Slf4j
-public abstract class AbstractDelayQueueListen {
+public abstract class AbstractDelayQueueListen implements ApplicationRunner {
 
     @Autowired
     private Cache cache;
@@ -87,7 +87,6 @@ public abstract class AbstractDelayQueueListen {
     /**
      * 监听队列
      */
-    @PostConstruct
     public void init() {
         ThreadPoolUtil.getPool().execute(this::startDelayQueueMachine);
     }
