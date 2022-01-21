@@ -1,5 +1,6 @@
 package cn.lili.modules.order.order.entity.dos;
 
+import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
@@ -82,6 +83,7 @@ public class Trade extends BaseEntity {
         }
         BeanUtil.copyProperties(tradeDTO, this);
         BeanUtil.copyProperties(tradeDTO.getPriceDetailDTO(), this);
+        this.setPayStatus(PayStatusEnum.UNPAID.name());
         this.setId(originId);
     }
 }

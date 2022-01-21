@@ -642,7 +642,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public Double getPaymentTotal(String orderSn) {
         Order order = this.getBySn(orderSn);
         Trade trade = tradeService.getBySn(order.getTradeSn());
-        if (trade.getPayStatus().equals(PayStatusEnum.PAID.name())) {
+        //如果交易不为空，则返回交易的金额，否则返回订单金额
+        if (StringUtils.isNotEmpty(trade.getPayStatus())
+                && trade.getPayStatus().equals(PayStatusEnum.PAID.name())) {
             return trade.getFlowPrice();
         }
         return order.getFlowPrice();
