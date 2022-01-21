@@ -36,9 +36,9 @@ public final class CurrencyUtil {
         return result.doubleValue();
     }
     /**
-     * 提供精确的加法运算。
+     * 提供精确的减法运算。
      *
-     * @return 累加之和
+     * @return 第一个参数为被减数，其余数字为减数
      */
     public static Double sub(double... params) {
         BigDecimal result = BigDecimal.valueOf(params[0]);
