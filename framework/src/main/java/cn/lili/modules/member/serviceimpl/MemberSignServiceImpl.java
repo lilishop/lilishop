@@ -67,14 +67,6 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
         //获取当前会员信息
         AuthUser authUser = UserContext.getCurrentUser();
         if (authUser != null) {
-            QueryWrapper<MemberSign> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("member_id", authUser.getId());
-            queryWrapper.between("create_time", new Date(DateUtil.startOfTodDay() * 1000), DateUtil.getCurrentDayEndTime());
-            //校验今天是否已经签到
-            List<MemberSign> todaySigns = this.baseMapper.getTodayMemberSign(queryWrapper);
-            if (todaySigns.size() > 0) {
-                throw new ServiceException(ResultCode.MEMBER_SIGN_REPEAT);
-            }
             //当前签到天数的前一天日期
             List<MemberSign> signs = this.baseMapper.getBeforeMemberSign(authUser.getId());
             //构建参数
@@ -89,14 +81,17 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
             } else {
                 memberSign.setSignDay(1);
             }
-            Integer result = this.baseMapper.insert(memberSign);
-            //签到成功后发送消息赠送积分
-            if (result > 0) {
+            //手动写入创建时间，以保证唯一索引生效
+            memberSign.setCreateTime(DateUtil.getCurrentDayEndTime());
+            try {
+                this.baseMapper.insert(memberSign);
+                //签到成功后发送消息赠送积分
                 String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_SING.name();
                 rocketMQTemplate.asyncSend(destination, memberSign, RocketmqSendCallbackBuilder.commonCallback());
                 return true;
+            } catch (Exception e) {
+                throw new ServiceException(ResultCode.MEMBER_SIGN_REPEAT);
             }
-            return false;
         }
         throw new ServiceException(ResultCode.USER_NOT_LOGIN);
     }
