@@ -41,9 +41,10 @@ public interface MemberEvaluationService extends IService<MemberEvaluation> {
      * 4.发送用户评价消息修改商品的评价数量以及好评率
      *
      * @param memberEvaluationDTO 评论
+     * @param isSelf              是否自己操作（true：买家操作/false 系统操作）
      * @return 操作状态
      */
-    MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO);
+    MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO, Boolean isSelf);
 
     /**
      * 根据ID查询会员评价

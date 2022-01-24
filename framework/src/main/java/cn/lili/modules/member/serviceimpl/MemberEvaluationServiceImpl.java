@@ -106,13 +106,15 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
     }
 
     @Override
-    public MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO) {
+    public MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO, Boolean isSelf) {
         //获取子订单信息
         OrderItem orderItem = orderItemService.getBySn(memberEvaluationDTO.getOrderItemSn());
         //获取订单信息
         Order order = orderService.getBySn(orderItem.getOrderSn());
         //检测是否可以添加会员评价
-        checkMemberEvaluation(orderItem, order);
+        if (isSelf) {
+            checkMemberEvaluation(orderItem, order);
+        }
         //获取用户信息
         Member member = memberService.getUserInfo();
         //获取商品信息

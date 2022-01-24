@@ -40,7 +40,7 @@ public class MemberEvaluationBuyerController {
     @ApiOperation(value = "添加会员评价")
     @PostMapping
     public ResultMessage<MemberEvaluationDTO> save(@Valid MemberEvaluationDTO memberEvaluationDTO) {
-        return ResultUtil.data(memberEvaluationService.addMemberEvaluation(memberEvaluationDTO));
+        return ResultUtil.data(memberEvaluationService.addMemberEvaluation(memberEvaluationDTO, true));
     }
 
     @ApiOperation(value = "查看会员评价详情")
