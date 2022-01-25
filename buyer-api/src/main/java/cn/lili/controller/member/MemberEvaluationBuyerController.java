@@ -1,5 +1,6 @@
 package cn.lili.controller.member;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.security.context.UserContext;
@@ -37,6 +38,7 @@ public class MemberEvaluationBuyerController {
     @Autowired
     private MemberEvaluationService memberEvaluationService;
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "添加会员评价")
     @PostMapping
     public ResultMessage<MemberEvaluationDTO> save(@Valid MemberEvaluationDTO memberEvaluationDTO) {

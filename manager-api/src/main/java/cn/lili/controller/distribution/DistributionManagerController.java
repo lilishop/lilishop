@@ -1,5 +1,6 @@
 package cn.lili.controller.distribution;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
@@ -39,6 +40,7 @@ public class DistributionManagerController {
     }
 
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "清退分销商")
     @PutMapping(value = "/retreat/{id}")
     @ApiImplicitParams({
@@ -53,6 +55,7 @@ public class DistributionManagerController {
 
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "恢复分销商")
     @PutMapping(value = "/resume/{id}")
     @ApiImplicitParams({
@@ -67,6 +70,7 @@ public class DistributionManagerController {
 
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "审核分销商")
     @PutMapping(value = "/audit/{id}")
     @ApiImplicitParams({

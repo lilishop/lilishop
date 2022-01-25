@@ -1,5 +1,6 @@
 package cn.lili.controller.wallet;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
@@ -120,6 +121,7 @@ public class MemberWalletBuyerController {
     }
 
 
+    @PreventDuplicateSubmissions
     @PostMapping(value = "/withdrawal")
     @ApiOperation(value = "会员中心余额提现")
     @ApiImplicitParams({

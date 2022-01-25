@@ -1,5 +1,6 @@
 package cn.lili.controller.order;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
@@ -68,6 +69,7 @@ public class OrderManagerController {
     }
 
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "确认收款")
     @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path")
     @PostMapping(value = "/{orderSn}/pay")
@@ -76,6 +78,7 @@ public class OrderManagerController {
         return ResultUtil.success();
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "修改收货人信息")
     @ApiImplicitParam(name = "orderSn", value = "订单sn", required = true, dataType = "String", paramType = "path")
     @PostMapping(value = "/update/{orderSn}/consignee")
@@ -84,6 +87,7 @@ public class OrderManagerController {
         return ResultUtil.data(orderService.updateConsignee(orderSn, memberAddressDTO));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "修改订单价格")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "orderSn", value = "订单sn", required = true, dataType = "String", paramType = "path"),
@@ -96,6 +100,7 @@ public class OrderManagerController {
     }
 
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "取消订单")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path"),

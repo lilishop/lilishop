@@ -1,5 +1,6 @@
 package cn.lili.controller.order;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
@@ -74,6 +75,7 @@ public class AfterSaleManagerController {
         return ResultUtil.data(afterSaleService.refund(afterSaleSn, remark));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "审核售后申请")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "afterSaleSn", value = "售后sn", required = true, paramType = "path"),
