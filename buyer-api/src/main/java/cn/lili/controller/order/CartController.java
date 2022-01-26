@@ -1,5 +1,6 @@
 package cn.lili.controller.order;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
@@ -235,6 +236,7 @@ public class CartController {
     }
 
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "创建交易")
     @PostMapping(value = "/create/trade", consumes = "application/json", produces = "application/json")
     public ResultMessage<Object> crateTrade(@RequestBody TradeParams tradeParams) {

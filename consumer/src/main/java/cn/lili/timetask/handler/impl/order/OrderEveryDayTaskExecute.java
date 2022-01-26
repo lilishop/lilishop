@@ -146,7 +146,7 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
                 memberEvaluationDTO.setDescriptionScore(5);
                 memberEvaluationDTO.setServiceScore(5);
 
-                memberEvaluationService.addMemberEvaluation(memberEvaluationDTO);
+                memberEvaluationService.addMemberEvaluation(memberEvaluationDTO, false);
             }
         }
     }
