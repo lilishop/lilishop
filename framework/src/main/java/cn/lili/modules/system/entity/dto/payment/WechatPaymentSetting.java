@@ -53,7 +53,7 @@ public class WechatPaymentSetting {
      */
     private String apiKey3;
 
-    public String getAppId() {
+    public String getAppIdValue() {
 
         if (StringUtils.isEmpty(appId)) {
             throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
@@ -61,14 +61,14 @@ public class WechatPaymentSetting {
         return appId;
     }
 
-    public String getMpAppId() {
+    public String getMpAppIdValue() {
         if (StringUtils.isEmpty(mpAppId)) {
             throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
         }
         return mpAppId;
     }
 
-    public String getServiceAppId() {
+    public String getServiceAppIdValue() {
         if (StringUtils.isEmpty(serviceAppId)) {
             throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
         }
