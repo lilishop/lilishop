@@ -1,8 +1,5 @@
 package cn.lili.modules.system.entity.dto.payment;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
-import com.alibaba.druid.util.StringUtils;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -52,26 +49,4 @@ public class WechatPaymentSetting {
      * apiv3私钥
      */
     private String apiKey3;
-
-    public String getAppIdValue() {
-
-        if (StringUtils.isEmpty(appId)) {
-            throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
-        }
-        return appId;
-    }
-
-    public String getMpAppIdValue() {
-        if (StringUtils.isEmpty(mpAppId)) {
-            throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
-        }
-        return mpAppId;
-    }
-
-    public String getServiceAppIdValue() {
-        if (StringUtils.isEmpty(serviceAppId)) {
-            throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
-        }
-        return serviceAppId;
-    }
 }
