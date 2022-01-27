@@ -30,11 +30,11 @@ import cn.lili.modules.promotion.service.KanjiaActivityService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -220,4 +220,16 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
         return this.page(PageUtil.initPage(page), queryWrapper);
     }
 
+    /**
+     * 结束砍价活动
+     *
+     * @param kanjiaId 砍价活动id
+     * @return 是否更新成功
+     */
+    @Override
+    public boolean endKanjiaActivity(String kanjiaId) {
+        return this.update(new LambdaUpdateWrapper<KanjiaActivity>()
+                .eq(KanjiaActivity::getId, kanjiaId)
+                .set(KanjiaActivity::getStatus, KanJiaStatusEnum.END.name()));
+    }
 }
