@@ -39,7 +39,6 @@ import cn.lili.modules.payment.kit.plugin.wechat.model.*;
 import cn.lili.modules.payment.service.PaymentService;
 import cn.lili.modules.payment.service.RefundLogService;
 import cn.lili.modules.system.entity.dos.Setting;
-import cn.lili.modules.system.entity.dto.connect.dto.WechatConnectSettingItem;
 import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
@@ -258,6 +257,9 @@ public class WechatPlugin implements Payment {
 
             WechatPaymentSetting setting = wechatPaymentSetting();
             String appid = setting.getAppId();
+            if (appid == null) {
+                throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
+            }
             UnifiedOrderModel unifiedOrderModel = new UnifiedOrderModel()
                     .setAppid(appid)
                     .setMchid(setting.getMchId())
@@ -323,6 +325,9 @@ public class WechatPlugin implements Payment {
             WechatPaymentSetting setting = wechatPaymentSetting();
 
             String appid = setting.getServiceAppId();
+            if (appid == null) {
+                throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
+            }
             UnifiedOrderModel unifiedOrderModel = new UnifiedOrderModel()
                     .setAppid(appid)
                     .setMchid(setting.getMchId())
@@ -391,6 +396,9 @@ public class WechatPlugin implements Payment {
             //微信小程序，appid 需要单独获取，这里读取了联合登陆配置的appid ，实际场景小程序自动登录，所以这个appid是最为保险的做法
             //如果有2开需求，这里需要调整，修改这个appid的获取途径即可
             String appid = wechatPaymentSetting().getMpAppId();
+            if (StringUtils.isEmpty(appid)) {
+                throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
+            }
             String attach = URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
 
             WechatPaymentSetting setting = wechatPaymentSetting();
