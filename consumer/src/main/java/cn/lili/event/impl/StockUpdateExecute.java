@@ -154,14 +154,11 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
      * @param stocks
      */
     private void checkStocks(List<Integer> stocks, OrderDetailVO order) {
-        for (int i = 0; i < stocks.size(); i++) {
-            if (null == stocks.get(i)) {
-                initSkuCache(order.getOrderItems());
-                initPromotionCache(order.getOrderItems());
-                return;
-            }
-
+        if (order.getOrderItems().size() == stocks.size()) {
+            return;
         }
+        initSkuCache(order.getOrderItems());
+        initPromotionCache(order.getOrderItems());
     }
 
     /**
