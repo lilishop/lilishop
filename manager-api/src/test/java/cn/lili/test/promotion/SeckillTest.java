@@ -50,10 +50,11 @@ class SeckillTest {
         System.out.println(setting);
         SeckillSetting seckillSetting = new Gson().fromJson(setting.getSettingValue(), SeckillSetting.class);
         System.out.println(seckillSetting);
-        Seckill seckill = new Seckill(SeckillService.PRE_CREATION, seckillSetting.getHours(), seckillSetting.getSeckillRule());
-        System.out.println(seckill);
-        boolean result = seckillService.savePromotions(seckill);
-        System.out.println(result);
+        boolean result = true;
+        for (int i = 1; i <= SeckillService.PRE_CREATION; i++) {
+            Seckill seckill = new Seckill(i, seckillSetting.getHours(), seckillSetting.getSeckillRule());
+            seckillService.savePromotions(seckill);
+        }
         Assertions.assertTrue(result);
     }
 
