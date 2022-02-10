@@ -54,8 +54,6 @@ public class StoreTokenGenerate extends AbstractTokenGenerate<Member> {
         //根据会员id查询店员信息
         Clerk clerk = clerkService.getClerkByMemberId(member.getId());
 
-        AuthUser user = new AuthUser(member.getUsername(), member.getId(), UserEnums.STORE, member.getNickName(), clerk.getIsSuper(), clerk.getId());
-
         if (clerk == null) {
             throw new ServiceException(ResultCode.CLERK_NOT_FOUND_ERROR);
         }
@@ -70,7 +68,8 @@ public class StoreTokenGenerate extends AbstractTokenGenerate<Member> {
         if (store == null) {
             throw new ServiceException(ResultCode.STORE_NOT_OPEN);
         }
-        AuthUser authUser = new AuthUser(member.getUsername(), member.getId(), member.getNickName(), store.getStoreLogo(), UserEnums.STORE);
+        AuthUser authUser = new AuthUser(member.getUsername(), member.getId(), UserEnums.STORE, member.getNickName(), clerk.getIsSuper(), clerk.getId(),store.getStoreLogo());
+
         authUser.setStoreId(store.getId());
         authUser.setStoreName(store.getStoreName());
         return tokenUtil.createToken(member.getUsername(), authUser, longTerm, UserEnums.STORE);
