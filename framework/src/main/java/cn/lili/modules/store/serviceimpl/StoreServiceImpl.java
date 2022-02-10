@@ -10,7 +10,9 @@ import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.member.entity.dos.Member;
+import cn.lili.modules.member.entity.dto.ClerkAddDTO;
 import cn.lili.modules.member.entity.dto.CollectionDTO;
+import cn.lili.modules.member.service.ClerkService;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
@@ -50,6 +52,12 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
      */
     @Autowired
     private MemberService memberService;
+
+    /**
+     * 店员
+     */
+    @Autowired
+    private ClerkService clerkService;
     /**
      * 商品
      */
@@ -171,6 +179,13 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             member.setHaveStore(true);
             member.setStoreId(id);
             memberService.updateById(member);
+            //创建店员
+            ClerkAddDTO clerkAddDTO = new ClerkAddDTO();
+            clerkAddDTO.setMemberId(member.getId());
+            clerkAddDTO.setIsSuper(true);
+            clerkAddDTO.setShopkeeper(true);
+            clerkAddDTO.setStoreId(id);
+            clerkService.saveClerk(clerkAddDTO);
             //设定商家的结算日
             storeDetailService.update(new LambdaUpdateWrapper<StoreDetail>()
                     .eq(StoreDetail::getStoreId, id)

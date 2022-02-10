@@ -47,7 +47,6 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate {
         AdminUser adminUser = adminUserService.findByUsername(username);
         AuthUser user = new AuthUser(adminUser.getUsername(), adminUser.getId(), UserEnums.MANAGER, adminUser.getNickName(), adminUser.getIsSuper());
 
-
         List<UserMenuVO> userMenuVOList = roleMenuService.findAllMenu(user.getId());
         //缓存权限列表
         cache.put(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + user.getId(), this.permissionList(userMenuVOList));

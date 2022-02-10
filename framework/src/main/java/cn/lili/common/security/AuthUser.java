@@ -46,6 +46,11 @@ public class AuthUser implements Serializable {
      * storeId
      */
     private String storeId;
+    /**
+     * 如果角色是商家，则存在此店铺id字段
+     * clerkId
+     */
+    private String clerkId;
 
     /**
      * 如果角色是商家，则存在此店铺名称字段
@@ -71,5 +76,15 @@ public class AuthUser implements Serializable {
         this.role = manager;
         this.isSuper = isSuper;
         this.nickName = nickName;
+        this.clerkId = clerkId;
+    }
+
+    public AuthUser(String username, String id, UserEnums manager, String nickName, Boolean isSuper, String clerkId) {
+        this.username = username;
+        this.id = id;
+        this.role = manager;
+        this.isSuper = isSuper;
+        this.nickName = nickName;
+        this.clerkId = clerkId;
     }
 }

@@ -476,7 +476,15 @@ public enum CachePrefix {
     /**
      * 用户菜单
      */
+    STORE_MENU_USER_ID,
+    /**
+     * 用户菜单
+     */
     USER_MENU,
+    /**
+     * 用户菜单
+     */
+    STORE_USER_MENU,
     /**
      * 订单暂时缓存
      */

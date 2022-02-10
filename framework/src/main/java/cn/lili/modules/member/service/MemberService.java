@@ -35,11 +35,10 @@ public interface MemberService extends IService<Member> {
     /**
      * 是否可以通过手机获取用户
      *
-     * @param uuid   UUID
      * @param mobile 手机号
      * @return 操作状态
      */
-    boolean findByMobile(String uuid, String mobile);
+    Member findByMobile(String mobile);
 
     /**
      * 通过用户名获取用户
@@ -86,11 +85,12 @@ public interface MemberService extends IService<Member> {
     /**
      * 修改用户密码
      *
+     * @param memberId    会员id
      * @param oldPassword 旧密码
      * @param newPassword 新密码
      * @return 操作结果
      */
-    Member modifyPass(String oldPassword, String newPassword);
+    Member modifyPass(String memberId, String oldPassword, String newPassword);
 
     /**
      * 注册会员
@@ -208,7 +208,7 @@ public interface MemberService extends IService<Member> {
     /**
      * 获取指定会员数据
      *
-     * @param columns 指定获取的列
+     * @param columns   指定获取的列
      * @param memberIds 会员ids
      * @return 指定会员数据
      */
@@ -220,4 +220,21 @@ public interface MemberService extends IService<Member> {
      * @param userEnums token角色类型
      */
     void logout(UserEnums userEnums);
+
+    /**
+     * 修改会员是否拥有店铺
+     *
+     * @param haveStore 是否拥有店铺
+     * @param storeId   店铺id
+     * @param memberIds 会员id
+     * @return
+     */
+    void updateHaveShop(Boolean haveStore, String storeId, List<String> memberIds);
+
+    /**
+     * 重置会员密码为123456
+     *
+     * @param ids 会员id
+     */
+    void resetPassword(List<String> ids);
 }
