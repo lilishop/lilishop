@@ -19,7 +19,6 @@ import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
 import cn.lili.modules.wallet.entity.enums.DepositServiceTypeEnum;
 import cn.lili.modules.wallet.service.MemberWalletService;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.Redisson;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;

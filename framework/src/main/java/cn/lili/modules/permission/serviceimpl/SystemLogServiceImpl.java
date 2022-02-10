@@ -22,7 +22,6 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,9 +64,10 @@ public class SystemLogServiceImpl implements SystemLogService {
 
     @Override
     public IPage<SystemLogVO> queryLog(String storeId, String operatorName, String key, SearchVO searchVo, PageVO pageVO) {
+        pageVO.setNotConvert(true);
         IPage<SystemLogVO> iPage = new Page<>();
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
-        if (pageVO != null) {
+        if (pageVO.getPageNumber() != null && pageVO.getPageSize() != null) {
             int pageNumber = pageVO.getPageNumber() - 1;
             if (pageNumber < 0) {
                 pageNumber = 0;
@@ -107,16 +107,15 @@ public class SystemLogServiceImpl implements SystemLogService {
             nativeSearchQueryBuilder.withFilter(filterBuilder);
         }
 
-        SearchHits<SystemLogVO> searchResult = restTemplate.search(nativeSearchQueryBuilder.build(), SystemLogVO.class);
-
-        iPage.setTotal(searchResult.getTotalHits());
-
-        if (pageVO != null && CharSequenceUtil.isNotEmpty(pageVO.getOrder()) && CharSequenceUtil.isNotEmpty(pageVO.getSort())) {
+        if (CharSequenceUtil.isNotEmpty(pageVO.getOrder()) && CharSequenceUtil.isNotEmpty(pageVO.getSort())) {
             nativeSearchQueryBuilder.withSort(SortBuilders.fieldSort(pageVO.getSort()).order(SortOrder.valueOf(pageVO.getOrder().toUpperCase())));
         } else {
             nativeSearchQueryBuilder.withSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC));
         }
 
+        SearchHits<SystemLogVO> searchResult = restTemplate.search(nativeSearchQueryBuilder.build(), SystemLogVO.class);
+
+        iPage.setTotal(searchResult.getTotalHits());
 
         iPage.setRecords(searchResult.getSearchHits().stream().map(SearchHit::getContent).collect(Collectors.toList()));
         return iPage;
