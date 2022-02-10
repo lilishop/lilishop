@@ -131,9 +131,9 @@ public class GoodsSearchParams extends PageVO {
         if (CharSequenceUtil.isNotEmpty(price)) {
             String[] s = price.split("_");
             if (s.length > 1) {
-                queryWrapper.ge("price", s[1]);
+                queryWrapper.between("price", s[0], s[1]);
             } else {
-                queryWrapper.le("price", s[0]);
+                queryWrapper.ge("price", s[0]);
             }
         }
     }

@@ -1,5 +1,6 @@
 package cn.lili.controller.order;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
@@ -86,6 +87,7 @@ public class OrderStoreController {
         return ResultUtil.data(orderService.updateConsignee(orderSn, memberAddressDTO));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "修改订单价格")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "orderSn", value = "订单sn", required = true, dataType = "String", paramType = "path"),
@@ -97,6 +99,7 @@ public class OrderStoreController {
         return ResultUtil.data(orderPriceService.updatePrice(orderSn, orderPrice));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "订单发货")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "orderSn", value = "订单sn", required = true, dataType = "String", paramType = "path"),
@@ -110,6 +113,7 @@ public class OrderStoreController {
         return ResultUtil.data(orderService.delivery(orderSn, logisticsNo, logisticsId));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "取消订单")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path"),
@@ -127,6 +131,7 @@ public class OrderStoreController {
         return ResultUtil.data(orderService.getOrderByVerificationCode(verificationCode));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "订单核验")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "orderSn", value = "订单号", required = true, paramType = "path"),

@@ -9,7 +9,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,7 +22,6 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@Transactional(rollbackFor = Exception.class)
 @Api(tags = "日志管理接口")
 @RequestMapping("/manager/log")
 public class LogManagerController {
@@ -33,12 +31,12 @@ public class LogManagerController {
     @GetMapping(value = "/getAllByPage")
     @ApiOperation(value = "分页获取全部")
     public ResultMessage<Object> getAllByPage(@RequestParam(required = false) Integer type,
-                                              @RequestParam String key,
+                                              @RequestParam String searchKey,
                                               String operatorName,
                                               SearchVO searchVo,
                                               PageVO pageVo) {
         try {
-            return ResultUtil.data(systemLogService.queryLog(null, operatorName, key, searchVo, pageVo));
+            return ResultUtil.data(systemLogService.queryLog(null, operatorName, searchKey, searchVo, pageVo));
         } catch (Exception e) {
             log.error("日志获取错误",e);
         }

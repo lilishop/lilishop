@@ -7,6 +7,7 @@ import cn.lili.modules.promotion.service.CouponActivityItemService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class CouponActivityItemServiceImpl extends ServiceImpl<CouponActivityIte
      * @param couponIds 优惠券id集合
      */
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public void removeByCouponId(List<String> couponIds) {
         this.remove(new LambdaQueryWrapper<CouponActivityItem>()
                 .in(CouponActivityItem::getCouponId, couponIds));

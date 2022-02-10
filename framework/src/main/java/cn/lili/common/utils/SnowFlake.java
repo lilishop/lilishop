@@ -2,6 +2,7 @@ package cn.lili.common.utils;
 
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
 
@@ -10,18 +11,29 @@ import java.util.Date;
  *
  * @author Chopper
  */
+@Slf4j
 public class SnowFlake {
 
-    /**
-     * 机器id
-     */
-    private static long workerId = 0L;
-    /**
-     * 机房id
-     */
-    private static long datacenterId = 0L;
+//    /**
+//     * 机器id
+//     */
+//    private static long workerId = 0L;
+//    /**
+//     * 机房id
+//     */
+//    public static long datacenterId = 0L;
 
-    private static Snowflake snowflake = IdUtil.createSnowflake(workerId, datacenterId);
+    private static Snowflake snowflake;
+
+    /**
+     * 初始化配置
+     *
+     * @param workerId
+     * @param datacenterId
+     */
+    public static void initialize(long workerId, long datacenterId) {
+        snowflake = IdUtil.getSnowflake(workerId, datacenterId);
+    }
 
     public static long getId() {
         return snowflake.nextId();
@@ -29,12 +41,14 @@ public class SnowFlake {
 
     /**
      * 生成字符，带有前缀
+     *
      * @param prefix
      * @return
      */
     public static String createStr(String prefix) {
         return prefix + DateUtil.toString(new Date(), "yyyyMMdd") + SnowFlake.getId();
     }
+
     public static String getIdStr() {
         return snowflake.nextId() + "";
     }

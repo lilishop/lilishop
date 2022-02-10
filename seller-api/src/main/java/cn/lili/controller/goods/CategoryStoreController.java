@@ -33,7 +33,6 @@ import java.util.Objects;
 @Api(tags = "店铺端,商品分类接口")
 @RequestMapping("/store/goods/category")
 @CacheConfig(cacheNames = "category")
-@Transactional(rollbackFor = Exception.class)
 public class CategoryStoreController {
 
     /**

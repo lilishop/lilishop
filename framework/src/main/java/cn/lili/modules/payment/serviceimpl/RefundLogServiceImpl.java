@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2020-12-19 09:25
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class RefundLogServiceImpl extends ServiceImpl<RefundLogMapper, RefundLog> implements RefundLogService {
 
     @Override

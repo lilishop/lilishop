@@ -132,4 +132,18 @@ public class GlobalControllerExceptionHandler {
         return ResultUtil.error(ResultCode.PARAMS_ERROR);
     }
 
+    /**
+     * bean校验未通过异常
+     *
+     * @see javax.validation.Valid
+     * @see org.springframework.validation.Validator
+     * @see org.springframework.validation.DataBinder
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ResultMessage<Object> constraintViolationExceptionHandler(HttpServletRequest request, final Exception e, HttpServletResponse response) {
+        ConstraintViolationException exception = (ConstraintViolationException) e;
+        return ResultUtil.error(ResultCode.PARAMS_ERROR.code(), exception.getMessage());
+    }
 }

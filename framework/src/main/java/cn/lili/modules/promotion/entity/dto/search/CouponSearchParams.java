@@ -1,4 +1,4 @@
-package cn.lili.modules.promotion.entity.vos;
+package cn.lili.modules.promotion.entity.dto.search;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.modules.promotion.entity.enums.*;
@@ -56,16 +56,11 @@ public class CouponSearchParams extends BasePromotionsSearchParams implements Se
      */
     @ApiModelProperty(value = "优惠券类型，分为免费领取和活动赠送")
     private String getType;
-    /**
-     * @see MemberCouponStatusEnum
-     */
-    @ApiModelProperty(value = "会员优惠券状态")
-    private String memberCouponStatus;
 
 
     @Override
     public <T> QueryWrapper<T> queryWrapper() {
-        QueryWrapper<T> queryWrapper = super.queryWrapper();
+        QueryWrapper<T> queryWrapper = super.baseQueryWrapper();
         if (CharSequenceUtil.isNotEmpty(couponName)) {
             queryWrapper.like("coupon_name", couponName);
         }
@@ -84,28 +79,28 @@ public class CouponSearchParams extends BasePromotionsSearchParams implements Se
         if (CharSequenceUtil.isNotEmpty(getType)) {
             queryWrapper.eq("get_type", CouponGetEnum.valueOf(getType).name());
         }
-        if (CharSequenceUtil.isNotEmpty(memberCouponStatus)) {
-            queryWrapper.eq("member_coupon_status", MemberCouponStatusEnum.valueOf(memberCouponStatus).name());
-        }
         if (CharSequenceUtil.isNotEmpty(this.getPromotionStatus())) {
-            switch (PromotionsStatusEnum.valueOf(this.getPromotionStatus())) {
-                case NEW:
-                    queryWrapper.nested(i -> i.gt(PromotionTools.START_TIME_COLUMN, new Date()).gt(PromotionTools.END_TIME_COLUMN, new Date()));
-                    break;
-                case START:
-                    queryWrapper.nested(i -> i.le(PromotionTools.START_TIME_COLUMN, new Date()).ge(PromotionTools.END_TIME_COLUMN, new Date()))
-                            .or(i -> i.gt("effective_days", 0).eq(RANGE_DAY_TYPE_COLUMN, CouponRangeDayEnum.DYNAMICTIME.name()));
-                    break;
-                case END:
-                    queryWrapper.nested(i -> i.lt(PromotionTools.START_TIME_COLUMN, new Date()).lt(PromotionTools.END_TIME_COLUMN, new Date()));
-                    break;
-                case CLOSE:
-                    queryWrapper.nested(n -> n.nested(i -> i.isNull(PromotionTools.START_TIME_COLUMN).isNull(PromotionTools.END_TIME_COLUMN)
-                                    .eq(RANGE_DAY_TYPE_COLUMN, CouponRangeDayEnum.FIXEDTIME.name())).
-                            or(i -> i.le("effective_days", 0).eq(RANGE_DAY_TYPE_COLUMN, CouponRangeDayEnum.DYNAMICTIME.name())));
-                    break;
-                default:
-            }
+            queryWrapper.and(p -> {
+                switch (PromotionsStatusEnum.valueOf(this.getPromotionStatus())) {
+                    case NEW:
+                        p.nested(i -> i.gt(PromotionTools.START_TIME_COLUMN, new Date()).gt(PromotionTools.END_TIME_COLUMN, new Date()));
+                        break;
+                    case START:
+                        p.nested(i -> i.le(PromotionTools.START_TIME_COLUMN, new Date()).ge(PromotionTools.END_TIME_COLUMN, new Date()))
+                                .or(i -> i.gt("effective_days", 0).eq(RANGE_DAY_TYPE_COLUMN, CouponRangeDayEnum.DYNAMICTIME.name()));
+                        break;
+                    case END:
+                        p.nested(i -> i.lt(PromotionTools.START_TIME_COLUMN, new Date()).lt(PromotionTools.END_TIME_COLUMN, new Date()));
+                        break;
+                    case CLOSE:
+                        p.nested(n -> n.nested(i -> i.isNull(PromotionTools.START_TIME_COLUMN).isNull(PromotionTools.END_TIME_COLUMN)
+                                        .eq(RANGE_DAY_TYPE_COLUMN, CouponRangeDayEnum.FIXEDTIME.name())).
+                                or(i -> i.le("effective_days", 0).eq(RANGE_DAY_TYPE_COLUMN, CouponRangeDayEnum.DYNAMICTIME.name())));
+                        break;
+                    default:
+                }
+            });
+
         }
         if (this.getStartTime() != null) {
             queryWrapper.ge("start_time", new Date(this.getEndTime()));
@@ -113,7 +108,6 @@ public class CouponSearchParams extends BasePromotionsSearchParams implements Se
         if (this.getEndTime() != null) {
             queryWrapper.le("end_time", new Date(this.getEndTime()));
         }
-        queryWrapper.eq("delete_flag", false);
         this.betweenWrapper(queryWrapper);
         queryWrapper.orderByDesc("create_time");
         return queryWrapper;
@@ -123,25 +117,25 @@ public class CouponSearchParams extends BasePromotionsSearchParams implements Se
         if (CharSequenceUtil.isNotEmpty(publishNum)) {
             String[] s = publishNum.split("_");
             if (s.length > 1) {
-                queryWrapper.ge("publish_num", s[1]);
+                queryWrapper.between("publish_num", s[0], s[1]);
             } else {
-                queryWrapper.le("publish_num", publishNum);
+                queryWrapper.ge("publish_num", s[0]);
             }
         }
         if (CharSequenceUtil.isNotEmpty(price)) {
             String[] s = price.split("_");
             if (s.length > 1) {
-                queryWrapper.ge(PRICE_COLUMN, s[1]);
+                queryWrapper.between(PRICE_COLUMN, s[0], s[1]);
             } else {
-                queryWrapper.le(PRICE_COLUMN, s[0]);
+                queryWrapper.ge(PRICE_COLUMN, s[0]);
             }
         }
         if (CharSequenceUtil.isNotEmpty(receivedNum)) {
             String[] s = receivedNum.split("_");
             if (s.length > 1) {
-                queryWrapper.ge("received_num", s[1]);
+                queryWrapper.between("received_num", s[0], s[1]);
             } else {
-                queryWrapper.le("received_num", s[0]);
+                queryWrapper.ge("received_num", s[0]);
             }
         }
     }

@@ -16,12 +16,12 @@ import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.PintuanMemberVO;
 import cn.lili.modules.promotion.entity.vos.PintuanShareVO;
 import cn.lili.modules.promotion.entity.vos.PintuanVO;
-import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.mapper.PintuanMapper;
 import cn.lili.modules.promotion.service.PintuanService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
@@ -47,7 +47,6 @@ import java.util.List;
  * @since 2020/8/21
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMapper, Pintuan> implements PintuanService {
 
     /**
@@ -204,10 +203,11 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
      * 更新促销商品信息
      *
      * @param promotions 促销实体
+     * @return 是否更新成功
      */
     @Override
-    public void updatePromotionsGoods(Pintuan promotions) {
-        super.updatePromotionsGoods(promotions);
+    public boolean updatePromotionsGoods(Pintuan promotions) {
+        boolean result = super.updatePromotionsGoods(promotions);
         if (!PromotionsStatusEnum.CLOSE.name().equals(promotions.getPromotionStatus())
                 && PromotionsScopeTypeEnum.PORTION_GOODS.name().equals(promotions.getScopeType())
                 && promotions instanceof PintuanVO) {
@@ -225,6 +225,7 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
             //过滤父级拼团订单，根据父级拼团订单分组
             this.orderService.checkFictitiousOrder(promotions.getId(), promotions.getRequiredNum(), promotions.getFictitious());
         }
+        return result;
     }
 
     /**

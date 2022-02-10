@@ -16,7 +16,6 @@ import java.util.List;
  * @author Chopper
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink> implements ShortLinkService {
 
     @Override

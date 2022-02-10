@@ -9,7 +9,6 @@ import cn.lili.modules.permission.service.SystemLogService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,7 +24,6 @@ import java.util.Objects;
  * @since 2020/11/22 14:23
  */
 @RestController
-@Transactional(rollbackFor = Exception.class)
 @Api(tags = "店铺端,日志管理接口")
 @RequestMapping("/store/log")
 public class LogStoreController {

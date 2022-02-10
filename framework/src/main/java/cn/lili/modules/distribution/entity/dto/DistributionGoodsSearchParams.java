@@ -2,12 +2,13 @@ package cn.lili.modules.distribution.entity.dto;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.Objects;
 
 /**
  * 分销员商品查询条件
@@ -37,13 +38,13 @@ public class DistributionGoodsSearchParams extends PageVO {
 
     public <T> QueryWrapper<T> storeQueryWrapper() {
         QueryWrapper<T> queryWrapper = this.distributionQueryWrapper();
-        queryWrapper.eq("dg.store_id", UserContext.getCurrentUser().getStoreId());
+        queryWrapper.eq("dg.store_id", Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId());
         return queryWrapper;
     }
 
     public <T> QueryWrapper<T> distributionQueryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
-        queryWrapper.like(StringUtils.isNotEmpty(goodsName), "dg.goods_name", goodsName);
+        queryWrapper.like(CharSequenceUtil.isNotEmpty(goodsName), "dg.goods_name", goodsName);
         return queryWrapper;
     }
 

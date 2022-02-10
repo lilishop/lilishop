@@ -103,14 +103,18 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
             }
             case COMPLETED: {
                 Order order = orderService.getBySn(orderMessage.getOrderSn());
-                //根据订单编号获取订单数据,如果订单促销类型不为空，并且订单促销类型为积分订单 则直接返回
-                if (StringUtils.isNotEmpty(order.getOrderPromotionType()) && order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINTS.name())) {
+                //如果是积分订单 则直接返回
+                if (StringUtils.isNotEmpty(order.getOrderPromotionType())
+                        && order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINTS.name())) {
                     return;
                 }
                 //获取积分设置
                 PointSetting pointSetting = getPointSetting();
+                if (pointSetting.getConsumer() == 0) {
+                    return;
+                }
                 //计算赠送积分数量
-                Double point = CurrencyUtil.mul(pointSetting.getMoney(), order.getFlowPrice(), 0);
+                Double point = CurrencyUtil.mul(pointSetting.getConsumer(), order.getFlowPrice(), 0);
                 //赠送会员积分
                 memberService.updateMemberPoint(point.longValue(), PointTypeEnum.INCREASE.name(), order.getMemberId(), "会员下单，赠送积分" + point + "分");
                 break;

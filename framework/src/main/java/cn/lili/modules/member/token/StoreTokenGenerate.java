@@ -15,12 +15,9 @@ import cn.lili.modules.member.entity.dos.Clerk;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.vo.StoreUserMenuVO;
 import cn.lili.modules.member.service.ClerkService;
-import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.member.service.StoreMenuRoleService;
-import cn.lili.modules.permission.entity.vo.UserMenuVO;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.service.StoreService;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,9 +34,7 @@ import java.util.Map;
  * @since 2020/11/16 10:51
  */
 @Component
-public class StoreTokenGenerate extends AbstractTokenGenerate {
-    @Autowired
-    private MemberService memberService;
+public class StoreTokenGenerate extends AbstractTokenGenerate<Member> {
     @Autowired
     private StoreService storeService;
     @Autowired
@@ -52,10 +47,8 @@ public class StoreTokenGenerate extends AbstractTokenGenerate {
     private ClerkService clerkService;
 
     @Override
-    public Token createToken(String username, Boolean longTerm) {
-        //生成token
-        Member member = memberService.findByUsername(username);
-        if (!member.getHaveStore()) {
+    public Token createToken(Member member, Boolean longTerm) {
+        if (Boolean.FALSE.equals(member.getHaveStore())) {
             throw new ServiceException(ResultCode.STORE_NOT_OPEN);
         }
         //根据会员id查询店员信息
@@ -77,9 +70,10 @@ public class StoreTokenGenerate extends AbstractTokenGenerate {
         if (store == null) {
             throw new ServiceException(ResultCode.STORE_NOT_OPEN);
         }
-        user.setStoreId(store.getId());
-        user.setStoreName(store.getStoreName());
-        return tokenUtil.createToken(username, user, longTerm, UserEnums.STORE);
+        AuthUser authUser = new AuthUser(member.getUsername(), member.getId(), member.getNickName(), store.getStoreLogo(), UserEnums.STORE);
+        authUser.setStoreId(store.getId());
+        authUser.setStoreName(store.getStoreName());
+        return tokenUtil.createToken(member.getUsername(), authUser, longTerm, UserEnums.STORE);
     }
 
     @Override

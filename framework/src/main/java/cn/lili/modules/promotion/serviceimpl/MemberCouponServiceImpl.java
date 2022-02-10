@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
@@ -7,11 +8,11 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
 import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
-import cn.lili.modules.promotion.entity.vos.CouponSearchParams;
 import cn.lili.modules.promotion.mapper.MemberCouponMapper;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
@@ -24,6 +25,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +40,7 @@ import java.util.*;
  * @since 2020/8/21
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
+@CacheConfig(cacheNames = "{MemberCoupon}")
 public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, MemberCoupon> implements MemberCouponService {
 
     /**
@@ -44,6 +48,12 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
      */
     @Autowired
     private CouponService couponService;
+
+    /**
+     * 缓存
+     */
+    @Autowired
+    private Cache cache;
 
     @Override
     public void checkCouponLimit(String couponId, String memberId) {
@@ -71,6 +81,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
      * @param memberName 会员名称
      */
     @Override
+    @CacheEvict(key = "#memberId")
     public void receiveBuyerCoupon(String couponId, String memberId, String memberName) {
         Coupon coupon = couponService.getById(couponId);
         if (coupon != null && !CouponGetEnum.FREE.name().equals(coupon.getGetType())) {
@@ -82,6 +93,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     }
 
     @Override
+    @CacheEvict(key = "#memberId")
     public void receiveCoupon(String couponId, String memberId, String memberName) {
         Coupon coupon = couponService.getById(couponId);
         if (coupon != null) {
@@ -92,20 +104,36 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     }
 
     @Override
-    public IPage<MemberCoupon> getMemberCoupons(CouponSearchParams param, PageVO pageVo) {
+    public IPage<MemberCoupon> getMemberCoupons(MemberCouponSearchParams param, PageVO pageVo) {
         QueryWrapper<MemberCoupon> queryWrapper = param.queryWrapper();
         return this.page(PageUtil.initPage(pageVo), queryWrapper);
     }
 
+    /**
+     * 获取会员优惠券列表
+     *
+     * @param param 查询参数
+     * @return 会员优惠券列表
+     */
     @Override
-    public List<MemberCoupon> getMemberCoupons() {
-        AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(MemberCoupon::getMemberId, authUser.getId());
-        queryWrapper.eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name());
-        queryWrapper.le(MemberCoupon::getStartTime, new Date());
-        queryWrapper.ge(MemberCoupon::getEndTime, new Date());
-        return this.list(queryWrapper);
+    public List<MemberCoupon> getMemberCoupons(MemberCouponSearchParams param) {
+        return this.list(param.queryWrapper());
+    }
+
+    /**
+     * 获取当前用户的优惠券列表（优先读取缓存）
+     *
+     * @param memberId 会员id
+     * @return 会员优惠券列表
+     */
+    @Override
+    @Cacheable(key = "#memberId")
+    public List<MemberCoupon> getMemberCoupons(String memberId) {
+        MemberCouponSearchParams searchParams = new MemberCouponSearchParams();
+        searchParams.setMemberId(Objects.requireNonNull(UserContext.getCurrentUser()).getId());
+        searchParams.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
+        searchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
+        return this.getMemberCoupons(searchParams);
     }
 
     /**
@@ -116,7 +144,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
      * @return 会员优惠券列表
      */
     @Override
-    public IPage<MemberCoupon> getMemberCouponsByCanUse(CouponSearchParams param, Double totalPrice, PageVO pageVo) {
+    public IPage<MemberCoupon> getMemberCouponsByCanUse(MemberCouponSearchParams param, Double totalPrice, PageVO pageVo) {
         LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<>();
         List<String> storeIds = new ArrayList<>(Arrays.asList(param.getStoreId().split(",")));
         storeIds.add(PromotionTools.PLATFORM_ID);
@@ -167,6 +195,17 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         return this.list(queryWrapper);
     }
 
+    /**
+     * 获取当前会员全品类优惠券
+     *
+     * @param param 查询参数
+     * @return 会员优惠券列表
+     */
+    @Override
+    public MemberCoupon getMemberCoupon(MemberCouponSearchParams param) {
+        return this.getOne(param.queryWrapper(), false);
+    }
+
     @Override
     public long getMemberCouponsNum() {
         AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
@@ -177,31 +216,10 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         return this.count(queryWrapper);
     }
 
-    /**
-     * 更新会员优惠券状态
-     *
-     * @param status 要变更的状态
-     * @param id     会员优惠券id
-     */
-    @Override
-    public void updateMemberCouponStatus(MemberCouponStatusEnum status, String id) {
-        MemberCoupon memberCoupon = this.getById(id);
-        if (memberCoupon == null) {
-            throw new ServiceException(ResultCode.COUPON_MEMBER_NOT_EXIST);
-        }
-        String memberCouponStatus = memberCoupon.getMemberCouponStatus();
-        if (memberCouponStatus.equals(MemberCouponStatusEnum.NEW.name()) || memberCouponStatus.equals(MemberCouponStatusEnum.USED.name())) {
-            LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(MemberCoupon::getId, id).set(MemberCoupon::getMemberCouponStatus, status.name());
-            this.update(updateWrapper);
-        } else {
-            throw new ServiceException(ResultCode.COUPON_MEMBER_STATUS_ERROR);
-        }
-    }
-
 
     @Override
-    public void used(List<String> ids) {
+    @CacheEvict(key = "#memberId")
+    public void used(String memberId, List<String> ids) {
         if (ids != null && !ids.isEmpty()) {
             List<MemberCoupon> memberCoupons = this.listByIds(ids);
 
@@ -228,7 +246,8 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
      * @param id id
      */
     @Override
-    public void cancellation(String id) {
+    @CacheEvict(key = "#memberId")
+    public void cancellation(String memberId, String id) {
         LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(MemberCoupon::getId, id);
         updateWrapper.set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.CLOSED.name());
@@ -245,6 +264,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         LambdaUpdateWrapper<MemberCoupon> memberCouponLambdaUpdateWrapper = new LambdaUpdateWrapper<MemberCoupon>()
                 .in(MemberCoupon::getCouponId, couponIds)
                 .set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.CLOSED.name());
+        this.cache.vagueDel("{MemberCoupon}");
         this.update(memberCouponLambdaUpdateWrapper);
     }
 

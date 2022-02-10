@@ -59,7 +59,9 @@ public class PromotionEverydayExecute implements EveryDayExecute {
     private void addSeckill() {
         Setting setting = settingService.get(SettingEnum.SECKILL_SETTING.name());
         SeckillSetting seckillSetting = new Gson().fromJson(setting.getSettingValue(), SeckillSetting.class);
-        Seckill seckill = new Seckill(SeckillService.PRE_CREATION, seckillSetting.getHours(), seckillSetting.getSeckillRule());
-        seckillService.savePromotions(seckill);
+        for (int i = 1; i <= SeckillService.PRE_CREATION; i++) {
+            Seckill seckill = new Seckill(i, seckillSetting.getHours(), seckillSetting.getSeckillRule());
+            seckillService.savePromotions(seckill);
+        }
     }
 }

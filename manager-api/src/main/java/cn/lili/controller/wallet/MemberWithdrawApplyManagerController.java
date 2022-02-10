@@ -1,6 +1,7 @@
 package cn.lili.controller.wallet;
 
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -29,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(tags = "管理端,余额提现记录接口")
 @RequestMapping("/manager/members/withdraw-apply")
-@Transactional(rollbackFor = Exception.class)
 public class MemberWithdrawApplyManagerController {
     @Autowired
     private MemberWithdrawApplyService memberWithdrawApplyService;
@@ -44,6 +44,7 @@ public class MemberWithdrawApplyManagerController {
     }
 
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "提现申请审核")
     @PostMapping
     @ApiImplicitParams({

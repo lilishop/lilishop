@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2020/12/6 16:09
  */
 @RestController
-@Transactional(rollbackFor = Exception.class)
 @Api(tags = "管理端,会员消息消息管理接口")
 @RequestMapping("/manager/message/member")
 public class MemberMessageManagerController {

@@ -31,8 +31,7 @@ public class SearchVO implements Serializable {
         if (StringUtils.isEmpty(startDate)) {
             return null;
         }
-        Date date = DateUtil.toDate(startDate, DateUtil.STANDARD_DATE_FORMAT);
-        return date;
+        return DateUtil.toDate(startDate, DateUtil.STANDARD_DATE_FORMAT);
     }
 
     public Date getConvertEndDate() {

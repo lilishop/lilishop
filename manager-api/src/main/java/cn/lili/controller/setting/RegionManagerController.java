@@ -25,7 +25,6 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,行政地区管理接口")
 @RequestMapping("/manager/region")
-@Transactional(rollbackFor = Exception.class)
 public class RegionManagerController {
     @Autowired
     private RegionService regionService;

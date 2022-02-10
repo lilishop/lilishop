@@ -2,9 +2,9 @@ package cn.lili.modules.promotion.service;
 
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
+import cn.lili.modules.promotion.entity.dto.search.SeckillSearchParams;
 import cn.lili.modules.promotion.entity.vos.SeckillApplyVO;
 import cn.lili.modules.promotion.entity.vos.SeckillGoodsVO;
-import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
 import cn.lili.modules.promotion.entity.vos.SeckillTimelineVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;

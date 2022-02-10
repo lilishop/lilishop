@@ -34,7 +34,6 @@ import java.util.Objects;
  * @since 2020-03-24 23:04:56
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class DistributionGoodsServiceImpl extends ServiceImpl<DistributionGoodsMapper, DistributionGoods> implements DistributionGoodsService {
 
     /**

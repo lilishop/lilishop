@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2020-03-24 23:04:56
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class DistributionSelectedGoodsServiceImpl extends ServiceImpl<DistributionSelectedGoodsMapper, DistributionSelectedGoods> implements DistributionSelectedGoodsService {
 
     /**
@@ -47,12 +46,6 @@ public class DistributionSelectedGoodsServiceImpl extends ServiceImpl<Distributi
                 .eq(DistributionSelectedGoods::getDistributionId, distributionId));
     }
 
-    /**
-     * 分销员添加分销商品
-     *
-     * @param distributionGoodsId 商品ID
-     * @return
-     */
     @Override
     public boolean deleteByDistributionGoodsId(String distributionGoodsId) {
         return this.remove(new LambdaQueryWrapper<DistributionSelectedGoods>()

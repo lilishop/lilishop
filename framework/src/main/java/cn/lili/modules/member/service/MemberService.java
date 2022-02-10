@@ -33,7 +33,7 @@ public interface MemberService extends IService<Member> {
     Member getUserInfo();
 
     /**
-     * 是否可以通过手机获取用户
+     * 通过手机获取用户
      *
      * @param mobile 手机号
      * @return 操作状态
@@ -222,6 +222,7 @@ public interface MemberService extends IService<Member> {
     void logout(UserEnums userEnums);
 
     /**
+     * <<<<<<< HEAD
      * 修改会员是否拥有店铺
      *
      * @param haveStore 是否拥有店铺
@@ -237,4 +238,19 @@ public interface MemberService extends IService<Member> {
      * @param ids 会员id
      */
     void resetPassword(List<String> ids);
+
+    /*
+     * 获取所有会员的手机号
+     *
+     * @return 所有会员的手机号
+     */
+    List<String> getAllMemberMobile();
+
+    /**
+     * 更新会员登录时间为最新时间
+     *
+     * @param memberId 会员id
+     * @return 是否更新成功
+     */
+    boolean updateMemberLoginTime(String memberId);
 }

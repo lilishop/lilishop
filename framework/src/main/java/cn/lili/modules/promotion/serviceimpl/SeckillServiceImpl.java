@@ -12,8 +12,9 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
+import cn.lili.modules.promotion.entity.dto.search.SeckillSearchParams;
 import cn.lili.modules.promotion.entity.enums.PromotionsApplyStatusEnum;
-import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.mapper.SeckillMapper;
 import cn.lili.modules.promotion.service.SeckillApplyService;
@@ -38,9 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 秒杀活动业务层实现
@@ -49,7 +48,6 @@ import java.util.Map;
  * @since 2020/8/21
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 @Slf4j
 public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMapper, Seckill> implements SeckillService {
 
@@ -150,22 +148,28 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
             for (SeckillApply seckillApply : seckillApplies) {
                 if (seckillApply.getPromotionApplyStatus().equals(PromotionsApplyStatusEnum.PASS.name())) {
                     this.setSeckillApplyTime(seckill, seckillApply);
-                    log.info("更新限时抢购商品状态:{}", seckill);
-                    String promotionKey = PromotionTypeEnum.SECKILL.name() + "-" + seckill.getId();
-                    Map<String, Object> map = new HashMap<>();
-                    // es促销key
-                    map.put("esPromotionKey", promotionKey);
-                    // 促销类型全路径名
-                    map.put("promotionsType", Seckill.class.getName());
-                    // 促销实体
-                    map.put("promotions", seckill);
-                    //更新商品促销消息
-                    String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX_PROMOTIONS.name();
-                    //发送mq消息
-                    rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(map), RocketmqSendCallbackBuilder.commonCallback());
                 }
             }
+            if (!seckillApplies.isEmpty()) {
+                this.updateEsGoodsIndex(seckill);
+            }
         }
+    }
+
+    /**
+     * 删除商品索引限时抢购信息
+     *
+     * @param seckill 限时抢购信息
+     * @param skuIds  商品skuId列表
+     */
+    @Override
+    public void deleteEsGoodsSeckill(Seckill seckill, List<String> skuIds) {
+        seckill.setScopeType(PromotionsScopeTypeEnum.PORTION_GOODS.name());
+        seckill.setScopeId(ArrayUtil.join(skuIds.toArray(), ","));
+        //删除商品促销消息
+        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.DELETE_GOODS_INDEX_PROMOTIONS.name();
+        //发送mq消息
+        rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(seckill), RocketmqSendCallbackBuilder.commonCallback());
     }
 
     @Override

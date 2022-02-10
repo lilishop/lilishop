@@ -35,7 +35,6 @@ import java.util.Map;
  */
 @Service
 @Slf4j
-@Transactional(rollbackFor = Exception.class)
 public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, WechatMessage> implements WechatMessageService {
 
     @Autowired

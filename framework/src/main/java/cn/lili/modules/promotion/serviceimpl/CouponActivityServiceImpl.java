@@ -23,6 +23,7 @@ import cn.lili.modules.promotion.tools.PromotionTools;
 import groovy.util.logging.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -137,10 +138,12 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
      * 更新优惠券活动商品信息
      *
      * @param couponActivity 优惠券活动实体
+     * @return 是否更新成功
      */
     @Override
-    public void updatePromotionsGoods(CouponActivity couponActivity) {
-        super.updatePromotionsGoods(couponActivity);
+    @Transactional(rollbackFor = {Exception.class})
+    public boolean updatePromotionsGoods(CouponActivity couponActivity) {
+        boolean result = super.updatePromotionsGoods(couponActivity);
         if (couponActivity instanceof CouponActivityDTO
                 && !PromotionsStatusEnum.CLOSE.name().equals(couponActivity.getPromotionStatus())
                 && PromotionsScopeTypeEnum.PORTION_GOODS.name().equals(couponActivity.getScopeType())) {
@@ -150,8 +153,9 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
                 couponActivityItem.setActivityId(couponActivityDTO.getId());
             }
             // 更新优惠券活动项信息
-            couponActivityItemService.saveBatch(couponActivityDTO.getCouponActivityItems());
+            result = couponActivityItemService.saveBatch(couponActivityDTO.getCouponActivityItems());
         }
+        return result;
     }
 
     /**
@@ -187,7 +191,8 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
      * @param memberList          用户列表
      * @param couponActivityItems 优惠券列表
      */
-    private void sendCoupon(List<Map<String, Object>> memberList, List<CouponActivityItem> couponActivityItems) {
+    @Transactional(rollbackFor = {Exception.class})
+    void sendCoupon(List<Map<String, Object>> memberList, List<CouponActivityItem> couponActivityItems) {
 
         for (CouponActivityItem couponActivityItem : couponActivityItems) {
             //获取优惠券

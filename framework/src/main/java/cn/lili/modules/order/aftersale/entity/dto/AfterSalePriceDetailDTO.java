@@ -1,7 +1,7 @@
 package cn.lili.modules.order.aftersale.entity.dto;
 
 
-import cn.lili.modules.promotion.entity.dto.BasePromotions;
+import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

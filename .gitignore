@@ -10,6 +10,7 @@ target
 .factorypath
 
 log/
+logs/
 *.factorypath
 lili-shop/src/main/java/cn/lili/generator/CodeGenerator.java
 lili-logs

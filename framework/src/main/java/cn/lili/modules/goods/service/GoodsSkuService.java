@@ -196,14 +196,6 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     void updateGoodsSkuCommentNum(String skuId);
 
     /**
-     * 更新商品sku促销价格
-     *
-     * @param skuId skuId
-     * @param promotionPrice 促销价格
-     */
-    void updateGoodsSkuPromotion(String skuId, Double promotionPrice);
-
-    /**
      * 根据商品id获取全部skuId的集合
      *
      * @param goodsId goodsId

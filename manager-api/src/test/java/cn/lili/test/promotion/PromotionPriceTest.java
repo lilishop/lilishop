@@ -1,6 +1,6 @@
 package cn.lili.test.promotion;
 
-import cn.lili.modules.promotion.entity.dto.BasePromotions;
+import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.service.PromotionService;
 import org.junit.jupiter.api.Assertions;

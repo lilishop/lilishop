@@ -106,6 +106,9 @@ public class OrderSearchParams extends PageVO {
     @ApiModelProperty(value = "是否为某订单类型的订单，如果是则为订单类型的id，否则为空")
     private String promotionId;
 
+    @ApiModelProperty(value = "总价格,可以为范围，如10_1000")
+    private String flowPrice;
+
     /**
      * @see OrderPromotionTypeEnum
      */
@@ -209,6 +212,14 @@ public class OrderSearchParams extends PageVO {
 
         wrapper.eq(CharSequenceUtil.isNotEmpty(orderPromotionType), "o.order_promotion_type", orderPromotionType);
 
+        if (CharSequenceUtil.isNotEmpty(flowPrice)) {
+            String[] s = flowPrice.split("_");
+            if (s.length > 1) {
+                wrapper.between("o.flow_price", s[0], s[1]);
+            } else {
+                wrapper.ge("o.flow_price", s[0]);
+            }
+        }
         wrapper.eq("o.delete_flag", false);
         return wrapper;
     }

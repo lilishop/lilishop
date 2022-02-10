@@ -12,14 +12,14 @@ import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.FullDiscount;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.dto.search.CouponSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.FullDiscountSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.enums.CouponRangeDayEnum;
 import cn.lili.modules.promotion.entity.enums.CouponTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
-import cn.lili.modules.promotion.entity.vos.CouponSearchParams;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
-import cn.lili.modules.promotion.entity.vos.FullDiscountSearchParams;
-import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.mapper.CouponMapper;
 import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.promotion.tools.PromotionTools;
@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
  * @since 2020/8/21
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMapper, Coupon> implements CouponService {
 
     /**
@@ -78,6 +77,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
      * @param receiveNum 领取数量
      */
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public void receiveCoupon(String couponId, Integer receiveNum) {
         Coupon coupon = this.getById(couponId);
         if (coupon == null) {
@@ -88,6 +88,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
     }
 
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public boolean removePromotions(List<String> ids) {
         //删除优惠券信息
         this.memberCouponService.closeMemberCoupon(ids);
@@ -104,6 +105,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
      * @param usedNum  使用数量
      */
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public void usedCoupon(String couponId, Integer usedNum) {
         Coupon coupon = this.getById(couponId);
         if (coupon == null) {
@@ -156,6 +158,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
      * @return 是否更新成功
      */
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public boolean updateStatus(List<String> ids, Long startTime, Long endTime) {
         List<Coupon> list = this.list(new LambdaQueryWrapper<Coupon>().in(Coupon::getId, ids).eq(Coupon::getRangeDayType, CouponRangeDayEnum.DYNAMICTIME.name()));
         if (!list.isEmpty()) {
@@ -221,8 +224,9 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
     }
 
     @Override
-    public void updatePromotionsGoods(Coupon promotions) {
-        super.updatePromotionsGoods(promotions);
+    @Transactional(rollbackFor = {Exception.class})
+    public boolean updatePromotionsGoods(Coupon promotions) {
+        boolean result = super.updatePromotionsGoods(promotions);
         if (!PromotionsStatusEnum.CLOSE.name().equals(promotions.getPromotionStatus()) &&
                 PromotionsScopeTypeEnum.PORTION_GOODS.name().equals(promotions.getScopeType()) &&
                 promotions instanceof CouponVO) {
@@ -234,8 +238,9 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
                 promotionGoods.setStoreName(promotions.getStoreName());
             }
             //促销活动商品更新
-            this.promotionGoodsService.saveBatch(promotionGoodsList);
+            result = this.promotionGoodsService.saveBatch(promotionGoodsList);
         }
+        return result;
     }
 
     /**

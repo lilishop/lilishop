@@ -22,7 +22,6 @@ import java.util.Objects;
  * @since 2020/11/17 4:28 下午
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class BillStatisticsServiceImpl extends ServiceImpl<BillStatisticsMapper, Bill> implements BillStatisticsService {
 
 

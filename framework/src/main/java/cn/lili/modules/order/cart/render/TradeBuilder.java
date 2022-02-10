@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -71,6 +72,8 @@ public class TradeBuilder {
         //需要对购物车渲染
         if (isSingle(checkedWay)) {
             renderCartBySteps(tradeDTO, RenderStepStatement.checkedSingleRender);
+        } else if (checkedWay.equals(CartTypeEnum.PINTUAN)) {
+            renderCartBySteps(tradeDTO, RenderStepStatement.pintuanTradeRender);
         } else {
             renderCartBySteps(tradeDTO, RenderStepStatement.checkedRender);
         }
@@ -83,16 +86,16 @@ public class TradeBuilder {
      * 1.构造交易
      * 2.创建交易
      *
-     * @param checkedWay 购物车类型
+     * @param tradeDTO 交易模型
      * @return 交易信息
      */
-    public Trade createTrade(CartTypeEnum checkedWay) {
-        //读取对应购物车的商品信息
-        TradeDTO tradeDTO = cartService.readDTO(checkedWay);
+    public Trade createTrade(TradeDTO tradeDTO) {
 
         //需要对购物车渲染
-        if (isSingle(checkedWay)) {
+        if (isSingle(tradeDTO.getCartTypeEnum())) {
             renderCartBySteps(tradeDTO, RenderStepStatement.singleTradeRender);
+        } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)) {
+            renderCartBySteps(tradeDTO, RenderStepStatement.pintuanTradeRender);
         } else {
             renderCartBySteps(tradeDTO, RenderStepStatement.tradeRender);
         }
@@ -110,7 +113,7 @@ public class TradeBuilder {
     private boolean isSingle(CartTypeEnum checkedWay) {
         //拼团   积分   砍价商品
 
-        return (checkedWay.equals(CartTypeEnum.PINTUAN) || checkedWay.equals(CartTypeEnum.POINTS) || checkedWay.equals(CartTypeEnum.KANJIA));
+        return (checkedWay.equals(CartTypeEnum.POINTS) || checkedWay.equals(CartTypeEnum.KANJIA));
     }
 
     /**

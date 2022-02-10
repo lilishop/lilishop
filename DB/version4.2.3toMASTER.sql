@@ -54,3 +54,11 @@ ALTER TABLE li_goods RENAME COLUMN is_auth TO auth_flag;
 
 ALTER TABLE li_goods_sku RENAME COLUMN is_promotion TO promotion_flag;
 ALTER TABLE li_goods_sku RENAME COLUMN is_auth TO auth_flag;
+
+
+-- 增加会员表索引
+ALTER TABLE li_member ADD INDEX query_mobile (`mobile`) COMMENT 'query_member';
+-- 会员签到唯一索引 惠券查询索引
+ALTER TABLE li_member_sign ADD INDEX query_create_time (`create_time`) COMMENT 'query_create_time';
+ALTER TABLE li_member_sign ADD INDEX query_member_id (`member_id`) COMMENT 'query_member_id';
+ALTER TABLE li_member_sign add unique uk_member_day (member_id, create_time) COMMENT 'uk_member_day';

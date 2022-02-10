@@ -4,8 +4,8 @@ package cn.lili.modules.promotion.service;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivity;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivityLog;
-import cn.lili.modules.promotion.entity.dto.KanjiaActivityQuery;
-import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivitySearchParams;
+import cn.lili.modules.promotion.entity.dto.search.KanjiaActivityQuery;
+import cn.lili.modules.promotion.entity.dto.search.KanjiaActivitySearchParams;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -64,4 +64,11 @@ public interface KanjiaActivityService extends IService<KanjiaActivity> {
     IPage<KanjiaActivity> getForPage(KanjiaActivityQuery kanJiaActivityQuery, PageVO page);
 
 
+    /**
+     * 结束砍价活动
+     *
+     * @param kanjiaId 砍价活动id
+     * @return 是否更新成功
+     */
+    boolean endKanjiaActivity(String kanjiaId);
 }

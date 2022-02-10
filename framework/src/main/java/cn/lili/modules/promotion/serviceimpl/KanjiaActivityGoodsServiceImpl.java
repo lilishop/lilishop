@@ -13,10 +13,10 @@ import cn.lili.modules.promotion.entity.dos.KanjiaActivityGoods;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsOperationDTO;
+import cn.lili.modules.promotion.entity.dto.search.KanjiaActivityGoodsParams;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsListVO;
-import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsParams;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsVO;
 import cn.lili.modules.promotion.mapper.KanJiaActivityGoodsMapper;
 import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
@@ -43,7 +43,6 @@ import java.util.List;
  * @since 2021/7/1
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImpl<KanJiaActivityGoodsMapper, KanjiaActivityGoods> implements KanjiaActivityGoodsService {
 
     /**
@@ -69,7 +68,7 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
             kanJiaActivityGoodsDTO.setStartTime(kanJiaActivityGoodsOperationDTO.getStartTime());
             kanJiaActivityGoodsDTO.setEndTime(kanJiaActivityGoodsOperationDTO.getEndTime());
             //检测同一时间段不能允许添加相同的商品
-            if (this.checkSkuDuplicate(goodsSku.getId(), kanJiaActivityGoodsDTO) != null) {
+            if (this.checkSkuDuplicate(kanJiaActivityGoodsDTO) != null) {
                 throw new ServiceException("商品id为" + goodsSku.getId() + "的商品已参加砍价商品活动！");
             }
             kanJiaActivityGoodsDTO.setGoodsSku(goodsSku);
@@ -172,13 +171,12 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
     /**
      * 检查砍价商品是否重复存在
      *
-     * @param skuId                  商品SkuId
      * @param kanJiaActivityGoodsDTO 砍价商品
      * @return 积分商品信息
      */
-    private KanjiaActivityGoods checkSkuDuplicate(String skuId, KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO) {
+    private KanjiaActivityGoods checkSkuDuplicate(KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO) {
         QueryWrapper<KanjiaActivityGoods> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("sku_id", skuId);
+        queryWrapper.eq("sku_id", kanJiaActivityGoodsDTO.getSkuId());
         if (kanJiaActivityGoodsDTO != null && CharSequenceUtil.isNotEmpty(kanJiaActivityGoodsDTO.getId())) {
             queryWrapper.ne("id", kanJiaActivityGoodsDTO.getId());
         }
@@ -263,7 +261,7 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
         //检测开始结束时间是否正确
         PromotionTools.checkPromotionTime(kanJiaActivityGoodsDTO.getStartTime(), kanJiaActivityGoodsDTO.getEndTime());
         //检测同一时间段不能允许添加相同的商品
-        if (this.checkSkuDuplicate(goodsSku.getId(), kanJiaActivityGoodsDTO) != null) {
+        if (this.checkSkuDuplicate(kanJiaActivityGoodsDTO) != null) {
             throw new ServiceException("商品id为" + goodsSku.getId() + "的商品已参加砍价商品活动！");
         }
         this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(kanJiaActivityGoodsDTO.getId()));

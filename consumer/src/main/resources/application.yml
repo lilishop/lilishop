@@ -111,7 +111,7 @@ spring:
     props:
       #是否打印逻辑SQL语句和实际SQL语句，建议调试时打印，在生产环境关闭
       sql:
-        show: true
+        show: false
 
 # 忽略鉴权url
 ignored:
@@ -179,7 +179,7 @@ logging:
   config: classpath:logback-spring.xml
   # 输出级别
   level:
-    cn.lili: info
+    root: error
   #    org.hibernate: debug
   #    org.springframework: debug
   file:

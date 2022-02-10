@@ -1,5 +1,6 @@
 package cn.lili.controller.member;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -30,6 +31,7 @@ public class MemberEvaluationManagerController {
     @Autowired
     private MemberEvaluationService memberEvaluationService;
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "通过id获取评论")
     @ApiImplicitParam(name = "id", value = "评价ID", required = true, dataType = "String", paramType = "path")
     @GetMapping(value = "/get/{id}")
@@ -45,6 +47,7 @@ public class MemberEvaluationManagerController {
         return ResultUtil.data(memberEvaluationService.queryPage(evaluationQueryParams));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "修改评价状态")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "评价ID", required = true, paramType = "path"),
