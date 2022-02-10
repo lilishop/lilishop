@@ -31,7 +31,7 @@
         <jasypt-version>3.0.4</jasypt-version>
         <neetl-version>2.9.10</neetl-version>
         <lombok-version>1.18.22</lombok-version>
-        <redisson>3.5.5</redisson>
+        <redisson>3.15.6</redisson>
         <aliyun-version>4.5.18</aliyun-version>
         <aliyun-sdk-oss-version>3.11.1</aliyun-sdk-oss-version>
         <aliyun-sdk-dysms-version>2.0.8</aliyun-sdk-dysms-version>

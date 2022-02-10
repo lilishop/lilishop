@@ -8,7 +8,6 @@ import cn.lili.common.security.token.Token;
 import cn.lili.common.security.token.TokenUtil;
 import cn.lili.common.security.token.base.AbstractTokenGenerate;
 import cn.lili.modules.member.entity.dos.Member;
-import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.service.StoreService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -31,7 +30,7 @@ public class StoreTokenGenerate extends AbstractTokenGenerate<Member> {
 
     @Override
     public Token createToken(Member member, Boolean longTerm) {
-        if (!member.getHaveStore()) {
+        if (Boolean.FALSE.equals(member.getHaveStore())) {
             throw new ServiceException(ResultCode.STORE_NOT_OPEN);
         }
         LambdaQueryWrapper<Store> queryWrapper = new LambdaQueryWrapper<>();

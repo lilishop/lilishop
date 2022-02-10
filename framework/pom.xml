@@ -129,7 +129,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
-        <!-- Swagger API文档 -->
+        <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter -->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>${redisson}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
@@ -164,12 +169,6 @@
             <groupId>com.github.ulisesbocchio</groupId>
             <artifactId>jasypt-spring-boot-starter</artifactId>
             <version>${jasypt-version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson</artifactId>
-            <version>${redisson}</version>
         </dependency>
         <!-- 阿里云核心包-->
         <dependency>
