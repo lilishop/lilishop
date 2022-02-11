@@ -82,6 +82,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
      */
     @Override
     @CacheEvict(key = "#memberId")
+    @Transactional(rollbackFor = Exception.class)
     public void receiveBuyerCoupon(String couponId, String memberId, String memberName) {
         Coupon coupon = couponService.getById(couponId);
         if (coupon != null && !CouponGetEnum.FREE.name().equals(coupon.getGetType())) {
@@ -94,6 +95,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
 
     @Override
     @CacheEvict(key = "#memberId")
+    @Transactional(rollbackFor = Exception.class)
     public void receiveCoupon(String couponId, String memberId, String memberName) {
         Coupon coupon = couponService.getById(couponId);
         if (coupon != null) {
@@ -219,6 +221,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
 
     @Override
     @CacheEvict(key = "#memberId")
+    @Transactional(rollbackFor = Exception.class)
     public void used(String memberId, List<String> ids) {
         if (ids != null && !ids.isEmpty()) {
             List<MemberCoupon> memberCoupons = this.listByIds(ids);
@@ -247,6 +250,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
      */
     @Override
     @CacheEvict(key = "#memberId")
+    @Transactional(rollbackFor = Exception.class)
     public void cancellation(String memberId, String id) {
         LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(MemberCoupon::getId, id);
@@ -260,6 +264,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
      * @param couponIds 优惠券id集合
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void closeMemberCoupon(List<String> couponIds) {
         LambdaUpdateWrapper<MemberCoupon> memberCouponLambdaUpdateWrapper = new LambdaUpdateWrapper<MemberCoupon>()
                 .in(MemberCoupon::getCouponId, couponIds)

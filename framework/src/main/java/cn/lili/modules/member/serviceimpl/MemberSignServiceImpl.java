@@ -2,34 +2,30 @@ package cn.lili.modules.member.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.member.entity.enums.PointTypeEnum;
-import cn.lili.modules.system.entity.dto.PointSettingItem;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.rocketmq.tags.MemberTagsEnum;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.DateUtil;
-import cn.lili.common.utils.StringUtils;
-import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.member.entity.dos.MemberSign;
+import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.mapper.MemberSignMapper;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.member.service.MemberSignService;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.PointSetting;
+import cn.lili.modules.system.entity.dto.PointSettingItem;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 会员签到业务层实现
@@ -74,7 +70,7 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
             memberSign.setMemberId(authUser.getId());
             memberSign.setMemberName(authUser.getUsername());
             //如果size大于0 说明昨天已经签到过，获取昨天的签到数，反之新签到
-            if (signs.size() > 0) {
+            if (!signs.isEmpty()) {
                 //截止目前为止 签到总天数 不带今天
                 Integer signDay = signs.get(0).getSignDay();
                 memberSign.setSignDay(CurrencyUtil.add(signDay, 1).intValue());
