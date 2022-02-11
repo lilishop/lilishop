@@ -85,7 +85,6 @@ import java.util.stream.Collectors;
  * @since 2020/11/17 7:38 下午
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
 
     private static final String ORDER_SN_COLUMN = "order_sn";
@@ -145,6 +144,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private TradeService tradeService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void intoDB(TradeDTO tradeDTO) {
         //检查TradeDTO信息
         checkTradeDTO(tradeDTO);
@@ -642,7 +642,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public Double getPaymentTotal(String orderSn) {
         Order order = this.getBySn(orderSn);
         Trade trade = tradeService.getBySn(order.getTradeSn());
-        if (trade.getPayStatus().equals(PayStatusEnum.PAID.name())) {
+        //如果交易不为空，则返回交易的金额，否则返回订单金额
+        if (StringUtils.isNotEmpty(trade.getPayStatus())
+                && trade.getPayStatus().equals(PayStatusEnum.PAID.name())) {
             return trade.getFlowPrice();
         }
         return order.getFlowPrice();

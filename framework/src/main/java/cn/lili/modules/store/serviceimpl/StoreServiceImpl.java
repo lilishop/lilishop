@@ -30,7 +30,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -42,7 +41,6 @@ import java.util.Optional;
  * @since 2020-03-07 16:18:56
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements StoreService {
 
     /**

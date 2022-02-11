@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 管理端,优惠券接口
@@ -91,7 +92,8 @@ public class CouponManagerController {
     @ApiOperation(value = "会员优惠券作废")
     @PutMapping(value = "/member/cancellation/{id}")
     public ResultMessage<Object> cancellation(@PathVariable String id) {
-        memberCouponService.cancellation(id);
+        AuthUser currentUser =  Objects.requireNonNull(UserContext.getCurrentUser());
+        memberCouponService.cancellation(currentUser.getId(), id);
         return ResultUtil.success(ResultCode.COUPON_CANCELLATION_SUCCESS);
     }
 

@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 店铺地址（自提点）业务层实现
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2020/11/22 16:00
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class StoreAddressServiceImpl extends ServiceImpl<StoreAddressMapper, StoreAddress> implements StoreAddressService {
 
     @Override

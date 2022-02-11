@@ -9,7 +9,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -25,7 +24,6 @@ import java.util.List;
 @RestController
 @Api(tags = "管理端,行政地区管理接口")
 @RequestMapping("/manager/setting/region")
-@Transactional(rollbackFor = Exception.class)
 public class RegionManagerController {
     @Autowired
     private RegionService regionService;

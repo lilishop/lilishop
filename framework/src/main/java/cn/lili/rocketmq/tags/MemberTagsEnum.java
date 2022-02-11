@@ -12,6 +12,10 @@ public enum MemberTagsEnum {
      */
     MEMBER_REGISTER("会员注册"),
     /**
+     * 会员注册
+     */
+    MEMBER_LOGIN("会员登录"),
+    /**
      * 会员签到
      */
     MEMBER_SING("会员签到"),

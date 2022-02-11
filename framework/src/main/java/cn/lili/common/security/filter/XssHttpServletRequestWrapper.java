@@ -7,7 +7,6 @@ import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
-import org.owasp.html.Sanitizers;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
@@ -32,33 +31,6 @@ import java.util.Map;
 @Slf4j
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
-
-    /**
-     * xss过滤参数
-     *
-     * @todo 这里的参数应该更智能些，例如iv，前端的参数包含这两个字母就会放过，这是有问题的
-     */
-    private static final String[] IGNORE_FIELD = {
-            "logo",
-            "url",
-            "photo",
-            "intro",
-            "content",
-            "name",
-            "image",
-            "encrypted",
-            "iv",
-            "mail",
-            "sell",
-            "id",
-            "price",
-            "prop",
-            "reply",
-            "profile",
-            "privateKey",
-            "wechatpay",
-    };
-
     //允许的标签
     private static final String[] allowedTags = {"h1", "h2", "h3", "h4", "h5", "h6",
             "span", "strong",
@@ -74,8 +46,10 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             "footer", "header", "hgroup", "section", "summary"};
 
     //带有超链接的标签
-    private static final String[] linkTags = {"img", "video", "source", "a", "iframe"};
+    private static final String[] linkTags = {"img", "video", "source", "a", "iframe", "p"};
 
+    //带有超链接的标签
+    private static final String[] allowAttributes = {"style", "src", "href", "target", "width", "height"};
 
     public XssHttpServletRequestWrapper(HttpServletRequest request) {
         super(request);
@@ -284,19 +258,11 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
                     .allowElements(allowedTags)
                     //内容标签转化为div
                     .allowElements((elementName, attributes) -> "div", needTransformTags)
-                    .allowAttributes("src", "href", "target", "width", "height").onElements(linkTags)
-                    //校验链接中的是否为http
-//                    .allowUrlProtocols("https")
+                    .allowAttributes(allowAttributes).onElements(linkTags)
+                    .allowStyling()
                     .toFactory();
             // basic prepackaged policies for links, tables, integers, images, styles, blocks
-            value = Sanitizers.FORMATTING
-                    .and(Sanitizers.STYLES)
-                    .and(Sanitizers.IMAGES)
-                    .and(Sanitizers.LINKS)
-                    .and(Sanitizers.BLOCKS)
-                    .and(Sanitizers.TABLES)
-                    .and(policy)
-                    .sanitize(value);
+            value = policy.sanitize(value);
         }
         return HtmlUtil.unescape(value);
     }
@@ -309,12 +275,6 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
      * @return 参数值
      */
     private String filterXss(String name, String value) {
-//        if (CharSequenceUtil.containsAny(name.toLowerCase(Locale.ROOT), IGNORE_FIELD)) {
-//            // 忽略的处理，（过滤敏感字符）
-//            return value;
-//        } else {
-//            return cleanXSS(value);
-//        }
         return cleanXSS(value);
     }
 

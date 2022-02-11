@@ -1,5 +1,6 @@
 package cn.lili.controller.other.purchase;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
@@ -48,6 +49,8 @@ public class PurchaseBuyerController {
         return ResultUtil.data(goodsUnitService.page(PageUtil.initPage(pageVO)));
     }
 
+
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "添加采购单")
     @PostMapping
     public ResultMessage<PurchaseOrderVO> addPurchaseOrderVO(@RequestBody PurchaseOrderVO purchaseOrderVO) {
@@ -74,6 +77,7 @@ public class PurchaseBuyerController {
         return ResultUtil.data(purchaseOrderService.page(purchaseOrderSearchParams));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "关闭采购单")
     @ApiImplicitParam(name = "id", value = "采购单ID", required = true, dataType = "Long", paramType = "path")
     @PutMapping("/{id}")

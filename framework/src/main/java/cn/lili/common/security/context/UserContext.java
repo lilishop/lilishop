@@ -37,6 +37,19 @@ public class UserContext {
         return null;
     }
 
+    /**
+     * 根据request获取用户信息
+     *
+     * @return 授权用户
+     */
+    public static String getUuid() {
+        if (RequestContextHolder.getRequestAttributes() != null) {
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            return request.getHeader(SecurityEnum.UUID.getValue());
+        }
+        return null;
+    }
+
 
     /**
      * 根据jwt获取token重的用户信息

@@ -1,5 +1,6 @@
 package cn.lili.controller.goods;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
@@ -65,6 +66,7 @@ public class GoodsManagerController {
         return goodsService.queryByParams(goodsSearchParams);
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "管理员下架商品", notes = "管理员下架商品时使用")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "query", allowMultiple = true),
@@ -79,6 +81,7 @@ public class GoodsManagerController {
         throw new ServiceException(ResultCode.GOODS_UNDER_ERROR);
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "管理员审核商品", notes = "管理员审核商品")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "goodsIds", value = "商品ID", required = true, paramType = "path", allowMultiple = true, dataType = "int"),
@@ -94,6 +97,7 @@ public class GoodsManagerController {
     }
 
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "管理员上架商品", notes = "管理员上架商品时使用")
     @PutMapping(value = "/{goodsId}/up")
     @ApiImplicitParams({

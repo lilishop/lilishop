@@ -103,7 +103,7 @@ public class GoodsOperationDTO implements Serializable {
      * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
      */
     @ApiModelProperty(value = "商品类型")
-    @EnumValue(strValues = {"PHYSICAL_GOODS","VIRTUAL_GOODS","E_COUPON"},message = "商品类型参数值错误")
+    @EnumValue(strValues = {"PHYSICAL_GOODS", "VIRTUAL_GOODS", "E_COUPON"}, message = "商品类型参数值错误")
     private String goodsType;
 
     /**
@@ -112,6 +112,9 @@ public class GoodsOperationDTO implements Serializable {
     @ApiModelProperty(value = "商品视频")
     private String goodsVideo;
 
-
-
+    public String getGoodsName() {
+        //对商品对名称做一个极限处理。这里没有用xss过滤是因为xss过滤为全局过滤，影响很大。
+        // 业务中，全局代码中只有商品名称不能拥有英文逗号，是由于商品名称存在一个数据库联合查询，结果要根据逗号分组
+        return goodsName.replace(",", "");
+    }
 }

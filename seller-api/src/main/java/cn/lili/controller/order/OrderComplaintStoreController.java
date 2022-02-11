@@ -1,5 +1,6 @@
 package cn.lili.controller.order;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.OperationalJudgment;
@@ -81,6 +82,7 @@ public class OrderComplaintStoreController {
         return ResultUtil.data(orderComplainVO);
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "申诉")
     @PutMapping("/appeal")
     public ResultMessage<OrderComplaintVO> appeal(StoreAppealVO storeAppealVO) {
@@ -88,6 +90,7 @@ public class OrderComplaintStoreController {
         return ResultUtil.data(orderComplaintService.getOrderComplainById(storeAppealVO.getOrderComplaintId()));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "修改状态")
     @PutMapping(value = "/status")
     public ResultMessage<Object> updateStatus(OrderComplaintOperationParams orderComplainVO) {

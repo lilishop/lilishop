@@ -14,7 +14,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +32,6 @@ import java.util.Objects;
 @Api(tags = "店铺端,商品分类接口")
 @RequestMapping("/store/goods/category")
 @CacheConfig(cacheNames = "category")
-@Transactional(rollbackFor = Exception.class)
 public class CategoryStoreController {
 
     /**

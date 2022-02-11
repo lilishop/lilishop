@@ -1,5 +1,6 @@
 package cn.lili.controller.sms;
 
+import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -29,21 +30,24 @@ public class SmsTemplateManagerController {
 
     @ApiOperation(value = "新增短信模板")
     @PostMapping
+    @DemoSite
     public ResultMessage<SmsTemplate> save(@Valid SmsTemplate smsTemplate) {
         smsTemplateService.addSmsTemplate(smsTemplate);
         return ResultUtil.success();
     }
 
     @ApiOperation(value = "删除短信模板")
-    @ApiImplicitParam(name = "id", value = "短信模板ID", required = true, paramType = "path")
-    @DeleteMapping("/{id}")
-    public ResultMessage<SmsTemplate> delete(@PathVariable("id") String id) {
-        smsTemplateService.deleteSmsTemplate(id);
+    @ApiImplicitParam(name = "templateCode", value = "短信模板CODE", required = true, paramType = "query")
+    @DeleteMapping
+    @DemoSite
+    public ResultMessage<SmsTemplate> delete(String templateCode) {
+        smsTemplateService.deleteSmsTemplate(templateCode);
         return ResultUtil.success();
     }
 
     @ApiOperation(value = "查询短信模板状态")
     @PutMapping("/querySmsSign")
+    @DemoSite
     public ResultMessage<SmsTemplate> querySmsSign() {
         smsTemplateService.querySmsTemplate();
         return ResultUtil.success();
@@ -51,6 +55,7 @@ public class SmsTemplateManagerController {
 
     @ApiOperation(value = "修改短信模板")
     @PutMapping("/modifySmsTemplate")
+    @DemoSite
     public ResultMessage<SmsTemplate> modifySmsTemplate(@Valid SmsTemplate smsTemplate) {
         smsTemplateService.modifySmsTemplate(smsTemplate);
         return ResultUtil.success();

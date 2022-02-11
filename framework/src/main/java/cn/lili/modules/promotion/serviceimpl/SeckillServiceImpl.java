@@ -36,12 +36,9 @@ import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 秒杀活动业务层实现
@@ -50,7 +47,6 @@ import java.util.Map;
  * @since 2020/8/21
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 @Slf4j
 public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMapper, Seckill> implements SeckillService {
 
@@ -154,19 +150,7 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
                 }
             }
             if (!seckillApplies.isEmpty()) {
-                log.info("更新限时抢购商品状态:{}", seckill);
-                String promotionKey = PromotionTypeEnum.SECKILL.name() + "-" + seckill.getId();
-                Map<String, Object> map = new HashMap<>();
-                // es促销key
-                map.put("esPromotionKey", promotionKey);
-                // 促销类型全路径名
-                map.put("promotionsType", Seckill.class.getName());
-                // 促销实体
-                map.put("promotions", seckill);
-                //更新商品促销消息
-                String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX_PROMOTIONS.name();
-                //发送mq消息
-                rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(map), RocketmqSendCallbackBuilder.commonCallback());
+                this.updateEsGoodsIndex(seckill);
             }
         }
     }

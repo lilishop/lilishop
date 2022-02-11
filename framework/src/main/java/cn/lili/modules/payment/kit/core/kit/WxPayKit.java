@@ -5,6 +5,8 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.payment.kit.core.PaymentHttpResponse;
 import cn.lili.modules.payment.kit.core.enums.RequestMethodEnums;
 import cn.lili.modules.payment.kit.core.enums.SignType;
@@ -113,6 +115,30 @@ public class WxPayKit {
             return hmacSha256(stringSignTemp, partnerKey).toUpperCase();
         }
     }
+
+    /**
+     * APP 单独生成签名
+     * app 支付环境中，如果遇到签名错误，百思不得其解，则可以使用这个方法调用签名尝试解决
+     *
+     * @param params 需要签名的参数
+     * @return 签名后的数据
+     */
+    public static String createAppSign(Map<String, String> params, String privateKey) {
+
+        String appid = params.get("appid");
+        String timestamp = params.get("timestamp");
+        String noncestr = params.get("noncestr");
+        String prepayid = params.get("prepayid");
+
+        String encrypt = appid + "\n" + timestamp + "\n" + noncestr + "\n" + prepayid + "\n";
+
+        try {
+            return PayKit.createSign(encrypt, privateKey);
+        } catch (Exception e) {
+            throw new ServiceException(ResultCode.ERROR);
+        }
+    }
+
 
     /**
      * 生成签名
@@ -351,6 +377,8 @@ public class WxPayKit {
             signType = SignType.MD5;
         }
         String packageSign = createSign(packageParams, partnerKey, signType);
+        // 部分微信APP支付 提示签名错误 解开下方注释 替换上边的代码就好。
+        //        String packageSign = createAppSign(packageParams, partnerKey);
         packageParams.put("sign", packageSign);
         return packageParams;
     }

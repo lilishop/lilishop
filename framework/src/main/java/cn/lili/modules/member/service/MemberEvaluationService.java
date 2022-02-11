@@ -41,9 +41,10 @@ public interface MemberEvaluationService extends IService<MemberEvaluation> {
      * 4.发送用户评价消息修改商品的评价数量以及好评率
      *
      * @param memberEvaluationDTO 评论
+     * @param isSelf              是否自己操作（true：买家操作/false 系统操作）
      * @return 操作状态
      */
-    MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO);
+    MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO, Boolean isSelf);
 
     /**
      * 根据ID查询会员评价
@@ -88,5 +89,26 @@ public interface MemberEvaluationService extends IService<MemberEvaluation> {
      */
     EvaluationNumberVO getEvaluationNumber(String goodsId);
 
+    /**
+     * 获取今天新增的评价数量
+     *
+     * @return 今日评价数量
+     */
+    long todayMemberEvaluation();
+
+    /**
+     * 获取等待回复评价数量
+     *
+     * @return 等待回复评价数量
+     */
+    long getWaitReplyNum();
+
+    /**
+     * 统计商品评价数量
+     *
+     * @param evaluationQueryParams 查询条件
+     * @return 商品评价数量
+     */
+    long getEvaluationCount(EvaluationQueryParams evaluationQueryParams);
 
 }

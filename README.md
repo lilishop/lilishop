@@ -75,7 +75,7 @@ PS：手机验证码为 ‘111111’
 
 #### 平台管理端功能
 
-![平台管理端功能](https://pickmall.cn/assets/imgs/other/managerList.jpg)
+![平台管理端功能](https://pickmall.cn/assets/imgs/other/managerList1.jpg)
 
 
 

@@ -87,7 +87,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
                 this.remove(queryWrapper);
                 throw new NoPermissionException("未绑定用户");
             }
-            return memberTokenGenerate.createToken(member.getUsername(), longTerm);
+            return memberTokenGenerate.createToken(member, longTerm);
         } catch (NoPermissionException e) {
             throw e;
         }
@@ -222,7 +222,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         //如果不存在会员，则进行绑定微信openid 和 unionid，并且登录
         if (member != null) {
             bindMpMember(openId, unionId, member);
-            return memberTokenGenerate.createToken(member.getUsername(), true);
+            return memberTokenGenerate.createToken(member, true);
         }
 
         //如果没有会员，则根据手机号注册会员
@@ -230,7 +230,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         memberService.save(newMember);
         newMember = memberService.findByUsername(newMember.getUsername());
         bindMpMember(openId, unionId, newMember);
-        return memberTokenGenerate.createToken(newMember.getUsername(), true);
+        return memberTokenGenerate.createToken(newMember, true);
     }
 
     @Override

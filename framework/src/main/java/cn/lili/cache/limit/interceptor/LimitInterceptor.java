@@ -1,9 +1,10 @@
 package cn.lili.cache.limit.interceptor;
 
-import cn.lili.cache.limit.enums.LimitTypeEnums;
 import cn.lili.cache.limit.annotation.LimitPoint;
+import cn.lili.cache.limit.enums.LimitTypeEnums;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.utils.IpUtils;
 import com.google.common.collect.ImmutableList;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +17,6 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 
 /**
@@ -54,7 +54,8 @@ public class LimitInterceptor {
                 key = limitPointAnnotation.key();
                 break;
             default:
-                key = limitPointAnnotation.key() + getIpAddress();
+                key = limitPointAnnotation.key() + IpUtils
+                        .getIpAddress(((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         }
         ImmutableList<String> keys = ImmutableList.of(StringUtils.join(limitPointAnnotation.prefix(), key));
         try {
@@ -71,32 +72,8 @@ public class LimitInterceptor {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("服务器异常，请稍后再试");
+            throw new ServiceException(ResultCode.ERROR);
         }
     }
 
-
-    /**
-     * 默认unknown常量值
-     */
-    private static final String UNKNOWN = "unknown";
-
-    /**
-     * 获取ip
-     * @return ip
-     */
-    public String getIpAddress() {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        String ip = request.getHeader("x-forwarded-for");
-        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || UNKNOWN.equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        return ip;
-    }
 }

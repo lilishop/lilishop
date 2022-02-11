@@ -64,4 +64,11 @@ public interface KanjiaActivityService extends IService<KanjiaActivity> {
     IPage<KanjiaActivity> getForPage(KanjiaActivityQuery kanJiaActivityQuery, PageVO page);
 
 
+    /**
+     * 结束砍价活动
+     *
+     * @param kanjiaId 砍价活动id
+     * @return 是否更新成功
+     */
+    boolean endKanjiaActivity(String kanjiaId);
 }

@@ -5,7 +5,6 @@ import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
 import cn.lili.modules.member.entity.vo.MemberVO;
-import cn.lili.modules.member.mapper.MemberMapper;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.message.entity.dos.MemberMessage;
 import cn.lili.modules.message.entity.dos.Message;
@@ -28,7 +27,6 @@ import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,11 +40,6 @@ import java.util.List;
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.notice-send-topic}", consumerGroup = "${lili.data.rocketmq.notice-send-group}")
 public class NoticeSendMessageListener implements RocketMQListener<MessageExt> {
 
-    /**
-     * 会员
-     */
-    @Resource
-    private MemberMapper memberMapper;
     /**
      * 短信
      */
@@ -82,7 +75,7 @@ public class NoticeSendMessageListener implements RocketMQListener<MessageExt> {
                 //发送全部会员
                 if (smsReachDTO.getSmsRange().equals(RangeEnum.ALL.name())) {
                     //获取所有会员的手机号
-                    List<String> list = memberMapper.getAllMemberMobile();
+                    List<String> list = memberService.getAllMemberMobile();
                     smsUtil.sendBatchSms(smsReachDTO.getSignName(), list, smsReachDTO.getMessageCode());
                     //判断为发送部分用户
                 } else {

@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,8 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2020/12/6 16:09
  */
 @RestController
-@Transactional(rollbackFor = Exception.class)
-@Api(tags = "管理端,会员消息管理接口")
+@Api(tags = "管理端,会员消息消息管理接口")
 @RequestMapping("/manager/message/member")
 public class MemberMessageManagerController {
     @Autowired

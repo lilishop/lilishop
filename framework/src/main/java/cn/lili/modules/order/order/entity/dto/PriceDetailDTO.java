@@ -309,7 +309,7 @@ public class PriceDetailDTO implements Serializable {
     }
 
     public Double getUpdatePrice() {
-        if (updatePrice == null || updatePrice <= 0) {
+        if (updatePrice == null) {
             return 0D;
         }
         return updatePrice;

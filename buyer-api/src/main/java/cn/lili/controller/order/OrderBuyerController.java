@@ -1,5 +1,6 @@
 package cn.lili.controller.order;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
@@ -62,6 +63,7 @@ public class OrderBuyerController {
         return ResultUtil.data(orderDetailVO);
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "确认收货")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, paramType = "path")
@@ -80,6 +82,7 @@ public class OrderBuyerController {
         return ResultUtil.success();
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "取消订单")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path"),
@@ -91,6 +94,7 @@ public class OrderBuyerController {
         return ResultUtil.success();
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "删除订单")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path")
@@ -113,6 +117,7 @@ public class OrderBuyerController {
     }
 
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "开票")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path")

@@ -85,19 +85,17 @@ public class TradeBuilder {
      * 1.构造交易
      * 2.创建交易
      *
-     * @param checkedWay 购物车类型
+     * @param tradeDTO 交易模型
      * @return 交易信息
      */
-    public Trade createTrade(CartTypeEnum checkedWay) {
-        //读取对应购物车的商品信息
-        TradeDTO tradeDTO = cartService.readDTO(checkedWay);
+    public Trade createTrade(TradeDTO tradeDTO) {
 
         //需要对购物车渲染
-        if (isSingle(checkedWay)) {
+        if (isSingle(tradeDTO.getCartTypeEnum())) {
             renderCartBySteps(tradeDTO, RenderStepStatement.singleTradeRender);
-        } else if (checkedWay.equals(CartTypeEnum.PINTUAN)) {
+        } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)) {
             renderCartBySteps(tradeDTO, RenderStepStatement.pintuanTradeRender);
-        }  else {
+        } else {
             renderCartBySteps(tradeDTO, RenderStepStatement.tradeRender);
         }
 

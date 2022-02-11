@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 分销选择商品接口实现
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2020-03-24 23:04:56
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class DistributionSelectedGoodsServiceImpl extends ServiceImpl<DistributionSelectedGoodsMapper, DistributionSelectedGoods> implements DistributionSelectedGoodsService {
 
     /**

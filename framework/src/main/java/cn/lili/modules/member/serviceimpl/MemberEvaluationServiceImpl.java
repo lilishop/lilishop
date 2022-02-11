@@ -1,11 +1,15 @@
 package cn.lili.modules.member.serviceimpl;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.sensitive.SensitiveWordsFilter;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -29,6 +33,7 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -51,7 +56,6 @@ import java.util.Map;
  * @since 2020-02-25 14:10:16
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMapper, MemberEvaluation> implements MemberEvaluationService {
 
     /**
@@ -102,13 +106,16 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
     }
 
     @Override
-    public MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO) {
+    @Transactional(rollbackFor = Exception.class)
+    public MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO, Boolean isSelf) {
         //获取子订单信息
         OrderItem orderItem = orderItemService.getBySn(memberEvaluationDTO.getOrderItemSn());
         //获取订单信息
         Order order = orderService.getBySn(orderItem.getOrderSn());
         //检测是否可以添加会员评价
-        checkMemberEvaluation(orderItem, order);
+        if (Boolean.TRUE.equals(isSelf)) {
+            checkMemberEvaluation(orderItem, order);
+        }
         //获取用户信息
         Member member = memberService.getUserInfo();
         //获取商品信息
@@ -189,6 +196,31 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
                 .eq("goods_id", goodsId)));
 
         return evaluationNumberVO;
+    }
+
+    @Override
+    public long todayMemberEvaluation() {
+        return this.count(new LambdaQueryWrapper<MemberEvaluation>().ge(MemberEvaluation::getCreateTime, DateUtil.beginOfDay(new DateTime())));
+    }
+
+    @Override
+    public long getWaitReplyNum() {
+        QueryWrapper<MemberEvaluation> queryWrapper = Wrappers.query();
+        queryWrapper.eq(CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
+                "store_id", UserContext.getCurrentUser().getStoreId());
+        queryWrapper.eq("reply_status", false);
+        return this.count(queryWrapper);
+    }
+
+    /**
+     * 统计商品评价数量
+     *
+     * @param evaluationQueryParams 查询条件
+     * @return 商品评价数量
+     */
+    @Override
+    public long getEvaluationCount(EvaluationQueryParams evaluationQueryParams) {
+        return this.count(evaluationQueryParams.queryWrapper());
     }
 
     /**

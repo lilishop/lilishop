@@ -11,7 +11,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,7 +22,6 @@ import java.util.List;
 @RestController
 @Api(tags = "微信小程序消息订阅接口")
 @RequestMapping("/manager/wechat/wechatMPMessage")
-@Transactional(rollbackFor = Exception.class)
 public class WechatMPMessageManagerController {
     @Autowired
     private WechatMPMessageService wechatMPMessageService;
