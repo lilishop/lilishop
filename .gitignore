@@ -1,0 +1,41 @@
+/.idea/
+target
+*.iml
+*.class
+.DS_Store
+*.classpath
+*.project
+*.log
+.settings/
+.factorypath
+
+log/
+logs/
+*.factorypath
+lili-shop/src/main/java/cn/lili/generator/CodeGenerator.java
+lili-logs
+
+
+### STS ###
+.apt_generated
+.classpath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+### VS Code ###
+.vscode/
