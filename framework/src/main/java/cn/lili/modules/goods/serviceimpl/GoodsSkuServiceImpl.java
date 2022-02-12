@@ -7,6 +7,7 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -447,7 +448,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 goodsIndexService.deleteIndexById(goodsSku.getId());
             }
             goodsSku.setQuantity(quantity);
-            this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
+            boolean update = this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
+            if (update) {
+                cache.remove(CachePrefix.GOODS.getPrefix() + goodsSku.getGoodsId());
+            }
             cache.put(GoodsSkuService.getCacheKeys(skuId), goodsSku);
             cache.put(GoodsSkuService.getStockCacheKey(skuId), quantity);
 
