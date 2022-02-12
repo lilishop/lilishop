@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "管理端,店铺消息消息管理接口")
-@RequestMapping("/manager/message/store")
+@RequestMapping("/manager/other/storeMessage")
 public class StoreMessageManagerController {
 
     @Autowired

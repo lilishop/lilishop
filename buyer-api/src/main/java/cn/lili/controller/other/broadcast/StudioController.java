@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "买家端,直播间接口")
-@RequestMapping("/buyer/other/broadcast/studio")
+@RequestMapping("/buyer/broadcast/studio")
 public class StudioController {
 
     @Autowired

@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "店铺端,商品计量单位接口")
-@RequestMapping("/store/goods/unit")
+@RequestMapping("/store/goods/goodsUnit")
 public class GoodsUnitStoreController {
     @Autowired
     private GoodsUnitService goodsUnitService;

@@ -21,7 +21,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "店铺端,分类绑定参数组管理接口")
-@RequestMapping("/store/goods/category/parameters")
+@RequestMapping("/store/goods/categoryParameters")
 public class CategoryParameterGroupStoreController {
 
 

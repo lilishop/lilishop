@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "店铺端,直播商品接口")
-@RequestMapping("/manager/other/broadcast/commodity")
+@RequestMapping("/manager/broadcast/commodity")
 public class CommodityManagerController {
 
     @Autowired

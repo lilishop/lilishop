@@ -26,7 +26,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "店铺端,直播商品接口")
-@RequestMapping("/store/other/broadcast/commodity")
+@RequestMapping("/store/broadcast/commodity")
 public class CommodityStoreController {
 
     @Autowired

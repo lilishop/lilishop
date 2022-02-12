@@ -27,7 +27,7 @@ import javax.validation.constraints.NotNull;
  */
 @RestController
 @Api(tags = "管理端,直播间接口")
-@RequestMapping("/manager/other/broadcast/studio")
+@RequestMapping("/manager/broadcast/studio")
 public class StudioManagerController {
 
     @Autowired
