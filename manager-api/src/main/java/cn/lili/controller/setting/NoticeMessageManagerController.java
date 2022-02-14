@@ -35,7 +35,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @Api(tags = "管理端,会员站内信管理接口")
-@RequestMapping("/manager/noticeMessage")
+@RequestMapping("/manager/setting/noticeMessage")
 public class NoticeMessageManagerController {
     @Autowired
     private NoticeMessageService noticeMessageService;

@@ -24,7 +24,7 @@ import java.util.Objects;
  **/
 @RestController
 @Api(tags = "店铺端,运费模板接口")
-@RequestMapping("/store/freightTemplate")
+@RequestMapping("/store/setting/freightTemplate")
 public class FreightTemplateStoreController {
     @Autowired
     private FreightTemplateService freightTemplateService;

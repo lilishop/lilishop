@@ -24,7 +24,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @Api(tags = "管理端,文章分类管理接口")
-@RequestMapping("/manager/article-category")
+@RequestMapping("/manager/other/articleCategory")
 public class ArticleCategoryManagerController {
 
     /**

@@ -23,7 +23,7 @@ import javax.validation.Valid;
  */
 @RestController
 @Api(tags = "买家端,意见反馈接口")
-@RequestMapping("/buyer/feedback")
+@RequestMapping("/buyer/other/feedback")
 public class FeedbackBuyerController {
 
     /**

@@ -8,6 +8,7 @@ import cn.lili.modules.page.service.SpecialService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 专题活动业务层实现
@@ -25,6 +26,7 @@ public class SpecialServiceImpl extends ServiceImpl<SpecialMapper, Special> impl
     private PageDataService pageDataService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Special addSpecial(Special special) {
         //新建页面
         PageData pageData = new PageData();
@@ -37,6 +39,7 @@ public class SpecialServiceImpl extends ServiceImpl<SpecialMapper, Special> impl
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean removeSpecial(String id) {
 
         //删除页面内容

@@ -1,4 +1,4 @@
-package cn.lili.controller.setting;
+package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
@@ -24,7 +24,7 @@ import javax.validation.constraints.NotNull;
  */
 @RestController
 @Api(tags = "管理端,物流公司接口")
-@RequestMapping("/manager/logistics")
+@RequestMapping("/manager/other/logistics")
 public class LogisticsManagerController {
     @Autowired
     private LogisticsService logisticsService;

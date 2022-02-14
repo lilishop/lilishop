@@ -35,7 +35,7 @@ import java.util.Objects;
  */
 @RestController
 @Api(tags = "买家端,订单接口")
-@RequestMapping("/buyer/orders")
+@RequestMapping("/buyer/order/order")
 public class OrderBuyerController {
 
     /**

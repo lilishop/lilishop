@@ -30,7 +30,7 @@ import javax.validation.constraints.NotNull;
  */
 @Api(tags = "买家端,采购接口")
 @RestController
-@RequestMapping("/buyer/purchase")
+@RequestMapping("/buyer/other/purchase/purchase")
 public class PurchaseBuyerController {
 
     /**

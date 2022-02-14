@@ -1,4 +1,4 @@
-package cn.lili.controller.member;
+package cn.lili.controller.passport;
 
 import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
@@ -30,7 +30,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,会员接口")
-@RequestMapping("/manager/member")
+@RequestMapping("/manager/passport/member")
 public class MemberManagerController {
     @Autowired
     private MemberService memberService;

@@ -28,7 +28,7 @@ import javax.validation.constraints.NotNull;
  */
 @RestController
 @Api(tags = "买家端,会员接口")
-@RequestMapping("/buyer/members")
+@RequestMapping("/buyer/passport/member")
 public class MemberBuyerController {
 
     @Autowired

@@ -23,7 +23,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,部门管理接口")
-@RequestMapping("/manager/department")
+@RequestMapping("/manager/permission/department")
 public class DepartmentManagerController {
     @Autowired
     private DepartmentService departmentService;

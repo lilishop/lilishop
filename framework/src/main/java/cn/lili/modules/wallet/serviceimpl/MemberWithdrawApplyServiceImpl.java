@@ -52,6 +52,7 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
     private MemberWalletService memberWalletService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean audit(String applyId, Boolean result, String remark) {
         MemberWithdrawalMessage memberWithdrawalMessage = new MemberWithdrawalMessage();
         //查询申请记录
@@ -66,11 +67,11 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
                 throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_FROZEN_AMOUNT_INSUFFICIENT);
             }
             //如果审核通过 则微信直接提现，反之则记录审核状态
-            if (result) {
+            if (Boolean.TRUE.equals(result)) {
                 memberWithdrawApply.setApplyStatus(WithdrawStatusEnum.VIA_AUDITING.name());
                 //提现，微信提现成功后扣减冻结金额
                 Boolean bool = memberWalletService.withdrawal(memberWithdrawApply);
-                if (bool) {
+                if (Boolean.TRUE.equals(bool)) {
                     memberWithdrawalMessage.setStatus(WithdrawStatusEnum.VIA_AUDITING.name());
                     //保存修改审核记录
                     this.updateById(memberWithdrawApply);

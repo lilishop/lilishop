@@ -51,6 +51,10 @@ public class BillSearchParams extends PageVO {
         //创建时间
         if (StringUtils.isNotEmpty(startDate) && StringUtils.isNotEmpty(endDate)) {
             wrapper.between("create_time", startDate, endDate);
+        } else if (StringUtils.isNotEmpty(startDate)) {
+            wrapper.ge("create_time", startDate);
+        } else if (StringUtils.isNotEmpty(endDate)) {
+            wrapper.le("create_time", endDate);
         }
         //账单号
         wrapper.eq(StringUtils.isNotEmpty(sn), "sn", sn);

@@ -77,7 +77,6 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
      * @param receiveNum 领取数量
      */
     @Override
-    @Transactional(rollbackFor = {Exception.class})
     public void receiveCoupon(String couponId, Integer receiveNum) {
         Coupon coupon = this.getById(couponId);
         if (coupon == null) {
@@ -105,7 +104,6 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
      * @param usedNum  使用数量
      */
     @Override
-    @Transactional(rollbackFor = {Exception.class})
     public void usedCoupon(String couponId, Integer usedNum) {
         Coupon coupon = this.getById(couponId);
         if (coupon == null) {

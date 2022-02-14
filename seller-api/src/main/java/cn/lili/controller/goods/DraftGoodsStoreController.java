@@ -27,7 +27,7 @@ import java.util.Objects;
  */
 @RestController
 @Api(tags = "店铺端,草稿商品接口")
-@RequestMapping("/store/draft/goods")
+@RequestMapping("/store/goods/draftGoods")
 public class DraftGoodsStoreController {
     @Autowired
     private DraftGoodsService draftGoodsService;

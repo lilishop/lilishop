@@ -23,7 +23,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,微信消息接口")
-@RequestMapping("/manager/message/wechat")
+@RequestMapping("/manager/wechat/wechatMessage")
 public class WechatMessageManageController {
     @Autowired
     private WechatMessageService wechatMessageService;

@@ -1,15 +1,15 @@
 package cn.lili.modules.message.serviceimpl;
 
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.mybatis.util.PageUtil;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.message.entity.dos.StoreMessage;
 import cn.lili.modules.message.entity.vos.StoreMessageQueryVO;
 import cn.lili.modules.message.mapper.StoreMessageMapper;
 import cn.lili.modules.message.service.StoreMessageService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -42,11 +42,11 @@ public class StoreMessageServiceImpl extends ServiceImpl<StoreMessageMapper, Sto
 
         QueryWrapper<StoreMessage> queryWrapper = new QueryWrapper<>();
         //消息id查询
-        if (StringUtils.isNotEmpty(storeMessageQueryVO.getMessageId())) {
+        if (CharSequenceUtil.isNotEmpty(storeMessageQueryVO.getMessageId())) {
             queryWrapper.eq("message_id", storeMessageQueryVO.getMessageId());
         }
         //商家id
-        if (StringUtils.isNotEmpty(storeMessageQueryVO.getStoreId())) {
+        if (CharSequenceUtil.isNotEmpty(storeMessageQueryVO.getStoreId())) {
             queryWrapper.eq("store_id", storeMessageQueryVO.getStoreId());
         }
         //状态查询

@@ -35,7 +35,7 @@ import javax.validation.constraints.Pattern;
  */
 @RestController
 @Api(tags = "买家端,会员余额接口")
-@RequestMapping("/buyer/members/wallet")
+@RequestMapping("/buyer/wallet/wallet")
 public class MemberWalletBuyerController {
 
     /**

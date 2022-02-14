@@ -36,6 +36,7 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void add(List<String> goodsGalleryList, String goodsId) {
         //删除原来商品相册信息
         this.baseMapper.delete(new UpdateWrapper<GoodsGallery>().eq("goods_id", goodsId));

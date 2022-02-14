@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "店铺端,管理员接口")
-@RequestMapping("/store/user")
+@RequestMapping("/store/member/user")
 public class StoreUserController {
     @Autowired
     private MemberService memberService;

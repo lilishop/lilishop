@@ -32,7 +32,7 @@ import java.util.List;
  * @since 2020/11/17 4:34 下午
  */
 @RestController
-@RequestMapping("/manager/orders")
+@RequestMapping("/manager/order/order")
 @Api(tags = "管理端,订单API")
 public class OrderManagerController {
 

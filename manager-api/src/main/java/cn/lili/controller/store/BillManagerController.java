@@ -27,7 +27,7 @@ import javax.validation.constraints.NotNull;
  */
 @RestController
 @Api(tags = "管理端,商家结算单接口")
-@RequestMapping("/manager/store/bill")
+@RequestMapping("/manager/order/bill")
 public class BillManagerController {
     @Autowired
     private BillService billService;

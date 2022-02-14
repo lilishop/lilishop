@@ -33,7 +33,7 @@ import java.io.IOException;
 @Slf4j
 @RestController
 @Api(tags = "买家端,web联合登录")
-@RequestMapping("/buyer/connect")
+@RequestMapping("/buyer/passport/connect/connect")
 public class ConnectBuyerWebController {
 
     @Autowired

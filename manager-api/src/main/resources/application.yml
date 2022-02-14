@@ -119,10 +119,10 @@ ignored:
     - /MP_verify_qSyvBPhDsPdxvOhC.txt
     - /weixin/**
     - /source/**
-    - /manager/user/login
-    - /manager/user/refresh/**
-    - /manager/elasticsearch
-    - /manager/custom-words
+    - /manager/passport/user/login
+    - /manager/passport/user/refresh/**
+    - /manager/other/elasticsearch
+    - /manager/other/customWords
     - /druid/**
     - /swagger-ui.html
     - /doc.html

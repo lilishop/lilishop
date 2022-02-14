@@ -22,7 +22,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,会员消息接口")
-@RequestMapping("/manager/memberNoticeLog")
+@RequestMapping("/manager/message/memberNoticeLog")
 public class MemberNoticeLogManagerController {
     @Autowired
     private MemberNoticeLogService memberNoticeLogService;

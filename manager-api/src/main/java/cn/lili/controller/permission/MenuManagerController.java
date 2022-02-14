@@ -26,7 +26,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @Api(tags = "管理端,菜单管理接口")
-@RequestMapping("/manager/menu")
+@RequestMapping("/manager/permission/menu")
 public class MenuManagerController {
 
     @Autowired

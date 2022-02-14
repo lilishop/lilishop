@@ -26,7 +26,7 @@ import javax.validation.constraints.NotNull;
  */
 @RestController
 @Api(tags = "管理端,会员商品评价接口")
-@RequestMapping("/manager/memberEvaluation")
+@RequestMapping("/manager/member/evaluation")
 public class MemberEvaluationManagerController {
     @Autowired
     private MemberEvaluationService memberEvaluationService;

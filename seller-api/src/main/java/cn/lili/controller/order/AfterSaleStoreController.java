@@ -31,7 +31,7 @@ import java.util.Objects;
  */
 @RestController
 @Api(tags = "店铺端,售后管理接口")
-@RequestMapping("/store/afterSale")
+@RequestMapping("/store/order/afterSale")
 public class AfterSaleStoreController {
 
     @Autowired

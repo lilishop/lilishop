@@ -23,7 +23,7 @@ import javax.validation.Valid;
  * @since 2021/1/6 14:11
  */
 @RestController
-@RequestMapping("/manager/afterSaleReason")
+@RequestMapping("/manager/order/afterSaleReason")
 @Api(tags = "管理端,售后原因接口")
 public class AfterSaleReasonManagerController {
 

@@ -119,24 +119,8 @@ ignored:
     - /MP_verify_qSyvBPhDsPdxvOhC.txt
     - /weixin/**
     - /source/**
-    - /buyer/mini-program/**
-    - /buyer/cashier/**
-    - /buyer/pageData/**
-    - /buyer/article/**
-    - /buyer/goods/**
-    - /buyer/category/**
-    - /buyer/shop/**
-    - /buyer/connect/**
-    - /buyer/members/smsLogin
-    - /buyer/members/refresh/*
-    - /buyer/members/refresh**
-    - /buyer/promotion/pintuan
-    - /buyer/promotion/seckill
-    - /buyer/memberEvaluation/**/goodsEvaluation
-    - /buyer/memberEvaluation/**/evaluationNumber
-    - /store/login/**
-    - /manager/user/login
-    - /manager/user/refresh/**
+    - /common/common/slider/**
+    - /common/common/sms/**
     - /druid/**
     - /swagger-ui.html
     - /doc.html
@@ -176,7 +160,7 @@ logging:
   config: classpath:logback-spring.xml
   # 输出级别
   level:
-    root: error
+    root: info
   #    org.hibernate: debug
   #    org.springframework: debug
   file:

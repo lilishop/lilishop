@@ -14,7 +14,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "管理端,余额提现记录接口")
-@RequestMapping("/manager/members/withdraw-apply")
+@RequestMapping("/manager/wallet/withdrawApply")
 public class MemberWithdrawApplyManagerController {
     @Autowired
     private MemberWithdrawApplyService memberWithdrawApplyService;
