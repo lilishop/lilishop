@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 @Api(tags = "买家端,退款回调")
 @RestController
-@RequestMapping("/buyer/cashier/refund")
+@RequestMapping("/buyer/payment/cashierRefund")
 public class CashierRefundController {
 
     @Autowired

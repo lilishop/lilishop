@@ -50,6 +50,7 @@ import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -380,6 +381,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     @PointLogPoint
+    @Transactional(rollbackFor = Exception.class)
     public Boolean updateMemberPoint(Long point, String type, String memberId, String content) {
         //获取当前会员信息
         Member member = this.getById(memberId);

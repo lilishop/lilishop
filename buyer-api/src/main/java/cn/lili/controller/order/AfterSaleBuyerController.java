@@ -1,5 +1,6 @@
 package cn.lili.controller.order;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.vo.ResultMessage;
@@ -35,7 +36,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "买家端,售后管理接口")
-@RequestMapping("/buyer/afterSale")
+@RequestMapping("/buyer/order/afterSale")
 public class AfterSaleBuyerController {
 
     /**
@@ -77,6 +78,7 @@ public class AfterSaleBuyerController {
         return ResultUtil.data(afterSaleService.getAfterSaleVO(sn));
     }
 
+    @PreventDuplicateSubmissions
     @PostMapping(value = "/save/{orderItemSn}")
     @ApiImplicitParam(name = "orderItemSn", value = "订单货物编号", required = true, paramType = "query")
     @ApiOperation(value = "申请售后")
@@ -101,6 +103,7 @@ public class AfterSaleBuyerController {
         return ResultUtil.data(afterSaleService.buyerDelivery(afterSaleSn, logisticsNo, logisticsId, mDeliverTime));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "售后，取消售后")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "afterSaleSn", value = "售后sn", required = true, dataType = "String", paramType = "path")

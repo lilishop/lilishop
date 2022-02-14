@@ -3,6 +3,8 @@ package cn.lili.modules.system.entity.dto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * 积分签到设置
  *
@@ -10,7 +12,7 @@ import lombok.Data;
  * @since 2021-02-26 11:48
  */
 @Data
-public class PointSettingItem implements Comparable<PointSettingItem> {
+public class PointSettingItem implements Comparable<PointSettingItem>, Serializable {
 
 
     @ApiModelProperty(value = "签到天数")
@@ -21,7 +23,7 @@ public class PointSettingItem implements Comparable<PointSettingItem> {
     private Integer point;
 
     public Integer getPoint() {
-        if (point != null || point < 0) {
+        if (point == null || point < 0) {
             return 0;
         }
         return point;

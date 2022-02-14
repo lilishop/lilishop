@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 2021-09-16 15:32
  */
 @RestController
-@RequestMapping("/common/IM")
+@RequestMapping("/common/common/IM")
 @Api(tags = "IM 中心")
 public class IMController {
 

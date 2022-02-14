@@ -29,7 +29,7 @@ import java.util.Objects;
  */
 @RestController
 @Api(tags = "店铺端,消息接口")
-@RequestMapping("/store/message")
+@RequestMapping("/store/message/storeMessage")
 public class StoreMessageController {
 
     /**

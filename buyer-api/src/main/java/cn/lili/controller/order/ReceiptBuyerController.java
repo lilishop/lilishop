@@ -1,5 +1,6 @@
 package cn.lili.controller.order;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -41,6 +42,7 @@ public class ReceiptBuyerController {
         return ResultUtil.data(this.receiptService.getReceiptData(searchParams, pageVO));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "保存发票信息")
     @PostMapping
     public ResultMessage<Receipt> save(@Valid Receipt receipt) {

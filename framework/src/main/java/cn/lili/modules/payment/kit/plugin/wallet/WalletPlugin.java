@@ -19,6 +19,8 @@ import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
 import cn.lili.modules.wallet.entity.enums.DepositServiceTypeEnum;
 import cn.lili.modules.wallet.service.MemberWalletService;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -57,9 +59,11 @@ public class WalletPlugin implements Payment {
     @Autowired
     private CashierSupport cashierSupport;
 
+    @Autowired
+    private RedissonClient redisson;
+
     @Override
     public ResultMessage<Object> h5pay(HttpServletRequest request, HttpServletResponse response, PayParam payParam) {
-
         savePaymentLog(payParam);
         return ResultUtil.success(ResultCode.PAY_SUCCESS);
     }
@@ -113,9 +117,18 @@ public class WalletPlugin implements Payment {
      * @param payParam 支付参数
      */
     private void savePaymentLog(PayParam payParam) {
-        //获取支付收银参数
-        CashierParam cashierParam = cashierSupport.cashierParam(payParam);
-        this.callBack(payParam, cashierParam);
+        //同一个会员如果在不同的客户端使用预存款支付，会存在同时支付，无法保证预存款的正确性，所以对会员加锁
+        RLock lock = redisson.getLock(UserContext.getCurrentUser().getId() + "");
+        lock.lock();
+        try {
+            //获取支付收银参数
+            CashierParam cashierParam = cashierSupport.cashierParam(payParam);
+            this.callBack(payParam, cashierParam);
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override

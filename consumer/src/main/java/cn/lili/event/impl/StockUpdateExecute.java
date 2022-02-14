@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +80,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
     private PointsGoodsService pointsGoodsService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void orderChange(OrderMessage orderMessage) {
 
         switch (orderMessage.getNewStatus()) {
@@ -154,14 +156,11 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
      * @param stocks
      */
     private void checkStocks(List<Integer> stocks, OrderDetailVO order) {
-        for (int i = 0; i < stocks.size(); i++) {
-            if (null == stocks.get(i)) {
-                initSkuCache(order.getOrderItems());
-                initPromotionCache(order.getOrderItems());
-                return;
-            }
-
+        if (order.getOrderItems().size() == stocks.size()) {
+            return;
         }
+        initSkuCache(order.getOrderItems());
+        initPromotionCache(order.getOrderItems());
     }
 
     /**

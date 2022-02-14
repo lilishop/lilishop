@@ -1,17 +1,17 @@
 package cn.lili.modules.page.serviceimpl;
 
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.modules.page.entity.dos.Article;
 import cn.lili.modules.page.entity.dto.ArticleSearchParams;
 import cn.lili.modules.page.entity.enums.ArticleEnum;
 import cn.lili.modules.page.entity.vos.ArticleVO;
 import cn.lili.modules.page.mapper.ArticleMapper;
 import cn.lili.modules.page.service.ArticleService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -19,7 +19,6 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -42,7 +41,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     public IPage<ArticleVO> articlePage(ArticleSearchParams articleSearchParams) {
         articleSearchParams.setSort("a.sort");
         QueryWrapper queryWrapper = articleSearchParams.queryWrapper();
-        queryWrapper.eq("open_status",true);
+        queryWrapper.eq("open_status", true);
         return this.baseMapper.getArticleList(PageUtil.initPage(articleSearchParams), queryWrapper);
     }
 
@@ -66,9 +65,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public void customRemove(String id) {
         //判断是否为默认文章
-        if(this.getById(id).getType().equals(ArticleEnum.OTHER.name())){
+        if (this.getById(id).getType().equals(ArticleEnum.OTHER.name())) {
             this.removeById(id);
-        }else{
+        } else {
             throw new ServiceException(ResultCode.ARTICLE_NO_DELETION);
         }
     }
@@ -80,15 +79,15 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Override
     public Article customGetByType(String type) {
-        if(!StrUtil.equals(type, ArticleEnum.OTHER.name())){
-            return this.getOne(new LambdaUpdateWrapper<Article>().eq(Article::getType,type));
+        if (!CharSequenceUtil.equals(type, ArticleEnum.OTHER.name())) {
+            return this.getOne(new LambdaUpdateWrapper<Article>().eq(Article::getType, type));
         }
         return null;
     }
 
     @Override
     public Boolean updateArticleStatus(String id, boolean status) {
-        Article article=this.getById(id);
+        Article article = this.getById(id);
         article.setOpenStatus(status);
         return this.updateById(article);
     }

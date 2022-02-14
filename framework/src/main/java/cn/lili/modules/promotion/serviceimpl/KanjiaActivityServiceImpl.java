@@ -30,6 +30,7 @@ import cn.lili.modules.promotion.service.KanjiaActivityService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +94,7 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public KanjiaActivityLog add(String id) {
         AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
         //根据skuId查询当前sku是否参与活动并且是在活动进行中
@@ -220,4 +222,16 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
         return this.page(PageUtil.initPage(page), queryWrapper);
     }
 
+    /**
+     * 结束砍价活动
+     *
+     * @param kanjiaId 砍价活动id
+     * @return 是否更新成功
+     */
+    @Override
+    public boolean endKanjiaActivity(String kanjiaId) {
+        return this.update(new LambdaUpdateWrapper<KanjiaActivity>()
+                .eq(KanjiaActivity::getId, kanjiaId)
+                .set(KanjiaActivity::getStatus, KanJiaStatusEnum.END.name()));
+    }
 }

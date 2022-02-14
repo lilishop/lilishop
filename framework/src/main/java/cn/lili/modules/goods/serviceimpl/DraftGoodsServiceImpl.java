@@ -8,7 +8,6 @@ import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.DraftGoods;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.modules.goods.entity.dto.DraftGoodsDTO;
 import cn.lili.modules.goods.entity.dto.DraftGoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
@@ -18,11 +17,11 @@ import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.goods.service.DraftGoodsService;
 import cn.lili.modules.goods.service.GoodsGalleryService;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 

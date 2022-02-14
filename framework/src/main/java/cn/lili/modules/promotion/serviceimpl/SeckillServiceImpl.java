@@ -85,6 +85,7 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void init() {
         //清除演示数据
 

@@ -74,6 +74,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Store add(AdminStoreApplyDTO adminStoreApplyDTO) {
 
         //判断店铺名称是否存在
@@ -112,6 +113,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Store edit(StoreEditDTO storeEditDTO) {
         if (storeEditDTO != null) {
             //判断店铺名是否唯一
@@ -158,6 +160,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean audit(String id, Integer passed) {
         Store store = this.getById(id);
         if (store == null) {

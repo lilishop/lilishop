@@ -1,4 +1,4 @@
-package cn.lili.controller.goods;
+package cn.lili.controller.hotwords;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @Api(tags = "管理端,系统设置扩展接口")
-@RequestMapping("/manager/hotwords")
+@RequestMapping("/manager/hotwords/hotwords")
 public class HotWordsManagerController {
 
     @Autowired

@@ -1,5 +1,6 @@
 package cn.lili.controller.wallet;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
@@ -34,7 +35,7 @@ import javax.validation.constraints.Pattern;
  */
 @RestController
 @Api(tags = "买家端,会员余额接口")
-@RequestMapping("/buyer/members/wallet")
+@RequestMapping("/buyer/wallet/wallet")
 public class MemberWalletBuyerController {
 
     /**
@@ -120,6 +121,7 @@ public class MemberWalletBuyerController {
     }
 
 
+    @PreventDuplicateSubmissions
     @PostMapping(value = "/withdrawal")
     @ApiOperation(value = "会员中心余额提现")
     @ApiImplicitParams({

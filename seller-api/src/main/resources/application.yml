@@ -119,7 +119,7 @@ ignored:
     - /MP_verify_qSyvBPhDsPdxvOhC.txt
     - /weixin/**
     - /source/**
-    - /store/login/**
+    - /store/passport/login/**
     - /druid/**
     - /swagger-ui.html
     - /doc.html

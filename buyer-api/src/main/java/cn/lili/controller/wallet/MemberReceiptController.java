@@ -1,6 +1,7 @@
 package cn.lili.controller.wallet;
 
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @Api(tags = "买家端,会员发票接口")
-@RequestMapping("/buyer/member/receipt")
+@RequestMapping("/buyer/wallet/receipt")
 public class MemberReceiptController {
 
     @Autowired
@@ -35,6 +36,7 @@ public class MemberReceiptController {
         return ResultUtil.data(memberReceiptService.getPage(memberReceiptVO, page));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "新增会员发票")
     @PostMapping
     public ResultMessage<Object> add(MemberReceiptAddVO memberReceiptAddVO) {

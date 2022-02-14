@@ -1,5 +1,6 @@
 package cn.lili.controller.distribution;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
@@ -29,7 +30,7 @@ import javax.validation.constraints.NotNull;
  */
 @RestController
 @Api(tags = "买家端,分销商品接口")
-@RequestMapping("/buyer/distributionGoods")
+@RequestMapping("/buyer/distribution/goods")
 public class DistributionGoodsBuyerController {
 
     /**
@@ -50,6 +51,7 @@ public class DistributionGoodsBuyerController {
         return ResultUtil.data(distributionGoodsService.goodsPage(distributionGoodsSearchParams));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "选择分销商品")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "distributionGoodsId", value = "分销ID", required = true, dataType = "String", paramType = "path"),

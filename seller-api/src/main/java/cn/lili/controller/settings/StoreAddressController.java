@@ -26,7 +26,7 @@ import java.util.Objects;
  */
 @RestController
 @Api(tags = "店铺端,商家地址（自提点）接口")
-@RequestMapping("/store/storeAddress")
+@RequestMapping("/store/member/storeAddress")
 public class StoreAddressController {
 
     /**

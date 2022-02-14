@@ -1,6 +1,6 @@
 package cn.lili.modules.wallet.serviceimpl;
 
-import cn.lili.common.utils.StringUtils;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.trade.entity.vo.DepositQueryVO;
 import cn.lili.modules.wallet.entity.dos.WalletLog;
@@ -11,7 +11,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -29,11 +28,11 @@ public class WalletLogServiceImpl extends ServiceImpl<WalletLogMapper, WalletLog
         //构建查询条件
         QueryWrapper<WalletLog> depositLogQueryWrapper = new QueryWrapper<>();
         //会员名称
-        depositLogQueryWrapper.like(!StringUtils.isEmpty(depositQueryVO.getMemberName()), "member_name", depositQueryVO.getMemberName());
+        depositLogQueryWrapper.like(!CharSequenceUtil.isEmpty(depositQueryVO.getMemberName()), "member_name", depositQueryVO.getMemberName());
         //会员id
-        depositLogQueryWrapper.eq(!StringUtils.isEmpty(depositQueryVO.getMemberId()), "member_id", depositQueryVO.getMemberId());
+        depositLogQueryWrapper.eq(!CharSequenceUtil.isEmpty(depositQueryVO.getMemberId()), "member_id", depositQueryVO.getMemberId());
         //开始时间和技术时间
-        if (!StringUtils.isEmpty(depositQueryVO.getStartDate()) && !StringUtils.isEmpty(depositQueryVO.getEndDate())) {
+        if (!CharSequenceUtil.isEmpty(depositQueryVO.getStartDate()) && !CharSequenceUtil.isEmpty(depositQueryVO.getEndDate())) {
             Date start = cn.hutool.core.date.DateUtil.parse(depositQueryVO.getStartDate());
             Date end = cn.hutool.core.date.DateUtil.parse(depositQueryVO.getEndDate());
             depositLogQueryWrapper.between("create_time", start, end);

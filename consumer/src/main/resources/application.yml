@@ -179,7 +179,7 @@ logging:
   config: classpath:logback-spring.xml
   # 输出级别
   level:
-    root: error
+    root: info
   #    org.hibernate: debug
   #    org.springframework: debug
   file:

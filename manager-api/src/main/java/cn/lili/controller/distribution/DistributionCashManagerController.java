@@ -1,5 +1,6 @@
 package cn.lili.controller.distribution;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.distribution.entity.dos.DistributionCash;
@@ -43,6 +44,7 @@ public class DistributionCashManagerController {
     }
 
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "审核")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "分销佣金ID", required = true, paramType = "path", dataType = "String"),

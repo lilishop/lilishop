@@ -45,8 +45,7 @@ public class UserContext {
     public static String getUuid() {
         if (RequestContextHolder.getRequestAttributes() != null) {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-            String uuid = request.getHeader(SecurityEnum.UUID.getValue());
-            return uuid;
+            return request.getHeader(SecurityEnum.UUID.getValue());
         }
         return null;
     }

@@ -38,6 +38,7 @@ public class CategoryBrandServiceImpl extends ServiceImpl<CategoryBrandMapper, C
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void saveCategoryBrandList(String categoryId, List<String> brandIds) {
         //删除分类品牌绑定信息
         this.deleteByCategoryId(categoryId);

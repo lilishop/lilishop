@@ -1,5 +1,6 @@
 package cn.lili.controller.distribution;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
@@ -49,6 +50,7 @@ public class DistributionCashBuyerController {
     private DistributionCashService distributorCashService;
 
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "分销员提现")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "price", value = "申请金额", required = true, paramType = "query", dataType = "double")

@@ -1,15 +1,11 @@
 package cn.lili.common.utils;
 
 import cn.lili.cache.Cache;
-import com.alibaba.fastjson.JSON;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.concurrent.TimeUnit;
 
 /**
  * SnowflakeInitiator
@@ -25,7 +21,7 @@ public class SnowflakeInitiator {
     /**
      * 缓存前缀
      */
-    private static String KEY = "{Snowflake}";
+    private static final String KEY = "{Snowflake}";
 
     @Autowired
     private Cache cache;

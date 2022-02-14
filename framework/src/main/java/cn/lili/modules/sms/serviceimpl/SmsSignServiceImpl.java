@@ -15,6 +15,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,7 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
     private AliSmsUtil aliSmsUtil;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void addSmsSign(SmsSign smsSign) {
         try {
             //如果短信签名已存在，不能重复申请
@@ -47,6 +49,7 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteSmsSign(String id) {
         try {
             SmsSign smsSign = this.getById(id);
@@ -61,6 +64,7 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void querySmsSign() {
         try {
             Map<String, Object> map = new HashMap<>(16);
@@ -79,6 +83,7 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void modifySmsSign(SmsSign smsSign) {
         try {
             aliSmsUtil.modifySmsSign(smsSign);

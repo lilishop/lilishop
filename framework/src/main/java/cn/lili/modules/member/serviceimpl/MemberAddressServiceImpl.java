@@ -55,6 +55,7 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public MemberAddress saveMemberAddress(MemberAddress memberAddress) {
         //判断当前地址是否为默认地址，如果为默认需要将其他的地址修改为非默认
         removeDefaultAddress(memberAddress);
@@ -65,6 +66,7 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public MemberAddress updateMemberAddress(MemberAddress memberAddress) {
         MemberAddress originalMemberAddress = this.getMemberAddress(memberAddress.getId());
         if (originalMemberAddress != null &&

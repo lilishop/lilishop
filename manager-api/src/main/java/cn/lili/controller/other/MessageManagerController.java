@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @Api(tags = "管理端,消息发送管理接口")
-@RequestMapping("/manager/message")
+@RequestMapping("/manager/other/message")
 public class MessageManagerController {
     @Autowired
     private MessageService messageService;

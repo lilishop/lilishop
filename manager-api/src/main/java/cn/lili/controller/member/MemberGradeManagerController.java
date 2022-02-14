@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @Api(tags = "管理端,会员等级接口")
-@RequestMapping("/manager/memberGrade")
+@RequestMapping("/manager/member/memberGrade")
 public class MemberGradeManagerController {
 
     @Autowired

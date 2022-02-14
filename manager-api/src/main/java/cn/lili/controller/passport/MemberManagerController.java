@@ -1,6 +1,7 @@
-package cn.lili.controller.member;
+package cn.lili.controller.passport;
 
 import cn.lili.common.aop.annotation.DemoSite;
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -29,7 +30,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,会员接口")
-@RequestMapping("/manager/member")
+@RequestMapping("/manager/passport/member")
 public class MemberManagerController {
     @Autowired
     private MemberService memberService;
@@ -56,20 +57,22 @@ public class MemberManagerController {
         return ResultUtil.data(memberService.addMember(member));
     }
 
+    @DemoSite
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "修改会员基本信息")
     @PutMapping
-    @DemoSite
     public ResultMessage<Member> update(@Valid ManagerMemberEditDTO managerMemberEditDTO) {
         return ResultUtil.data(memberService.updateMember(managerMemberEditDTO));
     }
 
+    @DemoSite
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "修改会员状态,开启关闭会员")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "memberIds", value = "会员ID", required = true, dataType = "String", allowMultiple = true, paramType = "query"),
             @ApiImplicitParam(name = "disabled", required = true, dataType = "boolean", paramType = "query")
     })
     @PutMapping("/updateMemberStatus")
-    @DemoSite
     public ResultMessage<Object> updateMemberStatus(@RequestParam List<String> memberIds, @RequestParam Boolean disabled) {
         memberService.updateMemberStatus(memberIds, disabled);
         return ResultUtil.success();

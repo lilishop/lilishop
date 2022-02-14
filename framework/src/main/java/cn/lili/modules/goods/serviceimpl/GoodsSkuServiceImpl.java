@@ -7,6 +7,7 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -113,6 +114,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     private ApplicationEventPublisher applicationEventPublisher;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void add(List<Map<String, Object>> skuList, Goods goods) {
         // 检查是否需要生成索引
         List<GoodsSku> newSkuList;
@@ -186,6 +188,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      * @param goodsSku sku信息
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void update(GoodsSku goodsSku) {
         this.updateById(goodsSku);
         cache.remove(GoodsSkuService.getCacheKeys(goodsSku.getId()));
@@ -319,6 +322,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      * @param goods 商品信息(Id,MarketEnable/AuthFlag)
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateGoodsSkuStatus(Goods goods) {
         LambdaUpdateWrapper<GoodsSku> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(GoodsSku::getGoodsId, goods.getId());
@@ -431,6 +435,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateStocks(List<GoodsSkuStockDTO> goodsSkuStockDTOS) {
         for (GoodsSkuStockDTO goodsSkuStockDTO : goodsSkuStockDTOS) {
             this.updateStock(goodsSkuStockDTO.getSkuId(), goodsSkuStockDTO.getQuantity());
@@ -438,6 +443,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateStock(String skuId, Integer quantity) {
         GoodsSku goodsSku = getGoodsSkuByIdFromCache(skuId);
         if (goodsSku != null) {
@@ -445,7 +451,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 goodsIndexService.deleteIndexById(goodsSku.getId());
             }
             goodsSku.setQuantity(quantity);
-            this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
+            boolean update = this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
+            if (update) {
+                cache.remove(CachePrefix.GOODS.getPrefix() + goodsSku.getGoodsId());
+            }
             cache.put(GoodsSkuService.getCacheKeys(skuId), goodsSku);
             cache.put(GoodsSkuService.getStockCacheKey(skuId), quantity);
 
@@ -470,6 +479,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateGoodsStuck(List<GoodsSku> goodsSkus) {
         //商品id集合 hashset 去重复
         Set<String> goodsIds = new HashSet<>();
@@ -498,6 +508,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateGoodsSkuCommentNum(String skuId) {
         //获取商品信息
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
@@ -578,7 +589,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      * @param skuList sku列表
      * @param goods   商品信息
      */
-    @Transactional(rollbackFor = Exception.class)
     List<GoodsSku> addGoodsSku(List<Map<String, Object>> skuList, Goods goods) {
         List<GoodsSku> skus = new ArrayList<>();
         for (Map<String, Object> skuVO : skuList) {

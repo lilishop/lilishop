@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "买家端,APP版本")
-@RequestMapping("/buyer/appVersion")
+@RequestMapping("/buyer/other/appVersion")
 public class AppVersionBuyerController {
 
     @Autowired

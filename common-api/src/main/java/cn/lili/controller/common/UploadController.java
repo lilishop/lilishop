@@ -5,7 +5,6 @@ import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.properties.SystemSettingProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
@@ -40,7 +39,7 @@ import java.util.Objects;
 @Slf4j
 @RestController
 @Api(tags = "文件上传接口")
-@RequestMapping("/common/upload")
+@RequestMapping("/common/common/upload")
 public class UploadController {
 
     @Autowired
