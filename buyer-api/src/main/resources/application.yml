@@ -129,6 +129,7 @@ ignored:
     - /weixin/**
     - /source/**
     - /buyer/payment/cashier/**
+    - /buyer/payment/cashierRefund/**
     - /buyer/other/pageData/**
     - /buyer/other/article/**
     - /buyer/goods/**
