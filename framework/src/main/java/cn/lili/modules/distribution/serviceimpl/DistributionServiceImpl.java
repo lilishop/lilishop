@@ -26,6 +26,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -68,6 +69,7 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Distribution applyDistribution(DistributionApplyDTO distributionApplyDTO) {
 
         //检查分销开关
@@ -172,7 +174,7 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
         //获取分销是否开启
         Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
         DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
-        if (!distributionSetting.getIsOpen()) {
+        if (Boolean.FALSE.equals(distributionSetting.getIsOpen())) {
             throw new ServiceException(ResultCode.DISTRIBUTION_CLOSE);
         }
     }

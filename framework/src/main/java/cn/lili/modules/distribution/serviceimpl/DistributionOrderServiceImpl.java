@@ -29,6 +29,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -78,6 +79,7 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
      * @param orderSn 订单编号
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void calculationDistribution(String orderSn) {
 
         //根据订单编号获取订单数据
@@ -147,6 +149,7 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
      * @param orderSn 订单编号
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void cancelOrder(String orderSn) {
         //根据订单编号获取订单数据
         Order order = orderService.getBySn(orderSn);

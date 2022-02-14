@@ -6,6 +6,7 @@ import cn.lili.modules.permission.service.DepartmentRoleService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class DepartmentRoleServiceImpl extends ServiceImpl<DepartmentRoleMapper,
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateByDepartmentId(String departmentId, List<DepartmentRole> departmentRoles) {
         QueryWrapper queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("department_id", departmentId);

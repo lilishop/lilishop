@@ -30,6 +30,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -73,6 +74,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Store add(AdminStoreApplyDTO adminStoreApplyDTO) {
 
         //判断店铺名称是否存在
@@ -111,6 +113,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Store edit(StoreEditDTO storeEditDTO) {
         if (storeEditDTO != null) {
             //判断店铺名是否唯一
@@ -157,6 +160,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean audit(String id, Integer passed) {
         Store store = this.getById(id);
         if (store == null) {

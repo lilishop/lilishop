@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.Date;
@@ -35,6 +36,7 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
     private EsGoodsSearchService esGoodsSearchService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FootPrint saveFootprint(FootPrint footPrint) {
         LambdaQueryWrapper<FootPrint> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(FootPrint::getMemberId, footPrint.getMemberId());
@@ -68,8 +70,7 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
         LambdaQueryWrapper<FootPrint> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(FootPrint::getMemberId, UserContext.getCurrentUser().getId());
         lambdaQueryWrapper.in(FootPrint::getGoodsId, ids);
-        this.remove(lambdaQueryWrapper);
-        return true;
+        return this.remove(lambdaQueryWrapper);
     }
 
     @Override

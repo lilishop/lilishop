@@ -2,7 +2,6 @@ package cn.lili.modules.member.serviceimpl;
 
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberPointsHistory;
@@ -49,7 +48,7 @@ public class MemberPointsHistoryServiceImpl extends ServiceImpl<MemberPointsHist
                 .eq(CharSequenceUtil.isNotEmpty(memberId), MemberPointsHistory::getMemberId, memberId)
                 .like(CharSequenceUtil.isNotEmpty(memberName), MemberPointsHistory::getMemberName, memberName);
         //如果排序为空，则默认创建时间倒序
-        if (StringUtils.isEmpty(page.getSort())) {
+        if (CharSequenceUtil.isEmpty(page.getSort())) {
             page.setSort("createTime");
             page.setOrder("desc");
         }

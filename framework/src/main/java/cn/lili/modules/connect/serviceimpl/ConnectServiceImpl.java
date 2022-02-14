@@ -1,5 +1,6 @@
 package cn.lili.modules.connect.serviceimpl;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
@@ -13,7 +14,6 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.utils.CookieUtil;
 import cn.lili.common.utils.HttpUtils;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.entity.dto.WechatMPLoginParams;
@@ -35,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -55,6 +56,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> implements ConnectService {
 
+    static final boolean AUTO_REGION = true;
 
     @Autowired
     private SettingService settingService;
@@ -65,10 +67,8 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     @Autowired
     private Cache cache;
 
-    static boolean AUTO_REGION = true;
-
-
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Token unionLoginCallback(String type, String unionid, String uuid, boolean longTerm) throws NoPermissionException {
 
         try {
@@ -94,6 +94,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Token unionLoginCallback(String type, ConnectAuthUser authUser, String uuid) {
 
         Token token;
@@ -126,6 +127,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void unbind(String type) {
 
         LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
@@ -142,13 +144,12 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         queryWrapper.eq(Connect::getUserId, UserContext.getCurrentUser().getId());
         List<Connect> connects = this.list(queryWrapper);
         List<String> keys = new ArrayList<>();
-        connects.forEach(item -> {
-            keys.add(item.getUnionType());
-        });
+        connects.forEach(item -> keys.add(item.getUnionType()));
         return keys;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Token appLoginCallback(ConnectAuthUser authUser, String uuid) {
         try {
             return this.unionLoginCallback(authUser.getSource(), authUser.getUuid(), uuid, true);
@@ -209,6 +210,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
      * @param unionId    微信unionid
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public Token phoneMpBindAndLogin(String sessionKey, WechatMPLoginParams params, String openId, String unionId) {
         String encryptedData = params.getEncryptedData(), iv = params.getIv();
         JSONObject userInfo = this.getUserInfo(encryptedData, sessionKey, iv);
@@ -237,9 +239,9 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     public Connect queryConnect(ConnectQueryDTO connectQueryDTO) {
 
         LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(StringUtils.isNotEmpty(connectQueryDTO.getUserId()), Connect::getUserId, connectQueryDTO.getUserId())
-                .eq(StringUtils.isNotEmpty(connectQueryDTO.getUnionType()), Connect::getUnionType, connectQueryDTO.getUnionType())
-                .eq(StringUtils.isNotEmpty(connectQueryDTO.getUnionId()), Connect::getUnionId, connectQueryDTO.getUnionId());
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(connectQueryDTO.getUserId()), Connect::getUserId, connectQueryDTO.getUserId())
+                .eq(CharSequenceUtil.isNotEmpty(connectQueryDTO.getUnionType()), Connect::getUnionType, connectQueryDTO.getUnionType())
+                .eq(CharSequenceUtil.isNotEmpty(connectQueryDTO.getUnionId()), Connect::getUnionId, connectQueryDTO.getUnionId());
         return this.getOne(queryWrapper);
     }
 
@@ -258,7 +260,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
 
 
         //如果unionid 不为空  则为账号绑定unionid
-        if (StringUtils.isNotEmpty(unionId)) {
+        if (CharSequenceUtil.isNotEmpty(unionId)) {
             LambdaQueryWrapper<Connect> lambdaQueryWrapper = new LambdaQueryWrapper();
             lambdaQueryWrapper.eq(Connect::getUnionId, unionId);
             lambdaQueryWrapper.eq(Connect::getUnionType, ConnectEnum.WECHAT.name());
@@ -271,12 +273,12 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
                 this.save(connect);
             }
         }//如果openid 不为空  则为账号绑定openid
-        if (StringUtils.isNotEmpty(openId)) {
+        if (CharSequenceUtil.isNotEmpty(openId)) {
             LambdaQueryWrapper<Connect> lambdaQueryWrapper = new LambdaQueryWrapper();
             lambdaQueryWrapper.eq(Connect::getUnionId, openId);
             lambdaQueryWrapper.eq(Connect::getUnionType, ConnectEnum.WECHAT_MP_OPEN_ID.name());
             List<Connect> connects = this.list(lambdaQueryWrapper);
-            if (connects.size() == 0) {
+            if (connects.isEmpty()) {
                 Connect connect = new Connect();
                 connect.setUnionId(openId);
                 connect.setUserId(member.getId());
@@ -290,7 +292,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     /**
      * 获取微信小程序配置
      *
-     * @return
+     * @return 微信小程序配置
      */
     private WechatConnectSettingItem getWechatMPSetting() {
         Setting setting = settingService.get(SettingEnum.WECHAT_CONNECT.name());

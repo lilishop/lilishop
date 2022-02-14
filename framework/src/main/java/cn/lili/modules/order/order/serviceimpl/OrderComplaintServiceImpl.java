@@ -32,6 +32,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -118,6 +119,7 @@ public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper,
      * @return 添加结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public OrderComplaint addOrderComplain(OrderComplaintDTO orderComplaintDTO) {
 
         try {

@@ -11,7 +11,6 @@ import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.sensitive.SensitiveWordsFilter;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.Member;
@@ -161,7 +160,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         UpdateWrapper<MemberEvaluation> updateWrapper = Wrappers.update();
         updateWrapper.set("reply_status", true);
         updateWrapper.set("reply", reply);
-        if (StringUtils.isNotEmpty(replyImage)) {
+        if (CharSequenceUtil.isNotEmpty(replyImage)) {
             updateWrapper.set("have_reply_image", true);
             updateWrapper.set("reply_image", replyImage);
         }

@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void add(List<String> goodsGalleryList, String goodsId) {
         //删除原来商品相册信息
         this.baseMapper.delete(new UpdateWrapper<GoodsGallery>().eq("goods_id", goodsId));

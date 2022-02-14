@@ -109,7 +109,7 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
     /**
      * 校验绑定关系
      *
-     * @param brandIds
+     * @param brandIds 品牌Ids
      */
     private void checkBind(List<String> brandIds) {
         //分了绑定关系查询
@@ -130,18 +130,10 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
     }
 
     /**
-     * 校验绑定关系
-     *
-     * @param brandIds
-     */
-    private void checkoutGoods(List<String> brandIds) {
-    }
-
-    /**
      * 校验是否存在
      *
-     * @param brandId
-     * @return
+     * @param brandId 品牌ID
+     * @return 品牌
      */
     private Brand checkExist(String brandId) {
         Brand brand = getById(brandId);

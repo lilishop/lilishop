@@ -16,7 +16,6 @@ import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.SnowFlake;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -281,6 +280,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     @OrderLogPoint(description = "'订单['+#orderSn+']取消，原因为：'+#reason", orderSn = "#orderSn")
+    @Transactional(rollbackFor = Exception.class)
     public Order cancel(String orderSn, String reason) {
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
         //如果订单促销类型不为空&&订单是拼团订单，并且订单未成团，则抛出异常
@@ -307,6 +307,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     @OrderLogPoint(description = "'订单['+#orderSn+']系统取消，原因为：'+#reason", orderSn = "#orderSn")
+    @Transactional(rollbackFor = Exception.class)
     public void systemCancel(String orderSn, String reason) {
         Order order = this.getBySn(orderSn);
         order.setOrderStatus(OrderStatusEnum.CANCELLED.name());
@@ -327,6 +328,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void payOrder(String orderSn, String paymentMethod, String receivableNo) {
 
         Order order = this.getBySn(orderSn);
@@ -362,6 +364,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     @OrderLogPoint(description = "'库存确认'", orderSn = "#orderSn")
+    @Transactional(rollbackFor = Exception.class)
     public void afterOrderConfirm(String orderSn) {
         Order order = this.getBySn(orderSn);
         //判断是否为拼团订单，进行特殊处理
@@ -382,6 +385,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     @SystemLogPoint(description = "修改订单", customerLog = "'订单[' + #orderSn + ']收货信息修改，修改为'+#memberAddressDTO.consigneeDetail+'")
+    @Transactional(rollbackFor = Exception.class)
     public Order updateConsignee(String orderSn, MemberAddressDTO memberAddressDTO) {
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
 
@@ -399,6 +403,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     @OrderLogPoint(description = "'订单['+#orderSn+']发货，发货单号['+#logisticsNo+']'", orderSn = "#orderSn")
+    @Transactional(rollbackFor = Exception.class)
     public Order delivery(String orderSn, String logisticsNo, String logisticsId) {
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
         //如果订单未发货，并且订单状态值等于待发货
@@ -465,6 +470,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     @OrderLogPoint(description = "'订单['+#orderSn+']完成'", orderSn = "#orderSn")
+    @Transactional(rollbackFor = Exception.class)
     public void complete(String orderSn) {
         //是否可以查询到订单
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
@@ -473,6 +479,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     @OrderLogPoint(description = "'订单['+#orderSn+']完成'", orderSn = "#orderSn")
+    @Transactional(rollbackFor = Exception.class)
     public void systemComplete(String orderSn) {
         Order order = this.getBySn(orderSn);
         complete(order, orderSn);
@@ -530,6 +537,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteOrder(String sn) {
         Order order = this.getBySn(sn);
         if (order == null) {
@@ -563,6 +571,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @param parentOrderSn 拼团订单sn
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void agglomeratePintuanOrder(String pintuanId, String parentOrderSn) {
         //获取拼团配置
         Pintuan pintuan = pintuanService.getById(pintuanId);
@@ -610,7 +619,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public void batchDeliver(MultipartFile files) {
 
-        InputStream inputStream = null;
+        InputStream inputStream;
         List<OrderBatchDeliverDTO> orderBatchDeliverDTOList = new ArrayList<>();
         try {
             inputStream = files.getInputStream();
@@ -643,7 +652,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Order order = this.getBySn(orderSn);
         Trade trade = tradeService.getBySn(order.getTradeSn());
         //如果交易不为空，则返回交易的金额，否则返回订单金额
-        if (StringUtils.isNotEmpty(trade.getPayStatus())
+        if (CharSequenceUtil.isNotEmpty(trade.getPayStatus())
                 && trade.getPayStatus().equals(PayStatusEnum.PAID.name())) {
             return trade.getFlowPrice();
         }
@@ -679,7 +688,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     orderBatchDeliverDTO.setLogisticsId(item.getId());
                 }
             });
-            if (StringUtils.isEmpty(orderBatchDeliverDTO.getLogisticsId())) {
+            if (CharSequenceUtil.isEmpty(orderBatchDeliverDTO.getLogisticsId())) {
                 throw new ServiceException("物流公司：'" + orderBatchDeliverDTO.getLogisticsName() + " '不存在");
             }
         }

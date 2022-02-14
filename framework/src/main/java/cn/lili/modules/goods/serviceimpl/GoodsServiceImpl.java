@@ -121,6 +121,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void underStoreGoods(String storeId) {
         //获取商品ID列表
         List<String> list = this.baseMapper.getGoodsIdByStoreId(storeId);
@@ -135,6 +136,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
      * @param params  商品参数
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateGoodsParams(String goodsId, String params) {
         LambdaUpdateWrapper<Goods> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(Goods::getId, goodsId);
@@ -151,6 +153,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void addGoods(GoodsOperationDTO goodsOperationDTO) {
         Goods goods = new Goods(goodsOperationDTO);
         //检查商品
@@ -174,6 +177,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void editGoods(GoodsOperationDTO goodsOperationDTO, String goodsId) {
         Goods goods = new Goods(goodsOperationDTO);
         goods.setId(goodsId);
@@ -264,6 +268,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean auditGoods(List<String> goodsIds, GoodsAuthEnum goodsAuthEnum) {
         boolean result = false;
         for (String goodsId : goodsIds) {
@@ -282,6 +287,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean updateGoodsMarketAble(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, String underReason) {
         boolean result;
 
@@ -311,6 +317,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean managerUpdateGoodsMarketAble(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, String underReason) {
         boolean result;
 
@@ -342,6 +349,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean deleteGoods(List<String> goodsIds) {
 
         LambdaUpdateWrapper<Goods> updateWrapper = this.getUpdateWrapperByStoreAuthority();
@@ -365,6 +373,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean freight(List<String> goodsIds, String templateId) {
 
         AuthUser authUser = this.checkStoreAuthority();
@@ -383,7 +392,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void updateStock(String goodsId, Integer quantity) {
         LambdaUpdateWrapper<Goods> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.set(Goods::getQuantity, quantity);
@@ -425,6 +433,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateStoreDetail(Store store) {
         UpdateWrapper updateWrapper = new UpdateWrapper<>()
                 .eq("store_id", store.getId())

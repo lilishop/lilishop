@@ -16,6 +16,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -50,6 +51,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
     private int maxLevel = 2;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ArticleCategory saveArticleCategory(ArticleCategory articleCategory) {
         //非顶级分类
         if (articleCategory.getParentId() != null && !parentId.equals(articleCategory.getParentId())) {

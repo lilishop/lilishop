@@ -29,6 +29,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,6 +55,7 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
     private PromotionGoodsService promotionGoodsService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean add(KanjiaActivityGoodsOperationDTO kanJiaActivityGoodsOperationDTO) {
         List<KanjiaActivityGoods> kanjiaActivityGoodsList = new ArrayList<>();
         List<PromotionGoods> promotionGoodsList = new ArrayList<>();
@@ -242,6 +244,7 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateKanjiaActivityGoods(KanjiaActivityGoodsDTO kanJiaActivityGoodsDTO) {
         //校验砍价商品是否存在
         KanjiaActivityGoods dbKanJiaActivityGoods = this.getKanjiaGoodsDetail(kanJiaActivityGoodsDTO.getId());

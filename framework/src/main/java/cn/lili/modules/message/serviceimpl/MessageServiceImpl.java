@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 管理端发送消息内容业务层实现
@@ -37,6 +38,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean sendMessage(Message message) {
         //保存站内信信息
         this.save(message);

@@ -17,6 +17,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -82,6 +83,7 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public StoreGoodsLabel addStoreGoodsLabel(StoreGoodsLabel storeGoodsLabel) {
         //获取当前登录商家账号
         AuthUser tokenUser = UserContext.getCurrentUser();
@@ -97,6 +99,7 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public StoreGoodsLabel editStoreGoodsLabel(StoreGoodsLabel storeGoodsLabel) {
         //修改当前店铺的商品分类
         AuthUser tokenUser = UserContext.getCurrentUser();
