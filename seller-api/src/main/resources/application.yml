@@ -120,6 +120,7 @@ ignored:
     - /weixin/**
     - /source/**
     - /store/passport/login/**
+    - /store/passport/login/refresh/**
     - /druid/**
     - /swagger-ui.html
     - /doc.html
