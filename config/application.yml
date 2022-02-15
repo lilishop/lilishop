@@ -24,11 +24,11 @@ spring:
   boot:
     admin:
       client:
-        url: http://192.168.2.126:8000
+        url: http://192.168.2.122:8000
   # mongodb
   data:
     mongodb:
-      host: 192.168.2.126
+      host: 192.168.2.122
       port: 27017
       database: rx-shop
       username: goboo
@@ -39,7 +39,7 @@ spring:
     type: redis
   # Redis
   redis:
-    host: 192.168.2.126
+    host: 192.168.2.122
     port: 6379
     password: Gb84505016
     lettuce:
@@ -73,8 +73,8 @@ spring:
         url: jdbc:mysql://192.168.2.126:3306/rx-shop?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&allowPublicKeyRetrieval=true&verifyServerCertificate=false&useSSL=false
         username: rx-shop
         password: J2xEZ42HwPXrDXt3
-        maxActive: 20
-        initialSize: 5
+        maxActive: 50
+        initialSize: 20
         maxWait: 60000
         minIdle: 5
         timeBetweenEvictionRunsMillis: 60000
@@ -125,33 +125,36 @@ ignored:
     - /MP_verify_qSyvBPhDsPdxvOhC.txt
     - /weixin/**
     - /source/**
-    - /buyer/mini-program/**
-    - /buyer/cashier/**
-    - /buyer/pageData/**
-    - /buyer/article/**
+    - /store/passport/login/**
+    - /common/common/slider/**
+    - /common/common/sms/**
+    - /buyer/payment/cashier/**
+    - /buyer/other/pageData/**
+    - /buyer/other/article/**
     - /buyer/goods/**
-    - /buyer/category/**
     - /buyer/store/**
-    - /buyer/connect/**
+    - /buyer/passport/connect/**
     - /buyer/members/**
+    - /buyer/passport/member/**
     - /buyer/promotion/pintuan/**
     - /buyer/promotion/seckill/**
     - /buyer/promotion/pointsGoods/**
     - /buyer/promotion/coupon
-    - /buyer/memberEvaluation/**/goodsEvaluation
-    - /buyer/memberEvaluation/**/evaluationNumber
-    - /buyer/appVersion/**
+    - /buyer/member/evaluation/**/goodsEvaluation
+    - /buyer/member/evaluation/**/evaluationNumber
+    - /buyer/other/appVersion/**
     - /buyer/broadcast/studio/**
-    - /store/login/**
-    - /manager/user/login
-    - /manager/user/refresh/**
+    - /manager/passport/user/login
+    - /manager/passport/user/refresh/**
+    - /manager/other/elasticsearch
+    - /manager/other/customWords
     - /druid/**
     - /swagger-ui.html
     - /doc.html
     - /swagger-resources/**
     - /swagger/**
     - /webjars/**
-    - /v2/api-docs
+    - /v2/api-docs**
     - /configuration/ui
     - /boot-admin
     - /manager/promotion/seckill/init
@@ -190,11 +193,13 @@ logging:
   #    org.springframework.data.mongodb.core: debug
   file:
     # 指定路径
-    path: lili-logs
-    # 最大保存天数
-    max-history: 7
-    # 每个文件最大大小
-    max-size: 5MB
+    path: logs
+  logback:
+    rollingpolicy:
+      # 最大保存天数
+      max-history: 7
+      # 每个文件最大大小
+      max-file-size: 5MB
 #加密参数
 jasypt:
   encryptor:
@@ -227,11 +232,11 @@ lili:
   system:
     isDemoSite: false
     isTestModel: true
-#     脱敏级别：
-#     0：不做脱敏处理
-#     1：管理端用户手机号等信息脱敏
-#     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
-#    sensitiveLevel: 2
+  #     脱敏级别：
+  #     0：不做脱敏处理
+  #     1：管理端用户手机号等信息脱敏
+  #     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
+    sensitiveLevel: 1
 
   statistics:
     # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数
@@ -244,16 +249,16 @@ lili:
     sk: zhNKVrJK6UPOhqIjn8AQvG37b9sz6
   #域名
   domain:
-    pc: http://192.168.2.126:8885
-    wap: http://192.168.2.126:8885
-    seller: http://192.168.2.126:8885
-    admin: http://192.168.2.126:8885
+    pc: http://192.168.2.122:8885
+    wap: http://192.168.2.122:8885
+    seller: http://192.168.2.122:8885
+    admin: http://192.168.2.122:8885
   #api地址
   api:
     buyer: https://z171l91606.51mypc.cn
-    base: http://192.168.2.126:8885
-    manager: http://192.168.2.126:8885
-    seller: http://192.168.2.126:8885
+    base: http://192.168.2.122:8885
+    manager: http://192.168.2.122:8885
+    seller: http://192.168.2.122:8885
 
   # jwt 细节设定
   jwt-setting:
@@ -272,7 +277,7 @@ lili:
   data:
     elasticsearch:
       cluster-name: elasticsearch
-      cluster-nodes: 192.168.2.126:9200
+      cluster-nodes: 192.168.2.122:9200
       index:
         number-of-replicas: 0
         number-of-shards: 3
@@ -283,7 +288,7 @@ lili:
     #        password: LiLiShopES
 
     logstash:
-      server: 192.168.2.126:4560
+      server: 192.168.2.122:4560
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
@@ -302,8 +307,7 @@ lili:
       notice-send-topic: lili_send_notice_topic
       notice-send-group: lili_send_notice_group
 rocketmq:
-  name-server: 192.168.2.126:9876
-  namesrvAddr: 192.168.2.126:9876
+  name-server: 192.168.2.122:9876
   isVIPChannel: false
   producer:
     group: lili_group
@@ -312,7 +316,7 @@ rocketmq:
 xxl:
   job:
     admin:
-      addresses: http://192.168.2.126:9001/xxl-job-admin
+      addresses: http://192.168.2.122:9001/xxl-job-admin
     executor:
       appname: xxl-job-executor-lilishop
       address:
