@@ -145,6 +145,7 @@ public interface MemberService extends IService<Member> {
      */
     IPage<MemberVO> getMemberPage(MemberSearchVO memberSearchVO, PageVO page);
 
+
     /**
      * 一键注册会员
      *
@@ -235,4 +236,11 @@ public interface MemberService extends IService<Member> {
      * @return 是否更新成功
      */
     boolean updateMemberLoginTime(String memberId);
+
+    /**
+     * 获取用户VO
+     * @param id
+     * @return
+     */
+    MemberVO getMember(String id);
 }

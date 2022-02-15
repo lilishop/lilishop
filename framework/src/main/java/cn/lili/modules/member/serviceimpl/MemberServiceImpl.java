@@ -611,6 +611,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         return this.update(updateWrapper);
     }
 
+    @Override
+    public MemberVO getMember(String id) {
+        return new MemberVO(this.getById(id));
+    }
+
     /**
      * 检测会员
      *

@@ -45,9 +45,9 @@ public class MemberManagerController {
     @ApiOperation(value = "通过ID获取会员信息")
     @ApiImplicitParam(name = "id", value = "会员ID", required = true, dataType = "String", paramType = "path")
     @GetMapping(value = "/{id}")
-    public ResultMessage<Member> get(@PathVariable String id) {
+    public ResultMessage<MemberVO> get(@PathVariable String id) {
 
-        return ResultUtil.data(memberService.getById(id));
+        return ResultUtil.data(memberService.getMember(id));
     }
 
     @ApiOperation(value = "添加会员")
