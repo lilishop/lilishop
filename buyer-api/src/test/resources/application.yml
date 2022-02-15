@@ -24,11 +24,11 @@ spring:
   boot:
     admin:
       client:
-        url: http://192.168.2.126:8000
+        url: http://192.168.2.122:8000
   # mongodb
   data:
     mongodb:
-      host: 192.168.2.126
+      host: 192.168.2.122
       port: 27017
       database: rx-shop
       username: goboo
@@ -39,10 +39,10 @@ spring:
     type: redis
   #amqp
   #  rabbitmq:
-  #    host: 192.168.2.126
+  #    host: 192.168.2.122
   # Redis
   redis:
-    host: 192.168.2.126
+    host: 192.168.2.122
     port: 6379
     password: Gb84505016
     lettuce:
@@ -143,8 +143,8 @@ ignored:
     - /buyer/memberEvaluation/**/goodsEvaluation
     - /buyer/memberEvaluation/**/evaluationNumber
     - /store/login/**
-    - /manager/user/login
-    - /manager/user/refresh/**
+    - /manager/passport/user/login
+    - /manager/passport/user/refresh/**
     - /druid/**
     - /swagger-ui.html
     - /doc.html
@@ -213,16 +213,16 @@ lili:
     sk: zhNKVrJK6UPOhqIjn8AQvG37b9sz6
   #域名
   domain:
-    pc: http://192.168.2.126:8885
-    wap: http://192.168.2.126:8885
-    seller: http://192.168.2.126:8885
-    admin: http://192.168.2.126:8885
+    pc: http://192.168.2.122:8885
+    wap: http://192.168.2.122:8885
+    seller: http://192.168.2.122:8885
+    admin: http://192.168.2.122:8885
   #api地址
   api:
     buyer: https://z171l91606.51mypc.cn
-    base: http://192.168.2.126:8885
-    manager: http://192.168.2.126:8885
-    seller: http://192.168.2.126:8885
+    base: http://192.168.2.122:8885
+    manager: http://192.168.2.122:8885
+    seller: http://192.168.2.122:8885
 
   # jwt 细节设定
   jwt-setting:
@@ -241,7 +241,7 @@ lili:
   data:
     elasticsearch:
       cluster-name: elasticsearch
-      cluster-nodes: 192.168.2.126:9200
+      cluster-nodes: 192.168.2.122:9200
       index:
         number-of-replicas: 0
         number-of-shards: 3
@@ -269,7 +269,7 @@ lili:
       notice-send-topic: lili_send_notice_topic
       notice-send-group: lili_send_notice_group
 rocketmq:
-  name-server: 192.168.2.126:9876
+  name-server: 192.168.2.122:9876
   producer:
     group: lili_group
     send-message-timeout: 30000
@@ -277,7 +277,7 @@ rocketmq:
 xxl:
   job:
     admin:
-      addresses: http://192.168.2.126:9001/xxl-job-admin
+      addresses: http://192.168.2.122:9001/xxl-job-admin
     executor:
       appname: xxl-job-executor-lilishop
       address:

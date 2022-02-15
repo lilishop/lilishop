@@ -1,7 +1,6 @@
 package cn.lili.controller.common;
 
 import cn.lili.cache.limit.annotation.LimitPoint;
-import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.verification.entity.enums.VerificationEnums;
@@ -20,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("/common/slider")
+@RequestMapping("/common/common/slider")
 @Api(tags = "滑块验证码接口")
 public class SliderImageController {
 

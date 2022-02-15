@@ -22,26 +22,18 @@ management:
       exposure:
         include: '*'
 spring:
+  application:
+    name: common-api
   # 要在其中注册的Spring Boot Admin Server的URL。
   boot:
     admin:
       client:
         url: http://127.0.0.1:8000
-  # mongodb
-  data:
-    mongodb:
-      host: 192.168.2.126
-      port: 27017
-      database: rx-shop
-      username: goboo
-      password: Gb84505016
-      authentication-database: admin
-  #      replica-set-name: mongoreplset
   cache:
     type: redis
   # Redis
   redis:
-    host: 192.168.2.126
+    host: 192.168.2.122
     port: 6379
     password: Gb84505016
     lettuce:
@@ -116,7 +108,7 @@ spring:
     props:
       #是否打印逻辑SQL语句和实际SQL语句，建议调试时打印，在生产环境关闭
       sql:
-        show: true
+        show: false
 
 # 忽略鉴权url
 ignored:
@@ -127,24 +119,8 @@ ignored:
     - /MP_verify_qSyvBPhDsPdxvOhC.txt
     - /weixin/**
     - /source/**
-    - /buyer/mini-program/**
-    - /buyer/cashier/**
-    - /buyer/pageData/**
-    - /buyer/article/**
-    - /buyer/goods/**
-    - /buyer/category/**
-    - /buyer/shop/**
-    - /buyer/connect/**
-    - /buyer/members/smsLogin
-    - /buyer/members/refresh/*
-    - /buyer/members/refresh**
-    - /buyer/promotion/pintuan
-    - /buyer/promotion/seckill
-    - /buyer/memberEvaluation/**/goodsEvaluation
-    - /buyer/memberEvaluation/**/evaluationNumber
-    - /store/login/**
-    - /manager/user/login
-    - /manager/user/refresh/**
+    - /common/common/slider/**
+    - /common/common/sms/**
     - /druid/**
     - /swagger-ui.html
     - /doc.html
@@ -164,11 +140,11 @@ swagger:
   title: API接口文档
   description: Api Documentation
   version: 1.0.0
-  termsOfServiceUrl:
+  termsOfServiceUrl: https://pickmall.cn
   contact:
-    name: rx
-    url:
-    email:
+    name: lili
+    url: https://pickmall.cn
+    email: admin@pickmall.com
 
 # Mybatis-plus
 mybatis-plus:
@@ -181,19 +157,21 @@ mybatis-plus:
 
 # 日志
 logging:
+  config: classpath:logback-spring.xml
   # 输出级别
   level:
-    cn.lili: info
+    root: info
   #    org.hibernate: debug
   #    org.springframework: debug
-  #    org.springframework.data.mongodb.core: debug
   file:
     # 指定路径
     path: lili-logs
-    # 最大保存天数
-    max-history: 7
-    # 每个文件最大大小
-    max-size: 5MB
+  logback:
+    rollingpolicy:
+      # 最大保存天数
+      max-history: 7
+      # 每个文件最大大小
+      max-file-size: 5MB
 #加密参数
 jasypt:
   encryptor:
@@ -205,7 +183,7 @@ lili:
     #图形验证码有效时间 秒 包含滑块验证码有效时间， 以及验证通过之后，缓存中存储的验证结果有效时间
     effectiveTime: 300
     #水印
-    watermark:
+    watermark: LILI-SHOP
     #干扰项数量 最大2 默认0
     interfereNum: 0
     #允许误差像素
@@ -263,7 +241,7 @@ lili:
   data:
     elasticsearch:
       cluster-name: elasticsearch
-      cluster-nodes: 192.168.2.126:9200
+      cluster-nodes: 192.168.2.122:9200
       index:
         number-of-replicas: 0
         number-of-shards: 3
@@ -272,7 +250,8 @@ lili:
     #      account:
     #        username: elastic
     #        password: LiLiShopES
-
+    logstash:
+      server: 192.168.2.122:4560
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
@@ -291,7 +270,7 @@ lili:
       notice-send-topic: lili_send_notice_topic
       notice-send-group: lili_send_notice_group
 rocketmq:
-  name-server: 192.168.2.126:9876
+  name-server: 192.168.2.122:9876
   producer:
     group: lili_group
     send-message-timeout: 30000
@@ -299,7 +278,7 @@ rocketmq:
 xxl:
   job:
     admin:
-      addresses: http://192.168.2.126:9001/xxl-job-admin
+      addresses: http://192.168.2.122:9001/xxl-job-admin
     executor:
       appname: xxl-job-executor-lilishop
       address:

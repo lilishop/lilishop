@@ -31,7 +31,7 @@ import java.util.List;
  * @since 2020/11/17 2:32 下午
  */
 @RestController
-@RequestMapping("/buyer/store")
+@RequestMapping("/buyer/store/store")
 @Api(tags = "买家端,店铺接口")
 public class StoreBuyerController {
 

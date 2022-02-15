@@ -29,7 +29,7 @@ import javax.validation.constraints.NotNull;
  */
 @RestController
 @Api(tags = "买家端,会员商品评价接口")
-@RequestMapping("/buyer/memberEvaluation")
+@RequestMapping("/buyer/member/evaluation")
 public class MemberEvaluationBuyerController {
 
     /**

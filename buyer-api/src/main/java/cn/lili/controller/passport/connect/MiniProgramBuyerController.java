@@ -26,7 +26,7 @@ import java.util.List;
  * @since 2021/2/19 09:28
  */
 @RestController
-@RequestMapping("/buyer/mini-program")
+@RequestMapping("/buyer/passport/connect/miniProgram")
 @Api(tags = "买家端,小程序登录接口")
 public class MiniProgramBuyerController {
 
