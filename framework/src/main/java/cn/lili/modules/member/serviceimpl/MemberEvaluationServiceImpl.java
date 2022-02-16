@@ -112,11 +112,15 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         //获取订单信息
         Order order = orderService.getBySn(orderItem.getOrderSn());
         //检测是否可以添加会员评价
+        Member member;
         if (Boolean.TRUE.equals(isSelf)) {
             checkMemberEvaluation(orderItem, order);
+            //获取用户信息 非自己评价时，读取数据库
+            member = memberService.getById(order.getMemberId());
+        } else {
+            //自我评价商品时，获取当前登录用户信息
+            member = memberService.getUserInfo();
         }
-        //获取用户信息
-        Member member = memberService.getUserInfo();
         //获取商品信息
         GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(memberEvaluationDTO.getSkuId());
         //新增用户评价
