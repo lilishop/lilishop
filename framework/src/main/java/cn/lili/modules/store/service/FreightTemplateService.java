@@ -70,7 +70,7 @@ public interface FreightTemplateService extends IService<FreightTemplate> {
      * @param id 运费模板ID
      * @return 操作状态
      */
-    @CacheEvict(key = "#freightTemplateVO.id")
+    @CacheEvict(key = "#id")
     boolean removeFreightTemplate(String id);
 
 }
