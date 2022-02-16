@@ -137,6 +137,7 @@ ignored:
     - /buyer/passport/connect/**
     - /buyer/members/**
     - /buyer/passport/member/**
+    - /buyer/passport/member/refresh/**
     - /buyer/promotion/pintuan/**
     - /buyer/promotion/seckill/**
     - /buyer/promotion/pointsGoods/**
