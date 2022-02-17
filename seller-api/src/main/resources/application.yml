@@ -1,5 +1,6 @@
 server:
-  port: 8889
+#  port: 8889
+  port: 30004
 
   servlet:
     context-path: /
@@ -22,26 +23,18 @@ management:
       exposure:
         include: '*'
 spring:
+  application:
+    name: seller-api
   # 要在其中注册的Spring Boot Admin Server的URL。
   boot:
     admin:
       client:
-        url: http://127.0.0.1:8000
-  # mongodb
-  data:
-    mongodb:
-      host: 192.168.2.126
-      port: 27017
-      database: rx-shop
-      username: goboo
-      password: Gb84505016
-      authentication-database: admin
-  #      replica-set-name: mongoreplset
+        url: http://127.0.0.1:30000
   cache:
     type: redis
   # Redis
   redis:
-    host: 192.168.2.126
+    host: 192.168.2.122
     port: 6379
     password: Gb84505016
     lettuce:
@@ -114,7 +107,7 @@ spring:
     #              #范围查询实现
     #              range-algorithm-class-name: cn.lili.mybatis.sharding.CreateTimeShardingTableAlgorithm
     props:
-      #是否打印逻辑SQL语句和实际SQL语句，建议调试时打印，在生产环境关闭 sql打印
+      #是否打印逻辑SQL语句和实际SQL语句，建议调试时打印，在生产环境关闭
       sql:
         show: true
 
@@ -127,7 +120,7 @@ ignored:
     - /MP_verify_qSyvBPhDsPdxvOhC.txt
     - /weixin/**
     - /source/**
-    - /store/login/**
+    - /store/passport/login/**
     - /druid/**
     - /swagger-ui.html
     - /doc.html
@@ -164,19 +157,21 @@ mybatis-plus:
 
 # 日志
 logging:
+  config: classpath:logback-spring.xml
   # 输出级别
   level:
     cn.lili: info
   #    org.hibernate: debug
   #    org.springframework: debug
-  #    org.springframework.data.mongodb.core: debug
   file:
     # 指定路径
     path: lili-logs
-    # 最大保存天数
-    max-history: 7
-    # 每个文件最大大小
-    max-size: 5MB
+  logback:
+    rollingpolicy:
+      # 最大保存天数
+      max-history: 7
+      # 每个文件最大大小
+      max-file-size: 5MB
 #加密参数
 jasypt:
   encryptor:
@@ -184,7 +179,7 @@ jasypt:
 
 lili:
   system:
-    isDemoSite: false
+    isDemoSite: true
   statistics:
     # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数
     onlineMember: 48
@@ -224,7 +219,7 @@ lili:
   data:
     elasticsearch:
       cluster-name: elasticsearch
-      cluster-nodes: 192.168.2.126:9200
+      cluster-nodes: 192.168.2.122:9200
       index:
         number-of-replicas: 0
         number-of-shards: 3
@@ -233,7 +228,8 @@ lili:
     #      account:
     #        username: elastic
     #        password: LiLiShopES
-
+    logstash:
+      server: 192.168.2.122:4560
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
@@ -254,7 +250,7 @@ lili:
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
 rocketmq:
-  name-server: 192.168.2.126:9876
+  name-server: 192.168.2.122:9876
   producer:
     group: lili_group
     send-message-timeout: 30000
@@ -262,7 +258,7 @@ rocketmq:
 xxl:
   job:
     admin:
-      addresses: http://192.168.2.126:9001/xxl-job-admin
+      addresses: http://192.168.2.122:9001/xxl-job-admin
     executor:
       appname: xxl-job-executor-lilishop
       address:

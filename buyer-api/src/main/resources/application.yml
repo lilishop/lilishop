@@ -1,6 +1,6 @@
 server:
-  port: 8885
-
+#  port: 8885
+  port: 30001
   servlet:
     context-path: /
 #
@@ -35,7 +35,7 @@ spring:
   boot:
     admin:
       client:
-        url: http://127.0.0.1:8000
+        url: http://127.0.0.1:30000
   # 文件大小上传配置
   servlet:
     multipart:
