@@ -24,7 +24,7 @@ spring:
   boot:
     admin:
       client:
-        url: http://192.168.2.122:8000
+        url: http://127.0.0.1:30000
   # mongodb
   data:
     mongodb:
