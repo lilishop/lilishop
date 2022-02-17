@@ -198,7 +198,7 @@ jasypt:
 
 lili:
   system:
-    isDemoSite: true
+    isDemoSite: false
   statistics:
     # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数
     onlineMember: 48
