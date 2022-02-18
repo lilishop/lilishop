@@ -12,7 +12,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,验证码资源维护接口")
-@RequestMapping("/manager/verificationSource")
+@RequestMapping("/manager/other/verificationSource")
 public class VerificationSourceController {
 
     @Autowired

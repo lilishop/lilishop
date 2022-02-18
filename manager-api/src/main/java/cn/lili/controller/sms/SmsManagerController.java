@@ -23,7 +23,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,短信接口")
-@RequestMapping("/manager/sms")
+@RequestMapping("/manager/sms/sms")
 public class SmsManagerController {
     @Autowired
     private SmsReachService smsReachService;

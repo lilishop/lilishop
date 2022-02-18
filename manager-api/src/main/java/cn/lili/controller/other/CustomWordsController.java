@@ -35,7 +35,7 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @RestController
 @Api(tags = "管理端,自定义分词接口")
-@RequestMapping("/manager/custom-words")
+@RequestMapping("/manager/other/customWords")
 public class CustomWordsController {
 
     /**

@@ -21,7 +21,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,管理员角色接口")
-@RequestMapping("/manager/userRole")
+@RequestMapping("/manager/permission/userRole")
 public class UserRoleManagerController {
     @Autowired
     private UserRoleService userRoleService;

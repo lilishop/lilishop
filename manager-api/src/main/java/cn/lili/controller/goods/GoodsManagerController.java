@@ -33,7 +33,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,商品管理接口")
-@RequestMapping("/manager/goods")
+@RequestMapping("/manager/goods/goods")
 public class GoodsManagerController {
     /**
      * 商品

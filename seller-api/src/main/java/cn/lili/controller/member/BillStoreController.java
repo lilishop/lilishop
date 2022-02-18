@@ -31,7 +31,7 @@ import java.util.Objects;
  */
 @RestController
 @Api(tags = "店铺端,结算单接口")
-@RequestMapping("/store/bill")
+@RequestMapping("/store/order/bill")
 public class BillStoreController {
 
     @Autowired

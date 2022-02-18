@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "管理端,系统设置扩展接口")
-@RequestMapping("/manager/system/settingx")
+@RequestMapping("/manager/setting/settingx")
 public class SettingXManagerController {
 
     @ApiOperation(value = "支持支付方式表单")

@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "管理端,意见反馈接口")
-@RequestMapping("/manager/feedback")
+@RequestMapping("/manager/other/feedback")
 public class FeedbackManagerController {
 
     /**

@@ -1,6 +1,5 @@
 server:
-#  port: 8887
-  port: 30003
+  port: 8887
 
   servlet:
     context-path: /
@@ -29,7 +28,7 @@ spring:
   boot:
     admin:
       client:
-        url: http://127.0.0.1:30000
+        url: http://127.0.0.1:8000
   cache:
     type: redis
   # Redis
@@ -182,7 +181,7 @@ jasypt:
 
 lili:
   system:
-    isDemoSite: true
+    isDemoSite: false
     #     脱敏级别：
     #     0：不做脱敏处理
     #     1：管理端用户手机号等信息脱敏

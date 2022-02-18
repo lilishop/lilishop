@@ -24,7 +24,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,敏感词管理接口")
-@RequestMapping("/manager/sensitiveWords")
+@RequestMapping("/manager/other/sensitiveWords")
 public class SensitiveWordsManagerController {
 
     @Autowired

@@ -41,7 +41,7 @@ import java.util.Objects;
  **/
 @Slf4j
 @RestController
-@RequestMapping("/store/orders")
+@RequestMapping("/store/order/order")
 @Api(tags = "店铺端,订单接口")
 public class OrderStoreController {
 

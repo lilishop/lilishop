@@ -27,7 +27,7 @@ import javax.validation.constraints.NotNull;
  */
 @RestController
 @Api(tags = "管理端,页面设置管理接口")
-@RequestMapping("/manager/pageData")
+@RequestMapping("/manager/other/pageData")
 public class PageDataManagerController {
 
     @Autowired

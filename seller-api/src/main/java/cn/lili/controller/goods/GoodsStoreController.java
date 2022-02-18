@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @Api(tags = "店铺端,商品接口")
-@RequestMapping("/store/goods")
+@RequestMapping("/store/goods/goods")
 public class GoodsStoreController {
 
     /**

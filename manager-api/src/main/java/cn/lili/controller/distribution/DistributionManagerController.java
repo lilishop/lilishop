@@ -27,7 +27,7 @@ import javax.validation.constraints.NotNull;
  */
 @RestController
 @Api(tags = "管理端,分销员管理接口")
-@RequestMapping("/manager/distribution")
+@RequestMapping("/manager/distribution/distribution")
 public class DistributionManagerController {
 
     @Autowired
