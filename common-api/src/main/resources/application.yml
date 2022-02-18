@@ -1,6 +1,5 @@
 server:
-#  port: 8890
-  port: 30002
+  port: 8890
   servlet:
     context-path: /
 
@@ -28,7 +27,7 @@ spring:
   boot:
     admin:
       client:
-        url: http://127.0.0.1:30000
+        url: http://127.0.0.1:8000
   cache:
     type: redis
   # Redis

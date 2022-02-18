@@ -1,6 +1,5 @@
 server:
-#  port: 8885
-  port: 30001
+  port: 8885
   servlet:
     context-path: /
 #
@@ -35,7 +34,7 @@ spring:
   boot:
     admin:
       client:
-        url: http://127.0.0.1:30000
+        url: http://127.0.0.1:8000
   # 文件大小上传配置
   servlet:
     multipart:
@@ -201,7 +200,7 @@ jasypt:
 
 lili:
   system:
-    isDemoSite: true
+    isDemoSite: false
   statistics:
     # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数
     onlineMember: 48
