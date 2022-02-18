@@ -35,6 +35,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -93,6 +94,7 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public KanjiaActivityLog add(String id) {
         AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
         //根据skuId查询当前sku是否参与活动并且是在活动进行中

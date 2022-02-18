@@ -83,6 +83,7 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public StoreGoodsLabel addStoreGoodsLabel(StoreGoodsLabel storeGoodsLabel) {
         //获取当前登录商家账号
         AuthUser tokenUser = UserContext.getCurrentUser();
@@ -98,6 +99,7 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public StoreGoodsLabel editStoreGoodsLabel(StoreGoodsLabel storeGoodsLabel) {
         //修改当前店铺的商品分类
         AuthUser tokenUser = UserContext.getCurrentUser();

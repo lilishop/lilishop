@@ -3,22 +3,22 @@ package cn.lili.modules.connect.util;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.security.token.Token;
-import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.properties.ApiProperties;
 import cn.lili.common.properties.DomainProperties;
-import cn.lili.common.enums.ClientTypeEnum;
+import cn.lili.common.security.token.Token;
+import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.connect.config.AuthConfig;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
 import cn.lili.modules.connect.entity.dto.AuthCallback;
 import cn.lili.modules.connect.entity.dto.AuthResponse;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.exception.AuthException;
-import cn.lili.modules.connect.request.BaseAuthQQRequest;
 import cn.lili.modules.connect.request.AuthRequest;
+import cn.lili.modules.connect.request.BaseAuthQQRequest;
 import cn.lili.modules.connect.request.BaseAuthWeChatPCRequest;
 import cn.lili.modules.connect.request.BaseAuthWeChatRequest;
 import cn.lili.modules.connect.service.ConnectService;
@@ -62,7 +62,7 @@ public class ConnectUtil {
     private DomainProperties domainProperties;
 
 
-    static String prefix = "/buyer/connect/callback/";
+    static String prefix = "/buyer/passport/connect/connect/callback/";
 
     /**
      * 回调地址获取

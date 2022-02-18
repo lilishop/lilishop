@@ -1,6 +1,6 @@
 package cn.lili.modules.system.serviceimpl;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
@@ -70,7 +70,7 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
      */
     private Traces getOrderTracesByJson(String logisticsId, String expNo) throws Exception {
         Setting setting = settingService.get(SettingEnum.KUAIDI_SETTING.name());
-        if (StrUtil.isBlank(setting.getSettingValue())) {
+        if (CharSequenceUtil.isBlank(setting.getSettingValue())) {
             throw new ServiceException(ResultCode.LOGISTICS_NOT_SETTING);
         }
         KuaidiSetting kuaidiSetting = new Gson().fromJson(setting.getSettingValue(), KuaidiSetting.class);
@@ -88,7 +88,7 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
 
         if (logistics != null) {
             String requestData = "{'OrderCode':'','ShipperCode':'" + logistics.getCode() + "','LogisticCode':'" + expNo + "'}";
-            Map<String, String> params = new HashMap<String, String>(8);
+            Map<String, String> params = new HashMap<>(8);
             params.put("RequestData", urlEncoder(requestData, "UTF-8"));
             params.put("EBusinessID", EBusinessID);
             params.put("RequestType", "1002");
@@ -134,14 +134,12 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
      * @throws UnsupportedEncodingException
      */
     private String base64(String str, String charset) throws UnsupportedEncodingException {
-        String encoded = base64Encode(str.getBytes(charset));
-        return encoded;
+        return base64Encode(str.getBytes(charset));
     }
 
     @SuppressWarnings("unused")
     private String urlEncoder(String str, String charset) throws UnsupportedEncodingException {
-        String result = URLEncoder.encode(str, charset);
-        return result;
+        return URLEncoder.encode(str, charset);
     }
 
     /**

@@ -4,7 +4,6 @@ package cn.lili.modules.member.serviceimpl;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberReceipt;
@@ -13,12 +12,14 @@ import cn.lili.modules.member.entity.vo.MemberReceiptVO;
 import cn.lili.modules.member.mapper.MemberReceiptMapper;
 import cn.lili.modules.member.service.MemberReceiptService;
 import cn.lili.modules.member.service.MemberService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -40,13 +41,14 @@ public class MemberReceiptServiceImpl extends ServiceImpl<MemberReceiptMapper, M
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean addMemberReceipt(MemberReceiptAddVO memberReceiptAddVO, String memberId) {
         //校验发票抬头是否重复
         List<MemberReceipt> receipts = this.baseMapper.selectList(new QueryWrapper<MemberReceipt>()
                 .eq("member_id", memberId)
                 .eq("receipt_title", memberReceiptAddVO.getReceiptTitle())
         );
-        if (receipts.size() > 0) {
+        if (!receipts.isEmpty()) {
             throw new ServiceException(ResultCode.USER_RECEIPT_REPEAT_ERROR);
         }
         //参数封装
@@ -60,7 +62,7 @@ public class MemberReceiptServiceImpl extends ServiceImpl<MemberReceiptMapper, M
             //设置发票默认
             List<MemberReceipt> list = this.baseMapper.selectList(new QueryWrapper<MemberReceipt>().eq("member_id", memberId));
             //如果当前会员只有一个发票则默认为默认发票，反之需要校验参数默认值，做一些处理
-            if (list.size() <= 0) {
+            if (list.isEmpty()) {
                 memberReceipt.setIsDefault(1);
             } else {
                 if (memberReceiptAddVO.getIsDefault().equals(1)) {
@@ -78,6 +80,7 @@ public class MemberReceiptServiceImpl extends ServiceImpl<MemberReceiptMapper, M
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean editMemberReceipt(MemberReceiptAddVO memberReceiptAddVO, String memberId) {
         //根据会员id查询发票信息
         MemberReceipt memberReceiptDb = this.baseMapper.selectById(memberReceiptAddVO.getId());
@@ -92,7 +95,7 @@ public class MemberReceiptServiceImpl extends ServiceImpl<MemberReceiptMapper, M
                     .eq("receipt_title", memberReceiptAddVO.getReceiptTitle())
                     .ne("id", memberReceiptAddVO.getId())
             );
-            if (receipts.size() > 0) {
+            if (!receipts.isEmpty()) {
                 throw new ServiceException(ResultCode.USER_RECEIPT_REPEAT_ERROR);
             }
             BeanUtil.copyProperties(memberReceiptAddVO, memberReceiptDb);

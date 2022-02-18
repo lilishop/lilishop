@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class PurchaseQuotedServiceImpl extends ServiceImpl<PurchaseQuotedMapper,
     @Autowired
     private PurchaseQuotedItemService purchaseQuotedItemService;
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public PurchaseQuotedVO addPurchaseQuoted(PurchaseQuotedVO purchaseQuotedVO) {
 
 

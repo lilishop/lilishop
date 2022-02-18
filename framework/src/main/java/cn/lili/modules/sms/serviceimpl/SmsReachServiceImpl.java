@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class SmsReachServiceImpl extends ServiceImpl<SmsReachMapper, SmsReach> i
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void addSmsReach(SmsReach smsReach,List<String> mobile) {
         String destination = rocketmqCustomProperties.getNoticeSendTopic() + ":" + OtherTagsEnum.SMS.name();
         SmsReachDTO smsReachDTO = new SmsReachDTO();

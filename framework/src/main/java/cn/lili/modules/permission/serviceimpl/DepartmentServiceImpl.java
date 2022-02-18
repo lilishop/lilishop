@@ -41,6 +41,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     private DepartmentRoleService departmentRoleService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteByIds(List<String> ids) {
         QueryWrapper<AdminUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("department_id", ids);

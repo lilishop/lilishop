@@ -10,8 +10,6 @@ import cn.lili.common.vo.SerializableStream;
 import cn.lili.modules.verification.SliderImageUtil;
 import cn.lili.modules.verification.entity.dos.VerificationSource;
 import cn.lili.modules.verification.entity.dto.VerificationDTO;
-import cn.lili.modules.verification.service.VerificationSourceService;
-import cn.lili.modules.verification.SliderImageUtil;
 import cn.lili.modules.verification.entity.enums.VerificationEnums;
 import cn.lili.modules.verification.service.VerificationService;
 import cn.lili.modules.verification.service.VerificationSourceService;
@@ -158,7 +156,7 @@ public class VerificationServiceImpl implements VerificationService {
     @Override
     public boolean check(String uuid, VerificationEnums verificationEnums) {
         //如果有校验标记，则返回校验结果
-        if (cache.remove(cacheResult(verificationEnums, uuid))) {
+        if (Boolean.TRUE.equals(cache.remove(cacheResult(verificationEnums, uuid)))) {
             return true;
         }
         throw new ServiceException(ResultCode.VERIFICATION_CODE_INVALID);

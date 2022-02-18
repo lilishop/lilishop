@@ -8,7 +8,6 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**

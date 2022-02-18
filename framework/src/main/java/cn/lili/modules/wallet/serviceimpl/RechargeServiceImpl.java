@@ -1,12 +1,12 @@
 package cn.lili.modules.wallet.serviceimpl;
 
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.SnowFlake;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.trade.entity.vo.RechargeQueryVO;
@@ -22,7 +22,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -60,13 +59,13 @@ public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> i
         //构建查询条件
         QueryWrapper<Recharge> queryWrapper = new QueryWrapper<>();
         //会员名称
-        queryWrapper.like(!StringUtils.isEmpty(rechargeQueryVO.getMemberName()), "member_name", rechargeQueryVO.getMemberName());
+        queryWrapper.like(!CharSequenceUtil.isEmpty(rechargeQueryVO.getMemberName()), "member_name", rechargeQueryVO.getMemberName());
         //充值订单号
-        queryWrapper.eq(!StringUtils.isEmpty(rechargeQueryVO.getRechargeSn()), "recharge_sn", rechargeQueryVO.getRechargeSn());
+        queryWrapper.eq(!CharSequenceUtil.isEmpty(rechargeQueryVO.getRechargeSn()), "recharge_sn", rechargeQueryVO.getRechargeSn());
         //会员id
-        queryWrapper.eq(!StringUtils.isEmpty(rechargeQueryVO.getMemberId()), "member_id", rechargeQueryVO.getMemberId());
+        queryWrapper.eq(!CharSequenceUtil.isEmpty(rechargeQueryVO.getMemberId()), "member_id", rechargeQueryVO.getMemberId());
         //支付时间 开始时间和结束时间
-        if (!StringUtils.isEmpty(rechargeQueryVO.getStartDate()) && !StringUtils.isEmpty(rechargeQueryVO.getEndDate())) {
+        if (!CharSequenceUtil.isEmpty(rechargeQueryVO.getStartDate()) && !CharSequenceUtil.isEmpty(rechargeQueryVO.getEndDate())) {
             Date start = cn.hutool.core.date.DateUtil.parse(rechargeQueryVO.getStartDate());
             Date end = cn.hutool.core.date.DateUtil.parse(rechargeQueryVO.getEndDate());
             queryWrapper.between("pay_time", start, end);

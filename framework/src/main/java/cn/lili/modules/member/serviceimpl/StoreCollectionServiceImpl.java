@@ -17,6 +17,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -50,6 +51,7 @@ public class StoreCollectionServiceImpl extends ServiceImpl<StoreCollectionMappe
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public StoreCollection addStoreCollection(String storeId) {
         if (this.getOne(new LambdaUpdateWrapper<StoreCollection>()
                 .eq(StoreCollection::getMemberId, UserContext.getCurrentUser().getId())
@@ -63,6 +65,7 @@ public class StoreCollectionServiceImpl extends ServiceImpl<StoreCollectionMappe
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteStoreCollection(String storeId) {
         QueryWrapper<StoreCollection> queryWrapper = new QueryWrapper();
         queryWrapper.eq("member_id", UserContext.getCurrentUser().getId());

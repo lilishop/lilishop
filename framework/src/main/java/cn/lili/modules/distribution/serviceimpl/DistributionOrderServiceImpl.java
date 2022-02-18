@@ -79,6 +79,7 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
      * @param orderSn 订单编号
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void calculationDistribution(String orderSn) {
 
         //根据订单编号获取订单数据
@@ -148,6 +149,7 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
      * @param orderSn 订单编号
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void cancelOrder(String orderSn) {
         //根据订单编号获取订单数据
         Order order = orderService.getBySn(orderSn);
