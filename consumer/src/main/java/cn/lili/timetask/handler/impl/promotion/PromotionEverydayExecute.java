@@ -62,14 +62,16 @@ public class PromotionEverydayExecute implements EveryDayExecute {
     /**
      * 添加秒杀活动
      * 从系统设置中获取秒杀活动的配置
-     * 添加30天后的秒杀活动
+     * 添加明天后的秒杀活动
      */
     private void addSeckill() {
         Setting setting = settingService.get(SettingEnum.SECKILL_SETTING.name());
         SeckillSetting seckillSetting = new Gson().fromJson(setting.getSettingValue(), SeckillSetting.class);
+        log.info("生成秒杀活动设置：{}", seckillSetting);
         for (int i = 1; i <= SeckillService.PRE_CREATION; i++) {
             Seckill seckill = new Seckill(i, seckillSetting.getHours(), seckillSetting.getSeckillRule());
-            seckillService.savePromotions(seckill);
+            boolean result = seckillService.savePromotions(seckill);
+            log.info("生成秒杀活动参数：{},结果：{}", seckill, result);
         }
     }
 }
