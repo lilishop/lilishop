@@ -39,7 +39,7 @@ public class IMController {
         try {
             Setting imSettingVal = settingService.get(SettingEnum.IM_SETTING.name());
             ImSetting imSetting = JSONUtil.toBean(imSettingVal.getSettingValue(), ImSetting.class);
-            imUrl = imSetting.getHttpUrl() + "?tenant_id=" + imSetting.getTenantId()+"&merchant_euid=";
+            imUrl = imSetting.getHttpUrl();
         } catch (Exception e) {
             throw new ServiceException(ResultCode.PLATFORM_NOT_SUPPORTED_IM);
         }
