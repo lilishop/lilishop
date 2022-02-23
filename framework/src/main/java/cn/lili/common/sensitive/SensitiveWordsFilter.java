@@ -77,6 +77,11 @@ public class SensitiveWordsFilter implements Serializable {
             int step = 1;
             //计算此位置开始2个字符的hash
             int hash = sp.nextTwoCharHash(i);
+
+            //如果没有敏感词，则直接返回内容
+            if (nodes.length == 0) {
+                return sentence;
+            }
             /*
              * 根据hash获取第一个节点，
              * 真正匹配的节点可能不是第一个，
