@@ -75,7 +75,7 @@ public class PromotionEverydayExecute implements EveryDayExecute {
             LambdaQueryWrapper<Seckill> lambdaQueryWrapper = new LambdaQueryWrapper<>();
             lambdaQueryWrapper.eq(Seckill::getStartTime, seckill.getStartTime());
             //如果已经存在促销，则不再次保存
-            if (seckillService.list(lambdaQueryWrapper).size() == 0) {
+            if (seckillService.list(lambdaQueryWrapper).isEmpty()) {
                 boolean result = seckillService.savePromotions(seckill);
                 log.info("生成秒杀活动参数：{},结果：{}", seckill, result);
             }

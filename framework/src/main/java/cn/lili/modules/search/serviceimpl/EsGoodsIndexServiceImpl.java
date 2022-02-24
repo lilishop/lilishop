@@ -535,7 +535,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             if (promotionMap != null && !promotionMap.isEmpty()) {
                 //促销不为空则进行清洗
                 promotionMap.entrySet().removeIf(i -> {
-                    JSONObject promotionJson = (JSONObject) i.getValue();
+                    JSONObject promotionJson = JSONUtil.parseObj(i.getValue());
                     BasePromotions promotion = promotionJson.toBean(BasePromotions.class);
                     return promotion.getEndTime() != null && promotion.getEndTime().getTime() < DateUtil.date().getTime();
                 });
