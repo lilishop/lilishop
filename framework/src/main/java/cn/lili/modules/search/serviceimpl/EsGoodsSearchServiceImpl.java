@@ -14,6 +14,7 @@ import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
 import cn.lili.modules.search.entity.dto.HotWordsDTO;
 import cn.lili.modules.search.entity.dto.ParamOptions;
 import cn.lili.modules.search.entity.dto.SelectorOptions;
+import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.alibaba.druid.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +75,9 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     @Autowired
     @Qualifier("elasticsearchRestTemplate")
     private ElasticsearchRestTemplate restTemplate;
+
+    @Autowired
+    private EsGoodsIndexService esGoodsIndexService;
     /**
      * 缓存
      */
@@ -82,6 +86,10 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
     @Override
     public SearchPage<EsGoodsIndex> searchGoods(EsGoodsSearchDTO searchDTO, PageVO pageVo) {
+        boolean exists = restTemplate.indexOps(EsGoodsIndex.class).exists();
+        if (!exists) {
+            esGoodsIndexService.init();
+        }
         if (CharSequenceUtil.isNotEmpty(searchDTO.getKeyword())) {
             cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), searchDTO.getKeyword());
         }
