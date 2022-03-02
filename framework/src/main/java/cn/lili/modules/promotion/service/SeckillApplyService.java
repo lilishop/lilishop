@@ -90,13 +90,13 @@ public interface SeckillApplyService extends IService<SeckillApply> {
     void removeSeckillApply(String seckillId, String id);
 
     /**
-     * 更新秒杀商品库存
+     * 更新秒杀商品出售数量
      *
      * @param seckillId 秒杀活动id
      * @param skuId 商品skuId
-     * @param quantity 库存
+     * @param saleNum 出售数量
      */
-    void updateSeckillApplyQuantity(String seckillId, String skuId, Integer quantity);
+    void updateSeckillApplySaleNum(String seckillId, String skuId, Integer saleNum);
 
     /**
      * 更新秒杀活动时间

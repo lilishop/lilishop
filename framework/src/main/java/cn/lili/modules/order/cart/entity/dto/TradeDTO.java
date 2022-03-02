@@ -139,7 +139,6 @@ public class TradeDTO implements Serializable {
         this.cartList = new ArrayList<>();
         this.skuPromotionDetail = new HashMap<>();
         this.storeCoupons = new HashMap<>();
-        this.storeCoupons = new HashMap<>();
         this.priceDetailDTO = new PriceDetailDTO();
         this.cantUseCoupons = new ArrayList<>();
         this.canUseCoupons = new ArrayList<>();

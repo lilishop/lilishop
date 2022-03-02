@@ -121,12 +121,9 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
     /**
      * 更新促销活动商品库存
      *
-     * @param typeEnum    促销商品类型
-     * @param promotionId 促销活动id
-     * @param skuId       商品skuId
-     * @param quantity    更新后的库存数量
+     * @param promotionGoodsList 更新促销活动商品信息
      */
-    void updatePromotionGoodsStock(PromotionTypeEnum typeEnum, String promotionId, String skuId, Integer quantity);
+    void updatePromotionGoodsStock(List<PromotionGoods> promotionGoodsList);
 
     /**
      * 更新促销活动商品索引

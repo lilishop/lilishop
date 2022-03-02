@@ -231,17 +231,17 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     }
 
     /**
-     * 更新秒杀商品库存
+     * 更新秒杀商品出售数量
      *
      * @param seckillId 秒杀活动id
      * @param skuId     商品skuId
-     * @param quantity  库存
+     * @param saleNum  库存
      */
     @Override
-    public void updateSeckillApplyQuantity(String seckillId, String skuId, Integer quantity) {
+    public void updateSeckillApplySaleNum(String seckillId, String skuId, Integer saleNum) {
         LambdaUpdateWrapper<SeckillApply> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(SeckillApply::getSeckillId, seckillId).eq(SeckillApply::getSkuId, skuId);
-        updateWrapper.set(SeckillApply::getQuantity, quantity);
+        updateWrapper.set(SeckillApply::getSalesNum, saleNum);
         this.update(updateWrapper);
     }
 
