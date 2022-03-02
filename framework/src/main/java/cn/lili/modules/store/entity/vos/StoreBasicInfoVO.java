@@ -58,4 +58,7 @@ public class StoreBasicInfoVO {
     @ApiModelProperty(value = "udesk标识")
     private String merchantEuid;
 
+    @ApiModelProperty
+    private String pageShow;
+
 }
