@@ -424,7 +424,11 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         //设置单独每个促销商品的结束时间
         DateTime startTime = DateUtil.offsetHour(DateUtil.beginOfDay(seckill.getStartTime()), seckillApply.getTimeLine());
         promotionGoods.setStartTime(startTime);
-        promotionGoods.setEndTime(seckill.getEndTime());
+        if (seckill.getEndTime() == null) {
+            promotionGoods.setEndTime(DateUtil.endOfDay(startTime));
+        } else {
+            promotionGoods.setEndTime(seckill.getEndTime());
+        }
         return promotionGoods;
     }
 
