@@ -190,37 +190,40 @@ public class SkuPromotionRender implements CartRenderStep {
             List<PromotionSkuVO> joinPromotion = cartSkuVO.getPriceDetailDTO().getJoinPromotion();
             if (!joinPromotion.isEmpty()) {
                 for (PromotionSkuVO promotionSkuVO : joinPromotion) {
-
-                    String promotionGoodsStockCacheKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(PromotionTypeEnum.valueOf(promotionSkuVO.getPromotionType()), promotionSkuVO.getActivityId(), cartSkuVO.getGoodsSku().getId());
-                    Object quantity = cache.get(promotionGoodsStockCacheKey);
-
-                    if (quantity == null) {
-                        //如果促销有库存信息
-                        PromotionTypeEnum promotionTypeEnum = PromotionTypeEnum.valueOf(promotionSkuVO.getPromotionType());
-                        switch (promotionTypeEnum) {
-                            case KANJIA:
-                                quantity = kanjiaActivityGoodsService.getKanjiaGoodsBySkuId(cartSkuVO.getGoodsSku().getId()).getStock();
-                                break;
-                            case POINTS_GOODS:
-                                quantity = pointsGoodsService.getPointsGoodsDetailBySkuId(cartSkuVO.getGoodsSku().getId()).getActiveStock();
-                                break;
-                            case SECKILL:
-                            case PINTUAN:
-                                quantity = promotionGoodsService.getPromotionGoodsStock(PromotionTypeEnum.valueOf(promotionSkuVO.getPromotionType()), promotionSkuVO.getActivityId(), cartSkuVO.getGoodsSku().getId());
-                                break;
-                            default:
-                                return;
-                        }
-                    }
-
-
-                    if (quantity != null && cartSkuVO.getNum() > (Integer) quantity) {//设置购物车未选中
-                        cartSkuVO.setChecked(false);
-                        //设置失效消息
-                        cartSkuVO.setErrorMessage("促销商品库存不足,现有库存数量[" + quantity + "]");
-                    }
+                    this.checkPromotionGoodsQuantity(cartSkuVO, promotionSkuVO);
                 }
             }
+        }
+    }
+
+    private void checkPromotionGoodsQuantity(CartSkuVO cartSkuVO, PromotionSkuVO promotionSkuVO) {
+        String promotionGoodsStockCacheKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(PromotionTypeEnum.valueOf(promotionSkuVO.getPromotionType()), promotionSkuVO.getActivityId(), cartSkuVO.getGoodsSku().getId());
+        Object quantity = cache.get(promotionGoodsStockCacheKey);
+
+        if (quantity == null) {
+            //如果促销有库存信息
+            PromotionTypeEnum promotionTypeEnum = PromotionTypeEnum.valueOf(promotionSkuVO.getPromotionType());
+            switch (promotionTypeEnum) {
+                case KANJIA:
+                    quantity = kanjiaActivityGoodsService.getKanjiaGoodsBySkuId(cartSkuVO.getGoodsSku().getId()).getStock();
+                    break;
+                case POINTS_GOODS:
+                    quantity = pointsGoodsService.getPointsGoodsDetailBySkuId(cartSkuVO.getGoodsSku().getId()).getActiveStock();
+                    break;
+                case SECKILL:
+                case PINTUAN:
+                    quantity = promotionGoodsService.getPromotionGoodsStock(PromotionTypeEnum.valueOf(promotionSkuVO.getPromotionType()), promotionSkuVO.getActivityId(), cartSkuVO.getGoodsSku().getId());
+                    break;
+                default:
+                    return;
+            }
+        }
+
+
+        if (quantity != null && cartSkuVO.getNum() > (Integer) quantity) {//设置购物车未选中
+            cartSkuVO.setChecked(false);
+            //设置失效消息
+            cartSkuVO.setErrorMessage("促销商品库存不足,现有库存数量[" + quantity + "]");
         }
     }
 
