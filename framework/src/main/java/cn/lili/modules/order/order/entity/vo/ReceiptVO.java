@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * 发票
  *
@@ -12,8 +14,10 @@ import lombok.Data;
  */
 @Data
 @ApiModel(value = "发票")
-public class ReceiptVO {
+public class ReceiptVO implements Serializable {
 
+    private static final long serialVersionUID = -8402457457074092957L;
+    
     @ApiModelProperty(value = "发票抬头")
     private String receiptTitle;
 

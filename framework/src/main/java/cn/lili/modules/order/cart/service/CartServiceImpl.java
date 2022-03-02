@@ -185,6 +185,7 @@ public class CartServiceImpl implements CartService {
 
                 //购物车中不存在此商品，则新建立一个
                 CartSkuVO cartSkuVO = new CartSkuVO(dataSku, promotionMap);
+                this.checkSetGoodsQuantity(cartSkuVO, skuId, num);
                 cartSkuVO.setCartType(cartTypeEnum);
                 //检测购物车数据
                 checkCart(cartTypeEnum, cartSkuVO, skuId, num);

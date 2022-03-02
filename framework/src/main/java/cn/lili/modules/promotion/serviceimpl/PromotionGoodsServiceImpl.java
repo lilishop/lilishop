@@ -3,8 +3,6 @@ package cn.lili.modules.promotion.serviceimpl;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
@@ -27,6 +25,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -209,31 +208,32 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     /**
      * 更新促销活动商品库存
      *
-     * @param typeEnum    促销商品类型
-     * @param promotionId 促销活动id
-     * @param skuId       商品skuId
-     * @param quantity    更新后的库存数量
+     * @param promotionGoodsList 更新促销活动商品信息
      */
     @Override
-    public void updatePromotionGoodsStock(PromotionTypeEnum typeEnum, String promotionId, String skuId, Integer quantity) {
-        String promotionStockKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(typeEnum, promotionId, skuId);
-        if (typeEnum.equals(PromotionTypeEnum.SECKILL)) {
-            SeckillSearchParams searchParams = new SeckillSearchParams();
-            searchParams.setSeckillId(promotionId);
-            searchParams.setSkuId(skuId);
-            SeckillApply seckillApply = this.seckillApplyService.getSeckillApply(searchParams);
-            if (seckillApply == null) {
-                throw new ServiceException(ResultCode.SECKILL_NOT_EXIST_ERROR);
+    @Transactional(rollbackFor = Exception.class)
+    public void updatePromotionGoodsStock(List<PromotionGoods> promotionGoodsList) {
+        for (PromotionGoods promotionGoods : promotionGoodsList) {
+            String promotionStockKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(PromotionTypeEnum.valueOf(promotionGoods.getPromotionType()), promotionGoods.getPromotionId(), promotionGoods.getSkuId());
+            if (promotionGoods.getPromotionType().equals(PromotionTypeEnum.SECKILL.name())) {
+                SeckillSearchParams searchParams = new SeckillSearchParams();
+                searchParams.setSeckillId(promotionGoods.getPromotionId());
+                searchParams.setSkuId(promotionGoods.getSkuId());
+                SeckillApply seckillApply = this.seckillApplyService.getSeckillApply(searchParams);
+                if (seckillApply != null) {
+                    seckillApplyService.updateSeckillApplySaleNum(promotionGoods.getPromotionId(), promotionGoods.getSkuId(), promotionGoods.getNum());
+                }
             }
-            seckillApplyService.updateSeckillApplyQuantity(promotionId, skuId, quantity);
-        } else {
+
             LambdaUpdateWrapper<PromotionGoods> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(PromotionGoods::getPromotionType, typeEnum.name()).eq(PromotionGoods::getPromotionId, promotionId).eq(PromotionGoods::getSkuId, skuId);
-            updateWrapper.set(PromotionGoods::getQuantity, quantity);
+            updateWrapper.eq(PromotionGoods::getPromotionType, promotionGoods.getPromotionType()).eq(PromotionGoods::getPromotionId, promotionGoods.getPromotionId()).eq(PromotionGoods::getSkuId, promotionGoods.getSkuId());
+            updateWrapper.set(PromotionGoods::getQuantity, promotionGoods.getQuantity()).set(PromotionGoods::getNum, promotionGoods.getNum());
+
             this.update(updateWrapper);
+            stringRedisTemplate.opsForValue().set(promotionStockKey, promotionGoods.getQuantity().toString());
         }
 
-        stringRedisTemplate.opsForValue().set(promotionStockKey, quantity.toString());
+
     }
 
     /**

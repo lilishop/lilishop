@@ -231,17 +231,17 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     }
 
     /**
-     * 更新秒杀商品库存
+     * 更新秒杀商品出售数量
      *
      * @param seckillId 秒杀活动id
      * @param skuId     商品skuId
-     * @param quantity  库存
+     * @param saleNum  库存
      */
     @Override
-    public void updateSeckillApplyQuantity(String seckillId, String skuId, Integer quantity) {
+    public void updateSeckillApplySaleNum(String seckillId, String skuId, Integer saleNum) {
         LambdaUpdateWrapper<SeckillApply> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(SeckillApply::getSeckillId, seckillId).eq(SeckillApply::getSkuId, skuId);
-        updateWrapper.set(SeckillApply::getQuantity, quantity);
+        updateWrapper.set(SeckillApply::getSalesNum, saleNum);
         this.update(updateWrapper);
     }
 
@@ -424,7 +424,11 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         //设置单独每个促销商品的结束时间
         DateTime startTime = DateUtil.offsetHour(DateUtil.beginOfDay(seckill.getStartTime()), seckillApply.getTimeLine());
         promotionGoods.setStartTime(startTime);
-        promotionGoods.setEndTime(seckill.getEndTime());
+        if (seckill.getEndTime() == null) {
+            promotionGoods.setEndTime(DateUtil.endOfDay(startTime));
+        } else {
+            promotionGoods.setEndTime(seckill.getEndTime());
+        }
         return promotionGoods;
     }
 
