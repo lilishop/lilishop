@@ -28,7 +28,7 @@ spring:
   # mongodb
   data:
     mongodb:
-      host: 192.168.2.122
+      host: 106.124.130.167
       port: 27017
       database: rx-shop
       username: goboo
@@ -39,12 +39,12 @@ spring:
     type: redis
   #amqp
   #  rabbitmq:
-  #    host: 192.168.2.122
+  #    host: 106.124.130.167
   # Redis
   redis:
-    host: 192.168.2.122
+    host: 120.71.145.134
     port: 6379
-    password: Gb84505016
+    password: ekLhvPGraSj8DGO0
     lettuce:
       pool:
         # 连接池最大连接数（使用负值表示没有限制） 默认 8
@@ -73,9 +73,9 @@ spring:
       default-datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://192.168.2.126:3306/rx-shop?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&allowPublicKeyRetrieval=true&verifyServerCertificate=false&useSSL=false
-        username: rx-shop
-        password: J2xEZ42HwPXrDXt3
+        url: jdbc:mysql://120.71.183.195:3306/zyt_shop?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&allowPublicKeyRetrieval=true&verifyServerCertificate=false&useSSL=false
+        username: zyt_shop
+        password: Gb84505016@zytshop
         maxActive: 20
         initialSize: 5
         maxWait: 60000
@@ -213,16 +213,16 @@ lili:
     sk: zhNKVrJK6UPOhqIjn8AQvG37b9sz6
   #域名
   domain:
-    pc: http://192.168.2.122:8885
-    wap: http://192.168.2.122:8885
-    seller: http://192.168.2.122:8885
-    admin: http://192.168.2.122:8885
+    pc: http://106.124.130.167:8885
+    wap: http://106.124.130.167:8885
+    seller: http://106.124.130.167:8885
+    admin: http://106.124.130.167:8885
   #api地址
   api:
     buyer: https://z171l91606.51mypc.cn
-    base: http://192.168.2.122:8885
-    manager: http://192.168.2.122:8885
-    seller: http://192.168.2.122:8885
+    base: http://106.124.130.167:8885
+    manager: http://106.124.130.167:8885
+    seller: http://106.124.130.167:8885
 
   # jwt 细节设定
   jwt-setting:
@@ -241,7 +241,7 @@ lili:
   data:
     elasticsearch:
       cluster-name: elasticsearch
-      cluster-nodes: 192.168.2.122:9200
+      cluster-nodes: 106.124.130.167:9200
       index:
         number-of-replicas: 0
         number-of-shards: 3
@@ -269,7 +269,7 @@ lili:
       notice-send-topic: lili_send_notice_topic
       notice-send-group: lili_send_notice_group
 rocketmq:
-  name-server: 192.168.2.122:9876
+  name-server: 106.124.130.167:9876
   producer:
     group: lili_group
     send-message-timeout: 30000
@@ -277,7 +277,7 @@ rocketmq:
 xxl:
   job:
     admin:
-      addresses: http://192.168.2.122:9001/xxl-job-admin
+      addresses: http://127.0.0.1:9001/xxl-job-admin
     executor:
       appname: xxl-job-executor-lilishop
       address:

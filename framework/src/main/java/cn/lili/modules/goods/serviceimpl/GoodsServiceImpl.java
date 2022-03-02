@@ -15,6 +15,7 @@ import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
+import cn.lili.modules.goods.entity.dto.GoodsOperationFuLuDTO;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
@@ -159,7 +160,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         //检查商品
         this.checkGoods(goods);
         //向goods加入图片
-        this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
+        if (goodsOperationDTO.getGoodsGalleryList().size() > 0 ) {
+            this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
+        }
         //添加商品参数
         if (goodsOperationDTO.getGoodsParamsDTOList() != null && !goodsOperationDTO.getGoodsParamsDTOList().isEmpty()) {
             //给商品参数填充值
@@ -175,6 +178,31 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         }
     }
 
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void fuLuAddGoods(GoodsOperationFuLuDTO goodsOperationDTO) {
+        Goods goods = new Goods(goodsOperationDTO);
+        //检查商品
+        this.checkGoods(goods);
+        //向goods加入图片
+        if (goodsOperationDTO.getGoodsGalleryList().size() > 0 ) {
+            this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
+        }
+        //添加商品参数
+        if (goodsOperationDTO.getGoodsParamsDTOList() != null && !goodsOperationDTO.getGoodsParamsDTOList().isEmpty()) {
+            //给商品参数填充值
+            goods.setParams(JSONUtil.toJsonStr(goodsOperationDTO.getGoodsParamsDTOList()));
+        }
+        //添加商品
+        this.save(goods);
+        //添加商品sku信息
+        this.goodsSkuService.add(goodsOperationDTO.getSkuList(), goods);
+        //添加相册
+        if (goodsOperationDTO.getGoodsGalleryList() != null && !goodsOperationDTO.getGoodsGalleryList().isEmpty()) {
+            this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
+        }
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

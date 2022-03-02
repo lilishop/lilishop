@@ -434,7 +434,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
      * @param mobilePhone 手机号
      * @return 会员
      */
-    private Long findMember(String mobilePhone, String userName) {
+    private Long findMember(String userName, String mobilePhone) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("mobile", mobilePhone)
                 .or().eq("username", userName);
@@ -624,7 +624,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
      */
     private void checkMember(String userName, String mobilePhone) {
         //判断手机号是否存在
-        if (findMember(userName, mobilePhone) > 0) {
+        Long aa = findMember(userName, mobilePhone);
+        if (aa  > 0) {
             throw new ServiceException(ResultCode.USER_EXIST);
         }
     }

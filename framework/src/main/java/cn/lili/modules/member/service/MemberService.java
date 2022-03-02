@@ -237,10 +237,10 @@ public interface MemberService extends IService<Member> {
      */
     boolean updateMemberLoginTime(String memberId);
 
-    /**
+     /**
      * 获取用户VO
-     * @param id
-     * @return
+     * @param id 会员id
+     * @return 用户VO
      */
     MemberVO getMember(String id);
 }

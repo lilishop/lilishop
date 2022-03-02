@@ -273,9 +273,9 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     }
 
     @Override
-    @AfterSaleLogPoint(sn = "#afterSaleSn", description = "'售后-商家收货:单号['+#afterSaleSn+']，物流单号为['+#logisticsNo+']" +
+    @AfterSaleLogPoint(sn = "#afterSaleSn", description = "'售后-商家收货:单号['+#afterSaleSn+']" +
             ",处理结果['+serviceStatus='PASS'?'商家收货':'商家拒收'+']'")
-    @SystemLogPoint(description = "售后-商家收货", customerLog = "'售后-商家收货:单号['+#afterSaleSn+']，物流单号为['+#logisticsNo+']" +
+    @SystemLogPoint(description = "售后-商家收货", customerLog = "'售后-商家收货:单号['+#afterSaleSn+']" +
             ",处理结果['+serviceStatus='PASS'?'商家收货':'商家拒收'+']'")
     @Transactional(rollbackFor = Exception.class)
     public AfterSale storeConfirm(String afterSaleSn, String serviceStatus, String remark) {

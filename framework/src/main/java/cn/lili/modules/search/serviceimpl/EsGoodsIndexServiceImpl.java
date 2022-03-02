@@ -356,7 +356,6 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                     addIndex(goodsIndex);
                     resultMap.put(KEY_SUCCESS, resultMap.get(KEY_SUCCESS) + 1);
                 } catch (Exception e) {
-                    e.printStackTrace();
                     log.error("商品{}生成索引错误！", goodsIndex);
                     resultMap.put(KEY_FAIL, resultMap.get(KEY_FAIL) + 1);
                 }
@@ -536,7 +535,8 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             if (promotionMap != null && !promotionMap.isEmpty()) {
                 //促销不为空则进行清洗
                 promotionMap.entrySet().removeIf(i -> {
-                    BasePromotions promotion = (BasePromotions) i.getValue();
+                    JSONObject promotionJson = JSONUtil.parseObj(i.getValue());
+                    BasePromotions promotion = promotionJson.toBean(BasePromotions.class);
                     return promotion.getEndTime() != null && promotion.getEndTime().getTime() < DateUtil.date().getTime();
                 });
             }

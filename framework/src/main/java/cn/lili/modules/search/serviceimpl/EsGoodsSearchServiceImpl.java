@@ -14,6 +14,7 @@ import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
 import cn.lili.modules.search.entity.dto.HotWordsDTO;
 import cn.lili.modules.search.entity.dto.ParamOptions;
 import cn.lili.modules.search.entity.dto.SelectorOptions;
+import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.alibaba.druid.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +75,9 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     @Autowired
     @Qualifier("elasticsearchRestTemplate")
     private ElasticsearchRestTemplate restTemplate;
+
+    @Autowired
+    private EsGoodsIndexService esGoodsIndexService;
     /**
      * 缓存
      */
@@ -82,6 +86,10 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
     @Override
     public SearchPage<EsGoodsIndex> searchGoods(EsGoodsSearchDTO searchDTO, PageVO pageVo) {
+        boolean exists = restTemplate.indexOps(EsGoodsIndex.class).exists();
+        if (!exists) {
+            esGoodsIndexService.init();
+        }
         if (CharSequenceUtil.isNotEmpty(searchDTO.getKeyword())) {
             cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), searchDTO.getKeyword());
         }
@@ -89,6 +97,14 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         NativeSearchQuery searchQuery = searchQueryBuilder.build();
         log.info("searchGoods DSL:{}", searchQuery.getQuery());
         SearchHits<EsGoodsIndex> search = restTemplate.search(searchQuery, EsGoodsIndex.class);
+        for (int i = 0; i < search.getSearchHits().size() ; i++){
+            if (search.getSearchHits().get(i).getContent().getSmall().contains("fuluapiossproductnew.oss-cn-hangzhou.aliyuncs.com")){
+                search.getSearchHits().get(i).getContent().setSmall(search.getSearchHits().get(i).getContent().getSmall().replace("?x-oss-process=style/200X200", ""));
+            }
+            if (search.getSearchHits().get(i).getContent().getThumbnail().contains("fuluapiossproductnew.oss-cn-hangzhou.aliyuncs.com")){
+                search.getSearchHits().get(i).getContent().setThumbnail(search.getSearchHits().get(i).getContent().getThumbnail().replace("?x-oss-process=style/400X400", ""));
+            }
+        }
         return SearchHitSupport.searchPageFor(search, searchQuery.getPageable());
     }
 

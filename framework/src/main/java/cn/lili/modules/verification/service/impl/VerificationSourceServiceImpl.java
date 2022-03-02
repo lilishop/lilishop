@@ -1,5 +1,6 @@
 package cn.lili.modules.verification.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import cn.lili.cache.Cache;
 import cn.lili.modules.system.mapper.VerificationSourceMapper;
 import cn.lili.modules.verification.entity.dos.VerificationSource;
@@ -52,7 +53,7 @@ public class VerificationSourceServiceImpl extends ServiceImpl<VerificationSourc
         } catch (ClassCastException cce) {
             verificationDTO = null;
         }
-        if (verificationDTO == null) {
+        if (verificationDTO == null || verificationDTO.getVerificationResources().size() <= 0 || verificationDTO.getVerificationSlider().size() <= 0) {
             return initCache();
         }
         return verificationDTO;

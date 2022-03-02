@@ -2,6 +2,7 @@ package cn.lili.modules.goods.service;
 
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
+import cn.lili.modules.goods.entity.dto.GoodsOperationFuLuDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
@@ -57,6 +58,14 @@ public interface GoodsService extends IService<Goods> {
      * @param goodsOperationDTO 商品查询条件
      */
     void addGoods(GoodsOperationDTO goodsOperationDTO);
+
+
+    /**
+     * 添加福禄商品
+     *
+     * @param goodsOperationFuLuDTO 商品查询条件
+     */
+    void fuLuAddGoods(GoodsOperationFuLuDTO goodsOperationFuLuDTO);
 
     /**
      * 修改商品

@@ -13,6 +13,7 @@ import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.search.utils.EsIndexUtil;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
+import cn.lili.modules.store.entity.dto.FuLuConfigureDTO;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.store.entity.dto.StoreSettingDTO;
 import cn.lili.modules.store.entity.dto.StoreSettlementDay;
@@ -149,6 +150,12 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
     }
 
     @Override
+    public FuLuConfigureDTO getFuLuConfigureDTO() {
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        return this.baseMapper.getFuLuConfigureDTO(storeId);
+    }
+
+    @Override
     public StoreAfterSaleAddressDTO getStoreAfterSaleAddressDTO(String id) {
         StoreAfterSaleAddressDTO storeAfterSaleAddressDTO = this.baseMapper.getStoreAfterSaleAddressDTO(id);
         if (storeAfterSaleAddressDTO == null) {
@@ -166,6 +173,17 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
         lambdaUpdateWrapper.set(StoreDetail::getSalesConsigneeAddressPath, storeAfterSaleAddressDTO.getSalesConsigneeAddressPath());
         lambdaUpdateWrapper.set(StoreDetail::getSalesConsigneeDetail, storeAfterSaleAddressDTO.getSalesConsigneeDetail());
         lambdaUpdateWrapper.set(StoreDetail::getSalesConsigneeMobile, storeAfterSaleAddressDTO.getSalesConsigneeMobile());
+        lambdaUpdateWrapper.eq(StoreDetail::getStoreId, storeId);
+        return this.update(lambdaUpdateWrapper);
+    }
+
+    @Override
+    public boolean editFuLuConfigureDTO(FuLuConfigureDTO fuLuConfigureDTO) {
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        LambdaUpdateWrapper<StoreDetail> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+        lambdaUpdateWrapper.set(StoreDetail::getAppSecretKey, fuLuConfigureDTO.getAppSecretKey());
+        lambdaUpdateWrapper.set(StoreDetail::getMerchantNumber, fuLuConfigureDTO.getMerchantNumber());
+        lambdaUpdateWrapper.set(StoreDetail::getAppMerchantKey, fuLuConfigureDTO.getAppMerchantKey());
         lambdaUpdateWrapper.eq(StoreDetail::getStoreId, storeId);
         return this.update(lambdaUpdateWrapper);
     }

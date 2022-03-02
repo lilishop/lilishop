@@ -1,6 +1,5 @@
 package cn.lili.modules.promotion.entity.dos;
 
-import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
@@ -59,7 +58,7 @@ public class Seckill extends BasePromotions {
 
     public Seckill(int day, String hours, String seckillRule) {
         //默认创建*天后的秒杀活动
-        DateTime dateTime = DateUtil.beginOfDay(DateUtil.offset(new DateTime(), DateField.DAY_OF_YEAR, day));
+        DateTime dateTime = DateUtil.beginOfDay(DateUtil.offsetDay(new Date(), day));
         this.applyEndTime = dateTime;
         this.hours = hours;
         this.seckillRule = seckillRule;
