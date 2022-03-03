@@ -235,7 +235,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
      *
      * @param seckillId 秒杀活动id
      * @param skuId     商品skuId
-     * @param saleNum  库存
+     * @param saleNum   库存
      */
     @Override
     public void updateSeckillApplySaleNum(String seckillId, String skuId, Integer saleNum) {
@@ -258,7 +258,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         List<PromotionGoods> promotionGoodsList = new ArrayList<>();
         LambdaQueryWrapper<SeckillApply> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(SeckillApply::getSeckillId, seckill.getId());
-        List<SeckillApply> list = this.list(queryWrapper);
+        List<SeckillApply> list = this.list(queryWrapper).stream().filter(i -> i.getTimeLine() != null && seckill.getHours().contains(i.getTimeLine().toString())).collect(Collectors.toList());
         for (SeckillApply seckillApply : list) {
             //获取参与活动的商品信息
             GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(seckillApply.getSkuId());
@@ -270,13 +270,20 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         if (!promotionGoodsList.isEmpty()) {
             PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
             searchParams.setPromotionType(PromotionTypeEnum.SECKILL.name());
-            searchParams.setSkuIds(promotionGoodsList.stream().map(PromotionGoods::getSkuId).collect(Collectors.toList()));
+            searchParams.setPromotionId(seckill.getId());
             promotionGoodsService.deletePromotionGoods(searchParams);
             //初始化促销商品
-            PromotionTools.promotionGoodsInit(promotionGoodsList, seckill, PromotionTypeEnum.SECKILL);
-            result = promotionGoodsService.saveBatch(promotionGoodsList);
+            List<PromotionGoods> promotionGoods = PromotionTools.promotionGoodsInit(promotionGoodsList, seckill, PromotionTypeEnum.SECKILL);
+            result = promotionGoodsService.saveBatch(promotionGoods);
             this.seckillService.updateEsGoodsSeckill(seckill, list);
         }
+
+        LambdaQueryWrapper<SeckillApply> deleteWrapper = new LambdaQueryWrapper<>();
+        deleteWrapper.eq(SeckillApply::getSeckillId, seckill.getId());
+        deleteWrapper.notIn(SeckillApply::getSkuId, promotionGoodsList.stream().map(PromotionGoods::getSkuId).collect(Collectors.toList()));
+        this.remove(deleteWrapper);
+        seckillService.updateSeckillGoodsNum(seckill.getId());
+
         return result;
     }
 

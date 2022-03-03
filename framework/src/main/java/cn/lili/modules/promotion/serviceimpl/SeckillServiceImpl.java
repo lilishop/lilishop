@@ -144,9 +144,10 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
      * @return 是否更新成功
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean updatePromotions(Seckill promotions) {
         seckillApplyService.updateSeckillApplyTime(promotions);
-        return super.updatePromotions(promotions);
+        return this.saveOrUpdate(promotions);
     }
 
     /**
