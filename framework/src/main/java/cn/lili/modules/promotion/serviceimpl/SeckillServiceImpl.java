@@ -132,11 +132,31 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
     }
 
     /**
+     * 通用促销更新
+     * 调用顺序:
+     * 1. checkStatus 检查促销状态
+     * 2. checkPromotions 检查促销参数
+     * 3. saveOrUpdate 保存促销信息
+     * 4. updatePromotionGoods 更新促销商品信息
+     * 5. updateEsGoodsIndex 更新商品索引促销信息
+     *
+     * @param promotions 促销信息
+     * @return 是否更新成功
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updatePromotions(Seckill promotions) {
+        seckillApplyService.updateSeckillApplyTime(promotions);
+        return this.saveOrUpdate(promotions);
+    }
+
+    /**
      * 更新商品索引限时抢购信息
      *
      * @param seckill 限时抢购信息
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateEsGoodsSeckill(Seckill seckill, List<SeckillApply> seckillApplies) {
         if (seckillApplies != null && !seckillApplies.isEmpty()) {
             // 更新促销范围

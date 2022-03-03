@@ -17,6 +17,7 @@ import cn.lili.common.security.token.Token;
 import cn.lili.common.sensitive.SensitiveWordsFilter;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CookieUtil;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.UuidUtils;
 import cn.lili.common.vo.PageVO;
@@ -120,17 +121,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @Override
-    public boolean findByMobile(String uuid, String mobile) {
+    public Member findByMobile(String mobile) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("mobile", mobile);
-        Member member = this.baseMapper.selectOne(queryWrapper);
-        if (member == null) {
-            throw new ServiceException(ResultCode.USER_NOT_PHONE);
-        }
-        cache.put(CachePrefix.FIND_MOBILE + uuid, mobile, 300L);
-
-        return true;
+        return this.baseMapper.selectOne(queryWrapper);
     }
+
 
     @Override
     public Token usernameLogin(String username, String password) {
@@ -265,12 +261,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @Override
-    public Member modifyPass(String oldPassword, String newPassword) {
-        AuthUser tokenUser = UserContext.getCurrentUser();
-        if (tokenUser == null) {
-            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
-        }
-        Member member = this.getById(tokenUser.getId());
+    public Member modifyPass(String memberId, String oldPassword, String newPassword) {
+        Member member = this.getById(memberId);
         //判断旧密码输入是否正确
         if (!new BCryptPasswordEncoder().matches(oldPassword, member.getPassword())) {
             throw new ServiceException(ResultCode.USER_OLD_PASSWORD_ERROR);
@@ -434,10 +426,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
      * @param mobilePhone 手机号
      * @return 会员
      */
-    private Long findMember(String mobilePhone, String userName) {
+    private Long findMember(String userName,String mobilePhone) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("mobile", mobilePhone)
-                .or().eq("username", userName);
+                .eq("username", userName);
         return this.baseMapper.selectCount(queryWrapper);
     }
 
@@ -587,6 +579,31 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         }
     }
 
+    @Override
+    public void updateHaveShop(Boolean haveStore, String storeId, List<String> memberIds) {
+        List<Member> members = this.baseMapper.selectBatchIds(memberIds);
+        if (members.size() > 0) {
+            members.forEach(member -> {
+                member.setHaveStore(haveStore);
+                if (haveStore) {
+                    member.setStoreId(storeId);
+                } else {
+                    member.setStoreId(null);
+                }
+            });
+            this.updateBatchById(members);
+        }
+    }
+
+    @Override
+    public void resetPassword(List<String> ids) {
+        String password = new BCryptPasswordEncoder().encode(StringUtils.md5("123456"));
+        LambdaUpdateWrapper<Member> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+        lambdaUpdateWrapper.in(Member::getId, ids);
+        lambdaUpdateWrapper.set(Member::getPassword, password);
+        this.update(lambdaUpdateWrapper);
+    }
+
     /**
      * 获取所有会员的手机号
      *
@@ -628,4 +645,5 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             throw new ServiceException(ResultCode.USER_EXIST);
         }
     }
+
 }

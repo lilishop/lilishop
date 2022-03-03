@@ -2,6 +2,7 @@ package cn.lili.modules.order.cart.render.impl;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import cn.lili.cache.Cache;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -19,10 +20,14 @@ import cn.lili.modules.promotion.entity.dto.search.KanjiaActivitySearchParams;
 import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
 import cn.lili.modules.promotion.entity.vos.PromotionSkuVO;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityVO;
+import cn.lili.modules.promotion.service.KanjiaActivityGoodsService;
 import cn.lili.modules.promotion.service.KanjiaActivityService;
+import cn.lili.modules.promotion.service.PointsGoodsService;
+import cn.lili.modules.promotion.service.PromotionGoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -40,7 +45,22 @@ public class SkuPromotionRender implements CartRenderStep {
     private KanjiaActivityService kanjiaActivityService;
 
     @Autowired
+    private KanjiaActivityGoodsService kanjiaActivityGoodsService;
+
+    @Autowired
+    private PointsGoodsService pointsGoodsService;
+
+    /**
+     * 促销商品
+     */
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
+
+    @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private Cache cache;
 
     @Override
     public RenderStepEnums step() {
@@ -54,6 +74,10 @@ public class SkuPromotionRender implements CartRenderStep {
         renderBasePrice(tradeDTO);
         //渲染单品促销
         renderSkuPromotion(tradeDTO);
+
+        checkPromotionQuantity(tradeDTO);
+
+
     }
 
     /**
@@ -152,6 +176,54 @@ public class SkuPromotionRender implements CartRenderStep {
                 }
                 return;
             default:
+        }
+    }
+
+    /**
+     * 检查促销库存
+     *
+     * @param tradeDTO 购物车视图
+     */
+    private void checkPromotionQuantity(TradeDTO tradeDTO) {
+        for (CartSkuVO cartSkuVO : tradeDTO.getCheckedSkuList()) {
+            cartSkuVO.getPromotionMap();
+            List<PromotionSkuVO> joinPromotion = cartSkuVO.getPriceDetailDTO().getJoinPromotion();
+            if (!joinPromotion.isEmpty()) {
+                for (PromotionSkuVO promotionSkuVO : joinPromotion) {
+                    this.checkPromotionGoodsQuantity(cartSkuVO, promotionSkuVO);
+                }
+            }
+        }
+    }
+
+    private void checkPromotionGoodsQuantity(CartSkuVO cartSkuVO, PromotionSkuVO promotionSkuVO) {
+        String promotionGoodsStockCacheKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(PromotionTypeEnum.valueOf(promotionSkuVO.getPromotionType()), promotionSkuVO.getActivityId(), cartSkuVO.getGoodsSku().getId());
+        Object quantity = cache.get(promotionGoodsStockCacheKey);
+
+        if (quantity == null) {
+            //如果促销有库存信息
+            PromotionTypeEnum promotionTypeEnum = PromotionTypeEnum.valueOf(promotionSkuVO.getPromotionType());
+            switch (promotionTypeEnum) {
+                case KANJIA:
+                    quantity = kanjiaActivityGoodsService.getKanjiaGoodsBySkuId(cartSkuVO.getGoodsSku().getId()).getStock();
+                    break;
+                case POINTS_GOODS:
+                    quantity = pointsGoodsService.getPointsGoodsDetailBySkuId(cartSkuVO.getGoodsSku().getId()).getActiveStock();
+                    break;
+                case SECKILL:
+                case PINTUAN:
+                    quantity = promotionGoodsService.getPromotionGoodsStock(PromotionTypeEnum.valueOf(promotionSkuVO.getPromotionType()), promotionSkuVO.getActivityId(), cartSkuVO.getGoodsSku().getId());
+                    break;
+                default:
+                    return;
+            }
+        }
+
+
+        if (quantity != null && cartSkuVO.getNum() > (Integer) quantity) {//设置购物车未选中
+            cartSkuVO.setChecked(false);
+            //设置失效消息
+            cartSkuVO.setErrorMessage("促销商品库存不足,现有库存数量[" + quantity + "]");
         }
     }
 

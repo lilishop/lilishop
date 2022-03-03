@@ -332,7 +332,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                 Integer num = promotionGoods.get(i).getNum();
                 promotionGoods.get(i).setNum((num != null ? num : 0) + order.getOrder().getGoodsNum());
             }
-            promotionGoodsService.updateBatchById(promotionGoods);
+            promotionGoodsService.updatePromotionGoodsStock(promotionGoods);
         }
         //商品库存，包含sku库存集合，批量更新商品库存相关
         goodsSkuService.updateGoodsStuck(goodsSkus);

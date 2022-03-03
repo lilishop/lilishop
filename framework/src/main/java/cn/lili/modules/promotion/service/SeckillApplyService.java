@@ -1,6 +1,7 @@
 package cn.lili.modules.promotion.service;
 
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
 import cn.lili.modules.promotion.entity.dto.search.SeckillSearchParams;
 import cn.lili.modules.promotion.entity.vos.SeckillApplyVO;
@@ -89,12 +90,20 @@ public interface SeckillApplyService extends IService<SeckillApply> {
     void removeSeckillApply(String seckillId, String id);
 
     /**
-     * 更新秒杀商品库存
+     * 更新秒杀商品出售数量
      *
      * @param seckillId 秒杀活动id
      * @param skuId 商品skuId
-     * @param quantity 库存
+     * @param saleNum 出售数量
      */
-    void updateSeckillApplyQuantity(String seckillId, String skuId, Integer quantity);
+    void updateSeckillApplySaleNum(String seckillId, String skuId, Integer saleNum);
+
+    /**
+     * 更新秒杀活动时间
+     *
+     * @param seckill 秒杀活动
+     * @return 是否更新成功
+     */
+    boolean updateSeckillApplyTime(Seckill seckill);
 
 }

@@ -105,7 +105,7 @@ public class PromotionServiceImpl implements PromotionService {
     /**
      * 根据商品索引获取当前商品索引的所有促销活动信息
      *
-     * @param storeId 店铺id
+     * @param storeId    店铺id
      * @param goodsSkuId 商品skuId
      * @return 当前促销活动集合
      */
@@ -129,7 +129,7 @@ public class PromotionServiceImpl implements PromotionService {
                     promotionMap.put(esPromotionKey, fullDiscount);
                     break;
                 case SECKILL:
-                    this.getGoodsCurrentSeckill(promotionGoods, promotionMap);
+                    this.getGoodsCurrentSeckill(esPromotionKey, promotionGoods, promotionMap);
                     break;
                 case POINTS_GOODS:
                     PointsGoods pointsGoods = pointsGoodsService.getById(promotionGoods.getPromotionId());
@@ -143,7 +143,7 @@ public class PromotionServiceImpl implements PromotionService {
     }
 
 
-    private void getGoodsCurrentSeckill(PromotionGoods promotionGoods, Map<String, Object> promotionMap) {
+    private void getGoodsCurrentSeckill(String esPromotionKey, PromotionGoods promotionGoods, Map<String, Object> promotionMap) {
         Seckill seckill = seckillService.getById(promotionGoods.getPromotionId());
         SeckillSearchParams searchParams = new SeckillSearchParams();
         searchParams.setSeckillId(promotionGoods.getPromotionId());
@@ -151,19 +151,12 @@ public class PromotionServiceImpl implements PromotionService {
         List<SeckillApply> seckillApplyList = seckillApplyService.getSeckillApplyList(searchParams);
         if (seckillApplyList != null && !seckillApplyList.isEmpty()) {
             SeckillApply seckillApply = seckillApplyList.get(0);
-            int nextHour = 23;
             String[] split = seckill.getHours().split(",");
             int[] hoursSored = Arrays.stream(split).mapToInt(Integer::parseInt).toArray();
             Arrays.sort(hoursSored);
-            for (int i : hoursSored) {
-                if (seckillApply.getTimeLine() < i) {
-                    nextHour = i;
-                }
-            }
-            String seckillKey = promotionGoods.getPromotionType() + "-" + nextHour;
             seckill.setStartTime(promotionGoods.getStartTime());
             seckill.setEndTime(promotionGoods.getEndTime());
-            promotionMap.put(seckillKey, seckill);
+            promotionMap.put(esPromotionKey, seckill);
         }
 
     }
