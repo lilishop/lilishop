@@ -2,6 +2,7 @@ package cn.lili.modules.store.mapper;
 
 import cn.hutool.core.date.DateTime;
 import cn.lili.modules.store.entity.dos.StoreDetail;
+import cn.lili.modules.store.entity.dto.FuLuConfigureDTO;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.store.entity.dto.StoreSettlementDay;
 import cn.lili.modules.store.entity.vos.StoreBasicInfoVO;
@@ -59,6 +60,15 @@ public interface StoreDetailMapper extends BaseMapper<StoreDetail> {
     @Select("select s.sales_consignee_name,s.sales_consignee_mobile,s.sales_consignee_address_id,s.sales_consignee_address_path,s.sales_consignee_detail " +
             "from li_store_detail s  where s.store_id=#{storeId}")
     StoreAfterSaleAddressDTO getStoreAfterSaleAddressDTO(String storeId);
+
+    /**
+     * 获取店铺福禄配置DTO
+     *
+     * @param storeId 店铺ID
+     * @return 店铺店铺福禄配置DTO
+     */
+    @Select("select s.app_secret_key,s.merchant_number,s.app_merchant_key from li_store_detail s where s.store_id =#{storeId}")
+    FuLuConfigureDTO getFuLuConfigureDTO(String storeId);
 
     /**
      * 获取待结算店铺列表

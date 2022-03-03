@@ -12,7 +12,7 @@ import cn.lili.common.utils.Base64DecodeMultipartFile;
 import cn.lili.common.utils.CommonUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.file.entity.File;
-import cn.lili.modules.file.plugin.FileManagerPlugin;
+import cn.lili.modules.file.plugin.QiNiuManagerPlugin;
 import cn.lili.modules.file.service.FileService;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -47,7 +47,7 @@ public class UploadController {
     @Autowired
     private SettingService settingService;
     @Autowired
-    private FileManagerPlugin fileManagerPlugin;
+    private QiNiuManagerPlugin fileManagerPlugin;
     @Autowired
     private Cache cache;
 

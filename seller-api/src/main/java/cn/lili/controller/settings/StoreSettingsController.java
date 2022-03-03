@@ -3,6 +3,7 @@ package cn.lili.controller.settings;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.store.entity.dto.FuLuConfigureDTO;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.store.entity.dto.StoreSettingDTO;
 import cn.lili.modules.store.entity.vos.StoreVO;
@@ -85,6 +86,21 @@ public class StoreSettingsController {
     public ResultMessage<Object> editStoreAfterSaleAddress(@Valid StoreAfterSaleAddressDTO storeAfterSaleAddressDTO) {
         //修改商家退货收件地址
         boolean result = storeDetailService.editStoreAfterSaleAddressDTO(storeAfterSaleAddressDTO);
+        return ResultUtil.data(result);
+    }
+
+    @ApiOperation(value = "获取商家福禄配置")
+    @GetMapping("/fuLuConfigure")
+    public ResultMessage<FuLuConfigureDTO> getFuLuConfigure() {
+        //获取当前登录商家内容
+        return ResultUtil.data(storeDetailService.getFuLuConfigureDTO());
+    }
+
+    @ApiOperation(value = "修改商家福禄配置")
+    @PutMapping("/fuLuConfigure")
+    public ResultMessage<Object> editFuLuConfigure(@Valid FuLuConfigureDTO fuLuConfigureDTO) {
+        //修改商家退货收件地址
+        boolean result = storeDetailService.editFuLuConfigureDTO(fuLuConfigureDTO);
         return ResultUtil.data(result);
     }
 }

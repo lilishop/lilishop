@@ -94,7 +94,7 @@ public class SliderImageUtil {
         graphics.dispose();
 
         //添加水印
-        ImageUtil.addWatermark(originalImage, watermark);
+//        ImageUtil.addWatermark(originalImage, watermark);
         //新建流
         ByteArrayOutputStream newImageOs = new ByteArrayOutputStream();
         //利用ImageIO类提供的write方法，将bi以png图片的数据模式写入流。

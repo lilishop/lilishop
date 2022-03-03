@@ -3,6 +3,7 @@ package cn.lili.modules.store.service;
 import cn.hutool.core.date.DateTime;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
+import cn.lili.modules.store.entity.dto.FuLuConfigureDTO;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.store.entity.dto.StoreSettingDTO;
 import cn.lili.modules.store.entity.dto.StoreSettlementDay;
@@ -70,6 +71,13 @@ public interface StoreDetailService extends IService<StoreDetail> {
     StoreAfterSaleAddressDTO getStoreAfterSaleAddressDTO();
 
     /**
+     * 获取当前登录店铺福禄配置
+     *
+     * @return 店铺福禄配置
+     */
+    FuLuConfigureDTO getFuLuConfigureDTO();
+
+    /**
      * 获取某一个店铺的退货收件地址信息
      *
      * @param id 店铺ID
@@ -86,6 +94,17 @@ public interface StoreDetailService extends IService<StoreDetail> {
     boolean editStoreAfterSaleAddressDTO(StoreAfterSaleAddressDTO storeAfterSaleAddressDTO);
 
     /**
+<<<<<<< HEAD
+     * 修改当前登录店铺福禄配置
+     *
+     * @param fuLuConfigureDTO 店铺福禄配置DTO
+     * @return 店铺福禄配置
+     */
+    boolean editFuLuConfigureDTO(FuLuConfigureDTO fuLuConfigureDTO);
+
+    /**
+=======
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
      * 修改店铺库存预警数量
      *
      * @param stockWarning 库存预警数量

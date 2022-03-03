@@ -27,7 +27,7 @@ import java.util.List;
  * @since 2020/11/17 3:44 下午
  */
 @Service
-@Transactional(propagation = Propagation.REQUIRED, rollbackFor = java.lang.Exception.class)
+@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 public class MemberNoticeSenterServiceImpl extends ServiceImpl<MemberNoticeSenterMapper, MemberNoticeSenter> implements MemberNoticeSenterService {
 
     /**
