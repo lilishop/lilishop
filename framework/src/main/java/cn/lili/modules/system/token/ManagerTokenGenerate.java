@@ -11,7 +11,6 @@ import cn.lili.common.security.token.TokenUtil;
 import cn.lili.common.security.token.base.AbstractTokenGenerate;
 import cn.lili.modules.permission.entity.dos.AdminUser;
 import cn.lili.modules.permission.entity.vo.UserMenuVO;
-import cn.lili.modules.permission.service.AdminUserService;
 import cn.lili.modules.permission.service.RoleMenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

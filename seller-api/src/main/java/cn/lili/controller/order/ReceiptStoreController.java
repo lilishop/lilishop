@@ -27,7 +27,7 @@ import java.util.Objects;
  **/
 @RestController
 @Api(tags = "店铺端,发票接口")
-@RequestMapping("/store/receipt")
+@RequestMapping("/store/trade/receipt")
 public class ReceiptStoreController {
 
     @Autowired

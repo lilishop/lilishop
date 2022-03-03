@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @Api(tags = "买家端,会员发票接口")
-@RequestMapping("/buyer/member/receipt")
+@RequestMapping("/buyer/wallet/receipt")
 public class MemberReceiptController {
 
     @Autowired

@@ -28,7 +28,7 @@ import java.util.Arrays;
  **/
 @RestController
 @Api(tags = "管理端,砍价促销接口")
-@RequestMapping("/manager/promotion/kan-jia-goods")
+@RequestMapping("/manager/promotion/kanJiaGoods")
 public class KanJiaActivityGoodsManagerController {
 
     @Autowired

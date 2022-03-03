@@ -43,7 +43,7 @@ import java.util.Map;
 @Slf4j
 @Api(tags = "买家端,商品接口")
 @RestController
-@RequestMapping("/buyer/goods")
+@RequestMapping("/buyer/goods/goods")
 public class GoodsBuyerController {
 
     /**

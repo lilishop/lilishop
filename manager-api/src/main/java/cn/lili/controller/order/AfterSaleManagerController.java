@@ -27,7 +27,7 @@ import java.util.List;
  * @since 2021/1/6 14:11
  */
 @RestController
-@RequestMapping("/manager/afterSale")
+@RequestMapping("/manager/order/afterSale")
 @Api(tags = "管理端,售后接口")
 public class AfterSaleManagerController {
 

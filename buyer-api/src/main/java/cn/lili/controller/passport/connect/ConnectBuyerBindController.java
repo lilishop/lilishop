@@ -21,7 +21,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "买家端,app/小程序 联合登录")
-@RequestMapping("/buyer/connect/bind")
+@RequestMapping("/buyer/passport/connect/bind")
 public class ConnectBuyerBindController {
 
     @Autowired

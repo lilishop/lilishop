@@ -6,10 +6,13 @@
 
 #### 欢迎交流需求，交流业务，交流技术（基础问题自行解决，进群先看文档后提问）
 
+
 ##### 交流 qq 1群 961316482（已满）
+<a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=BAhURE3DG2YWhQk6kRxVapbLykqMoPS8&jump_from=webapi"><img border="0" src="https://pub.idqqimg.com/wpa/images/group.png" alt="Lilishop交流群" title="Lilishop交流群">点击快捷加群</a>
 
 ##### 交流 qq 2群 875294241
 
+<a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=_lrekOvr5k2p5uTn5GRidI-chKEmpCX3&jump_from=webapi"><img border="0" src="https://pub.idqqimg.com/wpa/images/group.png" alt="Lilishop交流群2群" title="Lilishop交流群2群">点击快捷加群</a>
 
 
 ##### 体验 公众号/小程序/APP 体验，扫描二维码

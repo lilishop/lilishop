@@ -128,21 +128,23 @@ ignored:
     - /MP_verify_qSyvBPhDsPdxvOhC.txt
     - /weixin/**
     - /source/**
-    - /buyer/mini-program/**
-    - /buyer/cashier/**
-    - /buyer/pageData/**
-    - /buyer/article/**
+    - /buyer/payment/cashier/**
+    - /buyer/payment/cashierRefund/**
+    - /buyer/other/pageData/**
+    - /buyer/other/article/**
     - /buyer/goods/**
-    - /buyer/category/**
     - /buyer/store/**
-    - /buyer/connect/**
+    - /buyer/passport/connect/**
     - /buyer/members/**
+    - /buyer/passport/member/**
+    - /buyer/passport/member/refresh/**
     - /buyer/promotion/pintuan/**
     - /buyer/promotion/seckill/**
     - /buyer/promotion/pointsGoods/**
-    - /buyer/memberEvaluation/**/goodsEvaluation
-    - /buyer/memberEvaluation/**/evaluationNumber
-    - /buyer/appVersion/**
+    - /buyer/promotion/coupon
+    - /buyer/member/evaluation/**/goodsEvaluation
+    - /buyer/member/evaluation/**/evaluationNumber
+    - /buyer/other/appVersion/**
     - /buyer/broadcast/studio/**
     - /druid/**
     - /swagger-ui.html
@@ -183,7 +185,7 @@ logging:
   config: classpath:logback-spring.xml
   # 输出级别
   level:
-    root: error
+    root: info
 #    org.springframework: debug
   file:
     # 指定路径

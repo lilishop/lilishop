@@ -33,7 +33,7 @@ import java.util.List;
  */
 @Api(tags = "管理端,店铺管理接口")
 @RestController
-@RequestMapping("/manager/store")
+@RequestMapping("/manager/store/store")
 public class StoreManagerController {
 
     /**

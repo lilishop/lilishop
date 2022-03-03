@@ -50,6 +50,7 @@ import cn.lili.modules.search.service.EsGoodsSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -184,6 +185,7 @@ public class CartServiceImpl implements CartService {
 
                 //购物车中不存在此商品，则新建立一个
                 CartSkuVO cartSkuVO = new CartSkuVO(dataSku, promotionMap);
+                this.checkSetGoodsQuantity(cartSkuVO, skuId, num);
                 cartSkuVO.setCartType(cartTypeEnum);
                 //检测购物车数据
                 checkCart(cartTypeEnum, cartSkuVO, skuId, num);
@@ -271,6 +273,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void delete(String[] skuIds) {
         TradeDTO tradeDTO = this.readDTO(CartTypeEnum.CART);
         List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
@@ -496,6 +499,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void selectCoupon(String couponId, String way, boolean use) {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         //获取购物车，然后重新写入优惠券

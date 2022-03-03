@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2020/11/26 15:41
  */
 @RestController
-@Api(tags = "文件管理管理接口")
-@RequestMapping("/common/logo")
+@Api(tags = "文件管理接口")
+@RequestMapping("/common/common/logo")
 public class LogoController {
 
     @Autowired

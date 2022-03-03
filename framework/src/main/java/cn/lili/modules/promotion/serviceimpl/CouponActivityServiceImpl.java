@@ -54,6 +54,7 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void specify(String couponActivityId) {
         //获取优惠券
         CouponActivity couponActivity = this.getById(couponActivityId);
@@ -79,6 +80,7 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void registered(List<CouponActivity> couponActivityList, Member member) {
         for (CouponActivity couponActivity : couponActivityList) {
             //获取会员信息
@@ -164,6 +166,7 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
      * @param couponActivity 促销实体
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateEsGoodsIndex(CouponActivity couponActivity) {
         //如果是精准发券，进行发送优惠券
         if (!PromotionsStatusEnum.CLOSE.name().equals(couponActivity.getPromotionStatus()) && couponActivity.getCouponActivityType().equals(CouponActivityTypeEnum.SPECIFY.name())) {
@@ -191,7 +194,6 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
      * @param memberList          用户列表
      * @param couponActivityItems 优惠券列表
      */
-    @Transactional(rollbackFor = {Exception.class})
     void sendCoupon(List<Map<String, Object>> memberList, List<CouponActivityItem> couponActivityItems) {
 
         for (CouponActivityItem couponActivityItem : couponActivityItems) {

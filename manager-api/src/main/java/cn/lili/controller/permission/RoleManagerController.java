@@ -23,7 +23,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,角色管理接口")
-@RequestMapping("/manager/role")
+@RequestMapping("/manager/permission/role")
 public class RoleManagerController {
     @Autowired
     private RoleService roleService;

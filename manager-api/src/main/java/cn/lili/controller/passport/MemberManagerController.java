@@ -1,4 +1,4 @@
-package cn.lili.controller.member;
+package cn.lili.controller.passport;
 
 import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
@@ -30,7 +30,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "管理端,会员接口")
-@RequestMapping("/manager/member")
+@RequestMapping("/manager/passport/member")
 public class MemberManagerController {
     @Autowired
     private MemberService memberService;
@@ -45,9 +45,9 @@ public class MemberManagerController {
     @ApiOperation(value = "通过ID获取会员信息")
     @ApiImplicitParam(name = "id", value = "会员ID", required = true, dataType = "String", paramType = "path")
     @GetMapping(value = "/{id}")
-    public ResultMessage<Member> get(@PathVariable String id) {
+    public ResultMessage<MemberVO> get(@PathVariable String id) {
 
-        return ResultUtil.data(memberService.getById(id));
+        return ResultUtil.data(memberService.getMember(id));
     }
 
     @ApiOperation(value = "添加会员")

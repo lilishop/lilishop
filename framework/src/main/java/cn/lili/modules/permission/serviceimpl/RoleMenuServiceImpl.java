@@ -58,6 +58,7 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> i
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateRoleMenu(String roleId, List<RoleMenu> roleMenus) {
         try {
             //删除角色已经绑定的菜单

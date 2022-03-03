@@ -27,7 +27,7 @@ import java.util.Map;
  **/
 @RestController
 @Api(tags = "管理端,促销接口")
-@RequestMapping("/manager/promotion")
+@RequestMapping("/manager/promotion/promotion")
 public class PromotionManagerController {
 
     @Autowired

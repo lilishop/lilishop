@@ -7,7 +7,6 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dto.DistributionApplyDTO;
@@ -21,6 +20,7 @@ import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.DistributionSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -69,6 +69,7 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Distribution applyDistribution(DistributionApplyDTO distributionApplyDTO) {
 
         //检查分销开关
@@ -173,7 +174,7 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
         //获取分销是否开启
         Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
         DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
-        if (!distributionSetting.getIsOpen()) {
+        if (Boolean.FALSE.equals(distributionSetting.getIsOpen())) {
             throw new ServiceException(ResultCode.DISTRIBUTION_CLOSE);
         }
     }

@@ -22,7 +22,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "地址信息接口")
-@RequestMapping("/common/region")
+@RequestMapping("/common/common/region")
 public class RegionController {
 
     @Autowired

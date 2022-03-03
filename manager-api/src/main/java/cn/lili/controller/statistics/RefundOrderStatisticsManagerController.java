@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Api(tags = "管理端,退款统计接口")
 @RestController
-@RequestMapping("/manager/statistics/refund/order")
+@RequestMapping("/manager/statistics/refundOrder")
 public class RefundOrderStatisticsManagerController {
     @Autowired
     private RefundOrderStatisticsService refundOrderStatisticsService;

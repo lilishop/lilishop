@@ -3,7 +3,6 @@ package cn.lili.modules.goods.serviceimpl;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.CategoryParameterGroup;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.Parameters;
@@ -17,7 +16,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,12 +45,6 @@ public class CategoryParameterGroupServiceImpl extends ServiceImpl<CategoryParam
     @Autowired
     private GoodsService goodsService;
 
-    @Autowired
-    private RocketmqCustomProperties rocketmqCustomProperties;
-
-    @Autowired
-    private RocketMQTemplate rocketMQTemplate;
-
     @Override
     public List<ParameterGroupVO> getCategoryParams(String categoryId) {
         //根据id查询参数组
@@ -75,6 +67,7 @@ public class CategoryParameterGroupServiceImpl extends ServiceImpl<CategoryParam
      * @return 是否成功
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateCategoryGroup(CategoryParameterGroup categoryParameterGroup) {
         CategoryParameterGroup origin = this.getById(categoryParameterGroup.getId());
         if (origin == null) {

@@ -34,7 +34,7 @@ public class FullDiscountSearchParams extends BasePromotionsSearchParams impleme
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = super.queryWrapper();
         if (CharSequenceUtil.isNotEmpty(promotionName)) {
-            queryWrapper.like("title", promotionName);
+            queryWrapper.like("promotion_name", promotionName);
         }
         if (couponFlag != null) {
             queryWrapper.eq("coupon_flag", couponFlag);

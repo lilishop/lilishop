@@ -124,26 +124,31 @@ ignored:
     - /MP_verify_qSyvBPhDsPdxvOhC.txt
     - /weixin/**
     - /source/**
-    - /buyer/mini-program/**
-    - /buyer/cashier/**
-    - /buyer/pageData/**
-    - /buyer/article/**
+    - /store/passport/login/**
+    - /store/passport/login/refresh/**
+    - /common/common/slider/**
+    - /common/common/sms/**
+    - /buyer/payment/cashier/**
+    - /buyer/other/pageData/**
+    - /buyer/other/article/**
     - /buyer/goods/**
-    - /buyer/category/**
     - /buyer/store/**
-    - /buyer/connect/**
+    - /buyer/passport/connect/**
     - /buyer/members/**
+    - /buyer/passport/member/**
+    - /buyer/passport/member/refresh/**
     - /buyer/promotion/pintuan/**
     - /buyer/promotion/seckill/**
     - /buyer/promotion/pointsGoods/**
     - /buyer/promotion/coupon
-    - /buyer/memberEvaluation/**/goodsEvaluation
-    - /buyer/memberEvaluation/**/evaluationNumber
-    - /buyer/appVersion/**
+    - /buyer/member/evaluation/**/goodsEvaluation
+    - /buyer/member/evaluation/**/evaluationNumber
+    - /buyer/other/appVersion/**
     - /buyer/broadcast/studio/**
-    - /store/login/**
-    - /manager/user/login
-    - /manager/user/refresh/**
+    - /manager/passport/user/login
+    - /manager/passport/user/refresh/**
+    - /manager/other/elasticsearch
+    - /manager/other/customWords
     - /druid/**
     - /swagger-ui.html
     - /doc.html
@@ -183,7 +188,7 @@ mybatis-plus:
 logging:
   # 输出级别
   level:
-    root: info
+    cn.lili: info
   #    org.hibernate: debug
   #    org.springframework: debug
   #    org.springframework.data.mongodb.core: debug
@@ -232,7 +237,7 @@ lili:
   #     0：不做脱敏处理
   #     1：管理端用户手机号等信息脱敏
   #     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
-  #    sensitiveLevel: 2
+    sensitiveLevel: 1
 
   statistics:
     # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数
@@ -302,9 +307,10 @@ lili:
       notice-group: lili_notice_group
       notice-send-topic: lili_send_notice_topic
       notice-send-group: lili_send_notice_group
+      after-sale-topic: lili_after_sale_topic
+      after-sale-group: lili_after_sale_group
 rocketmq:
   name-server: 192.168.0.116:9876
-  namesrvAddr: 192.168.0.116:9876
   isVIPChannel: false
   producer:
     group: lili_group

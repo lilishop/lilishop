@@ -1,7 +1,7 @@
 package cn.lili.cache.limit.interceptor;
 
-import cn.lili.cache.limit.enums.LimitTypeEnums;
 import cn.lili.cache.limit.annotation.LimitPoint;
+import cn.lili.cache.limit.enums.LimitTypeEnums;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.IpUtils;
@@ -17,7 +17,6 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 
 /**

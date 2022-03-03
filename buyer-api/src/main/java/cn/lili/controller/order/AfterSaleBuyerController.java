@@ -36,7 +36,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "买家端,售后管理接口")
-@RequestMapping("/buyer/afterSale")
+@RequestMapping("/buyer/order/afterSale")
 public class AfterSaleBuyerController {
 
     /**

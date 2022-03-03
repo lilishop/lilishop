@@ -51,6 +51,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
     private int maxLevel = 2;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ArticleCategory saveArticleCategory(ArticleCategory articleCategory) {
         //非顶级分类
         if (articleCategory.getParentId() != null && !parentId.equals(articleCategory.getParentId())) {

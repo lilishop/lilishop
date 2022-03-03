@@ -1,6 +1,5 @@
 package cn.lili.modules.promotion.entity.dos;
 
-import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
@@ -12,6 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -31,6 +31,7 @@ import java.util.Date;
 @TableName("li_seckill")
 @ApiModel(value = "秒杀活动活动")
 @NoArgsConstructor
+@ToString(callSuper = true)
 public class Seckill extends BasePromotions {
 
     private static final long serialVersionUID = -9116425737163730836L;
@@ -59,7 +60,7 @@ public class Seckill extends BasePromotions {
 
     public Seckill(int day, String hours, String seckillRule) {
         //默认创建*天后的秒杀活动
-        DateTime dateTime = DateUtil.beginOfDay(DateUtil.offset(new DateTime(), DateField.DAY_OF_YEAR, day));
+        DateTime dateTime = DateUtil.beginOfDay(DateUtil.offsetDay(new Date(), day));
         this.applyEndTime = dateTime;
         this.hours = hours;
         this.seckillRule = seckillRule;

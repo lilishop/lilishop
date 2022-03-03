@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @Api(tags = "管理端,交易投诉接口")
-@RequestMapping("/manager/complain")
+@RequestMapping("/manager/order/complain")
 public class OrderComplaintManagerController {
 
     /**

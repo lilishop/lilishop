@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 @RestController
 @Api(tags = "买家端,收银台接口")
-@RequestMapping("/buyer/cashier")
+@RequestMapping("/buyer/payment/cashier")
 public class CashierController {
 
     @Autowired

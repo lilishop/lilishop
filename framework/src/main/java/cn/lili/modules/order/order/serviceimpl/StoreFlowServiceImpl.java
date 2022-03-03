@@ -1,9 +1,9 @@
 package cn.lili.modules.order.order.serviceimpl;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
@@ -32,7 +32,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -104,7 +103,7 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
             storeFlow.setDistributionRebate(item.getPriceDetailDTO().getDistributionCommission());
             storeFlow.setBillPrice(item.getPriceDetailDTO().getBillPrice());
             //兼容为空，以及普通订单操作
-            if (StringUtils.isNotEmpty(orderPromotionType)) {
+            if (CharSequenceUtil.isNotEmpty(orderPromotionType)) {
                 if (orderPromotionType.equals(OrderPromotionTypeEnum.NORMAL.name())) {
                     //普通订单操作
                 }
@@ -221,21 +220,21 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
                 StoreFlow::getDistributionRebate);
 
         //流水类型判定
-        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(storeFlowQueryDTO.getType()),
+        lambdaQueryWrapper.eq(CharSequenceUtil.isNotEmpty(storeFlowQueryDTO.getType()),
                 StoreFlow::getFlowType, storeFlowQueryDTO.getType());
 
         //售后编号判定
-        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(storeFlowQueryDTO.getRefundSn()),
+        lambdaQueryWrapper.eq(CharSequenceUtil.isNotEmpty(storeFlowQueryDTO.getRefundSn()),
                 StoreFlow::getRefundSn, storeFlowQueryDTO.getRefundSn());
 
         //售后编号判定
-        lambdaQueryWrapper.eq(StringUtils.isNotEmpty(storeFlowQueryDTO.getOrderSn()),
+        lambdaQueryWrapper.eq(CharSequenceUtil.isNotEmpty(storeFlowQueryDTO.getOrderSn()),
                 StoreFlow::getOrderSn, storeFlowQueryDTO.getOrderSn());
 
         //结算单非空，则校对结算单参数
         if (storeFlowQueryDTO.getBill() != null) {
             Bill bill = storeFlowQueryDTO.getBill();
-            lambdaQueryWrapper.eq(StringUtils.isNotEmpty(bill.getStoreId()), StoreFlow::getStoreId, bill.getStoreId());
+            lambdaQueryWrapper.eq(CharSequenceUtil.isNotEmpty(bill.getStoreId()), StoreFlow::getStoreId, bill.getStoreId());
             lambdaQueryWrapper.between(bill.getStartTime() != null && bill.getEndTime() != null,
                     StoreFlow::getCreateTime, bill.getStartTime(), bill.getEndTime());
         }

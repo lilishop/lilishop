@@ -17,6 +17,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -31,6 +32,7 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
     private PurchaseOrderItemService purchaseOrderItemService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public PurchaseOrderVO addPurchaseOrder(PurchaseOrderVO purchaseOrderVO) {
         PurchaseOrder purchaseOrder = new PurchaseOrder();
         BeanUtil.copyProperties(purchaseOrderVO, purchaseOrder);
@@ -72,6 +74,7 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean close(String id) {
         PurchaseOrder purchaseOrder = this.getById(id);
         purchaseOrder.setStatus("CLOSE");

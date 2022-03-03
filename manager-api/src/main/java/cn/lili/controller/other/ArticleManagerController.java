@@ -25,7 +25,7 @@ import javax.validation.Valid;
  */
 @RestController
 @Api(tags = "管理端,文章接口")
-@RequestMapping("/manager/article")
+@RequestMapping("/manager/other/article")
 public class ArticleManagerController {
 
     /**

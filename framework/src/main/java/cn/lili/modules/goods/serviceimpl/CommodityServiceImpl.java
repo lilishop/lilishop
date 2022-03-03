@@ -27,6 +27,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -46,6 +47,7 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
     private GoodsSkuService goodsSkuService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean addCommodity(List<Commodity> commodityList) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         for (Commodity commodity : commodityList) {
@@ -54,7 +56,7 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
             commodity.setStoreId(storeId);
             //添加直播商品
             JSONObject json = wechatLivePlayerUtil.addGoods(commodity);
-            if(!"0".equals(json.getStr("errcode"))){
+            if (!"0".equals(json.getStr("errcode"))) {
                 log.error(json.getStr("errmsg"));
                 throw new ServiceException(ResultCode.COMMODITY_ERROR);
             }
@@ -93,10 +95,11 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void getGoodsWareHouse() {
         //查询审核中的商品
         List<String> goodsIdList = this.baseMapper.getAuditCommodity();
-        if (goodsIdList.size() > 0) {
+        if (!goodsIdList.isEmpty()) {
             //同步状态
             JSONObject json = wechatLivePlayerUtil.getGoodsWareHouse(goodsIdList);
             //修改状态

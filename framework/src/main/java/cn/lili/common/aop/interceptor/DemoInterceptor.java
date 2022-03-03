@@ -26,7 +26,7 @@ public class DemoInterceptor {
 
     @Before("@annotation(demoSite)")
     public void doAfter(DemoSite demoSite) {
-        if (systemSettingProperties.getIsDemoSite()) {
+        if (Boolean.TRUE.equals(systemSettingProperties.getIsDemoSite())) {
             throw new ServiceException(ResultCode.DEMO_SITE_EXCEPTION);
         }
     }

@@ -19,8 +19,4 @@ public class ImSetting implements Serializable {
     private String httpUrl;
 
 
-    @ApiModelProperty(value = "平台ID")
-    private String tenantId;
-
-
 }

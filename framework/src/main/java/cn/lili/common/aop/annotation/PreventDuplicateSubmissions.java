@@ -1,7 +1,6 @@
 package cn.lili.common.aop.annotation;
 
 import java.lang.annotation.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 防止重复提交注解

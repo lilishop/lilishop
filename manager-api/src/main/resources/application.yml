@@ -119,10 +119,10 @@ ignored:
     - /MP_verify_qSyvBPhDsPdxvOhC.txt
     - /weixin/**
     - /source/**
-    - /manager/user/login
-    - /manager/user/refresh/**
-    - /manager/elasticsearch
-    - /manager/custom-words
+    - /manager/passport/user/login
+    - /manager/passport/user/refresh/**
+    - /manager/other/elasticsearch
+    - /manager/other/customWords
     - /druid/**
     - /swagger-ui.html
     - /doc.html
@@ -182,6 +182,11 @@ jasypt:
 lili:
   system:
     isDemoSite: true
+    #     脱敏级别：
+    #     0：不做脱敏处理
+    #     1：管理端用户手机号等信息脱敏
+    #     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
+    sensitiveLevel: 1
   statistics:
     # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数
     onlineMember: 48

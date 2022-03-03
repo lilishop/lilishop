@@ -3,9 +3,12 @@ package cn.lili.modules.member.entity.vo;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.security.sensitive.Sensitive;
 import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
+import cn.lili.common.utils.BeanUtil;
+import cn.lili.modules.member.entity.dos.Member;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
@@ -16,6 +19,7 @@ import java.util.Date;
  * @since 2021/11/8
  **/
 @Data
+@NoArgsConstructor
 public class MemberVO implements Serializable {
 
     private static final long serialVersionUID = 1810890757303309436L;
@@ -24,9 +28,11 @@ public class MemberVO implements Serializable {
     private String id;
 
     @ApiModelProperty(value = "会员用户名")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String username;
 
     @ApiModelProperty(value = "昵称")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String nickName;
 
     @ApiModelProperty(value = "会员性别,1为男，0为女")
@@ -89,4 +95,7 @@ public class MemberVO implements Serializable {
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;
 
+    public MemberVO(Member member) {
+        BeanUtil.copyProperties(member, this);
+    }
 }

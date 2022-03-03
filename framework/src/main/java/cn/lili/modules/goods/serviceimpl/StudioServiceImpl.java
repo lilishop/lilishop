@@ -35,6 +35,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Map;
@@ -63,6 +64,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     private GoodsService goodsService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean create(Studio studio) {
         studio.setStoreId(Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId());
         //创建小程序直播
@@ -97,6 +99,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean edit(Studio studio) {
         Studio oldStudio = this.getById(studio.getId());
         wechatLivePlayerUtil.editRoom(studio);
@@ -153,6 +156,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean push(Integer roomId, Integer goodsId, String storeId) {
 
         //判断直播间是否已添加商品
@@ -183,6 +187,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean goodsDeleteInRoom(Integer roomId, Integer goodsId, String storeId) {
         Goods goods = goodsService.getOne(new LambdaQueryWrapper<Goods>().eq(Goods::getId, goodsId).eq(Goods::getStoreId, storeId));
         if (goods == null) {

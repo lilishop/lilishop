@@ -1,4 +1,4 @@
-package cn.lili.controller.other.article;
+package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "店铺端,文章接口")
-@RequestMapping("/store/article")
+@RequestMapping("/store/other/article")
 public class ArticleStoreController {
 
     /**

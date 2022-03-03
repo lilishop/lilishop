@@ -47,6 +47,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteRoles(List<String> roleIds) {
         QueryWrapper queryWrapper = new QueryWrapper<>();
         queryWrapper.in("role_id", roleIds);

@@ -11,7 +11,6 @@ import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.sensitive.SensitiveWordsFilter;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.Member;
@@ -106,17 +105,22 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO, Boolean isSelf) {
         //获取子订单信息
         OrderItem orderItem = orderItemService.getBySn(memberEvaluationDTO.getOrderItemSn());
         //获取订单信息
         Order order = orderService.getBySn(orderItem.getOrderSn());
         //检测是否可以添加会员评价
-        if (isSelf) {
+        Member member;
+        if (Boolean.TRUE.equals(isSelf)) {
             checkMemberEvaluation(orderItem, order);
+            //获取用户信息 非自己评价时，读取数据库
+            member = memberService.getById(order.getMemberId());
+        } else {
+            //自我评价商品时，获取当前登录用户信息
+            member = memberService.getUserInfo();
         }
-        //获取用户信息
-        Member member = memberService.getUserInfo();
         //获取商品信息
         GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(memberEvaluationDTO.getSkuId());
         //新增用户评价
@@ -160,7 +164,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         UpdateWrapper<MemberEvaluation> updateWrapper = Wrappers.update();
         updateWrapper.set("reply_status", true);
         updateWrapper.set("reply", reply);
-        if (StringUtils.isNotEmpty(replyImage)) {
+        if (CharSequenceUtil.isNotEmpty(replyImage)) {
             updateWrapper.set("have_reply_image", true);
             updateWrapper.set("reply_image", replyImage);
         }

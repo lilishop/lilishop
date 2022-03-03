@@ -32,7 +32,7 @@ import javax.validation.constraints.NotNull;
 
 @RestController
 @Api(tags = "店铺端,商家登录接口 ")
-@RequestMapping("/store/login")
+@RequestMapping("/store/passport/login")
 public class StorePassportController {
 
     /**

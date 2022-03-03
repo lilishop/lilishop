@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 2021-09-16 15:32
  */
 @RestController
-@RequestMapping("/common/IM")
+@RequestMapping("/common/common/IM")
 @Api(tags = "IM 中心")
 public class IMController {
 
@@ -39,7 +39,7 @@ public class IMController {
         try {
             Setting imSettingVal = settingService.get(SettingEnum.IM_SETTING.name());
             ImSetting imSetting = JSONUtil.toBean(imSettingVal.getSettingValue(), ImSetting.class);
-            imUrl = imSetting.getHttpUrl() + "?tenant_id=" + imSetting.getTenantId()+"&merchant_euid=";
+            imUrl = imSetting.getHttpUrl();
         } catch (Exception e) {
             throw new ServiceException(ResultCode.PLATFORM_NOT_SUPPORTED_IM);
         }

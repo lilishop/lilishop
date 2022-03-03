@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(tags = "买家端,页面接口")
-@RequestMapping("/buyer/pageData")
+@RequestMapping("/buyer/other/pageData")
 public class PageBuyerController {
 
     /**
