@@ -8,14 +8,17 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.SearchVO;
+import cn.lili.modules.member.entity.dos.Clerk;
 import cn.lili.modules.member.entity.dos.StoreMenu;
 import cn.lili.modules.member.entity.dos.StoreMenuRole;
 import cn.lili.modules.member.entity.vo.StoreMenuVO;
 import cn.lili.modules.member.mapper.StoreMenuMapper;
+import cn.lili.modules.member.service.ClerkService;
 import cn.lili.modules.member.service.StoreMenuRoleService;
 import cn.lili.modules.member.service.StoreMenuService;
 import cn.lili.modules.permission.entity.dto.MenuSearchParams;
 import cn.lili.mybatis.util.PageUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +45,12 @@ public class StoreMenuServiceImpl extends ServiceImpl<StoreMenuMapper, StoreMenu
     @Autowired
     private Cache<List<StoreMenu>> cache;
 
+    /**
+     * 店员
+     */
+    @Autowired
+    private ClerkService clerkService;
+
     @Override
     public void deleteIds(List<String> ids) {
         QueryWrapper<StoreMenuRole> queryWrapper = new QueryWrapper<>();
@@ -60,7 +69,10 @@ public class StoreMenuServiceImpl extends ServiceImpl<StoreMenuMapper, StoreMenu
         if (Boolean.TRUE.equals(authUser.getIsSuper())) {
             return this.tree();
         }
-        List<StoreMenu> userMenus = this.baseMapper.findByUserId(authUser.getId());
+        //获取当前登录用户的店员信息
+        Clerk clerk = clerkService.getOne(new LambdaQueryWrapper<Clerk>().eq(Clerk::getMemberId, authUser.getId()));
+        //获取当前店员角色的菜单列表
+        List<StoreMenu> userMenus = this.baseMapper.findByUserId(clerk.getId());
         return this.tree(userMenus);
     }
 

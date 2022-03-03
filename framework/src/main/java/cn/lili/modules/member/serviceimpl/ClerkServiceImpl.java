@@ -9,16 +9,14 @@ import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.Clerk;
 import cn.lili.modules.member.entity.dos.Member;
+import cn.lili.modules.member.entity.dos.StoreClerkRole;
 import cn.lili.modules.member.entity.dos.StoreRole;
 import cn.lili.modules.member.entity.dto.ClerkAddDTO;
 import cn.lili.modules.member.entity.dto.ClerkEditDTO;
 import cn.lili.modules.member.entity.dto.ClerkQueryDTO;
 import cn.lili.modules.member.entity.vo.ClerkVO;
 import cn.lili.modules.member.mapper.ClerkMapper;
-import cn.lili.modules.member.service.ClerkService;
-import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.member.service.StoreDepartmentService;
-import cn.lili.modules.member.service.StoreRoleService;
+import cn.lili.modules.member.service.*;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -52,7 +50,7 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
     @Autowired
     private MemberService memberService;
     @Autowired
-    private ClerkMapper clerkMapper;
+    private StoreClerkRoleService storeClerkRoleService;
 
     @Override
     public IPage<ClerkVO> clerkForPage(PageVO page, ClerkQueryDTO clerkQueryDTO) {
@@ -62,17 +60,9 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
         clerkVOQueryWrapper.eq(StringUtils.isNotEmpty(clerkQueryDTO.getDepartmentId()), "li_clerk.department_id", clerkQueryDTO.getDepartmentId());
         clerkVOQueryWrapper.like(StringUtils.isNotEmpty(clerkQueryDTO.getClerkName()), "li_clerk.clerk_name", clerkQueryDTO.getClerkName());
         clerkVOQueryWrapper.like(StringUtils.isNotEmpty(clerkQueryDTO.getMobile()), "m.mobile", clerkQueryDTO.getMobile());
-        IPage<Clerk> clerkPage = this.clerkMapper.selectClerkPage(PageUtil.initPage(page), clerkVOQueryWrapper);
+        IPage<ClerkVO> clerkPage = this.baseMapper.selectClerkPage(PageUtil.initPage(page), clerkVOQueryWrapper);
 
-        List<ClerkVO> result = new ArrayList<>();
-        clerkPage.getRecords().forEach(clerk -> {
-            ClerkVO clerkVO = new ClerkVO(clerk);
-            result.add(clerkVO);
-        });
-
-        Page<ClerkVO> pageResult = new Page(clerkPage.getCurrent(), clerkPage.getSize(), clerkPage.getTotal());
-        pageResult.setRecords(result);
-        return pageResult;
+        return clerkPage;
 
 
         /*Page<Clerk> clerkPage = page(initPage, initWrapper);
@@ -166,9 +156,9 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
             if (!clerk.getStoreId().equals(UserContext.getCurrentUser().getStoreId())) {
                 throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
             }
-            if(clerkEditDTO.getIsSuper()){
+            if (clerkEditDTO.getIsSuper()) {
                 clerk.setRoleIds("");
-            }else{
+            } else {
                 //角色赋值
                 if (!clerkEditDTO.getRoles().isEmpty()) {
                     clerk.setRoleIds(CharSequenceUtil.join(",", clerkEditDTO.getRoles()));
@@ -216,7 +206,20 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
                 throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
             }
         }
+
         this.save(clerk);
+
+        //判断用户角色权限不为超级会员且权限路径不为空
+        if(clerkAddDTO.getIsSuper()==false && clerkAddDTO.getRoles()!=null){
+            //添加店员用户角色
+            List<StoreClerkRole> storeClerkRoleList = new ArrayList<>();
+
+            clerkAddDTO.getRoles().stream().forEach(a -> {
+                storeClerkRoleList.add(StoreClerkRole.builder().clerkId(clerk.getId()).roleId(a).build());
+            });
+            storeClerkRoleService.saveBatch(storeClerkRoleList);
+        }
+
         return clerk;
     }
 
@@ -230,7 +233,7 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
         QueryWrapper<Clerk> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("store_id", UserContext.getCurrentUser().getStoreId());
         queryWrapper.in("id", ids);
-        List<Clerk> clerks = this.clerkMapper.selectList(queryWrapper);
+        List<Clerk> clerks = this.baseMapper.selectList(queryWrapper);
         //校验要重置的店员是否是当前店铺的店员
         if (clerks.size() != ids.size()) {
             throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
@@ -253,7 +256,7 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
         QueryWrapper<Clerk> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("store_id", UserContext.getCurrentUser().getStoreId());
         queryWrapper.in("id", ids);
-        List<Clerk> clerks = this.clerkMapper.selectList(queryWrapper);
+        List<Clerk> clerks = this.baseMapper.selectList(queryWrapper);
         if (clerks.size() > 0) {
             //校验要重置的店员是否是当前店铺的店员
             if (clerks.size() != ids.size()) {

@@ -53,11 +53,11 @@ public class StoreMenuRoleServiceImpl extends ServiceImpl<StoreMenuRoleMapper, S
     }
 
     @Override
-    public List<StoreUserMenuVO> findAllMenu(String userId) {
-        String cacheKey = CachePrefix.STORE_USER_MENU.getPrefix() + userId;
+    public List<StoreUserMenuVO> findAllMenu(String clerkId,String memberId) {
+        String cacheKey = CachePrefix.STORE_USER_MENU.getPrefix() + memberId;
         List<StoreUserMenuVO> menuList = (List<StoreUserMenuVO>) cache.get(cacheKey);
-        if (menuList == null) {
-            menuList = storeMenuMapper.getUserRoleMenu(userId);
+        if (menuList == null || menuList.isEmpty()) {
+            menuList = storeMenuMapper.getUserRoleMenu(clerkId);
             cache.put(cacheKey, menuList);
         }
         return menuList;

@@ -4,7 +4,10 @@ import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 用户角色
@@ -15,6 +18,8 @@ import lombok.Data;
 @Data
 @TableName("li_clerk_role")
 @ApiModel(value = "用户角色")
+@Builder
+@NoArgsConstructor
 public class StoreClerkRole extends BaseIdEntity {
 
     @ApiModelProperty(value = "店员唯一id")
@@ -32,3 +37,4 @@ public class StoreClerkRole extends BaseIdEntity {
 
     }
 }
+

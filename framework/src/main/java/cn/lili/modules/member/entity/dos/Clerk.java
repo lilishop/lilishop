@@ -6,6 +6,7 @@ import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,6 +22,7 @@ import lombok.NoArgsConstructor;
 @TableName("li_clerk")
 @ApiModel(value = "店员")
 @NoArgsConstructor
+@AllArgsConstructor
 public class Clerk extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
@@ -56,7 +58,7 @@ public class Clerk extends BaseEntity {
      * @param clerkAddDTO
      */
     public Clerk(ClerkAddDTO clerkAddDTO) {
-        if (!clerkAddDTO.getRoles().isEmpty()) {
+        if (clerkAddDTO.getRoles()!=null && !clerkAddDTO.getRoles().isEmpty()) {
             this.roleIds = CharSequenceUtil.join(",", clerkAddDTO.getRoles());
         }
         this.memberId = clerkAddDTO.getMemberId();

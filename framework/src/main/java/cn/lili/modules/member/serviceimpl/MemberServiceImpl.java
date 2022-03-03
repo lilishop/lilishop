@@ -426,10 +426,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
      * @param mobilePhone 手机号
      * @return 会员
      */
-    private Long findMember(String mobilePhone, String userName) {
+    private Long findMember(String userName,String mobilePhone) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("mobile", mobilePhone)
-                .or().eq("username", userName);
+                .eq("username", userName);
         return this.baseMapper.selectCount(queryWrapper);
     }
 

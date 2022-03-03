@@ -41,7 +41,7 @@ public class StoreMenuController {
         return ResultUtil.data(storeMenuService.tree());
     }
 
-    @ApiOperation(value = "获取所有菜单")
+    @ApiOperation(value = "获取所有菜单---根据当前用户角色")
     @GetMapping("/memberMenu")
     public ResultMessage<List<StoreMenuVO>> memberMenu() {
         return ResultUtil.data(storeMenuService.findUserTree());

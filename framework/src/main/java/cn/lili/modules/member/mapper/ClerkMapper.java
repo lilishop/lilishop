@@ -27,8 +27,8 @@ public interface ClerkMapper extends BaseMapper<Clerk> {
      * @param ew 店铺ID
      * @return
      */
-    @Select("select li_clerk.*,m.id from li_clerk inner join li_member as m on li_clerk.member_id = m.id ${ew.customSqlSegment}")
-    IPage<Clerk> selectClerkPage(Page page, @Param(Constants.WRAPPER) QueryWrapper ew);
+    @Select("select li_clerk.*,m.id,m.mobile as mobile from li_clerk inner join li_member as m on li_clerk.member_id = m.id ${ew.customSqlSegment}")
+    IPage<ClerkVO> selectClerkPage(Page page, @Param(Constants.WRAPPER) QueryWrapper ew);
 
 
 }

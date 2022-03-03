@@ -26,10 +26,10 @@ public interface StoreMenuRoleService extends IService<StoreMenuRole> {
     /**
      * 根据角色集合获取拥有的菜单具体权限
      *
-     * @param userId
+     * @param clerkId
      * @return
      */
-    List<StoreUserMenuVO> findAllMenu(String userId);
+    List<StoreUserMenuVO> findAllMenu(String clerkId,String memberId);
 
 
     /**

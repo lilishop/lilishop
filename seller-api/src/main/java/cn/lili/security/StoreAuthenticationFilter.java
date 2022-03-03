@@ -129,8 +129,8 @@ public class StoreAuthenticationFilter extends BasicAuthenticationFilter {
             //获取数据(GET 请求)权限
             if (request.getMethod().equals(RequestMethod.GET.name())) {
                 //如果用户的超级权限和查阅权限都不包含当前请求的api
-                if (match(permission.get(PermissionEnum.SUPER.name()), requestUrl) ||
-                        match(permission.get(PermissionEnum.QUERY.name()), requestUrl)) {
+                if (match(permission.get(PermissionEnum.SUPER.name()), requestUrl)
+                        ||match(permission.get(PermissionEnum.QUERY.name()), requestUrl)) {
                 } else {
                     ResponseUtil.output(response, ResponseUtil.resultMap(false, 400, "权限不足"));
                     log.error("当前请求路径：{},所拥有权限：{}", requestUrl, JSONUtil.toJsonStr(permission));

@@ -60,9 +60,10 @@ public class StoreTokenGenerate extends AbstractTokenGenerate<Member> {
         if (!clerk.getStatus()) {
             throw new ServiceException(ResultCode.CLERK_DISABLED_ERROR);
         }
-        List<StoreUserMenuVO> storeUserMenuVOS = storeMenuRoleService.findAllMenu(clerk.getId());
+        //获取当前用户权限
+        List<StoreUserMenuVO> storeUserMenuVOS = storeMenuRoleService.findAllMenu(clerk.getId(),member.getId());
         //缓存权限列表
-        cache.put(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE) + clerk.getId(), this.permissionList(storeUserMenuVOS));
+        cache.put(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE) + member.getId(), this.permissionList(storeUserMenuVOS));
         //查询店铺信息
         Store store = storeService.getById(clerk.getStoreId());
         if (store == null) {
@@ -136,6 +137,21 @@ public class StoreTokenGenerate extends AbstractTokenGenerate<Member> {
      * @param queryPermissions 查询权限
      */
     void initPermission(List<String> superPermissions, List<String> queryPermissions) {
+        //菜单管理
+        superPermissions.add("/store/menu*");
+        //退出权限
+        superPermissions.add("/store/passport/login/logout*");
+
+
+
+
+        //店铺设置
+        queryPermissions.add("/store/settings/storeSettings*");
+        //文章接口
+        queryPermissions.add("/store/other/article*");
+        //首页统计
+        queryPermissions.add("/store/statistics/index*");
+
 
 
     }
