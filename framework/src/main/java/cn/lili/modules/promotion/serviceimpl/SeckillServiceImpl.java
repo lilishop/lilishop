@@ -132,6 +132,7 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
     }
 
     /**
+<<<<<<< HEAD
      * 通用促销更新
      * 调用顺序:
      * 1. checkStatus 检查促销状态

@@ -246,6 +246,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     }
 
     /**
+<<<<<<< HEAD
      * 更新秒杀活动时间
      *
      * @param seckill 秒杀活动
@@ -281,6 +282,8 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     }
 
     /**
+=======
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
      * 检查秒杀活动申请列表参数信息
      *
      * @param hours            秒杀活动时间段

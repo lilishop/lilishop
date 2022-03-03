@@ -76,6 +76,7 @@ public interface StoreDetailService extends IService<StoreDetail> {
      * @return 店铺福禄配置
      */
     FuLuConfigureDTO getFuLuConfigureDTO();
+
     /**
      * 获取某一个店铺的退货收件地址信息
      *
@@ -93,6 +94,7 @@ public interface StoreDetailService extends IService<StoreDetail> {
     boolean editStoreAfterSaleAddressDTO(StoreAfterSaleAddressDTO storeAfterSaleAddressDTO);
 
     /**
+<<<<<<< HEAD
      * 修改当前登录店铺福禄配置
      *
      * @param fuLuConfigureDTO 店铺福禄配置DTO
@@ -101,6 +103,8 @@ public interface StoreDetailService extends IService<StoreDetail> {
     boolean editFuLuConfigureDTO(FuLuConfigureDTO fuLuConfigureDTO);
 
     /**
+=======
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
      * 修改店铺库存预警数量
      *
      * @param stockWarning 库存预警数量

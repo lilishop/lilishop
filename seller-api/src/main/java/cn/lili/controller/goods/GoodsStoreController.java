@@ -22,6 +22,7 @@ import cn.lili.modules.store.entity.dto.FuLuConfigureDTO;
 import cn.lili.modules.store.service.StoreDetailService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import cn.lili.modules.store.service.StoreDetailService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
@@ -33,6 +34,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.*;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -277,6 +280,5 @@ public class GoodsStoreController {
         }
         return ResultUtil.success();
     }
-
 
 }

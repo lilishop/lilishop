@@ -15,6 +15,7 @@
     <packaging>jar</packaging>
 
     <dependencies>
+<<<<<<< HEAD
 
 
         <dependency>
@@ -28,6 +29,8 @@
             <version>7.4.0</version>
         </dependency>
 
+=======
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-properties-migrator</artifactId>

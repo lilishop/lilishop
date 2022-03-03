@@ -25,7 +25,6 @@ public class VerificationCodeProperties {
      * 水印
      */
     private String watermark = "";
-
     /**
      * 干扰数量 最大数量
      */

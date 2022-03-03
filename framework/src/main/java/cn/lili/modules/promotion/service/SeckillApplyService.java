@@ -97,7 +97,6 @@ public interface SeckillApplyService extends IService<SeckillApply> {
      * @param quantity 库存
      */
     void updateSeckillApplyQuantity(String seckillId, String skuId, Integer quantity);
-
     /**
      * 更新秒杀活动时间
      *
@@ -105,5 +104,4 @@ public interface SeckillApplyService extends IService<SeckillApply> {
      * @return 是否更新成功
      */
     boolean updateSeckillApplyTime(Seckill seckill);
-
 }

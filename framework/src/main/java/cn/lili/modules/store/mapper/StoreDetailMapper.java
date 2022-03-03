@@ -61,7 +61,6 @@ public interface StoreDetailMapper extends BaseMapper<StoreDetail> {
             "from li_store_detail s  where s.store_id=#{storeId}")
     StoreAfterSaleAddressDTO getStoreAfterSaleAddressDTO(String storeId);
 
-
     /**
      * 获取店铺福禄配置DTO
      *
@@ -70,7 +69,6 @@ public interface StoreDetailMapper extends BaseMapper<StoreDetail> {
      */
     @Select("select s.app_secret_key,s.merchant_number,s.app_merchant_key from li_store_detail s where s.store_id =#{storeId}")
     FuLuConfigureDTO getFuLuConfigureDTO(String storeId);
-
 
     /**
      * 获取待结算店铺列表

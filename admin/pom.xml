@@ -32,10 +32,17 @@
             <artifactId>logstash-logback-encoder</artifactId>
             <version>${logstash-logback-encoder}</version>
         </dependency>
+<<<<<<< HEAD
         <!--        <dependency>-->
         <!--            <groupId>org.springframework.boot</groupId>-->
         <!--            <artifactId>spring-boot-starter-mail</artifactId>-->
         <!--        </dependency> -->
+=======
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-mail</artifactId>-->
+<!--        </dependency> -->
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
     </dependencies>
 
     <build>
@@ -47,4 +54,8 @@
         </plugins>
     </build>
 
+<<<<<<< HEAD
 </project>
+=======
+</project>
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7

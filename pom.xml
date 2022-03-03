@@ -18,7 +18,11 @@
 
     <properties>
         <java.version>1.8</java.version>
+<<<<<<< HEAD
         <revision>4.3.0</revision>
+=======
+        <revision>4.2.4</revision>
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <skipTests>true</skipTests>

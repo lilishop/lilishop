@@ -346,8 +346,7 @@ public abstract class BaseElasticsearchService {
                         "    }\n" +
                         "  }\n";
 
-        PutMappingRequest request = new PutMappingRequest(index)
-                .source(source, XContentType.JSON);
+        PutMappingRequest request = new PutMappingRequest(index).source(source, XContentType.JSON);
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<AcknowledgedResponse> response = new AtomicReference<>();
         client.indices().putMappingAsync(

@@ -184,7 +184,6 @@ public class StoreDetail extends BaseIdEntity {
     @ApiModelProperty(value = "福禄appKEY商户key")
     private String appMerchantKey;
 
-
     public StoreDetail(Store store, AdminStoreApplyDTO adminStoreApplyDTO) {
         this.storeId = store.getId();
         //设置店铺公司信息、设置店铺银行信息、设置店铺其他信息

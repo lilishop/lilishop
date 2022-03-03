@@ -1,6 +1,5 @@
 package cn.lili.modules.verification.service.impl;
 
-import cn.hutool.core.util.StrUtil;
 import cn.lili.cache.Cache;
 import cn.lili.modules.system.mapper.VerificationSourceMapper;
 import cn.lili.modules.verification.entity.dos.VerificationSource;

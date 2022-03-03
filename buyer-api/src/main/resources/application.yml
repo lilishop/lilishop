@@ -1,5 +1,10 @@
 server:
+<<<<<<< HEAD
   port: 8885
+=======
+  port: 8888
+
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
   servlet:
     context-path: /
 #
@@ -51,9 +56,15 @@ spring:
 
   # Redis
   redis:
+<<<<<<< HEAD
     host: 120.71.145.134
     port: 6379
     password: ekLhvPGraSj8DGO0
+=======
+    host: 127.0.0.1
+    port: 6379
+    password: lilishop
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
     lettuce:
       pool:
         # 连接池最大连接数（使用负值表示没有限制） 默认 8
@@ -72,9 +83,15 @@ spring:
       default-datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
+<<<<<<< HEAD
         url: jdbc:mysql://120.71.183.195:3306/zyt_shop?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&allowPublicKeyRetrieval=true&verifyServerCertificate=false&useSSL=false
         username: zyt_shop
         password: Gb84505016@zytshop
+=======
+        url: jdbc:mysql://127.0.0.1:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+        username: root
+        password: lilishop
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
         maxActive: 50
         initialSize: 10
         maxWait: 60000
@@ -128,6 +145,10 @@ ignored:
     - /weixin/**
     - /source/**
     - /buyer/payment/cashier/**
+<<<<<<< HEAD
+=======
+    - /buyer/payment/cashierRefund/**
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
     - /buyer/other/pageData/**
     - /buyer/other/article/**
     - /buyer/goods/**
@@ -160,8 +181,13 @@ ignored:
 
 # Swagger界面内容配置
 swagger:
+<<<<<<< HEAD
   title: API接口文档
   description: Api Documentation
+=======
+  title: lili API接口文档
+  description: lili Api Documentation
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
   version: 1.0.0
   termsOfServiceUrl: https://pickmall.cn
   contact:
@@ -184,7 +210,11 @@ logging:
   # 输出级别
   level:
     root: info
+<<<<<<< HEAD
   #    org.springframework: debug
+=======
+#    org.springframework: debug
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
   file:
     # 指定路径
     path: lili-logs
@@ -201,7 +231,11 @@ jasypt:
 
 lili:
   system:
+<<<<<<< HEAD
     isDemoSite: false
+=======
+    isDemoSite: true
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
   statistics:
     # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数
     onlineMember: 48
@@ -219,10 +253,17 @@ lili:
     admin: https://admin-b2b2c.pickmall.cn
   #api地址
   api:
+<<<<<<< HEAD
     buyer: https://zshop-api.sx1788.cn/buyer-api
     common: https://zshop-api.sx1788.cn/common-api
     manager: https://zshop-api.sx1788.cn/manager-api
     store: https://zshop-api.sx1788.cn/seller-api
+=======
+    buyer: https://buyer-api.pickmall.cn
+    common: https://common-api.pickmall.cn
+    manager: https://admin-api.pickmall.cn
+    store: https://store-api.pickmall.cn
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
 
   # jwt 细节设定
   jwt-setting:
@@ -241,7 +282,11 @@ lili:
   data:
     elasticsearch:
       cluster-name: elasticsearch
+<<<<<<< HEAD
       cluster-nodes: 106.124.130.167:9200
+=======
+      cluster-nodes: 127.0.0.1:9200
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
       index:
         number-of-replicas: 0
         number-of-shards: 3
@@ -251,7 +296,11 @@ lili:
     #        username: elastic
     #        password: LiLiShopES
     logstash:
+<<<<<<< HEAD
       server: 106.124.130.167:4560
+=======
+      server: 192.168.0.116:4560
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
@@ -272,7 +321,11 @@ lili:
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
 rocketmq:
+<<<<<<< HEAD
   name-server: 106.124.130.167:9876
+=======
+  name-server: 127.0.0.1:9876
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
   producer:
     group: lili_group
     send-message-timeout: 30000
