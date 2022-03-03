@@ -231,6 +231,33 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
     }
 
+
+    @Override
+    public void fuLuEditGoods(GoodsOperationFuLuDTO goodsOperationFuLuDTO, String goodsId) {
+        Goods goods = new Goods(goodsOperationFuLuDTO);
+        goods.setId(goodsId);
+        //检查商品信息
+        this.checkGoods(goods);
+        //向goods加入图片
+        this.setGoodsGalleryParam(goodsOperationFuLuDTO.getGoodsGalleryList().get(0), goods);
+        //添加商品参数
+        if (goodsOperationFuLuDTO.getGoodsParamsDTOList() != null && !goodsOperationFuLuDTO.getGoodsParamsDTOList().isEmpty()) {
+            goods.setParams(JSONUtil.toJsonStr(goodsOperationFuLuDTO.getGoodsParamsDTOList()));
+        }
+        //修改商品
+        this.updateById(goods);
+        //修改商品sku信息
+        this.goodsSkuService.update(goodsOperationFuLuDTO.getSkuList(), goods, goodsOperationFuLuDTO.getRegeneratorSkuFlag());
+        //添加相册
+        if (goodsOperationFuLuDTO.getGoodsGalleryList() != null && !goodsOperationFuLuDTO.getGoodsGalleryList().isEmpty()) {
+            this.goodsGalleryService.add(goodsOperationFuLuDTO.getGoodsGalleryList(), goods.getId());
+        }
+        if (GoodsAuthEnum.TOBEAUDITED.name().equals(goods.getAuthFlag())) {
+            this.deleteEsGoods(Collections.singletonList(goodsId));
+        }
+        cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
+    }
+
     @Override
     public GoodsVO getGoodsVO(String goodsId) {
         //缓存获取，如果没有则读取缓存

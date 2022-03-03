@@ -70,6 +70,7 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
         } else {
             pageData.setPageShow(SwitchEnum.CLOSE.name());
         }
+        pageData.setPageData(pageData.getPageData().replace("?x-oss-process=style/200X200", "").replace("?x-oss-process=style/400X400", ""));
         this.save(pageData);
         return pageData;
     }
@@ -88,8 +89,10 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
             pageData.setPageShow(SwitchEnum.CLOSE.name());
         }
         LambdaUpdateWrapper<PageData> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.set(PageData::getPageData, pageData.getPageData());
+        String dataPage = pageData.getPageData().replace("?x-oss-process=style/200X200", "").replace("?x-oss-process=style/400X400", "");
+        lambdaUpdateWrapper.set(PageData::getPageData,dataPage);
         lambdaUpdateWrapper.eq(PageData::getId, pageData.getId());
+        pageData.setPageData(dataPage);
         this.updateById(pageData);
         return pageData;
     }

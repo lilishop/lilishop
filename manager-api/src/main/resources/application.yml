@@ -198,10 +198,10 @@ lili:
     sk: zhNKVrJK6UPOhqIjn8AQvG37b9sz6
   #域名
   domain:
-    pc: http://zbuyer.sx1788.cn/buyer
-    wap: http://zshop.sx1788.cn/
-    store: http://zseller.sx1788.cn/login
-    admin: http://zmanager.sx1788.cn/login
+    pc: https://zbuyer.sx1788.cn
+    wap: https://zshop.sx1788.cn
+    store: https://zseller.sx1788.cn
+    admin: https://zmanager.sx1788.cn
   #api地址
   api:
     buyer: https://zshop-api.sx1788.cn/buyer-api

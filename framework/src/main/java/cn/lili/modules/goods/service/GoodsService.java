@@ -76,6 +76,14 @@ public interface GoodsService extends IService<Goods> {
     void editGoods(GoodsOperationDTO goodsOperationDTO, String goodsId);
 
     /**
+     * 修改商品
+     *
+     * @param goodsOperationDTO 商品查询条件
+     * @param goodsId           商品ID
+     */
+    void fuLuEditGoods(GoodsOperationFuLuDTO goodsOperationFuLuDTO, String goodsId);
+
+    /**
      * 查询商品VO
      *
      * @param goodsId 商品id

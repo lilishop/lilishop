@@ -253,31 +253,26 @@ public class GoodsStoreController {
 
                     if (map1.containsKey("four_category_icon") && map1.get("four_category_icon") != null) {
                         List<Map<String, String>> images = new ArrayList<>();
-                        Map<String,String> map2 = new HashMap<>();
-                        map2.put("url",map1.get("four_category_icon").toString());
+                        Map<String, String> map2 = new HashMap<>();
+                        map2.put("url", map1.get("four_category_icon").toString());
                         images.add(map2);
                         map.put("images", images);
-                        i += 1;
                     }
 
                     mapArrayList.add(map);
                     goodsOperationDTO.setSkuList(mapArrayList);//sku列表
 
                     if (goodsList.size() > 0) {
-                        GoodsOperationDTO goodsOperationDTO1 = new GoodsOperationDTO();
-                        goodsOperationDTO1.setPrice(Double.valueOf(map1.get("purchase_price").toString()));
-                        goodsService.editGoods(goodsOperationDTO1, goodsList.get(0).getId());
-                    }else{
+                        goodsService.fuLuEditGoods(goodsOperationDTO, goodsList.get(0).getId());
+                    } else {
                         goodsService.fuLuAddGoods(goodsOperationDTO);
                     }
-
-
-
+                    i += 1;
                     break;
                 }
-//                if (i == 1) {
-//                    break;
-//                }
+                if (i == 1) {
+                    break;
+                }
             }
         }
         return ResultUtil.success();
