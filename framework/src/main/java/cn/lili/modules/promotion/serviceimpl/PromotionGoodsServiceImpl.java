@@ -232,8 +232,6 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
             this.update(updateWrapper);
             stringRedisTemplate.opsForValue().set(promotionStockKey, promotionGoods.getQuantity().toString());
         }
-
-
     }
 
     /**

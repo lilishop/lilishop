@@ -146,8 +146,11 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updatePromotions(Seckill promotions) {
+        this.checkStatus(promotions);
+        this.checkPromotions(promotions);
+        boolean result = this.updateById(promotions);
         seckillApplyService.updateSeckillApplyTime(promotions);
-        return this.saveOrUpdate(promotions);
+        return result;
     }
 
     /**

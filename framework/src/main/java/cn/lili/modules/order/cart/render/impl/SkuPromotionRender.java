@@ -74,7 +74,7 @@ public class SkuPromotionRender implements CartRenderStep {
         renderBasePrice(tradeDTO);
         //渲染单品促销
         renderSkuPromotion(tradeDTO);
-
+        //检查促销库存
         checkPromotionQuantity(tradeDTO);
 
 

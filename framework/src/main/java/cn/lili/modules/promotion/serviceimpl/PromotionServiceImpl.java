@@ -150,7 +150,6 @@ public class PromotionServiceImpl implements PromotionService {
         searchParams.setSkuId(promotionGoods.getSkuId());
         List<SeckillApply> seckillApplyList = seckillApplyService.getSeckillApplyList(searchParams);
         if (seckillApplyList != null && !seckillApplyList.isEmpty()) {
-            SeckillApply seckillApply = seckillApplyList.get(0);
             String[] split = seckill.getHours().split(",");
             int[] hoursSored = Arrays.stream(split).mapToInt(Integer::parseInt).toArray();
             Arrays.sort(hoursSored);
@@ -158,7 +157,6 @@ public class PromotionServiceImpl implements PromotionService {
             seckill.setEndTime(promotionGoods.getEndTime());
             promotionMap.put(esPromotionKey, seckill);
         }
-
     }
 
 }
