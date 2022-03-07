@@ -276,12 +276,13 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             List<PromotionGoods> promotionGoods = PromotionTools.promotionGoodsInit(promotionGoodsList, seckill, PromotionTypeEnum.SECKILL);
             result = promotionGoodsService.saveBatch(promotionGoods);
             this.seckillService.updateEsGoodsSeckill(seckill, list);
+
+            LambdaQueryWrapper<SeckillApply> deleteWrapper = new LambdaQueryWrapper<>();
+            deleteWrapper.eq(SeckillApply::getSeckillId, seckill.getId());
+            deleteWrapper.notIn(SeckillApply::getSkuId, promotionGoodsList.stream().map(PromotionGoods::getSkuId).collect(Collectors.toList()));
+            this.remove(deleteWrapper);
         }
 
-        LambdaQueryWrapper<SeckillApply> deleteWrapper = new LambdaQueryWrapper<>();
-        deleteWrapper.eq(SeckillApply::getSeckillId, seckill.getId());
-        deleteWrapper.notIn(SeckillApply::getSkuId, promotionGoodsList.stream().map(PromotionGoods::getSkuId).collect(Collectors.toList()));
-        this.remove(deleteWrapper);
         seckillService.updateSeckillGoodsNum(seckill.getId());
 
         return result;
