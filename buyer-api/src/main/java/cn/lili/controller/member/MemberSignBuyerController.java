@@ -1,5 +1,6 @@
 package cn.lili.controller.member;
 
+import cn.lili.cache.limit.annotation.LimitPoint;
 import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
@@ -32,6 +33,7 @@ public class MemberSignBuyerController {
     @PreventDuplicateSubmissions
     @PostMapping
     @ApiOperation(value = "会员签到")
+    @LimitPoint(limit = 1)
     public ResultMessage<Boolean> memberSign() {
         return ResultUtil.data(memberSignService.memberSign());
     }
