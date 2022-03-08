@@ -110,19 +110,24 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate<AdminUser> {
      * @param queryPermissions 查询权限
      */
     void initPermission(List<String> superPermissions, List<String> queryPermissions) {
-        //用户信息维护
-        superPermissions.add("/manager/user/info*");
-        superPermissions.add("/manager/user/edit*");
-        superPermissions.add("/manager/user/editPassword*");
+        //TODO 用户信息维护--操作权限
+        //获取当前登录用户
+        superPermissions.add("/manager/passport/user/info*");
+        //修改用户资料
+        superPermissions.add("/manager/passport/user/edit*");
+        //修改密码
+        superPermissions.add("/manager/passport/user/editPassword*");
+        //退出
+        superPermissions.add("/manager/passport/user/logout*");
 
         //统计查看权限
         queryPermissions.add("/manager/statistics*");
         //菜单查看权限
-        queryPermissions.add("/manager/menu*");
+        queryPermissions.add("/manager/permission/menu*");
         //商品分类查看权限
         queryPermissions.add("/manager/goods/category*");
         //查看地区接口
-        queryPermissions.add("/manager/region*");
+        queryPermissions.add("/manager/setting/region*");
 
     }
 
