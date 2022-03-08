@@ -636,6 +636,11 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         } else {
             promotionMap = goodsIndex.getPromotionMap();
         }
+
+        log.info("ES修改商品活动索引-活动信息:{}", promotion);
+        log.info("ES修改商品活动索引-活动信息状态:{}", promotion.getPromotionStatus());
+        log.info("ES修改商品活动索引-原商品索引信息:{}", goodsIndex);
+        log.info("ES修改商品活动索引-原商品索引活动信息:{}", promotionMap);
         //如果活动已结束
         if (promotion.getPromotionStatus().equals(PromotionsStatusEnum.END.name()) || promotion.getPromotionStatus().equals(PromotionsStatusEnum.CLOSE.name())) {//如果存在活动
             //删除活动
@@ -643,6 +648,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         } else {
             promotionMap.put(key, promotion);
         }
+        log.info("ES修改商品活动索引-过滤后商品索引活动信息:{}", promotionMap);
         return this.getGoodsIndexPromotionUpdateRequest(goodsIndex.getId(), promotionMap);
     }
 
@@ -678,7 +684,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             if (responses.hasFailures()) {
                 log.info("批量更新商品索引的促销信息中出现部分异常：{}", responses.buildFailureMessage());
             } else {
-                log.info("批量更新商品索引的促销信息结果：{}", responses.status());
+                log.info("批量更新商品索引的促销信息结果：{}", responses);
             }
         } catch (IOException e) {
             log.error("批量更新商品索引的促销信息出现异常！", e);
