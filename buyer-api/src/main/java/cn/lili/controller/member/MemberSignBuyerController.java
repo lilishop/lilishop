@@ -33,7 +33,6 @@ public class MemberSignBuyerController {
     @PreventDuplicateSubmissions
     @PostMapping
     @ApiOperation(value = "会员签到")
-    @LimitPoint(limit = 2)
     public ResultMessage<Boolean> memberSign() {
         return ResultUtil.data(memberSignService.memberSign());
     }
