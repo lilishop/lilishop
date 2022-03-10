@@ -144,11 +144,15 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 this.updateGoodsIndexPromotions(new String(messageExt.getBody()));
                 break;
             case DELETE_GOODS_INDEX_PROMOTIONS:
-                BasePromotions promotions = JSONUtil.toBean(new String(messageExt.getBody()), BasePromotions.class);
-                if (CharSequenceUtil.isNotEmpty(promotions.getScopeId())) {
-                    this.goodsIndexService.deleteEsGoodsPromotionByPromotionId(Arrays.asList(promotions.getScopeId().split(",")), promotions.getId());
+                JSONObject jsonObject = JSONUtil.parseObj(new String(messageExt.getBody()));
+                String promotionKey = jsonObject.getStr("promotionKey");
+                if (CharSequenceUtil.isEmpty(promotionKey)) {
+                    break;
+                }
+                if (CharSequenceUtil.isNotEmpty(jsonObject.getStr("scopeId"))) {
+                    this.goodsIndexService.deleteEsGoodsPromotionByPromotionKey(Arrays.asList(jsonObject.getStr("scopeId").split(",")), promotionKey);
                 } else {
-                    this.goodsIndexService.deleteEsGoodsPromotionByPromotionId(null, promotions.getId());
+                    this.goodsIndexService.deleteEsGoodsPromotionByPromotionKey(promotionKey);
                 }
                 break;
             case UPDATE_GOODS_INDEX:
@@ -252,16 +256,17 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 searchParams.setPromotionId(promotions.getId());
                 List<PromotionGoods> promotionGoodsList = this.promotionGoodsService.listFindAll(searchParams);
                 List<String> skuIds = promotionGoodsList.stream().map(PromotionGoods::getSkuId).collect(Collectors.toList());
-                this.goodsIndexService.deleteEsGoodsPromotionByPromotionId(skuIds, promotions.getId());
+                this.goodsIndexService.deleteEsGoodsPromotionByPromotionKey(skuIds, esPromotionKey);
                 this.goodsIndexService.updateEsGoodsIndexByList(promotionGoodsList, promotions, esPromotionKey);
             } else if (PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name().equals(promotions.getScopeType())) {
                 GoodsSearchParams searchParams = new GoodsSearchParams();
                 searchParams.setCategoryPath(promotions.getScopeId());
                 List<GoodsSku> goodsSkuByList = this.goodsSkuService.getGoodsSkuByList(searchParams);
                 List<String> skuIds = goodsSkuByList.stream().map(GoodsSku::getId).collect(Collectors.toList());
-                this.goodsIndexService.deleteEsGoodsPromotionByPromotionId(skuIds, promotions.getId());
+                this.goodsIndexService.deleteEsGoodsPromotionByPromotionKey(skuIds, esPromotionKey);
                 this.goodsIndexService.updateEsGoodsIndexPromotions(skuIds, promotions, esPromotionKey);
             } else if (PromotionsScopeTypeEnum.ALL.name().equals(promotions.getScopeType())) {
+                this.goodsIndexService.deleteEsGoodsPromotionByPromotionKey(esPromotionKey);
                 this.goodsIndexService.updateEsGoodsIndexAllByList(promotions, esPromotionKey);
             }
         } catch (Exception e) {

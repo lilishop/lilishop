@@ -3,6 +3,7 @@ package cn.lili.modules.promotion.serviceimpl;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.map.MapBuilder;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.json.JSONUtil;
@@ -14,7 +15,6 @@ import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
 import cn.lili.modules.promotion.entity.dto.search.SeckillSearchParams;
 import cn.lili.modules.promotion.entity.enums.PromotionsApplyStatusEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.mapper.SeckillMapper;
 import cn.lili.modules.promotion.service.SeckillApplyService;
@@ -40,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 秒杀活动业务层实现
@@ -188,12 +189,11 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
      */
     @Override
     public void deleteEsGoodsSeckill(Seckill seckill, List<String> skuIds) {
-        seckill.setScopeType(PromotionsScopeTypeEnum.PORTION_GOODS.name());
-        seckill.setScopeId(ArrayUtil.join(skuIds.toArray(), ","));
+        Map<Object, Object> build = MapBuilder.create().put("promotionKey", this.getPromotionType() + "-" + seckill.getId()).put("scopeId", ArrayUtil.join(skuIds.toArray(), ",")).build();
         //删除商品促销消息
         String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.DELETE_GOODS_INDEX_PROMOTIONS.name();
         //发送mq消息
-        rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(seckill), RocketmqSendCallbackBuilder.commonCallback());
+        rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(build), RocketmqSendCallbackBuilder.commonCallback());
     }
 
     @Override

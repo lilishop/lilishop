@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.hutool.core.map.MapBuilder;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
@@ -254,10 +255,11 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
     @Override
     public void updateEsGoodsIndex(T promotions) {
         if (promotions.getStartTime() == null && promotions.getEndTime() == null) {
+            Map<Object, Object> build = MapBuilder.create().put("promotionKey", this.getPromotionType() + "-" + promotions.getId()).put("scopeId", promotions.getScopeId()).build();
             //删除商品促销消息
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.DELETE_GOODS_INDEX_PROMOTIONS.name();
             //发送mq消息
-            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(promotions), RocketmqSendCallbackBuilder.commonCallback());
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(build), RocketmqSendCallbackBuilder.commonCallback());
         } else {
 
             String esPromotionKey = this.getPromotionType().name() + "-" + promotions.getId();
