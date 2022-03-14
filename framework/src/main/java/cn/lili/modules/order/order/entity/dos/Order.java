@@ -181,7 +181,7 @@ public class Order extends BaseEntity {
     @ApiModelProperty(value = "订单促销类型")
     private String orderPromotionType;
 
-    @ApiModelProperty(value = "价格详情")
+    @ApiModelProperty(value = "价格价格详情")
     private String priceDetail;
 
     @ApiModelProperty(value = "订单是否支持原路退回")

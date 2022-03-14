@@ -944,15 +944,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
         }
         //判断是否为虚拟订单
-        else if (!order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
+        if (!order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
             throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
         }
         //判断虚拟订单状态
-        else if (!order.getOrderStatus().equals(OrderStatusEnum.TAKE.name())) {
+        if (!order.getOrderStatus().equals(OrderStatusEnum.TAKE.name())) {
             throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
         }
         //判断验证码是否正确
-        else if (!verificationCode.equals(order.getVerificationCode())) {
+        if (!verificationCode.equals(order.getVerificationCode())) {
             throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
         }
     }
