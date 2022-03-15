@@ -91,7 +91,7 @@ public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, W
                 oldList.forEach(templateId -> {
                     Map<String, Object> params = new HashMap<>(1);
                     params.put("template_id", templateId);
-                    String message = WechatMessageUtil.wechatHandler(HttpUtil.post(delMsgTpl + accessToken, params));
+                    String message = WechatMessageUtil.wechatHandler(HttpUtils.doPostWithJson(delMsgTpl + accessToken, params));
                     log.info("删除模版请求:{},删除模版响应：{}", params, message);
                 });
             }
