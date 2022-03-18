@@ -342,11 +342,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public Member updateMember(ManagerMemberEditDTO managerMemberEditDTO) {
-        //判断是否用户登录并且会员ID为当前登录会员ID
-        AuthUser tokenUser = UserContext.getCurrentUser();
-        if (tokenUser == null) {
-            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
-        }
         //过滤会员昵称敏感词
         if (com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank(managerMemberEditDTO.getNickName())) {
             managerMemberEditDTO.setNickName(SensitiveWordsFilter.filter(managerMemberEditDTO.getNickName()));
@@ -356,7 +351,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             managerMemberEditDTO.setPassword(new BCryptPasswordEncoder().encode(managerMemberEditDTO.getPassword()));
         }
         //查询会员信息
-        Member member = this.findByUsername(managerMemberEditDTO.getUsername());
+        Member member = this.getById(managerMemberEditDTO.getId());
         //传递修改会员信息
         BeanUtil.copyProperties(managerMemberEditDTO, member);
         this.updateById(member);
