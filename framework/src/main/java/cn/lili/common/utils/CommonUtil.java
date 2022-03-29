@@ -1,13 +1,15 @@
 package cn.lili.common.utils;
 
-import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 通用工具
  * @author Chopper
  */
 public class CommonUtil {
+
+    public static final String BASE_NUMBER = "0123456789";
 
     /**
      * 以UUID重命名
@@ -24,12 +26,12 @@ public class CommonUtil {
      * 随机6位数生成
      */
     public static String getRandomNum() {
-
-        Random random = new Random();
-        int num = random.nextInt(999999);
-        //不足六位前面补0
-        String str = String.format("%06d", num);
-        return str;
+        StringBuilder sb = new StringBuilder(6);
+        for (int i = 0; i < 6; i++) {
+            int num = ThreadLocalRandom.current().nextInt(BASE_NUMBER.length());
+            sb.append(BASE_NUMBER.charAt(num));
+        }
+        return sb.toString();
     }
 
 }
