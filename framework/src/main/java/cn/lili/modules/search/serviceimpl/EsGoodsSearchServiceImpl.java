@@ -240,7 +240,8 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
             String brandName = "";
             if (brandBuckets.get(i).getAggregations() != null && brandBuckets.get(i).getAggregations().get(ATTR_BRAND_NAME) != null) {
-                brandName = this.getAggregationsBrandOptions(brandBuckets.get(i).getAggregations().get(ATTR_BRAND_NAME));
+                ParsedStringTerms aggregation = brandBuckets.get(i).getAggregations().get(ATTR_BRAND_NAME);
+                brandName = this.getAggregationsBrandOptions(aggregation);
                 if (StringUtils.isEmpty(brandName)) {
                     continue;
                 }
@@ -250,7 +251,8 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             if (brandUrlBuckets != null && !brandUrlBuckets.isEmpty() &&
                     brandUrlBuckets.get(i).getAggregations() != null &&
                     brandUrlBuckets.get(i).getAggregations().get(ATTR_BRAND_URL) != null) {
-                brandUrl = this.getAggregationsBrandOptions(brandUrlBuckets.get(i).getAggregations().get(ATTR_BRAND_URL));
+                ParsedStringTerms aggregation = brandUrlBuckets.get(i).getAggregations().get(ATTR_BRAND_URL);
+                brandUrl = this.getAggregationsBrandOptions(aggregation);
                 if (StringUtils.isEmpty(brandUrl)) {
                     continue;
                 }

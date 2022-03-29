@@ -338,7 +338,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             Arrays.sort(hoursSored);
             for (int i = 0; i < hoursSored.length; i++) {
                 SeckillTimelineVO tempTimeline = new SeckillTimelineVO();
-                boolean hoursSoredHour = (hoursSored[i] >= hour || ((i + 1) < hoursSored.length && hoursSored[i + 1] > hour));
+                boolean hoursSoredHour = (hoursSored[i] >= hour || ((i + 1) < hoursSored.length && hoursSored[i + 1] > hour) || hoursSored.length == 1);
                 if (hoursSoredHour) {
                     SimpleDateFormat format = new SimpleDateFormat(DatePattern.NORM_DATE_PATTERN);
                     String date = format.format(new Date());
