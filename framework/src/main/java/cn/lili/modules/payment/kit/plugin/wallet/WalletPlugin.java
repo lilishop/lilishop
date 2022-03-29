@@ -124,8 +124,6 @@ public class WalletPlugin implements Payment {
             //获取支付收银参数
             CashierParam cashierParam = cashierSupport.cashierParam(payParam);
             this.callBack(payParam, cashierParam);
-        } catch (Exception e) {
-            throw e;
         } finally {
             lock.unlock();
         }
