@@ -431,24 +431,26 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      */
     @Override
     public void updateEsGoodsIndexAllByList(BasePromotions promotion, String key) {
-        List<EsGoodsIndex> goodsIndices = new ArrayList<>();
-        //如果storeId不为空，则表示是店铺活动
-        if (promotion.getStoreId() != null && !promotion.getStoreId().equals(PromotionTools.PLATFORM_ID)) {
-            EsGoodsSearchDTO searchDTO = new EsGoodsSearchDTO();
-            searchDTO.setStoreId(promotion.getStoreId());
-            //查询出店铺商品
-            SearchPage<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(searchDTO, null);
-            for (SearchHit<EsGoodsIndex> searchHit : esGoodsIndices.getContent()) {
-                goodsIndices.add(searchHit.getContent());
+        ThreadUtil.execAsync(() -> {
+            List<EsGoodsIndex> goodsIndices = new ArrayList<>();
+            //如果storeId不为空，则表示是店铺活动
+            if (promotion.getStoreId() != null && !promotion.getStoreId().equals(PromotionTools.PLATFORM_ID)) {
+                EsGoodsSearchDTO searchDTO = new EsGoodsSearchDTO();
+                searchDTO.setStoreId(promotion.getStoreId());
+                //查询出店铺商品
+                SearchPage<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(searchDTO, null);
+                for (SearchHit<EsGoodsIndex> searchHit : esGoodsIndices.getContent()) {
+                    goodsIndices.add(searchHit.getContent());
+                }
+            } else {
+                //否则是平台活动
+                Iterable<EsGoodsIndex> all = goodsIndexRepository.findAll();
+                //查询出全部商品
+                goodsIndices = new ArrayList<>(IterableUtil.toCollection(all));
             }
-        } else {
-            //否则是平台活动
-            Iterable<EsGoodsIndex> all = goodsIndexRepository.findAll();
-            //查询出全部商品
-            goodsIndices = new ArrayList<>(IterableUtil.toCollection(all));
-        }
-        List<String> skuIds = goodsIndices.stream().map(EsGoodsIndex::getId).collect(Collectors.toList());
-        this.updateEsGoodsIndexPromotions(skuIds, promotion, key);
+            List<String> skuIds = goodsIndices.stream().map(EsGoodsIndex::getId).collect(Collectors.toList());
+            this.updateEsGoodsIndexPromotions(skuIds, promotion, key);
+        });
     }
 
     @Override
@@ -482,14 +484,16 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      */
     @Override
     public void deleteEsGoodsPromotionByPromotionKey(String promotionsKey) {
-        BulkRequest bulkRequest = new BulkRequest();
-        for (EsGoodsIndex goodsIndex : this.goodsIndexRepository.findAll()) {
-            UpdateRequest updateRequest = this.removePromotionByPromotionKey(goodsIndex, promotionsKey);
-            if (updateRequest != null) {
-                bulkRequest.add(updateRequest);
+        ThreadUtil.execAsync(() -> {
+            BulkRequest bulkRequest = new BulkRequest();
+            for (EsGoodsIndex goodsIndex : this.goodsIndexRepository.findAll()) {
+                UpdateRequest updateRequest = this.removePromotionByPromotionKey(goodsIndex, promotionsKey);
+                if (updateRequest != null) {
+                    bulkRequest.add(updateRequest);
+                }
             }
-        }
-        this.executeBulkUpdateRequest(bulkRequest);
+            this.executeBulkUpdateRequest(bulkRequest);
+        });
     }
 
     /**
