@@ -6,14 +6,12 @@ import cn.lili.elasticsearch.EsSuffix;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.promotion.tools.PromotionTools;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -251,9 +249,8 @@ public class EsGoodsIndex implements Serializable {
     private String goodsVideo;
 
     @ApiModelProperty("商品发布时间")
-    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @Field(type = FieldType.Date, format = DateFormat.basic_date_time)
-    private Date releaseTime;
+    @Field(type = FieldType.Date)
+    private Long releaseTime;
 
     /**
      * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
@@ -309,7 +306,7 @@ public class EsGoodsIndex implements Serializable {
             this.grade = sku.getGrade();
             this.recommend = sku.getRecommend();
             this.goodsType = sku.getGoodsType();
-            this.releaseTime = new Date();
+            this.releaseTime = new Date().getTime();
         }
     }
 
@@ -374,7 +371,7 @@ public class EsGoodsIndex implements Serializable {
             this.authFlag = sku.getAuthFlag();
             this.intro = sku.getIntro();
             this.grade = sku.getGrade();
-            this.releaseTime = new Date();
+            this.releaseTime = new Date().getTime();
         }
     }
 

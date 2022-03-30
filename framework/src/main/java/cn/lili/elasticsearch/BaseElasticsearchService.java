@@ -165,14 +165,8 @@ public abstract class BaseElasticsearchService {
                         "        \"type\": \"long\"\n" +
                         "      },\n" +
                         "      \"releaseTime\": {\n" +
-                        "        \"type\": \"text\",\n" +
-                        "        \"fielddata\": true, \n" +
-                        "        \"fields\": {\n" +
-                        "          \"keyword\": {\n" +
-                        "            \"type\": \"keyword\",\n" +
-                        "            \"ignore_above\": 256\n" +
-                        "          }\n" +
-                        "        }\n" +
+                        "        \"type\": \"date\",\n" +
+                        "        \"format\": \"yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis\"\n" +
                         "      },\n" +
                         "      \"categoryPath\": {\n" +
                         "        \"type\": \"text\",\n" +

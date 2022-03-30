@@ -277,7 +277,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 UpdateRequest updateRequest = new UpdateRequest(indexName, goodsIndex.getId());
 
                 JSONObject jsonObject = JSONUtil.parseObj(goodsIndex);
-                jsonObject.set("releaseTime", goodsIndex.getReleaseTime().getTime());
+                jsonObject.set("releaseTime", goodsIndex.getReleaseTime());
                 updateRequest.doc(jsonObject);
                 request.add(updateRequest);
             }
