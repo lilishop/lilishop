@@ -132,14 +132,6 @@ public interface EsGoodsIndexService {
     void updateEsGoodsIndexAllByList(BasePromotions promotion, String key);
 
     /**
-     * 删除指定商品的促销信息
-     *
-     * @param skuIds        skuId列表
-     * @param promotionType 促销类型
-     */
-    void deleteEsGoodsPromotionIndexByList(List<String> skuIds, PromotionTypeEnum promotionType);
-
-    /**
      * 删除索引中指定的促销活动id的促销活动
      *
      * @param skuIds      商品skuId
