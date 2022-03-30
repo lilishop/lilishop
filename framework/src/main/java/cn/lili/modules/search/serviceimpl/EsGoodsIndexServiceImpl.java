@@ -452,27 +452,6 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     }
 
     @Override
-    public void deleteEsGoodsPromotionIndexByList(List<String> skuIds, PromotionTypeEnum promotionType) {
-        //批量删除活动索引
-        for (String skuId : skuIds) {
-            EsGoodsIndex goodsIndex = findById(skuId);
-            //商品索引不为空
-            if (goodsIndex != null) {
-                Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
-                if (promotionMap != null && !promotionMap.isEmpty()) {
-                    //如果存在同类型促销活动删除
-                    List<String> collect = promotionMap.keySet().stream().filter(i -> i.contains(promotionType.name())).collect(Collectors.toList());
-                    collect.forEach(promotionMap::remove);
-                    goodsIndex.setPromotionMapJson(JSONUtil.toJsonStr(promotionMap));
-                    updateIndex(goodsIndex);
-                }
-            } else {
-                log.error("更新索引商品促销信息失败！skuId 为 【{}】的索引不存在！", skuId);
-            }
-        }
-    }
-
-    @Override
     public void deleteEsGoodsPromotionByPromotionKey(List<String> skuIds, String promotionsKey) {
         BulkRequest bulkRequest = new BulkRequest();
         log.info("删除商品活动索引");
@@ -520,13 +499,11 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      * @param promotionsKey 促销活动key
      */
     private UpdateRequest removePromotionByPromotionKey(EsGoodsIndex goodsIndex, String promotionsKey) {
-        Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
+        Map<String, Object> promotionMap = goodsIndex.getOriginPromotionMap();
         if (promotionMap != null && !promotionMap.isEmpty()) {
             //如果存在同促销ID的活动删除
-            List<String> collect = promotionMap.keySet().stream().filter(i -> i.equals(promotionsKey)).collect(Collectors.toList());
-            collect.forEach(promotionMap::remove);
-            goodsIndex.setPromotionMapJson(JSONUtil.toJsonStr(promotionMap));
-            return this.getGoodsIndexPromotionUpdateRequest(goodsIndex.getId(), promotionMap);
+            Map<String, Object> filterPromotionMap = promotionMap.entrySet().stream().filter(i -> !i.getKey().equals(promotionsKey)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            return this.getGoodsIndexPromotionUpdateRequest(goodsIndex.getId(), filterPromotionMap);
         }
         return null;
     }
@@ -538,7 +515,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     public void cleanInvalidPromotion() {
         Iterable<EsGoodsIndex> all = goodsIndexRepository.findAll();
         for (EsGoodsIndex goodsIndex : all) {
-            Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
+            Map<String, Object> promotionMap = goodsIndex.getOriginPromotionMap();
             //获取商品索引
             if (promotionMap != null && !promotionMap.isEmpty()) {
                 //促销不为空则进行清洗
@@ -574,7 +551,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
         //如果商品索引不为空，返回促销信息，否则返回空
         if (goodsIndex != null) {
-            Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
+            Map<String, Object> promotionMap = goodsIndex.getOriginPromotionMap();
             if (promotionMap == null || promotionMap.isEmpty()) {
                 return new HashMap<>(16);
             }
@@ -639,10 +616,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     private UpdateRequest updateGoodsIndexPromotion(EsGoodsIndex goodsIndex, String key, BasePromotions promotion) {
         Map<String, Object> promotionMap;
         //数据非空处理，如果空给一个新的信息
-        if (goodsIndex.getPromotionMap() == null || goodsIndex.getPromotionMap().isEmpty()) {
+        if (goodsIndex.getOriginPromotionMap() == null || goodsIndex.getOriginPromotionMap().isEmpty()) {
             promotionMap = new HashMap<>(1);
         } else {
-            promotionMap = goodsIndex.getPromotionMap();
+            promotionMap = goodsIndex.getOriginPromotionMap();
         }
 
         log.info("ES修改商品活动索引-活动信息:{}", promotion);
@@ -670,7 +647,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         UpdateRequest updateRequest = new UpdateRequest();
         updateRequest.index(getIndexName());
         updateRequest.id(id);
-//        updateRequest.retryOnConflict(5);
+        updateRequest.retryOnConflict(3);
 //        updateRequest.version(promotionMap.size());
         Map<String, Object> params = new HashMap<>();
         params.put("promotionMap", JSONUtil.toJsonStr(promotionMap));

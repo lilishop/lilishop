@@ -97,42 +97,42 @@ public class EsGoodsIndex implements Serializable {
     /**
      * 品牌id
      */
-    @Field(type = FieldType.Integer, fielddata = true)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("品牌id")
     private String brandId;
 
     /**
      * 品牌名称
      */
-    @Field(type = FieldType.Keyword, fielddata = true)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("品牌名称")
     private String brandName;
 
     /**
      * 品牌图片地址
      */
-    @Field(type = FieldType.Keyword, fielddata = true)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("品牌图片地址")
     private String brandUrl;
 
     /**
      * 分类path
      */
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("分类path")
     private String categoryPath;
 
     /**
      * 分类名称path
      */
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("分类名称path")
     private String categoryNamePath;
 
     /**
      * 店铺分类id
      */
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("店铺分类id")
     private String storeCategoryPath;
 
@@ -373,6 +373,10 @@ public class EsGoodsIndex implements Serializable {
             this.grade = sku.getGrade();
             this.releaseTime = new Date().getTime();
         }
+    }
+
+    public Map<String, Object> getOriginPromotionMap() {
+        return JSONUtil.parseObj(this.promotionMapJson);
     }
 
     public Map<String, Object> getPromotionMap() {
