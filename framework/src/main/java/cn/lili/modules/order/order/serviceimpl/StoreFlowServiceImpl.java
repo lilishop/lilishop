@@ -83,6 +83,8 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
             StoreFlow storeFlow = new StoreFlow();
             BeanUtil.copyProperties(item, storeFlow);
 
+            //去掉orderitem的时间。
+            storeFlow.setCreateTime(null);
             //入账
             storeFlow.setId(SnowFlake.getIdStr());
             storeFlow.setFlowType(FlowTypeEnum.PAY.name());

@@ -77,7 +77,7 @@ public enum ResultCode {
     MUST_HAVE_GOODS_SKU(11012, "规格必须要有一个！"),
     GOODS_PARAMS_ERROR(11013, "商品参数错误，刷新后重试"),
     PHYSICAL_GOODS_NEED_TEMP(11014, "实物商品需选择配送模板"),
-    VIRTUAL_GOODS_NOT_NEED_TEMP(11015, "实物商品需选择配送模板"),
+    VIRTUAL_GOODS_NOT_NEED_TEMP(11015, "虚拟商品无需选择配送模板"),
     GOODS_NOT_EXIST_STORE(11017, "当前用户无权操作此商品"),
     GOODS_TYPE_ERROR(11016, "需选择商品类型"),
 
