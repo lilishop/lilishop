@@ -40,6 +40,7 @@ public enum ResultCode {
     FILE_TYPE_NOT_SUPPORT(1010, "不支持上传的文件类型！"),
     PLATFORM_NOT_SUPPORTED_IM(1006, "平台未开启IM"),
     STORE_NOT_SUPPORTED_IM(1007, "店铺未开启IM"),
+    UNINITIALIZED_PASSWORD(1008, "非初始化密码，无法进行初始化设置"),
     /**
      * 分类
      */

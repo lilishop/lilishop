@@ -26,6 +26,11 @@ import java.util.Map;
 public interface MemberService extends IService<Member> {
 
     /**
+     * 默认密码
+     */
+    static String DEFAULT_PASSWORD = "111111";
+
+    /**
      * 获取当前登录的用户信息
      *
      * @return 会员信息
@@ -91,6 +96,29 @@ public interface MemberService extends IService<Member> {
      * @return 操作结果
      */
     Member modifyPass(String oldPassword, String newPassword);
+
+    /**
+     * 是否可以初始化密码
+     *
+     * @return
+     */
+    boolean canInitPass();
+
+    /**
+     * 初始化密码
+     *
+     * @param password 密码
+     * @return 操作结果
+     */
+    void initPass(String password);
+
+    /**
+     * 注销账号
+     *
+     * @param password 密码
+     * @return 操作结果
+     */
+    void cancellation(String password);
 
     /**
      * 注册会员
@@ -209,7 +237,7 @@ public interface MemberService extends IService<Member> {
     /**
      * 获取指定会员数据
      *
-     * @param columns 指定获取的列
+     * @param columns   指定获取的列
      * @param memberIds 会员ids
      * @return 指定会员数据
      */
@@ -239,6 +267,7 @@ public interface MemberService extends IService<Member> {
 
     /**
      * 获取用户VO
+     *
      * @param id 会员id
      * @return 用户VO
      */

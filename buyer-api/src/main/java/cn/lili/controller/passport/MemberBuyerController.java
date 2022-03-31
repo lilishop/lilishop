@@ -125,7 +125,6 @@ public class MemberBuyerController {
 
     @ApiOperation(value = "修改密码")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "query"),
             @ApiImplicitParam(name = "password", value = "是否保存登录", required = true, paramType = "query")
     })
     @PostMapping("/resetPassword")
@@ -152,6 +151,34 @@ public class MemberBuyerController {
         return ResultUtil.data(memberService.modifyPass(password, newPassword));
     }
 
+    @ApiOperation(value = "初始设置密码")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "newPassword", value = "新密码", required = true, paramType = "query")
+    })
+    @PutMapping("/canInitPassword")
+    public ResultMessage<Object> canInitPassword() {
+        return ResultUtil.data(memberService.canInitPass());
+    }
+
+    @ApiOperation(value = "初始设置密码")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "newPassword", value = "新密码", required = true, paramType = "query")
+    })
+    @PutMapping("/initPassword")
+    public ResultMessage<Object> initPassword(@NotNull(message = "密码不能为空") @RequestParam String password) {
+        memberService.initPass(password);
+        return ResultUtil.success();
+    }
+
+    @ApiOperation(value = "注销账号")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "password", value = "密码", required = true, paramType = "query")
+    })
+    @PutMapping("/cancellation")
+    public ResultMessage<Member> cancellation(@NotNull(message = "密码不能为空") @RequestParam String password) {
+        memberService.cancellation(password);
+        return ResultUtil.success();
+    }
 
     @ApiOperation(value = "刷新token")
     @GetMapping("/refresh/{refreshToken}")
