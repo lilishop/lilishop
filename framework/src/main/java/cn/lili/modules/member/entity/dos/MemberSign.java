@@ -42,4 +42,8 @@ public class MemberSign extends BaseIdEntity {
     @ApiModelProperty(value = "连续签到天数")
     private Integer signDay;
 
+
+    @ApiModelProperty(value = "签到日 为数字 从现在减去19700101 的日期")
+    private Integer day;
+
 }

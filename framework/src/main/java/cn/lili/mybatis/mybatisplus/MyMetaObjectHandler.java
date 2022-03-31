@@ -27,8 +27,7 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
             this.setFieldValByName("createBy", "SYSTEM", metaObject);
         }
         //有创建时间字段，切字段值为空
-        if (metaObject.hasGetter("createTime")
-                && metaObject.getValue("createTime") == null) {
+        if (metaObject.hasGetter("createTime")) {
             this.setFieldValByName("createTime", new Date(), metaObject);
         }
         //有值，则写入

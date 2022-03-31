@@ -25,6 +25,15 @@ public class DateUtil {
      *
      * @return 今天开始时间
      */
+    public static Long getDayOfStart() {
+        return DateUtil.getDateline()/(60*24*60);
+    }
+
+    /**
+     * 当天的开始时间
+     *
+     * @return 今天开始时间
+     */
     public static Date startOfTodDayTime() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, 0);

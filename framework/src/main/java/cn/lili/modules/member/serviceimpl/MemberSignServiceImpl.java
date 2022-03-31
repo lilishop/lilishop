@@ -77,8 +77,8 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
             } else {
                 memberSign.setSignDay(1);
             }
-            //手动写入创建时间，以保证唯一索引生效
-            memberSign.setCreateTime(DateUtil.getCurrentDayEndTime());
+
+            memberSign.setDay(DateUtil.getDayOfStart().intValue());
             try {
                 this.baseMapper.insert(memberSign);
                 //签到成功后发送消息赠送积分
