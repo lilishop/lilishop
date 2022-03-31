@@ -6,14 +6,12 @@ import cn.lili.elasticsearch.EsSuffix;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.promotion.tools.PromotionTools;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -99,42 +97,42 @@ public class EsGoodsIndex implements Serializable {
     /**
      * 品牌id
      */
-    @Field(type = FieldType.Integer, fielddata = true)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("品牌id")
     private String brandId;
 
     /**
      * 品牌名称
      */
-    @Field(type = FieldType.Keyword, fielddata = true)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("品牌名称")
     private String brandName;
 
     /**
      * 品牌图片地址
      */
-    @Field(type = FieldType.Keyword, fielddata = true)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("品牌图片地址")
     private String brandUrl;
 
     /**
      * 分类path
      */
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("分类path")
     private String categoryPath;
 
     /**
      * 分类名称path
      */
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("分类名称path")
     private String categoryNamePath;
 
     /**
      * 店铺分类id
      */
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("店铺分类id")
     private String storeCategoryPath;
 
@@ -251,9 +249,8 @@ public class EsGoodsIndex implements Serializable {
     private String goodsVideo;
 
     @ApiModelProperty("商品发布时间")
-    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @Field(type = FieldType.Date, format = DateFormat.basic_date_time)
-    private Date releaseTime;
+    @Field(type = FieldType.Date)
+    private Long releaseTime;
 
     /**
      * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
@@ -309,7 +306,7 @@ public class EsGoodsIndex implements Serializable {
             this.grade = sku.getGrade();
             this.recommend = sku.getRecommend();
             this.goodsType = sku.getGoodsType();
-            this.releaseTime = new Date();
+            this.releaseTime = new Date().getTime();
         }
     }
 
@@ -374,8 +371,12 @@ public class EsGoodsIndex implements Serializable {
             this.authFlag = sku.getAuthFlag();
             this.intro = sku.getIntro();
             this.grade = sku.getGrade();
-            this.releaseTime = new Date();
+            this.releaseTime = new Date().getTime();
         }
+    }
+
+    public Map<String, Object> getOriginPromotionMap() {
+        return JSONUtil.parseObj(this.promotionMapJson);
     }
 
     public Map<String, Object> getPromotionMap() {
