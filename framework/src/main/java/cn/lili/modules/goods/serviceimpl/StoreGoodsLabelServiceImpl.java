@@ -66,7 +66,7 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
         storeGoodsLabelVOList.sort(Comparator.comparing(StoreGoodsLabelVO::getSortOrder));
 
         if (!storeGoodsLabelVOList.isEmpty()) {
-            cache.put(CachePrefix.CATEGORY.getPrefix() + storeId + "tree", storeGoodsLabelVOList);
+            cache.put(CachePrefix.CATEGORY.getPrefix() + storeId, storeGoodsLabelVOList);
         }
         return storeGoodsLabelVOList;
     }
