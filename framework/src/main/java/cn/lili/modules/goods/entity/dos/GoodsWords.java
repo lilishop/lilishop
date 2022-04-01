@@ -1,5 +1,6 @@
 package cn.lili.modules.goods.entity.dos;
 
+import cn.lili.modules.goods.entity.enums.GoodsWordsTypeEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -41,7 +42,7 @@ public class GoodsWords extends BaseEntity {
     private String abbreviate;
 
     /**
-     * 类型
+     * @see  GoodsWordsTypeEnum
      */
     @ApiModelProperty(value = "类型")
     private String type;

@@ -1,5 +1,6 @@
 package cn.lili.modules.wechat.entity.dos;
 
+import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -34,6 +35,9 @@ public class WechatMessage extends BaseEntity {
     @ApiModelProperty(value = "是否开启")
     private Boolean enable = true;
 
+    /**
+     * @see OrderStatusEnum
+     */
     @ApiModelProperty("订单状态")
     private String orderStatus;
 
