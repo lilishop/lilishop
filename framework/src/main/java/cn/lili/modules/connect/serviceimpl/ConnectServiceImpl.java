@@ -245,6 +245,13 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         return this.getOne(queryWrapper);
     }
 
+    @Override
+    public void deleteByMemberId(String userId) {
+        LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Connect::getUserId, userId);
+        this.remove(queryWrapper);
+    }
+
     /**
      * 会员绑定 绑定微信小程序
      * <p>
