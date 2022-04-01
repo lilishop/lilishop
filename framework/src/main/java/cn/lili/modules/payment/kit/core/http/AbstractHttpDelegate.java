@@ -1,10 +1,11 @@
 package cn.lili.modules.payment.kit.core.http;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.net.SSLContextBuilder;
+import cn.hutool.core.net.SSLProtocols;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
-import cn.hutool.http.ssl.SSLSocketFactoryBuilder;
 import cn.lili.modules.payment.kit.core.PaymentHttpResponse;
 
 import javax.net.ssl.KeyManager;
@@ -235,12 +236,12 @@ public abstract class AbstractHttpDelegate {
         try {
             File file = FileUtil.newFile(filePath);
             return HttpRequest.post(url)
-                    .setSSLSocketFactory(SSLSocketFactoryBuilder
+                    .setSSLSocketFactory(SSLContextBuilder
                             .create()
                             .setProtocol(protocol)
                             .setKeyManagers(getKeyManager(certPass, certPath, null))
                             .setSecureRandom(new SecureRandom())
-                            .build()
+                            .build().getSocketFactory()
                     )
                     .header("Content-Type", "multipart/form-data;boundary=\"boundary\"")
                     .form("file", file)
@@ -263,7 +264,7 @@ public abstract class AbstractHttpDelegate {
      * @return {@link String}  请求返回的结果
      */
     public String upload(String url, String data, String certPath, String certPass, String filePath) {
-        return upload(url, data, certPath, certPass, filePath, SSLSocketFactoryBuilder.TLSv1);
+        return upload(url, data, certPath, certPass, filePath, SSLProtocols.TLSv1);
     }
 
     /**
@@ -279,12 +280,12 @@ public abstract class AbstractHttpDelegate {
     public String post(String url, String data, String certPath, String certPass, String protocol) {
         try {
             return HttpRequest.post(url)
-                    .setSSLSocketFactory(SSLSocketFactoryBuilder
+                    .setSSLSocketFactory(SSLContextBuilder
                             .create()
                             .setProtocol(protocol)
                             .setKeyManagers(getKeyManager(certPass, certPath, null))
                             .setSecureRandom(new SecureRandom())
-                            .build()
+                            .build().getSocketFactory()
                     )
                     .body(data)
                     .execute()
@@ -304,7 +305,7 @@ public abstract class AbstractHttpDelegate {
      * @return {@link String} 请求返回的结果
      */
     public String post(String url, String data, String certPath, String certPass) {
-        return post(url, data, certPath, certPass, SSLSocketFactoryBuilder.TLSv1);
+        return post(url, data, certPath, certPass, SSLProtocols.TLSv1);
     }
 
     /**
@@ -320,12 +321,12 @@ public abstract class AbstractHttpDelegate {
     public String post(String url, String data, InputStream certFile, String certPass, String protocol) {
         try {
             return HttpRequest.post(url)
-                    .setSSLSocketFactory(SSLSocketFactoryBuilder
+                    .setSSLSocketFactory(SSLContextBuilder
                             .create()
                             .setProtocol(protocol)
                             .setKeyManagers(getKeyManager(certPass, null, certFile))
                             .setSecureRandom(new SecureRandom())
-                            .build()
+                            .build().getSocketFactory()
                     )
                     .body(data)
                     .execute()
@@ -345,7 +346,7 @@ public abstract class AbstractHttpDelegate {
      * @return {@link String} 请求返回的结果
      */
     public String post(String url, String data, InputStream certFile, String certPass) {
-        return post(url, data, certFile, certPass, SSLSocketFactoryBuilder.TLSv1);
+        return post(url, data, certFile, certPass, SSLProtocols.TLSv1);
     }
 
     /**
