@@ -12,6 +12,7 @@ import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.*;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -78,6 +79,9 @@ public class Order extends BaseEntity {
     @ApiModelProperty(value = "第三方付款流水号")
     private String receivableNo;
 
+    /**
+     * @see  PaymentMethodEnum
+     */
     @ApiModelProperty(value = "支付方式")
     private String paymentMethod;
 

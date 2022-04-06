@@ -1,5 +1,6 @@
 package cn.lili.modules.payment.entity;
 
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -48,6 +49,9 @@ public class RefundLog extends BaseIdEntity {
     @ApiModelProperty(value = "是否已退款")
     private Boolean isRefund;
 
+    /**
+     * @see  PaymentMethodEnum
+     */
     @ApiModelProperty(value = "退款方式")
     private String paymentName;
 

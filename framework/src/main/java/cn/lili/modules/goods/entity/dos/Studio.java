@@ -1,5 +1,6 @@
 package cn.lili.modules.goods.entity.dos;
 
+import cn.lili.modules.goods.entity.enums.StudioStatusEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -88,6 +89,9 @@ public class Studio extends BaseEntity {
     @ApiModelProperty(value = "推荐直播间")
     private boolean recommend;
 
+    /**
+     * @see StudioStatusEnum
+     */
     @ApiModelProperty(value = "直播间状态")
     private String  status;
 }

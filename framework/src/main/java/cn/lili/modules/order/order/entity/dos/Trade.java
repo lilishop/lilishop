@@ -35,6 +35,9 @@ public class Trade extends BaseEntity {
     @ApiModelProperty(value = "买家用户名")
     private String memberName;
 
+    /**
+     * @see PayStatusEnum
+     */
     @ApiModelProperty(value = "支付方式")
     private String paymentMethod;
 

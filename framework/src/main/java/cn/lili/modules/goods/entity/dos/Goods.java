@@ -7,6 +7,7 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
+import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.mybatis.BaseEntity;
@@ -107,6 +108,9 @@ public class Goods extends BaseEntity {
     @ApiModelProperty(value = "运费模板id")
     private String templateId;
 
+    /**
+     * @see GoodsAuthEnum
+     */
     @ApiModelProperty(value = "审核状态")
     private String authFlag;
 

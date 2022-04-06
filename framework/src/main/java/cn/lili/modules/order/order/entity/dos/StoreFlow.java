@@ -1,6 +1,7 @@
 package cn.lili.modules.order.order.entity.dos;
 
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -113,6 +114,9 @@ public class StoreFlow extends BaseIdEntity {
     @ApiModelProperty(value = "第三方交易流水号")
     private String transactionId;
 
+    /**
+     * @see  PaymentMethodEnum
+     */
     @ApiModelProperty(value = "支付方式名称")
     private String paymentName;
 
