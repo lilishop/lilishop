@@ -77,7 +77,11 @@ public class AuthConfig {
     /**
      * 针对国外服务可以单独设置代理
      * HttpConfig config = new HttpConfig();
+<<<<<<< HEAD
+     * config.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("106.124.130.167", 10080)));
+=======
      * config.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 10080)));
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
      * config.setTimeout(15000);
      *
      * @since 1.15.5

@@ -99,7 +99,7 @@ public abstract class BaseElasticsearchService {
             log.info(" whether all of the nodes have acknowledged the request : {}", createIndexResponse.isAcknowledged());
             log.info(" Indicates whether the requisite number of shard copies were started for each shard in the index before timing out :{}", createIndexResponse.isShardsAcknowledged());
         } catch (Exception e) {
-            log.error("创建索引错误",e);
+            log.error("创建索引错误", e);
             throw new ElasticsearchException("创建索引 {" + index + "} 失败：" + e.getMessage());
         }
     }
@@ -346,8 +346,7 @@ public abstract class BaseElasticsearchService {
                         "    }\n" +
                         "  }\n";
 
-        PutMappingRequest request = new PutMappingRequest(index)
-                        .source(source, XContentType.JSON);
+        PutMappingRequest request = new PutMappingRequest(index).source(source, XContentType.JSON);
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<AcknowledgedResponse> response = new AtomicReference<>();
         client.indices().putMappingAsync(
@@ -452,7 +451,7 @@ public abstract class BaseElasticsearchService {
         try {
             searchResponse = client.search(searchRequest, COMMON_OPTIONS);
         } catch (IOException e) {
-            log.error("es 搜索错误",e);
+            log.error("es 搜索错误", e);
         }
         return searchResponse;
     }

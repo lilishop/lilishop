@@ -1,6 +1,5 @@
 server:
-  port: 8888
-
+  port: 8885
   servlet:
     context-path: /
 #
@@ -52,9 +51,9 @@ spring:
 
   # Redis
   redis:
-    host: 127.0.0.1
+    host: 120.71.145.134
     port: 6379
-    password: lilishop
+    password: ekLhvPGraSj8DGO0
     lettuce:
       pool:
         # 连接池最大连接数（使用负值表示没有限制） 默认 8
@@ -73,9 +72,9 @@ spring:
       default-datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://127.0.0.1:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-        username: root
-        password: lilishop
+        url: jdbc:mysql://120.71.183.195:3306/zyt_shop?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&allowPublicKeyRetrieval=true&verifyServerCertificate=false&useSSL=false
+        username: zyt_shop
+        password: Gb84505016@zytshop
         maxActive: 50
         initialSize: 10
         maxWait: 60000
@@ -162,8 +161,8 @@ ignored:
 
 # Swagger界面内容配置
 swagger:
-  title: lili API接口文档
-  description: lili Api Documentation
+  title: API接口文档
+  description: Api Documentation
   version: 1.0.0
   termsOfServiceUrl: https://pickmall.cn
   contact:
@@ -186,7 +185,7 @@ logging:
   # 输出级别
   level:
     root: info
-#    org.springframework: debug
+  #    org.springframework: debug
   file:
     # 指定路径
     path: lili-logs
@@ -203,7 +202,7 @@ jasypt:
 
 lili:
   system:
-    isDemoSite: true
+    isDemoSite: false
   statistics:
     # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数
     onlineMember: 48
@@ -221,10 +220,10 @@ lili:
     admin: https://admin-b2b2c.pickmall.cn
   #api地址
   api:
-    buyer: https://buyer-api.pickmall.cn
-    common: https://common-api.pickmall.cn
-    manager: https://admin-api.pickmall.cn
-    store: https://store-api.pickmall.cn
+    buyer: https://zshop-api.sx1788.cn/buyer-api
+    common: https://zshop-api.sx1788.cn/common-api
+    manager: https://zshop-api.sx1788.cn/manager-api
+    store: https://zshop-api.sx1788.cn/seller-api
 
   # jwt 细节设定
   jwt-setting:
@@ -243,7 +242,7 @@ lili:
   data:
     elasticsearch:
       cluster-name: elasticsearch
-      cluster-nodes: 127.0.0.1:9200
+      cluster-nodes: 106.124.130.167:9200
       index:
         number-of-replicas: 0
         number-of-shards: 3
@@ -253,7 +252,7 @@ lili:
     #        username: elastic
     #        password: LiLiShopES
     logstash:
-      server: 192.168.0.116:4560
+      server: 106.124.130.167:4560
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
@@ -274,7 +273,7 @@ lili:
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
 rocketmq:
-  name-server: 127.0.0.1:9876
+  name-server: 106.124.130.167:9876
   producer:
     group: lili_group
     send-message-timeout: 30000

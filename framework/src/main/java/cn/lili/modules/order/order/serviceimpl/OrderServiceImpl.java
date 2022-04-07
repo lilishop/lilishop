@@ -11,19 +11,19 @@ import cn.hutool.poi.excel.ExcelWriter;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.fulu.core.utils.Test;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.SnowFlake;
+import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
+import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
-import cn.lili.modules.order.order.entity.dos.Order;
-import cn.lili.modules.order.order.entity.dos.OrderItem;
-import cn.lili.modules.order.order.entity.dos.Receipt;
-import cn.lili.modules.order.order.entity.dos.Trade;
+import cn.lili.modules.order.order.entity.dos.*;
 import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
 import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
@@ -41,6 +41,9 @@ import cn.lili.modules.order.trade.service.OrderLogService;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.service.PintuanService;
+import cn.lili.modules.store.entity.dos.StoreDetail;
+import cn.lili.modules.store.entity.dto.FuLuConfigureDTO;
+import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.entity.dos.Logistics;
 import cn.lili.modules.system.entity.vo.Traces;
@@ -55,6 +58,7 @@ import cn.lili.trigger.message.PintuanOrderMessage;
 import cn.lili.trigger.model.TimeExecuteConstant;
 import cn.lili.trigger.model.TimeTriggerMsg;
 import cn.lili.trigger.util.DelayQueueTools;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -141,6 +145,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Autowired
     private TradeService tradeService;
+
+    /**
+     * 商品
+     */
+    @Autowired
+    private GoodsService goodsService;
+
+    /**
+     * 商品
+     */
+    @Autowired
+    private StoreDetailService storeDetailService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -954,6 +970,61 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //判断验证码是否正确
         else if (!verificationCode.equals(order.getVerificationCode())) {
             throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+        }
+    }
+
+
+    /**
+     * 获取订单
+     *
+     * @param receivableNo 微信支付单号
+     * @return 订单详情
+     */
+    @Override
+    public Order getOrderByReceivableNo(String receivableNo) {
+        return this.getOne(new LambdaQueryWrapper<Order>().eq(Order::getReceivableNo, receivableNo));
+    }
+
+
+    /**
+     * 验证福禄订单进行处理
+     *
+     * @param tradeNo 第三方流水
+     */
+    @Override
+    public void fuluOrder(String tradeNo) {
+        Order order = this.getOrderByReceivableNo(tradeNo);
+        if (order != null) {
+            List<StoreFlow> storeFlows = storeFlowService.list(new LambdaQueryWrapper<StoreFlow>().eq(StoreFlow::getOrderSn, order.getSn()));
+            if (storeFlows.size() > 0) {
+                Goods goods = goodsService.getById(storeFlows.get(0).getGoodsId());
+                if (goods != null) {
+                    FuLuConfigureDTO fuLuConfigureDTO = new FuLuConfigureDTO();
+                    StoreDetail storeDetail = storeDetailService.getOne(
+                            new LambdaQueryWrapper<StoreDetail>()
+                                    .eq(StoreDetail::getStoreId, storeFlows.get(0).getStoreId())
+                    );
+
+                    fuLuConfigureDTO.setAppSecretKey(storeDetail.getAppSecretKey());
+                    fuLuConfigureDTO.setMerchantNumber(storeDetail.getMerchantNumber());
+                    fuLuConfigureDTO.setAppMerchantKey(storeDetail.getAppMerchantKey());
+                    try {
+                        if (goods.getBrandId().equals("1496301301183672321")) {
+                            Map map1 = (Map) JSON.parse(Test.productInfoGetTest(fuLuConfigureDTO, goods.getSn()).get("result").toString());
+
+                            if (map1.get("product_type").toString().equals("直充")) {
+                                Test.directOrderAddTest(fuLuConfigureDTO, Integer.valueOf(goods.getSn()), order.getGoodsNum(), order.getQrCode(), order.getSn());
+                            } else if (map1.get("product_type").toString().equals("卡密")) {
+                                Test.cardOrderAddTest(fuLuConfigureDTO, Integer.valueOf(goods.getSn()), order.getGoodsNum(), order.getSn());
+                            } else {
+                                //不是直充也不是卡密需要修改代码
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
     }
 }

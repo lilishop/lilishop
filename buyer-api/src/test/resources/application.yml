@@ -24,17 +24,40 @@ spring:
   boot:
     admin:
       client:
+<<<<<<< HEAD
+        url: http://127.0.0.1:8000
+  # mongodb
+  data:
+    mongodb:
+      host: 106.124.130.167
+      port: 27017
+      database: rx-shop
+      username: goboo
+      password: Gb84505016
+      authentication-database: admin
+  #      replica-set-name: mongoreplset
+=======
         url: http://192.168.0.116:8000
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
   cache:
     type: redis
   #amqp
   #  rabbitmq:
+<<<<<<< HEAD
+  #    host: 106.124.130.167
+  # Redis
+  redis:
+    host: 120.71.145.134
+    port: 6379
+    password: ekLhvPGraSj8DGO0
+=======
   #    host: 192.168.0.116
   # Redis
   redis:
     host: 192.168.0.116
     port: 6379
     password: lilishop
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
     lettuce:
       pool:
         # 连接池最大连接数（使用负值表示没有限制） 默认 8
@@ -63,9 +86,15 @@ spring:
       default-datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
+<<<<<<< HEAD
+        url: jdbc:mysql://120.71.183.195:3306/zyt_shop?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&allowPublicKeyRetrieval=true&verifyServerCertificate=false&useSSL=false
+        username: zyt_shop
+        password: Gb84505016@zytshop
+=======
         url: jdbc:mysql://192.168.0.116:3306/new-lili?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
         password: lilishop
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
         maxActive: 20
         initialSize: 5
         maxWait: 60000
@@ -107,7 +136,11 @@ spring:
     props:
       #是否打印逻辑SQL语句和实际SQL语句，建议调试时打印，在生产环境关闭
       sql:
+<<<<<<< HEAD
+        show: true
+=======
         show: false
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
 
 # 忽略鉴权url
 ignored:
@@ -133,8 +166,13 @@ ignored:
     - /buyer/memberEvaluation/**/goodsEvaluation
     - /buyer/memberEvaluation/**/evaluationNumber
     - /store/login/**
+<<<<<<< HEAD
+    - /manager/passport/user/login
+    - /manager/passport/user/refresh/**
+=======
     - /manager/user/login
     - /manager/user/refresh/**
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
     - /druid/**
     - /swagger-ui.html
     - /doc.html
@@ -151,6 +189,16 @@ ignored:
 
 # Swagger界面内容配置
 swagger:
+<<<<<<< HEAD
+  title: API接口文档
+  description: Api Documentation
+  version: 1.0.0
+  termsOfServiceUrl:
+  contact:
+    name: rx
+    url:
+    email:
+=======
   title: lili API接口文档
   description: lili Api Documentation
   version: 1.0.0
@@ -159,6 +207,7 @@ swagger:
     name: lili
     url: https://pickmall.cn
     email: admin@pickmall.com
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
 
 # Mybatis-plus
 mybatis-plus:
@@ -176,6 +225,10 @@ logging:
     cn.lili: info
   #    org.hibernate: debug
   #    org.springframework: debug
+<<<<<<< HEAD
+  #    org.springframework.data.mongodb.core: debug
+=======
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
   file:
     # 指定路径
     path: lili-logs
@@ -190,7 +243,11 @@ jasypt:
 
 lili:
   system:
+<<<<<<< HEAD
+    isDemoSite: false
+=======
     isDemoSite: true
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
   statistics:
     # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数
     onlineMember: 48
@@ -202,6 +259,18 @@ lili:
     sk: zhNKVrJK6UPOhqIjn8AQvG37b9sz6
   #域名
   domain:
+<<<<<<< HEAD
+    pc: http://106.124.130.167:8885
+    wap: http://106.124.130.167:8885
+    seller: http://106.124.130.167:8885
+    admin: http://106.124.130.167:8885
+  #api地址
+  api:
+    buyer: https://z171l91606.51mypc.cn
+    base: http://106.124.130.167:8885
+    manager: http://106.124.130.167:8885
+    seller: http://106.124.130.167:8885
+=======
     pc: http://192.168.0.116:8888
     wap: http://192.168.0.116:8888
     seller: http://192.168.0.116:8888
@@ -212,6 +281,7 @@ lili:
     base: http://192.168.0.116:8888
     manager: http://192.168.0.116:8888
     seller: http://192.168.0.116:8888
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
 
   # jwt 细节设定
   jwt-setting:
@@ -230,7 +300,11 @@ lili:
   data:
     elasticsearch:
       cluster-name: elasticsearch
+<<<<<<< HEAD
+      cluster-nodes: 106.124.130.167:9200
+=======
       cluster-nodes: 192.168.0.116:9200
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
       index:
         number-of-replicas: 0
         number-of-shards: 3
@@ -239,8 +313,12 @@ lili:
     #      account:
     #        username: elastic
     #        password: LiLiShopES
+<<<<<<< HEAD
+
+=======
     logstash:
       server: 127.0.0.1:4560
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
@@ -259,7 +337,11 @@ lili:
       notice-send-topic: lili_send_notice_topic
       notice-send-group: lili_send_notice_group
 rocketmq:
+<<<<<<< HEAD
+  name-server: 106.124.130.167:9876
+=======
   name-server: 192.168.0.116:9876
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
   producer:
     group: lili_group
     send-message-timeout: 30000
@@ -267,7 +349,11 @@ rocketmq:
 xxl:
   job:
     admin:
+<<<<<<< HEAD
+      addresses: http://127.0.0.1:9001/xxl-job-admin
+=======
       addresses: http://192.168.0.116:9001/xxl-job-admin
+>>>>>>> ae0c4aea12996d3d72eca7c6ccdc97922373e4d7
     executor:
       appname: xxl-job-executor-lilishop
       address:

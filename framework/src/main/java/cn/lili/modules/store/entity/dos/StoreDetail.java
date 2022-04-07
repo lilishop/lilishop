@@ -173,6 +173,16 @@ public class StoreDetail extends BaseIdEntity {
     @ApiModelProperty(value = "详细地址")
     private String salesConsigneeDetail;
 
+    //店铺福禄配置
+
+    @ApiModelProperty(value = "福禄app密钥")
+    private String appSecretKey;
+
+    @ApiModelProperty(value = "福禄商户号")
+    private String merchantNumber;
+
+    @ApiModelProperty(value = "福禄appKEY商户key")
+    private String appMerchantKey;
 
     public StoreDetail(Store store, AdminStoreApplyDTO adminStoreApplyDTO) {
         this.storeId = store.getId();

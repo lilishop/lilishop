@@ -44,6 +44,14 @@ public interface OrderService extends IService<Order> {
     Order getBySn(String orderSn);
 
     /**
+     * 获取订单
+     *
+     * @param receivableNo 微信支付单号
+     * @return 订单信息
+     */
+    Order getOrderByReceivableNo(String receivableNo);
+
+    /**
      * 订单查询
      *
      * @param orderSearchParams 查询参数
@@ -284,4 +292,11 @@ public interface OrderService extends IService<Order> {
      * @return 是否成功
      */
     boolean checkFictitiousOrder(String pintuanId, Integer requiredNum, Boolean fictitious);
+
+    /**
+     * 验证福禄订单进行处理
+     * @param tradeNo 第三方流水
+     *
+     */
+    void fuluOrder(String tradeNo);
 }

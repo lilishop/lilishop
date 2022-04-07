@@ -36,12 +36,15 @@ public class PageBuyerController {
     public ResultMessage<PageDataVO> getIndex(@RequestParam String clientType) {
         PageDataDTO pageDataDTO = new PageDataDTO(PageEnum.INDEX.name());
         pageDataDTO.setPageClientType(clientType);
-        return ResultUtil.data(pageService.getPageData(pageDataDTO));
+        PageDataVO pageDataVO=pageService.getPageData(pageDataDTO);
+        return ResultUtil.data(pageDataVO);
     }
 
     @ApiOperation(value = "获取页面数据")
     @GetMapping
     public ResultMessage<PageDataVO> get(PageDataDTO pageDataDTO) {
-        return ResultUtil.data(pageService.getPageData(pageDataDTO));
+
+        PageDataVO pageDataVO=pageService.getPageData(pageDataDTO);
+        return ResultUtil.data(pageDataVO);
     }
 }

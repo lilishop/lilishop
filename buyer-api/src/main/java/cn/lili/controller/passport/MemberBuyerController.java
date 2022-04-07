@@ -45,6 +45,16 @@ public class MemberBuyerController {
     private Cache cache;
 
 
+    @ApiOperation(value = "手机号登录")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "query")
+    })
+    @PostMapping("/phoneLogin")
+    public ResultMessage<Object> phoneLogin(@NotNull(message = "手机号为空") @RequestParam String mobile) {
+        return ResultUtil.data(memberService.mobilePhoneLogin(mobile));
+    }
+
+
     @ApiOperation(value = "登录接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "username", value = "用户名", required = true, paramType = "query"),
