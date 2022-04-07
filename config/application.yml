@@ -24,25 +24,23 @@ spring:
   boot:
     admin:
       client:
-        url: http://127.0.0.1:8000
+        url: http://192.168.0.116:8000
   # mongodb
   data:
     mongodb:
-      host: 106.124.130.167
-      port: 27017
-      database: rx-shop
-      username: goboo
-      password: Gb84505016
-
+      uri: 192.168.0.116:27017
+      database: lilishop
+      username: root
+      password: lilishop
       authentication-database: admin
   #      replica-set-name: mongoreplset
   cache:
     type: redis
   # Redis
   redis:
-    host: 120.71.145.134
+    host: 192.168.0.116
     port: 6379
-    password: ekLhvPGraSj8DGO0
+    password: lilishop
     lettuce:
       pool:
         # 连接池最大连接数（使用负值表示没有限制） 默认 8
@@ -71,9 +69,9 @@ spring:
       default-datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://120.71.183.195:3306/zyt_shop?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&allowPublicKeyRetrieval=true&verifyServerCertificate=false&useSSL=false
-        username: zyt_shop
-        password: Gb84505016@zytshop
+        url: jdbc:mysql://192.168.0.116:3306/clerk?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+        username: root
+        password: lilishop
         maxActive: 50
         initialSize: 20
         maxWait: 60000
@@ -168,14 +166,15 @@ ignored:
 
 # Swagger界面内容配置
 swagger:
-  title: API接口文档
-  description: Api Documentation
-  version: 1.0.0
-  termsOfServiceUrl:
+  title: lilishop API接口文档
+  description: lilishop Api Documentation
+  version: 4.2.2
+  termsOfServiceUrl: https://pickmall.cn
   contact:
-    name: rx
-    url:
-    email:
+    name: lili
+    url: https://pickmall.cn
+    email: admin@pickmall.com
+
 # Mybatis-plus
 mybatis-plus:
   mapper-locations: classpath*:mapper/*.xml
@@ -214,7 +213,7 @@ lili:
     #图形验证码有效时间 秒 包含滑块验证码有效时间， 以及验证通过之后，缓存中存储的验证结果有效时间
     effectiveTime: 300
     #水印
-    watermark:
+    watermark: LILI-SHOP
     #干扰项数量 最大2 默认0
     interfereNum: 1
     #允许误差像素
@@ -222,22 +221,22 @@ lili:
   #短信模版配置
   sms:
     #登录
-    LOGIN: SMS_185821482
+    LOGIN: SMS_205755300
     #注册
-    REGISTER: SMS_185821482
+    REGISTER: SMS_205755298
     #找回密码
-    FIND_USER: SMS_185821482
+    FIND_USER: SMS_205755301
     #设置密码
-    UPDATE_PASSWORD: SMS_185821482
+    UPDATE_PASSWORD: SMS_205755297
     #支付密码
-    WALLET_PASSWORD: SMS_185821482
+    WALLET_PASSWORD: SMS_205755301
   system:
     isDemoSite: false
-    isTestModel: false
-  #     脱敏级别：
-  #     0：不做脱敏处理
-  #     1：管理端用户手机号等信息脱敏
-  #     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
+    isTestModel: true
+    #     脱敏级别：
+    #     0：不做脱敏处理
+    #     1：管理端用户手机号等信息脱敏
+    #     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
     sensitiveLevel: 1
 
   statistics:
@@ -251,16 +250,17 @@ lili:
     sk: zhNKVrJK6UPOhqIjn8AQvG37b9sz6
   #域名
   domain:
-    pc: http://106.124.130.167:8885
-    wap: http://106.124.130.167:8885
-    seller: http://106.124.130.167:8885
-    admin: http://106.124.130.167:8885
+    pc: http://192.168.0.116:8888
+    wap: http://192.168.0.116:8888
+    seller: http://192.168.0.116:8888
+    admin: http://192.168.0.116:8888
   #api地址
   api:
     buyer: https://z171l91606.51mypc.cn
-    base: http://106.124.130.167:8885
-    manager: http://106.124.130.167:8885
-    seller: http://106.124.130.167:8885
+    base: http://192.168.0.116:8888
+    manager: http://192.168.0.116:8888
+    seller: http://192.168.0.116:8888
+
   # jwt 细节设定
   jwt-setting:
     # token过期时间（分钟）
@@ -278,7 +278,7 @@ lili:
   data:
     elasticsearch:
       cluster-name: elasticsearch
-      cluster-nodes: 106.124.130.167:9200
+      cluster-nodes: 192.168.0.116:9200
       index:
         number-of-replicas: 0
         number-of-shards: 3
@@ -289,7 +289,7 @@ lili:
     #        password: LiLiShopES
 
     logstash:
-      server: 106.124.130.167:4560
+      server: 192.168.0.116:4560
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
@@ -310,7 +310,7 @@ lili:
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
 rocketmq:
-  name-server: 106.124.130.167:9876
+  name-server: 192.168.0.116:9876
   isVIPChannel: false
   producer:
     group: lili_group
@@ -319,7 +319,7 @@ rocketmq:
 xxl:
   job:
     admin:
-      addresses: http://127.0.0.1:9001/xxl-job-admin
+      addresses: http://192.168.0.116:9001/xxl-job-admin
     executor:
       appname: xxl-job-executor-lilishop
       address:
