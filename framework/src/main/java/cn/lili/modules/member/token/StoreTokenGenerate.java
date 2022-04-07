@@ -11,16 +11,16 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.security.token.TokenUtil;
 import cn.lili.common.security.token.base.AbstractTokenGenerate;
-import cn.lili.modules.member.entity.dos.Clerk;
 import cn.lili.modules.member.entity.dos.Member;
-import cn.lili.modules.member.entity.vo.StoreUserMenuVO;
-import cn.lili.modules.member.service.ClerkService;
-import cn.lili.modules.member.service.StoreMenuRoleService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.service.StoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import cn.lili.modules.member.entity.dos.Clerk;
+import cn.lili.modules.member.entity.vo.StoreUserMenuVO;
+import cn.lili.modules.member.service.ClerkService;
+import cn.lili.modules.member.service.StoreMenuRoleService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -141,7 +141,8 @@ public class StoreTokenGenerate extends AbstractTokenGenerate<Member> {
         superPermissions.add("/store/menu*");
         //退出权限
         superPermissions.add("/store/passport/login/logout*");
-
+        //修改
+        superPermissions.add("/store/passport/login*");
 
 
 
@@ -155,6 +156,4 @@ public class StoreTokenGenerate extends AbstractTokenGenerate<Member> {
 
 
     }
-
-
 }

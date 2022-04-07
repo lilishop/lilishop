@@ -5,7 +5,9 @@ import cn.lili.modules.member.entity.dos.Clerk;
 import cn.lili.modules.member.entity.dos.StoreMenu;
 import cn.lili.modules.member.entity.dos.StoreRole;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -16,6 +18,8 @@ import java.util.List;
  * @since 2020-11-22 09:17
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ClerkVO extends Clerk {
 
     private static final long serialVersionUID = -2378384199695839312L;
