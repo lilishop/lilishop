@@ -184,6 +184,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         //保存促销活动商品信息
         if (!promotionGoodsList.isEmpty()) {
             PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
+            searchParams.setPromotionId(seckillId);
             searchParams.setStoreId(storeId);
             searchParams.setPromotionType(PromotionTypeEnum.SECKILL.name());
             searchParams.setSkuIds(promotionGoodsList.stream().map(PromotionGoods::getSkuId).collect(Collectors.toList()));

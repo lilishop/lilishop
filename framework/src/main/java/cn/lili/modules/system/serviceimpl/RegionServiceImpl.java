@@ -61,6 +61,25 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
         }
     }
 
+    /**
+     * 根据最后一级名称获取改所有上级地区id
+     *
+     * @param lastName 最后一级名称
+     * @return 全部地区id
+     */
+    @Override
+    public String getItemByLastName(String lastName) {
+        StringBuilder sql = new StringBuilder();
+        LambdaQueryWrapper<Region> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Region::getName, lastName);
+        Region region = this.getOne(lambdaQueryWrapper, false);
+        if (region != null) {
+            sql.append(region.getPath()).append(",").append(region.getId());
+            return sql.toString().replace(",0,","");
+        }
+        return null;
+    }
+
     @Override
     public List<Region> getItem(String id) {
         LambdaQueryWrapper<Region> lambdaQueryWrapper = new LambdaQueryWrapper<>();

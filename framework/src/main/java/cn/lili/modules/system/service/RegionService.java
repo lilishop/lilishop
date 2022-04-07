@@ -37,6 +37,14 @@ public interface RegionService extends IService<Region> {
     List<Region> getItem(String id);
 
     /**
+     * 根据最后一级名称获取改所有上级地区id
+     *
+     * @param lastName 最后一级名称
+     * @return 全部地区id
+     */
+    String getItemByLastName(String lastName);
+
+    /**
      * 获取地址
      *
      * @param cityCode 城市编码
