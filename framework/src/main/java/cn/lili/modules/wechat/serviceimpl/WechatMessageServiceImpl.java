@@ -87,14 +87,14 @@ public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, W
                     oldList.add(JSONUtil.parseObj(item).getStr("template_id"));
                 });
             }
-            if (oldList.size() != 0) {
+/*            if (oldList.size() != 0) {
                 oldList.forEach(templateId -> {
                     Map<String, Object> params = new HashMap<>(1);
                     params.put("template_id", templateId);
                     String message = WechatMessageUtil.wechatHandler(HttpUtils.doPostWithJson(delMsgTpl + accessToken, params));
                     log.info("删除模版请求:{},删除模版响应：{}", params, message);
                 });
-            }
+            }*/
 
             //加入数据
             List<WechatMessageData> tmpList = initData();
