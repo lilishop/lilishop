@@ -95,12 +95,4 @@ public interface ArticleService extends IService<Article> {
      */
     @CacheEvict(key = "#article.type")
     Article updateArticleType(Article article);
-
-    /**
-     * 删除文章--类型
-     * @param type
-     * @param id
-     */
-    @CacheEvict(key = "#type")
-    void delAllByType(String type, String id);
 }

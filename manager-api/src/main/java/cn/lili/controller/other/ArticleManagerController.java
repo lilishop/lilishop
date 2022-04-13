@@ -77,14 +77,6 @@ public class ArticleManagerController {
         return ResultUtil.data(articleService.updateArticleType(article));
     }
 
-    @ApiOperation(value = "文章删除-文章类型")
-    @ApiImplicitParam(name = "type", value = "文章类型", required = true, dataType = "String", paramType = "path")
-    @DeleteMapping(value = "/delByIds/{type}")
-    public ResultMessage<Object> delAllByType(@PathVariable String type,String id) {
-        articleService.delAllByType(type,id);
-        return ResultUtil.success();
-    }
-
     @ApiOperation(value = "修改文章状态")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "文章ID", required = true, paramType = "path"),
@@ -97,7 +89,7 @@ public class ArticleManagerController {
     }
 
 
-    @ApiOperation(value = "批量删除--id")
+    @ApiOperation(value = "批量删除")
     @ApiImplicitParam(name = "id", value = "文章ID", required = true, dataType = "String", paramType = "path")
     @DeleteMapping(value = "/delByIds/{id}")
     public ResultMessage<Object> delAllByIds(@PathVariable String id) {
