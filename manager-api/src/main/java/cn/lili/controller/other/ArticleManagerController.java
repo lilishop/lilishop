@@ -60,12 +60,29 @@ public class ArticleManagerController {
         return ResultUtil.data(article);
     }
 
-    @ApiOperation(value = "修改文章")
+    @ApiOperation(value = "修改文章--文章id")
     @ApiImplicitParam(name = "id", value = "文章ID", required = true, paramType = "path")
     @PutMapping(value = "update/{id}", consumes = "application/json", produces = "application/json")
     public ResultMessage<Article> update(@RequestBody Article article, @PathVariable("id") String id) {
         article.setId(id);
         return ResultUtil.data(articleService.updateArticle(article));
+    }
+
+    @ApiOperation(value = "修改文章--文章类型")
+    @ApiImplicitParam(name = "type", value = "文章类型", required = true, paramType = "path")
+    @PutMapping(value = "updateArticle/{type}", consumes = "application/json", produces = "application/json")
+    public ResultMessage<Article> updateArticle(@RequestBody Article article, @PathVariable("type") String type,String id) {
+        article.setId(id);
+        article.setType(type);
+        return ResultUtil.data(articleService.updateArticleType(article));
+    }
+
+    @ApiOperation(value = "文章删除-文章类型")
+    @ApiImplicitParam(name = "type", value = "文章类型", required = true, dataType = "String", paramType = "path")
+    @DeleteMapping(value = "/delByIds/{type}")
+    public ResultMessage<Object> delAllByType(@PathVariable String type,String id) {
+        articleService.delAllByType(type,id);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "修改文章状态")
@@ -80,7 +97,7 @@ public class ArticleManagerController {
     }
 
 
-    @ApiOperation(value = "批量删除")
+    @ApiOperation(value = "批量删除--id")
     @ApiImplicitParam(name = "id", value = "文章ID", required = true, dataType = "String", paramType = "path")
     @DeleteMapping(value = "/delByIds/{id}")
     public ResultMessage<Object> delAllByIds(@PathVariable String id) {
