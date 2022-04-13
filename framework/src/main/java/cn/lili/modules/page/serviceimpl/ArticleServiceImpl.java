@@ -99,9 +99,4 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         this.updateById(oldArticle);
         return oldArticle;
     }
-
-    @Override
-    public void delAllByType(String type,String id) {
-          this.removeById(id);
-    }
 }
