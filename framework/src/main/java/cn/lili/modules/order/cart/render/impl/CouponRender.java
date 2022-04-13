@@ -57,8 +57,12 @@ public class CouponRender implements CartRenderStep {
      * @param tradeDTO 交易dto
      */
     private void renderCouponRule(TradeDTO tradeDTO) {
+        // 清除之前的优惠券
+        tradeDTO.removeCoupon();
+
         List<MemberCoupon> memberCouponList = memberCouponService.getMemberCoupons(tradeDTO.getMemberId());
 
+        //获取最新优惠券
         memberCouponList = memberCouponList.stream()
                 .filter(item -> item.getStartTime().before(new Date()) && item.getEndTime().after(new Date()))
                 .collect(Collectors.toList());

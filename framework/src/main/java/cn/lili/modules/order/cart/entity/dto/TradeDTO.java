@@ -160,4 +160,9 @@ public class TradeDTO implements Serializable {
         }
         return skuList;
     }
+
+    public void removeCoupon() {
+        this.canUseCoupons = new ArrayList<>();
+        this.cantUseCoupons = new ArrayList<>();
+    }
 }
