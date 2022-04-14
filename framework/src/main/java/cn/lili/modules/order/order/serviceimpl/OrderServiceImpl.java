@@ -62,6 +62,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +85,7 @@ import java.util.stream.Collectors;
  * @since 2020/11/17 7:38 下午
  */
 @Service
+@Slf4j
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
 
     private static final String ORDER_SN_COLUMN = "order_sn";
@@ -334,6 +336,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Order order = this.getBySn(orderSn);
         //如果订单已支付，就不能再次进行支付
         if (order.getPayStatus().equals(PayStatusEnum.PAID.name())) {
+            log.error("订单[ {} ]检测到重复付款，请处理", orderSn);
             throw new ServiceException(ResultCode.PAY_DOUBLE_ERROR);
         }
 

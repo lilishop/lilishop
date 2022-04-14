@@ -71,10 +71,6 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         //根据订单编号获取订单数据
         Order order = orderService.getBySn(orderSn);
 
-        //如果查询到多条支付记录，打印日志
-        if (order.getPayStatus().equals(PayStatusEnum.PAID.name())) {
-            log.error("订单[{}]检测到重复付款，请处理", orderSn);
-        }
 
         //获取订单促销类型,如果为促销订单则获取促销商品并获取结算价
         String orderPromotionType = order.getOrderPromotionType();
