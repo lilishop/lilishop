@@ -57,7 +57,8 @@ public class PriceDetailDTO implements Serializable {
     @ApiModelProperty(value = "平台收取交易佣金比例")
     private Double platFormCommissionPoint;
 
-    @ApiModelProperty(value = "平台收取交易佣金")
+
+    @ApiModelProperty(value = "平台收取交易佣金=(flowPrice(流水金额) * platFormCommissionPoint(平台佣金比例))/100")
     private Double platFormCommission;
 
     //=========end distribution==========
@@ -82,13 +83,15 @@ public class PriceDetailDTO implements Serializable {
 
     //=========end update price==========
 
-    @ApiModelProperty(value = "流水金额(入账 出帐金额) = goodsPrice + freight - discountPrice - couponPrice + updatePrice")
+    @ApiModelProperty(value = "流水金额(入账 出帐金额) = " +
+            "goodsPrice(商品总金额（商品原价）) + freightPrice(配送费) - " +
+            "discountPrice(优惠金额) - couponPrice(优惠券金额) + updatePrice(订单修改金额)")
     private Double flowPrice;
 
     @ApiModelProperty(value = "结算价格 与 商家/供应商 结算价格（例如积分商品/砍价商品）")
     private Double settlementPrice;
 
-    @ApiModelProperty(value = "最终结算金额 = flowPrice - platFormCommission - distributionCommission")
+    @ApiModelProperty(value = "最终结算金额 = flowPrice(流水金额) - platFormCommission(平台收取交易佣金) - distributionCommission(单品分销返现支出)")
     private Double billPrice;
 
     /**
