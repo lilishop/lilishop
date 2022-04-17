@@ -1,6 +1,7 @@
 package cn.lili.modules.order.order.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
@@ -9,6 +10,7 @@ import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
+import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.dto.StoreFlowQueryDTO;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
@@ -64,14 +66,16 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
     @Autowired
     private BillService billService;
 
+    /**
+     * 店铺订单支付流水
+     * @param orderSn 订单编号
+     */
     @Override
     public void payOrder(String orderSn) {
         //根据订单编号获取子订单列表
         List<OrderItem> orderItems = orderItemService.getByOrderSn(orderSn);
         //根据订单编号获取订单数据
         Order order = orderService.getBySn(orderSn);
-
-
         //获取订单促销类型,如果为促销订单则获取促销商品并获取结算价
         String orderPromotionType = order.getOrderPromotionType();
         //循环子订单记录流水
@@ -92,13 +96,26 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
             storeFlow.setMemberId(order.getMemberId());
             storeFlow.setMemberName(order.getMemberName());
             storeFlow.setGoodsName(item.getGoodsName());
-
             storeFlow.setOrderPromotionType(item.getPromotionType());
+            //格式化订单价格详情
+            PriceDetailDTO priceDetailDTO = JSONUtil.toBean(item.getPriceDetail(), PriceDetailDTO.class);
+            //站点优惠券佣金
+            storeFlow.setSiteCouponCommission(priceDetailDTO.getSiteCouponCommission());
+            //平台优惠券 使用金额
+            storeFlow.setSiteCouponPrice(priceDetailDTO.getSiteCouponPrice());
+            //站点优惠券佣金比例
+            storeFlow.setSiteCouponPoint(priceDetailDTO.getSiteCouponPoint());
 
-            //计算平台佣金
+            /**
+             * @TODO 计算平台佣金
+             */
+            //店铺流水金额=goodsPrice(商品总金额（商品原价）)+ freightPrice(配送费) - discountPrice(优惠金额) - couponPrice(优惠券金额) + updatePrice(订单修改金额)
             storeFlow.setFinalPrice(item.getPriceDetailDTO().getFlowPrice());
+            //平台收取交易佣金=(flowPrice(流水金额) * platFormCommissionPoint(平台佣金比例))/100
             storeFlow.setCommissionPrice(item.getPriceDetailDTO().getPlatFormCommission());
+            //单品分销返现支出
             storeFlow.setDistributionRebate(item.getPriceDetailDTO().getDistributionCommission());
+            //最终结算金额=flowPrice(流水金额) - platFormCommission(平台收取交易佣金) - distributionCommission(单品分销返现支出)
             storeFlow.setBillPrice(item.getPriceDetailDTO().getBillPrice());
             //兼容为空，以及普通订单操作
             if (CharSequenceUtil.isNotEmpty(orderPromotionType)) {
@@ -124,6 +141,10 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         }
     }
 
+    /**
+     * 店铺订单退款流水
+     * @param afterSale 售后单
+     */
     @Override
     public void refundOrder(AfterSale afterSale) {
         StoreFlow storeFlow = new StoreFlow();
@@ -147,19 +168,23 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         //获取付款信息
         StoreFlow payStoreFlow = this.getOne(new LambdaUpdateWrapper<StoreFlow>().eq(StoreFlow::getOrderItemSn, afterSale.getOrderItemSn())
                 .eq(StoreFlow::getFlowType, FlowTypeEnum.PAY));
+        //申请商品退款数量
         storeFlow.setNum(afterSale.getNum());
+        //分类ID
         storeFlow.setCategoryId(payStoreFlow.getCategoryId());
-        //佣金
+        //佣金 = （佣金/订单商品数量）* 售后商品数量
         storeFlow.setCommissionPrice(CurrencyUtil.mul(CurrencyUtil.div(payStoreFlow.getCommissionPrice(), payStoreFlow.getNum()), afterSale.getNum()));
-        //分销佣金
+        //分销佣金 =（分销佣金/订单商品数量）* 售后商品数量
         storeFlow.setDistributionRebate(CurrencyUtil.mul(CurrencyUtil.div(payStoreFlow.getDistributionRebate(), payStoreFlow.getNum()), afterSale.getNum()));
-        //流水金额
+        //流水金额 = 实际退款金额
         storeFlow.setFinalPrice(afterSale.getActualRefundPrice());
-        //最终结算金额
+        //最终结算金额 =店铺流水金额+店铺单品返现支出金额+平台收取佣金金额
         storeFlow.setBillPrice(CurrencyUtil.add(storeFlow.getFinalPrice(), storeFlow.getDistributionRebate(), storeFlow.getCommissionPrice()));
-        //获取第三方支付流水号
+        //退款日志
         RefundLog refundLog = refundLogService.queryByAfterSaleSn(afterSale.getSn());
+        //第三方流水单号
         storeFlow.setTransactionId(refundLog.getReceivableNo());
+        //支付方式
         storeFlow.setPaymentName(refundLog.getPaymentName());
         this.save(storeFlow);
     }

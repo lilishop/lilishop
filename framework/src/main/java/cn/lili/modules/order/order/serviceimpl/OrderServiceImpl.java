@@ -349,7 +349,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setCanReturn(!PaymentMethodEnum.BANK_TRANSFER.name().equals(order.getPaymentMethod()));
         this.updateById(order);
 
-        //记录订单流水
+        //记录店铺订单支付流水
         storeFlowService.payOrder(orderSn);
 
         //发送订单已付款消息
