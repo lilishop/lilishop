@@ -70,7 +70,7 @@ public interface StudioService extends IService<Studio> {
      * @param status 直播间状态
      * @return 直播间分页
      */
-    IPage<Studio> studioList(PageVO pageVO, Integer recommend, String status);
+    IPage<StudioVO> studioList(PageVO pageVO, Integer recommend, String status);
 
     /**
      * 修改直播间状态

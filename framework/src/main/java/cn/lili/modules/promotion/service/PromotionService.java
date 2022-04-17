@@ -1,5 +1,8 @@
 package cn.lili.modules.promotion.service;
 
+import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,7 +18,7 @@ public interface PromotionService {
      *
      * @return 当前促销活动集合
      */
-    Map<String, Object> getCurrentPromotion();
+    Map<String, List<PromotionGoods>> getCurrentPromotion();
 
     /**
      * 根据商品索引获取当前商品索引的所有促销活动信息

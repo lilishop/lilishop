@@ -3,7 +3,7 @@ package cn.lili.controller.other.broadcast;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.goods.entity.dos.Studio;
+import cn.lili.modules.goods.entity.vos.StudioVO;
 import cn.lili.modules.goods.service.StudioService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
@@ -35,7 +35,7 @@ public class StudioController {
             @ApiImplicitParam(name = "status", value = "直播间状态", paramType = "query", dataType = "String")
     })
     @GetMapping
-    public ResultMessage<IPage<Studio>> page(PageVO pageVO, Integer recommend, String status) {
+    public ResultMessage<IPage<StudioVO>> page(PageVO pageVO, Integer recommend, String status) {
         return ResultUtil.data(studioService.studioList(pageVO, recommend, status));
     }
 

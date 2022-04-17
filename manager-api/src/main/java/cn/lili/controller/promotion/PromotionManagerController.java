@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,8 +38,8 @@ public class PromotionManagerController {
 
     @GetMapping("/current")
     @ApiOperation(value = "获取当前进行中的促销活动")
-    public ResultMessage<Map<String, Object>> getCurrentPromotion() {
-        Map<String, Object> currentPromotion = promotionService.getCurrentPromotion();
+    public ResultMessage<Map<String, List<PromotionGoods>>> getCurrentPromotion() {
+        Map<String, List<PromotionGoods>> currentPromotion = promotionService.getCurrentPromotion();
         return ResultUtil.data(currentPromotion);
     }
 
