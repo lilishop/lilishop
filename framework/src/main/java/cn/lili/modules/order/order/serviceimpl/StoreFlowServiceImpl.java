@@ -180,6 +180,12 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         storeFlow.setFinalPrice(afterSale.getActualRefundPrice());
         //最终结算金额 =店铺流水金额+店铺单品返现支出金额+平台收取佣金金额
         storeFlow.setBillPrice(CurrencyUtil.add(storeFlow.getFinalPrice(), storeFlow.getDistributionRebate(), storeFlow.getCommissionPrice()));
+        //站点优惠券佣金
+        storeFlow.setSiteCouponCommission(payStoreFlow.getSiteCouponCommission());
+        //平台优惠券 使用金额
+        storeFlow.setSiteCouponPrice(payStoreFlow.getSiteCouponPrice());
+        //站点优惠券佣金比例
+        storeFlow.setSiteCouponPoint(payStoreFlow.getSiteCouponPoint());
         //退款日志
         RefundLog refundLog = refundLogService.queryByAfterSaleSn(afterSale.getSn());
         //第三方流水单号

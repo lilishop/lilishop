@@ -51,6 +51,6 @@ public interface BillMapper extends BaseMapper<Bill> {
      */
     @Select("SELECT SUM( final_price ) AS refundPrice,SUM( commission_price ) AS refundCommissionPrice" +
             ",SUM( distribution_rebate ) AS distributionRefundCommission,SUM( site_coupon_commission ) AS siteCouponRefundCommission" +
-            ",SUM( bill_price ) AS billPrice FROM li_store_flow ${ew.customSqlSegment}")
+            ",SUM( final_price ) AS billPrice FROM li_store_flow ${ew.customSqlSegment}")
     Bill getRefundBill(@Param(Constants.WRAPPER) QueryWrapper<Bill> queryWrapper);
 }
