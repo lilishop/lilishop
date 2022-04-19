@@ -59,7 +59,7 @@ public class HotWordsEveryDayTaskExecute implements EveryDayExecute {
             for (DefaultTypedTuple tuple : tuples) {
                 String keywords = (String) tuple.getValue();
                 Double score = tuple.getScore();
-                hotWordsHistories.add(new HotWordsHistory(calendar.getTime(), keywords, score.intValue()));
+                hotWordsHistories.add(new HotWordsHistory(keywords, score.intValue(), calendar.getTime()));
             }
 
             hotWordsHistoryService.saveBatch(hotWordsHistories);
