@@ -38,7 +38,7 @@ public interface MemberEvaluationMapper extends BaseMapper<MemberEvaluation> {
      * @param goodsId 商品ID
      * @return 会员评价
      */
-    @Select("select grade,count(1) as num from li_member_evaluation Where goods_id=#{goodsId} and status='OPEN' GROUP BY grade")
+    @Select("select grade,count(1) as num from li_member_evaluation Where goods_id=#{goodsId} and status='OPEN' and delete_flag = false GROUP BY grade")
     List<Map<String, Object>> getEvaluationNumber(String goodsId);
 
     /**
