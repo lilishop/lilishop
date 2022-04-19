@@ -185,6 +185,10 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new ImSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), ImSetting.class));
+            case HOT_WORDS:
+                return setting == null ?
+                        ResultUtil.data(new HotWordsSetting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), HotWordsSetting.class));
             default:
                 throw new ServiceException(ResultCode.SETTING_NOT_TO_SET);
         }

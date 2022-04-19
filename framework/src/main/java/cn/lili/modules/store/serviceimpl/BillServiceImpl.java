@@ -70,7 +70,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
 
         //结算基础信息
         bill.setStartTime(startTime);
-        bill.setEndTime(DateUtil.yesterday());
+        bill.setEndTime(endTime);
         bill.setBillStatus(BillStatusEnum.OUT.name());
         bill.setStoreId(storeId);
         bill.setStoreName(store.getStoreName());

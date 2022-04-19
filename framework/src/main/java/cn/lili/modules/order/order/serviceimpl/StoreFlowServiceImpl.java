@@ -149,13 +149,13 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
                 .eq(StoreFlow::getFlowType, FlowTypeEnum.PAY));
         storeFlow.setNum(afterSale.getNum());
         storeFlow.setCategoryId(payStoreFlow.getCategoryId());
-        //佣金
+        //佣金 = （佣金/订单商品数量）* 售后商品数量
         storeFlow.setCommissionPrice(CurrencyUtil.mul(CurrencyUtil.div(payStoreFlow.getCommissionPrice(), payStoreFlow.getNum()), afterSale.getNum()));
-        //分销佣金
+        //分销佣金 =（分校佣金/订单商品数量）* 售后商品数量
         storeFlow.setDistributionRebate(CurrencyUtil.mul(CurrencyUtil.div(payStoreFlow.getDistributionRebate(), payStoreFlow.getNum()), afterSale.getNum()));
-        //流水金额
+        //流水金额 = 实际退款金额
         storeFlow.setFinalPrice(afterSale.getActualRefundPrice());
-        //最终结算金额
+        //最终结算金额 =
         storeFlow.setBillPrice(CurrencyUtil.add(storeFlow.getFinalPrice(), storeFlow.getDistributionRebate(), storeFlow.getCommissionPrice()));
         //获取第三方支付流水号
         RefundLog refundLog = refundLogService.queryByAfterSaleSn(afterSale.getSn());
