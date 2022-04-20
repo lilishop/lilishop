@@ -10,10 +10,15 @@ import org.springframework.context.ApplicationEvent;
 @Data
 public class GeneratorEsGoodsIndexEvent extends ApplicationEvent {
 
-    private String goodsId;
+    private static final long serialVersionUID = -6206752641309458207L;
 
-    public GeneratorEsGoodsIndexEvent(Object source, String goodsId) {
+    private String id;
+
+    private String tag;
+
+    public GeneratorEsGoodsIndexEvent(Object source, String tag, String id) {
         super(source);
-        this.goodsId = goodsId;
+        this.tag = tag;
+        this.id = id;
     }
 }

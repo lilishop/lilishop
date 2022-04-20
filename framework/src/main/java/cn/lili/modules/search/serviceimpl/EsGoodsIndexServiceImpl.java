@@ -59,7 +59,6 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -287,13 +286,20 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         }
     }
 
+    /**
+     * 删除索引
+     *
+     * @param queryFields 查询条件
+     */
     @Override
-    public void deleteIndex(EsGoodsIndex goods) {
-        if (ObjectUtils.isEmpty(goods)) {
-            //如果对象为空，则删除全量
-            goodsIndexRepository.deleteAll();
+    public void deleteIndex(Map<String, Object> queryFields) {
+        NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        for (Map.Entry<String, Object> entry : queryFields.entrySet()) {
+            boolQueryBuilder.filter(QueryBuilders.termsQuery(entry.getKey(), entry.getValue()));
         }
-        goodsIndexRepository.delete(goods);
+        queryBuilder.withQuery(boolQueryBuilder);
+        this.restTemplate.delete(queryBuilder.build(), EsGoodsIndex.class);
     }
 
     /**
@@ -316,7 +322,6 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
         queryBuilder.withQuery(QueryBuilders.termsQuery("id", ids.toArray()));
         this.restTemplate.delete(queryBuilder.build(), EsGoodsIndex.class);
-
     }
 
     @Override

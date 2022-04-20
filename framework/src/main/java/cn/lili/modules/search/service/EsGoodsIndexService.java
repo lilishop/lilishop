@@ -71,9 +71,9 @@ public interface EsGoodsIndexService {
     /**
      * 删除索引
      *
-     * @param goods 商品索引信息
+     * @param queryFields 查询条件 (key 为字段，value为字段值)
      */
-    void deleteIndex(EsGoodsIndex goods);
+    void deleteIndex(Map<String, Object> queryFields);
 
     /**
      * 删除索引

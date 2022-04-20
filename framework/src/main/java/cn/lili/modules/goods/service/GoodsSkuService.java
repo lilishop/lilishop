@@ -152,6 +152,15 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     void updateGoodsSkuStatus(Goods goods);
 
     /**
+     * 更新商品sku状态根据店铺id
+     *
+     * @param storeId 店铺id
+     * @param marketEnable 市场启用状态
+     * @param authFlag 审核状态
+     */
+    void updateGoodsSkuStatusByStoreId(String storeId, String marketEnable, String authFlag);
+
+    /**
      * 发送生成ES商品索引
      *
      * @param goods 商品信息
