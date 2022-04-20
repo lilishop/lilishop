@@ -103,7 +103,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
             //分销订单退还，返现佣金返还
             bill.setDistributionRefundCommission(refundBill.getDistributionRefundCommission());
             //退货平台优惠券补贴返还
-            bill.setSiteCouponRefundCommission(refundBill.getSiteCouponRefundCommission());
+            bill.setSiteCouponRefundCommission(refundBill.getSiteCouponRefundCommission()!=null?refundBill.getSiteCouponRefundCommission():0D);
             //退款金额=店铺最终退款结算金额
             refundPrice = refundBill.getBillPrice();
         }
@@ -132,16 +132,16 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
             bill.setPointSettlementPrice(orderBill.getPointSettlementPrice());
             //砍价商品结算价格
             bill.setKanjiaSettlementPrice(orderBill.getKanjiaSettlementPrice());
-            //入款结算金额= 店铺支付结算金额 + 平台优惠券补贴 + 退单产生退还佣金金额 + 分销订单退还，返现佣金返还+退货平台优惠券补贴返还
+
+            //入款结算金额= 店铺支付结算金额 + 平台优惠券补贴 + 分销订单退还，返现佣金返还+退单产生退还佣金金额
             orderPrice = CurrencyUtil.add(orderBill.getBillPrice(),
                     bill.getSiteCouponCommission(),
-                    bill.getRefundCommissionPrice(),
                     bill.getDistributionRefundCommission(),
-                    bill.getSiteCouponRefundCommission());
+                    bill.getRefundCommissionPrice());
         }
 
-        //最终结算金额=入款结算金额-退款结算金额-
-        Double finalPrice = CurrencyUtil.sub(orderPrice, refundPrice);
+        //最终结算金额=入款结算金额-退款结算金额-退货平台优惠券补贴返还
+        Double finalPrice = CurrencyUtil.sub(orderPrice, refundPrice,bill.getSiteCouponRefundCommission());
         //店铺最终结算金额=最终结算金额
         bill.setBillPrice(finalPrice);
 
