@@ -19,6 +19,7 @@ import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
+import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.*;
 import cn.lili.modules.order.order.service.OrderItemService;
@@ -96,6 +97,15 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
         if (orderMessage.getNewStatus().equals(OrderStatusEnum.PAID)) {
             log.debug("满减活动，订单状态操作 {}", CachePrefix.ORDER.getPrefix() + orderMessage.getOrderSn());
             renderGift(JSONUtil.toBean(cache.getString(CachePrefix.ORDER.getPrefix() + orderMessage.getOrderSn()), CartVO.class), orderMessage);
+        } else if (orderMessage.getNewStatus().equals(OrderStatusEnum.CANCELLED)) {
+            log.debug("满减活动，取消订单状态操作 {}", CachePrefix.ORDER.getPrefix() + orderMessage.getOrderSn());
+            OrderSearchParams searchParams = new OrderSearchParams();
+            searchParams.setParentOrderSn(orderMessage.getOrderSn());
+            searchParams.setOrderPromotionType(OrderPromotionTypeEnum.GIFT.name());
+            List<Order> orders = orderService.queryListByParams(searchParams);
+            if (orders != null && !orders.isEmpty()) {
+                orderService.systemCancel(orders.get(0).getSn(),"主订单取消，赠送订单字段自动取消");
+            }
         }
     }
 
@@ -190,6 +200,7 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
         BeanUtil.copyProperties(priceDetailDTO, order, "id");
         //生成订单参数
         order.setSn(SnowFlake.createStr("G"));
+        order.setParentOrderSn(originOrder.getSn());
         order.setOrderPromotionType(OrderPromotionTypeEnum.GIFT.name());
         order.setOrderStatus(OrderStatusEnum.UNPAID.name());
         order.setPayStatus(PayStatusEnum.PAID.name());

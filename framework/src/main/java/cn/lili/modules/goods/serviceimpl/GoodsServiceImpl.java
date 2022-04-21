@@ -316,6 +316,29 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         return result;
     }
 
+    /**
+     * 更新商品上架状态状态
+     *
+     * @param storeId         店铺ID
+     * @param goodsStatusEnum 更新的商品状态
+     * @param underReason     下架原因
+     * @return 更新结果
+     */
+    @Override
+    public Boolean updateGoodsMarketAbleByStoreId(String storeId, GoodsStatusEnum goodsStatusEnum, String underReason) {
+        boolean result;
+
+        LambdaUpdateWrapper<Goods> updateWrapper = this.getUpdateWrapperByStoreAuthority();
+        updateWrapper.set(Goods::getMarketEnable, goodsStatusEnum.name());
+        updateWrapper.set(Goods::getUnderMessage, underReason);
+        updateWrapper.eq(Goods::getStoreId, storeId);
+        result = this.update(updateWrapper);
+
+        //修改规格商品
+        this.goodsSkuService.updateGoodsSkuStatusByStoreId(storeId, goodsStatusEnum.name(), null);
+        return result;
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean managerUpdateGoodsMarketAble(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, String underReason) {

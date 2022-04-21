@@ -126,6 +126,13 @@ public interface MemberCouponService extends IService<MemberCoupon> {
     void cancellation(String memberId, String id);
 
     /**
+     * 作废无效的会员优惠券
+     *
+     * @return 是否操作成功
+     */
+    boolean expireInvalidMemberCoupon(String memberId);
+
+    /**
      * 关闭会员优惠券
      *
      * @param couponIds 优惠券id集合

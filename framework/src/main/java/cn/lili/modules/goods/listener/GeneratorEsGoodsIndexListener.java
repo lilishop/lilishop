@@ -3,7 +3,6 @@ package cn.lili.modules.goods.listener;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.goods.event.GeneratorEsGoodsIndexEvent;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,9 +29,9 @@ public class GeneratorEsGoodsIndexListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void generatorEsGoodsIndex(GeneratorEsGoodsIndexEvent esGoodsIndexEvent) {
-        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GENERATOR_GOODS_INDEX.name();
+        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + esGoodsIndexEvent.getTag();
         //发送mq消息
-        rocketMQTemplate.asyncSend(destination, esGoodsIndexEvent.getGoodsId(), RocketmqSendCallbackBuilder.commonCallback());
+        rocketMQTemplate.asyncSend(destination, esGoodsIndexEvent.getId(), RocketmqSendCallbackBuilder.commonCallback());
     }
 
 }

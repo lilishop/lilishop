@@ -1,6 +1,7 @@
 package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -32,12 +33,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -209,15 +213,27 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     }
 
     @Override
-    public IPage<Studio> studioList(PageVO pageVO, Integer recommend, String status) {
+    public IPage<StudioVO> studioList(PageVO pageVO, Integer recommend, String status) {
         QueryWrapper queryWrapper = new QueryWrapper<Studio>()
                 .eq(recommend != null, "recommend", true)
-                .eq(status != null, "status", status)
+                .eq(CharSequenceUtil.isNotEmpty(status), "status", status)
                 .orderByDesc("create_time");
         if (UserContext.getCurrentUser() != null && UserContext.getCurrentUser().getRole().equals(UserEnums.STORE)) {
             queryWrapper.eq("store_id", UserContext.getCurrentUser().getStoreId());
         }
-        return this.page(PageUtil.initPage(pageVO), queryWrapper);
+        Page page = this.page(PageUtil.initPage(pageVO), queryWrapper);
+        List<Studio> records = page.getRecords();
+        List<StudioVO> studioVOS = new ArrayList<>();
+        for (Studio record : records) {
+            StudioVO studioVO = new StudioVO();
+            //获取直播间信息
+            BeanUtil.copyProperties(record, studioVO);
+            //获取直播间商品信息
+            studioVO.setCommodityList(commodityMapper.getCommodityByRoomId(studioVO.getRoomId()));
+            studioVOS.add(studioVO);
+        }
+        page.setRecords(studioVOS);
+        return page;
 
     }
 

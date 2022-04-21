@@ -37,10 +37,17 @@ public class HotWordsManagerController {
         return ResultUtil.success();
     }
 
-    @ApiOperation(value = "设置热词")
+    @ApiOperation(value = "删除热词")
     @DeleteMapping("/{words}")
     public ResultMessage<Object> deleteWords(@PathVariable String words) {
         esGoodsSearchService.deleteHotWords(words);
+        return ResultUtil.success();
+    }
+
+    @ApiOperation(value = "删除全部热词")
+    @DeleteMapping("")
+    public ResultMessage<Object> deleteWordsAll() {
+        esGoodsSearchService.deleteHotWords(null);
         return ResultUtil.success();
     }
 

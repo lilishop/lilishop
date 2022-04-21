@@ -36,7 +36,7 @@ public class StudioManagerController {
     @ApiOperation(value = "获取店铺直播间列表")
     @ApiImplicitParam(name = "status", value = "直播间状态", paramType = "query")
     @GetMapping
-    public ResultMessage<IPage<Studio>> page(PageVO pageVO, String status) {
+    public ResultMessage<IPage<StudioVO>> page(PageVO pageVO, String status) {
         return ResultUtil.data(studioService.studioList(pageVO, null, status));
     }
 

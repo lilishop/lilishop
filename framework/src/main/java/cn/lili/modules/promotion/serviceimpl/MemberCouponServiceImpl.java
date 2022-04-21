@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -23,6 +24,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -108,7 +110,12 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     @Override
     public IPage<MemberCoupon> getMemberCoupons(MemberCouponSearchParams param, PageVO pageVo) {
         QueryWrapper<MemberCoupon> queryWrapper = param.queryWrapper();
-        return this.page(PageUtil.initPage(pageVo), queryWrapper);
+        Page<MemberCoupon> page = this.page(PageUtil.initPage(pageVo), queryWrapper);
+        if (page.getRecords().stream().anyMatch(i -> i.getEndTime().before(new Date()))) {
+            this.expireInvalidMemberCoupon(param.getMemberId());
+            return this.page(PageUtil.initPage(pageVo), queryWrapper);
+        }
+        return page;
     }
 
     /**
@@ -119,7 +126,12 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
      */
     @Override
     public List<MemberCoupon> getMemberCoupons(MemberCouponSearchParams param) {
-        return this.list(param.queryWrapper());
+        List<MemberCoupon> list = this.list(param.queryWrapper());
+        if (list.stream().anyMatch(i -> i.getEndTime().before(new Date()))) {
+            this.expireInvalidMemberCoupon(param.getMemberId());
+            return this.list(param.queryWrapper());
+        }
+        return list;
     }
 
     /**
@@ -271,6 +283,23 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
                 .set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.CLOSED.name());
         this.cache.vagueDel("{MemberCoupon}");
         this.update(memberCouponLambdaUpdateWrapper);
+    }
+
+    /**
+     * 清除无效的会员优惠券
+     *
+     * @return 是否操作成功
+     */
+    @Override
+    @CacheEvict(key = "#memberId")
+    public boolean expireInvalidMemberCoupon(String memberId) {
+        //将过期优惠券变更为过期状体
+        LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<MemberCoupon>()
+                .eq(CharSequenceUtil.isNotEmpty(memberId), MemberCoupon::getMemberId, memberId)
+                .eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name())
+                .le(MemberCoupon::getEndTime, new Date())
+                .set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.EXPIRE.name());
+        return this.update(updateWrapper);
     }
 
     private void receiverCoupon(String couponId, String memberId, String memberName, Coupon coupon) {

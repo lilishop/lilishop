@@ -11,6 +11,10 @@ public enum GoodsTagsEnum {
      */
     GENERATOR_GOODS_INDEX("生成商品索引"),
     /**
+     * "生成店铺商品索引"
+     */
+    GENERATOR_STORE_GOODS_INDEX("生成店铺商品索引"),
+    /**
      * "更新商品索引"
      */
     UPDATE_GOODS_INDEX("更新商品索引"),
@@ -31,6 +35,10 @@ public enum GoodsTagsEnum {
      * "重置商品索引"
      */
     RESET_GOODS_INDEX("重置商品索引"),
+    /**
+     * "删除店铺商品索引"
+     */
+    STORE_GOODS_DELETE("删除店铺商品索引"),
     /**
      * "删除商品"
      */

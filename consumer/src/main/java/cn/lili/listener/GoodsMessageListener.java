@@ -140,6 +140,14 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                     log.error("生成商品索引事件执行异常，商品信息 {}", new String(messageExt.getBody()));
                 }
                 break;
+            case GENERATOR_STORE_GOODS_INDEX:
+                try {
+                    String storeId = new String(messageExt.getBody());
+                    this.updateGoodsIndex(storeId);
+                } catch (Exception e) {
+                    log.error("生成店铺商品索引事件执行异常，商品信息 {}", new String(messageExt.getBody()));
+                }
+                break;
             case UPDATE_GOODS_INDEX_PROMOTIONS:
                 this.updateGoodsIndexPromotions(new String(messageExt.getBody()));
                 break;
@@ -219,6 +227,14 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 String message = new String(messageExt.getBody());
                 List<String> skuIds = JSONUtil.toList(message, String.class);
                 goodsCollectionService.deleteSkuCollection(skuIds);
+                break;
+            case STORE_GOODS_DELETE:
+                try {
+                    String storeId = new String(messageExt.getBody());
+                    goodsIndexService.deleteIndex(MapUtil.builder(new HashMap<String, Object>()).put("storeId", storeId).build());
+                } catch (Exception e) {
+                    log.error("删除店铺商品索引事件执行异常，商品信息 {}", new String(messageExt.getBody()));
+                }
                 break;
             //商品评价
             case GOODS_COMMENT_COMPLETE:
@@ -306,6 +322,22 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
             }
         }
         goodsIndexService.updateBulkIndex(goodsIndices);
+    }
+
+
+    /**
+     * 更新商品索引根据店铺id
+     *
+     * @param storeId 店铺id
+     */
+    private void updateGoodsIndex(String storeId) {
+        //如果商品通过审核&&并且已上架
+        GoodsSearchParams searchParams = new GoodsSearchParams();
+        searchParams.setStoreId(storeId);
+        for (Goods goods : this.goodsService.queryListByParams(searchParams)) {
+            this.updateGoodsIndex(goods);
+        }
+
     }
 
     /**
