@@ -69,7 +69,8 @@ public interface StoreDetailMapper extends BaseMapper<StoreDetail> {
     @Select("SELECT store_id,settlement_day FROM li_store_detail " +
             "WHERE settlement_cycle LIKE concat(#{day},',%')  " +
             "OR settlement_cycle LIKE concat('%,',#{day},',%') " +
-            "OR settlement_cycle LIKE concat('%,',#{day})")
+            "OR settlement_cycle LIKE concat('%,',#{day})"+
+            "OR settlement_cycle = #{day}")
     List<StoreSettlementDay> getSettlementStore(int day);
 
     /**
