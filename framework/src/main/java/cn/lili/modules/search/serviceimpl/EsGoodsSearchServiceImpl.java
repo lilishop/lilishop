@@ -130,7 +130,11 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
      */
     @Override
     public void deleteHotWords(String keywords) {
-        cache.zRemove(CachePrefix.HOT_WORD.getPrefix(), keywords);
+        if (CharSequenceUtil.isEmpty(keywords)) {
+            cache.vagueDel(CachePrefix.HOT_WORD.getPrefix());
+        } else {
+            cache.zRemove(CachePrefix.HOT_WORD.getPrefix(), keywords);
+        }
     }
 
     @Override
