@@ -53,8 +53,7 @@ import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
 import org.mybatis.spring.MyBatisSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -116,8 +115,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
     @Autowired
-    @Qualifier("elasticsearchRestTemplate")
-    private ElasticsearchRestTemplate restTemplate;
+    private ElasticsearchOperations restTemplate;
 
     @Override
     public void init() {
@@ -504,7 +502,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     /**
      * 从索引中删除指定促销活动id的促销活动
      *
-     * @param goodsIndex  索引
+     * @param goodsIndex    索引
      * @param promotionsKey 促销活动key
      */
     private UpdateRequest removePromotionByPromotionKey(EsGoodsIndex goodsIndex, String promotionsKey) {
