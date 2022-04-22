@@ -126,8 +126,9 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         //获取订单货物判断是否可申请售后
         OrderItem orderItem = orderItemService.getBySn(sn);
 
-        //未申请售后订单货物才能进行申请
-        if (!orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name())) {
+        //未申请售后订单货物或部分售后才能进行申请
+        if (!orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name())
+                && !orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.PART_AFTER_SALE.name())) {
             throw new ServiceException(ResultCode.AFTER_SALES_BAN);
         }
 
