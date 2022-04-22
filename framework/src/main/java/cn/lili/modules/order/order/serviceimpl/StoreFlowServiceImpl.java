@@ -78,6 +78,7 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         Order order = orderService.getBySn(orderSn);
         //获取订单促销类型,如果为促销订单则获取促销商品并获取结算价
         String orderPromotionType = order.getOrderPromotionType();
+
         //循环子订单记录流水
         for (OrderItem item : orderItems) {
             StoreFlow storeFlow = new StoreFlow();
@@ -180,8 +181,8 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         storeFlow.setFinalPrice(afterSale.getActualRefundPrice());
         //最终结算金额 =店铺流水金额+店铺单品返现支出金额+平台收取佣金金额
         storeFlow.setBillPrice(CurrencyUtil.add(storeFlow.getFinalPrice(), storeFlow.getDistributionRebate(), storeFlow.getCommissionPrice()));
-        //站点优惠券佣金
-        storeFlow.setSiteCouponCommission(payStoreFlow.getSiteCouponCommission());
+        //站点优惠券补贴返还金额=(站点优惠券补贴金额/购买商品数量)*退款商品数量
+        storeFlow.setSiteCouponCommission(CurrencyUtil.mul(CurrencyUtil.div(payStoreFlow.getSiteCouponCommission(),payStoreFlow.getNum()),afterSale.getNum()));
         //平台优惠券 使用金额
         storeFlow.setSiteCouponPrice(payStoreFlow.getSiteCouponPrice());
         //站点优惠券佣金比例
