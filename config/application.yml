@@ -25,20 +25,11 @@ spring:
     admin:
       client:
         url: http://192.168.0.116:8000
-  # mongodb
-  data:
-    mongodb:
-      uri: 192.168.0.116:27017
-      database: lilishop
-      username: root
-      password: lilishop
-      authentication-database: admin
-  #      replica-set-name: mongoreplset
   cache:
     type: redis
   # Redis
   redis:
-    host: 101.43.251.145
+    host: 192.168.0.116
     port: 6379
     password: lilishop
     lettuce:
@@ -69,7 +60,7 @@ spring:
       default-datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://101.43.251.145:3306/zhimai1?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://192.168.0.116:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
         password: lilishop
         maxActive: 50
@@ -163,8 +154,6 @@ ignored:
     - /**/*.css
     - /**/*.png
     - /**/*.ico
-    - /buyer/distribution/distribution/**
-    - /store/distribution/goods/**
 
 # Swagger界面内容配置
 swagger:
@@ -193,7 +182,6 @@ logging:
     cn.lili: info
   #    org.hibernate: debug
   #    org.springframework: debug
-  #    org.springframework.data.mongodb.core: debug
   file:
     # 指定路径
     path: logs
@@ -223,22 +211,22 @@ lili:
   #短信模版配置
   sms:
     #登录
-    LOGIN: SMS_234157072
+    LOGIN: SMS_205755300
     #注册
-    REGISTER: SMS_234157072
+    REGISTER: SMS_205755298
     #找回密码
-    FIND_USER: SMS_234157072
+    FIND_USER: SMS_205755301
     #设置密码
-    UPDATE_PASSWORD: SMS_234157072
+    UPDATE_PASSWORD: SMS_205755297
     #支付密码
-    WALLET_PASSWORD: SMS_234157072
+    WALLET_PASSWORD: SMS_205755301
   system:
     isDemoSite: false
     isTestModel: true
-    #     脱敏级别：
-    #     0：不做脱敏处理
-    #     1：管理端用户手机号等信息脱敏
-    #     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
+  #     脱敏级别：
+  #     0：不做脱敏处理
+  #     1：管理端用户手机号等信息脱敏
+  #     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
     sensitiveLevel: 1
 
   statistics:
@@ -280,7 +268,7 @@ lili:
   data:
     elasticsearch:
       cluster-name: elasticsearch
-      cluster-nodes: 101.43.251.145:9200
+      cluster-nodes: 192.168.0.116:9200
       index:
         number-of-replicas: 0
         number-of-shards: 3
@@ -309,8 +297,10 @@ lili:
       notice-group: lili_notice_group
       notice-send-topic: lili_send_notice_topic
       notice-send-group: lili_send_notice_group
+      after-sale-topic: lili_after_sale_topic
+      after-sale-group: lili_after_sale_group
 rocketmq:
-  name-server: 101.43.251.145:9876
+  name-server: 192.168.0.116:9876
   isVIPChannel: false
   producer:
     group: lili_group
@@ -319,7 +309,7 @@ rocketmq:
 xxl:
   job:
     admin:
-      addresses: http://127.0.0.1:8080/xxl-job-admin
+      addresses: http://192.168.0.116:9001/xxl-job-admin
     executor:
       appname: xxl-job-executor-lilishop
       address:
