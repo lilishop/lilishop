@@ -335,7 +335,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
                 return item.getChildren();
             }
             if (item.getChildren() != null && !item.getChildren().isEmpty()) {
-                return getChildren(parentId, categoryVOList);
+                return getChildren(parentId, item.getChildren());
             }
         }
         return categoryVOList;
