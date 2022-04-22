@@ -177,6 +177,7 @@ public enum ResultCode {
     MEMBER_ADDRESS_NOT_EXIST(31009, "订单无收货地址，请先配置收货地址"),
     ORDER_DELIVER_NUM_ERROR(31010, "没有待发货的订单"),
     ORDER_NOT_SUPPORT_DISTRIBUTION(31011, "购物车中包含不支持配送的商品，请重新选择收货地址，或者重新选择商品"),
+    ORDER_NOT_EXIST_VALID(31041, "购物车中无有效商品，请检查购物车内商品，或者重新选择商品"),
     ORDER_CAN_NOT_CANCEL(31012, "当前订单状态不可取消"),
     ORDER_BATCH_DELIVER_ERROR(31013, "批量发货,文件读取失败"),
     ORDER_ITEM_NOT_EXIST(31014, "当前订单项不存在！"),
