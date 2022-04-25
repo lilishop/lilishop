@@ -36,10 +36,9 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHitSupport;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.SearchPage;
@@ -73,8 +72,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
      * ES
      */
     @Autowired
-    @Qualifier("elasticsearchRestTemplate")
-    private ElasticsearchRestTemplate restTemplate;
+    private ElasticsearchOperations restTemplate;
 
     @Autowired
     private EsGoodsIndexService esGoodsIndexService;
@@ -144,7 +142,6 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     public EsGoodsIndex getEsGoodsById(String id) {
         return this.restTemplate.get(id, EsGoodsIndex.class);
     }
-
 
     /**
      * 转换搜索结果为聚合商品展示信息
