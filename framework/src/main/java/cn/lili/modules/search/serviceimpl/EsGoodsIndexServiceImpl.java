@@ -370,6 +370,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             goodsIndexRepository.deleteAll();
             for (EsGoodsIndex goodsIndex : goodsIndexList) {
                 try {
+                    log.info("生成商品索引：{}", goodsIndex);
                     addIndex(goodsIndex);
                     resultMap.put(KEY_SUCCESS, resultMap.get(KEY_SUCCESS) + 1);
                 } catch (Exception e) {
