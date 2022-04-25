@@ -39,6 +39,13 @@ public interface EsGoodsIndexService {
     void addIndex(EsGoodsIndex goods);
 
     /**
+     * 添加商品索引
+     *
+     * @param goods 商品索引信息
+     */
+    void addIndex(List<EsGoodsIndex> goods);
+
+    /**
      * 更新商品索引
      *
      * @param goods 商品索引信息

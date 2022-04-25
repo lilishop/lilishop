@@ -376,20 +376,18 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
      */
     private void generatorGoodsIndex(Goods goods, List<GoodsSku> goodsSkuList) {
         int skuSource = 100;
+        List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
         for (GoodsSku goodsSku : goodsSkuList) {
-            EsGoodsIndex esGoodsOld = goodsIndexService.findById(goodsSku.getId());
             EsGoodsIndex goodsIndex = this.settingUpGoodsIndexData(goods, goodsSku);
             goodsIndex.setSkuSource(skuSource--);
             log.info("goodsSku：{}", goodsSku);
-            log.info("esGoodsOld：{}", esGoodsOld);
             //如果商品库存不为0，并且es中有数据
-            if (goodsSku.getQuantity() > 0 && esGoodsOld == null) {
+            if (goodsSku.getQuantity() > 0) {
                 log.info("生成商品索引 {}", goodsIndex);
-                this.goodsIndexService.addIndex(goodsIndex);
-            } else if (goodsSku.getQuantity() > 0 && esGoodsOld != null) {
-                goodsIndexService.updateIndex(goodsIndex);
+                esGoodsIndices.add(goodsIndex);
             }
         }
+        this.goodsIndexService.addIndex(esGoodsIndices);
     }
 
     private EsGoodsIndex settingUpGoodsIndexData(Goods goods, GoodsSku goodsSku) {

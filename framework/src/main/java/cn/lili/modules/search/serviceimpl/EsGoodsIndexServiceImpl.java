@@ -210,6 +210,20 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         }
     }
 
+    /**
+     * 添加商品索引
+     *
+     * @param goods 商品索引信息
+     */
+    @Override
+    public void addIndex(List<EsGoodsIndex> goods) {
+        try {
+            goodsIndexRepository.saveAll(goods);
+        } catch (Exception e) {
+            log.error("批量为商品生成索引异常", e);
+        }
+    }
+
     @Override
     public void updateIndex(EsGoodsIndex goods) {
         goodsIndexRepository.save(goods);
