@@ -52,6 +52,9 @@ public class HotWordsSearchParams extends PageVO {
 
     private Date endTime;
 
+    //搜索热词数量
+    private Integer top = 50;
+
     public <T> QueryWrapper<T> queryWrapper() {
         //组织查询时间
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();

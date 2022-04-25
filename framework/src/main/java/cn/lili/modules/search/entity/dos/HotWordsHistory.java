@@ -1,21 +1,15 @@
 package cn.lili.modules.search.entity.dos;
 
-import cn.lili.mybatis.BaseEntity;
 import cn.lili.mybatis.BaseIdEntity;
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -29,7 +23,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName("li_hot_words_history")
-public class HotWordsHistory extends BaseIdEntity {
+public class HotWordsHistory extends BaseIdEntity implements Comparable<HotWordsHistory>, Serializable {
 
     /**
      * 词
@@ -41,7 +35,18 @@ public class HotWordsHistory extends BaseIdEntity {
      */
     private Integer score;
 
+    @ApiModelProperty(value = "创建时间")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date createTime;
+
+    public HotWordsHistory(String keywords, Integer score) {
+        this.keywords = keywords;
+        this.score = score;
+    }
+
+    @Override
+    public int compareTo(HotWordsHistory hotWordsHistory) {
+        return hotWordsHistory.getScore() - this.score;
+    }
 }

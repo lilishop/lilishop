@@ -29,9 +29,9 @@ public class DateUtil {
         return DateUtil.getDateline()/(60*24*60);
     }
     /**
-     * 当天的开始时间
+     * 指定日的开始时间
      *
-     * @return 今天开始时间
+     * @return 指定日时间
      */
     public static Long getDayOfStart(Date date) {
         return date.getTime()/(60*24*60);

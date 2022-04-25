@@ -2,6 +2,7 @@ package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.search.entity.dos.HotWordsHistory;
 import cn.lili.modules.search.entity.dto.HotWordsDTO;
 import cn.lili.modules.search.entity.dto.HotWordsSearchParams;
 import cn.lili.modules.search.service.HotWordsHistoryService;
@@ -15,7 +16,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 管理端,热词管理
@@ -58,7 +62,9 @@ public class HotWordsManagerController {
     @ApiOperation(value = "历史热词")
     @GetMapping("/history")
     public ResultMessage<Object> deleteWords(HistorySearchParams historySearchParams) {
-        return ResultUtil.data(hotWordsHistoryService.queryByDay(historySearchParams.getDate()));
+        List<HotWordsHistory> hotWordsHistoryList = hotWordsHistoryService.queryByDay(historySearchParams.getDate());
+        Collections.sort(hotWordsHistoryList);
+        return ResultUtil.data(hotWordsHistoryList);
     }
 
     @ApiOperation(value = "热词统计")
@@ -66,8 +72,6 @@ public class HotWordsManagerController {
     public ResultMessage<Object> deleteWords(HotWordsSearchParams hotWordsSearchParams) {
         return ResultUtil.data(hotWordsHistoryService.statistics(hotWordsSearchParams));
     }
-
-
 }
 
 @Data
