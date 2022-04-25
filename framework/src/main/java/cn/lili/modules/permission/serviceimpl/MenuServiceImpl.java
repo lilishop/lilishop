@@ -60,7 +60,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         if (Boolean.TRUE.equals(authUser.getIsSuper())) {
             return this.tree();
         }
-        List<Menu> userMenus = this.baseMapper.findByUserId(authUser.getId());
+        List<Menu> userMenus = this.findUserList(authUser.getId());
         return this.tree(userMenus);
     }
 

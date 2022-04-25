@@ -44,5 +44,7 @@ public enum SettingEnum {
     //支付宝支付设置
     ALIPAY_PAYMENT,
     //微信支付设置
-    WECHAT_PAYMENT;
+    WECHAT_PAYMENT,
+    //热词设置
+    HOT_WORDS
 }

@@ -47,13 +47,7 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> i
 
     @Override
     public List<UserMenuVO> findAllMenu(String userId) {
-        String cacheKey = CachePrefix.USER_MENU.getPrefix() + userId;
-        List<UserMenuVO> menuList = (List<UserMenuVO>) cache.get(cacheKey);
-        if (menuList == null) {
-            menuList = menuMapper.getUserRoleMenu(userId);
-            cache.put(cacheKey, menuList);
-        }
-        return menuList;
+        return menuMapper.getUserRoleMenu(userId);
     }
 
 

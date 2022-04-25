@@ -121,4 +121,30 @@ public class StatisticsDateUtil {
         }
     }
 
+
+    /**
+     * 根据一个日期，获取这一天的开始时间和结束时间
+     *
+     * @param queryDate
+     * @return
+     */
+    public static Date[] getDateArray(Date queryDate) {
+
+        Date[] dateArray = new Date[2];
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(queryDate);
+        //时间归到今天凌晨0点
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        dateArray[0] = calendar.getTime();
+
+        calendar.set(Calendar.DAY_OF_YEAR, calendar.get(Calendar.DAY_OF_YEAR) + 1);
+        calendar.set(Calendar.SECOND, calendar.get(Calendar.SECOND) - 1);
+
+        dateArray[1] = calendar.getTime();
+        return dateArray;
+    }
+
 }
