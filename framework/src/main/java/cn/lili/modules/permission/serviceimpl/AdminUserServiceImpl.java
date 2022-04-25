@@ -141,15 +141,6 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
         if (user == null) {
             return null;
         }
-        AdminUserVO adminUserVO = new AdminUserVO(user);
-        //关联部门
-        if (user.getDepartmentId() != null) {
-            Department department = departmentService.getById(user.getDepartmentId());
-            if (department != null) {
-                adminUserVO.setDepartmentTitle(department.getTitle());
-            }
-        }
-        adminUserVO.setMenus(menuService.findUserList(user.getId()));
         return user;
     }
 
