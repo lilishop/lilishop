@@ -12,6 +12,7 @@ import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.RetryException;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.elasticsearch.BaseElasticsearchService;
@@ -39,7 +40,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.assertj.core.util.IterableUtil;
-import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -48,6 +48,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.index.reindex.UpdateByQueryRequest;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
@@ -268,7 +269,15 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             script.append("ctx._source.").append(entry.getKey()).append("=").append("'").append(entry.getValue()).append("'").append(";");
         }
         update.setScript(new Script(script.toString()));
-        client.updateByQueryAsync(update, RequestOptions.DEFAULT, this.actionListener());
+        update.setConflicts("proceed");
+        try {
+            BulkByScrollResponse bulkByScrollResponse = client.updateByQuery(update, RequestOptions.DEFAULT);
+            if (bulkByScrollResponse.getVersionConflicts() > 0) {
+                throw new RetryException("更新商品索引失败，es内容版本冲突");
+            }
+        } catch (IOException e) {
+            log.error("更新商品索引异常", e);
+        }
     }
 
     /**
@@ -305,13 +314,23 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      */
     @Override
     public void deleteIndex(Map<String, Object> queryFields) {
-        NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder();
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         for (Map.Entry<String, Object> entry : queryFields.entrySet()) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery(entry.getKey(), entry.getValue()));
         }
-        queryBuilder.withQuery(boolQueryBuilder);
-        this.restTemplate.delete(queryBuilder.build(), EsGoodsIndex.class);
+
+        DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest();
+        deleteByQueryRequest.setQuery(boolQueryBuilder);
+        deleteByQueryRequest.indices(getIndexName());
+        deleteByQueryRequest.setConflicts("proceed");
+        try {
+            BulkByScrollResponse bulkByScrollResponse = client.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+            if (bulkByScrollResponse.getVersionConflicts() > 0) {
+                throw new RetryException("删除索引失败，es内容版本冲突");
+            }
+        } catch (IOException e) {
+            log.error("删除索引异常", e);
+        }
     }
 
     /**
@@ -791,19 +810,5 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsSkuPromotionMap(index.getStoreId(), index.getId());
         index.setPromotionMapJson(JSONUtil.toJsonStr(goodsCurrentPromotionMap));
         return index;
-    }
-
-    private ActionListener<BulkByScrollResponse> actionListener() {
-        return new ActionListener<BulkByScrollResponse>() {
-            @Override
-            public void onResponse(BulkByScrollResponse bulkByScrollResponse) {
-                log.info("UpdateByQueryResponse: {}", bulkByScrollResponse);
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                log.error("UpdateByQueryRequestFailure: ", e);
-            }
-        };
     }
 }
