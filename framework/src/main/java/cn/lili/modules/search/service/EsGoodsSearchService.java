@@ -27,28 +27,6 @@ public interface EsGoodsSearchService {
     SearchPage<EsGoodsIndex> searchGoods(EsGoodsSearchDTO searchDTO, PageVO pageVo);
 
     /**
-     * 获取热门关键词
-     *
-     * @param count 热词数量
-     * @return 热词集合
-     */
-    List<String> getHotWords(Integer count);
-
-    /**
-     * 设置热门关键词
-     *
-     * @param hotWords 热词分数
-     */
-    void setHotWords(HotWordsDTO hotWords);
-
-    /**
-     * 删除热门关键词
-     *
-     * @param keywords 热词
-     */
-    void deleteHotWords(String keywords);
-
-    /**
      * 获取筛选器
      *
      * @param goodsSearch 搜索条件

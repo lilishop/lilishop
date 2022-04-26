@@ -222,6 +222,7 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
      */
     @Override
     public void updateEsGoodsIndex(PointsGoods promotions) {
+        super.updateEsGoodsIndex(promotions);
         Map<String, Object> query = MapUtil.builder(new HashMap<String, Object>()).put("id", promotions.getSkuId()).build();
         Map<String, Object> update = MapUtil.builder(new HashMap<String, Object>()).put("points", promotions.getPoints()).build();
         //修改规格索引,发送mq消息

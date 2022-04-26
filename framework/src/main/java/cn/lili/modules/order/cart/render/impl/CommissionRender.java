@@ -4,6 +4,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
@@ -85,7 +86,7 @@ public class CommissionRender implements CartRenderStep {
                     if (kanjiaPromotions.isPresent()) {
                         JSONObject promotionsObj = JSONUtil.parseObj(kanjiaPromotions.get().getValue());
                         KanjiaActivityGoods kanjiaActivityGoods = JSONUtil.toBean(promotionsObj, KanjiaActivityGoods.class);
-                        priceDetailDTO.setSettlementPrice(kanjiaActivityGoods.getSettlementPrice());
+                        priceDetailDTO.setSettlementPrice(CurrencyUtil.add(kanjiaActivityGoods.getSettlementPrice(),priceDetailDTO.getBillPrice()));
                     }
                 }
             }

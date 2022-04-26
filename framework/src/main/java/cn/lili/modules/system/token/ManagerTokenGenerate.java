@@ -1,8 +1,6 @@
 package cn.lili.modules.system.token;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.lili.cache.Cache;
-import cn.lili.cache.CachePrefix;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.enums.PermissionEnum;
 import cn.lili.common.security.enums.UserEnums;
@@ -11,7 +9,6 @@ import cn.lili.common.security.token.TokenUtil;
 import cn.lili.common.security.token.base.AbstractTokenGenerate;
 import cn.lili.modules.permission.entity.dos.AdminUser;
 import cn.lili.modules.permission.entity.vo.UserMenuVO;
-import cn.lili.modules.permission.service.RoleMenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,21 +29,10 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate<AdminUser> {
 
     @Autowired
     private TokenUtil tokenUtil;
-    @Autowired
-    private RoleMenuService roleMenuService;
-    @Autowired
-    private Cache cache;
-
 
     @Override
     public Token createToken(AdminUser adminUser, Boolean longTerm) {
         AuthUser authUser = new AuthUser(adminUser.getUsername(), adminUser.getId(), adminUser.getAvatar(), UserEnums.MANAGER, adminUser.getNickName(), adminUser.getIsSuper());
-
-
-        List<UserMenuVO> userMenuVOList = roleMenuService.findAllMenu(authUser.getId());
-        //缓存权限列表
-        cache.put(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + authUser.getId(), this.permissionList(userMenuVOList));
-
         return tokenUtil.createToken(adminUser.getUsername(), authUser, longTerm, UserEnums.MANAGER);
     }
 

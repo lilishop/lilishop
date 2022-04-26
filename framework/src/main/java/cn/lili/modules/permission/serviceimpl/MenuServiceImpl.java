@@ -7,6 +7,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.vo.SearchVO;
 import cn.lili.modules.permission.entity.dos.Menu;
 import cn.lili.modules.permission.entity.dos.RoleMenu;
@@ -60,17 +61,18 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         if (Boolean.TRUE.equals(authUser.getIsSuper())) {
             return this.tree();
         }
-        List<Menu> userMenus = this.baseMapper.findByUserId(authUser.getId());
+        List<Menu> userMenus = this.findUserList(authUser.getId());
         return this.tree(userMenus);
     }
 
     @Override
     public List<Menu> findUserList(String userId) {
-        String cacheKey = CachePrefix.MENU_USER_ID.getPrefix() + userId;
+        String cacheKey = CachePrefix.USER_MENU.getPrefix(UserEnums.MANAGER) + userId;
         List<Menu> menuList = cache.get(cacheKey);
         if (menuList == null) {
             menuList = this.baseMapper.findByUserId(userId);
-            cache.put(cacheKey, menuList);
+            //每5分钟重新确认用户权限
+            cache.put(cacheKey, menuList, 300L);
         }
         return menuList;
     }
@@ -84,8 +86,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public boolean saveOrUpdateMenu(Menu menu) {
         if (CharSequenceUtil.isNotEmpty(menu.getId())) {
-            cache.vagueDel(CachePrefix.MENU_USER_ID.getPrefix());
-            cache.vagueDel(CachePrefix.USER_MENU.getPrefix());
+
         }
         return this.saveOrUpdate(menu);
     }

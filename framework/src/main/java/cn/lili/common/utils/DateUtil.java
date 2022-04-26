@@ -28,6 +28,14 @@ public class DateUtil {
     public static Long getDayOfStart() {
         return DateUtil.getDateline()/(60*24*60);
     }
+    /**
+     * 指定日的开始时间
+     *
+     * @return 指定日时间
+     */
+    public static Long getDayOfStart(Date date) {
+        return date.getTime()/(60*24*60);
+    }
 
     /**
      * 当天的开始时间

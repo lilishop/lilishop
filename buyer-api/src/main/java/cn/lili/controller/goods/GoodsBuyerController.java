@@ -14,6 +14,7 @@ import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.entity.dos.EsGoodsRelatedInfo;
 import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
 import cn.lili.modules.search.service.EsGoodsSearchService;
+import cn.lili.modules.search.service.HotWordsService;
 import cn.lili.modules.statistics.aop.PageViewPoint;
 import cn.lili.modules.statistics.aop.enums.PageViewEnum;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -61,6 +62,9 @@ public class GoodsBuyerController {
      */
     @Autowired
     private EsGoodsSearchService goodsSearchService;
+
+    @Autowired
+    private HotWordsService hotWordsService;
 
     @ApiOperation(value = "通过id获取商品信息")
     @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "path", dataType = "Long")
@@ -117,7 +121,7 @@ public class GoodsBuyerController {
     @ApiOperation(value = "获取搜索热词")
     @GetMapping("/hot-words")
     public ResultMessage<List<String>> getGoodsHotWords(Integer count) {
-        List<String> hotWords = goodsSearchService.getHotWords(count);
+        List<String> hotWords = hotWordsService.getHotWords(count);
         return ResultUtil.data(hotWords);
     }
 
