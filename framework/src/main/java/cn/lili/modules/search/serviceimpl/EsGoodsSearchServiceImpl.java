@@ -88,7 +88,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         if (!exists) {
             esGoodsIndexService.init();
         }
-        if (CharSequenceUtil.isNotEmpty(searchDTO.getKeyword())) {
+        if (CharSequenceUtil.isNotBlank(searchDTO.getKeyword())) {
             cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), searchDTO.getKeyword());
         }
         NativeSearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(searchDTO, pageVo);

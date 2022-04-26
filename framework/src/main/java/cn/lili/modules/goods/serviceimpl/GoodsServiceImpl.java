@@ -363,6 +363,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         queryWrapper.in(Goods::getId, goodsIds);
         List<Goods> goodsList = this.list(queryWrapper);
         for (Goods goods : goodsList) {
+            if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
+                cache.remove(CachePrefix.GOODS.getPrefix() + goods.getId());
+            }
             goodsSkuService.updateGoodsSkuStatus(goods);
         }
         if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
