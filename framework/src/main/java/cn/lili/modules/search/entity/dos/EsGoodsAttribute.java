@@ -33,7 +33,7 @@ public class EsGoodsAttribute implements Serializable {
     /**
      * 属性名称
      */
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Text, fielddata = true)
     private String name;
 
     /**
@@ -45,7 +45,7 @@ public class EsGoodsAttribute implements Serializable {
     /**
      * 属性值
      */
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Text, fielddata = true)
     private String value;
 
 
