@@ -1,13 +1,5 @@
 package cn.lili.common.aop.interceptor;
 
-/**
- * 防重复提交业务
- *
- * @author Chopper
- * @version v1.0
- * 2022-01-25 09:20
- */
-
 import cn.lili.cache.Cache;
 import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultCode;
@@ -23,6 +15,13 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * 防重复提交业务
+ *
+ * @author Chopper
+ * @version v1.0
+ * 2022-01-25 09:20
+ */
 @Aspect
 @Component
 @Slf4j

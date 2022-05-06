@@ -306,13 +306,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         LambdaQueryWrapper<Goods> queryWrapper = this.getQueryWrapperByStoreAuthority();
         queryWrapper.in(Goods::getId, goodsIds);
         List<Goods> goodsList = this.list(queryWrapper);
-        for (Goods goods : goodsList) {
-            goodsSkuService.updateGoodsSkuStatus(goods);
-        }
-
-        if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
-            this.deleteEsGoods(goodsIds);
-        }
+        this.updateGoodsStatus(goodsIds, goodsStatusEnum, goodsList);
         return result;
     }
 
@@ -362,15 +356,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         LambdaQueryWrapper<Goods> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(Goods::getId, goodsIds);
         List<Goods> goodsList = this.list(queryWrapper);
-        for (Goods goods : goodsList) {
-            if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
-                cache.remove(CachePrefix.GOODS.getPrefix() + goods.getId());
-            }
-            goodsSkuService.updateGoodsSkuStatus(goods);
-        }
-        if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
-            this.deleteEsGoods(goodsIds);
-        }
+        this.updateGoodsStatus(goodsIds, goodsStatusEnum, goodsList);
         return result;
     }
 
@@ -391,6 +377,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         for (Goods goods : goodsList) {
             //修改SKU状态
             goodsSkuService.updateGoodsSkuStatus(goods);
+            cache.remove(CachePrefix.GOODS.getPrefix() + goods.getId());
         }
 
         this.deleteEsGoods(goodsIds);
@@ -478,6 +465,26 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
                         .eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name()));
     }
 
+
+    /**
+     * 更新商品状态
+     *
+     * @param goodsIds        商品ID
+     * @param goodsStatusEnum 商品状态
+     * @param goodsList       商品列表
+     */
+    private void updateGoodsStatus(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, List<Goods> goodsList) {
+        for (Goods goods : goodsList) {
+            if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
+                cache.remove(CachePrefix.GOODS.getPrefix() + goods.getId());
+            }
+            goodsSkuService.updateGoodsSkuStatus(goods);
+        }
+
+        if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
+            this.deleteEsGoods(goodsIds);
+        }
+    }
 
     /**
      * 发送删除es索引的信息

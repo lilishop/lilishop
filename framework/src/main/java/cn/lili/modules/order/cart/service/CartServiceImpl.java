@@ -542,7 +542,7 @@ public class CartServiceImpl implements CartService {
         }
         //构建交易
         Trade trade = tradeBuilder.createTrade(tradeDTO);
-        this.cleanChecked(tradeDTO);
+        this.cleanChecked(this.readDTO(cartTypeEnum));
         return trade;
     }
 
