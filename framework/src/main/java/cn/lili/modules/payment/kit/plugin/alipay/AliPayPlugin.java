@@ -212,31 +212,6 @@ public class AliPayPlugin implements Payment {
     }
 
     @Override
-    public void cancel(RefundLog refundLog) {
-        AlipayTradeCancelModel model = new AlipayTradeCancelModel();
-        //这里取支付回调时返回的流水
-        if (StringUtils.isNotEmpty(refundLog.getPaymentReceivableNo())) {
-            model.setTradeNo(refundLog.getPaymentReceivableNo());
-        } else {
-            log.error("退款时，支付参数为空导致异常：{}", refundLog);
-            throw new ServiceException(ResultCode.ALIPAY_PARAMS_EXCEPTION);
-        }
-        try {
-            //与阿里进行交互
-            AlipayTradeCancelResponse alipayTradeCancelResponse = AliPayApi.tradeCancelToResponse(model);
-            if (alipayTradeCancelResponse.isSuccess()) {
-                refundLog.setIsRefund(true);
-                refundLog.setReceivableNo(refundLog.getOutOrderNo());
-            } else {
-                refundLog.setErrorMessage(String.format("错误码：%s,错误原因：%s", alipayTradeCancelResponse.getSubCode(), alipayTradeCancelResponse.getSubMsg()));
-            }
-            refundLogService.save(refundLog);
-        } catch (Exception e) {
-            log.error("支付宝退款异常", e);
-        }
-    }
-
-    @Override
     public void refundNotify(HttpServletRequest request) {
         //不需要实现
     }

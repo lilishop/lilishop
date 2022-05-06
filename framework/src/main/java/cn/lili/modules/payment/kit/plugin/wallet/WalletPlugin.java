@@ -96,21 +96,6 @@ public class WalletPlugin implements Payment {
         return ResultUtil.success(ResultCode.PAY_SUCCESS);
     }
 
-    @Override
-    public void cancel(RefundLog refundLog) {
-
-        try {
-            memberWalletService.increase(new MemberWalletUpdateDTO(refundLog.getTotalAmount(),
-                    refundLog.getMemberId(),
-                    "取消[" + refundLog.getOrderSn() + "]订单，退还金额[" + refundLog.getTotalAmount() + "]",
-                    DepositServiceTypeEnum.WALLET_REFUND.name()));
-            refundLog.setIsRefund(true);
-            refundLogService.save(refundLog);
-        } catch (Exception e) {
-            log.error("订单取消错误", e);
-        }
-    }
-
     /**
      * 保存支付日志
      *
@@ -134,7 +119,7 @@ public class WalletPlugin implements Payment {
         try {
             memberWalletService.increase(new MemberWalletUpdateDTO(refundLog.getTotalAmount(),
                     refundLog.getMemberId(),
-                    "售后[" + refundLog.getAfterSaleNo() + "]审批，退还金额[" + refundLog.getTotalAmount() + "]",
+                    "订单[" + refundLog.getOrderSn() + "]，售后单[" + refundLog.getAfterSaleNo() + "]，退还金额[" + refundLog.getTotalAmount() + "]",
                     DepositServiceTypeEnum.WALLET_REFUND.name()));
             refundLog.setIsRefund(true);
             refundLogService.save(refundLog);

@@ -555,12 +555,6 @@ public class WechatPlugin implements Payment {
     }
 
     @Override
-    public void cancel(RefundLog refundLog) {
-        this.refund(refundLog);
-    }
-
-
-    @Override
     public void refundNotify(HttpServletRequest request) {
         String timestamp = request.getHeader("Wechatpay-Timestamp");
         String nonce = request.getHeader("Wechatpay-Nonce");
