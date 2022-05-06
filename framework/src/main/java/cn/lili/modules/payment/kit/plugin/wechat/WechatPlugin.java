@@ -293,7 +293,7 @@ public class WechatPlugin implements Payment {
                 Map<String, String> map = WxPayKit.appPrepayIdCreateSign(appid,
                         setting.getMchId(),
                         prepayId,
-                        setting.getApiclient_key(), SignType.HMACSHA256);
+                        setting.getApiclient_key(), SignType.MD5);
                 log.info("唤起支付参数:{}", map);
 
                 return ResultUtil.data(map);

@@ -445,7 +445,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //获取订单信息
         Order order = this.getBySn(orderSn);
         //获取踪迹信息
-        return logisticsService.getLogistic(order.getLogisticsCode(), order.getLogisticsNo());
+        String str=order.getConsigneeMobile();
+        return logisticsService.getLogistic(order.getLogisticsCode(), order.getLogisticsNo(), str.substring(str.length()-4));
     }
 
     @Override

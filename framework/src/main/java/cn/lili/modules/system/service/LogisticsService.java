@@ -19,9 +19,10 @@ public interface LogisticsService extends IService<Logistics> {
      *
      * @param logisticsId 物流公司ID
      * @param logisticsNo 单号
+     * @param customerName 手机号后四位
      * @return
      */
-    Traces getLogistic(String logisticsId, String logisticsNo);
+    Traces getLogistic(String logisticsId, String logisticsNo, String customerName);
 
     /**
      * 获取已开启的物流公司列表

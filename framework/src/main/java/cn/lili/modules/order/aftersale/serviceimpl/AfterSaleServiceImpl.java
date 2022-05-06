@@ -269,8 +269,8 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
 
         //根据售后单号获取售后单
         AfterSale afterSale = OperationalJudgment.judgment(this.getBySn(afterSaleSn));
-
-        return logisticsService.getLogistic(afterSale.getMLogisticsCode(), afterSale.getMLogisticsNo());
+        String str=storeDetailService.getStoreDetail(afterSale.getStoreId()).getSalesConsigneeMobile();
+        return logisticsService.getLogistic(afterSale.getMLogisticsCode(), afterSale.getMLogisticsNo(), str.substring(str.length()-4));
     }
 
     @Override
