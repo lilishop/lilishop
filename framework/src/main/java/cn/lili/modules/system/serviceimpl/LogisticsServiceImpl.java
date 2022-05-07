@@ -90,7 +90,7 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
         if (logistics != null) {
             String requestData = "{'OrderCode':'','ShipperCode':'" + logistics.getCode() +
                     "','LogisticCode':'" + expNo + "'" +
-                    "','CustomerName':'" + customerName + "'"+
+                    ",'CustomerName':'" + customerName + "'"+
                     "}";
             Map<String, String> params = new HashMap<>(8);
             params.put("RequestData", urlEncoder(requestData, "UTF-8"));
