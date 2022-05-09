@@ -62,3 +62,25 @@ ALTER TABLE li_member ADD INDEX query_mobile (`mobile`) COMMENT 'query_member';
 ALTER TABLE li_member_sign ADD INDEX query_create_time (`create_time`) COMMENT 'query_create_time';
 ALTER TABLE li_member_sign ADD INDEX query_member_id (`member_id`) COMMENT 'query_member_id';
 ALTER TABLE li_member_sign add unique uk_member_day (member_id, create_time) COMMENT 'uk_member_day';
+
+
+/**增加店铺发货信息**/
+ALTER TABLE li_store_detail ADD  `sales_consignor_address_id` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '发货地址id';
+ALTER TABLE li_store_detail ADD  `sales_consignor_address_path` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '发货地址名称';
+ALTER TABLE li_store_detail ADD  `sales_consignor_detail` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '发货详细地址';
+ALTER TABLE li_store_detail ADD  `sales_consignor_mobile` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '发货人手机';
+ALTER TABLE li_store_detail ADD  `sales_consignor_name` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '发货人姓名';
+
+
+/**增加电子面单店铺信息**/
+ALTER TABLE `li_store_logistics` ADD `customer_name` varchar(255) DEFAULT NULL COMMENT '客户代码';
+ALTER TABLE `li_store_logistics` ADD `customer_pwd` varchar(255) DEFAULT NULL COMMENT '客户密码';
+ALTER TABLE `li_store_logistics` ADD `month_code` varchar(255) DEFAULT NULL COMMENT '月结号/密钥';
+ALTER TABLE `li_store_logistics` ADD `send_site` varchar(255) DEFAULT NULL COMMENT '归属网点';
+ALTER TABLE `li_store_logistics` ADD `send_staff` varchar(255) DEFAULT NULL COMMENT '收件快递员';
+ALTER TABLE `li_store_logistics` ADD `face_sheet_flag` bit(1) DEFAULT NULL COMMENT '是否使用电子面单';
+
+/**是否使用电子面单标志**/
+ALTER TABLE li_store_logistics RENAME COLUMN is_face_sheet TO face_sheet_flag;
+
+

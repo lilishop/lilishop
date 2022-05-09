@@ -184,6 +184,22 @@ public class StoreDetail extends BaseIdEntity {
     @ApiModelProperty(value = "福禄appKEY商户key")
     private String appMerchantKey;
 
+    //店铺发货地址
+    @ApiModelProperty(value = "发货人姓名")
+    private String salesConsignorName;
+
+    @ApiModelProperty(value = "发件人手机")
+    private String salesConsignorMobile;
+
+    @ApiModelProperty(value = "发件人地址Id， '，'分割")
+    private String salesConsignorAddressId;
+
+    @ApiModelProperty(value = "发件人地址名称， '，'分割")
+    private String salesConsignorAddressPath;
+
+    @ApiModelProperty(value = "发件人详细地址")
+    private String salesConsignorDetail;
+
     public StoreDetail(Store store, AdminStoreApplyDTO adminStoreApplyDTO) {
         this.storeId = store.getId();
         //设置店铺公司信息、设置店铺银行信息、设置店铺其他信息
