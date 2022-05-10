@@ -38,7 +38,7 @@
         <aliyun-version>4.6.0</aliyun-version>
         <aliyun-sdk-oss-version>3.14.0</aliyun-sdk-oss-version>
         <aliyun-sdk-dysms-version>2.0.9</aliyun-sdk-dysms-version>
-        <rocketmq-version>2.2.1</rocketmq-version>
+        <rocketmq-version>2.2.2</rocketmq-version>
         <jwt-version>0.11.2</jwt-version>
         <sharding-jdbc-version>4.0.0</sharding-jdbc-version>
         <druid-version>1.2.8</druid-version>
@@ -46,13 +46,13 @@
         <antlr4-version>4.7.2</antlr4-version>
         <antlr4-runtime-version>4.7.2</antlr4-runtime-version>
         <knife4j.version>2.0.9</knife4j.version>
-        <de.codecentric>2.6.2</de.codecentric>
+        <de.codecentric>2.6.6</de.codecentric>
         <userAgentUtils>1.21</userAgentUtils>
         <poi-version>5.1.0</poi-version>
         <poi-ooxml-version>5.1.0</poi-ooxml-version>
-        <logstash-logback-encoder>7.0.1</logstash-logback-encoder>
-        <zxing>3.4.1</zxing>
-        <slf4j-api>1.7.35</slf4j-api>
+        <logstash-logback-encoder>7.1.1</logstash-logback-encoder>
+        <zxing>3.5.0</zxing>
+        <slf4j-api>1.7.36</slf4j-api>
         <xk-time>3.2.3</xk-time>
         <commons-text>1.9</commons-text>
         <enjoy.version>4.3</enjoy.version>
@@ -110,7 +110,7 @@
         <repository>
             <id>central</id>
             <name>aliyun maven</name>
-            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <url>https://maven.aliyun.com/repository/public</url>
             <layout>default</layout>
             <!-- 是否开启发布版构件下载 -->
             <releases>
