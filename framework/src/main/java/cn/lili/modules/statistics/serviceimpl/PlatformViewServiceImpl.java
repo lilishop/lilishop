@@ -142,7 +142,7 @@ public class PlatformViewServiceImpl extends ServiceImpl<PlatformViewMapper, Pla
                 }
             }
             if (exitOnlineNum == null) {
-                onlineMemberVOS.add(new OnlineMemberVO(calendar.getTime(), 0));
+                onlineMemberVOS.add(new OnlineMemberVO(calendar.getTime(), 0, 0));
             } else {
                 onlineMemberVOS.add(exitOnlineNum);
             }
