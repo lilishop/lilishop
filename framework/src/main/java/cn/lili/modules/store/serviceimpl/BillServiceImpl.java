@@ -89,59 +89,49 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         bill.setSn(SnowFlake.createStr("B"));
 
         //退款结算信息
-        Bill refundBill = this.baseMapper.getRefundBill(new QueryWrapper<Bill>()
-                .eq("store_id", storeId)
-                .eq("flow_type", FlowTypeEnum.REFUND.name())
-                .between("create_time", startTime, endTime));
+        Bill refundBill = this.baseMapper.getRefundBill(new QueryWrapper<Bill>().eq("store_id", storeId).eq("flow_type", FlowTypeEnum.REFUND.name()).between("create_time", startTime, endTime));
         //店铺退款金额
         Double refundPrice = 0D;
         if (refundBill != null) {
             //退单金额
-            bill.setRefundPrice(refundBill.getRefundPrice());
+            bill.setRefundPrice(refundBill.getRefundPrice() != null ? refundBill.getRefundPrice() : 0D);
             //退单产生退还佣金金额
-            bill.setRefundCommissionPrice(refundBill.getRefundCommissionPrice());
+            bill.setRefundCommissionPrice(refundBill.getRefundCommissionPrice() != null ? refundBill.getRefundCommissionPrice() : 0D);
             //分销订单退还，返现佣金返还
-            bill.setDistributionRefundCommission(refundBill.getDistributionRefundCommission());
+            bill.setDistributionRefundCommission(refundBill.getDistributionRefundCommission() != null ? refundBill.getRefundCommissionPrice() : 0D);
             //退货平台优惠券补贴返还
-            bill.setSiteCouponRefundCommission(refundBill.getSiteCouponRefundCommission());
+            bill.setSiteCouponRefundCommission(refundBill.getSiteCouponRefundCommission() != null ? refundBill.getSiteCouponRefundCommission() : 0D);
             //退款金额=店铺最终退款结算金额
-            refundPrice = refundBill.getBillPrice();
+            refundPrice = refundBill.getBillPrice() != null ? refundBill.getBillPrice() : 0D;
         }
 
 
         /**
          *  @TODO 入账结算信息
          */
-        Bill orderBill = this.baseMapper.getOrderBill(new QueryWrapper<Bill>()
-                .eq("store_id", storeId)
-                .eq("flow_type", FlowTypeEnum.PAY.name())
-                .between("create_time", startTime, endTime));
+        Bill orderBill = this.baseMapper.getOrderBill(new QueryWrapper<Bill>().eq("store_id", storeId).eq("flow_type", FlowTypeEnum.PAY.name()).between("create_time", startTime, endTime));
         //店铺入款结算金额
         double orderPrice = 0D;
 
         if (orderBill != null) {
             //结算周期内订单付款总金额
-            bill.setOrderPrice(orderBill.getOrderPrice());
+            bill.setOrderPrice(orderBill.getOrderPrice() != null ? orderBill.getOrderPrice() : 0D);
             //平台收取佣金
-            bill.setCommissionPrice(orderBill.getCommissionPrice());
+            bill.setCommissionPrice(orderBill.getCommissionPrice() != null ? orderBill.getCommissionPrice() : 0D);
             //分销返现支出
-            bill.setDistributionCommission(orderBill.getDistributionCommission());
+            bill.setDistributionCommission(orderBill.getDistributionCommission() != null ? orderBill.getDistributionCommission() : 0D);
             //平台优惠券补贴
-            bill.setSiteCouponCommission(orderBill.getSiteCouponCommission());
+            bill.setSiteCouponCommission(orderBill.getSiteCouponCommission() != null ? orderBill.getSiteCouponCommission() : 0D);
             //积分商品结算价格
-            bill.setPointSettlementPrice(orderBill.getPointSettlementPrice());
+            bill.setPointSettlementPrice(orderBill.getPointSettlementPrice() != null ? orderBill.getPointSettlementPrice() : 0D);
             //砍价商品结算价格
-            bill.setKanjiaSettlementPrice(orderBill.getKanjiaSettlementPrice());
+            bill.setKanjiaSettlementPrice(orderBill.getKanjiaSettlementPrice() != null ? orderBill.getKanjiaSettlementPrice() : 0D);
 
             //入款结算金额= 店铺支付结算金额 + 平台优惠券补贴 + 分销订单退还，返现佣金返还+退单产生退还佣金金额
-            orderPrice = CurrencyUtil.add(orderBill.getBillPrice(),
-                    bill.getSiteCouponCommission(),
-                    bill.getDistributionRefundCommission(),
-                    bill.getRefundCommissionPrice());
+            orderPrice = CurrencyUtil.add(orderBill.getBillPrice() == null ? 0 : orderBill.getBillPrice(), bill.getSiteCouponCommission() == null ? 0 : bill.getSiteCouponCommission(), bill.getDistributionRefundCommission() == null ? 0 : bill.getDistributionRefundCommission(), bill.getRefundCommissionPrice() == null ? 0 : bill.getRefundCommissionPrice());
         }
-
         //最终结算金额=入款结算金额-退款结算金额-退货平台优惠券补贴返还
-        Double finalPrice = CurrencyUtil.sub(orderPrice, refundPrice,bill.getSiteCouponRefundCommission());
+        Double finalPrice = CurrencyUtil.sub(orderPrice, refundPrice, bill.getSiteCouponRefundCommission() == null ? 0 : bill.getSiteCouponRefundCommission());
         //店铺最终结算金额=最终结算金额
         bill.setBillPrice(finalPrice);
 
@@ -276,9 +266,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         writer.setColumnWidth(12, 20);
 
 
-        List<StoreFlowRefundDownloadVO> storeFlowRefundDownloadVOList = storeFlowService.getStoreFlowRefundDownloadVO(
-                StoreFlowQueryDTO.builder().type(FlowTypeEnum.REFUND.name()).bill(bill).build()
-        );
+        List<StoreFlowRefundDownloadVO> storeFlowRefundDownloadVOList = storeFlowService.getStoreFlowRefundDownloadVO(StoreFlowQueryDTO.builder().type(FlowTypeEnum.REFUND.name()).bill(bill).build());
         writer.write(storeFlowRefundDownloadVOList, true);
 
         ServletOutputStream out = null;
