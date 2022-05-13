@@ -9,7 +9,9 @@ import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 会员浏览历史业务层实现
@@ -29,9 +32,7 @@ import java.util.Objects;
 @Service
 public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint> implements FootprintService {
 
-    /**
-     * es商品业务层
-     */
+
     @Autowired
     private EsGoodsSearchService esGoodsSearchService;
 
@@ -74,20 +75,35 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
     }
 
     @Override
-    public List<EsGoodsIndex> footPrintPage(PageVO pageVO) {
+    public IPage<EsGoodsIndex> footPrintPage(PageVO pageVO) {
 
         LambdaQueryWrapper<FootPrint> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(FootPrint::getMemberId, UserContext.getCurrentUser().getId());
         lambdaQueryWrapper.eq(FootPrint::getDeleteFlag, false);
-        lambdaQueryWrapper.orderByDesc(FootPrint::getUpdateTime);
-        List<String> skuIdList = this.baseMapper.footprintSkuIdList(PageUtil.initPage(pageVO), lambdaQueryWrapper);
-        if (!skuIdList.isEmpty()) {
-            List<EsGoodsIndex> list = esGoodsSearchService.getEsGoodsBySkuIds(skuIdList);
+        lambdaQueryWrapper.orderByDesc(FootPrint::getCreateTime);
+        IPage<FootPrint> footPrintPages = this.page(PageUtil.initPage(pageVO), lambdaQueryWrapper);
+
+
+        //定义结果
+        IPage<EsGoodsIndex> esGoodsIndexIPage = new Page<EsGoodsIndex>();
+
+        if (footPrintPages.getRecords() == null || footPrintPages.getRecords().isEmpty()) {
+            return esGoodsIndexIPage;
+        } else {
+            List<EsGoodsIndex> list = esGoodsSearchService.getEsGoodsBySkuIds(
+                    footPrintPages.getRecords().stream().map(item -> {
+                        return item.getSkuId();
+                    }).collect(Collectors.toList()));
             //去除为空的商品数据
             list.removeIf(Objects::isNull);
-            return list;
+
+            esGoodsIndexIPage.setPages(footPrintPages.getPages());
+            esGoodsIndexIPage.setRecords(list);
+            esGoodsIndexIPage.setTotal(footPrintPages.getTotal());
+            esGoodsIndexIPage.setSize(footPrintPages.getSize());
+            esGoodsIndexIPage.setCurrent(footPrintPages.getCurrent());
+            return esGoodsIndexIPage;
         }
-        return Collections.emptyList();
     }
 
     @Override

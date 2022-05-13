@@ -3,6 +3,7 @@ package cn.lili.modules.member.service;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -44,7 +45,7 @@ public interface FootprintService extends IService<FootPrint> {
      * @param pageVO 分页
      * @return 会员浏览历史列表
      */
-    List<EsGoodsIndex> footPrintPage(PageVO pageVO);
+    IPage<EsGoodsIndex> footPrintPage(PageVO pageVO);
 
     /**
      * 获取当前会员的浏览记录数量
