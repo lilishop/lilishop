@@ -76,18 +76,16 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         List<OrderItem> orderItems = orderItemService.getByOrderSn(orderSn);
         //根据订单编号获取订单数据
         Order order = orderService.getBySn(orderSn);
-        //如果查询到多条支付记录，打印日志
-        if (order.getPayStatus().equals(PayStatusEnum.PAID.name())) {
-            log.error("订单[{}]检测到重复付款，请处理", orderSn);
-        }
-
         //获取订单促销类型,如果为促销订单则获取促销商品并获取结算价
         String orderPromotionType = order.getOrderPromotionType();
+
         //循环子订单记录流水
         for (OrderItem item : orderItems) {
             StoreFlow storeFlow = new StoreFlow();
             BeanUtil.copyProperties(item, storeFlow);
 
+            //去掉orderitem的时间。
+            storeFlow.setCreateTime(null);
             //入账
             storeFlow.setId(SnowFlake.getIdStr());
             storeFlow.setFlowType(FlowTypeEnum.PAY.name());
@@ -102,24 +100,28 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
             storeFlow.setOrderPromotionType(item.getPromotionType());
             //格式化订单价格详情
             PriceDetailDTO priceDetailDTO = JSONUtil.toBean(item.getPriceDetail(), PriceDetailDTO.class);
-            //站点优惠券佣金比例
+            //站点优惠券比例=最大比例(100)-店铺承担比例
             storeFlow.setSiteCouponPoint(CurrencyUtil.sub(100,priceDetailDTO.getSiteCouponPoint()));
             //平台优惠券 使用金额
             storeFlow.setSiteCouponPrice(priceDetailDTO.getSiteCouponPrice());
             //站点优惠券佣金（站点优惠券承担金额=优惠券金额 * (站点承担比例/100)）
             storeFlow.setSiteCouponCommission(CurrencyUtil.mul(storeFlow.getSiteCouponPrice(),CurrencyUtil.div(storeFlow.getSiteCouponPoint(),100)));
 
-            //计算平台佣金
-            storeFlow.setCommissionPrice(item.getPriceDetailDTO().getPlatFormCommission());
-            //订单流水金额
+            /**
+             * @TODO 计算平台佣金
+             */
+            //店铺流水金额=goodsPrice(商品总金额（商品原价）)+ freightPrice(配送费) - discountPrice(优惠金额) - couponPrice(优惠券金额) + updatePrice(订单修改金额)
             storeFlow.setFinalPrice(item.getPriceDetailDTO().getFlowPrice());
+            //平台收取交易佣金=(flowPrice(流水金额) * platFormCommissionPoint(平台佣金比例))/100
+            storeFlow.setCommissionPrice(item.getPriceDetailDTO().getPlatFormCommission());
+            //单品分销返现支出
             storeFlow.setDistributionRebate(item.getPriceDetailDTO().getDistributionCommission());
+            //最终结算金额=flowPrice(流水金额) - platFormCommission(平台收取交易佣金) - distributionCommission(单品分销返现支出)
             storeFlow.setBillPrice(item.getPriceDetailDTO().getBillPrice());
             //兼容为空，以及普通订单操作
             if (CharSequenceUtil.isNotEmpty(orderPromotionType)) {
                 if (orderPromotionType.equals(OrderPromotionTypeEnum.NORMAL.name())) {
                     //普通订单操作
-
                 }
                 //如果为砍价活动，填写砍价结算价
                 else if (orderPromotionType.equals(OrderPromotionTypeEnum.KANJIA.name())) {
