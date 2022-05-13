@@ -75,4 +75,14 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
         //根据商品id查询商品相册
         return this.baseMapper.selectList(new QueryWrapper<GoodsGallery>().eq("goods_id", goodsId));
     }
+
+    /**
+     * 根据商品 id删除商品相册缩略图
+     *
+     * @param goodsId 商品ID
+     */
+    @Override
+    public void removeByGoodsId(String goodsId) {
+        this.baseMapper.delete(new UpdateWrapper<GoodsGallery>().eq("goods_id", goodsId));
+    }
 }

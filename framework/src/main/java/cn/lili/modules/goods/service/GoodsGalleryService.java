@@ -36,4 +36,11 @@ public interface GoodsGalleryService extends IService<GoodsGallery> {
      */
     List<GoodsGallery> goodsGalleryList(String goodsId);
 
+    /**
+     * 根据商品 id删除商品相册缩略图
+     *
+     * @param goodsId 商品ID
+     */
+    void removeByGoodsId(String goodsId);
+
 }
