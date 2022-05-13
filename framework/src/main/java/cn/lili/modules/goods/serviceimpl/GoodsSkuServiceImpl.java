@@ -149,10 +149,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 oldSkuIds.add(goodsSkuVO.getId());
                 cache.remove(GoodsSkuService.getCacheKeys(goodsSkuVO.getId()));
             }
-            goodsIndexService.deleteIndexByIds(oldSkuIds);
             this.removeByIds(oldSkuIds);
             //删除sku相册
-            goodsGalleryService.removeByIds(oldSkuIds);
+            goodsGalleryService.removeByGoodsId(goods.getId());
             // 添加商品sku
             newSkuList = this.addGoodsSku(skuList, goods);
 
@@ -633,7 +632,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             skus.add(goodsSku);
             cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
         }
-        this.saveBatch(skus);
+        this.saveOrUpdateBatch(skus);
         return skus;
     }
 
