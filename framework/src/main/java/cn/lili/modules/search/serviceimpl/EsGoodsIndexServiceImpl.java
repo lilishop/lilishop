@@ -1,5 +1,6 @@
 package cn.lili.modules.search.serviceimpl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
@@ -37,6 +38,8 @@ import cn.lili.modules.search.service.EsGoodsSearchService;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.assertj.core.util.IterableUtil;
@@ -137,34 +140,46 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
         ThreadUtil.execAsync(() -> {
             try {
-                List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
 
                 LambdaQueryWrapper<Goods> goodsQueryWrapper = new LambdaQueryWrapper<>();
                 goodsQueryWrapper.eq(Goods::getAuthFlag, GoodsAuthEnum.PASS.name());
                 goodsQueryWrapper.eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name());
                 goodsQueryWrapper.eq(Goods::getDeleteFlag, false);
 
-                for (Goods goods : goodsService.list(goodsQueryWrapper)) {
-                    LambdaQueryWrapper<GoodsSku> skuQueryWrapper = new LambdaQueryWrapper<>();
-                    skuQueryWrapper.eq(GoodsSku::getGoodsId, goods.getId());
-                    skuQueryWrapper.eq(GoodsSku::getAuthFlag, GoodsAuthEnum.PASS.name());
-                    skuQueryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
-                    skuQueryWrapper.eq(GoodsSku::getDeleteFlag, false);
-
-                    List<GoodsSku> goodsSkuList = goodsSkuService.list(skuQueryWrapper);
-                    int skuSource = 100;
-                    for (GoodsSku goodsSku : goodsSkuList) {
-                        EsGoodsIndex esGoodsIndex = wrapperEsGoodsIndex(goodsSku, goods);
-                        esGoodsIndex.setSkuSource(skuSource--);
-                        esGoodsIndices.add(esGoodsIndex);
-                        //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
-                        cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
+                for (int i = 1; ; i++) {
+                    List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
+                    IPage<Goods> page = new Page<>(i, 1000);
+                    IPage<Goods> goodsIPage = goodsService.page(page, goodsQueryWrapper);
+                    if (goodsIPage == null || CollUtil.isEmpty(goodsIPage.getRecords())) {
+                        break;
                     }
-
+                    for (Goods goods : goodsIPage.getRecords()) {
+                        LambdaQueryWrapper<GoodsSku> skuQueryWrapper = new LambdaQueryWrapper<>();
+                        skuQueryWrapper.eq(GoodsSku::getGoodsId, goods.getId());
+                        skuQueryWrapper.eq(GoodsSku::getAuthFlag, GoodsAuthEnum.PASS.name());
+                        skuQueryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
+                        skuQueryWrapper.eq(GoodsSku::getDeleteFlag, false);
+                        for (int j = 1; ; j++) {
+                            IPage<GoodsSku> skuPage = new Page<>(j, 100);
+                            IPage<GoodsSku> skuIPage = goodsSkuService.page(skuPage, skuQueryWrapper);
+                            if (skuIPage == null || CollUtil.isEmpty(skuIPage.getRecords())) {
+                                break;
+                            }
+                            int skuSource = 100;
+                            for (GoodsSku goodsSku : skuIPage.getRecords()) {
+                                EsGoodsIndex esGoodsIndex = wrapperEsGoodsIndex(goodsSku, goods);
+                                esGoodsIndex.setSkuSource(skuSource--);
+                                esGoodsIndices.add(esGoodsIndex);
+                                //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
+                                cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
+                            }
+                        }
+                    }
+                    this.initIndex(esGoodsIndices);
                 }
 
+
                 //初始化商品索引
-                this.initIndex(esGoodsIndices);
             } catch (Exception e) {
                 log.error("商品索引生成异常：", e);
                 //如果出现异常，则将进行中的任务标识取消掉，打印日志
