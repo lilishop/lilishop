@@ -56,7 +56,7 @@ public class OnlineMemberStatistics implements EveryHourExecute {
 
         Calendar finalCalendar = calendar;
 
-        AtomicReference<Integer> lastNum = new AtomicReference<>(1);
+        AtomicReference<Integer> lastNum = new AtomicReference<>(0);
         onlineMemberVOS = onlineMemberVOS.stream()
                 .filter(onlineMemberVO -> {
                     lastNum.set(onlineMemberVO.getNum());
