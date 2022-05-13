@@ -162,7 +162,13 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         } else {
             newSkuList = new ArrayList<>();
             for (Map<String, Object> map : skuList) {
-                GoodsSku sku = new GoodsSku();
+                GoodsSku sku = null;
+                if (map.get("id") != null) {
+                    sku = this.getGoodsSkuByIdFromCache(map.get("id").toString());
+                }
+                if (sku == null || map.get("id") == null) {
+                    sku = new GoodsSku();
+                }
                 //设置商品信息
                 goodsInfo(sku, goods);
                 //设置商品规格信息
