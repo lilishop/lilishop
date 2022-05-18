@@ -179,7 +179,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                     this.clearCache(sku.getId());
                 }
             }
-            this.updateBatchById(newSkuList);
+            this.saveOrUpdateBatch(newSkuList);
         }
         this.updateStock(newSkuList);
         if (GoodsAuthEnum.PASS.name().equals(goods.getAuthFlag()) && !newSkuList.isEmpty()) {
