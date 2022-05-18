@@ -18,6 +18,8 @@ import java.util.List;
 @ToString
 public class CashierParam {
 
+    static Long MAX_DETAIL_LENGTH = 30L;
+
     @ApiModelProperty(value = "价格")
     private Double price;
 
@@ -48,7 +50,7 @@ public class CashierParam {
             return "清单详细";
         }
         //对参数长度进行限制
-        if (!StringUtils.isEmpty(detail) && detail.length() > 30) {
+        if (!StringUtils.isEmpty(detail) && detail.length() > MAX_DETAIL_LENGTH) {
             detail = detail.substring(30);
         }
         return StringUtils.filterSpecialChart(detail);
