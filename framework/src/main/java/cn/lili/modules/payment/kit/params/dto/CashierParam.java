@@ -49,10 +49,6 @@ public class CashierParam {
         if (StringUtils.isEmpty(detail)) {
             return "清单详细";
         }
-        //对参数长度进行限制
-        if (!StringUtils.isEmpty(detail) && detail.length() > MAX_DETAIL_LENGTH) {
-            detail = detail.substring(30);
-        }
-        return StringUtils.filterSpecialChart(detail);
+        return StringUtils.filterSpecialChart(StringUtils.sub(detail, 30));
     }
 }

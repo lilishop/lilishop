@@ -148,6 +148,20 @@ public class StringUtils extends StrUtil {
     }
 
     /**
+     * 切割字符串
+     *
+     * @param str    字符串
+     * @param length 长度
+     * @return 处理后的字符串
+     */
+    public static String sub(String str, Integer length) {
+        if (str.length() < length) {
+            return str;
+        }
+        return str.substring(0, length);
+    }
+
+    /**
      * 过滤特殊字符串
      *
      * @param str
