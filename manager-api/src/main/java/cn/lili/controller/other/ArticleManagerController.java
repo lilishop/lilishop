@@ -42,6 +42,14 @@ public class ArticleManagerController {
         return ResultUtil.data(articleService.getById(id));
     }
 
+    @ApiOperation(value = "根据类型查看文章")
+    @ApiImplicitParam(name = "type", value = "文章类型", required = true, dataType = "String", paramType = "path")
+    @GetMapping(value = "/type/{type}")
+    public ResultMessage<Article> getByType(@PathVariable String type) {
+
+        return ResultUtil.data(articleService.customGetByType(type));
+    }
+
     @ApiOperation(value = "分页获取")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "categoryId", value = "文章分类ID", paramType = "query"),
