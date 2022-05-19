@@ -211,4 +211,6 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * @return 全部skuId的集合
      */
     List<String> getSkuIdsByGoodsId(String goodsId);
+
+    boolean deleteAndInsertGoodsSkus(List<GoodsSku> goodsSkus);
 }
