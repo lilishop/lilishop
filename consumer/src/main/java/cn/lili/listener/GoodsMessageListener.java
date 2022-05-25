@@ -138,7 +138,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                     String goodsId = new String(messageExt.getBody());
                     log.info("生成索引: {}", goodsId);
                     Goods goods = this.goodsService.getById(goodsId);
-                    updateGoodsIndex(goods);
+                    this.updateGoodsIndex(goods);
                 } catch (Exception e) {
                     log.error("生成商品索引事件执行异常，商品信息: " + new String(messageExt.getBody()), e);
                 }
@@ -214,10 +214,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                         if (goodsById != null) {
                             this.deleteGoods(goodsById);
                             this.updateGoodsNum(goodsById);
-                            List<String> skuIdsByGoodsId = this.goodsSkuService.getSkuIdsByGoodsId(goodsId);
-                            if (skuIdsByGoodsId != null && !skuIdsByGoodsId.isEmpty()) {
-                                this.goodsIndexService.deleteIndexByIds(skuIdsByGoodsId);
-                            }
+                            goodsIndexService.deleteIndex(MapUtil.builder(new HashMap<String, Object>()).put("goodsId", goodsId).build());
                         }
                     }
 
@@ -392,6 +389,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 esGoodsIndices.add(goodsIndex);
             }
         }
+        this.goodsIndexService.deleteIndex(MapUtil.builder(new HashMap<String, Object>()).put("goodsId", goods.getId()).build());
         this.goodsIndexService.addIndex(esGoodsIndices);
     }
 
