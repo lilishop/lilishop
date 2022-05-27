@@ -1,5 +1,6 @@
 package cn.lili.modules.order.cart.service;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -11,11 +12,14 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
+import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.member.service.MemberAddressService;
@@ -124,6 +128,9 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private PromotionGoodsService promotionGoodsService;
 
+    @Autowired
+    private WholesaleService wholesaleService;
+
     @Override
     public void add(String skuId, Integer num, String cartType, Boolean cover) {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
@@ -193,6 +200,7 @@ public class CartServiceImpl implements CartService {
                 cartSkuVOS.add(cartSkuVO);
             }
 
+            this.checkGoodsSaleModel(dataSku, tradeDTO.getSkuList());
             tradeDTO.setCartTypeEnum(cartTypeEnum);
             //如购物车发生更改，则重置优惠券
             tradeDTO.setStoreCoupons(null);
@@ -554,12 +562,9 @@ public class CartServiceImpl implements CartService {
             goodsIndex = goodsIndexService.getResetEsGoodsIndex(dataSku, goodsVO.getGoodsParamsDTOList());
         }
         if (goodsIndex.getPromotionMap() != null && !goodsIndex.getPromotionMap().isEmpty()) {
-            if (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.SECKILL.name())) ||
-                    (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.PINTUAN.name()))
-                            && CartTypeEnum.PINTUAN.name().equals(cartType))) {
+            if (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.SECKILL.name())) || (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.PINTUAN.name())) && CartTypeEnum.PINTUAN.name().equals(cartType))) {
 
-                Optional<Map.Entry<String, Object>> containsPromotion = goodsIndex.getPromotionMap().entrySet().stream().filter(i ->
-                        i.getKey().contains(PromotionTypeEnum.SECKILL.name()) || i.getKey().contains(PromotionTypeEnum.PINTUAN.name())).findFirst();
+                Optional<Map.Entry<String, Object>> containsPromotion = goodsIndex.getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.SECKILL.name()) || i.getKey().contains(PromotionTypeEnum.PINTUAN.name())).findFirst();
                 if (containsPromotion.isPresent()) {
                     JSONObject promotionsObj = JSONUtil.parseObj(containsPromotion.get().getValue());
                     PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
@@ -706,6 +711,24 @@ public class CartServiceImpl implements CartService {
         } else if (cartTypeEnum.equals(CartTypeEnum.POINTS)) {
             //检测购物车的数量
             checkPoint(cartSkuVO);
+        }
+    }
+
+
+    private void checkGoodsSaleModel(GoodsSku dataSku, List<CartSkuVO> cartSkuVOS) {
+        if (dataSku.getSalesModel().equals(GoodsSalesModeEnum.WHOLESALE.name())) {
+            int numSum = 0;
+            List<CartSkuVO> sameGoodsIdSkuList = cartSkuVOS.stream().filter(i -> i.getGoodsSku().getGoodsId().equals(dataSku.getGoodsId())).collect(Collectors.toList());
+            if (CollUtil.isNotEmpty(sameGoodsIdSkuList)) {
+                numSum += sameGoodsIdSkuList.stream().mapToInt(CartSkuVO::getNum).sum();
+            }
+            Wholesale match = wholesaleService.match(dataSku.getGoodsId(), numSum);
+            if (match != null) {
+                sameGoodsIdSkuList.forEach(i -> {
+                    i.setPurchasePrice(match.getPrice());
+                    i.setSubTotal(CurrencyUtil.mul(i.getPurchasePrice(), i.getNum()));
+                });
+            }
         }
     }
 

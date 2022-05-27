@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Max;
@@ -24,6 +25,7 @@ import java.util.Date;
 @Data
 @TableName("li_goods_sku")
 @ApiModel(value = "商品sku对象")
+@NoArgsConstructor
 public class GoodsSku extends BaseEntity {
 
     private static final long serialVersionUID = 4865908658161118934L;
@@ -150,6 +152,9 @@ public class GoodsSku extends BaseEntity {
     @ApiModelProperty(value = "是否为推荐商品", required = true)
     private Boolean recommend;
 
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
+     */
     @ApiModelProperty(value = "销售模式", required = true)
     private String salesModel;
     /**
@@ -173,4 +178,36 @@ public class GoodsSku extends BaseEntity {
             return super.getUpdateTime();
         }
     }
+
+    /**
+     * 设置规格商品的基本商品信息
+     *
+     * @param goods 基本商品信息
+     */
+    public GoodsSku(Goods goods) {
+        //商品基本信息
+        this.goodsId = goods.getId();
+        this.goodsName = goods.getGoodsName();
+        this.goodsType = goods.getGoodsType();
+
+        this.selfOperated = goods.getSelfOperated();
+        this.sellingPoint = goods.getSellingPoint();
+        this.categoryPath = goods.getCategoryPath();
+        this.brandId = goods.getBrandId();
+        this.marketEnable = goods.getMarketEnable();
+        this.intro = goods.getIntro();
+        this.mobileIntro = goods.getMobileIntro();
+        this.goodsUnit = goods.getGoodsUnit();
+        this.grade = 100D;
+        //商品状态
+        this.authFlag = goods.getAuthFlag();
+        this.salesModel = goods.getSalesModel();
+        //卖家信息
+        this.storeId = goods.getStoreId();
+        this.storeName = goods.getStoreName();
+        this.storeCategoryPath = goods.getStoreCategoryPath();
+        this.freightTemplateId = goods.getTemplateId();
+        this.recommend = goods.getRecommend();
+    }
+
 }

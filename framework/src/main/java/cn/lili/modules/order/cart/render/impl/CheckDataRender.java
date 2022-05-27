@@ -1,5 +1,6 @@
 package cn.lili.modules.order.cart.render.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -7,10 +8,14 @@ import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
+import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -55,6 +60,9 @@ public class CheckDataRender implements CartRenderStep {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private WholesaleService wholesaleService;
+
 
     @Override
     public RenderStepEnums step() {
@@ -69,6 +77,7 @@ public class CheckDataRender implements CartRenderStep {
         //校验商品有效性
         checkData(tradeDTO);
 
+        preSaleModel(tradeDTO);
         //店铺分组数据初始化
         groupStore(tradeDTO);
 
@@ -212,4 +221,29 @@ public class CheckDataRender implements CartRenderStep {
 
     }
 
+
+    /**
+     * 商品销售模式特殊处理
+     *
+     * @param tradeDTO 交易信息
+     */
+    private void preSaleModel(TradeDTO tradeDTO) {
+        // 寻找同goods下销售模式为批发的商品
+        Map<String, List<CartSkuVO>> goodsGroup = tradeDTO.getSkuList().stream().filter(i -> i.getGoodsSku().getSalesModel().equals(GoodsSalesModeEnum.WHOLESALE.name())).collect(Collectors.groupingBy(i -> i.getGoodsSku().getGoodsId()));
+        if (CollUtil.isNotEmpty(goodsGroup)) {
+            goodsGroup.forEach((k, v) -> {
+                // 获取购买总数
+                int sum = v.stream().mapToInt(CartSkuVO::getNum).sum();
+                // 匹配符合的批发规则
+                Wholesale match = wholesaleService.match(k, sum);
+                if (match != null) {
+                    v.forEach(i -> {
+                        // 将符合规则的商品设置批发价格
+                        i.setPurchasePrice(match.getPrice());
+                        i.setSubTotal(CurrencyUtil.mul(i.getPurchasePrice(), i.getNum()));
+                    });
+                }
+            });
+        }
+    }
 }

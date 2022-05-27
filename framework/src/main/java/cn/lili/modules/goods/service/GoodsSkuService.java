@@ -3,6 +3,7 @@ package cn.lili.modules.goods.service;
 import cn.lili.cache.CachePrefix;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
@@ -43,19 +44,18 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     /**
      * 添加商品sku
      *
-     * @param skuList sku列表
-     * @param goods   商品信息
+     * @param goods             商品信息
+     * @param goodsOperationDTO 商品操作信息
      */
-    void add(List<Map<String, Object>> skuList, Goods goods);
+    void add(Goods goods, GoodsOperationDTO goodsOperationDTO);
 
     /**
      * 更新商品sku
      *
-     * @param skuList            sku列表
-     * @param goods              商品信息
-     * @param regeneratorSkuFlag 是否是否重新生成sku
+     * @param goods             商品信息
+     * @param goodsOperationDTO 商品操作信息
      */
-    void update(List<Map<String, Object>> skuList, Goods goods, Boolean regeneratorSkuFlag);
+    void update(Goods goods, GoodsOperationDTO goodsOperationDTO);
 
     /**
      * 更新商品sku
@@ -154,9 +154,9 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     /**
      * 更新商品sku状态根据店铺id
      *
-     * @param storeId 店铺id
+     * @param storeId      店铺id
      * @param marketEnable 市场启用状态
-     * @param authFlag 审核状态
+     * @param authFlag     审核状态
      */
     void updateGoodsSkuStatusByStoreId(String storeId, String marketEnable, String authFlag);
 
