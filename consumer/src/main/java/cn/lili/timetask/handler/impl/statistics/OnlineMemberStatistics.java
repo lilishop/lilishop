@@ -59,7 +59,8 @@ public class OnlineMemberStatistics implements EveryHourExecute {
         AtomicReference<Integer> lastNum = new AtomicReference<>(0);
         onlineMemberVOS = onlineMemberVOS.stream()
                 .filter(onlineMemberVO -> {
-                    if (onlineMemberVO.getDate().before(finalCalendar.getTime())) {
+                    //如果为过滤参数，则记录为过期参数，则为统一时段上一周期的在线人数
+                    if (!onlineMemberVO.getDate().after(finalCalendar.getTime())) {
                         lastNum.set(onlineMemberVO.getNum());
                     }
                     return onlineMemberVO.getDate().after(finalCalendar.getTime());
