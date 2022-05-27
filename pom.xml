@@ -26,11 +26,11 @@
         <images-version>1</images-version>
         <alipay-sdk-version>4.22.32.ALL</alipay-sdk-version>
         <mybatis-plus-version>3.5.1</mybatis-plus-version>
-        <Hutool-version>5.7.20</Hutool-version>
+        <Hutool-version>5.8.0</Hutool-version>
         <TinyPinyin-verions>2.0.3.RELEASE</TinyPinyin-verions>
         <jasypt-version>3.0.4</jasypt-version>
         <neetl-version>2.9.10</neetl-version>
-        <lombok-version>1.18.22</lombok-version>
+        <lombok-version>1.18.24</lombok-version>
         <redisson>3.15.6</redisson>
         <aliyun-version>4.5.18</aliyun-version>
         <aliyun-sdk-oss-version>3.11.1</aliyun-sdk-oss-version>

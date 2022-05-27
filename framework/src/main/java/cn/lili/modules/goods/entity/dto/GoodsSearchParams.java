@@ -77,6 +77,12 @@ public class GoodsSearchParams extends PageVO {
     @ApiModelProperty(value = "商品类型")
     private String goodsType;
 
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
+     */
+    @ApiModelProperty(value = "销售模式", required = true)
+    private String salesModel;
+
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
         if (CharSequenceUtil.isNotEmpty(goodsId)) {
@@ -120,6 +126,9 @@ public class GoodsSearchParams extends PageVO {
         }
         if (CharSequenceUtil.isNotEmpty(goodsType)) {
             queryWrapper.eq("goods_type", goodsType);
+        }
+        if (CharSequenceUtil.isNotEmpty(salesModel)) {
+            queryWrapper.eq("sales_model", salesModel);
         }
 
         queryWrapper.eq("delete_flag", false);

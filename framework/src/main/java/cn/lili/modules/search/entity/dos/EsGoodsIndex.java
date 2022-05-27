@@ -215,6 +215,7 @@ public class EsGoodsIndex implements Serializable {
 
     /**
      * 销售模式
+     * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
      */
     @Field(type = FieldType.Text)
     @ApiModelProperty("销售模式")

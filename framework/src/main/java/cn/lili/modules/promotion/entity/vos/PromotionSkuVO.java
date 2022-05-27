@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 促销skuVO
  *
@@ -15,7 +17,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PromotionSkuVO {
+public class PromotionSkuVO implements Serializable {
+
+    private static final long serialVersionUID = -8587010496940375179L;
 
     /**
      * 促销类型
