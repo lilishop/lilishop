@@ -41,6 +41,7 @@ public class WholesaleServiceImpl extends ServiceImpl<WholesaleMapper, Wholesale
     public Boolean removeByGoodsId(String goodsId) {
         LambdaQueryWrapper<Wholesale> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Wholesale::getGoodsId, goodsId);
+        cache.remove("{wholesale}_" + goodsId);
         return this.remove(queryWrapper);
     }
 

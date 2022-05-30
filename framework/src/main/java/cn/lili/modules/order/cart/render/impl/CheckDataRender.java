@@ -233,14 +233,20 @@ public class CheckDataRender implements CartRenderStep {
         if (CollUtil.isNotEmpty(goodsGroup)) {
             goodsGroup.forEach((k, v) -> {
                 // 获取购买总数
-                int sum = v.stream().mapToInt(CartSkuVO::getNum).sum();
+                int sum = v.stream().filter(i -> Boolean.TRUE.equals(i.getChecked())).mapToInt(CartSkuVO::getNum).sum();
+                int fSum = v.stream().filter(i -> Boolean.FALSE.equals(i.getChecked())).mapToInt(CartSkuVO::getNum).sum();
                 // 匹配符合的批发规则
                 Wholesale match = wholesaleService.match(k, sum);
                 if (match != null) {
                     v.forEach(i -> {
                         // 将符合规则的商品设置批发价格
-                        i.setPurchasePrice(match.getPrice());
-                        i.setSubTotal(CurrencyUtil.mul(i.getPurchasePrice(), i.getNum()));
+                        if (Boolean.TRUE.equals(i.getChecked())) {
+                            i.setPurchasePrice(match.getPrice());
+                            i.setSubTotal(CurrencyUtil.mul(i.getPurchasePrice(), i.getNum()));
+                        } else {
+                            i.setPurchasePrice(wholesaleService.match(k, fSum).getPrice());
+                            i.setSubTotal(CurrencyUtil.mul(i.getPurchasePrice(), i.getNum()));
+                        }
                     });
                 }
             });
