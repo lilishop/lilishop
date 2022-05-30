@@ -632,6 +632,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     void renderGoodsSkuList(List<GoodsSku> goodsSkuList, GoodsOperationDTO goodsOperationDTO) {
         // 商品销售模式渲染器
         salesModelRenders.stream().filter(i -> i.getSalesMode().equals(goodsOperationDTO.getSalesModel())).findFirst().ifPresent(i -> i.renderBatch(goodsSkuList, goodsOperationDTO));
+        for (GoodsSku goodsSku : goodsSkuList) {
+            this.renderImages(goodsSku);
+        }
     }
 
     /**
@@ -643,6 +646,21 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     void renderGoodsSku(GoodsSku goodsSku, GoodsOperationDTO goodsOperationDTO) {
         // 商品销售模式渲染器
         salesModelRenders.stream().filter(i -> i.getSalesMode().equals(goodsOperationDTO.getSalesModel())).findFirst().ifPresent(i -> i.renderSingle(goodsSku, goodsOperationDTO));
+        this.renderImages(goodsSku);
+    }
+
+    /**
+     * 渲染sku图片
+     *
+     * @param goodsSku
+     */
+    void renderImages(GoodsSku goodsSku) {
+        JSONObject jsonObject = JSONUtil.parseObj(goodsSku.getSpecs());
+        List<Map<String, String>> images = jsonObject.get("images", List.class);
+        if (images != null && !images.isEmpty()) {
+            goodsSku.setThumbnail(goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getThumbnail());
+            goodsSku.setSmall(goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getSmall());
+        }
     }
 
     /**

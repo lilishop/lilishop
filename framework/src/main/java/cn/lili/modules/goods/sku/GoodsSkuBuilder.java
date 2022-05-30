@@ -71,16 +71,18 @@ public class GoodsSkuBuilder {
         Map<String, Object> specMap = new HashMap<>(16);
 
         // 原始规格项
-        String[] ignoreOriginKeys = {"id", "sn", "cost", "price", "quantity", "weight", IMAGES_KEY};
+        String[] ignoreOriginKeys = {"id", "sn", "cost", "price", "quantity", "weight"};
         //获取规格信息
         for (Map.Entry<String, Object> spec : skuInfo.entrySet()) {
             //保存新增规格信息
             if (!CollUtil.contains(Arrays.asList(ignoreOriginKeys), spec.getKey()) && spec.getValue() != null) {
                 specMap.put(spec.getKey(), spec.getValue());
-                //设置商品名称
-                goodsName.append(" ").append(spec.getValue());
-                //规格简短信息
-                simpleSpecs.append(" ").append(spec.getValue());
+                if (!spec.getKey().equals(IMAGES_KEY)) {
+                    //设置商品名称
+                    goodsName.append(" ").append(spec.getValue());
+                    //规格简短信息
+                    simpleSpecs.append(" ").append(spec.getValue());
+                }
             }
         }
         //设置规格信息
