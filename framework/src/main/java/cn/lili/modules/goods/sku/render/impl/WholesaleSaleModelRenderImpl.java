@@ -37,11 +37,9 @@ public class WholesaleSaleModelRenderImpl implements SalesModelRender {
     @Transactional(rollbackFor = Exception.class)
     public void renderSingle(GoodsSku goodsSku, GoodsOperationDTO goodsOperationDTO) {
         Assert.notEmpty(goodsOperationDTO.getWholesaleList(), "批发规则不能为空");
-        this.checkWholesaleList(goodsOperationDTO.getWholesaleList());
+        this.checkWholesaleList(goodsOperationDTO.getWholesaleList(), goodsSku);
         List<Wholesale> collect = goodsOperationDTO.getWholesaleList().stream().sorted(Comparator.comparing(Wholesale::getPrice)).collect(Collectors.toList());
-        if (CharSequenceUtil.isNotEmpty(goodsOperationDTO.getGoodsId())) {
-            wholesaleService.removeByGoodsId(goodsOperationDTO.getGoodsId());
-        }
+        wholesaleService.removeByGoodsId(goodsSku.getGoodsId());
         wholesaleService.saveOrUpdateBatch(collect);
         goodsSku.setPrice(collect.get(0).getPrice());
         goodsSku.setCost(collect.get(0).getPrice());
@@ -51,19 +49,17 @@ public class WholesaleSaleModelRenderImpl implements SalesModelRender {
     @Transactional(rollbackFor = Exception.class)
     public void renderBatch(List<GoodsSku> goodsSkus, GoodsOperationDTO goodsOperationDTO) {
         Assert.notEmpty(goodsOperationDTO.getWholesaleList(), "批发规则不能为空");
-        this.checkWholesaleList(goodsOperationDTO.getWholesaleList());
+        this.checkWholesaleList(goodsOperationDTO.getWholesaleList(), goodsSkus.get(0));
         List<Wholesale> collect = goodsOperationDTO.getWholesaleList().stream().sorted(Comparator.comparing(Wholesale::getPrice)).collect(Collectors.toList());
         for (GoodsSku skus : goodsSkus) {
             skus.setPrice(collect.get(0).getPrice());
             skus.setCost(collect.get(0).getPrice());
         }
-        if (CharSequenceUtil.isNotEmpty(goodsOperationDTO.getGoodsId())) {
-            wholesaleService.removeByGoodsId(goodsOperationDTO.getGoodsId());
-        }
+        wholesaleService.removeByGoodsId(goodsSkus.get(0).getGoodsId());
         wholesaleService.saveOrUpdateBatch(collect);
     }
 
-    private void checkWholesaleList(List<WholesaleDTO> wholesaleList) {
+    private void checkWholesaleList(List<WholesaleDTO> wholesaleList, GoodsSku goodsSku) {
         if (CollUtil.isEmpty(wholesaleList)) {
             throw new ServiceException(ResultCode.MUST_HAVE_SALES_MODEL);
         }
@@ -71,6 +67,10 @@ public class WholesaleSaleModelRenderImpl implements SalesModelRender {
             if (wholesaleDTO.getPrice() == null || wholesaleDTO.getPrice() <= 0 || wholesaleDTO.getNum() == null || wholesaleDTO.getNum() <= 0) {
                 throw new ServiceException(ResultCode.HAVE_INVALID_SALES_MODEL);
             }
+            if (CharSequenceUtil.isEmpty(wholesaleDTO.getGoodsId())) {
+                wholesaleDTO.setGoodsId(goodsSku.getGoodsId());
+            }
+
         }
     }
 
