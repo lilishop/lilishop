@@ -121,7 +121,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
                     rocketmqCustomProperties.getPromotionTopic());
 
             //直播间结束
-            broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.START.name());
+            broadcastMessage = new BroadcastMessage(studio.getId(), StudioStatusEnum.END.name());
             this.timeTrigger.edit(
                     TimeExecuteConstant.BROADCAST_EXECUTOR,
                     broadcastMessage,
