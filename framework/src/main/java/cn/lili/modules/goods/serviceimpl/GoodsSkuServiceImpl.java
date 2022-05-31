@@ -167,12 +167,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             skuList = new ArrayList<>();
             for (Map<String, Object> map : goodsOperationDTO.getSkuList()) {
                 GoodsSku sku = null;
-                if (map.get("id") != null) {
-                    sku = GoodsSkuBuilder.build(this.getGoodsSkuByIdFromCache(map.get("id").toString()), map, goodsOperationDTO);
-                }
-                if (sku == null || map.get("id") == null) {
-                    sku = GoodsSkuBuilder.build(goods, map, goodsOperationDTO);
-                }
+                sku = GoodsSkuBuilder.build(goods, map, goodsOperationDTO);
                 renderGoodsSku(sku, goodsOperationDTO);
                 skuList.add(sku);
                 //如果商品状态值不对，则es索引移除
