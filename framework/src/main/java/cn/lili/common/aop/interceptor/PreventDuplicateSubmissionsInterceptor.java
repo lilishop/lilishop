@@ -36,8 +36,8 @@ public class PreventDuplicateSubmissionsInterceptor {
 
         try {
             Long count = cache.incr(getParams(), preventDuplicateSubmissions.expire());
-            //如果超过1或者设置的参数，则表示重复提交了
-            if (count.intValue() >= 1) {
+            //如果超过2或者设置的参数，则表示重复提交了
+            if (count.intValue() >= 2) {
                 throw new ServiceException(ResultCode.LIMIT_ERROR);
             }
         }

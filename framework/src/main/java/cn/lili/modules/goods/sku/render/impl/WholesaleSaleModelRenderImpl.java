@@ -2,6 +2,7 @@ package cn.lili.modules.goods.sku.render.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -38,7 +39,9 @@ public class WholesaleSaleModelRenderImpl implements SalesModelRender {
         Assert.notEmpty(goodsOperationDTO.getWholesaleList(), "批发规则不能为空");
         this.checkWholesaleList(goodsOperationDTO.getWholesaleList());
         List<Wholesale> collect = goodsOperationDTO.getWholesaleList().stream().sorted(Comparator.comparing(Wholesale::getPrice)).collect(Collectors.toList());
-        wholesaleService.removeByGoodsId(goodsOperationDTO.getGoodsId());
+        if (CharSequenceUtil.isNotEmpty(goodsOperationDTO.getGoodsId())) {
+            wholesaleService.removeByGoodsId(goodsOperationDTO.getGoodsId());
+        }
         wholesaleService.saveOrUpdateBatch(collect);
         goodsSku.setPrice(collect.get(0).getPrice());
         goodsSku.setCost(collect.get(0).getPrice());
@@ -54,7 +57,9 @@ public class WholesaleSaleModelRenderImpl implements SalesModelRender {
             skus.setPrice(collect.get(0).getPrice());
             skus.setCost(collect.get(0).getPrice());
         }
-        wholesaleService.removeByGoodsId(goodsOperationDTO.getGoodsId());
+        if (CharSequenceUtil.isNotEmpty(goodsOperationDTO.getGoodsId())) {
+            wholesaleService.removeByGoodsId(goodsOperationDTO.getGoodsId());
+        }
         wholesaleService.saveOrUpdateBatch(collect);
     }
 
