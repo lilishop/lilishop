@@ -709,6 +709,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @return 是否成功
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean checkFictitiousOrder(String pintuanId, Integer requiredNum, Boolean fictitious) {
         Map<String, List<Order>> collect = this.queryListByPromotion(pintuanId)
                 .stream().collect(Collectors.groupingBy(Order::getParentOrderSn));
@@ -813,7 +814,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             //如果为开团订单，则发布一个一小时的延时任务，时间到达后，如果未成团则自动结束（未开启虚拟成团的情况下）
             PintuanOrderMessage pintuanOrderMessage = new PintuanOrderMessage();
             //开团结束时间
-//            long startTime = DateUtil.offsetHour(new Date(), 1).getTime();
             long startTime = DateUtil.offsetMinute(new Date(), 2).getTime();
             pintuanOrderMessage.setOrderSn(parentOrderSn);
             pintuanOrderMessage.setPintuanId(pintuanId);
