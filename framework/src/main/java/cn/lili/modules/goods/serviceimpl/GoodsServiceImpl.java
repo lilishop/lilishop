@@ -278,6 +278,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean auditGoods(List<String> goodsIds, GoodsAuthEnum goodsAuthEnum) {
+        List<String> goodsCacheKeys = new ArrayList<>();
         boolean result = false;
         for (String goodsId : goodsIds) {
             Goods goods = this.checkExist(goodsId);
@@ -285,12 +286,13 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             result = this.updateById(goods);
             goodsSkuService.updateGoodsSkuStatus(goods);
             //删除之前的缓存
-            cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
+            goodsCacheKeys.add(CachePrefix.GOODS.getPrefix() + goodsId);
             //商品审核消息
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_AUDIT.name();
             //发送mq消息
             rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goods), RocketmqSendCallbackBuilder.commonCallback());
         }
+        cache.multiDel(goodsCacheKeys);
         return result;
     }
 
@@ -382,14 +384,15 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         LambdaQueryWrapper<Goods> queryWrapper = this.getQueryWrapperByStoreAuthority();
         queryWrapper.in(Goods::getId, goodsIds);
         List<Goods> goodsList = this.list(queryWrapper);
+        List<String> goodsCacheKeys = new ArrayList<>();
         for (Goods goods : goodsList) {
             //修改SKU状态
             goodsSkuService.updateGoodsSkuStatus(goods);
-            cache.remove(CachePrefix.GOODS.getPrefix() + goods.getId());
+            goodsCacheKeys.add(CachePrefix.GOODS.getPrefix() + goods.getId());
         }
-
+        //删除缓存
+        cache.multiDel(goodsCacheKeys);
         this.deleteEsGoods(goodsIds);
-
         return true;
     }
 
@@ -482,12 +485,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
      * @param goodsList       商品列表
      */
     private void updateGoodsStatus(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, List<Goods> goodsList) {
+        List<String> goodsCacheKeys = new ArrayList<>();
         for (Goods goods : goodsList) {
-            if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
-                cache.remove(CachePrefix.GOODS.getPrefix() + goods.getId());
-            }
+            goodsCacheKeys.add(CachePrefix.GOODS.getPrefix() + goods.getId());
             goodsSkuService.updateGoodsSkuStatus(goods);
         }
+        cache.multiDel(goodsCacheKeys);
 
         if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
             this.deleteEsGoods(goodsIds);
