@@ -410,28 +410,28 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
      * @param searchDTO
      */
     private void recommended(BoolQueryBuilder filterBuilder, EsGoodsSearchDTO searchDTO) {
-        EsGoodsIndex currentGoodsIndice = null;
-        if(CharSequenceUtil.isNotEmpty(searchDTO.getCurrentGoodsId())){
-            //查询当前商品的信息
-            NativeSearchQueryBuilder searchQueryBuilder = new NativeSearchQueryBuilder();
-            NativeSearchQuery build = searchQueryBuilder.build();
-            build.setIds(Arrays.asList(searchDTO.getCurrentGoodsId()));
-            List<EsGoodsIndex> esGoodsIndices = restTemplate.multiGet(build, EsGoodsIndex.class, restTemplate.getIndexCoordinatesFor(EsGoodsIndex.class));
-            if(esGoodsIndices==null || esGoodsIndices.size()<1){
-                return;
-            }
-            currentGoodsIndice = esGoodsIndices.get(0);
+
+        String currentGoodsId = searchDTO.getCurrentGoodsId();
+        if(CharSequenceUtil.isEmpty(currentGoodsId)) {
+            return;
         }
-        //推荐相同分类的商品
-        String categoryPath = currentGoodsIndice.getCategoryPath();
+
+        //排除当前商品
+        filterBuilder.mustNot(QueryBuilders.matchQuery("id",currentGoodsId));
+
+        //查询当前浏览商品的索引信息
+        EsGoodsIndex esGoodsIndex = restTemplate.get(currentGoodsId, EsGoodsIndex.class);
+        if(esGoodsIndex==null) {
+            return;
+        }
+        //推荐与当前浏览商品相同一个二级分类下的商品
+        String categoryPath = esGoodsIndex.getCategoryPath();
         if(CharSequenceUtil.isNotEmpty(categoryPath)){
             //匹配二级分类
             String substring = categoryPath.substring(0, categoryPath.lastIndexOf(","));
             filterBuilder.must(QueryBuilders.wildcardQuery("categoryPath",substring+"*"));
         }
 
-        //排除当前商品
-        filterBuilder.mustNot(QueryBuilders.matchQuery("id",searchDTO.getCurrentGoodsId()));
     }
 
     /**
