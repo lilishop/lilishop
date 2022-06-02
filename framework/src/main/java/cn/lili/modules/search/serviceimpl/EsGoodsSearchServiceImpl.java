@@ -363,6 +363,9 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             //对查询条件进行处理
             this.commonSearch(filterBuilder, searchDTO);
 
+            //智能推荐
+            this.recommended(filterBuilder,searchDTO);
+
             //未上架的商品不显示
             filterBuilder.must(QueryBuilders.matchQuery("marketEnable", GoodsStatusEnum.UPPER.name()));
             //待审核和审核不通过的商品不显示
@@ -399,6 +402,36 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
         }
         return nativeSearchQueryBuilder;
+    }
+
+    /**
+     * 商品推荐
+     * @param filterBuilder
+     * @param searchDTO
+     */
+    private void recommended(BoolQueryBuilder filterBuilder, EsGoodsSearchDTO searchDTO) {
+
+        String currentGoodsId = searchDTO.getCurrentGoodsId();
+        if(CharSequenceUtil.isEmpty(currentGoodsId)) {
+            return;
+        }
+
+        //排除当前商品
+        filterBuilder.mustNot(QueryBuilders.matchQuery("id",currentGoodsId));
+
+        //查询当前浏览商品的索引信息
+        EsGoodsIndex esGoodsIndex = restTemplate.get(currentGoodsId, EsGoodsIndex.class);
+        if(esGoodsIndex==null) {
+            return;
+        }
+        //推荐与当前浏览商品相同一个二级分类下的商品
+        String categoryPath = esGoodsIndex.getCategoryPath();
+        if(CharSequenceUtil.isNotEmpty(categoryPath)){
+            //匹配二级分类
+            String substring = categoryPath.substring(0, categoryPath.lastIndexOf(","));
+            filterBuilder.must(QueryBuilders.wildcardQuery("categoryPath",substring+"*"));
+        }
+
     }
 
     /**
