@@ -117,4 +117,8 @@ public class CartSkuVO extends CartBase implements Serializable {
     public Map<String, Object> getPromotionMap() {
         return PromotionTools.filterInvalidPromotionsMap(this.promotionMap);
     }
+
+    public Map<String, Object> getNotFilterPromotionMap() {
+        return this.promotionMap;
+    }
 }

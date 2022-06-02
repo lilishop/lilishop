@@ -31,6 +31,7 @@ import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dos.PointsGoods;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
+import cn.lili.modules.promotion.service.PromotionGoodsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,6 +64,11 @@ public class CheckDataRender implements CartRenderStep {
     @Autowired
     private WholesaleService wholesaleService;
 
+    /**
+     * 商品索引
+     */
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
 
     @Override
     public RenderStepEnums step() {
@@ -127,6 +133,17 @@ public class CheckDataRender implements CartRenderStep {
                 //设置失效消息
                 cartSkuVO.setErrorMessage("商品库存不足,现有库存数量[" + dataSku.getQuantity() + "]");
             }
+            //如果存在商品促销活动，则判定商品促销状态
+            if (CollUtil.isNotEmpty(cartSkuVO.getNotFilterPromotionMap()) || Boolean.TRUE.equals(cartSkuVO.getGoodsSku().getPromotionFlag())) {
+                //获取当前最新的促销信息
+                cartSkuVO.setPromotionMap(this.promotionGoodsService.getCurrentGoodsPromotion(cartSkuVO.getGoodsSku(), tradeDTO.getCartTypeEnum().name()));
+                //设定商品价格
+                Double goodsPrice = cartSkuVO.getGoodsSku().getPromotionFlag() != null && cartSkuVO.getGoodsSku().getPromotionFlag() ? cartSkuVO.getGoodsSku().getPromotionPrice() : cartSkuVO.getGoodsSku().getPrice();
+                cartSkuVO.setPurchasePrice(goodsPrice);
+                cartSkuVO.setUtilPrice(goodsPrice);
+                cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
+            }
+
         }
     }
 
