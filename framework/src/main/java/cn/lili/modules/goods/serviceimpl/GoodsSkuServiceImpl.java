@@ -506,18 +506,14 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateGoodsStuck(List<GoodsSku> goodsSkus) {
-        //商品id集合 hashset 去重复
-        Set<String> goodsIds = new HashSet<>();
-        for (GoodsSku sku : goodsSkus) {
-            goodsIds.add(sku.getGoodsId());
-        }
+        Map<String, List<GoodsSku>> groupByGoodsIds = goodsSkus.stream().collect(Collectors.groupingBy(GoodsSku::getGoodsId));
         //获取相关的sku集合
         LambdaQueryWrapper<GoodsSku> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.in(GoodsSku::getGoodsId, goodsIds);
+        lambdaQueryWrapper.in(GoodsSku::getGoodsId, groupByGoodsIds.keySet());
         List<GoodsSku> goodsSkuList = this.list(lambdaQueryWrapper);
 
         //统计每个商品的库存
-        for (String goodsId : goodsIds) {
+        for (String goodsId : groupByGoodsIds.keySet()) {
             //库存
             Integer quantity = 0;
             for (GoodsSku goodsSku : goodsSkuList) {
