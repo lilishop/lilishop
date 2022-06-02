@@ -3,6 +3,8 @@ package cn.lili.modules.store.serviceimpl;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.json.JSONUtil;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
@@ -64,9 +66,17 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
 
+    @Autowired
+    private Cache cache;
+
     @Override
     public StoreDetailVO getStoreDetailVO(String storeId) {
-        return this.baseMapper.getStoreDetail(storeId);
+        StoreDetailVO storeDetailVO = (StoreDetailVO) cache.get(CachePrefix.STORE.getPrefix() + storeId);
+        if (storeDetailVO == null) {
+            storeDetailVO = this.baseMapper.getStoreDetail(storeId);
+            cache.put(CachePrefix.STORE.getPrefix() + storeId, storeDetailVO, 7200L);
+        }
+        return storeDetailVO;
     }
 
     @Override

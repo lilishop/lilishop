@@ -469,10 +469,22 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         return this.count(
                 new LambdaQueryWrapper<Goods>()
                         .eq(Goods::getStoreId, storeId)
+                        .eq(Goods::getDeleteFlag, Boolean.FALSE)
                         .eq(Goods::getAuthFlag, GoodsAuthEnum.PASS.name())
                         .eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name()));
     }
 
+
+
+    /**
+     * 更新店铺商品数量
+     *
+     * @param storeId 信息体
+     */
+    void updateGoodsNum(String storeId) {
+        Long num = goodsSkuService.countSkuNum(storeId);
+        storeService.updateStoreGoodsNum(storeId, num);
+    }
 
     /**
      * 更新商品状态

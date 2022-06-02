@@ -270,12 +270,10 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     }
 
     @Override
-    public void updateStoreGoodsNum(String storeId) {
-        //获取店铺已上架已审核通过商品数量
-        long goodsNum = goodsService.countStoreGoodsNum(storeId);
+    public void updateStoreGoodsNum(String storeId, Long num) {
         //修改店铺商品数量
         this.update(new LambdaUpdateWrapper<Store>()
-                .set(Store::getGoodsNum, goodsNum)
+                .set(Store::getGoodsNum, num)
                 .eq(Store::getId, storeId));
     }
 

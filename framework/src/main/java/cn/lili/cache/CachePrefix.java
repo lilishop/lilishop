@@ -466,6 +466,10 @@ public enum CachePrefix {
     INIT_INDEX_FLAG,
 
     /**
+     * 店铺
+     */
+    STORE,
+    /**
      * 店铺分类
      */
     STORE_CATEGORY,

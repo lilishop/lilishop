@@ -601,6 +601,18 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         return count > 0;
     }
 
+    @Override
+    public Long countSkuNum(String storeId) {
+        LambdaQueryWrapper<GoodsSku> queryWrapper = new LambdaQueryWrapper<>();
+
+        queryWrapper
+                .eq(GoodsSku::getStoreId, storeId)
+                .eq(GoodsSku::getDeleteFlag, Boolean.FALSE)
+                .eq(GoodsSku::getAuthFlag, GoodsAuthEnum.PASS.name())
+                .eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
+        return this.count(queryWrapper);
+    }
+
     /**
      * 修改库存
      *

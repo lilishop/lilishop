@@ -106,8 +106,9 @@ public interface StoreService extends IService<Store> {
      * 更新店铺商品数量
      *
      * @param storeId 店铺ID
+     * @param num     商品数量
      */
-    void updateStoreGoodsNum(String storeId);
+    void updateStoreGoodsNum(String storeId, Long num);
 
     /**
      * 更新店铺收藏数量

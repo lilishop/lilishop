@@ -61,11 +61,6 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
     @Autowired
     private EsGoodsIndexService goodsIndexService;
     /**
-     * 店铺
-     */
-    @Autowired
-    private StoreService storeService;
-    /**
      * 商品
      */
     @Autowired
@@ -202,7 +197,6 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
             //审核商品
             case GOODS_AUDIT:
                 Goods goods = JSONUtil.toBean(new String(messageExt.getBody()), Goods.class);
-                updateGoodsNum(goods);
                 updateGoodsIndex(goods);
                 break;
             //删除商品
@@ -213,7 +207,6 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                         Goods goodsById = this.goodsService.getById(goodsId);
                         if (goodsById != null) {
                             this.deleteGoods(goodsById);
-                            this.updateGoodsNum(goodsById);
                             goodsIndexService.deleteIndex(MapUtil.builder(new HashMap<String, Object>()).put("goodsId", goodsId).build());
                         }
                     }
@@ -458,22 +451,6 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
             distributionGoodsService.removeById(distributionGoods.getId());
         }
     }
-
-    /**
-     * 修改商品数量
-     *
-     * @param goods 信息体
-     */
-    private void updateGoodsNum(Goods goods) {
-        try {
-            //更新店铺商品数量
-            assert goods != null;
-            storeService.updateStoreGoodsNum(goods.getStoreId());
-        } catch (Exception e) {
-            log.error("修改商品数量错误");
-        }
-    }
-
     /**
      * 商品购买完成
      * 1.更新商品购买数量
