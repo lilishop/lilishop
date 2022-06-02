@@ -16,7 +16,6 @@ import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
-import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.goods.service.WholesaleService;
@@ -36,10 +35,8 @@ import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.entity.vo.ReceiptVO;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivity;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
-import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.search.KanjiaActivitySearchParams;
 import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
-import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
@@ -139,7 +136,7 @@ public class CartServiceImpl implements CartService {
         }
         CartTypeEnum cartTypeEnum = getCartType(cartType);
         GoodsSku dataSku = checkGoods(skuId);
-        Map<String, Object> promotionMap = this.getCurrentGoodsPromotion(dataSku, cartType);
+        Map<String, Object> promotionMap = promotionGoodsService.getCurrentGoodsPromotion(dataSku, cartType);
 
         try {
             //购物车方式购买需要保存之前的选择，其他方式购买，则直接抹除掉之前的记录
@@ -552,39 +549,6 @@ public class CartServiceImpl implements CartService {
         Trade trade = tradeBuilder.createTrade(tradeDTO);
         this.cleanChecked(this.readDTO(cartTypeEnum));
         return trade;
-    }
-
-    private Map<String, Object> getCurrentGoodsPromotion(GoodsSku dataSku, String cartType) {
-        Map<String, Object> promotionMap;
-        EsGoodsIndex goodsIndex = goodsIndexService.findById(dataSku.getId());
-        if (goodsIndex == null) {
-            GoodsVO goodsVO = this.goodsService.getGoodsVO(dataSku.getGoodsId());
-            goodsIndex = goodsIndexService.getResetEsGoodsIndex(dataSku, goodsVO.getGoodsParamsDTOList());
-        }
-        if (goodsIndex.getPromotionMap() != null && !goodsIndex.getPromotionMap().isEmpty()) {
-            if (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.SECKILL.name())) || (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.PINTUAN.name())) && CartTypeEnum.PINTUAN.name().equals(cartType))) {
-
-                Optional<Map.Entry<String, Object>> containsPromotion = goodsIndex.getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.SECKILL.name()) || i.getKey().contains(PromotionTypeEnum.PINTUAN.name())).findFirst();
-                if (containsPromotion.isPresent()) {
-                    JSONObject promotionsObj = JSONUtil.parseObj(containsPromotion.get().getValue());
-                    PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
-                    searchParams.setSkuId(dataSku.getId());
-                    searchParams.setPromotionId(promotionsObj.get("id").toString());
-                    PromotionGoods promotionsGoods = promotionGoodsService.getPromotionsGoods(searchParams);
-                    if (promotionsGoods != null && promotionsGoods.getPrice() != null) {
-                        dataSku.setPromotionFlag(true);
-                        dataSku.setPromotionPrice(promotionsGoods.getPrice());
-                    } else {
-                        dataSku.setPromotionFlag(false);
-                        dataSku.setPromotionPrice(null);
-                    }
-                }
-            }
-            promotionMap = goodsIndex.getPromotionMap();
-        } else {
-            promotionMap = null;
-        }
-        return promotionMap;
     }
 
 
