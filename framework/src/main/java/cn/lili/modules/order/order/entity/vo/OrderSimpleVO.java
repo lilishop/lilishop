@@ -2,7 +2,6 @@ package cn.lili.modules.order.order.entity.vo;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ClientTypeEnum;
-import cn.lili.modules.order.order.entity.enums.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
