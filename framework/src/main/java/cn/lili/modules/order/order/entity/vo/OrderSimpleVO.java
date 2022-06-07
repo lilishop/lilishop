@@ -1,8 +1,7 @@
 package cn.lili.modules.order.order.entity.vo;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ClientTypeEnum;
-import cn.lili.common.utils.StringUtils;
-import cn.lili.modules.order.order.entity.enums.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -135,26 +134,52 @@ public class OrderSimpleVO {
     private String deliverStatus;
 
     public List<OrderItemVO> getOrderItems() {
-        if (StringUtils.isEmpty(groupGoodsId)) {
+        if (CharSequenceUtil.isEmpty(groupGoodsId)) {
             return new ArrayList<>();
         }
         List<OrderItemVO> orderItemVOS = new ArrayList<>();
-        String[] orderItemsSn = groupOrderItemsSn.split(",");
+
+
         String[] goodsId = groupGoodsId.split(",");
-        String[] skuId = groupSkuId.split(",");
-        String[] num = groupNum.split(",");
-        String[] image = groupImages.split(",");
-        String[] name = groupName.split(",");
-        String[] afterSaleStatus = groupAfterSaleStatus.split(",");
-        String[] complainStatus = groupComplainStatus.split(",");
-        String[] commentStatus = groupCommentStatus.split(",");
-        String[] goodsPrice = groupGoodsPrice.split(",");
 
         for (int i = 0; i < goodsId.length; i++) {
-            orderItemVOS.add(new OrderItemVO(orderItemsSn[i], goodsId[i], skuId[i], num[i], image[i], name[i], afterSaleStatus[i], complainStatus[i], commentStatus[i], Double.parseDouble(goodsPrice[i])));
+            orderItemVOS.add(this.getOrderItemVO(i));
         }
         return orderItemVOS;
 
+    }
+
+    private OrderItemVO getOrderItemVO(int i) {
+        OrderItemVO orderItemVO = new OrderItemVO();
+        orderItemVO.setGoodsId(groupGoodsId.split(",")[i]);
+        if (CharSequenceUtil.isNotEmpty(groupOrderItemsSn)) {
+            orderItemVO.setSn(groupOrderItemsSn.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupSkuId)) {
+            orderItemVO.setSkuId(groupSkuId.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupName)) {
+            orderItemVO.setName(groupName.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupNum) && groupNum.split(",").length == groupGoodsId.split(",").length) {
+            orderItemVO.setNum(groupNum.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupImages) && groupImages.split(",").length == groupGoodsId.split(",").length) {
+            orderItemVO.setImage(groupImages.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupAfterSaleStatus) && groupAfterSaleStatus.split(",").length == groupGoodsId.split(",").length) {
+            orderItemVO.setAfterSaleStatus(groupAfterSaleStatus.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupComplainStatus) && groupComplainStatus.split(",").length == groupGoodsId.split(",").length) {
+            orderItemVO.setComplainStatus(groupComplainStatus.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupCommentStatus) && groupCommentStatus.split(",").length == groupGoodsId.split(",").length) {
+            orderItemVO.setCommentStatus(groupCommentStatus.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupGoodsPrice) && groupGoodsPrice.split(",").length == groupGoodsId.split(",").length) {
+            orderItemVO.setGoodsPrice(Double.parseDouble(groupGoodsPrice.split(",")[i]));
+        }
+        return orderItemVO;
     }
 
     /**
