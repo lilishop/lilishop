@@ -1,15 +1,22 @@
 package cn.lili.modules.file.plugin;
 
+import cn.lili.modules.file.entity.enums.OssEnum;
+
 import java.io.InputStream;
 import java.util.List;
 
 /**
- * 文件管理插件
+ * 文件插件接口
  *
  * @author Chopper
  */
-public interface FileManagerPlugin {
+public interface FilePlugin {
 
+
+    /**
+     * 插件名称
+     */
+    OssEnum pluginName();
 
     /**
      * 文件路径上传

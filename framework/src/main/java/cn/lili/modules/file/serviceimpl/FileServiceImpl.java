@@ -9,7 +9,8 @@ import cn.lili.common.vo.SearchVO;
 import cn.lili.modules.file.entity.File;
 import cn.lili.modules.file.entity.dto.FileOwnerDTO;
 import cn.lili.modules.file.mapper.FileMapper;
-import cn.lili.modules.file.plugin.FileManagerPlugin;
+import cn.lili.modules.file.plugin.FilePlugin;
+import cn.lili.modules.file.plugin.FilePluginFactory;
 import cn.lili.modules.file.service.FileService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -31,7 +32,7 @@ import java.util.List;
 public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements FileService {
 
     @Autowired
-    private FileManagerPlugin fileManagerPlugin;
+    private FilePluginFactory filePluginFactory;
 
     @Override
     public void batchDelete(List<String> ids) {
@@ -42,7 +43,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
         List<File> files = this.list(queryWrapper);
         List<String> keys = new ArrayList<>();
         files.forEach(item -> keys.add(item.getFileKey()));
-        fileManagerPlugin.deleteFile(keys);
+        filePluginFactory.filePlugin().deleteFile(keys);
         this.remove(queryWrapper);
     }
 
@@ -68,7 +69,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
         List<File> files = this.list(queryWrapper);
         List<String> keys = new ArrayList<>();
         files.forEach(item -> keys.add(item.getFileKey()));
-        fileManagerPlugin.deleteFile(keys);
+        filePluginFactory.filePlugin().deleteFile(keys);
         this.remove(queryWrapper);
     }
 

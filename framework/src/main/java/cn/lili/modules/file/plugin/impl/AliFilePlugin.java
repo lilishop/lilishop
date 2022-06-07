@@ -1,23 +1,17 @@
 package cn.lili.modules.file.plugin.impl;
 
-import cn.hutool.core.util.StrUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.modules.file.plugin.FileManagerPlugin;
-import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.file.entity.enums.OssEnum;
+import cn.lili.modules.file.plugin.FilePlugin;
 import cn.lili.modules.system.entity.dto.OssSetting;
-import cn.lili.modules.system.entity.enums.SettingEnum;
-import cn.lili.modules.system.service.SettingService;
 import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.OSSException;
 import com.aliyun.oss.model.DeleteObjectsRequest;
 import com.aliyun.oss.model.ObjectMetadata;
-import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.InputStream;
@@ -29,28 +23,19 @@ import java.util.List;
  * @author Chopper
  */
 
-@Component
 @Slf4j
-public class AliFileManagerPlugin implements FileManagerPlugin {
+public class AliFilePlugin implements FilePlugin {
 
-    @Autowired
-    private SettingService settingService;
+    private OssSetting ossSetting;
 
-    /**
-     * 下一个初始化配置参数的时间
-     * 这里为了防止多次调用redis，减少与redis的交互时间
-     */
-    private static Long nextInitSetting;
+    public AliFilePlugin(OssSetting ossSetting) {
+        this.ossSetting = ossSetting;
+    }
 
-    /**
-     * 暂时设定3分账请求一次设置
-     */
-    private static final Long INTERVAL = 60 * 3 * 1000L;
-
-    /**
-     * 静态设置，最快三分钟更新一次
-     */
-    private static OssSetting ossSetting;
+    @Override
+    public OssEnum pluginName() {
+        return OssEnum.ALI_OSS;
+    }
 
     /**
      * 获取oss client
@@ -58,32 +43,12 @@ public class AliFileManagerPlugin implements FileManagerPlugin {
      * @return
      */
     private OSS getOssClient() {
-        OssSetting ossSetting = getSetting();
-
         return new OSSClientBuilder().build(
                 ossSetting.getEndPoint(),
                 ossSetting.getAccessKeyId(),
                 ossSetting.getAccessKeySecret());
     }
 
-    /**
-     * 获取配置
-     *
-     * @return
-     */
-    private OssSetting getSetting() {
-        //如果没有配置，或者没有下次刷新时间，或者下次刷新时间小于当前时间，则从redis 更新一次
-        if (ossSetting == null || nextInitSetting == null || nextInitSetting < System.currentTimeMillis()) {
-            Setting setting = settingService.get(SettingEnum.OSS_SETTING.name());
-            if (setting == null || StrUtil.isBlank(setting.getSettingValue())) {
-                throw new ServiceException(ResultCode.OSS_NOT_EXIST);
-            }
-            nextInitSetting = System.currentTimeMillis() + INTERVAL;
-            ossSetting = new Gson().fromJson(setting.getSettingValue(), OssSetting.class);
-            return ossSetting;
-        }
-        return ossSetting;
-    }
 
     /**
      * 获取配置前缀
@@ -91,7 +56,6 @@ public class AliFileManagerPlugin implements FileManagerPlugin {
      * @return
      */
     private String getUrlPrefix() {
-        OssSetting ossSetting = getSetting();
         return "https://" + ossSetting.getBucketName() + "." + ossSetting.getEndPoint() + "/";
     }
 
@@ -130,7 +94,7 @@ public class AliFileManagerPlugin implements FileManagerPlugin {
         try {
             ObjectMetadata meta = new ObjectMetadata();
             meta.setContentType("image/jpg");
-            ossClient.putObject(getSetting().getBucketName(), key, inputStream, meta);
+            ossClient.putObject(ossSetting.getBucketName(), key, inputStream, meta);
         } catch (OSSException oe) {
             log.error("Caught an OSSException, which means your request made it to OSS, "
                     + "but was rejected with an error response for some reason.");
@@ -161,7 +125,7 @@ public class AliFileManagerPlugin implements FileManagerPlugin {
 
         try {
             ossClient.deleteObjects(
-                    new DeleteObjectsRequest(getSetting().getBucketName()).withKeys(key));
+                    new DeleteObjectsRequest(ossSetting.getBucketName()).withKeys(key));
         } catch (OSSException oe) {
             log.error("Caught an OSSException, which means your request made it to OSS, "
                     + "but was rejected with an error response for some reason.");
