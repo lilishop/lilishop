@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.tools;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -12,6 +13,7 @@ import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
  * @author paulG
  * @since 2020/8/18
  **/
+@Slf4j
 public class PromotionTools {
 
     public static final String START_TIME_COLUMN = "start_time";
@@ -159,18 +162,23 @@ public class PromotionTools {
     }
 
     public static Map<String, Object> filterInvalidPromotionsMap(Map<String, Object> map) {
-        if (map == null) {
+        if (CollUtil.isEmpty(map)) {
             return new HashMap<>();
         }
-        //移除无效促销活动
-        return map.entrySet().stream().filter(i -> {
-            JSONObject promotionsObj = JSONUtil.parseObj(i.getValue());
-            BasePromotions basePromotions = promotionsObj.toBean(BasePromotions.class);
-            if (basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
-                return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
-            }
-            return true;
-        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        try {
+            //移除无效促销活动
+            return map.entrySet().stream().filter(Objects::nonNull).filter(i -> {
+                JSONObject promotionsObj = JSONUtil.parseObj(i.getValue());
+                BasePromotions basePromotions = promotionsObj.toBean(BasePromotions.class);
+                if (basePromotions != null && basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
+                    return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
+                }
+                return i.getValue() != null;
+            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> newValue));
+        } catch (Exception e) {
+            log.error("过滤无效促销活动出现异常。异常促销信息：{}，异常信息：{} ", map, e);
+            return new HashMap<>();
+        }
     }
 
 }
