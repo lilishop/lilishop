@@ -164,13 +164,16 @@ public class PromotionTools {
         }
         //移除无效促销活动
         return map.entrySet().stream().filter(i -> {
-            JSONObject promotionsObj = JSONUtil.parseObj(i.getValue());
-            BasePromotions basePromotions = promotionsObj.toBean(BasePromotions.class);
-            if (basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
-                return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
+            if (i != null) {
+                JSONObject promotionsObj = JSONUtil.parseObj(i.getValue());
+                BasePromotions basePromotions = promotionsObj.toBean(BasePromotions.class);
+                if (basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
+                    return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
+                }
             }
+
             return true;
-        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        }).collect(Collectors.toMap(stringObjectEntry -> stringObjectEntry != null ? stringObjectEntry.getKey() : null, stringObjectEntry1 -> stringObjectEntry1 != null ? stringObjectEntry1.getValue() : new BasePromotions()));
     }
 
 }
