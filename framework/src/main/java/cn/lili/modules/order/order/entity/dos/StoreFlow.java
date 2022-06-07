@@ -93,10 +93,10 @@ public class StoreFlow extends BaseIdEntity {
     @ApiModelProperty(value = "平台优惠券 使用金额")
     private Double siteCouponPrice;
 
-    @ApiModelProperty(value = "站点优惠券佣金比例")
+    @ApiModelProperty(value = "站点优惠券补贴比例")
     private Double siteCouponPoint;
 
-    @ApiModelProperty(value = "站点优惠券佣金")
+    @ApiModelProperty(value = "站点优惠券补贴金额")
     private Double siteCouponCommission;
 
     @ApiModelProperty(value = "单品分销返现支出")

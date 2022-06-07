@@ -168,8 +168,8 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         //检测会员预存款讯息是否存在，如果不存在则新建
         MemberWallet memberWallet = this.checkMemberWallet(memberWalletUpdateDTO.getMemberId());
         //校验此金额是否超过冻结金额
-        if (0 > CurrencyUtil.sub(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney())) {
-            throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_INSUFFICIENT);
+        if (0 > CurrencyUtil.sub(memberWallet.getMemberFrozenWallet(), memberWalletUpdateDTO.getMoney())) {
+            throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_FROZEN_AMOUNT_INSUFFICIENT);
         }
         memberWallet.setMemberFrozenWallet(CurrencyUtil.sub(memberWallet.getMemberFrozenWallet(), memberWalletUpdateDTO.getMoney()));
         this.updateById(memberWallet);
