@@ -13,6 +13,7 @@ import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
  * @author paulG
  * @since 2020/8/18
  **/
+@Slf4j
 public class PromotionTools {
 
     public static final String START_TIME_COLUMN = "start_time";
@@ -163,18 +165,23 @@ public class PromotionTools {
         if (CollUtil.isEmpty(map)) {
             return new HashMap<>();
         }
-        //移除无效促销活动
-        return map.entrySet().stream().filter(i -> {
-            if (i != null) {
-                JSONObject promotionsObj = JSONUtil.parseObj(i.getValue());
-                BasePromotions basePromotions = promotionsObj.toBean(BasePromotions.class);
-                if (basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
-                    return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
+        try {
+            //移除无效促销活动
+            return map.entrySet().stream().filter(i -> {
+                if (i != null) {
+                    JSONObject promotionsObj = JSONUtil.parseObj(i.getValue());
+                    BasePromotions basePromotions = promotionsObj.toBean(BasePromotions.class);
+                    if (basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
+                        return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
+                    }
                 }
-            }
 
-            return true;
-        }).collect(Collectors.toMap(stringObjectEntry -> stringObjectEntry != null ? stringObjectEntry.getKey() : null, stringObjectEntry1 -> stringObjectEntry1 != null ? stringObjectEntry1.getValue() : new BasePromotions(), (oldValue, newValue) -> newValue));
+                return true;
+            }).collect(Collectors.toMap(stringObjectEntry -> stringObjectEntry != null ? stringObjectEntry.getKey() : null, stringObjectEntry1 -> stringObjectEntry1 != null ? stringObjectEntry1.getValue() : new BasePromotions(), (oldValue, newValue) -> newValue));
+        } catch (Exception e) {
+            log.error("过滤无效促销活动出现异常。异常促销信息：{}，异常信息：{} ", map, e);
+            return new HashMap<>();
+        }
     }
 
 }
