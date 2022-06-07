@@ -167,17 +167,14 @@ public class PromotionTools {
         }
         try {
             //移除无效促销活动
-            return map.entrySet().stream().filter(i -> {
-                if (i != null) {
-                    JSONObject promotionsObj = JSONUtil.parseObj(i.getValue());
-                    BasePromotions basePromotions = promotionsObj.toBean(BasePromotions.class);
-                    if (basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
-                        return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
-                    }
+            return map.entrySet().stream().filter(Objects::nonNull).filter(i -> {
+                JSONObject promotionsObj = JSONUtil.parseObj(i.getValue());
+                BasePromotions basePromotions = promotionsObj.toBean(BasePromotions.class);
+                if (basePromotions != null && basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
+                    return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
                 }
-
-                return true;
-            }).collect(Collectors.toMap(stringObjectEntry -> stringObjectEntry != null ? stringObjectEntry.getKey() : null, stringObjectEntry1 -> stringObjectEntry1 != null ? stringObjectEntry1.getValue() : new BasePromotions(), (oldValue, newValue) -> newValue));
+                return i.getValue() != null;
+            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> newValue));
         } catch (Exception e) {
             log.error("过滤无效促销活动出现异常。异常促销信息：{}，异常信息：{} ", map, e);
             return new HashMap<>();
