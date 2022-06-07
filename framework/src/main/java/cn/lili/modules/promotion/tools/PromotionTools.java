@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.tools;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -159,7 +160,7 @@ public class PromotionTools {
     }
 
     public static Map<String, Object> filterInvalidPromotionsMap(Map<String, Object> map) {
-        if (map == null) {
+        if (CollUtil.isEmpty(map)) {
             return new HashMap<>();
         }
         //移除无效促销活动
@@ -173,7 +174,7 @@ public class PromotionTools {
             }
 
             return true;
-        }).collect(Collectors.toMap(stringObjectEntry -> stringObjectEntry != null ? stringObjectEntry.getKey() : null, stringObjectEntry1 -> stringObjectEntry1 != null ? stringObjectEntry1.getValue() : new BasePromotions()));
+        }).collect(Collectors.toMap(stringObjectEntry -> stringObjectEntry != null ? stringObjectEntry.getKey() : null, stringObjectEntry1 -> stringObjectEntry1 != null ? stringObjectEntry1.getValue() : new BasePromotions(), (oldValue, newValue) -> newValue));
     }
 
 }
