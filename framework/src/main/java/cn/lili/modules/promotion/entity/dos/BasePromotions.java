@@ -29,7 +29,7 @@ public class BasePromotions extends BaseEntity {
     @ApiModelProperty(value = "商家名称，如果是平台，这个值为 platform")
     private String storeName;
 
-    @ApiModelProperty(value = "商家id，如果是平台，这个值为 platform")
+    @ApiModelProperty(value = "商家id，如果是平台，这个值为 0")
     private String storeId;
 
     @NotEmpty(message = "活动名称不能为空")

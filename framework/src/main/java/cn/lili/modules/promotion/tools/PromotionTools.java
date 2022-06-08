@@ -31,7 +31,7 @@ public class PromotionTools {
 
     public static final String START_TIME_COLUMN = "start_time";
     public static final String END_TIME_COLUMN = "end_time";
-    public static final String PLATFORM_ID = "platform";
+    public static final String PLATFORM_ID = "0";
     public static final String PLATFORM_NAME = "platform";
 
     /**

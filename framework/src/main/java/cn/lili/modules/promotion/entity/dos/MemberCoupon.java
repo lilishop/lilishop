@@ -36,7 +36,7 @@ public class MemberCoupon extends BaseEntity {
     @ApiModelProperty(value = "从哪个模版领取的优惠券")
     private String couponId;
 
-    @ApiModelProperty(value = "商家id，如果是平台发送，这个值为 platform")
+    @ApiModelProperty(value = "商家id，如果是平台发送，这个值为 0")
     private String storeId;
 
     @ApiModelProperty(value = "商家名称，如果是平台，这个值为 platform")
