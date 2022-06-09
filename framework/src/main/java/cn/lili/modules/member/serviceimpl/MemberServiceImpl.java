@@ -681,7 +681,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
      */
     private void checkMember(String userName, String mobilePhone) {
         //判断手机号是否存在
-        if (findMember(userName, mobilePhone) > 0) {
+        if (findMember(mobilePhone, userName) > 0) {
             throw new ServiceException(ResultCode.USER_EXIST);
         }
     }

@@ -107,7 +107,7 @@ public class CheckDataRender implements CartRenderStep {
             //缓存中的商品信息
             GoodsSku dataSku = goodsSkuService.getGoodsSkuByIdFromCache(cartSkuVO.getGoodsSku().getId());
             //商品有效性判定
-            if (dataSku == null || dataSku.getUpdateTime().before(cartSkuVO.getGoodsSku().getUpdateTime())) {
+            if (dataSku == null || dataSku.getCreateTime().after(cartSkuVO.getGoodsSku().getCreateTime())) {
                 //设置购物车未选中
                 cartSkuVO.setChecked(false);
                 //设置购物车此sku商品已失效

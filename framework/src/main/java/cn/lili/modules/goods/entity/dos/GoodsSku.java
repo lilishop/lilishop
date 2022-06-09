@@ -171,11 +171,11 @@ public class GoodsSku extends BaseEntity {
     }
 
     @Override
-    public Date getUpdateTime() {
-        if (super.getUpdateTime() == null) {
+    public Date getCreateTime() {
+        if (super.getCreateTime() == null) {
             return new Date(1593571928);
         } else {
-            return super.getUpdateTime();
+            return super.getCreateTime();
         }
     }
 
