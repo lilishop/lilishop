@@ -150,7 +150,7 @@ public class CartServiceImpl implements CartService {
 
 
                 //购物车中已经存在，更新数量
-                if (cartSkuVO != null && dataSku.getUpdateTime().equals(cartSkuVO.getGoodsSku().getUpdateTime())) {
+                if (cartSkuVO != null && dataSku.getCreateTime().equals(cartSkuVO.getGoodsSku().getCreateTime())) {
 
                     //如果覆盖购物车中商品数量
                     if (Boolean.TRUE.equals(cover)) {
