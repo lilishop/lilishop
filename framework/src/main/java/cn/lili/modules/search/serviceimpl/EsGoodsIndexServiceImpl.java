@@ -66,6 +66,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -127,7 +128,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         Boolean flag = (Boolean) cache.get(CachePrefix.INIT_INDEX_FLAG.getPrefix());
         //为空则默认写入没有任务
         if (flag == null) {
-            cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false);
+            cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false, 10L, TimeUnit.MINUTES);
         }
         //有正在初始化的任务，则提示异常
         if (Boolean.TRUE.equals(flag)) {
