@@ -123,7 +123,7 @@ public abstract class BaseElasticsearchService {
                         "            \"type\": \"keyword\"\n" +
                         "          },\n" +
                         "          \"type\": {\n" +
-                        "            \"type\": \"long\"\n" +
+                        "            \"type\": \"integer\"\n" +
                         "          },\n" +
                         "          \"value\": {\n" +
                         "            \"type\": \"keyword\"\n" +

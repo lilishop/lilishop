@@ -201,6 +201,25 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     }
 
     @Override
+    public void initIndex() {
+        //索引名称拼接
+        String indexName = this.getIndexName();
+
+        //索引初始化，因为mapping结构问题：
+        //但是如果索引已经自动生成过，这里就不会创建索引，设置mapping，所以这里决定在初始化索引的同时，将已有索引删除，重新创建
+
+        boolean indexExist = this.indexExist(indexName);
+        log.info("检测 {} 索引结构是否存在：{}", indexName, indexExist);
+        if (!indexExist) {
+
+            log.info("初始化索引结构 {}", indexName);
+            //如果索引不存在，则创建索引
+            createIndexRequest(indexName);
+        }
+
+    }
+
+    @Override
     public void addIndex(EsGoodsIndex goods) {
         try {
             //分词器分词

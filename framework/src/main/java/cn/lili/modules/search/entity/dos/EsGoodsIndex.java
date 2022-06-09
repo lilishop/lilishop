@@ -277,7 +277,7 @@ public class EsGoodsIndex implements Serializable {
      * @see PromotionTypeEnum
      * value 为 促销活动实体信息
      */
-    @Field(type = FieldType.Nested)
+    @Field(type = FieldType.Text)
     @ApiModelProperty("商品促销活动集合JSON，key 为 促销活动类型，value 为 促销活动实体信息 ")
     private String promotionMapJson;
 
