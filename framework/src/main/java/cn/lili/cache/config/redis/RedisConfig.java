@@ -115,7 +115,6 @@ public class RedisConfig extends CachingConfigurerSupport {
     @Bean(destroyMethod = "shutdown")
     public RedissonClient redisson() {
         Config config = new Config();
-
         if (redisProperties.getSentinel() != null && !redisProperties.getSentinel().getNodes().isEmpty()) {
             // 哨兵模式
             SentinelServersConfig sentinelServersConfig = config.useSentinelServers();
@@ -145,6 +144,7 @@ public class RedisConfig extends CachingConfigurerSupport {
             if (CharSequenceUtil.isNotEmpty(redisProperties.getPassword())) {
                 singleServerConfig.setPassword(redisProperties.getPassword());
             }
+            singleServerConfig.setPingConnectionInterval(1000);
         }
 
         return Redisson.create(config);

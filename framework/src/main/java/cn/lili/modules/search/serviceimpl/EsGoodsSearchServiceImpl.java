@@ -11,10 +11,8 @@ import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.entity.dos.EsGoodsRelatedInfo;
 import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
-import cn.lili.modules.search.entity.dto.HotWordsDTO;
 import cn.lili.modules.search.entity.dto.ParamOptions;
 import cn.lili.modules.search.entity.dto.SelectorOptions;
-import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.alibaba.druid.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +42,6 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -73,9 +70,6 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
      */
     @Autowired
     private ElasticsearchOperations restTemplate;
-
-    @Autowired
-    private EsGoodsIndexService esGoodsIndexService;
     /**
      * 缓存
      */
@@ -84,10 +78,6 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
     @Override
     public SearchPage<EsGoodsIndex> searchGoods(EsGoodsSearchDTO searchDTO, PageVO pageVo) {
-        boolean exists = restTemplate.indexOps(EsGoodsIndex.class).exists();
-        if (!exists) {
-            esGoodsIndexService.init();
-        }
         if (CharSequenceUtil.isNotBlank(searchDTO.getKeyword())) {
             cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), searchDTO.getKeyword());
         }
@@ -364,7 +354,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             this.commonSearch(filterBuilder, searchDTO);
 
             //智能推荐
-            this.recommended(filterBuilder,searchDTO);
+            this.recommended(filterBuilder, searchDTO);
 
             //未上架的商品不显示
             filterBuilder.must(QueryBuilders.matchQuery("marketEnable", GoodsStatusEnum.UPPER.name()));
@@ -406,30 +396,31 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
     /**
      * 商品推荐
+     *
      * @param filterBuilder
      * @param searchDTO
      */
     private void recommended(BoolQueryBuilder filterBuilder, EsGoodsSearchDTO searchDTO) {
 
         String currentGoodsId = searchDTO.getCurrentGoodsId();
-        if(CharSequenceUtil.isEmpty(currentGoodsId)) {
+        if (CharSequenceUtil.isEmpty(currentGoodsId)) {
             return;
         }
 
         //排除当前商品
-        filterBuilder.mustNot(QueryBuilders.matchQuery("id",currentGoodsId));
+        filterBuilder.mustNot(QueryBuilders.matchQuery("id", currentGoodsId));
 
         //查询当前浏览商品的索引信息
         EsGoodsIndex esGoodsIndex = restTemplate.get(currentGoodsId, EsGoodsIndex.class);
-        if(esGoodsIndex==null) {
+        if (esGoodsIndex == null) {
             return;
         }
         //推荐与当前浏览商品相同一个二级分类下的商品
         String categoryPath = esGoodsIndex.getCategoryPath();
-        if(CharSequenceUtil.isNotEmpty(categoryPath)){
+        if (CharSequenceUtil.isNotEmpty(categoryPath)) {
             //匹配二级分类
             String substring = categoryPath.substring(0, categoryPath.lastIndexOf(","));
-            filterBuilder.must(QueryBuilders.wildcardQuery("categoryPath",substring+"*"));
+            filterBuilder.must(QueryBuilders.wildcardQuery("categoryPath", substring + "*"));
         }
 
     }

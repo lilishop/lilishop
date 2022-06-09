@@ -66,6 +66,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -127,7 +128,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         Boolean flag = (Boolean) cache.get(CachePrefix.INIT_INDEX_FLAG.getPrefix());
         //为空则默认写入没有任务
         if (flag == null) {
-            cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false);
+            cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false, 10L, TimeUnit.MINUTES);
         }
         //有正在初始化的任务，则提示异常
         if (Boolean.TRUE.equals(flag)) {
@@ -198,6 +199,25 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         Boolean flag = (Boolean) cache.get(CachePrefix.INIT_INDEX_FLAG.getPrefix());
         map.put("flag", Boolean.TRUE.equals(flag) ? 1 : 0);
         return map;
+    }
+
+    @Override
+    public void initIndex() {
+        //索引名称拼接
+        String indexName = this.getIndexName();
+
+        //索引初始化，因为mapping结构问题：
+        //但是如果索引已经自动生成过，这里就不会创建索引，设置mapping，所以这里决定在初始化索引的同时，将已有索引删除，重新创建
+
+        boolean indexExist = this.indexExist(indexName);
+        log.info("检测 {} 索引结构是否存在：{}", indexName, indexExist);
+        if (!indexExist) {
+
+            log.info("初始化索引结构 {}", indexName);
+            //如果索引不存在，则创建索引
+            createIndexRequest(indexName);
+        }
+
     }
 
     @Override

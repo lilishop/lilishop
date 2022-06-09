@@ -20,7 +20,7 @@ import java.util.Map;
 public interface EsGoodsIndexService {
 
     /**
-     * 全局索引初始化
+     * 全局索引数据初始化
      */
     void init();
 
@@ -30,6 +30,12 @@ public interface EsGoodsIndexService {
      * @return
      */
     Map<String, Integer> getProgress();
+
+
+    /**
+     * 全局索引初始化
+     */
+    void initIndex();
 
     /**
      * 添加商品索引
