@@ -215,7 +215,7 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     /**
      * 删除并且新增sku，即覆盖之前信息
      *
-     * @param goodsSkus
+     * @param goodsSkus 商品sku集合
      * @return
      */
     boolean deleteAndInsertGoodsSkus(List<GoodsSku> goodsSkus);
@@ -223,8 +223,8 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     /**
      * 统计sku总数
      *
-     * @param storeId
-     * @return
+     * @param storeId 店铺id
+     * @return sku总数
      */
     Long countSkuNum(String storeId);
 }
