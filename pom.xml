@@ -88,7 +88,6 @@
                     <imageName>${docker-registry}/${project.artifactId}:${revision}.${images-version}</imageName>
                     <baseImage>java</baseImage>
                     <entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
-                    <pushImage>true</pushImage>
                     <resources>
                         <resource>
                             <targetPath>/</targetPath>
