@@ -1,7 +1,11 @@
 package cn.lili.modules.goods.mapper;
 
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -98,5 +102,16 @@ public interface GoodsSkuMapper extends BaseMapper<GoodsSku> {
             "\t#{goodsSku.deleteFlag}\n" +
             ")")
     int replaceGoodsSku(@Param("goodsSku") GoodsSku goodsSku);
+
+
+    /**
+     * 分页查询商品skuDTO
+     *
+     * @param page         分页
+     * @param queryWrapper 查询条件
+     * @return 售后VO分页
+     */
+    @Select("SELECT *,g.params as params FROM li_goods_sku gs inner join li_goods g on gs.goods_id = g.id ${ew.customSqlSegment}")
+    IPage<GoodsSkuDTO> queryByParams(IPage<GoodsSkuDTO> page, @Param(Constants.WRAPPER) Wrapper<GoodsSkuDTO> queryWrapper);
 
 }

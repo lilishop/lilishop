@@ -33,7 +33,7 @@ public class ElasticsearchController {
     }
 
     @GetMapping("/progress")
-    public ResultMessage<Map<String, Integer>> getProgress() {
+    public ResultMessage<Map<String, Long>> getProgress() {
         return ResultUtil.data(esGoodsIndexService.getProgress());
     }
 }

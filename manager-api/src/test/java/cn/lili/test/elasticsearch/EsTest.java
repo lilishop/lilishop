@@ -3,9 +3,11 @@ package cn.lili.test.elasticsearch;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.service.PromotionService;
 import cn.lili.modules.search.entity.dos.EsGoodsAttribute;
@@ -48,6 +50,9 @@ class EsTest {
     private GoodsSkuService goodsSkuService;
 
     @Autowired
+    private GoodsService goodsService;
+
+    @Autowired
     private Cache cache;
 
     @Autowired
@@ -63,6 +68,13 @@ class EsTest {
 //        System.out.println(HtmlUtil.filter("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-"));
 //        Date dt1 = new Date(2021, 12, 10);
 //        Date dt2 = new Date(2021, 12, 14);
+        for (int i = 0; i < 1000; i++) {
+
+            Goods goods = new Goods();
+            goods.setGoodsName("测试商品" + i);
+//            goods.setAuthFlag();
+        }
+
 //
 
     }
@@ -132,7 +144,7 @@ class EsTest {
             esGoodsIndices.add(index);
             cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
         }
-        esGoodsIndexService.initIndex(esGoodsIndices);
+        esGoodsIndexService.initIndex(esGoodsIndices, true);
         Assertions.assertTrue(true);
     }
 
