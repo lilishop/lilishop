@@ -29,7 +29,7 @@ public interface EsGoodsIndexService {
      *
      * @return
      */
-    Map<String, Integer> getProgress();
+    Map<String, Long> getProgress();
 
 
     /**
@@ -106,8 +106,9 @@ public interface EsGoodsIndexService {
      * 初始化商品索引
      *
      * @param goodsIndexList 商品索引列表
+     * @param regeneratorIndex 是否重新生成索引
      */
-    void initIndex(List<EsGoodsIndex> goodsIndexList);
+    void initIndex(List<EsGoodsIndex> goodsIndexList, boolean regeneratorIndex);
 
     /**
      * 更新商品索引的促销信息

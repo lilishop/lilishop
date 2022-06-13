@@ -21,6 +21,7 @@ import cn.lili.elasticsearch.EsSuffix;
 import cn.lili.elasticsearch.config.ElasticsearchProperties;
 import cn.lili.modules.goods.entity.dos.*;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
+import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.enums.GoodsWordsTypeEnum;
@@ -38,6 +39,7 @@ import cn.lili.modules.search.service.EsGoodsSearchService;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
@@ -82,6 +84,11 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     private static final String IGNORE_FIELD = "serialVersionUID,promotionMap,id,goodsId";
 
     private final Map<String, Field> fieldMap = ReflectUtil.getFieldMap(EsGoodsIndex.class);
+
+
+    private final String KEY_SUCCESS = "success";
+    private final String KEY_FAIL = "fail";
+    private final String KEY_PROCESSED = "processed";
 
     @Autowired
     private ElasticsearchProperties elasticsearchProperties;
@@ -128,7 +135,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         Boolean flag = (Boolean) cache.get(CachePrefix.INIT_INDEX_FLAG.getPrefix());
         //为空则默认写入没有任务
         if (flag == null) {
-            cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false, 10L, TimeUnit.MINUTES);
+            cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false);
         }
         //有正在初始化的任务，则提示异常
         if (Boolean.TRUE.equals(flag)) {
@@ -137,48 +144,58 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
         //初始化标识
         cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), null);
-        cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), true);
+        cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), true, 10L, TimeUnit.MINUTES);
+
 
         ThreadUtil.execAsync(() -> {
             try {
 
-                LambdaQueryWrapper<Goods> goodsQueryWrapper = new LambdaQueryWrapper<>();
-                goodsQueryWrapper.eq(Goods::getAuthFlag, GoodsAuthEnum.PASS.name());
-                goodsQueryWrapper.eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name());
-                goodsQueryWrapper.eq(Goods::getDeleteFlag, false);
+                QueryWrapper<GoodsSkuDTO> skuQueryWrapper = new QueryWrapper<>();
+                skuQueryWrapper.eq("gs.auth_flag", GoodsAuthEnum.PASS.name());
+                skuQueryWrapper.eq("gs.market_enable", GoodsStatusEnum.UPPER.name());
+                skuQueryWrapper.eq("gs.delete_flag", false);
+
+
+                Map<String, Long> resultMap = (Map<String, Long>) cache.get(CachePrefix.INIT_INDEX_PROCESS.getPrefix());
+
+                if (CollUtil.isEmpty(resultMap)) {
+                    QueryWrapper<GoodsSku> skuCountQueryWrapper = new QueryWrapper<>();
+                    skuCountQueryWrapper.eq("auth_flag", GoodsAuthEnum.PASS.name());
+                    skuCountQueryWrapper.eq("market_enable", GoodsStatusEnum.UPPER.name());
+                    skuCountQueryWrapper.eq("delete_flag", false);
+                    resultMap = new HashMap<>();
+                    resultMap.put(KEY_SUCCESS, 0L);
+                    resultMap.put(KEY_FAIL, 0L);
+                    resultMap.put(KEY_PROCESSED, 0L);
+                    resultMap.put("total", this.goodsSkuService.count(skuCountQueryWrapper));
+                    cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), resultMap);
+                }
 
                 for (int i = 1; ; i++) {
                     List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
-                    IPage<Goods> page = new Page<>(i, 1000);
-                    IPage<Goods> goodsIPage = goodsService.page(page, goodsQueryWrapper);
-                    if (goodsIPage == null || CollUtil.isEmpty(goodsIPage.getRecords())) {
+                    Page<GoodsSkuDTO> skuPage = new Page<>(i, 100);
+                    IPage<GoodsSkuDTO> skuIPage = goodsSkuService.getGoodsSkuDTOByPage(skuPage, skuQueryWrapper);
+                    if (skuIPage == null || CollUtil.isEmpty(skuIPage.getRecords())) {
                         break;
                     }
-                    for (Goods goods : goodsIPage.getRecords()) {
-                        LambdaQueryWrapper<GoodsSku> skuQueryWrapper = new LambdaQueryWrapper<>();
-                        skuQueryWrapper.eq(GoodsSku::getGoodsId, goods.getId());
-                        skuQueryWrapper.eq(GoodsSku::getAuthFlag, GoodsAuthEnum.PASS.name());
-                        skuQueryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
-                        skuQueryWrapper.eq(GoodsSku::getDeleteFlag, false);
-                        for (int j = 1; ; j++) {
-                            IPage<GoodsSku> skuPage = new Page<>(j, 100);
-                            IPage<GoodsSku> skuIPage = goodsSkuService.page(skuPage, skuQueryWrapper);
-                            if (skuIPage == null || CollUtil.isEmpty(skuIPage.getRecords())) {
-                                break;
-                            }
-                            int skuSource = 100;
-                            for (GoodsSku goodsSku : skuIPage.getRecords()) {
-                                EsGoodsIndex esGoodsIndex = wrapperEsGoodsIndex(goodsSku, goods);
-                                esGoodsIndex.setSkuSource(skuSource--);
-                                esGoodsIndices.add(esGoodsIndex);
-                                //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
-                                cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
-                            }
+                    for (GoodsSkuDTO goodsSku : skuIPage.getRecords()) {
+                        int skuSource = 100;
+                        EsGoodsIndex esGoodsIndex = wrapperEsGoodsIndex(goodsSku);
+                        long count = esGoodsIndices.stream().filter(j -> j.getGoodsId().equals(esGoodsIndex.getGoodsId())).count();
+                        if (count >= 1) {
+                            skuSource -= count;
                         }
+                        esGoodsIndex.setSkuSource(skuSource);
+                        esGoodsIndices.add(esGoodsIndex);
+                        //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
+                        cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
                     }
-                    this.initIndex(esGoodsIndices);
+
+                    //批量插入索引，如果为第一次则删除原索引并创建新索引
+                    this.initIndex(esGoodsIndices, i == 1);
                 }
 
+                cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false);
 
                 //初始化商品索引
             } catch (Exception e) {
@@ -188,16 +205,17 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false);
             }
         });
+
     }
 
     @Override
-    public Map<String, Integer> getProgress() {
-        Map<String, Integer> map = (Map<String, Integer>) cache.get(CachePrefix.INIT_INDEX_PROCESS.getPrefix());
+    public Map<String, Long> getProgress() {
+        Map<String, Long> map = (Map<String, Long>) cache.get(CachePrefix.INIT_INDEX_PROCESS.getPrefix());
         if (map == null) {
             return Collections.emptyMap();
         }
         Boolean flag = (Boolean) cache.get(CachePrefix.INIT_INDEX_FLAG.getPrefix());
-        map.put("flag", Boolean.TRUE.equals(flag) ? 1 : 0);
+        map.put("flag", Boolean.TRUE.equals(flag) ? 1L : 0L);
         return map;
     }
 
@@ -391,7 +409,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     }
 
     @Override
-    public void initIndex(List<EsGoodsIndex> goodsIndexList) {
+    public void initIndex(List<EsGoodsIndex> goodsIndexList, boolean regeneratorIndex) {
         if (goodsIndexList == null || goodsIndexList.isEmpty()) {
             //初始化标识
             cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), null);
@@ -405,27 +423,18 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         //但是如果索引已经自动生成过，这里就不会创建索引，设置mapping，所以这里决定在初始化索引的同时，将已有索引删除，重新创建
 
         //如果索引存在，则删除，重新生成。 这里应该有更优解。
-        if (this.indexExist(indexName)) {
-            deleteIndexRequest(indexName);
+        boolean indexExist = this.indexExist(indexName);
+        if (regeneratorIndex || !indexExist) {
+            //如果索引不存在，则创建索引
+            createIndexRequest(indexName);
         }
 
-        //如果索引不存在，则创建索引
-        createIndexRequest(indexName);
-        Map<String, Integer> resultMap = new HashMap<>(16);
-        final String KEY_SUCCESS = "success";
-        final String KEY_FAIL = "fail";
-        final String KEY_PROCESSED = "processed";
-        resultMap.put("total", goodsIndexList.size());
-        resultMap.put(KEY_SUCCESS, 0);
-        resultMap.put(KEY_FAIL, 0);
-        resultMap.put(KEY_PROCESSED, 0);
-        cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), resultMap);
+        Map<String, Long> resultMap = (Map<String, Long>) cache.get(CachePrefix.INIT_INDEX_PROCESS.getPrefix());
         if (!goodsIndexList.isEmpty()) {
-            goodsIndexRepository.deleteAll();
             for (EsGoodsIndex goodsIndex : goodsIndexList) {
                 try {
                     log.info("生成商品索引：{}", goodsIndex);
-                    addIndex(goodsIndex);
+                    this.addIndex(goodsIndex);
                     resultMap.put(KEY_SUCCESS, resultMap.get(KEY_SUCCESS) + 1);
                 } catch (Exception e) {
                     log.error("商品{}生成索引错误！", goodsIndex);
@@ -436,7 +445,6 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             }
         }
         cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), resultMap);
-        cache.put(CachePrefix.INIT_INDEX_FLAG.getPrefix(), false);
     }
 
     @Override
@@ -813,30 +821,30 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         return elasticsearchProperties.getIndexPrefix() + "_" + EsSuffix.GOODS_INDEX_NAME;
     }
 
-    private EsGoodsIndex wrapperEsGoodsIndex(GoodsSku goodsSku, Goods goods) {
+    private EsGoodsIndex wrapperEsGoodsIndex(GoodsSkuDTO goodsSku) {
         EsGoodsIndex index = new EsGoodsIndex(goodsSku);
 
         //商品参数索引
-        if (goods.getParams() != null && !goods.getParams().isEmpty()) {
-            List<GoodsParamsDTO> goodsParamDTOS = JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class);
+        if (CharSequenceUtil.isNotEmpty(goodsSku.getParams())) {
+            List<GoodsParamsDTO> goodsParamDTOS = JSONUtil.toList(goodsSku.getParams(), GoodsParamsDTO.class);
             index = new EsGoodsIndex(goodsSku, goodsParamDTOS);
         }
         //商品分类索引
-        if (goods.getCategoryPath() != null) {
-            List<Category> categories = categoryService.listByIdsOrderByLevel(Arrays.asList(goods.getCategoryPath().split(",")));
+        if (goodsSku.getCategoryPath() != null) {
+            List<Category> categories = categoryService.listByIdsOrderByLevel(Arrays.asList(goodsSku.getCategoryPath().split(",")));
             if (!categories.isEmpty()) {
                 index.setCategoryNamePath(ArrayUtil.join(categories.stream().map(Category::getName).toArray(), ","));
             }
         }
         //商品品牌索引
-        Brand brand = brandService.getById(goods.getBrandId());
+        Brand brand = brandService.getById(goodsSku.getBrandId());
         if (brand != null) {
             index.setBrandName(brand.getName());
             index.setBrandUrl(brand.getLogo());
         }
         //店铺分类索引
-        if (goods.getStoreCategoryPath() != null && CharSequenceUtil.isNotEmpty(goods.getStoreCategoryPath())) {
-            List<StoreGoodsLabel> storeGoodsLabels = storeGoodsLabelService.listByStoreIds(Arrays.asList(goods.getStoreCategoryPath().split(",")));
+        if (goodsSku.getStoreCategoryPath() != null && CharSequenceUtil.isNotEmpty(goodsSku.getStoreCategoryPath())) {
+            List<StoreGoodsLabel> storeGoodsLabels = storeGoodsLabelService.listByStoreIds(Arrays.asList(goodsSku.getStoreCategoryPath().split(",")));
             if (!storeGoodsLabels.isEmpty()) {
                 index.setStoreCategoryNamePath(ArrayUtil.join(storeGoodsLabels.stream().map(StoreGoodsLabel::getLabelName).toArray(), ","));
             }
