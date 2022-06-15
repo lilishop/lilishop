@@ -314,6 +314,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     }
 
     private void setGoodsPromotionInfo(GoodsSku dataSku, Map.Entry<String, Object> promotionInfo) {
+        System.out.println(promotionInfo);
         JSONObject promotionsObj = JSONUtil.parseObj(promotionInfo);
         PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
         searchParams.setSkuId(dataSku.getId());
