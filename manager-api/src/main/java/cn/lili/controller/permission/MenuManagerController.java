@@ -53,7 +53,6 @@ public class MenuManagerController {
     @ApiImplicitParam(name = "id", value = "菜单ID", required = true, paramType = "path", dataType = "String")
     @ApiOperation(value = "编辑")
     @PutMapping(value = "/{id}")
-
     @DemoSite
     public ResultMessage<Menu> edit(@PathVariable String id, Menu menu) {
         menu.setId(id);
