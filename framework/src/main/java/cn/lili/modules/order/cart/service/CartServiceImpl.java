@@ -419,7 +419,7 @@ public class CartServiceImpl implements CartService {
             cartSkuVO.setNum(num);
         }
 
-        if (cartSkuVO.getNum() > 99) {
+        if (!GoodsSalesModeEnum.WHOLESALE.name().equals(cartSkuVO.getGoodsSku().getSalesModel()) && cartSkuVO.getNum() > 99) {
             cartSkuVO.setNum(99);
         }
     }
