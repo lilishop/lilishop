@@ -253,6 +253,7 @@ public enum ResultCode {
      */
     PROMOTION_GOODS_NOT_EXIT(40000, "当前促销商品不存在！"),
     PROMOTION_GOODS_QUANTITY_NOT_EXIT(40020, "当前促销商品库存不足！"),
+    PROMOTION_GOODS_DO_NOT_JOIN_WHOLESALE(40050, "批发商品无法参加促销"),
     PROMOTION_SAME_ACTIVE_EXIST(40001, "活动时间内已存在同类活动，请选择关闭、删除当前时段的活动"),
     PROMOTION_START_TIME_ERROR(40002, "活动起始时间不能小于当前时间"),
     PROMOTION_END_TIME_ERROR(40003, "活动结束时间不能小于当前时间"),
