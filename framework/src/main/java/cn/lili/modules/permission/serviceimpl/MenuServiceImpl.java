@@ -88,6 +88,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         if (CharSequenceUtil.isNotEmpty(menu.getId())) {
 
         }
+        cache.vagueDel(CachePrefix.USER_MENU.getPrefix(UserEnums.MANAGER));
         return this.saveOrUpdate(menu);
     }
 
