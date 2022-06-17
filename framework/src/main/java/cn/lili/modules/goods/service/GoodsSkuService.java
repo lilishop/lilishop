@@ -143,7 +143,8 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     /**
      * 分页查询商品sku信息
      *
-     * @param searchParams 查询参数
+     * @param page 分页参数
+     * @param queryWrapper 查询参数
      * @return 商品sku信息
      */
     IPage<GoodsSkuDTO> getGoodsSkuDTOByPage(Page<GoodsSkuDTO> page, Wrapper<GoodsSkuDTO> queryWrapper);

@@ -86,9 +86,9 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     private final Map<String, Field> fieldMap = ReflectUtil.getFieldMap(EsGoodsIndex.class);
 
 
-    private final String KEY_SUCCESS = "success";
-    private final String KEY_FAIL = "fail";
-    private final String KEY_PROCESSED = "processed";
+    private static final String KEY_SUCCESS = "success";
+    private static final String KEY_FAIL = "fail";
+    private static final String KEY_PROCESSED = "processed";
 
     @Autowired
     private ElasticsearchProperties elasticsearchProperties;
@@ -104,8 +104,6 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
     @Autowired
     private GoodsSkuService goodsSkuService;
-    @Autowired
-    private GoodsService goodsService;
     @Autowired
     private BrandService brandService;
 
@@ -425,8 +423,11 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         //如果索引存在，则删除，重新生成。 这里应该有更优解。
         boolean indexExist = this.indexExist(indexName);
         if (regeneratorIndex || !indexExist) {
+            if (indexExist) {
+                this.deleteIndexRequest(indexName);
+            }
             //如果索引不存在，则创建索引
-            createIndexRequest(indexName);
+            this.createIndexRequest(indexName);
         }
 
         Map<String, Long> resultMap = (Map<String, Long>) cache.get(CachePrefix.INIT_INDEX_PROCESS.getPrefix());
