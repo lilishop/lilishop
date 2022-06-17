@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -85,15 +84,13 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
 
 
         //定义结果
-        IPage<EsGoodsIndex> esGoodsIndexIPage = new Page<EsGoodsIndex>();
+        IPage<EsGoodsIndex> esGoodsIndexIPage = new Page<>();
 
         if (footPrintPages.getRecords() == null || footPrintPages.getRecords().isEmpty()) {
             return esGoodsIndexIPage;
         } else {
             List<EsGoodsIndex> list = esGoodsSearchService.getEsGoodsBySkuIds(
-                    footPrintPages.getRecords().stream().map(item -> {
-                        return item.getSkuId();
-                    }).collect(Collectors.toList()));
+                    footPrintPages.getRecords().stream().map(FootPrint::getSkuId).collect(Collectors.toList()));
             //去除为空的商品数据
             list.removeIf(Objects::isNull);
 
