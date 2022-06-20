@@ -57,7 +57,6 @@ public class PaymentExecute implements OrderStatusChangeEvent {
                     .orderSn(order.getSn())
                     .paymentReceivableNo(order.getReceivableNo())
                     .outOrderNo("AF" + SnowFlake.getIdStr())
-                    .outOrderNo("AF" + SnowFlake.getIdStr())
                     .refundReason("订单取消")
                     .build();
             payment.refund(refundLog);
