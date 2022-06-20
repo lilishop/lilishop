@@ -99,7 +99,7 @@ public class MinioFilePlugin implements FilePlugin {
         }
         MinioClient ossClient = getOssClient();
         List<DeleteObject> objectList = key.stream().map(DeleteObject::new).collect(Collectors.toList());
-        ossClient.removeObjects(RemoveObjectsArgs.builder().objects(objectList).build());
+        ossClient.removeObjects(RemoveObjectsArgs.builder().objects(objectList).bucket(ossSetting.getM_bucketName()).build());
     }
 
 
