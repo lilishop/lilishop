@@ -133,6 +133,13 @@ public class PromotionTools {
                     promotionGoods.setStoreName(promotion.getStoreName());
                 }
                 promotionGoods.setTitle(promotion.getPromotionName());
+                // 如果是秒杀活动保留原时间
+                if (promotionGoods.getStartTime() == null || !PromotionTypeEnum.SECKILL.equals(promotionTypeEnum)) {
+                    promotionGoods.setStartTime(promotion.getStartTime());
+                }
+                if (promotionGoods.getStartTime() == null || !PromotionTypeEnum.SECKILL.equals(promotionTypeEnum)) {
+                    promotionGoods.setEndTime(promotion.getEndTime());
+                }
                 promotionGoods.setStartTime(promotion.getStartTime());
                 promotionGoods.setEndTime(promotion.getEndTime());
                 promotionGoods.setPromotionType(promotionTypeEnum.name());
