@@ -4,6 +4,7 @@ import cn.hutool.core.map.MapBuilder;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.event.TransactionCommitSendMQEvent;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.vo.PageVO;
@@ -11,19 +12,16 @@ import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.search.BasePromotionsSearchParams;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
-import cn.lili.modules.promotion.event.UpdateEsGoodsIndexPromotionsEvent;
 import cn.lili.modules.promotion.service.AbstractPromotionsService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.mybatis.util.PageUtil;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,12 +45,6 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
      */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-
-    /**
-     * rocketMq
-     */
-    @Autowired
-    private RocketMQTemplate rocketMQTemplate;
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
@@ -253,13 +245,12 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
      * @param promotions 促销实体
      */
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public void updateEsGoodsIndex(T promotions) {
         if (promotions.getStartTime() == null && promotions.getEndTime() == null) {
             Map<Object, Object> build = MapBuilder.create().put("promotionKey", this.getPromotionType() + "-" + promotions.getId()).put("scopeId", promotions.getScopeId()).build();
             //删除商品促销消息
-            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.DELETE_GOODS_INDEX_PROMOTIONS.name();
-            //发送mq消息
-            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(build), RocketmqSendCallbackBuilder.commonCallback());
+            applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("删除商品促销事件", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.DELETE_GOODS_INDEX_PROMOTIONS.name(), JSONUtil.toJsonStr(build)));
         } else {
 
             String esPromotionKey = this.getPromotionType().name() + "-" + promotions.getId();
@@ -270,7 +261,7 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
             map.put("promotionsType", promotions.getClass().getName());
             // 促销实体
             map.put("promotions", promotions);
-            applicationEventPublisher.publishEvent(new UpdateEsGoodsIndexPromotionsEvent("更新商品索引促销事件", JSONUtil.toJsonStr(map)));
+            applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品索引促销事件", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.UPDATE_GOODS_INDEX_PROMOTIONS.name(), JSONUtil.toJsonStr(map)));
         }
     }
 
