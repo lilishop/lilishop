@@ -502,7 +502,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @param order   订单
      * @param orderSn 订单编号
      */
-    private void complete(Order order, String orderSn) {//修改订单状态为完成
+    @Transactional(rollbackFor = Exception.class)
+    public void complete(Order order, String orderSn) {//修改订单状态为完成
         this.updateStatus(orderSn, OrderStatusEnum.COMPLETED);
 
         //修改订单货物可以进行评价
@@ -784,9 +785,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     /**
      * 订单状态变更消息
      *
-     * @param order
+     * @param order 订单信息
      */
-    private void orderStatusMessage(Order order) {
+    @Transactional(rollbackFor = Exception.class)
+    public void orderStatusMessage(Order order) {
         OrderMessage orderMessage = new OrderMessage();
         orderMessage.setOrderSn(order.getSn());
         orderMessage.setNewStatus(OrderStatusEnum.valueOf(order.getOrderStatus()));
@@ -913,7 +915,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      *
      * @param orderSn 订单编号
      */
-    private void normalOrderConfirm(String orderSn) {
+    @Transactional(rollbackFor = Exception.class)
+    public void normalOrderConfirm(String orderSn) {
         //修改订单
         this.update(new LambdaUpdateWrapper<Order>()
                 .eq(Order::getSn, orderSn)
@@ -932,7 +935,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      *
      * @param orderSn 订单编号
      */
-    private void virtualOrderConfirm(String orderSn) {
+    @Transactional(rollbackFor = Exception.class)
+    public void virtualOrderConfirm(String orderSn) {
         //修改订单
         this.update(new LambdaUpdateWrapper<Order>()
                 .eq(Order::getSn, orderSn)
