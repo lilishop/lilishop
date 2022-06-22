@@ -84,7 +84,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         QueryWrapper<MemberWallet> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("member_id", memberId);
         //执行查询
-        MemberWallet memberWallet = this.baseMapper.selectOne(queryWrapper);
+        MemberWallet memberWallet = this.getOne(queryWrapper, false);
         //如果没有钱包，则创建钱包
         if (memberWallet == null) {
             memberWallet = this.save(memberId, memberService.getById(memberId).getUsername());
@@ -186,7 +186,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
      */
     private MemberWallet checkMemberWallet(String memberId) {
         //获取会员预存款信息
-        MemberWallet memberWallet = this.getOne(new QueryWrapper<MemberWallet>().eq("member_id", memberId));
+        MemberWallet memberWallet = this.getOne(new QueryWrapper<MemberWallet>().eq("member_id", memberId), false);
         //如果会员预存款信息不存在则同步重新建立预存款信息
         if (memberWallet == null) {
             Member member = memberService.getById(memberId);
