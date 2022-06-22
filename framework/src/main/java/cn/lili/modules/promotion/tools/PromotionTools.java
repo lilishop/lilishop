@@ -133,12 +133,8 @@ public class PromotionTools {
                     promotionGoods.setStoreName(promotion.getStoreName());
                 }
                 promotionGoods.setTitle(promotion.getPromotionName());
-                if (promotionGoods.getStartTime() == null) {
-                    promotionGoods.setStartTime(promotion.getStartTime());
-                }
-                if (promotionGoods.getEndTime() == null) {
-                    promotionGoods.setEndTime(promotion.getEndTime());
-                }
+                promotionGoods.setStartTime(promotion.getStartTime());
+                promotionGoods.setEndTime(promotion.getEndTime());
                 promotionGoods.setPromotionType(promotionTypeEnum.name());
                 promotionGoods.setNum(0);
                 promotionGoods.setDeleteFlag(promotion.getDeleteFlag());
