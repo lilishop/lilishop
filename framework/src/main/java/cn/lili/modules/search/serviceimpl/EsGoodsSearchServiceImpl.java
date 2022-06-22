@@ -55,8 +55,8 @@ import java.util.*;
 @Service
 public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
-    // 最小分词匹配数
-    private static final String MINIMUM_SHOULD_MATCH = "2";
+    // 最小分词匹配
+    private static final String MINIMUM_SHOULD_MATCH = "20%";
 
     private static final String ATTR_PATH = "attrList";
     private static final String ATTR_VALUE = "attrList.value";
@@ -539,6 +539,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
                 .setMinScore(2);
         //聚合搜索则将结果放入过滤条件
         filterBuilder.must(functionScoreQueryBuilder);
+        filterBuilder.should(QueryBuilders.boolQuery().should(QueryBuilders.matchPhraseQuery("goodsName", keyword).boost(10)));
     }
 
     /**

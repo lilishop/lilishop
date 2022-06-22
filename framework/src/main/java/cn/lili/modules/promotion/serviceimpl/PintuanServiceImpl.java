@@ -299,7 +299,7 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
             for (PromotionGoods promotionGood : promotionGoods) {
                 if (goodsSkuService.getGoodsSkuByIdFromCache(promotionGood.getSkuId()) == null) {
                     log.error("商品[" + promotionGood.getGoodsName() + "]不存在或处于不可售卖状态！");
-                    throw new ServiceException();
+                    throw new ServiceException("商品[" + promotionGood.getGoodsName() + "]不存在或处于不可售卖状态！");
                 }
                 //查询是否在同一时间段参与了拼团活动
                 Integer count = promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.SECKILL.name(), promotionGood.getSkuId(), pintuan.getStartTime(), pintuan.getEndTime(), pintuan.getId());

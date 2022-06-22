@@ -11,7 +11,6 @@ import org.redisson.config.ClusterServersConfig;
 import org.redisson.config.Config;
 import org.redisson.config.SentinelServersConfig;
 import org.redisson.config.SingleServerConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -56,12 +55,10 @@ import java.util.Map;
 public class RedisConfig extends CachingConfigurerSupport {
 
 
+    private static final String REDIS_PREFIX = "redis://";
+
     @Value("${lili.cache.timeout:7200}")
     private Integer timeout;
-
-    @Autowired
-    private RedisProperties redisProperties;
-
 
     /**
      * 当有多个管理器的时候，必须使用该注解在一个管理器上注释：表示该管理器为默认的管理器
@@ -101,7 +98,7 @@ public class RedisConfig extends CachingConfigurerSupport {
     public RedisTemplate<Object, Object> redisTemplate(LettuceConnectionFactory lettuceConnectionFactory) {
         RedisTemplate<Object, Object> template = new RedisTemplate<>();
         //使用fastjson序列化
-        FastJsonRedisSerializer fastJsonRedisSerializer = new FastJsonRedisSerializer(Object.class);
+        FastJsonRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisSerializer<>(Object.class);
         //value值的序列化采用fastJsonRedisSerializer
         template.setValueSerializer(fastJsonRedisSerializer);
         template.setHashValueSerializer(fastJsonRedisSerializer);
@@ -113,7 +110,7 @@ public class RedisConfig extends CachingConfigurerSupport {
     }
 
     @Bean(destroyMethod = "shutdown")
-    public RedissonClient redisson() {
+    public RedissonClient redisson(RedisProperties redisProperties) {
         Config config = new Config();
         if (redisProperties.getSentinel() != null && !redisProperties.getSentinel().getNodes().isEmpty()) {
             // 哨兵模式
@@ -121,7 +118,7 @@ public class RedisConfig extends CachingConfigurerSupport {
             sentinelServersConfig.setMasterName(redisProperties.getSentinel().getMaster());
             List<String> sentinelAddress = new ArrayList<>();
             for (String node : redisProperties.getCluster().getNodes()) {
-                sentinelAddress.add("redis://" + node);
+                sentinelAddress.add(REDIS_PREFIX + node);
             }
             sentinelServersConfig.setSentinelAddresses(sentinelAddress);
             if (CharSequenceUtil.isNotEmpty(redisProperties.getSentinel().getPassword())) {
@@ -132,7 +129,7 @@ public class RedisConfig extends CachingConfigurerSupport {
             ClusterServersConfig clusterServersConfig = config.useClusterServers();
             List<String> clusterNodes = new ArrayList<>();
             for (String node : redisProperties.getCluster().getNodes()) {
-                clusterNodes.add("redis://" + node);
+                clusterNodes.add(REDIS_PREFIX + node);
             }
             clusterServersConfig.setNodeAddresses(clusterNodes);
             if (CharSequenceUtil.isNotEmpty(redisProperties.getPassword())) {
@@ -140,7 +137,7 @@ public class RedisConfig extends CachingConfigurerSupport {
             }
         } else {
             SingleServerConfig singleServerConfig = config.useSingleServer();
-            singleServerConfig.setAddress("redis://" + redisProperties.getHost() + ":" + redisProperties.getPort());
+            singleServerConfig.setAddress(REDIS_PREFIX + redisProperties.getHost() + ":" + redisProperties.getPort());
             if (CharSequenceUtil.isNotEmpty(redisProperties.getPassword())) {
                 singleServerConfig.setPassword(redisProperties.getPassword());
             }
