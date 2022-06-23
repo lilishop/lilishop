@@ -6,12 +6,12 @@
 ##### 交流 qq 1群 961316482（已满）
 <a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=BAhURE3DG2YWhQk6kRxVapbLykqMoPS8&jump_from=webapi"><img border="0" src="https://pub.idqqimg.com/wpa/images/group.png" alt="Lilishop交流群" title="Lilishop交流群">点击快捷加群</a>
 
-##### 交流 qq 2群 875294241（最后63名额）
+##### 交流 qq 2群 875294241（已满）
 
 <a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=_lrekOvr5k2p5uTn5GRidI-chKEmpCX3&jump_from=webapi"><img border="0" src="https://pub.idqqimg.com/wpa/images/group.png" alt="Lilishop交流群2群" title="Lilishop交流群2群">点击快捷加群</a>
 
 
-##### 交流 qq 3群 263785057（2022-06-13建立）
+##### 交流 qq 3群 263785057
 
 <a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=VUogkDvaso4zLTFH8nxFPDRKq0EthUn1&jump_from=webapi"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Lilishop交流群3群" title="Lilishop交流群3群">点击快捷加群</a>
 
@@ -167,5 +167,5 @@ PS：手机验证码为 ‘111111’
 ### 交流群
 
 ##### 官方qq 1群 961316482（已满）
-##### 官方qq 2群 875294241
-
+##### 官方qq 2群 875294241（已满）
+##### 官网qq 3群 263785057
