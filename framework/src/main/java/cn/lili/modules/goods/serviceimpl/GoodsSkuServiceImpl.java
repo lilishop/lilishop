@@ -250,11 +250,16 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
         //如果使用商品ID无法查询SKU则返回错误
         if (goodsVO == null || goodsSku == null) {
+            //发送mq消息
+            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_DELETE.name();
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(Collections.singletonList(goodsId)), RocketmqSendCallbackBuilder.commonCallback());
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
 
         //商品下架||商品未审核通过||商品删除，则提示：商品已下架
         if (GoodsStatusEnum.DOWN.name().equals(goodsVO.getMarketEnable()) || !GoodsAuthEnum.PASS.name().equals(goodsVO.getAuthFlag()) || Boolean.TRUE.equals(goodsVO.getDeleteFlag())) {
+            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_DELETE.name();
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(Collections.singletonList(goodsId)), RocketmqSendCallbackBuilder.commonCallback());
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
 
@@ -584,6 +589,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      * @param goods 商品信息
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void generateEs(Goods goods) {
         // 不生成没有审核通过且没有上架的商品
         if (!GoodsStatusEnum.UPPER.name().equals(goods.getMarketEnable()) || !GoodsAuthEnum.PASS.name().equals(goods.getAuthFlag())) {
