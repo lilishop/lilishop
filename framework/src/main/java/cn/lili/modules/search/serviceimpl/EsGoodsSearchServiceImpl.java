@@ -83,7 +83,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         }
         NativeSearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(searchDTO, pageVo);
         NativeSearchQuery searchQuery = searchQueryBuilder.build();
-        log.info("searchGoods DSL:{}", searchQuery.getQuery());
+        log.debug("searchGoods DSL:{}", searchQuery.getQuery());
         SearchHits<EsGoodsIndex> search = restTemplate.search(searchQuery, EsGoodsIndex.class);
         return SearchHitSupport.searchPageFor(search, searchQuery.getPageable());
     }
@@ -109,7 +109,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         NativeSearchQuery searchQuery = builder.build();
         SearchHits<EsGoodsIndex> search = restTemplate.search(searchQuery, EsGoodsIndex.class);
 
-        log.info("getSelector DSL:{}", searchQuery.getQuery());
+        log.debug("getSelector DSL:{}", searchQuery.getQuery());
         Map<String, Aggregation> aggregationMap = Objects.requireNonNull(search.getAggregations()).getAsMap();
         return convertToEsGoodsRelatedInfo(aggregationMap, goodsSearch);
     }
