@@ -89,6 +89,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             }
             return memberTokenGenerate.createToken(member, longTerm);
         } catch (NoPermissionException e) {
+            log.error("联合登陆失败：", e);
             throw e;
         }
     }
@@ -121,7 +122,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
 
     @Override
     public void bind(String unionId, String type) {
-        AuthUser authUser = UserContext.getCurrentUser();
+        AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
         Connect connect = new Connect(authUser.getId(), unionId, type);
         this.save(connect);
     }
@@ -160,6 +161,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
 
 
     @Override
+    @Transactional
     public Token miniProgramAutoLogin(WechatMPLoginParams params) {
 
         Object cacheData = cache.get(CachePrefix.WECHAT_SESSION_PARAMS.getPrefix() + params.getUuid());
@@ -186,8 +188,8 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     /**
      * 通过微信返回等code 获取openid 等信息
      *
-     * @param code
-     * @return
+     * @param code 微信code
+     * @return 微信返回的信息
      */
     public JSONObject getConnect(String code) {
         WechatConnectSettingItem setting = getWechatMPSetting();
@@ -208,11 +210,12 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
      * @param params     微信小程序自动登录参数
      * @param openId     微信openid
      * @param unionId    微信unionid
-     * @return
+     * @return token
      */
     @Transactional(rollbackFor = Exception.class)
     public Token phoneMpBindAndLogin(String sessionKey, WechatMPLoginParams params, String openId, String unionId) {
-        String encryptedData = params.getEncryptedData(), iv = params.getIv();
+        String encryptedData = params.getEncryptedData();
+        String iv = params.getIv();
         JSONObject userInfo = this.getUserInfo(encryptedData, sessionKey, iv);
         log.info("联合登陆返回：{}", userInfo.toString());
         String phone = (String) userInfo.get("purePhoneNumber");
@@ -259,9 +262,9 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
      * 这样，微信小程序注册之后，其他app 公众号页面，都可以实现绑定自动登录功能
      * </p>
      *
-     * @param openId
-     * @param unionId
-     * @param member
+     * @param openId    微信openid
+     * @param unionId  微信unionid
+     * @param member   会员
      */
     private void bindMpMember(String openId, String unionId, Member member) {
 
@@ -272,7 +275,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             lambdaQueryWrapper.eq(Connect::getUnionId, unionId);
             lambdaQueryWrapper.eq(Connect::getUnionType, ConnectEnum.WECHAT.name());
             List<Connect> connects = this.list(lambdaQueryWrapper);
-            if (connects.size() == 0) {
+            if (connects.isEmpty()) {
                 Connect connect = new Connect();
                 connect.setUnionId(unionId);
                 connect.setUserId(member.getId());
@@ -281,7 +284,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             }
         }//如果openid 不为空  则为账号绑定openid
         if (CharSequenceUtil.isNotEmpty(openId)) {
-            LambdaQueryWrapper<Connect> lambdaQueryWrapper = new LambdaQueryWrapper();
+            LambdaQueryWrapper<Connect> lambdaQueryWrapper = new LambdaQueryWrapper<>();
             lambdaQueryWrapper.eq(Connect::getUnionId, openId);
             lambdaQueryWrapper.eq(Connect::getUnionType, ConnectEnum.WECHAT_MP_OPEN_ID.name());
             List<Connect> connects = this.list(lambdaQueryWrapper);

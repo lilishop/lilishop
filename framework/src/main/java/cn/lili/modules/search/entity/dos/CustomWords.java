@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
@@ -18,6 +19,7 @@ import javax.validation.constraints.NotEmpty;
 @Data
 @TableName("li_custom_words")
 @ApiModel(value = "自定义分词")
+@EqualsAndHashCode(callSuper = true)
 public class CustomWords extends BaseEntity {
 
     private static final long serialVersionUID = 650889506808657977L;

@@ -133,12 +133,15 @@ public class PromotionTools {
                     promotionGoods.setStoreName(promotion.getStoreName());
                 }
                 promotionGoods.setTitle(promotion.getPromotionName());
-                if (promotionGoods.getStartTime() == null) {
+                // 如果是秒杀活动保留原时间
+                if (promotionGoods.getStartTime() == null || !PromotionTypeEnum.SECKILL.equals(promotionTypeEnum)) {
                     promotionGoods.setStartTime(promotion.getStartTime());
                 }
-                if (promotionGoods.getEndTime() == null) {
+                if (promotionGoods.getStartTime() == null || !PromotionTypeEnum.SECKILL.equals(promotionTypeEnum)) {
                     promotionGoods.setEndTime(promotion.getEndTime());
                 }
+                promotionGoods.setStartTime(promotion.getStartTime());
+                promotionGoods.setEndTime(promotion.getEndTime());
                 promotionGoods.setPromotionType(promotionTypeEnum.name());
                 promotionGoods.setNum(0);
                 promotionGoods.setDeleteFlag(promotion.getDeleteFlag());
