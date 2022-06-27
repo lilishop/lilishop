@@ -199,9 +199,9 @@ public class CartServiceImpl implements CartService {
 
             this.checkGoodsSaleModel(dataSku, tradeDTO.getSkuList());
             tradeDTO.setCartTypeEnum(cartTypeEnum);
-            //如购物车发生更改，则重置优惠券
-            tradeDTO.setStoreCoupons(null);
-            tradeDTO.setPlatformCoupon(null);
+
+            remoteCoupon(tradeDTO);
+
             this.resetTradeDTO(tradeDTO);
         } catch (ServiceException serviceException) {
             throw serviceException;
@@ -245,6 +245,9 @@ public class CartServiceImpl implements CartService {
     @Override
     public void checked(String skuId, boolean checked) {
         TradeDTO tradeDTO = this.readDTO(CartTypeEnum.CART);
+
+        remoteCoupon(tradeDTO);
+
         List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
         for (CartSkuVO cartSkuVO : cartSkuVOS) {
             if (cartSkuVO.getGoodsSku().getId().equals(skuId)) {
@@ -257,6 +260,9 @@ public class CartServiceImpl implements CartService {
     @Override
     public void checkedStore(String storeId, boolean checked) {
         TradeDTO tradeDTO = this.readDTO(CartTypeEnum.CART);
+
+        remoteCoupon(tradeDTO);
+
         List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
         for (CartSkuVO cartSkuVO : cartSkuVOS) {
             if (cartSkuVO.getStoreId().equals(storeId)) {
@@ -269,11 +275,23 @@ public class CartServiceImpl implements CartService {
     @Override
     public void checkedAll(boolean checked) {
         TradeDTO tradeDTO = this.readDTO(CartTypeEnum.CART);
+
+        remoteCoupon(tradeDTO);
+
         List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
         for (CartSkuVO cartSkuVO : cartSkuVOS) {
             cartSkuVO.setChecked(checked);
         }
         cache.put(this.getOriginKey(CartTypeEnum.CART), tradeDTO);
+    }
+
+    /**
+     * 当购物车商品发生变更时，取消已选择当优惠券
+     * @param tradeDTO
+     */
+    private void remoteCoupon(TradeDTO tradeDTO){
+        tradeDTO.setPlatformCoupon(null);
+        tradeDTO.setStoreCoupons(new HashMap<>());
     }
 
     @Override
