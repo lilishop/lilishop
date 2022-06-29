@@ -68,7 +68,7 @@ public class CustomWordsServiceImpl extends ServiceImpl<CustomWordsMapper, Custo
         LambdaQueryWrapper<CustomWords> queryWrapper = new LambdaQueryWrapper<CustomWords>().eq(CustomWords::getName, customWordsVO.getName());
         CustomWords one = this.getOne(queryWrapper, false);
         if (one != null && one.getDisabled().equals(1)) {
-            throw new ServiceException(ResultCode.CUSTOM_WORDS_EXIST_ERROR);
+            return false;
         } else if (one != null && !one.getDisabled().equals(1)) {
             this.remove(queryWrapper);
         }
