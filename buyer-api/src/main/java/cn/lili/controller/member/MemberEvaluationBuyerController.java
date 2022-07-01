@@ -48,7 +48,7 @@ public class MemberEvaluationBuyerController {
     @ApiOperation(value = "查看会员评价详情")
     @ApiImplicitParam(name = "id", value = "评价ID", required = true, paramType = "path")
     @GetMapping(value = "/get/{id}")
-    public ResultMessage<MemberEvaluationVO> save(@NotNull(message = "评价ID不能为空") @PathVariable("id") String id) {
+    public ResultMessage<MemberEvaluationVO> get(@NotNull(message = "评价ID不能为空") @PathVariable("id") String id) {
         return ResultUtil.data(memberEvaluationService.queryById(id));
 
     }
