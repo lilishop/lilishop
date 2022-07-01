@@ -92,7 +92,14 @@ public class StatisticsDateUtil {
         Date[] dateArray = new Date[2];
 
         Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month, 0);
+
+        //时间归到今天凌晨0点
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        calendar.set(year, month, 1);
         dateArray[1] = calendar.getTime();
         calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
         dateArray[0] = calendar.getTime();
