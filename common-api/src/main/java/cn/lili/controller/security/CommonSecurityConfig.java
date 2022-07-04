@@ -1,8 +1,5 @@
 package cn.lili.controller.security;
 
-import cn.lili.cache.Cache;
-import cn.lili.common.security.CustomAccessDeniedHandler;
-import cn.lili.common.properties.IgnoredUrlsProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -26,17 +23,8 @@ public class CommonSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     /**
-     * 忽略验权配置
-     */
-    @Autowired
-    private IgnoredUrlsProperties ignoredUrlsProperties;
-    /**
      * spring security -》 权限不足处理
      */
-    @Autowired
-    private CustomAccessDeniedHandler accessDeniedHandler;
-    @Autowired
-    private Cache<String> cache;
     @Autowired
     private CorsConfigurationSource corsConfigurationSource;
 

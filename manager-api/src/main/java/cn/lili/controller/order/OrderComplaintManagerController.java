@@ -23,6 +23,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
+
 /**
  * 管理端,交易投诉接口
  *
@@ -74,8 +76,8 @@ public class OrderComplaintManagerController {
     })
     @PostMapping("/communication")
     public ResultMessage<OrderComplaintCommunicationVO> addCommunication(@RequestParam String complainId, @RequestParam String content) {
-        AuthUser currentUser = UserContext.getCurrentUser();
-        OrderComplaintCommunicationVO communicationVO = new OrderComplaintCommunicationVO(complainId, content, CommunicationOwnerEnum.PLATFORM.name(), currentUser.getId(), currentUser.getUsername());
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        OrderComplaintCommunicationVO communicationVO = new OrderComplaintCommunicationVO(complainId, content, CommunicationOwnerEnum.PLATFORM.name(), currentUser.getUsername(), currentUser.getId());
         orderComplaintCommunicationService.addCommunication(communicationVO);
         return ResultUtil.data(communicationVO);
     }
