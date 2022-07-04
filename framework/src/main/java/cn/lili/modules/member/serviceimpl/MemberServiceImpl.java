@@ -203,7 +203,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             loginBindUser(member, authUser.getUuid(), authUser.getSource());
             return memberTokenGenerate.createToken(member, false);
         } catch (ServiceException e) {
-            log.error("自动注册服务泡出异常：", e);
+            log.error("自动注册服务抛出异常：", e);
             throw e;
         } catch (Exception e) {
             log.error("自动注册异常：", e);
