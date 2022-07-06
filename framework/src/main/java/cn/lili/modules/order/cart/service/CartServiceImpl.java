@@ -287,9 +287,10 @@ public class CartServiceImpl implements CartService {
 
     /**
      * 当购物车商品发生变更时，取消已选择当优惠券
+     *
      * @param tradeDTO
      */
-    private void remoteCoupon(TradeDTO tradeDTO){
+    private void remoteCoupon(TradeDTO tradeDTO) {
         tradeDTO.setPlatformCoupon(null);
         tradeDTO.setStoreCoupons(new HashMap<>());
     }
@@ -526,6 +527,12 @@ public class CartServiceImpl implements CartService {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         //获取购物车，然后重新写入优惠券
         CartTypeEnum cartTypeEnum = getCartType(way);
+
+        //积分商品不允许使用优惠券
+        if (cartTypeEnum.equals(CartTypeEnum.POINTS)) {
+            throw new ServiceException(ResultCode.SPECIAL_CANT_USE);
+        }
+
         TradeDTO tradeDTO = this.readDTO(cartTypeEnum);
 
         MemberCouponSearchParams searchParams = new MemberCouponSearchParams();

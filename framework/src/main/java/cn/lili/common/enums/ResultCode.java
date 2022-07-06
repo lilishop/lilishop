@@ -293,6 +293,8 @@ public enum ResultCode {
     COUPON_MEMBER_NOT_EXIST(41015, "没有当前会员优惠券"),
     COUPON_MEMBER_STATUS_ERROR(41016, "当前会员优惠券已过期/作废无法变更状态！"),
 
+    SPECIAL_CANT_USE(41020, "特殊商品不能使用优惠券，不能使用"),
+
 
     /**
      * 拼团
