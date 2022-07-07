@@ -168,10 +168,12 @@ public class CheckDataRender implements CartRenderStep {
                 try {
                     //筛选属于当前店铺的优惠券
                     storeCart.getValue().forEach(i -> i.getPromotionMap().forEach((key, value) -> {
-                        JSONObject promotionsObj = JSONUtil.parseObj(value);
-                        Coupon coupon = JSONUtil.toBean(promotionsObj, Coupon.class);
-                        if (key.contains(PromotionTypeEnum.COUPON.name()) && coupon.getStoreId().equals(storeCart.getKey())) {
-                            cartVO.getCanReceiveCoupon().add(new CouponVO(coupon));
+                        if (key.contains(PromotionTypeEnum.COUPON.name())) {
+                            JSONObject promotionsObj = JSONUtil.parseObj(value);
+                            Coupon coupon = JSONUtil.toBean(promotionsObj, Coupon.class);
+                            if (key.contains(PromotionTypeEnum.COUPON.name()) && coupon.getStoreId().equals(storeCart.getKey())) {
+                                cartVO.getCanReceiveCoupon().add(new CouponVO(coupon));
+                            }
                         }
                     }));
                 } catch (Exception e) {

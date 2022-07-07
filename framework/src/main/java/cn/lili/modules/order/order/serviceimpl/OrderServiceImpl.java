@@ -21,10 +21,7 @@ import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
-import cn.lili.modules.order.order.entity.dos.Order;
-import cn.lili.modules.order.order.entity.dos.OrderItem;
-import cn.lili.modules.order.order.entity.dos.Receipt;
-import cn.lili.modules.order.order.entity.dos.Trade;
+import cn.lili.modules.order.order.entity.dos.*;
 import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
 import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
@@ -305,6 +302,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             order.setCancelReason(reason);
             //修改订单
             this.updateById(order);
+            //生成店铺退款流水
+            this.generatorStoreRefundFlow(order);
             orderStatusMessage(order);
             return order;
         } else {
@@ -321,6 +320,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setOrderStatus(OrderStatusEnum.CANCELLED.name());
         order.setCancelReason(reason);
         this.updateById(order);
+        //生成店铺退款流水
+        this.generatorStoreRefundFlow(order);
         orderStatusMessage(order);
     }
 
@@ -793,6 +794,62 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderMessage.setOrderSn(order.getSn());
         orderMessage.setNewStatus(OrderStatusEnum.valueOf(order.getOrderStatus()));
         this.sendUpdateStatusMessage(orderMessage);
+    }
+
+    /**
+     * 生成店铺退款流水
+     *
+     * @param order 订单信息
+     */
+    private void generatorStoreRefundFlow(Order order) {
+        // 判断订单是否是付款
+        if (!PayStatusEnum.PAID.name().equals((order.getPayStatus()))) {
+            return;
+        }
+        List<OrderItem> items = orderItemService.getByOrderSn(order.getSn());
+        List<StoreFlow> storeFlows = new ArrayList<>();
+        String orderPromotionType = order.getOrderPromotionType();
+        for (OrderItem item : items) {
+            StoreFlow storeFlow = new StoreFlow();
+            BeanUtil.copyProperties(item, storeFlow);
+
+            //入账
+            storeFlow.setId(SnowFlake.getIdStr());
+            storeFlow.setFlowType(FlowTypeEnum.REFUND.name());
+            storeFlow.setSn(SnowFlake.createStr("SF"));
+            storeFlow.setOrderSn(item.getOrderSn());
+            storeFlow.setOrderItemSn(item.getSn());
+            storeFlow.setStoreId(order.getStoreId());
+            storeFlow.setStoreName(order.getStoreName());
+            storeFlow.setMemberId(order.getMemberId());
+            storeFlow.setMemberName(order.getMemberName());
+            storeFlow.setGoodsName(item.getGoodsName());
+
+            storeFlow.setOrderPromotionType(item.getPromotionType());
+
+            //计算平台佣金
+            storeFlow.setFinalPrice(item.getPriceDetailDTO().getFlowPrice());
+            storeFlow.setCommissionPrice(item.getPriceDetailDTO().getPlatFormCommission());
+            storeFlow.setDistributionRebate(item.getPriceDetailDTO().getDistributionCommission());
+            storeFlow.setBillPrice(item.getPriceDetailDTO().getBillPrice());
+            //兼容为空，以及普通订单操作
+            if (CharSequenceUtil.isNotEmpty(orderPromotionType)) {
+                //如果为砍价活动，填写砍价结算价
+                if (orderPromotionType.equals(OrderPromotionTypeEnum.KANJIA.name())) {
+                    storeFlow.setKanjiaSettlementPrice(item.getPriceDetailDTO().getSettlementPrice());
+                }
+                //如果为砍价活动，填写砍价结算价
+                else if (orderPromotionType.equals(OrderPromotionTypeEnum.POINTS.name())) {
+                    storeFlow.setPointSettlementPrice(item.getPriceDetailDTO().getSettlementPrice());
+                }
+            }
+            //添加支付方式
+            storeFlow.setPaymentName(order.getPaymentMethod());
+            //添加第三方支付流水号
+            storeFlow.setTransactionId(order.getReceivableNo());
+            storeFlows.add(storeFlow);
+        }
+        storeFlowService.saveBatch(storeFlows);
     }
 
     /**

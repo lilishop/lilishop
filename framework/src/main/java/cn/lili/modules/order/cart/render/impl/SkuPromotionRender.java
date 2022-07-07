@@ -186,7 +186,6 @@ public class SkuPromotionRender implements CartRenderStep {
      */
     private void checkPromotionQuantity(TradeDTO tradeDTO) {
         for (CartSkuVO cartSkuVO : tradeDTO.getCheckedSkuList()) {
-            cartSkuVO.getPromotionMap();
             List<PromotionSkuVO> joinPromotion = cartSkuVO.getPriceDetailDTO().getJoinPromotion();
             if (!joinPromotion.isEmpty()) {
                 for (PromotionSkuVO promotionSkuVO : joinPromotion) {
