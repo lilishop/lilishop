@@ -808,45 +808,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         }
         List<OrderItem> items = orderItemService.getByOrderSn(order.getSn());
         List<StoreFlow> storeFlows = new ArrayList<>();
-        String orderPromotionType = order.getOrderPromotionType();
         for (OrderItem item : items) {
-            StoreFlow storeFlow = new StoreFlow();
-            BeanUtil.copyProperties(item, storeFlow);
-
-            //入账
-            storeFlow.setId(SnowFlake.getIdStr());
-            storeFlow.setFlowType(FlowTypeEnum.REFUND.name());
-            storeFlow.setSn(SnowFlake.createStr("SF"));
-            storeFlow.setOrderSn(item.getOrderSn());
-            storeFlow.setOrderItemSn(item.getSn());
-            storeFlow.setStoreId(order.getStoreId());
-            storeFlow.setStoreName(order.getStoreName());
-            storeFlow.setMemberId(order.getMemberId());
-            storeFlow.setMemberName(order.getMemberName());
-            storeFlow.setGoodsName(item.getGoodsName());
-
-            storeFlow.setOrderPromotionType(item.getPromotionType());
-
-            //计算平台佣金
-            storeFlow.setFinalPrice(item.getPriceDetailDTO().getFlowPrice());
-            storeFlow.setCommissionPrice(item.getPriceDetailDTO().getPlatFormCommission());
-            storeFlow.setDistributionRebate(item.getPriceDetailDTO().getDistributionCommission());
-            storeFlow.setBillPrice(item.getPriceDetailDTO().getBillPrice());
-            //兼容为空，以及普通订单操作
-            if (CharSequenceUtil.isNotEmpty(orderPromotionType)) {
-                //如果为砍价活动，填写砍价结算价
-                if (orderPromotionType.equals(OrderPromotionTypeEnum.KANJIA.name())) {
-                    storeFlow.setKanjiaSettlementPrice(item.getPriceDetailDTO().getSettlementPrice());
-                }
-                //如果为砍价活动，填写砍价结算价
-                else if (orderPromotionType.equals(OrderPromotionTypeEnum.POINTS.name())) {
-                    storeFlow.setPointSettlementPrice(item.getPriceDetailDTO().getSettlementPrice());
-                }
-            }
-            //添加支付方式
-            storeFlow.setPaymentName(order.getPaymentMethod());
-            //添加第三方支付流水号
-            storeFlow.setTransactionId(order.getReceivableNo());
+            StoreFlow storeFlow = new StoreFlow(order, item, FlowTypeEnum.REFUND);
             storeFlows.add(storeFlow);
         }
         storeFlowService.saveBatch(storeFlows);
