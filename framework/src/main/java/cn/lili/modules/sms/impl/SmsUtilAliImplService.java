@@ -156,6 +156,9 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 .setTemplateParam(JSONUtil.toJsonStr(param));
         try {
             SendSmsResponse response = client.sendSms(sendSmsRequest);
+            if (!("OK").equals(response.getBody().getCode())) {
+                throw new ServiceException(response.getBody().getMessage());
+            }
         } catch (Exception e) {
             log.error("发送短信错误", e);
         }
