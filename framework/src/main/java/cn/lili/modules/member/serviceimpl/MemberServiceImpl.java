@@ -15,10 +15,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.sensitive.SensitiveWordsFilter;
-import cn.lili.common.utils.BeanUtil;
-import cn.lili.common.utils.CookieUtil;
-import cn.lili.common.utils.SnowFlake;
-import cn.lili.common.utils.UuidUtils;
+import cn.lili.common.utils.*;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
 import cn.lili.modules.connect.entity.Connect;
@@ -405,11 +402,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Override
     public Member updateMember(ManagerMemberEditDTO managerMemberEditDTO) {
         //过滤会员昵称敏感词
-        if (com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank(managerMemberEditDTO.getNickName())) {
+        if (StringUtils.isNotBlank(managerMemberEditDTO.getNickName())) {
             managerMemberEditDTO.setNickName(SensitiveWordsFilter.filter(managerMemberEditDTO.getNickName()));
         }
         //如果密码不为空则加密密码
-        if (com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank(managerMemberEditDTO.getPassword())) {
+        if (StringUtils.isNotBlank(managerMemberEditDTO.getPassword())) {
             managerMemberEditDTO.setPassword(new BCryptPasswordEncoder().encode(managerMemberEditDTO.getPassword()));
         }
         //查询会员信息
