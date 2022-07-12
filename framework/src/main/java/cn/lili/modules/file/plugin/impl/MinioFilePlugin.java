@@ -1,5 +1,7 @@
 package cn.lili.modules.file.plugin.impl;
 
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.file.entity.enums.OssEnum;
 import cn.lili.modules.file.plugin.FilePlugin;
 import cn.lili.modules.system.entity.dto.OssSetting;
@@ -62,14 +64,13 @@ public class MinioFilePlugin implements FilePlugin {
     public String pathUpload(String filePath, String key) {
         try {
             return this.inputStreamUpload(new FileInputStream(filePath), key);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new ServiceException(ResultCode.OSS_DELETE_ERROR, e.getMessage());
         }
-        return null;
     }
 
     @Override
-    public String inputStreamUpload(InputStream inputStream, String key) {
+    public String inputStreamUpload(InputStream inputStream, String key)  {
         String bucket = "";
         try {
             MinioClient client = getOssClient();
@@ -80,12 +81,9 @@ public class MinioFilePlugin implements FilePlugin {
                     .contentType("image/png")
                     .build();
             client.putObject(putObjectArgs);
-        } catch (ErrorResponseException e) {
-            e.printStackTrace();
-            return null;
         } catch (Exception e) {
             log.error("上传失败2，", e);
-            return null;
+            throw new ServiceException(ResultCode.OSS_DELETE_ERROR, e.getMessage());
         }
         //拼接出可访问的url地址
         return ossSetting.getM_endpoint() + "/" + bucket + "/" + key;
@@ -129,8 +127,10 @@ public class MinioFilePlugin implements FilePlugin {
                         log.info("创建minio桶成功{}", ossSetting.getM_bucketName());
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    //晴空配置
+                    minioClient = null;
                     log.error("创建[{}]bucket失败", ossSetting.getM_bucketName());
+                    throw new ServiceException(ResultCode.OSS_DELETE_ERROR, e.getMessage());
                 }
             }
         }
