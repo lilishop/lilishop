@@ -51,6 +51,11 @@ public class OssSetting implements Serializable {
     private String m_endpoint;
 
     /**
+     * minio 前端请求地址
+     */
+    private String m_frontUrl;
+
+    /**
      * minio用户名
      */
     private String m_accessKey;

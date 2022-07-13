@@ -70,7 +70,7 @@ public class MinioFilePlugin implements FilePlugin {
     }
 
     @Override
-    public String inputStreamUpload(InputStream inputStream, String key)  {
+    public String inputStreamUpload(InputStream inputStream, String key) {
         String bucket = "";
         try {
             MinioClient client = getOssClient();
@@ -78,7 +78,7 @@ public class MinioFilePlugin implements FilePlugin {
             PutObjectArgs putObjectArgs = PutObjectArgs.builder()
                     .bucket(bucket).stream(inputStream, inputStream.available(), 5 * 1024 * 1024)
                     .object(key)
-                    .contentType("image/png")
+                    .contentType("image/png" )
                     .build();
             client.putObject(putObjectArgs);
         } catch (Exception e) {
@@ -86,7 +86,7 @@ public class MinioFilePlugin implements FilePlugin {
             throw new ServiceException(ResultCode.OSS_DELETE_ERROR, e.getMessage());
         }
         //拼接出可访问的url地址
-        return ossSetting.getM_endpoint() + "/" + bucket + "/" + key;
+        return ossSetting.getM_frontUrl() + "/" + bucket + "/" + key;
     }
 
 
@@ -123,7 +123,7 @@ public class MinioFilePlugin implements FilePlugin {
                         //创建bucket
                         MakeBucketArgs makeBucketArgs = MakeBucketArgs.builder().bucket(ossSetting.getM_bucketName()).build();
                         this.minioClient.makeBucket(makeBucketArgs);
-                        setBucketPolicy(this.minioClient, ossSetting.getM_bucketName(), "read-write");
+                        setBucketPolicy(this.minioClient, ossSetting.getM_bucketName(), "read-write" );
                         log.info("创建minio桶成功{}", ossSetting.getM_bucketName());
                     }
                 } catch (Exception e) {
@@ -153,7 +153,7 @@ public class MinioFilePlugin implements FilePlugin {
                 client.setBucketPolicy(SetBucketPolicyArgs.builder().bucket(bucket).config(WRITE_ONLY.replace(BUCKET_PARAM, bucket)).build());
                 break;
             case "read-write":
-                client.setBucketPolicy(SetBucketPolicyArgs.builder().bucket(bucket).region("public").config(READ_WRITE.replace(BUCKET_PARAM, bucket)).build());
+                client.setBucketPolicy(SetBucketPolicyArgs.builder().bucket(bucket).region("public" ).config(READ_WRITE.replace(BUCKET_PARAM, bucket)).build());
                 break;
             case "none":
             default:
