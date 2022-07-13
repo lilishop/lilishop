@@ -1,5 +1,6 @@
 package cn.lili.modules.page.serviceimpl;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.SwitchEnum;
@@ -80,8 +81,8 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
         //如果页面为发布，则关闭其他页面，开启此页面
         if (pageData.getPageShow() != null && pageData.getPageShow().equals(SwitchEnum.OPEN.name())) {
             LambdaUpdateWrapper<PageData> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-            lambdaUpdateWrapper.eq(PageData::getPageType, pageData.getPageType());
-            lambdaUpdateWrapper.eq(PageData::getPageClientType, pageData.getPageClientType());
+            lambdaUpdateWrapper.eq(CharSequenceUtil.isNotEmpty(pageData.getPageType()), PageData::getPageType, pageData.getPageType());
+            lambdaUpdateWrapper.eq(CharSequenceUtil.isNotEmpty(pageData.getPageClientType()), PageData::getPageClientType, pageData.getPageClientType());
             lambdaUpdateWrapper.set(PageData::getPageShow, SwitchEnum.CLOSE.name());
             this.update(lambdaUpdateWrapper);
         } else {
