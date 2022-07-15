@@ -118,10 +118,10 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         storeFlow.setCommissionPrice(CurrencyUtil.mul(CurrencyUtil.div(payStoreFlow.getCommissionPrice(), payStoreFlow.getNum()), afterSale.getNum()));
         //分销佣金 =（分销佣金/订单商品数量）* 售后商品数量
         storeFlow.setDistributionRebate(CurrencyUtil.mul(CurrencyUtil.div(payStoreFlow.getDistributionRebate(), payStoreFlow.getNum()), afterSale.getNum()));
-        //流水金额 = 实际退款金额
-        storeFlow.setFinalPrice(afterSale.getActualRefundPrice());
-        //最终结算金额 =店铺流水金额+店铺单品返现支出金额+平台收取佣金金额
-        storeFlow.setBillPrice(CurrencyUtil.add(storeFlow.getFinalPrice(), storeFlow.getDistributionRebate(), storeFlow.getCommissionPrice()));
+        //流水金额 = 支付最终结算金额
+        storeFlow.setFinalPrice(payStoreFlow.getBillPrice());
+        //最终结算金额 =实际退款金额
+        storeFlow.setBillPrice(afterSale.getActualRefundPrice());
         //站点优惠券补贴返还金额=(站点优惠券补贴金额/购买商品数量)*退款商品数量
         storeFlow.setSiteCouponCommission(CurrencyUtil.mul(CurrencyUtil.div(payStoreFlow.getSiteCouponCommission(), payStoreFlow.getNum()), afterSale.getNum()));
         //平台优惠券 使用金额
