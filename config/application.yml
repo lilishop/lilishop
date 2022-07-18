@@ -29,7 +29,7 @@ spring:
     type: redis
   # Redis
   redis:
-    host: 192.168.0.116
+    host: 127.0.0.1
     port: 6379
     password: lilishop
     lettuce:
@@ -60,7 +60,7 @@ spring:
       default-datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://192.168.0.116:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://127.0.0.1:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
         password: lilishop
         maxActive: 50
@@ -119,6 +119,7 @@ ignored:
     - /store/passport/login/refresh/**
     - /common/common/slider/**
     - /common/common/sms/**
+    - /common/common/site
     - /buyer/payment/cashier/**
     - /buyer/other/pageData/**
     - /buyer/other/article/**
@@ -268,7 +269,7 @@ lili:
   data:
     elasticsearch:
       cluster-name: elasticsearch
-      cluster-nodes: 192.168.0.116:9200
+      cluster-nodes: 127.0.0.1:9200
       index:
         number-of-replicas: 0
         number-of-shards: 3
@@ -279,7 +280,7 @@ lili:
     #        password: LiLiShopES
 
     logstash:
-      server: 192.168.0.116:4560
+      server: 127.0.0.1:4560
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
@@ -300,7 +301,7 @@ lili:
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
 rocketmq:
-  name-server: 192.168.0.116:9876
+  name-server: 127.0.0.1:9876
   isVIPChannel: false
   producer:
     group: lili_group
@@ -309,7 +310,7 @@ rocketmq:
 xxl:
   job:
     admin:
-      addresses: http://192.168.0.116:9001/xxl-job-admin
+      addresses: http://127.0.0.1:9001/xxl-job-admin
     executor:
       appname: xxl-job-executor-lilishop
       address:

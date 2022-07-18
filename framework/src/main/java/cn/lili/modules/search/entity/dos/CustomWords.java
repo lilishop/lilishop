@@ -4,8 +4,10 @@ import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
@@ -20,6 +22,8 @@ import javax.validation.constraints.NotEmpty;
 @TableName("li_custom_words")
 @ApiModel(value = "自定义分词")
 @EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class CustomWords extends BaseEntity {
 
     private static final long serialVersionUID = 650889506808657977L;
