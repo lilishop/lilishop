@@ -496,6 +496,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         log.info("更新商品索引的促销信息----------");
         log.info("商品ids: {}", ids);
         log.info("活动: {}", promotion);
+        log.info("key: {}", key);
         for (String id : ids) {
             UpdateRequest updateRequest = this.updateEsGoodsIndexPromotions(id, promotion, key);
             if (updateRequest != null) {
@@ -730,8 +731,6 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             promotionMap = goodsIndex.getOriginPromotionMap();
         }
 
-        log.info("ES修改商品活动索引-活动信息:{}", promotion);
-        log.info("ES修改商品活动索引-活动信息状态:{}", promotion.getPromotionStatus());
         log.info("ES修改商品活动索引-原商品索引信息:{}", goodsIndex);
         log.info("ES修改商品活动索引-原商品索引活动信息:{}", promotionMap);
         //如果活动已结束
@@ -760,6 +759,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         Map<String, Object> params = new HashMap<>();
         params.put("promotionMap", JSONUtil.toJsonStr(promotionMap));
         Script script = new Script(ScriptType.INLINE, "painless", "ctx._source.promotionMapJson=params.promotionMap;", params);
+        log.info("执行脚本内容：{}", script);
         updateRequest.script(script);
         return updateRequest;
     }
