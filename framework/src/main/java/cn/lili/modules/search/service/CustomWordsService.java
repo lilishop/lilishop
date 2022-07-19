@@ -62,6 +62,12 @@ public interface CustomWordsService extends IService<CustomWords> {
      */
     boolean deleteBathByName(List<String> names);
 
+    /**
+     * 批量插入自定义分词
+     *
+     * @param customWordsList 自定义分词列表
+     * @return 受影响行数
+     */
     long insertBatchCustomWords(List<CustomWords> customWordsList);
 
     /**

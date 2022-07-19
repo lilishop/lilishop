@@ -1,4 +1,4 @@
-package cn.lili.mybatis.mybatisplus;
+package cn.lili.mybatis.mybatisplus.external;
 
 import com.baomidou.mybatisplus.core.injector.AbstractMethod;
 import com.baomidou.mybatisplus.core.injector.DefaultSqlInjector;

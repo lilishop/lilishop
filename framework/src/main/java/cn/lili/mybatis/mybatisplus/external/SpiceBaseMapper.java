@@ -1,4 +1,4 @@
-package cn.lili.mybatis.mybatisplus;
+package cn.lili.mybatis.mybatisplus.external;
 
 import java.util.List;
 
