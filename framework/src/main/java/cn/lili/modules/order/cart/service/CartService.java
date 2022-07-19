@@ -96,13 +96,6 @@ public interface CartService {
     void clean();
 
     /**
-     * 清空购物车无效数据
-     *
-     * @param way 购物车类型
-     */
-    void cleanChecked(CartTypeEnum way);
-
-    /**
      * 重新写入
      *
      * @param tradeDTO 购物车构建器最终要构建的成品

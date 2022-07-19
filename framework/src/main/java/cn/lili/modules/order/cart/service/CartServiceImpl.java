@@ -16,7 +16,6 @@ import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
-import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.member.entity.dos.Member;
@@ -46,7 +45,6 @@ import cn.lili.modules.promotion.service.MemberCouponService;
 import cn.lili.modules.promotion.service.PointsGoodsService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
-import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,16 +96,6 @@ public class CartServiceImpl implements CartService {
      */
     @Autowired
     private EsGoodsSearchService esGoodsSearchService;
-    /**
-     * 商品索引
-     */
-    @Autowired
-    private EsGoodsIndexService goodsIndexService;
-    /**
-     * ES商品
-     */
-    @Autowired
-    private GoodsService goodsService;
     /**
      * 砍价
      */
@@ -161,7 +149,7 @@ public class CartServiceImpl implements CartService {
                         int newNum = oldNum + num;
                         this.checkSetGoodsQuantity(cartSkuVO, skuId, newNum);
                     }
-
+                    cartSkuVO.setPromotionMap(promotionMap);
                     //计算购物车小计
                     cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
                 } else {
@@ -254,7 +242,8 @@ public class CartServiceImpl implements CartService {
                 cartSkuVO.setChecked(checked);
             }
         }
-        cache.put(this.getOriginKey(CartTypeEnum.CART), tradeDTO);
+
+        this.resetTradeDTO(tradeDTO);
     }
 
     @Override
@@ -269,7 +258,8 @@ public class CartServiceImpl implements CartService {
                 cartSkuVO.setChecked(checked);
             }
         }
-        cache.put(this.getOriginKey(CartTypeEnum.CART), tradeDTO);
+
+        resetTradeDTO(tradeDTO);
     }
 
     @Override
@@ -282,7 +272,7 @@ public class CartServiceImpl implements CartService {
         for (CartSkuVO cartSkuVO : cartSkuVOS) {
             cartSkuVO.setChecked(checked);
         }
-        cache.put(this.getOriginKey(CartTypeEnum.CART), tradeDTO);
+        resetTradeDTO(tradeDTO);
     }
 
     /**
@@ -296,7 +286,6 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void delete(String[] skuIds) {
         TradeDTO tradeDTO = this.readDTO(CartTypeEnum.CART);
         List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
@@ -309,7 +298,7 @@ public class CartServiceImpl implements CartService {
             }
         }
         cartSkuVOS.removeAll(deleteVos);
-        cache.put(this.getOriginKey(CartTypeEnum.CART), tradeDTO);
+        resetTradeDTO(tradeDTO);
     }
 
     @Override
@@ -331,17 +320,8 @@ public class CartServiceImpl implements CartService {
         tradeDTO.setStoreCoupons(null);
         //清除添加过的备注
         tradeDTO.setStoreRemark(null);
-        cache.put(this.getOriginKey(tradeDTO.getCartTypeEnum()), tradeDTO);
-    }
 
-    @Override
-    public void cleanChecked(CartTypeEnum way) {
-        if (way.equals(CartTypeEnum.CART)) {
-            TradeDTO tradeDTO = this.readDTO(CartTypeEnum.CART);
-            this.cleanChecked(tradeDTO);
-        } else {
-            cache.remove(this.getOriginKey(way));
-        }
+        resetTradeDTO(tradeDTO);
     }
 
     @Override
