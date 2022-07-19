@@ -239,6 +239,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             //如果店铺详情为空，则new ，否则复制对象，然后保存即可。
             if (storeDetail == null) {
                 storeDetail = new StoreDetail();
+                storeDetail.setStoreId(store.getId());
                 BeanUtil.copyProperties(storeCompanyDTO, storeDetail);
                 return storeDetailService.save(storeDetail);
             } else {
