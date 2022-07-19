@@ -91,6 +91,18 @@ public class CustomWordsServiceImpl extends ServiceImpl<CustomWordsMapper, Custo
         return this.removeById(id);
     }
 
+    @Override
+    public boolean deleteBathByName(List<String> names) {
+        LambdaQueryWrapper<CustomWords> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(CustomWords::getName, names);
+        return this.remove(queryWrapper);
+    }
+
+    @Override
+    public long insertBatchCustomWords(List<CustomWords> customWordsList) {
+        return this.baseMapper.insertBatchSomeColumn(customWordsList);
+    }
+
     /**
      * 修改自定义分词
      *
