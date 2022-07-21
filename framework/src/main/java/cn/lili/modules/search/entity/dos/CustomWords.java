@@ -37,7 +37,7 @@ public class CustomWords extends BaseEntity {
     private String name;
 
 
-    @ApiModelProperty(value = "是否禁用")
+    @ApiModelProperty(value = "是否禁用: 0,禁用;1,不禁用")
     private Integer disabled;
 
 
