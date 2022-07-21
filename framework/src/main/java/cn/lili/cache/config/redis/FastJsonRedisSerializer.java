@@ -6,6 +6,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 要实现对象的缓存，定义自己的序列化和反序列化器。使用阿里的fastjson来实现的比较多
@@ -13,8 +14,8 @@ import java.nio.charset.Charset;
  * @author Bulbasaur
  */
 public class FastJsonRedisSerializer<T> implements RedisSerializer<T> {
-    private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
-    private Class<T> clazz;
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+    private final Class<T> clazz;
 
     public FastJsonRedisSerializer(Class<T> clazz) {
         super();
@@ -26,7 +27,10 @@ public class FastJsonRedisSerializer<T> implements RedisSerializer<T> {
         if (null == t) {
             return new byte[0];
         }
-        return JSON.toJSONString(t, SerializerFeature.WriteClassName).getBytes(DEFAULT_CHARSET);
+        return JSON.toJSONString(t,
+                SerializerFeature.WriteClassName,
+                SerializerFeature.DisableCircularReferenceDetect)
+                .getBytes(DEFAULT_CHARSET);
     }
 
     @Override
