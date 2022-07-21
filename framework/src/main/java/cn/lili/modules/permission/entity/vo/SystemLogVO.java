@@ -42,7 +42,7 @@ public class SystemLogVO implements Serializable {
 
     @ApiModelProperty(value = "日志记录时间")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @Field(type = FieldType.Date, format = DateFormat.basic_date_time)
+    @Field(type = FieldType.Date, format = DateFormat.basic_date_time, fielddata = true)
     private Date createTime = new Date();
 
     @ApiModelProperty(value = "请求用户")

@@ -294,7 +294,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 for (EsGoodsAttribute esGoodsAttribute : goods.getAttrList()) {
                     if (keywordsList.stream().noneMatch(i -> i.toLowerCase(Locale.ROOT).equals(esGoodsAttribute.getValue().toLowerCase(Locale.ROOT)))) {
                         keywordsList.add(esGoodsAttribute.getValue());
-                        customWordsList.add(new CustomWords(esGoodsAttribute.getValue(), 0));
+                        customWordsList.add(new CustomWords(esGoodsAttribute.getValue(), 1));
                     }
                 }
             }
@@ -302,7 +302,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             for (AnalyzeResponse.AnalyzeToken token : tokens) {
                 if (keywordsList.stream().noneMatch(i -> i.toLowerCase(Locale.ROOT).equals(token.getTerm().toLowerCase(Locale.ROOT)))) {
                     keywordsList.add(token.getTerm());
-                    customWordsList.add(new CustomWords(token.getTerm(), 0));
+                    customWordsList.add(new CustomWords(token.getTerm(), 1));
                 }
                 //保存词条进入数据库
             }
