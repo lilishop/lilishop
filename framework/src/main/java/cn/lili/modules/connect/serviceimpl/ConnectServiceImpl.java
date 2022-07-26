@@ -8,7 +8,9 @@ import cn.lili.cache.CachePrefix;
 import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.event.TransactionCommitSendMQEvent;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.token.Token;
@@ -29,11 +31,13 @@ import cn.lili.modules.system.entity.dto.connect.WechatConnectSetting;
 import cn.lili.modules.system.entity.dto.connect.dto.WechatConnectSettingItem;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
+import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,6 +70,14 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     private MemberTokenGenerate memberTokenGenerate;
     @Autowired
     private Cache cache;
+    /**
+     * RocketMQ 配置
+     */
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -235,6 +247,8 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         memberService.save(newMember);
         newMember = memberService.findByUsername(newMember.getUsername());
         bindMpMember(openId, unionId, newMember);
+        // 发送会员注册信息
+        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("new member register", rocketmqCustomProperties.getMemberTopic(), MemberTagsEnum.MEMBER_REGISTER.name(), newMember));
         return memberTokenGenerate.createToken(newMember, true);
     }
 
@@ -262,9 +276,9 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
      * 这样，微信小程序注册之后，其他app 公众号页面，都可以实现绑定自动登录功能
      * </p>
      *
-     * @param openId    微信openid
-     * @param unionId  微信unionid
-     * @param member   会员
+     * @param openId  微信openid
+     * @param unionId 微信unionid
+     * @param member  会员
      */
     private void bindMpMember(String openId, String unionId, Member member) {
 
