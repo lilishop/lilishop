@@ -297,7 +297,7 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
         if (pintuan.getPromotionGoodsList() != null && !pintuan.getPromotionGoodsList().isEmpty()) {
             List<PromotionGoods> promotionGoods = PromotionTools.promotionGoodsInit(pintuan.getPromotionGoodsList(), pintuan, PromotionTypeEnum.PINTUAN);
             for (PromotionGoods promotionGood : promotionGoods) {
-                if (goodsSkuService.getGoodsSkuByIdFromCache(promotionGood.getSkuId()) == null) {
+                if (goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(promotionGood.getSkuId()) == null) {
                     log.error("商品[" + promotionGood.getGoodsName() + "]不存在或处于不可售卖状态！");
                     throw new ServiceException("商品[" + promotionGood.getGoodsName() + "]不存在或处于不可售卖状态！");
                 }
