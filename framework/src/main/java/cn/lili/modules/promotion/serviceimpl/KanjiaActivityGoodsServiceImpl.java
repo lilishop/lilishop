@@ -120,7 +120,7 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
      * @return 商品sku
      */
     private GoodsSku checkSkuExist(String skuId) {
-        GoodsSku goodsSku = this.goodsSkuService.getGoodsSkuByIdFromCache(skuId);
+        GoodsSku goodsSku = this.goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(skuId);
         if (goodsSku == null) {
             log.error("商品ID为" + skuId + "的商品不存在！");
             throw new ServiceException();
@@ -206,7 +206,7 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
         }
         KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO = new KanjiaActivityGoodsDTO();
         BeanUtils.copyProperties(kanjiaActivityGoods, kanjiaActivityGoodsDTO);
-        GoodsSku goodsSku = this.goodsSkuService.getGoodsSkuByIdFromCache(kanjiaActivityGoods.getSkuId());
+        GoodsSku goodsSku = this.goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(kanjiaActivityGoods.getSkuId());
         if (goodsSku != null) {
             kanjiaActivityGoodsDTO.setGoodsSku(goodsSku);
         }
@@ -233,7 +233,7 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
         //获取砍价商品
         KanjiaActivityGoods kanJiaActivityGoods = this.getById(id);
         //获取商品SKU
-        GoodsSku goodsSku = this.goodsSkuService.getGoodsSkuByIdFromCache(kanJiaActivityGoods.getSkuId());
+        GoodsSku goodsSku = this.goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(kanJiaActivityGoods.getSkuId());
         //填写活动商品价格、剩余数量
         kanJiaActivityGoodsVO.setGoodsSku(goodsSku);
         kanJiaActivityGoodsVO.setStock(kanJiaActivityGoods.getStock());

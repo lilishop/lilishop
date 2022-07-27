@@ -83,6 +83,14 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     GoodsSku getGoodsSkuByIdFromCache(String id);
 
     /**
+     * 从缓存中获取可参与促销商品
+     *
+     * @param skuId skuid
+     * @return 商品详情
+     */
+    GoodsSku getCanPromotionGoodsSkuByIdFromCache(String skuId);
+
+    /**
      * 获取商品sku详情
      *
      * @param goodsId 商品ID
@@ -143,7 +151,7 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     /**
      * 分页查询商品sku信息
      *
-     * @param page 分页参数
+     * @param page         分页参数
      * @param queryWrapper 查询参数
      * @return 商品sku信息
      */

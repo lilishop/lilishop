@@ -22,6 +22,7 @@ import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
+import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.vos.GoodsSkuSpecVO;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
@@ -233,6 +234,15 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             //写入最新的库存信息
             goodsSku.setQuantity(integer);
             cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
+        }
+        return goodsSku;
+    }
+
+    @Override
+    public GoodsSku getCanPromotionGoodsSkuByIdFromCache(String skuId) {
+        GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
+        if (goodsSku != null && GoodsSalesModeEnum.WHOLESALE.name().equals(goodsSku.getSalesModel())) {
+            throw new ServiceException(ResultCode.PROMOTION_GOODS_DO_NOT_JOIN_WHOLESALE, goodsSku.getGoodsName());
         }
         return goodsSku;
     }
