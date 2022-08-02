@@ -296,20 +296,15 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             //根据商品名称生成分词
             keywordsList.add(goods.getGoodsName().substring(0, Math.min(goods.getGoodsName().length(), 10)));
 
-            //如果有分词
-            if (!keywordsList.isEmpty()) {
-                //去除重复词
-                removeDuplicate(keywordsList);
-                //入库自定义分词
-                List<CustomWords> customWordsArrayList = new ArrayList<>();
-                keywordsList.stream().forEach(item -> {
-                    customWordsArrayList.add(new CustomWords(item));
-                });
-                //这里采用先批量删除再插入的方法，故意这么做。否则需要挨个匹配是否存在，性能消耗更大
-                if (CollUtil.isNotEmpty(customWordsArrayList)) {
-                    customWordsService.deleteBathByName(keywordsList);
-                    customWordsService.insertBatchCustomWords(customWordsArrayList);
-                }
+            //去除重复词
+            removeDuplicate(keywordsList);
+            //入库自定义分词
+            List<CustomWords> customWordsArrayList = new ArrayList<>();
+            keywordsList.forEach(item -> customWordsArrayList.add(new CustomWords(item)));
+            //这里采用先批量删除再插入的方法，故意这么做。否则需要挨个匹配是否存在，性能消耗更大
+            if (CollUtil.isNotEmpty(customWordsArrayList)) {
+                customWordsService.deleteBathByName(keywordsList);
+                customWordsService.insertBatchCustomWords(customWordsArrayList);
             }
         } catch (Exception e) {
             log.info(goods + "自定义分词错误", e);
