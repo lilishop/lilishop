@@ -72,7 +72,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     @Override
     public List<PromotionGoods> findSkuValidPromotion(String skuId, String storeIds) {
 
-        GoodsSku sku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(skuId);
+        GoodsSku sku = goodsSkuService.getGoodsSkuByIdFromCache(skuId);
         if (sku == null) {
             return new ArrayList<>();
         }
