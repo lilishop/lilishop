@@ -115,7 +115,7 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
         }
         KanjiaActivity kanJiaActivity = new KanjiaActivity();
         //获取商品信息
-        GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(kanJiaActivityGoods.getSkuId());
+        GoodsSku goodsSku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(kanJiaActivityGoods.getSkuId());
         if (goodsSku != null) {
             kanJiaActivity.setSkuId(kanJiaActivityGoods.getSkuId());
             kanJiaActivity.setGoodsName(goodsSku.getGoodsName());

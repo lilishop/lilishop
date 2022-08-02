@@ -5,11 +5,8 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
@@ -75,7 +72,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     @Override
     public List<PromotionGoods> findSkuValidPromotion(String skuId, String storeIds) {
 
-        GoodsSku sku = goodsSkuService.getGoodsSkuByIdFromCache(skuId);
+        GoodsSku sku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(skuId);
         if (sku == null) {
             return new ArrayList<>();
         }
@@ -314,40 +311,6 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
             dataSku.setPromotionPrice(null);
         }
         return promotionMap;
-    }
-
-    @Override
-    public boolean save(PromotionGoods entity) {
-        this.checkGoodsSku(entity.getSkuId());
-        return super.save(entity);
-    }
-
-    @Override
-    public boolean saveBatch(Collection<PromotionGoods> entityList) {
-        for (PromotionGoods promotionGoods : entityList) {
-            this.checkGoodsSku(promotionGoods.getSkuId());
-        }
-        return super.saveBatch(entityList);
-    }
-
-    @Override
-    public boolean saveOrUpdateBatch(Collection<PromotionGoods> entityList) {
-        for (PromotionGoods promotionGoods : entityList) {
-            this.checkGoodsSku(promotionGoods.getSkuId());
-        }
-        return super.saveOrUpdateBatch(entityList);
-    }
-
-    /**
-     * 检查是否为不能参加促销活动的商品
-     *
-     * @param skuId 商品skuId
-     */
-    private void checkGoodsSku(String skuId) {
-        GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(skuId);
-        if (goodsSku != null && GoodsSalesModeEnum.WHOLESALE.name().equals(goodsSku.getSalesModel())) {
-            throw new ServiceException(ResultCode.PROMOTION_GOODS_DO_NOT_JOIN_WHOLESALE, goodsSku.getGoodsName());
-        }
     }
 
     private void setGoodsPromotionInfo(GoodsSku dataSku, Map.Entry<String, Object> promotionInfo) {
