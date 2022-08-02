@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.Date;
 
 /**
  * 自定义分词
@@ -41,4 +42,8 @@ public class CustomWords extends BaseEntity {
     private Integer disabled;
 
 
+    public CustomWords(String name) {
+        this.name = name;
+        this.disabled = 0;
+    }
 }
