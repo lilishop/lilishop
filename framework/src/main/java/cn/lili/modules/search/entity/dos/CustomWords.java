@@ -41,4 +41,8 @@ public class CustomWords extends BaseEntity {
     private Integer disabled;
 
 
+    public CustomWords(String name) {
+        this.name = name;
+        this.disabled = 1;
+    }
 }

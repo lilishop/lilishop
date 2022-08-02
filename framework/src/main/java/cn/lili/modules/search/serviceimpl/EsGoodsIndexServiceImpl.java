@@ -55,8 +55,6 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.indices.AnalyzeRequest;
-import org.elasticsearch.client.indices.AnalyzeResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
@@ -283,36 +281,44 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      */
     private void analyzeAndSaveWords(EsGoodsIndex goods) {
         try {
-            //分词器分词
-            AnalyzeRequest analyzeRequest = AnalyzeRequest.withIndexAnalyzer(getIndexName(), "ik_max_word", goods.getGoodsName());
-            AnalyzeResponse analyze = client.indices().analyze(analyzeRequest, RequestOptions.DEFAULT);
-            List<AnalyzeResponse.AnalyzeToken> tokens = analyze.getTokens();
-            List<CustomWords> customWordsList = new ArrayList<>();
             List<String> keywordsList = new ArrayList<>();
+            //根据商品参数分词
             if (goods.getAttrList() != null && !goods.getAttrList().isEmpty()) {
                 //保存分词
                 for (EsGoodsAttribute esGoodsAttribute : goods.getAttrList()) {
                     if (keywordsList.stream().noneMatch(i -> i.toLowerCase(Locale.ROOT).equals(esGoodsAttribute.getValue().toLowerCase(Locale.ROOT)))) {
                         keywordsList.add(esGoodsAttribute.getValue());
-                        customWordsList.add(new CustomWords(esGoodsAttribute.getValue(), 1));
                     }
                 }
             }
-            //分析词条
-            for (AnalyzeResponse.AnalyzeToken token : tokens) {
-                if (keywordsList.stream().noneMatch(i -> i.toLowerCase(Locale.ROOT).equals(token.getTerm().toLowerCase(Locale.ROOT)))) {
-                    keywordsList.add(token.getTerm());
-                    customWordsList.add(new CustomWords(token.getTerm(), 1));
-                }
-                //保存词条进入数据库
-            }
-            if (CollUtil.isNotEmpty(customWordsList)) {
+            //根据商品名称生成分词
+            keywordsList.add(goods.getGoodsName().substring(0, Math.min(goods.getGoodsName().length(), 10)));
+
+            //去除重复词
+            removeDuplicate(keywordsList);
+            //入库自定义分词
+            List<CustomWords> customWordsArrayList = new ArrayList<>();
+            keywordsList.forEach(item -> customWordsArrayList.add(new CustomWords(item)));
+            //这里采用先批量删除再插入的方法，故意这么做。否则需要挨个匹配是否存在，性能消耗更大
+            if (CollUtil.isNotEmpty(customWordsArrayList)) {
                 customWordsService.deleteBathByName(keywordsList);
-                customWordsService.insertBatchCustomWords(customWordsList);
+                customWordsService.insertBatchCustomWords(customWordsArrayList);
             }
-        } catch (IOException e) {
-            log.info(goods + "分词错误", e);
+        } catch (Exception e) {
+            log.info(goods + "自定义分词错误", e);
         }
+    }
+
+    /**
+     * 去除 重复元素
+     *
+     * @param list
+     * @return
+     */
+    public static void removeDuplicate(List<String> list) {
+        HashSet<String> h = new HashSet(list);
+        list.clear();
+        list.addAll(h);
     }
 
     /**
