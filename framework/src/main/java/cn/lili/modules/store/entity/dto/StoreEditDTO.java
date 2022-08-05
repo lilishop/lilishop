@@ -49,7 +49,6 @@ public class StoreEditDTO {
     @ApiModelProperty(value = "公司地址地区")
     private String companyAddressPath;
 
-    @Mobile
     @ApiModelProperty(value = "公司电话")
     private String companyPhone;
 
