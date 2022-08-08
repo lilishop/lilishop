@@ -673,8 +673,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public QRCodeLoginSessionVo createPcSession() {
         QRCodeLoginSessionVo session = new QRCodeLoginSessionVo();
         session.setStatus(QRCodeLoginSessionStatusEnum.WAIT_SCANNING.getCode());
-        //过期时间，10s
-        Long duration= 10 * 1000L;
+        //过期时间，20s
+        Long duration= 20 * 1000L;
         session.setDuration(duration);
         String token = CachePrefix.QR_CODE_LOGIN_SESSION.name()+SnowFlake.getIdStr();
         session.setToken(token);
@@ -684,6 +684,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public Object appScanner(String token) {
+        AuthUser tokenUser = UserContext.getCurrentUser();
+        if (tokenUser == null) {
+            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        }
         QRCodeLoginSessionVo session = (QRCodeLoginSessionVo) cache.get(token);
         if(session == null){
             return QRCodeLoginSessionStatusEnum.NO_EXIST.getCode();
@@ -695,6 +699,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public boolean appSConfirm(String token, Integer code) {
+        AuthUser tokenUser = UserContext.getCurrentUser();
+        if (tokenUser == null) {
+            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        }
         QRCodeLoginSessionVo session = (QRCodeLoginSessionVo) cache.get(token);
         if(session == null){
             return false;
@@ -702,8 +710,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         if(code==1){
             //同意
             session.setStatus(QRCodeLoginSessionStatusEnum.VERIFIED.getCode());
-            AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
-            session.setUserId(Long.valueOf(currentUser.getId()));
+            session.setUserId(Long.valueOf(tokenUser.getId()));
         }else{
             //拒绝
             session.setStatus(QRCodeLoginSessionStatusEnum.CANCELED.getCode());

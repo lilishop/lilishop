@@ -3,6 +3,7 @@ package cn.lili.controller.passport;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.Member;
@@ -70,7 +71,7 @@ public class MemberBuyerController {
         log.info("receive login with session key {}", token);
         ResponseEntity<ResultMessage> timeoutResponseEntity =
                 new ResponseEntity<>(ResultUtil.error(ResultCode.ERROR), HttpStatus.OK);
-        int timeoutSecond = 10;
+        int timeoutSecond = 20;
         DeferredResult<ResponseEntity> deferredResult = new DeferredResult<>(timeoutSecond * 1000L, timeoutResponseEntity);
         CompletableFuture.runAsync(() -> {
             try {
