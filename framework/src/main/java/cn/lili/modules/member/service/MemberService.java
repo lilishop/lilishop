@@ -24,7 +24,6 @@ import java.util.Map;
  * @since 2020-02-25 14:10:16
  */
 public interface MemberService extends IService<Member> {
-
     /**
      * 默认密码
      */
@@ -98,6 +97,16 @@ public interface MemberService extends IService<Member> {
     Member modifyPass(String memberId, String oldPassword, String newPassword);
 
     /**
+     * 注册会员
+     *
+     * @param userName    会员
+     * @param password    密码
+     * @param mobilePhone mobilePhone
+     * @return 处理结果
+     */
+    Token register(String userName, String password, String mobilePhone);
+
+    /**
      * 是否可以初始化密码
      *
      * @return
@@ -119,17 +128,6 @@ public interface MemberService extends IService<Member> {
      * @return 操作结果
      */
     void cancellation(String password);
-
-    /**
-     * 注册会员
-     *
-     * @param userName    会员
-     * @param password    密码
-     * @param mobilePhone mobilePhone
-     * @return 处理结果
-     */
-    Token register(String userName, String password, String mobilePhone);
-
     /**
      * 修改当前会员的手机号
      *
@@ -268,7 +266,7 @@ public interface MemberService extends IService<Member> {
      */
     void resetPassword(List<String> ids);
 
-    /*
+    /**
      * 获取所有会员的手机号
      *
      * @return 所有会员的手机号
@@ -283,9 +281,8 @@ public interface MemberService extends IService<Member> {
      */
     boolean updateMemberLoginTime(String memberId);
 
-     /**
+    /**
      * 获取用户VO
-     *
      * @param id 会员id
      * @return 用户VO
      */
