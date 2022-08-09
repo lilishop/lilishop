@@ -1,6 +1,5 @@
 package cn.lili.modules.store.entity.dto;
 
-import cn.lili.common.validation.Mobile;
 import cn.lili.common.validation.Phone;
 import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModelProperty;

@@ -278,11 +278,6 @@ public enum ResultCode {
     COUPON_RECEIVE_ERROR(41005, "当前优惠券已经被领取完了，下次要早点来哦"),
     COUPON_NUM_INSUFFICIENT_ERROR(41006, "优惠券剩余领取数量不足"),
     COUPON_NOT_EXIST(41007, "当前优惠券不存在"),
-    COUPON_DO_NOT_RECEIVER(41030, "当前优惠券不允许主动领取"),
-    COUPON_ACTIVITY_NOT_EXIST(410022, "当前优惠券活动不存在"),
-    COUPON_SAVE_ERROR(41020, "保存优惠券失败"),
-    COUPON_ACTIVITY_SAVE_ERROR(41023, "保存优惠券活动失败"),
-    COUPON_DELETE_ERROR(41021, "删除优惠券失败"),
     COUPON_LIMIT_NUM_LESS_THAN_0(41008, "领取限制数量不能为负数"),
     COUPON_LIMIT_GREATER_THAN_PUBLISH(41009, "领取限制数量超出发行数量"),
     COUPON_DISCOUNT_ERROR(41010, "优惠券折扣必须小于10且大于0"),
@@ -293,8 +288,15 @@ public enum ResultCode {
     COUPON_MEMBER_NOT_EXIST(41015, "没有当前会员优惠券"),
     COUPON_MEMBER_STATUS_ERROR(41016, "当前会员优惠券已过期/作废无法变更状态！"),
 
-    SPECIAL_CANT_USE(41020, "特殊商品不能使用优惠券，不能使用"),
+    SPECIAL_CANT_USE(41019, "特殊商品不能使用优惠券，不能使用"),
 
+    COUPON_SAVE_ERROR(41020, "保存优惠券失败"),
+    COUPON_DELETE_ERROR(41021, "删除优惠券失败"),
+    COUPON_ACTIVITY_NOT_EXIST(41022, "当前优惠券活动不存在"),
+    COUPON_ACTIVITY_SAVE_ERROR(41023, "保存优惠券活动失败"),
+    COUPON_ACTIVITY_MAX_NUM(41024, "优惠券活动赠券数量最多为3"),
+
+    COUPON_DO_NOT_RECEIVER(41030, "当前优惠券不允许主动领取"),
 
     /**
      * 拼团
