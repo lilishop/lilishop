@@ -47,13 +47,7 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> i
 
     @Override
     public List<UserMenuVO> findAllMenu(String userId) {
-        String cacheKey = CachePrefix.USER_MENU.getPrefix() + userId;
-        List<UserMenuVO> menuList = (List<UserMenuVO>) cache.get(cacheKey);
-        if (menuList == null) {
-            menuList = menuMapper.getUserRoleMenu(userId);
-            cache.put(cacheKey, menuList);
-        }
-        return menuList;
+        return menuMapper.getUserRoleMenu(userId);
     }
 
 
@@ -65,8 +59,7 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> i
             this.deleteRoleMenu(roleId);
             //重新保存角色菜单关系
             this.saveBatch(roleMenus);
-            cache.vagueDel(CachePrefix.MENU_USER_ID.getPrefix());
-            cache.vagueDel(CachePrefix.USER_MENU.getPrefix());
+            
         } catch (Exception e) {
             log.error("修改用户权限错误", e);
         }
@@ -78,8 +71,7 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> i
         QueryWrapper<RoleMenu> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("role_id", roleId);
         this.remove(queryWrapper);
-        cache.vagueDel(CachePrefix.MENU_USER_ID.getPrefix());
-        cache.vagueDel(CachePrefix.USER_MENU.getPrefix());
+        
     }
 
     @Override
@@ -88,7 +80,6 @@ public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> i
         QueryWrapper<RoleMenu> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("role_id", roleId);
         this.remove(queryWrapper);
-        cache.vagueDel(CachePrefix.MENU_USER_ID.getPrefix());
-        cache.vagueDel(CachePrefix.USER_MENU.getPrefix());
+        
     }
 }

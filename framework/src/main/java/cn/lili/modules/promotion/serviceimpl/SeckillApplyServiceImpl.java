@@ -161,7 +161,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         List<PromotionGoods> promotionGoodsList = new ArrayList<>();
         for (SeckillApplyVO seckillApply : seckillApplyList) {
             //获取参与活动的商品信息
-            GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(seckillApply.getSkuId());
+            GoodsSku goodsSku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(seckillApply.getSkuId());
             if (!goodsSku.getStoreId().equals(storeId)) {
                 continue;
             }
@@ -184,6 +184,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         //保存促销活动商品信息
         if (!promotionGoodsList.isEmpty()) {
             PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
+            searchParams.setPromotionId(seckillId);
             searchParams.setStoreId(storeId);
             searchParams.setPromotionType(PromotionTypeEnum.SECKILL.name());
             searchParams.setSkuIds(promotionGoodsList.stream().map(PromotionGoods::getSkuId).collect(Collectors.toList()));
@@ -267,7 +268,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
 
         for (SeckillApply seckillApply : list) {
             //获取参与活动的商品信息
-            GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(seckillApply.getSkuId());
+            GoodsSku goodsSku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(seckillApply.getSkuId());
             //获取促销商品
             PromotionGoods promotionGoods = this.setSeckillGoods(goodsSku, seckillApply, seckill);
             promotionGoodsList.add(promotionGoods);
@@ -282,12 +283,13 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             List<PromotionGoods> promotionGoods = PromotionTools.promotionGoodsInit(promotionGoodsList, seckill, PromotionTypeEnum.SECKILL);
             result = promotionGoodsService.saveBatch(promotionGoods);
             this.seckillService.updateEsGoodsSeckill(seckill, list);
+
+            LambdaQueryWrapper<SeckillApply> deleteWrapper = new LambdaQueryWrapper<>();
+            deleteWrapper.eq(SeckillApply::getSeckillId, seckill.getId());
+            deleteWrapper.notIn(SeckillApply::getSkuId, promotionGoodsList.stream().map(PromotionGoods::getSkuId).collect(Collectors.toList()));
+            this.remove(deleteWrapper);
         }
 
-        LambdaQueryWrapper<SeckillApply> deleteWrapper = new LambdaQueryWrapper<>();
-        deleteWrapper.eq(SeckillApply::getSeckillId, seckill.getId());
-        deleteWrapper.notIn(SeckillApply::getSkuId, promotionGoodsList.stream().map(PromotionGoods::getSkuId).collect(Collectors.toList()));
-        this.remove(deleteWrapper);
         seckillService.updateSeckillGoodsNum(seckill.getId());
 
         return result;
@@ -343,7 +345,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             Arrays.sort(hoursSored);
             for (int i = 0; i < hoursSored.length; i++) {
                 SeckillTimelineVO tempTimeline = new SeckillTimelineVO();
-                boolean hoursSoredHour = (hoursSored[i] >= hour || ((i + 1) < hoursSored.length && hoursSored[i + 1] > hour));
+                boolean hoursSoredHour = (hoursSored[i] >= hour || i + 1 == hoursSored.length);
                 if (hoursSoredHour) {
                     SimpleDateFormat format = new SimpleDateFormat(DatePattern.NORM_DATE_PATTERN);
                     String date = format.format(new Date());
@@ -377,7 +379,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         if (!seckillApplyList.isEmpty()) {
             List<SeckillApply> collect = seckillApplyList.stream().filter(i -> i.getTimeLine().equals(startTimeline) && i.getPromotionApplyStatus().equals(PromotionsApplyStatusEnum.PASS.name())).collect(Collectors.toList());
             for (SeckillApply seckillApply : collect) {
-                GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(seckillApply.getSkuId());
+                GoodsSku goodsSku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(seckillApply.getSkuId());
                 if (goodsSku != null) {
                     SeckillGoodsVO goodsVO = new SeckillGoodsVO();
                     BeanUtil.copyProperties(seckillApply, goodsVO);

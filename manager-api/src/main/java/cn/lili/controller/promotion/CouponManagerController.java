@@ -44,7 +44,9 @@ public class CouponManagerController {
     @ApiOperation(value = "获取优惠券列表")
     @GetMapping
     public ResultMessage<IPage<CouponVO>> getCouponList(CouponSearchParams queryParam, PageVO page) {
-        queryParam.setStoreId(PromotionTools.PLATFORM_ID);
+        if (queryParam.getStoreId() == null) {
+            queryParam.setStoreId(PromotionTools.PLATFORM_ID);
+        }
         return ResultUtil.data(couponService.pageVOFindAll(queryParam, page));
     }
 

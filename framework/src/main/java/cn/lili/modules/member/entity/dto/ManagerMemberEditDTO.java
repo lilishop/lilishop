@@ -21,9 +21,8 @@ import java.util.Date;
 @Data
 public class ManagerMemberEditDTO {
 
-    @ApiModelProperty(value = "会员用户名,用户名不能进行修改", required = true)
-    @NotNull(message = "会员用户名不能为空")
-    private String username;
+    @NotNull(message = "用户ID不能为空")
+    private String id;
 
     @ApiModelProperty(value = "会员密码")
     private String password;
@@ -45,7 +44,7 @@ public class ManagerMemberEditDTO {
     private Integer sex;
 
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-  @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "会员生日")
     private Date birthday;
 

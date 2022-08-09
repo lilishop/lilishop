@@ -291,7 +291,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
             throw new ServiceException(ResultCode.COUPON_SCOPE_ERROR);
         }
         for (String id : split) {
-            GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(id);
+            GoodsSku goodsSku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(id);
             if (goodsSku == null) {
                 throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
             }

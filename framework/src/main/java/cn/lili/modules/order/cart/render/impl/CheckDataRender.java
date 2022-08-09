@@ -1,5 +1,6 @@
 package cn.lili.modules.order.cart.render.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -7,10 +8,14 @@ import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
+import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -26,6 +31,7 @@ import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dos.PointsGoods;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
+import cn.lili.modules.promotion.service.PromotionGoodsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,6 +61,14 @@ public class CheckDataRender implements CartRenderStep {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private WholesaleService wholesaleService;
+
+    /**
+     * 商品索引
+     */
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
 
     @Override
     public RenderStepEnums step() {
@@ -69,6 +83,7 @@ public class CheckDataRender implements CartRenderStep {
         //校验商品有效性
         checkData(tradeDTO);
 
+        preSaleModel(tradeDTO);
         //店铺分组数据初始化
         groupStore(tradeDTO);
 
@@ -92,7 +107,7 @@ public class CheckDataRender implements CartRenderStep {
             //缓存中的商品信息
             GoodsSku dataSku = goodsSkuService.getGoodsSkuByIdFromCache(cartSkuVO.getGoodsSku().getId());
             //商品有效性判定
-            if (dataSku == null || dataSku.getUpdateTime().before(cartSkuVO.getGoodsSku().getUpdateTime())) {
+            if (dataSku == null || dataSku.getCreateTime().after(cartSkuVO.getGoodsSku().getCreateTime())) {
                 //设置购物车未选中
                 cartSkuVO.setChecked(false);
                 //设置购物车此sku商品已失效
@@ -118,6 +133,17 @@ public class CheckDataRender implements CartRenderStep {
                 //设置失效消息
                 cartSkuVO.setErrorMessage("商品库存不足,现有库存数量[" + dataSku.getQuantity() + "]");
             }
+            //如果存在商品促销活动，则判定商品促销状态
+            if (!cartSkuVO.getCartType().equals(CartTypeEnum.POINTS) && (CollUtil.isNotEmpty(cartSkuVO.getNotFilterPromotionMap()) || Boolean.TRUE.equals(cartSkuVO.getGoodsSku().getPromotionFlag()))) {
+                //获取当前最新的促销信息
+                cartSkuVO.setPromotionMap(this.promotionGoodsService.getCurrentGoodsPromotion(cartSkuVO.getGoodsSku(), tradeDTO.getCartTypeEnum().name()));
+                //设定商品价格
+                Double goodsPrice = cartSkuVO.getGoodsSku().getPromotionFlag() != null && cartSkuVO.getGoodsSku().getPromotionFlag() ? cartSkuVO.getGoodsSku().getPromotionPrice() : cartSkuVO.getGoodsSku().getPrice();
+                cartSkuVO.setPurchasePrice(goodsPrice);
+                cartSkuVO.setUtilPrice(goodsPrice);
+                cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
+            }
+
         }
     }
 
@@ -142,10 +168,12 @@ public class CheckDataRender implements CartRenderStep {
                 try {
                     //筛选属于当前店铺的优惠券
                     storeCart.getValue().forEach(i -> i.getPromotionMap().forEach((key, value) -> {
-                        JSONObject promotionsObj = JSONUtil.parseObj(value);
-                        Coupon coupon = JSONUtil.toBean(promotionsObj, Coupon.class);
-                        if (key.contains(PromotionTypeEnum.COUPON.name()) && coupon.getStoreId().equals(storeCart.getKey())) {
-                            cartVO.getCanReceiveCoupon().add(new CouponVO(coupon));
+                        if (key.contains(PromotionTypeEnum.COUPON.name())) {
+                            JSONObject promotionsObj = JSONUtil.parseObj(value);
+                            Coupon coupon = JSONUtil.toBean(promotionsObj, Coupon.class);
+                            if (key.contains(PromotionTypeEnum.COUPON.name()) && coupon.getStoreId().equals(storeCart.getKey())) {
+                                cartVO.getCanReceiveCoupon().add(new CouponVO(coupon));
+                            }
                         }
                     }));
                 } catch (Exception e) {
@@ -212,4 +240,41 @@ public class CheckDataRender implements CartRenderStep {
 
     }
 
+
+    /**
+     * 商品销售模式特殊处理
+     *
+     * @param tradeDTO 交易信息
+     */
+    private void preSaleModel(TradeDTO tradeDTO) {
+        // 寻找同goods下销售模式为批发的商品
+        Map<String, List<CartSkuVO>> goodsGroup = tradeDTO.getSkuList().stream().filter(i -> i.getGoodsSku().getSalesModel().equals(GoodsSalesModeEnum.WHOLESALE.name())).collect(Collectors.groupingBy(i -> i.getGoodsSku().getGoodsId()));
+        if (CollUtil.isNotEmpty(goodsGroup)) {
+            goodsGroup.forEach((k, v) -> {
+                // 获取购买总数
+                int sum = v.stream().filter(i -> Boolean.TRUE.equals(i.getChecked())).mapToInt(CartSkuVO::getNum).sum();
+                int fSum = v.stream().filter(i -> Boolean.FALSE.equals(i.getChecked())).mapToInt(CartSkuVO::getNum).sum();
+                // 匹配符合的批发规则
+                Wholesale match = wholesaleService.match(k, sum);
+                if (match != null) {
+                    v.forEach(i -> {
+                        // 将符合规则的商品设置批发价格
+                        if (Boolean.TRUE.equals(i.getChecked())) {
+                            i.setPurchasePrice(match.getPrice());
+                            i.getGoodsSku().setPrice(match.getPrice());
+                            i.getGoodsSku().setCost(match.getPrice());
+                            i.setUtilPrice(match.getPrice());
+                            i.setSubTotal(CurrencyUtil.mul(i.getPurchasePrice(), i.getNum()));
+                        } else {
+                            i.setPurchasePrice(wholesaleService.match(k, fSum).getPrice());
+                            i.getGoodsSku().setPrice(i.getPurchasePrice());
+                            i.getGoodsSku().setCost(i.getPurchasePrice());
+                            i.setUtilPrice(i.getPurchasePrice());
+                            i.setSubTotal(CurrencyUtil.mul(i.getPurchasePrice(), i.getNum()));
+                        }
+                    });
+                }
+            });
+        }
+    }
 }

@@ -53,7 +53,7 @@ public interface ArticleService extends IService<Article> {
     Article updateArticle(Article article);
 
     /**
-     * 删除文章
+     * 删除文章--id
      *
      * @param id
      */
@@ -87,4 +87,12 @@ public interface ArticleService extends IService<Article> {
      */
     @CacheEvict(key = "#id")
     Boolean updateArticleStatus(String id, boolean status);
+
+    /**
+     * 修改文章--文章类型修改
+     * @param article
+     * @return
+     */
+    @CacheEvict(key = "#article.type")
+    Article updateArticleType(Article article);
 }

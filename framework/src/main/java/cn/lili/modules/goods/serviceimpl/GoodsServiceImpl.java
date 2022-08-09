@@ -1,5 +1,6 @@
 package cn.lili.modules.goods.serviceimpl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONUtil;
@@ -14,6 +15,7 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
+import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.dto.GoodsOperationFuLuDTO;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
@@ -23,10 +25,7 @@ import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.mapper.GoodsMapper;
-import cn.lili.modules.goods.service.CategoryService;
-import cn.lili.modules.goods.service.GoodsGalleryService;
-import cn.lili.modules.goods.service.GoodsService;
-import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.service.*;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
@@ -112,6 +111,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     private FreightTemplateService freightTemplateService;
 
     @Autowired
+    private WholesaleService wholesaleService;
+
+    @Autowired
     private Cache<GoodsVO> cache;
 
     @Override
@@ -171,7 +173,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         //添加商品
         this.save(goods);
         //添加商品sku信息
-        this.goodsSkuService.add(goodsOperationDTO.getSkuList(), goods);
+        this.goodsSkuService.add(goods, goodsOperationDTO);
         //添加相册
         if (goodsOperationDTO.getGoodsGalleryList() != null && !goodsOperationDTO.getGoodsGalleryList().isEmpty()) {
             this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
@@ -220,7 +222,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         //修改商品
         this.updateById(goods);
         //修改商品sku信息
-        this.goodsSkuService.update(goodsOperationDTO.getSkuList(), goods, goodsOperationDTO.getRegeneratorSkuFlag());
+        this.goodsSkuService.update(goods, goodsOperationDTO);
         //添加相册
         if (goodsOperationDTO.getGoodsGalleryList() != null && !goodsOperationDTO.getGoodsGalleryList().isEmpty()) {
             this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
@@ -302,6 +304,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (CharSequenceUtil.isNotEmpty(goods.getParams())) {
             goodsVO.setGoodsParamsDTOList(JSONUtil.toList(goods.getParams(), GoodsParamsDTO.class));
         }
+
+        List<Wholesale> wholesaleList = wholesaleService.findByGoodsId(goodsId);
+        if (CollUtil.isNotEmpty(wholesaleList)) {
+            goodsVO.setWholesaleList(wholesaleList);
+        }
+
         cache.put(CachePrefix.GOODS.getPrefix() + goodsId, goodsVO);
         return goodsVO;
     }
@@ -325,6 +333,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean auditGoods(List<String> goodsIds, GoodsAuthEnum goodsAuthEnum) {
+        List<String> goodsCacheKeys = new ArrayList<>();
         boolean result = false;
         for (String goodsId : goodsIds) {
             Goods goods = this.checkExist(goodsId);
@@ -332,12 +341,13 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             result = this.updateById(goods);
             goodsSkuService.updateGoodsSkuStatus(goods);
             //删除之前的缓存
-            cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
+            goodsCacheKeys.add(CachePrefix.GOODS.getPrefix() + goodsId);
             //商品审核消息
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_AUDIT.name();
             //发送mq消息
             rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(goods), RocketmqSendCallbackBuilder.commonCallback());
         }
+        cache.multiDel(goodsCacheKeys);
         return result;
     }
 
@@ -361,13 +371,30 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         LambdaQueryWrapper<Goods> queryWrapper = this.getQueryWrapperByStoreAuthority();
         queryWrapper.in(Goods::getId, goodsIds);
         List<Goods> goodsList = this.list(queryWrapper);
-        for (Goods goods : goodsList) {
-            goodsSkuService.updateGoodsSkuStatus(goods);
-        }
+        this.updateGoodsStatus(goodsIds, goodsStatusEnum, goodsList);
+        return result;
+    }
 
-        if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
-            this.deleteEsGoods(goodsIds);
-        }
+    /**
+     * 更新商品上架状态状态
+     *
+     * @param storeId         店铺ID
+     * @param goodsStatusEnum 更新的商品状态
+     * @param underReason     下架原因
+     * @return 更新结果
+     */
+    @Override
+    public Boolean updateGoodsMarketAbleByStoreId(String storeId, GoodsStatusEnum goodsStatusEnum, String underReason) {
+        boolean result;
+
+        LambdaUpdateWrapper<Goods> updateWrapper = this.getUpdateWrapperByStoreAuthority();
+        updateWrapper.set(Goods::getMarketEnable, goodsStatusEnum.name());
+        updateWrapper.set(Goods::getUnderMessage, underReason);
+        updateWrapper.eq(Goods::getStoreId, storeId);
+        result = this.update(updateWrapper);
+
+        //修改规格商品
+        this.goodsSkuService.updateGoodsSkuStatusByStoreId(storeId, goodsStatusEnum.name(), null);
         return result;
     }
 
@@ -394,12 +421,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         LambdaQueryWrapper<Goods> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(Goods::getId, goodsIds);
         List<Goods> goodsList = this.list(queryWrapper);
-        for (Goods goods : goodsList) {
-            goodsSkuService.updateGoodsSkuStatus(goods);
-        }
-        if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
-            this.deleteEsGoods(goodsIds);
-        }
+        this.updateGoodsStatus(goodsIds, goodsStatusEnum, goodsList);
         return result;
     }
 
@@ -417,13 +439,15 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         LambdaQueryWrapper<Goods> queryWrapper = this.getQueryWrapperByStoreAuthority();
         queryWrapper.in(Goods::getId, goodsIds);
         List<Goods> goodsList = this.list(queryWrapper);
+        List<String> goodsCacheKeys = new ArrayList<>();
         for (Goods goods : goodsList) {
             //修改SKU状态
             goodsSkuService.updateGoodsSkuStatus(goods);
+            goodsCacheKeys.add(CachePrefix.GOODS.getPrefix() + goods.getId());
         }
-
+        //删除缓存
+        cache.multiDel(goodsCacheKeys);
         this.deleteEsGoods(goodsIds);
-
         return true;
     }
 
@@ -503,10 +527,42 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         return this.count(
                 new LambdaQueryWrapper<Goods>()
                         .eq(Goods::getStoreId, storeId)
+                        .eq(Goods::getDeleteFlag, Boolean.FALSE)
                         .eq(Goods::getAuthFlag, GoodsAuthEnum.PASS.name())
                         .eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name()));
     }
 
+
+
+    /**
+     * 更新店铺商品数量
+     *
+     * @param storeId 信息体
+     */
+    void updateGoodsNum(String storeId) {
+        Long num = goodsSkuService.countSkuNum(storeId);
+        storeService.updateStoreGoodsNum(storeId, num);
+    }
+
+    /**
+     * 更新商品状态
+     *
+     * @param goodsIds        商品ID
+     * @param goodsStatusEnum 商品状态
+     * @param goodsList       商品列表
+     */
+    private void updateGoodsStatus(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, List<Goods> goodsList) {
+        List<String> goodsCacheKeys = new ArrayList<>();
+        for (Goods goods : goodsList) {
+            goodsCacheKeys.add(CachePrefix.GOODS.getPrefix() + goods.getId());
+            goodsSkuService.updateGoodsSkuStatus(goods);
+        }
+        cache.multiDel(goodsCacheKeys);
+
+        if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
+            this.deleteEsGoods(goodsIds);
+        }
+    }
 
     /**
      * 发送删除es索引的信息

@@ -34,7 +34,7 @@ public class CouponExecute implements EveryDayExecute {
      */
     @Override
     public void execute() {
-        //将过期优惠券变更为过期状体
+        //将过期优惠券变更为过期状态
         LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<MemberCoupon>()
                 .eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name())
                 .le(MemberCoupon::getEndTime, new Date())

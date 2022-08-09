@@ -35,11 +35,11 @@ public interface BillMapper extends BaseMapper<Bill> {
      * @param queryWrapper 查询条件
      * @return 结算单
      */
-    @Select("SELECT SUM( final_price ) AS orderPrice,SUM( commission_price ) AS commissionPrice" +
-            ",SUM( distribution_rebate ) AS distributionCommission,SUM( site_coupon_commission ) AS siteCouponCommission" +
-            ",SUM( point_settlement_price ) AS pointSettlementPrice " +
-            ",SUM( kanjia_settlement_price ) AS kanjiaSettlementPrice " +
-            ",SUM( bill_price ) AS billPrice " +
+    @Select("SELECT IFNULL(SUM( final_price ),0) AS orderPrice,IFNULL(SUM( commission_price ),0) AS commissionPrice" +
+            ",IFNULL(SUM( distribution_rebate ),0) AS distributionCommission,IFNULL(SUM( site_coupon_commission ),0) AS siteCouponCommission" +
+            ",IFNULL(SUM( point_settlement_price ),0) AS pointSettlementPrice " +
+            ",IFNULL(SUM( kanjia_settlement_price ),0) AS kanjiaSettlementPrice " +
+            ",IFNULL(SUM( bill_price ),0) AS billPrice " +
             "FROM li_store_flow ${ew.customSqlSegment}")
     Bill getOrderBill(@Param(Constants.WRAPPER) QueryWrapper<Bill> queryWrapper);
 
@@ -49,8 +49,8 @@ public interface BillMapper extends BaseMapper<Bill> {
      * @param queryWrapper 查询条件
      * @return 结算单
      */
-    @Select("SELECT SUM( final_price ) AS refundPrice,SUM( commission_price ) AS refundCommissionPrice" +
-            ",SUM( distribution_rebate ) AS distributionRefundCommission,SUM( site_coupon_commission ) AS siteCouponRefundCommission" +
-            ",SUM( bill_price ) AS billPrice FROM li_store_flow ${ew.customSqlSegment}")
+    @Select("SELECT IFNULL(SUM( final_price ),0) AS refundPrice,IFNULL(SUM( commission_price ),0) AS refundCommissionPrice" +
+            ",IFNULL(SUM( distribution_rebate ),0) AS distributionRefundCommission,IFNULL(SUM( site_coupon_commission ),0) AS siteCouponRefundCommission" +
+            ",IFNULL(SUM( final_price ),0) AS billPrice FROM li_store_flow ${ew.customSqlSegment}")
     Bill getRefundBill(@Param(Constants.WRAPPER) QueryWrapper<Bill> queryWrapper);
 }

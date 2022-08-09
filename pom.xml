@@ -26,11 +26,11 @@
         <images-version>1</images-version>
         <alipay-sdk-version>4.22.32.ALL</alipay-sdk-version>
         <mybatis-plus-version>3.5.1</mybatis-plus-version>
-        <Hutool-version>5.7.20</Hutool-version>
+        <Hutool-version>5.8.0</Hutool-version>
         <TinyPinyin-verions>2.0.3.RELEASE</TinyPinyin-verions>
         <jasypt-version>3.0.4</jasypt-version>
         <neetl-version>2.9.10</neetl-version>
-        <lombok-version>1.18.22</lombok-version>
+        <lombok-version>1.18.24</lombok-version>
         <redisson>3.15.6</redisson>
         <aliyun-version>4.5.18</aliyun-version>
         <aliyun-sdk-oss-version>3.11.1</aliyun-sdk-oss-version>
@@ -38,7 +38,7 @@
         <aliyun-version>4.6.0</aliyun-version>
         <aliyun-sdk-oss-version>3.14.0</aliyun-sdk-oss-version>
         <aliyun-sdk-dysms-version>2.0.9</aliyun-sdk-dysms-version>
-        <rocketmq-version>2.2.1</rocketmq-version>
+        <rocketmq-version>2.2.2</rocketmq-version>
         <jwt-version>0.11.2</jwt-version>
         <sharding-jdbc-version>4.0.0</sharding-jdbc-version>
         <druid-version>1.2.8</druid-version>
@@ -46,13 +46,13 @@
         <antlr4-version>4.7.2</antlr4-version>
         <antlr4-runtime-version>4.7.2</antlr4-runtime-version>
         <knife4j.version>2.0.9</knife4j.version>
-        <de.codecentric>2.6.2</de.codecentric>
+        <de.codecentric>2.6.6</de.codecentric>
         <userAgentUtils>1.21</userAgentUtils>
         <poi-version>5.1.0</poi-version>
         <poi-ooxml-version>5.1.0</poi-ooxml-version>
-        <logstash-logback-encoder>7.0.1</logstash-logback-encoder>
-        <zxing>3.4.1</zxing>
-        <slf4j-api>1.7.35</slf4j-api>
+        <logstash-logback-encoder>7.1.1</logstash-logback-encoder>
+        <zxing>3.5.0</zxing>
+        <slf4j-api>1.7.36</slf4j-api>
         <xk-time>3.2.3</xk-time>
         <commons-text>1.9</commons-text>
         <enjoy.version>4.3</enjoy.version>
@@ -60,6 +60,7 @@
         <spotify>1.2.2</spotify>
         <spring-boot-admin>2.3.1</spring-boot-admin>
         <owasp-java-html-sanitizer>20211018.2</owasp-java-html-sanitizer>
+        <minio.version>8.0.3</minio.version>
     </properties>
 
     <modules>
@@ -87,7 +88,6 @@
                     <imageName>${docker-registry}/${project.artifactId}:${revision}.${images-version}</imageName>
                     <baseImage>java</baseImage>
                     <entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
-                    <pushImage>true</pushImage>
                     <resources>
                         <resource>
                             <targetPath>/</targetPath>
@@ -110,7 +110,7 @@
         <repository>
             <id>central</id>
             <name>aliyun maven</name>
-            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <url>https://maven.aliyun.com/repository/public</url>
             <layout>default</layout>
             <!-- 是否开启发布版构件下载 -->
             <releases>

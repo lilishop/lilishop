@@ -76,14 +76,6 @@ public class Bill extends BaseIdEntity {
     @ApiModelProperty(value = "支行联行号")
     private String bankCode;
 
-    /**
-     * 开始算钱啦
-     * billPrice=orderPrice-refundPrice
-     * -commissionPrice+refundCommissionPrice
-     * -distributionCommission+distributionRefundCommission
-     * +siteCouponCommission-siteCouponRefundCommission
-     * +kanjiaSettlementPrice+pointSettlementPrice
-     */
     @ApiModelProperty(value = "结算周期内订单付款总金额")
     private Double orderPrice;
 
@@ -114,6 +106,16 @@ public class Bill extends BaseIdEntity {
     @ApiModelProperty(value = "砍价商品结算价格")
     private Double kanjiaSettlementPrice;
 
+
+    /**
+     * 开始算钱啦
+     * billPrice(最终结算金额) =
+     *   orderPrice(结算周期内订单付款总金额) - refundPrice(退单金额)
+     * - commissionPrice(平台收取佣金) + refundCommissionPrice(退单产生退还佣金金额)
+     * - distributionCommission(分销返现支出) + distributionRefundCommission(分销订单退还，返现佣金返还)
+     * + siteCouponCommission(平台优惠券补贴) - siteCouponRefundCommission(退货平台优惠券补贴返还)
+     * + kanjiaSettlementPrice(砍价商品结算价格) + pointSettlementPrice(pointSettlementPrice)
+     */
     @ApiModelProperty(value = "最终结算金额")
     private Double billPrice;
 

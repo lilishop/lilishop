@@ -84,7 +84,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         QueryWrapper<MemberWallet> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("member_id", memberId);
         //执行查询
-        MemberWallet memberWallet = this.baseMapper.selectOne(queryWrapper);
+        MemberWallet memberWallet = this.getOne(queryWrapper, false);
         //如果没有钱包，则创建钱包
         if (memberWallet == null) {
             memberWallet = this.save(memberId, memberService.getById(memberId).getUsername());
@@ -168,8 +168,8 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         //检测会员预存款讯息是否存在，如果不存在则新建
         MemberWallet memberWallet = this.checkMemberWallet(memberWalletUpdateDTO.getMemberId());
         //校验此金额是否超过冻结金额
-        if (0 > CurrencyUtil.sub(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney())) {
-            throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_INSUFFICIENT);
+        if (0 > CurrencyUtil.sub(memberWallet.getMemberFrozenWallet(), memberWalletUpdateDTO.getMoney())) {
+            throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_FROZEN_AMOUNT_INSUFFICIENT);
         }
         memberWallet.setMemberFrozenWallet(CurrencyUtil.sub(memberWallet.getMemberFrozenWallet(), memberWalletUpdateDTO.getMoney()));
         this.updateById(memberWallet);
@@ -186,7 +186,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
      */
     private MemberWallet checkMemberWallet(String memberId) {
         //获取会员预存款信息
-        MemberWallet memberWallet = this.getOne(new QueryWrapper<MemberWallet>().eq("member_id", memberId));
+        MemberWallet memberWallet = this.getOne(new QueryWrapper<MemberWallet>().eq("member_id", memberId), false);
         //如果会员预存款信息不存在则同步重新建立预存款信息
         if (memberWallet == null) {
             Member member = memberService.getById(memberId);

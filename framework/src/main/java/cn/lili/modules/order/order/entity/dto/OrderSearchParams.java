@@ -121,7 +121,7 @@ public class OrderSearchParams extends PageVO {
 
         //关键字查询
         if (CharSequenceUtil.isNotEmpty(keywords)) {
-            wrapper.like("o.sn", keywords).or().like("oi.goods_name", keywords);
+            wrapper.and(keyWrapper -> keyWrapper.like("o.sn", keywords).or().like("oi.goods_name", keywords));
         }
         if (currentUser != null) {
             //按卖家查询

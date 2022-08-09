@@ -19,10 +19,7 @@ import cn.lili.modules.promotion.service.MemberCouponService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -60,7 +57,15 @@ public class CouponRender implements CartRenderStep {
      * @param tradeDTO 交易dto
      */
     private void renderCouponRule(TradeDTO tradeDTO) {
+        // 清除之前的优惠券
+        tradeDTO.removeCoupon();
+
         List<MemberCoupon> memberCouponList = memberCouponService.getMemberCoupons(tradeDTO.getMemberId());
+
+        //获取最新优惠券
+        memberCouponList = memberCouponList.stream()
+                .filter(item -> item.getStartTime().before(new Date()) && item.getEndTime().after(new Date()))
+                .collect(Collectors.toList());
 
         if (!memberCouponList.isEmpty()) {
             this.checkMemberExistCoupon(tradeDTO, memberCouponList);

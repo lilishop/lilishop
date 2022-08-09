@@ -44,4 +44,7 @@ public class EsGoodsSearchDTO {
     @ApiModelProperty(hidden = true)
     private Map<String, List<String>> notShowCol = new HashMap<>();
 
+    @ApiModelProperty("当前商品skuId,根据当前浏览的商品信息来给用户推荐可能喜欢的商品")
+    private String currentGoodsId;
+
 }

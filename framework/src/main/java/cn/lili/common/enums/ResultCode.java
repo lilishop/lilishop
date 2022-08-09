@@ -40,6 +40,7 @@ public enum ResultCode {
     FILE_TYPE_NOT_SUPPORT(1010, "不支持上传的文件类型！"),
     PLATFORM_NOT_SUPPORTED_IM(1006, "平台未开启IM"),
     STORE_NOT_SUPPORTED_IM(1007, "店铺未开启IM"),
+    UNINITIALIZED_PASSWORD(1008, "非初始化密码，无法进行初始化设置"),
     /**
      * 分类
      */
@@ -75,9 +76,13 @@ public enum ResultCode {
     GOODS_SKU_QUANTITY_ERROR(11011, "商品库存数量不能为负数"),
     GOODS_SKU_QUANTITY_NOT_ENOUGH(11011, "商品库存不足"),
     MUST_HAVE_GOODS_SKU(11012, "规格必须要有一个！"),
+    MUST_HAVE_SALES_MODEL(11022, "销售模式为批发时必须要有批发规则！"),
+
+    HAVE_INVALID_SALES_MODEL(11023, "批发规则存在小于等于0的无效数据！"),
+
     GOODS_PARAMS_ERROR(11013, "商品参数错误，刷新后重试"),
     PHYSICAL_GOODS_NEED_TEMP(11014, "实物商品需选择配送模板"),
-    VIRTUAL_GOODS_NOT_NEED_TEMP(11015, "实物商品需选择配送模板"),
+    VIRTUAL_GOODS_NOT_NEED_TEMP(11015, "虚拟商品无需选择配送模板"),
     GOODS_NOT_EXIST_STORE(11017, "当前用户无权操作此商品"),
     GOODS_TYPE_ERROR(11016, "需选择商品类型"),
 
@@ -187,6 +192,7 @@ public enum ResultCode {
     MEMBER_ADDRESS_NOT_EXIST(31009, "订单无收货地址，请先配置收货地址"),
     ORDER_DELIVER_NUM_ERROR(31010, "没有待发货的订单"),
     ORDER_NOT_SUPPORT_DISTRIBUTION(31011, "购物车中包含不支持配送的商品，请重新选择收货地址，或者重新选择商品"),
+    ORDER_NOT_EXIST_VALID(31041, "购物车中无有效商品，请检查购物车内商品，或者重新选择商品"),
     ORDER_CAN_NOT_CANCEL(31012, "当前订单状态不可取消"),
     ORDER_BATCH_DELIVER_ERROR(31013, "批量发货,文件读取失败"),
     ORDER_ITEM_NOT_EXIST(31014, "当前订单项不存在！"),
@@ -258,6 +264,7 @@ public enum ResultCode {
      */
     PROMOTION_GOODS_NOT_EXIT(40000, "当前促销商品不存在！"),
     PROMOTION_GOODS_QUANTITY_NOT_EXIT(40020, "当前促销商品库存不足！"),
+    PROMOTION_GOODS_DO_NOT_JOIN_WHOLESALE(40050, "批发商品无法参加促销"),
     PROMOTION_SAME_ACTIVE_EXIST(40001, "活动时间内已存在同类活动，请选择关闭、删除当前时段的活动"),
     PROMOTION_START_TIME_ERROR(40002, "活动起始时间不能小于当前时间"),
     PROMOTION_END_TIME_ERROR(40003, "活动结束时间不能小于当前时间"),
@@ -282,11 +289,6 @@ public enum ResultCode {
     COUPON_RECEIVE_ERROR(41005, "当前优惠券已经被领取完了，下次要早点来哦"),
     COUPON_NUM_INSUFFICIENT_ERROR(41006, "优惠券剩余领取数量不足"),
     COUPON_NOT_EXIST(41007, "当前优惠券不存在"),
-    COUPON_DO_NOT_RECEIVER(41030, "当前优惠券不允许主动领取"),
-    COUPON_ACTIVITY_NOT_EXIST(410022, "当前优惠券活动不存在"),
-    COUPON_SAVE_ERROR(41020, "保存优惠券失败"),
-    COUPON_ACTIVITY_SAVE_ERROR(41023, "保存优惠券活动失败"),
-    COUPON_DELETE_ERROR(41021, "删除优惠券失败"),
     COUPON_LIMIT_NUM_LESS_THAN_0(41008, "领取限制数量不能为负数"),
     COUPON_LIMIT_GREATER_THAN_PUBLISH(41009, "领取限制数量超出发行数量"),
     COUPON_DISCOUNT_ERROR(41010, "优惠券折扣必须小于10且大于0"),
@@ -297,6 +299,15 @@ public enum ResultCode {
     COUPON_MEMBER_NOT_EXIST(41015, "没有当前会员优惠券"),
     COUPON_MEMBER_STATUS_ERROR(41016, "当前会员优惠券已过期/作废无法变更状态！"),
 
+    SPECIAL_CANT_USE(41019, "特殊商品不能使用优惠券，不能使用"),
+
+    COUPON_SAVE_ERROR(41020, "保存优惠券失败"),
+    COUPON_DELETE_ERROR(41021, "删除优惠券失败"),
+    COUPON_ACTIVITY_NOT_EXIST(41022, "当前优惠券活动不存在"),
+    COUPON_ACTIVITY_SAVE_ERROR(41023, "保存优惠券活动失败"),
+    COUPON_ACTIVITY_MAX_NUM(41024, "优惠券活动赠券数量最多为3"),
+
+    COUPON_DO_NOT_RECEIVER(41030, "当前优惠券不允许主动领取"),
 
     /**
      * 拼团

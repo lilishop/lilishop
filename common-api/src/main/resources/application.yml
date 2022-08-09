@@ -121,6 +121,8 @@ ignored:
     - /source/**
     - /common/common/slider/**
     - /common/common/sms/**
+    - /common/common/logo
+    - /common/common/site
     - /druid/**
     - /swagger-ui.html
     - /doc.html

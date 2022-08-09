@@ -131,7 +131,7 @@ public class PlatformViewServiceImpl extends ServiceImpl<PlatformViewMapper, Pla
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
 
-        calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY) - statisticsProperties.getOnlineMember() - 1);
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY) - statisticsProperties.getOnlineMember());
         //循环填充数据
         for (int i = 0; i < statisticsProperties.getOnlineMember(); i++) {
             calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY) + 1);
@@ -142,7 +142,7 @@ public class PlatformViewServiceImpl extends ServiceImpl<PlatformViewMapper, Pla
                 }
             }
             if (exitOnlineNum == null) {
-                onlineMemberVOS.add(new OnlineMemberVO(calendar.getTime(), 0));
+                onlineMemberVOS.add(new OnlineMemberVO(calendar.getTime(), 0, 0));
             } else {
                 onlineMemberVOS.add(exitOnlineNum);
             }

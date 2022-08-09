@@ -94,6 +94,9 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
             //循环店铺流水记录判断是否包含分销商品
             //包含分销商品则进行记录分销订单、计算分销总额
             for (StoreFlow storeFlow : storeFlowList) {
+                if (storeFlow.getDistributionRebate() == null || storeFlow.getDistributionRebate() == 0) {
+                    continue;
+                }
                 rebate = CurrencyUtil.add(rebate, storeFlow.getDistributionRebate());
                 DistributionOrder distributionOrder = new DistributionOrder(storeFlow);
                 distributionOrder.setDistributionId(order.getDistributionId());

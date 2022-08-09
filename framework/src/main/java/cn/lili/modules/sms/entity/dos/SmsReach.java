@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -23,7 +24,10 @@ import java.util.Date;
 @Data
 @TableName("li_sms_reach")
 @ApiModel(value = "短信任务")
+@EqualsAndHashCode(callSuper = true)
 public class SmsReach extends BaseIdEntity {
+
+    private static final long serialVersionUID = -8106666482841131277L;
 
     @ApiModelProperty(value = "签名名称", required = true)
     private String signName;

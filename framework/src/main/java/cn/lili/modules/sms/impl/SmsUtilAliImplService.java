@@ -122,7 +122,9 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
         //如果是测试模式 默认验证码 6个1
         if (systemSettingProperties.getIsTestModel()) {
             code = "111111";
+            log.info("测试模式 - 接收手机：{},验证码：{}",mobile,code);
         } else {
+            log.info("接收手机：{},验证码：{}",mobile,code);
             //发送短信
             this.sendSmsCode(smsSetting.getSignName(), mobile, params, templateCode);
         }
@@ -154,6 +156,9 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 .setTemplateParam(JSONUtil.toJsonStr(param));
         try {
             SendSmsResponse response = client.sendSms(sendSmsRequest);
+            if (!("OK").equals(response.getBody().getCode())) {
+                throw new ServiceException(response.getBody().getMessage());
+            }
         } catch (Exception e) {
             log.error("发送短信错误", e);
         }

@@ -112,4 +112,11 @@ public interface ConnectService extends IService<Connect> {
      * @return
      */
     Connect queryConnect(ConnectQueryDTO connectQueryDTO);
+
+    /**
+     * 根据会员id删除记录
+     *
+     * @param userId 会员id
+     */
+    void deleteByMemberId(String userId);
 }

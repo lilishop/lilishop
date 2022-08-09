@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 public class EvaluationNumberVO {
 
-    @ApiModelProperty(value = "全部商品")
+    @ApiModelProperty(value = "全部评价")
     private Integer all;
 
     @ApiModelProperty(value = "好评数量")

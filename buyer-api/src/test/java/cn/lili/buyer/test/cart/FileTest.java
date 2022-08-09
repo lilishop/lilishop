@@ -1,7 +1,7 @@
 package cn.lili.buyer.test.cart;
 
 
-import cn.lili.modules.file.plugin.FileManagerPlugin;
+import cn.lili.modules.file.plugin.FilePlugin;
 import cn.lili.modules.goods.entity.dos.Brand;
 import cn.lili.modules.goods.service.BrandService;
 import com.xkcoding.http.util.StringUtil;
@@ -27,7 +27,7 @@ class FileTest {
 
 
     @Autowired
-    private FileManagerPlugin fileManagerPlugin;
+    private FilePlugin fileManagerPlugin;
 
     @Autowired
     private BrandService brandService;

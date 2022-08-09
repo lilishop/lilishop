@@ -74,7 +74,7 @@ public class SkuPromotionRender implements CartRenderStep {
         renderBasePrice(tradeDTO);
         //渲染单品促销
         renderSkuPromotion(tradeDTO);
-
+        //检查促销库存
         checkPromotionQuantity(tradeDTO);
 
 
@@ -186,7 +186,6 @@ public class SkuPromotionRender implements CartRenderStep {
      */
     private void checkPromotionQuantity(TradeDTO tradeDTO) {
         for (CartSkuVO cartSkuVO : tradeDTO.getCheckedSkuList()) {
-            cartSkuVO.getPromotionMap();
             List<PromotionSkuVO> joinPromotion = cartSkuVO.getPriceDetailDTO().getJoinPromotion();
             if (!joinPromotion.isEmpty()) {
                 for (PromotionSkuVO promotionSkuVO : joinPromotion) {

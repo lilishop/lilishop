@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author paulG
@@ -124,7 +123,7 @@ public abstract class BaseElasticsearchService {
                         "            \"type\": \"keyword\"\n" +
                         "          },\n" +
                         "          \"type\": {\n" +
-                        "            \"type\": \"long\"\n" +
+                        "            \"type\": \"integer\"\n" +
                         "          },\n" +
                         "          \"value\": {\n" +
                         "            \"type\": \"keyword\"\n" +
@@ -165,14 +164,8 @@ public abstract class BaseElasticsearchService {
                         "        \"type\": \"long\"\n" +
                         "      },\n" +
                         "      \"releaseTime\": {\n" +
-                        "        \"type\": \"text\",\n" +
-                        "        \"fielddata\": true, \n" +
-                        "        \"fields\": {\n" +
-                        "          \"keyword\": {\n" +
-                        "            \"type\": \"keyword\",\n" +
-                        "            \"ignore_above\": 256\n" +
-                        "          }\n" +
-                        "        }\n" +
+                        "        \"type\": \"date\",\n" +
+                        "        \"format\": \"yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis\"\n" +
                         "      },\n" +
                         "      \"categoryPath\": {\n" +
                         "        \"type\": \"text\",\n" +
@@ -348,20 +341,20 @@ public abstract class BaseElasticsearchService {
 
         PutMappingRequest request = new PutMappingRequest(index).source(source, XContentType.JSON);
         CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<AcknowledgedResponse> response = new AtomicReference<>();
         client.indices().putMappingAsync(
                 request,
                 RequestOptions.DEFAULT,
                 new ActionListener<AcknowledgedResponse>() {
                     @Override
                     public void onResponse(AcknowledgedResponse r) {
-                        response.set(r);
                         latch.countDown();
+                        log.info("创建索引mapping成功：{}", r);
                     }
 
                     @Override
                     public void onFailure(Exception e) {
                         latch.countDown();
+                        log.error("创建索引mapping失败", e);
                     }
                 });
         latch.await(10, TimeUnit.SECONDS);

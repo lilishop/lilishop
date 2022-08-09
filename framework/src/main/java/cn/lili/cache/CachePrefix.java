@@ -466,15 +466,18 @@ public enum CachePrefix {
     INIT_INDEX_FLAG,
 
     /**
+     * 店铺
+     */
+    STORE,
+    /**
      * 店铺分类
      */
     STORE_CATEGORY,
     /**
      * 用户菜单
-     */
-    MENU_USER_ID,
-    /**
-     * 用户菜单
+     * <p>
+     * 这个缓存并非永久缓存，而是300秒缓存，也就是说修改用户关联的部门，关联的角色，
+     * 部门关联的角色，角色关联的菜单等等，最多需要5分钟才能生效
      */
     STORE_MENU_USER_ID,
     /**

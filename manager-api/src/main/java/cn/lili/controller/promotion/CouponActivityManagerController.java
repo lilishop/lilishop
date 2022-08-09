@@ -6,6 +6,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.CouponActivity;
+import cn.lili.modules.promotion.entity.dos.CouponActivityItem;
 import cn.lili.modules.promotion.entity.dto.CouponActivityDTO;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
 import cn.lili.modules.promotion.service.CouponActivityService;
@@ -49,8 +50,12 @@ public class CouponActivityManagerController {
 
     @ApiOperation(value = "添加优惠券活动")
     @PostMapping
-    @PutMapping(consumes = "application/json", produces = "application/json")
     public ResultMessage<CouponActivity> addCouponActivity(@RequestBody(required = false) CouponActivityDTO couponActivityDTO) {
+        for (CouponActivityItem couponActivityItem : couponActivityDTO.getCouponActivityItems()) {
+            if (couponActivityItem.getNum() > 3) {
+                throw new ServiceException(ResultCode.COUPON_ACTIVITY_MAX_NUM);
+            }
+        }
         if (couponActivityService.savePromotions(couponActivityDTO)) {
             return ResultUtil.data(couponActivityDTO);
         }

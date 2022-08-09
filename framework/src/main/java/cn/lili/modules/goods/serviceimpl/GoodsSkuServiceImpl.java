@@ -1,6 +1,5 @@
 package cn.lili.modules.goods.serviceimpl;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
@@ -10,25 +9,29 @@ import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.event.TransactionCommitSendMQEvent;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.goods.entity.dos.Goods;
+import cn.lili.modules.goods.entity.dos.GoodsGallery;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
+import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
+import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.vos.GoodsSkuSpecVO;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.entity.vos.SpecValueVO;
-import cn.lili.modules.goods.event.GeneratorEsGoodsIndexEvent;
 import cn.lili.modules.goods.mapper.GoodsSkuMapper;
-import cn.lili.modules.goods.service.CategoryService;
-import cn.lili.modules.goods.service.GoodsGalleryService;
-import cn.lili.modules.goods.service.GoodsService;
-import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.service.*;
+import cn.lili.modules.goods.sku.GoodsSkuBuilder;
+import cn.lili.modules.goods.sku.render.SalesModelRender;
 import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
@@ -37,16 +40,17 @@ import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
-import cn.lili.modules.search.entity.dos.EsGoodsAttribute;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.search.utils.EsIndexUtil;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,35 +117,42 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
+    @Autowired
+    private WholesaleService wholesaleService;
+
+    @Autowired
+    private List<SalesModelRender> salesModelRenders;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void add(List<Map<String, Object>> skuList, Goods goods) {
-        // 检查是否需要生成索引
-        List<GoodsSku> newSkuList;
-        //如果有规格
-        if (skuList != null && !skuList.isEmpty()) {
-            // 添加商品sku
-            newSkuList = this.addGoodsSku(skuList, goods);
-        } else {
+    public void add(Goods goods, GoodsOperationDTO goodsOperationDTO) {
+        // 是否存在规格
+        if (goodsOperationDTO.getSkuList() == null || goodsOperationDTO.getSkuList().isEmpty()) {
             throw new ServiceException(ResultCode.MUST_HAVE_GOODS_SKU);
         }
+        // 检查是否需要生成索引
+        List<GoodsSku> goodsSkus = GoodsSkuBuilder.buildBatch(goods, goodsOperationDTO);
+        renderGoodsSkuList(goodsSkus, goodsOperationDTO);
 
-        this.updateStock(newSkuList);
-        if (!newSkuList.isEmpty()) {
-            generateEs(goods);
+        if (!goodsSkus.isEmpty()) {
+            this.saveOrUpdateBatch(goodsSkus);
+            this.updateStock(goodsSkus);
+            this.generateEs(goods);
         }
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void update(List<Map<String, Object>> skuList, Goods goods, Boolean regeneratorSkuFlag) {
+    public void update(Goods goods, GoodsOperationDTO goodsOperationDTO) {
         // 是否存在规格
-        if (skuList == null || skuList.isEmpty()) {
+        if (goodsOperationDTO.getSkuList() == null || goodsOperationDTO.getSkuList().isEmpty()) {
             throw new ServiceException(ResultCode.MUST_HAVE_GOODS_SKU);
         }
-        List<GoodsSku> newSkuList;
+        List<GoodsSku> skuList;
         //删除旧的sku信息
-        if (Boolean.TRUE.equals(regeneratorSkuFlag)) {
+        if (Boolean.TRUE.equals(goodsOperationDTO.getRegeneratorSkuFlag())) {
+            skuList = GoodsSkuBuilder.buildBatch(goods, goodsOperationDTO);
+            renderGoodsSkuList(skuList, goodsOperationDTO);
             List<GoodsSkuVO> goodsListByGoodsId = getGoodsListByGoodsId(goods.getId());
             List<String> oldSkuIds = new ArrayList<>();
             //删除旧索引
@@ -149,36 +160,32 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 oldSkuIds.add(goodsSkuVO.getId());
                 cache.remove(GoodsSkuService.getCacheKeys(goodsSkuVO.getId()));
             }
-            goodsIndexService.deleteIndexByIds(oldSkuIds);
-            this.removeByIds(oldSkuIds);
+
+            this.remove(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goods.getId()));
             //删除sku相册
-            goodsGalleryService.removeByIds(oldSkuIds);
-            // 添加商品sku
-            newSkuList = this.addGoodsSku(skuList, goods);
+            goodsGalleryService.removeByGoodsId(goods.getId());
 
             //发送mq消息
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.SKU_DELETE.name();
             rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(oldSkuIds), RocketmqSendCallbackBuilder.commonCallback());
         } else {
-            newSkuList = new ArrayList<>();
-            for (Map<String, Object> map : skuList) {
-                GoodsSku sku = new GoodsSku();
-                //设置商品信息
-                goodsInfo(sku, goods);
-                //设置商品规格信息
-                skuInfo(sku, goods, map, null);
-                newSkuList.add(sku);
+            skuList = new ArrayList<>();
+            for (Map<String, Object> map : goodsOperationDTO.getSkuList()) {
+                GoodsSku sku = GoodsSkuBuilder.build(goods, map, goodsOperationDTO);
+                renderGoodsSku(sku, goodsOperationDTO);
+                skuList.add(sku);
                 //如果商品状态值不对，则es索引移除
                 if (goods.getAuthFlag().equals(GoodsAuthEnum.PASS.name()) && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())) {
                     goodsIndexService.deleteIndexById(sku.getId());
                     this.clearCache(sku.getId());
                 }
             }
-            this.updateBatchById(newSkuList);
         }
-        this.updateStock(newSkuList);
-        if (GoodsAuthEnum.PASS.name().equals(goods.getAuthFlag()) && !newSkuList.isEmpty()) {
-            generateEs(goods);
+        if (!skuList.isEmpty()) {
+            this.remove(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goods.getId()));
+            this.saveOrUpdateBatch(skuList);
+            this.updateStock(skuList);
+            this.generateEs(goods);
         }
     }
 
@@ -232,6 +239,15 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     @Override
+    public GoodsSku getCanPromotionGoodsSkuByIdFromCache(String skuId) {
+        GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
+        if (goodsSku != null && GoodsSalesModeEnum.WHOLESALE.name().equals(goodsSku.getSalesModel())) {
+            throw new ServiceException(ResultCode.PROMOTION_GOODS_DO_NOT_JOIN_WHOLESALE, goodsSku.getGoodsName());
+        }
+        return goodsSku;
+    }
+
+    @Override
     public Map<String, Object> getGoodsSkuDetail(String goodsId, String skuId) {
         Map<String, Object> map = new HashMap<>(16);
         //获取商品VO
@@ -244,13 +260,16 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
         //如果使用商品ID无法查询SKU则返回错误
         if (goodsVO == null || goodsSku == null) {
+            //发送mq消息
+            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_DELETE.name();
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(Collections.singletonList(goodsId)), RocketmqSendCallbackBuilder.commonCallback());
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
 
         //商品下架||商品未审核通过||商品删除，则提示：商品已下架
-        if (GoodsStatusEnum.DOWN.name().equals(goodsVO.getMarketEnable())
-                || !GoodsAuthEnum.PASS.name().equals(goodsVO.getAuthFlag())
-                || Boolean.TRUE.equals(goodsVO.getDeleteFlag())) {
+        if (GoodsStatusEnum.DOWN.name().equals(goodsVO.getMarketEnable()) || !GoodsAuthEnum.PASS.name().equals(goodsVO.getAuthFlag()) || Boolean.TRUE.equals(goodsVO.getDeleteFlag())) {
+            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_DELETE.name();
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(Collections.singletonList(goodsId)), RocketmqSendCallbackBuilder.commonCallback());
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
 
@@ -269,13 +288,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             promotionMap = promotionMap.entrySet().stream().parallel().filter(i -> {
                 JSONObject jsonObject = JSONUtil.parseObj(i.getValue());
                 // 过滤活动赠送优惠券和无效时间的活动
-                return (jsonObject.get("getType") == null || jsonObject.get("getType", String.class).equals(CouponGetEnum.FREE.name())) &&
-                        (jsonObject.get("startTime") != null && jsonObject.get("startTime", Date.class).getTime() <= System.currentTimeMillis()) &&
-                        (jsonObject.get("endTime") == null || jsonObject.get("endTime", Date.class).getTime() >= System.currentTimeMillis());
+                return (jsonObject.get("getType") == null || jsonObject.get("getType", String.class).equals(CouponGetEnum.FREE.name())) && (jsonObject.get("startTime") != null && jsonObject.get("startTime", Date.class).getTime() <= System.currentTimeMillis()) && (jsonObject.get("endTime") == null || jsonObject.get("endTime", Date.class).getTime() >= System.currentTimeMillis());
             }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-            Optional<Map.Entry<String, Object>> containsPromotion = promotionMap.entrySet().stream().filter(i ->
-                    i.getKey().contains(PromotionTypeEnum.SECKILL.name()) || i.getKey().contains(PromotionTypeEnum.PINTUAN.name())).findFirst();
+            Optional<Map.Entry<String, Object>> containsPromotion = promotionMap.entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.SECKILL.name()) || i.getKey().contains(PromotionTypeEnum.PINTUAN.name())).findFirst();
             if (containsPromotion.isPresent()) {
                 JSONObject jsonObject = JSONUtil.parseObj(containsPromotion.get().getValue());
                 PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
@@ -296,6 +312,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
         //获取分类
         String[] split = goodsSkuDetail.getCategoryPath().split(",");
+        map.put("wholesaleList", wholesaleService.findByGoodsId(goodsSkuDetail.getGoodsId()));
         map.put("categoryName", categoryService.getCategoryNameByIds(Arrays.asList(split)));
 
         //获取规格信息
@@ -325,7 +342,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Transactional(rollbackFor = Exception.class)
     public void updateGoodsSkuStatus(Goods goods) {
         LambdaUpdateWrapper<GoodsSku> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(GoodsSku::getGoodsId, goods.getId());
+        updateWrapper.eq(CharSequenceUtil.isNotEmpty(goods.getId()), GoodsSku::getGoodsId, goods.getId());
+        updateWrapper.eq(CharSequenceUtil.isNotEmpty(goods.getStoreId()), GoodsSku::getStoreId, goods.getStoreId());
         updateWrapper.set(GoodsSku::getMarketEnable, goods.getMarketEnable());
         updateWrapper.set(GoodsSku::getAuthFlag, goods.getAuthFlag());
         updateWrapper.set(GoodsSku::getDeleteFlag, goods.getDeleteFlag());
@@ -337,7 +355,32 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 cache.put(GoodsSkuService.getCacheKeys(sku.getId()), sku);
             }
             if (!goodsSkus.isEmpty()) {
-                generateEs(goods);
+                this.generateEs(goods);
+            }
+        }
+    }
+
+    /**
+     * 更新商品sku状态根据店铺id
+     *
+     * @param storeId      店铺id
+     * @param marketEnable 市场启用状态
+     * @param authFlag     审核状态
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateGoodsSkuStatusByStoreId(String storeId, String marketEnable, String authFlag) {
+        LambdaUpdateWrapper<GoodsSku> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(GoodsSku::getStoreId, storeId);
+        updateWrapper.set(CharSequenceUtil.isNotEmpty(marketEnable), GoodsSku::getMarketEnable, marketEnable);
+        updateWrapper.set(CharSequenceUtil.isNotEmpty(authFlag), GoodsSku::getAuthFlag, authFlag);
+        boolean update = this.update(updateWrapper);
+        if (Boolean.TRUE.equals(update)) {
+            if (GoodsStatusEnum.UPPER.name().equals(marketEnable)) {
+                applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("生成店铺商品", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.GENERATOR_STORE_GOODS_INDEX.name(), storeId));
+            } else if (GoodsStatusEnum.DOWN.name().equals(marketEnable)) {
+                cache.vagueDel(CachePrefix.GOODS_SKU.getPrefix());
+                applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("删除店铺商品", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.STORE_GOODS_DELETE.name(), storeId));
             }
         }
     }
@@ -362,7 +405,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     @Override
     public List<GoodsSkuVO> getGoodsListByGoodsId(String goodsId) {
-        List<GoodsSku> list = this.list(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goodsId));
+        List<GoodsSku> list = this.list(new LambdaQueryWrapper<GoodsSku>().eq(GoodsSku::getGoodsId, goodsId).orderByAsc(GoodsSku::getGoodsName));
         return this.getGoodsSkuVOList(list);
     }
 
@@ -423,6 +466,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         return this.page(PageUtil.initPage(searchParams), searchParams.queryWrapper());
     }
 
+    @Override
+    public IPage<GoodsSkuDTO> getGoodsSkuDTOByPage(Page<GoodsSkuDTO> page, Wrapper<GoodsSkuDTO> queryWrapper) {
+        return this.baseMapper.queryByParams(page, queryWrapper);
+    }
+
     /**
      * 列表查询商品sku信息
      *
@@ -481,18 +529,14 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateGoodsStuck(List<GoodsSku> goodsSkus) {
-        //商品id集合 hashset 去重复
-        Set<String> goodsIds = new HashSet<>();
-        for (GoodsSku sku : goodsSkus) {
-            goodsIds.add(sku.getGoodsId());
-        }
+        Map<String, List<GoodsSku>> groupByGoodsIds = goodsSkus.stream().collect(Collectors.groupingBy(GoodsSku::getGoodsId));
         //获取相关的sku集合
         LambdaQueryWrapper<GoodsSku> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.in(GoodsSku::getGoodsId, goodsIds);
+        lambdaQueryWrapper.in(GoodsSku::getGoodsId, groupByGoodsIds.keySet());
         List<GoodsSku> goodsSkuList = this.list(lambdaQueryWrapper);
 
         //统计每个商品的库存
-        for (String goodsId : goodsIds) {
+        for (String goodsId : groupByGoodsIds.keySet()) {
             //库存
             Integer quantity = 0;
             for (GoodsSku goodsSku : goodsSkuList) {
@@ -530,10 +574,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
 
         //修改规格索引,发送mq消息
-        Map<String, Object> updateIndexFieldsMap = EsIndexUtil.getUpdateIndexFieldsMap(
-                MapUtil.builder(new HashMap<String, Object>()).put("id", goodsSku.getId()).build(),
-                MapUtil.builder(new HashMap<String, Object>()).put("commentNum", goodsSku.getCommentNum()).put("highPraiseNum", highPraiseNum)
-                        .put("grade", grade).build());
+        Map<String, Object> updateIndexFieldsMap = EsIndexUtil.getUpdateIndexFieldsMap(MapUtil.builder(new HashMap<String, Object>()).put("id", goodsSku.getId()).build(), MapUtil.builder(new HashMap<String, Object>()).put("commentNum", goodsSku.getCommentNum()).put("highPraiseNum", highPraiseNum).put("grade", grade).build());
         String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX_FIELD.name();
         rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(updateIndexFieldsMap), RocketmqSendCallbackBuilder.commonCallback());
 
@@ -558,12 +599,38 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      * @param goods 商品信息
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void generateEs(Goods goods) {
         // 不生成没有审核通过且没有上架的商品
         if (!GoodsStatusEnum.UPPER.name().equals(goods.getMarketEnable()) || !GoodsAuthEnum.PASS.name().equals(goods.getAuthFlag())) {
             return;
         }
-        applicationEventPublisher.publishEvent(new GeneratorEsGoodsIndexEvent("生成商品索引事件", goods.getId()));
+        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("生成商品", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.GENERATOR_GOODS_INDEX.name(), goods.getId()));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteAndInsertGoodsSkus(List<GoodsSku> goodsSkus) {
+        int count = 0;
+        for (GoodsSku skus : goodsSkus) {
+            if (CharSequenceUtil.isEmpty(skus.getId())) {
+                skus.setId(SnowFlake.getIdStr());
+            }
+            count = this.baseMapper.replaceGoodsSku(skus);
+        }
+        return count > 0;
+    }
+
+    @Override
+    public Long countSkuNum(String storeId) {
+        LambdaQueryWrapper<GoodsSku> queryWrapper = new LambdaQueryWrapper<>();
+
+        queryWrapper
+                .eq(GoodsSku::getStoreId, storeId)
+                .eq(GoodsSku::getDeleteFlag, Boolean.FALSE)
+                .eq(GoodsSku::getAuthFlag, GoodsAuthEnum.PASS.name())
+                .eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
+        return this.count(queryWrapper);
     }
 
     /**
@@ -584,152 +651,64 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
 
     /**
-     * 增加sku集合
+     * 批量渲染商品sku
      *
-     * @param skuList sku列表
-     * @param goods   商品信息
+     * @param goodsSkuList      sku集合
+     * @param goodsOperationDTO 商品操作DTO
      */
-    List<GoodsSku> addGoodsSku(List<Map<String, Object>> skuList, Goods goods) {
-        List<GoodsSku> skus = new ArrayList<>();
-        for (Map<String, Object> skuVO : skuList) {
-            Map<String, Object> resultMap = this.add(skuVO, goods);
-            GoodsSku goodsSku = (GoodsSku) resultMap.get("goodsSku");
-            if (goods.getSelfOperated() != null) {
-                goodsSku.setSelfOperated(goods.getSelfOperated());
-            }
-            goodsSku.setGoodsType(goods.getGoodsType());
-            skus.add(goodsSku);
-            cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
+    void renderGoodsSkuList(List<GoodsSku> goodsSkuList, GoodsOperationDTO goodsOperationDTO) {
+        // 商品销售模式渲染器
+        salesModelRenders.stream().filter(i -> i.getSalesMode().equals(goodsOperationDTO.getSalesModel())).findFirst().ifPresent(i -> i.renderBatch(goodsSkuList, goodsOperationDTO));
+        for (GoodsSku goodsSku : goodsSkuList) {
+            extendOldSkuValue(goodsSku);
+            this.renderImages(goodsSku);
         }
-        this.saveBatch(skus);
-        return skus;
     }
 
     /**
-     * 添加商品规格
+     * 渲染商品sku
      *
-     * @param map   规格属性
-     * @param goods 商品
-     * @return 规格商品
+     * @param goodsSku          sku
+     * @param goodsOperationDTO 商品操作DTO
      */
-    private Map<String, Object> add(Map<String, Object> map, Goods goods) {
-        Map<String, Object> resultMap = new HashMap<>(2);
-        GoodsSku sku = new GoodsSku();
-
-        //商品索引
-        EsGoodsIndex esGoodsIndex = new EsGoodsIndex();
-
-        //设置商品信息
-        goodsInfo(sku, goods);
-        //设置商品规格信息
-        skuInfo(sku, goods, map, esGoodsIndex);
-
-        esGoodsIndex.setGoodsSku(sku);
-        resultMap.put("goodsSku", sku);
-        resultMap.put("goodsIndex", esGoodsIndex);
-        return resultMap;
+    void renderGoodsSku(GoodsSku goodsSku, GoodsOperationDTO goodsOperationDTO) {
+        extendOldSkuValue(goodsSku);
+        // 商品销售模式渲染器
+        salesModelRenders.stream().filter(i -> i.getSalesMode().equals(goodsOperationDTO.getSalesModel())).findFirst().ifPresent(i -> i.renderSingle(goodsSku, goodsOperationDTO));
+        this.renderImages(goodsSku);
     }
 
     /**
-     * 设置规格商品的商品信息
+     * 将原sku的一些不会直接传递的值放到新的sku中
      *
-     * @param sku   规格
-     * @param goods 商品
+     * @param goodsSku 商品sku
      */
-    private void goodsInfo(GoodsSku sku, Goods goods) {
-        //商品基本信息
-        sku.setGoodsId(goods.getId());
-
-        sku.setSellingPoint(goods.getSellingPoint());
-        sku.setCategoryPath(goods.getCategoryPath());
-        sku.setBrandId(goods.getBrandId());
-        sku.setMarketEnable(goods.getMarketEnable());
-        sku.setIntro(goods.getIntro());
-        sku.setMobileIntro(goods.getMobileIntro());
-        sku.setGoodsUnit(goods.getGoodsUnit());
-        sku.setGrade(100D);
-        //商品状态
-        sku.setAuthFlag(goods.getAuthFlag());
-        sku.setSalesModel(goods.getSalesModel());
-        //卖家信息
-        sku.setStoreId(goods.getStoreId());
-        sku.setStoreName(goods.getStoreName());
-        sku.setStoreCategoryPath(goods.getStoreCategoryPath());
-        sku.setFreightTemplateId(goods.getTemplateId());
-        sku.setRecommend(goods.getRecommend());
-    }
-
-    /**
-     * 设置商品规格信息
-     *
-     * @param sku          规格商品
-     * @param goods        商品
-     * @param map          规格信息
-     * @param esGoodsIndex 商品索引
-     */
-    private void skuInfo(GoodsSku sku, Goods goods, Map<String, Object> map, EsGoodsIndex esGoodsIndex) {
-
-        //规格简短信息
-        StringBuilder simpleSpecs = new StringBuilder();
-        //商品名称
-        StringBuilder goodsName = new StringBuilder(goods.getGoodsName());
-        //规格商品缩略图
-        String thumbnail = "";
-        String small = "";
-        //规格值
-        Map<String, Object> specMap = new HashMap<>(16);
-        //商品属性
-        List<EsGoodsAttribute> attributes = new ArrayList<>();
-
-        //获取规格信息
-        for (Map.Entry<String, Object> spec : map.entrySet()) {
-            //保存规格信息
-            if (("id").equals(spec.getKey()) || ("sn").equals(spec.getKey()) || ("cost").equals(spec.getKey())
-                    || ("price").equals(spec.getKey()) || ("quantity").equals(spec.getKey())
-                    || ("weight").equals(spec.getKey())) {
-                continue;
-            } else {
-                specMap.put(spec.getKey(), spec.getValue());
-                if (("images").equals(spec.getKey())) {
-                    //设置规格商品缩略图
-                    List<Map<String, String>> images = (List<Map<String, String>>) spec.getValue();
-                    if (images == null || images.isEmpty()) {
-                        continue;
-                    }
-                    //设置规格商品缩略图
-                    //如果规格没有图片，则用商品图片复盖。有则增加规格图片，放在商品图片集合之前
-                    if (CharSequenceUtil.isNotEmpty(spec.getValue().toString())) {
-                        thumbnail = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getThumbnail();
-                        small = goodsGalleryService.getGoodsGallery(images.get(0).get("url")).getSmall();
-                    }
-                } else {
-                    if (spec.getValue() != null) {
-                        //设置商品名称
-                        goodsName.append(" ").append(spec.getValue());
-                        //规格简短信息
-                        simpleSpecs.append(" ").append(spec.getValue());
-                    }
-                }
+    private void extendOldSkuValue(GoodsSku goodsSku) {
+        if (CharSequenceUtil.isNotEmpty(goodsSku.getGoodsId())) {
+            GoodsSku oldSku = this.getGoodsSkuByIdFromCache(goodsSku.getId());
+            if (oldSku != null) {
+                goodsSku.setCommentNum(oldSku.getCommentNum());
+                goodsSku.setViewCount(oldSku.getViewCount());
+                goodsSku.setBuyCount(oldSku.getBuyCount());
+                goodsSku.setGrade(oldSku.getGrade());
             }
         }
-        //设置规格信息
-        sku.setGoodsName(goodsName.toString());
-        sku.setThumbnail(thumbnail);
-        sku.setSmall(small);
+    }
 
-        //规格信息
-        sku.setId(Convert.toStr(map.get("id"), ""));
-        sku.setSn(Convert.toStr(map.get("sn")));
-        sku.setWeight(Convert.toDouble(map.get("weight"), 0D));
-        sku.setPrice(Convert.toDouble(map.get("price"), 0D));
-        sku.setCost(Convert.toDouble(map.get("cost"), 0D));
-        sku.setQuantity(Convert.toInt(map.get("quantity"), 0));
-        sku.setSpecs(JSONUtil.toJsonStr(specMap));
-        sku.setSimpleSpecs(simpleSpecs.toString());
-
-        if (esGoodsIndex != null) {
-            //商品索引
-            esGoodsIndex.setAttrList(attributes);
+    /**
+     * 渲染sku图片
+     *
+     * @param goodsSku sku
+     */
+    void renderImages(GoodsSku goodsSku) {
+        JSONObject jsonObject = JSONUtil.parseObj(goodsSku.getSpecs());
+        List<Map<String, String>> images = jsonObject.get("images", List.class);
+        if (images != null && !images.isEmpty()) {
+            GoodsGallery goodsGallery = goodsGalleryService.getGoodsGallery(images.get(0).get("url"));
+            goodsSku.setBig(goodsGallery.getOriginal());
+            goodsSku.setOriginal(goodsGallery.getOriginal());
+            goodsSku.setThumbnail(goodsGallery.getThumbnail());
+            goodsSku.setSmall(goodsGallery.getSmall());
         }
     }
 

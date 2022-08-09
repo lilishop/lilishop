@@ -4,9 +4,6 @@ package cn.lili.modules.goods.service;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.vos.CategoryVO;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
 
@@ -16,7 +13,6 @@ import java.util.List;
  * @author pikachu
  * @since 2020-03-02 16:44:56
  */
-@CacheConfig(cacheNames = "{category}")
 public interface CategoryService extends IService<Category> {
 
 
@@ -35,7 +31,6 @@ public interface CategoryService extends IService<Category> {
      * @param id
      * @return
      */
-    @Cacheable(key = "#id")
     Category getCategoryById(String id);
 
     /**
@@ -99,7 +94,6 @@ public interface CategoryService extends IService<Category> {
      * @param category 商品分类信息
      * @return 修改结果
      */
-    @CacheEvict(key = "#category.id")
     void updateCategory(Category category);
 
     /**

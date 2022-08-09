@@ -37,7 +37,7 @@ public enum NoticeMessageParameterEnum {
      */
     CANCEL_REASON("cancel_reason", "取消原因"),
     /**
-     * 取消原因
+     * 金额
      */
     PRICE("price", "金额");
 

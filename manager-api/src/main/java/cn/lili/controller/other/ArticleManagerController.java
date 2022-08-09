@@ -42,6 +42,14 @@ public class ArticleManagerController {
         return ResultUtil.data(articleService.getById(id));
     }
 
+    @ApiOperation(value = "根据类型查看文章")
+    @ApiImplicitParam(name = "type", value = "文章类型", required = true, dataType = "String", paramType = "path")
+    @GetMapping(value = "/type/{type}")
+    public ResultMessage<Article> getByType(@PathVariable String type) {
+
+        return ResultUtil.data(articleService.customGetByType(type));
+    }
+
     @ApiOperation(value = "分页获取")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "categoryId", value = "文章分类ID", paramType = "query"),
@@ -60,12 +68,21 @@ public class ArticleManagerController {
         return ResultUtil.data(article);
     }
 
-    @ApiOperation(value = "修改文章")
+    @ApiOperation(value = "修改文章--文章id")
     @ApiImplicitParam(name = "id", value = "文章ID", required = true, paramType = "path")
     @PutMapping(value = "update/{id}", consumes = "application/json", produces = "application/json")
     public ResultMessage<Article> update(@RequestBody Article article, @PathVariable("id") String id) {
         article.setId(id);
         return ResultUtil.data(articleService.updateArticle(article));
+    }
+
+    @ApiOperation(value = "修改文章--文章类型")
+    @ApiImplicitParam(name = "type", value = "文章类型", required = true, paramType = "path")
+    @PutMapping(value = "updateArticle/{type}", consumes = "application/json", produces = "application/json")
+    public ResultMessage<Article> updateArticle(@RequestBody Article article, @PathVariable("type") String type,String id) {
+        article.setId(id);
+        article.setType(type);
+        return ResultUtil.data(articleService.updateArticleType(article));
     }
 
     @ApiOperation(value = "修改文章状态")

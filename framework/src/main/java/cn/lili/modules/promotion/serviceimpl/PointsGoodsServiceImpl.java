@@ -222,6 +222,7 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
      */
     @Override
     public void updateEsGoodsIndex(PointsGoods promotions) {
+        super.updateEsGoodsIndex(promotions);
         Map<String, Object> query = MapUtil.builder(new HashMap<String, Object>()).put("id", promotions.getSkuId()).build();
         Map<String, Object> update = MapUtil.builder(new HashMap<String, Object>()).put("points", promotions.getPoints()).build();
         //修改规格索引,发送mq消息
@@ -277,7 +278,7 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
      * @return 商品sku
      */
     private GoodsSku checkSkuExist(String skuId) {
-        GoodsSku goodsSku = this.goodsSkuService.getGoodsSkuByIdFromCache(skuId);
+        GoodsSku goodsSku = this.goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(skuId);
         if (goodsSku == null) {
             log.error("商品ID为" + skuId + "的商品不存在！");
             throw new ServiceException();

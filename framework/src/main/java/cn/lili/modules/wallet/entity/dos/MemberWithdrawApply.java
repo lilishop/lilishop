@@ -1,5 +1,6 @@
 package cn.lili.modules.wallet.entity.dos;
 
+import cn.lili.modules.wallet.entity.enums.WithdrawStatusEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -28,6 +29,9 @@ public class MemberWithdrawApply extends BaseEntity {
     @ApiModelProperty(value = "申请提现金额")
     private Double applyMoney;
 
+    /**
+     * @see WithdrawStatusEnum
+     */
     @ApiModelProperty(value = "提现状态")
     private String applyStatus;
 

@@ -6,6 +6,8 @@ import cn.lili.modules.search.entity.vo.CustomWordsVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * 自定义分词业务层
  *
@@ -51,6 +53,22 @@ public interface CustomWordsService extends IService<CustomWords> {
      * @return 是否删除成功
      */
     boolean deleteCustomWords(String id);
+
+    /**
+     * 根据名字批量删除
+     *
+     * @param names 名称列表
+     * @return 是否删除成功
+     */
+    boolean deleteBathByName(List<String> names);
+
+    /**
+     * 批量插入自定义分词
+     *
+     * @param customWordsList 自定义分词列表
+     * @return 受影响行数
+     */
+    long insertBatchCustomWords(List<CustomWords> customWordsList);
 
     /**
      * 分页查询自定义分词

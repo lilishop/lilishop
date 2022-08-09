@@ -6,6 +6,7 @@ import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
@@ -19,6 +20,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class CartSkuVO extends CartBase implements Serializable {
 
 
@@ -116,5 +118,9 @@ public class CartSkuVO extends CartBase implements Serializable {
 
     public Map<String, Object> getPromotionMap() {
         return PromotionTools.filterInvalidPromotionsMap(this.promotionMap);
+    }
+
+    public Map<String, Object> getNotFilterPromotionMap() {
+        return this.promotionMap;
     }
 }

@@ -1,5 +1,6 @@
 package cn.lili.modules.order.cart.service;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -11,11 +12,12 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
+import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
-import cn.lili.modules.goods.entity.vos.GoodsVO;
-import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.member.service.MemberAddressService;
@@ -32,10 +34,8 @@ import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.entity.vo.ReceiptVO;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivity;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
-import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.search.KanjiaActivitySearchParams;
 import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
-import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
@@ -45,7 +45,6 @@ import cn.lili.modules.promotion.service.MemberCouponService;
 import cn.lili.modules.promotion.service.PointsGoodsService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
-import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,16 +97,6 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private EsGoodsSearchService esGoodsSearchService;
     /**
-     * 商品索引
-     */
-    @Autowired
-    private EsGoodsIndexService goodsIndexService;
-    /**
-     * ES商品
-     */
-    @Autowired
-    private GoodsService goodsService;
-    /**
      * 砍价
      */
     @Autowired
@@ -124,6 +113,9 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private PromotionGoodsService promotionGoodsService;
 
+    @Autowired
+    private WholesaleService wholesaleService;
+
     @Override
     public void add(String skuId, Integer num, String cartType, Boolean cover) {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
@@ -132,7 +124,7 @@ public class CartServiceImpl implements CartService {
         }
         CartTypeEnum cartTypeEnum = getCartType(cartType);
         GoodsSku dataSku = checkGoods(skuId);
-        Map<String, Object> promotionMap = this.getCurrentGoodsPromotion(dataSku, cartType);
+        Map<String, Object> promotionMap = promotionGoodsService.getCurrentGoodsPromotion(dataSku, cartTypeEnum.name());
 
         try {
             //购物车方式购买需要保存之前的选择，其他方式购买，则直接抹除掉之前的记录
@@ -146,7 +138,7 @@ public class CartServiceImpl implements CartService {
 
 
                 //购物车中已经存在，更新数量
-                if (cartSkuVO != null && dataSku.getUpdateTime().equals(cartSkuVO.getGoodsSku().getUpdateTime())) {
+                if (cartSkuVO != null && dataSku.getCreateTime().equals(cartSkuVO.getGoodsSku().getCreateTime())) {
 
                     //如果覆盖购物车中商品数量
                     if (Boolean.TRUE.equals(cover)) {
@@ -157,7 +149,7 @@ public class CartServiceImpl implements CartService {
                         int newNum = oldNum + num;
                         this.checkSetGoodsQuantity(cartSkuVO, skuId, newNum);
                     }
-
+                    cartSkuVO.setPromotionMap(promotionMap);
                     //计算购物车小计
                     cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
                 } else {
@@ -185,7 +177,6 @@ public class CartServiceImpl implements CartService {
 
                 //购物车中不存在此商品，则新建立一个
                 CartSkuVO cartSkuVO = new CartSkuVO(dataSku, promotionMap);
-                this.checkSetGoodsQuantity(cartSkuVO, skuId, num);
                 cartSkuVO.setCartType(cartTypeEnum);
                 //检测购物车数据
                 checkCart(cartTypeEnum, cartSkuVO, skuId, num);
@@ -194,10 +185,11 @@ public class CartServiceImpl implements CartService {
                 cartSkuVOS.add(cartSkuVO);
             }
 
+            this.checkGoodsSaleModel(dataSku, tradeDTO.getSkuList());
             tradeDTO.setCartTypeEnum(cartTypeEnum);
-            //如购物车发生更改，则重置优惠券
-            tradeDTO.setStoreCoupons(null);
-            tradeDTO.setPlatformCoupon(null);
+
+            remoteCoupon(tradeDTO);
+
             this.resetTradeDTO(tradeDTO);
         } catch (ServiceException serviceException) {
             throw serviceException;
@@ -241,39 +233,59 @@ public class CartServiceImpl implements CartService {
     @Override
     public void checked(String skuId, boolean checked) {
         TradeDTO tradeDTO = this.readDTO(CartTypeEnum.CART);
+
+        remoteCoupon(tradeDTO);
+
         List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
         for (CartSkuVO cartSkuVO : cartSkuVOS) {
             if (cartSkuVO.getGoodsSku().getId().equals(skuId)) {
                 cartSkuVO.setChecked(checked);
             }
         }
-        cache.put(this.getOriginKey(CartTypeEnum.CART), tradeDTO);
+
+        this.resetTradeDTO(tradeDTO);
     }
 
     @Override
     public void checkedStore(String storeId, boolean checked) {
         TradeDTO tradeDTO = this.readDTO(CartTypeEnum.CART);
+
+        remoteCoupon(tradeDTO);
+
         List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
         for (CartSkuVO cartSkuVO : cartSkuVOS) {
             if (cartSkuVO.getStoreId().equals(storeId)) {
                 cartSkuVO.setChecked(checked);
             }
         }
-        cache.put(this.getOriginKey(CartTypeEnum.CART), tradeDTO);
+
+        resetTradeDTO(tradeDTO);
     }
 
     @Override
     public void checkedAll(boolean checked) {
         TradeDTO tradeDTO = this.readDTO(CartTypeEnum.CART);
+
+        remoteCoupon(tradeDTO);
+
         List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
         for (CartSkuVO cartSkuVO : cartSkuVOS) {
             cartSkuVO.setChecked(checked);
         }
-        cache.put(this.getOriginKey(CartTypeEnum.CART), tradeDTO);
+        resetTradeDTO(tradeDTO);
+    }
+
+    /**
+     * 当购物车商品发生变更时，取消已选择当优惠券
+     *
+     * @param tradeDTO
+     */
+    private void remoteCoupon(TradeDTO tradeDTO) {
+        tradeDTO.setPlatformCoupon(null);
+        tradeDTO.setStoreCoupons(new HashMap<>());
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void delete(String[] skuIds) {
         TradeDTO tradeDTO = this.readDTO(CartTypeEnum.CART);
         List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
@@ -286,7 +298,7 @@ public class CartServiceImpl implements CartService {
             }
         }
         cartSkuVOS.removeAll(deleteVos);
-        cache.put(this.getOriginKey(CartTypeEnum.CART), tradeDTO);
+        resetTradeDTO(tradeDTO);
     }
 
     @Override
@@ -308,17 +320,8 @@ public class CartServiceImpl implements CartService {
         tradeDTO.setStoreCoupons(null);
         //清除添加过的备注
         tradeDTO.setStoreRemark(null);
-        cache.put(this.getOriginKey(tradeDTO.getCartTypeEnum()), tradeDTO);
-    }
 
-    @Override
-    public void cleanChecked(CartTypeEnum way) {
-        if (way.equals(CartTypeEnum.CART)) {
-            TradeDTO tradeDTO = this.readDTO(CartTypeEnum.CART);
-            this.cleanChecked(tradeDTO);
-        } else {
-            cache.remove(this.getOriginKey(way));
-        }
+        resetTradeDTO(tradeDTO);
     }
 
     @Override
@@ -415,7 +418,7 @@ public class CartServiceImpl implements CartService {
             cartSkuVO.setNum(num);
         }
 
-        if (cartSkuVO.getNum() > 99) {
+        if (cartSkuVO.getGoodsSku() != null && !GoodsSalesModeEnum.WHOLESALE.name().equals(cartSkuVO.getGoodsSku().getSalesModel()) && cartSkuVO.getNum() > 99) {
             cartSkuVO.setNum(99);
         }
     }
@@ -504,6 +507,12 @@ public class CartServiceImpl implements CartService {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         //获取购物车，然后重新写入优惠券
         CartTypeEnum cartTypeEnum = getCartType(way);
+
+        //积分商品不允许使用优惠券
+        if (cartTypeEnum.equals(CartTypeEnum.POINTS)) {
+            throw new ServiceException(ResultCode.SPECIAL_CANT_USE);
+        }
+
         TradeDTO tradeDTO = this.readDTO(cartTypeEnum);
 
         MemberCouponSearchParams searchParams = new MemberCouponSearchParams();
@@ -543,44 +552,8 @@ public class CartServiceImpl implements CartService {
         }
         //构建交易
         Trade trade = tradeBuilder.createTrade(tradeDTO);
-        this.cleanChecked(tradeDTO);
+        this.cleanChecked(this.readDTO(cartTypeEnum));
         return trade;
-    }
-
-    private Map<String, Object> getCurrentGoodsPromotion(GoodsSku dataSku, String cartType) {
-        Map<String, Object> promotionMap;
-        EsGoodsIndex goodsIndex = goodsIndexService.findById(dataSku.getId());
-        if (goodsIndex == null) {
-            GoodsVO goodsVO = this.goodsService.getGoodsVO(dataSku.getGoodsId());
-            goodsIndex = goodsIndexService.getResetEsGoodsIndex(dataSku, goodsVO.getGoodsParamsDTOList());
-        }
-        if (goodsIndex.getPromotionMap() != null && !goodsIndex.getPromotionMap().isEmpty()) {
-            if (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.SECKILL.name())) ||
-                    (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.PINTUAN.name()))
-                            && CartTypeEnum.PINTUAN.name().equals(cartType))) {
-
-                Optional<Map.Entry<String, Object>> containsPromotion = goodsIndex.getPromotionMap().entrySet().stream().filter(i ->
-                        i.getKey().contains(PromotionTypeEnum.SECKILL.name()) || i.getKey().contains(PromotionTypeEnum.PINTUAN.name())).findFirst();
-                if (containsPromotion.isPresent()) {
-                    JSONObject promotionsObj = JSONUtil.parseObj(containsPromotion.get().getValue());
-                    PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
-                    searchParams.setSkuId(dataSku.getId());
-                    searchParams.setPromotionId(promotionsObj.get("id").toString());
-                    PromotionGoods promotionsGoods = promotionGoodsService.getPromotionsGoods(searchParams);
-                    if (promotionsGoods != null && promotionsGoods.getPrice() != null) {
-                        dataSku.setPromotionFlag(true);
-                        dataSku.setPromotionPrice(promotionsGoods.getPrice());
-                    } else {
-                        dataSku.setPromotionFlag(false);
-                        dataSku.setPromotionPrice(null);
-                    }
-                }
-            }
-            promotionMap = goodsIndex.getPromotionMap();
-        } else {
-            promotionMap = null;
-        }
-        return promotionMap;
     }
 
 
@@ -636,6 +609,9 @@ public class CartServiceImpl implements CartService {
                     cartPrice = CurrencyUtil.add(cartPrice, CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
                     skuPrice.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
                 }
+            } else {
+                cartPrice = CurrencyUtil.add(cartPrice, CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
+                skuPrice.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
             }
         }
 
@@ -707,6 +683,24 @@ public class CartServiceImpl implements CartService {
         } else if (cartTypeEnum.equals(CartTypeEnum.POINTS)) {
             //检测购物车的数量
             checkPoint(cartSkuVO);
+        }
+    }
+
+
+    private void checkGoodsSaleModel(GoodsSku dataSku, List<CartSkuVO> cartSkuVOS) {
+        if (dataSku.getSalesModel().equals(GoodsSalesModeEnum.WHOLESALE.name())) {
+            int numSum = 0;
+            List<CartSkuVO> sameGoodsIdSkuList = cartSkuVOS.stream().filter(i -> i.getGoodsSku().getGoodsId().equals(dataSku.getGoodsId())).collect(Collectors.toList());
+            if (CollUtil.isNotEmpty(sameGoodsIdSkuList)) {
+                numSum += sameGoodsIdSkuList.stream().mapToInt(CartSkuVO::getNum).sum();
+            }
+            Wholesale match = wholesaleService.match(dataSku.getGoodsId(), numSum);
+            if (match != null) {
+                sameGoodsIdSkuList.forEach(i -> {
+                    i.setPurchasePrice(match.getPrice());
+                    i.setSubTotal(CurrencyUtil.mul(i.getPurchasePrice(), i.getNum()));
+                });
+            }
         }
     }
 

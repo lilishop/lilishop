@@ -68,7 +68,7 @@ public class OrderComplaintStoreController {
     @PostMapping("/communication")
     public ResultMessage<OrderComplaintCommunicationVO> addCommunication(@RequestParam String complainId, @RequestParam String content) {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        OrderComplaintCommunicationVO communicationVO = new OrderComplaintCommunicationVO(complainId, content, CommunicationOwnerEnum.STORE.name(), currentUser.getStoreId(), currentUser.getUsername());
+        OrderComplaintCommunicationVO communicationVO = new OrderComplaintCommunicationVO(complainId, content, CommunicationOwnerEnum.STORE.name(), currentUser.getUsername(), currentUser.getStoreId());
         orderComplaintCommunicationService.addCommunication(communicationVO);
         return ResultUtil.success();
     }

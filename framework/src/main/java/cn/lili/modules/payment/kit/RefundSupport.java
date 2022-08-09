@@ -75,7 +75,6 @@ public class RefundSupport {
      *
      * @return void
      * @Author ftyy
-     * @Description //TODO
      * @Date 17:33 2021/11/18
      * @Param [afterSale]
      **/
@@ -87,31 +86,6 @@ public class RefundSupport {
 
         //修改子订单订单中的退货数量
         orderItemService.updateById(orderItem);
-    }
-
-    /**
-     * 订单取消
-     *
-     * @param afterSale
-     */
-    public void cancel(AfterSale afterSale) {
-
-        Order order = orderService.getBySn(afterSale.getOrderSn());
-        RefundLog refundLog = RefundLog.builder()
-                .isRefund(false)
-                .totalAmount(afterSale.getActualRefundPrice())
-                .payPrice(afterSale.getActualRefundPrice())
-                .memberId(afterSale.getMemberId())
-                .paymentName(order.getPaymentMethod())
-                .afterSaleNo(afterSale.getSn())
-                .paymentReceivableNo(order.getReceivableNo())
-                .outOrderNo("AF" + SnowFlake.getIdStr())
-                .orderSn(afterSale.getOrderSn())
-                .refundReason(afterSale.getReason())
-                .build();
-        PaymentMethodEnum paymentMethodEnum = PaymentMethodEnum.paymentNameOf(order.getPaymentMethod());
-        Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
-        payment.refund(refundLog);
     }
 
 

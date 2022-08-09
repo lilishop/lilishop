@@ -7,7 +7,8 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
-import cn.lili.modules.goods.entity.dto.GoodsOperationFuLuDTO;
+import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
+import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.mybatis.BaseEntity;
@@ -108,6 +109,9 @@ public class Goods extends BaseEntity {
     @ApiModelProperty(value = "运费模板id")
     private String templateId;
 
+    /**
+     * @see GoodsAuthEnum
+     */
     @ApiModelProperty(value = "审核状态")
     private String authFlag;
 
@@ -130,6 +134,9 @@ public class Goods extends BaseEntity {
     @ApiModelProperty(value = "是否为推荐商品", required = true)
     private Boolean recommend;
 
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
+     */
     @ApiModelProperty(value = "销售模式", required = true)
     private String salesModel;
 
@@ -144,83 +151,15 @@ public class Goods extends BaseEntity {
     @JsonIgnore
     private String params;
 
-    //福禄所需参数
-    /**
-     * 商品编号
-     */
-    @Length(max = 30, message = "商品规格编号太长，不能超过30个字符")
-    @ApiModelProperty(value = "商品编号")
-    private String sn;
-
-    /**
-     * 重量
-     */
-    @ApiModelProperty(value = "重量")
-    @Max(value = 99999999, message = "重量不能超过99999999")
-    private Double weight;
 
     public Goods() {
     }
-
-    /**
-     * 福禄
-     * @param goodsOperationDTO
-     */
-    public Goods(GoodsOperationFuLuDTO goodsOperationDTO) {
-        this.goodsName = goodsOperationDTO.getGoodsName();
-        this.categoryPath = goodsOperationDTO.getCategoryPath();
-        this.storeCategoryPath = goodsOperationDTO.getStoreCategoryPath();
-        this.brandId = goodsOperationDTO.getBrandId();
-        this.sn = goodsOperationDTO.getSn();
-        this.price = goodsOperationDTO.getPrice();
-        this.weight = goodsOperationDTO.getWeight();
-        this.templateId = goodsOperationDTO.getTemplateId();
-        this.recommend = goodsOperationDTO.getRecommend();
-        this.sellingPoint = goodsOperationDTO.getSellingPoint();
-        this.salesModel = goodsOperationDTO.getSalesModel();
-        this.goodsUnit = goodsOperationDTO.getGoodsUnit();
-        this.intro = goodsOperationDTO.getIntro();
-        this.mobileIntro = goodsOperationDTO.getMobileIntro();
-        this.goodsVideo = goodsOperationDTO.getGoodsVideo();
-        this.price = goodsOperationDTO.getPrice();
-        if (goodsOperationDTO.getGoodsParamsDTOList() != null && goodsOperationDTO.getGoodsParamsDTOList().isEmpty()) {
-            this.params = JSONUtil.toJsonStr(goodsOperationDTO.getGoodsParamsDTOList());
-        }
-        //如果立即上架则
-        this.marketEnable = Boolean.TRUE.equals(goodsOperationDTO.getRelease()) ? GoodsStatusEnum.UPPER.name() : GoodsStatusEnum.DOWN.name();
-        this.goodsType = goodsOperationDTO.getGoodsType();
-        this.grade = 100D;
-
-        //循环sku，判定sku是否有效
-        for (Map<String, Object> sku : goodsOperationDTO.getSkuList()) {
-            //判定参数不能为空
-            if (!sku.containsKey("sn") || sku.get("sn") == null) {
-                throw new ServiceException(ResultCode.GOODS_SKU_SN_ERROR);
-            }
-            if (!sku.containsKey("price") || StringUtil.isEmpty(sku.get("price").toString()) || Convert.toDouble(sku.get("price")) <= 0) {
-                throw new ServiceException(ResultCode.GOODS_SKU_PRICE_ERROR);
-            }
-            if (!sku.containsKey("cost") || StringUtil.isEmpty(sku.get("cost").toString()) || Convert.toDouble(sku.get("cost")) <= 0) {
-                throw new ServiceException(ResultCode.GOODS_SKU_COST_ERROR);
-            }
-            //虚拟商品没有重量字段
-            if (this.goodsType.equals(GoodsTypeEnum.PHYSICAL_GOODS.name()) && (!sku.containsKey("weight") || sku.containsKey("weight") && (StringUtil.isEmpty(sku.get("weight").toString()) || Convert.toDouble(sku.get("weight").toString()) < 0))) {
-                throw new ServiceException(ResultCode.GOODS_SKU_WEIGHT_ERROR);
-            }
-            if (!sku.containsKey("quantity") || StringUtil.isEmpty(sku.get("quantity").toString()) || Convert.toInt(sku.get("quantity").toString()) < 0) {
-                throw new ServiceException(ResultCode.GOODS_SKU_QUANTITY_ERROR);
-            }
-
-        }
-    }
-
 
     public Goods(GoodsOperationDTO goodsOperationDTO) {
         this.goodsName = goodsOperationDTO.getGoodsName();
         this.categoryPath = goodsOperationDTO.getCategoryPath();
         this.storeCategoryPath = goodsOperationDTO.getStoreCategoryPath();
         this.brandId = goodsOperationDTO.getBrandId();
-        this.price = goodsOperationDTO.getPrice();
         this.templateId = goodsOperationDTO.getTemplateId();
         this.recommend = goodsOperationDTO.getRecommend();
         this.sellingPoint = goodsOperationDTO.getSellingPoint();
@@ -244,10 +183,10 @@ public class Goods extends BaseEntity {
             if (!sku.containsKey("sn") || sku.get("sn") == null) {
                 throw new ServiceException(ResultCode.GOODS_SKU_SN_ERROR);
             }
-            if (!sku.containsKey("price") || StringUtil.isEmpty(sku.get("price").toString()) || Convert.toDouble(sku.get("price")) <= 0) {
+            if ((!sku.containsKey("price") || StringUtil.isEmpty(sku.get("price").toString()) || Convert.toDouble(sku.get("price")) <= 0) && !goodsOperationDTO.getSalesModel().equals(GoodsSalesModeEnum.WHOLESALE.name())) {
                 throw new ServiceException(ResultCode.GOODS_SKU_PRICE_ERROR);
             }
-            if (!sku.containsKey("cost") || StringUtil.isEmpty(sku.get("cost").toString()) || Convert.toDouble(sku.get("cost")) <= 0) {
+            if ((!sku.containsKey("cost") || StringUtil.isEmpty(sku.get("cost").toString()) || Convert.toDouble(sku.get("cost")) <= 0) && !goodsOperationDTO.getSalesModel().equals(GoodsSalesModeEnum.WHOLESALE.name())) {
                 throw new ServiceException(ResultCode.GOODS_SKU_COST_ERROR);
             }
             //虚拟商品没有重量字段

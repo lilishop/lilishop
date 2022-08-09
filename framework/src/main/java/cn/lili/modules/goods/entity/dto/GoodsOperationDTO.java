@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 商品编辑DTO
+ * 商品操作DTO
  *
  * @author pikachu
  * @since 2020-02-24 19:27:20
@@ -77,13 +77,12 @@ public class GoodsOperationDTO implements Serializable {
     @Min(value = 0, message = "运费模板值不正确")
     private String templateId;
 
-    @ApiModelProperty(value = "sku列表")
-    @Valid
-    private List<Map<String, Object>> skuList;
-
     @ApiModelProperty(value = "卖点")
     private String sellingPoint;
 
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
+     */
     @ApiModelProperty(value = "销售模式", required = true)
     private String salesModel;
 
@@ -111,6 +110,17 @@ public class GoodsOperationDTO implements Serializable {
      */
     @ApiModelProperty(value = "商品视频")
     private String goodsVideo;
+
+
+    @ApiModelProperty(value = "sku列表")
+    @Valid
+    private List<Map<String, Object>> skuList;
+
+    /**
+     * 批发商品规则
+     */
+    @ApiModelProperty(value = "批发商品规则")
+    private List<WholesaleDTO> wholesaleList;
 
     public String getGoodsName() {
         //对商品对名称做一个极限处理。这里没有用xss过滤是因为xss过滤为全局过滤，影响很大。

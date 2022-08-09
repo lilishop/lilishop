@@ -83,17 +83,6 @@ public interface Payment {
         throw new ServiceException(ResultCode.PAY_ERROR);
     }
 
-
-    /**
-     * 取消支付订单
-     *
-     * @param refundLog 支付参数
-     */
-    default void cancel(RefundLog refundLog) {
-        throw new ServiceException(ResultCode.PAY_ERROR);
-    }
-
-
     /**
      * 回调
      *
@@ -131,6 +120,7 @@ public interface Payment {
     default String callbackUrl(String api, PaymentMethodEnum paymentMethodEnum) {
         return api + "/buyer/payment/cashier/callback/" + paymentMethodEnum.name();
     }
+
     /**
      * 支付异步通知地址
      *

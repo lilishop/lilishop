@@ -91,4 +91,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         article.setOpenStatus(status);
         return this.updateById(article);
     }
+
+    @Override
+    public Article updateArticleType(Article article) {
+        Article oldArticle = this.getById(article.getId());
+        BeanUtil.copyProperties(article, oldArticle);
+        this.updateById(oldArticle);
+        return oldArticle;
+    }
 }

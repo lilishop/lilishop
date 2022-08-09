@@ -43,9 +43,9 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
     private SettingService settingService;
 
     @Override
-    public Traces getLogistic(String logisticsId, String logisticsNo) {
+    public Traces getLogistic(String logisticsId, String logisticsNo, String customerName) {
         try {
-            return getOrderTracesByJson(logisticsId, logisticsNo);
+            return getOrderTracesByJson(logisticsId, logisticsNo,customerName);
         } catch (Exception e) {
             log.error("获取物流公司错误",e);
 
@@ -65,10 +65,11 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
      *
      * @param logisticsId 物流公司ID
      * @param expNo       物流单号
+     * @param customerName 手机号后四位
      * @return 物流信息
      * @throws Exception
      */
-    private Traces getOrderTracesByJson(String logisticsId, String expNo) throws Exception {
+    private Traces getOrderTracesByJson(String logisticsId, String expNo, String customerName) throws Exception {
         Setting setting = settingService.get(SettingEnum.KUAIDI_SETTING.name());
         if (CharSequenceUtil.isBlank(setting.getSettingValue())) {
             throw new ServiceException(ResultCode.LOGISTICS_NOT_SETTING);
@@ -87,7 +88,10 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
         Logistics logistics = this.getById(logisticsId);
 
         if (logistics != null) {
-            String requestData = "{'OrderCode':'','ShipperCode':'" + logistics.getCode() + "','LogisticCode':'" + expNo + "'}";
+            String requestData = "{'OrderCode':'','ShipperCode':'" + logistics.getCode() +
+                    "','LogisticCode':'" + expNo + "'" +
+                    ",'CustomerName':'" + customerName + "'"+
+                    "}";
             Map<String, String> params = new HashMap<>(8);
             params.put("RequestData", urlEncoder(requestData, "UTF-8"));
             params.put("EBusinessID", EBusinessID);

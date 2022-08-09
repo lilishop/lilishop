@@ -3,6 +3,7 @@ package cn.lili.modules.statistics.entity.vo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -14,6 +15,7 @@ import java.util.Date;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class OnlineMemberVO {
 
     /**
@@ -26,5 +28,10 @@ public class OnlineMemberVO {
      * 在线会员人数
      */
     private Integer num;
+
+    /**
+     * 上一周期在线会员人数
+     */
+    private Integer lastNum;
 
 }
