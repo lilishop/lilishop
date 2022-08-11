@@ -60,7 +60,7 @@ public interface OrderMapper extends BaseMapper<Order> {
      * @param queryWrapper 查询条件
      * @return 简短订单分页
      */
-    @Select("select o.sn,o.flow_price,o.create_time,o.order_status,o.pay_status,o.payment_method,o.payment_time,o.member_name,o.store_name as store_name,o.store_id as store_id,o.client_type,o.order_type,o.deliver_status " +
+    @Select("select o.sn,o.flow_price,o.create_time,o.order_status,o.pay_status,o.payment_method,o.payment_time,o.member_name,o.store_name as store_name,o.store_id as store_id,o.client_type,o.order_type,o.deliver_status,o.order_promotion_type " +
             ",GROUP_CONCAT(oi.goods_id) as group_goods_id," +
             " GROUP_CONCAT(oi.sku_id) as group_sku_id," +
             " GROUP_CONCAT(oi.num) as group_num" +

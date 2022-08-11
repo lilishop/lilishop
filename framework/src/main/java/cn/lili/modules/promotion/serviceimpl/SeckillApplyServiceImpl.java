@@ -339,8 +339,9 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             Arrays.sort(hoursSored);
             for (int i = 0; i < hoursSored.length; i++) {
                 SeckillTimelineVO tempTimeline = new SeckillTimelineVO();
-                boolean hoursSoredHour = (hoursSored[i] >= hour || i + 1 == hoursSored.length);
-                if (hoursSoredHour) {
+                boolean hoursSoredHour = (hoursSored[i] >= hour || ((i + 1) < hoursSored.length && hoursSored[i + 1] > hour));
+                boolean lastHour = i == hoursSored.length - 1 && hoursSored[i] < hour;
+                if (hoursSoredHour || lastHour) {
                     SimpleDateFormat format = new SimpleDateFormat(DatePattern.NORM_DATE_PATTERN);
                     String date = format.format(new Date());
                     //当前时间的秒数
