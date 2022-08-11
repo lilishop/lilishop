@@ -34,13 +34,13 @@ public class OrderSimpleVO {
     private Date createTime;
 
     /**
-     * @see OrderStatusEnum
+     * @see cn.lili.modules.order.order.entity.enums.OrderStatusEnum
      */
     @ApiModelProperty(value = "订单状态")
     private String orderStatus;
 
     /**
-     * @see PayStatusEnum
+     * @see cn.lili.modules.order.order.entity.enums.PayStatusEnum
      */
     @ApiModelProperty(value = "付款状态")
     private String payStatus;
@@ -100,21 +100,21 @@ public class OrderSimpleVO {
     @Setter
     private String groupGoodsPrice;
     /**
-     * @see OrderItemAfterSaleStatusEnum
+     * @see cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum
      */
     @ApiModelProperty(hidden = true, value = "item 售后状态", allowableValues = "NOT_APPLIED(未申请),ALREADY_APPLIED(已申请),EXPIRED(已失效不允许申请售后)")
     @Setter
     private String groupAfterSaleStatus;
 
     /**
-     * @see OrderComplaintStatusEnum
+     * @see cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum
      */
     @ApiModelProperty(hidden = true, value = "item 投诉状态")
     @Setter
     private String groupComplainStatus;
 
     /**
-     * @see CommentStatusEnum
+     * @see cn.lili.modules.order.order.entity.enums.CommentStatusEnum
      */
     @ApiModelProperty(hidden = true, value = "item 评价状态")
     @Setter
@@ -122,16 +122,22 @@ public class OrderSimpleVO {
 
 
     /**
-     * @see OrderTypeEnum
+     * @see cn.lili.modules.order.order.entity.enums.OrderTypeEnum
      */
     @ApiModelProperty(value = "订单类型")
     private String orderType;
 
     /**
-     * @see DeliverStatusEnum
+     * @see cn.lili.modules.order.order.entity.enums.DeliverStatusEnum
      */
     @ApiModelProperty(value = "货运状态")
     private String deliverStatus;
+
+    /**
+     * @see cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum
+     */
+    @ApiModelProperty(value = "订单促销类型")
+    private String orderPromotionType;
 
     public List<OrderItemVO> getOrderItems() {
         if (CharSequenceUtil.isEmpty(groupGoodsId)) {

@@ -1,6 +1,6 @@
 package cn.lili.modules.order.order.entity.dos;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.PromotionTypeEnum;
@@ -262,12 +262,14 @@ public class Order extends BaseEntity {
         //判断是否为普通订单、促销订单
         if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.CART) || tradeDTO.getCartTypeEnum().equals(CartTypeEnum.BUY_NOW)) {
             this.setOrderType(OrderTypeEnum.NORMAL.name());
+            this.setOrderPromotionType(OrderPromotionTypeEnum.NORMAL.name());
         } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.VIRTUAL)) {
             this.setOrderType(OrderTypeEnum.VIRTUAL.name());
+            this.setOrderPromotionType(OrderPromotionTypeEnum.NORMAL.name());
         } else {
             //促销订单（拼团、积分）-判断购买的是虚拟商品还是实物商品
             String goodsType = cartVO.getCheckedSkuList().get(0).getGoodsSku().getGoodsType();
-            if (StrUtil.isEmpty(goodsType) || goodsType.equals(GoodsTypeEnum.PHYSICAL_GOODS.name())) {
+            if (CharSequenceUtil.isEmpty(goodsType) || goodsType.equals(GoodsTypeEnum.PHYSICAL_GOODS.name())) {
                 this.setOrderType(OrderTypeEnum.NORMAL.name());
             } else {
                 this.setOrderType(OrderTypeEnum.VIRTUAL.name());
