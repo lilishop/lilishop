@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
@@ -249,7 +250,7 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
     public void checkStatus(Seckill promotions) {
         super.checkStatus(promotions);
         if (promotions.getStartTime() != null && CharSequenceUtil.isNotEmpty(promotions.getHours())) {
-            String[] split = promotions.getHours().split(",");
+            Integer[] split = Convert.toIntArray(promotions.getHours().split(","));
             Arrays.sort(split);
             String startTimeStr = DateUtil.format(promotions.getStartTime(), DatePattern.NORM_DATE_PATTERN) + " " + split[0] + ":00";
             promotions.setStartTime(DateUtil.parse(startTimeStr, DatePattern.NORM_DATETIME_MINUTE_PATTERN));

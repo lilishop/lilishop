@@ -316,7 +316,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      * @return
      */
     public static void removeDuplicate(List<String> list) {
-        HashSet<String> h = new HashSet(list);
+        HashSet<String> h = new HashSet<>(list);
         list.clear();
         list.addAll(h);
     }
@@ -553,36 +553,37 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      */
     @Override
     public void updateEsGoodsIndexAllByList(BasePromotions promotion, String key) {
-        ThreadUtil.execAsync(() -> {
-            for (int i = 1; ; i++) {
-                List<String> skuIds;
-                //如果storeId不为空，则表示是店铺活动
-                if (promotion.getStoreId() != null && !promotion.getStoreId().equals(PromotionTools.PLATFORM_ID)) {
-                    PageVO pageVO = new PageVO();
-                    pageVO.setPageNumber(i);
-                    pageVO.setPageSize(1000);
-                    EsGoodsSearchDTO searchDTO = new EsGoodsSearchDTO();
-                    searchDTO.setStoreId(promotion.getStoreId());
-                    //查询出店铺商品
-                    SearchPage<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(searchDTO, pageVO);
+        ThreadUtil.execAsync(() -> this.executeUpdateEsGoodsIndexAll(promotion, key));
 
-                    skuIds = esGoodsIndices.isEmpty() ? new ArrayList<>() : esGoodsIndices.getContent().stream().map(SearchHit::getId).collect(Collectors.toList());
-                } else {
-                    //否则是平台活动
-                    org.springframework.data.domain.Page<EsGoodsIndex> all = goodsIndexRepository.findAll(PageRequest.of(i, 1000));
+    }
 
-                    //查询出全部商品
-                    skuIds = all.isEmpty() ? new ArrayList<>() : all.toList().stream().map(EsGoodsIndex::getId).collect(Collectors.toList());
-                }
-                if (skuIds.isEmpty()) {
-                    break;
-                }
-                this.deleteEsGoodsPromotionByPromotionKey(skuIds, key);
-                this.updateEsGoodsIndexPromotions(skuIds, promotion, key);
+    private void executeUpdateEsGoodsIndexAll(BasePromotions promotion, String key) {
+        for (int i = 1; ; i++) {
+            List<String> skuIds;
+            //如果storeId不为空，则表示是店铺活动
+            if (promotion.getStoreId() != null && !promotion.getStoreId().equals(PromotionTools.PLATFORM_ID)) {
+                PageVO pageVO = new PageVO();
+                pageVO.setPageNumber(i);
+                pageVO.setPageSize(1000);
+                EsGoodsSearchDTO searchDTO = new EsGoodsSearchDTO();
+                searchDTO.setStoreId(promotion.getStoreId());
+                //查询出店铺商品
+                SearchPage<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(searchDTO, pageVO);
+
+                skuIds = esGoodsIndices.isEmpty() ? new ArrayList<>() : esGoodsIndices.getContent().stream().map(SearchHit::getId).collect(Collectors.toList());
+            } else {
+                //否则是平台活动
+                org.springframework.data.domain.Page<EsGoodsIndex> all = goodsIndexRepository.findAll(PageRequest.of(i, 1000));
+
+                //查询出全部商品
+                skuIds = all.isEmpty() ? new ArrayList<>() : all.toList().stream().map(EsGoodsIndex::getId).collect(Collectors.toList());
             }
-
-        });
-
+            if (skuIds.isEmpty()) {
+                break;
+            }
+            this.deleteEsGoodsPromotionByPromotionKey(skuIds, key);
+            this.updateEsGoodsIndexPromotions(skuIds, promotion, key);
+        }
     }
 
     @Override
@@ -649,21 +650,31 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      */
     @Override
     public void cleanInvalidPromotion() {
-        Iterable<EsGoodsIndex> all = goodsIndexRepository.findAll();
-        for (EsGoodsIndex goodsIndex : all) {
-            Map<String, Object> promotionMap = goodsIndex.getOriginPromotionMap();
-            //获取商品索引
-            if (promotionMap != null && !promotionMap.isEmpty()) {
-                //促销不为空则进行清洗
-                promotionMap.entrySet().removeIf(i -> {
-                    JSONObject promotionJson = JSONUtil.parseObj(i.getValue());
-                    BasePromotions promotion = promotionJson.toBean(BasePromotions.class);
-                    return promotion.getEndTime() != null && promotion.getEndTime().getTime() < DateUtil.date().getTime();
-                });
-            }
-        }
-        goodsIndexRepository.saveAll(all);
+        ThreadUtil.execAsync(this::executeCleanInvalidPromotions);
     }
+
+    private void executeCleanInvalidPromotions() {
+        for (int i = 1; ; i++) {
+            org.springframework.data.domain.Page<EsGoodsIndex> all = goodsIndexRepository.findAll(PageRequest.of(i, 1000));
+            if (all.isEmpty()) {
+                break;
+            }
+            for (EsGoodsIndex goodsIndex : all.toList()) {
+                Map<String, Object> promotionMap = goodsIndex.getOriginPromotionMap();
+                //获取商品索引
+                if (promotionMap != null && !promotionMap.isEmpty()) {
+                    //促销不为空则进行清洗
+                    promotionMap.entrySet().removeIf(j -> {
+                        JSONObject promotionJson = JSONUtil.parseObj(j.getValue());
+                        BasePromotions promotion = promotionJson.toBean(BasePromotions.class);
+                        return promotion.getEndTime() != null && promotion.getEndTime().getTime() < DateUtil.date().getTime();
+                    });
+                }
+            }
+            goodsIndexRepository.saveAll(all);
+        }
+    }
+
 
     @Override
     public EsGoodsIndex findById(String id) {
