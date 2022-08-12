@@ -139,4 +139,12 @@ public interface MemberCouponService extends IService<MemberCoupon> {
      */
     void closeMemberCoupon(List<String> couponIds);
 
+    /**
+     * 恢复会员优惠券
+     *
+     * @param memberCouponIds 会员优惠券id列表
+     * @return 是否恢复成功
+     */
+    boolean recoveryMemberCoupon(List<String> memberCouponIds);
+
 }

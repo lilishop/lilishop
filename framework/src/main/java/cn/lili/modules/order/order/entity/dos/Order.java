@@ -6,6 +6,7 @@ import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
+import cn.lili.modules.order.cart.entity.dto.MemberCouponDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
@@ -238,8 +239,8 @@ public class Order extends BaseEntity {
         //店铺优惠券判定
         if (tradeDTO.getStoreCoupons() != null && !tradeDTO.getStoreCoupons().isEmpty()) {
             StringBuilder storeCouponIds = new StringBuilder();
-            for (String s : tradeDTO.getStoreCoupons().keySet()) {
-                storeCouponIds.append(s).append(",");
+            for (MemberCouponDTO value : tradeDTO.getStoreCoupons().values()) {
+                storeCouponIds.append(value.getMemberCoupon().getId()).append(",");
             }
             this.setUseStoreMemberCouponIds(storeCouponIds.toString());
         }
