@@ -140,8 +140,6 @@ public class PromotionTools {
                 if (promotionGoods.getStartTime() == null || !PromotionTypeEnum.SECKILL.equals(promotionTypeEnum)) {
                     promotionGoods.setEndTime(promotion.getEndTime());
                 }
-                promotionGoods.setStartTime(promotion.getStartTime());
-                promotionGoods.setEndTime(promotion.getEndTime());
                 promotionGoods.setPromotionType(promotionTypeEnum.name());
                 promotionGoods.setNum(0);
                 promotionGoods.setDeleteFlag(promotion.getDeleteFlag());
