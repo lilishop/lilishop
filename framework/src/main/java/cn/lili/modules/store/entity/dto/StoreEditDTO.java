@@ -1,6 +1,5 @@
 package cn.lili.modules.store.entity.dto;
 
-import cn.lili.common.validation.Mobile;
 import cn.lili.common.validation.Phone;
 import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModelProperty;
@@ -49,7 +48,6 @@ public class StoreEditDTO {
     @ApiModelProperty(value = "公司地址地区")
     private String companyAddressPath;
 
-    @Mobile
     @ApiModelProperty(value = "公司电话")
     private String companyPhone;
 

@@ -71,7 +71,7 @@ public class TimedTaskJobHandler {
             try {
                 everyHourExecutes.get(i).execute();
             } catch (Exception e) {
-                log.error("每分钟任务异常", e);
+                log.error("每小时任务异常", e);
             }
         }
         return ReturnT.SUCCESS;
@@ -94,7 +94,7 @@ public class TimedTaskJobHandler {
             try {
                 everyDayExecutes.get(i).execute();
             } catch (Exception e) {
-                log.error("每分钟任务异常", e);
+                log.error("每日任务异常", e);
             }
         }
         return ReturnT.SUCCESS;
