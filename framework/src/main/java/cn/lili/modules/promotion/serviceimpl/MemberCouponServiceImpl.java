@@ -285,6 +285,14 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         this.update(memberCouponLambdaUpdateWrapper);
     }
 
+    @Override
+    public boolean recoveryMemberCoupon(List<String> memberCouponIds) {
+        LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.in(MemberCoupon::getId, memberCouponIds);
+        updateWrapper.set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name());
+        return this.update(updateWrapper);
+    }
+
     /**
      * 清除无效的会员优惠券
      *
