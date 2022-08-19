@@ -194,6 +194,12 @@ public class Goods extends BaseEntity {
             if (!sku.containsKey("quantity") || StringUtil.isEmpty(sku.get("quantity").toString()) || Convert.toInt(sku.get("quantity").toString()) < 0) {
                 throw new ServiceException(ResultCode.GOODS_SKU_QUANTITY_ERROR);
             }
+            sku.values().forEach(i -> {
+                if (CharSequenceUtil.isBlank(i.toString())) {
+                    throw new ServiceException(ResultCode.MUST_HAVE_GOODS_SKU_VALUE);
+                }
+            });
+
 
         }
     }

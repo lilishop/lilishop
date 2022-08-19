@@ -79,6 +79,7 @@ public enum ResultCode {
     MUST_HAVE_SALES_MODEL(11022, "销售模式为批发时必须要有批发规则！"),
 
     HAVE_INVALID_SALES_MODEL(11023, "批发规则存在小于等于0的无效数据！"),
+    MUST_HAVE_GOODS_SKU_VALUE(11024, "规格值不能为空！"),
 
     GOODS_PARAMS_ERROR(11013, "商品参数错误，刷新后重试"),
     PHYSICAL_GOODS_NEED_TEMP(11014, "实物商品需选择配送模板"),
