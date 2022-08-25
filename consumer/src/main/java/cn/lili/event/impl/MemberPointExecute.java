@@ -1,8 +1,8 @@
 package cn.lili.event.impl;
 
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.event.AfterSaleStatusChangeEvent;
 import cn.lili.event.GoodsCommentCompleteEvent;
 import cn.lili.event.MemberRegisterEvent;
@@ -104,7 +104,7 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
             case COMPLETED: {
                 Order order = orderService.getBySn(orderMessage.getOrderSn());
                 //如果是积分订单 则直接返回
-                if (StringUtils.isNotEmpty(order.getOrderPromotionType())
+                if (CharSequenceUtil.isNotEmpty(order.getOrderPromotionType())
                         && order.getOrderPromotionType().equals(OrderPromotionTypeEnum.POINTS.name())) {
                     return;
                 }

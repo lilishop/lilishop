@@ -242,7 +242,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         }
 
         //判断是否是当前会员的订单
-        if (!order.getMemberId().equals(UserContext.getCurrentUser().getId())) {
+        if (UserContext.getCurrentUser() != null && !order.getMemberId().equals(UserContext.getCurrentUser().getId())) {
             throw new ServiceException(ResultCode.ORDER_NOT_USER);
         }
     }
