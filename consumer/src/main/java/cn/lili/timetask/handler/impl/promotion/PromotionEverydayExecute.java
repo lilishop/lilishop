@@ -1,14 +1,15 @@
 package cn.lili.timetask.handler.impl.promotion;
 
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.service.SeckillService;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.SeckillSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.timetask.handler.EveryDayExecute;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,10 +73,9 @@ public class PromotionEverydayExecute implements EveryDayExecute {
         for (int i = 1; i <= SeckillService.PRE_CREATION; i++) {
             Seckill seckill = new Seckill(i, seckillSetting.getHours(), seckillSetting.getSeckillRule());
 
-            LambdaQueryWrapper<Seckill> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(Seckill::getStartTime, seckill.getStartTime());
             //如果已经存在促销，则不再次保存
-            if (seckillService.list(lambdaQueryWrapper).isEmpty()) {
+            if (seckillService.list(
+                    PromotionTools.checkActiveTime(seckill.getStartTime(), seckill.getEndTime(), PromotionTypeEnum.SECKILL, null, seckill.getId())).isEmpty()) {
                 boolean result = seckillService.savePromotions(seckill);
                 log.info("生成秒杀活动参数：{},结果：{}", seckill, result);
             }
