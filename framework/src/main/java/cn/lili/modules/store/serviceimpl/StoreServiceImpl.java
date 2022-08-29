@@ -35,7 +35,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * 店铺业务层实现
@@ -219,10 +218,12 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     public boolean applyFirstStep(StoreCompanyDTO storeCompanyDTO) {
         //获取当前操作的店铺
         Store store = getStoreByMember();
-        //如果没有申请过店铺，新增店铺
-        if (store != null) {
+
+        //店铺为空，则新增店铺
+        if (store == null) {
             AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
             Member member = memberService.getById(authUser.getId());
+            //根据会员创建店铺
             store = new Store(member);
             BeanUtil.copyProperties(storeCompanyDTO, store);
             this.save(store);
@@ -231,7 +232,8 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             BeanUtil.copyProperties(storeCompanyDTO, storeDetail);
             return storeDetailService.save(storeDetail);
         } else {
-            store = new Store();
+
+            //复制参数 修改已存在店铺
             BeanUtil.copyProperties(storeCompanyDTO, store);
             this.updateById(store);
             //判断是否存在店铺详情，如果没有则进行新建，如果存在则进行修改
