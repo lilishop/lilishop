@@ -190,7 +190,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
         }
         //打折优惠券大于10折
         boolean discountCoupon = (promotions.getCouponType().equals(CouponTypeEnum.DISCOUNT.name())
-                && (promotions.getCouponDiscount() < 0 && promotions.getCouponDiscount() > 10));
+                && (promotions.getCouponDiscount() < 0 || promotions.getCouponDiscount() > 10));
         if (discountCoupon) {
             throw new ServiceException(ResultCode.COUPON_DISCOUNT_ERROR);
         }
