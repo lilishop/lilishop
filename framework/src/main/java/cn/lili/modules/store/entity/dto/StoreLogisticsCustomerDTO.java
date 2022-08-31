@@ -32,4 +32,10 @@ public class StoreLogisticsCustomerDTO {
     @ApiModelProperty(value = "是否使用电子面单")
     private boolean faceSheetFlag;
 
+    @ApiModelProperty(value = "支付方式")
+    private String payType;
+
+    @ApiModelProperty(value = "快递类型")
+    private String expType;
+
 }

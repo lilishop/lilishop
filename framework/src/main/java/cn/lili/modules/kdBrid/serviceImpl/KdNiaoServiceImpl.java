@@ -110,7 +110,7 @@ public class KdNiaoServiceImpl implements KdNiaoService {
         String AppKey = kuaidiSetting.getAppKey();
 
         //请求url
-        String ReqURL = kuaidiSetting.getReqURL();
+        String ReqURL = kuaidiSetting.getSheetReqURL();
 
         //如果订单未发货，并且订单状态值等于待发货
         if (order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name()) && order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())) {
@@ -145,8 +145,8 @@ public class KdNiaoServiceImpl implements KdNiaoService {
                     "'MonthCode': '"+storeLogistics.getMonthCode()+"'," +       //密钥
                     "'SendSite': '"+storeLogistics.getSendSite()+"'," +         //归属网点
                     "'SendStaff': '"+storeLogistics.getSendStaff()+"'," +       //收件快递员
-                     "'PayType': 1," +
-                    "'ExpType': 1," +
+                    "'PayType': "+storeLogistics.getPayType()+"," +
+                    "'ExpType': "+storeLogistics.getExpType()+"," +
                     //发件人信息
                     "'Sender': {" +
                     "'Name': '" + storeDeliverGoodsAddressDTO.getSalesConsignorName() + "'," +
@@ -176,7 +176,7 @@ public class KdNiaoServiceImpl implements KdNiaoService {
                         "},";
             }
             resultDate = resultDate + "]," +
-                    "'Quantity': 1," +  //包裹数
+                    "'Quantity': "+orderItems.size()+"," +  //包裹数
                     "'IsReturnPrintTemplate':1,"+  //生成电子面单模板
                     "'Remark': '" + order.getRemark() + "'"+//商家备注
                     "}";

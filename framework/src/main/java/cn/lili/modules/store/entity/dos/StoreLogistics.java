@@ -51,6 +51,12 @@ public class StoreLogistics extends BaseEntity {
     @ApiModelProperty(value = "是否使用电子面单")
     private boolean faceSheetFlag;
 
+    @ApiModelProperty(value = "支付方式")
+    private String payType;
+
+    @ApiModelProperty(value = "快递类型")
+    private String expType;
+
     public StoreLogistics(StoreLogisticsCustomerDTO storeLogisticsCustomerDTO){
         this.customerName=storeLogisticsCustomerDTO.getCustomerName();
         this.customerPwd=storeLogisticsCustomerDTO.getCustomerPwd();
@@ -58,7 +64,10 @@ public class StoreLogistics extends BaseEntity {
         this.sendStaff=storeLogisticsCustomerDTO.getSendStaff();
         this.monthCode=storeLogisticsCustomerDTO.getMonthCode();
         this.faceSheetFlag=storeLogisticsCustomerDTO.isFaceSheetFlag();
+        this.payType = storeLogisticsCustomerDTO.getPayType();
+        this.expType = storeLogisticsCustomerDTO.getExpType();
     }
+
 
 
 }
