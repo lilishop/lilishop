@@ -218,7 +218,7 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
                 //批量添加优惠券
                 memberCouponService.saveBatch(memberCouponList);
                 //添加优惠券已领取数量
-                couponService.receiveCoupon(couponActivityItem.getCouponId(), memberCouponList.size() * couponActivityItem.getNum());
+                couponService.receiveCoupon(couponActivityItem.getCouponId(), memberCouponList.size());
             } else {
                 log.error("赠送优惠券失败,当前优惠券不存在:" + couponActivityItem.getCouponId());
             }
