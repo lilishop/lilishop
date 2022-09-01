@@ -29,8 +29,8 @@ spring:
     type: redis
   # Redis
   redis:
-    host: 101.43.251.145
-    port: 6379
+    host: 192.168.0.108
+    port: 30379
     password: lilishop
     lettuce:
       pool:
@@ -60,7 +60,7 @@ spring:
       default-datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://101.43.251.145:3306/clerk?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://192.168.0.108:30306/clerk?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
         password: lilishop
         maxActive: 50
@@ -119,7 +119,8 @@ ignored:
     - /store/passport/login/refresh/**
     - /common/common/slider/**
     - /common/common/sms/**
-    - /common/common/site
+    - /common/common/logo
+    - /buyer/promotion/kanjiaGoods
     - /buyer/payment/cashier/**
     - /buyer/other/pageData/**
     - /buyer/other/article/**
@@ -255,7 +256,7 @@ lili:
   # jwt 细节设定
   jwt-setting:
     # token过期时间（分钟）
-    tokenExpireTime: 30
+    tokenExpireTime: 300000
 
   # 使用Spring @Cacheable注解失效时间
   cache:
@@ -269,7 +270,7 @@ lili:
   data:
     elasticsearch:
       cluster-name: elasticsearch
-      cluster-nodes: 101.43.251.145:9200
+      cluster-nodes: 192.168.0.108:30920
       index:
         number-of-replicas: 0
         number-of-shards: 3
@@ -277,10 +278,10 @@ lili:
       schema: http
     #      account:
     #        username: elastic
-    #        password: LiLiShopES
+    #        password: uE41Dc3m9A52L2omQPV148jG
 
     logstash:
-      server: 101.43.251.145:4560
+      server: 192.168.0.108:30560
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
@@ -301,7 +302,7 @@ lili:
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
 rocketmq:
-  name-server: 101.43.251.145:9876
+  name-server: 192.168.0.108:30876
   isVIPChannel: false
   producer:
     group: lili_group
@@ -310,7 +311,7 @@ rocketmq:
 xxl:
   job:
     admin:
-      addresses: http://101.43.251.145:9001/xxl-job-admin
+      addresses: http://192.168.0.108:30001/xxl-job-admin
     executor:
       appname: xxl-job-executor-lilishop
       address:

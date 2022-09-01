@@ -11,6 +11,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.service.GoodsService;
+import cn.lili.modules.member.entity.dos.Clerk;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dto.ClerkAddDTO;
 import cn.lili.modules.member.entity.dto.CollectionDTO;
@@ -36,6 +37,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -69,7 +72,6 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
      */
     @Autowired
     private StoreDetailService storeDetailService;
-
 
     @Autowired
     private Cache cache;
@@ -311,6 +313,18 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     @Override
     public void updateStoreCollectionNum(CollectionDTO collectionDTO) {
         baseMapper.updateCollection(collectionDTO.getId(), collectionDTO.getNum());
+    }
+
+    @Override
+    public void storeToClerk() {
+        //清空店铺信息方便重新导入不会有重复数据
+        clerkService.remove(new LambdaQueryWrapper<Clerk>().eq(Clerk::getShopkeeper,true));
+        List<Clerk> clerkList = new ArrayList<>();
+        //遍历已开启的店铺
+        for (Store store : this.list(new LambdaQueryWrapper<Store>().eq(Store::getDeleteFlag,false).eq(Store::getStoreDisable,StoreStatusEnum.OPEN.name()))) {
+            clerkList.add(new Clerk(store));
+        }
+        clerkService.saveBatch(clerkList);
     }
 
     /**

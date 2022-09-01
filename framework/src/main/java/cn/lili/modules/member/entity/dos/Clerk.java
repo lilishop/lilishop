@@ -2,6 +2,7 @@ package cn.lili.modules.member.entity.dos;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.modules.member.entity.dto.ClerkAddDTO;
+import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -66,5 +67,15 @@ public class Clerk extends BaseEntity {
         this.storeId = clerkAddDTO.getStoreId();
         this.clerkName = clerkAddDTO.getUsername();
 
+    }
+
+
+    public Clerk(Store store){
+        this.memberId = store.getMemberId();
+        this.storeId = store.getId();
+        this.clerkName = store.getMemberName();
+        this.setShopkeeper(true);
+        this.setIsSuper(true);
+        this.setStatus(true);
     }
 }
