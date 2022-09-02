@@ -184,11 +184,6 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
         return this.baseMapper.getStoreAfterSaleAddressDTO(storeId);
     }
 
-    @Override
-    public FuLuConfigureDTO getFuLuConfigureDTO() {
-        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
-        return this.baseMapper.getFuLuConfigureDTO(storeId);
-    }
 
     @Override
     public StoreAfterSaleAddressDTO getStoreAfterSaleAddressDTO(String id) {
@@ -212,16 +207,6 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
         return this.update(lambdaUpdateWrapper);
     }
 
-    @Override
-    public boolean editFuLuConfigureDTO(FuLuConfigureDTO fuLuConfigureDTO) {
-        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
-        LambdaUpdateWrapper<StoreDetail> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.set(StoreDetail::getAppSecretKey, fuLuConfigureDTO.getAppSecretKey());
-        lambdaUpdateWrapper.set(StoreDetail::getMerchantNumber, fuLuConfigureDTO.getMerchantNumber());
-        lambdaUpdateWrapper.set(StoreDetail::getAppMerchantKey, fuLuConfigureDTO.getAppMerchantKey());
-        lambdaUpdateWrapper.eq(StoreDetail::getStoreId, storeId);
-        return this.update(lambdaUpdateWrapper);
-    }
 
     @Override
     public boolean updateStockWarning(Integer stockWarning) {

@@ -90,21 +90,6 @@ public class StoreSettingsController {
         return ResultUtil.data(result);
     }
 
-    @ApiOperation(value = "获取商家福禄配置")
-    @GetMapping("/fuLuConfigure")
-    public ResultMessage<FuLuConfigureDTO> getFuLuConfigure() {
-        //获取当前登录商家内容
-        return ResultUtil.data(storeDetailService.getFuLuConfigureDTO());
-    }
-
-    @ApiOperation(value = "修改商家福禄配置")
-    @PutMapping("/fuLuConfigure")
-    public ResultMessage<Object> editFuLuConfigure(@Valid FuLuConfigureDTO fuLuConfigureDTO) {
-        //修改商家退货收件地址
-        boolean result = storeDetailService.editFuLuConfigureDTO(fuLuConfigureDTO);
-        return ResultUtil.data(result);
-    }
-
 
     @ApiOperation(value = "获取商家发货地址")
     @GetMapping("/storeDeliverGoodsAddress")
