@@ -3,7 +3,10 @@ package cn.lili.modules.goods.serviceimpl;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.AuthUser;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.GoodsUnit;
 import cn.lili.modules.goods.entity.dto.GoodsImportDTO;
@@ -53,7 +56,11 @@ public class GoodsImportServiceImpl implements GoodsImportService {
 
     @Override
     public void download(HttpServletResponse response) {
-        String storeId = "1376369067769724928";
+        AuthUser currentUser = UserContext.getCurrentUser();
+        if(currentUser == null || currentUser.getStoreId() == null ){
+            throw  new ServiceException(ResultCode.STORE_NOT_EXIST);
+        }
+        String storeId = currentUser.getStoreId();
 //        //Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         //创建Excel工作薄对象
         Workbook workbook = new HSSFWorkbook();
