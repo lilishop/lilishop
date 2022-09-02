@@ -163,7 +163,7 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
 
         //如果有店铺id传入，则查询店铺
         if (StringUtils.isNotEmpty(statisticsQueryParam.getStoreId())) {
-            orderOverviewVO.setPaymentsNum(baseMapper.countPayers(statisticsQueryParam.getStoreId(), dates[0], dates[1]));
+            orderOverviewVO.setPaymentsNum(baseMapper.countPayersByStore(statisticsQueryParam.getStoreId(), dates[0], dates[1]));
         } else {
             orderOverviewVO.setPaymentsNum(baseMapper.countPayers(dates[0], dates[1]));
         }
