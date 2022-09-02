@@ -68,7 +68,7 @@ public class GoodsSkuBuilder {
         //商品名称
         StringBuilder goodsName = new StringBuilder(goodsOperationDTO.getGoodsName());
         //规格值
-        Map<String, Object> specMap = new HashMap<>(16);
+        Map<String, Object> specMap = new LinkedHashMap<>();
 
         // 原始规格项
         String[] ignoreOriginKeys = {"id", "sn", "cost", "price", "quantity", "weight"};
