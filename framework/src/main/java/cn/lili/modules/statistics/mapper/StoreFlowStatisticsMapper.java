@@ -61,7 +61,7 @@ public interface StoreFlowStatisticsMapper extends BaseMapper<StoreFlow> {
      * @return 付款人数
      */
     @Select("SELECT count(0) AS num FROM (SELECT count(0) FROM li_store_flow " +
-            " where store_id = ${storeId} and flow_type='PAY' and create_time >=${startTime} and create_time < ${endTime}" +
+            " where store_id = #{storeId} and flow_type='PAY' and create_time >=#{startTime} and create_time < #{endTime}" +
             " GROUP BY member_id) t")
     Long countPayers(String storeId, Date startTime, Date endTime);
 
@@ -73,7 +73,7 @@ public interface StoreFlowStatisticsMapper extends BaseMapper<StoreFlow> {
      * @return 付款人数
      */
     @Select("SELECT count(0) AS num FROM (SELECT count(0) FROM li_store_flow " +
-            " where  flow_type='PAY' and create_time >=${startTime} and create_time < ${endTime}" +
+            " where  flow_type='PAY' and create_time >=#{startTime} and create_time < #{endTime}" +
             " GROUP BY member_id) t")
     Long countPayers(Date startTime, Date endTime);
 
