@@ -274,6 +274,11 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
         return this.updateById(kanJiaActivityGoodsDTO);
     }
 
+    @Override
+    public void deleteByGoodsIds(List<String> goodsIds) {
+        this.remove(new QueryWrapper<KanjiaActivityGoods>().in("goods_id", goodsIds));
+    }
+
     /**
      * 当前促销类型
      *

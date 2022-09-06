@@ -10,6 +10,8 @@ import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsListVO;
 import cn.lili.modules.promotion.entity.vos.kanjia.KanjiaActivityGoodsVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
+import java.util.List;
+
 
 /**
  * 砍价业务层
@@ -69,4 +71,9 @@ public interface KanjiaActivityGoodsService extends AbstractPromotionsService<Ka
      */
     boolean updateKanjiaActivityGoods(KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO);
 
+    /**
+     * 根据商品id删除促销活动
+     * @param goodsIds
+     */
+    void deleteByGoodsIds(List<String> goodsIds);
 }
