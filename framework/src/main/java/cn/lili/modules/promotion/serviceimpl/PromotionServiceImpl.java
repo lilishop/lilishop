@@ -122,7 +122,7 @@ public class PromotionServiceImpl implements PromotionService {
     @Override
     public void removeByGoodsIds(String goodsIdsJsonStr) {
         promotionGoodsService.deletePromotionGoods(Arrays.asList(goodsIdsJsonStr.split(",")));
-        kanjiaActivityGoodsService.deleteByGoodsIds(Arrays.asList(goodsIdsJsonStr.split(",")))
+        kanjiaActivityGoodsService.deleteByGoodsIds(Arrays.asList(goodsIdsJsonStr.split(",")));
     }
 
     private void getGoodsCurrentSeckill(String esPromotionKey, PromotionGoods promotionGoods, Map<String, Object> promotionMap) {
