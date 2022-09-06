@@ -574,7 +574,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
                 break;
             case "VIRTUAL_GOODS":
                 if (!"0".equals(goods.getTemplateId())) {
-                    throw new ServiceException(ResultCode.VIRTUAL_GOODS_NOT_NEED_TEMP);
+                    goods.setTemplateId("0");
                 }
                 break;
             default:
