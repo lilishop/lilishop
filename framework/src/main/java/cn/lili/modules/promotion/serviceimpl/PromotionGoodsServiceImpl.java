@@ -281,6 +281,13 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         this.remove(queryWrapper);
     }
 
+    @Override
+    public void deletePromotionGoodsByGoods(List<String> goodsIds) {
+        LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<PromotionGoods>().in(PromotionGoods::getGoodsId, goodsIds);
+        this.remove(queryWrapper);
+    }
+
+
     /**
      * 根据参数删除促销商品
      *

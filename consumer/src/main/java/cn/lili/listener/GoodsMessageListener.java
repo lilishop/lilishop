@@ -205,6 +205,8 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                     for (String goodsId : JSONUtil.toList(goodsIdsJsonStr, String.class)) {
                         goodsIndexService.deleteIndex(MapUtil.builder(new HashMap<String, Object>()).put("goodsId", goodsId).build());
                     }
+
+                    promotionService.removeByGoodsIds(goodsIdsJsonStr);
                 } catch (Exception e) {
                     log.error("删除商品索引事件执行异常，商品信息: " + new String(messageExt.getBody()), e);
                 }

@@ -150,6 +150,13 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
     void deletePromotionGoods(List<String> promotionIds);
 
     /**
+     * 删除商品的促销
+     *
+     * @param goodsIds 商品id
+     */
+    void deletePromotionGoodsByGoods(List<String> goodsIds);
+
+    /**
      * 根据参数删除促销商品
      *
      * @param searchParams 查询参数
