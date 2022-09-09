@@ -128,7 +128,7 @@ public class DraftGoodsServiceImpl extends ServiceImpl<DraftGoodsMapper, DraftGo
     }
 
     private GoodsSku add(Map<String, Object> map) {
-        Map<String, Object> specMap = new HashMap<>(2);
+        Map<String, Object> specMap = new LinkedHashMap<>();
         GoodsSku sku = new GoodsSku();
         for (Map.Entry<String, Object> m : map.entrySet()) {
             switch (m.getKey()) {
