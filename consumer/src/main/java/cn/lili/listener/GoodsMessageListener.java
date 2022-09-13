@@ -211,6 +211,10 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                     log.error("删除商品索引事件执行异常，商品信息: " + new String(messageExt.getBody()), e);
                 }
                 break;
+            case DOWN:
+                String goodsIdsJsonStr = new String(messageExt.getBody());
+                promotionService.removeByGoodsIds(goodsIdsJsonStr);
+                break;
             //规格删除
             case SKU_DELETE:
                 String message = new String(messageExt.getBody());
