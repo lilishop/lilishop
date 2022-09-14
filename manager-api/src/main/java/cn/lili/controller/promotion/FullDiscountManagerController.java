@@ -35,7 +35,6 @@ public class FullDiscountManagerController {
     @ApiOperation(value = "获取满优惠列表")
     @GetMapping
     public ResultMessage<IPage<FullDiscount>> getCouponList(FullDiscountSearchParams searchParams, PageVO page) {
-        page.setNotConvert(true);
         return ResultUtil.data(fullDiscountService.pageFindAll(searchParams, page));
     }
 

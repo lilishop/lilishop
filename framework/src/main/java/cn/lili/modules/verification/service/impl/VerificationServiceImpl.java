@@ -96,6 +96,7 @@ public class VerificationServiceImpl implements VerificationService {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
+            log.error("生成验证码失败", e);
             throw new ServiceException(ResultCode.ERROR);
         }
     }

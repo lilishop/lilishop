@@ -45,21 +45,20 @@ public class LimitInterceptor {
     @Before("@annotation(limitPointAnnotation)")
     public void interceptor(LimitPoint limitPointAnnotation) {
         LimitTypeEnums limitTypeEnums = limitPointAnnotation.limitType();
-        String name = limitPointAnnotation.name();
+
         String key;
         int limitPeriod = limitPointAnnotation.period();
         int limitCount = limitPointAnnotation.limit();
-        switch (limitTypeEnums) {
-            case CUSTOMER:
-                key = limitPointAnnotation.key();
-                break;
-            default:
-                key = limitPointAnnotation.key() + IpUtils
-                        .getIpAddress(((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
+        if (limitTypeEnums == LimitTypeEnums.CUSTOMER) {
+            key = limitPointAnnotation.key();
+        } else {
+            key = limitPointAnnotation.key() + IpUtils
+                    .getIpAddress(((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
         }
         ImmutableList<String> keys = ImmutableList.of(StringUtils.join(limitPointAnnotation.prefix(), key));
         try {
             Number count = redisTemplate.execute(limitScript, keys, limitCount, limitPeriod);
+            assert count != null;
             log.info("限制请求{}, 当前请求{},缓存key{}", limitCount, count.intValue(), key);
             //如果缓存里没有值，或者他的值小于限制频率
             if (count.intValue() >= limitCount) {
@@ -72,6 +71,7 @@ public class LimitInterceptor {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
+            log.error("限流异常", e);
             throw new ServiceException(ResultCode.ERROR);
         }
     }

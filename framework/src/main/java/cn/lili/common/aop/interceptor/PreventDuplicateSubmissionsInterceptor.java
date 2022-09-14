@@ -47,6 +47,7 @@ public class PreventDuplicateSubmissionsInterceptor {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
+            log.error("防重复提交拦截器异常", e);
             throw new ServiceException(ResultCode.ERROR);
         }
     }
