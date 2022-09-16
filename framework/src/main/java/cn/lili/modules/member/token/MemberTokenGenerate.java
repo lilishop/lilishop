@@ -37,17 +37,18 @@ public class MemberTokenGenerate extends AbstractTokenGenerate<Member> {
     @Override
     public Token createToken(Member member, Boolean longTerm) {
 
-        //获取客户端类型
-        String clientType = ThreadContextHolder.getHttpRequest().getHeader("clientType");
+
         ClientTypeEnum clientTypeEnum;
         try {
+            //获取客户端类型
+            String clientType = ThreadContextHolder.getHttpRequest().getHeader("clientType");
             //如果客户端为空，则缺省值为PC，pc第三方登录时不会传递此参数
             if (clientType == null) {
                 clientTypeEnum = ClientTypeEnum.PC;
             } else {
                 clientTypeEnum = ClientTypeEnum.valueOf(clientType);
             }
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             clientTypeEnum = ClientTypeEnum.UNKNOWN;
         }
         //记录最后登录时间，客户端类型

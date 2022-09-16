@@ -11,6 +11,8 @@ import cn.lili.modules.member.entity.dto.MemberAddDTO;
 import cn.lili.modules.member.entity.dto.MemberEditDTO;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
 import cn.lili.modules.member.entity.vo.MemberVO;
+import cn.lili.modules.member.entity.vo.QRLoginResultVo;
+import cn.lili.modules.member.entity.vo.QRCodeLoginSessionVo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -272,4 +274,12 @@ public interface MemberService extends IService<Member> {
      * @return 用户VO
      */
     MemberVO getMember(String id);
+
+    QRCodeLoginSessionVo createPcSession();
+
+    Object appScanner(String token);
+
+    boolean appSConfirm(String token, Integer code);
+
+    QRLoginResultVo loginWithSession(String token);
 }
