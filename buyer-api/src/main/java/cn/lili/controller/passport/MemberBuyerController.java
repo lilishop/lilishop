@@ -3,7 +3,6 @@ package cn.lili.controller.passport;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.Member;
@@ -58,41 +57,42 @@ public class MemberBuyerController {
     }
 
 
-
     /**
      * 长轮询：参考nacos
+     *
      * @param token
-     * @param beforeSessionStatus  上次记录的session状态
+     * @param beforeSessionStatus 上次记录的session状态
      * @return
      */
     @ApiOperation(value = "web-二维码登录")
     @PostMapping(value = "/session_login/{token}", produces = "application/json;charset=UTF-8")
-    public Object loginWithSession(@PathVariable("token") String token,Integer beforeSessionStatus) {
+    public Object loginWithSession(@PathVariable("token") String token, Integer beforeSessionStatus) {
         log.info("receive login with session key {}", token);
-        ResponseEntity<ResultMessage> timeoutResponseEntity =
+        ResponseEntity<ResultMessage<Object>> timeoutResponseEntity =
                 new ResponseEntity<>(ResultUtil.error(ResultCode.ERROR), HttpStatus.OK);
         int timeoutSecond = 20;
-        DeferredResult<ResponseEntity> deferredResult = new DeferredResult<>(timeoutSecond * 1000L, timeoutResponseEntity);
+        DeferredResult<ResponseEntity<Object>> deferredResult = new DeferredResult<>(timeoutSecond * 1000L, timeoutResponseEntity);
         CompletableFuture.runAsync(() -> {
             try {
                 int i = 0;
                 while (i < timeoutSecond) {
                     QRLoginResultVo queryResult = memberService.loginWithSession(token);
                     int status = queryResult.getStatus();
-                    if(status==beforeSessionStatus
-                            && (QRCodeLoginSessionStatusEnum.WAIT_SCANNING.getCode()==status
-                            || QRCodeLoginSessionStatusEnum.SCANNING.getCode()==status)){
+                    if (status == beforeSessionStatus
+                            && (QRCodeLoginSessionStatusEnum.WAIT_SCANNING.getCode() == status
+                            || QRCodeLoginSessionStatusEnum.SCANNING.getCode() == status)) {
                         //睡眠一秒种，继续等待结果
                         TimeUnit.SECONDS.sleep(1);
-                    }else{
+                    } else {
                         deferredResult.setResult(new ResponseEntity<>(ResultUtil.data(queryResult), HttpStatus.OK));
                         break;
                     }
-                    i ++;
+                    i++;
                 }
             } catch (Exception e) {
-                log.error("获取登录状态异常，",e);
-                deferredResult.setResult(new ResponseEntity(ResultUtil.error(ResultCode.ERROR), HttpStatus.OK));
+                log.error("获取登录状态异常，", e);
+                deferredResult.setResult(new ResponseEntity<>(ResultUtil.error(ResultCode.ERROR), HttpStatus.OK));
+                Thread.currentThread().interrupt();
             }
         }, Executors.newCachedThreadPool());
         return deferredResult;
@@ -111,9 +111,9 @@ public class MemberBuyerController {
             @ApiImplicitParam(name = "code", value = "操作：0拒绝登录，1同意登录", required = true, paramType = "query")
     })
     @PostMapping(value = "/app_confirm", produces = "application/json;charset=UTF-8")
-    public ResultMessage<Object> appSConfirm(String token,Integer code) {
-        boolean flag = memberService.appSConfirm(token,code);
-        return flag ? ResultUtil.success():ResultUtil.error(ResultCode.ERROR);
+    public ResultMessage<Object> appSConfirm(String token, Integer code) {
+        boolean flag = memberService.appSConfirm(token, code);
+        return flag ? ResultUtil.success() : ResultUtil.error(ResultCode.ERROR);
     }
 
 
