@@ -431,6 +431,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         LambdaUpdateWrapper<Goods> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.set(Goods::getQuantity, quantity);
         lambdaUpdateWrapper.eq(Goods::getId, goodsId);
+        cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
         this.update(lambdaUpdateWrapper);
     }
 
