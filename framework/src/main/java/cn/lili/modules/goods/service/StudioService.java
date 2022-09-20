@@ -53,7 +53,7 @@ public interface StudioService extends IService<Studio> {
      * @param storeId 店铺ID
      * @return 操作结果
      */
-    Boolean push(Integer roomId,Integer goodsId, String storeId);
+    Boolean push(Integer roomId,Integer liveGoodsId, String storeId, String goodsId);
 
     /**
      * 删除商品
