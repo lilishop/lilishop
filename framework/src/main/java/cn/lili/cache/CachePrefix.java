@@ -487,7 +487,16 @@ public enum CachePrefix {
     /**
      * 敏感词
      */
-    SENSITIVE;
+    SENSITIVE,
+
+    /**
+     * 扫码登录
+     * @param str
+     * @return
+     */
+    QR_CODE_LOGIN_SESSION
+
+    ;
 
 
     public static String removePrefix(String str) {

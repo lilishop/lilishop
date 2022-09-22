@@ -17,7 +17,10 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.sensitive.SensitiveWordsFilter;
-import cn.lili.common.utils.*;
+import cn.lili.common.utils.BeanUtil;
+import cn.lili.common.utils.CookieUtil;
+import cn.lili.common.utils.SnowFlake;
+import cn.lili.common.utils.UuidUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
 import cn.lili.modules.connect.entity.Connect;
@@ -27,8 +30,11 @@ import cn.lili.modules.member.aop.annotation.PointLogPoint;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dto.*;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
+import cn.lili.modules.member.entity.enums.QRCodeLoginSessionStatusEnum;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
 import cn.lili.modules.member.entity.vo.MemberVO;
+import cn.lili.modules.member.entity.vo.QRCodeLoginSessionVo;
+import cn.lili.modules.member.entity.vo.QRLoginResultVo;
 import cn.lili.modules.member.mapper.MemberMapper;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.member.token.MemberTokenGenerate;
@@ -54,6 +60,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 会员接口业务层实现
@@ -209,6 +216,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @Override
+    @Transactional
     public Token autoRegister() {
         ConnectAuthUser connectAuthUser = this.checkConnectUser();
         return this.autoRegister(connectAuthUser);
@@ -403,11 +411,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Override
     public Member updateMember(ManagerMemberEditDTO managerMemberEditDTO) {
         //过滤会员昵称敏感词
-        if (StringUtils.isNotBlank(managerMemberEditDTO.getNickName())) {
+        if (CharSequenceUtil.isNotBlank(managerMemberEditDTO.getNickName())) {
             managerMemberEditDTO.setNickName(SensitiveWordsFilter.filter(managerMemberEditDTO.getNickName()));
         }
         //如果密码不为空则加密密码
-        if (StringUtils.isNotBlank(managerMemberEditDTO.getPassword())) {
+        if (CharSequenceUtil.isNotBlank(managerMemberEditDTO.getPassword())) {
             managerMemberEditDTO.setPassword(new BCryptPasswordEncoder().encode(managerMemberEditDTO.getPassword()));
         }
         //查询会员信息
@@ -668,6 +676,81 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Override
     public MemberVO getMember(String id) {
         return new MemberVO(this.getById(id));
+    }
+
+    @Override
+    public QRCodeLoginSessionVo createPcSession() {
+        QRCodeLoginSessionVo session = new QRCodeLoginSessionVo();
+        session.setStatus(QRCodeLoginSessionStatusEnum.WAIT_SCANNING.getCode());
+        //过期时间，20s
+        Long duration = 20 * 1000L;
+        session.setDuration(duration);
+        String token = CachePrefix.QR_CODE_LOGIN_SESSION.name() + SnowFlake.getIdStr();
+        session.setToken(token);
+        cache.put(token, session, duration, TimeUnit.MILLISECONDS);
+        return session;
+    }
+
+    @Override
+    public Object appScanner(String token) {
+        AuthUser tokenUser = UserContext.getCurrentUser();
+        if (tokenUser == null) {
+            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        }
+        QRCodeLoginSessionVo session = (QRCodeLoginSessionVo) cache.get(token);
+        if (session == null) {
+            return QRCodeLoginSessionStatusEnum.NO_EXIST.getCode();
+        }
+        session.setStatus(QRCodeLoginSessionStatusEnum.SCANNING.getCode());
+        cache.put(token, session, session.getDuration(), TimeUnit.MILLISECONDS);
+        return QRCodeLoginSessionStatusEnum.SCANNING.getCode();
+    }
+
+    @Override
+    public boolean appSConfirm(String token, Integer code) {
+        AuthUser tokenUser = UserContext.getCurrentUser();
+        if (tokenUser == null) {
+            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        }
+        QRCodeLoginSessionVo session = (QRCodeLoginSessionVo) cache.get(token);
+        if (session == null) {
+            return false;
+        }
+        if (code == 1) {
+            //同意
+            session.setStatus(QRCodeLoginSessionStatusEnum.VERIFIED.getCode());
+            session.setUserId(Long.parseLong(tokenUser.getId()));
+        } else {
+            //拒绝
+            session.setStatus(QRCodeLoginSessionStatusEnum.CANCELED.getCode());
+        }
+        cache.put(token, session, session.getDuration(), TimeUnit.MILLISECONDS);
+        return true;
+    }
+
+    @Override
+    public QRLoginResultVo loginWithSession(String sessionToken) {
+        QRLoginResultVo result = new QRLoginResultVo();
+        result.setStatus(QRCodeLoginSessionStatusEnum.NO_EXIST.getCode());
+        QRCodeLoginSessionVo session = (QRCodeLoginSessionVo) cache.get(sessionToken);
+        if (session == null) {
+            return result;
+        }
+        result.setStatus(session.getStatus());
+        if (QRCodeLoginSessionStatusEnum.VERIFIED.getCode().equals(session.getStatus())) {
+            //生成token
+            Member member = this.getById(session.getUserId());
+            if (member == null) {
+                throw new ServiceException(ResultCode.USER_NOT_EXIST);
+            } else {
+                //生成token
+                Token token = memberTokenGenerate.createToken(member, false);
+                result.setToken(token);
+                cache.vagueDel(sessionToken);
+            }
+
+        }
+        return result;
     }
 
     /**

@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -42,7 +41,7 @@ public class SystemLogVO implements Serializable {
 
     @ApiModelProperty(value = "日志记录时间")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @Field(type = FieldType.Date, format = DateFormat.basic_date_time, fielddata = true)
+    @Field(type = FieldType.Date, fielddata = true)
     private Date createTime = new Date();
 
     @ApiModelProperty(value = "请求用户")

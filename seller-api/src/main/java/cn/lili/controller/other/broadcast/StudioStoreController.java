@@ -74,9 +74,9 @@ public class StudioStoreController {
             @ApiImplicitParam(name = "liveGoodsId", value = "直播商品ID", required = true, dataType = "Integer", paramType = "path")
     })
     @PutMapping(value = "/push/{roomId}/{liveGoodsId}")
-    public ResultMessage<Studio> push(@PathVariable Integer roomId, @PathVariable Integer liveGoodsId) {
+    public ResultMessage<Studio> push(@PathVariable Integer roomId, @PathVariable Integer liveGoodsId, @RequestParam String goodsId) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
-        if (Boolean.TRUE.equals(studioService.push(roomId, liveGoodsId, storeId))) {
+        if (Boolean.TRUE.equals(studioService.push(roomId, liveGoodsId, storeId, goodsId))) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
         throw new ServiceException(ResultCode.ERROR);

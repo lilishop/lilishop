@@ -1,13 +1,13 @@
 package cn.lili.controller.goods;
 
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultUtil;
-import cn.lili.mybatis.util.PageUtil;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Specification;
 import cn.lili.modules.goods.service.SpecificationService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
@@ -37,17 +37,16 @@ public class SpecificationManagerController {
 
     @GetMapping("/all")
     @ApiOperation(value = "获取所有可用规格")
-    public List<Specification> getAll() {
-        List<Specification> list = specificationService.list();
-        return list;
+    public ResultMessage<List<Specification>> getAll() {
+        return ResultUtil.data(specificationService.list());
     }
 
     @GetMapping
     @ApiOperation(value = "搜索规格")
-    public Page<Specification> page(String specName, PageVO page) {
+    public ResultMessage<Page<Specification>> page(String specName, PageVO page) {
         LambdaQueryWrapper<Specification> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.like(StringUtils.isNotEmpty(specName), Specification::getSpecName, specName);
-        return specificationService.page(PageUtil.initPage(page), lambdaQueryWrapper);
+        lambdaQueryWrapper.like(CharSequenceUtil.isNotEmpty(specName), Specification::getSpecName, specName);
+        return ResultUtil.data(specificationService.page(PageUtil.initPage(page), lambdaQueryWrapper));
     }
 
     @PostMapping
@@ -61,15 +60,13 @@ public class SpecificationManagerController {
     @ApiOperation(value = "更改规格")
     public ResultMessage<Object> update(@Valid Specification specification, @PathVariable String id) {
         specification.setId(id);
-        specificationService.saveOrUpdate(specification);
-        return ResultUtil.success();
+        return ResultUtil.data(specificationService.saveOrUpdate(specification));
     }
 
     @DeleteMapping("/{ids}")
     @ApiImplicitParam(name = "ids", value = "规格ID", required = true, dataType = "String", allowMultiple = true, paramType = "path")
     @ApiOperation(value = "批量删除")
     public ResultMessage<Object> delAllByIds(@PathVariable List<String> ids) {
-        specificationService.deleteSpecification(ids);
-        return ResultUtil.success();
+        return ResultUtil.data(specificationService.deleteSpecification(ids));
     }
 }

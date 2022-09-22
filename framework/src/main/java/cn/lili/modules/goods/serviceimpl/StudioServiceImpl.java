@@ -161,12 +161,12 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean push(Integer roomId, Integer goodsId, String storeId) {
+    public Boolean push(Integer roomId, Integer liveGoodsId, String storeId, String goodsId) {
 
         //判断直播间是否已添加商品
         if (studioCommodityService.getOne(
                 new LambdaQueryWrapper<StudioCommodity>().eq(StudioCommodity::getRoomId, roomId)
-                        .eq(StudioCommodity::getGoodsId, goodsId)) != null) {
+                        .eq(StudioCommodity::getGoodsId, liveGoodsId)) != null) {
             throw new ServiceException(ResultCode.STODIO_GOODS_EXIST_ERROR);
         }
 
@@ -176,8 +176,8 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
         }
 
         //调用微信接口添加直播间商品并进行记录
-        if (Boolean.TRUE.equals(wechatLivePlayerUtil.pushGoods(roomId, goodsId))) {
-            studioCommodityService.save(new StudioCommodity(roomId, goodsId));
+        if (Boolean.TRUE.equals(wechatLivePlayerUtil.pushGoods(roomId, liveGoodsId))) {
+            studioCommodityService.save(new StudioCommodity(roomId, liveGoodsId));
             //添加直播间商品数量
             Studio studio = this.getByRoomId(roomId);
             studio.setRoomGoodsNum(studio.getRoomGoodsNum() != null ? studio.getRoomGoodsNum() + 1 : 1);
