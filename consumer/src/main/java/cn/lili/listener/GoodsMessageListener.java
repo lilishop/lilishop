@@ -319,7 +319,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 }
             }
         }
-        goodsIndexService.updateBulkIndex(goodsIndices);
+        goodsIndexService.addIndex(goodsIndices);
     }
 
 
