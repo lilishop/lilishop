@@ -11,23 +11,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 滑块验证码接口
+ * 站点基础配置获取
  *
- * @author Chopper
- * @since 2020/11/26 15:41
+ * @author liushuai(liushuai711 @ gmail.com)
+ * @version v4.0
+ * @Description:
+ * @since 2022/9/22 17:49
  */
 @Slf4j
 @RestController
 @RequestMapping("/common/common/site")
-@Api(tags = "系统基础接口")
+@Api(tags = "站点基础接口")
 public class SiteController {
 
     @Autowired
     private SettingService settingService;
 
-    @ApiOperation(value = "获取系统基础信息")
+    @ApiOperation(value = "获取站点基础信息")
     @GetMapping
-    public ResultMessage<Object> getFileList() {
+    public ResultMessage<Object> baseSetting() {
         return ResultUtil.data(settingService.get(SettingEnum.BASE_SETTING.name()));
     }
 }
