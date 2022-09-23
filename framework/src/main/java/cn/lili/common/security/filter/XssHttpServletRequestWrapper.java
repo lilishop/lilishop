@@ -181,7 +181,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
                 //将resultMap转换为json字符串
                 String resultStr = JSONUtil.toJsonStr(resultMap);
                 //将json字符串转换为字节
-                final ByteArrayInputStream resultBIS = new ByteArrayInputStream(resultStr.getBytes());
+                final ByteArrayInputStream resultBIS = new ByteArrayInputStream(resultStr.getBytes(StandardCharsets.UTF_8));
 
                 //实现接口
                 return new ServletInputStream() {
