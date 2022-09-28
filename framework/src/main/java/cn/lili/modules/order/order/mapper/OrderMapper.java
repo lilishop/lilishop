@@ -38,7 +38,7 @@ public interface OrderMapper extends BaseMapper<Order> {
      * @return 导出订单DTO列表
      */
     @Select("SELECT o.sn,o.create_time,o.member_name,o.consignee_name,o.consignee_mobile,o.consignee_address_path,o.consignee_detail," +
-            "o.payment_method, o.logistics_name,o.freight_price,o.goods_price,o.discount_price,o.flow_price,oi.goods_name,oi.num," +
+            "o.payment_method, o.logistics_name,o.freight_price,oi.goods_price,o.discount_price,o.flow_price,oi.goods_name,oi.num," +
             "o.remark,o.order_status,o.pay_status,o.deliver_status,o.need_receipt,o.store_name FROM li_order o LEFT JOIN li_order_item oi " +
             "ON oi.order_sn=o.sn ${ew.customSqlSegment}")
     List<OrderExportDTO> queryExportOrder(@Param(Constants.WRAPPER) Wrapper<OrderSimpleVO> queryWrapper);
