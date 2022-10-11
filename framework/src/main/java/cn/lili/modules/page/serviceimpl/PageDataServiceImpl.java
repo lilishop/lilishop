@@ -200,4 +200,9 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
         return this.baseMapper.getPageDataList(PageUtil.initPage(pageVO), queryWrapper);
 
     }
+
+    @Override
+    public PageData getSpecial(String id) {
+        return this.getById(id);
+    }
 }
