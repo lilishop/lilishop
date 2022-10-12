@@ -62,7 +62,7 @@ public class UserContext {
     public static AuthUser getAuthUser(Cache cache, String accessToken) {
         try {
 
-            if (!cache.hasKey(Objects.requireNonNull(UserContext.getAuthUser(accessToken)).getRole().getRole() + accessToken)) {
+            if (!cache.hasKey("*" + Objects.requireNonNull(UserContext.getAuthUser(accessToken)).getRole().name() + accessToken)) {
                 throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
             }
             return getAuthUser(accessToken);
