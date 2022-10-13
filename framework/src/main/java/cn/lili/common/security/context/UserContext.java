@@ -1,6 +1,7 @@
 package cn.lili.common.security.context;
 
 import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
@@ -13,7 +14,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Objects;
 
 /**
  * 用户上下文
@@ -61,11 +61,13 @@ public class UserContext {
      */
     public static AuthUser getAuthUser(Cache cache, String accessToken) {
         try {
+            AuthUser authUser = getAuthUser(accessToken);
+            assert authUser != null;
 
-            if (!cache.hasKey("*" + Objects.requireNonNull(UserContext.getAuthUser(accessToken)).getRole().name() + accessToken)) {
+            if (!cache.hasKey(CachePrefix.ACCESS_TOKEN.getPrefix(authUser.getRole()) + accessToken)) {
                 throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
             }
-            return getAuthUser(accessToken);
+            return authUser;
         } catch (Exception e) {
             return null;
         }
