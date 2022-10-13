@@ -74,20 +74,30 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
 
     @Override
     public List<SeckillTimelineVO> getSeckillTimeline() {
-        //秒杀活动缓存key
-        return getSeckillTimelineInfo();
+        try {
+            //秒杀活动缓存key
+            return getSeckillTimelineInfo();
+        } catch (Exception e) {
+            log.error("获取秒杀时间轴失败", e);
+            return new ArrayList<>();
+        }
     }
 
     @Override
     public List<SeckillGoodsVO> getSeckillGoods(Integer timeline) {
-        List<SeckillGoodsVO> seckillGoodsVoS = new ArrayList<>();
-        //获取
-        List<SeckillTimelineVO> seckillTimelineToCache = getSeckillTimelineInfo();
-        Optional<SeckillTimelineVO> first = seckillTimelineToCache.stream().filter(i -> i.getTimeLine().equals(timeline)).findFirst();
-        if (first.isPresent()) {
-            seckillGoodsVoS = first.get().getSeckillGoodsList();
+        try {
+            List<SeckillGoodsVO> seckillGoodsVoS = new ArrayList<>();
+            //获取
+            List<SeckillTimelineVO> seckillTimelineToCache = getSeckillTimelineInfo();
+            Optional<SeckillTimelineVO> first = seckillTimelineToCache.stream().filter(i -> i.getTimeLine().equals(timeline)).findFirst();
+            if (first.isPresent()) {
+                seckillGoodsVoS = first.get().getSeckillGoodsList();
+            }
+            return seckillGoodsVoS;
+        } catch (Exception e) {
+            log.error("获取秒杀商品失败", e);
+            return new ArrayList<>();
         }
-        return seckillGoodsVoS;
     }
 
     @Override

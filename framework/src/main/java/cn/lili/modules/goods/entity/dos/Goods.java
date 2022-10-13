@@ -6,6 +6,7 @@ import cn.hutool.http.HtmlUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.modules.goods.entity.dto.DraftGoodsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
@@ -202,6 +203,30 @@ public class Goods extends BaseEntity {
 
 
         }
+    }
+
+    public Goods(DraftGoodsDTO goodsDTO) {
+        this.goodsName = goodsDTO.getGoodsName();
+        this.categoryPath = goodsDTO.getCategoryPath();
+        this.storeCategoryPath = goodsDTO.getStoreCategoryPath();
+        this.brandId = goodsDTO.getBrandId();
+        this.templateId = goodsDTO.getTemplateId();
+        this.recommend = goodsDTO.getRecommend();
+        this.sellingPoint = goodsDTO.getSellingPoint();
+        this.salesModel = goodsDTO.getSalesModel();
+        this.goodsUnit = goodsDTO.getGoodsUnit();
+        this.intro = goodsDTO.getIntro();
+        this.mobileIntro = goodsDTO.getMobileIntro();
+        this.goodsVideo = goodsDTO.getGoodsVideo();
+        this.price = goodsDTO.getPrice();
+        if (goodsDTO.getGoodsParamsDTOList() != null && goodsDTO.getGoodsParamsDTOList().isEmpty()) {
+            this.params = JSONUtil.toJsonStr(goodsDTO.getGoodsParamsDTOList());
+        }
+        //如果立即上架则
+        this.marketEnable = GoodsStatusEnum.DOWN.name();
+        this.goodsType = goodsDTO.getGoodsType();
+        this.grade = 100D;
+
     }
 
     public String getIntro() {

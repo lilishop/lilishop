@@ -132,7 +132,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             throw new ServiceException(ResultCode.MUST_HAVE_GOODS_SKU);
         }
         // 检查是否需要生成索引
-        List<GoodsSku> goodsSkus = GoodsSkuBuilder.buildBatch(goods, goodsOperationDTO);
+        List<GoodsSku> goodsSkus = GoodsSkuBuilder.buildBatch(goods, goodsOperationDTO.getSkuList());
         renderGoodsSkuList(goodsSkus, goodsOperationDTO);
 
         if (!goodsSkus.isEmpty()) {
@@ -151,7 +151,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         List<GoodsSku> skuList;
         //删除旧的sku信息
         if (Boolean.TRUE.equals(goodsOperationDTO.getRegeneratorSkuFlag())) {
-            skuList = GoodsSkuBuilder.buildBatch(goods, goodsOperationDTO);
+            skuList = GoodsSkuBuilder.buildBatch(goods, goodsOperationDTO.getSkuList());
             renderGoodsSkuList(skuList, goodsOperationDTO);
             List<GoodsSkuVO> goodsListByGoodsId = getGoodsListByGoodsId(goods.getId());
             List<String> oldSkuIds = new ArrayList<>();
@@ -170,7 +170,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         } else {
             skuList = new ArrayList<>();
             for (Map<String, Object> map : goodsOperationDTO.getSkuList()) {
-                GoodsSku sku = GoodsSkuBuilder.build(goods, map, goodsOperationDTO);
+                GoodsSku sku = GoodsSkuBuilder.build(goods, map);
                 renderGoodsSku(sku, goodsOperationDTO);
                 skuList.add(sku);
                 //如果商品状态值不对，则es索引移除
@@ -639,7 +639,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      * @param goodsSkuList      sku集合
      * @param goodsOperationDTO 商品操作DTO
      */
-    void renderGoodsSkuList(List<GoodsSku> goodsSkuList, GoodsOperationDTO goodsOperationDTO) {
+    @Override
+    public void renderGoodsSkuList(List<GoodsSku> goodsSkuList, GoodsOperationDTO goodsOperationDTO) {
         // 商品销售模式渲染器
         salesModelRenders.stream().filter(i -> i.getSalesMode().equals(goodsOperationDTO.getSalesModel())).findFirst().ifPresent(i -> i.renderBatch(goodsSkuList, goodsOperationDTO));
         for (GoodsSku goodsSku : goodsSkuList) {

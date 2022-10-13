@@ -241,4 +241,12 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * @return sku总数
      */
     Long countSkuNum(String storeId);
+
+    /**
+     * 批量渲染商品sku
+     *
+     * @param goodsSkuList SKU基础数据列表
+     * @param goodsOperationDTO 商品操作信息
+     */
+    void renderGoodsSkuList(List<GoodsSku> goodsSkuList, GoodsOperationDTO goodsOperationDTO);
 }
