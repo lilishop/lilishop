@@ -55,7 +55,9 @@ public class WholesaleSaleModelRenderImpl implements SalesModelRender {
             skus.setPrice(collect.get(0).getPrice());
             skus.setCost(collect.get(0).getPrice());
         }
-        wholesaleService.removeByGoodsId(goodsSkus.get(0).getGoodsId());
+        if (Boolean.FALSE.equals(goodsOperationDTO.getGoodsTemplateFlag())) {
+            wholesaleService.removeByGoodsId(goodsSkus.get(0).getGoodsId());
+        }
         wholesaleService.saveOrUpdateBatch(collect);
     }
 

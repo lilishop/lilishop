@@ -37,6 +37,23 @@ public class WholesaleServiceImpl extends ServiceImpl<WholesaleMapper, Wholesale
     }
 
     @Override
+    @Cacheable(key = "#templateId+'_template'")
+    public List<Wholesale> findByTemplateId(String templateId) {
+        LambdaQueryWrapper<Wholesale> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Wholesale::getTemplateId, templateId);
+        return this.list(queryWrapper).stream().sorted(Comparator.comparing(Wholesale::getNum)).collect(Collectors.toList());
+    }
+
+    @Override
+    @CacheEvict(key = "#templateId+'_template'")
+    public Boolean removeByTemplateId(String templateId) {
+        LambdaQueryWrapper<Wholesale> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Wholesale::getTemplateId, templateId);
+        cache.remove("{wholesale}_" + templateId + "_template");
+        return this.remove(queryWrapper);
+    }
+
+    @Override
     @CacheEvict(key = "#goodsId")
     public Boolean removeByGoodsId(String goodsId) {
         LambdaQueryWrapper<Wholesale> queryWrapper = new LambdaQueryWrapper<>();

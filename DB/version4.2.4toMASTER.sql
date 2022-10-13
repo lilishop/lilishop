@@ -44,3 +44,5 @@ CREATE TABLE `li_wholesale`
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_bin COMMENT '批发规则表';
 
+ALTER TABLE li_wholesale
+    ADD template_id bigint DEFAULT NULL COMMENT '商品模版id';
