@@ -58,6 +58,7 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
                     list.stream()
                             .filter(label -> label.getParentId() != null && label.getParentId().equals(storeGoodsLabel.getId()))
                             .forEach(storeGoodsLabelChild -> storeGoodsLabelVOChildList.add(new StoreGoodsLabelVO(storeGoodsLabelChild.getId(), storeGoodsLabelChild.getLabelName(), storeGoodsLabelChild.getLevel(), storeGoodsLabelChild.getSortOrder())));
+                    storeGoodsLabelVOChildList.sort(Comparator.comparing(StoreGoodsLabelVO::getSortOrder));
                     storeGoodsLabelVO.setChildren(storeGoodsLabelVOChildList);
                     storeGoodsLabelVOList.add(storeGoodsLabelVO);
                 });
