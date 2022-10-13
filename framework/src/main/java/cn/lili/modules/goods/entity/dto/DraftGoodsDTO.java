@@ -30,4 +30,10 @@ public class DraftGoodsDTO extends DraftGoods {
     @Valid
     private List<Map<String, Object>> skuList;
 
+    /**
+     * 批发商品规则
+     */
+    @ApiModelProperty(value = "批发商品规则")
+    private List<WholesaleDTO> wholesaleList;
+
 }

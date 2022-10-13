@@ -6,7 +6,6 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.json.JSONUtil;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -25,48 +24,42 @@ public class GoodsSkuBuilder {
     /**
      * 构建商品sku
      *
-     * @param goods             商品
-     * @param skuInfo           sku信息列表
-     * @param goodsOperationDTO 商品操作信息（如需处理额外信息传递，不需可传空）
+     * @param goods   商品
+     * @param skuInfo sku信息列表
      * @return 商品sku
      */
-    public static GoodsSku build(Goods goods, Map<String, Object> skuInfo, GoodsOperationDTO goodsOperationDTO) {
+    public static GoodsSku build(Goods goods, Map<String, Object> skuInfo) {
         GoodsSku goodsSku = new GoodsSku(goods);
-        builderSingle(goodsSku, skuInfo, goodsOperationDTO);
+        builderSingle(goodsSku, skuInfo);
         return goodsSku;
     }
 
     /**
      * 批量构建商品sku
      *
-     * @param goods             商品
-     * @param goodsOperationDTO 商品操作信息
+     * @param goods 商品
      * @return 商品sku
      */
-    public static List<GoodsSku> buildBatch(Goods goods, GoodsOperationDTO goodsOperationDTO) {
-        return builderBatch(goods, goodsOperationDTO);
+    public static List<GoodsSku> buildBatch(Goods goods, List<Map<String, Object>> skuList) {
+        Assert.notEmpty(skuList, "skuList不能为空");
+        Assert.notNull(goods, "goods不能为空");
+        List<GoodsSku> goodsSkus = new ArrayList<>();
+        for (Map<String, Object> skuInfo : skuList) {
+            GoodsSku goodsSku = new GoodsSku(goods);
+            builderSingle(goodsSku, skuInfo);
+            goodsSkus.add(goodsSku);
+        }
+        return goodsSkus;
     }
 
-    /**
-     * 从已有的商品sku中构建商品sku
-     *
-     * @param goodsSku          原商品sku
-     * @param skuInfo           sku信息列表
-     * @param goodsOperationDTO 商品操作信息（如需处理额外信息传递，不需可传空）
-     * @return 商品sku
-     */
-    public static GoodsSku build(GoodsSku goodsSku, Map<String, Object> skuInfo, GoodsOperationDTO goodsOperationDTO) {
-        builderSingle(goodsSku, skuInfo, goodsOperationDTO);
-        return goodsSku;
-    }
 
-    private static void builderSingle(GoodsSku goodsSku, Map<String, Object> skuInfo, GoodsOperationDTO goodsOperationDTO) {
+    private static void builderSingle(GoodsSku goodsSku, Map<String, Object> skuInfo) {
         Assert.notNull(goodsSku, "goodsSku不能为空");
         Assert.notEmpty(skuInfo, "skuInfo不能为空");
         //规格简短信息
         StringBuilder simpleSpecs = new StringBuilder();
         //商品名称
-        StringBuilder goodsName = new StringBuilder(goodsOperationDTO.getGoodsName());
+        StringBuilder goodsName = new StringBuilder(goodsSku.getGoodsName());
         //规格值
         Map<String, Object> specMap = new LinkedHashMap<>();
 
@@ -98,18 +91,6 @@ public class GoodsSkuBuilder {
         goodsSku.setQuantity(Convert.toInt(skuInfo.get("quantity"), 0));
         goodsSku.setSpecs(JSONUtil.toJsonStr(specMap));
         goodsSku.setSimpleSpecs(simpleSpecs.toString());
-    }
-
-    private static List<GoodsSku> builderBatch(Goods goods, GoodsOperationDTO goodsOperationDTO) {
-        Assert.notEmpty(goodsOperationDTO.getSkuList(), "goodsOperationDTO.getSkuList()不能为空");
-        Assert.notNull(goods, "goods不能为空");
-        List<GoodsSku> goodsSkus = new ArrayList<>();
-        for (Map<String, Object> skuInfo : goodsOperationDTO.getSkuList()) {
-            GoodsSku goodsSku = new GoodsSku(goods);
-            builderSingle(goodsSku, skuInfo, goodsOperationDTO);
-            goodsSkus.add(goodsSku);
-        }
-        return goodsSkus;
     }
 
 

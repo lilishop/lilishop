@@ -23,6 +23,8 @@ public class Wholesale extends BaseIdEntity {
     private String goodsId;
     @ApiModelProperty(value = "SkuID")
     private String skuId;
+    @ApiModelProperty(value = "模版id")
+    private String templateId;
     @ApiModelProperty(value = "数量")
     private Integer num;
     @ApiModelProperty(value = "金额")

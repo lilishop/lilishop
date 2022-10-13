@@ -1,5 +1,6 @@
 package cn.lili.modules.order.aftersale.aop;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
@@ -7,6 +8,7 @@ import cn.lili.common.utils.SpelUtil;
 import cn.lili.common.utils.ThreadPoolUtil;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSaleLog;
 import cn.lili.modules.order.aftersale.service.AfterSaleLogService;
+import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -67,6 +69,9 @@ public class AfterSaleOperationLogAspect {
         AfterSaleLogPoint afterSaleLogPoint = signature.getMethod().getAnnotation(AfterSaleLogPoint.class);
         String description = SpelUtil.compileParams(joinPoint, rvt, afterSaleLogPoint.description());
         String sn = SpelUtil.compileParams(joinPoint, rvt, afterSaleLogPoint.sn());
+        if (CharSequenceUtil.isNotEmpty(afterSaleLogPoint.serviceStatus())) {
+            description += AfterSaleStatusEnum.valueOf(SpelUtil.compileParams(joinPoint, rvt, afterSaleLogPoint.serviceStatus())).description();
+        }
         result.put("description", description);
         result.put("sn", sn);
         return result;

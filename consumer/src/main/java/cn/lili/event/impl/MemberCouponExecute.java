@@ -36,7 +36,8 @@ public class MemberCouponExecute implements OrderStatusChangeEvent {
             Order order = orderService.getBySn(orderMessage.getOrderSn());
             if (CharSequenceUtil.isNotEmpty(order.getUseStoreMemberCouponIds())) {
                 memberCouponService.recoveryMemberCoupon(ListUtil.toList(order.getUseStoreMemberCouponIds().split(",")));
-            } else if (CharSequenceUtil.isNotEmpty(order.getUsePlatformMemberCouponId())) {
+            }
+            if (CharSequenceUtil.isNotEmpty(order.getUsePlatformMemberCouponId())) {
                 memberCouponService.recoveryMemberCoupon(ListUtil.toList(order.getUsePlatformMemberCouponId().split(",")));
             }
         }

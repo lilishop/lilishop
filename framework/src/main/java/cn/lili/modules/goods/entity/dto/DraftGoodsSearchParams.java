@@ -1,6 +1,6 @@
 package cn.lili.modules.goods.entity.dto;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.modules.goods.entity.enums.DraftGoodsSaveType;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
@@ -26,7 +26,7 @@ public class DraftGoodsSearchParams extends GoodsSearchParams {
     @Override
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = super.queryWrapper();
-        if (StrUtil.isNotEmpty(saveType)) {
+        if (CharSequenceUtil.isNotEmpty(saveType)) {
             queryWrapper.eq("save_type", saveType);
         }
         return queryWrapper;

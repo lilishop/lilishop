@@ -14,7 +14,12 @@ public interface WholesaleService extends IService<Wholesale> {
 
     List<Wholesale> findByGoodsId(String goodsId);
 
+    List<Wholesale> findByTemplateId(String templateId);
+
     Boolean removeByGoodsId(String goodsId);
+
+
+    Boolean removeByTemplateId(String templateId);
 
     /**
      * 匹配批发规则

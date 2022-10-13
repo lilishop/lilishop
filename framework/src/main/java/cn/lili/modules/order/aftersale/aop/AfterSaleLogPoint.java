@@ -27,4 +27,11 @@ public @interface AfterSaleLogPoint {
      */
     String sn();
 
+
+    /**
+     *
+     * @return 售后状态
+     */
+    String serviceStatus() default "";
+
 }

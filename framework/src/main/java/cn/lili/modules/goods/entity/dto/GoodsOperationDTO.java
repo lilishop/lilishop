@@ -2,8 +2,7 @@ package cn.lili.modules.goods.entity.dto;
 
 import cn.lili.common.validation.EnumValue;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.Valid;
@@ -20,6 +19,9 @@ import java.util.Map;
  */
 @Data
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class GoodsOperationDTO implements Serializable {
 
     private static final long serialVersionUID = -509667581371776913L;
@@ -116,6 +118,8 @@ public class GoodsOperationDTO implements Serializable {
     @Valid
     private List<Map<String, Object>> skuList;
 
+    @ApiModelProperty(value = "是否为商品模版")
+    private Boolean goodsTemplateFlag = false;
     /**
      * 批发商品规则
      */
