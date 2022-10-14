@@ -5,15 +5,13 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import cn.lili.modules.goods.entity.dos.*;
-import cn.lili.modules.goods.entity.dto.DraftGoodsDTO;
-import cn.lili.modules.goods.entity.dto.DraftGoodsSearchParams;
-import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
-import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
+import cn.lili.modules.goods.entity.dto.*;
 import cn.lili.modules.goods.entity.vos.DraftGoodsVO;
 import cn.lili.modules.goods.mapper.DraftGoodsMapper;
 import cn.lili.modules.goods.service.*;
 import cn.lili.modules.goods.sku.GoodsSkuBuilder;
 import cn.lili.mybatis.util.PageUtil;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,13 +73,23 @@ public class DraftGoodsServiceImpl extends ServiceImpl<DraftGoodsMapper, DraftGo
             draftGoods.setSmall(goodsGallery.getSmall());
             draftGoods.setThumbnail(goodsGallery.getThumbnail());
         }
+        // 商品图片
         draftGoods.setGoodsGalleryListJson(JSONUtil.toJsonStr(draftGoods.getGoodsGalleryList()));
-        // 检查是否需要生成索引
-        List<GoodsSku> goodsSkus = GoodsSkuBuilder.buildBatch(new Goods(draftGoods), draftGoods.getSkuList());
-        goodsSkuService.renderGoodsSkuList(goodsSkus, GoodsOperationDTO.builder().goodsTemplateFlag(true).wholesaleList(draftGoods.getWholesaleList()).salesModel(draftGoods.getSalesModel()).build());
-        draftGoods.setSkuListJson(JSONUtil.toJsonStr(goodsSkus));
+        // 商品参数
         draftGoods.setGoodsParamsListJson(JSONUtil.toJsonStr(draftGoods.getGoodsParamsDTOList()));
-        this.saveOrUpdate(draftGoods);
+        boolean result = this.saveOrUpdate(draftGoods);
+        if (result) {
+            // 商品sku
+            List<GoodsSku> goodsSkus = GoodsSkuBuilder.buildBatch(new Goods(draftGoods), draftGoods.getSkuList());
+            for (WholesaleDTO wholesaleDTO : draftGoods.getWholesaleList()) {
+                wholesaleDTO.setTemplateId(draftGoods.getId());
+            }
+            goodsSkuService.renderGoodsSkuList(goodsSkus, GoodsOperationDTO.builder().goodsTemplateFlag(true).wholesaleList(draftGoods.getWholesaleList()).salesModel(draftGoods.getSalesModel()).build());
+            LambdaUpdateWrapper<DraftGoods> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(DraftGoods::getId, draftGoods.getId());
+            updateWrapper.set(DraftGoods::getSkuListJson, JSONUtil.toJsonStr(goodsSkus));
+            this.update(updateWrapper);
+        }
     }
 
     @Override
