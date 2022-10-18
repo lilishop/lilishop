@@ -78,13 +78,17 @@ public class DraftGoodsServiceImpl extends ServiceImpl<DraftGoodsMapper, DraftGo
         // 商品参数
         draftGoods.setGoodsParamsListJson(JSONUtil.toJsonStr(draftGoods.getGoodsParamsDTOList()));
         boolean result = this.saveOrUpdate(draftGoods);
-        if (result) {
-            // 商品sku
+        if (result && draftGoods.getSkuList() != null && !draftGoods.getSkuList().isEmpty()) {
             List<GoodsSku> goodsSkus = GoodsSkuBuilder.buildBatch(new Goods(draftGoods), draftGoods.getSkuList());
-            for (WholesaleDTO wholesaleDTO : draftGoods.getWholesaleList()) {
-                wholesaleDTO.setTemplateId(draftGoods.getId());
+            GoodsOperationDTO.GoodsOperationDTOBuilder goodsOperationDTOBuilder = GoodsOperationDTO.builder().goodsTemplateFlag(true).salesModel(draftGoods.getSalesModel());
+            if (draftGoods.getWholesaleList() != null && !draftGoods.getWholesaleList().isEmpty()) {
+
+                for (WholesaleDTO wholesaleDTO : draftGoods.getWholesaleList()) {
+                    wholesaleDTO.setTemplateId(draftGoods.getId());
+                }
+                goodsOperationDTOBuilder.wholesaleList(draftGoods.getWholesaleList());
             }
-            goodsSkuService.renderGoodsSkuList(goodsSkus, GoodsOperationDTO.builder().goodsTemplateFlag(true).wholesaleList(draftGoods.getWholesaleList()).salesModel(draftGoods.getSalesModel()).build());
+            goodsSkuService.renderGoodsSkuList(goodsSkus, goodsOperationDTOBuilder.build());
             LambdaUpdateWrapper<DraftGoods> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(DraftGoods::getId, draftGoods.getId());
             updateWrapper.set(DraftGoods::getSkuListJson, JSONUtil.toJsonStr(goodsSkus));
