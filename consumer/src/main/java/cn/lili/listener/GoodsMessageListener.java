@@ -356,11 +356,8 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
             EsGoodsIndex goodsIndex = this.settingUpGoodsIndexData(goods, goodsSku);
             goodsIndex.setSkuSource(skuSource--);
             log.info("goodsSku：{}", goodsSku);
-            //如果商品库存不为0，并且es中有数据
-            if (goodsSku.getQuantity() > 0) {
-                log.info("生成商品索引 {}", goodsIndex);
-                esGoodsIndices.add(goodsIndex);
-            }
+            log.info("生成商品索引 {}", goodsIndex);
+            esGoodsIndices.add(goodsIndex);
         }
         this.goodsIndexService.deleteIndex(MapUtil.builder(new HashMap<String, Object>()).put("goodsId", goods.getId()).build());
         this.goodsIndexService.addIndex(esGoodsIndices);
