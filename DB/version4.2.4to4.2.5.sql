@@ -510,7 +510,12 @@ INSERT INTO `li_store_menu` VALUES (1367048967635861504, NULL, '2022-01-12 22:02
 INSERT INTO `li_store_menu` VALUES (1367048967635861505, NULL, '2022-02-18 16:12:18.000000', b'0', NULL, '2022-02-18 16:12:21', NULL, 'shop/system/clerk/clerkManage', 'ios-american-football', 2, '\nclerkManage', '1367048967635861503', '\nclerkManage', '6.31', '店员管理', '/store/department*,/store/clerk*,/store/role*,/store/department*');
 INSERT INTO `li_store_menu` VALUES (1367048967635861506, NULL, '2022-02-18 16:25:27.000000', NULL, NULL, '2022-02-18 16:25:31', NULL, 'shop/system/department/storeDepartmentManage', 'ios-american-football', 2, 'storeDepartmentManage', '1367048967635861503', 'storeDepartmentManage', '6.32', '部门管理', '/store/department*');
 INSERT INTO `li_store_menu` VALUES (1367048967635861507, NULL, '2022-02-18 16:27:28.000000', NULL, NULL, '2022-02-18 16:27:30', NULL, 'shop/system/role/storeRoleManage', 'ios-american-football', 2, 'storeRoleManage', '1367048967635861503', 'storeRoleManage', '6.33', '角色权限', '/store/role*');
+INSERT INTO `li_store_menu` VALUES (1367048967635861510, NULL, '2022-03-07 14:45:10.000000', b'0', NULL, '2022-03-07 14:45:13', NULL, 'shop/floorList', 'ios-american-football', 2, 'floorList', '1367046266214678528', 'floorList', '6.23', 'PC端', '/store/other/pageData*');
+INSERT INTO `li_store_menu` VALUES (1367048967635861511, NULL, '2022-03-07 15:13:52.000000', b'0', NULL, '2022-03-07 15:13:55', NULL, 'shop/wap/wapList', 'ios-american-football', 2, 'wapList', '1367046266214678528', 'wapList', '6.24', '移动端', '/store/other/pageData*');
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+insert li_clerk(id,create_by,create_time,store_id,clerk_name,member_id,shopkeeper,is_super,`status`) select id,member_name,current_date(),id,member_name,member_id ,TRUE,TRUE,TRUE from li_store
 
 

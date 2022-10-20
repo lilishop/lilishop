@@ -26,7 +26,7 @@ public interface StoreMenuMapper extends BaseMapper<StoreMenu> {
     @Select("SELECT menu.* FROM li_store_menu AS menu WHERE menu.id IN (" +
             "SELECT rm.menu_id FROM li_store_menu_role AS rm WHERE rm.role_id IN (" +
             "SELECT ur.role_id FROM li_clerk_role AS ur WHERE ur.clerk_id=#{userId}) OR rm.role_id IN (" +
-            "SELECT dr.role_id FROM li_store_department_role AS dr WHERE dr.id=(" +
+            "SELECT dr.role_id FROM li_store_department_role AS dr WHERE dr.department_id=(" +
             "SELECT department_id FROM li_clerk AS au WHERE au.id = #{userId})))")
     List<StoreMenu> findByUserId(String userId);
 
