@@ -34,9 +34,9 @@ public class TokenUtil {
     /**
      * 构建token
      *
-     * @param username 主体
-     * @param claim    私有声明
-     * @param longTerm 长时间特殊token 如：移动端，微信小程序等
+     * @param username  主体
+     * @param claim     私有声明
+     * @param longTerm  长时间特殊token 如：移动端，微信小程序等
      * @param userEnums 用户枚举
      * @return TOKEN
      */
@@ -62,7 +62,7 @@ public class TokenUtil {
      * 刷新token
      *
      * @param oldRefreshToken 刷新token
-     * @param userEnums 用户枚举
+     * @param userEnums       用户枚举
      * @return token
      */
     public Token refreshToken(String oldRefreshToken, UserEnums userEnums) {

@@ -2,7 +2,9 @@ package cn.lili.modules.store.mapper;
 
 import cn.hutool.core.date.DateTime;
 import cn.lili.modules.store.entity.dos.StoreDetail;
+import cn.lili.modules.store.entity.dto.FuLuConfigureDTO;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
+import cn.lili.modules.store.entity.dto.StoreDeliverGoodsAddressDTO;
 import cn.lili.modules.store.entity.dto.StoreSettlementDay;
 import cn.lili.modules.store.entity.vos.StoreBasicInfoVO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
@@ -61,6 +63,15 @@ public interface StoreDetailMapper extends BaseMapper<StoreDetail> {
     StoreAfterSaleAddressDTO getStoreAfterSaleAddressDTO(String storeId);
 
     /**
+     * 获取店铺福禄配置DTO
+     *
+     * @param storeId 店铺ID
+     * @return 店铺店铺福禄配置DTO
+     */
+    @Select("select s.app_secret_key,s.merchant_number,s.app_merchant_key from li_store_detail s where s.store_id =#{storeId}")
+    FuLuConfigureDTO getFuLuConfigureDTO(String storeId);
+
+    /**
      * 获取待结算店铺列表
      *
      * @param day 结算日
@@ -89,4 +100,13 @@ public interface StoreDetailMapper extends BaseMapper<StoreDetail> {
      */
     @Select("SELECT * FROM li_store_detail WHERE store_id=#{storeId}")
     StoreOtherVO getLicencePhoto(String storeId);
+
+    /***
+     * 获取店铺发货地址
+     * @param storeId 店铺ID
+     * @return 店铺发货地址DTO
+     */
+    @Select("select s.sales_consignor_name,s.sales_consignor_mobile,s.sales_consignor_address_id,s.sales_consignor_address_path,s.sales_consignor_detail "+
+            "from li_store_detail s  where s.store_id=#{storeId}")
+    StoreDeliverGoodsAddressDTO getStoreDeliverGoodsAddressDto(String storeId);
 }

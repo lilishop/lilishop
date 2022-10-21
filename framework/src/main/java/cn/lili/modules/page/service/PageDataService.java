@@ -74,4 +74,12 @@ public interface PageDataService extends IService<PageData> {
      * @return
      */
     IPage<PageDataListVO> getPageDataList(PageVO pageVO, PageDataDTO pageDataDTO);
+
+
+    /**
+     * 获取专题信息
+     * @param id id
+     * @return
+     */
+    PageData getSpecial(String id);
 }

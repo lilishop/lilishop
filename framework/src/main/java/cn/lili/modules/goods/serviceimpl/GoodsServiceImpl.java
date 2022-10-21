@@ -18,6 +18,7 @@ import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
 import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
+import cn.lili.modules.goods.entity.dto.GoodsOperationFuLuDTO;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
@@ -170,7 +171,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         //检查商品
         this.checkGoods(goods);
         //向goods加入图片
-        this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
+        if (goodsOperationDTO.getGoodsGalleryList().size() > 0 ) {
+            this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
+        }
         //添加商品参数
         if (goodsOperationDTO.getGoodsParamsDTOList() != null && !goodsOperationDTO.getGoodsParamsDTOList().isEmpty()) {
             //给商品参数填充值
@@ -186,6 +189,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         }
         this.generateEs(goods);
     }
+
 
 
     @Override
@@ -215,6 +219,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
         this.generateEs(goods);
     }
+
 
     @Override
     public GoodsVO getGoodsVO(String goodsId) {

@@ -43,6 +43,7 @@ public interface OrderService extends IService<Order> {
      */
     Order getBySn(String orderSn);
 
+
     /**
      * 订单查询
      *
@@ -284,4 +285,5 @@ public interface OrderService extends IService<Order> {
      * @return 是否成功
      */
     boolean checkFictitiousOrder(String pintuanId, Integer requiredNum, Boolean fictitious);
+
 }

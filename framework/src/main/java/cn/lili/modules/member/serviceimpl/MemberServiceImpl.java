@@ -5,7 +5,6 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
-import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.SwitchEnum;
@@ -19,6 +18,7 @@ import cn.lili.common.security.token.Token;
 import cn.lili.common.sensitive.SensitiveWordsFilter;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CookieUtil;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.UuidUtils;
 import cn.lili.common.vo.PageVO;
@@ -43,6 +43,7 @@ import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.enums.StoreStatusEnum;
 import cn.lili.modules.store.service.StoreService;
 import cn.lili.mybatis.util.PageUtil;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -50,6 +51,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -260,38 +262,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         // 发送会员注册信息
         applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("new member register", rocketmqCustomProperties.getMemberTopic(), MemberTagsEnum.MEMBER_REGISTER.name(), member));
     }
-
-    @Override
-    public Member editOwn(MemberEditDTO memberEditDTO) {
-        //查询会员信息
-        Member member = this.findByUsername(Objects.requireNonNull(UserContext.getCurrentUser()).getUsername());
-        //传递修改会员信息
-        BeanUtil.copyProperties(memberEditDTO, member);
-        //修改会员
-        this.updateById(member);
-        return member;
-    }
-
-    @Override
-    @DemoSite
-    public Member modifyPass(String oldPassword, String newPassword) {
-        AuthUser tokenUser = UserContext.getCurrentUser();
-        if (tokenUser == null) {
-            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
-        }
-        Member member = this.getById(tokenUser.getId());
-        //判断旧密码输入是否正确
-        if (!new BCryptPasswordEncoder().matches(oldPassword, member.getPassword())) {
-            throw new ServiceException(ResultCode.USER_OLD_PASSWORD_ERROR);
-        }
-        //修改会员密码
-        LambdaUpdateWrapper<Member> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.eq(Member::getId, member.getId());
-        lambdaUpdateWrapper.set(Member::getPassword, new BCryptPasswordEncoder().encode(newPassword));
-        this.update(lambdaUpdateWrapper);
-        return member;
-    }
-
     @Override
     public boolean canInitPass() {
         AuthUser tokenUser = UserContext.getCurrentUser();
@@ -410,6 +380,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public Member updateMember(ManagerMemberEditDTO managerMemberEditDTO) {
+        //判断是否用户登录并且会员ID为当前登录会员ID
+        AuthUser tokenUser = UserContext.getCurrentUser();
+        if (tokenUser == null) {
+            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        }
         //过滤会员昵称敏感词
         if (CharSequenceUtil.isNotBlank(managerMemberEditDTO.getNickName())) {
             managerMemberEditDTO.setNickName(SensitiveWordsFilter.filter(managerMemberEditDTO.getNickName()));
@@ -649,6 +624,31 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         }
     }
 
+    @Override
+    public void updateHaveShop(Boolean haveStore, String storeId, List<String> memberIds) {
+        List<Member> members = this.baseMapper.selectBatchIds(memberIds);
+        if (members.size() > 0) {
+            members.forEach(member -> {
+                member.setHaveStore(haveStore);
+                if (haveStore) {
+                    member.setStoreId(storeId);
+                } else {
+                    member.setStoreId(null);
+                }
+            });
+            this.updateBatchById(members);
+        }
+    }
+
+    @Override
+    public void resetPassword(List<String> ids) {
+        String password = new BCryptPasswordEncoder().encode(StringUtils.md5("123456"));
+        LambdaUpdateWrapper<Member> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+        lambdaUpdateWrapper.in(Member::getId, ids);
+        lambdaUpdateWrapper.set(Member::getPassword, password);
+        this.update(lambdaUpdateWrapper);
+    }
+
     /**
      * 获取所有会员的手机号
      *
@@ -765,4 +765,5 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             throw new ServiceException(ResultCode.USER_EXIST);
         }
     }
+
 }

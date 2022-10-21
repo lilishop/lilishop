@@ -25,4 +25,9 @@ public class KuaidiSetting implements Serializable {
      * api地址
      */
     private String reqURL;
+
+    /**
+     * 电子面单api地址
+     */
+    private String sheetReqURL;
 }

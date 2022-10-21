@@ -18,7 +18,7 @@ import javax.validation.ConstraintViolationException;
 import java.util.List;
 
 /**
- * 全局异常异常处理
+ * 异常处理
  *
  * @author Chopper
  */
@@ -74,6 +74,15 @@ public class GlobalControllerExceptionHandler {
         }
         return ResultUtil.error(ResultCode.ERROR.code(), errorMsg);
     }
+/*
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ResultMessage<Object> constraintExceptionHandler(HttpServletRequest request, final Exception e, HttpServletResponse response) {
+
+        log.error("全局异常[RuntimeException]:", e);
+
+        return ResultUtil.error(001, e.getMessage());
+    }*/
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)

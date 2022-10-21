@@ -24,6 +24,10 @@ public class ManagerMemberEditDTO {
     @NotNull(message = "用户ID不能为空")
     private String id;
 
+    @ApiModelProperty(value = "会员用户名,用户名不能进行修改", required = true)
+    @NotNull(message = "会员用户名不能为空")
+    private String username;
+
     @ApiModelProperty(value = "会员密码")
     private String password;
 

@@ -204,6 +204,9 @@ public class Order extends BaseEntity {
     @ApiModelProperty(value = "使用的平台会员优惠券id")
     private String usePlatformMemberCouponId;
 
+    @ApiModelProperty(value = "qrCode  实物为提货码  虚拟货物为账号")
+    private String qrCode;
+
     /**
      * 构建订单
      *

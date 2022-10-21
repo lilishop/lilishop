@@ -24,4 +24,7 @@ public class StoreLogisticsVO extends BaseEntity {
 
     @ApiModelProperty(value = "已选择", notes = "如果已选择则有值，没有选择则无值")
     private String selected;
+
+    @ApiModelProperty(value = "是否使用电子面单")
+    private Boolean faceSheetFlag;
 }

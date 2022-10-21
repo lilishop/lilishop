@@ -1,12 +1,14 @@
 package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.fulu.core.utils.Test;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
+import cn.lili.modules.goods.entity.dto.GoodsOperationFuLuDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
@@ -16,6 +18,10 @@ import cn.lili.modules.goods.entity.vos.StockWarningVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.store.entity.dos.StoreDetail;
+import cn.lili.modules.store.entity.dto.FuLuConfigureDTO;
+import cn.lili.modules.store.service.StoreDetailService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import cn.lili.modules.store.service.StoreDetailService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -27,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
