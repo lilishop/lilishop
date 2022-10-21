@@ -78,7 +78,7 @@ public class StorePassportController {
         if (tokenUser == null) {
             throw new ServiceException(ResultCode.USER_NOT_LOGIN);
         }
-        return ResultUtil.data(memberService.modifyPass(tokenUser.getId(), password, newPassword));
+        return ResultUtil.data(memberService.modifyPass(password, newPassword));
     }
 
     @ApiOperation(value = "刷新token")

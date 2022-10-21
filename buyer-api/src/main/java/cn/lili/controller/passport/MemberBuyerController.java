@@ -1,12 +1,8 @@
 package cn.lili.controller.passport;
 
-import cn.lili.cache.Cache;
-import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.security.AuthUser;
-import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.Member;
@@ -52,18 +48,6 @@ public class MemberBuyerController {
     private SmsUtil smsUtil;
     @Autowired
     private VerificationService verificationService;
-    @Autowired
-    private Cache cache;
-
-
-    @ApiOperation(value = "手机号登录")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "query")
-    })
-    @PostMapping("/phoneLogin")
-    public ResultMessage<Object> phoneLogin(@NotNull(message = "手机号为空") @RequestParam String mobile) {
-        return ResultUtil.data(memberService.mobilePhoneLogin(mobile));
-    }
 
 
     @ApiOperation(value = "web-获取登录二维码")
@@ -210,13 +194,8 @@ public class MemberBuyerController {
         //校验短信验证码是否正确
         if (smsUtil.verifyCode(mobile, VerificationEnums.FIND_USER, uuid, code)) {
             //校验是否通过手机号可获取会员,存在则将会员信息存入缓存，有效时间3分钟
-            Member member = memberService.findByMobile(mobile);
-            if (member == null) {
-                throw new ServiceException(ResultCode.USER_NOT_PHONE);
-            }
-            cache.put(CachePrefix.FIND_MOBILE + uuid, mobile, 300L);
+            memberService.findByMobile(uuid, mobile);
             return ResultUtil.success();
-
         } else {
             throw new ServiceException(ResultCode.VERIFICATION_SMS_CHECKED_ERROR);
         }
@@ -247,11 +226,7 @@ public class MemberBuyerController {
     @PutMapping("/modifyPass")
     public ResultMessage<Member> modifyPass(@NotNull(message = "旧密码不能为空") @RequestParam String password,
                                             @NotNull(message = "新密码不能为空") @RequestParam String newPassword) {
-        AuthUser tokenUser = UserContext.getCurrentUser();
-        if (tokenUser == null) {
-            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
-        }
-        return ResultUtil.data(memberService.modifyPass(tokenUser.getId(), password, newPassword));
+        return ResultUtil.data(memberService.modifyPass(password, newPassword));
     }
 
     @ApiOperation(value = "初始设置密码")

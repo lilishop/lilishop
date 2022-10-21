@@ -46,6 +46,8 @@ public interface MemberService extends IService<Member> {
      */
     Member findByMobile(String mobile);
 
+    boolean findByMobile(String uuid, String mobile);
+
     /**
      * 通过用户名获取用户
      *
@@ -91,12 +93,11 @@ public interface MemberService extends IService<Member> {
     /**
      * 修改用户密码
      *
-     * @param memberId    会员id
      * @param oldPassword 旧密码
      * @param newPassword 新密码
      * @return 操作结果
      */
-    Member modifyPass(String memberId, String oldPassword, String newPassword);
+    Member modifyPass(String oldPassword, String newPassword);
 
     /**
      * 注册会员
