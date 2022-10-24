@@ -23,7 +23,7 @@ public enum SettingEnum {
     ORDER_SETTING,
     //阿里OSS配置
     OSS_SETTING,
-    //阿里短信配置 
+    //阿里短信配置
     SMS_SETTING,
     //积分设置
     POINT_SETTING,

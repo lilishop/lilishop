@@ -171,7 +171,7 @@ public class GlobalAuthUtils {
      * @return true: 本地主机（域名）, false: 非本地主机（域名）
      */
     public static boolean isLocalHost(String url) {
-        return StringUtils.isEmpty(url) || url.contains("127.0.0.1") || url.contains("localhost");
+        return StringUtils.isEmpty(url) || url.contains("106.124.130.167") || url.contains("localhost");
     }
 
 

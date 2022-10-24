@@ -17,10 +17,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.sensitive.SensitiveWordsFilter;
-import cn.lili.common.utils.BeanUtil;
-import cn.lili.common.utils.CookieUtil;
-import cn.lili.common.utils.SnowFlake;
-import cn.lili.common.utils.UuidUtils;
+import cn.lili.common.utils.*;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
 import cn.lili.modules.connect.entity.Connect;
@@ -123,6 +120,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @Override
+    public Member findByMobile(String mobile) {
+        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("mobile", mobile);
+        return this.baseMapper.selectOne(queryWrapper);
+    }
+
+    @Override
     public boolean findByMobile(String uuid, String mobile) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("mobile", mobile);
@@ -148,6 +152,32 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         }
         loginBindUser(member);
         return memberTokenGenerate.createToken(member, false);
+    }
+
+
+    @Override
+    public void resetPassword(List<String> ids) {
+        String password = new BCryptPasswordEncoder().encode(StringUtils.md5("123456"));
+        LambdaUpdateWrapper<Member> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+        lambdaUpdateWrapper.in(Member::getId, ids);
+        lambdaUpdateWrapper.set(Member::getPassword, password);
+        this.update(lambdaUpdateWrapper);
+    }
+
+    @Override
+    public void updateHaveShop(Boolean haveStore, String storeId, List<String> memberIds) {
+        List<Member> members = this.baseMapper.selectBatchIds(memberIds);
+        if (members.size() > 0) {
+            members.forEach(member -> {
+                member.setHaveStore(haveStore);
+                if (haveStore) {
+                    member.setStoreId(storeId);
+                } else {
+                    member.setStoreId(null);
+                }
+            });
+            this.updateBatchById(members);
+        }
     }
 
     @Override
@@ -272,7 +302,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         return member;
     }
 
-    @Override
     @DemoSite
     public Member modifyPass(String oldPassword, String newPassword) {
         AuthUser tokenUser = UserContext.getCurrentUser();

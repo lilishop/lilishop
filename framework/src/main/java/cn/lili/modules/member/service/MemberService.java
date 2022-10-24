@@ -26,7 +26,6 @@ import java.util.Map;
  * @since 2020-02-25 14:10:16
  */
 public interface MemberService extends IService<Member> {
-
     /**
      * 默认密码
      */
@@ -40,12 +39,13 @@ public interface MemberService extends IService<Member> {
     Member getUserInfo();
 
     /**
-     * 是否可以通过手机获取用户
+     * 通过手机获取用户
      *
-     * @param uuid   UUID
      * @param mobile 手机号
      * @return 操作状态
      */
+    Member findByMobile(String mobile);
+
     boolean findByMobile(String uuid, String mobile);
 
     /**
@@ -100,6 +100,16 @@ public interface MemberService extends IService<Member> {
     Member modifyPass(String oldPassword, String newPassword);
 
     /**
+     * 注册会员
+     *
+     * @param userName    会员
+     * @param password    密码
+     * @param mobilePhone mobilePhone
+     * @return 处理结果
+     */
+    Token register(String userName, String password, String mobilePhone);
+
+    /**
      * 是否可以初始化密码
      *
      * @return
@@ -121,17 +131,6 @@ public interface MemberService extends IService<Member> {
      * @return 操作结果
      */
     void cancellation(String password);
-
-    /**
-     * 注册会员
-     *
-     * @param userName    会员
-     * @param password    密码
-     * @param mobilePhone mobilePhone
-     * @return 处理结果
-     */
-    Token register(String userName, String password, String mobilePhone);
-
     /**
      * 修改当前会员的手机号
      *
@@ -253,6 +252,24 @@ public interface MemberService extends IService<Member> {
     void logout(UserEnums userEnums);
 
     /**
+     * <<<<<<< HEAD
+     * 修改会员是否拥有店铺
+     *
+     * @param haveStore 是否拥有店铺
+     * @param storeId   店铺id
+     * @param memberIds 会员id
+     * @return
+     */
+    void updateHaveShop(Boolean haveStore, String storeId, List<String> memberIds);
+
+    /**
+     * 重置会员密码为123456
+     *
+     * @param ids 会员id
+     */
+    void resetPassword(List<String> ids);
+
+    /**
      * 获取所有会员的手机号
      *
      * @return 所有会员的手机号
@@ -269,7 +286,6 @@ public interface MemberService extends IService<Member> {
 
     /**
      * 获取用户VO
-     *
      * @param id 会员id
      * @return 用户VO
      */

@@ -52,7 +52,7 @@ public class VerificationSourceServiceImpl extends ServiceImpl<VerificationSourc
         } catch (ClassCastException cce) {
             verificationDTO = null;
         }
-        if (verificationDTO == null) {
+        if (verificationDTO == null || verificationDTO.getVerificationResources().size() <= 0 || verificationDTO.getVerificationSlider().size() <= 0) {
             return initCache();
         }
         return verificationDTO;

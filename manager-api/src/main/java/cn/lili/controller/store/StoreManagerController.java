@@ -126,4 +126,11 @@ public class StoreManagerController {
         }
         return ResultUtil.data(null);
     }
+
+    @ApiOperation(value = "将所有店铺导入店员表")
+    @PostMapping("store/to/clerk")
+    public ResultMessage<Object> storeToClerk(){
+        this.storeService.storeToClerk();
+        return ResultUtil.success();
+    }
 }

@@ -6,10 +6,12 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.service.StoreLogisticsService;
 import cn.lili.modules.store.entity.dos.StoreLogistics;
+import cn.lili.modules.store.entity.dto.StoreLogisticsCustomerDTO;
 import cn.lili.modules.system.entity.vo.StoreLogisticsVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +40,12 @@ public class LogisticsStoreController {
     @GetMapping
     public ResultMessage<List<StoreLogisticsVO>> get() {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
-        return ResultUtil.data(storeLogisticsService.getStoreLogistics(storeId));
+        //获取已开启的物流公司
+        List<StoreLogisticsVO> storeLogistics = storeLogisticsService.getOpenStoreLogistics(storeId);
+        //获取未开启的物流公司
+        List<StoreLogisticsVO> closeStoreLogistics = storeLogisticsService.getCloseStoreLogistics(storeId);
+        storeLogistics.addAll(closeStoreLogistics);
+        return ResultUtil.data(storeLogistics);
     }
 
     @ApiOperation(value = "获取商家已选择物流公司列表")
@@ -49,11 +56,13 @@ public class LogisticsStoreController {
     }
 
     @ApiOperation(value = "选择物流公司")
-    @ApiImplicitParam(name = "logisticsId", value = "物流公司ID", required = true, paramType = "path")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "logisticsId", value = "物流公司ID", required = true, paramType = "path"),
+    })
     @PostMapping("/{logisticsId}")
-    public ResultMessage<StoreLogistics> checked(@PathVariable String logisticsId) {
+    public ResultMessage<StoreLogistics> checked(@PathVariable String logisticsId,@RequestBody StoreLogisticsCustomerDTO storeLogisticsCustomerDTO) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
-        return ResultUtil.data(storeLogisticsService.add(logisticsId, storeId));
+        return ResultUtil.data(storeLogisticsService.add(logisticsId, storeId,storeLogisticsCustomerDTO));
     }
 
 
@@ -64,6 +73,30 @@ public class LogisticsStoreController {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         boolean remove = storeLogisticsService.remove(new LambdaQueryWrapper<StoreLogistics>().eq(StoreLogistics::getId, id).eq(StoreLogistics::getStoreId, storeId));
         return ResultUtil.data(remove);
+    }
+
+    @ApiOperation(value = "修改电子面单参数")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "logisticsId", value = "物流公司ID", required = true, paramType = "path"),
+    })
+    @PutMapping("/{logisticsId}/updateStoreLogistics")
+    public ResultMessage<StoreLogistics> updateStoreLogistics(@PathVariable String logisticsId,StoreLogisticsCustomerDTO storeLogisticsCustomerDTO){
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        return ResultUtil.data(storeLogisticsService.update(logisticsId, storeId,storeLogisticsCustomerDTO));
+    }
+
+    @ApiOperation(value = "获取商家已选择物流公司并且使用电子面单列表")
+    @GetMapping("/getCheckedFaceSheet")
+    public ResultMessage<List<StoreLogisticsVO>> getCheckedFaceSheet() {
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        return ResultUtil.data(storeLogisticsService.getStoreSelectedLogisticsUseFaceSheet(storeId));
+    }
+
+    @ApiOperation(value = "获取店铺-物流公司详细信息")
+    @ApiImplicitParam(name = "logisticsId", value = "物流公司ID", required = true, paramType = "path")
+    @GetMapping("/{logisticsId}/getStoreLogistics")
+    public ResultMessage<StoreLogistics> getStoreLogistics(@PathVariable String logisticsId){
+        return ResultUtil.data(storeLogisticsService.getStoreLogisticsInfo(logisticsId));
     }
 
 }
