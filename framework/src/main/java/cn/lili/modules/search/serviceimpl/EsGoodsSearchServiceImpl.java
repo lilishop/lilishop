@@ -125,10 +125,19 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     }
 
     @Override
-    public List<EsGoodsIndex> getEsGoodsBySkuIds(List<String> skuIds) {
+    public List<EsGoodsIndex> getEsGoodsBySkuIds(List<String> skuIds, PageVO pageVo) {
         NativeSearchQueryBuilder searchQueryBuilder = new NativeSearchQueryBuilder();
         NativeSearchQuery build = searchQueryBuilder.build();
         build.setIds(skuIds);
+        if (pageVo != null) {
+            int pageNumber = pageVo.getPageNumber() - 1;
+            if (pageNumber < 0) {
+                pageNumber = 0;
+            }
+            Pageable pageable = PageRequest.of(pageNumber, pageVo.getPageSize());
+            //分页
+            searchQueryBuilder.withPageable(pageable);
+        }
         return restTemplate.multiGet(build, EsGoodsIndex.class, restTemplate.getIndexCoordinatesFor(EsGoodsIndex.class));
     }
 
@@ -404,8 +413,8 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     /**
      * 商品推荐
      *
-     * @param filterBuilder
-     * @param searchDTO
+     * @param filterBuilder 过滤条件
+     * @param searchDTO     搜索条件
      */
     private void recommended(BoolQueryBuilder filterBuilder, EsGoodsSearchDTO searchDTO) {
 
@@ -565,7 +574,8 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         FunctionScoreQueryBuilder.FilterFunctionBuilder skuNoBuilder = new FunctionScoreQueryBuilder.FilterFunctionBuilder(skuNoScore);
         filterFunctionBuilders.add(skuNoBuilder);
 
-        FieldValueFactorFunctionBuilder buyCountScore = ScoreFunctionBuilders.fieldValueFactorFunction("buyCount").modifier(FieldValueFactorFunction.Modifier.LOG1P).setWeight(3);
+        // 修改分数算法为无，数字最大分数越高
+        FieldValueFactorFunctionBuilder buyCountScore = ScoreFunctionBuilders.fieldValueFactorFunction("buyCount").modifier(FieldValueFactorFunction.Modifier.NONE).setWeight(3);
         FunctionScoreQueryBuilder.FilterFunctionBuilder buyCountBuilder = new FunctionScoreQueryBuilder.FilterFunctionBuilder(buyCountScore);
         filterFunctionBuilders.add(buyCountBuilder);
         return filterFunctionBuilders;

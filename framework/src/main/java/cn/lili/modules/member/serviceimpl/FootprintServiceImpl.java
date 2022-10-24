@@ -90,9 +90,7 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
             return esGoodsIndexIPage;
         } else {
             List<EsGoodsIndex> list = esGoodsSearchService.getEsGoodsBySkuIds(
-                    footPrintPages.getRecords().stream().map(FootPrint::getSkuId).collect(Collectors.toList()));
-            //去除为空的商品数据
-            list.removeIf(Objects::isNull);
+                    footPrintPages.getRecords().stream().map(FootPrint::getSkuId).collect(Collectors.toList()), pageVO);
 
             esGoodsIndexIPage.setPages(footPrintPages.getPages());
             esGoodsIndexIPage.setRecords(list);

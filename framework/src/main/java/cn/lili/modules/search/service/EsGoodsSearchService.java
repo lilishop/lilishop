@@ -40,7 +40,7 @@ public interface EsGoodsSearchService {
      * @param skuIds SkuId列表
      * @return ES商品列表
      */
-    List<EsGoodsIndex> getEsGoodsBySkuIds(List<String> skuIds);
+    List<EsGoodsIndex> getEsGoodsBySkuIds(List<String> skuIds, PageVO pageVo);
 
     /**
      * 根据id获取商品索引
