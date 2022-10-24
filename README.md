@@ -13,10 +13,13 @@
 <a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=_lrekOvr5k2p5uTn5GRidI-chKEmpCX3&jump_from=webapi"><img border="0" src="https://pub.idqqimg.com/wpa/images/group.png" alt="Lilishop交流群2群" title="Lilishop交流群2群">点击快捷加群</a>
 
 
-##### 交流 qq 3群 263785057
+##### 交流 qq 3群 263785057（已满）
 
 <a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=VUogkDvaso4zLTFH8nxFPDRKq0EthUn1&jump_from=webapi"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Lilishop交流群3群" title="Lilishop交流群3群">点击快捷加群</a>
 
+##### 交流 qq 4群 674617534
+
+<a target="_blank" href="https://jq.qq.com/?_wv=1027&k=10DZAe8s"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Lilishop交流群4群" title="Lilishop交流群4群">点击快捷加群</a>
 
 ##### 体验 公众号/小程序/APP 体验，扫描二维码
 
