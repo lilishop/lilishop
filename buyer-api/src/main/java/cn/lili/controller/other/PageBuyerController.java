@@ -47,6 +47,16 @@ public class PageBuyerController {
         return ResultUtil.data(pageDataVO);
     }
 
+    @ApiOperation(value = "获取店铺首页")
+    @GetMapping("/getStore")
+    public ResultMessage<PageDataVO> getShopPage(@RequestParam String clientType,String storeId) {
+        PageDataDTO pageDataDTO = new PageDataDTO(PageEnum.STORE.name());
+        pageDataDTO.setPageClientType(clientType);
+        pageDataDTO.setNum(storeId);
+        PageDataVO pageDataVO=pageService.getPageData(pageDataDTO);
+        return ResultUtil.data(pageDataVO);
+    }
+
     @ApiOperation(value = "获取页面数据")
     @ApiImplicitParam(name = "id", value = "id", required = true, dataType = "String", paramType = "path")
     @GetMapping("/get/{id}")
