@@ -61,7 +61,7 @@ public class LimitInterceptor {
             assert count != null;
             log.info("限制请求{}, 当前请求{},缓存key{}", limitCount, count.intValue(), key);
             //如果缓存里没有值，或者他的值小于限制频率
-            if (count.intValue() >= limitCount) {
+            if (count.intValue() > limitCount) {
                 throw new ServiceException(ResultCode.LIMIT_ERROR);
             }
         }
