@@ -4,6 +4,7 @@
 
 #### 不用削尖脑袋往老群里加，老群活跃度较低，很多潜水党，新群相对而言活跃一些 :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: 
 
+#### PS：项目拥有一定门槛，新手小白上手有困难。 :dizzy: 
 
 ##### 交流 qq 1群 961316482（已满）
 <a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=BAhURE3DG2YWhQk6kRxVapbLykqMoPS8&jump_from=webapi"><img border="0" src="https://pub.idqqimg.com/wpa/images/group.png" alt="Lilishop交流群" title="Lilishop交流群">点击快捷加群</a>
