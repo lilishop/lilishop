@@ -1,5 +1,7 @@
 package cn.lili.modules.wallet.entity.dos;
 
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
@@ -52,6 +54,7 @@ public class Recharge extends BaseIdEntity {
     private String memberId;
 
     @ApiModelProperty(value = "会员名称")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String memberName;
 
     @NotEmpty(message = "充值金额不能为空")

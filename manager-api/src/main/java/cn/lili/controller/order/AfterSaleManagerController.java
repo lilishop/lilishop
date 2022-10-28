@@ -63,6 +63,7 @@ public class AfterSaleManagerController {
         return ResultUtil.data(afterSaleService.deliveryTraces(sn));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "售后线下退款")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "afterSaleSn", value = "售后sn", required = true, paramType = "path"),

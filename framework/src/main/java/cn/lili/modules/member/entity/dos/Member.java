@@ -101,7 +101,7 @@ public class Member extends BaseEntity {
         this.username = username;
         this.password = password;
         this.mobile = mobile;
-        this.nickName = mobile;
+        this.nickName = "临时昵称";
         this.disabled = true;
         this.haveStore = false;
         this.sex = 0;

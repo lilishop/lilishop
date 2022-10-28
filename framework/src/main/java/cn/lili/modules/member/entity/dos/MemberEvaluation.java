@@ -1,6 +1,8 @@
 package cn.lili.modules.member.entity.dos;
 
 import cn.lili.common.enums.SwitchEnum;
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
@@ -50,6 +52,7 @@ public class MemberEvaluation extends BaseEntity {
 
     @NotNull
     @ApiModelProperty(value = "会员名称")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String memberName;
 
     @NotNull
