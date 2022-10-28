@@ -2,6 +2,8 @@ package cn.lili.modules.order.order.entity.vo;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ClientTypeEnum;
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -53,6 +55,7 @@ public class OrderSimpleVO {
     private Date paymentTime;
 
     @ApiModelProperty(value = "用户名")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String memberName;
 
     @ApiModelProperty(value = "店铺名称")
