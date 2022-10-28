@@ -28,7 +28,7 @@ public class MemberVO implements Serializable {
     private String id;
 
     @ApiModelProperty(value = "会员用户名")
-    @Sensitive(strategy = SensitiveStrategy.USERNAME)
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String username;
 
     @ApiModelProperty(value = "昵称")
