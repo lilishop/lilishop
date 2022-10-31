@@ -11,8 +11,6 @@
 ##### 交流 qq 3群 263785057（已满）
 ##### 交流 qq 4群 674617534
 
-<a target="_blank" href="https://jq.qq.com/?_wv=1027&k=10DZAe8s"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Lilishop交流群4群" title="Lilishop交流群4群">点击快捷加群</a>
-
 ##### 体验 公众号/小程序/APP 体验，扫描二维码
 
 ![image-20210511171611793](https://pickmall.cn/assets/imgs/h5-qrcode.png)
