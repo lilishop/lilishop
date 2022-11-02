@@ -2,7 +2,6 @@ package cn.lili.modules.goods.service;
 
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
-import cn.lili.modules.goods.entity.dto.GoodsOperationFuLuDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
