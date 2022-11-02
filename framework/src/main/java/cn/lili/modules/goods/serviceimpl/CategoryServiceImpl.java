@@ -25,10 +25,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -78,6 +75,14 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public List<Category> listByIdsOrderByLevel(List<String> ids) {
         return this.list(new LambdaQueryWrapper<Category>().in(Category::getId, ids).orderByAsc(Category::getLevel));
+    }
+
+    @Override
+    public List<Map<String, Object>> listMapsByIdsOrderByLevel(List<String> ids, String columns) {
+        QueryWrapper<Category> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select(columns);
+        queryWrapper.in("id", ids).orderByAsc("level");
+        return this.listMaps(queryWrapper);
     }
 
     @Override

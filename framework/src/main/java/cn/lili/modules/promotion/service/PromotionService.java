@@ -35,4 +35,12 @@ public interface PromotionService {
      * @param goodsIdsJsonStr
      */
     void removeByGoodsIds(String goodsIdsJsonStr);
+
+    /**
+     * 根据促销商品信息包装促销信息
+     *
+     * @param promotionGoodsList 促销商品信息
+     * @return 促销信息
+     */
+    Map<String, Object> wrapperPromotionMapList(List<PromotionGoods> promotionGoodsList);
 }

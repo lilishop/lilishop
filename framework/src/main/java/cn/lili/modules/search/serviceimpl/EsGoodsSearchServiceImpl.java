@@ -87,14 +87,6 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         NativeSearchQuery searchQuery = searchQueryBuilder.build();
         log.debug("searchGoods DSL:{}", searchQuery.getQuery());
         SearchHits<EsGoodsIndex> search = restTemplate.search(searchQuery, EsGoodsIndex.class);
-//        for (int i = 0; i < search.getSearchHits().size() ; i++){
-//            if (search.getSearchHits().get(i).getContent().getSmall().contains("fuluapiossproductnew.oss-cn-hangzhou.aliyuncs.com")){
-//                search.getSearchHits().get(i).getContent().setSmall(search.getSearchHits().get(i).getContent().getSmall().replace("?x-oss-process=style/200X200", ""));
-//            }
-//            if (search.getSearchHits().get(i).getContent().getThumbnail().contains("fuluapiossproductnew.oss-cn-hangzhou.aliyuncs.com")){
-//                search.getSearchHits().get(i).getContent().setThumbnail(search.getSearchHits().get(i).getContent().getThumbnail().replace("?x-oss-process=style/400X400", ""));
-//            }
-//        }
         return SearchHitSupport.searchPageFor(search, searchQuery.getPageable());
     }
 
@@ -575,9 +567,9 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         filterFunctionBuilders.add(skuNoBuilder);
 
         // 修改分数算法为无，数字最大分数越高
-        FieldValueFactorFunctionBuilder buyCountScore = ScoreFunctionBuilders.fieldValueFactorFunction("buyCount").modifier(FieldValueFactorFunction.Modifier.NONE).setWeight(3);
-        FunctionScoreQueryBuilder.FilterFunctionBuilder buyCountBuilder = new FunctionScoreQueryBuilder.FilterFunctionBuilder(buyCountScore);
-        filterFunctionBuilders.add(buyCountBuilder);
+//        FieldValueFactorFunctionBuilder buyCountScore = ScoreFunctionBuilders.fieldValueFactorFunction("buyCount").modifier(FieldValueFactorFunction.Modifier.NONE).setWeight(10);
+//        FunctionScoreQueryBuilder.FilterFunctionBuilder buyCountBuilder = new FunctionScoreQueryBuilder.FilterFunctionBuilder(buyCountScore);
+//        filterFunctionBuilders.add(buyCountBuilder);
         return filterFunctionBuilders;
     }
 

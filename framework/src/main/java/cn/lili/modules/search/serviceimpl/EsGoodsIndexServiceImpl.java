@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -19,10 +18,7 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.elasticsearch.BaseElasticsearchService;
 import cn.lili.elasticsearch.EsSuffix;
 import cn.lili.elasticsearch.config.ElasticsearchProperties;
-import cn.lili.modules.goods.entity.dos.Brand;
-import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.goods.entity.dos.StoreGoodsLabel;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
@@ -33,7 +29,9 @@ import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.goods.service.StoreGoodsLabelService;
 import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
+import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.service.PromotionService;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.modules.search.entity.dos.CustomWords;
@@ -102,6 +100,9 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     private PromotionService promotionService;
 
     @Autowired
+    private PromotionGoodsService promotionGoodsService;
+
+    @Autowired
     private CustomWordsService customWordsService;
 
     @Autowired
@@ -128,6 +129,18 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     private RocketmqCustomProperties rocketmqCustomProperties;
     @Autowired
     private ElasticsearchOperations restTemplate;
+
+    /**
+     * 去除 重复元素
+     *
+     * @param list
+     * @return
+     */
+    public static void removeDuplicate(List<String> list) {
+        HashSet<String> h = new HashSet<>(list);
+        list.clear();
+        list.addAll(h);
+    }
 
     @Override
     public void init() {
@@ -173,19 +186,66 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
                 for (int i = 1; ; i++) {
                     List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
-                    Page<GoodsSkuDTO> skuPage = new Page<>(i, 100);
+                    Page<GoodsSkuDTO> skuPage = new Page<>(i, 2000);
                     IPage<GoodsSkuDTO> skuIPage = goodsSkuService.getGoodsSkuDTOByPage(skuPage, skuQueryWrapper);
+
                     if (skuIPage == null || CollUtil.isEmpty(skuIPage.getRecords())) {
                         break;
                     }
+                    List<PromotionGoods> skuValidPromotions = promotionGoodsService.findSkuValidPromotions(skuIPage.getRecords());
+
+                    List<String> brandIds = new ArrayList<>();
+
+                    List<String> categoryPaths = new ArrayList<>();
+
+                    List<String> storeCategoryPaths = new ArrayList<>();
+
+                    for (GoodsSkuDTO goodsSkuDTO : skuIPage.getRecords()) {
+                        if (CharSequenceUtil.isNotEmpty(goodsSkuDTO.getBrandId())) {
+                            brandIds.add(goodsSkuDTO.getBrandId());
+                        }
+                        if (CharSequenceUtil.isNotEmpty(goodsSkuDTO.getStoreCategoryPath())) {
+                            storeCategoryPaths.addAll(Arrays.asList(goodsSkuDTO.getStoreCategoryPath().split(",")));
+                        }
+                        if (CharSequenceUtil.isNotEmpty((goodsSkuDTO.getCategoryPath()))) {
+                            categoryPaths.addAll(Arrays.asList(goodsSkuDTO.getCategoryPath().split(",")));
+                        }
+                    }
+
+                    List<Map<String, Object>> brandList = new ArrayList<>();
+                    if (CollUtil.isNotEmpty(brandIds)) {
+                        brandList = this.brandService.getBrandsMapsByCategory(brandIds, "id,name,logo");
+                    }
+                    List<Map<String, Object>> categoryList = new ArrayList<>();
+                    if (CollUtil.isNotEmpty(categoryList)) {
+                        categoryList = this.categoryService.listMapsByIdsOrderByLevel(categoryPaths, "id,name");
+                    }
+                    List<Map<String, Object>> storeCategoryList = new ArrayList<>();
+                    if (CollUtil.isNotEmpty(storeCategoryList)) {
+                        storeCategoryList = this.storeGoodsLabelService.listMapsByStoreIds(storeCategoryPaths, "id,label_name");
+                    }
+
                     for (GoodsSkuDTO goodsSku : skuIPage.getRecords()) {
                         int skuSource = 100;
-                        EsGoodsIndex esGoodsIndex = wrapperEsGoodsIndex(goodsSku);
+                        EsGoodsIndex esGoodsIndex = wrapperEsGoodsIndex(goodsSku, brandList, categoryList, storeCategoryList);
                         long count = esGoodsIndices.stream().filter(j -> j.getGoodsId().equals(esGoodsIndex.getGoodsId())).count();
                         if (count >= 1) {
                             skuSource -= count;
                         }
                         esGoodsIndex.setSkuSource(skuSource);
+
+
+                        //设置促销信息
+                        List<PromotionGoods> promotionGoods = skuValidPromotions.stream()
+                                .filter(j ->
+                                        (CharSequenceUtil.isNotEmpty(j.getSkuId()) && j.getSkuId().equals(goodsSku.getId())) ||
+                                                j.getScopeType().equals(PromotionsScopeTypeEnum.ALL.name()) ||
+                                                (j.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name()) && j.getScopeId().contains(goodsSku.getCategoryPath())))
+                                .collect(Collectors.toList());
+                        if (CollUtil.isNotEmpty(promotionGoods)) {
+                            esGoodsIndex.setPromotionMapJson(JSONUtil.toJsonStr(promotionService.wrapperPromotionMapList(promotionGoods)));
+                        }
+
                         esGoodsIndices.add(esGoodsIndex);
                         //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
                         cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
@@ -273,7 +333,6 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         goodsIndexRepository.save(goods);
     }
 
-
     /**
      * 商品分词
      *
@@ -307,18 +366,6 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         } catch (Exception e) {
             log.info(goods + "自定义分词错误", e);
         }
-    }
-
-    /**
-     * 去除 重复元素
-     *
-     * @param list
-     * @return
-     */
-    public static void removeDuplicate(List<String> list) {
-        HashSet<String> h = new HashSet<>(list);
-        list.clear();
-        list.addAll(h);
     }
 
     /**
@@ -853,7 +900,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         return elasticsearchProperties.getIndexPrefix() + "_" + EsSuffix.GOODS_INDEX_NAME;
     }
 
-    private EsGoodsIndex wrapperEsGoodsIndex(GoodsSkuDTO goodsSku) {
+    private EsGoodsIndex wrapperEsGoodsIndex(GoodsSkuDTO goodsSku, List<Map<String, Object>> brandList, List<Map<String, Object>> categoryList, List<Map<String, Object>> storeCategoryList) {
         EsGoodsIndex index = new EsGoodsIndex(goodsSku);
 
         //商品参数索引
@@ -862,28 +909,27 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             index = new EsGoodsIndex(goodsSku, goodsParamDTOS);
         }
         //商品分类索引
-        if (goodsSku.getCategoryPath() != null) {
-            List<Category> categories = categoryService.listByIdsOrderByLevel(Arrays.asList(goodsSku.getCategoryPath().split(",")));
-            if (!categories.isEmpty()) {
-                index.setCategoryNamePath(ArrayUtil.join(categories.stream().map(Category::getName).toArray(), ","));
-            }
+        if (CollUtil.isNotEmpty(categoryList) && CharSequenceUtil.isNotEmpty(goodsSku.getCategoryPath())) {
+            StringBuilder categoryNamePath = new StringBuilder();
+            categoryList.stream().filter(o -> goodsSku.getCategoryPath().contains(o.get("id").toString())).forEach(p -> categoryNamePath.append(p.get("name")).append(","));
+            categoryNamePath.deleteCharAt(categoryNamePath.length() - 1);
+            index.setCategoryNamePath(categoryNamePath.toString());
         }
         //商品品牌索引
-        Brand brand = brandService.getById(goodsSku.getBrandId());
-        if (brand != null) {
-            index.setBrandName(brand.getName());
-            index.setBrandUrl(brand.getLogo());
-        }
-        //店铺分类索引
-        if (goodsSku.getStoreCategoryPath() != null && CharSequenceUtil.isNotEmpty(goodsSku.getStoreCategoryPath())) {
-            List<StoreGoodsLabel> storeGoodsLabels = storeGoodsLabelService.listByStoreIds(Arrays.asList(goodsSku.getStoreCategoryPath().split(",")));
-            if (!storeGoodsLabels.isEmpty()) {
-                index.setStoreCategoryNamePath(ArrayUtil.join(storeGoodsLabels.stream().map(StoreGoodsLabel::getLabelName).toArray(), ","));
+        if (CollUtil.isNotEmpty(brandList) && CharSequenceUtil.isNotEmpty(goodsSku.getBrandId())) {
+            Optional<Map<String, Object>> brandInfo = brandList.stream().filter(p -> p.get("id").equals(goodsSku.getBrandId())).findFirst();
+            if (brandInfo.isPresent()) {
+                index.setBrandName(brandInfo.get().get("name").toString());
+                index.setBrandUrl(brandInfo.get().get("logo").toString());
             }
         }
-        //促销索引
-        Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsSkuPromotionMap(index.getStoreId(), index.getId());
-        index.setPromotionMapJson(JSONUtil.toJsonStr(goodsCurrentPromotionMap));
+        //店铺分类索引
+        if (CollUtil.isNotEmpty(storeCategoryList) && CharSequenceUtil.isNotEmpty(goodsSku.getStoreCategoryPath())) {
+            StringBuilder storeCategoryNamePath = new StringBuilder();
+            storeCategoryList.stream().filter(o -> goodsSku.getStoreCategoryPath().contains(o.get("id").toString())).forEach(p -> storeCategoryNamePath.append(p.get("label_name").toString()).append(","));
+            storeCategoryNamePath.deleteCharAt(storeCategoryNamePath.length() - 1);
+            index.setStoreCategoryNamePath(storeCategoryNamePath.toString());
+        }
         return index;
     }
 }

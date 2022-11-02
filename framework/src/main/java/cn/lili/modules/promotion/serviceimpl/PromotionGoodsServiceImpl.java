@@ -7,6 +7,7 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 促销商品业务层实现
@@ -84,6 +86,22 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
                         .and(l -> l.like("scope_id", sku.getCategoryPath())))));
         queryWrapper.and(i -> i.or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START)).or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.NEW)));
         queryWrapper.in("store_id", Arrays.asList(storeIds.split(",")));
+        return this.list(queryWrapper);
+    }
+
+    @Override
+    public List<PromotionGoods> findSkuValidPromotions(List<GoodsSkuDTO> skus) {
+        List<String> categories = skus.stream().map(GoodsSku::getCategoryPath).collect(Collectors.toList());
+        List<String> skuIds = skus.stream().map(GoodsSku::getId).collect(Collectors.toList());
+        List<String> categoriesPath = new ArrayList<>();
+        categories.forEach(i -> categoriesPath.addAll(Arrays.asList(i.split(","))));
+        QueryWrapper<PromotionGoods> queryWrapper = new QueryWrapper<>();
+
+        queryWrapper.and(i -> i.or(j -> j.in(SKU_ID_COLUMN, skuIds))
+                .or(n -> n.eq("scope_type", PromotionsScopeTypeEnum.ALL.name()))
+                .or(n -> n.and(k -> k.eq("scope_type", PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name())
+                        .and(l -> l.in("scope_id", categoriesPath)))));
+        queryWrapper.and(i -> i.or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START)).or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.NEW)));
         return this.list(queryWrapper);
     }
 

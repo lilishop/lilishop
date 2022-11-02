@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 商品品牌业务层
@@ -39,6 +40,14 @@ public interface BrandService extends IService<Brand> {
      * @return 品牌列表
      */
     List<Brand> getBrandsByCategory(String categoryId);
+
+    /**
+     * 根据分类ID获取品牌列表
+     *
+     * @param categoryIds 分类ID
+     * @return 品牌列表
+     */
+    List<Map<String, Object>> getBrandsMapsByCategory(List<String> categoryIds, String columns);
 
     /**
      * 添加品牌
