@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -66,6 +67,14 @@ public class BrandServiceImpl extends ServiceImpl<BrandMapper, Brand> implements
             return this.list(new LambdaQueryWrapper<Brand>().in(Brand::getId, collect));
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public List<Map<String, Object>> getBrandsMapsByCategory(List<String> categoryIds, String columns) {
+        QueryWrapper<Brand> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select(columns);
+        queryWrapper.in("id", categoryIds);
+        return this.listMaps(queryWrapper);
     }
 
     @Override

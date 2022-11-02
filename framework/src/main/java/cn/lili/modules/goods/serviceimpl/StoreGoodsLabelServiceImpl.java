@@ -12,6 +12,7 @@ import cn.lili.modules.goods.entity.vos.StoreGoodsLabelVO;
 import cn.lili.modules.goods.mapper.StoreGoodsLabelMapper;
 import cn.lili.modules.goods.service.StoreGoodsLabelService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 店铺商品分类业务层实现
@@ -81,6 +83,13 @@ public class StoreGoodsLabelServiceImpl extends ServiceImpl<StoreGoodsLabelMappe
     @Override
     public List<StoreGoodsLabel> listByStoreIds(List<String> ids) {
         return this.list(new LambdaQueryWrapper<StoreGoodsLabel>().in(StoreGoodsLabel::getId, ids).orderByAsc(StoreGoodsLabel::getLevel));
+    }
+
+    @Override
+    public List<Map<String, Object>> listMapsByStoreIds(List<String> ids, String columns) {
+        QueryWrapper<StoreGoodsLabel> queryWrapper = new QueryWrapper<StoreGoodsLabel>().in("id", ids).orderByAsc("level");
+        queryWrapper.select(columns);
+        return this.listMaps(queryWrapper);
     }
 
     @Override
