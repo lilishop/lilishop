@@ -98,8 +98,8 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
             LambdaUpdateWrapper<PageData> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
             lambdaUpdateWrapper.eq(CharSequenceUtil.isNotEmpty(pageData.getPageType()), PageData::getPageType, pageData.getPageType());
             lambdaUpdateWrapper.eq(CharSequenceUtil.isNotEmpty(pageData.getPageClientType()), PageData::getPageClientType, pageData.getPageClientType());
+            lambdaUpdateWrapper.eq(PageData::getNum, pageData.getNum());
             lambdaUpdateWrapper.set(PageData::getPageShow, SwitchEnum.CLOSE.name());
-            lambdaUpdateWrapper.set(PageData::getNum, pageData.getNum());
             lambdaUpdateWrapper.set(StrUtil.isNotEmpty(pageData.getNum()), PageData::getNum, SwitchEnum.CLOSE.name());
             this.update(lambdaUpdateWrapper);
         } else {
