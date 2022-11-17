@@ -10,9 +10,9 @@ import cn.lili.modules.goods.entity.dto.GoodsImportDTO;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.vos.CategoryVO;
 import cn.lili.modules.goods.service.CategoryService;
+import cn.lili.modules.goods.service.GoodsImportService;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsUnitService;
-import cn.lili.modules.goods.service.GoodsImportService;
 import cn.lili.modules.store.entity.vos.FreightTemplateVO;
 import cn.lili.modules.store.service.FreightTemplateService;
 import cn.lili.modules.store.service.StoreDetailService;
@@ -263,7 +263,7 @@ public class GoodsImportServiceImpl implements GoodsImportService {
         Name namedCell = workbook.createName();
         namedCell.setNameName(sheetName);
         // 设置名称引用的公式
-        namedCell.setRefersToFormula(sheetName + "!$A$1:$A$" + sheetData.length);
+        namedCell.setRefersToFormula(sheetName + "!$A$1:$A$" + (sheetData.length > 0 ? sheetData.length : 1));
         //加载数据,将名称为hidden的sheet中的数据转换为List形式
         DVConstraint constraint = DVConstraint.createFormulaListConstraint(sheetName);
 
