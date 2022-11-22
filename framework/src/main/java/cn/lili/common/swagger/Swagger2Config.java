@@ -81,6 +81,19 @@ public class Swagger2Config {
                 .securitySchemes(securitySchemes())
                 .securityContexts(securityContexts());
     }
+    @Bean
+    public Docket orderRestApi() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .groupName("订单")
+                .apiInfo(apiInfo()).select()
+                //扫描所有有注解的api，用这种方式更灵活
+//               .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
+                .apis(RequestHandlerSelectors.basePackage("cn.lili.controller.order"))
+                .paths(PathSelectors.any())
+                .build()
+                .securitySchemes(securitySchemes())
+                .securityContexts(securityContexts());
+    }
 
     @Bean
     public Docket memberRestApi() {

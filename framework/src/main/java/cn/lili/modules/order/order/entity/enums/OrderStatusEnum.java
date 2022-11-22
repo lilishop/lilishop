@@ -16,6 +16,7 @@ public enum OrderStatusEnum {
     UNDELIVERED("待发货"),
     DELIVERED("已发货"),
     COMPLETED("已完成"),
+    STAY_PICKED_UP("待自提"),
     /**
      * 虚拟订单需要核验商品
      */

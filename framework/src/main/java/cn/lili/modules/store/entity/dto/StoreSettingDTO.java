@@ -36,4 +36,7 @@ public class StoreSettingDTO {
     @ApiModelProperty(value = "默认页面是否开启")
     private Boolean pageShow;
 
+    @ApiModelProperty(value = "是否开启自提")
+    private Boolean selfPickFlag;
+
 }

@@ -155,35 +155,37 @@ public class CheckDataRender implements CartRenderStep {
     private void groupStore(TradeDTO tradeDTO) {
         //渲染的购物车
         List<CartVO> cartList = new ArrayList<>();
-
-        //根据店铺分组
-        Map<String, List<CartSkuVO>> storeCollect = tradeDTO.getSkuList().stream().collect(Collectors.groupingBy(CartSkuVO::getStoreId));
-        for (Map.Entry<String, List<CartSkuVO>> storeCart : storeCollect.entrySet()) {
-            if (!storeCart.getValue().isEmpty()) {
-                CartVO cartVO = new CartVO(storeCart.getValue().get(0));
-                if (CharSequenceUtil.isEmpty(cartVO.getDeliveryMethod())) {
-                    cartVO.setDeliveryMethod(DeliveryMethodEnum.LOGISTICS.name());
-                }
-                cartVO.setSkuList(storeCart.getValue());
-                try {
-                    //筛选属于当前店铺的优惠券
-                    storeCart.getValue().forEach(i -> i.getPromotionMap().forEach((key, value) -> {
-                        if (key.contains(PromotionTypeEnum.COUPON.name())) {
-                            JSONObject promotionsObj = JSONUtil.parseObj(value);
-                            Coupon coupon = JSONUtil.toBean(promotionsObj, Coupon.class);
-                            if (key.contains(PromotionTypeEnum.COUPON.name()) && coupon.getStoreId().equals(storeCart.getKey())) {
-                                cartVO.getCanReceiveCoupon().add(new CouponVO(coupon));
+        if(tradeDTO.getCartList() == null || tradeDTO.getCartList().size() == 0){
+            //根据店铺分组
+            Map<String, List<CartSkuVO>> storeCollect = tradeDTO.getSkuList().stream().collect(Collectors.groupingBy(CartSkuVO::getStoreId));
+            for (Map.Entry<String, List<CartSkuVO>> storeCart : storeCollect.entrySet()) {
+                if (!storeCart.getValue().isEmpty()) {
+                    CartVO cartVO = new CartVO(storeCart.getValue().get(0));
+                    if (CharSequenceUtil.isEmpty(cartVO.getDeliveryMethod())) {
+                        cartVO.setDeliveryMethod(DeliveryMethodEnum.LOGISTICS.name());
+                    }
+                    cartVO.setSkuList(storeCart.getValue());
+                    try {
+                        //筛选属于当前店铺的优惠券
+                        storeCart.getValue().forEach(i -> i.getPromotionMap().forEach((key, value) -> {
+                            if (key.contains(PromotionTypeEnum.COUPON.name())) {
+                                JSONObject promotionsObj = JSONUtil.parseObj(value);
+                                Coupon coupon = JSONUtil.toBean(promotionsObj, Coupon.class);
+                                if (key.contains(PromotionTypeEnum.COUPON.name()) && coupon.getStoreId().equals(storeCart.getKey())) {
+                                    cartVO.getCanReceiveCoupon().add(new CouponVO(coupon));
+                                }
                             }
-                        }
-                    }));
-                } catch (Exception e) {
-                    log.error("筛选属于当前店铺的优惠券发生异常！", e);
+                        }));
+                    } catch (Exception e) {
+                        log.error("筛选属于当前店铺的优惠券发生异常！", e);
+                    }
+                    storeCart.getValue().stream().filter(i -> Boolean.TRUE.equals(i.getChecked())).findFirst().ifPresent(cartSkuVO -> cartVO.setChecked(true));
+                    cartList.add(cartVO);
                 }
-                storeCart.getValue().stream().filter(i -> Boolean.TRUE.equals(i.getChecked())).findFirst().ifPresent(cartSkuVO -> cartVO.setChecked(true));
-                cartList.add(cartVO);
             }
+            tradeDTO.setCartList(cartList);
         }
-        tradeDTO.setCartList(cartList);
+
     }
 
     /**
