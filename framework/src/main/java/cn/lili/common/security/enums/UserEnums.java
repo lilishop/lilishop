@@ -14,7 +14,8 @@ public enum UserEnums {
     MEMBER("会员"),
     STORE("商家"),
     MANAGER("管理员"),
-    SYSTEM("系统");
+    SYSTEM("系统"),
+    SEAT("坐席");
     private final String role;
 
     UserEnums(String role) {
