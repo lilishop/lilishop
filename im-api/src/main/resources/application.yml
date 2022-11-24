@@ -248,6 +248,8 @@ lili:
       order-group: lili_order_group
       member-topic: lili_member_topic
       member-group: lili_member_group
+      store-topic: lili_store_topic
+      store-group: lili_store_group
       other-topic: lili_other_topic
       other-group: lili_other_group
       notice-topic: lili_notice_topic

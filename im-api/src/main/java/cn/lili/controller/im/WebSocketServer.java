@@ -3,6 +3,7 @@ package cn.lili.controller.im;
 import cn.lili.cache.Cache;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.im.config.CustomSpringConfigurator;
 import cn.lili.modules.im.entity.dos.ImMessage;
@@ -12,6 +13,8 @@ import cn.lili.modules.im.entity.vo.MessageVO;
 import cn.lili.modules.im.service.ImMessageService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
+import cn.lili.modules.store.entity.dos.Store;
+import cn.lili.modules.store.service.StoreService;
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +47,9 @@ public class WebSocketServer {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private StoreService storeService;
+
 
     @Autowired
     private Cache cache;
@@ -61,9 +67,16 @@ public class WebSocketServer {
     @OnOpen
     public void onOpen(@PathParam("accessToken") String accessToken, Session session) throws IOException {
         AuthUser authUser = UserContext.getAuthUser(accessToken);
-        Member member = memberService.getById(authUser.getId());
-        sessionPools.put(authUser.getId(), session);
-        MessageVO messageVO = new MessageVO(MessageResultType.FRIENDS, member);
+        Object message = null;
+        if (UserEnums.STORE.equals(authUser.getRole())) {
+            message = storeService.getById(authUser.getStoreId());
+            sessionPools.put(authUser.getStoreId(), session);
+
+        } else if (UserEnums.MEMBER.equals(authUser.getRole())) {
+            message = memberService.getById(authUser.getId());
+            sessionPools.put(authUser.getId(), session);
+        }
+        MessageVO messageVO = new MessageVO(MessageResultType.FRIENDS, message);
         sendMessage(authUser.getId(), messageVO);
     }
 
