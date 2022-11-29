@@ -5,6 +5,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
@@ -479,6 +480,15 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
             if (prices.length == 2) {
                 max = Convert.toDouble(prices[1], Double.MAX_VALUE);
+            }
+            if (min > max) {
+                throw new ServiceException("价格区间错误");
+            }
+            if (min > Double.MAX_VALUE) {
+                min = Double.MAX_VALUE;
+            }
+            if (max > Double.MAX_VALUE) {
+                max = Double.MAX_VALUE;
             }
             filterBuilder.must(QueryBuilders.rangeQuery("price").from(min).to(max).includeLower(true).includeUpper(true));
         }
