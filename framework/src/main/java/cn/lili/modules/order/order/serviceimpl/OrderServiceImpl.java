@@ -165,6 +165,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         List<OrderVO> orderVOS = new ArrayList<>();
         //循环购物车
         tradeDTO.getCartList().forEach(item -> {
+            //当前购物车订单子项
+            List<OrderItem> currentOrderItems = new ArrayList<>();
             Order order = new Order(item, tradeDTO);
             //构建orderVO对象
             OrderVO orderVO = new OrderVO();
@@ -175,10 +177,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             //记录日志
             orderLogs.add(new OrderLog(item.getSn(), UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), message));
             item.getCheckedSkuList().forEach(
-                    sku -> orderItems.add(new OrderItem(sku, item, tradeDTO))
+                    sku -> {
+                        orderItems.add(new OrderItem(sku, item, tradeDTO));
+                        currentOrderItems.add(new OrderItem(sku, item, tradeDTO));
+                    }
             );
             //写入子订单信息
-            orderVO.setOrderItems(orderItems);
+            orderVO.setOrderItems(currentOrderItems);
             //orderVO 记录
             orderVOS.add(orderVO);
         });
