@@ -10,7 +10,10 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.Clerk;
 import cn.lili.modules.member.entity.dos.Member;
-import cn.lili.modules.member.entity.dto.*;
+import cn.lili.modules.member.entity.dto.ClerkAddDTO;
+import cn.lili.modules.member.entity.dto.ClerkEditDTO;
+import cn.lili.modules.member.entity.dto.ClerkQueryDTO;
+import cn.lili.modules.member.entity.dto.MemberAddDTO;
 import cn.lili.modules.member.entity.vo.ClerkVO;
 import cn.lili.modules.member.service.ClerkService;
 import cn.lili.modules.member.service.MemberService;
@@ -20,7 +23,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -54,7 +56,7 @@ public class ClerkStoreController {
     @GetMapping
     @ApiOperation(value = "分页获取店员列表")
     public ResultMessage<IPage<ClerkVO>> page(ClerkQueryDTO clerkQueryDTO,
-                                                        PageVO pageVo) {
+                                              PageVO pageVo) {
 
         IPage<ClerkVO> page = clerkService.clerkForPage(pageVo, clerkQueryDTO);
         return ResultUtil.data(page);
@@ -94,11 +96,11 @@ public class ClerkStoreController {
                 member = memberService.addMember(memberAddDTO);
             } else {
                 //校验要添加的会员是否已经是店主
-                if (member.getHaveStore()) {
+                if (Boolean.TRUE.equals(member.getHaveStore())) {
                     throw new ServiceException(ResultCode.STORE_APPLY_DOUBLE_ERROR);
                 }
                 //校验会员的有效性
-                if (!member.getDisabled()) {
+                if (Boolean.FALSE.equals(member.getDisabled())) {
                     throw new ServiceException(ResultCode.USER_STATUS_ERROR);
                 }
             }
@@ -111,6 +113,9 @@ public class ClerkStoreController {
             List<String> ids = new ArrayList<>();
             ids.add(member.getId());
             memberService.updateHaveShop(true, UserContext.getCurrentUser().getStoreId(), ids);
+        } catch (ServiceException se) {
+            log.info(se.getMsg(), se);
+            throw se;
         } catch (Exception e) {
             log.error("添加店员出错", e);
         }

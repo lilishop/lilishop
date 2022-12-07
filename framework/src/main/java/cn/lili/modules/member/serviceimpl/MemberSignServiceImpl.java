@@ -1,5 +1,6 @@
 package cn.lili.modules.member.serviceimpl;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
@@ -7,6 +8,7 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.DateUtil;
+import cn.lili.modules.goods.entity.dos.Specification;
 import cn.lili.modules.member.entity.dos.MemberSign;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.mapper.MemberSignMapper;
@@ -19,6 +21,10 @@ import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -63,6 +69,13 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
         //获取当前会员信息
         AuthUser authUser = UserContext.getCurrentUser();
         if (authUser != null) {
+
+            LambdaQueryWrapper<MemberSign> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(MemberSign::getMemberId, authUser.getId());
+            List<MemberSign> signSize = this.baseMapper.getTodayMemberSign(queryWrapper);
+            if (signSize.size() > 0) {
+                throw new ServiceException(ResultCode.MEMBER_SIGN_REPEAT);
+            }
             //当前签到天数的前一天日期
             List<MemberSign> signs = this.baseMapper.getBeforeMemberSign(authUser.getId());
             //构建参数

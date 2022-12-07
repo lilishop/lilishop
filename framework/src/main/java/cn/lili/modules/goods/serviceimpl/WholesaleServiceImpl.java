@@ -2,6 +2,8 @@ package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.lili.cache.Cache;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.mapper.WholesaleMapper;
 import cn.lili.modules.goods.service.WholesaleService;
@@ -75,7 +77,7 @@ public class WholesaleServiceImpl extends ServiceImpl<WholesaleMapper, Wholesale
         if (CollUtil.isNotEmpty(matchList)) {
             return matchList.get(matchList.size() - 1);
         } else if (CollUtil.isNotEmpty(wholesaleList) && CollUtil.isEmpty(matchList)) {
-            return wholesaleList.get(0);
+            throw new ServiceException(ResultCode.DO_NOT_MATCH_WHOLESALE);
         }
         return null;
     }
