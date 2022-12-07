@@ -408,6 +408,7 @@ public enum ResultCode {
     STORE_NOT_LOGIN_ERROR(50005, "未登录店铺"),
     STORE_CLOSE_ERROR(50006, "店铺关闭，请联系管理员"),
     FREIGHT_TEMPLATE_NOT_EXIST(50010, "当前模版不存在"),
+    STORE_STATUS_ERROR(50011, "店铺状态异常，无法申请"),
 
     /**
      * 结算单

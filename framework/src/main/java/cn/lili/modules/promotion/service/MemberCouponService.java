@@ -147,4 +147,11 @@ public interface MemberCouponService extends IService<MemberCoupon> {
      */
     boolean recoveryMemberCoupon(List<String> memberCouponIds);
 
+    /**
+     * 作废优惠券
+     *
+     * @param couponId 优惠券ID
+     */
+    void voidCoupon(String couponId);
+
 }

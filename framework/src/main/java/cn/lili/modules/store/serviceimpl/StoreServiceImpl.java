@@ -250,6 +250,8 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             return storeDetailService.save(storeDetail);
         } else {
 
+            //校验迪纳普状态
+            checkStoreStatus(store);
             //复制参数 修改已存在店铺
             BeanUtil.copyProperties(storeCompanyDTO, store);
             this.updateById(store);
@@ -273,6 +275,8 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
 
         //获取当前操作的店铺
         Store store = getStoreByMember();
+        //校验迪纳普状态
+        checkStoreStatus(store);
         StoreDetail storeDetail = storeDetailService.getStoreDetail(store.getId());
         //设置店铺的银行信息
         BeanUtil.copyProperties(storeBankDTO, storeDetail);
@@ -283,6 +287,9 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     public boolean applyThirdStep(StoreOtherInfoDTO storeOtherInfoDTO) {
         //获取当前操作的店铺
         Store store = getStoreByMember();
+
+        //校验迪纳普状态
+        checkStoreStatus(store);
         BeanUtil.copyProperties(storeOtherInfoDTO, store);
         this.updateById(store);
 
@@ -304,6 +311,22 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         return this.updateById(store);
     }
 
+    /**
+     * 申请店铺时 对店铺状态进行校验判定
+     *
+     * @param store 店铺
+     */
+    private void checkStoreStatus(Store store) {
+
+        //如果店铺状态为申请中或者已申请，则正常走流程，否则抛出异常
+        if (store.getStoreDisable().equals(StoreStatusEnum.APPLY.name()) || store.getStoreDisable().equals(StoreStatusEnum.APPLYING.name())) {
+            return;
+        } else {
+            throw new ServiceException(ResultCode.STORE_STATUS_ERROR);
+        }
+
+    }
+
     @Override
     public void updateStoreGoodsNum(String storeId, Long num) {
         //修改店铺商品数量
@@ -320,10 +343,10 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     @Override
     public void storeToClerk() {
         //清空店铺信息方便重新导入不会有重复数据
-        clerkService.remove(new LambdaQueryWrapper<Clerk>().eq(Clerk::getShopkeeper,true));
+        clerkService.remove(new LambdaQueryWrapper<Clerk>().eq(Clerk::getShopkeeper, true));
         List<Clerk> clerkList = new ArrayList<>();
         //遍历已开启的店铺
-        for (Store store : this.list(new LambdaQueryWrapper<Store>().eq(Store::getDeleteFlag,false).eq(Store::getStoreDisable,StoreStatusEnum.OPEN.name()))) {
+        for (Store store : this.list(new LambdaQueryWrapper<Store>().eq(Store::getDeleteFlag, false).eq(Store::getStoreDisable, StoreStatusEnum.OPEN.name()))) {
             clerkList.add(new Clerk(store));
         }
         clerkService.saveBatch(clerkList);
