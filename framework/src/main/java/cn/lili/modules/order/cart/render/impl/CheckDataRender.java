@@ -95,8 +95,10 @@ public class CheckDataRender implements CartRenderStep {
      * @param tradeDTO 购物车视图
      */
     private void checkData(TradeDTO tradeDTO) {
+        List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
+
         //循环购物车中的商品
-        for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
+        for (CartSkuVO cartSkuVO : cartSkuVOS) {
 
             //如果失效，确认sku为未选中状态
             if (Boolean.TRUE.equals(cartSkuVO.getInvalid())) {
@@ -106,14 +108,17 @@ public class CheckDataRender implements CartRenderStep {
 
             //缓存中的商品信息
             GoodsSku dataSku = goodsSkuService.getGoodsSkuByIdFromCache(cartSkuVO.getGoodsSku().getId());
+            Map<String, Object> promotionMap = promotionGoodsService.getCurrentGoodsPromotion(dataSku, tradeDTO.getCartTypeEnum().name());
             //商品有效性判定
-            if (dataSku == null || dataSku.getCreateTime().after(cartSkuVO.getGoodsSku().getCreateTime())) {
-                //设置购物车未选中
-                cartSkuVO.setChecked(false);
-                //设置购物车此sku商品已失效
-                cartSkuVO.setInvalid(true);
-                //设置失效消息
-                cartSkuVO.setErrorMessage("商品信息发生变化,已失效");
+            if (dataSku == null || dataSku.getUpdateTime().after(cartSkuVO.getGoodsSku().getUpdateTime())) {
+                //商品失效,将商品移除并重新填充商品
+                cartSkuVOS.remove(cartSkuVO);
+                //设置新商品
+                CartSkuVO newCartSkuVO = new CartSkuVO(dataSku,promotionMap);
+                newCartSkuVO.setCartType(tradeDTO.getCartTypeEnum());
+                newCartSkuVO.setNum(cartSkuVO.getNum());
+                newCartSkuVO.setSubTotal(CurrencyUtil.mul(newCartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
+                cartSkuVOS.add(newCartSkuVO);
                 continue;
             }
             //商品上架状态判定
