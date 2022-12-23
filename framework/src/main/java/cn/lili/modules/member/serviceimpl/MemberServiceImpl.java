@@ -287,6 +287,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         member.setId(SnowFlake.getIdStr());
         //保存会员
         this.save(member);
+
+
         // 发送会员注册信息
         applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("new member register", rocketmqCustomProperties.getMemberTopic(), MemberTagsEnum.MEMBER_REGISTER.name(), member));
     }

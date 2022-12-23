@@ -3,6 +3,7 @@ package cn.lili.common.security;
 import cn.lili.common.security.enums.UserEnums;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -10,6 +11,7 @@ import java.io.Serializable;
  * @author Chopper
  */
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class AuthUser implements Serializable {
 
@@ -85,7 +87,7 @@ public class AuthUser implements Serializable {
         this.nickName = nickName;
     }
 
-    public AuthUser(String username, String id, UserEnums manager, String nickName, Boolean isSuper, String clerkId,String face) {
+    public AuthUser(String username, String id, UserEnums manager, String nickName, Boolean isSuper, String clerkId, String face) {
         this.username = username;
         this.id = id;
         this.role = manager;

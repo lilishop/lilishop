@@ -7,6 +7,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.enums.SecurityEnum;
 import cn.lili.common.security.token.SecretKeyUtil;
+import cn.lili.common.utils.StringUtils;
 import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -101,4 +102,21 @@ public class UserContext {
             return null;
         }
     }
+
+
+    /**
+     * 写入邀请人信息
+     */
+    public static void settingInviter(String memberId, Cache cache) {
+        if (RequestContextHolder.getRequestAttributes() != null) {
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            //邀请人id
+            String inviterId = request.getHeader(SecurityEnum.INVITER.getValue());
+            if (StringUtils.isNotEmpty(inviterId)) {
+                cache.put(CachePrefix.INVITER.getPrefix() + memberId, inviterId);
+            }
+        }
+    }
+
+
 }

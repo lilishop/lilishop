@@ -42,6 +42,9 @@ public class PriceDetailDTO implements Serializable {
     @ApiModelProperty(value = "优惠金额")
     private Double discountPrice;
 
+    @ApiModelProperty(value = "优惠金额")
+    private String discountPriceDetail;
+
     @ApiModelProperty(value = "优惠券金额")
     private Double couponPrice;
 

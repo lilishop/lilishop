@@ -111,9 +111,11 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     public IPage<MemberCoupon> getMemberCoupons(MemberCouponSearchParams param, PageVO pageVo) {
         QueryWrapper<MemberCoupon> queryWrapper = param.queryWrapper();
         Page<MemberCoupon> page = this.page(PageUtil.initPage(pageVo), queryWrapper);
-        if (page.getRecords().stream().anyMatch(i -> i.getEndTime().before(new Date()))) {
-            this.expireInvalidMemberCoupon(param.getMemberId());
-            return this.page(PageUtil.initPage(pageVo), queryWrapper);
+        if (page.getRecords() != null && page.getRecords().size() > 0) {
+            if (page.getRecords().stream().anyMatch(i -> i.getEndTime().before(new Date()))) {
+                this.expireInvalidMemberCoupon(param.getMemberId());
+                return this.page(PageUtil.initPage(pageVo), queryWrapper);
+            }
         }
         return page;
     }
