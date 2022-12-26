@@ -1,7 +1,9 @@
 package cn.lili.modules.order.order.entity.dto;
 
 
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.utils.CurrencyUtil;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.promotion.entity.vos.PromotionSkuVO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -42,6 +44,9 @@ public class PriceDetailDTO implements Serializable {
     @ApiModelProperty(value = "优惠金额")
     private Double discountPrice;
 
+    /**
+     * @See List<DiscountPriceItem>
+     */
     @ApiModelProperty(value = "优惠详情")
     private String discountPriceDetail;
 
@@ -102,6 +107,29 @@ public class PriceDetailDTO implements Serializable {
      */
     @ApiModelProperty(value = "参与的促销活动")
     private List<PromotionSkuVO> joinPromotion;
+
+
+    /**
+     * 设置促销详情
+     *
+     * @param discountPriceItem 促销信息
+     */
+    public void setDiscountPriceItem(DiscountPriceItem discountPriceItem) {
+        List<DiscountPriceItem> discountPriceItems = new ArrayList<>();
+        this.discountPriceDetail = JSONUtil.toJsonStr(discountPriceItems);
+    }
+
+    /**
+     * 设置促销详情
+     *
+     * @param discountPriceItem 促销信息
+     */
+    public void addDiscountPriceItem(DiscountPriceItem discountPriceItem) {
+        List<DiscountPriceItem> discountPriceItems = StringUtils.isEmpty(this.discountPriceDetail) ?
+                new ArrayList<>() : JSONUtil.toList(this.discountPriceDetail, DiscountPriceItem.class);
+
+        this.discountPriceDetail = JSONUtil.toJsonStr(discountPriceItems.add(discountPriceItem));
+    }
 
 
     public Double getOriginalPrice() {

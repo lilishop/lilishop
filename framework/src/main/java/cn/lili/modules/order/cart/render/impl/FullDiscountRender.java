@@ -84,7 +84,7 @@ public class FullDiscountRender implements CartRenderStep {
                         if (isFull(countPrice, cart)) {
                             //如果减现金
                             if (Boolean.TRUE.equals(fullDiscount.getFullMinusFlag())) {
-                                promotionPriceUtil.recountPrice(tradeDTO, skuPriceDetail, fullDiscount.getFullMinus(), PromotionTypeEnum.FULL_DISCOUNT);
+                                promotionPriceUtil.recountPrice(tradeDTO, skuPriceDetail, fullDiscount.getFullMinus(), PromotionTypeEnum.FULL_DISCOUNT, fullDiscountVO.getId());
                             }
                             //打折
                             else if (Boolean.TRUE.equals(fullDiscount.getFullRateFlag())) {

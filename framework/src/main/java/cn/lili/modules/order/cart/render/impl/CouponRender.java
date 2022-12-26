@@ -269,7 +269,7 @@ public class CouponRender implements CartRenderStep {
         //分发优惠券
         promotionPriceUtil.recountPrice(tradeDTO, memberCouponDTO.getSkuDetail(), memberCouponDTO.getMemberCoupon().getPrice(),
                 Boolean.TRUE.equals(coupon.getPlatformFlag()) ?
-                        PromotionTypeEnum.PLATFORM_COUPON : PromotionTypeEnum.COUPON);
+                        PromotionTypeEnum.PLATFORM_COUPON : PromotionTypeEnum.COUPON, memberCouponDTO.getMemberCoupon().getCouponId());
         //如果是平台券 则需要计算商家承担比例
         if (Boolean.TRUE.equals(coupon.getPlatformFlag()) && coupon.getStoreCommission() > 0) {
 

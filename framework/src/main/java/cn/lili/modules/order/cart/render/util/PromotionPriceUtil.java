@@ -4,8 +4,8 @@ import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
+import cn.lili.modules.order.order.entity.dto.DiscountPriceItem;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
@@ -17,7 +17,6 @@ import java.util.Map;
  * @author paulG
  * @since 2020/8/21
  **/
-@Service
 @Slf4j
 public class PromotionPriceUtil {
 
@@ -29,7 +28,7 @@ public class PromotionPriceUtil {
      * @param discountPrice      需要分发的优惠金额
      * @param promotionTypeEnum  促销类型
      */
-    public void recountPrice(TradeDTO tradeDTO, Map<String, Double> skuPromotionDetail, Double discountPrice, PromotionTypeEnum promotionTypeEnum) {
+    public void recountPrice(TradeDTO tradeDTO, Map<String, Double> skuPromotionDetail, Double discountPrice, PromotionTypeEnum promotionTypeEnum, String activityId) {
 
         // sku 促销信息非空判定
         if (skuPromotionDetail == null || skuPromotionDetail.size() == 0) {
@@ -102,6 +101,17 @@ public class PromotionPriceUtil {
 
                         cartSkuVO.getPriceDetailDTO().setCouponPrice(
                                 CurrencyUtil.add(cartSkuVO.getPriceDetailDTO().getCouponPrice(), skuDiscountPrice));
+
+                        cartSkuVO.getPriceDetailDTO().addDiscountPriceItem(
+                                DiscountPriceItem.builder()
+                                        .goodsId(cartSkuVO.getGoodsSku().getGoodsId())
+                                        .skuId(cartSkuVO.getGoodsSku().getId())
+                                        .discountPrice(skuDiscountPrice)
+                                        .promotionTypeEnum(PromotionTypeEnum.COUPON)
+                                        .promotionId(activityId)
+                                        .build()
+                        );
+
                     } else if (promotionTypeEnum == PromotionTypeEnum.PLATFORM_COUPON) {
 
                         cartSkuVO.getPriceDetailDTO().setSiteCouponPrice(
@@ -109,9 +119,32 @@ public class PromotionPriceUtil {
 
                         cartSkuVO.getPriceDetailDTO().setCouponPrice(
                                 CurrencyUtil.add(cartSkuVO.getPriceDetailDTO().getCouponPrice(), cartSkuVO.getPriceDetailDTO().getSiteCouponPrice()));
+
+
+                        cartSkuVO.getPriceDetailDTO().addDiscountPriceItem(
+                                DiscountPriceItem.builder()
+                                        .goodsId(cartSkuVO.getGoodsSku().getGoodsId())
+                                        .skuId(cartSkuVO.getGoodsSku().getId())
+                                        .discountPrice(skuDiscountPrice)
+                                        .promotionTypeEnum(PromotionTypeEnum.PLATFORM_COUPON)
+                                        .promotionId(activityId)
+                                        .build()
+                        );
+
                     } else {
                         cartSkuVO.getPriceDetailDTO().setDiscountPrice(
                                 CurrencyUtil.add(cartSkuVO.getPriceDetailDTO().getDiscountPrice(), skuDiscountPrice));
+
+                        //目前剩余的只有满减金额活动。后续如果需要调整，这里建议传递活动类型进来
+                        cartSkuVO.getPriceDetailDTO().addDiscountPriceItem(
+                                DiscountPriceItem.builder()
+                                        .goodsId(cartSkuVO.getGoodsSku().getGoodsId())
+                                        .skuId(cartSkuVO.getGoodsSku().getId())
+                                        .discountPrice(skuDiscountPrice)
+                                        .promotionTypeEnum(PromotionTypeEnum.FULL_DISCOUNT)
+                                        .promotionId(activityId)
+                                        .build()
+                        );
                     }
                 }
             }

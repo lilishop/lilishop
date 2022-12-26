@@ -2,6 +2,7 @@ package cn.lili.modules.order.order.entity.dto;
 
 import cn.lili.common.enums.PromotionTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -12,6 +13,7 @@ import lombok.Data;
  * @Description:
  * @since 2022/12/23 14:52
  */
+@Builder
 @Data
 public class DiscountPriceItem {
 
