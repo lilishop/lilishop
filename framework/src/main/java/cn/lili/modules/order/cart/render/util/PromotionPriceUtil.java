@@ -28,7 +28,7 @@ public class PromotionPriceUtil {
      * @param discountPrice      需要分发的优惠金额
      * @param promotionTypeEnum  促销类型
      */
-    public void recountPrice(TradeDTO tradeDTO, Map<String, Double> skuPromotionDetail, Double discountPrice, PromotionTypeEnum promotionTypeEnum, String activityId) {
+    public static void recountPrice(TradeDTO tradeDTO, Map<String, Double> skuPromotionDetail, Double discountPrice, PromotionTypeEnum promotionTypeEnum, String activityId) {
 
         // sku 促销信息非空判定
         if (skuPromotionDetail == null || skuPromotionDetail.size() == 0) {
@@ -163,7 +163,7 @@ public class PromotionPriceUtil {
      * @param promotionId   活动ID
      * @return 是否有效
      */
-    private boolean checkPromotionValidTime(Date startTime, Date endTime, String promotionType, String promotionId) {
+    private static boolean checkPromotionValidTime(Date startTime, Date endTime, String promotionType, String promotionId) {
         long now = System.currentTimeMillis();
         if (startTime.getTime() > now) {
             log.error("商品ID为{}的{}活动开始时间小于当时时间，活动未开始！", promotionId, promotionType);

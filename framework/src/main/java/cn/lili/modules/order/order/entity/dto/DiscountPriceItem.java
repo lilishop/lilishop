@@ -2,8 +2,10 @@ package cn.lili.modules.order.order.entity.dto;
 
 import cn.lili.common.enums.PromotionTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 优惠信息详情
@@ -15,6 +17,8 @@ import lombok.Data;
  */
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class DiscountPriceItem {
 
 

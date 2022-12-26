@@ -196,7 +196,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
         }
 
         //如果优惠券使用时间类型不合法，抛出异常，抛出异常
-        if (CouponRangeDayEnum.exist(coupon.getRangeDayType())) {
+        if (!CouponRangeDayEnum.exist(coupon.getRangeDayType())) {
             throw new ServiceException(ResultCode.COUPON_RANGE_ERROR);
         }
 

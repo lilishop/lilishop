@@ -1,9 +1,7 @@
 package cn.lili.modules.order.order.entity.dto;
 
 
-import cn.hutool.json.JSONUtil;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.promotion.entity.vos.PromotionSkuVO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -44,11 +42,8 @@ public class PriceDetailDTO implements Serializable {
     @ApiModelProperty(value = "优惠金额")
     private Double discountPrice;
 
-    /**
-     * @See List<DiscountPriceItem>
-     */
     @ApiModelProperty(value = "优惠详情")
-    private String discountPriceDetail;
+    private List<DiscountPriceItem> discountPriceDetail;
 
     @ApiModelProperty(value = "优惠券金额")
     private Double couponPrice;
@@ -116,7 +111,8 @@ public class PriceDetailDTO implements Serializable {
      */
     public void setDiscountPriceItem(DiscountPriceItem discountPriceItem) {
         List<DiscountPriceItem> discountPriceItems = new ArrayList<>();
-        this.discountPriceDetail = JSONUtil.toJsonStr(discountPriceItems);
+        discountPriceItems.add(discountPriceItem);
+        this.discountPriceDetail = discountPriceItems;
     }
 
     /**
@@ -125,10 +121,7 @@ public class PriceDetailDTO implements Serializable {
      * @param discountPriceItem 促销信息
      */
     public void addDiscountPriceItem(DiscountPriceItem discountPriceItem) {
-        List<DiscountPriceItem> discountPriceItems = StringUtils.isEmpty(this.discountPriceDetail) ?
-                new ArrayList<>() : JSONUtil.toList(this.discountPriceDetail, DiscountPriceItem.class);
-
-        this.discountPriceDetail = JSONUtil.toJsonStr(discountPriceItems.add(discountPriceItem));
+        discountPriceDetail.add(discountPriceItem);
     }
 
 
@@ -165,6 +158,7 @@ public class PriceDetailDTO implements Serializable {
         billPrice = 0d;
         settlementPrice = 0d;
 
+        discountPriceDetail = new ArrayList<>();
 
         joinPromotion = new ArrayList<>();
     }
@@ -234,6 +228,8 @@ public class PriceDetailDTO implements Serializable {
         flowPrice = CurrencyUtil.add(flowPrice, priceDetailDTO.getFlowPrice());
         billPrice = CurrencyUtil.add(billPrice, priceDetailDTO.getBillPrice());
         settlementPrice = CurrencyUtil.add(settlementPrice, priceDetailDTO.getSettlementPrice());
+
+        discountPriceDetail.addAll(priceDetailDTO.getDiscountPriceDetail());
 
     }
 
