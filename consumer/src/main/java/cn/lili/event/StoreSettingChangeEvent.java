@@ -14,5 +14,5 @@ public interface StoreSettingChangeEvent {
      *
      * @param store 店铺信息
      */
-    void StoreSettingChange(Store store);
+    void storeSettingChange(Store store);
 }

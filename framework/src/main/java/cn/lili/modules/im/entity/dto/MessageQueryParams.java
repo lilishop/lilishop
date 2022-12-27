@@ -3,6 +3,7 @@ package cn.lili.modules.im.entity.dto;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.StringUtils;
+import cn.lili.common.vo.PageVO;
 import cn.lili.modules.im.entity.dos.ImMessage;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.Data;
@@ -15,7 +16,7 @@ import lombok.Data;
  * 2022-01-20 17:16
  */
 @Data
-public class MessageQueryParams {
+public class MessageQueryParams extends PageVO {
     /**
      * 聊天窗口
      */
@@ -42,8 +43,8 @@ public class MessageQueryParams {
         if (StringUtils.isNotEmpty(lastMessageId)) {
             lambdaQueryWrapper.lt(ImMessage::getId, lastMessageId);
         }
-        lambdaQueryWrapper.orderByDesc(ImMessage::getId);
-        lambdaQueryWrapper.last("limit " + num);
+        lambdaQueryWrapper.orderByDesc(ImMessage::getCreateTime);
+//        lambdaQueryWrapper.last("limit " + num);
         return lambdaQueryWrapper;
     }
 }

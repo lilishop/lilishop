@@ -19,39 +19,40 @@ public class ImTalkVO extends BaseTenantEntity {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * id
-     */
+    @ApiModelProperty("id")
     private String id;
-    /**
-     * 用户 id
-     */
+
+    @ApiModelProperty("用户 id")
     private String userId;
 
-    /**
-     * 置顶
-     */
+    @ApiModelProperty("置顶")
     private Boolean top;
 
-    /**
-     * 用户 不可见
-     */
+    @ApiModelProperty("用户 不可见")
     private Boolean disable;
 
-    /**
-     * 用户名字
-     */
+    @ApiModelProperty("用户名字")
     private String name;
 
-    /**
-     * 用户头像
-     */
+    @ApiModelProperty("用户头像")
     private String face;
+
+    @ApiModelProperty("店铺标识")
+    private Boolean storeFlag;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "最后聊天时间", hidden = true)
     private Date lastTalkTime;
+
+    @ApiModelProperty(value = "最后聊天内容")
+    private String lastTalkMessage;
+
+    @ApiModelProperty(value = "最后发送消息类型")
+    private String lastMessageType;
+
+    @ApiModelProperty(value = "未读数量")
+    private Long unread;
 
     public ImTalkVO() {
 
@@ -64,15 +65,18 @@ public class ImTalkVO extends BaseTenantEntity {
             disable = imTalk.getDisable1();
             name = imTalk.getName1();
             face = imTalk.getFace1();
+            storeFlag = imTalk.getStoreFlag1();
         } else {
             userId = imTalk.getUserId2();
             top = imTalk.getTop2();
             disable = imTalk.getDisable2();
             name = imTalk.getName2();
             face = imTalk.getFace2();
+            storeFlag = imTalk.getStoreFlag2();
         }
-
+        lastTalkMessage = imTalk.getLastTalkMessage();
         lastTalkTime = imTalk.getLastTalkTime();
+        lastMessageType = imTalk.getLastMessageType();
         id = imTalk.getId();
     }
 }

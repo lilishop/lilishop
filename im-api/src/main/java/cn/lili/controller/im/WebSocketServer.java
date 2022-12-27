@@ -7,16 +7,20 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.im.config.CustomSpringConfigurator;
 import cn.lili.modules.im.entity.dos.ImMessage;
+import cn.lili.modules.im.entity.dos.ImTalk;
 import cn.lili.modules.im.entity.enums.MessageResultType;
 import cn.lili.modules.im.entity.vo.MessageOperation;
 import cn.lili.modules.im.entity.vo.MessageVO;
 import cn.lili.modules.im.service.ImMessageService;
+import cn.lili.modules.im.service.ImTalkService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.service.StoreService;
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -49,6 +53,9 @@ public class WebSocketServer {
 
     @Autowired
     private StoreService storeService;
+
+    @Autowired
+    private ImTalkService imTalkService;
 
 
     @Autowired
@@ -116,16 +123,12 @@ public class WebSocketServer {
                 break;
             case MESSAGE:
                 //保存消息
-                ImMessage imMessage = new ImMessage();
-                imMessage.setFromUser(messageOperation.getFrom());
-                imMessage.setMessageType(messageOperation.getMessageType());
-                imMessage.setIsRead(false);
-                imMessage.setText(messageOperation.getContext());
-                imMessage.setTalkId(messageOperation.getTalkId());
-                imMessage.setCreateTime(new Date());
-                imMessage.setToUser(messageOperation.getTo());
-                imMessage.setId(SnowFlake.getIdStr());
+                ImMessage imMessage = new ImMessage(messageOperation);
                 imMessageService.save(imMessage);
+                //修改最后消息信息
+                imTalkService.update(new LambdaUpdateWrapper<ImTalk>().eq(ImTalk::getId,messageOperation.getTalkId()).set(ImTalk::getLastTalkMessage,messageOperation.getContext())
+                        .set(ImTalk::getLastTalkTime,imMessage.getCreateTime())
+                        .set(ImTalk::getLastMessageType,imMessage.getMessageType()));
                 //发送消息
                 sendMessage(messageOperation.getTo(), new MessageVO(MessageResultType.MESSAGE, imMessage));
                 break;

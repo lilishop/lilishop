@@ -7,7 +7,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
@@ -18,64 +20,65 @@ import java.util.Date;
 @Data
 @TableName("li_im_talk")
 @ApiModel(value = "聊天")
+@NoArgsConstructor
+@AllArgsConstructor
 public class ImTalk extends BaseTenantEntity {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 用户1 id小的排在1
-     */
+    @ApiModelProperty("用户1 id")
     private String userId1;
-    /**
-     * 用户1 id大的排在2
-     */
+
+    @ApiModelProperty("用户2 id")
     private String userId2;
 
-    /**
-     * 用户1置顶
-     */
+    @ApiModelProperty("用户1置顶")
     private Boolean top1;
 
-    /**
-     * 用户2置顶
-     */
+    @ApiModelProperty("用户2置顶")
     private Boolean top2;
-    /**
-     * 用户1 不可见
-     */
+
+    @ApiModelProperty("用户1 不可见")
     private Boolean disable1;
 
-    /**
-     * 用户2 不可见
-     */
+    @ApiModelProperty("用户2 不可见")
     private Boolean disable2;
-    /**
-     * 用户1名字
-     */
+
+    @ApiModelProperty("用户1名字")
     private String name1;
 
-    /**
-     * 用户2名字
-     */
+    @ApiModelProperty("用户2名字")
     private String name2;
-    /**
-     * 用户1头像
-     */
+
+    @ApiModelProperty("用户1头像")
     private String face1;
 
-    /**
-     * 用户2头像
-     */
+    @ApiModelProperty("用户2头像")
     private String face2;
+
+    @ApiModelProperty("用户1的店铺标识")
+    private Boolean storeFlag1;
+
+    @ApiModelProperty("用户2的店铺标识")
+    private Boolean storeFlag2;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "最后聊天时间", hidden = true)
     private Date lastTalkTime;
 
-    public ImTalk() {
+    @ApiModelProperty(value = "最后聊天内容")
+    private String lastTalkMessage;
 
-    }
+    @ApiModelProperty(value = "最后发送消息类型")
+    private String lastMessageType;
+
+    @ApiModelProperty(value = "坐席Id")
+    private String tenantId;
+
+    @ApiModelProperty(value = "坐席名称")
+    private String tenantName;
+
 
     public ImTalk(String userId1, String userId2,
                   String face1, String face2,
@@ -87,6 +90,8 @@ public class ImTalk extends BaseTenantEntity {
         this.top2 = false;
         this.disable1 = false;
         this.disable2 = false;
+        this.storeFlag1 = false;
+        this.storeFlag2 = false;
         this.setId(SnowFlake.getIdStr());
         this.lastTalkTime = new Date();
         this.face1 = face1;

@@ -1,6 +1,7 @@
 package cn.lili.modules.im.service;
 
 import cn.lili.modules.im.entity.dos.ImMessage;
+import cn.lili.modules.im.entity.dto.MessageQueryParams;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -41,4 +42,22 @@ public interface ImMessageService extends IService<ImMessage> {
      * @return
      */
     Boolean hasNewMessage(String accessToken);
+
+    /**
+     * 分页获取消息列表
+     * @param messageQueryParams 查询条件
+     * @return 消息列表
+     */
+    List<ImMessage> getList(MessageQueryParams messageQueryParams);
+
+    /**
+     * 获取所有未读消息
+     * @return
+     */
+    Long unreadMessageCount();
+
+    /**
+     * 清空所有未读消息
+     */
+    void cleanUnreadMessage();
 }

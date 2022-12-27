@@ -1,7 +1,10 @@
 package cn.lili.modules.im.service;
 
 import cn.lili.modules.im.entity.dos.ImTalk;
+import cn.lili.modules.im.entity.vo.ImTalkVO;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * 聊天 业务层
@@ -33,4 +36,16 @@ public interface ImTalkService extends IService<ImTalk> {
      * @param id
      */
     void disable(String id);
+
+    /**
+     * 获取用户聊天列表
+     * @return
+     */
+    List<ImTalkVO> getUserTalkList(String userName);
+
+    /**
+     * 获取商家聊天列表
+     * @return
+     */
+    List<ImTalkVO> getStoreTalkList();
 }

@@ -1,10 +1,16 @@
 package cn.lili.modules.im.entity.dos;
 
+import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.im.entity.enums.MessageTypeEnum;
+import cn.lili.modules.im.entity.vo.MessageOperation;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Date;
 
 /**
  * @author Chopper
@@ -12,6 +18,8 @@ import lombok.Data;
 @Data
 @TableName("li_im_message")
 @ApiModel(value = "Im消息")
+@NoArgsConstructor
+@AllArgsConstructor
 public class ImMessage extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
@@ -45,5 +53,17 @@ public class ImMessage extends BaseEntity {
      * 消息实体
      */
     private String text;
+
+
+    public ImMessage(MessageOperation messageOperation){
+        this.setFromUser(messageOperation.getFrom());
+        this.setMessageType(messageOperation.getMessageType());
+        this.setIsRead(false);
+        this.setText(messageOperation.getContext());
+        this.setTalkId(messageOperation.getTalkId());
+        this.setCreateTime(new Date());
+        this.setToUser(messageOperation.getTo());
+        this.setId(SnowFlake.getIdStr());
+    }
 
 }

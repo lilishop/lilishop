@@ -33,7 +33,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @Api(tags = "管理员")
-@RequestMapping("/manager/im/passport/user")
+@RequestMapping("/im/manager/im/passport/user")
 @Validated
 public class ImManagerController {
     @Autowired

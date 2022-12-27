@@ -8,8 +8,10 @@ import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.im.entity.dos.ImTalk;
 import cn.lili.modules.im.entity.vo.ImTalkVO;
 import cn.lili.modules.im.service.ImTalkService;
+import cn.lili.modules.store.service.StoreService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +27,15 @@ import java.util.stream.Collectors;
  */
 @RestController
 @Api(tags = "聊天接口")
-@RequestMapping("/lili/imTalk")
+@RequestMapping("/im/talk")
 @Transactional(rollbackFor = Exception.class)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ImTalkController {
 
     private final ImTalkService imTalkService;
+
+    @Autowired
+    private StoreService storeService;
 
     @GetMapping(value = "/{id}")
     @ApiOperation(value = "查看聊天详情")
@@ -47,6 +52,13 @@ public class ImTalkController {
         return ResultUtil.data(imTalkService.getTalkByUser(authUser.getId(), uid));
     }
 
+    @GetMapping(value = "/by/user/{userId}")
+    @ApiOperation(value = "查看与某人聊天详情")
+    public ResultMessage<ImTalkVO> getByUser(@PathVariable String userId) {
+        AuthUser authUser = UserContext.getCurrentUser();
+        return ResultUtil.data(new ImTalkVO(imTalkService.getTalkByUser(authUser.getId(), userId), authUser.getId()));
+    }
+
     @GetMapping(value = "/top")
     @ApiOperation(value = "查看与某人聊天详情")
     public ResultMessage top(String id, Boolean top) {
@@ -56,32 +68,15 @@ public class ImTalkController {
 
     @GetMapping("/list")
     @ApiOperation(value = "分页获取聊天")
-    public ResultMessage<List<ImTalkVO>> getByPage() {
-        AuthUser authUser = UserContext.getCurrentUser();
-        LambdaQueryWrapper<ImTalk> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ImTalk::getUserId1, authUser.getId()).or().eq(ImTalk::getUserId2, authUser.getId());
-        List<ImTalk> imTalks = imTalkService.list(queryWrapper);
-
-        List<ImTalkVO> results = imTalks.stream().map(imTalk -> {
-            return new ImTalkVO(imTalk, authUser.getId());
-        }).collect(Collectors.toList());
-
-        return ResultUtil.data(results);
+    @ApiImplicitParam(name = "userName", value = "用户名称", paramType = "query", dataType = "String")
+    public ResultMessage<List<ImTalkVO>> getUserTalkList(String userName) {
+        return ResultUtil.data(imTalkService.getUserTalkList(userName));
     }
 
     @GetMapping("/store/list")
     @ApiOperation(value = "分页获取商家聊天")
     public ResultMessage<List<ImTalkVO>> getStoreTalkList() {
-        AuthUser authUser = UserContext.getCurrentUser();
-        LambdaQueryWrapper<ImTalk> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ImTalk::getUserId1, authUser.getStoreId()).or().eq(ImTalk::getUserId2, authUser.getStoreId());
-        List<ImTalk> imTalks = imTalkService.list(queryWrapper);
-
-        List<ImTalkVO> results = imTalks.stream().map(imTalk -> {
-            return new ImTalkVO(imTalk, authUser.getStoreId());
-        }).collect(Collectors.toList());
-
-        return ResultUtil.data(results);
+        return ResultUtil.data(imTalkService.getStoreTalkList());
     }
 
     @DeleteMapping(value = "/{id}")

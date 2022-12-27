@@ -94,7 +94,14 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         List<String> categories = skus.stream().map(GoodsSku::getCategoryPath).collect(Collectors.toList());
         List<String> skuIds = skus.stream().map(GoodsSku::getId).collect(Collectors.toList());
         List<String> categoriesPath = new ArrayList<>();
-        categories.forEach(i -> categoriesPath.addAll(Arrays.asList(i.split(","))));
+        for (String category : categories) {
+            if(CharSequenceUtil.isNotEmpty(category) && CharSequenceUtil.isNotBlank(category)){
+                categoriesPath.addAll(Arrays.asList(category.split(",")));
+            }
+
+        }
+
+//        categories.forEach(i -> categoriesPath.addAll(Arrays.asList(i.split(","))));
         QueryWrapper<PromotionGoods> queryWrapper = new QueryWrapper<>();
 
         queryWrapper.and(i -> i.or(j -> j.in(SKU_ID_COLUMN, skuIds))

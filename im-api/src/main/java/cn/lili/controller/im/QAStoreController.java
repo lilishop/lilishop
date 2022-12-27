@@ -25,7 +25,7 @@ import javax.validation.constraints.NotNull;
 @Slf4j
 @RestController
 @Api(tags = "管理端,自定义分词接口")
-@RequestMapping("/store/qa")
+@RequestMapping("/im/store/qa")
 public class QAStoreController {
 
     @Autowired

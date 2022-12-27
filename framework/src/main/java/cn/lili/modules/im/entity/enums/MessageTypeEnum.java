@@ -17,5 +17,6 @@ public enum MessageTypeEnum {
     MESSAGE,
     PICTURE,
     VOICE,
+    GOODS,
     VIDEO
 }

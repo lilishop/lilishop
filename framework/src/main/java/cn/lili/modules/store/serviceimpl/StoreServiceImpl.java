@@ -11,12 +11,16 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsService;
+import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.Clerk;
+import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dto.ClerkAddDTO;
 import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.member.service.ClerkService;
+import cn.lili.modules.member.service.FootprintService;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
@@ -70,6 +74,9 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
      */
     @Autowired
     private GoodsService goodsService;
+
+    @Autowired
+    private GoodsSkuService goodsSkuService;
     /**
      * 店铺详情
      */
@@ -81,6 +88,9 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
 
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
+
+    @Autowired
+    private FootprintService footprintService;
 
     @Autowired
     private Cache cache;
@@ -341,6 +351,18 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             clerkList.add(new Clerk(store));
         }
         clerkService.saveBatch(clerkList);
+    }
+
+    @Override
+    public List<GoodsSku> getToMemberHistory(String memberId) {
+        AuthUser currentUser = UserContext.getCurrentUser();
+        List<String> skuIdList = new ArrayList<>();
+        for (FootPrint footPrint : footprintService.list(new LambdaUpdateWrapper<FootPrint>().eq(FootPrint::getStoreId, currentUser.getStoreId()).eq(FootPrint::getMemberId, memberId))) {
+            if(footPrint.getSkuId() != null){
+                skuIdList.add(footPrint.getSkuId());
+            }
+        }
+        return goodsSkuService.getGoodsSkuByIdFromCache(skuIdList);
     }
 
     /**

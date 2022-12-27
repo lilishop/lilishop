@@ -21,7 +21,7 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "Im消息接口")
-@RequestMapping("/lili/imMessage")
+@RequestMapping("/im/message")
 @Transactional(rollbackFor = Exception.class)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ImMessageController {
@@ -31,7 +31,6 @@ public class ImMessageController {
     @GetMapping(value = "/{id}")
     @ApiOperation(value = "查看Im消息详情")
     public ResultMessage<ImMessage> get(@PathVariable String id) {
-
         ImMessage imMessage = imMessageService.getById(id);
         return new ResultUtil<ImMessage>().setData(imMessage);
     }
@@ -39,14 +38,13 @@ public class ImMessageController {
     @GetMapping
     @ApiOperation(value = "分页获取Im消息")
     public ResultMessage<List<ImMessage>> historyMessage(MessageQueryParams messageQueryParams) {
-        List<ImMessage> data = imMessageService.list(messageQueryParams.initQueryWrapper());
+        List<ImMessage> data = imMessageService.getList(messageQueryParams);
         return new ResultUtil<List<ImMessage>>().setData(data);
     }
 
     @PostMapping
     @ApiOperation(value = "新增Im消息")
     public ResultMessage<ImMessage> save(ImMessage imMessage) {
-
         if (imMessageService.save(imMessage)) {
             return new ResultUtil<ImMessage>().setData(imMessage);
         }
@@ -65,18 +63,27 @@ public class ImMessageController {
     @DeleteMapping(value = "/{ids}")
     @ApiOperation(value = "删除Im消息")
     public ResultMessage<Object> delAllByIds(@PathVariable List ids) {
-
         imMessageService.removeByIds(ids);
         return ResultUtil.success(ResultCode.SUCCESS);
     }
 
 
     @GetMapping(value = "/newMessage")
-    @ApiOperation(value = "删除Im消息")
+    @ApiOperation(value = "查看是否有新消息")
     public ResultMessage<Boolean> hasNewMessage(String accessToken) {
-
         return ResultUtil.data(imMessageService.hasNewMessage(accessToken));
     }
 
+    @GetMapping(value = "/unredMessage")
+    @ApiOperation(value = "获取所有未读消息")
+    public ResultMessage<Long> getUnreadMessageCount() {
+        return ResultUtil.data(imMessageService.unreadMessageCount());
+    }
 
+    @PutMapping(value = "/clean/unred")
+    @ApiOperation(value = "清除所有未读消息")
+    public ResultMessage<Object> cleanUnreadMessage() {
+        imMessageService.cleanUnreadMessage();
+        return ResultUtil.success();
+    }
 }

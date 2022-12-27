@@ -42,7 +42,7 @@ public class ImTalkExecute implements MemberInfoChangeEvent, StoreSettingChangeE
     }
 
     @Override
-    public void StoreSettingChange(Store store) {
+    public void storeSettingChange(Store store) {
         //当与UserId1相等时
         List<ImTalk> imTalkList1 = imTalkService.list(new LambdaQueryWrapper<ImTalk>().eq(ImTalk::getUserId1, store.getId()));
         for (ImTalk imTalk : imTalkList1) {
