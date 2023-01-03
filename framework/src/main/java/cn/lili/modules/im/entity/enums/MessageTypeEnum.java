@@ -18,5 +18,6 @@ public enum MessageTypeEnum {
     PICTURE,
     VOICE,
     GOODS,
+    ORDER,
     VIDEO
 }

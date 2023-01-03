@@ -1,4 +1,4 @@
-package cn.lili.modules.member.entity.dto;
+package cn.lili.modules.im.entity.dto;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.vo.PageVO;
@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel
-public class FootPrintQueryParams extends PageVO {
+public class ImQueryParams extends PageVO {
 
     @ApiModelProperty("用户Id")
     private String memberId;

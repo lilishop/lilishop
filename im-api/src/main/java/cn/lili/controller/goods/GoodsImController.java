@@ -3,28 +3,19 @@ package cn.lili.controller.goods;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.goods.entity.dos.Goods;
-import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
-import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
-import cn.lili.modules.search.entity.dos.EsGoodsIndex;
-import cn.lili.modules.search.entity.dos.EsGoodsRelatedInfo;
-import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import cn.lili.modules.search.service.HotWordsService;
 import cn.lili.modules.statistics.aop.PageViewPoint;
 import cn.lili.modules.statistics.aop.enums.PageViewEnum;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,13 +26,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 买家端,商品接口
+ * IM端,商品接口
  *
- * @author Chopper
- * @since 2020/11/16 10:06 下午
+ * @author chc
+ * @since 2022-12-28 18:30:33
  */
 @Slf4j
-@Api(tags = "买家端,商品接口")
+@Api(tags = "IM端,商品接口")
 @RestController
 @RequestMapping("/im/goods/goods")
 public class GoodsImController {

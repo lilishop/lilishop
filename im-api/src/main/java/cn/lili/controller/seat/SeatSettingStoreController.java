@@ -1,4 +1,4 @@
-package cn.lili.controller.im;
+package cn.lili.controller.seat;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;

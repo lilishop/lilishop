@@ -44,19 +44,17 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
         queryWrapper.eq(FootPrint::getGoodsId, footPrint.getGoodsId());
         //如果已存在某商品记录，则更新其修改时间
         //如果不存在则添加记录
+        //为了保证足迹的排序,将原本足迹删除后重新添加
         List<FootPrint> oldPrints = list(queryWrapper);
         if (oldPrints != null && !oldPrints.isEmpty()) {
             FootPrint oldPrint = oldPrints.get(0);
-            oldPrint.setSkuId(footPrint.getSkuId());
-            this.updateById(oldPrint);
-            return oldPrint;
-        } else {
-            footPrint.setCreateTime(new Date());
-            this.save(footPrint);
-            //删除超过100条后的记录
-            this.baseMapper.deleteLastFootPrint(footPrint.getMemberId());
-            return footPrint;
+            this.removeById(oldPrint.getId());
         }
+        footPrint.setCreateTime(new Date());
+        this.save(footPrint);
+        //删除超过100条后的记录
+        this.baseMapper.deleteLastFootPrint(footPrint.getMemberId());
+        return footPrint;
     }
 
     @Override
