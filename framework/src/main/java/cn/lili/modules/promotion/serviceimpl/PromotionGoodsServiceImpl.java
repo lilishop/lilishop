@@ -5,6 +5,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
@@ -94,7 +95,12 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         List<String> categories = skus.stream().map(GoodsSku::getCategoryPath).collect(Collectors.toList());
         List<String> skuIds = skus.stream().map(GoodsSku::getId).collect(Collectors.toList());
         List<String> categoriesPath = new ArrayList<>();
-        categories.forEach(i -> categoriesPath.addAll(Arrays.asList(i.split(","))));
+        categories.forEach(i -> {
+                    if (StringUtils.isNotEmpty(i)) {
+                        categoriesPath.addAll(Arrays.asList(i.split(",")));
+                    }
+                }
+        );
         QueryWrapper<PromotionGoods> queryWrapper = new QueryWrapper<>();
 
         queryWrapper.and(i -> i.or(j -> j.in(SKU_ID_COLUMN, skuIds))
