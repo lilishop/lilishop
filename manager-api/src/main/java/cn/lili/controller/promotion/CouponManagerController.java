@@ -10,7 +10,9 @@ import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dto.search.CouponSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
+import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
 import cn.lili.modules.promotion.tools.PromotionTools;
@@ -109,6 +111,14 @@ public class CouponManagerController {
         );
         return ResultUtil.data(data);
 
+    }
+
+    @ApiOperation(value = "获取优惠券领取详情")
+    @GetMapping(value = "/received")
+    public ResultMessage<IPage<MemberCouponVO>> getReceiveByPage(MemberCouponSearchParams searchParams,
+                                                                 PageVO page) {
+        IPage<MemberCouponVO> result = memberCouponService.getMemberCouponsPage(PageUtil.initPage(page), searchParams);
+        return ResultUtil.data(result);
     }
 
     private void setStoreInfo(CouponVO couponVO) {
