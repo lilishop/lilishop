@@ -6,6 +6,7 @@ import cn.lili.modules.goods.entity.vos.CategoryVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 商品分类业务层
@@ -40,6 +41,14 @@ public interface CategoryService extends IService<Category> {
      * @return 商品分类列表
      */
     List<Category> listByIdsOrderByLevel(List<String> ids);
+
+    /**
+     * 根据分类id集合获取所有分类根据层级排序
+     *
+     * @param ids 分类ID集合
+     * @return 商品分类列表
+     */
+    List<Map<String, Object>> listMapsByIdsOrderByLevel(List<String> ids, String columns);
 
     /**
      * 获取分类树

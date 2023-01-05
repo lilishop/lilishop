@@ -74,20 +74,30 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
 
     @Override
     public List<SeckillTimelineVO> getSeckillTimeline() {
-        //秒杀活动缓存key
-        return getSeckillTimelineInfo();
+        try {
+            //秒杀活动缓存key
+            return getSeckillTimelineInfo();
+        } catch (Exception e) {
+            log.error("获取秒杀时间轴失败", e);
+            return new ArrayList<>();
+        }
     }
 
     @Override
     public List<SeckillGoodsVO> getSeckillGoods(Integer timeline) {
-        List<SeckillGoodsVO> seckillGoodsVoS = new ArrayList<>();
-        //获取
-        List<SeckillTimelineVO> seckillTimelineToCache = getSeckillTimelineInfo();
-        Optional<SeckillTimelineVO> first = seckillTimelineToCache.stream().filter(i -> i.getTimeLine().equals(timeline)).findFirst();
-        if (first.isPresent()) {
-            seckillGoodsVoS = first.get().getSeckillGoodsList();
+        try {
+            List<SeckillGoodsVO> seckillGoodsVoS = new ArrayList<>();
+            //获取
+            List<SeckillTimelineVO> seckillTimelineToCache = getSeckillTimelineInfo();
+            Optional<SeckillTimelineVO> first = seckillTimelineToCache.stream().filter(i -> i.getTimeLine().equals(timeline)).findFirst();
+            if (first.isPresent()) {
+                seckillGoodsVoS = first.get().getSeckillGoodsList();
+            }
+            return seckillGoodsVoS;
+        } catch (Exception e) {
+            log.error("获取秒杀商品失败", e);
+            return new ArrayList<>();
         }
-        return seckillGoodsVoS;
     }
 
     @Override
@@ -161,7 +171,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         List<PromotionGoods> promotionGoodsList = new ArrayList<>();
         for (SeckillApplyVO seckillApply : seckillApplyList) {
             //获取参与活动的商品信息
-            GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(seckillApply.getSkuId());
+            GoodsSku goodsSku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(seckillApply.getSkuId());
             if (!goodsSku.getStoreId().equals(storeId)) {
                 continue;
             }
@@ -247,6 +257,10 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     }
 
     /**
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin/master
      * 更新秒杀活动时间
      *
      * @param seckill 秒杀活动
@@ -259,10 +273,12 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         List<PromotionGoods> promotionGoodsList = new ArrayList<>();
         LambdaQueryWrapper<SeckillApply> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(SeckillApply::getSeckillId, seckill.getId());
+
         List<SeckillApply> list = this.list(queryWrapper).stream().filter(i -> i.getTimeLine() != null && seckill.getHours().contains(i.getTimeLine().toString())).collect(Collectors.toList());
+
         for (SeckillApply seckillApply : list) {
             //获取参与活动的商品信息
-            GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(seckillApply.getSkuId());
+            GoodsSku goodsSku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(seckillApply.getSkuId());
             //获取促销商品
             PromotionGoods promotionGoods = this.setSeckillGoods(goodsSku, seckillApply, seckill);
             promotionGoodsList.add(promotionGoods);
@@ -339,8 +355,9 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             Arrays.sort(hoursSored);
             for (int i = 0; i < hoursSored.length; i++) {
                 SeckillTimelineVO tempTimeline = new SeckillTimelineVO();
-                boolean hoursSoredHour = (hoursSored[i] >= hour || ((i + 1) < hoursSored.length && hoursSored[i + 1] > hour) || hoursSored.length == 1);
-                if (hoursSoredHour) {
+                boolean hoursSoredHour = (hoursSored[i] >= hour || ((i + 1) < hoursSored.length && hoursSored[i + 1] > hour));
+                boolean lastHour = i == hoursSored.length - 1 && hoursSored[i] < hour;
+                if (hoursSoredHour || lastHour) {
                     SimpleDateFormat format = new SimpleDateFormat(DatePattern.NORM_DATE_PATTERN);
                     String date = format.format(new Date());
                     //当前时间的秒数
@@ -373,7 +390,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         if (!seckillApplyList.isEmpty()) {
             List<SeckillApply> collect = seckillApplyList.stream().filter(i -> i.getTimeLine().equals(startTimeline) && i.getPromotionApplyStatus().equals(PromotionsApplyStatusEnum.PASS.name())).collect(Collectors.toList());
             for (SeckillApply seckillApply : collect) {
-                GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(seckillApply.getSkuId());
+                GoodsSku goodsSku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(seckillApply.getSkuId());
                 if (goodsSku != null) {
                     SeckillGoodsVO goodsVO = new SeckillGoodsVO();
                     BeanUtil.copyProperties(seckillApply, goodsVO);

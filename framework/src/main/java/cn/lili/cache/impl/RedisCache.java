@@ -90,14 +90,13 @@ public class RedisCache implements Cache {
      */
     @Override
     public void vagueDel(Object key) {
-        Set<Object> keys = redisTemplate.keys(key + "*");
+        List keys = this.keys(key + "*");
         redisTemplate.delete(keys);
     }
 
     @Override
     public void clear() {
-
-        Set keys = redisTemplate.keys("*");
+        List keys = this.keys("*");
         redisTemplate.delete(keys);
     }
 
@@ -133,8 +132,8 @@ public class RedisCache implements Cache {
      * @return 模糊匹配key
      */
     @Override
-    public List<String> keys(String pattern) {
-        List<String> keys = new ArrayList<>();
+    public List<Object> keys(String pattern) {
+        List<Object> keys = new ArrayList<>();
         this.scan(pattern, item -> {
             //符合条件的key
             String key = new String(item, StandardCharsets.UTF_8);
@@ -143,6 +142,13 @@ public class RedisCache implements Cache {
         return keys;
     }
 
+    @Override
+    public List<Object> keysBlock(String pattern) {
+        Set<Object> set = redisTemplate.keys(pattern);
+        List<Object> list = new ArrayList<>();
+        list.addAll(set);
+        return list;
+    }
 
     /**
      * scan 实现

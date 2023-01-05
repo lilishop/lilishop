@@ -40,6 +40,7 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
 
     @Autowired
     private OrderStatisticsService orderStatisticsService;
+
     @Override
     public List<GoodsStatisticsDataVO> getGoodsStatisticsData(GoodsStatisticsQueryParam goodsStatisticsQueryParam, Integer num) {
         //获取查询条件
@@ -159,18 +160,13 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
         orderOverviewVO.setPaymentOrderNum(payment != null && payment.containsKey("num") ? (Long) payment.get("num") : 0L);
         orderOverviewVO.setPaymentAmount(payment != null && payment.containsKey("price") ? (Double) payment.get("price") : 0D);
 
-        //付款人数
-        queryWrapper = Wrappers.query();
-        queryWrapper.between("create_time", dates[0], dates[1]);
+
         //如果有店铺id传入，则查询店铺
         if (StringUtils.isNotEmpty(statisticsQueryParam.getStoreId())) {
-            queryWrapper.eq("store_id", statisticsQueryParam.getStoreId());
+            orderOverviewVO.setPaymentsNum(baseMapper.countPayersByStore(statisticsQueryParam.getStoreId(), dates[0], dates[1]));
+        } else {
+            orderOverviewVO.setPaymentsNum(baseMapper.countPayers(dates[0], dates[1]));
         }
-        queryWrapper.select("COUNT(0) AS num");
-        queryWrapper.groupBy("member_id");
-        Map paymentMemberNum = this.getMap(queryWrapper);
-
-        orderOverviewVO.setPaymentsNum(paymentMemberNum != null && paymentMemberNum.containsKey("num") ? (Long) paymentMemberNum.get("num") : 0L);
     }
 
     /**

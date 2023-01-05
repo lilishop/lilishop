@@ -21,18 +21,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 /**
- * 店铺端,页面接口
+ * 店铺端,页面设置管理接口
  *
  * @author paulGao
- * @since 2020/11/22 14:23
+ * @since 2020-05-06 15:18:56
  */
 @RestController
-@Api(tags = "店铺端,页面接口")
+@Api(tags = "店铺端,页面设置管理接口")
 @RequestMapping("/store/settings/pageData")
-public class StorePageDataController {
+public class PageDataStoreController {
+
     @Autowired
     private PageDataService pageDataService;
 
@@ -52,38 +54,44 @@ public class StorePageDataController {
     @ApiImplicitParam(name = "id", value = "页面ID", required = true, dataType = "String", paramType = "path")
     @GetMapping(value = "/{id}")
     public ResultMessage<PageData> getPageData(@PathVariable String id) {
-        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
-        LambdaQueryWrapper<PageData> queryWrapper = new LambdaQueryWrapper<PageData>().eq(PageData::getId, id).eq(PageData::getPageType, PageEnum.STORE.name()).eq(PageData::getNum, storeId);
-        return ResultUtil.data(pageDataService.getOne(queryWrapper));
+        //查询当前店铺下的页面数据
+        PageData pageData = pageDataService.getOne(
+                new LambdaQueryWrapper<PageData>()
+                        .eq(PageData::getPageType, PageEnum.STORE.name())
+                        .eq(PageData::getNum, UserContext.getCurrentUser().getStoreId())
+                        .eq(PageData::getId, id));
+        return ResultUtil.data(pageData);
     }
 
-    @ApiOperation(value = "添加店铺首页")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "name", value = "页面名称", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "pageClientType", value = "客户端类型", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "pageData", value = "页面数据", required = true, dataType = "String", paramType = "query")
-    })
+    @ApiOperation(value = "添加页面")
     @PostMapping("/save")
-    public ResultMessage<PageData> savePageData(@RequestParam String name, @RequestParam String pageClientType, @RequestParam String pageData) {
-        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
-        return ResultUtil.data(pageDataService.addPageData(new PageData(name, pageClientType, pageData, storeId)));
+    public ResultMessage<PageData> addPageData(@Valid PageData pageData) {
+        //添加店铺类型，填写店铺ID
+        pageData.setPageType(PageEnum.STORE.name());
+        pageData.setNum(UserContext.getCurrentUser().getStoreId());
+        return ResultUtil.data(pageDataService.addPageData(pageData));
     }
 
-    @ApiOperation(value = "修改首页")
+    @ApiOperation(value = "修改页面")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "页面ID", required = true, dataType = "String", paramType = "path")
     })
     @PutMapping("/update/{id}")
-    public ResultMessage<PageData> updatePageData(@Valid PageData pageData, @PathVariable String id) {
+    public ResultMessage<PageData> updatePageData(@Valid PageData pageData, @NotNull @PathVariable String id) {
+
         this.checkAuthority(id);
         pageData.setId(id);
+        //添加店铺类型，填写店铺ID
+        pageData.setPageType(PageEnum.STORE.name());
+        pageData.setNum(UserContext.getCurrentUser().getStoreId());
         return ResultUtil.data(pageDataService.updatePageData(pageData));
     }
+
 
     @ApiOperation(value = "发布页面")
     @ApiImplicitParam(name = "id", value = "页面ID", required = true, dataType = "String", paramType = "path")
     @PutMapping("/release/{id}")
-    public ResultMessage<PageData> releasePageData(@PathVariable String id) {
+    public ResultMessage<PageData> release(@PathVariable String id) {
         this.checkAuthority(id);
         return ResultUtil.data(pageDataService.releasePageData(id));
     }
@@ -91,12 +99,17 @@ public class StorePageDataController {
     @ApiOperation(value = "删除页面")
     @ApiImplicitParam(name = "id", value = "页面ID", required = true, dataType = "String", paramType = "path")
     @DeleteMapping("/removePageData/{id}")
-    public ResultMessage<Object> removePageData(@PathVariable String id) {
+    public ResultMessage<Object> remove(@PathVariable String id) {
         this.checkAuthority(id);
         return ResultUtil.data(pageDataService.removePageData(id));
     }
 
 
+    /**
+     * 店铺权限判定
+     *
+     * @param id
+     */
     private void checkAuthority(String id) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         LambdaQueryWrapper<PageData> queryWrapper = new LambdaQueryWrapper<PageData>().eq(PageData::getId, id).eq(PageData::getPageType, PageEnum.STORE.name()).eq(PageData::getNum, storeId);

@@ -111,7 +111,7 @@ public class DraftGoods extends BaseEntity {
     private String goodsVideo;
 
     @ApiModelProperty(value = "是否为推荐商品")
-    private boolean recommend;
+    private Boolean recommend;
 
     /**
      * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum

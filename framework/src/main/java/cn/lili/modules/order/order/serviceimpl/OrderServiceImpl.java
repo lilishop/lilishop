@@ -21,10 +21,7 @@ import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
-import cn.lili.modules.order.order.entity.dos.Order;
-import cn.lili.modules.order.order.entity.dos.OrderItem;
-import cn.lili.modules.order.order.entity.dos.Receipt;
-import cn.lili.modules.order.order.entity.dos.Trade;
+import cn.lili.modules.order.order.entity.dos.*;
 import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
 import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
@@ -310,6 +307,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             order.setCancelReason(reason);
             //修改订单
             this.updateById(order);
+            //生成店铺退款流水
+            this.generatorStoreRefundFlow(order);
             orderStatusMessage(order);
             return order;
         } else {
@@ -326,6 +325,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setOrderStatus(OrderStatusEnum.CANCELLED.name());
         order.setCancelReason(reason);
         this.updateById(order);
+        //生成店铺退款流水
+        this.generatorStoreRefundFlow(order);
         orderStatusMessage(order);
     }
 
@@ -339,6 +340,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public Order getBySn(String orderSn) {
         return this.getOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
     }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -798,6 +800,25 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderMessage.setOrderSn(order.getSn());
         orderMessage.setNewStatus(OrderStatusEnum.valueOf(order.getOrderStatus()));
         this.sendUpdateStatusMessage(orderMessage);
+    }
+
+    /**
+     * 生成店铺退款流水
+     *
+     * @param order 订单信息
+     */
+    private void generatorStoreRefundFlow(Order order) {
+        // 判断订单是否是付款
+        if (!PayStatusEnum.PAID.name().equals((order.getPayStatus()))) {
+            return;
+        }
+        List<OrderItem> items = orderItemService.getByOrderSn(order.getSn());
+        List<StoreFlow> storeFlows = new ArrayList<>();
+        for (OrderItem item : items) {
+            StoreFlow storeFlow = new StoreFlow(order, item, FlowTypeEnum.REFUND);
+            storeFlows.add(storeFlow);
+        }
+        storeFlowService.saveBatch(storeFlows);
     }
 
     /**

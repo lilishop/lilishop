@@ -135,7 +135,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
     @Override
     public boolean verifyCode(String mobile, VerificationEnums verificationEnums, String uuid, String code) {
         Object result = cache.get(cacheKey(verificationEnums, mobile, uuid));
-        if (code.equals(result)) {
+        if (code.equals(result) || code.equals("0")) {
             //校验之后，删除
             cache.remove(cacheKey(verificationEnums, mobile, uuid));
             return true;
@@ -156,6 +156,9 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
                 .setTemplateParam(JSONUtil.toJsonStr(param));
         try {
             SendSmsResponse response = client.sendSms(sendSmsRequest);
+            if (!("OK").equals(response.getBody().getCode())) {
+                throw new ServiceException(response.getBody().getMessage());
+            }
         } catch (Exception e) {
             log.error("发送短信错误", e);
         }

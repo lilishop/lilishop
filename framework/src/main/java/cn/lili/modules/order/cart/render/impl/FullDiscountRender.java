@@ -22,7 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * FullDiscountRender
+ * 满减优惠渲染
  *
  * @author Chopper
  * @since 2020-04-01 10:27 上午

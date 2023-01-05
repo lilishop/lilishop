@@ -75,7 +75,7 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
         Region region = this.getOne(lambdaQueryWrapper, false);
         if (region != null) {
             sql.append(region.getPath()).append(",").append(region.getId());
-            return sql.toString().replace(",0,","");
+            return sql.toString().replace(",0,", "");
         }
         return null;
     }
@@ -92,9 +92,9 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
     @Override
     public Map<String, Object> getRegion(String cityCode, String townName) {
         //获取地址信息
-        Region region = this.baseMapper.selectOne(new QueryWrapper<Region>()
+        Region region = this.getOne(new QueryWrapper<Region>()
                 .eq("city_code", cityCode)
-                .eq("name", townName));
+                .eq("name", townName), false);
         if (region != null) {
             //获取它的层级关系
             String path = region.getPath();

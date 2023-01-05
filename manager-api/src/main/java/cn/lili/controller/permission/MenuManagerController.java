@@ -74,7 +74,7 @@ public class MenuManagerController {
         return ResultUtil.data(menuService.tree());
     }
 
-    @ApiOperation(value = "获取所有菜单")
+    @ApiOperation(value = "获取所有菜单--根据当前用户角色")
     @GetMapping("/memberMenu")
     public ResultMessage<List<MenuVO>> memberMenu() {
         return ResultUtil.data(menuService.findUserTree());

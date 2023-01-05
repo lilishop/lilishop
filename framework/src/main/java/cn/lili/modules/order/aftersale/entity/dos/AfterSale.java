@@ -1,5 +1,7 @@
 package cn.lili.modules.order.aftersale.entity.dos;
 
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -41,6 +43,7 @@ public class AfterSale extends BaseEntity {
     private String memberId;
 
     @ApiModelProperty(value = "会员名称")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String memberName;
 
     @ApiModelProperty(value = "商家ID")

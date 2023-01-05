@@ -5,11 +5,9 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
+import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
@@ -38,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 促销商品业务层实现
@@ -87,6 +86,22 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
                         .and(l -> l.like("scope_id", sku.getCategoryPath())))));
         queryWrapper.and(i -> i.or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START)).or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.NEW)));
         queryWrapper.in("store_id", Arrays.asList(storeIds.split(",")));
+        return this.list(queryWrapper);
+    }
+
+    @Override
+    public List<PromotionGoods> findSkuValidPromotions(List<GoodsSkuDTO> skus) {
+        List<String> categories = skus.stream().map(GoodsSku::getCategoryPath).collect(Collectors.toList());
+        List<String> skuIds = skus.stream().map(GoodsSku::getId).collect(Collectors.toList());
+        List<String> categoriesPath = new ArrayList<>();
+        categories.forEach(i -> categoriesPath.addAll(Arrays.asList(i.split(","))));
+        QueryWrapper<PromotionGoods> queryWrapper = new QueryWrapper<>();
+
+        queryWrapper.and(i -> i.or(j -> j.in(SKU_ID_COLUMN, skuIds))
+                .or(n -> n.eq("scope_type", PromotionsScopeTypeEnum.ALL.name()))
+                .or(n -> n.and(k -> k.eq("scope_type", PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name())
+                        .and(l -> l.in("scope_id", categoriesPath)))));
+        queryWrapper.and(i -> i.or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START)).or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.NEW)));
         return this.list(queryWrapper);
     }
 
@@ -284,6 +299,13 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         this.remove(queryWrapper);
     }
 
+    @Override
+    public void deletePromotionGoodsByGoods(List<String> goodsIds) {
+        LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<PromotionGoods>().in(PromotionGoods::getGoodsId, goodsIds);
+        this.remove(queryWrapper);
+    }
+
+
     /**
      * 根据参数删除促销商品
      *
@@ -314,40 +336,6 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
             dataSku.setPromotionPrice(null);
         }
         return promotionMap;
-    }
-
-    @Override
-    public boolean save(PromotionGoods entity) {
-        this.checkGoodsSku(entity.getSkuId());
-        return super.save(entity);
-    }
-
-    @Override
-    public boolean saveBatch(Collection<PromotionGoods> entityList) {
-        for (PromotionGoods promotionGoods : entityList) {
-            this.checkGoodsSku(promotionGoods.getSkuId());
-        }
-        return super.saveBatch(entityList);
-    }
-
-    @Override
-    public boolean saveOrUpdateBatch(Collection<PromotionGoods> entityList) {
-        for (PromotionGoods promotionGoods : entityList) {
-            this.checkGoodsSku(promotionGoods.getSkuId());
-        }
-        return super.saveOrUpdateBatch(entityList);
-    }
-
-    /**
-     * 检查是否为不能参加促销活动的商品
-     *
-     * @param skuId 商品skuId
-     */
-    private void checkGoodsSku(String skuId) {
-        GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(skuId);
-        if (goodsSku != null && GoodsSalesModeEnum.WHOLESALE.name().equals(goodsSku.getSalesModel())) {
-            throw new ServiceException(ResultCode.PROMOTION_GOODS_DO_NOT_JOIN_WHOLESALE, goodsSku.getGoodsName());
-        }
     }
 
     private void setGoodsPromotionInfo(GoodsSku dataSku, Map.Entry<String, Object> promotionInfo) {

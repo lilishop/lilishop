@@ -2,19 +2,14 @@
 
 #### 欢迎交流需求，交流业务，交流技术（基础问题自行解决，其他问题先看文档后提问）
 
+#### 不用削尖脑袋往老群里加，老群活跃度较低，很多潜水党，新群相对而言活跃一些 :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: 
+
+#### PS： **演示站点所有环境均部署master分支。如果有演示站点问题，可以反馈，如果演示站点没问题本地运行有问题，需自行处理** 
 
 ##### 交流 qq 1群 961316482（已满）
-<a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=BAhURE3DG2YWhQk6kRxVapbLykqMoPS8&jump_from=webapi"><img border="0" src="https://pub.idqqimg.com/wpa/images/group.png" alt="Lilishop交流群" title="Lilishop交流群">点击快捷加群</a>
-
 ##### 交流 qq 2群 875294241（已满）
-
-<a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=_lrekOvr5k2p5uTn5GRidI-chKEmpCX3&jump_from=webapi"><img border="0" src="https://pub.idqqimg.com/wpa/images/group.png" alt="Lilishop交流群2群" title="Lilishop交流群2群">点击快捷加群</a>
-
-
-##### 交流 qq 3群 263785057
-
-<a target="_blank" href="https://qm.qq.com/cgi-bin/qm/qr?k=VUogkDvaso4zLTFH8nxFPDRKq0EthUn1&jump_from=webapi"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="Lilishop交流群3群" title="Lilishop交流群3群">点击快捷加群</a>
-
+##### 交流 qq 3群 263785057（已满）
+##### 交流 qq 4群 674617534
 
 ##### 体验 公众号/小程序/APP 体验，扫描二维码
 
@@ -166,6 +161,7 @@ PS：手机验证码为 ‘111111’
 
 ### 交流群
 
-##### 官方qq 1群 961316482（已满）
-##### 官方qq 2群 875294241（已满）
-##### 官网qq 3群 263785057
+##### 交流 qq 1群 961316482（已满）
+##### 交流 qq 2群 875294241（已满）
+##### 交流 qq 3群 263785057（已满）
+##### 交流 qq 4群 674617534

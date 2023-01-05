@@ -50,6 +50,9 @@ public class DistributionOrder extends BaseIdEntity {
     private String distributionId;
     @ApiModelProperty(value = "分销员名称")
     private String distributionName;
+
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "解冻日期")
     private Date settleCycle;
     @ApiModelProperty(value = "提成金额")

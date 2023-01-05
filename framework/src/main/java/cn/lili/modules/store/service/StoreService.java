@@ -116,4 +116,6 @@ public interface StoreService extends IService<Store> {
      * @param collectionDTO 收藏信息
      */
     void updateStoreCollectionNum(CollectionDTO collectionDTO);
+
+    void storeToClerk();
 }

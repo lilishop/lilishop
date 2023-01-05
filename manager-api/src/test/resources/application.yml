@@ -1,0 +1,319 @@
+server:
+  servlet:
+    context-path: /
+
+  tomcat:
+    uri-encoding: UTF-8
+    threads:
+      min-spare: 50
+      max: 1000
+
+# 与Spring Boot 2一样，默认情况下，大多数端点都不通过http公开，我们公开了所有端点。对于生产，您应该仔细选择要公开的端点。
+management:
+  #  health:
+  #    elasticsearch:
+  #      enabled: false
+  #    datasource:
+  #      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+spring:
+  # 要在其中注册的Spring Boot Admin Server的URL。
+  boot:
+    admin:
+      client:
+        url: http://192.168.0.116:8000
+  cache:
+    type: redis
+  # Redis
+  redis:
+    host: 192.168.0.108
+    port: 30379
+    password: lilishop
+    lettuce:
+      pool:
+        # 连接池最大连接数（使用负值表示没有限制） 默认 8
+        max-active: 200
+        # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
+        max-wait: 20
+        # 连接池中的最大空闲连接 默认 8
+        max-idle: 10
+        # 连接池中的最小空闲连接 默认 8
+        min-idle: 8
+  # 文件大小上传配置
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+  jackson:
+    time-zone: GMT+8
+    serialization:
+      #关闭jackson 对json做解析
+      fail-on-empty-beans: false
+
+  shardingsphere:
+    datasource:
+      #  数据库名称，可自定义，可以为多个，以逗号隔开，每个在这里定义的库，都要在下面定义连接属性
+      names: default-datasource
+      default-datasource:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driverClassName: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://192.168.0.108:30306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+        username: root
+        password: lilishop
+        maxActive: 50
+        initialSize: 20
+        maxWait: 60000
+        minIdle: 5
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: SELECT 1 FROM DUAL
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        #是否缓存preparedStatement，也就是PSCache。在mysql下建议关闭。 PSCache对支持游标的数据库性能提升巨大，比如说oracle。
+        poolPreparedStatements: false
+        #要启用PSCache，-1为关闭 必须配置大于0，当大于0时，poolPreparedStatements自动触发修改为true  可以把这个数值配置大一些，比如说100
+        maxOpenPreparedStatements: -1
+        #配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+        filters: stat,wall,log4j2
+        #通过connectProperties属性来打开mergeSql功能；慢SQL记录
+        connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+        #合并多个DruidDataSource的监控数据
+        useGlobalDataSourceStat: true
+        loginUsername: druid
+        loginPassword: druid
+    #    sharding:
+    #      default-data-source-name: default-datasource
+    #      #需要拆分的表，可以设置多个  在 li_order 级别即可
+    #      tables:
+    #        #需要进行分表的逻辑表名
+    #        li_order:
+    #          #实际的表结点,下面代表的是li_order_为开头的所有表，如果能确定表的范围例如按月份分表，这里的写法是data2020.li_order_$->{2020..2021}_$->{01..12}  表示例如 li_order_2020_01 li_order_2020_03 li_order_2021_01
+    #          actual-data-nodes: data2020.li_order_$->{2019..2021}_$->{01..12}
+    #          table-strategy:
+    #            # 分表策略，根据创建日期
+    #            standard:
+    #              sharding-column: create_time
+    #              #分表策略
+    #              precise-algorithm-class-name: cn.lili.mybatis.sharding.CreateTimeShardingTableAlgorithm
+    #              #范围查询实现
+    #              range-algorithm-class-name: cn.lili.mybatis.sharding.CreateTimeShardingTableAlgorithm
+    props:
+      #是否打印逻辑SQL语句和实际SQL语句，建议调试时打印，在生产环境关闭
+      sql:
+        show: true
+
+# 忽略鉴权url
+ignored:
+  urls:
+    - /editor-app/**
+    - /actuator**
+    - /actuator/**
+    - /MP_verify_qSyvBPhDsPdxvOhC.txt
+    - /weixin/**
+    - /source/**
+    - /store/passport/login/**
+    - /store/passport/login/refresh/**
+    - /common/common/slider/**
+    - /common/common/sms/**
+    - /buyer/payment/cashier/**
+    - /buyer/other/pageData/**
+    - /buyer/other/article/**
+    - /buyer/goods/**
+    - /buyer/store/**
+    - /buyer/passport/connect/**
+    - /buyer/members/**
+    - /buyer/passport/member/**
+    - /buyer/passport/member/refresh/**
+    - /buyer/promotion/pintuan/**
+    - /buyer/promotion/seckill/**
+    - /buyer/promotion/pointsGoods/**
+    - /buyer/promotion/coupon
+    - /buyer/member/evaluation/**/goodsEvaluation
+    - /buyer/member/evaluation/**/evaluationNumber
+    - /buyer/other/appVersion/**
+    - /buyer/broadcast/studio/**
+    - /manager/passport/user/login
+    - /manager/passport/user/refresh/**
+    - /manager/other/elasticsearch
+    - /manager/other/customWords
+    - /druid/**
+    - /swagger-ui.html
+    - /doc.html
+    - /swagger-resources/**
+    - /swagger/**
+    - /webjars/**
+    - /v2/api-docs**
+    - /configuration/ui
+    - /boot-admin
+    - /manager/promotion/seckill/init
+    - /**/*.js
+    - /**/*.css
+    - /**/*.png
+    - /**/*.ico
+
+# Swagger界面内容配置
+swagger:
+  title: lilishop API接口文档
+  description: lilishop Api Documentation
+  version: 4.2.2
+  termsOfServiceUrl: https://pickmall.cn
+  contact:
+    name: lili
+    url: https://pickmall.cn
+    email: admin@pickmall.com
+
+# Mybatis-plus
+mybatis-plus:
+  mapper-locations: classpath*:mapper/*.xml
+  configuration:
+    #缓存开启
+    cache-enabled: true
+    #日志
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 日志
+logging:
+  # 输出级别
+  level:
+    cn.lili: info
+  #    org.hibernate: debug
+  #    org.springframework: debug
+  file:
+    # 指定路径
+    path: logs
+  logback:
+    rollingpolicy:
+      # 最大保存天数
+      max-history: 7
+      # 每个文件最大大小
+      max-file-size: 5MB
+#加密参数
+jasypt:
+  encryptor:
+    password: lili
+
+
+lili:
+  #验证码设置
+  verification-code:
+    #图形验证码有效时间 秒 包含滑块验证码有效时间， 以及验证通过之后，缓存中存储的验证结果有效时间
+    effectiveTime: 300
+    #水印
+    watermark: LILI-SHOP
+    #干扰项数量 最大2 默认0
+    interfereNum: 1
+    #允许误差像素
+    faultTolerant: 3
+  #短信模版配置
+  sms:
+    #登录
+    LOGIN: SMS_205755300
+    #注册
+    REGISTER: SMS_205755298
+    #找回密码
+    FIND_USER: SMS_205755301
+    #设置密码
+    UPDATE_PASSWORD: SMS_205755297
+    #支付密码
+    WALLET_PASSWORD: SMS_205755301
+  system:
+    isDemoSite: false
+    isTestModel: true
+  #     脱敏级别：
+  #     0：不做脱敏处理
+  #     1：管理端用户手机号等信息脱敏
+  #     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
+    sensitiveLevel: 1
+
+  statistics:
+    # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数
+    onlineMember: 48
+    # 当前在线人数刷新时间间隔，单位秒，设置为600，则每10分钟刷新一次
+    currentOnlineUpdate: 600
+  #qq lbs 申请
+  lbs:
+    key: 4BYBZ-7MT6S-PUAOA-6BNWL-FJUD7-UUFXT
+    sk: zhNKVrJK6UPOhqIjn8AQvG37b9sz6
+  #域名
+  domain:
+    pc: http://192.168.0.116:8888
+    wap: http://192.168.0.116:8888
+    seller: http://192.168.0.116:8888
+    admin: http://192.168.0.116:8888
+  #api地址
+  api:
+    buyer: https://z171l91606.51mypc.cn
+    base: http://192.168.0.116:8888
+    manager: http://192.168.0.116:8888
+    seller: http://192.168.0.116:8888
+
+  # jwt 细节设定
+  jwt-setting:
+    # token过期时间（分钟）
+    tokenExpireTime: 30
+
+  # 使用Spring @Cacheable注解失效时间
+  cache:
+    # 过期时间 单位秒 永久不过期设为-1
+    timeout: 1500
+  #多线程配置
+  thread:
+    corePoolSize: 5
+    maxPoolSize: 50
+    queueCapacity: 50
+  data:
+    elasticsearch:
+      cluster-name: elasticsearch
+      cluster-nodes: 192.168.0.108:30920
+      index:
+        number-of-replicas: 0
+        number-of-shards: 3
+      index-prefix: lili
+      schema: http
+    #      account:
+    #        username: elastic
+    #        password: LiLiShopES
+
+    logstash:
+      server: 192.168.0.108:30560
+    rocketmq:
+      promotion-topic: lili_promotion_topic
+      promotion-group: lili_promotion_group
+      msg-ext-topic: lili_msg_topic
+      msg-ext-group: lili_msg_group
+      goods-topic: lili_goods_topic
+      goods-group: lili_goods_group
+      order-topic: lili_order_topic
+      order-group: lili_order_group
+      member-topic: lili_member_topic
+      member-group: lili_member_group
+      other-topic: lili_other_topic
+      other-group: lili_other_group
+      notice-topic: lili_notice_topic
+      notice-group: lili_notice_group
+      notice-send-topic: lili_send_notice_topic
+      notice-send-group: lili_send_notice_group
+      after-sale-topic: lili_after_sale_topic
+      after-sale-group: lili_after_sale_group
+rocketmq:
+  name-server: 192.168.0.108:30876
+  isVIPChannel: false
+  producer:
+    group: lili_group
+    send-message-timeout: 30000
+
+xxl:
+  job:
+    admin:
+      addresses: http://192.168.0.108:30001/xxl-job-admin
+    executor:
+      appname: xxl-job-executor-lilishop
+      address:
+      ip:
+      port: 8891
+      logpath: ./xxl-job/executor
+      logretentiondays: 7

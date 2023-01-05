@@ -3,9 +3,7 @@ package cn.lili.modules.store.service;
 import cn.hutool.core.date.DateTime;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
-import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
-import cn.lili.modules.store.entity.dto.StoreSettingDTO;
-import cn.lili.modules.store.entity.dto.StoreSettlementDay;
+import cn.lili.modules.store.entity.dto.*;
 import cn.lili.modules.store.entity.vos.StoreBasicInfoVO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
 import cn.lili.modules.store.entity.vos.StoreManagementCategoryVO;
@@ -85,6 +83,8 @@ public interface StoreDetailService extends IService<StoreDetail> {
      */
     boolean editStoreAfterSaleAddressDTO(StoreAfterSaleAddressDTO storeAfterSaleAddressDTO);
 
+
+
     /**
      * 修改店铺库存预警数量
      *
@@ -138,4 +138,28 @@ public interface StoreDetailService extends IService<StoreDetail> {
      * @param dateTime 结算日
      */
     void updateSettlementDay(String storeId, DateTime dateTime);
+
+
+    /**
+     * 获取当前登录店铺发件地址
+     *
+     * @return 店铺售后发件地址
+     */
+    StoreDeliverGoodsAddressDTO getStoreDeliverGoodsAddressDto();
+
+    /**
+     * 获取某一个店铺的发货寄件地址信息
+     *
+     * @param id 店铺ID
+     * @return 店铺发件地址
+     */
+    StoreDeliverGoodsAddressDTO getStoreDeliverGoodsAddressDto(String id);
+
+    /**
+     * 修改当前登录店铺发件地址
+     *
+     * @param storeDeliverGoodsAddressDto 店铺发货信息DTO
+     * @return 店铺售后发件地址
+     */
+    boolean editStoreDeliverGoodsAddressDTO(StoreDeliverGoodsAddressDTO storeDeliverGoodsAddressDto);
 }

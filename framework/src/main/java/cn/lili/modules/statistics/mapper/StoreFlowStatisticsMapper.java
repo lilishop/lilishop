@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.toolkit.Constants;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -41,7 +42,6 @@ public interface StoreFlowStatisticsMapper extends BaseMapper<StoreFlow> {
     List<CategoryStatisticsDataVO> getCateGoryStatisticsData(@Param(Constants.WRAPPER) Wrapper<CategoryStatisticsDataVO> queryWrapper);
 
 
-
     /**
      * 店铺统计列表
      *
@@ -51,5 +51,31 @@ public interface StoreFlowStatisticsMapper extends BaseMapper<StoreFlow> {
      */
     @Select("SELECT store_id AS storeId,store_name AS storeName,SUM(final_price) AS price,SUM(num) AS num FROM li_store_flow ${ew.customSqlSegment}")
     List<StoreStatisticsDataVO> getStoreStatisticsData(IPage<GoodsStatisticsDataVO> page, @Param(Constants.WRAPPER) Wrapper<GoodsStatisticsDataVO> queryWrapper);
+
+    /**
+     * 店铺统计付款人数
+     *
+     * @param storeId   店铺id
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 付款人数
+     */
+    @Select("SELECT count(0) AS num FROM (SELECT count(0) FROM li_store_flow " +
+            " where store_id = #{storeId} and flow_type='PAY' and create_time >=#{startTime} and create_time < #{endTime}" +
+            " GROUP BY member_id) t")
+    Long countPayersByStore(String storeId, Date startTime, Date endTime);
+
+    /**
+     * 统计付款人数
+     *
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 付款人数
+     */
+    @Select("SELECT count(0) AS num FROM (SELECT count(0) FROM li_store_flow " +
+            " where  flow_type='PAY' and create_time >=#{startTime} and create_time < #{endTime}" +
+            " GROUP BY member_id) t")
+    Long countPayers(Date startTime, Date endTime);
+
 
 }

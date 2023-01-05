@@ -83,6 +83,14 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     GoodsSku getGoodsSkuByIdFromCache(String id);
 
     /**
+     * 从缓存中获取可参与促销商品
+     *
+     * @param skuId skuid
+     * @return 商品详情
+     */
+    GoodsSku getCanPromotionGoodsSkuByIdFromCache(String skuId);
+
+    /**
      * 获取商品sku详情
      *
      * @param goodsId 商品ID
@@ -143,7 +151,7 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     /**
      * 分页查询商品sku信息
      *
-     * @param page 分页参数
+     * @param page         分页参数
      * @param queryWrapper 查询参数
      * @return 商品sku信息
      */
@@ -172,13 +180,6 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * @param authFlag     审核状态
      */
     void updateGoodsSkuStatusByStoreId(String storeId, String marketEnable, String authFlag);
-
-    /**
-     * 发送生成ES商品索引
-     *
-     * @param goods 商品信息
-     */
-    void generateEs(Goods goods);
 
     /**
      * 更新SKU库存
@@ -240,4 +241,12 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * @return sku总数
      */
     Long countSkuNum(String storeId);
+
+    /**
+     * 批量渲染商品sku
+     *
+     * @param goodsSkuList SKU基础数据列表
+     * @param goodsOperationDTO 商品操作信息
+     */
+    void renderGoodsSkuList(List<GoodsSku> goodsSkuList, GoodsOperationDTO goodsOperationDTO);
 }

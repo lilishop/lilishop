@@ -1,5 +1,7 @@
 package cn.lili.modules.wallet.entity.dos;
 
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
 import cn.lili.modules.wallet.entity.enums.DepositServiceTypeEnum;
 import cn.lili.mybatis.BaseIdEntity;
@@ -35,6 +37,7 @@ public class WalletLog extends BaseIdEntity {
     private String memberId;
 
     @ApiModelProperty(value = "会员名称")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String memberName;
 
     @ApiModelProperty(value = "金额")

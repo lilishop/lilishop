@@ -87,12 +87,8 @@ public class PromotionTools {
         } else {
             queryWrapper.ge(START_TIME_COLUMN, DateUtil.beginOfDay(startTime)).le(END_TIME_COLUMN, DateUtil.endOfDay(endTime));
         }
-        if (storeId != null) {
-            queryWrapper.eq("store_id", storeId);
-        }
-        if (activityId != null) {
-            queryWrapper.ne("id", activityId);
-        }
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(storeId), "store_id", storeId);
+        queryWrapper.ne(CharSequenceUtil.isNotEmpty(activityId), "id", activityId);
         queryWrapper.and(i -> i.or(queryPromotionStatus(PromotionsStatusEnum.NEW)).or(queryPromotionStatus(PromotionsStatusEnum.START)));
         queryWrapper.eq("delete_flag", false);
         return queryWrapper;
@@ -140,8 +136,6 @@ public class PromotionTools {
                 if (promotionGoods.getStartTime() == null || !PromotionTypeEnum.SECKILL.equals(promotionTypeEnum)) {
                     promotionGoods.setEndTime(promotion.getEndTime());
                 }
-                promotionGoods.setStartTime(promotion.getStartTime());
-                promotionGoods.setEndTime(promotion.getEndTime());
                 promotionGoods.setPromotionType(promotionTypeEnum.name());
                 promotionGoods.setNum(0);
                 promotionGoods.setDeleteFlag(promotion.getDeleteFlag());

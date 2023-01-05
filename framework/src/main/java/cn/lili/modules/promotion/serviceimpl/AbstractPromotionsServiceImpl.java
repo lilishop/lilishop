@@ -158,7 +158,6 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
      */
     @Override
     public <S extends BasePromotionsSearchParams> IPage<T> pageFindAll(S searchParams, PageVO page) {
-        page.setNotConvert(false);
         return this.page(PageUtil.initPage(page), searchParams.queryWrapper());
     }
 

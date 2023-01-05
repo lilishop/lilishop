@@ -1,14 +1,18 @@
 package cn.lili.modules.goods.entity.dto;
 
 import cn.lili.common.validation.EnumValue;
+import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
+import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +24,9 @@ import java.util.Map;
  */
 @Data
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class GoodsOperationDTO implements Serializable {
 
     private static final long serialVersionUID = -509667581371776913L;
@@ -116,15 +123,57 @@ public class GoodsOperationDTO implements Serializable {
     @Valid
     private List<Map<String, Object>> skuList;
 
+    @ApiModelProperty(value = "是否为商品模版")
+    private Boolean goodsTemplateFlag = false;
     /**
      * 批发商品规则
      */
     @ApiModelProperty(value = "批发商品规则")
     private List<WholesaleDTO> wholesaleList;
 
+    @ApiModelProperty(value = "注意事项")
+    private String needingAttention;
+
+
+    @ApiModelProperty(value = "是否为年度会员专属")
+    private Boolean annualFeeExclusive;
+
+    @ApiModelProperty(value = "浏览权限")
+    private String browsePermissions;
+
     public String getGoodsName() {
         //对商品对名称做一个极限处理。这里没有用xss过滤是因为xss过滤为全局过滤，影响很大。
         // 业务中，全局代码中只有商品名称不能拥有英文逗号，是由于商品名称存在一个数据库联合查询，结果要根据逗号分组
         return goodsName.replace(",", "");
+    }
+
+    public GoodsOperationDTO(GoodsImportDTO goodsImportDTO) {
+        this.price = goodsImportDTO.getPrice();
+        this.goodsName = goodsImportDTO.getGoodsName();
+        this.intro = goodsImportDTO.getIntro();
+        this.mobileIntro = goodsImportDTO.getIntro();
+        this.quantity = goodsImportDTO.getQuantity();
+        this.goodsGalleryList = goodsImportDTO.getGoodsGalleryList();
+        this.templateId = goodsImportDTO.getTemplate();
+        this.sellingPoint = goodsImportDTO.getSellingPoint();
+        this.salesModel = GoodsSalesModeEnum.RETAIL.name();
+        this.goodsUnit = goodsImportDTO.getGoodsUnit();
+        this.goodsType = GoodsTypeEnum.PHYSICAL_GOODS.name();
+        this.release = goodsImportDTO.getRelease();
+        this.recommend=false;
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("sn", goodsImportDTO.getSn());
+        map.put("price", goodsImportDTO.getPrice());
+        map.put("cost", goodsImportDTO.getCost());
+        map.put("weight", goodsImportDTO.getWeight());
+        map.put("quantity", goodsImportDTO.getQuantity());
+        map.put(goodsImportDTO.getSkuKey(), goodsImportDTO.getSkuValue());
+        map.put("images", goodsImportDTO.getImages());
+
+        List<Map<String, Object>> skuList = new ArrayList<>();
+        skuList.add(map);
+        this.skuList = skuList;
+
     }
 }

@@ -2,6 +2,8 @@ package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.lili.cache.Cache;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.mapper.WholesaleMapper;
 import cn.lili.modules.goods.service.WholesaleService;
@@ -37,6 +39,23 @@ public class WholesaleServiceImpl extends ServiceImpl<WholesaleMapper, Wholesale
     }
 
     @Override
+    @Cacheable(key = "#templateId+'_template'")
+    public List<Wholesale> findByTemplateId(String templateId) {
+        LambdaQueryWrapper<Wholesale> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Wholesale::getTemplateId, templateId);
+        return this.list(queryWrapper).stream().sorted(Comparator.comparing(Wholesale::getNum)).collect(Collectors.toList());
+    }
+
+    @Override
+    @CacheEvict(key = "#templateId+'_template'")
+    public Boolean removeByTemplateId(String templateId) {
+        LambdaQueryWrapper<Wholesale> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Wholesale::getTemplateId, templateId);
+        cache.remove("{wholesale}_" + templateId + "_template");
+        return this.remove(queryWrapper);
+    }
+
+    @Override
     @CacheEvict(key = "#goodsId")
     public Boolean removeByGoodsId(String goodsId) {
         LambdaQueryWrapper<Wholesale> queryWrapper = new LambdaQueryWrapper<>();
@@ -58,7 +77,7 @@ public class WholesaleServiceImpl extends ServiceImpl<WholesaleMapper, Wholesale
         if (CollUtil.isNotEmpty(matchList)) {
             return matchList.get(matchList.size() - 1);
         } else if (CollUtil.isNotEmpty(wholesaleList) && CollUtil.isEmpty(matchList)) {
-            return wholesaleList.get(0);
+            throw new ServiceException(ResultCode.DO_NOT_MATCH_WHOLESALE);
         }
         return null;
     }

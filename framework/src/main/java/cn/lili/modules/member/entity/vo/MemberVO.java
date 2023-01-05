@@ -32,7 +32,7 @@ public class MemberVO implements Serializable {
     private String username;
 
     @ApiModelProperty(value = "昵称")
-    @Sensitive(strategy = SensitiveStrategy.PHONE)
+
     private String nickName;
 
     @ApiModelProperty(value = "会员性别,1为男，0为女")

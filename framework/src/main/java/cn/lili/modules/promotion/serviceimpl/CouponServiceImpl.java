@@ -190,7 +190,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
         }
         //打折优惠券大于10折
         boolean discountCoupon = (promotions.getCouponType().equals(CouponTypeEnum.DISCOUNT.name())
-                && (promotions.getCouponDiscount() < 0 && promotions.getCouponDiscount() > 10));
+                && (promotions.getCouponDiscount() < 0 || promotions.getCouponDiscount() > 10));
         if (discountCoupon) {
             throw new ServiceException(ResultCode.COUPON_DISCOUNT_ERROR);
         }
@@ -291,7 +291,7 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
             throw new ServiceException(ResultCode.COUPON_SCOPE_ERROR);
         }
         for (String id : split) {
-            GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(id);
+            GoodsSku goodsSku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(id);
             if (goodsSku == null) {
                 throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
             }

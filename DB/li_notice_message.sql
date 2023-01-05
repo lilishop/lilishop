@@ -7,6 +7,7 @@
  Source Host           : 192.168.0.116:3306
  Source Schema         : lilishop
 
+
  Target Server Type    : MySQL
  Target Server Version : 80023
  File Encoding         : 65001

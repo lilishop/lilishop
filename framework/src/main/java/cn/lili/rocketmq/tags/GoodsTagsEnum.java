@@ -40,6 +40,10 @@ public enum GoodsTagsEnum {
      */
     STORE_GOODS_DELETE("删除店铺商品索引"),
     /**
+     * 下架商品"
+     */
+    DOWN("下架商品"),
+    /**
      * "删除商品"
      */
     GOODS_DELETE("删除商品"),

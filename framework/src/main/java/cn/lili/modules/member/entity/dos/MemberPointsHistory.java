@@ -1,6 +1,8 @@
 package cn.lili.modules.member.entity.dos;
 
 
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -43,6 +45,8 @@ public class MemberPointsHistory extends BaseIdEntity {
     @ApiModelProperty(value = "会员ID")
     private String memberId;
 
+
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     @ApiModelProperty(value = "会员名称")
     private String memberName;
 

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 佣金计算
+ * 勾选商品过滤
  *
  * @author Chopper
  * @see CartVO

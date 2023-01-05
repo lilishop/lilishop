@@ -1,5 +1,6 @@
 package cn.lili.test.CacheTest;
 
+import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.modules.statistics.util.StatisticsSuffix;
@@ -120,6 +121,53 @@ class CacheTest {
             System.out.println("----------");
         }
         Assertions.assertTrue(true);
+    }
+
+
+    @Test
+    void scanTests() {
+
+        for (int i = 0; i < 1000000; i++) {
+            cache.put("scan" + i, i);
+        }
+        Date date = new Date();
+        System.out.println(JSONUtil.toJsonStr(cache.keys("scan999999*")));
+
+        System.out.println("100w数据耗时");
+        System.out.println(new Date().getTime() - date.getTime());
+
+
+        for (int i = 1000000; i < 5000000; i++) {
+            cache.put("scan" + i, i);
+        }
+
+        date = new Date();
+        System.out.println(JSONUtil.toJsonStr(cache.keys("scan999999*")));
+        System.out.println("600w数据耗时");
+        System.out.println(new Date().getTime() - date.getTime());
+
+    }
+
+    // scan 慢些，但是在缓存更多的情况下，表现更好，虽然用时更久，但是不会阻塞其他读写
+    //
+    //["scan999999"]
+    //redisTemplate scan 500w数据耗时
+    //2985
+    //["scan999999"]
+    //redisTemplate keys 500w数据耗时
+    //1073
+    @Test
+    void testKsysVsScan() {
+        Date date = new Date();
+        System.out.println(JSONUtil.toJsonStr(cache.keys("scan999999*")));
+        System.out.println("redisTemplate scan 500w数据耗时");
+        System.out.println(new Date().getTime() - date.getTime());
+
+        date = new Date();
+        System.out.println(JSONUtil.toJsonStr(cache.keysBlock("scan999999*")));
+        System.out.println("redisTemplate keys 500w数据耗时");
+        System.out.println(new Date().getTime() - date.getTime());
+
     }
 
 }

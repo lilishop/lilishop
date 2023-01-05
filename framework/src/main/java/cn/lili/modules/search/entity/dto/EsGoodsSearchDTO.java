@@ -1,5 +1,7 @@
 package cn.lili.modules.search.entity.dto;
 
+import cn.lili.common.utils.RegularUtil;
+import cn.lili.common.utils.StringUtils;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -47,4 +49,11 @@ public class EsGoodsSearchDTO {
     @ApiModelProperty("当前商品skuId,根据当前浏览的商品信息来给用户推荐可能喜欢的商品")
     private String currentGoodsId;
 
+    //过滤搜索关键字
+    public String getKeyword() {
+        if (StringUtils.isNotEmpty(keyword)) {
+            RegularUtil.replace(this.keyword);
+        }
+        return keyword;
+    }
 }

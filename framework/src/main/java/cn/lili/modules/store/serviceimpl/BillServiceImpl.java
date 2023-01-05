@@ -98,7 +98,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
             //退单产生退还佣金金额
             bill.setRefundCommissionPrice(refundBill.getRefundCommissionPrice() != null ? refundBill.getRefundCommissionPrice() : 0D);
             //分销订单退还，返现佣金返还
-            bill.setDistributionRefundCommission(refundBill.getDistributionRefundCommission() != null ? refundBill.getRefundCommissionPrice() : 0D);
+            bill.setDistributionRefundCommission(refundBill.getDistributionRefundCommission() != null ? refundBill.getDistributionRefundCommission() : 0D);
             //退货平台优惠券补贴返还
             bill.setSiteCouponRefundCommission(refundBill.getSiteCouponRefundCommission() != null ? refundBill.getSiteCouponRefundCommission() : 0D);
             //退款金额=店铺最终退款结算金额

@@ -1,11 +1,13 @@
 package cn.lili.modules.member.entity.dos;
 
-import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.enums.SwitchEnum;
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -50,6 +52,7 @@ public class MemberEvaluation extends BaseEntity {
 
     @NotNull
     @ApiModelProperty(value = "会员名称")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String memberName;
 
     @NotNull
@@ -108,28 +111,28 @@ public class MemberEvaluation extends BaseEntity {
     private Integer descriptionScore;
 
 
-    public MemberEvaluation(MemberEvaluationDTO memberEvaluationDTO, GoodsSku goodsSku, Member member,Order order){
+    public MemberEvaluation(MemberEvaluationDTO memberEvaluationDTO, GoodsSku goodsSku, Member member, Order order) {
         //复制评价信息
         BeanUtils.copyProperties(memberEvaluationDTO, this);
         //设置会员
-        this.memberId=member.getId();
+        this.memberId = member.getId();
         //会员名称
-        this.memberName=member.getNickName();
+        this.memberName = member.getNickName();
         //设置会员头像
-        this.memberProfile=member.getFace();
+        this.memberProfile = member.getFace();
         //商品名称
-        this.goodsName=goodsSku.getGoodsName();
+        this.goodsName = goodsSku.getGoodsName();
         //商品图片
-        this.goodsImage=goodsSku.getThumbnail();
+        this.goodsImage = goodsSku.getThumbnail();
         //设置店铺ID
-        this.storeId=order.getStoreId();
+        this.storeId = order.getStoreId();
         //设置店铺名称
-        this.storeName=order.getStoreName();
+        this.storeName = order.getStoreName();
         //设置订单编号
-        this.orderNo=order.getSn();
+        this.orderNo = order.getSn();
         //是否包含图片
-        this.haveImage=StringUtils.isNotEmpty(memberEvaluationDTO.getImages());
+        this.haveImage = StringUtils.isNotEmpty(memberEvaluationDTO.getImages());
         //默认开启评价
-        this.status=SwitchEnum.OPEN.name();
+        this.status = SwitchEnum.OPEN.name();
     }
 }

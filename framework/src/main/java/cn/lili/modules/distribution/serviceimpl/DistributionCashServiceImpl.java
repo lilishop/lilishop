@@ -73,6 +73,7 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
             }
             //将提现金额存入冻结金额,扣减可提现金额
             distribution.setCanRebate(CurrencyUtil.sub(distribution.getCanRebate(), applyMoney));
+            distribution.setCommissionFrozen(CurrencyUtil.add(distribution.getCommissionFrozen(), applyMoney));
             distributionService.updateById(distribution);
             //提现申请记录
             DistributionCash distributionCash = new DistributionCash("D" + SnowFlake.getId(), distribution.getId(), applyMoney, distribution.getMemberName());

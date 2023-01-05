@@ -1,5 +1,6 @@
 package cn.lili.controller.goods;
 
+import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
@@ -48,8 +49,8 @@ public class GoodsManagerController {
 
     @ApiOperation(value = "分页获取")
     @GetMapping(value = "/list")
-    public IPage<Goods> getByPage(GoodsSearchParams goodsSearchParams) {
-        return goodsService.queryByParams(goodsSearchParams);
+    public ResultMessage<IPage<Goods>> getByPage(GoodsSearchParams goodsSearchParams) {
+        return ResultUtil.data(goodsService.queryByParams(goodsSearchParams));
     }
 
     @ApiOperation(value = "分页获取商品列表")
@@ -60,10 +61,9 @@ public class GoodsManagerController {
 
     @ApiOperation(value = "分页获取待审核商品")
     @GetMapping(value = "/auth/list")
-    public IPage<Goods> getAuthPage(GoodsSearchParams goodsSearchParams) {
-
+    public ResultMessage<IPage<Goods>> getAuthPage(GoodsSearchParams goodsSearchParams) {
         goodsSearchParams.setAuthFlag(GoodsAuthEnum.TOBEAUDITED.name());
-        return goodsService.queryByParams(goodsSearchParams);
+        return ResultUtil.data(goodsService.queryByParams(goodsSearchParams));
     }
 
     @PreventDuplicateSubmissions
@@ -72,6 +72,7 @@ public class GoodsManagerController {
             @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "query", allowMultiple = true),
             @ApiImplicitParam(name = "reason", value = "下架理由", required = true, paramType = "query")
     })
+    @DemoSite
     @PutMapping(value = "/{goodsId}/under")
     public ResultMessage<Object> underGoods(@PathVariable String goodsId, @NotEmpty(message = "下架原因不能为空") @RequestParam String reason) {
         List<String> goodsIds = Arrays.asList(goodsId.split(","));
@@ -104,7 +105,7 @@ public class GoodsManagerController {
             @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, allowMultiple = true)
     })
     public ResultMessage<Object> unpGoods(@PathVariable List<String> goodsId) {
-        if (goodsService.updateGoodsMarketAble(goodsId, GoodsStatusEnum.UPPER, "")) {
+        if (Boolean.TRUE.equals(goodsService.updateGoodsMarketAble(goodsId, GoodsStatusEnum.UPPER, ""))) {
             return ResultUtil.success();
         }
         throw new ServiceException(ResultCode.GOODS_UPPER_ERROR);

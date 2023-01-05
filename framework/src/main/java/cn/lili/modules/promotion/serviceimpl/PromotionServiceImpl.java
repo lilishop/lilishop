@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.dos.*;
 import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
@@ -62,6 +63,9 @@ public class PromotionServiceImpl implements PromotionService {
     @Autowired
     private PointsGoodsService pointsGoodsService;
 
+    @Autowired
+    private KanjiaActivityGoodsService kanjiaActivityGoodsService;
+
 
     /**
      * 获取当前进行的所有促销活动信息
@@ -85,8 +89,19 @@ public class PromotionServiceImpl implements PromotionService {
      */
     public Map<String, Object> getGoodsSkuPromotionMap(String storeId, String goodsSkuId) {
         String storeIds = storeId + "," + PromotionTools.PLATFORM_ID;
-        Map<String, Object> promotionMap = new HashMap<>();
         List<PromotionGoods> promotionGoodsList = promotionGoodsService.findSkuValidPromotion(goodsSkuId, storeIds);
+        return wrapperPromotionMapList(promotionGoodsList);
+    }
+
+    @Override
+    public void removeByGoodsIds(String goodsIdsJsonStr) {
+        List<String> goodsIds = JSONUtil.toList(goodsIdsJsonStr, String.class);
+        promotionGoodsService.deletePromotionGoodsByGoods(goodsIds);
+        kanjiaActivityGoodsService.deleteByGoodsIds(goodsIds);
+    }
+
+    public Map<String, Object> wrapperPromotionMapList(List<PromotionGoods> promotionGoodsList) {
+        Map<String, Object> promotionMap = new HashMap<>();
         for (PromotionGoods promotionGoods : promotionGoodsList) {
             String esPromotionKey = promotionGoods.getPromotionType() + "-" + promotionGoods.getPromotionId();
             switch (PromotionTypeEnum.valueOf(promotionGoods.getPromotionType())) {
@@ -115,7 +130,6 @@ public class PromotionServiceImpl implements PromotionService {
         }
         return promotionMap;
     }
-
 
     private void getGoodsCurrentSeckill(String esPromotionKey, PromotionGoods promotionGoods, Map<String, Object> promotionMap) {
         Seckill seckill = seckillService.getById(promotionGoods.getPromotionId());

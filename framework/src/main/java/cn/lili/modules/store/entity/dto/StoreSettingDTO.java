@@ -33,4 +33,7 @@ public class StoreSettingDTO {
     @ApiModelProperty(value = "经纬度")
     private String storeCenter;
 
+    @ApiModelProperty(value = "默认页面是否开启")
+    private Boolean pageShow;
+
 }

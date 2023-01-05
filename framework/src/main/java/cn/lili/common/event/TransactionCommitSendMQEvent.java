@@ -21,9 +21,9 @@ public class TransactionCommitSendMQEvent extends ApplicationEvent {
     private final String tag;
 
     @Getter
-    private final String message;
+    private final Object message;
 
-    public TransactionCommitSendMQEvent(Object source, String topic, String tag, String message) {
+    public TransactionCommitSendMQEvent(Object source, String topic, String tag, Object message) {
         super(source);
         this.topic = topic;
         this.tag = tag;

@@ -1,5 +1,6 @@
 package cn.lili.controller.goods;
 
+import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
@@ -113,6 +114,7 @@ public class GoodsStoreController {
         return ResultUtil.success();
     }
 
+    @DemoSite
     @ApiOperation(value = "下架商品", notes = "下架商品时使用")
     @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "query", allowMultiple = true)
     @PutMapping(value = "/under")
@@ -130,6 +132,7 @@ public class GoodsStoreController {
         return ResultUtil.success();
     }
 
+    @DemoSite
     @ApiOperation(value = "删除商品")
     @PutMapping(value = "/delete")
     @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "query", allowMultiple = true)

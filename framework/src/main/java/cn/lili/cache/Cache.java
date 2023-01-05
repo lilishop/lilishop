@@ -153,7 +153,15 @@ public interface Cache<T> {
      * @param pattern 模糊key
      * @return 缓存中的数据
      */
-    List<String> keys(String pattern);
+    List<Object> keys(String pattern);
+
+    /**
+     * 原生阻塞keys 不推荐使用
+     *
+     * @param pattern 模糊key
+     * @return 缓存中的数据
+     */
+    List<Object> keysBlock(String pattern);
 
 
     //-----------------------------------------------用于特殊场景，redis去重计数---------------------------------------------
@@ -211,11 +219,12 @@ public interface Cache<T> {
      * @return 计数器结果
      */
     Long incr(String key, long liveTime);
+
     /**
      * redis 计数器 累加
      * 注：到达liveTime之后，该次增加取消，即自动-1，而不是redis值为空
      *
-     * @param key      为累计的key，同一key每次调用则值 +1
+     * @param key 为累计的key，同一key每次调用则值 +1
      * @return 计数器结果
      */
     Long incr(String key);

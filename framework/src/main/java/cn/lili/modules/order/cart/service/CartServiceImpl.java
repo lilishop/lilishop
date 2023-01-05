@@ -16,7 +16,6 @@ import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
-import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.member.entity.dos.Member;
@@ -46,7 +45,6 @@ import cn.lili.modules.promotion.service.MemberCouponService;
 import cn.lili.modules.promotion.service.PointsGoodsService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
-import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,16 +97,6 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private EsGoodsSearchService esGoodsSearchService;
     /**
-     * 商品索引
-     */
-    @Autowired
-    private EsGoodsIndexService goodsIndexService;
-    /**
-     * ES商品
-     */
-    @Autowired
-    private GoodsService goodsService;
-    /**
      * 砍价
      */
     @Autowired
@@ -136,7 +124,7 @@ public class CartServiceImpl implements CartService {
         }
         CartTypeEnum cartTypeEnum = getCartType(cartType);
         GoodsSku dataSku = checkGoods(skuId);
-        Map<String, Object> promotionMap = promotionGoodsService.getCurrentGoodsPromotion(dataSku, cartType);
+        Map<String, Object> promotionMap = promotionGoodsService.getCurrentGoodsPromotion(dataSku, cartTypeEnum.name());
 
         try {
             //购物车方式购买需要保存之前的选择，其他方式购买，则直接抹除掉之前的记录
@@ -161,7 +149,7 @@ public class CartServiceImpl implements CartService {
                         int newNum = oldNum + num;
                         this.checkSetGoodsQuantity(cartSkuVO, skuId, newNum);
                     }
-
+                    cartSkuVO.setPromotionMap(promotionMap);
                     //计算购物车小计
                     cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
                 } else {
@@ -254,7 +242,8 @@ public class CartServiceImpl implements CartService {
                 cartSkuVO.setChecked(checked);
             }
         }
-        cache.put(this.getOriginKey(CartTypeEnum.CART), tradeDTO);
+
+        this.resetTradeDTO(tradeDTO);
     }
 
     @Override
@@ -269,7 +258,8 @@ public class CartServiceImpl implements CartService {
                 cartSkuVO.setChecked(checked);
             }
         }
-        cache.put(this.getOriginKey(CartTypeEnum.CART), tradeDTO);
+
+        resetTradeDTO(tradeDTO);
     }
 
     @Override
@@ -282,20 +272,20 @@ public class CartServiceImpl implements CartService {
         for (CartSkuVO cartSkuVO : cartSkuVOS) {
             cartSkuVO.setChecked(checked);
         }
-        cache.put(this.getOriginKey(CartTypeEnum.CART), tradeDTO);
+        resetTradeDTO(tradeDTO);
     }
 
     /**
      * 当购物车商品发生变更时，取消已选择当优惠券
+     *
      * @param tradeDTO
      */
-    private void remoteCoupon(TradeDTO tradeDTO){
+    private void remoteCoupon(TradeDTO tradeDTO) {
         tradeDTO.setPlatformCoupon(null);
         tradeDTO.setStoreCoupons(new HashMap<>());
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void delete(String[] skuIds) {
         TradeDTO tradeDTO = this.readDTO(CartTypeEnum.CART);
         List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
@@ -308,7 +298,7 @@ public class CartServiceImpl implements CartService {
             }
         }
         cartSkuVOS.removeAll(deleteVos);
-        cache.put(this.getOriginKey(CartTypeEnum.CART), tradeDTO);
+        resetTradeDTO(tradeDTO);
     }
 
     @Override
@@ -330,17 +320,8 @@ public class CartServiceImpl implements CartService {
         tradeDTO.setStoreCoupons(null);
         //清除添加过的备注
         tradeDTO.setStoreRemark(null);
-        cache.put(this.getOriginKey(tradeDTO.getCartTypeEnum()), tradeDTO);
-    }
 
-    @Override
-    public void cleanChecked(CartTypeEnum way) {
-        if (way.equals(CartTypeEnum.CART)) {
-            TradeDTO tradeDTO = this.readDTO(CartTypeEnum.CART);
-            this.cleanChecked(tradeDTO);
-        } else {
-            cache.remove(this.getOriginKey(way));
-        }
+        resetTradeDTO(tradeDTO);
     }
 
     @Override
@@ -367,7 +348,7 @@ public class CartServiceImpl implements CartService {
         if (tradeDTO.getSkuList() != null && !tradeDTO.getSkuList().isEmpty()) {
             List<String> ids = tradeDTO.getSkuList().stream().filter(i -> Boolean.TRUE.equals(i.getChecked())).map(i -> i.getGoodsSku().getId()).collect(Collectors.toList());
 
-            List<EsGoodsIndex> esGoodsList = esGoodsSearchService.getEsGoodsBySkuIds(ids);
+            List<EsGoodsIndex> esGoodsList = esGoodsSearchService.getEsGoodsBySkuIds(ids, null);
             for (EsGoodsIndex esGoodsIndex : esGoodsList) {
                 if (esGoodsIndex != null && esGoodsIndex.getPromotionMap() != null && !esGoodsIndex.getPromotionMap().isEmpty()) {
                     List<String> couponIds = esGoodsIndex.getPromotionMap().keySet().stream().filter(i -> i.contains(PromotionTypeEnum.COUPON.name())).map(i -> i.substring(i.lastIndexOf("-") + 1)).collect(Collectors.toList());
@@ -526,6 +507,12 @@ public class CartServiceImpl implements CartService {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         //获取购物车，然后重新写入优惠券
         CartTypeEnum cartTypeEnum = getCartType(way);
+
+        //积分商品不允许使用优惠券
+        if (cartTypeEnum.equals(CartTypeEnum.POINTS)) {
+            throw new ServiceException(ResultCode.SPECIAL_CANT_USE);
+        }
+
         TradeDTO tradeDTO = this.readDTO(cartTypeEnum);
 
         MemberCouponSearchParams searchParams = new MemberCouponSearchParams();

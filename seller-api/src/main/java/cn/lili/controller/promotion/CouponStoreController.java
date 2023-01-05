@@ -41,7 +41,6 @@ public class CouponStoreController {
     @GetMapping
     @ApiOperation(value = "获取优惠券列表")
     public ResultMessage<IPage<CouponVO>> getCouponList(CouponSearchParams queryParam, PageVO page) {
-        page.setNotConvert(true);
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         queryParam.setStoreId(storeId);
         IPage<CouponVO> coupons = couponService.pageVOFindAll(queryParam, page);
