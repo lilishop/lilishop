@@ -240,6 +240,10 @@ public enum CachePrefix {
      * 积分商品缓存key前缀
      */
     STORE_ID_EXCHANGE,
+    /**
+     * 会员领取标记
+     */
+    MEMBER_COUPON_SIGN,
 
 
     //================交易=================

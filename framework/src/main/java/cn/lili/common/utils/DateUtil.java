@@ -26,15 +26,16 @@ public class DateUtil {
      * @return 今天开始时间
      */
     public static Long getDayOfStart() {
-        return DateUtil.getDateline()/(60*24*60);
+        return DateUtil.getDateline() / (60 * 24 * 60);
     }
+
     /**
      * 指定日的开始时间
      *
      * @return 指定日时间
      */
     public static Long getDayOfStart(Date date) {
-        return date.getTime()/(60*24*60);
+        return date.getTime() / (60 * 24 * 60);
     }
 
     /**
@@ -352,6 +353,22 @@ public class DateUtil {
     /**
      * 获取当前天的结束时间
      *
+     * @return 当前天的开始时间
+     */
+    public static Date getCurrentDayStartTime() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(Calendar.SECOND, cal.get(Calendar.SECOND) - 1);
+        return cal.getTime();
+    }
+
+    /**
+     * 获取当前天的结束时间
+     *
      * @return 当前天的结束时间
      */
     public static Date getCurrentDayEndTime() {
@@ -364,6 +381,21 @@ public class DateUtil {
         cal.set(Calendar.DATE, cal.get(Calendar.DATE) + 1);
         cal.set(Calendar.SECOND, cal.get(Calendar.SECOND) - 1);
         return cal.getTime();
+    }
+
+    /**
+     * 获取干净的时间
+     *
+     * @return 时间对象
+     */
+    public static Calendar getCleanCalendar() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal;
     }
 
     /**

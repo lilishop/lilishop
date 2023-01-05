@@ -2,6 +2,7 @@ package cn.lili.modules.promotion.entity.dos;
 
 import cn.lili.modules.promotion.entity.enums.CouponActivitySendTypeEnum;
 import cn.lili.modules.promotion.entity.enums.CouponActivityTypeEnum;
+import cn.lili.modules.promotion.entity.enums.CouponFrequencyEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -36,6 +37,12 @@ public class CouponActivity extends BasePromotions {
     @NotNull(message = "请选择活动范围")
     @ApiModelProperty(value = "活动范围", allowableValues = "ALL:全部会员,DESIGNATED：指定会员")
     private String activityScope;
+    /**
+     * @see CouponFrequencyEnum
+     */
+    @NotNull(message = "领取周期")
+    @ApiModelProperty(value = "活动范围", allowableValues = " DAY:每天, WEEK:每周, MONTH:每月")
+    private String couponFrequencyEnum;
 
     @ApiModelProperty(value = "活动范围详情,只有精准发券使用")
     private String activityScopeInfo;

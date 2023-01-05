@@ -8,7 +8,6 @@ import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
-import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.CouponActivity;
@@ -20,10 +19,7 @@ import cn.lili.modules.promotion.entity.enums.*;
 import cn.lili.modules.promotion.entity.vos.CouponActivityItemVO;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
 import cn.lili.modules.promotion.mapper.CouponActivityMapper;
-import cn.lili.modules.promotion.service.CouponActivityItemService;
-import cn.lili.modules.promotion.service.CouponActivityService;
-import cn.lili.modules.promotion.service.CouponService;
-import cn.lili.modules.promotion.service.MemberCouponService;
+import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import groovy.util.logging.Slf4j;
@@ -31,7 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -50,6 +49,11 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
     private MemberCouponService memberCouponService;
     @Autowired
     private CouponActivityItemService couponActivityItemService;
+
+
+    @Autowired
+    private MemberCouponSignService memberCouponSignService;
+
     @Autowired
     private MemberService memberService;
 
@@ -90,6 +94,7 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
         }
 
     }
+
     /**
      * 初始化促销字段
      *
@@ -181,6 +186,14 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
         //获取当前正在进行的优惠券活动
         List<CouponActivityVO> couponActivities = currentCouponActivity(couponActivityTrigger.getCouponActivityTypeEnum().name());
 
+
+        /**
+         * 自动发送优惠券则需要补足日志
+         */
+        if (couponActivityTrigger.getCouponActivityTypeEnum().equals(CouponActivityTypeEnum.AUTO_COUPON)) {
+            couponActivities = memberCouponSignService.receiveCoupon(couponActivities);
+        }
+
         //优惠券发放列表
         List<CouponActivityItemVO> couponActivityItemVOS = new ArrayList<>();
 
@@ -190,6 +203,7 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
         AuthUser authUser = new AuthUser();
         authUser.setId(couponActivityTrigger.getUserId());
         authUser.setNickName(couponActivityTrigger.getNickName());
+
 
         return this.sendCoupon(authUser, couponActivityItemVOS);
     }
@@ -307,16 +321,20 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
      * @param couponActivityItems 优惠券列表
      */
     private List<MemberCoupon> sendCoupon(AuthUser authUser, List<? extends CouponActivityItem> couponActivityItems) {
+
+        //最终优惠券列表
+        List<MemberCoupon> finalCoupons = new ArrayList<>();
+
         //循环优惠券赠送列表
         for (CouponActivityItem couponActivityItem : couponActivityItems) {
             //获取优惠券
             Coupon coupon = couponService.getById(couponActivityItem.getCouponId());
             //判断优惠券是否存在
             if (coupon != null) {
-                List<MemberCoupon> memberCouponList = new LinkedList<>();
                 //循环优惠券的领取数量
                 int activitySendNum = couponActivityItem.getNum();
 
+                List<MemberCoupon> memberCouponList = new ArrayList<>();
                 for (int i = 1; i <= activitySendNum; i++) {
                     MemberCoupon memberCoupon = new MemberCoupon(coupon);
                     memberCoupon.setMemberId(authUser.getId());
@@ -325,6 +343,8 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
                     memberCoupon.setPlatformFlag(PromotionTools.PLATFORM_ID.equals(coupon.getStoreId()));
                     memberCouponList.add(memberCoupon);
                 }
+
+                finalCoupons.addAll(memberCouponList);
                 //批量添加优惠券
                 memberCouponService.saveBatch(memberCouponList);
                 //添加优惠券已领取数量
@@ -333,7 +353,10 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
                 log.error("赠送优惠券失败,当前优惠券不存在:" + couponActivityItem.getCouponId());
             }
         }
-        return new ArrayList<>();
+        if (finalCoupons.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return finalCoupons;
 
     }
 
