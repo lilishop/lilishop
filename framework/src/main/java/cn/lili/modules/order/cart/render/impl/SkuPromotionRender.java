@@ -204,6 +204,21 @@ public class SkuPromotionRender implements CartRenderStep {
                             cartSkuVO.getPriceDetailDTO().setGoodsPrice(cartSkuVO.getSubTotal());
 
                             cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
+
+                            //如果是秒杀活动
+                            if (promotionSkuVO.getPromotionType().equals(PromotionTypeEnum.SECKILL.name())) {
+                                //需记录秒杀活动详情
+                                cartSkuVO.getPriceDetailDTO().setDiscountPriceItem(
+                                        DiscountPriceItem.builder()
+                                                .discountPrice(CurrencyUtil.sub(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getPurchasePrice()))
+                                                .promotionId(promotionSkuVO.getActivityId())
+                                                .promotionTypeEnum(PromotionTypeEnum.SECKILL)
+                                                .skuId(cartSkuVO.getGoodsSku().getId())
+                                                .goodsId(cartSkuVO.getGoodsSku().getGoodsId())
+                                                .build());
+                            }
+
+
                         }
                     }
                 }
