@@ -70,6 +70,12 @@ public class AuthUser implements Serializable {
      */
     private Boolean isSuper = false;
 
+    /**
+     * 租户id
+     */
+    private String tenantId;
+
+
     public AuthUser(String username, String id, String nickName, String face, UserEnums role) {
         this.username = username;
         this.face = face;

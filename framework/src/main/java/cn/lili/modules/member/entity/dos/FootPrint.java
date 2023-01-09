@@ -28,6 +28,9 @@ public class FootPrint extends BaseEntity {
     @ApiModelProperty(value = "会员ID")
     private String memberId;
 
+    @ApiModelProperty(value = "店铺Id")
+    private String storeId;
+
     @ApiModelProperty(value = "商品ID")
     private String goodsId;
 

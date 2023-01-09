@@ -7,6 +7,8 @@ import cn.lili.modules.order.cart.entity.vo.TradeParams;
 import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.entity.vo.ReceiptVO;
 
+import java.util.List;
+
 /**
  * 购物车业务层
  *
@@ -112,6 +114,14 @@ public interface CartService {
     void shippingAddress(String shippingAddressId, String way);
 
     /**
+     * 选择自提地址
+     *
+     * @param shopAddressId 收货地址id
+     * @param way               购物车类型
+     */
+    void shippingSelfAddress(String shopAddressId, String way);
+
+    /**
      * 选择发票
      *
      * @param receiptVO 发票信息
@@ -123,11 +133,10 @@ public interface CartService {
     /**
      * 选择配送方式
      *
-     * @param storeId        店铺id
      * @param deliveryMethod 配送方式
      * @param way            购物车类型
      */
-    void shippingMethod(String storeId, String deliveryMethod, String way);
+    void shippingMethod(String deliveryMethod, String way);
 
     /**
      * 获取购物车商品数量
@@ -160,4 +169,11 @@ public interface CartService {
      * @return 交易信息
      */
     Trade createTrade(TradeParams tradeParams);
+
+    /***
+     * 获取可使用的配送方式
+     * @param way
+     * @return
+     */
+    List<String> shippingMethodList(String way);
 }
