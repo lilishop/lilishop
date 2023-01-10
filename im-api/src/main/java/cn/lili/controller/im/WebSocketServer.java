@@ -4,7 +4,6 @@ import cn.lili.cache.Cache;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.im.config.CustomSpringConfigurator;
 import cn.lili.modules.im.entity.dos.ImMessage;
 import cn.lili.modules.im.entity.dos.ImTalk;
@@ -13,23 +12,20 @@ import cn.lili.modules.im.entity.vo.MessageOperation;
 import cn.lili.modules.im.entity.vo.MessageVO;
 import cn.lili.modules.im.service.ImMessageService;
 import cn.lili.modules.im.service.ImTalkService;
-import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.service.StoreService;
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -37,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 @ServerEndpoint(value = "/lili/webSocket/{accessToken}", configurator = CustomSpringConfigurator.class)
+@Scope("prototype")
 @Slf4j
 public class WebSocketServer {
     /**
