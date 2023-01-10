@@ -73,4 +73,7 @@ ALTER TABLE li_order ADD  `store_address_mobile` varchar(255) CHARACTER SET utf8
   店铺是否开启自提
  */
 ALTER TABLE li_store  ADD `self_pick_flag` bit(1) DEFAULT NULL;
+/**
+  历史足迹增加店铺Id
+ */
 ALTER TABLE li_foot_print  ADD `store_id` varchar(255) DEFAULT NULL COMMENT '店铺ID';
