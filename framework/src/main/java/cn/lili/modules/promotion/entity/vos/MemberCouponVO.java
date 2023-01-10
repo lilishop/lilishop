@@ -4,6 +4,7 @@ import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * MemberCouponVO
@@ -12,8 +13,14 @@ import lombok.Data;
  * @version v1.0
  * 2021-08-24 14:30
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class MemberCouponVO extends MemberCoupon {
+
+    private static final long serialVersionUID = -5533168813075444962L;
+
+    @ApiModelProperty(value = "优惠券名称")
+    private String couponName;
 
     @ApiModelProperty(value = "无法使用原因")
     private String reason;

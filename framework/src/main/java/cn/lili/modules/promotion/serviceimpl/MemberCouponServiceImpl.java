@@ -316,10 +316,10 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         queryWrapper.eq(CharSequenceUtil.isNotEmpty(param.getCouponType()), "mc.coupon_type", param.getCouponType());
         queryWrapper.eq(CharSequenceUtil.isNotEmpty(param.getMemberCouponStatus()), "mc.member_coupon_status", param.getMemberCouponStatus());
         if (param.getStartTime() != null) {
-            queryWrapper.ge("start_time", new Date(param.getStartTime()));
+            queryWrapper.ge("mc.start_time", new Date(param.getStartTime()));
         }
         if (param.getEndTime() != null) {
-            queryWrapper.le("end_time", new Date(param.getEndTime()));
+            queryWrapper.le("mc.end_time", new Date(param.getEndTime()));
         }
         return this.baseMapper.getMemberCoupons(page, queryWrapper);
     }
