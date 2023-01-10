@@ -185,7 +185,7 @@ public class RedisCache implements Cache {
     public Long counter(Object key) {
         HyperLogLogOperations<Object, Object> operations = redisTemplate.opsForHyperLogLog();
 
-        //add 方法对应 PFADD 命令
+        //add 方法对应 PFCOUNT  命令
         return operations.size(key);
     }
 

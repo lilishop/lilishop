@@ -209,6 +209,10 @@ public enum CachePrefix {
      */
     PROMOTION,
     /**
+     * 当前优惠券活动
+     */
+    CURRENT_COUPON_ACTIVITY,
+    /**
      * 促销活动
      */
     PROMOTION_GOODS,
@@ -236,6 +240,10 @@ public enum CachePrefix {
      * 积分商品缓存key前缀
      */
     STORE_ID_EXCHANGE,
+    /**
+     * 会员领取标记
+     */
+    MEMBER_COUPON_SIGN,
 
 
     //================交易=================
@@ -441,6 +449,10 @@ public enum CachePrefix {
      * 分销员
      */
     DISTRIBUTION,
+    /**
+     * 邀请人
+     */
+    INVITER,
 
     /**
      * 找回手机
@@ -503,12 +515,11 @@ public enum CachePrefix {
 
     /**
      * 扫码登录
+     *
      * @param str
      * @return
      */
-    QR_CODE_LOGIN_SESSION
-
-    ;
+    QR_CODE_LOGIN_SESSION;
 
 
     public static String removePrefix(String str) {

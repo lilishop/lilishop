@@ -241,12 +241,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             }
         }
         UpdateWrapper<Category> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("id", category.getId())
-                .set("name", category.getName())
-                .set("image", category.getImage())
-                .set("sort_order", category.getSortOrder())
-                .set(DELETE_FLAG_COLUMN, category.getDeleteFlag())
-                .set("commission_rate", category.getCommissionRate());
+        updateWrapper.eq("id", category.getId());
         this.baseMapper.update(category, updateWrapper);
         removeCache();
     }

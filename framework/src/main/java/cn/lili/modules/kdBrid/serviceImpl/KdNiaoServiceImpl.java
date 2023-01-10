@@ -26,7 +26,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.gson.Gson;
-import groovy.util.logging.Slf4j;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,7 +88,7 @@ public class KdNiaoServiceImpl implements KdNiaoService {
 
 
     @Override
-    @OrderLogPoint(description = "'订单['+#orderSn+']发货，发货单号['+#logisticsNo+'],已打印电子面单'", orderSn = "#orderSn")
+    @OrderLogPoint(description = "'订单['+#orderSn+']发货,打印电子面单'", orderSn = "#orderSn")
     @Transactional(rollbackFor = Exception.class)
     public String createElectronicsFaceSheet(String orderSn, String logisticsId) throws Exception {
         //电子面单模板
@@ -198,6 +198,7 @@ public class KdNiaoServiceImpl implements KdNiaoService {
             //根据公司业务处理返回的信息......
             JSONObject obj = JSONObject.parseObject(result);
 
+            log.info("电子面单响应：{}",result);
             if(!"100".equals(obj.getString("ResultCode"))){
                 return obj.getString("Reason");
             }

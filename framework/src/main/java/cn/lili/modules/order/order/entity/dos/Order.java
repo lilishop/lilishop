@@ -210,6 +210,15 @@ public class Order extends BaseEntity {
     @ApiModelProperty(value = "qrCode  实物为提货码  虚拟货物为账号")
     private String qrCode;
 
+    @ApiModelProperty(value = "自提点地址")
+    private String storeAddressPath;
+
+    @ApiModelProperty(value = "自提点电话")
+    private String storeAddressMobile;
+
+    @ApiModelProperty(value = "自提点地址经纬度")
+    private String storeAddressCenter;
+
     /**
      * 构建订单
      *
@@ -233,11 +242,19 @@ public class Order extends BaseEntity {
         this.setRemark(cartVO.getRemark());
         this.setFreightPrice(tradeDTO.getPriceDetailDTO().getFreightPrice());
         //会员收件信息
-        this.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());
-        this.setConsigneeAddressPath(tradeDTO.getMemberAddress().getConsigneeAddressPath());
-        this.setConsigneeDetail(tradeDTO.getMemberAddress().getDetail());
-        this.setConsigneeMobile(tradeDTO.getMemberAddress().getMobile());
-        this.setConsigneeName(tradeDTO.getMemberAddress().getName());
+        if(DeliveryMethodEnum.LOGISTICS.name().equals(cartVO.getDeliveryMethod())){
+            this.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());
+            this.setConsigneeAddressPath(tradeDTO.getMemberAddress().getConsigneeAddressPath());
+            this.setConsigneeDetail(tradeDTO.getMemberAddress().getDetail());
+            this.setConsigneeMobile(tradeDTO.getMemberAddress().getMobile());
+            this.setConsigneeName(tradeDTO.getMemberAddress().getName());
+        }
+        //自提点信息
+        if(DeliveryMethodEnum.SELF_PICK_UP.name().equals(cartVO.getDeliveryMethod())){
+            this.setStoreAddressPath(tradeDTO.getStoreAddress().getAddress());
+            this.setStoreAddressMobile(tradeDTO.getStoreAddress().getMobile());
+            this.setStoreAddressCenter(tradeDTO.getStoreAddress().getCenter());
+        }
         //平台优惠券判定
         if (tradeDTO.getPlatformCoupon() != null) {
             this.setUsePlatformMemberCouponId(tradeDTO.getPlatformCoupon().getMemberCoupon().getId());

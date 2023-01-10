@@ -16,10 +16,12 @@ import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
+import cn.lili.common.utils.ObjectUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
 import cn.lili.modules.order.order.entity.dos.*;
 import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
@@ -290,12 +292,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
         //如果订单促销类型不为空&&订单是拼团订单，并且订单未成团，则抛出异常
         if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())
-                && !order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())) {
+                && !CharSequenceUtil.equalsAny(order.getOrderStatus(),OrderStatusEnum.UNDELIVERED.name(),OrderStatusEnum.STAY_PICKED_UP.name())) {
             throw new ServiceException(ResultCode.ORDER_CAN_NOT_CANCEL);
         }
         if (CharSequenceUtil.equalsAny(order.getOrderStatus(),
                 OrderStatusEnum.UNDELIVERED.name(),
                 OrderStatusEnum.UNPAID.name(),
+                OrderStatusEnum.STAY_PICKED_UP.name(),
                 OrderStatusEnum.PAID.name())) {
 
             order.setOrderStatus(OrderStatusEnum.CANCELLED.name());
@@ -473,10 +476,23 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
+    public Order take(String verificationCode) {
+        String storeId = OperationalJudgment.judgment(UserContext.getCurrentUser()).getStoreId();
+        Order order = this.getOne(new LambdaQueryWrapper<Order>().eq(Order::getVerificationCode, verificationCode).eq(Order::getStoreId, storeId));
+        if(order == null){
+            throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
+        }
+        order.setOrderStatus(OrderStatusEnum.COMPLETED.name());
+        //订单完成
+        this.complete(order.getSn());
+        return order;
+    }
+
+    @Override
     public Order getOrderByVerificationCode(String verificationCode) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         return this.getOne(new LambdaQueryWrapper<Order>()
-                .eq(Order::getOrderStatus, OrderStatusEnum.TAKE.name())
+                .in(Order::getOrderStatus, OrderStatusEnum.TAKE.name(),OrderStatusEnum.STAY_PICKED_UP.name())
                 .eq(Order::getStoreId, storeId)
                 .eq(Order::getVerificationCode, verificationCode));
     }
@@ -938,13 +954,20 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Transactional(rollbackFor = Exception.class)
     public void normalOrderConfirm(String orderSn) {
+        OrderStatusEnum orderStatusEnum = null;
+        Order order = this.getBySn(orderSn);
+        if(DeliveryMethodEnum.SELF_PICK_UP.name().equals(order.getDeliveryMethod())){
+            orderStatusEnum = OrderStatusEnum.STAY_PICKED_UP;
+        }else if (DeliveryMethodEnum.LOGISTICS.name().equals(order.getDeliveryMethod())){
+            orderStatusEnum = OrderStatusEnum.UNDELIVERED;
+        }
         //修改订单
         this.update(new LambdaUpdateWrapper<Order>()
                 .eq(Order::getSn, orderSn)
-                .set(Order::getOrderStatus, OrderStatusEnum.UNDELIVERED.name()));
+                .set(Order::getOrderStatus, orderStatusEnum.name()));
         //修改订单
         OrderMessage orderMessage = new OrderMessage();
-        orderMessage.setNewStatus(OrderStatusEnum.UNDELIVERED);
+        orderMessage.setNewStatus(orderStatusEnum);
         orderMessage.setOrderSn(orderSn);
         this.sendUpdateStatusMessage(orderMessage);
     }

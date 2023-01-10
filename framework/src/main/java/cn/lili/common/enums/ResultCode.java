@@ -280,6 +280,7 @@ public enum ResultCode {
     PROMOTION_ACTIVITY_GOODS_ERROR(40009, "当前活动已经开始无法添加商品"),
     PROMOTION_ACTIVITY_ERROR(400010, "当前促销活动不存在"),
     PROMOTION_LOG_EXIST(40011, "活动已参加，已发重复参加"),
+    APPLY_END_TIME_ERROR(40012, "参与截至时间不能小于当前时间，不能大于活动开始时间"),
 
     /**
      * 优惠券
@@ -301,6 +302,7 @@ public enum ResultCode {
     COUPON_SCOPE_ERROR(41014, "指定商品范围关联id无效！"),
     COUPON_MEMBER_NOT_EXIST(41015, "没有当前会员优惠券"),
     COUPON_MEMBER_STATUS_ERROR(41016, "当前会员优惠券已过期/作废无法变更状态！"),
+    COUPON_RANGE_ERROR(41017, "优惠券使用时间范围错误"),
 
     SPECIAL_CANT_USE(41019, "特殊商品不能使用优惠券，不能使用"),
 
@@ -308,7 +310,7 @@ public enum ResultCode {
     COUPON_DELETE_ERROR(41021, "删除优惠券失败"),
     COUPON_ACTIVITY_NOT_EXIST(41022, "当前优惠券活动不存在"),
     COUPON_ACTIVITY_SAVE_ERROR(41023, "保存优惠券活动失败"),
-    COUPON_ACTIVITY_MAX_NUM(41024, "优惠券活动赠券数量最多为3"),
+    COUPON_ACTIVITY_MAX_NUM(41024, "优惠券活动赠券数量最多为5"),
 
     COUPON_DO_NOT_RECEIVER(41030, "当前优惠券不允许主动领取"),
 
@@ -373,6 +375,7 @@ public enum ResultCode {
     COUPON_ACTIVITY_ITEM_ERROR(46003, "优惠券活动必须指定优惠券，不能为空"),
     COUPON_ACTIVITY_ITEM_MUST_NUM_ERROR(46004, "优惠券活动最多指定10个优惠券"),
     COUPON_ACTIVITY_ITEM_NUM_ERROR(46005, "赠券数量必须大于0"),
+    COUPON_ACTIVITY_ITEM_NUM_MAX_VALUE_2(46006, "赠券数量最大为2"),
 
     /**
      * 其他促销

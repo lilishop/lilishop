@@ -149,6 +149,16 @@ public class OrderStoreController {
         return ResultUtil.data(orderService.take(orderSn, verificationCode));
     }
 
+    @PreventDuplicateSubmissions
+    @ApiOperation(value = "订单核验")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "verificationCode", value = "核验码", required = true, paramType = "path")
+    })
+    @PutMapping(value = "/take/{verificationCode}")
+    public ResultMessage<Object> take(@PathVariable String verificationCode) {
+        return ResultUtil.data(orderService.take(verificationCode));
+    }
+
     @ApiOperation(value = "查询物流踪迹")
     @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path")
     @GetMapping(value = "/getTraces/{orderSn}")

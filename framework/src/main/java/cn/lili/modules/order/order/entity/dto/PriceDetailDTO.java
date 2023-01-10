@@ -42,6 +42,9 @@ public class PriceDetailDTO implements Serializable {
     @ApiModelProperty(value = "优惠金额")
     private Double discountPrice;
 
+    @ApiModelProperty(value = "优惠详情")
+    private List<DiscountPriceItem> discountPriceDetail;
+
     @ApiModelProperty(value = "优惠券金额")
     private Double couponPrice;
 
@@ -101,6 +104,27 @@ public class PriceDetailDTO implements Serializable {
     private List<PromotionSkuVO> joinPromotion;
 
 
+    /**
+     * 设置促销详情
+     *
+     * @param discountPriceItem 促销信息
+     */
+    public void setDiscountPriceItem(DiscountPriceItem discountPriceItem) {
+        List<DiscountPriceItem> discountPriceItems = new ArrayList<>();
+        discountPriceItems.add(discountPriceItem);
+        this.discountPriceDetail = discountPriceItems;
+    }
+
+    /**
+     * 设置促销详情
+     *
+     * @param discountPriceItem 促销信息
+     */
+    public void addDiscountPriceItem(DiscountPriceItem discountPriceItem) {
+        discountPriceDetail.add(discountPriceItem);
+    }
+
+
     public Double getOriginalPrice() {
         if (originalPrice == 0D) {
             return flowPrice;
@@ -134,6 +158,7 @@ public class PriceDetailDTO implements Serializable {
         billPrice = 0d;
         settlementPrice = 0d;
 
+        discountPriceDetail = new ArrayList<>();
 
         joinPromotion = new ArrayList<>();
     }
@@ -203,6 +228,8 @@ public class PriceDetailDTO implements Serializable {
         flowPrice = CurrencyUtil.add(flowPrice, priceDetailDTO.getFlowPrice());
         billPrice = CurrencyUtil.add(billPrice, priceDetailDTO.getBillPrice());
         settlementPrice = CurrencyUtil.add(settlementPrice, priceDetailDTO.getSettlementPrice());
+
+        discountPriceDetail.addAll(priceDetailDTO.getDiscountPriceDetail());
 
     }
 

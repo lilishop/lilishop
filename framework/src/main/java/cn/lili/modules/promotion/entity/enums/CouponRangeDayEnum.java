@@ -23,5 +23,14 @@ public enum CouponRangeDayEnum {
         return description;
     }
 
+    public static boolean exist(String name) {
+        try {
+            CouponRangeDayEnum.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        return true;
+    }
+
 
 }

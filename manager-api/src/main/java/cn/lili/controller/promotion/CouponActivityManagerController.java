@@ -37,8 +37,8 @@ public class CouponActivityManagerController {
 
     @ApiOperation(value = "获取优惠券活动分页")
     @GetMapping
-    public ResultMessage<IPage<CouponActivity>> getCouponActivityPage(PageVO page) {
-        return ResultUtil.data(couponActivityService.page(PageUtil.initPage(page)));
+    public ResultMessage<IPage<CouponActivity>> getCouponActivityPage(PageVO page, CouponActivity couponActivity) {
+        return ResultUtil.data(couponActivityService.page(PageUtil.initPage(page), PageUtil.initWrapper(couponActivity)));
     }
 
     @ApiOperation(value = "获取优惠券活动")
@@ -52,7 +52,7 @@ public class CouponActivityManagerController {
     @PostMapping
     public ResultMessage<CouponActivity> addCouponActivity(@RequestBody(required = false) CouponActivityDTO couponActivityDTO) {
         for (CouponActivityItem couponActivityItem : couponActivityDTO.getCouponActivityItems()) {
-            if (couponActivityItem.getNum() > 3) {
+            if (couponActivityItem.getNum() > 5) {
                 throw new ServiceException(ResultCode.COUPON_ACTIVITY_MAX_NUM);
             }
         }
@@ -63,9 +63,7 @@ public class CouponActivityManagerController {
     }
 
     @ApiOperation(value = "关闭优惠券活动")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "优惠券活动ID", required = true, dataType = "String", paramType = "path")
-    })
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "优惠券活动ID", required = true, dataType = "String", paramType = "path")})
     @DeleteMapping("/{id}")
     public ResultMessage<CouponActivity> updateStatus(@PathVariable String id) {
         if (couponActivityService.updateStatus(Collections.singletonList(id), null, null)) {

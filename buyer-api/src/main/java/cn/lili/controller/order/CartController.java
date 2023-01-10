@@ -189,20 +189,38 @@ public class CartController {
         }
     }
 
+    @ApiOperation(value = "选择自提地址")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "storeAddressId", value = "自提地址id ", required = true, paramType = "query"),
+            @ApiImplicitParam(name = "way", value = "购物车类型 ", paramType = "query")
+    })
+    @GetMapping("/storeAddress")
+    public ResultMessage<Object> shippingSelfPickAddress(@NotNull(message = "自提地址ID不能为空") String storeAddressId,
+                                                 String way) {
+        try {
+            cartService.shippingSelfAddress(storeAddressId, way);
+            return ResultUtil.success();
+        } catch (ServiceException se) {
+            log.error(ResultCode.SHIPPING_NOT_APPLY.message(), se);
+            throw new ServiceException(ResultCode.SHIPPING_NOT_APPLY);
+        } catch (Exception e) {
+            log.error(ResultCode.CART_ERROR.message(), e);
+            throw new ServiceException(ResultCode.CART_ERROR);
+        }
+    }
+
     @ApiOperation(value = "选择配送方式")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "shippingMethod", value = "配送方式：SELF_PICK_UP(自提)," +
                     "LOCAL_TOWN_DELIVERY(同城配送)," +
                     "LOGISTICS(物流) ", required = true, paramType = "query"),
-            @ApiImplicitParam(name = "selleId", value = "店铺id", paramType = "query"),
             @ApiImplicitParam(name = "way", value = "购物车类型 ", paramType = "query")
     })
-    @GetMapping("/shippingMethod")
+    @PutMapping("/shippingMethod")
     public ResultMessage<Object> shippingMethod(@NotNull(message = "配送方式不能为空") String shippingMethod,
-                                                String selleId,
                                                 String way) {
         try {
-            cartService.shippingMethod(selleId, shippingMethod, way);
+            cartService.shippingMethod( shippingMethod, way);
             return ResultUtil.success();
         } catch (ServiceException se) {
             log.error(se.getMsg(), se);
@@ -210,6 +228,21 @@ public class CartController {
         } catch (Exception e) {
             log.error(ResultCode.CART_ERROR.message(), e);
             throw new ServiceException(ResultCode.CART_ERROR);
+        }
+    }
+
+    @ApiOperation(value = "获取用户可选择的物流方式")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "way", value = "购物车类型 ", paramType = "query")
+    })
+    @GetMapping("/shippingMethodList")
+    public ResultMessage<Object> shippingMethodList(String way) {
+        try {
+            return ResultUtil.data(cartService.shippingMethodList(way));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return ResultUtil.error(ResultCode.ERROR);
         }
     }
 
