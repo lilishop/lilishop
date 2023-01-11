@@ -325,7 +325,7 @@ public abstract class BaseElasticsearchService {
                         "        }\n" +
                         "      },\n" +
                         "      \"promotionMapJson\": {\n" +
-                        "        \"type\": \"text\"\n" +
+                        "        \"type\": \"keyword\"\n" +
                         "      },\n" +
                         "      \"thumbnail\": {\n" +
                         "        \"type\": \"text\",\n" +

@@ -239,7 +239,8 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                         List<PromotionGoods> promotionGoods = skuValidPromotions.stream()
                                 .filter(j ->
                                         (CharSequenceUtil.isNotEmpty(j.getSkuId()) && j.getSkuId().equals(goodsSku.getId())) ||
-                                                j.getScopeType().equals(PromotionsScopeTypeEnum.ALL.name()) ||
+                                                (j.getScopeType().equals(PromotionsScopeTypeEnum.ALL.name()) && j.getStoreId().equals("0")) ||
+                                                (j.getScopeType().equals(PromotionsScopeTypeEnum.ALL.name()) && j.getStoreId().equals(esGoodsIndex.getStoreId())) ||
                                                 (j.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name()) && j.getScopeId().contains(goodsSku.getCategoryPath())))
                                 .collect(Collectors.toList());
                         if (CollUtil.isNotEmpty(promotionGoods)) {

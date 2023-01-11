@@ -138,6 +138,14 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
     void updatePromotionGoodsStock(List<PromotionGoods> promotionGoodsList);
 
     /**
+     * 更新促销活动商品库存
+     *
+     * @param skuId      商品skuId
+     * @param quantity  库存
+     */
+    void updatePromotionGoodsStock(String skuId, Integer quantity);
+
+    /**
      * 更新促销活动商品索引
      *
      * @param promotionGoods 促销商品信息
