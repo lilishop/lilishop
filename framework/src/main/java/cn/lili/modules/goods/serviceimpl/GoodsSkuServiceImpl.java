@@ -508,6 +508,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             List<GoodsSku> goodsSkus = new ArrayList<>();
             goodsSkus.add(goodsSku);
             this.updateGoodsStuck(goodsSkus);
+            this.promotionGoodsService.updatePromotionGoodsStock(goodsSku.getId(), quantity);
         }
     }
 

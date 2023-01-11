@@ -10,8 +10,12 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dto.search.CouponSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
+import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
 import cn.lili.modules.promotion.service.CouponService;
+import cn.lili.modules.promotion.service.MemberCouponService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
@@ -37,6 +41,10 @@ public class CouponStoreController {
 
     @Autowired
     private CouponService couponService;
+
+
+    @Autowired
+    private MemberCouponService memberCouponService;
 
     @GetMapping
     @ApiOperation(value = "获取优惠券列表")
@@ -89,6 +97,15 @@ public class CouponStoreController {
         List<Coupon> list = couponService.list(queryWrapper);
         List<String> filterIds = list.stream().map(Coupon::getId).collect(Collectors.toList());
         return couponService.removePromotions(filterIds) ? ResultUtil.success() : ResultUtil.error(ResultCode.COUPON_DELETE_ERROR);
+    }
+
+    @ApiOperation(value = "获取优惠券领取详情")
+    @GetMapping(value = "/received")
+    public ResultMessage<IPage<MemberCouponVO>> getReceiveByPage(MemberCouponSearchParams searchParams,
+                                                                 PageVO page) {
+        searchParams.setStoreId(Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId());
+        IPage<MemberCouponVO> result = memberCouponService.getMemberCouponsPage(PageUtil.initPage(page), searchParams);
+        return ResultUtil.data(result);
     }
 
     @ApiOperation(value = "修改优惠券状态")

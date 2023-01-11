@@ -14,6 +14,7 @@ import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
+import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
 import cn.lili.modules.promotion.mapper.MemberCouponMapper;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
@@ -302,6 +303,27 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         updateWrapper.set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.CLOSED.name());
         updateWrapper.set(MemberCoupon::getDeleteFlag, true);
         this.update(updateWrapper);
+    }
+
+    @Override
+    public Page<MemberCouponVO> getMemberCouponsPage(Page<MemberCoupon> page, MemberCouponSearchParams param) {
+        QueryWrapper<MemberCouponVO> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(param.getMemberId()), "mc.member_id", param.getMemberId());
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(param.getStoreId()), "c.store_id", param.getStoreId());
+        queryWrapper.like(CharSequenceUtil.isNotEmpty(param.getMemberName()), "mc.member_name", param.getMemberName());
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(param.getCouponId()), "mc.coupon_id", param.getCouponId());
+        queryWrapper.like(CharSequenceUtil.isNotEmpty(param.getCouponName()), "c.coupon_name", param.getCouponName());
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(param.getGetType()), "mc.get_type", param.getGetType());
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(param.getScopeType()), "mc.scope_type", param.getPromotionStatus());
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(param.getCouponType()), "mc.coupon_type", param.getCouponType());
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(param.getMemberCouponStatus()), "mc.member_coupon_status", param.getMemberCouponStatus());
+        if (param.getStartTime() != null) {
+            queryWrapper.ge("mc.start_time", new Date(param.getStartTime()));
+        }
+        if (param.getEndTime() != null) {
+            queryWrapper.le("mc.end_time", new Date(param.getEndTime()));
+        }
+        return this.baseMapper.getMemberCoupons(page, queryWrapper);
     }
 
     /**

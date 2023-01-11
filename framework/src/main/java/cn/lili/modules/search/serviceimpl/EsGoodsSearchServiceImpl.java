@@ -469,6 +469,10 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         if (CharSequenceUtil.isNotEmpty(searchDTO.getProp())) {
             this.propSearch(filterBuilder, searchDTO);
         }
+        // 促销活动判定
+        if (CharSequenceUtil.isNotEmpty(searchDTO.getPromotionsId()) && CharSequenceUtil.isNotEmpty(searchDTO.getPromotionType())) {
+            filterBuilder.must(QueryBuilders.wildcardQuery("promotionMapJson", "*" + searchDTO.getPromotionType() + "-" + searchDTO.getPromotionsId() + "*"));
+        }
         //价格区间判定
         if (CharSequenceUtil.isNotEmpty(searchDTO.getPrice())) {
             String[] prices = searchDTO.getPrice().split("_");
