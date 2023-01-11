@@ -4,8 +4,8 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import cn.lili.cache.Cache;
 import cn.lili.common.enums.PromotionTypeEnum;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
@@ -72,6 +72,9 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     @Autowired
     private EsGoodsIndexService goodsIndexService;
 
+    @Autowired
+    private Cache cache;
+
     @Override
     public List<PromotionGoods> findSkuValidPromotion(String skuId, String storeIds) {
 
@@ -96,7 +99,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         List<String> skuIds = skus.stream().map(GoodsSku::getId).collect(Collectors.toList());
         List<String> categoriesPath = new ArrayList<>();
         categories.forEach(i -> {
-                    if (StringUtils.isNotEmpty(i)) {
+                    if (CharSequenceUtil.isNotEmpty(i)) {
                         categoriesPath.addAll(Arrays.asList(i.split(",")));
                     }
                 }
@@ -266,6 +269,20 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
             this.update(updateWrapper);
             stringRedisTemplate.opsForValue().set(promotionStockKey, promotionGoods.getQuantity().toString());
         }
+    }
+
+    @Override
+    public void updatePromotionGoodsStock(String skuId, Integer quantity) {
+        LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(PromotionGoods::getSkuId, skuId);
+        this.list(queryWrapper).forEach(promotionGoods -> {
+            String promotionStockKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(PromotionTypeEnum.valueOf(promotionGoods.getPromotionType()), promotionGoods.getPromotionId(), promotionGoods.getSkuId());
+            cache.remove(promotionStockKey);
+        });
+        LambdaUpdateWrapper<PromotionGoods> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(PromotionGoods::getSkuId, skuId);
+        updateWrapper.set(PromotionGoods::getQuantity, quantity);
+        this.update(updateWrapper);
     }
 
     /**

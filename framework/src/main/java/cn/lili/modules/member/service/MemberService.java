@@ -252,7 +252,6 @@ public interface MemberService extends IService<Member> {
     void logout(UserEnums userEnums);
 
     /**
-     * <<<<<<< HEAD
      * 修改会员是否拥有店铺
      *
      * @param haveStore 是否拥有店铺

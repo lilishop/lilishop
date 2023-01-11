@@ -4,8 +4,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +17,9 @@ import java.util.List;
  **/
 @EqualsAndHashCode(callSuper = true)
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PromotionGoodsSearchParams extends BasePromotionsSearchParams {
 
     @ApiModelProperty(value = "促销活动id")

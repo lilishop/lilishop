@@ -42,6 +42,7 @@ public class WechatMessageExecute implements OrderStatusChangeEvent, TradeEvent 
             case PAID:
             case UNDELIVERED:
             case DELIVERED:
+            case STAY_PICKED_UP:
             case COMPLETED:
                 try {
                     wechatMessageUtil.sendWechatMessage(orderMessage.getOrderSn());

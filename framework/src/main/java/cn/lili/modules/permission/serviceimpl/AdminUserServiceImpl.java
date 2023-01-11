@@ -1,10 +1,13 @@
 package cn.lili.modules.permission.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.StringUtils;
@@ -53,6 +56,10 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     private MenuService menuService;
     @Autowired
     private ManagerTokenGenerate managerTokenGenerate;
+
+    @Autowired
+    private Cache cache;
+
     /**
      * 角色长度
      */
@@ -130,6 +137,14 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     @Override
     public Token refreshToken(String refreshToken) {
         return managerTokenGenerate.refreshToken(refreshToken);
+    }
+
+    @Override
+    public void logout(UserEnums userEnums) {
+        String currentUserToken = UserContext.getCurrentUserToken();
+        if (CharSequenceUtil.isNotEmpty(currentUserToken)) {
+            cache.remove(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums) + currentUserToken);
+        }
     }
 
 
