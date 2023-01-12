@@ -1,6 +1,6 @@
 package cn.lili.controller.im;
 
-import cn.lili.cache.Cache;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
@@ -12,11 +12,10 @@ import cn.lili.modules.im.entity.vo.MessageOperation;
 import cn.lili.modules.im.entity.vo.MessageVO;
 import cn.lili.modules.im.service.ImMessageService;
 import cn.lili.modules.im.service.ImTalkService;
-import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.store.service.StoreService;
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -35,33 +34,21 @@ import java.util.concurrent.ConcurrentHashMap;
 @ServerEndpoint(value = "/lili/webSocket/{accessToken}", configurator = CustomSpringConfigurator.class)
 @Scope("prototype")
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WebSocketServer {
     /**
      * 消息服务
      */
-    @Autowired
-    private ImMessageService imMessageService;
+    private final ImMessageService imMessageService;
 
-    /**
-     * im用户服务
-     */
-    @Autowired
-    private MemberService memberService;
+    private final ImTalkService imTalkService;
 
-    @Autowired
-    private StoreService storeService;
-
-    @Autowired
-    private ImTalkService imTalkService;
-
-
-    @Autowired
-    private Cache cache;
     /**
      * 在线人数
      * PS 注意，只能单节点，如果多节点部署需要自行寻找方案
      */
     private static ConcurrentHashMap<String, Session> sessionPools = new ConcurrentHashMap<>();
+
 
     /**
      * 建立连接
@@ -69,19 +56,24 @@ public class WebSocketServer {
      * @param session
      */
     @OnOpen
-    public void onOpen(@PathParam("accessToken") String accessToken, Session session) throws IOException {
-        AuthUser authUser = UserContext.getAuthUser(accessToken);
-        Object message = null;
-        if (UserEnums.STORE.equals(authUser.getRole())) {
-            message = storeService.getById(authUser.getStoreId());
-            sessionPools.put(authUser.getStoreId(), session);
+    public void onOpen(@PathParam("accessToken") String accessToken, Session session) {
 
-        } else if (UserEnums.MEMBER.equals(authUser.getRole())) {
-            message = memberService.getById(authUser.getId());
-            sessionPools.put(authUser.getId(), session);
+
+        AuthUser authUser = UserContext.getAuthUser(accessToken);
+
+        String sessionId = UserEnums.STORE.equals(authUser.getRole()) ? authUser.getStoreId() : authUser.getId();
+        //如果已有会话，则进行下线提醒。
+        if (sessionPools.containsKey(sessionId)) {
+            log.info("用户重复登陆，旧用户下线");
+            Session oldSession = sessionPools.get(sessionId);
+            sendMessage(oldSession, MessageVO.builder().messageResultType(MessageResultType.OFFLINE).result("用户异地登陆").build());
+            try {
+                oldSession.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        MessageVO messageVO = new MessageVO(MessageResultType.FRIENDS, message);
-        sendMessage(authUser.getId(), messageVO);
+        sessionPools.put(sessionId, session);
     }
 
     /**
@@ -89,8 +81,9 @@ public class WebSocketServer {
      */
     @OnClose
     public void onClose(@PathParam("accessToken") String accessToken) {
-        log.info("断开连接:{}", accessToken);
-        sessionPools.remove(UserContext.getAuthUser(accessToken).getId());
+        AuthUser authUser = UserContext.getAuthUser(accessToken);
+        log.info("用户断开断开连接:{}", JSONUtil.toJsonStr(authUser));
+        sessionPools.remove(authUser);
     }
 
     /**
@@ -101,7 +94,7 @@ public class WebSocketServer {
      */
     @OnMessage
     public void onMessage(@PathParam("accessToken") String accessToken, String msg) {
-        log.error(msg);
+        log.info("发送消息：{}", msg);
         MessageOperation messageOperation = JSON.parseObject(msg, MessageOperation.class);
         operation(accessToken, messageOperation);
     }
@@ -123,9 +116,9 @@ public class WebSocketServer {
                 ImMessage imMessage = new ImMessage(messageOperation);
                 imMessageService.save(imMessage);
                 //修改最后消息信息
-                imTalkService.update(new LambdaUpdateWrapper<ImTalk>().eq(ImTalk::getId,messageOperation.getTalkId()).set(ImTalk::getLastTalkMessage,messageOperation.getContext())
-                        .set(ImTalk::getLastTalkTime,imMessage.getCreateTime())
-                        .set(ImTalk::getLastMessageType,imMessage.getMessageType()));
+                imTalkService.update(new LambdaUpdateWrapper<ImTalk>().eq(ImTalk::getId, messageOperation.getTalkId()).set(ImTalk::getLastTalkMessage, messageOperation.getContext())
+                        .set(ImTalk::getLastTalkTime, imMessage.getCreateTime())
+                        .set(ImTalk::getLastMessageType, imMessage.getMessageType()));
                 //发送消息
                 sendMessage(messageOperation.getTo(), new MessageVO(MessageResultType.MESSAGE, imMessage));
                 break;
@@ -148,15 +141,25 @@ public class WebSocketServer {
     /**
      * 发送消息
      *
-     * @param key     密钥
+     * @param sessionId sessionId
+     * @param message   消息对象
+     */
+    private void sendMessage(String sessionId, MessageVO message) {
+        Session session = sessionPools.get(sessionId);
+        sendMessage(session, message);
+    }
+
+    /**
+     * 发送消息
+     *
+     * @param session 会话
      * @param message 消息对象
      */
-    private void sendMessage(String key, MessageVO message) {
-        Session session = sessionPools.get(key);
+    private void sendMessage(Session session, MessageVO message) {
         if (session != null) {
             try {
                 session.getBasicRemote().sendText(JSON.toJSONString(message, true));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -170,16 +173,8 @@ public class WebSocketServer {
      */
     @OnError
     public void onError(Session session, Throwable throwable) {
-        throwable.printStackTrace();
+        log.error("socket异常: {}", session.getId(), throwable);
     }
 
-    /**
-     * 获取店铺id
-     *
-     * @return
-     */
-    private String storeKey(String storeId) {
-        return "STORE_" + storeId;
-    }
 
 }

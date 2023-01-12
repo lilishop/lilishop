@@ -16,6 +16,7 @@ public enum MessageResultType {
      * 未读消息
      * 历史消息
      * 系统提示
+     * 下线提醒
      */
     FRIENDS,
     ADD_FRIENDS,
@@ -23,6 +24,7 @@ public enum MessageResultType {
     READ_MESSAGE,
     UN_READ,
     HISTORY,
-    SYSTEM_TIPS
+    SYSTEM_TIPS,
+    OFFLINE
 
 }
