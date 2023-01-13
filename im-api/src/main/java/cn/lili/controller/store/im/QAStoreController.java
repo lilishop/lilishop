@@ -1,4 +1,4 @@
-package cn.lili.controller.im;
+package cn.lili.controller.store.im;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;

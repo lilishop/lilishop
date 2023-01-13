@@ -1,4 +1,4 @@
-package cn.lili.controller.seat;
+package cn.lili.controller.store.seat;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;

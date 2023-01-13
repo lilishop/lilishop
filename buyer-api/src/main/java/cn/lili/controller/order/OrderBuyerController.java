@@ -128,5 +128,4 @@ public class OrderBuyerController {
         return ResultUtil.data(orderService.invoice(orderSn));
     }
 
-
 }
