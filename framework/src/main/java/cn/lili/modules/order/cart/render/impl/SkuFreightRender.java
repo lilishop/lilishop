@@ -116,6 +116,9 @@ public class SkuFreightRender implements CartRenderStep {
                     }
                 }
             }
+        }else{
+            //自提清空不配送商品
+            tradeDTO.setNotSupportFreight(null);
         }
     }
 

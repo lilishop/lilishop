@@ -267,7 +267,7 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
      * @param storeId 店铺id
      */
     private void removeCache(String storeId) {
-        cache.get(CachePrefix.STORE.getPrefix() + storeId);
+        cache.remove(CachePrefix.STORE.getPrefix() + storeId);
     }
 
 }

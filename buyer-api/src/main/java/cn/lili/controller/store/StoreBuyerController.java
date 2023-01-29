@@ -1,11 +1,13 @@
 package cn.lili.controller.store;
 
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.vos.StoreGoodsLabelVO;
 import cn.lili.modules.goods.service.StoreGoodsLabelService;
+import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dto.StoreBankDTO;
 import cn.lili.modules.store.entity.dto.StoreCompanyDTO;
 import cn.lili.modules.store.entity.dto.StoreOtherInfoDTO;
@@ -55,6 +57,20 @@ public class StoreBuyerController {
     @GetMapping
     public ResultMessage<IPage<StoreVO>> getByPage(StoreSearchParams entity, PageVO page) {
         return ResultUtil.data(storeService.findByConditionPage(entity, page));
+    }
+
+    @GetMapping("/store")
+    @ApiOperation(value = "im-获取店铺信息")
+    public ResultMessage<Store> getStoreUser() {
+        AuthUser authUser = UserContext.getCurrentUser();
+        return ResultUtil.data(storeService.getById(authUser.getStoreId()));
+    }
+
+    @GetMapping("/store/{storeId}")
+    @ApiImplicitParam(name = "storeId", value = "店铺Id", required = true, dataType = "String", paramType = "path")
+    @ApiOperation(value = "im-店铺ID获取店铺信息")
+    public ResultMessage<Store> getStoreUserDetail(@PathVariable String storeId) {
+        return ResultUtil.data(storeService.getById(storeId));
     }
 
     @ApiOperation(value = "通过id获取店铺信息")

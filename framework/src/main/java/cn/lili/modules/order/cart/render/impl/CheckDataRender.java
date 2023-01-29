@@ -110,7 +110,8 @@ public class CheckDataRender implements CartRenderStep {
             GoodsSku dataSku = goodsSkuService.getGoodsSkuByIdFromCache(cartSkuVO.getGoodsSku().getId());
             Map<String, Object> promotionMap = promotionGoodsService.getCurrentGoodsPromotion(dataSku, tradeDTO.getCartTypeEnum().name());
             //商品有效性判定
-            if (dataSku == null || dataSku.getUpdateTime().after(cartSkuVO.getGoodsSku().getUpdateTime())) {
+            log.info("dataSku: {}, goodsSku: {}", dataSku, cartSkuVO.getGoodsSku());
+            if (dataSku == null || (dataSku.getUpdateTime() != null && dataSku.getUpdateTime().after(cartSkuVO.getGoodsSku().getUpdateTime()))) {
                 //商品失效,将商品移除并重新填充商品
                 cartSkuVOS.remove(cartSkuVO);
                 //设置新商品
