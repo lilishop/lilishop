@@ -257,10 +257,6 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     }
 
     /**
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> origin/master
      * 更新秒杀活动时间
      *
      * @param seckill 秒杀活动
