@@ -716,6 +716,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public MemberVO getMember(String id) {
+        Member byId = this.getById(id);
         return new MemberVO(this.getById(id));
     }
 
