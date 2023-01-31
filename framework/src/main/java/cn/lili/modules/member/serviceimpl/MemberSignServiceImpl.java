@@ -73,7 +73,7 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
             LambdaQueryWrapper<MemberSign> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(MemberSign::getMemberId, authUser.getId());
             List<MemberSign> signSize = this.baseMapper.getTodayMemberSign(queryWrapper);
-            if (signSize.size() > 0) {
+            if (signSize.isEmpty()) {
                 throw new ServiceException(ResultCode.MEMBER_SIGN_REPEAT);
             }
             //当前签到天数的前一天日期
