@@ -109,6 +109,18 @@ public class CheckDataRender implements CartRenderStep {
             //缓存中的商品信息
             GoodsSku dataSku = goodsSkuService.getGoodsSkuByIdFromCache(cartSkuVO.getGoodsSku().getId());
             Map<String, Object> promotionMap = promotionGoodsService.getCurrentGoodsPromotion(dataSku, tradeDTO.getCartTypeEnum().name());
+
+            //商品上架状态判定
+            if (!GoodsAuthEnum.PASS.name().equals(dataSku.getAuthFlag()) || !GoodsStatusEnum.UPPER.name().equals(dataSku.getMarketEnable())) {
+                //设置购物车未选中
+                cartSkuVO.setChecked(false);
+                //设置购物车此sku商品已失效
+                cartSkuVO.setInvalid(true);
+                //设置失效消息
+                cartSkuVO.setErrorMessage("商品已下架");
+                continue;
+            }
+
             //商品有效性判定
             log.info("dataSku: {}, goodsSku: {}", dataSku, cartSkuVO.getGoodsSku());
             if (dataSku == null || (dataSku.getUpdateTime() != null && dataSku.getUpdateTime().after(cartSkuVO.getGoodsSku().getUpdateTime()))) {
@@ -120,16 +132,6 @@ public class CheckDataRender implements CartRenderStep {
                 newCartSkuVO.setNum(cartSkuVO.getNum());
                 newCartSkuVO.setSubTotal(CurrencyUtil.mul(newCartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
                 cartSkuVOS.add(newCartSkuVO);
-                continue;
-            }
-            //商品上架状态判定
-            if (!GoodsAuthEnum.PASS.name().equals(dataSku.getAuthFlag()) || !GoodsStatusEnum.UPPER.name().equals(dataSku.getMarketEnable())) {
-                //设置购物车未选中
-                cartSkuVO.setChecked(false);
-                //设置购物车此sku商品已失效
-                cartSkuVO.setInvalid(true);
-                //设置失效消息
-                cartSkuVO.setErrorMessage("商品已下架");
                 continue;
             }
             //商品库存判定
