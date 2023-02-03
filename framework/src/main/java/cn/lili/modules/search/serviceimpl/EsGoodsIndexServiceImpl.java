@@ -214,15 +214,15 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
                     List<Map<String, Object>> brandList = new ArrayList<>();
                     if (CollUtil.isNotEmpty(brandIds)) {
-                        brandList = this.brandService.getBrandsMapsByCategory(brandIds, "id,name,logo");
+                        brandList = this.brandService.getBrandsMapsByCategory(CollUtil.distinct(brandIds), "id,name,logo");
                     }
                     List<Map<String, Object>> categoryList = new ArrayList<>();
-                    if (CollUtil.isNotEmpty(categoryList)) {
-                        categoryList = this.categoryService.listMapsByIdsOrderByLevel(categoryPaths, "id,name");
+                    if (CollUtil.isNotEmpty(categoryPaths)) {
+                        categoryList = this.categoryService.listMapsByIdsOrderByLevel(CollUtil.distinct(categoryPaths), "id,name");
                     }
                     List<Map<String, Object>> storeCategoryList = new ArrayList<>();
-                    if (CollUtil.isNotEmpty(storeCategoryList)) {
-                        storeCategoryList = this.storeGoodsLabelService.listMapsByStoreIds(storeCategoryPaths, "id,label_name");
+                    if (CollUtil.isNotEmpty(storeCategoryPaths)) {
+                        storeCategoryList = this.storeGoodsLabelService.listMapsByStoreIds(CollUtil.distinct(storeCategoryPaths), "id,label_name");
                     }
 
                     for (GoodsSkuDTO goodsSku : skuIPage.getRecords()) {
