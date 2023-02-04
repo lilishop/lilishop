@@ -913,8 +913,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         if (CollUtil.isNotEmpty(categoryList) && CharSequenceUtil.isNotEmpty(goodsSku.getCategoryPath())) {
             StringBuilder categoryNamePath = new StringBuilder();
             categoryList.stream().filter(o -> goodsSku.getCategoryPath().contains(o.get("id").toString())).forEach(p -> categoryNamePath.append(p.get("name")).append(","));
-            categoryNamePath.deleteCharAt(categoryNamePath.length() - 1);
-            index.setCategoryNamePath(categoryNamePath.toString());
+            if (CharSequenceUtil.isNotEmpty(categoryNamePath)) {
+                categoryNamePath.deleteCharAt(categoryNamePath.length() - 1);
+                index.setCategoryNamePath(categoryNamePath.toString());
+            }
         }
         //商品品牌索引
         if (CollUtil.isNotEmpty(brandList) && CharSequenceUtil.isNotEmpty(goodsSku.getBrandId())) {
@@ -928,8 +930,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         if (CollUtil.isNotEmpty(storeCategoryList) && CharSequenceUtil.isNotEmpty(goodsSku.getStoreCategoryPath())) {
             StringBuilder storeCategoryNamePath = new StringBuilder();
             storeCategoryList.stream().filter(o -> goodsSku.getStoreCategoryPath().contains(o.get("id").toString())).forEach(p -> storeCategoryNamePath.append(p.get("label_name").toString()).append(","));
-            storeCategoryNamePath.deleteCharAt(storeCategoryNamePath.length() - 1);
-            index.setStoreCategoryNamePath(storeCategoryNamePath.toString());
+            if (CharSequenceUtil.isNotEmpty(storeCategoryNamePath)) {
+                storeCategoryNamePath.deleteCharAt(storeCategoryNamePath.length() - 1);
+                index.setStoreCategoryNamePath(storeCategoryNamePath.toString());
+            }
         }
         return index;
     }
