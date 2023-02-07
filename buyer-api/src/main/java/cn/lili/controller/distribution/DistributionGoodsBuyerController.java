@@ -54,22 +54,22 @@ public class DistributionGoodsBuyerController {
     @PreventDuplicateSubmissions
     @ApiOperation(value = "选择分销商品")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "distributionGoodsId", value = "分销ID", required = true, dataType = "String", paramType = "path"),
+            @ApiImplicitParam(name = "distributionGoodsId", value = "分销ID", required = true, dataType = "String", paramType = "path"),
             @ApiImplicitParam(name = "checked", value = "是否选择", required = true, dataType = "boolean", paramType = "query")
     })
     @GetMapping(value = "/checked/{distributionGoodsId}")
     public ResultMessage<Object> distributionCheckGoods(
-            @NotNull(message = "分销商品不能为空") @PathVariable("distributionGoodsId") String distributionGoodsId,Boolean checked) {
-        Boolean result=false;
-        if(checked){
-            result=distributionSelectedGoodsService.add(distributionGoodsId);
-        }else {
-            result=distributionSelectedGoodsService.delete(distributionGoodsId);
+            @NotNull(message = "分销商品不能为空") @PathVariable("distributionGoodsId") String distributionGoodsId, Boolean checked) {
+        Boolean result = false;
+        if (checked) {
+            result = distributionSelectedGoodsService.add(distributionGoodsId);
+        } else {
+            result = distributionSelectedGoodsService.delete(distributionGoodsId);
         }
         //判断操作结果
-        if(result){
+        if (result) {
             return ResultUtil.success(ResultCode.SUCCESS);
-        }else{
+        } else {
             throw new ServiceException(ResultCode.ERROR);
         }
 

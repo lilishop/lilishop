@@ -1,9 +1,9 @@
 package cn.lili.modules.member.entity.dos;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.security.sensitive.Sensitive;
 import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
@@ -131,7 +131,7 @@ public class MemberEvaluation extends BaseEntity {
         //设置订单编号
         this.orderNo = order.getSn();
         //是否包含图片
-        this.haveImage = StringUtils.isNotEmpty(memberEvaluationDTO.getImages());
+        this.haveImage = CharSequenceUtil.isNotEmpty(memberEvaluationDTO.getImages());
         //默认开启评价
         this.status = SwitchEnum.OPEN.name();
     }

@@ -1,8 +1,8 @@
 package cn.lili.event.impl;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.event.MemberRegisterEvent;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
@@ -46,7 +46,7 @@ public class RegisteredCouponActivityExecute implements MemberRegisterEvent {
                 .build());
         //邀请人赠券
         String memberId = (String) cache.get(CachePrefix.INVITER.getPrefix() + member.getId());
-        if (StringUtils.isNotEmpty(memberId)) {
+        if (CharSequenceUtil.isNotEmpty(memberId)) {
             //邀请人
             Member inviter = memberService.getById(memberId);
             couponActivityService.trigger(CouponActivityTrigger.builder()

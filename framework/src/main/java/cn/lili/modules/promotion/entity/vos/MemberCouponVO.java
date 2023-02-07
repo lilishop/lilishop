@@ -5,6 +5,7 @@ import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * MemberCouponVO
@@ -15,6 +16,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@NoArgsConstructor
 public class MemberCouponVO extends MemberCoupon {
 
     private static final long serialVersionUID = -5533168813075444962L;
@@ -30,7 +32,4 @@ public class MemberCouponVO extends MemberCoupon {
         this.reason = reason;
     }
 
-    public MemberCouponVO(){
-
-    }
 }
