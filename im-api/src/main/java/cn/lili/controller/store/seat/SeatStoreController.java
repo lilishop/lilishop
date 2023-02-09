@@ -1,6 +1,7 @@
-package cn.lili.controller.seat;
+package cn.lili.controller.store.seat;
 
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.im.entity.vo.SeatVO;
 import cn.lili.modules.im.service.SeatService;
@@ -23,17 +24,19 @@ import java.util.List;
  */
 @RestController
 @Api(tags = "店铺端,坐席管理")
-@RequestMapping("/manager/seat/setting")
+@RequestMapping("/store/seat/setting")
 @Transactional(rollbackFor = Exception.class)
-public class SeatStoreManagerController {
+public class SeatStoreController {
+
 
     @Autowired
     private SeatService seatService;
 
-    @ApiOperation(value = "查看店铺坐席列表")
+    @ApiOperation(value = "分页获取坐席")
     @GetMapping("/list")
-    public ResultMessage<List<SeatVO>> getSeats(String storeId) {
-        return ResultUtil.data(seatService.seatVoList(storeId));
+    public ResultMessage<List<SeatVO>> getSeats() {
+        return ResultUtil.data(seatService.seatVoList(UserContext.getCurrentUser().getTenantId()));
     }
+
 
 }

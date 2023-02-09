@@ -36,10 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -108,29 +105,36 @@ public class CheckDataRender implements CartRenderStep {
 
             //缓存中的商品信息
             GoodsSku dataSku = goodsSkuService.getGoodsSkuByIdFromCache(cartSkuVO.getGoodsSku().getId());
-            Map<String, Object> promotionMap = promotionGoodsService.getCurrentGoodsPromotion(dataSku, tradeDTO.getCartTypeEnum().name());
-            //商品有效性判定
-            if (dataSku == null || dataSku.getUpdateTime().after(cartSkuVO.getGoodsSku().getUpdateTime())) {
-                //商品失效,将商品移除并重新填充商品
-                cartSkuVOS.remove(cartSkuVO);
-                //设置新商品
-                CartSkuVO newCartSkuVO = new CartSkuVO(dataSku,promotionMap);
-                newCartSkuVO.setCartType(tradeDTO.getCartTypeEnum());
-                newCartSkuVO.setNum(cartSkuVO.getNum());
-                newCartSkuVO.setSubTotal(CurrencyUtil.mul(newCartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
-                cartSkuVOS.add(newCartSkuVO);
-                continue;
-            }
+
+
             //商品上架状态判定
-            if (!GoodsAuthEnum.PASS.name().equals(dataSku.getAuthFlag()) || !GoodsStatusEnum.UPPER.name().equals(dataSku.getMarketEnable())) {
-                //设置购物车未选中
-                cartSkuVO.setChecked(false);
-                //设置购物车此sku商品已失效
-                cartSkuVO.setInvalid(true);
-                //设置失效消息
-                cartSkuVO.setErrorMessage("商品已下架");
+            boolean checkGoodsStatus = dataSku == null || !GoodsAuthEnum.PASS.name().equals(dataSku.getAuthFlag()) || !GoodsStatusEnum.UPPER.name().equals(dataSku.getMarketEnable());
+            //商品有效性判定
+            boolean checkGoodsValid = dataSku != null && dataSku.getUpdateTime() != null && dataSku.getUpdateTime().after(cartSkuVO.getGoodsSku().getUpdateTime());
+
+            Map<String, Object> promotionMap = dataSku != null ? promotionGoodsService.getCurrentGoodsPromotion(dataSku, tradeDTO.getCartTypeEnum().name()) : null;
+
+            log.info("dataSku: {}, goodsSku: {}", dataSku, cartSkuVO.getGoodsSku());
+            if (checkGoodsStatus || checkGoodsValid) {
+                if (checkGoodsStatus) {
+                    //设置购物车未选中
+                    cartSkuVO.setChecked(false);
+                    //设置购物车此sku商品已失效
+                    cartSkuVO.setInvalid(true);
+                    //设置失效消息
+                    cartSkuVO.setErrorMessage("商品已下架");
+                }
+                if (checkGoodsValid) {
+                    CartSkuVO newCartSkuVO = new CartSkuVO(dataSku,promotionMap);
+                    newCartSkuVO.setCartType(tradeDTO.getCartTypeEnum());
+                    newCartSkuVO.setNum(cartSkuVO.getNum());
+                    newCartSkuVO.setSubTotal(CurrencyUtil.mul(newCartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
+                    cartSkuVO = newCartSkuVO;
+                    log.info("商品信息已更新，更新后的商品信息为：{}", cartSkuVO);
+                }
                 continue;
             }
+
             //商品库存判定
             if (dataSku.getQuantity() < cartSkuVO.getNum()) {
                 //设置购物车未选中

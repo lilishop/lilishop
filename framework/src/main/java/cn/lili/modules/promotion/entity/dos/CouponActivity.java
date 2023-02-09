@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
 @ApiModel(value = "优惠券活动实体类")
 public class CouponActivity extends BasePromotions {
 
+    private static final long serialVersionUID = 4230258450334305951L;
     /**
      * @see CouponActivityTypeEnum
      */

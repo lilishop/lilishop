@@ -42,7 +42,6 @@ import cn.lili.modules.store.service.StoreService;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -189,8 +188,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Override
     public Token usernameStoreLogin(String username, String password) {
 
-//        Member member = this.findMember(username);
-        Member member = this.getOne(new LambdaQueryWrapper<Member>().eq(Member::getMobile,username));
+        Member member = this.findMember(username);
         //判断用户是否存在
         if (member == null || !member.getDisabled()) {
             throw new ServiceException(ResultCode.USER_NOT_EXIST);

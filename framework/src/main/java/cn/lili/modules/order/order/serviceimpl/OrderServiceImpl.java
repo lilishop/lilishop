@@ -1002,12 +1002,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (order == null) {
             throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
         }
-        //判断是否为虚拟订单
-        if (!order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
+        //判断是否为虚拟订单 或 自提订单
+        if (!order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name()) && !order.getDeliveryMethod().equals(DeliveryMethodEnum.SELF_PICK_UP.name())) {
             throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
         }
-        //判断虚拟订单状态
-        if (!order.getOrderStatus().equals(OrderStatusEnum.TAKE.name())) {
+        //判断虚拟订单状态 或 待自提
+        if (!order.getOrderStatus().equals(OrderStatusEnum.TAKE.name()) && !order.getOrderStatus().equals(OrderStatusEnum.STAY_PICKED_UP.name())) {
             throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
         }
         //判断验证码是否正确

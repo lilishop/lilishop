@@ -120,8 +120,6 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     @Override
     public List<EsGoodsIndex> getEsGoodsBySkuIds(List<String> skuIds, PageVO pageVo) {
         NativeSearchQueryBuilder searchQueryBuilder = new NativeSearchQueryBuilder();
-        NativeSearchQuery build = searchQueryBuilder.build();
-        build.setIds(skuIds);
         if (pageVo != null) {
             int pageNumber = pageVo.getPageNumber() - 1;
             if (pageNumber < 0) {
@@ -131,6 +129,8 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             //分页
             searchQueryBuilder.withPageable(pageable);
         }
+        NativeSearchQuery build = searchQueryBuilder.build();
+        build.setIds(skuIds);
         return restTemplate.multiGet(build, EsGoodsIndex.class, restTemplate.getIndexCoordinatesFor(EsGoodsIndex.class));
     }
 

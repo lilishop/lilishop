@@ -4,7 +4,6 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.Clerk;
@@ -20,7 +19,6 @@ import cn.lili.modules.member.service.*;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,9 +58,8 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
         clerkVOQueryWrapper.eq(StringUtils.isNotEmpty(clerkQueryDTO.getDepartmentId()), "li_clerk.department_id", clerkQueryDTO.getDepartmentId());
         clerkVOQueryWrapper.like(StringUtils.isNotEmpty(clerkQueryDTO.getClerkName()), "li_clerk.clerk_name", clerkQueryDTO.getClerkName());
         clerkVOQueryWrapper.like(StringUtils.isNotEmpty(clerkQueryDTO.getMobile()), "m.mobile", clerkQueryDTO.getMobile());
-        IPage<ClerkVO> clerkPage = this.baseMapper.selectClerkPage(PageUtil.initPage(page), clerkVOQueryWrapper);
 
-        return clerkPage;
+        return this.baseMapper.selectClerkPage(PageUtil.initPage(page), clerkVOQueryWrapper);
 
 
         /*Page<Clerk> clerkPage = page(initPage, initWrapper);

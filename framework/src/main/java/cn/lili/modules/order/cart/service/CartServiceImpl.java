@@ -492,12 +492,11 @@ public class CartServiceImpl implements CartService {
         if (CharSequenceUtil.isNotEmpty(way)) {
             cartTypeEnum = CartTypeEnum.valueOf(way);
         }
-        TradeDTO tradeDTO = this.getCheckedTradeDTO(cartTypeEnum);
-        for (CartVO cartVO : tradeDTO.getCartList()) {
-            cartVO.setDeliveryMethod(DeliveryMethodEnum.valueOf(deliveryMethod).name());
+        TradeDTO tradeDTO = this.readDTO(cartTypeEnum);
+        for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
+            cartSkuVO.setDeliveryMethod(DeliveryMethodEnum.valueOf(deliveryMethod).name());
         }
         this.resetTradeDTO(tradeDTO);
-        TradeDTO neTradeDTO = (TradeDTO) cache.get(this.getOriginKey(cartTypeEnum));
     }
 
     /**

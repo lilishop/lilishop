@@ -1,3 +1,6 @@
+
+/** 优惠券活动增加领取周期字段 **/
+ALTER TABLE li_coupon_activity ADD coupon_frequency_enum varchar(255) COMMENT '领取周期';
 -- 会员优惠券标识
 CREATE TABLE `li_member_coupon_sign`  (
                                      `id` bigint NOT NULL,

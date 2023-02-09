@@ -65,4 +65,10 @@ public class FootprintController {
         return ResultUtil.data(footprintService.getFootprintNum());
     }
 
+
+    @GetMapping("/history")
+    @ApiOperation(value = "获取会员的历史足迹")
+    public ResultMessage<IPage<EsGoodsIndex>> getMemberHistory(FootPrintQueryParams params) {
+        return ResultUtil.data(footprintService.footPrintPage(params));
+    }
 }

@@ -194,10 +194,11 @@ public class KdNiaoServiceImpl implements KdNiaoService {
             params.put("DataType", "2");
             // 以form表单形式提交post请求，post请求体中包含了应用级参数和系统级参数
             String result = sendPost(ReqURL, params);
-
+            if(CharSequenceUtil.isEmpty(result) || CharSequenceUtil.isBlank(result)){
+                throw new ServiceException(ResultCode.LOGISTICS_CHECK_SETTING);
+            }
             //根据公司业务处理返回的信息......
             JSONObject obj = JSONObject.parseObject(result);
-
             log.info("电子面单响应：{}",result);
             if(!"100".equals(obj.getString("ResultCode"))){
                 return obj.getString("Reason");
