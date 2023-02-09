@@ -246,7 +246,17 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         Member newMember = new Member("m" + phone, "111111", phone, params.getNickName(), params.getImage());
         memberService.save(newMember);
         newMember = memberService.findByUsername(newMember.getUsername());
+
+        //判定有没有邀请人并且写入
+        UserContext.settingInviter(newMember.getId(), cache);
+
         bindMpMember(openId, unionId, newMember);
+
+
+        //判定有没有邀请人并且写入
+        UserContext.settingInviter(newMember.getId(), cache);
+
+
         // 发送会员注册信息
         applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("new member register", rocketmqCustomProperties.getMemberTopic(), MemberTagsEnum.MEMBER_REGISTER.name(), newMember));
         return memberTokenGenerate.createToken(newMember, true);

@@ -15,7 +15,10 @@ import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.search.utils.EsIndexUtil;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
-import cn.lili.modules.store.entity.dto.*;
+import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
+import cn.lili.modules.store.entity.dto.StoreDeliverGoodsAddressDTO;
+import cn.lili.modules.store.entity.dto.StoreSettingDTO;
+import cn.lili.modules.store.entity.dto.StoreSettlementDay;
 import cn.lili.modules.store.entity.vos.StoreBasicInfoVO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
 import cn.lili.modules.store.entity.vos.StoreManagementCategoryVO;
@@ -25,6 +28,7 @@ import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.store.service.StoreService;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
+import cn.lili.rocketmq.tags.StoreTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -98,7 +102,11 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
         boolean result = storeService.updateById(store);
         if (result) {
             this.updateStoreGoodsInfo(store);
+            this.removeCache(store.getId());
         }
+        String destination = rocketmqCustomProperties.getStoreTopic() + ":" + StoreTagsEnum.EDIT_STORE_SETTING.name();
+        //发送订单变更mq消息
+        rocketMQTemplate.asyncSend(destination, store, RocketmqSendCallbackBuilder.commonCallback());
         return result;
     }
 
@@ -120,6 +128,7 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
         AuthUser tokenUser = Objects.requireNonNull(UserContext.getCurrentUser());
         Store store = storeService.getById(tokenUser.getStoreId());
         store.setMerchantEuid(merchantEuid);
+        this.removeCache(store.getId());
         return storeService.updateById(store);
     }
 
@@ -143,7 +152,7 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
     @Override
     public StoreDeliverGoodsAddressDTO getStoreDeliverGoodsAddressDto(String id) {
         StoreDeliverGoodsAddressDTO storeDeliverGoodsAddressDto = this.baseMapper.getStoreDeliverGoodsAddressDto(id);
-        if(storeDeliverGoodsAddressDto ==null ){
+        if (storeDeliverGoodsAddressDto == null) {
             storeDeliverGoodsAddressDto = new StoreDeliverGoodsAddressDTO();
         }
         return storeDeliverGoodsAddressDto;
@@ -153,12 +162,15 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
     public boolean editStoreDeliverGoodsAddressDTO(StoreDeliverGoodsAddressDTO storeDeliverGoodsAddressDto) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser().getStoreId());
         LambdaUpdateWrapper<StoreDetail> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.set(StoreDetail::getSalesConsignorName,storeDeliverGoodsAddressDto.getSalesConsignorName());
-        lambdaUpdateWrapper.set(StoreDetail::getSalesConsignorMobile,storeDeliverGoodsAddressDto.getSalesConsignorMobile());
-        lambdaUpdateWrapper.set(StoreDetail::getSalesConsignorAddressId,storeDeliverGoodsAddressDto.getSalesConsignorAddressId());
-        lambdaUpdateWrapper.set(StoreDetail::getSalesConsignorAddressPath,storeDeliverGoodsAddressDto.getSalesConsignorAddressPath());
-        lambdaUpdateWrapper.set(StoreDetail::getSalesConsignorDetail,storeDeliverGoodsAddressDto.getSalesConsignorDetail());
-        lambdaUpdateWrapper.eq(StoreDetail::getStoreId,storeId);
+        lambdaUpdateWrapper.set(StoreDetail::getSalesConsignorName, storeDeliverGoodsAddressDto.getSalesConsignorName());
+        lambdaUpdateWrapper.set(StoreDetail::getSalesConsignorMobile, storeDeliverGoodsAddressDto.getSalesConsignorMobile());
+        lambdaUpdateWrapper.set(StoreDetail::getSalesConsignorAddressId, storeDeliverGoodsAddressDto.getSalesConsignorAddressId());
+        lambdaUpdateWrapper.set(StoreDetail::getSalesConsignorAddressPath, storeDeliverGoodsAddressDto.getSalesConsignorAddressPath());
+        lambdaUpdateWrapper.set(StoreDetail::getSalesConsignorDetail, storeDeliverGoodsAddressDto.getSalesConsignorDetail());
+        lambdaUpdateWrapper.eq(StoreDetail::getStoreId, storeId);
+
+
+        this.removeCache(storeId);
         return this.update(lambdaUpdateWrapper);
     }
 
@@ -170,6 +182,7 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
      */
     @Override
     public void updateSettlementDay(String storeId, DateTime dateTime) {
+        this.removeCache(storeId);
         this.baseMapper.updateSettlementDay(storeId, dateTime);
     }
 
@@ -204,6 +217,8 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
         lambdaUpdateWrapper.set(StoreDetail::getSalesConsigneeDetail, storeAfterSaleAddressDTO.getSalesConsigneeDetail());
         lambdaUpdateWrapper.set(StoreDetail::getSalesConsigneeMobile, storeAfterSaleAddressDTO.getSalesConsigneeMobile());
         lambdaUpdateWrapper.eq(StoreDetail::getStoreId, storeId);
+
+        this.removeCache(storeId);
         return this.update(lambdaUpdateWrapper);
     }
 
@@ -214,6 +229,7 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
         LambdaUpdateWrapper<StoreDetail> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.set(StoreDetail::getStockWarning, stockWarning);
         lambdaUpdateWrapper.eq(StoreDetail::getStoreId, storeId);
+        this.removeCache(storeId);
         return this.update(lambdaUpdateWrapper);
     }
 
@@ -242,6 +258,16 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
     @Override
     public StoreOtherVO getStoreOtherVO(String storeId) {
         return this.baseMapper.getLicencePhoto(storeId);
+    }
+
+
+    /**
+     * 删除缓存
+     *
+     * @param storeId 店铺id
+     */
+    private void removeCache(String storeId) {
+        cache.remove(CachePrefix.STORE.getPrefix() + storeId);
     }
 
 }

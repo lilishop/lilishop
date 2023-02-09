@@ -3,10 +3,12 @@ package cn.lili.modules.order.cart.render.impl;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
 import cn.lili.modules.store.entity.dos.FreightTemplateChild;
+import cn.lili.modules.store.entity.dos.StoreAddress;
 import cn.lili.modules.store.entity.dto.FreightTemplateChildDTO;
 import cn.lili.modules.store.entity.enums.FreightTemplateEnum;
 import cn.lili.modules.store.entity.vos.FreightTemplateVO;
@@ -42,72 +44,81 @@ public class SkuFreightRender implements CartRenderStep {
         List<CartSkuVO> cartSkuVOS = tradeDTO.getCheckedSkuList();
         //会员收货地址问题处理
         MemberAddress memberAddress = tradeDTO.getMemberAddress();
+        StoreAddress storeAddress = tradeDTO.getStoreAddress();
         //如果收货地址为空，则抛出异常
-        if (memberAddress == null) {
+        if (memberAddress == null && storeAddress == null) {
             return;
         }
-        //运费分组信息
-        Map<String, List<String>> freightGroups = freightTemplateGrouping(cartSkuVOS);
+        //选择物流的时候计算价格
+        if(DeliveryMethodEnum.LOGISTICS.name().equals(tradeDTO.getCartList().get(0).getDeliveryMethod())){
+            if (memberAddress != null) {
+                //运费分组信息
+                Map<String, List<String>> freightGroups = freightTemplateGrouping(cartSkuVOS);
 
-        //循环运费模版
-        for (Map.Entry<String, List<String>> freightTemplateGroup : freightGroups.entrySet()) {
+                //循环运费模版
+                for (Map.Entry<String, List<String>> freightTemplateGroup : freightGroups.entrySet()) {
 
-            //商品id列表
-            List<String> skuIds = freightTemplateGroup.getValue();
+                    //商品id列表
+                    List<String> skuIds = freightTemplateGroup.getValue();
 
-            //当前购物车商品列表
-            List<CartSkuVO> currentCartSkus = cartSkuVOS.stream().filter(item -> skuIds.contains(item.getGoodsSku().getId())).collect(Collectors.toList());
+                    //当前购物车商品列表
+                    List<CartSkuVO> currentCartSkus = cartSkuVOS.stream().filter(item -> skuIds.contains(item.getGoodsSku().getId())).collect(Collectors.toList());
 
-            //寻找对应对商品运费计算模版
-            FreightTemplateVO freightTemplate = freightTemplateService.getFreightTemplate(freightTemplateGroup.getKey());
-            if (freightTemplate != null
-                    && freightTemplate.getFreightTemplateChildList() != null
-                    && !freightTemplate.getFreightTemplateChildList().isEmpty()) {
-                //店铺模版免运费则跳过
-                if (freightTemplate.getPricingMethod().equals(FreightTemplateEnum.FREE.name())) {
-                    break;
-                }
+                    //寻找对应对商品运费计算模版
+                    FreightTemplateVO freightTemplate = freightTemplateService.getFreightTemplate(freightTemplateGroup.getKey());
+                    if (freightTemplate != null
+                            && freightTemplate.getFreightTemplateChildList() != null
+                            && !freightTemplate.getFreightTemplateChildList().isEmpty()) {
+                        //店铺模版免运费则跳过
+                        if (freightTemplate.getPricingMethod().equals(FreightTemplateEnum.FREE.name())) {
+                            break;
+                        }
 
-                //运费模版
-                FreightTemplateChild freightTemplateChild = null;
+                        //运费模版
+                        FreightTemplateChild freightTemplateChild = null;
 
-                //获取市级别id匹配运费模版
-                String addressId = memberAddress.getConsigneeAddressIdPath().split(",")[1];
-                for (FreightTemplateChild templateChild : freightTemplate.getFreightTemplateChildList()) {
-                    //模版匹配判定
-                    if (templateChild.getAreaId().contains(addressId)) {
-                        freightTemplateChild = templateChild;
-                        break;
+                        //获取市级别id匹配运费模版
+                        String addressId = memberAddress.getConsigneeAddressIdPath().split(",")[1];
+                        for (FreightTemplateChild templateChild : freightTemplate.getFreightTemplateChildList()) {
+                            //模版匹配判定
+                            if (templateChild.getAreaId().contains(addressId)) {
+                                freightTemplateChild = templateChild;
+                                break;
+                            }
+                        }
+                        //如果没有匹配到物流规则，则说明不支持配送
+                        if (freightTemplateChild == null) {
+                            if (tradeDTO.getNotSupportFreight() == null) {
+                                tradeDTO.setNotSupportFreight(new ArrayList<>());
+                            }
+                            tradeDTO.getNotSupportFreight().addAll(currentCartSkus);
+                            continue;
+                        }
+
+                        //物流规则模型创立
+                        FreightTemplateChildDTO freightTemplateChildDTO = new FreightTemplateChildDTO(freightTemplateChild);
+                        //模型写入运费模版设置的计费方式
+                        freightTemplateChildDTO.setPricingMethod(freightTemplate.getPricingMethod());
+
+                        //计算运费总数
+                        Double count = currentCartSkus.stream().mapToDouble(item ->
+                                // 根据计费规则 累加计费基数
+                                freightTemplateChildDTO.getPricingMethod().equals(FreightTemplateEnum.NUM.name()) ?
+                                        item.getNum().doubleValue() :
+                                        CurrencyUtil.mul(item.getNum(), item.getGoodsSku().getWeight())
+                        ).sum();
+
+                        //计算运费
+                        Double countFreight = countFreight(count, freightTemplateChildDTO);
+
+                        //写入SKU运费
+                        resetFreightPrice(FreightTemplateEnum.valueOf(freightTemplateChildDTO.getPricingMethod()), count, countFreight, currentCartSkus);
                     }
                 }
-                //如果没有匹配到物流规则，则说明不支持配送
-                if (freightTemplateChild == null) {
-                    if (tradeDTO.getNotSupportFreight() == null) {
-                        tradeDTO.setNotSupportFreight(new ArrayList<>());
-                    }
-                    tradeDTO.getNotSupportFreight().addAll(currentCartSkus);
-                    continue;
-                }
-
-                //物流规则模型创立
-                FreightTemplateChildDTO freightTemplateChildDTO = new FreightTemplateChildDTO(freightTemplateChild);
-                //模型写入运费模版设置的计费方式
-                freightTemplateChildDTO.setPricingMethod(freightTemplate.getPricingMethod());
-
-                //计算运费总数
-                Double count = currentCartSkus.stream().mapToDouble(item ->
-                        // 根据计费规则 累加计费基数
-                        freightTemplateChildDTO.getPricingMethod().equals(FreightTemplateEnum.NUM.name()) ?
-                                item.getNum().doubleValue() :
-                                CurrencyUtil.mul(item.getNum(), item.getGoodsSku().getWeight())
-                ).sum();
-
-                //计算运费
-                Double countFreight = countFreight(count, freightTemplateChildDTO);
-
-                //写入SKU运费
-                resetFreightPrice(FreightTemplateEnum.valueOf(freightTemplateChildDTO.getPricingMethod()), count, countFreight, currentCartSkus);
             }
+        }else{
+            //自提清空不配送商品
+            tradeDTO.setNotSupportFreight(null);
         }
     }
 

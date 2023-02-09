@@ -1,6 +1,7 @@
 package cn.lili.modules.permission.service;
 
 
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.Token;
 import cn.lili.modules.permission.entity.dos.AdminUser;
 import cn.lili.modules.permission.entity.dto.AdminUserDTO;
@@ -98,5 +99,12 @@ public interface AdminUserService extends IService<AdminUser> {
      * @return token
      */
     Token refreshToken(String refreshToken);
+
+    /**
+     * 登出
+     *
+     * @param userEnums token角色类型
+     */
+    void logout(UserEnums userEnums);
 
 }

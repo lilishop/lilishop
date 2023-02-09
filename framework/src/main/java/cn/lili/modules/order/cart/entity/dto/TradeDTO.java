@@ -11,6 +11,7 @@ import cn.lili.modules.order.order.entity.vo.OrderVO;
 import cn.lili.modules.order.order.entity.vo.ReceiptVO;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
+import cn.lili.modules.store.entity.dos.StoreAddress;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -106,6 +107,10 @@ public class TradeDTO implements Serializable {
      */
     private MemberAddress memberAddress;
 
+    /**
+     * 自提地址
+     */
+    private StoreAddress storeAddress;
 
     /**
      * 客户端类型

@@ -6,16 +6,21 @@ import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsService;
+import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.Clerk;
+import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dto.ClerkAddDTO;
 import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.member.service.ClerkService;
+import cn.lili.modules.member.service.FootprintService;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
@@ -27,12 +32,15 @@ import cn.lili.modules.store.mapper.StoreMapper;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.store.service.StoreService;
 import cn.lili.mybatis.util.PageUtil;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.StoreTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,11 +74,23 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
      */
     @Autowired
     private GoodsService goodsService;
+
+    @Autowired
+    private GoodsSkuService goodsSkuService;
     /**
      * 店铺详情
      */
     @Autowired
     private StoreDetailService storeDetailService;
+
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
+
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
+
+    @Autowired
+    private FootprintService footprintService;
 
     @Autowired
     private Cache cache;
@@ -159,7 +179,11 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             if (result) {
                 storeDetailService.updateStoreGoodsInfo(store);
             }
+            String destination = rocketmqCustomProperties.getStoreTopic() + ":" + StoreTagsEnum.EDIT_STORE_SETTING.name();
+            //发送订单变更mq消息
+            rocketMQTemplate.asyncSend(destination, store, RocketmqSendCallbackBuilder.commonCallback());
         }
+
         cache.remove(CachePrefix.STORE.getPrefix() + storeEditDTO.getStoreId());
         return store;
     }
@@ -350,6 +374,18 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             clerkList.add(new Clerk(store));
         }
         clerkService.saveBatch(clerkList);
+    }
+
+    @Override
+    public List<GoodsSku> getToMemberHistory(String memberId) {
+        AuthUser currentUser = UserContext.getCurrentUser();
+        List<String> skuIdList = new ArrayList<>();
+        for (FootPrint footPrint : footprintService.list(new LambdaUpdateWrapper<FootPrint>().eq(FootPrint::getStoreId, currentUser.getStoreId()).eq(FootPrint::getMemberId, memberId))) {
+            if(footPrint.getSkuId() != null){
+                skuIdList.add(footPrint.getSkuId());
+            }
+        }
+        return goodsSkuService.getGoodsSkuByIdFromCache(skuIdList);
     }
 
     /**

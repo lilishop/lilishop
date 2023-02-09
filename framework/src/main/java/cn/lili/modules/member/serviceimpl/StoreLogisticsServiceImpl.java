@@ -45,7 +45,7 @@ public class StoreLogisticsServiceImpl extends ServiceImpl<StoreLogisticsMapper,
     }
 
     @Override
-    public StoreLogistics update(String logisticsId, String storeId,StoreLogisticsCustomerDTO storeLogisticsCustomerDTO) {
+    public StoreLogistics update(String logisticsId, String storeId, StoreLogisticsCustomerDTO storeLogisticsCustomerDTO) {
         LambdaQueryWrapper<StoreLogistics> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(StoreLogistics::getLogisticsId, logisticsId);
         lambdaQueryWrapper.eq(StoreLogistics::getStoreId, storeId);
@@ -58,15 +58,15 @@ public class StoreLogisticsServiceImpl extends ServiceImpl<StoreLogisticsMapper,
     }
 
     @Override
-    public StoreLogistics getStoreLogisticsInfo( String logisticsId) {
+    public StoreLogistics getStoreLogisticsInfo(String logisticsId) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
-        return this.getOne(new LambdaQueryWrapper<StoreLogistics>().eq(StoreLogistics::getStoreId,storeId).eq(StoreLogistics::getLogisticsId,logisticsId));
+        return this.getOne(new LambdaQueryWrapper<StoreLogistics>().eq(StoreLogistics::getStoreId, storeId).eq(StoreLogistics::getLogisticsId, logisticsId));
     }
 
     @Override
     public List<StoreLogisticsVO> getOpenStoreLogistics(String storeId) {
         List<StoreLogisticsVO> openStoreLogistics = this.baseMapper.getOpenStoreLogistics(storeId);
-        for(StoreLogisticsVO storeLogisticsVO:openStoreLogistics){
+        for (StoreLogisticsVO storeLogisticsVO : openStoreLogistics) {
             storeLogisticsVO.setSelected("1");
         }
         return openStoreLogistics;
@@ -78,19 +78,19 @@ public class StoreLogisticsServiceImpl extends ServiceImpl<StoreLogisticsMapper,
     }
 
     @Override
-    public StoreLogistics add(String logisticsId, String storeId, StoreLogisticsCustomerDTO storeLogisticsCustomerDTO){
+    public StoreLogistics add(String logisticsId, String storeId, StoreLogisticsCustomerDTO storeLogisticsCustomerDTO) {
         //判断是否已经选择过，如果没有选择则进行添加
         LambdaQueryWrapper<StoreLogistics> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(StoreLogistics::getLogisticsId, logisticsId);
         lambdaQueryWrapper.eq(StoreLogistics::getStoreId, storeId);
-        StoreLogistics storeLogistics=null;
+        StoreLogistics storeLogistics = null;
         if (this.getOne(lambdaQueryWrapper) == null) {
-        storeLogistics=new StoreLogistics(storeLogisticsCustomerDTO);
-        storeLogistics.setStoreId(storeId);
-        storeLogistics.setLogisticsId(logisticsId);
-        this.save(storeLogistics);
-        return storeLogistics;
-    }
+            storeLogistics = new StoreLogistics(storeLogisticsCustomerDTO);
+            storeLogistics.setStoreId(storeId);
+            storeLogistics.setLogisticsId(logisticsId);
+            this.save(storeLogistics);
+            return storeLogistics;
+        }
         return null;
     }
 

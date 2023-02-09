@@ -7,7 +7,7 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.Date;
@@ -60,7 +60,7 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
      * @param pageVo       分页参数
      * @return 促销商品列表
      */
-    IPage<PromotionGoods> pageFindAll(PromotionGoodsSearchParams searchParams, PageVO pageVo);
+    Page<PromotionGoods> pageFindAll(PromotionGoodsSearchParams searchParams, PageVO pageVo);
 
     /**
      * 获取促销商品信息
@@ -136,6 +136,14 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
      * @param promotionGoodsList 更新促销活动商品信息
      */
     void updatePromotionGoodsStock(List<PromotionGoods> promotionGoodsList);
+
+    /**
+     * 更新促销活动商品库存
+     *
+     * @param skuId      商品skuId
+     * @param quantity  库存
+     */
+    void updatePromotionGoodsStock(String skuId, Integer quantity);
 
     /**
      * 更新促销活动商品索引

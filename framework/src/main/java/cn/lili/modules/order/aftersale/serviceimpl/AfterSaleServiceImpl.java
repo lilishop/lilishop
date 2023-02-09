@@ -455,7 +455,10 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         switch (afterSaleStatusEnum) {
             //判断当前售后的状态---申请中
             case APPLY: {
+//                买家申请售后时已经输入了订单售后数量，这里不需要(+x)处理
                 orderItem.setReturnGoodsNumber(orderItem.getReturnGoodsNumber() + afterSale.getNum());
+                //修改orderItem订单
+                this.updateOrderItem(orderItem);
                 break;
             }
 
@@ -464,13 +467,13 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             case BUYER_CANCEL:
             case SELLER_TERMINATION: {
                 orderItem.setReturnGoodsNumber(orderItem.getReturnGoodsNumber() - afterSale.getNum());
+                //修改orderItem订单
+                this.updateOrderItem(orderItem);
                 break;
             }
             default:
                 break;
         }
-        //修改orderItem订单
-        this.updateOrderItem(orderItem);
     }
 
 

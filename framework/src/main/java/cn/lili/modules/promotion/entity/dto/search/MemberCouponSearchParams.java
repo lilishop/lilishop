@@ -27,8 +27,18 @@ public class MemberCouponSearchParams extends BasePromotionsSearchParams impleme
 
     private static final String PRICE_COLUMN = "price";
 
+    @ApiModelProperty(value = "优惠券id")
+    private String couponId;
+
+    @ApiModelProperty(value = "优惠券名称")
+    private String couponName;
+
     @ApiModelProperty(value = "会员id")
     private String memberId;
+
+    @ApiModelProperty(value = "会员名称")
+    private String memberName;
+
     /**
      * POINT("打折"), PRICE("减免现金");
      *
@@ -62,6 +72,9 @@ public class MemberCouponSearchParams extends BasePromotionsSearchParams impleme
     @Override
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = super.queryWrapper();
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(couponId), "coupon_id", couponId);
+        queryWrapper.like(CharSequenceUtil.isNotEmpty(couponName), "coupon_name", couponName);
+        queryWrapper.like(CharSequenceUtil.isNotEmpty(memberName), "member_name", memberName);
         if (CharSequenceUtil.isNotEmpty(couponType)) {
             queryWrapper.eq("coupon_type", CouponTypeEnum.valueOf(couponType).name());
         }

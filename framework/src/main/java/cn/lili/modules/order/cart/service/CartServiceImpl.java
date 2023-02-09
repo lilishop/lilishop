@@ -46,6 +46,10 @@ import cn.lili.modules.promotion.service.PointsGoodsService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsSearchService;
+import cn.lili.modules.store.entity.dos.Store;
+import cn.lili.modules.store.entity.dos.StoreAddress;
+import cn.lili.modules.store.service.StoreAddressService;
+import cn.lili.modules.store.service.StoreService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -115,6 +119,12 @@ public class CartServiceImpl implements CartService {
 
     @Autowired
     private WholesaleService wholesaleService;
+
+    @Autowired
+    private StoreService storeService;
+
+    @Autowired
+    private StoreAddressService storeAddressService;
 
     @Override
     public void add(String skuId, Integer num, String cartType, Boolean cover) {
@@ -438,6 +448,20 @@ public class CartServiceImpl implements CartService {
         this.resetTradeDTO(tradeDTO);
     }
 
+    @Override
+    public void shippingSelfAddress(String shopAddressId, String way) {
+        //默认购物车
+        CartTypeEnum cartTypeEnum = CartTypeEnum.CART;
+        if (CharSequenceUtil.isNotEmpty(way)) {
+            cartTypeEnum = CartTypeEnum.valueOf(way);
+        }
+
+        TradeDTO tradeDTO = this.readDTO(cartTypeEnum);
+        StoreAddress storeAddress = storeAddressService.getById(shopAddressId);
+        tradeDTO.setStoreAddress(storeAddress);
+        this.resetTradeDTO(tradeDTO);
+    }
+
     /**
      * 选择发票
      *
@@ -459,21 +483,18 @@ public class CartServiceImpl implements CartService {
     /**
      * 选择配送方式
      *
-     * @param storeId        店铺id
      * @param deliveryMethod 配送方式
      * @param way            购物车类型
      */
     @Override
-    public void shippingMethod(String storeId, String deliveryMethod, String way) {
+    public void shippingMethod(String deliveryMethod, String way) {
         CartTypeEnum cartTypeEnum = CartTypeEnum.CART;
         if (CharSequenceUtil.isNotEmpty(way)) {
             cartTypeEnum = CartTypeEnum.valueOf(way);
         }
         TradeDTO tradeDTO = this.readDTO(cartTypeEnum);
-        for (CartVO cartVO : tradeDTO.getCartList()) {
-            if (cartVO.getStoreId().equals(storeId)) {
-                cartVO.setDeliveryMethod(DeliveryMethodEnum.valueOf(deliveryMethod).name());
-            }
+        for (CartSkuVO cartSkuVO : tradeDTO.getSkuList()) {
+            cartSkuVO.setDeliveryMethod(DeliveryMethodEnum.valueOf(deliveryMethod).name());
         }
         this.resetTradeDTO(tradeDTO);
     }
@@ -547,13 +568,31 @@ public class CartServiceImpl implements CartService {
         tradeDTO.setStoreRemark(tradeParams.getRemark());
         tradeDTO.setParentOrderSn(tradeParams.getParentOrderSn());
         //订单无收货地址校验
-        if (tradeDTO.getMemberAddress() == null) {
-            throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
+        if(tradeDTO.getStoreAddress() == null){
+            if (tradeDTO.getMemberAddress() == null) {
+                throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
+            }
         }
         //构建交易
         Trade trade = tradeBuilder.createTrade(tradeDTO);
         this.cleanChecked(this.readDTO(cartTypeEnum));
         return trade;
+    }
+
+    @Override
+    public List<String> shippingMethodList(String way) {
+        List<String> list = new ArrayList<String>();
+        list.add(DeliveryMethodEnum.LOGISTICS.name());
+        TradeDTO tradeDTO = this.getCheckedTradeDTO(CartTypeEnum.valueOf(way));
+        if(tradeDTO.getCartList().size()==1){
+            for (CartVO cartVO : tradeDTO.getCartList()) {
+                Store store = storeService.getById(cartVO.getStoreId());
+                if(store.getSelfPickFlag() != null && store.getSelfPickFlag()){
+                    list.add(DeliveryMethodEnum.SELF_PICK_UP.name());
+                }
+            }
+        }
+        return list;
     }
 
 

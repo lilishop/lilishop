@@ -44,8 +44,9 @@ public class DistributionOrderExecute implements OrderStatusChangeEvent, EveryDa
     public void orderChange(OrderMessage orderMessage) {
 
         switch (orderMessage.getNewStatus()) {
-            //订单带校验/订单代发货，则记录分销信息
+            //订单带校验/订单代发货/待自提，则记录分销信息
             case TAKE:
+            case STAY_PICKED_UP:
             case UNDELIVERED: {
                 //记录分销订单
                 distributionOrderService.calculationDistribution(orderMessage.getOrderSn());

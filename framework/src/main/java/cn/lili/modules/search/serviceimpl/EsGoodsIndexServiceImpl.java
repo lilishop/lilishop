@@ -214,15 +214,15 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
                     List<Map<String, Object>> brandList = new ArrayList<>();
                     if (CollUtil.isNotEmpty(brandIds)) {
-                        brandList = this.brandService.getBrandsMapsByCategory(brandIds, "id,name,logo");
+                        brandList = this.brandService.getBrandsMapsByCategory(CollUtil.distinct(brandIds), "id,name,logo");
                     }
                     List<Map<String, Object>> categoryList = new ArrayList<>();
-                    if (CollUtil.isNotEmpty(categoryList)) {
-                        categoryList = this.categoryService.listMapsByIdsOrderByLevel(categoryPaths, "id,name");
+                    if (CollUtil.isNotEmpty(categoryPaths)) {
+                        categoryList = this.categoryService.listMapsByIdsOrderByLevel(CollUtil.distinct(categoryPaths), "id,name");
                     }
                     List<Map<String, Object>> storeCategoryList = new ArrayList<>();
-                    if (CollUtil.isNotEmpty(storeCategoryList)) {
-                        storeCategoryList = this.storeGoodsLabelService.listMapsByStoreIds(storeCategoryPaths, "id,label_name");
+                    if (CollUtil.isNotEmpty(storeCategoryPaths)) {
+                        storeCategoryList = this.storeGoodsLabelService.listMapsByStoreIds(CollUtil.distinct(storeCategoryPaths), "id,label_name");
                     }
 
                     for (GoodsSkuDTO goodsSku : skuIPage.getRecords()) {
@@ -239,7 +239,8 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                         List<PromotionGoods> promotionGoods = skuValidPromotions.stream()
                                 .filter(j ->
                                         (CharSequenceUtil.isNotEmpty(j.getSkuId()) && j.getSkuId().equals(goodsSku.getId())) ||
-                                                j.getScopeType().equals(PromotionsScopeTypeEnum.ALL.name()) ||
+                                                (j.getScopeType().equals(PromotionsScopeTypeEnum.ALL.name()) && j.getStoreId().equals("0")) ||
+                                                (j.getScopeType().equals(PromotionsScopeTypeEnum.ALL.name()) && j.getStoreId().equals(esGoodsIndex.getStoreId())) ||
                                                 (j.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name()) && j.getScopeId().contains(goodsSku.getCategoryPath())))
                                 .collect(Collectors.toList());
                         if (CollUtil.isNotEmpty(promotionGoods)) {
@@ -912,8 +913,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         if (CollUtil.isNotEmpty(categoryList) && CharSequenceUtil.isNotEmpty(goodsSku.getCategoryPath())) {
             StringBuilder categoryNamePath = new StringBuilder();
             categoryList.stream().filter(o -> goodsSku.getCategoryPath().contains(o.get("id").toString())).forEach(p -> categoryNamePath.append(p.get("name")).append(","));
-            categoryNamePath.deleteCharAt(categoryNamePath.length() - 1);
-            index.setCategoryNamePath(categoryNamePath.toString());
+            if (CharSequenceUtil.isNotEmpty(categoryNamePath)) {
+                categoryNamePath.deleteCharAt(categoryNamePath.length() - 1);
+                index.setCategoryNamePath(categoryNamePath.toString());
+            }
         }
         //商品品牌索引
         if (CollUtil.isNotEmpty(brandList) && CharSequenceUtil.isNotEmpty(goodsSku.getBrandId())) {
@@ -927,8 +930,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         if (CollUtil.isNotEmpty(storeCategoryList) && CharSequenceUtil.isNotEmpty(goodsSku.getStoreCategoryPath())) {
             StringBuilder storeCategoryNamePath = new StringBuilder();
             storeCategoryList.stream().filter(o -> goodsSku.getStoreCategoryPath().contains(o.get("id").toString())).forEach(p -> storeCategoryNamePath.append(p.get("label_name").toString()).append(","));
-            storeCategoryNamePath.deleteCharAt(storeCategoryNamePath.length() - 1);
-            index.setStoreCategoryNamePath(storeCategoryNamePath.toString());
+            if (CharSequenceUtil.isNotEmpty(storeCategoryNamePath)) {
+                storeCategoryNamePath.deleteCharAt(storeCategoryNamePath.length() - 1);
+                index.setStoreCategoryNamePath(storeCategoryNamePath.toString());
+            }
         }
         return index;
     }

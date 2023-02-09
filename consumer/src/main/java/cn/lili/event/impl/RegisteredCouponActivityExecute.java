@@ -1,17 +1,16 @@
 package cn.lili.event.impl;
 
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.event.MemberRegisterEvent;
 import cn.lili.modules.member.entity.dos.Member;
-import cn.lili.modules.promotion.entity.dos.CouponActivity;
+import cn.lili.modules.member.service.MemberService;
+import cn.lili.modules.promotion.entity.dto.CouponActivityTrigger;
 import cn.lili.modules.promotion.entity.enums.CouponActivityTypeEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.service.CouponActivityService;
-import cn.lili.modules.promotion.tools.PromotionTools;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * 注册赠券活动
@@ -25,6 +24,12 @@ public class RegisteredCouponActivityExecute implements MemberRegisterEvent {
     @Autowired
     private CouponActivityService couponActivityService;
 
+
+    @Autowired
+    private MemberService memberService;
+    @Autowired
+    private Cache cache;
+
     /**
      * 获取进行中的注册赠券的优惠券活动
      * 发送注册赠券
@@ -33,9 +38,22 @@ public class RegisteredCouponActivityExecute implements MemberRegisterEvent {
      */
     @Override
     public void memberRegister(Member member) {
-        List<CouponActivity> couponActivities = couponActivityService.list(new QueryWrapper<CouponActivity>()
-                .eq("coupon_activity_type", CouponActivityTypeEnum.REGISTERED.name())
-                .and(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START)));
-        couponActivityService.registered(couponActivities, member);
+        //用户注册赠券
+        couponActivityService.trigger(CouponActivityTrigger.builder()
+                .nickName(member.getNickName())
+                .userId(member.getId())
+                .couponActivityTypeEnum(CouponActivityTypeEnum.REGISTERED)
+                .build());
+        //邀请人赠券
+        String memberId = (String) cache.get(CachePrefix.INVITER.getPrefix() + member.getId());
+        if (CharSequenceUtil.isNotEmpty(memberId)) {
+            //邀请人
+            Member inviter = memberService.getById(memberId);
+            couponActivityService.trigger(CouponActivityTrigger.builder()
+                    .nickName(inviter.getNickName())
+                    .userId(inviter.getId())
+                    .couponActivityTypeEnum(CouponActivityTypeEnum.INVITE_NEW)
+                    .build());
+        }
     }
 }

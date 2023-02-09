@@ -15,6 +15,7 @@ import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
+import cn.lili.modules.order.order.entity.dto.DiscountPriceItem;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.promotion.entity.dto.search.KanjiaActivitySearchParams;
 import cn.lili.modules.promotion.entity.enums.KanJiaStatusEnum;
@@ -117,6 +118,17 @@ public class SkuPromotionRender implements CartRenderStep {
                         PromotionSkuVO promotionSkuVO = new PromotionSkuVO(PromotionTypeEnum.POINTS_GOODS.name(), cartSkuVO.getPointsId());
                         cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
                         totalPayPoints += cartSkuVO.getPoint();
+
+                        //记录优惠由来
+                        cartSkuVO.getPriceDetailDTO().setDiscountPriceItem(
+                                DiscountPriceItem.builder()
+                                        .discountPrice(CurrencyUtil.sub(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getPurchasePrice()))
+                                        .promotionId(promotionSkuVO.getActivityId())
+                                        .promotionTypeEnum(PromotionTypeEnum.POINTS_GOODS)
+                                        .skuId(cartSkuVO.getGoodsSku().getId())
+                                        .goodsId(cartSkuVO.getGoodsSku().getGoodsId())
+                                        .build()
+                        );
                     }
                 }
                 if (userInfo.getPoint() < totalPayPoints) {
@@ -138,9 +150,19 @@ public class SkuPromotionRender implements CartRenderStep {
                             cartSkuVO.setSubTotal(kanjiaActivityVO.getPurchasePrice());
                             cartSkuVO.getPriceDetailDTO().setGoodsPrice(kanjiaActivityVO.getPurchasePrice());
                         }
-
                         PromotionSkuVO promotionSkuVO = new PromotionSkuVO(PromotionTypeEnum.KANJIA.name(), cartSkuVO.getKanjiaId());
                         cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
+
+                        //记录优惠由来
+                        cartSkuVO.getPriceDetailDTO().setDiscountPriceItem(
+                                DiscountPriceItem.builder()
+                                        .discountPrice(CurrencyUtil.sub(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getPurchasePrice()))
+                                        .promotionId(promotionSkuVO.getActivityId())
+                                        .promotionTypeEnum(PromotionTypeEnum.KANJIA)
+                                        .skuId(cartSkuVO.getGoodsSku().getId())
+                                        .goodsId(cartSkuVO.getGoodsSku().getGoodsId())
+                                        .build()
+                        );
                     }
                 }
                 return;
@@ -149,6 +171,17 @@ public class SkuPromotionRender implements CartRenderStep {
                     for (CartSkuVO cartSkuVO : cartVO.getCheckedSkuList()) {
                         PromotionSkuVO promotionSkuVO = new PromotionSkuVO(PromotionTypeEnum.PINTUAN.name(), cartSkuVO.getPintuanId());
                         cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
+
+                        //记录优惠由来
+                        cartSkuVO.getPriceDetailDTO().setDiscountPriceItem(
+                                DiscountPriceItem.builder()
+                                        .discountPrice(CurrencyUtil.sub(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getPurchasePrice()))
+                                        .promotionId(promotionSkuVO.getActivityId())
+                                        .promotionTypeEnum(PromotionTypeEnum.PINTUAN)
+                                        .skuId(cartSkuVO.getGoodsSku().getId())
+                                        .goodsId(cartSkuVO.getGoodsSku().getGoodsId())
+                                        .build()
+                        );
                     }
                 }
                 return;
@@ -171,6 +204,21 @@ public class SkuPromotionRender implements CartRenderStep {
                             cartSkuVO.getPriceDetailDTO().setGoodsPrice(cartSkuVO.getSubTotal());
 
                             cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
+
+                            //如果是秒杀活动
+                            if (promotionSkuVO.getPromotionType().equals(PromotionTypeEnum.SECKILL.name())) {
+                                //需记录秒杀活动详情
+                                cartSkuVO.getPriceDetailDTO().setDiscountPriceItem(
+                                        DiscountPriceItem.builder()
+                                                .discountPrice(CurrencyUtil.sub(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getPurchasePrice()))
+                                                .promotionId(promotionSkuVO.getActivityId())
+                                                .promotionTypeEnum(PromotionTypeEnum.SECKILL)
+                                                .skuId(cartSkuVO.getGoodsSku().getId())
+                                                .goodsId(cartSkuVO.getGoodsSku().getGoodsId())
+                                                .build());
+                            }
+
+
                         }
                     }
                 }

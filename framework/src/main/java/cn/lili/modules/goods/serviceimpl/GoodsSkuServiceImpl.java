@@ -327,7 +327,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
         //记录用户足迹
         if (UserContext.getCurrentUser() != null) {
-            FootPrint footPrint = new FootPrint(UserContext.getCurrentUser().getId(), goodsId, skuId);
+            FootPrint footPrint = new FootPrint(UserContext.getCurrentUser().getId(), goodsIndex.getStoreId(), goodsId, skuId);
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.VIEW_GOODS.name();
             rocketMQTemplate.asyncSend(destination, footPrint, RocketmqSendCallbackBuilder.commonCallback());
         }
@@ -508,6 +508,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             List<GoodsSku> goodsSkus = new ArrayList<>();
             goodsSkus.add(goodsSku);
             this.updateGoodsStuck(goodsSkus);
+            this.promotionGoodsService.updatePromotionGoodsStock(goodsSku.getId(), quantity);
         }
     }
 

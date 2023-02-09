@@ -5,6 +5,7 @@ import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import java.util.List;
  * @author pikachu
  * @since 2020-02-26 23:24:13
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class DraftGoodsVO extends DraftGoods {
 

@@ -1,7 +1,8 @@
 package cn.lili.modules.promotion.service;
 
-import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.promotion.entity.dos.CouponActivity;
+import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.dto.CouponActivityTrigger;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
 
 import java.util.List;
@@ -27,16 +28,15 @@ public interface CouponActivityService extends AbstractPromotionsService<CouponA
     /**
      * 精准发券
      *
-     * @param couponActivityId 优惠券活动ID
+     * @param couponActivity 精准发券
      */
-    void specify(String couponActivityId);
+    void specify(CouponActivity couponActivity);
 
     /**
-     * 注册赠券
+     * 用户优惠券活动触发
      *
-     * @param couponActivityList 优惠券活动
-     * @param member             会员
+     * @return 优惠券列表
      */
-    void registered(List<CouponActivity> couponActivityList, Member member);
+    List<MemberCoupon> trigger(CouponActivityTrigger couponActivityTrigger);
 
 }

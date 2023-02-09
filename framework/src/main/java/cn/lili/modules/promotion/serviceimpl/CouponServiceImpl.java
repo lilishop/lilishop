@@ -166,6 +166,13 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
             this.update(updateWrapper);
         }
 
+        // 关闭优惠券，删除相关会员优惠券和券活动
+        if (startTime == null && endTime == null) {
+            //删除优惠券信息
+            this.memberCouponService.closeMemberCoupon(ids);
+            //删除优惠券活动关联优惠券
+            this.couponActivityItemService.removeByCouponId(ids);
+        }
         return super.updateStatus(ids, startTime, endTime);
     }
 
@@ -176,36 +183,52 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
     }
 
     @Override
-    public void checkPromotions(Coupon promotions) {
-        if (promotions.getRangeDayType() == null) {
-            super.checkPromotions(promotions);
+    public void checkPromotions(Coupon coupon) {
+        if (coupon.getRangeDayType() == null) {
+            super.checkPromotions(coupon);
         }
         //优惠券限制领取数量
-        if (promotions.getCouponLimitNum() < 0) {
+        if (coupon.getCouponLimitNum() < 0) {
             throw new ServiceException(ResultCode.COUPON_LIMIT_NUM_LESS_THAN_0);
         }
         //如果发行数量是0则判断领取限制数量
-        if (promotions.getPublishNum() != 0 && promotions.getCouponLimitNum() > promotions.getPublishNum()) {
+        if (coupon.getPublishNum() != 0 && coupon.getCouponLimitNum() > coupon.getPublishNum()) {
             throw new ServiceException(ResultCode.COUPON_LIMIT_GREATER_THAN_PUBLISH);
         }
         //打折优惠券大于10折
-        boolean discountCoupon = (promotions.getCouponType().equals(CouponTypeEnum.DISCOUNT.name())
-                && (promotions.getCouponDiscount() < 0 || promotions.getCouponDiscount() > 10));
+        boolean discountCoupon = (coupon.getCouponType().equals(CouponTypeEnum.DISCOUNT.name())
+                && (coupon.getCouponDiscount() < 0 || coupon.getCouponDiscount() > 10));
         if (discountCoupon) {
             throw new ServiceException(ResultCode.COUPON_DISCOUNT_ERROR);
         }
 
-        //优惠券为固定时间类型
-        if (promotions.getRangeDayType() != null && promotions.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
-            long nowTime = DateUtil.getDateline() * 1000;
-            //固定时间的优惠券不能小于当前时间
-            if (promotions.getEndTime().getTime() < nowTime) {
-                throw new ServiceException(ResultCode.PROMOTION_END_TIME_ERROR);
-            }
+        //如果优惠券使用时间类型不合法，抛出异常，抛出异常
+        if (!CouponRangeDayEnum.exist(coupon.getRangeDayType())) {
+            throw new ServiceException(ResultCode.COUPON_RANGE_ERROR);
+        }
+
+        switch (CouponRangeDayEnum.valueOf(coupon.getRangeDayType())) {
+            case FIXEDTIME:
+                //如果优惠券为固定时间，则开始结束时间不能为空
+                if (coupon.getEndTime() == null || coupon.getStartTime() == null) {
+                    throw new ServiceException(ResultCode.PROMOTION_TIME_ERROR);
+                }
+                long nowTime = DateUtil.getDateline() * 1000;
+                //固定时间的优惠券不能小于当前时间
+                if (coupon.getEndTime().getTime() < nowTime) {
+                    throw new ServiceException(ResultCode.PROMOTION_END_TIME_ERROR);
+                }
+                break;
+            case DYNAMICTIME:
+                //固定时间的优惠券不能小于当前时间
+                if (coupon.getEffectiveDays() == null || coupon.getEffectiveDays() < 0) {
+                    throw new ServiceException(ResultCode.PROMOTION_END_TIME_ERROR);
+                }
+                break;
         }
 
 
-        this.checkCouponScope((CouponVO) promotions);
+        this.checkCouponScope((CouponVO) coupon);
     }
 
     @Override

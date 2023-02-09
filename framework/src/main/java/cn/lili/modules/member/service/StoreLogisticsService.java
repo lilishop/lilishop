@@ -89,5 +89,4 @@ public interface StoreLogisticsService extends IService<StoreLogistics> {
      */
     List<StoreLogisticsVO> getCloseStoreLogistics(String storeId);
 
-
 }

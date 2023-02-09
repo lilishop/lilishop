@@ -1,14 +1,17 @@
 package cn.lili.controller.member;
 
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.member.entity.dto.FootPrintQueryParams;
 import cn.lili.modules.member.service.FootprintService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,8 +38,9 @@ public class FootprintController {
 
     @ApiOperation(value = "分页获取")
     @GetMapping
-    public ResultMessage<IPage<EsGoodsIndex>> getByPage(PageVO page) {
-        return ResultUtil.data(footprintService.footPrintPage(page));
+    public ResultMessage<IPage<EsGoodsIndex>> getByPage(FootPrintQueryParams params) {
+        params.setMemberId(UserContext.getCurrentUser().getId());
+        return ResultUtil.data(footprintService.footPrintPage(params));
     }
 
     @ApiOperation(value = "根据id删除")
@@ -61,4 +65,10 @@ public class FootprintController {
         return ResultUtil.data(footprintService.getFootprintNum());
     }
 
+
+    @GetMapping("/history")
+    @ApiOperation(value = "获取会员的历史足迹")
+    public ResultMessage<IPage<EsGoodsIndex>> getMemberHistory(FootPrintQueryParams params) {
+        return ResultUtil.data(footprintService.footPrintPage(params));
+    }
 }

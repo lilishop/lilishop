@@ -3,6 +3,7 @@ package cn.lili.modules.order.cart.entity.vo;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
+import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -88,6 +89,12 @@ public class CartSkuVO extends CartBase implements Serializable {
      */
     @ApiModelProperty(value = "购物车类型")
     private CartTypeEnum cartType;
+
+    /**
+     * @see DeliveryMethodEnum
+     */
+    @ApiModelProperty(value = "配送方式")
+    private String deliveryMethod;
 
     /**
      * 在构造器里初始化促销列表，规格列表

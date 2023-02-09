@@ -13,7 +13,15 @@ public enum CouponActivityTypeEnum {
      */
     REGISTERED("新人赠券"),
     /**
-     * "精确发券"
+     * "邀新赠券"
+     */
+    INVITE_NEW("邀新赠券"),
+    /**
+     * "自动赠券"
+     */
+    AUTO_COUPON("自动赠券"),
+    /**
+     * "定向发券"
      */
     SPECIFY("精确发券");
 
