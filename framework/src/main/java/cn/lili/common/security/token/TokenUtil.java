@@ -34,24 +34,21 @@ public class TokenUtil {
     /**
      * 构建token
      *
-     * @param username  主体
-     * @param claim     私有声明
-     * @param longTerm  长时间特殊token 如：移动端，微信小程序等
-     * @param userEnums 用户枚举
+     * @param authUser 私有声明
      * @return TOKEN
      */
-    public Token createToken(String username, Object claim, boolean longTerm, UserEnums userEnums) {
+    public Token createToken(AuthUser authUser) {
         Token token = new Token();
         //访问token
-        String accessToken = createToken(username, claim, tokenProperties.getTokenExpireTime());
+        String accessToken = createToken(authUser, tokenProperties.getTokenExpireTime());
 
-        cache.put(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums) + accessToken, 1,
+        cache.put(CachePrefix.ACCESS_TOKEN.getPrefix(authUser.getRole()) + accessToken, 1,
                 tokenProperties.getTokenExpireTime(), TimeUnit.MINUTES);
         //刷新token生成策略：如果是长时间有效的token（用于app），则默认15天有效期刷新token。如果是普通用户登录，则刷新token为普通token2倍数
-        Long expireTime = longTerm ? 15 * 24 * 60L : tokenProperties.getTokenExpireTime() * 2;
-        String refreshToken = createToken(username, claim, expireTime);
+        Long expireTime = authUser.getLongTerm() ? 15 * 24 * 60L : tokenProperties.getTokenExpireTime() * 2;
+        String refreshToken = createToken(authUser, expireTime);
 
-        cache.put(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums) + refreshToken, 1, expireTime, TimeUnit.MINUTES);
+        cache.put(CachePrefix.REFRESH_TOKEN.getPrefix(authUser.getRole()) + refreshToken, 1, expireTime, TimeUnit.MINUTES);
 
         token.setAccessToken(accessToken);
         token.setRefreshToken(refreshToken);
@@ -62,10 +59,9 @@ public class TokenUtil {
      * 刷新token
      *
      * @param oldRefreshToken 刷新token
-     * @param userEnums       用户枚举
      * @return token
      */
-    public Token refreshToken(String oldRefreshToken, UserEnums userEnums) {
+    public Token refreshToken(String oldRefreshToken) {
 
         Claims claims;
         try {
@@ -81,7 +77,7 @@ public class TokenUtil {
         //获取存储在claims中的用户信息
         String json = claims.get(SecurityEnum.USER_CONTEXT.getValue()).toString();
         AuthUser authUser = new Gson().fromJson(json, AuthUser.class);
-
+        UserEnums userEnums = authUser.getRole();
 
         String username = authUser.getUsername();
         //获取是否长期有效的token
@@ -92,7 +88,7 @@ public class TokenUtil {
         if (cache.hasKey(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums) + oldRefreshToken)) {
             Token token = new Token();
             //访问token
-            String accessToken = createToken(username, authUser, tokenProperties.getTokenExpireTime());
+            String accessToken = createToken(authUser, tokenProperties.getTokenExpireTime());
             cache.put(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums) + accessToken, 1, tokenProperties.getTokenExpireTime(), TimeUnit.MINUTES);
 
             //如果是信任登录设备，则刷新token长度继续延长
@@ -103,7 +99,7 @@ public class TokenUtil {
             }
 
             //刷新token生成策略：如果是长时间有效的token（用于app），则默认15天有效期刷新token。如果是普通用户登录，则刷新token为普通token2倍数
-            String refreshToken = createToken(username, authUser, expirationTime);
+            String refreshToken = createToken(authUser, expirationTime);
 
             cache.put(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums) + refreshToken, 1, expirationTime, TimeUnit.MINUTES);
             token.setAccessToken(accessToken);
@@ -119,18 +115,17 @@ public class TokenUtil {
     /**
      * 生成token
      *
-     * @param username       主体
-     * @param claim          私有神明内容
+     * @param authUser       jwt主体对象
      * @param expirationTime 过期时间（分钟）
      * @return token字符串
      */
-    private String createToken(String username, Object claim, Long expirationTime) {
+    private String createToken(AuthUser authUser, Long expirationTime) {
         //JWT 生成
         return Jwts.builder()
                 //jwt 私有声明
-                .claim(SecurityEnum.USER_CONTEXT.getValue(), new Gson().toJson(claim))
+                .claim(SecurityEnum.USER_CONTEXT.getValue(), new Gson().toJson(authUser))
                 //JWT的主体
-                .setSubject(username)
+                .setSubject(authUser.getUsername())
                 //失效时间 当前时间+过期分钟
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime * 60 * 1000))
                 //签名算法和密钥
