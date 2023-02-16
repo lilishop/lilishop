@@ -40,18 +40,26 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate<AdminUser> {
 
     @Override
     public Token createToken(AdminUser adminUser, Boolean longTerm) {
-        AuthUser authUser = new AuthUser(adminUser.getUsername(), adminUser.getId(), adminUser.getAvatar(), UserEnums.MANAGER, adminUser.getNickName(), adminUser.getIsSuper());
+        AuthUser authUser = AuthUser.builder()
+                .username(adminUser.getUsername())
+                .id(adminUser.getId())
+                .face(adminUser.getAvatar())
+                .role(UserEnums.MANAGER)
+                .nickName(adminUser.getNickName())
+                .isSuper(adminUser.getIsSuper())
+                .longTerm(longTerm)
+                .build();
 
         List<UserMenuVO> userMenuVOList = roleMenuService.findAllMenu(authUser.getId());
         //缓存权限列表
         cache.put(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + authUser.getId(), this.permissionList(userMenuVOList));
 
-        return tokenUtil.createToken(adminUser.getUsername(), authUser, longTerm, UserEnums.MANAGER);
+        return tokenUtil.createToken(authUser);
     }
 
     @Override
     public Token refreshToken(String refreshToken) {
-        return tokenUtil.refreshToken(refreshToken, UserEnums.MANAGER);
+        return tokenUtil.refreshToken(refreshToken);
     }
 
     /**

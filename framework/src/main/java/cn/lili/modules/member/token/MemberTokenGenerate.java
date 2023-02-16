@@ -57,14 +57,21 @@ public class MemberTokenGenerate extends AbstractTokenGenerate<Member> {
         String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_LOGIN.name();
         rocketMQTemplate.asyncSend(destination, member, RocketmqSendCallbackBuilder.commonCallback());
 
-        AuthUser authUser = new AuthUser(member.getUsername(), member.getId(), member.getNickName(), member.getFace(), UserEnums.MEMBER);
+        AuthUser authUser = AuthUser.builder()
+                .username(member.getUsername())
+                .face(member.getFace())
+                .id(member.getId())
+                .role(UserEnums.MEMBER)
+                .nickName(member.getNickName())
+                .longTerm(longTerm)
+                .build();
         //登陆成功生成token
-        return tokenUtil.createToken(member.getUsername(), authUser, longTerm, UserEnums.MEMBER);
+        return tokenUtil.createToken(authUser);
     }
 
     @Override
     public Token refreshToken(String refreshToken) {
-        return tokenUtil.refreshToken(refreshToken, UserEnums.MEMBER);
+        return tokenUtil.refreshToken(refreshToken);
     }
 
 }
