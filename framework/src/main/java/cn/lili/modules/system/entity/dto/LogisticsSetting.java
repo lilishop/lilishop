@@ -11,23 +11,29 @@ import java.io.Serializable;
  * @since 2020-03-10 10:04 上午
  */
 @Data
-public class KuaidiSetting implements Serializable {
+public class LogisticsSetting implements Serializable {
     private static final long serialVersionUID = 3520379500723173689L;
+
+    /**
+     * 快递查询类型
+     */
+    private String type;
+
     /**
      * 企业id
      */
-    private String ebusinessID;
+    private String kdniaoEbusinessID;
     /**
      * 密钥
      */
-    private String appKey;
-    /**
-     * api地址
-     */
-    private String reqURL;
+    private String kdniaoAppKey;
 
     /**
-     * 电子面单api地址
+     * 快递100 授权码，请申请企业版获取
      */
-    private String sheetReqURL;
+    private String kuaidi100Customer;
+    /**
+     * 快递100 Key
+     */
+    private String kuaidi100Key;
 }

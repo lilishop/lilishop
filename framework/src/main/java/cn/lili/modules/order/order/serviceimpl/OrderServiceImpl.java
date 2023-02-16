@@ -16,7 +16,6 @@ import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.common.utils.ObjectUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
@@ -41,6 +40,8 @@ import cn.lili.modules.order.trade.service.OrderLogService;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.service.PintuanService;
+import cn.lili.modules.store.entity.dto.StoreDeliverGoodsAddressDTO;
+import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.entity.dos.Logistics;
 import cn.lili.modules.system.entity.vo.Traces;
@@ -148,6 +149,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
+
+    @Autowired
+    private StoreDetailService storeDetailService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -297,7 +301,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
         //如果订单促销类型不为空&&订单是拼团订单，并且订单未成团，则抛出异常
         if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())
-                && !CharSequenceUtil.equalsAny(order.getOrderStatus(),OrderStatusEnum.UNDELIVERED.name(),OrderStatusEnum.STAY_PICKED_UP.name())) {
+                && !CharSequenceUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.UNDELIVERED.name(), OrderStatusEnum.STAY_PICKED_UP.name())) {
             throw new ServiceException(ResultCode.ORDER_CAN_NOT_CANCEL);
         }
         if (CharSequenceUtil.equalsAny(order.getOrderStatus(),
@@ -461,8 +465,19 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //获取订单信息
         Order order = this.getBySn(orderSn);
         //获取踪迹信息
-        String str = order.getConsigneeMobile();
-        return logisticsService.getLogistic(order.getLogisticsCode(), order.getLogisticsNo(), str.substring(str.length() - 4));
+        return logisticsService.getLogisticTrack(order.getLogisticsCode(), order.getLogisticsNo(), order.getConsigneeMobile());
+    }
+
+    @Override
+    public Traces getMapTraces(String orderSn) {
+        //获取订单信息
+        Order order = this.getBySn(orderSn);
+        //获取店家信息
+        StoreDeliverGoodsAddressDTO storeDeliverGoodsAddressDTO = storeDetailService.getStoreDeliverGoodsAddressDto(order.getStoreId());
+        String from = storeDeliverGoodsAddressDTO.getSalesConsignorAddressPath().substring(0, storeDeliverGoodsAddressDTO.getSalesConsignorAddressPath().indexOf(",") - 1);
+        String to = order.getConsigneeAddressPath().substring(0, order.getConsigneeAddressPath().indexOf(",") - 1);
+        //获取踪迹信息
+        return logisticsService.getLogisticMapTrack(order.getLogisticsCode(), order.getLogisticsNo(), order.getConsigneeMobile(), from, to);
     }
 
     @Override
@@ -484,7 +499,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public Order take(String verificationCode) {
         String storeId = OperationalJudgment.judgment(UserContext.getCurrentUser()).getStoreId();
         Order order = this.getOne(new LambdaQueryWrapper<Order>().eq(Order::getVerificationCode, verificationCode).eq(Order::getStoreId, storeId));
-        if(order == null){
+        if (order == null) {
             throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
         }
         order.setOrderStatus(OrderStatusEnum.COMPLETED.name());
@@ -497,7 +512,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public Order getOrderByVerificationCode(String verificationCode) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         return this.getOne(new LambdaQueryWrapper<Order>()
-                .in(Order::getOrderStatus, OrderStatusEnum.TAKE.name(),OrderStatusEnum.STAY_PICKED_UP.name())
+                .in(Order::getOrderStatus, OrderStatusEnum.TAKE.name(), OrderStatusEnum.STAY_PICKED_UP.name())
                 .eq(Order::getStoreId, storeId)
                 .eq(Order::getVerificationCode, verificationCode));
     }
@@ -961,9 +976,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public void normalOrderConfirm(String orderSn) {
         OrderStatusEnum orderStatusEnum = null;
         Order order = this.getBySn(orderSn);
-        if(DeliveryMethodEnum.SELF_PICK_UP.name().equals(order.getDeliveryMethod())){
+        if (DeliveryMethodEnum.SELF_PICK_UP.name().equals(order.getDeliveryMethod())) {
             orderStatusEnum = OrderStatusEnum.STAY_PICKED_UP;
-        }else if (DeliveryMethodEnum.LOGISTICS.name().equals(order.getDeliveryMethod())){
+        } else if (DeliveryMethodEnum.LOGISTICS.name().equals(order.getDeliveryMethod())) {
             orderStatusEnum = OrderStatusEnum.UNDELIVERED;
         }
         //修改订单

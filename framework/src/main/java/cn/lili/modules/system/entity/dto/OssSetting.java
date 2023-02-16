@@ -24,25 +24,25 @@ public class OssSetting implements Serializable {
     private String type;
 
     /**
-     * 域名
+     * 阿里云-域名
      */
-    private String endPoint = "";
+    private String aliyunOSSEndPoint = "";
     /**
-     * 储存空间
+     * 阿里云-储存空间
      */
-    private String bucketName = "";
+    private String aliyunOSSBucketName = "";
     /**
-     * 存放路径路径
+     * 阿里云-存放路径路径
      */
-    private String picLocation = "";
+    private String aliyunOSSPicLocation = "";
     /**
-     * 密钥id
+     * 阿里云-密钥id
      */
-    private String accessKeyId = "";
+    private String aliyunOSSAccessKeyId = "";
     /**
-     * 密钥
+     * 阿里云-密钥
      */
-    private String accessKeySecret = "";
+    private String aliyunOSSAccessKeySecret = "";
 
 
     /**
@@ -70,6 +70,48 @@ public class OssSetting implements Serializable {
      */
     private String m_bucketName;
 
+
+    /**
+     * 华为云-发起者的Access Key
+     *
+     * @return
+     */
+
+    String huaweicloudOBSAccessKey;
+    /**
+     * 华为云-密钥
+     */
+    String huaweicloudOBSSecretKey;
+    /**
+     * 华为云OBS-节点
+     */
+    String huaweicloudOBSEndPoint;
+
+    /**
+     * 华为云OBS-桶
+     */
+    private String huaweicloudOBSBucketName = "";
+
+    /**
+     * 腾讯云 用户的 SecretId
+     */
+    String tencentCOSSecretId;
+    /**
+     * 腾讯云 用户的 SecretKey
+     */
+    String tencentCOSSecretKey;
+    /**
+     * 腾讯云 bucket 的地域
+     */
+    String tencentCOSRegion;
+    /**
+     * 腾讯云 bucket
+     */
+    String tencentCOSBucket;
+    /**
+     * 腾讯云-域名
+     */
+    private String tencentCOSEndPoint = "";
 
     public String getType() {
         //默认给阿里云oss存储类型

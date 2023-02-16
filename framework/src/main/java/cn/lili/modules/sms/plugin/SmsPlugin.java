@@ -1,16 +1,46 @@
-package cn.lili.modules.sms;
+package cn.lili.modules.sms.plugin;
 
 import cn.lili.modules.sms.entity.dos.SmsSign;
 import cn.lili.modules.sms.entity.dos.SmsTemplate;
+import cn.lili.modules.sms.entity.enums.SmsEnum;
+import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 
+import java.util.List;
 import java.util.Map;
 
 /**
- * @author Chopper
- * @version v4.1
- * @since 2021/2/1 6:05 下午
+ * 短信插件接口
+ *
+ * @author Bulbasaur
+ * @since 2023-02-16
  */
-public interface AliSmsUtil {
+public interface SmsPlugin {
+
+    /**
+     * 插件名称
+     */
+    SmsEnum pluginName();
+
+    /**
+     * 短信发送
+     *
+     * @param mobile       接收手机号
+     * @param param        参数
+     * @param templateCode 模版code
+     * @param signName     签名名称
+     */
+    void sendSmsCode(String signName, String mobile, Map<String, String> param, String templateCode) throws TencentCloudSDKException;
+
+    /**
+     * 短信批量发送
+     *
+     * @param mobile       接收手机号
+     * @param signName     签名
+     * @param templateCode 模版code
+     */
+    void sendBatchSms(String signName, List<String> mobile, String templateCode);
+
+
     /**
      * 申请短信签名
      *

@@ -7,7 +7,6 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.kdBrid.service.KdNiaoService;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.member.service.StoreLogisticsService;
 import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
@@ -16,6 +15,7 @@ import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.service.OrderPriceService;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.system.service.LogisticsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -63,10 +63,10 @@ public class OrderStoreController {
     private StoreLogisticsService storeLogisticsService;
 
     /**
-     * 快递鸟电子面单
+     * 快递
      */
     @Autowired
-    private KdNiaoService kdNiaoService;
+    private LogisticsService logisticsService;
 
 
     @ApiOperation(value = "查询订单列表")
@@ -200,7 +200,7 @@ public class OrderStoreController {
             @ApiImplicitParam(name = "logisticsId", value = "物流公司", required = true, dataType = "String", paramType = "query")
     })
     public ResultMessage<Object> createElectronicsFaceSheet(@NotNull(message = "参数非法") @PathVariable String orderSn,
-                                                            @NotNull(message = "请选择物流公司") String logisticsId) throws Exception{
-        return ResultUtil.data(kdNiaoService.createElectronicsFaceSheet(orderSn,logisticsId));
+                                                            @NotNull(message = "请选择物流公司") String logisticsId) throws Exception {
+        return ResultUtil.data(logisticsService.labelOrder(orderSn, logisticsId));
     }
 }

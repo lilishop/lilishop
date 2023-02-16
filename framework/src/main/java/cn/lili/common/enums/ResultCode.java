@@ -193,7 +193,7 @@ public enum ResultCode {
     ORDER_NOT_USER(31007, "非当前会员的订单"),
     ORDER_TAKE_ERROR(31008, "当前订单无法核销"),
     MEMBER_ADDRESS_NOT_EXIST(31009, "订单无收货地址，请先配置收货地址"),
-    STORE_ADDRESS_NOT_EXIST(31009,"订单没有自提地址,请先选择自提地址"),
+    STORE_ADDRESS_NOT_EXIST(31009, "订单没有自提地址,请先选择自提地址"),
     ORDER_DELIVER_NUM_ERROR(31010, "没有待发货的订单"),
     ORDER_NOT_SUPPORT_DISTRIBUTION(31011, "购物车中包含不支持配送的商品，请重新选择收货地址，或者重新选择商品"),
     ORDER_NOT_EXIST_VALID(31041, "购物车中无有效商品，请检查购物车内商品，或者重新选择商品"),
@@ -201,6 +201,8 @@ public enum ResultCode {
     ORDER_BATCH_DELIVER_ERROR(31013, "批量发货,文件读取失败"),
     ORDER_ITEM_NOT_EXIST(31014, "当前订单项不存在！"),
     POINT_NOT_ENOUGH(31015, "当前会员积分不足购买当前积分商品！"),
+
+    ORDER_LABEL_ORDER_ERROR(31016, "订单不能打印电子面单"),
 
 
     /**

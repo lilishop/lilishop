@@ -3,9 +3,9 @@ package cn.lili.modules.sms.serviceimpl;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.sms.AliSmsUtil;
 import cn.lili.modules.sms.entity.dos.SmsSign;
 import cn.lili.modules.sms.mapper.SmsSignMapper;
+import cn.lili.modules.sms.plugin.SmsPluginFactory;
 import cn.lili.modules.sms.service.SmsSignService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -23,6 +23,7 @@ import java.util.Map;
 
 /**
  * 短信签名业务层实现
+ *
  * @author Chopper
  * @since 2021/1/30 4:27 下午
  */
@@ -30,7 +31,7 @@ import java.util.Map;
 @Service
 public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> implements SmsSignService {
     @Autowired
-    private AliSmsUtil aliSmsUtil;
+    private SmsPluginFactory smsPluginFactory;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -40,11 +41,11 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
             if (this.getOne(new QueryWrapper<SmsSign>().eq("sign_name", smsSign.getSignName())) != null) {
                 throw new ServiceException(ResultCode.SMS_SIGN_EXIST_ERROR);
             }
-            aliSmsUtil.addSmsSign(smsSign);
+            smsPluginFactory.smsPlugin().addSmsSign(smsSign);
             smsSign.setSignStatus(0);
             this.save(smsSign);
         } catch (Exception e) {
-            log.error("添加短信签名错误",e);
+            log.error("添加短信签名错误", e);
         }
     }
 
@@ -54,11 +55,11 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
         try {
             SmsSign smsSign = this.getById(id);
             if (smsSign != null) {
-                aliSmsUtil.deleteSmsSign(smsSign.getSignName());
+                smsPluginFactory.smsPlugin().deleteSmsSign(smsSign.getSignName());
                 this.removeById(id);
             }
         } catch (Exception e) {
-            log.error("删除短信签名错误",e);
+            log.error("删除短信签名错误", e);
         }
 
     }
@@ -72,13 +73,13 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
             List<SmsSign> list = list(new LambdaQueryWrapper<SmsSign>().ne(SmsSign::getSignStatus, 1));
             //查询签名状态
             for (SmsSign smsSign : list) {
-                map = aliSmsUtil.querySmsSign(smsSign.getSignName());
+                map = smsPluginFactory.smsPlugin().querySmsSign(smsSign.getSignName());
                 smsSign.setSignStatus((Integer) map.get("SignStatus"));
                 smsSign.setReason(map.get("Reason").toString());
                 this.updateById(smsSign);
             }
         } catch (Exception e) {
-            log.error("查询短信签名错误",e);
+            log.error("查询短信签名错误", e);
         }
     }
 
@@ -86,10 +87,10 @@ public class SmsSignServiceImpl extends ServiceImpl<SmsSignMapper, SmsSign> impl
     @Transactional(rollbackFor = Exception.class)
     public void modifySmsSign(SmsSign smsSign) {
         try {
-            aliSmsUtil.modifySmsSign(smsSign);
+            smsPluginFactory.smsPlugin().modifySmsSign(smsSign);
             this.updateById(smsSign);
         } catch (Exception e) {
-            log.error("更新短信签名错误",e);
+            log.error("更新短信签名错误", e);
         }
     }
 

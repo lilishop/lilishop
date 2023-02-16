@@ -4,7 +4,9 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.file.entity.enums.OssEnum;
 import cn.lili.modules.file.plugin.impl.AliFilePlugin;
+import cn.lili.modules.file.plugin.impl.HuaweiFilePlugin;
 import cn.lili.modules.file.plugin.impl.MinioFilePlugin;
+import cn.lili.modules.file.plugin.impl.TencentFilePlugin;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.OssSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -47,6 +49,10 @@ public class FilePluginFactory {
                     return new MinioFilePlugin(ossSetting);
                 case ALI_OSS:
                     return new AliFilePlugin(ossSetting);
+                case HUAWEI_OBS:
+                    return new HuaweiFilePlugin(ossSetting);
+                case TENCENT_COS:
+                    return new TencentFilePlugin(ossSetting);
                 default:
                     throw new ServiceException();
             }
