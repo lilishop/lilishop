@@ -4,10 +4,10 @@ import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.properties.JWTTokenProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.enums.SecurityEnum;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.common.properties.JWTTokenProperties;
 import com.google.gson.Gson;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
@@ -72,7 +72,8 @@ public class TokenUtil {
             claims = Jwts.parser()
                     .setSigningKey(SecretKeyUtil.generalKeyByDecoders())
                     .parseClaimsJws(oldRefreshToken).getBody();
-        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
+        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException |
+                 IllegalArgumentException e) {
             //token 过期 认证失败等
             throw new ServiceException(ResultCode.USER_AUTH_EXPIRED);
         }
@@ -98,6 +99,7 @@ public class TokenUtil {
             Long expirationTime = tokenProperties.getTokenExpireTime() * 2;
             if (longTerm) {
                 expirationTime = 60 * 24 * 15L;
+                authUser.setLongTerm(true);
             }
 
             //刷新token生成策略：如果是长时间有效的token（用于app），则默认15天有效期刷新token。如果是普通用户登录，则刷新token为普通token2倍数
