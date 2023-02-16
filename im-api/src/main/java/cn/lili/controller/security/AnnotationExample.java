@@ -1,2 +1,3 @@
-package cn.lili.controller.security;public class Cop {
+package cn.lili.controller.security;
+public class AnnotationExample {
 }
