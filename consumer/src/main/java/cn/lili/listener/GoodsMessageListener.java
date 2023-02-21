@@ -57,6 +57,8 @@ import java.util.stream.Collectors;
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.goods-topic}", consumerGroup = "${lili.data.rocketmq.goods-group}")
 public class GoodsMessageListener implements RocketMQListener<MessageExt> {
 
+    private static final int BATCH_SIZE = 10;
+
     /**
      * ES商品
      */
@@ -267,7 +269,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                     searchParams.setPromotionId(promotions.getId());
                     PageVO pageVO = new PageVO();
                     pageVO.setPageNumber(i);
-                    pageVO.setPageSize(100);
+                    pageVO.setPageSize(BATCH_SIZE);
                     Page<PromotionGoods> promotionGoodsPage = this.promotionGoodsService.pageFindAll(searchParams, pageVO);
                     if (promotionGoodsPage == null || promotionGoodsPage.getRecords().isEmpty()) {
                         break;
@@ -283,7 +285,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                     GoodsSearchParams searchParams = new GoodsSearchParams();
                     searchParams.setCategoryPath(promotions.getScopeId());
                     searchParams.setPageNumber(i);
-                    searchParams.setPageSize(100);
+                    searchParams.setPageSize(BATCH_SIZE);
                     IPage<GoodsSku> goodsSkuByPage = this.goodsSkuService.getGoodsSkuByPage(searchParams);
                     if (goodsSkuByPage == null || goodsSkuByPage.getRecords().isEmpty()) {
                         break;
@@ -340,7 +342,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
             GoodsSearchParams searchParams = new GoodsSearchParams();
             searchParams.setGoodsId(goods.getId());
             searchParams.setPageNumber(i);
-            searchParams.setPageSize(100);
+            searchParams.setPageSize(BATCH_SIZE);
             IPage<GoodsSku> goodsSkuByPage = this.goodsSkuService.getGoodsSkuByPage(searchParams);
             if (goodsSkuByPage == null || goodsSkuByPage.getRecords().isEmpty()) {
                 break;
