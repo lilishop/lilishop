@@ -6,6 +6,7 @@ import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.dto.PayParam;
+import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -107,6 +108,13 @@ public interface Payment {
      * @param request HttpServletRequest
      */
     default void refundNotify(HttpServletRequest request) {
+        throw new ServiceException(ResultCode.PAY_ERROR);
+    }
+
+    /**
+     * 提现
+     */
+    default void transfer(MemberWithdrawApply memberWithdrawApply) {
         throw new ServiceException(ResultCode.PAY_ERROR);
     }
 

@@ -56,4 +56,9 @@ public class MemberWithdrawApply extends BaseEntity {
     @ApiModelProperty(value = "sn")
     private String sn;
 
+    @ApiModelProperty(value = "真实姓名")
+    private String realName;
+    @ApiModelProperty(value = "第三方平台账号")
+    private String connectNumber;
+
 }
