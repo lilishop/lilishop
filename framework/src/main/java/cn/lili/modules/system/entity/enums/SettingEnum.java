@@ -46,8 +46,7 @@ public enum SettingEnum {
     //微信支付设置
     WECHAT_PAYMENT,
     //银联支付设置
-    UNION_PAYMENT,
-
+    UNIONPAY_PAYMENT,
     //热词设置
     HOT_WORDS
 }

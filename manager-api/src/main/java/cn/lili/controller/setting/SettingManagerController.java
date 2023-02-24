@@ -13,6 +13,7 @@ import cn.lili.modules.system.entity.dto.connect.QQConnectSetting;
 import cn.lili.modules.system.entity.dto.connect.WechatConnectSetting;
 import cn.lili.modules.system.entity.dto.payment.AlipayPaymentSetting;
 import cn.lili.modules.system.entity.dto.payment.PaymentSupportSetting;
+import cn.lili.modules.system.entity.dto.payment.UnionPaymentSetting;
 import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
 import cn.lili.modules.system.entity.dto.payment.dto.PaymentSupportForm;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -171,6 +172,10 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new AlipayPaymentSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), AlipayPaymentSetting.class));
+            case UNIONPAY_PAYMENT:
+                return setting == null ?
+                        ResultUtil.data(new UnionPaymentSetting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), UnionPaymentSetting.class));
             case WECHAT_CONNECT:
                 return setting == null ?
                         ResultUtil.data(new WechatConnectSetting()) :
