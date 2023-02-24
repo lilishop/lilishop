@@ -2,12 +2,10 @@ package cn.lili.controller.other;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.payment.service.CorporateBankService;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,14 +23,6 @@ import java.util.Map;
 @RequestMapping("/manager/other/elasticsearch")
 public class ElasticsearchController {
 
-    @Autowired
-    private CorporateBankService corporateBankService;
-
-    @PostMapping
-    public ResultMessage<String> corporateBankInit(int i) {
-        corporateBankService.init(i);
-        return ResultUtil.success();
-    }
     @Autowired
     private EsGoodsIndexService esGoodsIndexService;
 
