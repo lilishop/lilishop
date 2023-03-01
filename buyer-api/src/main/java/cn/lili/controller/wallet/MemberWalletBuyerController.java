@@ -9,12 +9,18 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
+import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.WithdrawalSetting;
+import cn.lili.modules.system.entity.enums.SettingEnum;
+import cn.lili.modules.system.entity.vo.WithdrawalSettingVO;
+import cn.lili.modules.system.service.SettingService;
 import cn.lili.modules.verification.entity.enums.VerificationEnums;
 import cn.lili.modules.verification.service.VerificationService;
 import cn.lili.modules.wallet.entity.dos.MemberWallet;
 import cn.lili.modules.wallet.entity.vo.MemberWalletVO;
 import cn.lili.modules.wallet.service.MemberWalletService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.gson.Gson;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -24,7 +30,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 
 /**
@@ -54,6 +59,9 @@ public class MemberWalletBuyerController {
     @Autowired
     private VerificationService verificationService;
 
+    @Autowired
+    private SettingService settingService;
+
     @GetMapping
     @ApiOperation(value = "查询会员预存款余额")
     public ResultMessage<MemberWalletVO> get() {
@@ -62,6 +70,31 @@ public class MemberWalletBuyerController {
             return ResultUtil.data(memberWalletService.getMemberWallet(authUser.getId()));
         }
         throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+    }
+
+    @GetMapping(value = "/withdrawalSettingVO")
+    @ApiOperation(value = "获取提现设置VO")
+    public ResultMessage<Object> minPrice() {
+        Setting setting = settingService.get(SettingEnum.WITHDRAWAL_SETTING.name());
+        WithdrawalSetting withdrawalSetting = new Gson().fromJson(setting.getSettingValue(), WithdrawalSetting.class);
+
+        WithdrawalSettingVO withdrawalSettingVO = new WithdrawalSettingVO();
+        withdrawalSettingVO.setMinPrice(withdrawalSetting.getMinPrice());
+        withdrawalSettingVO.setFee(withdrawalSetting.getFee());
+        withdrawalSettingVO.setType(withdrawalSetting.getType());
+        return ResultUtil.data(withdrawalSettingVO);
+    }
+
+    @PreventDuplicateSubmissions
+    @PostMapping(value = "/withdrawal")
+    @ApiOperation(value = "会员中心余额提现")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "price", value = "提现金额", required = true, dataType = "double", paramType = "query"),
+            @ApiImplicitParam(name = "realName", value = "真实姓名", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "connectNumber", value = "第三方登录账号", required = true, dataType = "String", paramType = "query")
+    })
+    public ResultMessage<Boolean> withdrawal(@Max(value = 9999, message = "充值金额单次最多允许提现9999元") Double price, @RequestParam String realName, @RequestParam String connectNumber) {
+        return ResultUtil.data(memberWalletService.applyWithdrawal(price, realName, connectNumber));
     }
 
     @PostMapping(value = "/set-password")
@@ -118,17 +151,6 @@ public class MemberWalletBuyerController {
     @ApiOperation(value = "检测会员是否设置过支付密码,会员中心设置或者修改密码时使用")
     public Boolean checkPassword() {
         return memberWalletService.checkPassword();
-    }
-
-
-    @PreventDuplicateSubmissions
-    @PostMapping(value = "/withdrawal")
-    @ApiOperation(value = "会员中心余额提现")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "price", value = "提现金额", required = true, dataType = "double", paramType = "query")
-    })
-    public ResultMessage<Boolean> withdrawal(@Max(value = 9999, message = "充值金额单次最多允许提现9999元") @Min(value = 1, message = "充值金额单次最少提现金额为1元") Double price) {
-        return ResultUtil.data(memberWalletService.applyWithdrawal(price));
     }
 
 }

@@ -31,7 +31,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.domain.*;
 import com.alipay.api.internal.util.AlipaySignature;
-import com.alipay.api.request.AlipayFundTransUniTransferRequest;
 import com.alipay.api.response.AlipayFundTransUniTransferResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -238,7 +237,7 @@ public class AliPayPlugin implements Payment {
      * @param memberWithdrawApply 会员提现申请
      */
     @Override
-    public void transfer(MemberWithdrawApply memberWithdrawApply) {
+    public boolean transfer(MemberWithdrawApply memberWithdrawApply) {
         AlipayFundTransUniTransferModel model = new AlipayFundTransUniTransferModel();
         model.setOutBizNo(SnowFlake.createStr("T"));
         model.setRemark("用户提现");
@@ -255,10 +254,10 @@ public class AliPayPlugin implements Payment {
         model.setOrderTitle("用户提现");
         //交互退款
         try {
-            AlipayFundTransUniTransferResponse alipayFundTransUniTransferResponse  = AliPayApi.uniTransferToResponse(model,null);
+            AlipayFundTransUniTransferResponse alipayFundTransUniTransferResponse = AliPayApi.uniTransferToResponse(model, null);
             log.error("支付宝退款，参数：{},支付宝响应：{}", JSONUtil.toJsonStr(model), JSONUtil.toJsonStr(alipayFundTransUniTransferResponse));
             if (alipayFundTransUniTransferResponse.isSuccess()) {
-
+                return true;
             } else {
                 log.error(alipayFundTransUniTransferResponse.getSubMsg());
             }
@@ -266,6 +265,7 @@ public class AliPayPlugin implements Payment {
             log.error("用户提现异常：", e);
             throw new ServiceException(ResultCode.PAY_ERROR);
         }
+        return false;
     }
 
     /**

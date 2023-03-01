@@ -3,10 +3,10 @@ package cn.lili.modules.wallet.service;
 
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.wallet.entity.dos.MemberWallet;
-import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
 import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
 import cn.lili.modules.wallet.entity.vo.MemberWalletVO;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 会员预存款业务层
@@ -80,7 +80,7 @@ public interface MemberWalletService extends IService<MemberWallet> {
     Boolean checkPassword();
 
     /**
-     * 会员注册添加会员预存款
+     * 会员注册添加会员余额钱包
      *
      * @param memberId   会员id
      * @param memberName 会员名称
@@ -92,16 +92,18 @@ public interface MemberWalletService extends IService<MemberWallet> {
      * 用户提现
      *
      * @param price 提现金额
+     * @param realName 真实姓名
+     * @param connectNumber 第三方账号
      * @return 是否提现成功
      */
-    Boolean applyWithdrawal(Double price);
+    Boolean applyWithdrawal(Double price, String realName, String connectNumber);
 
     /**
-     * 提现公共方法，此方法供前端用户提现和后端提现使用
+     * 提现公共方法
      *
-     * @param memberWithdrawApply 会员零钱提现申请
+     * @param withdrawApplyId 会员零钱提现Id
      * @return 操作状态
      */
-    Boolean withdrawal(MemberWithdrawApply memberWithdrawApply);
+    Boolean withdrawal(String withdrawApplyId);
 
 }

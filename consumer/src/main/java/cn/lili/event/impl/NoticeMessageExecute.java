@@ -16,7 +16,6 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleTypeEnum;
 import cn.lili.modules.wallet.entity.dto.MemberWithdrawalMessage;
-import cn.lili.modules.wallet.entity.enums.MemberWithdrawalDestinationEnum;
 import cn.lili.modules.wallet.entity.enums.WithdrawStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -179,60 +178,30 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
     public void memberWithdrawal(MemberWithdrawalMessage memberWithdrawalMessage) {
         NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
         noticeMessageDTO.setMemberId(memberWithdrawalMessage.getMemberId());
-        //如果提现状态为申请则发送申请提现站内消息
-        if (memberWithdrawalMessage.getStatus().equals(WithdrawStatusEnum.APPLY.name())) {
-            noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_CREATE);
-            Map<String, String> params = new HashMap<>(2);
-            params.put("price", memberWithdrawalMessage.getPrice().toString());
-            noticeMessageDTO.setParameter(params);
-            //发送提现申请成功消息
-            noticeMessageService.noticeMessage(noticeMessageDTO);
-        }
-        //如果提现状态为通过则发送审核通过站内消息
-        if (memberWithdrawalMessage.getStatus().equals(WithdrawStatusEnum.VIA_AUDITING.name())) {
-            //如果提现到余额
-            if (memberWithdrawalMessage.getDestination().equals(MemberWithdrawalDestinationEnum.WALLET.name())) {
-                //组织参数
-                Map<String, String> params = new HashMap<>(2);
-                params.put("income", memberWithdrawalMessage.getPrice().toString());
-                noticeMessageDTO.setParameter(params);
+        Map<String, String> params = new HashMap<>(2);
+        switch (WithdrawStatusEnum.valueOf(memberWithdrawalMessage.getStatus())) {
+            case APPLY:
+                //如果提现状态为申请则发送申请提现站内消息
+                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_CREATE);
+                break;
+            case FAIL_AUDITING:
+                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_AUDIT_ERROR);
+                break;
+            case SUCCESS:
                 noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_SUCCESS);
-                //发送提现成功消息
-                noticeMessageService.noticeMessage(noticeMessageDTO);
-                params.put("income", memberWithdrawalMessage.getPrice().toString());
-                params.put("expenditure", "0");
-                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_CHANGE);
-                noticeMessageDTO.setParameter(params);
-                //发送余额变动消息
-                noticeMessageService.noticeMessage(noticeMessageDTO);
-            }
-            //如果提现到微信
-            if (memberWithdrawalMessage.getDestination().equals(MemberWithdrawalDestinationEnum.WECHAT.name())) {
-                Map<String, String> params = new HashMap<>(2);
-                params.put("income", memberWithdrawalMessage.getPrice().toString());
-                noticeMessageDTO.setParameter(params);
-                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_WEICHAT_SUCCESS);
-                //发送提现成功消息
-                noticeMessageService.noticeMessage(noticeMessageDTO);
-
-                params.put("income", "0");
-                params.put("expenditure", memberWithdrawalMessage.getPrice().toString());
-                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_CHANGE);
-                noticeMessageDTO.setParameter(params);
-                //发送余额变动消息
-                noticeMessageService.noticeMessage(noticeMessageDTO);
-            }
-        }
-        //如果提现状态为拒绝则发送审核拒绝站内消息
-        if (memberWithdrawalMessage.getStatus().equals(WithdrawStatusEnum.FAIL_AUDITING.name())) {
-            noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_ERROR);
-            Map<String, String> params = new HashMap<>(2);
-            params.put("price", memberWithdrawalMessage.getPrice().toString());
-            noticeMessageDTO.setParameter(params);
-            //发送提现申请成功消息
-            noticeMessageService.noticeMessage(noticeMessageDTO);
+                break;
+            case ERROR:
+                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_ERROR);
+                break;
+            case VIA_AUDITING:
+                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_AUDIT_SUCCESS);
+            default:
+                break;
         }
 
-
+        params.put("price", memberWithdrawalMessage.getPrice().toString());
+        noticeMessageDTO.setParameter(params);
+        //发送提现申请消息
+        noticeMessageService.noticeMessage(noticeMessageDTO);
     }
 }
