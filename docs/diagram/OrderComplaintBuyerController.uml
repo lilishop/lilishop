@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>cn.lili.controller.order.OrderComplaintBuyerController</OriginalElement>
+  <nodes>
+    <node x="-377.0" y="-206.0">cn.lili.modules.order.order.service.OrderComplaintCommunicationService</node>
+    <node x="-927.5" y="123.5">cn.lili.controller.order.OrderComplaintStoreController</node>
+    <node x="-378.0" y="607.0">cn.lili.modules.order.order.service.OrderComplaintService</node>
+    <node x="311.5" y="111.0">cn.lili.controller.order.OrderComplaintBuyerController</node>
+    <node x="-308.0" y="123.5">cn.lili.controller.order.OrderComplaintManagerController</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="cn.lili.controller.order.OrderComplaintStoreController" target="cn.lili.modules.order.order.service.OrderComplaintCommunicationService" relationship="TO_ONE">
+      <point x="278.0" y="-84.5" />
+      <point x="-330.0" y="38.5" />
+    </edge>
+    <edge source="cn.lili.controller.order.OrderComplaintStoreController" target="cn.lili.modules.order.order.service.OrderComplaintService" relationship="TO_ONE">
+      <point x="262.0" y="84.5" />
+      <point x="-300.0" y="-119.0" />
+    </edge>
+    <edge source="cn.lili.controller.order.OrderComplaintBuyerController" target="cn.lili.modules.order.order.service.OrderComplaintCommunicationService" relationship="TO_ONE">
+      <point x="-286.0" y="-73.0" />
+      <point x="345.0" y="38.5" />
+    </edge>
+    <edge source="cn.lili.controller.order.OrderComplaintBuyerController" target="cn.lili.modules.order.order.service.OrderComplaintService" relationship="TO_ONE">
+      <point x="0.0" y="73.0" />
+      <point x="606.5" y="726.0" />
+      <point x="307.5" y="0.0" />
+    </edge>
+    <edge source="cn.lili.controller.order.OrderComplaintManagerController" target="cn.lili.modules.order.order.service.OrderComplaintCommunicationService" relationship="TO_ONE">
+      <point x="-11.5" y="-84.5" />
+      <point x="0.0" y="38.5" />
+    </edge>
+    <edge source="cn.lili.controller.order.OrderComplaintManagerController" target="cn.lili.modules.order.order.service.OrderComplaintService" relationship="TO_ONE">
+      <point x="-57.5" y="84.5" />
+      <point x="0.0" y="-119.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic" zoom="1.0" showDependencies="true" x="-13.0" y="319.65625" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Inner Classes</Category>
+    <Category>Methods</Category>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
