@@ -27,6 +27,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Max;
@@ -41,6 +42,7 @@ import javax.validation.constraints.Pattern;
 @RestController
 @Api(tags = "买家端,会员余额接口")
 @RequestMapping("/buyer/wallet/wallet")
+@Validated
 public class MemberWalletBuyerController {
 
     /**

@@ -257,6 +257,9 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
     @Transactional(rollbackFor = Exception.class)
     public Boolean applyWithdrawal(Double price, String realName, String connectNumber) {
 
+        if (price == null || price <= 0 || price > 1000000) {
+            throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_AMOUNT_ERROR);
+        }
         AuthUser authUser = UserContext.getCurrentUser();
 
         //校验金额是否满足提现，因为是从余额扣减，所以校验的是余额
@@ -312,7 +315,6 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
     public Boolean withdrawal(String withdrawApplyId) {
         MemberWithdrawApply memberWithdrawApply = memberWithdrawApplyService.getById(withdrawApplyId);
         memberWithdrawApply.setInspectTime(new Date());
-
         //获取提现设置
         Setting setting = settingService.get(SettingEnum.WITHDRAWAL_SETTING.name());
         WithdrawalSetting withdrawalSetting = new Gson().fromJson(setting.getSettingValue(), WithdrawalSetting.class);

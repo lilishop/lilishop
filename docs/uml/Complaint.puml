@@ -1,0 +1,21 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+actor user
+actor seller
+actor manager
+
+activate 平台
+user -> 平台:     输入原因，发起投诉
+user --> 平台:     多次输出对话
+seller --> 平台:    多次输出对话
+manager --> 平台:  多次输出对话
+manager -> 平台: 根据各方意见，仲裁投诉结果
+activate 平台
+平台->平台: 仲裁结果，更新状态
+
+平台 -> seller: 根据平台仲裁结果进行处理
+平台 -> user: 根据平台仲裁结果进行处理
+deactivate 平台
+
+@enduml

@@ -221,7 +221,7 @@ public enum ResultCode {
     PAY_POINT_ENOUGH(32010, "积分不足，不能兑换"),
     PAY_NOT_EXIST_ORDER(32011, "支付订单不存在"),
     CAN_NOT_RECHARGE_WALLET(32012, "不能使用余额进行充值"),
-
+    RECHARGE_PRICE_ERROR(32013, "充值金额错误"),
 
     /**
      * 售后
@@ -260,7 +260,7 @@ public enum ResultCode {
     WALLET_EXIT_ERROR(34005, "钱包已存在，无法重复创建"),
     WALLET_APPLY_ERROR(34006, "提现申请异常！"),
     WALLET_APPLY_MIN_PRICE_ERROR(34007, "提现最低提现金额错误!"),
-
+    WALLET_WITHDRAWAL_AMOUNT_ERROR(34008, "申请提现金额异常！"),
     /**
      * 评价
      */
@@ -502,6 +502,7 @@ public enum ResultCode {
     ELASTICSEARCH_INDEX_INIT_ERROR(90003, "索引初始化失败！"),
     PURCHASE_ORDER_DEADLINE_ERROR(90004, "供求单，已超过报名截止时间"),
     INDEX_BUILDING(90005, "索引正在生成");
+
 
     private final Integer code;
     private final String message;

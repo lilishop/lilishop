@@ -1,0 +1,20 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+actor user
+actor seller
+actor manager
+
+user --> 平台:     申请售后
+seller -> 平台:    审核售后申请
+activate 平台
+平台 -> 平台: 更新售后状态
+return 售后审核响应
+
+user -> 平台: 填写物流信息
+seller->平台: 确认收货
+activate 平台
+平台 -> 平台: 自动退款
+return 售后审核响应
+平台 -> user: 售后结束
+@enduml
