@@ -10,6 +10,8 @@ import cn.lili.modules.connect.entity.dto.AuthToken;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.entity.enums.AuthResponseStatus;
 import cn.lili.modules.connect.entity.enums.AuthUserGender;
+import cn.lili.modules.connect.entity.enums.ConnectEnum;
+import cn.lili.modules.connect.entity.enums.SourceEnum;
 import cn.lili.modules.connect.exception.AuthException;
 import cn.lili.common.utils.HttpUtils;
 import com.alibaba.fastjson.JSONObject;
@@ -56,10 +58,12 @@ public class BaseAuthWeChatPCRequest extends BaseAuthRequest {
                 .nickname(object.getString("nickname"))
                 .avatar(object.getString("headimgurl"))
                 .location(location)
-                .uuid(authToken.getUnionId())
+                .uuid(authToken.getOpenId())
                 .gender(AuthUserGender.getWechatRealGender(object.getString("sex")))
                 .token(authToken)
                 .source(source.toString())
+                .source1(ConnectEnum.WECHAT.name())
+                .type(SourceEnum.WECHAT_PC_OPEN_ID.name())
                 .build();
     }
 

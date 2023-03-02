@@ -29,26 +29,13 @@ public interface ConnectService extends IService<Connect> {
     String CONNECT_TYPE = "CONNECT_TYPE";
 
     /**
-     * 联合登陆
-     *
-     * @param type     类型
-     * @param unionid  unionid
-     * @param longTerm 是否长时间有效
-     * @param uuid     UUID
-     * @return token
-     * @throws NoPermissionException 不允许操作
-     */
-    Token unionLoginCallback(String type, String unionid, String uuid, boolean longTerm) throws NoPermissionException;
-
-    /**
      * 联合登陆对象直接登录
      *
-     * @param type     第三方登录类型
      * @param authUser 第三方登录返回封装类
      * @param uuid     用户uuid
      * @return token
      */
-    Token unionLoginCallback(String type, ConnectAuthUser authUser, String uuid);
+    Token unionLoginCallback(ConnectAuthUser authUser, String uuid);
 
     /**
      * 绑定
@@ -86,15 +73,6 @@ public interface ConnectService extends IService<Connect> {
         return CachePrefix.CONNECT_AUTH.getPrefix() + type + uuid;
     }
 
-    /**
-     * app联合登录 回调
-     *
-     * @param authUser 登录对象
-     * @param uuid     uuid
-     * @return token
-     */
-    Token appLoginCallback(ConnectAuthUser authUser, String uuid);
-
 
     /**
      * 微信一键登录
@@ -119,4 +97,12 @@ public interface ConnectService extends IService<Connect> {
      * @param userId 会员id
      */
     void deleteByMemberId(String userId);
+
+    /**
+     * 绑定第三方平台用户
+     * @param userId 用户ID
+     * @param unionId 第三方平台用户ID
+     * @param type 平台类型
+     */
+    void loginBindUser(String userId, String unionId, String type);
 }

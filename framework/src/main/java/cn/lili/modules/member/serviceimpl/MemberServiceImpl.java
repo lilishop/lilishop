@@ -224,7 +224,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     @Transactional
-    public Token autoRegister(ConnectAuthUser authUser) {
+    public Member autoRegister(ConnectAuthUser authUser) {
 
         if (CharSequenceUtil.isEmpty(authUser.getNickname())) {
             authUser.setNickname("临时昵称");
@@ -236,11 +236,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             String username = UuidUtils.getUUID();
             Member member = new Member(username, UuidUtils.getUUID(), authUser.getAvatar(), authUser.getNickname(),
                     authUser.getGender() != null ? Convert.toInt(authUser.getGender().getCode()) : 0);
-            registerHandler(member);
             member.setPassword(DEFAULT_PASSWORD);
-            //绑定登录方式
-            loginBindUser(member, authUser.getUuid(), authUser.getSource());
-            return memberTokenGenerate.createToken(member, false);
+            // 发送会员注册信息
+            registerHandler(member);
+
+            return member;
         } catch (ServiceException e) {
             log.error("自动注册服务抛出异常：", e);
             throw e;
@@ -250,12 +250,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         }
     }
 
-    @Override
-    @Transactional
-    public Token autoRegister() {
-        ConnectAuthUser connectAuthUser = this.checkConnectUser();
-        return this.autoRegister(connectAuthUser);
-    }
+//    @Override
+//    @Transactional
+//    public Token autoRegister() {
+//        ConnectAuthUser connectAuthUser = this.checkConnectUser();
+//        return this.autoRegister(connectAuthUser);
+//    }
 
     @Override
     public Token refreshToken(String refreshToken) {
@@ -292,7 +292,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         member.setId(SnowFlake.getIdStr());
         //保存会员
         this.save(member);
-
 
         // 发送会员注册信息
         applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("new member register", rocketmqCustomProperties.getMemberTopic(), MemberTagsEnum.MEMBER_REGISTER.name(), member));
@@ -560,23 +559,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     /**
      * 成功登录，则检测cookie中的信息，进行会员绑定
      *
-     * @param member  会员
-     * @param unionId unionId
-     * @param type    状态
-     */
-    private void loginBindUser(Member member, String unionId, String type) {
-        Connect connect = connectService.queryConnect(
-                ConnectQueryDTO.builder().unionId(unionId).unionType(type).build()
-        );
-        if (connect == null) {
-            connect = new Connect(member.getId(), unionId, type);
-            connectService.save(connect);
-        }
-    }
-
-    /**
-     * 成功登录，则检测cookie中的信息，进行会员绑定
-     *
      * @param member 会员
      */
     private void loginBindUser(Member member) {
@@ -612,42 +594,42 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
 
-    /**
-     * 检测是否可以绑定第三方联合登陆
-     * 返回null原因
-     * 包含原因1：redis中已经没有联合登陆信息  2：已绑定其他账号
-     *
-     * @return 返回对象则代表可以进行绑定第三方会员，返回null则表示联合登陆无法继续
-     */
-    private ConnectAuthUser checkConnectUser() {
-        //获取cookie存储的信息
-        String uuid = CookieUtil.getCookie(ConnectService.CONNECT_COOKIE, ThreadContextHolder.getHttpRequest());
-        String connectType = CookieUtil.getCookie(ConnectService.CONNECT_TYPE, ThreadContextHolder.getHttpRequest());
-
-        //如果联合登陆存储了信息
-        if (CharSequenceUtil.isNotEmpty(uuid) && CharSequenceUtil.isNotEmpty(connectType)) {
-            //枚举 联合登陆类型获取
-            ConnectAuthEnum authInterface = ConnectAuthEnum.valueOf(connectType);
-
-            ConnectAuthUser connectAuthUser = getConnectAuthUser(uuid, connectType);
-            if (connectAuthUser == null) {
-                throw new ServiceException(ResultCode.USER_OVERDUE_CONNECT_ERROR);
-            }
-            //检测是否已经绑定过用户
-            Connect connect = connectService.queryConnect(
-                    ConnectQueryDTO.builder().unionType(connectType).unionId(connectAuthUser.getUuid()).build()
-            );
-            //没有关联则返回true，表示可以继续绑定
-            if (connect == null) {
-                connectAuthUser.setConnectEnum(authInterface);
-                return connectAuthUser;
-            } else {
-                throw new ServiceException(ResultCode.USER_CONNECT_BANDING_ERROR);
-            }
-        } else {
-            throw new ServiceException(ResultCode.USER_CONNECT_NOT_EXIST_ERROR);
-        }
-    }
+//    /**
+//     * 检测是否可以绑定第三方联合登陆
+//     * 返回null原因
+//     * 包含原因1：redis中已经没有联合登陆信息  2：已绑定其他账号
+//     *
+//     * @return 返回对象则代表可以进行绑定第三方会员，返回null则表示联合登陆无法继续
+//     */
+//    private ConnectAuthUser checkConnectUser() {
+//        //获取cookie存储的信息
+//        String uuid = CookieUtil.getCookie(ConnectService.CONNECT_COOKIE, ThreadContextHolder.getHttpRequest());
+//        String connectType = CookieUtil.getCookie(ConnectService.CONNECT_TYPE, ThreadContextHolder.getHttpRequest());
+//
+//        //如果联合登陆存储了信息
+//        if (CharSequenceUtil.isNotEmpty(uuid) && CharSequenceUtil.isNotEmpty(connectType)) {
+//            //枚举 联合登陆类型获取
+//            ConnectAuthEnum authInterface = ConnectAuthEnum.valueOf(connectType);
+//
+//            ConnectAuthUser connectAuthUser = getConnectAuthUser(uuid, connectType);
+//            if (connectAuthUser == null) {
+//                throw new ServiceException(ResultCode.USER_OVERDUE_CONNECT_ERROR);
+//            }
+//            //检测是否已经绑定过用户
+//            Connect connect = connectService.queryConnect(
+//                    ConnectQueryDTO.builder().unionType(connectType).unionId(connectAuthUser.getUuid()).build()
+//            );
+//            //没有关联则返回true，表示可以继续绑定
+//            if (connect == null) {
+//                connectAuthUser.setConnectEnum(authInterface);
+//                return connectAuthUser;
+//            } else {
+//                throw new ServiceException(ResultCode.USER_CONNECT_BANDING_ERROR);
+//            }
+//        } else {
+//            throw new ServiceException(ResultCode.USER_CONNECT_NOT_EXIST_ERROR);
+//        }
+//    }
 
     @Override
     public long getMemberNum(MemberSearchVO memberSearchVO) {

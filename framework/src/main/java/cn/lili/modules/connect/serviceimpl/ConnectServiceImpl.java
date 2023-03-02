@@ -18,6 +18,7 @@ import cn.lili.common.utils.CookieUtil;
 import cn.lili.common.utils.HttpUtils;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
+import cn.lili.modules.connect.entity.dto.MemberConnectLoginMessage;
 import cn.lili.modules.connect.entity.dto.WechatMPLoginParams;
 import cn.lili.modules.connect.entity.enums.ConnectEnum;
 import cn.lili.modules.connect.mapper.ConnectMapper;
@@ -31,10 +32,13 @@ import cn.lili.modules.system.entity.dto.connect.WechatConnectSetting;
 import cn.lili.modules.system.entity.dto.connect.dto.WechatConnectSettingItem;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -71,65 +75,21 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     @Autowired
     private Cache cache;
     /**
-     * RocketMQ 配置
+     * RocketMQ
+     */
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
+    /**
+     * RocketMQ配置
      */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
 
-    @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
-
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Token unionLoginCallback(String type, String unionid, String uuid, boolean longTerm) throws NoPermissionException {
+    public Token unionLoginCallback(ConnectAuthUser authUser, String uuid) {
 
-        try {
-            LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(Connect::getUnionId, unionid);
-            queryWrapper.eq(Connect::getUnionType, type);
-            //查询绑定关系
-            Connect connect = this.getOne(queryWrapper);
-            if (connect == null) {
-                throw new NoPermissionException("未绑定用户");
-            }
-            //查询会员
-            Member member = memberService.getById(connect.getUserId());
-            //如果未绑定会员，则把刚才查询到的联合登录表数据删除
-            if (member == null) {
-                this.remove(queryWrapper);
-                throw new NoPermissionException("未绑定用户");
-            }
-            return memberTokenGenerate.createToken(member, longTerm);
-        } catch (NoPermissionException e) {
-            log.error("联合登陆失败：", e);
-            throw e;
-        }
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Token unionLoginCallback(String type, ConnectAuthUser authUser, String uuid) {
-
-        Token token;
-        try {
-            token = this.unionLoginCallback(type, authUser.getUuid(), uuid, false);
-        } catch (NoPermissionException e) {
-            if (AUTO_REGION) {
-                token = memberService.autoRegister(authUser);
-                return token;
-            } else {
-                //写入cookie
-                CookieUtil.addCookie(CONNECT_COOKIE, uuid, 1800, ThreadContextHolder.getHttpResponse());
-                CookieUtil.addCookie(CONNECT_TYPE, type, 1800, ThreadContextHolder.getHttpResponse());
-                //自动登录失败，则把信息缓存起来
-                cache.put(ConnectService.cacheKey(type, uuid), authUser, 30L, TimeUnit.MINUTES);
-                throw new ServiceException(ResultCode.USER_NOT_BINDING);
-            }
-        } catch (Exception e) {
-            log.error("联合登陆异常：", e);
-            throw new ServiceException(ResultCode.ERROR);
-        }
-        return token;
+        return this.unionLoginCallback(authUser, false);
     }
 
     @Override
@@ -137,6 +97,8 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
         Connect connect = new Connect(authUser.getId(), unionId, type);
         this.save(connect);
+
+
     }
 
     @Override
@@ -159,16 +121,6 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         List<String> keys = new ArrayList<>();
         connects.forEach(item -> keys.add(item.getUnionType()));
         return keys;
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Token appLoginCallback(ConnectAuthUser authUser, String uuid) {
-        try {
-            return this.unionLoginCallback(authUser.getSource(), authUser.getUuid(), uuid, true);
-        } catch (NoPermissionException e) {
-            return memberService.autoRegister(authUser);
-        }
     }
 
 
@@ -226,40 +178,24 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
      */
     @Transactional(rollbackFor = Exception.class)
     public Token phoneMpBindAndLogin(String sessionKey, WechatMPLoginParams params, String openId, String unionId) {
-        String encryptedData = params.getEncryptedData();
-        String iv = params.getIv();
-        JSONObject userInfo = this.getUserInfo(encryptedData, sessionKey, iv);
-        log.info("联合登陆返回：{}", userInfo.toString());
-        String phone = (String) userInfo.get("purePhoneNumber");
+        try {
+            String encryptedData = params.getEncryptedData();
+            String iv = params.getIv();
+            JSONObject userInfo = this.getUserInfo(encryptedData, sessionKey, iv);
+            log.info("联合登陆返回：{}", userInfo.toString());
+            String phone = (String) userInfo.get("purePhoneNumber");
 
-        //手机号登录
-        LambdaQueryWrapper<Member> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(Member::getMobile, phone);
-        Member member = memberService.getOne(lambdaQueryWrapper);
-        //如果不存在会员，则进行绑定微信openid 和 unionid，并且登录
-        if (member != null) {
-            bindMpMember(openId, unionId, member);
-            return memberTokenGenerate.createToken(member, true);
+            ConnectAuthUser connectAuthUser = new ConnectAuthUser();
+            connectAuthUser.setUuid(openId);
+            connectAuthUser.setNickname(params.getNickName());
+            connectAuthUser.setAvatar(params.getImage());
+            connectAuthUser.setUsername("m" + phone);
+            connectAuthUser.setPhone(phone);
+            return this.unionLoginCallback(connectAuthUser, true);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        //如果没有会员，则根据手机号注册会员
-        Member newMember = new Member("m" + phone, "111111", phone, params.getNickName(), params.getImage());
-        memberService.save(newMember);
-        newMember = memberService.findByUsername(newMember.getUsername());
-
-        //判定有没有邀请人并且写入
-        UserContext.settingInviter(newMember.getId(), cache);
-
-        bindMpMember(openId, unionId, newMember);
-
-
-        //判定有没有邀请人并且写入
-        UserContext.settingInviter(newMember.getId(), cache);
-
-
-        // 发送会员注册信息
-        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("new member register", rocketmqCustomProperties.getMemberTopic(), MemberTagsEnum.MEMBER_REGISTER.name(), newMember));
-        return memberTokenGenerate.createToken(newMember, true);
+        return null;
     }
 
     @Override
@@ -280,47 +216,72 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     }
 
     /**
-     * 会员绑定 绑定微信小程序
-     * <p>
-     * 如果openid 已经绑定其他账号，则这里不作处理，如果未绑定，则绑定最新的会员
-     * 这样，微信小程序注册之后，其他app 公众号页面，都可以实现绑定自动登录功能
-     * </p>
+     * 成功登录，则检测cookie中的信息，进行会员绑定
      *
-     * @param openId  微信openid
-     * @param unionId 微信unionid
-     * @param member  会员
+     * @param userId  用户ID
+     * @param unionId 第三方用户ID
+     * @param type    类型
      */
-    private void bindMpMember(String openId, String unionId, Member member) {
-
-
-        //如果unionid 不为空  则为账号绑定unionid
-        if (CharSequenceUtil.isNotEmpty(unionId)) {
-            LambdaQueryWrapper<Connect> lambdaQueryWrapper = new LambdaQueryWrapper();
-            lambdaQueryWrapper.eq(Connect::getUnionId, unionId);
-            lambdaQueryWrapper.eq(Connect::getUnionType, ConnectEnum.WECHAT.name());
-            List<Connect> connects = this.list(lambdaQueryWrapper);
-            if (connects.isEmpty()) {
-                Connect connect = new Connect();
-                connect.setUnionId(unionId);
-                connect.setUserId(member.getId());
-                connect.setUnionType(ConnectEnum.WECHAT.name());
-                this.save(connect);
-            }
-        }//如果openid 不为空  则为账号绑定openid
-        if (CharSequenceUtil.isNotEmpty(openId)) {
-            LambdaQueryWrapper<Connect> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(Connect::getUnionId, openId);
-            lambdaQueryWrapper.eq(Connect::getUnionType, ConnectEnum.WECHAT_MP_OPEN_ID.name());
-            List<Connect> connects = this.list(lambdaQueryWrapper);
-            if (connects.isEmpty()) {
-                Connect connect = new Connect();
-                connect.setUnionId(openId);
-                connect.setUserId(member.getId());
-                connect.setUnionType(ConnectEnum.WECHAT_MP_OPEN_ID.name());
-                this.save(connect);
-            }
+    @Override
+    public void loginBindUser(String userId, String unionId, String type) {
+        Connect connect = this.queryConnect(
+                ConnectQueryDTO.builder().unionId(unionId).unionType(type).build()
+        );
+        if (connect == null) {
+            connect = new Connect(userId, unionId, type);
+            this.save(connect);
         }
+    }
 
+
+    /**
+     * 第三方联合登陆
+     * 1.判断是否使用开放平台
+     * 1.1如果使用开放平台则使用UnionId进行登录
+     * 1.2如果不适用开放平台则使用OpenId进行登录
+     * <p>
+     * 2.用户登录后判断绑定OpenId
+     *
+     * @param authUser 第三方登录封装类
+     * @param longTerm 是否长时间有效
+     * @return token
+     * @throws NoPermissionException 不允许操作
+     */
+    private Token unionLoginCallback(ConnectAuthUser authUser, boolean longTerm) {
+
+        //使用UnionId登录
+        try {
+            LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<Connect>()
+                    .eq(Connect::getUnionId, authUser.getToken().getUnionId())
+                    .eq(Connect::getUnionType, authUser.getSource1());
+            //查询绑定关系
+            Connect connect = this.getOne(queryWrapper);
+            Member member = new Member();
+            if (connect == null) {
+                member = memberService.autoRegister(authUser);
+            } else {
+                //查询会员
+                member = memberService.getById(connect.getUserId());
+                //如果未绑定会员，则把刚才查询到的联合登录表数据删除
+                if (member == null) {
+                    this.remove(queryWrapper);
+                    member = memberService.autoRegister(authUser);
+                }
+            }
+
+            //发送用户第三方登录消息
+            MemberConnectLoginMessage memberConnectLoginMessage = new MemberConnectLoginMessage();
+            memberConnectLoginMessage.setMember(member);
+            memberConnectLoginMessage.setConnectAuthUser(authUser);
+            String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_CONNECT_LOGIN.name();
+            //发送用户第三方登录消息
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(memberConnectLoginMessage), RocketmqSendCallbackBuilder.commonCallback());
+
+            return memberTokenGenerate.createToken(member, longTerm);
+        } catch (Exception e) {
+            log.error("联合登陆失败：", e);
+            throw e;
+        }
     }
 
     /**

@@ -1,25 +1,49 @@
 package cn.lili.event.impl;
 
+import cn.hutool.core.util.StrUtil;
+import cn.lili.event.MemberConnectLoginEvent;
 import cn.lili.event.MemberLoginEvent;
+import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
+import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
+import cn.lili.modules.system.service.SettingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
  * 会员自身业务
+ * 会员登录，会员第三方登录
  *
  * @author Chopper
  * @version v1.0
  * 2022-01-11 11:08
  */
 @Service
-public class MemberExecute implements MemberLoginEvent {
+public class MemberExecute implements MemberLoginEvent, MemberConnectLoginEvent {
     @Autowired
     private MemberService memberService;
+    @Autowired
+    private ConnectService connectService;
+    @Autowired
+    private SettingService settingService;
 
     @Override
     public void memberLogin(Member member) {
         memberService.updateMemberLoginTime(member.getId());
+    }
+
+    @Override
+    public void memberConnectLogin(Member member, ConnectAuthUser authUser) {
+
+        //保存UnionID
+        if (StrUtil.isNotBlank(authUser.getToken().getUnionId())) {
+            connectService.loginBindUser(member.getId(), authUser.getToken().getUnionId(), authUser.getType());
+        }
+        //保存OpenID
+        if (StrUtil.isNotBlank(authUser.getUuid())) {
+            connectService.loginBindUser(member.getId(), authUser.getUuid(), authUser.getType());
+        }
+
     }
 }

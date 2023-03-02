@@ -47,7 +47,7 @@ public class ConnectBuyerWebController {
 
 
     @GetMapping("/login/web/{type}")
-    @ApiOperation(value = "WEB信任登录授权")
+    @ApiOperation(value = "WEB信任登录授权,包含PC、WAP")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "type", value = "登录方式:QQ,微信,微信_PC",
                     allowableValues = "QQ,WECHAT,WECHAT_PC", paramType = "path")
@@ -75,12 +75,12 @@ public class ConnectBuyerWebController {
         return connectUtil.getResult(state);
     }
 
-    @GetMapping("/register/auto")
-    @ApiOperation(value = "WEB信任登录授权")
-    public ResultMessage<Token> webAuthorize() {
-        Token token = memberService.autoRegister();
-        return ResultUtil.data(token);
-    }
+//    @GetMapping("/register/auto")
+//    @ApiOperation(value = "WEB信任登录授权")
+//    public ResultMessage<Token> webAuthorize() {
+//        Token token = memberService.autoRegister();
+//        return ResultUtil.data(token);
+//    }
 
     @ApiOperation(value = "unionID登录")
     @ApiImplicitParams({
@@ -92,7 +92,7 @@ public class ConnectBuyerWebController {
     @GetMapping("/app/login")
     public ResultMessage<Token> unionLogin(ConnectAuthUser authUser, @RequestHeader("uuid") String uuid) {
         try {
-            return ResultUtil.data(connectService.appLoginCallback(authUser, uuid));
+            return ResultUtil.data(connectService.unionLoginCallback(authUser, uuid));
         } catch (Exception e) {
             log.error("unionID登录错误", e);
         }

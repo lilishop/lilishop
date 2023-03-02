@@ -10,6 +10,8 @@ import cn.lili.modules.connect.entity.dto.AuthToken;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.entity.enums.AuthResponseStatus;
 import cn.lili.modules.connect.entity.enums.AuthUserGender;
+import cn.lili.modules.connect.entity.enums.ConnectEnum;
+import cn.lili.modules.connect.entity.enums.SourceEnum;
 import cn.lili.modules.connect.exception.AuthException;
 import cn.lili.modules.connect.util.GlobalAuthUtils;
 import cn.lili.common.utils.HttpUtils;
@@ -23,7 +25,7 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class BaseAuthWeChatRequest extends BaseAuthRequest {
     public BaseAuthWeChatRequest(AuthConfig config, Cache cache) {
-        super(config, ConnectAuthEnum.WECHAT, cache);
+        super(config, ConnectAuthEnum.WECHAT_WAP, cache);
     }
 
     /**
@@ -62,6 +64,8 @@ public class BaseAuthWeChatRequest extends BaseAuthRequest {
                 .gender(AuthUserGender.getWechatRealGender(object.getString("sex")))
                 .token(authToken)
                 .source(source.toString())
+                .source1(ConnectEnum.WECHAT.name())
+                .type(SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name())
                 .build();
     }
 

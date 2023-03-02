@@ -15,6 +15,7 @@ import cn.lili.modules.member.entity.vo.QRLoginResultVo;
 import cn.lili.modules.member.entity.vo.QRCodeLoginSessionVo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.elasticsearch.monitor.os.OsStats;
 
 import java.util.List;
 import java.util.Map;
@@ -175,12 +176,12 @@ public interface MemberService extends IService<Member> {
     IPage<MemberVO> getMemberPage(MemberSearchVO memberSearchVO, PageVO page);
 
 
-    /**
-     * 一键注册会员
-     *
-     * @return
-     */
-    Token autoRegister();
+//    /**
+//     * 一键注册会员
+//     *
+//     * @return
+//     */
+//    Token autoRegister();
 
     /**
      * 一键注册会员
@@ -188,7 +189,7 @@ public interface MemberService extends IService<Member> {
      * @param authUser 联合登录用户
      * @return Token
      */
-    Token autoRegister(ConnectAuthUser authUser);
+    Member autoRegister(ConnectAuthUser authUser);
 
     /**
      * 刷新token
