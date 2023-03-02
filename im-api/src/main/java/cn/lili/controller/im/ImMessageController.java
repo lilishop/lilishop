@@ -2,6 +2,7 @@ package cn.lili.controller.im;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.im.entity.dos.ImMessage;
 import cn.lili.modules.im.entity.dto.MessageQueryParams;
@@ -32,39 +33,39 @@ public class ImMessageController {
     @ApiOperation(value = "查看Im消息详情")
     public ResultMessage<ImMessage> get(@PathVariable String id) {
         ImMessage imMessage = imMessageService.getById(id);
-        return new ResultUtil<ImMessage>().setData(imMessage);
+        return ResultUtil.data(imMessage);
     }
 
     @GetMapping
     @ApiOperation(value = "分页获取Im消息")
     public ResultMessage<List<ImMessage>> historyMessage(MessageQueryParams messageQueryParams) {
         List<ImMessage> data = imMessageService.getList(messageQueryParams);
-        return new ResultUtil<List<ImMessage>>().setData(data);
+        return ResultUtil.data(data);
     }
 
     @PostMapping
     @ApiOperation(value = "新增Im消息")
     public ResultMessage<ImMessage> save(ImMessage imMessage) {
         if (imMessageService.save(imMessage)) {
-            return new ResultUtil<ImMessage>().setData(imMessage);
+            return ResultUtil.data(imMessage);
         }
-        return new ResultUtil<ImMessage>().setErrorMsg(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.IM_MESSAGE_ADD_ERROR);
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "更新Im消息")
     public ResultMessage<ImMessage> update(@PathVariable String id, ImMessage imMessage) {
         if (imMessageService.updateById(imMessage)) {
-            return new ResultUtil<ImMessage>().setData(imMessage);
+            return ResultUtil.data(imMessage);
         }
-        return new ResultUtil<ImMessage>().setErrorMsg(ResultCode.ERROR);
+        throw new ServiceException(ResultCode.IM_MESSAGE_EDIT_ERROR);
     }
 
     @DeleteMapping(value = "/{ids}")
     @ApiOperation(value = "删除Im消息")
     public ResultMessage<Object> delAllByIds(@PathVariable List ids) {
         imMessageService.removeByIds(ids);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 

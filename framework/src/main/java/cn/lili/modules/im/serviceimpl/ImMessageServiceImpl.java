@@ -4,6 +4,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.modules.im.entity.dos.ImMessage;
 import cn.lili.modules.im.entity.dto.MessageQueryParams;
 import cn.lili.modules.im.mapper.ImMessageMapper;
@@ -18,9 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Im消息 业务实现
@@ -130,9 +131,18 @@ public class ImMessageServiceImpl extends ServiceImpl<ImMessageMapper, ImMessage
      * @param messageList 消息列表
      */
     private void readMessage(List<ImMessage> messageList) {
-        if (messageList.size() > 0) {
+        if (!messageList.isEmpty()) {
+            //判断用户类型
+            AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
+            String toUserId = "";
+            if(UserEnums.MEMBER.equals(authUser.getRole())){
+                toUserId = authUser.getId();
+            }else if(UserEnums.STORE.equals(authUser.getRole())){
+                toUserId = authUser.getStoreId();
+            }
+            //发送给自己的未读信息进行已读操作
             for (ImMessage imMessage : messageList) {
-                if(Boolean.FALSE.equals(imMessage.getIsRead())){
+                if(Boolean.FALSE.equals(imMessage.getIsRead()) && imMessage.getToUser().equals(toUserId)){
                     imMessage.setIsRead(true);
                 }
             }
