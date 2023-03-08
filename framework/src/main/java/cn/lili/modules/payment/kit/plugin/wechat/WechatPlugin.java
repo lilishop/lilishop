@@ -18,6 +18,7 @@ import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.enums.ConnectEnum;
+import cn.lili.modules.connect.entity.enums.SourceEnum;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.member.entity.dto.ConnectQueryDTO;
 import cn.lili.modules.order.order.service.OrderService;
@@ -40,6 +41,8 @@ import cn.lili.modules.payment.service.PaymentService;
 import cn.lili.modules.payment.service.RefundLogService;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.WithdrawalSetting;
+import cn.lili.modules.system.entity.dto.connect.WechatConnectSetting;
+import cn.lili.modules.system.entity.dto.connect.dto.WechatConnectSettingItem;
 import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
@@ -47,6 +50,7 @@ import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.formula.atp.Switch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -380,7 +384,7 @@ public class WechatPlugin implements Payment {
 
         try {
             Connect connect = connectService.queryConnect(
-                    ConnectQueryDTO.builder().userId(UserContext.getCurrentUser().getId()).unionType(ConnectEnum.WECHAT_MP_OPEN_ID.name()).build()
+                    ConnectQueryDTO.builder().userId(UserContext.getCurrentUser().getId()).unionType(SourceEnum.WECHAT_MP_OPEN_ID.name()).build()
             );
             if (connect == null) {
                 return null;
@@ -478,16 +482,38 @@ public class WechatPlugin implements Payment {
      */
     @Override
     public boolean transfer(MemberWithdrawApply memberWithdrawApply) {
-
         try {
             //获取提现设置
             WithdrawalSetting withdrawalSetting = new Gson().fromJson(settingService.get(SettingEnum.WITHDRAWAL_SETTING.name()).getSettingValue(), WithdrawalSetting.class);
+
+            //获取用户OPENID
+            WechatConnectSetting wechatConnectSetting = new Gson().fromJson(settingService.get(SettingEnum.WECHAT_CONNECT.name()).getSettingValue(), WechatConnectSetting.class);
+            String source = "";
+            for (WechatConnectSettingItem wechatConnectSettingItem : wechatConnectSetting.getWechatConnectSettingItems()) {
+                if (wechatConnectSettingItem.getAppId().equals(withdrawalSetting.getWechatAppId())) {
+                    switch (wechatConnectSettingItem.getClientType()) {
+                        case "PC":
+                            source = SourceEnum.WECHAT_PC_OPEN_ID.name();
+                            break;
+                        case "H5":
+                            source = SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name();
+                            break;
+                        case "MP":
+                            source = SourceEnum.WECHAT_MP_OPEN_ID.name();
+                            break;
+                        case "APP":
+                            source = SourceEnum.WECHAT_APP_OPEN_ID.name();
+                            break;
+                    }
+                }
+            }
+
             //获取微信设置
             WechatPaymentSetting wechatPaymentSetting = wechatPaymentSetting();
             //获取用户openId
             Connect connect = connectService.queryConnect(
                     ConnectQueryDTO.builder().userId(memberWithdrawApply.getMemberId())
-                            .unionType(ConnectEnum.WECHAT_OPEN_ID.name()).build()
+                            .unionType(source).build()
             );
             //构建提现，发起申请
             TransferModel transferModel = new TransferModel()

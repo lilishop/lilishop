@@ -11,6 +11,7 @@ import cn.lili.common.utils.HttpUtils;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.enums.ConnectEnum;
+import cn.lili.modules.connect.entity.enums.SourceEnum;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.member.entity.dto.ConnectQueryDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
@@ -146,7 +147,7 @@ public class WechatMessageUtil {
         }
 
         Connect connect = connectService.queryConnect(
-                ConnectQueryDTO.builder().userId(order.getMemberId()).unionType(ConnectEnum.WECHAT_MP_OPEN_ID.name()).build()
+                ConnectQueryDTO.builder().userId(order.getMemberId()).unionType(SourceEnum.WECHAT_MP_OPEN_ID.name()).build()
         );
         if (connect == null) {
             return;

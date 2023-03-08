@@ -32,7 +32,7 @@ public class WithdrawalSetting implements Serializable {
     private Boolean apply;
 
     /**
-     * 微信提现使用的APPID
+     * 微信提现-渠道使用的APPID
      */
     private String wechatAppId;
     /**
