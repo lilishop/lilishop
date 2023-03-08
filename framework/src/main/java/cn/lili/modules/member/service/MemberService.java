@@ -75,6 +75,14 @@ public interface MemberService extends IService<Member> {
     Token usernameStoreLogin(String username, String password);
 
     /**
+     * 商家登录：用户名、密码登录
+     *
+     * @param mobilePhone 用户名
+     * @return token
+     */
+    Token mobilePhoneStoreLogin(String mobilePhone);
+
+    /**
      * 注册：手机号、验证码登录
      *
      * @param mobilePhone 手机号

@@ -121,6 +121,14 @@ public class OrderStoreController {
     }
 
     @PreventDuplicateSubmissions
+    @ApiOperation(value = "订单顺丰发货")
+    @ApiImplicitParam(name = "orderSn", value = "订单sn", required = true, dataType = "String", paramType = "path")
+    @PostMapping(value = "/{orderSn}/shunfeng/delivery")
+    public ResultMessage<Object> shunFengDelivery(@NotNull(message = "参数非法") @PathVariable String orderSn) {
+        return ResultUtil.data(orderService.shunFengDelivery(orderSn));
+    }
+
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "取消订单")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path"),
@@ -200,7 +208,7 @@ public class OrderStoreController {
             @ApiImplicitParam(name = "logisticsId", value = "物流公司", required = true, dataType = "String", paramType = "query")
     })
     public ResultMessage<Object> createElectronicsFaceSheet(@NotNull(message = "参数非法") @PathVariable String orderSn,
-                                                            @NotNull(message = "请选择物流公司") String logisticsId) throws Exception {
+                                                            @NotNull(message = "请选择物流公司") String logisticsId) {
         return ResultUtil.data(logisticsService.labelOrder(orderSn, logisticsId));
     }
 }

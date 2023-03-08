@@ -416,6 +416,7 @@ public enum ResultCode {
     STORE_DELIVER_GOODS_ADDRESS(50007,"请填写商家发货地址"),
     FREIGHT_TEMPLATE_NOT_EXIST(50010, "当前模版不存在"),
     STORE_STATUS_ERROR(50011, "店铺状态异常，无法申请"),
+    STORE_DELIVER_ADDRESS_EXIST(50012,"请填写发货地址"),
 
     /**
      * 结算单
