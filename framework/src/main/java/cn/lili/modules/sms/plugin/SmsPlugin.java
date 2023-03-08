@@ -3,7 +3,6 @@ package cn.lili.modules.sms.plugin;
 import cn.lili.modules.sms.entity.dos.SmsSign;
 import cn.lili.modules.sms.entity.dos.SmsTemplate;
 import cn.lili.modules.sms.entity.enums.SmsEnum;
-import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 
 import java.util.List;
 import java.util.Map;
@@ -29,7 +28,7 @@ public interface SmsPlugin {
      * @param templateCode 模版code
      * @param signName     签名名称
      */
-    void sendSmsCode(String signName, String mobile, Map<String, String> param, String templateCode) throws TencentCloudSDKException;
+    void sendSmsCode(String signName, String mobile, Map<String, String> param, String templateCode);
 
     /**
      * 短信批量发送

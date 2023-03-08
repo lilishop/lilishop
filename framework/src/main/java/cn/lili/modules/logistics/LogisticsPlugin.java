@@ -2,8 +2,11 @@ package cn.lili.modules.logistics;
 
 import cn.lili.modules.logistics.entity.dto.LabelOrderDTO;
 import cn.lili.modules.logistics.entity.enums.LogisticsEnum;
+import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.system.entity.dos.Logistics;
 import cn.lili.modules.system.entity.vo.Traces;
+
+import java.util.Map;
 
 /**
  * 物流插件接口
@@ -48,6 +51,8 @@ public interface LogisticsPlugin {
      * @param labelOrderDTO 电子面单DTO
      * @return
      */
-    String labelOrder(LabelOrderDTO labelOrderDTO);
+    Map labelOrder(LabelOrderDTO labelOrderDTO);
+
+    String createOrder(OrderDetailVO orderDetailVO);
 
 }

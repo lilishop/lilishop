@@ -18,7 +18,9 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
+import cn.lili.modules.logistics.entity.enums.LogisticsEnum;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
+import cn.lili.modules.member.service.StoreLogisticsService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
@@ -44,6 +46,7 @@ import cn.lili.modules.store.entity.dto.StoreDeliverGoodsAddressDTO;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.entity.dos.Logistics;
+import cn.lili.modules.system.entity.dto.LogisticsSetting;
 import cn.lili.modules.system.entity.vo.Traces;
 import cn.lili.modules.system.service.LogisticsService;
 import cn.lili.mybatis.util.PageUtil;
@@ -458,6 +461,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             throw new ServiceException(ResultCode.ORDER_DELIVER_ERROR);
         }
         return order;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Order shunFengDelivery(String orderSn) {
+        OrderDetailVO orderDetailVO = this.queryDetail(orderSn);
+        String logisticsNo = logisticsService.sfCreateOrder(orderDetailVO);
+        Logistics logistics = logisticsService.getOne(new LambdaQueryWrapper<Logistics>().eq(Logistics::getCode,"SF"));
+        return delivery(orderSn,logisticsNo,logistics.getId());
     }
 
     @Override

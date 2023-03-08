@@ -457,6 +457,13 @@
             <artifactId>sdk</artifactId>
             <version>${kuaidi100-api.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.qiyuesuo.sdk</groupId>
+            <artifactId>SDK</artifactId>
+            <version>2.1.7</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/maven-repository/SF-CSIM-EXPRESS-SDK-V2.1.7.jar</systemPath>
+        </dependency>
     </dependencies>
 
 

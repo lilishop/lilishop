@@ -6,6 +6,7 @@ import cn.lili.modules.logistics.entity.enums.LogisticsEnum;
 import cn.lili.modules.logistics.plugin.kuaidi100.utils.Kuaidi100SignUtils;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
+import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.store.entity.dos.StoreLogistics;
 import cn.lili.modules.store.entity.dto.StoreDeliverGoodsAddressDTO;
 import cn.lili.modules.system.entity.dos.Logistics;
@@ -121,7 +122,7 @@ public class Kuaidi100Plugin implements LogisticsPlugin {
     }
 
     @Override
-    public String labelOrder(LabelOrderDTO labelOrderDTO) {
+    public Map<String,Object> labelOrder(LabelOrderDTO labelOrderDTO) {
         try {
             //订单
             Order order = labelOrderDTO.getOrder();
@@ -180,5 +181,11 @@ public class Kuaidi100Plugin implements LogisticsPlugin {
         }
         return null;
     }
+
+    @Override
+    public String createOrder(OrderDetailVO orderDetailVO) {
+        return null;
+    }
+
 
 }

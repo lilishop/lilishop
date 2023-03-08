@@ -8,6 +8,7 @@ import cn.lili.modules.logistics.entity.dto.LabelOrderDTO;
 import cn.lili.modules.logistics.entity.enums.LogisticsEnum;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
+import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.store.entity.dos.StoreLogistics;
 import cn.lili.modules.store.entity.dto.StoreDeliverGoodsAddressDTO;
 import cn.lili.modules.system.entity.dos.Logistics;
@@ -111,8 +112,9 @@ public class KdniaoPlugin implements LogisticsPlugin {
     }
 
     @Override
-    public String labelOrder(LabelOrderDTO labelOrderDTO) {
+    public Map<String,Object> labelOrder(LabelOrderDTO labelOrderDTO) {
         try {
+            Map<String,Object> resultMap = new HashMap();
             //订单
             Order order = labelOrderDTO.getOrder();
             //订单货物
@@ -198,15 +200,21 @@ public class KdniaoPlugin implements LogisticsPlugin {
             JSONObject obj = JSONObject.parseObject(result);
             log.info("电子面单响应：{}", result);
             if (!"100".equals(obj.getString("ResultCode"))) {
-                return obj.getString("Reason");
+                resultMap.put("Reason",obj.getString("Reason"));
+                return resultMap;
             }
 
             JSONObject orderJson = JSONObject.parseObject(obj.getString("Order"));
-
-            return obj.getString("PrintTemplate");
+            resultMap.put("printTemplate",obj.getString("PrintTemplate"));
+            return resultMap;
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
+    }
+
+    @Override
+    public String createOrder(OrderDetailVO orderDetailVO) {
         return null;
     }
 

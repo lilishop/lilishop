@@ -21,9 +21,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.stringtemplate.v4.ST;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -45,47 +45,44 @@ public class ImTalkServiceImpl extends ServiceImpl<ImTalkMapper, ImTalk> impleme
     @Autowired
     private ImMessageService imMessageService;
 
-    @Override
-    public ImTalk getTalkByUser(String userId1, String userId2) {
+    public ImTalk getTalkByUser(String userId) {
         LambdaQueryWrapper<ImTalk> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ImTalk::getUserId2, userId2);
-        queryWrapper.eq(ImTalk::getUserId1, userId1);
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        //登录用户的Id
+        String selfId = "";
+        //查看当前用户角色对Id进行赋值
+        if(UserEnums.STORE.equals(currentUser.getRole())){
+            selfId = currentUser.getStoreId();
+        }else if(UserEnums.MEMBER.equals(currentUser.getRole())){
+            selfId = currentUser.getId();
+        }
+        //小数在前保证永远是同一个对话
+        String finalSelfId = selfId;
+        queryWrapper.and(wq-> wq.eq(ImTalk::getUserId2, userId).eq(ImTalk::getUserId1, finalSelfId).or().eq(ImTalk::getUserId2, finalSelfId).eq(ImTalk::getUserId1, userId));
         ImTalk imTalk = this.getOne(queryWrapper);
-        AuthUser currentUser = UserContext.getCurrentUser();
         //如果没有聊天，则创建聊天
         if (imTalk == null) {
-            // 没有登录的这个账户信息
-            if (currentUser == null) {
-                return null;
-            }
             //当自己为店铺时
             if(UserEnums.STORE.equals(currentUser.getRole())){
-                Store selfStore = storeService.getById(userId1);
+                Store selfStore = storeService.getById(selfId);
                 //没有这个用户信息
-                Member other = memberService.getById(userId2);
+                Member other = memberService.getById(userId);
                 if(other == null){
                     return null;
                 }
                 //自己为店铺其他人必定为用户
-                imTalk = new ImTalk(userId1, userId2, selfStore.getStoreLogo(), other.getFace(), selfStore.getStoreName(), other.getNickName());
-                imTalk.setStoreFlag1(true);
+                imTalk = new ImTalk(other,selfStore);
             }else if(UserEnums.MEMBER.equals(currentUser.getRole())){
                 //没有这个店铺信息
-                Member self = memberService.getById(userId1);
-                Member otherMember = memberService.getById(userId2);
-                Store otherStore = storeService.getById(userId2);
-                if(otherStore != null){
-                    imTalk = new ImTalk(userId1, userId2, self.getFace(), otherStore.getStoreLogo(), self.getNickName(), otherStore.getStoreName());
-                    imTalk.setStoreFlag2(true);
-                }else if (otherMember != null){
-                    imTalk = new ImTalk(userId1, userId2, self.getFace(), otherMember.getFace(), self.getNickName(), otherMember.getNickName());
-                }else{
-                    return null;
-                }
+                Member self = memberService.getById(selfId);
+                Member otherMember = memberService.getById(userId);
+                Store otherStore = storeService.getById(userId);
+                    if(otherStore != null){
+                        imTalk = new ImTalk(self, otherStore);
+                    }else if (otherMember != null){
+                        imTalk = new ImTalk(self, otherMember);
+                    }
             }
-            this.save(imTalk);
-        } else {
-            imTalk = check(imTalk);
         }
         return imTalk;
     }
@@ -93,7 +90,7 @@ public class ImTalkServiceImpl extends ServiceImpl<ImTalkMapper, ImTalk> impleme
     /**
      * 发起聊天后，如果聊天不可见为true，则需要修正
      *
-     * @param imTalk
+     * @param imTalk 对话信息
      */
     private ImTalk check(ImTalk imTalk) {
         if (imTalk.getDisable1() || imTalk.getDisable2()) {
@@ -131,23 +128,16 @@ public class ImTalkServiceImpl extends ServiceImpl<ImTalkMapper, ImTalk> impleme
     }
 
     @Override
-    public List<ImTalkVO> getUserTalkList(String userName) {
+    public List<ImTalkVO> getUserTalkList() {
         AuthUser authUser = UserContext.getCurrentUser();
         if(authUser == null){
             throw new ServiceException(ResultCode.USER_NOT_LOGIN);
         }
         LambdaQueryWrapper<ImTalk> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.and(wq->{
-            wq.like(ImTalk::getName1, userName).or().like(ImTalk::getName2,userName);
-        });
-        queryWrapper.and(wq->{
-            wq.like(ImTalk::getUserId1, authUser.getId()).or().like(ImTalk::getUserId2,authUser.getId());
-        });
+        queryWrapper.and(wq-> wq.eq(ImTalk::getUserId1, authUser.getId()).or().eq(ImTalk::getUserId2,authUser.getId()));
         queryWrapper.orderByDesc(ImTalk::getLastTalkTime);
         List<ImTalk> imTalks = this.list(queryWrapper);
-        List<ImTalkVO> imTalkVOList = imTalks.stream().map(imTalk -> {
-            return new ImTalkVO(imTalk, authUser.getId());
-        }).collect(Collectors.toList());
+        List<ImTalkVO> imTalkVOList = imTalks.stream().map(imTalk -> new ImTalkVO(imTalk, authUser.getId())).collect(Collectors.toList());
         getUnread(imTalkVOList);
         return imTalkVOList;
     }
@@ -160,7 +150,7 @@ public class ImTalkServiceImpl extends ServiceImpl<ImTalkMapper, ImTalk> impleme
         }
         LambdaQueryWrapper<ImTalk> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.and(wq->{
-            wq.like(ImTalk::getUserId1, authUser.getStoreId()).or().like(ImTalk::getUserId2,authUser.getStoreId());
+            wq.eq(ImTalk::getUserId1, authUser.getStoreId()).or().eq(ImTalk::getUserId2,authUser.getStoreId());
         });
         queryWrapper.orderByDesc(ImTalk::getLastTalkTime);
         List<ImTalk> imTalks = this.list(queryWrapper);
@@ -174,12 +164,12 @@ public class ImTalkServiceImpl extends ServiceImpl<ImTalkMapper, ImTalk> impleme
 
     /**
      * 获取未读消息数量
-     * @param imTalkVOList
+     * @param imTalkVOList 消息列表
      */
     private void getUnread(List<ImTalkVO> imTalkVOList){
-        if(imTalkVOList.size() > 0){
+        if(!imTalkVOList.isEmpty()){
             for (ImTalkVO imTalkVO : imTalkVOList) {
-                long count = imMessageService.count(new LambdaQueryWrapper<ImMessage>().eq(ImMessage::getFromUser, imTalkVO.getUserId()).eq(ImMessage::getIsRead, false));
+                long count = imMessageService.count(new LambdaQueryWrapper<ImMessage>().eq(ImMessage::getFromUser, imTalkVO.getUserId()).eq(ImMessage::getTalkId,imTalkVO.getId()).eq(ImMessage::getIsRead, false));
                 imTalkVO.setUnread(count);
             }
         }

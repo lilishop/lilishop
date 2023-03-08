@@ -12,6 +12,7 @@ import cn.lili.common.utils.CommonUtil;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.sms.SmsUtil;
+import cn.lili.modules.sms.plugin.SmsPluginFactory;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.SmsSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -44,6 +45,8 @@ public class SmsUtilAliImplService implements SmsUtil {
     private SettingService settingService;
     @Autowired
     private MemberService memberService;
+    @Autowired
+    private SmsPluginFactory smsPluginFactory;
 
     @Autowired
     private SmsTemplateProperties smsTemplateProperties;
@@ -118,7 +121,7 @@ public class SmsUtilAliImplService implements SmsUtil {
         } else {
             log.info("接收手机：{},验证码：{}", mobile, code);
             //发送短信
-            this.sendSmsCode(smsSetting.getSignName(), mobile, params, templateCode);
+            smsPluginFactory.smsPlugin().sendSmsCode(smsSetting.getSignName(), mobile, params, templateCode);
         }
         //缓存中写入要验证的信息
         cache.put(cacheKey(verificationEnums, mobile, uuid), code, 300L);
@@ -139,13 +142,9 @@ public class SmsUtilAliImplService implements SmsUtil {
 
     @Override
     public void sendBatchSms(String signName, List<String> mobile, String templateCode) {
-
+        smsPluginFactory.smsPlugin().sendBatchSms(signName, mobile, templateCode);
     }
 
-    private void sendSmsCode(String signName, String mobile, Map<String, String> param, String templateCode) {
-
-
-    }
 
     /**
      * 生成缓存key

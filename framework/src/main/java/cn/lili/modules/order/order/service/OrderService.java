@@ -166,6 +166,14 @@ public interface OrderService extends IService<Order> {
     Order delivery(String orderSn, String invoiceNumber, String logisticsId);
 
     /**
+     * 订单发货
+     *
+     * @param orderSn       订单编号
+     * @return 订单
+     */
+    Order shunFengDelivery(String orderSn);
+
+    /**
      * 获取物流踪迹
      *
      * @param orderSn 订单编号

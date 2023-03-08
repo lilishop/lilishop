@@ -5,6 +5,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.logistics.entity.enums.LogisticsEnum;
 import cn.lili.modules.logistics.plugin.kdniao.KdniaoPlugin;
 import cn.lili.modules.logistics.plugin.kuaidi100.Kuaidi100Plugin;
+import cn.lili.modules.logistics.plugin.shunfeng.ShunfengPlugin;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.LogisticsSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -44,6 +45,8 @@ public class LogisticsPluginFactory {
                     return new KdniaoPlugin(logisticsSetting);
                 case KUAIDI100:
                     return new Kuaidi100Plugin(logisticsSetting);
+                case SHUNFENG:
+                    return new ShunfengPlugin(logisticsSetting);
                 default:
                     throw new ServiceException();
             }
