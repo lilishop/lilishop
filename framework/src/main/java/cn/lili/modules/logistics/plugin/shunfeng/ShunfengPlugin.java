@@ -32,7 +32,6 @@ import java.util.*;
  * @author admin
  */
 @Slf4j
-@Component
 public class ShunfengPlugin implements LogisticsPlugin {
 
     /**
