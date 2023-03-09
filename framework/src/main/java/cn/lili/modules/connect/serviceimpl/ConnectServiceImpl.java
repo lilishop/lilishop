@@ -188,7 +188,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             connectAuthUser.setUsername("m" + phone);
             connectAuthUser.setPhone(phone);
 
-            AuthToken authToken=new AuthToken();
+            AuthToken authToken = new AuthToken();
             authToken.setUnionId(unionId);
             connectAuthUser.setToken(authToken);
             return this.unionLoginCallback(connectAuthUser, true);
@@ -227,9 +227,14 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         Connect connect = this.queryConnect(
                 ConnectQueryDTO.builder().unionId(unionId).unionType(type).build()
         );
+        //如果未绑定则直接绑定
         if (connect == null) {
             connect = new Connect(userId, unionId, type);
             this.save(connect);
+        //如果已绑定不是当前用户信息则删除绑定信息，重新绑定
+        } else if (!connect.getUserId().equals(userId)) {
+            this.removeById(connect.getId());
+            this.loginBindUser(userId, unionId, type);
         }
     }
 
