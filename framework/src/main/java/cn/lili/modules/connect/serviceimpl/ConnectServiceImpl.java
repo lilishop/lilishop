@@ -1,26 +1,25 @@
 package cn.lili.modules.connect.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
-import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.event.TransactionCommitSendMQEvent;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.token.Token;
-import cn.lili.common.utils.CookieUtil;
 import cn.lili.common.utils.HttpUtils;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.entity.dto.MemberConnectLoginMessage;
 import cn.lili.modules.connect.entity.dto.WechatMPLoginParams;
 import cn.lili.modules.connect.entity.enums.ConnectEnum;
+import cn.lili.modules.connect.entity.enums.SourceEnum;
 import cn.lili.modules.connect.mapper.ConnectMapper;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.member.entity.dos.Member;
@@ -33,7 +32,6 @@ import cn.lili.modules.system.entity.dto.connect.dto.WechatConnectSettingItem;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -41,7 +39,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +50,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.AlgorithmParameters;
 import java.security.Security;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 联合登陆接口实现
@@ -88,7 +84,6 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Token unionLoginCallback(ConnectAuthUser authUser, String uuid) {
-
         return this.unionLoginCallback(authUser, false);
     }
 
@@ -249,11 +244,20 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
      */
     private Token unionLoginCallback(ConnectAuthUser authUser, boolean longTerm) {
 
-        //使用UnionId登录
+
         try {
-            LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<Connect>()
-                    .eq(Connect::getUnionId, authUser.getToken().getUnionId())
-                    .eq(Connect::getUnionType, authUser.getSource1());
+            LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<Connect>();
+            //使用UnionId登录
+            if (StrUtil.isNotBlank(authUser.getToken().getUnionId())) {
+                queryWrapper.eq(Connect::getUnionId, authUser.getToken().getUnionId())
+                        .eq(Connect::getUnionType, authUser.getSource());
+            } else {
+                //使用OpenID登录
+                SourceEnum sourceEnum = SourceEnum.getSourceEnum(ConnectEnum.valueOf(authUser.getType()), ClientTypeEnum.valueOf(authUser.getSource()));
+                queryWrapper.eq(Connect::getUnionId, authUser.getToken().getUnionId())
+                        .eq(Connect::getUnionType, sourceEnum.name());
+            }
+
             //查询绑定关系
             Connect connect = this.getOne(queryWrapper);
             Member member = new Member();
@@ -353,4 +357,6 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         }
         throw new ServiceException(ResultCode.USER_CONNECT_ERROR);
     }
+
+
 }

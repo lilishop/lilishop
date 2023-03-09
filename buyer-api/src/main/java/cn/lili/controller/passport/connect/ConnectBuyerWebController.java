@@ -75,25 +75,14 @@ public class ConnectBuyerWebController {
         return connectUtil.getResult(state);
     }
 
-//    @GetMapping("/register/auto")
-//    @ApiOperation(value = "WEB信任登录授权")
-//    public ResultMessage<Token> webAuthorize() {
-//        Token token = memberService.autoRegister();
-//        return ResultUtil.data(token);
-//    }
-
-    @ApiOperation(value = "unionID登录")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "openId", value = "openid", required = true, paramType = "query"),
-            @ApiImplicitParam(name = "type", value = "联合类型", required = true,
-                    allowableValues = "WECHAT,QQ,ALIPAY,WEIBO,APPLE", paramType = "query"),
-            @ApiImplicitParam(name = "uniAccessToken", value = "联合登陆返回的accessToken", required = true, paramType = "query")
-    })
+    @ApiOperation(value = "APP-unionID登录")
     @GetMapping("/app/login")
     public ResultMessage<Token> unionLogin(ConnectAuthUser authUser, @RequestHeader("uuid") String uuid) {
         try {
+            System.out.println(1);
             return ResultUtil.data(connectService.unionLoginCallback(authUser, uuid));
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("unionID登录错误", e);
         }
         return null;

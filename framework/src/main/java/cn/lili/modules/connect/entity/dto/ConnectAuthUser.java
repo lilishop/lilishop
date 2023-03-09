@@ -67,11 +67,7 @@ public class ConnectAuthUser implements Serializable {
      * 用户来源
      */
     private String source;
-    /**
-     * 用户来源
-     * 例如：微信、支付宝、微博
-     */
-    private String source1;
+
     /**
      * 类型
      * 例如：PC、WAP、小程序

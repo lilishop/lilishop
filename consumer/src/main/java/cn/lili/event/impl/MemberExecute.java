@@ -1,9 +1,12 @@
 package cn.lili.event.impl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.event.MemberConnectLoginEvent;
 import cn.lili.event.MemberLoginEvent;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
+import cn.lili.modules.connect.entity.enums.ConnectEnum;
+import cn.lili.modules.connect.entity.enums.SourceEnum;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
@@ -38,11 +41,12 @@ public class MemberExecute implements MemberLoginEvent, MemberConnectLoginEvent 
 
         //保存UnionID
         if (StrUtil.isNotBlank(authUser.getToken().getUnionId())) {
-            connectService.loginBindUser(member.getId(), authUser.getToken().getUnionId(), authUser.getType());
+            connectService.loginBindUser(member.getId(), authUser.getToken().getUnionId(), authUser.getSource());
         }
         //保存OpenID
         if (StrUtil.isNotBlank(authUser.getUuid())) {
-            connectService.loginBindUser(member.getId(), authUser.getUuid(), authUser.getType());
+            SourceEnum sourceEnum = SourceEnum.getSourceEnum(ConnectEnum.valueOf(authUser.getSource()), ClientTypeEnum.valueOf(authUser.getType()));
+            connectService.loginBindUser(member.getId(), authUser.getUuid(), sourceEnum.name());
         }
 
     }

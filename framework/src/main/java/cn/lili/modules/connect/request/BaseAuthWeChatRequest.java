@@ -1,6 +1,8 @@
 package cn.lili.modules.connect.request;
 
 import cn.lili.cache.Cache;
+import cn.lili.common.enums.ClientTypeEnum;
+import cn.lili.common.utils.HttpUtils;
 import cn.lili.common.utils.UrlBuilder;
 import cn.lili.modules.connect.config.AuthConfig;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
@@ -14,7 +16,6 @@ import cn.lili.modules.connect.entity.enums.ConnectEnum;
 import cn.lili.modules.connect.entity.enums.SourceEnum;
 import cn.lili.modules.connect.exception.AuthException;
 import cn.lili.modules.connect.util.GlobalAuthUtils;
-import cn.lili.common.utils.HttpUtils;
 import com.alibaba.fastjson.JSONObject;
 
 /**
@@ -63,8 +64,8 @@ public class BaseAuthWeChatRequest extends BaseAuthRequest {
                 .uuid(openId)
                 .gender(AuthUserGender.getWechatRealGender(object.getString("sex")))
                 .token(authToken)
-                .source(source.toString())
-                .source1(ConnectEnum.WECHAT.name())
+                .source(ConnectEnum.WECHAT.name())
+                .type(ClientTypeEnum.H5.name())
                 .type(SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name())
                 .build();
     }
