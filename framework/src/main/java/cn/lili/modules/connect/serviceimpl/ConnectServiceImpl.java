@@ -187,6 +187,8 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             connectAuthUser.setAvatar(params.getImage());
             connectAuthUser.setUsername("m" + phone);
             connectAuthUser.setPhone(phone);
+            connectAuthUser.setSource(ConnectEnum.WECHAT.name());
+            connectAuthUser.setType(ClientTypeEnum.WECHAT_MP.name());
 
             AuthToken authToken = new AuthToken();
             authToken.setUnionId(unionId);
@@ -231,7 +233,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         if (connect == null) {
             connect = new Connect(userId, unionId, type);
             this.save(connect);
-        //如果已绑定不是当前用户信息则删除绑定信息，重新绑定
+            //如果已绑定不是当前用户信息则删除绑定信息，重新绑定
         } else if (!connect.getUserId().equals(userId)) {
             this.removeById(connect.getId());
             this.loginBindUser(userId, unionId, type);
