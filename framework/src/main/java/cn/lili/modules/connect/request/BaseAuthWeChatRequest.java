@@ -66,7 +66,6 @@ public class BaseAuthWeChatRequest extends BaseAuthRequest {
                 .token(authToken)
                 .source(ConnectEnum.WECHAT.name())
                 .type(ClientTypeEnum.H5.name())
-                .type(SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name())
                 .build();
     }
 
