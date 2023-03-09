@@ -100,14 +100,13 @@ public class WechatMessageUtil {
         //发送url
         String url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=" + token;
 
-        Map<String, String> map = new HashMap<>(4);
+        Map<String, Object> map = new HashMap<>(4);
         //用户id
         map.put("touser", connect.getUnionId());
         //模版id
         map.put("template_id", wechatMessage.getCode());
         //模版中所需数据
-        String postParams = createData(order, wechatMessage);
-        map.put("data", postParams);
+        map.put("data", createData(order, wechatMessage));
 
         log.info("参数内容：" + JSONUtil.toJsonStr(map));
         String content = HttpUtil.post(url, JSONUtil.toJsonStr(map));
@@ -119,7 +118,7 @@ public class WechatMessageUtil {
         if (!"0".equals(errcode)) {
             log.error("消息发送失败：" + errorMessage);
             log.error("消息发送请求token：" + token);
-            log.error("消息发送请求：" + postParams);
+            log.error("消息发送请求：" + map.get("data"));
         }
     }
 
@@ -164,8 +163,7 @@ public class WechatMessageUtil {
         //模版id
         map.put("template_id", wechatMPMessage.getCode());
         //模版中所需数据
-        Map<String, Map<String, String>> postParams = createData(order, wechatMPMessage);
-        map.put("data", postParams);
+        map.put("data", createData(order, wechatMPMessage));
         map.put("page", "pages/order/orderDetail?sn=" + order.getSn());
         log.info("参数内容：" + JSONUtil.toJsonStr(map));
         String content = null;
@@ -182,7 +180,7 @@ public class WechatMessageUtil {
         if (!"0".equals(errcode)) {
             log.error("消息发送失败：" + errorMessage);
             log.error("消息发送请求token：" + token);
-            log.error("消息发送请求：" + postParams);
+            log.error("消息发送请求：" + map.get("data"));
         }
     }
 
@@ -193,7 +191,7 @@ public class WechatMessageUtil {
      * @param wechatMessage
      * @return
      */
-    private String createData(Order order, WechatMessage wechatMessage) {
+    private Map<String, Map<String, String>> createData(Order order, WechatMessage wechatMessage) {
         WechatMessageData wechatMessageData = new WechatMessageData();
         wechatMessageData.setFirst(wechatMessage.getFirst());
         wechatMessageData.setRemark(wechatMessage.getRemark());
