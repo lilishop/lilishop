@@ -79,7 +79,6 @@ public class ConnectBuyerWebController {
     @GetMapping("/app/login")
     public ResultMessage<Token> unionLogin(ConnectAuthUser authUser, @RequestHeader("uuid") String uuid) {
         try {
-            System.out.println(1);
             return ResultUtil.data(connectService.unionLoginCallback(authUser, uuid));
         } catch (Exception e) {
             e.printStackTrace();
