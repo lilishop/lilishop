@@ -26,7 +26,7 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class BaseAuthWeChatRequest extends BaseAuthRequest {
     public BaseAuthWeChatRequest(AuthConfig config, Cache cache) {
-        super(config, ConnectAuthEnum.WECHAT_WAP, cache);
+        super(config, ConnectAuthEnum.WECHAT, cache);
     }
 
     /**

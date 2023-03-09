@@ -147,7 +147,7 @@ public class ConnectUtil {
         }
         AuthRequest authRequest = null;
         switch (authInterface) {
-            case WECHAT_WAP: {
+            case WECHAT: {
                 //寻找配置
                 Setting setting = settingService.get(SettingEnum.WECHAT_CONNECT.name());
                 WechatConnectSetting wechatConnectSetting = JSONUtil.toBean(setting.getSettingValue(), WechatConnectSetting.class);

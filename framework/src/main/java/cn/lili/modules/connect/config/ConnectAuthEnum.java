@@ -13,7 +13,7 @@ public enum ConnectAuthEnum implements ConnectAuth {
     /**
      * 微信公众号登录
      */
-    WECHAT_WAP {
+    WECHAT {
         @Override
         public String authorize() {
             return "https://open.weixin.qq.com/connect/oauth2/authorize";
