@@ -15,6 +15,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.utils.HttpUtils;
 import cn.lili.modules.connect.entity.Connect;
+import cn.lili.modules.connect.entity.dto.AuthToken;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.entity.dto.MemberConnectLoginMessage;
 import cn.lili.modules.connect.entity.dto.WechatMPLoginParams;
@@ -186,6 +187,10 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             connectAuthUser.setAvatar(params.getImage());
             connectAuthUser.setUsername("m" + phone);
             connectAuthUser.setPhone(phone);
+
+            AuthToken authToken=new AuthToken();
+            authToken.setUnionId(unionId);
+            connectAuthUser.setToken(authToken);
             return this.unionLoginCallback(connectAuthUser, true);
         } catch (Exception e) {
             e.printStackTrace();
