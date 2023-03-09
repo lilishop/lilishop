@@ -1,35 +1,23 @@
-package cn.lili.modules.kdBrid.serviceImpl;
+package cn.lili.modules.logistics.plugin.kdniao;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.security.OperationalJudgment;
-import cn.lili.modules.kdBrid.service.KdNiaoService;
-import cn.lili.modules.member.service.StoreLogisticsService;
-import cn.lili.modules.order.order.aop.OrderLogPoint;
+import cn.lili.modules.logistics.LogisticsPlugin;
+import cn.lili.modules.logistics.entity.dto.LabelOrderDTO;
+import cn.lili.modules.logistics.entity.enums.LogisticsEnum;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
-import cn.lili.modules.order.order.entity.enums.DeliverStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
-import cn.lili.modules.order.order.service.OrderItemService;
-import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.store.entity.dos.StoreLogistics;
 import cn.lili.modules.store.entity.dto.StoreDeliverGoodsAddressDTO;
-import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.system.entity.dos.Logistics;
-import cn.lili.modules.system.entity.dos.Setting;
-import cn.lili.modules.system.entity.dto.KuaidiSetting;
-import cn.lili.modules.system.entity.enums.SettingEnum;
-import cn.lili.modules.system.service.LogisticsService;
-import cn.lili.modules.system.service.SettingService;
+import cn.lili.modules.system.entity.dto.LogisticsSetting;
+import cn.lili.modules.system.entity.vo.Traces;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -42,111 +30,117 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 快递鸟电子面单业务层实现
+ * 快递鸟插件
  *
- * @author chc
- * @since 2022-4-12 10:12:43
+ * @author Bulbasaur
  */
-@Service
 @Slf4j
-public class KdNiaoServiceImpl implements KdNiaoService {
-    /**
-     * 订单货物
-     */
-    @Autowired
-    OrderItemService orderItemService;
+public class KdniaoPlugin implements LogisticsPlugin {
 
-    /**
-     * 订单
-     */
     @Autowired
-    OrderService orderService;
+    private LogisticsSetting logisticsSetting;
 
-    /**
-     * 物流公司
-     */
-    @Autowired
-    LogisticsService logisticsService;
-
-    /**
-     * 商家店铺
-     */
-    @Autowired
-    StoreDetailService storeDetailService;
-
-    /**
-     * 配置
-     */
-    @Autowired
-    SettingService settingService;
-
-    /**
-     * 店铺-物流
-     */
-    @Autowired
-    StoreLogisticsService storeLogisticsService;
-
+    public KdniaoPlugin(LogisticsSetting logisticsSetting) {
+        this.logisticsSetting = logisticsSetting;
+    }
 
     @Override
-    @OrderLogPoint(description = "'订单['+#orderSn+']发货,打印电子面单'", orderSn = "#orderSn")
-    @Transactional(rollbackFor = Exception.class)
-    public String createElectronicsFaceSheet(String orderSn, String logisticsId) throws Exception {
-        //电子面单模板
-        String printTemplate = null;
-        //获取订单及子订单
-        Order order = OperationalJudgment.judgment(orderService.getBySn(orderSn));
-        List<OrderItem> orderItems = orderItemService.getByOrderSn(orderSn);
+    public LogisticsEnum pluginName() {
+        return LogisticsEnum.KDNIAO;
+    }
 
-        Setting setting = settingService.get(SettingEnum.KUAIDI_SETTING.name());
-        if (CharSequenceUtil.isBlank(setting.getSettingValue())) {
-            throw new ServiceException(ResultCode.LOGISTICS_NOT_SETTING);
+    @Override
+    public Traces pollQuery(Logistics logistics, String expNo, String phone) {
+        try {
+            String requestData = "{'OrderCode':'','ShipperCode':'" + logistics.getCode() +
+                    "','LogisticCode':'" + expNo + "'" +
+                    ",'CustomerName':'" + phone.substring(phone.length() - 4) + "'" +
+                    "}";
+            //请求地址-测试地址
+            String testReqURL = "http://sandboxapi.kdniao.com:8080/kdniaosandbox/gateway/exterfaceInvoke.json";
+            //请求地址-正式地址
+            String reqURL = "https://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx";
+            Map<String, String> params = new HashMap<>(8);
+            params.put("RequestData", urlEncoder(requestData, "UTF-8"));
+            params.put("EBusinessID", logisticsSetting.getKdniaoEbusinessID());
+            params.put("RequestType", "1002");
+            String dataSign = encrypt(requestData, logisticsSetting.getKdniaoAppKey(), "UTF-8");
+            params.put("DataSign", urlEncoder(dataSign, "UTF-8"));
+            params.put("DataType", "2");
+
+            String result = sendPost(reqURL, params);
+            Map map = (Map) JSON.parse(result);
+            return new Traces(logistics.getName(), expNo, (List<Map>) map.get("Traces"));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        KuaidiSetting kuaidiSetting = new Gson().fromJson(setting.getSettingValue(), KuaidiSetting.class);
+        return null;
+    }
 
-        //ID
-        String EBusinessID = kuaidiSetting.getEbusinessID();
+    @Override
+    public Traces pollMapTrack(Logistics logistics, String expNo, String phone, String from, String to) {
+        try {
+            //请求地址-测试地址
+            String testReqURL = "http://sandboxapi.kdniao.com:8080/kdniaosandbox/gateway/exterfaceInvoke.json";
+            //请求地址-正式地址
+            String reqURL = "https://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx";
+            String RequestData = "{" +
+                    "'OrderCode': ''," +
+                    "'CustomerName': '" + phone.substring(phone.length() - 4) + "'," +
+                    "'ShipperCode': '" + logistics.getCode() + "'," +
+                    "'LogisticCode': '" + expNo + "'," +
+                    "'SenderCityName': '" + from + "'," +
+                    "'ReceiverCityName': '" + to + "'," +
+                    "'IsReturnCoordinates': 1," +
+                    "'IsReturnRouteMap': 1," +
+                    "}";
+            // 组装系统级参数
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("RequestData", urlEncoder(RequestData, "UTF-8"));
+            params.put("EBusinessID", logisticsSetting.getKdniaoEbusinessID());
+            params.put("RequestType", "8003");
+            String dataSign = encrypt(RequestData, logisticsSetting.getKdniaoAppKey(), "UTF-8");
+            params.put("DataSign", urlEncoder(dataSign, "UTF-8"));
+            // params.put("DataType", "2");
+            // 以form表单形式提交post请求，post请求体中包含了应用级参数和系统级参数
+            String result = sendPost(reqURL, params);
+            log.error(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-        //KEY
-        String AppKey = kuaidiSetting.getAppKey();
-
-        //请求url
-        String ReqURL = kuaidiSetting.getSheetReqURL();
-
-        //如果订单未发货，并且订单状态值等于待发货
-        if (order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name()) && order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())) {
-
+    @Override
+    public Map<String,Object> labelOrder(LabelOrderDTO labelOrderDTO) {
+        try {
+            Map<String,Object> resultMap = new HashMap();
+            //订单
+            Order order = labelOrderDTO.getOrder();
+            //订单货物
+            List<OrderItem> orderItems = labelOrderDTO.getOrderItems();
             //获取对应物流
-            Logistics logistics = logisticsService.getById(logisticsId);
-
-            //物流为空,抛出异常
-            if (logistics == null) {
-                throw new ServiceException(ResultCode.ORDER_LOGISTICS_ERROR);
-            }
-
-            //获取店家的物流信息
-            LambdaQueryWrapper<StoreLogistics> lambdaQueryWrapper = Wrappers.lambdaQuery();
-            lambdaQueryWrapper.eq(StoreLogistics::getLogisticsId, logisticsId);
-            lambdaQueryWrapper.eq(StoreLogistics::getStoreId, order.getStoreId());
-            StoreLogistics storeLogistics = storeLogisticsService.getOne(lambdaQueryWrapper);
-
-            //获取店家信息
-            StoreDeliverGoodsAddressDTO storeDeliverGoodsAddressDTO = storeDetailService.getStoreDeliverGoodsAddressDto(order.getStoreId());
+            Logistics logistics = labelOrderDTO.getLogistics();
             //收件人地址
             String[] ConsigneeAddress = order.getConsigneeAddressPath().split(",");
+            //获取店家信息
+            StoreDeliverGoodsAddressDTO storeDeliverGoodsAddressDTO = labelOrderDTO.getStoreDeliverGoodsAddressDTO();
             //发件人地址
             String[] consignorAddress = storeDeliverGoodsAddressDTO.getSalesConsignorAddressPath().split(",");
+            //店铺-物流公司设置
+            StoreLogistics storeLogistics = labelOrderDTO.getStoreLogistics();
 
             //组装快递鸟应用级参数
             String resultDate = "{" +
-                    "'OrderCode': '" + orderSn + "'," + //订单编码
+                    "'OrderCode': '" + order.getSn() + "'," + //订单编码
                     "'ShipperCode': '" + logistics.getCode() + "'," +   //快递公司编码
-                    "'CustomerName': '"+storeLogistics.getCustomerName()+"'," +//客户编码
-                    "'CustomerPwd': '"+storeLogistics.getCustomerPwd()+"'," +     //客户密码
-                    "'MonthCode': '"+storeLogistics.getMonthCode()+"'," +       //密钥
-                    "'SendSite': '"+storeLogistics.getSendSite()+"'," +         //归属网点
-                    "'SendStaff': '"+storeLogistics.getSendStaff()+"'," +       //收件快递员
-                    "'PayType': "+storeLogistics.getPayType()+"," +
-                    "'ExpType': "+storeLogistics.getExpType()+"," +
+                    "'CustomerName': '" + storeLogistics.getCustomerName() + "'," +//客户编码
+                    "'CustomerPwd': '" + storeLogistics.getCustomerPwd() + "'," +     //客户密码
+                    "'MonthCode': '" + storeLogistics.getMonthCode() + "'," +       //密钥
+                    "'SendSite': '" + storeLogistics.getSendSite() + "'," +         //归属网点
+                    "'SendStaff': '" + storeLogistics.getSendStaff() + "'," +       //收件快递员
+                    "'PayType': " + storeLogistics.getPayType() + "," +
+                    "'ExpType': " + storeLogistics.getExpType() + "," +
                     //发件人信息
                     "'Sender': {" +
                     "'Name': '" + storeDeliverGoodsAddressDTO.getSalesConsignorName() + "'," +
@@ -176,44 +170,54 @@ public class KdNiaoServiceImpl implements KdNiaoService {
                         "},";
             }
             resultDate = resultDate + "]," +
-                    "'Quantity': "+orderItems.size()+"," +  //包裹数
-                    "'IsReturnPrintTemplate':1,"+  //生成电子面单模板
-                    "'Remark': '" + order.getRemark() + "'"+//商家备注
+                    "'Quantity': " + orderItems.size() + "," +  //包裹数
+                    "'IsReturnPrintTemplate':1," +  //生成电子面单模板
+                    "'Remark': '" + order.getRemark() + "'" +//商家备注
                     "}";
 
 
             //组织系统级参数
             Map<String, String> params = new HashMap<>();
+            //请求地址-测试地址
+            String testReqURL = "http://sandboxapi.kdniao.com:8080/kdniaosandbox/gateway/exterfaceInvoke.json";
+            //请求地址-正式地址
+            String reqURL = "https://api.kdniao.com/api/EOrderService";
+
             //进行格式加密
             params.put("RequestData", urlEncoder(resultDate, "UTF-8"));
-            params.put("EBusinessID", EBusinessID);
+            params.put("EBusinessID", logisticsSetting.getKdniaoEbusinessID());
             params.put("RequestType", "1007");
 
-            String dataSign = encrypt(resultDate, AppKey, "UTF-8");
+            String dataSign = encrypt(resultDate, logisticsSetting.getKdniaoAppKey(), "UTF-8");
             params.put("DataSign", dataSign);
             params.put("DataType", "2");
             // 以form表单形式提交post请求，post请求体中包含了应用级参数和系统级参数
-            String result = sendPost(ReqURL, params);
-            if(CharSequenceUtil.isEmpty(result) || CharSequenceUtil.isBlank(result)){
+            String result = sendPost(reqURL, params);
+            if (CharSequenceUtil.isEmpty(result) || CharSequenceUtil.isBlank(result)) {
                 throw new ServiceException(ResultCode.LOGISTICS_CHECK_SETTING);
             }
             //根据公司业务处理返回的信息......
             JSONObject obj = JSONObject.parseObject(result);
-            log.info("电子面单响应：{}",result);
-            if(!"100".equals(obj.getString("ResultCode"))){
-                return obj.getString("Reason");
+            log.info("电子面单响应：{}", result);
+            if (!"100".equals(obj.getString("ResultCode"))) {
+                resultMap.put("Reason",obj.getString("Reason"));
+                return resultMap;
             }
 
             JSONObject orderJson = JSONObject.parseObject(obj.getString("Order"));
-
-            //电子面单模板
-            printTemplate = obj.getString("PrintTemplate");
-
-            //进行发货
-            orderService.delivery(orderSn, orderJson.getString("LogisticCode"), logisticsId);
+            resultMap.put("printTemplate",obj.getString("PrintTemplate"));
+            return resultMap;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return printTemplate;
+        return null;
     }
+
+    @Override
+    public String createOrder(OrderDetailVO orderDetailVO) {
+        return null;
+    }
+
 
     /**
      * MD5加密
@@ -323,7 +327,7 @@ public class KdNiaoServiceImpl implements KdNiaoService {
                 result.append(line);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("向指定 URL 发送POST方法的请求错误", e);
         }
         //使用finally块来关闭输出流、输入流
         finally {
@@ -381,5 +385,4 @@ public class KdNiaoServiceImpl implements KdNiaoService {
         }
         return sb.toString();
     }
-
 }

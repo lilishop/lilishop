@@ -17,10 +17,9 @@ public interface ImTalkService extends IService<ImTalk> {
      * 获取与某人的聊天框
      *
      * @param userId1
-     * @param userId2
      * @return
      */
-    ImTalk getTalkByUser(String userId1, String userId2);
+    ImTalk getTalkByUser(String userId1);
 
     /**
      * 置顶消息
@@ -41,7 +40,7 @@ public interface ImTalkService extends IService<ImTalk> {
      * 获取用户聊天列表
      * @return
      */
-    List<ImTalkVO> getUserTalkList(String userName);
+    List<ImTalkVO> getUserTalkList();
 
     /**
      * 获取商家聊天列表

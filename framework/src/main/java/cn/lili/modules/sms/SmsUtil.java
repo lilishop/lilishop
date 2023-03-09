@@ -3,7 +3,6 @@ package cn.lili.modules.sms;
 import cn.lili.modules.verification.entity.enums.VerificationEnums;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 短信接口
@@ -35,15 +34,6 @@ public interface SmsUtil {
      */
     boolean verifyCode(String mobile, VerificationEnums verificationEnums, String uuid, String code);
 
-    /**
-     * 短信发送
-     *
-     * @param mobile       接收手机号
-     * @param param        参数
-     * @param templateCode 模版code
-     * @param signName     签名名称
-     */
-    void sendSmsCode(String signName, String mobile, Map<String, String> param, String templateCode);
 
     /**
      * 短信批量发送

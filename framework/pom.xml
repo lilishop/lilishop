@@ -437,8 +437,33 @@
             <artifactId>minio</artifactId>
             <version>${minio.version}</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>com.huaweicloud</groupId>
+            <artifactId>esdk-obs-java</artifactId>
+            <version>${huaweicloud.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.qcloud</groupId>
+            <artifactId>cos_api</artifactId>
+            <version>${cos.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.tencentcloudapi</groupId>
+            <artifactId>tencentcloud-sdk-java</artifactId>
+            <version>${tencentcloud.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.kuaidi100-api</groupId>
+            <artifactId>sdk</artifactId>
+            <version>${kuaidi100-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.qiyuesuo.sdk</groupId>
+            <artifactId>SDK</artifactId>
+            <version>2.1.7</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/maven-repository/SF-CSIM-EXPRESS-SDK-V2.1.7.jar</systemPath>
+        </dependency>
     </dependencies>
 
 

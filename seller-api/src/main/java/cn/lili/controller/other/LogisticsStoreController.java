@@ -1,13 +1,21 @@
 package cn.lili.controller.other;
 
 
+import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.service.StoreLogisticsService;
 import cn.lili.modules.store.entity.dos.StoreLogistics;
 import cn.lili.modules.store.entity.dto.StoreLogisticsCustomerDTO;
+import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.ImSetting;
+import cn.lili.modules.system.entity.dto.LogisticsSetting;
+import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.entity.vo.StoreLogisticsVO;
+import cn.lili.modules.system.service.SettingService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -35,6 +43,9 @@ public class LogisticsStoreController {
      */
     @Autowired
     private StoreLogisticsService storeLogisticsService;
+
+    @Autowired
+    private SettingService settingService;
 
     @ApiOperation(value = "获取商家物流公司列表，如果已选择则checked有值")
     @GetMapping
@@ -97,6 +108,20 @@ public class LogisticsStoreController {
     @GetMapping("/{logisticsId}/getStoreLogistics")
     public ResultMessage<StoreLogistics> getStoreLogistics(@PathVariable String logisticsId){
         return ResultUtil.data(storeLogisticsService.getStoreLogisticsInfo(logisticsId));
+    }
+
+    @ApiOperation(value = "获取IM接口前缀")
+    @GetMapping("/setting")
+    public ResultMessage<String> getUrl() {
+        String logisticsType;
+        try {
+            Setting logisticsSettingVal = settingService.get(SettingEnum.LOGISTICS_SETTING.name());
+            LogisticsSetting logisticsSetting = JSONUtil.toBean(logisticsSettingVal.getSettingValue(), LogisticsSetting.class);
+            logisticsType = logisticsSetting.getType();
+        } catch (Exception e) {
+            throw new ServiceException(ResultCode.ORDER_LOGISTICS_ERROR);
+        }
+        return ResultUtil.data(logisticsType);
     }
 
 }

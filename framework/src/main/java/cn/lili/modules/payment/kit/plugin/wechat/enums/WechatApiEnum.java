@@ -555,6 +555,11 @@ public enum WechatApiEnum {
      * 连锁品牌-删除分账接收方
      */
     BRAND_PROFIT_SHARING_RECEIVERS_delete("/v3/brand/profitsharing/receivers/delete"),
+
+    /**
+     * 发起商家转账
+     */
+    TRANSFER_BATCHES("/v3/transfer/batches"),
     ;
 
     /**

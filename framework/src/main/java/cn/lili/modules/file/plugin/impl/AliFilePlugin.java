@@ -44,9 +44,9 @@ public class AliFilePlugin implements FilePlugin {
      */
     private OSS getOssClient() {
         return new OSSClientBuilder().build(
-                ossSetting.getEndPoint(),
-                ossSetting.getAccessKeyId(),
-                ossSetting.getAccessKeySecret());
+                ossSetting.getAliyunOSSEndPoint(),
+                ossSetting.getAliyunOSSAccessKeyId(),
+                ossSetting.getAliyunOSSAccessKeySecret());
     }
 
 
@@ -56,14 +56,14 @@ public class AliFilePlugin implements FilePlugin {
      * @return
      */
     private String getUrlPrefix() {
-        return "https://" + ossSetting.getBucketName() + "." + ossSetting.getEndPoint() + "/";
+        return "https://" + ossSetting.getAliyunOSSBucketName() + "." + ossSetting.getAliyunOSSEndPoint() + "/";
     }
 
     @Override
     public String pathUpload(String filePath, String key) {
         OSS ossClient = getOssClient();
         try {
-            ossClient.putObject(ossSetting.getBucketName(), key, new File(filePath));
+            ossClient.putObject(ossSetting.getAliyunOSSBucketName(), key, new File(filePath));
         } catch (OSSException oe) {
             log.error("Caught an OSSException, which means your request made it to OSS, "
                     + "but was rejected with an error response for some reason.");
@@ -94,7 +94,7 @@ public class AliFilePlugin implements FilePlugin {
         try {
             ObjectMetadata meta = new ObjectMetadata();
             meta.setContentType("image/jpg");
-            ossClient.putObject(ossSetting.getBucketName(), key, inputStream, meta);
+            ossClient.putObject(ossSetting.getAliyunOSSBucketName(), key, inputStream, meta);
         } catch (OSSException oe) {
             log.error("Caught an OSSException, which means your request made it to OSS, "
                     + "but was rejected with an error response for some reason.");
@@ -125,7 +125,7 @@ public class AliFilePlugin implements FilePlugin {
 
         try {
             ossClient.deleteObjects(
-                    new DeleteObjectsRequest(ossSetting.getBucketName()).withKeys(key));
+                    new DeleteObjectsRequest(ossSetting.getAliyunOSSBucketName()).withKeys(key));
         } catch (OSSException oe) {
             log.error("Caught an OSSException, which means your request made it to OSS, "
                     + "but was rejected with an error response for some reason.");

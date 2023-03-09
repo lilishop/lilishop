@@ -42,6 +42,11 @@ public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> i
 
     @Override
     public Recharge recharge(Double price) {
+
+        if (price == null || price <= 0 || price > 1000000) {
+            throw new ServiceException(ResultCode.RECHARGE_PRICE_ERROR);
+        }
+
         //获取当前登录的会员
         AuthUser authUser = UserContext.getCurrentUser();
         //构建sn

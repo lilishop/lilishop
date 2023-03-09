@@ -17,8 +17,8 @@ public enum SettingEnum {
     EMAIL_SETTING,
     //商品设置
     GOODS_SETTING,
-    //快递鸟设置
-    KUAIDI_SETTING,
+    //快递设置
+    LOGISTICS_SETTING,
     //订单配置
     ORDER_SETTING,
     //阿里OSS配置
@@ -45,6 +45,8 @@ public enum SettingEnum {
     ALIPAY_PAYMENT,
     //微信支付设置
     WECHAT_PAYMENT,
+    //银联支付设置
+    UNIONPAY_PAYMENT,
     //热词设置
     HOT_WORDS
 }

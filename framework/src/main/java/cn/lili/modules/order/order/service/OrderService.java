@@ -64,9 +64,9 @@ public interface OrderService extends IService<Order> {
      * 根据促销查询订单
      *
      * @param orderPromotionType 订单类型
-     * @param payStatus 支付状态
-     * @param parentOrderSn 依赖订单编号
-     * @param orderSn 订单编号
+     * @param payStatus          支付状态
+     * @param parentOrderSn      依赖订单编号
+     * @param orderSn            订单编号
      * @return 订单信息
      */
     List<Order> queryListByPromotion(String orderPromotionType, String payStatus, String parentOrderSn, String orderSn);
@@ -75,9 +75,9 @@ public interface OrderService extends IService<Order> {
      * 根据促销查询订单
      *
      * @param orderPromotionType 订单类型
-     * @param payStatus 支付状态
-     * @param parentOrderSn 依赖订单编号
-     * @param orderSn 订单编号
+     * @param payStatus          支付状态
+     * @param parentOrderSn      依赖订单编号
+     * @param orderSn            订单编号
      * @return 订单信息
      */
     long queryCountByPromotion(String orderPromotionType, String payStatus, String parentOrderSn, String orderSn);
@@ -89,7 +89,6 @@ public interface OrderService extends IService<Order> {
      * @return 拼团订单信息
      */
     List<Order> queryListByPromotion(String pintuanId);
-
 
 
     /**
@@ -167,12 +166,28 @@ public interface OrderService extends IService<Order> {
     Order delivery(String orderSn, String invoiceNumber, String logisticsId);
 
     /**
+     * 订单发货
+     *
+     * @param orderSn       订单编号
+     * @return 订单
+     */
+    Order shunFengDelivery(String orderSn);
+
+    /**
      * 获取物流踪迹
      *
      * @param orderSn 订单编号
      * @return 物流踪迹
      */
     Traces getTraces(String orderSn);
+
+    /**
+     * 获取地图版 物流踪迹
+     *
+     * @param orderSn 订单编号
+     * @return 物流踪迹
+     */
+    Traces getMapTraces(String orderSn);
 
     /**
      * 订单核验
@@ -288,9 +303,9 @@ public interface OrderService extends IService<Order> {
     /**
      * 检查是否开始虚拟成团
      *
-     * @param pintuanId 拼团活动id
+     * @param pintuanId   拼团活动id
      * @param requiredNum 成团人数
-     * @param fictitious 是否开启成团
+     * @param fictitious  是否开启成团
      * @return 是否成功
      */
     boolean checkFictitiousOrder(String pintuanId, Integer requiredNum, Boolean fictitious);

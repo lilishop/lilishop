@@ -1,6 +1,7 @@
 package cn.lili.controller.setting;
 
 import cn.hutool.json.JSONUtil;
+import cn.lili.cache.Cache;
 import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
@@ -12,6 +13,7 @@ import cn.lili.modules.system.entity.dto.connect.QQConnectSetting;
 import cn.lili.modules.system.entity.dto.connect.WechatConnectSetting;
 import cn.lili.modules.system.entity.dto.payment.AlipayPaymentSetting;
 import cn.lili.modules.system.entity.dto.payment.PaymentSupportSetting;
+import cn.lili.modules.system.entity.dto.payment.UnionPaymentSetting;
 import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
 import cn.lili.modules.system.entity.dto.payment.dto.PaymentSupportForm;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -36,6 +38,11 @@ import java.util.Collections;
 public class SettingManagerController {
     @Autowired
     private SettingService settingService;
+    /**
+     * 缓存
+     */
+    @Autowired
+    private Cache<String> cache;
 
 
     @DemoSite
@@ -79,7 +86,6 @@ public class SettingManagerController {
     }
 
 
-
     /**
      * 对配置进行过滤
      *
@@ -111,6 +117,7 @@ public class SettingManagerController {
      */
     private ResultMessage createSetting(String key) {
         SettingEnum settingEnum = SettingEnum.valueOf(key);
+        cache.remove(key);
         Setting setting = settingService.get(key);
         switch (settingEnum) {
             case BASE_SETTING:
@@ -133,10 +140,10 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new GoodsSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), GoodsSetting.class));
-            case KUAIDI_SETTING:
+            case LOGISTICS_SETTING:
                 return setting == null ?
-                        ResultUtil.data(new KuaidiSetting()) :
-                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), KuaidiSetting.class));
+                        ResultUtil.data(new LogisticsSetting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), LogisticsSetting.class));
             case ORDER_SETTING:
                 return setting == null ?
                         ResultUtil.data(new OrderSetting()) :
@@ -165,6 +172,10 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new AlipayPaymentSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), AlipayPaymentSetting.class));
+            case UNIONPAY_PAYMENT:
+                return setting == null ?
+                        ResultUtil.data(new UnionPaymentSetting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), UnionPaymentSetting.class));
             case WECHAT_CONNECT:
                 return setting == null ?
                         ResultUtil.data(new WechatConnectSetting()) :

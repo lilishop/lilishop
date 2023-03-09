@@ -1,7 +1,5 @@
 package cn.lili.modules.file.entity.enums;
 
-import com.aliyun.oss.OSS;
-
 /**
  * OssEnum
  *
@@ -11,7 +9,7 @@ import com.aliyun.oss.OSS;
  */
 public enum OssEnum {
     /**
-     *
+     * 上传渠道
      */
-    ALI_OSS, MINIO;
+    ALI_OSS, MINIO, HUAWEI_OBS, TENCENT_COS;
 }

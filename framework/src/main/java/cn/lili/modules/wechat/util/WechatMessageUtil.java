@@ -7,7 +7,6 @@ import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.DateUtil;
-import cn.lili.common.utils.HttpUtils;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.enums.ConnectEnum;
@@ -111,7 +110,7 @@ public class WechatMessageUtil {
         map.put("data", postParams);
 
         log.info("参数内容：" + JSONUtil.toJsonStr(map));
-        String content = HttpUtils.doPostWithJson(url, map);
+        String content = HttpUtil.post(url, JSONUtil.toJsonStr(map));
         JSONObject json = new JSONObject(content);
         log.info("微信消息发送结果：" + content);
         String errorMessage = json.getStr("errmsg");

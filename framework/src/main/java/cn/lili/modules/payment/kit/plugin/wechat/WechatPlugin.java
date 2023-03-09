@@ -42,6 +42,7 @@ import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
+import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -463,6 +466,63 @@ public class WechatPlugin implements Payment {
         } catch (Exception e) {
             log.error("支付异常", e);
         }
+    }
+
+    /**
+     * 微信提现
+     * 文档地址：https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/transfer-batch/initiate-batch-transfer.html
+     *
+     * @param memberWithdrawApply 会员提现申请
+     */
+    @Override
+    public void transfer(MemberWithdrawApply memberWithdrawApply) {
+
+        try {
+            WechatPaymentSetting setting = wechatPaymentSetting();
+            Connect connect = connectService.queryConnect(
+                    ConnectQueryDTO.builder().userId(UserContext.getCurrentUser().getId())
+                            .unionType(ConnectEnum.WECHAT_OPEN_ID.name()).build()
+            );
+            //根据自身情况设置AppId,此处我存放的是服务号的APPID，下方的openID需要对应此处的APPID配置
+            TransferModel transferModel = new TransferModel()
+                    .setAppid(setting.getServiceAppId())
+                    .setOut_batch_no(SnowFlake.createStr("T"))
+                    .setBatch_name("用户提现")
+                    .setBatch_remark("用户提现")
+                    .setTotal_amount(CurrencyUtil.fen(memberWithdrawApply.getApplyMoney()))
+                    .setTotal_num(1)
+                    .setTransfer_scene_id("1000");
+            List<TransferDetailInput> transferDetailListList = new ArrayList<>();
+            {
+                TransferDetailInput transferDetailInput = new TransferDetailInput();
+                transferDetailInput.setOut_detail_no(SnowFlake.createStr("TD"));
+                transferDetailInput.setTransfer_amount(CurrencyUtil.fen(memberWithdrawApply.getApplyMoney()));
+                transferDetailInput.setTransfer_remark("用户提现");
+                transferDetailInput.setOpenid(connect.getUnionId());
+//                transferDetailInput.setUserName(
+//                        "757b340b45ebef5467rter35gf464344v3542sdf4t6re4tb4f54ty45t4yyry45");
+//                transferDetailInput.setUserIdCard(
+//                        "8609cb22e1774a50a930e414cc71eca06121bcd266335cda230d24a7886a8d9f");
+                transferDetailListList.add(transferDetailInput);
+            }
+            transferModel.setTransfer_detail_list(transferDetailListList);
+
+            PaymentHttpResponse response = WechatApi.v3(
+                    RequestMethodEnums.POST,
+                    WechatDomain.CHINA.toString(),
+                    WechatApiEnum.TRANSFER_BATCHES.toString(),
+                    setting.getMchId(),
+                    setting.getSerialNumber(),
+                    null,
+                    setting.getApiclient_key(),
+                    JSONUtil.toJsonStr(transferModel)
+            );
+            log.info("微信提现响应 {}", response);
+            //根据自身业务进行接下来的任务处理
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**

@@ -198,6 +198,22 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             throw new ServiceException(ResultCode.USER_PASSWORD_ERROR);
         }
         //对店铺状态的判定处理
+        return checkMemberStore(member);
+    }
+
+    @Override
+    public Token mobilePhoneStoreLogin(String mobilePhone) {
+        Member member = this.findMember(mobilePhone);
+        //如果手机号不存在则自动注册用户
+        if (member == null) {
+            throw new ServiceException(ResultCode.USER_NOT_EXIST);
+        }
+        loginBindUser(member);
+        //对店铺状态的判定处理
+        return checkMemberStore(member);
+    }
+
+    private Token checkMemberStore(Member member) {
         if (Boolean.TRUE.equals(member.getHaveStore())) {
             Store store = storeService.getById(member.getStoreId());
             if (!store.getStoreDisable().equals(StoreStatusEnum.OPEN.name())) {
@@ -206,7 +222,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         } else {
             throw new ServiceException(ResultCode.USER_NOT_EXIST);
         }
-
         return storeTokenGenerate.createToken(member, false);
     }
 

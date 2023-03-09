@@ -23,20 +23,23 @@ public class SeatTokenGenerate extends AbstractTokenGenerate<Seat> {
 
     @Override
     public Token createToken(Seat seat, Boolean longTerm) {
-        AuthUser authUser = new AuthUser(
-                seat.getUsername(),
-                seat.getId(),
-                seat.getNickName(),
-                seat.getFace(),
-                UserEnums.SEAT);
-        authUser.setTenantId(seat.getTenantId());
+        AuthUser authUser = AuthUser.builder()
+                .username(seat.getUsername())
+                .id(seat.getId())
+                .nickName(seat.getNickName())
+                .face(seat.getFace())
+                .role(UserEnums.SEAT)
+                .longTerm(longTerm)
+                .tenantId(seat.getTenantId())
+                .build();
+
         //登陆成功生成token
-        return tokenUtil.createToken(seat.getUsername(), authUser, longTerm, UserEnums.SEAT);
+        return tokenUtil.createToken(authUser);
     }
 
     @Override
     public Token refreshToken(String refreshToken) {
-        return tokenUtil.refreshToken(refreshToken, UserEnums.SEAT);
+        return tokenUtil.refreshToken(refreshToken);
     }
 
 }

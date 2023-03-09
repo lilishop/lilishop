@@ -193,7 +193,7 @@ public enum ResultCode {
     ORDER_NOT_USER(31007, "非当前会员的订单"),
     ORDER_TAKE_ERROR(31008, "当前订单无法核销"),
     MEMBER_ADDRESS_NOT_EXIST(31009, "订单无收货地址，请先配置收货地址"),
-    STORE_ADDRESS_NOT_EXIST(31009,"订单没有自提地址,请先选择自提地址"),
+    STORE_ADDRESS_NOT_EXIST(31009, "订单没有自提地址,请先选择自提地址"),
     ORDER_DELIVER_NUM_ERROR(31010, "没有待发货的订单"),
     ORDER_NOT_SUPPORT_DISTRIBUTION(31011, "购物车中包含不支持配送的商品，请重新选择收货地址，或者重新选择商品"),
     ORDER_NOT_EXIST_VALID(31041, "购物车中无有效商品，请检查购物车内商品，或者重新选择商品"),
@@ -201,6 +201,8 @@ public enum ResultCode {
     ORDER_BATCH_DELIVER_ERROR(31013, "批量发货,文件读取失败"),
     ORDER_ITEM_NOT_EXIST(31014, "当前订单项不存在！"),
     POINT_NOT_ENOUGH(31015, "当前会员积分不足购买当前积分商品！"),
+
+    ORDER_LABEL_ORDER_ERROR(31016, "订单不能打印电子面单"),
 
 
     /**
@@ -219,7 +221,7 @@ public enum ResultCode {
     PAY_POINT_ENOUGH(32010, "积分不足，不能兑换"),
     PAY_NOT_EXIST_ORDER(32011, "支付订单不存在"),
     CAN_NOT_RECHARGE_WALLET(32012, "不能使用余额进行充值"),
-
+    RECHARGE_PRICE_ERROR(32013, "充值金额错误"),
 
     /**
      * 售后
@@ -257,7 +259,7 @@ public enum ResultCode {
     WALLET_REMARK_ERROR(34004, "请填写审核备注！"),
     WALLET_EXIT_ERROR(34000, "钱包已存在，无法重复创建"),
     WALLET_APPLY_ERROR(34005, "提现申请异常！"),
-
+    WALLET_WITHDRAWAL_AMOUNT_ERROR(34006, "申请提现金额异常！"),
     /**
      * 评价
      */
@@ -411,8 +413,10 @@ public enum ResultCode {
     STORE_NOT_OPEN(50004, "该会员未开通店铺"),
     STORE_NOT_LOGIN_ERROR(50005, "未登录店铺"),
     STORE_CLOSE_ERROR(50006, "店铺关闭，请联系管理员"),
+    STORE_DELIVER_GOODS_ADDRESS(50007,"请填写商家发货地址"),
     FREIGHT_TEMPLATE_NOT_EXIST(50010, "当前模版不存在"),
     STORE_STATUS_ERROR(50011, "店铺状态异常，无法申请"),
+    STORE_DELIVER_ADDRESS_EXIST(50012,"请填写发货地址"),
 
     /**
      * 结算单
@@ -490,6 +494,12 @@ public enum ResultCode {
     APP_VERSION_EXIST(80307, "APP版本已存在"),
 
     /**
+     * IM
+     */
+    IM_MESSAGE_ADD_ERROR(80400,"IM消息发送错误"),
+    IM_MESSAGE_EDIT_ERROR(80400,"IM消息更新错误"),
+
+    /**
      * 其他
      */
     CUSTOM_WORDS_EXIST_ERROR(90000, "当前自定义分词已存在！"),
@@ -499,6 +509,7 @@ public enum ResultCode {
     ELASTICSEARCH_INDEX_INIT_ERROR(90003, "索引初始化失败！"),
     PURCHASE_ORDER_DEADLINE_ERROR(90004, "供求单，已超过报名截止时间"),
     INDEX_BUILDING(90005, "索引正在生成");
+
 
     private final Integer code;
     private final String message;

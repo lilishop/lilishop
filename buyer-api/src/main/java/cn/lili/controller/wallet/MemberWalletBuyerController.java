@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Max;
@@ -36,6 +37,7 @@ import javax.validation.constraints.Pattern;
 @RestController
 @Api(tags = "买家端,会员余额接口")
 @RequestMapping("/buyer/wallet/wallet")
+@Validated
 public class MemberWalletBuyerController {
 
     /**
@@ -127,7 +129,10 @@ public class MemberWalletBuyerController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "price", value = "提现金额", required = true, dataType = "double", paramType = "query")
     })
-    public ResultMessage<Boolean> withdrawal(@Max(value = 9999, message = "充值金额单次最多允许提现9999元") @Min(value = 1, message = "充值金额单次最少提现金额为1元") Double price) {
+    public ResultMessage<Boolean> withdrawal(
+            @Max(value = 9999, message = "提现金额单次最多允许提现9999元")
+            @Min(value = 1, message = "提现金额单次最少提现金额为1元")
+            Double price) {
         return ResultUtil.data(memberWalletService.applyWithdrawal(price));
     }
 

@@ -116,6 +116,16 @@ public class OrderBuyerController {
         return ResultUtil.data(orderService.getTraces(orderSn));
     }
 
+    @ApiOperation(value = "查询地图版物流踪迹")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "orderSn", value = "订单编号", required = true, dataType = "String", paramType = "path")
+    })
+    @PostMapping(value = "/getMapTraces/{orderSn}")
+    public ResultMessage<Object> getMapTraces(@NotBlank(message = "订单编号不能为空") @PathVariable String orderSn) {
+        OperationalJudgment.judgment(orderService.getBySn(orderSn));
+        return ResultUtil.data(orderService.getMapTraces(orderSn));
+    }
+
 
     @PreventDuplicateSubmissions
     @ApiOperation(value = "开票")
