@@ -77,12 +77,13 @@ public class ImTalkServiceImpl extends ServiceImpl<ImTalkMapper, ImTalk> impleme
                 Member self = memberService.getById(selfId);
                 Member otherMember = memberService.getById(userId);
                 Store otherStore = storeService.getById(userId);
-                    if(otherStore != null){
-                        imTalk = new ImTalk(self, otherStore);
-                    }else if (otherMember != null){
-                        imTalk = new ImTalk(self, otherMember);
-                    }
+                if(otherStore != null){
+                    imTalk = new ImTalk(self, otherStore);
+                }else if (otherMember != null){
+                    imTalk = new ImTalk(self, otherMember);
+                }
             }
+            this.save(imTalk);
         }
         return imTalk;
     }
