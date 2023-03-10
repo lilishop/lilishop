@@ -145,13 +145,15 @@ public class CashierSupport {
 
     /**
      * 用户提现
-     * @param paymentMethodEnum 支付渠道
+     *
+     * @param paymentMethodEnum   支付渠道
      * @param memberWithdrawApply 用户提现申请
      */
-    public void transfer(PaymentMethodEnum paymentMethodEnum, MemberWithdrawApply memberWithdrawApply){
+    public boolean transfer(PaymentMethodEnum paymentMethodEnum, MemberWithdrawApply memberWithdrawApply) {
         Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
-        payment.transfer(memberWithdrawApply);
+        return payment.transfer(memberWithdrawApply);
     }
+
     /**
      * 获取收银台参数
      *

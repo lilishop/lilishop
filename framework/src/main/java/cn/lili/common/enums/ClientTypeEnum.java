@@ -31,7 +31,7 @@ public enum ClientTypeEnum {
      */
     UNKNOWN("未知");
 
-    private final String clientName;
+    private String clientName;
 
     ClientTypeEnum(String des) {
         this.clientName = des;

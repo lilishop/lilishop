@@ -18,6 +18,7 @@ import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.enums.ConnectEnum;
+import cn.lili.modules.connect.entity.enums.SourceEnum;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.member.entity.dto.ConnectQueryDTO;
 import cn.lili.modules.order.order.service.OrderService;
@@ -39,12 +40,17 @@ import cn.lili.modules.payment.kit.plugin.wechat.model.*;
 import cn.lili.modules.payment.service.PaymentService;
 import cn.lili.modules.payment.service.RefundLogService;
 import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.WithdrawalSetting;
+import cn.lili.modules.system.entity.dto.connect.WechatConnectSetting;
+import cn.lili.modules.system.entity.dto.connect.dto.WechatConnectSettingItem;
 import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.formula.atp.Switch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -378,7 +384,7 @@ public class WechatPlugin implements Payment {
 
         try {
             Connect connect = connectService.queryConnect(
-                    ConnectQueryDTO.builder().userId(UserContext.getCurrentUser().getId()).unionType(ConnectEnum.WECHAT_MP_OPEN_ID.name()).build()
+                    ConnectQueryDTO.builder().userId(UserContext.getCurrentUser().getId()).unionType(SourceEnum.WECHAT_MP_OPEN_ID.name()).build()
             );
             if (connect == null) {
                 return null;
@@ -475,17 +481,43 @@ public class WechatPlugin implements Payment {
      * @param memberWithdrawApply 会员提现申请
      */
     @Override
-    public void transfer(MemberWithdrawApply memberWithdrawApply) {
-
+    public boolean transfer(MemberWithdrawApply memberWithdrawApply) {
         try {
-            WechatPaymentSetting setting = wechatPaymentSetting();
+            //获取提现设置
+            WithdrawalSetting withdrawalSetting = new Gson().fromJson(settingService.get(SettingEnum.WITHDRAWAL_SETTING.name()).getSettingValue(), WithdrawalSetting.class);
+
+            //获取用户OPENID
+            WechatConnectSetting wechatConnectSetting = new Gson().fromJson(settingService.get(SettingEnum.WECHAT_CONNECT.name()).getSettingValue(), WechatConnectSetting.class);
+            String source = "";
+            for (WechatConnectSettingItem wechatConnectSettingItem : wechatConnectSetting.getWechatConnectSettingItems()) {
+                if (wechatConnectSettingItem.getAppId().equals(withdrawalSetting.getWechatAppId())) {
+                    switch (wechatConnectSettingItem.getClientType()) {
+                        case "PC":
+                            source = SourceEnum.WECHAT_PC_OPEN_ID.name();
+                            break;
+                        case "H5":
+                            source = SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name();
+                            break;
+                        case "MP":
+                            source = SourceEnum.WECHAT_MP_OPEN_ID.name();
+                            break;
+                        case "APP":
+                            source = SourceEnum.WECHAT_APP_OPEN_ID.name();
+                            break;
+                    }
+                }
+            }
+
+            //获取微信设置
+            WechatPaymentSetting wechatPaymentSetting = wechatPaymentSetting();
+            //获取用户openId
             Connect connect = connectService.queryConnect(
-                    ConnectQueryDTO.builder().userId(UserContext.getCurrentUser().getId())
-                            .unionType(ConnectEnum.WECHAT_OPEN_ID.name()).build()
+                    ConnectQueryDTO.builder().userId(memberWithdrawApply.getMemberId())
+                            .unionType(source).build()
             );
-            //根据自身情况设置AppId,此处我存放的是服务号的APPID，下方的openID需要对应此处的APPID配置
+            //构建提现，发起申请
             TransferModel transferModel = new TransferModel()
-                    .setAppid(setting.getServiceAppId())
+                    .setAppid(withdrawalSetting.getWechatAppId())
                     .setOut_batch_no(SnowFlake.createStr("T"))
                     .setBatch_name("用户提现")
                     .setBatch_remark("用户提现")
@@ -499,10 +531,6 @@ public class WechatPlugin implements Payment {
                 transferDetailInput.setTransfer_amount(CurrencyUtil.fen(memberWithdrawApply.getApplyMoney()));
                 transferDetailInput.setTransfer_remark("用户提现");
                 transferDetailInput.setOpenid(connect.getUnionId());
-//                transferDetailInput.setUserName(
-//                        "757b340b45ebef5467rter35gf464344v3542sdf4t6re4tb4f54ty45t4yyry45");
-//                transferDetailInput.setUserIdCard(
-//                        "8609cb22e1774a50a930e414cc71eca06121bcd266335cda230d24a7886a8d9f");
                 transferDetailListList.add(transferDetailInput);
             }
             transferModel.setTransfer_detail_list(transferDetailListList);
@@ -511,17 +539,21 @@ public class WechatPlugin implements Payment {
                     RequestMethodEnums.POST,
                     WechatDomain.CHINA.toString(),
                     WechatApiEnum.TRANSFER_BATCHES.toString(),
-                    setting.getMchId(),
-                    setting.getSerialNumber(),
+                    wechatPaymentSetting.getMchId(),
+                    wechatPaymentSetting.getSerialNumber(),
                     null,
-                    setting.getApiclient_key(),
+                    wechatPaymentSetting.getApiclient_key(),
                     JSONUtil.toJsonStr(transferModel)
             );
             log.info("微信提现响应 {}", response);
+            String body = response.getBody();
+            JSONObject jsonObject = JSONUtil.parseObj(body);
+            return jsonObject.getStr("batch_id") != null ? true : false;
             //根据自身业务进行接下来的任务处理
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return false;
 
     }
 

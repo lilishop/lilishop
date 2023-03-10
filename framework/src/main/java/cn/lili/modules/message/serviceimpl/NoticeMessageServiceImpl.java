@@ -54,7 +54,7 @@ public class NoticeMessageServiceImpl extends ServiceImpl<NoticeMessageTemplateM
             NoticeMessage noticeMessage = this.getOne(
                     new LambdaQueryWrapper<NoticeMessage>()
                             .eq(NoticeMessage::getNoticeNode
-                                    , noticeMessageDTO.getNoticeMessageNodeEnum().getDescription().trim()));
+                                    , noticeMessageDTO.getNoticeMessageNodeEnum().getDescription().trim()),false);
             //如果通知类站内信开启的情况下
             if (noticeMessage != null && noticeMessage.getNoticeStatus().equals(SwitchEnum.OPEN.name())) {
                 MemberMessage memberMessage = new MemberMessage();

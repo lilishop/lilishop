@@ -56,8 +56,14 @@ public class MemberWithdrawApply extends BaseEntity {
     @ApiModelProperty(value = "sn")
     private String sn;
 
+    /**
+     * 支付宝提现时必填
+     */
     @ApiModelProperty(value = "真实姓名")
     private String realName;
+    /**
+     * 支付宝登录账号
+     */
     @ApiModelProperty(value = "第三方平台账号")
     private String connectNumber;
 

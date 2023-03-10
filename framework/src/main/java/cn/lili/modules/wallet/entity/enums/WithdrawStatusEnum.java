@@ -18,7 +18,15 @@ public enum WithdrawStatusEnum {
     /**
      * 审核未通过
      */
-    FAIL_AUDITING("审核未通过");
+    FAIL_AUDITING("审核未通过"),
+    /**
+     * 提现成功
+     */
+    SUCCESS("提现成功"),
+    /**
+     * 提现失败
+     */
+    ERROR("提现失败");
 
     private String description;
 

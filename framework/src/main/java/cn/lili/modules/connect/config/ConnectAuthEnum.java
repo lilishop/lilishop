@@ -11,7 +11,7 @@ package cn.lili.modules.connect.config;
 public enum ConnectAuthEnum implements ConnectAuth {
 
     /**
-     * 微信开放平台
+     * 微信公众号登录
      */
     WECHAT {
         @Override
@@ -32,6 +32,7 @@ public enum ConnectAuthEnum implements ConnectAuth {
 
     /**
      * 微信开放平台
+     * 微信PC登录
      */
     WECHAT_PC {
         @Override

@@ -66,6 +66,7 @@ public class ConnectUtil {
 
     /**
      * 回调地址获取
+     *
      * @param connectAuthEnum 用户枚举
      * @return 回调地址
      */
@@ -75,9 +76,11 @@ public class ConnectUtil {
 
     /**
      * 登录回调
+     * 此方法处理第三方登录回调
+     * 场景：PC、WAP(微信公众号)
      *
-     * @param type
-     * @param callback
+     * @param type                类型
+     * @param callback            回调参数
      * @param httpServletResponse
      * @param httpServletRequest
      * @throws IOException
@@ -89,9 +92,8 @@ public class ConnectUtil {
         //联合登陆处理，如果响应正常，则录入响应结果到redis
         if (response.ok()) {
             ConnectAuthUser authUser = response.getData();
-            Token token;
             try {
-                token = connectService.unionLoginCallback(type, authUser, callback.getState());
+                Token token = connectService.unionLoginCallback(authUser, callback.getState());
                 resultMessage = ResultUtil.data(token);
             } catch (ServiceException e) {
                 throw new ServiceException(ResultCode.ERROR, e.getMessage());
@@ -112,7 +114,7 @@ public class ConnectUtil {
         try {
             httpServletResponse.sendRedirect(url);
         } catch (Exception e) {
-            log.error("登录回调错误",e);
+            log.error("登录回调错误", e);
         }
     }
 
@@ -165,6 +167,7 @@ public class ConnectUtil {
                 //寻找配置
                 Setting setting = settingService.get(SettingEnum.WECHAT_CONNECT.name());
                 WechatConnectSetting wechatConnectSetting = JSONUtil.toBean(setting.getSettingValue(), WechatConnectSetting.class);
+
                 for (WechatConnectSettingItem wechatConnectSettingItem : wechatConnectSetting.getWechatConnectSettingItems()) {
                     if (wechatConnectSettingItem.getClientType().equals(ClientTypeEnum.PC.name())) {
                         authRequest = new BaseAuthWeChatPCRequest(AuthConfig.builder()
@@ -178,10 +181,10 @@ public class ConnectUtil {
                 break;
             }
             case QQ:
-
                 //寻找配置
                 Setting setting = settingService.get(SettingEnum.QQ_CONNECT.name());
                 QQConnectSetting qqConnectSetting = JSONUtil.toBean(setting.getSettingValue(), QQConnectSetting.class);
+
                 for (QQConnectSettingItem qqConnectSettingItem : qqConnectSetting.getQqConnectSettingItemList()) {
                     if (qqConnectSettingItem.getClientType().equals(ClientTypeEnum.PC.name())) {
                         authRequest = new BaseAuthQQRequest(AuthConfig.builder()
