@@ -71,7 +71,7 @@ public class SkuFreightRender implements CartRenderStep {
                             && !freightTemplate.getFreightTemplateChildList().isEmpty()) {
                         //店铺模版免运费则跳过
                         if (freightTemplate.getPricingMethod().equals(FreightTemplateEnum.FREE.name())) {
-                            break;
+                            continue;
                         }
 
                         //运费模版
