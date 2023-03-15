@@ -32,10 +32,11 @@ public class Distribution extends BaseEntity {
     public Distribution(String memberId, String memberName, DistributionApplyDTO distributionApplyDTO) {
         this.memberId = memberId;
         this.memberName = memberName;
-        distributionOrderCount=0;
+        this.distributionOrderCount=0;
+        this.rebateTotal=0D;
+        this.canRebate=0D;
+        this.commissionFrozen=0D;
         this.distributionStatus = DistributionStatusEnum.APPLY.name();
-        commissionFrozen=0D;
-        canRebate=0D;
         BeanUtil.copyProperties(distributionApplyDTO, this);
     }
 
@@ -52,13 +53,13 @@ public class Distribution extends BaseEntity {
     private String idNumber;
 
     @ApiModelProperty(value = "分销总额")
-    private Double rebateTotal = 0D;
+    private Double rebateTotal ;
 
     @ApiModelProperty(value = "可提现金额")
-    private Double canRebate = 0D;
+    private Double canRebate ;
 
     @ApiModelProperty(value = "冻结金额")
-    private Double commissionFrozen = 0D;
+    private Double commissionFrozen ;
 
     @ApiModelProperty(value = "分销订单数")
     private Integer distributionOrderCount;
