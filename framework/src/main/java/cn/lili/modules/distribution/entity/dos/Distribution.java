@@ -53,13 +53,13 @@ public class Distribution extends BaseEntity {
     private String idNumber;
 
     @ApiModelProperty(value = "分销总额")
-    private Double rebateTotal ;
+    private Double rebateTotal = 0D;
 
     @ApiModelProperty(value = "可提现金额")
-    private Double canRebate ;
+    private Double canRebate = 0D;
 
     @ApiModelProperty(value = "冻结金额")
-    private Double commissionFrozen ;
+    private Double commissionFrozen = 0D;
 
     @ApiModelProperty(value = "分销订单数")
     private Integer distributionOrderCount;
