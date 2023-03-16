@@ -10,7 +10,6 @@ import cn.lili.modules.system.entity.dto.GoodsSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,7 +38,7 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
     @Transactional(rollbackFor = Exception.class)
     public void add(List<String> goodsGalleryList, String goodsId) {
         //删除原来商品相册信息
-        this.baseMapper.delete(new UpdateWrapper<GoodsGallery>().eq("goods_id", goodsId));
+        this.baseMapper.delete(new QueryWrapper<GoodsGallery>().eq("goods_id", goodsId));
         //确定好图片选择器后进行处理
         int i = 0;
         for (String origin : goodsGalleryList) {
@@ -83,6 +82,6 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
      */
     @Override
     public void removeByGoodsId(String goodsId) {
-        this.baseMapper.delete(new UpdateWrapper<GoodsGallery>().eq("goods_id", goodsId));
+        this.baseMapper.delete(new QueryWrapper<GoodsGallery>().eq("goods_id", goodsId));
     }
 }
