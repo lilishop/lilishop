@@ -148,11 +148,12 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
     @Override
     public Clerk updateClerk(ClerkEditDTO clerkEditDTO) {
         Clerk clerk = this.getById(clerkEditDTO.getId());
-        if(clerk.getShopkeeper()){
-            throw new ServiceException(ResultCode.CANT_EDIT_CLERK_SHOPKEEPER);
-        }
-
         if (clerk != null) {
+            //编辑店主限制
+            if(clerk.getShopkeeper()){
+                throw new ServiceException(ResultCode.CANT_EDIT_CLERK_SHOPKEEPER);
+            }
+
             //校验当前店员是否是当前店铺的
             if (!clerk.getStoreId().equals(UserContext.getCurrentUser().getStoreId())) {
                 throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
