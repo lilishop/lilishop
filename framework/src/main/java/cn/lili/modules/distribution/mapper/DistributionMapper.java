@@ -19,8 +19,8 @@ public interface DistributionMapper extends BaseMapper<Distribution> {
      * @param commissionFrozen      分销金额
      * @param distributionId 分销员ID
      */
-    @Update("UPDATE li_distribution set commission_frozen = (commission_frozen+#{commissionFrozen}) " +
-            ", rebate_total=(rebate_total+#{commissionFrozen})  WHERE id = #{distributionId}")
+    @Update("UPDATE li_distribution set commission_frozen = (IFNULL(commission_frozen,0)+#{commissionFrozen}) " +
+            ", rebate_total=(IFNULL(rebate_total,0)+#{commissionFrozen})  WHERE id = #{distributionId}")
     void subCanRebate(Double commissionFrozen, String distributionId);
 
     /**
@@ -29,9 +29,9 @@ public interface DistributionMapper extends BaseMapper<Distribution> {
      * @param commissionFrozen      分销金额
      * @param distributionId 分销员ID
      */
-    @Update("UPDATE li_distribution set commission_frozen = (commission_frozen+#{commissionFrozen}) " +
-            ", rebate_total=(rebate_total+#{commissionFrozen}) " +
-            ", distribution_order_count=(distribution_order_count+1) WHERE id = #{distributionId}")
+    @Update("UPDATE li_distribution set commission_frozen = (IFNULL(commission_frozen,0)+#{commissionFrozen}) " +
+            ", rebate_total=(IFNULL(rebate_total,0)+#{commissionFrozen}) " +
+            ", distribution_order_count=(IFNULL(distribution_order_count,0)+1) WHERE id = #{distributionId}")
     void addCanRebate(Double commissionFrozen, String distributionId);
 
 }
