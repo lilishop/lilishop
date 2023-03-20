@@ -61,7 +61,7 @@
         <spring-boot-admin>2.3.1</spring-boot-admin>
         <owasp-java-html-sanitizer>20211018.2</owasp-java-html-sanitizer>
         <minio.version>8.0.3</minio.version>
-        <huaweicloud.version>3.21.8</huaweicloud.version>
+        <huaweicloud-obs.version>3.20.6.2</huaweicloud-obs.version>
         <cos.version>5.6.97</cos.version>
         <tencentcloud.version>3.1.693</tencentcloud.version>
         <kuaidi100-api.version>1.0.11</kuaidi100-api.version>

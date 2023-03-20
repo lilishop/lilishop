@@ -179,7 +179,7 @@ public class WechatPlugin implements Payment {
 
         try {
             Connect connect = connectService.queryConnect(
-                    ConnectQueryDTO.builder().userId(UserContext.getCurrentUser().getId()).unionType(ConnectEnum.WECHAT.name()).build()
+                    ConnectQueryDTO.builder().userId(UserContext.getCurrentUser().getId()).unionType(SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name()).build()
             );
             if (connect == null) {
                 return null;
