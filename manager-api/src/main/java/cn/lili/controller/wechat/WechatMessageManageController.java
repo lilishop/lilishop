@@ -53,6 +53,7 @@ public class WechatMessageManageController {
         return ResultUtil.data(data);
     }
 
+    @DemoSite
     @PostMapping
     @ApiOperation(value = "新增微信消息")
     public ResultMessage<WechatMessage> save(WechatMessage wechatMessage) {
@@ -61,6 +62,7 @@ public class WechatMessageManageController {
         return ResultUtil.data(wechatMessage);
     }
 
+    @DemoSite
     @PutMapping("/{id}")
     @ApiOperation(value = "更新微信消息")
     public ResultMessage<WechatMessage> update(@PathVariable String id, WechatMessage wechatMessage) {
@@ -68,6 +70,7 @@ public class WechatMessageManageController {
         return ResultUtil.data(wechatMessage);
     }
 
+    @DemoSite
     @DeleteMapping(value = "/{ids}")
     @ApiOperation(value = "删除微信消息")
     public ResultMessage<Object> delAllByIds(@PathVariable List ids) {

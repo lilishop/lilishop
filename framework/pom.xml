@@ -436,7 +436,7 @@
         <dependency>
             <groupId>com.huaweicloud</groupId>
             <artifactId>esdk-obs-java</artifactId>
-            <version>${huaweicloud.version}</version>
+            <version>${huaweicloud-obs.version}</version>
         </dependency>
         <dependency>
             <groupId>com.qcloud</groupId>

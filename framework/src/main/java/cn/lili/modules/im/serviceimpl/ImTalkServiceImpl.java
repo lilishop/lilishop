@@ -88,6 +88,50 @@ public class ImTalkServiceImpl extends ServiceImpl<ImTalkMapper, ImTalk> impleme
         return imTalk;
     }
 
+    @Override
+    public ImTalkVO getTalkByUserId(String userId) {
+        LambdaQueryWrapper<ImTalk> queryWrapper = new LambdaQueryWrapper<>();
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        //登录用户的Id
+        String selfId = "";
+        //查看当前用户角色对Id进行赋值
+        if(UserEnums.STORE.equals(currentUser.getRole())){
+            selfId = currentUser.getStoreId();
+        }else if(UserEnums.MEMBER.equals(currentUser.getRole())){
+            selfId = currentUser.getId();
+        }
+        //小数在前保证永远是同一个对话
+        String finalSelfId = selfId;
+        queryWrapper.and(wq-> wq.eq(ImTalk::getUserId2, userId).eq(ImTalk::getUserId1, finalSelfId).or().eq(ImTalk::getUserId2, finalSelfId).eq(ImTalk::getUserId1, userId));
+        ImTalk imTalk = this.getOne(queryWrapper);
+        //如果没有聊天，则创建聊天
+        if (imTalk == null) {
+            //当自己为店铺时
+            if(UserEnums.STORE.equals(currentUser.getRole())){
+                Store selfStore = storeService.getById(selfId);
+                //没有这个用户信息
+                Member other = memberService.getById(userId);
+                if(other == null){
+                    return null;
+                }
+                //自己为店铺其他人必定为用户
+                imTalk = new ImTalk(other,selfStore);
+            }else if(UserEnums.MEMBER.equals(currentUser.getRole())){
+                //没有这个店铺信息
+                Member self = memberService.getById(selfId);
+                Member otherMember = memberService.getById(userId);
+                Store otherStore = storeService.getById(userId);
+                if(otherStore != null){
+                    imTalk = new ImTalk(self, otherStore);
+                }else if (otherMember != null){
+                    imTalk = new ImTalk(self, otherMember);
+                }
+            }
+            this.save(imTalk);
+        }
+        return new ImTalkVO(imTalk,currentUser.getId());
+    }
+
     /**
      * 发起聊天后，如果聊天不可见为true，则需要修正
      *

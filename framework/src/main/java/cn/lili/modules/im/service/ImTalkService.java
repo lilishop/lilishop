@@ -22,6 +22,13 @@ public interface ImTalkService extends IService<ImTalk> {
     ImTalk getTalkByUser(String userId1);
 
     /**
+     * 获取与某人的聊天
+     * @param userId
+     * @return
+     */
+    ImTalkVO getTalkByUserId(String userId);
+
+    /**
      * 置顶消息
      *
      * @param id

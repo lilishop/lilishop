@@ -148,6 +148,7 @@ public enum ResultCode {
     CLERK_ALREADY_EXIT_ERROR(20030, "店员已经存在"),
     CLERK_DISABLED_ERROR(20031, "店员已禁用"),
     CLERK_CURRENT_SUPPER(20032, "无法删除当前登录店员"),
+    CANT_EDIT_CLERK_SHOPKEEPER(20033, "无法在店员管理编辑店员信息"),
     /**
      * 权限
      */

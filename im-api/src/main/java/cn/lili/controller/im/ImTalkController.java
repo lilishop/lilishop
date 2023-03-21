@@ -46,7 +46,7 @@ public class ImTalkController {
     @GetMapping(value = "/by/user/{userId}")
     @ApiOperation(value = "查看与某人聊天详情")
     public ResultMessage<ImTalkVO> getByUser(@PathVariable String userId) {
-        return ResultUtil.data(new ImTalkVO(imTalkService.getTalkByUser(userId),userId));
+        return ResultUtil.data(imTalkService.getTalkByUserId(userId));
     }
 
     @GetMapping(value = "/top")

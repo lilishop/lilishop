@@ -1,5 +1,6 @@
 package cn.lili.modules.goods.entity.dos;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.http.HtmlUtil;
@@ -219,7 +220,7 @@ public class Goods extends BaseEntity {
         this.mobileIntro = goodsDTO.getMobileIntro();
         this.goodsVideo = goodsDTO.getGoodsVideo();
         this.price = goodsDTO.getPrice();
-        if (goodsDTO.getGoodsParamsDTOList() != null && goodsDTO.getGoodsParamsDTOList().isEmpty()) {
+        if (CollectionUtil.isNotEmpty(goodsDTO.getGoodsParamsDTOList())){
             this.params = JSONUtil.toJsonStr(goodsDTO.getGoodsParamsDTOList());
         }
         //如果立即上架则
