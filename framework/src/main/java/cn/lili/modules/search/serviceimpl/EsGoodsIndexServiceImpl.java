@@ -455,7 +455,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     public void deleteIndex(Map<String, Object> queryFields) {
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         for (Map.Entry<String, Object> entry : queryFields.entrySet()) {
-            boolQueryBuilder.filter(QueryBuilders.termsQuery(entry.getKey(), entry.getValue()));
+            boolQueryBuilder.filter(QueryBuilders.termsQuery(entry.getKey(), entry.getValue().toString()));
         }
 
         DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest();

@@ -1,6 +1,5 @@
 package cn.lili.modules.permission.serviceimpl;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
@@ -9,7 +8,9 @@ import cn.lili.modules.permission.repository.SystemLogRepository;
 import cn.lili.modules.permission.service.SystemLogService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -82,25 +83,22 @@ public class SystemLogServiceImpl implements SystemLogService {
         }
 
         if (CharSequenceUtil.isNotEmpty(operatorName)) {
-            nativeSearchQueryBuilder.withFilter(QueryBuilders.wildcardQuery("username", "*" + operatorName + "*"));
+            nativeSearchQueryBuilder.withQuery(QueryBuilders.matchQuery("username", operatorName));
         }
 
         if (CharSequenceUtil.isNotEmpty(key)) {
-            BoolQueryBuilder filterBuilder = new BoolQueryBuilder();
-            filterBuilder.should(QueryBuilders.wildcardQuery("requestUrl", "*" + key + "*"))
-                    .should(QueryBuilders.wildcardQuery("requestParam", "*" + key + "*"))
-                    .should(QueryBuilders.wildcardQuery("responseBody", "*" + key + "*"))
-                    .should(QueryBuilders.wildcardQuery("name", "*" + key + "*"));
-            nativeSearchQueryBuilder.withFilter(filterBuilder);
+            MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders.multiMatchQuery(key, "requestUrl", "requestParam", "responseBody", "name");
+            multiMatchQueryBuilder.fuzziness(Fuzziness.AUTO);
+            nativeSearchQueryBuilder.withFilter(multiMatchQueryBuilder);
         }
         //时间有效性判定
         if (searchVo.getConvertStartDate() != null && searchVo.getConvertEndDate() != null) {
             BoolQueryBuilder filterBuilder = new BoolQueryBuilder();
             //大于方法
-            filterBuilder.must(
+            filterBuilder.filter(
                     QueryBuilders.rangeQuery("createTime")
-                            .gte(DateUtil.format(searchVo.getConvertStartDate(), "dd/MM/yyyy"))
-                            .lte(DateUtil.format(searchVo.getConvertEndDate(), "dd/MM/yyyy")).format("dd/MM/yyyy||yyyy"));
+                            .gte(searchVo.getConvertStartDate().getTime())
+                            .lte(searchVo.getConvertEndDate().getTime()));
 
             nativeSearchQueryBuilder.withFilter(filterBuilder);
         }

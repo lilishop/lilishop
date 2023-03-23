@@ -133,7 +133,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         //获取商品ID列表
         List<String> list = this.baseMapper.getGoodsIdByStoreId(storeId);
         //下架店铺下的商品
-        updateGoodsMarketAble(list, GoodsStatusEnum.DOWN, "店铺关闭");
+        this.updateGoodsMarketAbleByStoreId(storeId, GoodsStatusEnum.DOWN, "店铺关闭");
 
         applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("下架商品",
                 rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.DOWN.name(), JSONUtil.toJsonStr(list)));
