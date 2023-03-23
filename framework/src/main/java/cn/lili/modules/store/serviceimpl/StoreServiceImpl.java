@@ -320,7 +320,6 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         //校验迪纳普状态
         checkStoreStatus(store);
         BeanUtil.copyProperties(storeOtherInfoDTO, store);
-        this.updateById(store);
 
         StoreDetail storeDetail = storeDetailService.getStoreDetail(store.getId());
         //设置店铺的其他信息
@@ -332,11 +331,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         //修改店铺详细信息
         storeDetailService.updateById(storeDetail);
         //设置店铺名称,修改店铺信息
-        store.setStoreName(storeOtherInfoDTO.getStoreName());
         store.setStoreDisable(StoreStatusEnum.APPLYING.name());
-        store.setStoreCenter(storeOtherInfoDTO.getStoreCenter());
-        store.setStoreDesc(storeOtherInfoDTO.getStoreDesc());
-        store.setStoreLogo(storeOtherInfoDTO.getStoreLogo());
         return this.updateById(store);
     }
 
