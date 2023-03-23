@@ -342,10 +342,11 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
      */
     private void checkStoreStatus(Store store) {
 
-        //如果店铺状态为申请中或者已申请，则正常走流程，否则抛出异常
-        if (store.getStoreDisable().equals(StoreStatusEnum.APPLY.name()) || store.getStoreDisable().equals(StoreStatusEnum.APPLYING.name())) {
-            return;
-        } else {
+        //如果店铺状态为已开启、已关闭、申请中，则抛出异常
+        if (store.getStoreDisable().equals(StoreStatusEnum.OPEN.name())
+                || store.getStoreDisable().equals(StoreStatusEnum.CLOSED.name())
+                || store.getStoreDisable().equals(StoreStatusEnum.APPLYING.name())
+        ) {
             throw new ServiceException(ResultCode.STORE_STATUS_ERROR);
         }
 
@@ -381,7 +382,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         AuthUser currentUser = UserContext.getCurrentUser();
         List<String> skuIdList = new ArrayList<>();
         for (FootPrint footPrint : footprintService.list(new LambdaUpdateWrapper<FootPrint>().eq(FootPrint::getStoreId, currentUser.getStoreId()).eq(FootPrint::getMemberId, memberId))) {
-            if(footPrint.getSkuId() != null){
+            if (footPrint.getSkuId() != null) {
                 skuIdList.add(footPrint.getSkuId());
             }
         }
