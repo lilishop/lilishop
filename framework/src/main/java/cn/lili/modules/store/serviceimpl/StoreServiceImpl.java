@@ -235,11 +235,16 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     public boolean disable(String id) {
         Store store = this.getById(id);
         if (store != null) {
-            store.setStoreDisable(StoreStatusEnum.CLOSED.value());
 
+            LambdaUpdateWrapper<Store> storeLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+            storeLambdaUpdateWrapper.eq(Store::getId, id);
+            storeLambdaUpdateWrapper.set(Store::getStoreDisable, StoreStatusEnum.CLOSED.value());
+            boolean update = this.update(storeLambdaUpdateWrapper);
             //下架所有此店铺商品
-            goodsService.underStoreGoods(id);
-            return this.updateById(store);
+            if (update) {
+                goodsService.underStoreGoods(id);
+            }
+            return update;
         }
 
         throw new ServiceException(ResultCode.STORE_NOT_EXIST);

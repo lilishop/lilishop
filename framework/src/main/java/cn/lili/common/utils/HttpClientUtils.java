@@ -183,7 +183,6 @@ public class HttpClientUtils {
                 if (response != null) {
                     response.close();
                 }
-                httpClient.close();
             } catch (IOException e) {
                 log.error("Get错误", e);
             }

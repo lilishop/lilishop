@@ -138,13 +138,13 @@ public class WechatMessageServiceImpl extends ServiceImpl<WechatMessageMapper, W
         List<WechatMessageData> msg = new ArrayList<>();
         //新订单消息提示
         msg.add(new WechatMessageData(
-                "待支付",
-                "您有新订单需要支付",
+                "订单支付成功通知",
+                "订单支付成功通知",
                 "如有问题，请联系在线客服",
                 "OPENTM207498902",
                 WechatMessageItemEnums.MEMBER_NAME.name() + "," + WechatMessageItemEnums.ORDER_SN.name() + "," +
                         WechatMessageItemEnums.PRICE.name() + "," + WechatMessageItemEnums.GOODS_INFO.name(),
-                OrderStatusEnum.UNPAID));
+                OrderStatusEnum.UNDELIVERED));
         //已发货
         msg.add(new WechatMessageData(
                 "订单发货",

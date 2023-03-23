@@ -1,6 +1,8 @@
 package cn.lili.modules.connect.request;
 
 import cn.lili.cache.Cache;
+import cn.lili.common.enums.ClientTypeEnum;
+import cn.lili.common.utils.HttpUtils;
 import cn.lili.common.utils.UrlBuilder;
 import cn.lili.modules.connect.config.AuthConfig;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
@@ -10,8 +12,9 @@ import cn.lili.modules.connect.entity.dto.AuthToken;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.entity.enums.AuthResponseStatus;
 import cn.lili.modules.connect.entity.enums.AuthUserGender;
+import cn.lili.modules.connect.entity.enums.ConnectEnum;
+import cn.lili.modules.connect.entity.enums.SourceEnum;
 import cn.lili.modules.connect.exception.AuthException;
-import cn.lili.common.utils.HttpUtils;
 import com.alibaba.fastjson.JSONObject;
 
 /**
@@ -56,10 +59,11 @@ public class BaseAuthWeChatPCRequest extends BaseAuthRequest {
                 .nickname(object.getString("nickname"))
                 .avatar(object.getString("headimgurl"))
                 .location(location)
-                .uuid(authToken.getUnionId())
+                .uuid(authToken.getOpenId())
                 .gender(AuthUserGender.getWechatRealGender(object.getString("sex")))
                 .token(authToken)
-                .source(source.toString())
+                .source(ConnectEnum.WECHAT.name())
+                .type(ClientTypeEnum.PC.name())
                 .build();
     }
 
@@ -112,6 +116,7 @@ public class BaseAuthWeChatPCRequest extends BaseAuthRequest {
      */
     @Override
     public String authorize(String state) {
+
         return UrlBuilder.fromBaseUrl(source.authorize())
                 .queryParam("response_type", "code")
                 .queryParam("appid", config.getClientId())

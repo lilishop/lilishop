@@ -114,7 +114,7 @@ public interface Payment {
     /**
      * 提现
      */
-    default void transfer(MemberWithdrawApply memberWithdrawApply) {
+    default boolean transfer(MemberWithdrawApply memberWithdrawApply) {
         throw new ServiceException(ResultCode.PAY_ERROR);
     }
 

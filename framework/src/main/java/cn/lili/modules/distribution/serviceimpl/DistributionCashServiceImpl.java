@@ -83,7 +83,6 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
                 MemberWithdrawalMessage memberWithdrawalMessage = new MemberWithdrawalMessage();
                 memberWithdrawalMessage.setMemberId(distribution.getMemberId());
                 memberWithdrawalMessage.setPrice(applyMoney);
-                memberWithdrawalMessage.setDestination(MemberWithdrawalDestinationEnum.WALLET.name());
                 memberWithdrawalMessage.setStatus(WithdrawStatusEnum.APPLY.name());
                 String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_WITHDRAWAL.name();
                 rocketMQTemplate.asyncSend(destination, memberWithdrawalMessage, RocketmqSendCallbackBuilder.commonCallback());
@@ -147,7 +146,6 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
                     //组织会员提现审核消息
                     memberWithdrawalMessage.setMemberId(distribution.getMemberId());
                     memberWithdrawalMessage.setPrice(distributorCash.getPrice());
-                    memberWithdrawalMessage.setDestination(MemberWithdrawalDestinationEnum.WALLET.name());
                     String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_WITHDRAWAL.name();
                     rocketMQTemplate.asyncSend(destination, memberWithdrawalMessage, RocketmqSendCallbackBuilder.commonCallback());
                 }

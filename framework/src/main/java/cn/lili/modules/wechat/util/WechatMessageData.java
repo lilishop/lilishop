@@ -1,6 +1,5 @@
 package cn.lili.modules.wechat.util;
 
-import cn.hutool.json.JSONUtil;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -48,7 +47,7 @@ public class WechatMessageData {
      *
      * @return
      */
-    public String createData() {
+    public Map<String, Map<String, String>> createData() {
 
         Map<String, Map<String, String>> dataMap = new LinkedHashMap<>();
 
@@ -62,7 +61,7 @@ public class WechatMessageData {
         //拼接备注
         dataMap.put("remark", createValue(this.remark));
 
-        return JSONUtil.toJsonStr(dataMap);
+        return dataMap;
     }
 
 

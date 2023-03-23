@@ -67,6 +67,12 @@ public class ConnectAuthUser implements Serializable {
      * 用户来源
      */
     private String source;
+
+    /**
+     * 类型
+     * 例如：PC、WAP、小程序
+     */
+    private String type;
     /**
      * 用户授权的token信息
      */
@@ -80,5 +86,10 @@ public class ConnectAuthUser implements Serializable {
      * 联合登陆类型
      */
     private ConnectAuthEnum connectEnum;
+
+    /**
+     * 手机号
+     */
+    private String phone;
 
 }

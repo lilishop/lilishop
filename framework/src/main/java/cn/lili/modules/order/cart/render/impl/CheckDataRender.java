@@ -259,7 +259,7 @@ public class CheckDataRender implements CartRenderStep {
      */
     private void preSaleModel(TradeDTO tradeDTO) {
         // 寻找同goods下销售模式为批发的商品
-        Map<String, List<CartSkuVO>> goodsGroup = tradeDTO.getSkuList().stream().filter(i -> i.getGoodsSku().getSalesModel().equals(GoodsSalesModeEnum.WHOLESALE.name())).collect(Collectors.groupingBy(i -> i.getGoodsSku().getGoodsId()));
+        Map<String, List<CartSkuVO>> goodsGroup = tradeDTO.getCheckedSkuList().stream().filter(i -> i.getGoodsSku().getSalesModel().equals(GoodsSalesModeEnum.WHOLESALE.name())).collect(Collectors.groupingBy(i -> i.getGoodsSku().getGoodsId()));
         if (CollUtil.isNotEmpty(goodsGroup)) {
             goodsGroup.forEach((k, v) -> {
                 // 获取购买总数

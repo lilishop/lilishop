@@ -1,5 +1,6 @@
 package cn.lili.controller.wechat;
 
+import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
@@ -31,6 +32,7 @@ public class WechatMessageManageController {
 
     @GetMapping(value = "/init")
     @ApiOperation(value = "初始化微信消息")
+    @DemoSite
     public ResultMessage init() {
         wechatMessageService.init();
         return ResultUtil.success();
@@ -51,6 +53,7 @@ public class WechatMessageManageController {
         return ResultUtil.data(data);
     }
 
+    @DemoSite
     @PostMapping
     @ApiOperation(value = "新增微信消息")
     public ResultMessage<WechatMessage> save(WechatMessage wechatMessage) {
@@ -59,6 +62,7 @@ public class WechatMessageManageController {
         return ResultUtil.data(wechatMessage);
     }
 
+    @DemoSite
     @PutMapping("/{id}")
     @ApiOperation(value = "更新微信消息")
     public ResultMessage<WechatMessage> update(@PathVariable String id, WechatMessage wechatMessage) {
@@ -66,6 +70,7 @@ public class WechatMessageManageController {
         return ResultUtil.data(wechatMessage);
     }
 
+    @DemoSite
     @DeleteMapping(value = "/{ids}")
     @ApiOperation(value = "删除微信消息")
     public ResultMessage<Object> delAllByIds(@PathVariable List ids) {

@@ -85,7 +85,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
                                     .getTitle()
                     );
                 } catch (Exception e) {
-                    log.error("填充部门信息异常", e);
+                    log.debug("权限部门信息异常", e);
                 }
             }
             if (!CharSequenceUtil.isEmpty(adminUser.getRoleIds())) {
@@ -97,7 +97,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
                                     .collect(Collectors.toList())
                     );
                 } catch (Exception e) {
-                    log.error("填充部门信息异常", e);
+                    log.debug("权限色信息异常", e);
                 }
             }
             result.add(adminUserVO);

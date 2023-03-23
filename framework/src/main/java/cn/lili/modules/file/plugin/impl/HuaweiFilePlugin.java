@@ -44,7 +44,7 @@ public class HuaweiFilePlugin implements FilePlugin {
      * @return
      */
     private ObsClient getObsClient() {
-        return new ObsClient(ossSetting.getHuaweicloudOBSAccessKey(), ossSetting.getHuaweicloudOBSSecretKey(), ossSetting.getAliyunOSSEndPoint());
+        return new ObsClient(ossSetting.getHuaweicloudOBSAccessKey(), ossSetting.getHuaweicloudOBSSecretKey(), ossSetting.getHuaweicloudOBSEndPoint());
     }
 
 
@@ -72,14 +72,17 @@ public class HuaweiFilePlugin implements FilePlugin {
     public String inputStreamUpload(InputStream inputStream, String key) {
         ObsClient obsClient = getObsClient();
         try {
-            obsClient.putObject(new PutObjectRequest(ossSetting.getHuaweicloudOBSBucketName(), key, inputStream));
+            PutObjectRequest putObjectRequest=new PutObjectRequest(ossSetting.getHuaweicloudOBSBucketName(), key, inputStream);
+            obsClient.putObject(putObjectRequest);
         } catch (ObsException obsException) {
+            obsException.printStackTrace();
             throw new ServiceException(ResultCode.OSS_EXCEPTION_ERROR);
         } finally {
             try {
                 // 关闭OBS连接
                 obsClient.close();
             } catch (IOException e) {
+                e.printStackTrace();
                 log.error("OBS关闭连接报错！" + e.getMessage());
                 throw new ServiceException(ResultCode.OSS_EXCEPTION_ERROR);
             }

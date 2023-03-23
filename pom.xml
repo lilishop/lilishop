@@ -26,7 +26,7 @@
         <images-version>1</images-version>
         <alipay-sdk-version>4.22.32.ALL</alipay-sdk-version>
         <mybatis-plus-version>3.5.1</mybatis-plus-version>
-        <Hutool-version>5.8.0</Hutool-version>
+        <Hutool-version>5.8.14</Hutool-version>
         <TinyPinyin-verions>2.0.3.RELEASE</TinyPinyin-verions>
         <jasypt-version>3.0.4</jasypt-version>
         <neetl-version>2.9.10</neetl-version>
@@ -61,7 +61,7 @@
         <spring-boot-admin>2.3.1</spring-boot-admin>
         <owasp-java-html-sanitizer>20211018.2</owasp-java-html-sanitizer>
         <minio.version>8.0.3</minio.version>
-        <huaweicloud.version>3.21.8</huaweicloud.version>
+        <huaweicloud-obs.version>3.20.6.2</huaweicloud-obs.version>
         <cos.version>5.6.97</cos.version>
         <tencentcloud.version>3.1.693</tencentcloud.version>
         <kuaidi100-api.version>1.0.11</kuaidi100-api.version>
