@@ -6,6 +6,8 @@ package cn.lili.modules.distribution.entity.enums;
  * @author pikachu
  */
 public enum DistributionOrderStatusEnum {
+    //未完成
+    NO_COMPLETED("未完成"),
     //待结算（冻结）
     WAIT_BILL("待结算"),
     //待提现

@@ -81,7 +81,7 @@ public class DistributionOrder extends BaseIdEntity {
     private Integer num;
 
     public DistributionOrder(StoreFlow storeFlow) {
-        distributionOrderStatus = DistributionOrderStatusEnum.WAIT_BILL.name();
+        distributionOrderStatus = DistributionOrderStatusEnum.NO_COMPLETED.name();
         memberId = storeFlow.getMemberId();
         memberName = storeFlow.getMemberName();
         rebate = storeFlow.getDistributionRebate();
