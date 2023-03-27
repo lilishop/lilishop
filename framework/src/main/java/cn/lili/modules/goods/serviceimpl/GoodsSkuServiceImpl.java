@@ -312,9 +312,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         map.put("data", goodsSkuDetail);
 
         //获取分类
-        String[] split = goodsSkuDetail.getCategoryPath().split(",");
-        map.put("wholesaleList", wholesaleService.findByGoodsId(goodsSkuDetail.getGoodsId()));
-        map.put("categoryName", categoryService.getCategoryNameByIds(Arrays.asList(split)));
+        map.put("wholesaleList", GoodsSalesModeEnum.WHOLESALE.name().equals(goodsVO.getSalesModel()) ? wholesaleService.findByGoodsId(goodsSkuDetail.getGoodsId()) : Collections.emptyList());
+        map.put("categoryName", CharSequenceUtil.isNotEmpty(goodsIndex.getCategoryNamePath()) ? goodsIndex.getCategoryNamePath().split(",") : null);
 
         //获取规格信息
         map.put("specs", this.groupBySkuAndSpec(goodsVO.getSkuList()));

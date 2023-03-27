@@ -189,7 +189,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     }
 
     /**
-     * 修改店铺详细细腻
+     * 修改店铺详细信息
      *
      * @param storeEditDTO 修改店铺信息
      */
@@ -235,11 +235,16 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     public boolean disable(String id) {
         Store store = this.getById(id);
         if (store != null) {
-            store.setStoreDisable(StoreStatusEnum.CLOSED.value());
 
+            LambdaUpdateWrapper<Store> storeLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+            storeLambdaUpdateWrapper.eq(Store::getId, id);
+            storeLambdaUpdateWrapper.set(Store::getStoreDisable, StoreStatusEnum.CLOSED.value());
+            boolean update = this.update(storeLambdaUpdateWrapper);
             //下架所有此店铺商品
-            goodsService.underStoreGoods(id);
-            return this.updateById(store);
+            if (update) {
+                goodsService.underStoreGoods(id);
+            }
+            return update;
         }
 
         throw new ServiceException(ResultCode.STORE_NOT_EXIST);
@@ -299,7 +304,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
 
         //获取当前操作的店铺
         Store store = getStoreByMember();
-        //校验迪纳普状态
+        //校验店铺状态
         checkStoreStatus(store);
         StoreDetail storeDetail = storeDetailService.getStoreDetail(store.getId());
         //设置店铺的银行信息
@@ -312,10 +317,9 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         //获取当前操作的店铺
         Store store = getStoreByMember();
 
-        //校验迪纳普状态
+        //校验店铺状态
         checkStoreStatus(store);
         BeanUtil.copyProperties(storeOtherInfoDTO, store);
-        this.updateById(store);
 
         StoreDetail storeDetail = storeDetailService.getStoreDetail(store.getId());
         //设置店铺的其他信息
@@ -327,11 +331,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         //修改店铺详细信息
         storeDetailService.updateById(storeDetail);
         //设置店铺名称,修改店铺信息
-        store.setStoreName(storeOtherInfoDTO.getStoreName());
         store.setStoreDisable(StoreStatusEnum.APPLYING.name());
-        store.setStoreCenter(storeOtherInfoDTO.getStoreCenter());
-        store.setStoreDesc(storeOtherInfoDTO.getStoreDesc());
-        store.setStoreLogo(storeOtherInfoDTO.getStoreLogo());
         return this.updateById(store);
     }
 
@@ -342,10 +342,11 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
      */
     private void checkStoreStatus(Store store) {
 
-        //如果店铺状态为申请中或者已申请，则正常走流程，否则抛出异常
-        if (store.getStoreDisable().equals(StoreStatusEnum.APPLY.name()) || store.getStoreDisable().equals(StoreStatusEnum.APPLYING.name())) {
-            return;
-        } else {
+        //如果店铺状态为已开启、已关闭、申请中，则抛出异常
+        if (store.getStoreDisable().equals(StoreStatusEnum.OPEN.name())
+                || store.getStoreDisable().equals(StoreStatusEnum.CLOSED.name())
+                || store.getStoreDisable().equals(StoreStatusEnum.APPLYING.name())
+        ) {
             throw new ServiceException(ResultCode.STORE_STATUS_ERROR);
         }
 
@@ -381,7 +382,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         AuthUser currentUser = UserContext.getCurrentUser();
         List<String> skuIdList = new ArrayList<>();
         for (FootPrint footPrint : footprintService.list(new LambdaUpdateWrapper<FootPrint>().eq(FootPrint::getStoreId, currentUser.getStoreId()).eq(FootPrint::getMemberId, memberId))) {
-            if(footPrint.getSkuId() != null){
+            if (footPrint.getSkuId() != null) {
                 skuIdList.add(footPrint.getSkuId());
             }
         }

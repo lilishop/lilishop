@@ -2,9 +2,12 @@ package cn.lili.timetask.handler.impl.order;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.modules.distribution.service.DistributionOrderService;
 import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
@@ -68,6 +71,9 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
     @Autowired
     private AfterSaleService afterSaleService;
+
+    @Autowired
+    private DistributionOrderService distributionOrderService;
 
     /**
      * 执行每日任务
@@ -179,6 +185,15 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
                     .set(OrderItem::getAfterSaleStatus, OrderItemAfterSaleStatusEnum.EXPIRED.name())
                     .in(OrderItem::getId, orderItemIdList);
             orderItemService.update(lambdaUpdateWrapper);
+            //修改订售后状态
+            List<OrderItem> orderItemsList = orderItems.stream()
+                    .map((orderItem)->{
+                        orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.EXPIRED.name());
+                        return orderItem;
+                    })
+                    .collect(Collectors.toList());
+            //修改对应分销订单状态
+            distributionOrderService.updateDistributionOrderStatus(orderItemsList);
         }
 
     }
