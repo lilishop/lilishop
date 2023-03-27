@@ -202,8 +202,8 @@ public enum ResultCode {
     ORDER_BATCH_DELIVER_ERROR(31013, "批量发货,文件读取失败"),
     ORDER_ITEM_NOT_EXIST(31014, "当前订单项不存在！"),
     POINT_NOT_ENOUGH(31015, "当前会员积分不足购买当前积分商品！"),
-
     ORDER_LABEL_ORDER_ERROR(31016, "订单不能打印电子面单"),
+    ORDER_PRICE_ERROR(31017,"订单金额不能小于等于0"),
 
 
     /**

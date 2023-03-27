@@ -1,5 +1,7 @@
 package cn.lili.controller.order;
 
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.NumberUtil;
 import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultCode;
@@ -103,7 +105,11 @@ public class OrderStoreController {
     @PutMapping(value = "/update/{orderSn}/price")
     public ResultMessage<Object> updateOrderPrice(@PathVariable String orderSn,
                                                   @NotNull(message = "订单价格不能为空") @RequestParam Double orderPrice) {
-        return ResultUtil.data(orderPriceService.updatePrice(orderSn, orderPrice));
+        if (NumberUtil.isGreater(Convert.toBigDecimal(orderPrice), Convert.toBigDecimal(0))) {
+            return ResultUtil.data(orderPriceService.updatePrice(orderSn, orderPrice));
+        } else {
+            return ResultUtil.error(ResultCode.ORDER_PRICE_ERROR);
+        }
     }
 
     @PreventDuplicateSubmissions
