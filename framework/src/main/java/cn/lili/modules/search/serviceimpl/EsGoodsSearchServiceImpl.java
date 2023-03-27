@@ -98,7 +98,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
     @Override
     public EsGoodsRelatedInfo getSelector(EsGoodsSearchDTO goodsSearch, PageVO pageVo) {
-        NativeSearchQueryBuilder builder = createSearchQueryBuilder(goodsSearch, null);
+        NativeSearchQueryBuilder builder = createSearchQueryBuilder(goodsSearch, pageVo);
         //分类
         AggregationBuilder categoryNameBuilder = AggregationBuilders.terms("categoryNameAgg").field("categoryNamePath.keyword");
         builder.addAggregation(AggregationBuilders.terms("categoryAgg").field("categoryPath").subAggregation(categoryNameBuilder));
