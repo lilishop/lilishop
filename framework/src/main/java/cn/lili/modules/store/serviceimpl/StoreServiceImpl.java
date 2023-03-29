@@ -189,7 +189,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     }
 
     /**
-     * 修改店铺详细细腻
+     * 修改店铺详细信息
      *
      * @param storeEditDTO 修改店铺信息
      */
@@ -304,7 +304,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
 
         //获取当前操作的店铺
         Store store = getStoreByMember();
-        //校验迪纳普状态
+        //校验店铺状态
         checkStoreStatus(store);
         StoreDetail storeDetail = storeDetailService.getStoreDetail(store.getId());
         //设置店铺的银行信息
@@ -317,7 +317,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         //获取当前操作的店铺
         Store store = getStoreByMember();
 
-        //校验迪纳普状态
+        //校验店铺状态
         checkStoreStatus(store);
         BeanUtil.copyProperties(storeOtherInfoDTO, store);
 
