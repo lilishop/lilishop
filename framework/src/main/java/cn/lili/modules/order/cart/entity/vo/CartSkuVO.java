@@ -1,5 +1,6 @@
 package cn.lili.modules.order.cart.entity.vo;
 
+import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
@@ -121,6 +122,18 @@ public class CartSkuVO extends CartBase implements Serializable {
         if (promotionMap != null && !promotionMap.isEmpty()) {
             this.promotionMap = promotionMap;
         }
+    }
+
+    public void rebuildBySku(GoodsSku goodsSku) {
+        this.goodsSku = goodsSku;
+        this.purchasePrice = goodsSku.getPromotionFlag() != null && goodsSku.getPromotionFlag() ? goodsSku.getPromotionPrice() : goodsSku.getPrice();
+        this.utilPrice = goodsSku.getPromotionFlag() != null && goodsSku.getPromotionFlag() ? goodsSku.getPromotionPrice() : goodsSku.getPrice();
+
+
+        //计算购物车小计
+        this.subTotal = CurrencyUtil.mul(this.getPurchasePrice(), this.getNum());
+        this.setStoreId(goodsSku.getStoreId());
+        this.setStoreName(goodsSku.getStoreName());
     }
 
     public Map<String, Object> getPromotionMap() {
