@@ -36,7 +36,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -74,13 +77,17 @@ public class CheckDataRender implements CartRenderStep {
 
     @Override
     public void render(TradeDTO tradeDTO) {
-        //预校验
-        preCalibration(tradeDTO);
+
 
         //校验商品有效性
         checkData(tradeDTO);
 
+        //预校验
+        preCalibration(tradeDTO);
+
+        //批量销售预处理
         preSaleModel(tradeDTO);
+
         //店铺分组数据初始化
         groupStore(tradeDTO);
 
@@ -106,15 +113,12 @@ public class CheckDataRender implements CartRenderStep {
             //缓存中的商品信息
             GoodsSku dataSku = goodsSkuService.getGoodsSkuByIdFromCache(cartSkuVO.getGoodsSku().getId());
 
-
-            //商品上架状态判定
+            //商品上架状态判定  sku为空、sku非上架状态、sku审核不通过
             boolean checkGoodsStatus = dataSku == null || !GoodsAuthEnum.PASS.name().equals(dataSku.getAuthFlag()) || !GoodsStatusEnum.UPPER.name().equals(dataSku.getMarketEnable());
-            //商品有效性判定
+            //商品有效性判定 sku不为空且sku的更新时间不为空且sku的更新时间在购物车sku的更新时间之后
             boolean checkGoodsValid = dataSku != null && dataSku.getUpdateTime() != null && dataSku.getUpdateTime().after(cartSkuVO.getGoodsSku().getUpdateTime());
 
-            Map<String, Object> promotionMap = dataSku != null ? promotionGoodsService.getCurrentGoodsPromotion(dataSku, tradeDTO.getCartTypeEnum().name()) : null;
 
-            log.info("dataSku: {}, goodsSku: {}", dataSku, cartSkuVO.getGoodsSku());
             if (checkGoodsStatus || checkGoodsValid) {
                 if (checkGoodsStatus) {
                     //设置购物车未选中
@@ -125,14 +129,8 @@ public class CheckDataRender implements CartRenderStep {
                     cartSkuVO.setErrorMessage("商品已下架");
                 }
                 if (checkGoodsValid) {
-                    CartSkuVO newCartSkuVO = new CartSkuVO(dataSku,promotionMap);
-                    newCartSkuVO.setCartType(tradeDTO.getCartTypeEnum());
-                    newCartSkuVO.setNum(cartSkuVO.getNum());
-                    newCartSkuVO.setSubTotal(CurrencyUtil.mul(newCartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
-                    cartSkuVO = newCartSkuVO;
-                    log.info("商品信息已更新，更新后的商品信息为：{}", cartSkuVO);
+                    cartSkuVO.rebuildBySku(dataSku);
                 }
-                continue;
             }
 
             //商品库存判定
@@ -164,7 +162,7 @@ public class CheckDataRender implements CartRenderStep {
     private void groupStore(TradeDTO tradeDTO) {
         //渲染的购物车
         List<CartVO> cartList = new ArrayList<>();
-        if(tradeDTO.getCartList() == null || tradeDTO.getCartList().size() == 0){
+        if (tradeDTO.getCartList() == null || tradeDTO.getCartList().size() == 0) {
             //根据店铺分组
             Map<String, List<CartSkuVO>> storeCollect = tradeDTO.getSkuList().stream().collect(Collectors.groupingBy(CartSkuVO::getStoreId));
             for (Map.Entry<String, List<CartSkuVO>> storeCart : storeCollect.entrySet()) {

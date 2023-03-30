@@ -82,7 +82,7 @@ public class LogisticsStoreController {
     @DeleteMapping(value = "/{id}")
     public ResultMessage<Object> cancel(@PathVariable String id) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
-        boolean remove = storeLogisticsService.remove(new LambdaQueryWrapper<StoreLogistics>().eq(StoreLogistics::getId, id).eq(StoreLogistics::getStoreId, storeId));
+        boolean remove = storeLogisticsService.remove(new LambdaQueryWrapper<StoreLogistics>().eq(StoreLogistics::getLogisticsId, id).eq(StoreLogistics::getStoreId, storeId));
         return ResultUtil.data(remove);
     }
 

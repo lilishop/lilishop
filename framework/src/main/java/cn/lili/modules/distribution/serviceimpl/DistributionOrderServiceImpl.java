@@ -1,19 +1,26 @@
 package cn.lili.modules.distribution.serviceimpl;
 
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.utils.CurrencyUtil;
+import cn.lili.common.utils.SpringContextUtil;
 import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dos.DistributionOrder;
 import cn.lili.modules.distribution.entity.enums.DistributionOrderStatusEnum;
+import cn.lili.modules.distribution.entity.enums.DistributionStatusEnum;
 import cn.lili.modules.distribution.entity.vos.DistributionOrderSearchParams;
 import cn.lili.modules.distribution.mapper.DistributionOrderMapper;
 import cn.lili.modules.distribution.service.DistributionOrderService;
 import cn.lili.modules.distribution.service.DistributionService;
 import cn.lili.modules.order.order.entity.dos.Order;
+import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.order.order.entity.dto.StoreFlowQueryDTO;
+import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.StoreFlowService;
@@ -31,7 +38,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**
@@ -107,14 +118,7 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
                 //设置结算天数(解冻日期)
                 Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
                 DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
-                //默认解冻1天
-                if (distributionSetting.getCashDay().equals(0)) {
-                    distributionOrder.setSettleCycle(new DateTime());
-                } else {
-                    DateTime dateTime = new DateTime();
-                    dateTime = dateTime.offsetNew(DateField.DAY_OF_MONTH, distributionSetting.getCashDay());
-                    distributionOrder.setSettleCycle(dateTime);
-                }
+
 
                 //添加分销订单
                 this.save(distributionOrder);
@@ -126,15 +130,11 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
                     //如果天数写0则立即进行结算
                     if (distributionSetting.getCashDay().equals(0)) {
                         DateTime dateTime = new DateTime();
-                        dateTime = dateTime.offsetNew(DateField.MINUTE, 5);
-                        //计算分销提佣
-                        this.baseMapper.rebate(DistributionOrderStatusEnum.WAIT_BILL.name(), dateTime);
-
-                        //修改分销订单状态
-                        this.update(new LambdaUpdateWrapper<DistributionOrder>()
-                                .eq(DistributionOrder::getDistributionOrderStatus, DistributionOrderStatusEnum.WAIT_BILL.name())
-                                .le(DistributionOrder::getSettleCycle, dateTime)
-                                .set(DistributionOrder::getDistributionOrderStatus, DistributionOrderStatusEnum.WAIT_CASH.name()));
+                        dateTime = dateTime.offsetNew(DateField.DAY_OF_MONTH, -distributionSetting.getCashDay());
+                        //防止事务失效，采用上下文获取bean
+                        DistributionOrderService bean = SpringContextUtil.getBean(DistributionOrderService.class);
+                        //分销订单结算
+                        bean.updateRebate(dateTime, DistributionOrderStatusEnum.WAIT_BILL.name());
                     }
                 }
 
@@ -214,4 +214,128 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
         }
     }
 
+    @Override
+    public void updateDistributionOrderStatus(List<OrderItem> orderItems) {
+        if (orderItems.isEmpty()) {
+            return;
+        }
+
+        //获取未完成分销订单
+        List<DistributionOrder> distributionOrderList = this.list(new LambdaQueryWrapper<DistributionOrder>()
+                .eq(DistributionOrder::getDistributionOrderStatus, DistributionOrderStatusEnum.NO_COMPLETED.name()));
+
+        if (distributionOrderList.isEmpty()) {
+            return;
+        }
+
+        List<DistributionOrder> list = ListUtil.list(false);
+
+        orderItems.stream().forEach(orderItem -> {
+            //订单售后状态为已失效并且投诉状态为已失效
+            if (StrUtil.equals(OrderItemAfterSaleStatusEnum.EXPIRED.name(), orderItem.getAfterSaleStatus())) {
+
+
+                List<DistributionOrder> collect = distributionOrderList.stream()
+                        .filter(distributionOrder -> StrUtil.equals(distributionOrder.getOrderItemSn(), orderItem.getSn()))
+                        .map((distributionOrder) -> {
+                            distributionOrder.setDistributionOrderStatus(DistributionOrderStatusEnum.WAIT_BILL.name());
+                            distributionOrder.setSettleCycle(new Date());
+                            return distributionOrder;
+                        })
+                        .collect(Collectors.toList());
+
+                list.addAll(collect);
+            }
+
+        });
+
+        if (!list.isEmpty()) {
+            //批量修改分销订单结算状态
+            this.updateBatchById(list);
+        }
+    }
+
+    @Override
+    public void updateRebate(DateTime dateTime, String distributionOrderStatus) {
+        //结算时间延后五分钟
+        dateTime = dateTime.offsetNew(DateField.MINUTE, 5);
+        //获取待结算订单
+        List<DistributionOrder> distributionOrderList = this.list(new LambdaQueryWrapper<DistributionOrder>()
+                .eq(DistributionOrder::getDistributionOrderStatus, distributionOrderStatus)
+                .isNotNull(DistributionOrder::getSettleCycle)
+                .le(DistributionOrder::getSettleCycle, dateTime));
+        //校验待结算订单
+        if (ObjectUtil.isNotNull(distributionOrderList) && distributionOrderList.size() > 0) {
+            //结算分销人员信息列表
+            List<Distribution> distributionUpdateList = new ArrayList<>();
+            //获取分销员信息
+            List<Distribution> distributionList = distributionService.list(new LambdaQueryWrapper<Distribution>()
+                    .eq(Distribution::getDistributionStatus, DistributionStatusEnum.PASS.name()));
+            //根据销人员获取对应分销订单
+            Map<String, List<DistributionOrder>> distributionOrderList1 = distributionOrderList.stream()
+                    .collect(Collectors.groupingBy(DistributionOrder::getDistributionId));
+
+            //校验分销订单不为空
+            if (ObjectUtil.isNotNull(distributionOrderList1) && distributionOrderList1.size() > 0) {
+                //遍历分销订单map
+                distributionOrderList1.forEach((key, value) -> {
+                    //计算分销结算金额
+                    distributionUpdateList.add(checkDistribution(key, value, distributionList));
+                });
+            }
+
+            //校验分销信息列表不为空
+            if (ObjectUtil.isNotNull(distributionUpdateList) && !distributionUpdateList.isEmpty()) {
+                //修改分销员收益
+                distributionService.updateBatchById(distributionUpdateList);
+                distributionOrderList.stream().forEach(distributionOrder -> {
+                    //修改分销订单状态为待提现
+                    distributionOrder.setDistributionOrderStatus(DistributionOrderStatusEnum.WAIT_CASH.name());
+                });
+            }
+
+            //修改分销订单状态
+            this.updateBatchById(distributionOrderList);
+        }
+
+
+    }
+
+
+    /**
+     * 计算分销结算金额
+     *
+     * @param distributionId   分销ID
+     * @param list             分销订单
+     * @param distributionList 分销列表
+     * @return
+     */
+    public Distribution checkDistribution(String distributionId, List<DistributionOrder> list, List<Distribution> distributionList) {
+        //获取所有待结算订单分销人员信息
+        Distribution distribution = distributionList.parallelStream().filter(a -> StrUtil.equals(a.getId(), distributionId)).collect(Collectors.toList()).get(0);
+
+        //获取分销订单总金额
+        double rebate = list.stream().mapToDouble(DistributionOrder::getRebate).sum();
+
+        //检验单分销人员冻结金额为负数时.扣除负数冻结金额后再结算
+        if (distribution.getCommissionFrozen() < 0) {
+            rebate = CurrencyUtil.add(distribution.getCommissionFrozen() == null ? 0.0 : distribution.getCommissionFrozen(), rebate);
+        }
+        //结算订单总金额+分销可提现金额
+        Double canRebate = CurrencyUtil.add(rebate, distribution.getCanRebate() == null ? 0.0 : distribution.getCanRebate());
+        //结算金额小于0
+        if (canRebate < 0) {
+            //结算订单总金额+分销可提现金额
+            distribution.setCanRebate(0.0);
+            //冻结金额
+            distribution.setCommissionFrozen(canRebate);
+        } else {
+            //结算订单总金额+分销可提现金额
+            distribution.setCanRebate(canRebate);
+            //冻结金额
+            distribution.setCommissionFrozen(0.0);
+        }
+
+        return distribution;
+    }
 }

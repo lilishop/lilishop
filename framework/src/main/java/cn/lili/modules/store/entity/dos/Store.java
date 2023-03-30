@@ -82,7 +82,7 @@ public class Store extends BaseEntity {
     @ApiModelProperty(value = "服务评分")
     private Double serviceScore;
 
-    @ApiModelProperty(value = "物流描述")
+    @ApiModelProperty(value = "物流评分")
     private Double deliveryScore;
 
     @ApiModelProperty(value = "商品数量")
