@@ -17,6 +17,7 @@ import cn.lili.modules.search.entity.dto.SelectorOptions;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import cn.lili.modules.search.utils.SqlFilter;
 import com.alibaba.druid.util.StringUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.lucene.search.function.FieldValueFactorFunction;
@@ -37,15 +38,13 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.SearchHitSupport;
-import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.SearchPage;
+import org.springframework.data.elasticsearch.core.*;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * ES商品搜索业务层实现
@@ -95,6 +94,20 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         return SearchHitSupport.searchPageFor(search, searchQuery.getPageable());
     }
 
+    @Override
+    public Page<EsGoodsIndex> searchGoodsByPage(EsGoodsSearchDTO searchDTO, PageVO pageVo) {
+        SearchPage<EsGoodsIndex> esGoodsIndices = this.searchGoods(searchDTO, pageVo);
+        Page<EsGoodsIndex> resultPage = new Page<>();
+        if (esGoodsIndices != null && !esGoodsIndices.getContent().isEmpty()) {
+            List<EsGoodsIndex> collect = esGoodsIndices.getSearchHits().getSearchHits().stream().map(SearchHit::getContent).collect(Collectors.toList());
+            resultPage.setRecords(collect);
+            resultPage.setPages(esGoodsIndices.getTotalPages());
+            resultPage.setCurrent(esGoodsIndices.getNumber() + 1L);
+            resultPage.setSize(esGoodsIndices.getSize());
+            resultPage.setTotal(esGoodsIndices.getTotalElements());
+        }
+        return resultPage;
+    }
 
     @Override
     public EsGoodsRelatedInfo getSelector(EsGoodsSearchDTO goodsSearch, PageVO pageVo) {
