@@ -608,7 +608,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     }
 
     private void executeUpdateEsGoodsIndexAll(BasePromotions promotion, String key) {
-        for (int i = 1; ; i++) {
+        for (int i = 0; ; i++) {
             List<String> skuIds;
             //如果storeId不为空，则表示是店铺活动
             if (promotion.getStoreId() != null && !promotion.getStoreId().equals(PromotionTools.PLATFORM_ID)) {
