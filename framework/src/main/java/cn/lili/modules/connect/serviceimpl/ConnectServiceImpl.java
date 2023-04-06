@@ -187,8 +187,8 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             connectAuthUser.setAvatar(params.getImage());
             connectAuthUser.setUsername("m" + phone);
             connectAuthUser.setPhone(phone);
-            connectAuthUser.setSource(ConnectEnum.WECHAT.name());
-            connectAuthUser.setType(ClientTypeEnum.WECHAT_MP.name());
+            connectAuthUser.setSource(ClientTypeEnum.WECHAT_MP.name());
+            connectAuthUser.setType(ConnectEnum.WECHAT.name());
 
             AuthToken authToken = new AuthToken();
             authToken.setUnionId(unionId);
