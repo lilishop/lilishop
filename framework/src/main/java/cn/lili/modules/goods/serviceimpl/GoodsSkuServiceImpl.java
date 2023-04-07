@@ -176,8 +176,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 //如果商品状态值不对，则es索引移除
                 if (goods.getAuthFlag().equals(GoodsAuthEnum.PASS.name()) && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())) {
                     goodsIndexService.deleteIndexById(sku.getId());
-                    this.clearCache(sku.getId());
                 }
+                this.clearCache(sku.getId());
             }
         }
         if (!skuList.isEmpty()) {
