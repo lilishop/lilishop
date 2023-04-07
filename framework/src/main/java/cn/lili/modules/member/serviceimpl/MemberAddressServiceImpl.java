@@ -69,9 +69,7 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
     @Transactional(rollbackFor = Exception.class)
     public MemberAddress updateMemberAddress(MemberAddress memberAddress) {
         MemberAddress originalMemberAddress = this.getMemberAddress(memberAddress.getId());
-        if (originalMemberAddress != null &&
-                originalMemberAddress.getMemberId().equals(Objects.requireNonNull(UserContext.getCurrentUser()).getId())) {
-
+        if (originalMemberAddress != null) {
             if (memberAddress.getIsDefault() == null) {
                 memberAddress.setIsDefault(false);
             }
