@@ -34,6 +34,10 @@ public class PromotionTools {
     public static final String PLATFORM_ID = "0";
     public static final String PLATFORM_NAME = "platform";
 
+    private PromotionTools() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * 参数验证
      * 1、活动起始时间必须大于当前时间
@@ -87,10 +91,40 @@ public class PromotionTools {
         } else {
             queryWrapper.ge(START_TIME_COLUMN, DateUtil.beginOfDay(startTime)).le(END_TIME_COLUMN, DateUtil.endOfDay(endTime));
         }
-        queryWrapper.eq(CharSequenceUtil.isNotEmpty(storeId), "store_id", storeId);
-        queryWrapper.ne(CharSequenceUtil.isNotEmpty(activityId), "id", activityId);
+        if (storeId != null) {
+            queryWrapper.eq("store_id", storeId);
+        }
+        if (activityId != null) {
+            queryWrapper.ne("id", activityId);
+        }
         queryWrapper.and(i -> i.or(queryPromotionStatus(PromotionsStatusEnum.NEW)).or(queryPromotionStatus(PromotionsStatusEnum.START)));
         queryWrapper.eq("delete_flag", false);
+        return queryWrapper;
+    }
+
+    /**
+     * 检查商品是否重复参加同类型活动
+     *
+     * @param exceptType 排除的促销活动类型（可同时参加的活动类型）
+     * @param skuIds     商品skuId
+     * @param activityId 当前活动id
+     * @return mybatis plus query wrapper对象
+     */
+    public static QueryWrapper<PromotionGoods> checkSkuDuplicate(List<PromotionTypeEnum> exceptType, List<String> skuIds, String activityId) {
+        QueryWrapper<PromotionGoods> queryWrapper = new QueryWrapper<>();
+        if (skuIds != null && !skuIds.isEmpty()) {
+            queryWrapper.in("sku_id", skuIds);
+        }
+        if (CharSequenceUtil.isNotEmpty(activityId)) {
+            queryWrapper.ne("id", activityId);
+        }
+        queryWrapper.and(i -> i.or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START)).or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.NEW)));
+
+        if (exceptType != null) {
+            queryWrapper.notIn(!exceptType.isEmpty(), "promotion_type", exceptType.stream().map(PromotionTypeEnum::name).collect(Collectors.toList()));
+        }
+        queryWrapper.eq("delete_flag", false);
+
         return queryWrapper;
     }
 
@@ -158,6 +192,12 @@ public class PromotionTools {
         return nextHour;
     }
 
+    /**
+     * 过滤无效促销活动
+     *
+     * @param map 促销活动map
+     * @return 过滤后的促销活动map
+     */
     public static Map<String, Object> filterInvalidPromotionsMap(Map<String, Object> map) {
         if (CollUtil.isEmpty(map)) {
             return new HashMap<>();
@@ -173,9 +213,22 @@ public class PromotionTools {
                 return i.getValue() != null;
             }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> newValue));
         } catch (Exception e) {
-            log.error("过滤无效促销活动出现异常。异常促销信息：{}，异常信息：{} ", map, e);
+            log.error("过滤无效促销活动出现异常。异常促销信息：{}，异常信息 ", map, e);
             return new HashMap<>();
         }
+    }
+
+    /**
+     * 是否为需要检查的促销活动类型(用于判定部分类型的商品不能参与活动的条件)
+     * 内容为不需要检查的促销活动类型
+     *
+     * @param key 促销key
+     * @return 当前促销key是否存在
+     */
+    public static boolean isPromotionsTypeNeedsToChecked(String key) {
+        return !CharSequenceUtil.containsAny(key,
+                PromotionTypeEnum.COUPON.name(),
+                PromotionTypeEnum.FULL_DISCOUNT.name());
     }
 
 }

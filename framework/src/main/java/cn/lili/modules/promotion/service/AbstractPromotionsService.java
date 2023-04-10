@@ -128,4 +128,11 @@ public interface AbstractPromotionsService<T extends BasePromotions> extends ISe
      */
     PromotionTypeEnum getPromotionType();
 
+    /**
+     * 是否允许同一时间内存在相同的促销
+     *
+     * @return 是否允许同一时间内存在相同的促销
+     */
+    boolean allowExistSame();
+
 }

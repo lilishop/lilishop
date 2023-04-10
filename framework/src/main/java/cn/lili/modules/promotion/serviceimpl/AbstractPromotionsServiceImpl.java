@@ -192,6 +192,9 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
     @Override
     public void checkPromotions(T promotions) {
         PromotionTools.checkPromotionTime(promotions.getStartTime(), promotions.getEndTime());
+        if (!this.allowExistSame()) {
+            this.checkSamePromotions(promotions);
+        }
     }
 
     /**
@@ -261,6 +264,23 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
             // 促销实体
             map.put("promotions", promotions);
             applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品索引促销事件", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.UPDATE_GOODS_INDEX_PROMOTIONS.name(), JSONUtil.toJsonStr(map)));
+        }
+    }
+
+    @Override
+    public boolean allowExistSame() {
+        return false;
+    }
+
+    public void checkSamePromotions(T promotions) {
+        if (promotions.getStartTime() == null || promotions.getEndTime() == null) {
+            return;
+        }
+        QueryWrapper<T> queryWrapper = PromotionTools.checkActiveTime(promotions.getStartTime(), promotions.getEndTime(), this.getPromotionType(), promotions.getStoreId(), promotions.getId());
+        long sameNum = this.count(queryWrapper);
+        //当前时间段是否存在同类活动
+        if (sameNum > 0) {
+            throw new ServiceException(ResultCode.PROMOTION_SAME_ACTIVE_EXIST);
         }
     }
 
