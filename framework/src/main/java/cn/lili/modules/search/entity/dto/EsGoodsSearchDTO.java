@@ -58,6 +58,24 @@ public class EsGoodsSearchDTO {
     @ApiModelProperty(value = "促销活动id")
     private String promotionsId;
 
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型")
+    private String goodsType;
+
+    @ApiModelProperty("销售模式")
+    private String salesModel;
+
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "除了当前商品类型之外")
+    private String neGoodsType;
+
+    @ApiModelProperty("除了销售模式当前销售模式之外")
+    private String neSalesModel;
+
     //过滤搜索关键字
     public String getKeyword() {
         if (CharSequenceUtil.isNotEmpty(keyword)) {

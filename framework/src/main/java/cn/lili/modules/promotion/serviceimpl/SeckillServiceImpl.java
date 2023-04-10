@@ -262,17 +262,6 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
             promotions.setStartTime(DateUtil.parse(startTimeStr, DatePattern.NORM_DATETIME_MINUTE_PATTERN));
             promotions.setEndTime(DateUtil.endOfDay(promotions.getStartTime()));
         }
-        if (promotions.getStartTime() != null && promotions.getEndTime() != null) {
-            //同一时间段内相同的活动
-            QueryWrapper<Seckill> queryWrapper = PromotionTools.checkActiveTime(promotions.getStartTime(), promotions.getEndTime(), PromotionTypeEnum.SECKILL, null, promotions.getId());
-            long sameNum = this.count(queryWrapper);
-            //当前时间段是否存在同类活动
-            if (sameNum > 0) {
-                throw new ServiceException(ResultCode.PROMOTION_SAME_ACTIVE_EXIST);
-            }
-        }
-
-
     }
 
     /**

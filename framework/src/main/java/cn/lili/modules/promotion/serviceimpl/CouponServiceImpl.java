@@ -310,11 +310,11 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
      */
     private void checkCouponPortionGoods(CouponVO coupon) {
         String[] split = coupon.getScopeId().split(",");
-        if (split.length <= 0) {
+        if (split.length == 0) {
             throw new ServiceException(ResultCode.COUPON_SCOPE_ERROR);
         }
         for (String id : split) {
-            GoodsSku goodsSku = goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(id);
+            GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(id);
             if (goodsSku == null) {
                 throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
             }

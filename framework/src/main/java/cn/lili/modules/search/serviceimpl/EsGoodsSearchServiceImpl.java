@@ -466,6 +466,20 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         if (searchDTO.getRecommend() != null) {
             filterBuilder.filter(QueryBuilders.termQuery("recommend", searchDTO.getRecommend()));
         }
+        // 商品类型判定
+        if (CharSequenceUtil.isNotEmpty(searchDTO.getGoodsType())) {
+            filterBuilder.filter(QueryBuilders.termQuery("goodsType", searchDTO.getGoodsType()));
+        }
+        if (CharSequenceUtil.isNotEmpty(searchDTO.getNeGoodsType())) {
+            filterBuilder.mustNot(QueryBuilders.termQuery("goodsType", searchDTO.getNeGoodsType()));
+        }
+        // 销售类型判定
+        if (CharSequenceUtil.isNotEmpty(searchDTO.getSalesModel())) {
+            filterBuilder.filter(QueryBuilders.termQuery("salesModel", searchDTO.getSalesModel()));
+        }
+        if (CharSequenceUtil.isNotEmpty(searchDTO.getNeSalesModel())) {
+            filterBuilder.mustNot(QueryBuilders.termQuery("salesModel", searchDTO.getNeSalesModel()));
+        }
         //规格项判定
         if (searchDTO.getNameIds() != null && !searchDTO.getNameIds().isEmpty()) {
             filterBuilder.must(QueryBuilders.nestedQuery(ATTR_PATH, QueryBuilders.termsQuery("attrList.nameId", searchDTO.getNameIds()), ScoreMode.None));

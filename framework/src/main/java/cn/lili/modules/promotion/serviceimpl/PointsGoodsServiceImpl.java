@@ -74,7 +74,8 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
             if (this.checkSkuDuplicate(pointsGoods.getSkuId(), null) == null) {
                 pointsGoods.setPromotionName("积分商品活动");
             } else {
-                throw new ServiceException("商品id为" + pointsGoods.getSkuId() + "的商品已参加积分商品活动！");
+                throw new ServiceException(ResultCode.PROMOTION_LOG_EXIST, "商品id为" + pointsGoods.getSkuId() +
+                        "的商品已参加积分商品活动！");
             }
             GoodsSku goodsSku = this.checkSkuExist(pointsGoods.getSkuId());
             pointsGoods.setStoreId(goodsSku.getStoreId());
