@@ -167,6 +167,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 skuQueryWrapper.eq("gs.auth_flag", GoodsAuthEnum.PASS.name());
                 skuQueryWrapper.eq("gs.market_enable", GoodsStatusEnum.UPPER.name());
                 skuQueryWrapper.eq("gs.delete_flag", false);
+                skuQueryWrapper.gt("gs.quantity", 0);
 
 
                 Map<String, Long> resultMap = (Map<String, Long>) cache.get(CachePrefix.INIT_INDEX_PROCESS.getPrefix());
@@ -176,6 +177,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                     skuCountQueryWrapper.eq("auth_flag", GoodsAuthEnum.PASS.name());
                     skuCountQueryWrapper.eq("market_enable", GoodsStatusEnum.UPPER.name());
                     skuCountQueryWrapper.eq("delete_flag", false);
+                    skuCountQueryWrapper.ge("quantity", 0);
                     resultMap = new HashMap<>();
                     resultMap.put(KEY_SUCCESS, 0L);
                     resultMap.put(KEY_FAIL, 0L);
@@ -606,7 +608,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     }
 
     private void executeUpdateEsGoodsIndexAll(BasePromotions promotion, String key) {
-        for (int i = 1; ; i++) {
+        for (int i = 0; ; i++) {
             List<String> skuIds;
             //如果storeId不为空，则表示是店铺活动
             if (promotion.getStoreId() != null && !promotion.getStoreId().equals(PromotionTools.PLATFORM_ID)) {

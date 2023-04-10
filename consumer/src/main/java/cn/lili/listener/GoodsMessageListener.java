@@ -343,6 +343,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
             searchParams.setGoodsId(goods.getId());
             searchParams.setPageNumber(i);
             searchParams.setPageSize(BATCH_SIZE);
+            searchParams.setGeQuantity(0);
             IPage<GoodsSku> goodsSkuByPage = this.goodsSkuService.getGoodsSkuByPage(searchParams);
             if (goodsSkuByPage == null || goodsSkuByPage.getRecords().isEmpty()) {
                 break;

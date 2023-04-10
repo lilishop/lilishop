@@ -460,6 +460,14 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/src/main/resources/maven-repository/SF-CSIM-EXPRESS-SDK-V2.1.7.jar</systemPath>
         </dependency>
+        <!-- netty-resolver-dns-native-macos -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-resolver-dns-native-macos</artifactId>
+            <version>4.1.90.Final</version>
+            <scope>runtime</scope>
+            <classifier>osx-aarch_64</classifier>
+        </dependency>
     </dependencies>
 
 
