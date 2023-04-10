@@ -14,6 +14,7 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.utils.HttpUtils;
+import cn.lili.common.utils.UuidUtils;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.AuthToken;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
@@ -179,16 +180,26 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             String iv = params.getIv();
             JSONObject userInfo = this.getUserInfo(encryptedData, sessionKey, iv);
             log.info("联合登陆返回：{}", userInfo.toString());
-            String phone = (String) userInfo.get("purePhoneNumber");
+
 
             ConnectAuthUser connectAuthUser = new ConnectAuthUser();
             connectAuthUser.setUuid(openId);
             connectAuthUser.setNickname(params.getNickName());
             connectAuthUser.setAvatar(params.getImage());
-            connectAuthUser.setUsername("m" + phone);
-            connectAuthUser.setPhone(phone);
-            connectAuthUser.setSource(ConnectEnum.WECHAT.name());
-            connectAuthUser.setType(ClientTypeEnum.WECHAT_MP.name());
+
+            if (userInfo.containsKey("purePhoneNumber")) {
+                String phone = (String) userInfo.get("purePhoneNumber");
+                connectAuthUser.setUsername("m" + phone);
+                connectAuthUser.setPhone(phone);
+                connectAuthUser.setSource(ConnectEnum.WECHAT.name());
+                connectAuthUser.setType(ClientTypeEnum.WECHAT_MP.name());
+
+            } else {
+                connectAuthUser.setUsername(UuidUtils.getUUID());
+                connectAuthUser.setSource(ConnectEnum.WECHAT.name());
+                connectAuthUser.setType(ClientTypeEnum.WECHAT_MP.name());
+            }
+
 
             AuthToken authToken = new AuthToken();
             authToken.setUnionId(unionId);
@@ -204,9 +215,12 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     public Connect queryConnect(ConnectQueryDTO connectQueryDTO) {
 
         LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(CharSequenceUtil.isNotEmpty(connectQueryDTO.getUserId()), Connect::getUserId, connectQueryDTO.getUserId())
-                .eq(CharSequenceUtil.isNotEmpty(connectQueryDTO.getUnionType()), Connect::getUnionType, connectQueryDTO.getUnionType())
-                .eq(CharSequenceUtil.isNotEmpty(connectQueryDTO.getUnionId()), Connect::getUnionId, connectQueryDTO.getUnionId());
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(connectQueryDTO.getUserId()), Connect::getUserId,
+                        connectQueryDTO.getUserId())
+                .eq(CharSequenceUtil.isNotEmpty(connectQueryDTO.getUnionType()), Connect::getUnionType,
+                        connectQueryDTO.getUnionType())
+                .eq(CharSequenceUtil.isNotEmpty(connectQueryDTO.getUnionId()), Connect::getUnionId,
+                        connectQueryDTO.getUnionId());
         return this.getOne(queryWrapper);
     }
 
@@ -265,7 +279,8 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
                         .eq(Connect::getUnionType, authUser.getSource());
             } else {
                 //使用OpenID登录
-                SourceEnum sourceEnum = SourceEnum.getSourceEnum(ConnectEnum.valueOf(authUser.getType()), ClientTypeEnum.valueOf(authUser.getSource()));
+                SourceEnum sourceEnum = SourceEnum.getSourceEnum(ConnectEnum.valueOf(authUser.getType()),
+                        ClientTypeEnum.valueOf(authUser.getSource()));
                 queryWrapper.eq(Connect::getUnionId, authUser.getToken().getUnionId())
                         .eq(Connect::getUnionType, sourceEnum.name());
             }
@@ -289,9 +304,11 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             MemberConnectLoginMessage memberConnectLoginMessage = new MemberConnectLoginMessage();
             memberConnectLoginMessage.setMember(member);
             memberConnectLoginMessage.setConnectAuthUser(authUser);
-            String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_CONNECT_LOGIN.name();
+            String destination =
+                    rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_CONNECT_LOGIN.name();
             //发送用户第三方登录消息
-            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(memberConnectLoginMessage), RocketmqSendCallbackBuilder.commonCallback());
+            rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(memberConnectLoginMessage),
+                    RocketmqSendCallbackBuilder.commonCallback());
 
             return memberTokenGenerate.createToken(member, longTerm);
         } catch (Exception e) {
@@ -308,7 +325,8 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     private WechatConnectSettingItem getWechatMPSetting() {
         Setting setting = settingService.get(SettingEnum.WECHAT_CONNECT.name());
 
-        WechatConnectSetting wechatConnectSetting = JSONUtil.toBean(setting.getSettingValue(), WechatConnectSetting.class);
+        WechatConnectSetting wechatConnectSetting = JSONUtil.toBean(setting.getSettingValue(),
+                WechatConnectSetting.class);
 
         if (wechatConnectSetting == null) {
             throw new ServiceException(ResultCode.WECHAT_CONNECT_NOT_EXIST);
