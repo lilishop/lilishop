@@ -165,4 +165,9 @@ public interface MemberCouponService extends IService<MemberCoupon> {
      */
     Page<MemberCouponVO> getMemberCouponsPage(Page<MemberCoupon> page, MemberCouponSearchParams param);
 
+    /**
+     * 获取会员领取过的优惠券数量
+     */
+    long getMemberCouponNum(String memberId, String couponId);
+
 }
