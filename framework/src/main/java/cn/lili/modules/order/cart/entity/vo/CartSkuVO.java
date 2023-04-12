@@ -102,6 +102,9 @@ public class CartSkuVO extends CartBase implements Serializable {
      */
     public CartSkuVO(GoodsSku goodsSku) {
         this.goodsSku = goodsSku;
+        if (goodsSku.getUpdateTime() == null) {
+            this.goodsSku.setUpdateTime(goodsSku.getCreateTime());
+        }
         this.checked = true;
         this.invalid = false;
         //默认时间为0，让系统为此商品更新缓存
