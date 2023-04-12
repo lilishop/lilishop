@@ -1,13 +1,13 @@
 package cn.lili.modules.member.serviceimpl;
 
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.vo.PageVO;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.entity.dto.FootPrintQueryParams;
 import cn.lili.modules.member.mapper.FootprintMapper;
 import cn.lili.modules.member.service.FootprintService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
-import cn.lili.modules.search.service.EsGoodsSearchService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -18,9 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -34,7 +32,7 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
 
 
     @Autowired
-    private EsGoodsSearchService esGoodsSearchService;
+    private GoodsSkuService goodsSkuService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -74,23 +72,25 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
 
     @Override
     public IPage<EsGoodsIndex> footPrintPage(FootPrintQueryParams params) {
-        IPage<FootPrint> footPrintPages = this.page(PageUtil.initPage(params), params.queryWrapper());
+        params.setSort("createTime");
+        Page<FootPrint> footPrintPages = this.page(PageUtil.initPage(params), params.queryWrapper());
         //定义结果
-        IPage<EsGoodsIndex> esGoodsIndexIPage = new Page<>();
+        Page<EsGoodsIndex> esGoodsIndexIPage = new Page<>();
 
-        if (footPrintPages.getRecords() == null || footPrintPages.getRecords().isEmpty()) {
-            return esGoodsIndexIPage;
-        } else {
-            List<EsGoodsIndex> list = esGoodsSearchService.getEsGoodsBySkuIds(
-                    footPrintPages.getRecords().stream().map(FootPrint::getSkuId).collect(Collectors.toList()), params);
-
+        if (footPrintPages.getRecords() != null && !footPrintPages.getRecords().isEmpty()) {
+            List<String> skuIds = footPrintPages.getRecords().stream().map(FootPrint::getSkuId).collect(Collectors.toList());
+            List<GoodsSku> goodsSkuByIdFromCache = goodsSkuService.getGoodsSkuByIdFromCache(skuIds);
             esGoodsIndexIPage.setPages(footPrintPages.getPages());
-            esGoodsIndexIPage.setRecords(list);
+            esGoodsIndexIPage.setRecords(goodsSkuByIdFromCache.stream().map(i -> {
+                Optional<FootPrint> first = footPrintPages.getRecords().stream().filter(j -> j.getSkuId().equals(i.getId())).findFirst();
+                return first.map(footPrint -> new EsGoodsIndex(i, footPrint.getCreateTime())).orElseGet(() -> new EsGoodsIndex(i));
+            }).sorted(Comparator.comparingLong(EsGoodsIndex::getReleaseTime).reversed()).collect(Collectors.toList()));
             esGoodsIndexIPage.setTotal(footPrintPages.getTotal());
             esGoodsIndexIPage.setSize(footPrintPages.getSize());
             esGoodsIndexIPage.setCurrent(footPrintPages.getCurrent());
             return esGoodsIndexIPage;
         }
+        return esGoodsIndexIPage;
     }
 
     @Override
