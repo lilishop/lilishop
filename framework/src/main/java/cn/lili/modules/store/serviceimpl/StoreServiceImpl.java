@@ -227,7 +227,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         } else {
             store.setStoreDisable(StoreStatusEnum.REFUSED.value());
         }
-
+        cache.remove(CachePrefix.STORE.getPrefix()+store.getId());
         return this.updateById(store);
     }
 
