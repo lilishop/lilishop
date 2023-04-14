@@ -52,7 +52,7 @@ public class TencentFilePlugin implements FilePlugin {
         // 1 初始化用户身份信息（secretId, secretKey）。
         COSCredentials cred = new BasicCOSCredentials(ossSetting.getTencentCOSSecretId(), ossSetting.getTencentCOSSecretKey());
         // 2 设置 bucket 的地域, COS 地域的简称请参见 https://cloud.tencent.com/document/product/436/6224
-        ClientConfig clientConfig = new ClientConfig(new Region("COS_REGION"));
+        ClientConfig clientConfig = new ClientConfig(new Region(ossSetting.getTencentCOSRegion()));
         // 这里建议设置使用 https 协议
         clientConfig.setHttpProtocol(HttpProtocol.https);
         // 3 生成 cos 客户端。
@@ -66,7 +66,8 @@ public class TencentFilePlugin implements FilePlugin {
      * @return
      */
     private String getUrlPrefix() {
-        return "https://" + ossSetting.getTencentCOSBucket() + "." + ossSetting.getTencentCOSEndPoint() + "/";
+//        return "https://" + ossSetting.getTencentCOSBucket() + "." + ossSetting.getTencentCOSEndPoint() + "/";
+        return "https://" + ossSetting.getTencentCOSBucket() + ".cos" + ossSetting.getTencentCOSEndPoint() + ".myqcloud.com/";
     }
 
     @Override

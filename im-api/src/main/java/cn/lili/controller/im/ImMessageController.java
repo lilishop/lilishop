@@ -75,7 +75,7 @@ public class ImMessageController {
         return ResultUtil.data(imMessageService.hasNewMessage(accessToken));
     }
 
-    @GetMapping(value = "/unredMessage")
+    @GetMapping(value = "/unreadMessage")
     @ApiOperation(value = "获取所有未读消息")
     public ResultMessage<Long> getUnreadMessageCount() {
         return ResultUtil.data(imMessageService.unreadMessageCount());
