@@ -19,7 +19,6 @@ import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -65,12 +64,6 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
         AuthUser authUser = UserContext.getCurrentUser();
         if (authUser != null) {
 
-            LambdaQueryWrapper<MemberSign> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(MemberSign::getMemberId, authUser.getId());
-            List<MemberSign> signSize = this.baseMapper.getTodayMemberSign(queryWrapper);
-            if (!signSize.isEmpty()) {
-                throw new ServiceException(ResultCode.MEMBER_SIGN_REPEAT);
-            }
             //当前签到天数的前一天日期
             List<MemberSign> signs = this.baseMapper.getBeforeMemberSign(authUser.getId());
             //构建参数
