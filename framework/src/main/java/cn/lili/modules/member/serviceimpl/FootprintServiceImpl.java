@@ -18,8 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * 会员浏览历史业务层实现
@@ -80,11 +84,19 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
         if (footPrintPages.getRecords() != null && !footPrintPages.getRecords().isEmpty()) {
             List<String> skuIds = footPrintPages.getRecords().stream().map(FootPrint::getSkuId).collect(Collectors.toList());
             List<GoodsSku> goodsSkuByIdFromCache = goodsSkuService.getGoodsSkuByIdFromCache(skuIds);
+            List<EsGoodsIndex> collect = IntStream.range(0, goodsSkuByIdFromCache.size())
+                    .mapToObj(i -> {
+                        if (goodsSkuByIdFromCache.get(i) == null) {
+                            EsGoodsIndex esGoodsIndex = new EsGoodsIndex();
+                            esGoodsIndex.setReleaseTime(footPrintPages.getRecords().get(i).getCreateTime().getTime());
+                            return esGoodsIndex;
+                        }
+                        Optional<FootPrint> first = footPrintPages.getRecords().stream().filter(j -> j.getSkuId().equals(goodsSkuByIdFromCache.get(i).getId())).findFirst();
+                        return first.map(footPrint -> new EsGoodsIndex(goodsSkuByIdFromCache.get(i), footPrint.getCreateTime())).orElseGet(() -> new EsGoodsIndex(goodsSkuByIdFromCache.get(i)));
+                    })
+                    .collect(Collectors.toList());
             esGoodsIndexIPage.setPages(footPrintPages.getPages());
-            esGoodsIndexIPage.setRecords(goodsSkuByIdFromCache.stream().map(i -> {
-                Optional<FootPrint> first = footPrintPages.getRecords().stream().filter(j -> j.getSkuId().equals(i.getId())).findFirst();
-                return first.map(footPrint -> new EsGoodsIndex(i, footPrint.getCreateTime())).orElseGet(() -> new EsGoodsIndex(i));
-            }).sorted(Comparator.comparingLong(EsGoodsIndex::getReleaseTime).reversed()).collect(Collectors.toList()));
+            esGoodsIndexIPage.setRecords(collect);
             esGoodsIndexIPage.setTotal(footPrintPages.getTotal());
             esGoodsIndexIPage.setSize(footPrintPages.getSize());
             esGoodsIndexIPage.setCurrent(footPrintPages.getCurrent());
