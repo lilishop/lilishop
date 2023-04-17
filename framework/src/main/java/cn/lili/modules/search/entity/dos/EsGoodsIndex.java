@@ -350,6 +350,11 @@ public class EsGoodsIndex implements Serializable {
         }
     }
 
+    public EsGoodsIndex(GoodsSku sku, Date createDate) {
+        this(sku);
+        this.releaseTime = createDate.getTime();
+    }
+
     public void setGoodsSku(GoodsSku sku) {
         if (sku != null) {
             this.id = sku.getId();

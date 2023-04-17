@@ -327,6 +327,14 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         return this.baseMapper.getMemberCoupons(page, queryWrapper);
     }
 
+    @Override
+    public long getMemberCouponNum(String memberId, String couponId) {
+        LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MemberCoupon::getMemberId, memberId);
+        queryWrapper.eq(MemberCoupon::getCouponId, couponId);
+        return this.count(queryWrapper);
+    }
+
     /**
      * 清除无效的会员优惠券
      *

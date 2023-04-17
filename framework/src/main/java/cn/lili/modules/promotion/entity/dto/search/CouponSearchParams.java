@@ -103,7 +103,7 @@ public class CouponSearchParams extends BasePromotionsSearchParams implements Se
 
         }
         if (this.getStartTime() != null) {
-            queryWrapper.ge("start_time", new Date(this.getEndTime()));
+            queryWrapper.ge("start_time", new Date(this.getStartTime()));
         }
         if (this.getEndTime() != null) {
             queryWrapper.le("end_time", new Date(this.getEndTime()));

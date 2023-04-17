@@ -22,6 +22,7 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
+import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.BrandService;
 import cn.lili.modules.goods.service.CategoryService;
@@ -167,6 +168,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                 skuQueryWrapper.eq("gs.auth_flag", GoodsAuthEnum.PASS.name());
                 skuQueryWrapper.eq("gs.market_enable", GoodsStatusEnum.UPPER.name());
                 skuQueryWrapper.eq("gs.delete_flag", false);
+                skuQueryWrapper.gt("gs.quantity", 0);
 
 
                 Map<String, Long> resultMap = (Map<String, Long>) cache.get(CachePrefix.INIT_INDEX_PROCESS.getPrefix());
@@ -176,6 +178,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                     skuCountQueryWrapper.eq("auth_flag", GoodsAuthEnum.PASS.name());
                     skuCountQueryWrapper.eq("market_enable", GoodsStatusEnum.UPPER.name());
                     skuCountQueryWrapper.eq("delete_flag", false);
+                    skuCountQueryWrapper.ge("quantity", 0);
                     resultMap = new HashMap<>();
                     resultMap.put(KEY_SUCCESS, 0L);
                     resultMap.put(KEY_FAIL, 0L);
@@ -540,6 +543,10 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     public UpdateRequest updateEsGoodsIndexPromotions(String id, BasePromotions promotion, String key) {
         EsGoodsIndex goodsIndex = findById(id);
         if (goodsIndex != null) {
+            // 批发商品不参与促销（除优惠券和满减）
+            if (PromotionTools.isPromotionsTypeNeedsToChecked(key) && GoodsSalesModeEnum.WHOLESALE.name().equals(goodsIndex.getSalesModel())) {
+                return null;
+            }
             //更新索引
             return this.updateGoodsIndexPromotion(goodsIndex, key, promotion);
         } else {
@@ -606,26 +613,25 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     }
 
     private void executeUpdateEsGoodsIndexAll(BasePromotions promotion, String key) {
-        for (int i = 1; ; i++) {
+        for (int i = 0; ; i++) {
             List<String> skuIds;
+            PageVO pageVO = new PageVO();
+            pageVO.setPageNumber(i);
+            pageVO.setPageSize(1000);
+            EsGoodsSearchDTO searchDTO = new EsGoodsSearchDTO();
+            if (PromotionTools.isPromotionsTypeNeedsToChecked(key)) {
+                searchDTO.setSalesModel(GoodsSalesModeEnum.RETAIL.name());
+            }
             //如果storeId不为空，则表示是店铺活动
             if (promotion.getStoreId() != null && !promotion.getStoreId().equals(PromotionTools.PLATFORM_ID)) {
-                PageVO pageVO = new PageVO();
-                pageVO.setPageNumber(i);
-                pageVO.setPageSize(1000);
-                EsGoodsSearchDTO searchDTO = new EsGoodsSearchDTO();
                 searchDTO.setStoreId(promotion.getStoreId());
-                //查询出店铺商品
-                SearchPage<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(searchDTO, pageVO);
-
-                skuIds = esGoodsIndices.isEmpty() ? new ArrayList<>() : esGoodsIndices.getContent().stream().map(SearchHit::getId).collect(Collectors.toList());
-            } else {
-                //否则是平台活动
-                org.springframework.data.domain.Page<EsGoodsIndex> all = goodsIndexRepository.findAll(PageRequest.of(i, 1000));
-
-                //查询出全部商品
-                skuIds = all.isEmpty() ? new ArrayList<>() : all.toList().stream().map(EsGoodsIndex::getId).collect(Collectors.toList());
             }
+
+            //查询出店铺商品
+            SearchPage<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(searchDTO, pageVO);
+
+            skuIds = esGoodsIndices.isEmpty() ? new ArrayList<>() :
+                    esGoodsIndices.getContent().stream().map(SearchHit::getId).collect(Collectors.toList());
             if (skuIds.isEmpty()) {
                 break;
             }

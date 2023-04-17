@@ -27,7 +27,7 @@ public interface FootprintMapper extends BaseMapper<FootPrint> {
             "    FROM li_foot_print " +
             "    WHERE member_id = ${memberId} " +
             "    ORDER BY create_time DESC " +
-            "    LIMIT 1 " +
+            "    LIMIT 100 " +
             "  ) AS keep " +
             ") AS latest_footprints " +
             "ON li_foot_print.id = latest_footprints.id " +

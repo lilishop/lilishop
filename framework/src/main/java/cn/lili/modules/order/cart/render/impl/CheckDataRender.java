@@ -120,6 +120,9 @@ public class CheckDataRender implements CartRenderStep {
 
 
             if (checkGoodsStatus || checkGoodsValid) {
+                if (checkGoodsValid) {
+                    cartSkuVO.rebuildBySku(dataSku);
+                }
                 if (checkGoodsStatus) {
                     //设置购物车未选中
                     cartSkuVO.setChecked(false);
@@ -127,10 +130,9 @@ public class CheckDataRender implements CartRenderStep {
                     cartSkuVO.setInvalid(true);
                     //设置失效消息
                     cartSkuVO.setErrorMessage("商品已下架");
+                    continue;
                 }
-                if (checkGoodsValid) {
-                    cartSkuVO.rebuildBySku(dataSku);
-                }
+
             }
 
             //商品库存判定
