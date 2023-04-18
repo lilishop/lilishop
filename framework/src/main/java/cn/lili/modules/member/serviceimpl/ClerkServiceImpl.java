@@ -189,10 +189,12 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
         clerk.setIsSuper(clerkAddDTO.getIsSuper());
         //校验此会员是否已经是店员
         Clerk temp = this.getClerkByMemberId(clerkAddDTO.getMemberId());
-        if (temp != null && !temp.getStoreId().equals(UserContext.getCurrentUser().getStoreId())) {
+
+        //店员信息不为空
+        if (temp != null && !temp.getStoreId().equals(clerkAddDTO.getStoreId())) {
             throw new ServiceException(ResultCode.CLERK_USER_ERROR);
         }
-        if (temp != null && temp.getStoreId().equals(UserContext.getCurrentUser().getStoreId())) {
+        if (temp != null && temp.getStoreId().equals(clerkAddDTO.getStoreId())) {
             throw new ServiceException(ResultCode.CLERK_ALREADY_EXIT_ERROR);
         }
         //部门校验
