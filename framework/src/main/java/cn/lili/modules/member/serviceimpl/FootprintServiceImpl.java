@@ -88,6 +88,9 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
                     .mapToObj(i -> {
                         if (goodsSkuByIdFromCache.get(i) == null) {
                             EsGoodsIndex esGoodsIndex = new EsGoodsIndex();
+                            FootPrint footPrint = footPrintPages.getRecords().get(i);
+                            esGoodsIndex.setGoodsId(footPrint.getGoodsId());
+                            esGoodsIndex.setId(footPrint.getSkuId());
                             esGoodsIndex.setReleaseTime(footPrintPages.getRecords().get(i).getCreateTime().getTime());
                             return esGoodsIndex;
                         }
