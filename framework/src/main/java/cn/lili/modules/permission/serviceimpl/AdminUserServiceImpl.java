@@ -142,11 +142,24 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     @Override
     public void logout(UserEnums userEnums) {
         String currentUserToken = UserContext.getCurrentUserToken();
+        AuthUser authUser = UserContext.getAuthUser(currentUserToken);
+
         if (CharSequenceUtil.isNotEmpty(currentUserToken)) {
-            cache.remove(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums) + currentUserToken);
+            cache.remove(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums, authUser.getId()) + currentUserToken);
+            cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums, authUser.getId()));
         }
     }
 
+    @Override
+    public void logout(List<String> adminUserIds) {
+        if (adminUserIds == null || adminUserIds.isEmpty()) {
+            return;
+        }
+        adminUserIds.forEach(adminUserId -> {
+            cache.vagueDel(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MANAGER, adminUserId));
+            cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(UserEnums.MANAGER, adminUserId));
+        });
+    }
 
     @Override
     public AdminUser findByUsername(String username) {
@@ -234,6 +247,8 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
         QueryWrapper<UserRole> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("user_id", ids);
         userRoleService.remove(queryWrapper);
+
+        this.logout(ids);
     }
 
     /**

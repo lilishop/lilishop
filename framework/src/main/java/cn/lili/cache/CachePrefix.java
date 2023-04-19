@@ -555,4 +555,16 @@ public enum CachePrefix {
     public String getPrefix(UserEnums user) {
         return "{" + this.name() + "_" + user.name() + "}_";
     }
+
+    /**
+     * 获取缓存key值 + 用户端 +自定义前缀
+     * 例如：三端都有用户体系，需要分别登录，如果用户名一致，则redis中的权限可能会冲突出错
+     *
+     * @param user         角色
+     * @param customPrefix 自定义前缀
+     * @return 缓存key值
+     */
+    public String getPrefix(UserEnums user, String customPrefix) {
+        return "{" + this.name() + "_" + user.name() + "}_" + customPrefix + "_";
+    }
 }

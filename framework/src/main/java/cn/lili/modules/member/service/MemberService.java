@@ -11,11 +11,10 @@ import cn.lili.modules.member.entity.dto.MemberAddDTO;
 import cn.lili.modules.member.entity.dto.MemberEditDTO;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
 import cn.lili.modules.member.entity.vo.MemberVO;
-import cn.lili.modules.member.entity.vo.QRLoginResultVo;
 import cn.lili.modules.member.entity.vo.QRCodeLoginSessionVo;
+import cn.lili.modules.member.entity.vo.QRLoginResultVo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.elasticsearch.monitor.os.OsStats;
 
 import java.util.List;
 import java.util.Map;
@@ -259,6 +258,13 @@ public interface MemberService extends IService<Member> {
      * @param userEnums token角色类型
      */
     void logout(UserEnums userEnums);
+
+    /**
+     * 登出
+     *
+     * @param userId 用户id
+     */
+    void logout(String userId);
 
     /**
      * 修改会员是否拥有店铺
