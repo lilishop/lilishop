@@ -191,13 +191,13 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
                 String phone = (String) userInfo.get("purePhoneNumber");
                 connectAuthUser.setUsername("m" + phone);
                 connectAuthUser.setPhone(phone);
-                connectAuthUser.setSource(ConnectEnum.WECHAT.name());
-                connectAuthUser.setType(ClientTypeEnum.WECHAT_MP.name());
+                connectAuthUser.setSource(ClientTypeEnum.WECHAT_MP.name());
+                connectAuthUser.setType(ConnectEnum.WECHAT.name());
 
             } else {
                 connectAuthUser.setUsername(UuidUtils.getUUID());
-                connectAuthUser.setSource(ConnectEnum.WECHAT.name());
-                connectAuthUser.setType(ClientTypeEnum.WECHAT_MP.name());
+                connectAuthUser.setSource(ClientTypeEnum.WECHAT_MP.name());
+                connectAuthUser.setType(ConnectEnum.WECHAT.name());
             }
 
 
