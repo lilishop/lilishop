@@ -69,8 +69,8 @@ public class BaseAuthQQRequest extends BaseAuthRequest {
                 .uuid(openId)
                 .gender(AuthUserGender.getRealGender(object.getString("gender")))
                 .token(authToken)
-                .source(ConnectEnum.QQ.name())
-                .type(ClientTypeEnum.PC.name())
+                .source(ConnectEnum.QQ)
+                .type(ClientTypeEnum.PC)
                 .build();
     }
 

@@ -191,15 +191,11 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
                 String phone = (String) userInfo.get("purePhoneNumber");
                 connectAuthUser.setUsername("m" + phone);
                 connectAuthUser.setPhone(phone);
-                connectAuthUser.setSource(ClientTypeEnum.WECHAT_MP.name());
-                connectAuthUser.setType(ConnectEnum.WECHAT.name());
-
             } else {
                 connectAuthUser.setUsername(UuidUtils.getUUID());
-                connectAuthUser.setSource(ClientTypeEnum.WECHAT_MP.name());
-                connectAuthUser.setType(ConnectEnum.WECHAT.name());
             }
-
+            connectAuthUser.setSource(ConnectEnum.WECHAT);
+            connectAuthUser.setType(ClientTypeEnum.WECHAT_MP);
 
             AuthToken authToken = new AuthToken();
             authToken.setUnionId(unionId);
@@ -270,33 +266,39 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
      */
     private Token unionLoginCallback(ConnectAuthUser authUser, boolean longTerm) {
 
-
         try {
-            LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<Connect>();
-            //使用UnionId登录
-            if (StrUtil.isNotBlank(authUser.getToken().getUnionId())) {
-                queryWrapper.eq(Connect::getUnionId, authUser.getToken().getUnionId())
-                        .eq(Connect::getUnionType, authUser.getSource());
-            } else {
-                //使用OpenID登录
-                SourceEnum sourceEnum = SourceEnum.getSourceEnum(ConnectEnum.valueOf(authUser.getType()),
-                        ClientTypeEnum.valueOf(authUser.getSource()));
-                queryWrapper.eq(Connect::getUnionId, authUser.getUuid())
-                        .eq(Connect::getUnionType, sourceEnum.name());
+            Member member =null;
+            //判断是否传递手机号，如果传递手机号则使用手机号登录
+            if(StrUtil.isNotBlank(authUser.getPhone())){
+                member = memberService.findByMobile(authUser.getPhone());
             }
+            //如果未查到手机号的会员则使用第三方登录
+            if(member==null){
+                LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<Connect>();
+                //使用UnionId登录
+                if (StrUtil.isNotBlank(authUser.getToken().getUnionId())) {
+                    queryWrapper.eq(Connect::getUnionId, authUser.getToken().getUnionId())
+                            .eq(Connect::getUnionType, authUser.getSource());
+                } else {
+                    //使用OpenID登录
+                    SourceEnum sourceEnum = SourceEnum.getSourceEnum(authUser.getSource(), authUser.getType());
+                    queryWrapper.eq(Connect::getUnionId, authUser.getUuid())
+                            .eq(Connect::getUnionType, sourceEnum.name());
+                }
 
-            //查询绑定关系
-            Connect connect = this.getOne(queryWrapper);
-            Member member = new Member();
-            if (connect == null) {
-                member = memberService.autoRegister(authUser);
-            } else {
-                //查询会员
-                member = memberService.getById(connect.getUserId());
-                //如果未绑定会员，则把刚才查询到的联合登录表数据删除
-                if (member == null) {
-                    this.remove(queryWrapper);
+                //查询绑定关系
+                Connect connect = this.getOne(queryWrapper);
+
+                if (connect == null) {
                     member = memberService.autoRegister(authUser);
+                } else {
+                    //查询会员
+                    member = memberService.getById(connect.getUserId());
+                    //如果未绑定会员，则把刚才查询到的联合登录表数据删除
+                    if (member == null) {
+                        this.remove(queryWrapper);
+                        member = memberService.autoRegister(authUser);
+                    }
                 }
             }
 

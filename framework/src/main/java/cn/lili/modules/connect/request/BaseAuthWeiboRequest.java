@@ -12,6 +12,7 @@ import cn.lili.modules.connect.entity.dto.AuthToken;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.entity.enums.AuthResponseStatus;
 import cn.lili.modules.connect.entity.enums.AuthUserGender;
+import cn.lili.modules.connect.entity.enums.ConnectEnum;
 import cn.lili.modules.connect.exception.AuthException;
 import cn.lili.common.utils.HttpUtils;
 import cn.lili.common.utils.IpUtils;
@@ -72,7 +73,7 @@ public class BaseAuthWeiboRequest extends BaseAuthRequest {
                 .remark(object.getString("description"))
                 .gender(AuthUserGender.getRealGender(object.getString("gender")))
                 .token(authToken)
-                .source(source.toString())
+                .source(ConnectEnum.WEIBO)
                 .build();
     }
 

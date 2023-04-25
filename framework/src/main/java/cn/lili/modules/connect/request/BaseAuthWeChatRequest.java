@@ -64,8 +64,8 @@ public class BaseAuthWeChatRequest extends BaseAuthRequest {
                 .uuid(openId)
                 .gender(AuthUserGender.getWechatRealGender(object.getString("sex")))
                 .token(authToken)
-                .source(ConnectEnum.WECHAT.name())
-                .type(ClientTypeEnum.H5.name())
+                .source(ConnectEnum.WECHAT)
+                .type(ClientTypeEnum.H5)
                 .build();
     }
 
