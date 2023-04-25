@@ -281,7 +281,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
                 //使用OpenID登录
                 SourceEnum sourceEnum = SourceEnum.getSourceEnum(ConnectEnum.valueOf(authUser.getType()),
                         ClientTypeEnum.valueOf(authUser.getSource()));
-                queryWrapper.eq(Connect::getUnionId, authUser.getToken().getUnionId())
+                queryWrapper.eq(Connect::getUnionId, authUser.getUuid())
                         .eq(Connect::getUnionType, sourceEnum.name());
             }
 
