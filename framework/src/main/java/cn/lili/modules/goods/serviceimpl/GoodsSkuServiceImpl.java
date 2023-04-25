@@ -3,6 +3,7 @@ package cn.lili.modules.goods.serviceimpl;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
@@ -529,9 +530,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     public void updateStock(String skuId, Integer quantity) {
         GoodsSku goodsSku = getGoodsSkuByIdFromCache(skuId);
         if (goodsSku != null) {
-            if (quantity <= 0) {
-                goodsIndexService.deleteIndexById(goodsSku.getId());
-            }
+            //判断商品sku是否已经下架(修改商品库存为0时  会自动下架商品),再次更新商品库存时 需更新商品索引
+            Boolean isFlag = goodsSku.getQuantity()<= 0;
+
             goodsSku.setQuantity(quantity);
             boolean update =
                     this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
@@ -546,6 +547,16 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             goodsSkus.add(goodsSku);
             this.updateGoodsStuck(goodsSkus);
             this.promotionGoodsService.updatePromotionGoodsStock(goodsSku.getId(), quantity);
+            //商品库存为0是删除商品索引
+            if (quantity <= 0) {
+                goodsIndexService.deleteIndexById(goodsSku.getId());
+            }
+            //商品SKU库存为0并且商品sku状态为上架时更新商品库存
+            if(isFlag && StrUtil.equals(goodsSku.getMarketEnable(),GoodsStatusEnum.UPPER.name())) {
+                List<String> goodsIds = new ArrayList<>();
+                goodsIds.add(goodsSku.getGoodsId());
+                applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.UPDATE_GOODS_INDEX.name(), goodsIds));
+            }
         }
     }
 

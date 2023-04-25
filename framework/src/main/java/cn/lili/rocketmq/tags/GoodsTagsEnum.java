@@ -56,6 +56,10 @@ public enum GoodsTagsEnum {
      */
     GOODS_COLLECTION("收藏商品"),
     /**
+     * 同步商品分类名称
+     */
+    CATEGORY_GOODS_NAME("同步商品分类名称"),
+    /**
      * "购买商品完成"
      */
     BUY_GOODS_COMPLETE("购买商品完成"),
