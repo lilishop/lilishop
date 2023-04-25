@@ -12,6 +12,8 @@ import cn.lili.modules.connect.entity.dto.AuthToken;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.entity.enums.AuthResponseStatus;
 import cn.lili.modules.connect.entity.enums.AuthUserGender;
+import cn.lili.modules.connect.entity.enums.ConnectEnum;
+import cn.lili.modules.connect.entity.enums.SourceEnum;
 import cn.lili.modules.connect.exception.AuthException;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
@@ -119,7 +121,7 @@ public class BaseAuthAlipayRequest extends BaseAuthRequest {
             .location(location)
             .gender(AuthUserGender.getRealGender(response.getGender()))
             .token(authToken)
-            .source(source.toString())
+            .source(ConnectEnum.ALIPAY)
             .build();
     }
 
