@@ -247,9 +247,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             authUser.setAvatar("https://i.loli.net/2020/11/19/LyN6JF7zZRskdIe.png");
         }
         try {
-            String username = UuidUtils.getUUID();
-            Member member = new Member(username, UuidUtils.getUUID(), authUser.getAvatar(), authUser.getNickname(),
-                    authUser.getGender() != null ? Convert.toInt(authUser.getGender().getCode()) : 0);
+//            String username = UuidUtils.getUUID();
+            Member member = new Member(authUser.getUsername(), UuidUtils.getUUID(), authUser.getAvatar(), authUser.getNickname(),
+                    authUser.getGender() != null ? Convert.toInt(authUser.getGender().getCode()) : 0,authUser.getPhone());
             member.setPassword(DEFAULT_PASSWORD);
             // 发送会员注册信息
             registerHandler(member);
