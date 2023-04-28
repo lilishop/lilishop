@@ -49,6 +49,10 @@ public class MemberExecute implements MemberLoginEvent, MemberConnectLoginEvent 
             SourceEnum sourceEnum = SourceEnum.getSourceEnum(authUser.getSource(), authUser.getType());
             connectService.loginBindUser(member.getId(), authUser.getUuid(), sourceEnum.name());
         }
+        //保存手机号，判断用户是否存手机号，如果不存在则保存手机号
+        if (StrUtil.isNotBlank(authUser.getPhone())&&StrUtil.isBlank(member.getMobile())) {
+            memberService.changeMobile(member.getId(),member.getMobile());
+        }
 
     }
 }

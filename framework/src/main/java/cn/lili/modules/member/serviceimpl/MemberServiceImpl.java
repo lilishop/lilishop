@@ -432,6 +432,15 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @Override
+    public boolean changeMobile(String memberId, String mobile) {
+        //修改会员手机号
+        LambdaUpdateWrapper<Member> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+        lambdaUpdateWrapper.eq(Member::getId, memberId);
+        lambdaUpdateWrapper.set(Member::getMobile, mobile);
+        return this.update(lambdaUpdateWrapper);
+    }
+
+    @Override
     public boolean resetByMobile(String uuid, String password) {
         String phone = cache.get(CachePrefix.FIND_MOBILE + uuid).toString();
         //根据手机号获取会员判定是否存在此会员

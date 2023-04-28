@@ -147,6 +147,14 @@ public interface MemberService extends IService<Member> {
      */
     boolean changeMobile(String mobile);
 
+    /**
+     * 修改用户手机号
+     * @param memberId 会员ID
+     * @param mobile 手机号
+     * @return
+     */
+    boolean changeMobile(String memberId,String mobile);
+
 
     /**
      * 通过手机号修改密码
