@@ -67,4 +67,10 @@ public class MemberWithdrawApply extends BaseEntity {
     @ApiModelProperty(value = "第三方平台账号")
     private String connectNumber;
 
+    /**
+     * 支付宝登录账号
+     */
+    @ApiModelProperty(value = "第三方错误消息")
+    private String errorMessage;
+
 }

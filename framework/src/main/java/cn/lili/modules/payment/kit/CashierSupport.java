@@ -19,6 +19,7 @@ import cn.lili.modules.system.entity.dto.payment.dto.PaymentSupportItem;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
+import cn.lili.modules.wallet.entity.dto.TransferResultDTO;
 import cn.lili.modules.wallet.service.MemberWalletService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,7 +150,7 @@ public class CashierSupport {
      * @param paymentMethodEnum   支付渠道
      * @param memberWithdrawApply 用户提现申请
      */
-    public boolean transfer(PaymentMethodEnum paymentMethodEnum, MemberWithdrawApply memberWithdrawApply) {
+    public TransferResultDTO transfer(PaymentMethodEnum paymentMethodEnum, MemberWithdrawApply memberWithdrawApply) {
         Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
         return payment.transfer(memberWithdrawApply);
     }

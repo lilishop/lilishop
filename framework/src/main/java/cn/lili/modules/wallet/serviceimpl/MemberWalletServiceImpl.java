@@ -22,6 +22,7 @@ import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
 import cn.lili.modules.wallet.entity.dos.WalletLog;
 import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
 import cn.lili.modules.wallet.entity.dto.MemberWithdrawalMessage;
+import cn.lili.modules.wallet.entity.dto.TransferResultDTO;
 import cn.lili.modules.wallet.entity.enums.DepositServiceTypeEnum;
 import cn.lili.modules.wallet.entity.enums.WithdrawStatusEnum;
 import cn.lili.modules.wallet.entity.vo.MemberWalletVO;
@@ -312,7 +313,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
     }
 
     @Override
-    public Boolean withdrawal(String withdrawApplyId) {
+    public void withdrawal(String withdrawApplyId) {
         MemberWithdrawApply memberWithdrawApply = memberWithdrawApplyService.getById(withdrawApplyId);
         memberWithdrawApply.setInspectTime(new Date());
         //获取提现设置
@@ -320,20 +321,18 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         WithdrawalSetting withdrawalSetting = new Gson().fromJson(setting.getSettingValue(), WithdrawalSetting.class);
 
         //调用提现方法
-        boolean result = true;
-        if ("WECHAT".equals(withdrawalSetting.getType())) {
-            result = cashierSupport.transfer(PaymentMethodEnum.WECHAT, memberWithdrawApply);
-        } else if ("ALI".equals(withdrawalSetting.getType())) {
-            result = cashierSupport.transfer(PaymentMethodEnum.ALIPAY, memberWithdrawApply);
-        }
+        TransferResultDTO transferResultDTO = "WECHAT".equals(withdrawalSetting.getType()) ?
+                cashierSupport.transfer(PaymentMethodEnum.WECHAT, memberWithdrawApply) : cashierSupport.transfer(PaymentMethodEnum.ALIPAY,
+                memberWithdrawApply);
 
         //成功则扣减冻结金额
         //失败则恢复冻结金额
 
-        if (result) {
+        if (transferResultDTO.getResult()) {
             memberWithdrawApply.setApplyStatus(WithdrawStatusEnum.SUCCESS.name());
         } else {
             memberWithdrawApply.setApplyStatus(WithdrawStatusEnum.ERROR.name());
+            memberWithdrawApply.setErrorMessage(transferResultDTO.getResponse());
         }
         //修改提现申请
         this.memberWithdrawApplyService.updateById(memberWithdrawApply);
@@ -348,7 +347,6 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
 
         String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_WITHDRAWAL.name();
         rocketMQTemplate.asyncSend(destination, memberWithdrawalMessage, RocketmqSendCallbackBuilder.commonCallback());
-        return result;
     }
 
 }
