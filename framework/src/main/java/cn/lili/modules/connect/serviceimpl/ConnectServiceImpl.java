@@ -217,7 +217,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
                         connectQueryDTO.getUnionType())
                 .eq(CharSequenceUtil.isNotEmpty(connectQueryDTO.getUnionId()), Connect::getUnionId,
                         connectQueryDTO.getUnionId());
-        return this.getOne(queryWrapper);
+        return this.getOne(queryWrapper,false);
     }
 
     @Override

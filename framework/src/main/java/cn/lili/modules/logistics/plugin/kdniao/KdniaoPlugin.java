@@ -200,8 +200,9 @@ public class KdniaoPlugin implements LogisticsPlugin {
             JSONObject obj = JSONObject.parseObject(result);
             log.info("电子面单响应：{}", result);
             if (!"100".equals(obj.getString("ResultCode"))) {
-                resultMap.put("Reason",obj.getString("Reason"));
-                return resultMap;
+//                resultMap.put("Reason",obj.getString("Reason"));
+                throw new ServiceException(obj.getString("Reason"));
+//                return resultMap;
             }
 
             JSONObject orderJson = JSONObject.parseObject(obj.getString("Order"));
