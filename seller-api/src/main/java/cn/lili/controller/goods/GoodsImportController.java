@@ -29,15 +29,9 @@ public class GoodsImportController {
 
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiOperation(value = "上传文件，商品批量添加")
-    public ResultMessage<Object> importExcel(@RequestPart("files") MultipartFile files) {
-        try {
-            goodsImportService.importExcel(files);
-            return ResultUtil.success(ResultCode.SUCCESS);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ServiceException(ResultCode.ERROR);
-        }
-
+    public ResultMessage<Object> importExcel(@RequestPart("files") MultipartFile files) throws Exception {
+        goodsImportService.importExcel(files);
+        return ResultUtil.success(ResultCode.SUCCESS);
     }
 
 
