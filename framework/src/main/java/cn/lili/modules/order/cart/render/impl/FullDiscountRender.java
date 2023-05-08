@@ -16,6 +16,7 @@ import cn.lili.modules.order.cart.render.util.PromotionPriceUtil;
 import cn.lili.modules.order.order.entity.dto.DiscountPriceItem;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.promotion.entity.dos.FullDiscount;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,6 +71,9 @@ public class FullDiscountRender implements CartRenderStep {
                     cart.setFullDiscount(fullDiscountVO);
                     Map<String, Double> skuPriceDetail = new HashMap<>(16);
                     for (CartSkuVO cartSkuVO : cart.getSkuList()) {
+                        if (PromotionsScopeTypeEnum.PORTION_GOODS.name().equals(fullDiscountVO.getScopeType()) && fullDiscountVO.getScopeId() != null && !fullDiscountVO.getScopeId().contains(cartSkuVO.getGoodsSku().getId())) {
+                            continue;
+                        }
                         skuPriceDetail.put(cartSkuVO.getGoodsSku().getId(), cartSkuVO.getPriceDetailDTO().getGoodsPrice());
                     }
                     if (!skuPriceDetail.isEmpty()) {
