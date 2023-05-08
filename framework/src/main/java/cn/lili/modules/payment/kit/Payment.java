@@ -7,6 +7,7 @@ import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.dto.PayParam;
 import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
+import cn.lili.modules.wallet.entity.dto.TransferResultDTO;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -114,7 +115,7 @@ public interface Payment {
     /**
      * 提现
      */
-    default boolean transfer(MemberWithdrawApply memberWithdrawApply) {
+    default TransferResultDTO transfer(MemberWithdrawApply memberWithdrawApply) {
         throw new ServiceException(ResultCode.PAY_ERROR);
     }
 

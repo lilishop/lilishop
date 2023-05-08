@@ -19,7 +19,6 @@ import cn.lili.common.security.token.Token;
 import cn.lili.common.sensitive.SensitiveWordsFilter;
 import cn.lili.common.utils.*;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.connect.config.ConnectAuthEnum;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.service.ConnectService;
@@ -248,9 +247,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             authUser.setAvatar("https://i.loli.net/2020/11/19/LyN6JF7zZRskdIe.png");
         }
         try {
-            String username = UuidUtils.getUUID();
-            Member member = new Member(username, UuidUtils.getUUID(), authUser.getAvatar(), authUser.getNickname(),
-                    authUser.getGender() != null ? Convert.toInt(authUser.getGender().getCode()) : 0);
+//            String username = UuidUtils.getUUID();
+            Member member = new Member(authUser.getUsername(), UuidUtils.getUUID(), authUser.getAvatar(), authUser.getNickname(),
+                    authUser.getGender() != null ? Convert.toInt(authUser.getGender().getCode()) : 0,authUser.getPhone());
             member.setPassword(DEFAULT_PASSWORD);
             // 发送会员注册信息
             registerHandler(member);
@@ -309,7 +308,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         this.save(member);
 
         // 发送会员注册信息
-        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("new member register", rocketmqCustomProperties.getMemberTopic(), MemberTagsEnum.MEMBER_REGISTER.name(), member));
+        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("new member register", rocketmqCustomProperties.getMemberTopic(),
+                MemberTagsEnum.MEMBER_REGISTER.name(), member));
     }
 
     @Override
@@ -432,6 +432,15 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @Override
+    public boolean changeMobile(String memberId, String mobile) {
+        //修改会员手机号
+        LambdaUpdateWrapper<Member> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+        lambdaUpdateWrapper.eq(Member::getId, memberId);
+        lambdaUpdateWrapper.set(Member::getMobile, mobile);
+        return this.update(lambdaUpdateWrapper);
+    }
+
+    @Override
     public boolean resetByMobile(String uuid, String password) {
         String phone = cache.get(CachePrefix.FIND_MOBILE + uuid).toString();
         //根据手机号获取会员判定是否存在此会员
@@ -456,7 +465,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         checkMember(memberAddDTO.getUsername(), memberAddDTO.getMobile());
 
         //添加会员
-        Member member = new Member(memberAddDTO.getUsername(), new BCryptPasswordEncoder().encode(memberAddDTO.getPassword()), memberAddDTO.getMobile());
+        Member member = new Member(memberAddDTO.getUsername(), new BCryptPasswordEncoder().encode(memberAddDTO.getPassword()),
+                memberAddDTO.getMobile());
         registerHandler(member);
         return member;
     }
@@ -525,7 +535,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 memberPointMessage.setPoint(point);
                 memberPointMessage.setType(type);
                 memberPointMessage.setMemberId(memberId);
-                applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("update member point", rocketmqCustomProperties.getMemberTopic(), MemberTagsEnum.MEMBER_POINT_CHANGE.name(), memberPointMessage));
+                applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("update member point",
+                        rocketmqCustomProperties.getMemberTopic(), MemberTagsEnum.MEMBER_POINT_CHANGE.name(), memberPointMessage));
                 return true;
             }
             return false;
@@ -540,6 +551,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         updateWrapper.set("disabled", status);
         updateWrapper.in("id", memberIds);
 
+        //如果是禁用
+        if (Boolean.FALSE.equals(status)) {
+            disableMemberLogout(memberIds);
+        }
         return this.update(updateWrapper);
     }
 
@@ -680,8 +695,33 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Override
     public void logout(UserEnums userEnums) {
         String currentUserToken = UserContext.getCurrentUserToken();
+
+        AuthUser authUser = UserContext.getAuthUser(currentUserToken);
+
         if (CharSequenceUtil.isNotEmpty(currentUserToken)) {
-            cache.remove(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums) + currentUserToken);
+            cache.remove(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums, authUser.getId()) + currentUserToken);
+            cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums, authUser.getId()) );
+        }
+    }
+
+    @Override
+    public void logout(String userId) {
+
+        cache.vagueDel(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MANAGER, userId));
+        cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(UserEnums.MANAGER, userId));
+    }
+
+    /**
+     * 禁用会员会员token删除
+     *
+     * @param memberIds 会员id
+     */
+    public void disableMemberLogout(List<String> memberIds) {
+        if (memberIds != null) {
+            memberIds.forEach(memberId -> {
+                cache.vagueDel(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MEMBER, memberId));
+                cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(UserEnums.MEMBER, memberId));
+            });
         }
     }
 

@@ -184,4 +184,10 @@ public interface GoodsService extends IService<Goods> {
      */
     long countStoreGoodsNum(String storeId);
 
+    /**
+     * 同步商品分类名称
+     *
+     * @param categoryId 分类ID
+     */
+    void categoryGoodsName(String categoryId);
 }

@@ -494,6 +494,16 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
                         .eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name()));
     }
 
+    @Override
+    public void categoryGoodsName(String categoryId) {
+        //获取分类下的商品
+        List<Goods> list = this.list(new LambdaQueryWrapper<Goods>().like(Goods::getCategoryPath,categoryId));
+        list.parallelStream().forEach(goods->{
+            //移除redis中商品缓存
+            cache.remove(CachePrefix.GOODS.getPrefix() + goods.getId());
+        });
+    }
+
 
     /**
      * 更新商品状态

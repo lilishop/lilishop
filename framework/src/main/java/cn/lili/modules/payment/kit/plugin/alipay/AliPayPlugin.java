@@ -27,6 +27,7 @@ import cn.lili.modules.system.entity.dto.payment.AlipayPaymentSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
+import cn.lili.modules.wallet.entity.dto.TransferResultDTO;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.domain.*;
@@ -170,7 +171,8 @@ public class AliPayPlugin implements Payment {
             payModel.setTimeoutExpress("3m");
             payModel.setOutTradeNo(outTradeNo);
             log.info("支付宝扫码：{}", payModel);
-            String resultStr = AliPayRequest.tradePrecreatePayToResponse(payModel, notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY)).getBody();
+            String resultStr =
+                    AliPayRequest.tradePrecreatePayToResponse(payModel, notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY)).getBody();
 
             log.info("支付宝扫码交互返回：{}", resultStr);
             JSONObject jsonObject = JSONObject.parseObject(resultStr);
@@ -202,7 +204,8 @@ public class AliPayPlugin implements Payment {
                 refundLog.setIsRefund(true);
                 refundLog.setReceivableNo(refundLog.getOutOrderNo());
             } else {
-                refundLog.setErrorMessage(String.format("错误码：%s,错误原因：%s", alipayTradeRefundResponse.getSubCode(), alipayTradeRefundResponse.getSubMsg()));
+                refundLog.setErrorMessage(String.format("错误码：%s,错误原因：%s", alipayTradeRefundResponse.getSubCode(),
+                        alipayTradeRefundResponse.getSubMsg()));
             }
             refundLogService.save(refundLog);
         } catch (Exception e) {
@@ -237,7 +240,7 @@ public class AliPayPlugin implements Payment {
      * @param memberWithdrawApply 会员提现申请
      */
     @Override
-    public boolean transfer(MemberWithdrawApply memberWithdrawApply) {
+    public TransferResultDTO transfer(MemberWithdrawApply memberWithdrawApply) {
         AlipayFundTransUniTransferModel model = new AlipayFundTransUniTransferModel();
         model.setOutBizNo(SnowFlake.createStr("T"));
         model.setRemark("用户提现");
@@ -257,15 +260,15 @@ public class AliPayPlugin implements Payment {
             AlipayFundTransUniTransferResponse alipayFundTransUniTransferResponse = AliPayApi.uniTransferToResponse(model, null);
             log.error("支付宝退款，参数：{},支付宝响应：{}", JSONUtil.toJsonStr(model), JSONUtil.toJsonStr(alipayFundTransUniTransferResponse));
             if (alipayFundTransUniTransferResponse.isSuccess()) {
-                return true;
+                return TransferResultDTO.builder().result(true).build();
             } else {
                 log.error(alipayFundTransUniTransferResponse.getSubMsg());
+                return TransferResultDTO.builder().result(false).response(alipayFundTransUniTransferResponse.getSubMsg()).build();
             }
         } catch (Exception e) {
             log.error("用户提现异常：", e);
-            throw new ServiceException(ResultCode.PAY_ERROR);
+            return TransferResultDTO.builder().result(false).response(e.getMessage()).build();
         }
-        return false;
     }
 
     /**
