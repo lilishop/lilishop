@@ -235,6 +235,9 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                         if (count >= 1) {
                             skuSource -= count;
                         }
+                        if (skuSource <= 0) {
+                            skuSource = 1;
+                        }
                         esGoodsIndex.setSkuSource(skuSource);
 
 

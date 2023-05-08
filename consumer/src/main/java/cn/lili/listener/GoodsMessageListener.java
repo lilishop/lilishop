@@ -382,7 +382,11 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
         List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
         for (GoodsSku goodsSku : goodsSkuList) {
             EsGoodsIndex goodsIndex = this.settingUpGoodsIndexData(goods, goodsSku);
-            goodsIndex.setSkuSource(skuSource--);
+            skuSource--;
+            if (skuSource <= 0) {
+                skuSource = 1;
+            }
+            goodsIndex.setSkuSource(skuSource);
             log.info("goodsSku：{}", goodsSku);
             log.info("生成商品索引 {}", goodsIndex);
             esGoodsIndices.add(goodsIndex);
