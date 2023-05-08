@@ -112,9 +112,9 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
         List<T> promotionsList = this.list(new QueryWrapper<T>().in("id", ids));
         for (T t : promotionsList) {
             if (startTime != null && endTime != null) {
-                this.checkPromotions(t);
                 t.setStartTime(new Date(startTime));
                 t.setEndTime(new Date(endTime));
+                this.checkPromotions(t);
             } else {
                 t.setStartTime(null);
                 t.setEndTime(null);
