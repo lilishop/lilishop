@@ -29,7 +29,8 @@ public class PromotionPriceUtil {
      * @param discountPrice      需要分发的优惠金额
      * @param promotionTypeEnum  促销类型
      */
-    public static void recountPrice(TradeDTO tradeDTO, Map<String, Double> skuPromotionDetail, Double discountPrice, PromotionTypeEnum promotionTypeEnum, String activityId) {
+    public static void recountPrice(TradeDTO tradeDTO, Map<String, Double> skuPromotionDetail, Double discountPrice,
+                                    PromotionTypeEnum promotionTypeEnum, String activityId) {
 
         // sku 促销信息非空判定
         if (skuPromotionDetail == null || skuPromotionDetail.size() == 0) {
@@ -116,7 +117,8 @@ public class PromotionPriceUtil {
      * @param promotionTypeEnum 优惠类型
      * @param activityId        优惠活动id
      */
-    private static void calculateCartSkuPromotionsPrice(CartSkuVO cartSkuVO, Double skuDiscountPrice, PromotionTypeEnum promotionTypeEnum, String activityId) {
+    private static void calculateCartSkuPromotionsPrice(CartSkuVO cartSkuVO, Double skuDiscountPrice, PromotionTypeEnum promotionTypeEnum,
+                                                        String activityId) {
         //优惠券金额，则计入优惠券 ，其他则计入总的discount price
         if (promotionTypeEnum == PromotionTypeEnum.COUPON) {
 
@@ -179,14 +181,16 @@ public class PromotionPriceUtil {
      * @param promotionTypeEnum  优惠类型
      * @param activityId         优惠活动id
      */
-    private static void calculateNotEnoughPromotionsPrice(List<CartSkuVO> skuVOList, Map<String, Double> skuPromotionDetail, Double discountPrice, Double totalPrice, PromotionTypeEnum promotionTypeEnum, String activityId) {
+    private static void calculateNotEnoughPromotionsPrice(List<CartSkuVO> skuVOList, Map<String, Double> skuPromotionDetail, Double discountPrice,
+                                                          Double totalPrice, PromotionTypeEnum promotionTypeEnum, String activityId) {
         // 特殊情况处理，如参与多个促销活动，部分商品在其他促销计算后的金额不足以满足与当前参与的促销活动的优惠金额
         // 但当前购物车内存在当前当前促销活动的其他商品且剩余金额也满足分摊不足商品的不足金额，则分摊到其他商品上
         // 满足当前促销的总优惠金额
         if (skuPromotionDetail == null || skuPromotionDetail.isEmpty()) {
             return;
         }
-        long matchPromotionsZeroCount = skuVOList.stream().filter(l -> l.getPriceDetailDTO().getFlowPrice() == 0 && skuPromotionDetail.containsKey(l.getGoodsSku().getId())).count();
+        long matchPromotionsZeroCount =
+                skuVOList.stream().filter(l -> l.getPriceDetailDTO().getFlowPrice() == 0 && skuPromotionDetail.containsKey(l.getGoodsSku().getId())).count();
         long matchPromotionsCount = skuVOList.stream().filter(l -> skuPromotionDetail.containsKey(l.getGoodsSku().getId())).count();
         if (matchPromotionsZeroCount == matchPromotionsCount) {
             return;

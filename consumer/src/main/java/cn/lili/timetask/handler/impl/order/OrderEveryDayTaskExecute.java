@@ -183,6 +183,10 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
      * @param orderSetting 订单设置
      */
     private void closeAfterSale(OrderSetting orderSetting) {
+        //为0则不限制
+        if (orderSetting.getCloseAfterSale() == null || orderSetting.getCloseAfterSale() == 0) {
+            return;
+        }
         //订单关闭售后申请时间 = 当前时间 - 自动关闭售后申请天数
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getCloseAfterSale());
 
@@ -223,6 +227,10 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
      */
     private void closeComplaint(OrderSetting orderSetting) {
 
+        //为0则不限制
+        if (orderSetting.getCloseComplaint() == null || orderSetting.getCloseComplaint() == 0) {
+            return;
+        }
         //订单关闭交易投诉申请时间 = 当前时间 - 自动关闭交易投诉申请天数
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getCloseComplaint());
 
