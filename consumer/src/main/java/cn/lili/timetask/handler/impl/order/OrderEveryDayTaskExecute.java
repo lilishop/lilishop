@@ -9,7 +9,6 @@ import cn.lili.modules.distribution.service.DistributionOrderService;
 import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
-import cn.lili.modules.order.aftersale.service.AfterSaleService;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
@@ -66,9 +65,6 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
      */
     @Autowired
     private MemberEvaluationService memberEvaluationService;
-
-    @Autowired
-    private AfterSaleService afterSaleService;
 
     @Autowired
     private DistributionOrderService distributionOrderService;

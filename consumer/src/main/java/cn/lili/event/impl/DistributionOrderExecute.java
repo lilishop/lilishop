@@ -39,11 +39,6 @@ public class DistributionOrderExecute implements OrderStatusChangeEvent, EveryDa
      */
     @Autowired
     private DistributionOrderService distributionOrderService;
-    /**
-     * 分销订单持久层
-     */
-    @Resource
-    private DistributionOrderMapper distributionOrderMapper;
 
     @Autowired
     private SettingService settingService;
