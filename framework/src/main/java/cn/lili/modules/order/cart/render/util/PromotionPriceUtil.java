@@ -203,9 +203,12 @@ public class PromotionPriceUtil {
             return false;
         }).collect(Collectors.toList());
         if (!unEnoughSku.isEmpty()) {
+            if (unEnoughSku.size() == skuVOList.size()) {
+                return;
+            }
             for (CartSkuVO cartSkuVO : skuVOList) {
                 if (unEnoughSku.isEmpty()) {
-                    return;
+                    break;
                 }
                 if (skuPromotionDetail.containsKey(cartSkuVO.getGoodsSku().getId()) && unEnoughSku.stream().noneMatch(k -> k.getGoodsSku().getId().equals(cartSkuVO.getGoodsSku().getId()))) {
                     // 商品金额占比
