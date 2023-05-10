@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "lili.data.rocketmq")
 public class RocketmqCustomProperties {
 
+
     private String promotionTopic;
 
     private String promotionGroup;
