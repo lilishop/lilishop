@@ -42,13 +42,13 @@ public class TokenUtil {
         //访问token
         String accessToken = createToken(authUser, tokenProperties.getTokenExpireTime());
 
-        cache.put(CachePrefix.ACCESS_TOKEN.getPrefix(authUser.getRole()) + accessToken, 1,
+        cache.put(CachePrefix.ACCESS_TOKEN.getPrefix(authUser.getRole(), authUser.getId()) + accessToken, 1,
                 tokenProperties.getTokenExpireTime(), TimeUnit.MINUTES);
         //刷新token生成策略：如果是长时间有效的token（用于app），则默认15天有效期刷新token。如果是普通用户登录，则刷新token为普通token2倍数
         Long expireTime = authUser.getLongTerm() ? 15 * 24 * 60L : tokenProperties.getTokenExpireTime() * 2;
         String refreshToken = createToken(authUser, expireTime);
 
-        cache.put(CachePrefix.REFRESH_TOKEN.getPrefix(authUser.getRole()) + refreshToken, 1, expireTime, TimeUnit.MINUTES);
+        cache.put(CachePrefix.REFRESH_TOKEN.getPrefix(authUser.getRole(), authUser.getId()) + refreshToken, 1, expireTime, TimeUnit.MINUTES);
 
         token.setAccessToken(accessToken);
         token.setRefreshToken(refreshToken);
@@ -85,11 +85,12 @@ public class TokenUtil {
 
 
         //如果缓存中有刷新token &&
-        if (cache.hasKey(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums) + oldRefreshToken)) {
+        if (cache.hasKey(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums, authUser.getId()) + oldRefreshToken)) {
             Token token = new Token();
             //访问token
             String accessToken = createToken(authUser, tokenProperties.getTokenExpireTime());
-            cache.put(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums) + accessToken, 1, tokenProperties.getTokenExpireTime(), TimeUnit.MINUTES);
+            cache.put(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums, authUser.getId()) + accessToken, 1, tokenProperties.getTokenExpireTime(),
+                    TimeUnit.MINUTES);
 
             //如果是信任登录设备，则刷新token长度继续延长
             Long expirationTime = tokenProperties.getTokenExpireTime() * 2;
@@ -101,10 +102,10 @@ public class TokenUtil {
             //刷新token生成策略：如果是长时间有效的token（用于app），则默认15天有效期刷新token。如果是普通用户登录，则刷新token为普通token2倍数
             String refreshToken = createToken(authUser, expirationTime);
 
-            cache.put(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums) + refreshToken, 1, expirationTime, TimeUnit.MINUTES);
+            cache.put(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums, authUser.getId()) + refreshToken, 1, expirationTime, TimeUnit.MINUTES);
             token.setAccessToken(accessToken);
             token.setRefreshToken(refreshToken);
-            cache.remove(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums) + oldRefreshToken);
+            cache.remove(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums, authUser.getId()) + oldRefreshToken);
             return token;
         } else {
             throw new ServiceException(ResultCode.USER_AUTH_EXPIRED);

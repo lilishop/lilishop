@@ -6,7 +6,6 @@ import cn.lili.modules.wallet.entity.dos.MemberWallet;
 import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
 import cn.lili.modules.wallet.entity.vo.MemberWalletVO;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 会员预存款业务层
@@ -102,8 +101,7 @@ public interface MemberWalletService extends IService<MemberWallet> {
      * 提现公共方法
      *
      * @param withdrawApplyId 会员零钱提现Id
-     * @return 操作状态
      */
-    Boolean withdrawal(String withdrawApplyId);
+    void withdrawal(String withdrawApplyId);
 
 }

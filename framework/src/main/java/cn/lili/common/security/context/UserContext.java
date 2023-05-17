@@ -65,7 +65,7 @@ public class UserContext {
             AuthUser authUser = getAuthUser(accessToken);
             assert authUser != null;
 
-            if (!cache.hasKey(CachePrefix.ACCESS_TOKEN.getPrefix(authUser.getRole()) + accessToken)) {
+            if (!cache.hasKey(CachePrefix.ACCESS_TOKEN.getPrefix(authUser.getRole(), authUser.getId()) + accessToken)) {
                 throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
             }
             return authUser;

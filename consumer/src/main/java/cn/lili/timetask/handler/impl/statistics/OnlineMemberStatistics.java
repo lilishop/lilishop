@@ -72,7 +72,8 @@ public class OnlineMemberStatistics implements EveryHourExecute {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        onlineMemberVOS.add(new OnlineMemberVO(calendar.getTime(), cache.keys(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MEMBER) + "*").size(), lastNum.get()));
+        onlineMemberVOS.add(new OnlineMemberVO(calendar.getTime(), cache.keys(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MEMBER) + "*").size(),
+                lastNum.get()));
 
         //写入缓存
         cache.put(CachePrefix.ONLINE_MEMBER.getPrefix(), onlineMemberVOS);

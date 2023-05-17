@@ -9,7 +9,6 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.connect.entity.Connect;
-import cn.lili.modules.connect.entity.enums.ConnectEnum;
 import cn.lili.modules.connect.entity.enums.SourceEnum;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.member.entity.dto.ConnectQueryDTO;
@@ -79,47 +78,54 @@ public class WechatMessageUtil {
         if (order == null) {
             throw new ServiceException("订单" + sn + "不存在，发送微信公众号消息错误");
         }
-        //获取微信消息
-        LambdaQueryWrapper<WechatMessage> wechatMessageQueryWrapper = new LambdaQueryWrapper();
-        wechatMessageQueryWrapper.eq(WechatMessage::getOrderStatus, order.getOrderStatus());
-        WechatMessage wechatMessage = wechatMessageService.getOne(wechatMessageQueryWrapper);
-        if (wechatMessage == null) {
-            return;
-        }
+        if (ClientTypeEnum.H5.name().equals(order.getClientType())) {
+            //获取微信消息
+            LambdaQueryWrapper<WechatMessage> wechatMessageQueryWrapper = new LambdaQueryWrapper();
+            wechatMessageQueryWrapper.eq(WechatMessage::getOrderStatus, order.getOrderStatus());
+            WechatMessage wechatMessage = wechatMessageService.getOne(wechatMessageQueryWrapper);
 
-        Connect connect = connectService.queryConnect(
-                ConnectQueryDTO.builder().userId(order.getMemberId()).unionType(ConnectEnum.WECHAT.name()).build()
-        );
-        if (connect == null) {
-            return;
-        }
+            if (wechatMessage == null) {
+                log.error("未配置微信公众号消息");
+                return;
+            }
 
-        log.info("微信消息发送消息：{}", order.getMemberId() + "-" + sn);
-        //获取token
-        String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.H5);
+            Connect connect = connectService.queryConnect(
+                    ConnectQueryDTO.builder()
+                            .userId(order.getMemberId())
+                            .unionType(SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name())
+                            .build()
+            );
+            if (connect == null) {
+                return;
+            }
 
-        //发送url
-        String url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=" + token;
+            log.info("微信消息发送消息：{}", order.getMemberId() + "-" + sn);
+            //获取token
+            String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.H5);
 
-        Map<String, Object> map = new HashMap<>(4);
-        //用户id
-        map.put("touser", connect.getUnionId());
-        //模版id
-        map.put("template_id", wechatMessage.getCode());
-        //模版中所需数据
-        map.put("data", createData(order, wechatMessage));
+            //发送url
+            String url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=" + token;
 
-        log.info("参数内容：" + JSONUtil.toJsonStr(map));
-        String content = HttpUtil.post(url, JSONUtil.toJsonStr(map));
-        JSONObject json = new JSONObject(content);
-        log.info("微信消息发送结果：" + content);
-        String errorMessage = json.getStr("errmsg");
-        String errcode = json.getStr("errcode");
-        //发送失败
-        if (!"0".equals(errcode)) {
-            log.error("消息发送失败：" + errorMessage);
-            log.error("消息发送请求token：" + token);
-            log.error("消息发送请求：" + map.get("data"));
+            Map<String, Object> map = new HashMap<>(4);
+            //用户id
+            map.put("touser", connect.getUnionId());
+            //模版id
+            map.put("template_id", wechatMessage.getCode());
+            //模版中所需数据
+            map.put("data", createData(order, wechatMessage));
+
+            log.info("参数内容：" + JSONUtil.toJsonStr(map));
+            String content = HttpUtil.post(url, JSONUtil.toJsonStr(map));
+            JSONObject json = new JSONObject(content);
+            log.info("微信消息发送结果：" + content);
+            String errorMessage = json.getStr("errmsg");
+            String errcode = json.getStr("errcode");
+            //发送失败
+            if (!"0".equals(errcode)) {
+                log.error("消息发送失败：" + errorMessage);
+                log.error("消息发送请求token：" + token);
+                log.error("消息发送请求：" + map.get("data"));
+            }
         }
     }
 
@@ -135,53 +141,56 @@ public class WechatMessageUtil {
         if (order == null) {
             throw new ServiceException("订单" + sn + "不存在，发送订阅消息错误");
         }
-        //获取微信消息
-        LambdaQueryWrapper<WechatMPMessage> wechatMPMessageQueryWrapper = new LambdaQueryWrapper();
-        wechatMPMessageQueryWrapper.eq(WechatMPMessage::getOrderStatus, order.getOrderStatus());
-        WechatMPMessage wechatMPMessage = wechatMPMessageService.getOne(wechatMPMessageQueryWrapper);
-        if (wechatMPMessage == null) {
-            log.info("未配置微信消息订阅");
-            return;
-        }
+        if (ClientTypeEnum.WECHAT_MP.name().equals(order.getClientType())) {
 
-        Connect connect = connectService.queryConnect(
-                ConnectQueryDTO.builder().userId(order.getMemberId()).unionType(SourceEnum.WECHAT_MP_OPEN_ID.name()).build()
-        );
-        if (connect == null) {
-            return;
-        }
+            //获取微信消息
+            LambdaQueryWrapper<WechatMPMessage> wechatMPMessageQueryWrapper = new LambdaQueryWrapper();
+            wechatMPMessageQueryWrapper.eq(WechatMPMessage::getOrderStatus, order.getOrderStatus());
+            WechatMPMessage wechatMPMessage = wechatMPMessageService.getOne(wechatMPMessageQueryWrapper);
+            if (wechatMPMessage == null) {
+                log.info("未配置微信消息订阅");
+                return;
+            }
 
-        log.info("微信消息订阅消息发送：{}", order.getMemberId() + "-" + sn);
-        //获取token
-        String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
+            Connect connect = connectService.queryConnect(
+                    ConnectQueryDTO.builder().userId(order.getMemberId()).unionType(SourceEnum.WECHAT_MP_OPEN_ID.name()).build()
+            );
+            if (connect == null) {
+                return;
+            }
 
-        //发送url
-        String url = "https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=" + token;
+            log.info("微信消息订阅消息发送：{}", order.getMemberId() + "-" + sn);
+            //获取token
+            String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
 
-        Map<String, Object> map = new HashMap<>(4);
-        //用户id
-        map.put("touser", connect.getUnionId());
-        //模版id
-        map.put("template_id", wechatMPMessage.getCode());
-        //模版中所需数据
-        map.put("data", createData(order, wechatMPMessage));
-        map.put("page", "pages/order/orderDetail?sn=" + order.getSn());
-        log.info("参数内容：" + JSONUtil.toJsonStr(map));
-        String content = null;
-        try {
-            content = HttpUtil.post(url, JSONUtil.toJsonStr(map));
-        } catch (Exception e) {
-            log.error("微信消息发送错误", e);
-        }
-        JSONObject json = new JSONObject(content);
-        log.info("微信消息发送结果：" + content);
-        String errorMessage = json.getStr("errmsg");
-        String errcode = json.getStr("errcode");
-        //发送失败
-        if (!"0".equals(errcode)) {
-            log.error("消息发送失败：" + errorMessage);
-            log.error("消息发送请求token：" + token);
-            log.error("消息发送请求：" + map.get("data"));
+            //发送url
+            String url = "https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=" + token;
+
+            Map<String, Object> map = new HashMap<>(4);
+            //用户id
+            map.put("touser", connect.getUnionId());
+            //模版id
+            map.put("template_id", wechatMPMessage.getCode());
+            //模版中所需数据
+            map.put("data", createData(order, wechatMPMessage));
+            map.put("page", "pages/order/orderDetail?sn=" + order.getSn());
+            log.info("参数内容：" + JSONUtil.toJsonStr(map));
+            String content = null;
+            try {
+                content = HttpUtil.post(url, JSONUtil.toJsonStr(map));
+            } catch (Exception e) {
+                log.error("微信消息发送错误", e);
+            }
+            JSONObject json = new JSONObject(content);
+            log.info("微信小程序消息发送结果：" + content);
+            String errorMessage = json.getStr("errmsg");
+            String errcode = json.getStr("errcode");
+            //发送失败
+            if (!"0".equals(errcode)) {
+                log.error("消息发送失败：" + errorMessage);
+                log.error("消息发送请求token：" + token);
+                log.error("消息发送请求：" + map.get("data"));
+            }
         }
     }
 

@@ -86,7 +86,8 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
         //如果不是超级管理员， 则鉴权
         if (Boolean.FALSE.equals(authUser.getIsSuper())) {
             //获取缓存中的权限
-            Map<String, List<String>> permission = (Map<String, List<String>>) cache.get(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + authUser.getId());
+            Map<String, List<String>> permission =
+                    (Map<String, List<String>>) cache.get(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + authUser.getId());
 
             //获取数据(GET 请求)权限
             if (request.getMethod().equals(RequestMethod.GET.name())) {
@@ -143,7 +144,7 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
             AuthUser authUser = new Gson().fromJson(json, AuthUser.class);
 
             //校验redis中是否有权限
-            if (cache.hasKey(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MANAGER) + jwt)) {
+            if (cache.hasKey(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MANAGER, authUser.getId()) + jwt)) {
                 //用户角色
                 List<GrantedAuthority> auths = new ArrayList<>();
                 auths.add(new SimpleGrantedAuthority("ROLE_" + authUser.getRole().name()));

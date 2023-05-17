@@ -40,18 +40,18 @@ public class MemberExecute implements MemberLoginEvent, MemberConnectLoginEvent 
 
     @Override
     public void memberConnectLogin(Member member, ConnectAuthUser authUser) {
-        log.info("unionid:"+authUser.getToken().getUnionId());
-        log.info("openid:"+authUser.getUuid());
         //保存UnionID
         if (StrUtil.isNotBlank(authUser.getToken().getUnionId())) {
-            connectService.loginBindUser(member.getId(), authUser.getToken().getUnionId(), authUser.getSource());
+            connectService.loginBindUser(member.getId(), authUser.getToken().getUnionId(), authUser.getSource().name());
         }
         //保存OpenID
         if (StrUtil.isNotBlank(authUser.getUuid())) {
-            log.info("authUser.getSource():"+authUser.getSource());
-            log.info("authUser.getType():"+authUser.getType());
-            SourceEnum sourceEnum = SourceEnum.getSourceEnum(ConnectEnum.valueOf(authUser.getSource()), ClientTypeEnum.valueOf(authUser.getType()));
+            SourceEnum sourceEnum = SourceEnum.getSourceEnum(authUser.getSource(), authUser.getType());
             connectService.loginBindUser(member.getId(), authUser.getUuid(), sourceEnum.name());
+        }
+        //保存手机号，判断用户是否存手机号，如果不存在则保存手机号
+        if (StrUtil.isNotBlank(authUser.getPhone())&&StrUtil.isBlank(member.getMobile())) {
+            memberService.changeMobile(member.getId(),member.getMobile());
         }
 
     }

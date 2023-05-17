@@ -107,4 +107,11 @@ public interface AdminUserService extends IService<AdminUser> {
      */
     void logout(UserEnums userEnums);
 
+    /**
+     * 登出
+     *
+     * @param adminUserIds 用户id
+     */
+    void logout(List<String> adminUserIds);
+
 }

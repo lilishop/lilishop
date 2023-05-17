@@ -234,6 +234,12 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                     log.error("删除店铺商品索引事件执行异常，商品信息: " + new String(messageExt.getBody()), e);
                 }
                 break;
+            //同步商品分类名称
+            case CATEGORY_GOODS_NAME:
+                //分类ID
+                String id = new String(messageExt.getBody());
+                goodsService.categoryGoodsName(id);
+                break;
             //商品评价
             case GOODS_COMMENT_COMPLETE:
                 MemberEvaluation memberEvaluation = JSONUtil.toBean(new String(messageExt.getBody()), MemberEvaluation.class);
@@ -376,7 +382,11 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
         List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
         for (GoodsSku goodsSku : goodsSkuList) {
             EsGoodsIndex goodsIndex = this.settingUpGoodsIndexData(goods, goodsSku);
-            goodsIndex.setSkuSource(skuSource--);
+            skuSource--;
+            if (skuSource <= 0) {
+                skuSource = 1;
+            }
+            goodsIndex.setSkuSource(skuSource);
             log.info("goodsSku：{}", goodsSku);
             log.info("生成商品索引 {}", goodsIndex);
             esGoodsIndices.add(goodsIndex);

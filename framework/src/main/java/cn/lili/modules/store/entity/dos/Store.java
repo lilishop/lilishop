@@ -100,6 +100,20 @@ public class Store extends BaseEntity {
     @ApiModelProperty(value = "udesk IM标识")
     private String merchantEuid;
 
+    public Boolean getPageShow() {
+        if(pageShow == null){
+            return false;
+        }
+        return pageShow;
+    }
+
+    public Boolean getSelfPickFlag() {
+        if(selfPickFlag == null){
+            return false;
+        }
+        return selfPickFlag;
+    }
+
     @ApiModelProperty(value = "默认页面是否开启")
     private Boolean pageShow;
 
@@ -116,6 +130,8 @@ public class Store extends BaseEntity {
         descriptionScore = 5.0;
         goodsNum = 0;
         collectionNum = 0;
+        this.selfPickFlag = false;
+        this.pageShow = false;
     }
 
     public Store(Member member, AdminStoreApplyDTO adminStoreApplyDTO) {
@@ -130,6 +146,8 @@ public class Store extends BaseEntity {
         descriptionScore = 5.0;
         goodsNum = 0;
         collectionNum = 0;
+        this.selfPickFlag = false;
+        this.pageShow = false;
     }
 
 }

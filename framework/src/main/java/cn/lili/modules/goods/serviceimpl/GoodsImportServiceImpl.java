@@ -1,9 +1,11 @@
 package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dos.GoodsUnit;
 import cn.lili.modules.goods.entity.dto.GoodsImportDTO;
@@ -31,10 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -51,10 +50,12 @@ public class GoodsImportServiceImpl implements GoodsImportService {
     @Autowired
     private GoodsService goodsService;
 
+    private  static final int COLUMS = 15;
+
     @Override
     public void download(HttpServletResponse response) {
-        String storeId = "1376369067769724928";
-//        //Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+//        String storeId = "1376369067769724928";
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         //创建Excel工作薄对象
         Workbook workbook = new HSSFWorkbook();
         //生成一个表格 设置：页签
@@ -165,6 +166,14 @@ public class GoodsImportServiceImpl implements GoodsImportService {
         List<List<Object>> read = excelReader.read(1, excelReader.getRowCount());
         for (List<Object> objects : read) {
             GoodsImportDTO goodsImportDTO = new GoodsImportDTO();
+            if (objects.size() < COLUMS){
+                throw new ServiceException("请将表格内容填写完全！");
+            }
+            for (Object object : objects) {
+                if( CharSequenceUtil.isEmpty(object.toString()) || CharSequenceUtil.isBlank(object.toString())){
+                    throw new ServiceException("请将表格内容填写完全！");
+                }
+            }
 
             String categoryId = objects.get(2).toString().substring(0, objects.get(2).toString().indexOf("-"));
 

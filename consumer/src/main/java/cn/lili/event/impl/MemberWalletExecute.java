@@ -31,15 +31,19 @@ public class MemberWalletExecute implements MemberWithdrawalEvent {
             case SUCCESS:
                 //提现成功扣减冻结金额
                 memberWalletService.reduceFrozen(
-                        new MemberWalletUpdateDTO(memberWithdrawalMessage.getPrice(), memberWithdrawalMessage.getMemberId(), "提现成功，余额提现", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
+                        new MemberWalletUpdateDTO(memberWithdrawalMessage.getPrice(), memberWithdrawalMessage.getMemberId(), "提现成功，余额提现",
+                                DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
                 break;
             case ERROR:
                 //需要从冻结金额扣减到余额
-                memberWalletService.increaseWithdrawal(new MemberWalletUpdateDTO(memberWithdrawalMessage.getPrice(), memberWithdrawalMessage.getMemberId(), "提现失败，提现金额解冻到余额", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
+                memberWalletService.increaseWithdrawal(new MemberWalletUpdateDTO(memberWithdrawalMessage.getPrice(),
+                        memberWithdrawalMessage.getMemberId(), "第三方提现失败，提现金额解冻到余额", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
                 break;
             case FAIL_AUDITING:
                 //需要从冻结金额扣减到余额
-                memberWalletService.increaseWithdrawal(new MemberWalletUpdateDTO(memberWithdrawalMessage.getPrice(), memberWithdrawalMessage.getMemberId(), "审核拒绝，提现金额解冻到余额", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
+                memberWalletService.increaseWithdrawal(new MemberWalletUpdateDTO(memberWithdrawalMessage.getPrice(),
+                        memberWithdrawalMessage.getMemberId(), "审核拒绝，提现金额解冻到余额", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
+                break;
             default:
                 break;
         }

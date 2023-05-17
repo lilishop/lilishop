@@ -9,6 +9,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -227,7 +228,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         } else {
             store.setStoreDisable(StoreStatusEnum.REFUSED.value());
         }
-        cache.remove(CachePrefix.STORE.getPrefix()+store.getId());
+        cache.remove(CachePrefix.STORE.getPrefix() + store.getId());
         return this.updateById(store);
     }
 
@@ -244,6 +245,13 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             if (update) {
                 goodsService.underStoreGoods(id);
             }
+
+            //删除店员token
+            clerkService.list(new LambdaQueryWrapper<Clerk>().eq(Clerk::getStoreId, id)).forEach(clerk -> {
+                cache.vagueDel(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.STORE, clerk.getMemberId()));
+                cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(UserEnums.STORE, clerk.getMemberId()));
+            });
+
             return update;
         }
 
@@ -371,7 +379,8 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         clerkService.remove(new LambdaQueryWrapper<Clerk>().eq(Clerk::getShopkeeper, true));
         List<Clerk> clerkList = new ArrayList<>();
         //遍历已开启的店铺
-        for (Store store : this.list(new LambdaQueryWrapper<Store>().eq(Store::getDeleteFlag, false).eq(Store::getStoreDisable, StoreStatusEnum.OPEN.name()))) {
+        for (Store store : this.list(new LambdaQueryWrapper<Store>().eq(Store::getDeleteFlag, false).eq(Store::getStoreDisable,
+                StoreStatusEnum.OPEN.name()))) {
             clerkList.add(new Clerk(store));
         }
         clerkService.saveBatch(clerkList);
@@ -381,7 +390,8 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     public List<GoodsSku> getToMemberHistory(String memberId) {
         AuthUser currentUser = UserContext.getCurrentUser();
         List<String> skuIdList = new ArrayList<>();
-        for (FootPrint footPrint : footprintService.list(new LambdaUpdateWrapper<FootPrint>().eq(FootPrint::getStoreId, currentUser.getStoreId()).eq(FootPrint::getMemberId, memberId))) {
+        for (FootPrint footPrint :
+                footprintService.list(new LambdaUpdateWrapper<FootPrint>().eq(FootPrint::getStoreId, currentUser.getStoreId()).eq(FootPrint::getMemberId, memberId))) {
             if (footPrint.getSkuId() != null) {
                 skuIdList.add(footPrint.getSkuId());
             }

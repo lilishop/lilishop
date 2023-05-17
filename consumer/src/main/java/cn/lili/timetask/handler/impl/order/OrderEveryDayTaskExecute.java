@@ -2,8 +2,6 @@ package cn.lili.timetask.handler.impl.order;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -11,7 +9,6 @@ import cn.lili.modules.distribution.service.DistributionOrderService;
 import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
-import cn.lili.modules.order.aftersale.service.AfterSaleService;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
@@ -70,9 +67,6 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
     private MemberEvaluationService memberEvaluationService;
 
     @Autowired
-    private AfterSaleService afterSaleService;
-
-    @Autowired
     private DistributionOrderService distributionOrderService;
 
     /**
@@ -88,14 +82,30 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
             throw new ServiceException(ResultCode.ORDER_SETTING_ERROR);
         }
 
-        //自动确认收货
-        completedOrder(orderSetting);
-        //自动好评
-        memberEvaluation(orderSetting);
-        //关闭允许售后申请
-        closeAfterSale(orderSetting);
-        //关闭允许投诉
-        closeComplaint(orderSetting);
+        try {
+            //自动确认收货
+            completedOrder(orderSetting);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        try {
+            //自动好评
+            memberEvaluation(orderSetting);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        try {
+            //关闭允许售后申请
+            closeAfterSale(orderSetting);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        try {
+            //关闭允许投诉
+            closeComplaint(orderSetting);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     /**
@@ -115,12 +125,16 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         queryWrapper.le(Order::getLogisticsTime, receiveTime);
         List<Order> list = orderService.list(queryWrapper);
 
-        //判断是否有符合条件的订单，进行订单完成处理
-        if (!list.isEmpty()) {
-            List<String> receiveSnList = list.stream().map(Order::getSn).collect(Collectors.toList());
-            for (String orderSn : receiveSnList) {
-                orderService.systemComplete(orderSn);
+        try {
+            //判断是否有符合条件的订单，进行订单完成处理
+            if (!list.isEmpty()) {
+                List<String> receiveSnList = list.stream().map(Order::getSn).collect(Collectors.toList());
+                for (String orderSn : receiveSnList) {
+                    orderService.systemComplete(orderSn);
+                }
             }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -152,7 +166,12 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
                 memberEvaluationDTO.setDescriptionScore(5);
                 memberEvaluationDTO.setServiceScore(5);
 
-                memberEvaluationService.addMemberEvaluation(memberEvaluationDTO, false);
+                try {
+                    memberEvaluationService.addMemberEvaluation(memberEvaluationDTO, false);
+
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
             }
         }
     }
@@ -164,7 +183,10 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
      * @param orderSetting 订单设置
      */
     private void closeAfterSale(OrderSetting orderSetting) {
-
+        //为0则不限制
+        if (orderSetting.getCloseAfterSale() == null || orderSetting.getCloseAfterSale() == 0) {
+            return;
+        }
         //订单关闭售后申请时间 = 当前时间 - 自动关闭售后申请天数
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getCloseAfterSale());
 
@@ -187,7 +209,7 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
             orderItemService.update(lambdaUpdateWrapper);
             //修改订售后状态
             List<OrderItem> orderItemsList = orderItems.stream()
-                    .map((orderItem)->{
+                    .map((orderItem) -> {
                         orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.EXPIRED.name());
                         return orderItem;
                     })
@@ -205,6 +227,10 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
      */
     private void closeComplaint(OrderSetting orderSetting) {
 
+        //为0则不限制
+        if (orderSetting.getCloseComplaint() == null || orderSetting.getCloseComplaint() == 0) {
+            return;
+        }
         //订单关闭交易投诉申请时间 = 当前时间 - 自动关闭交易投诉申请天数
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getCloseComplaint());
 

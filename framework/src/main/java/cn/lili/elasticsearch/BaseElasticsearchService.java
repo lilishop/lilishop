@@ -90,6 +90,7 @@ public abstract class BaseElasticsearchService {
             request.settings(Settings.builder()
                     .put("index.number_of_shards", elasticsearchProperties.getIndex().getNumberOfShards())
                     .put("index.number_of_replicas", elasticsearchProperties.getIndex().getNumberOfReplicas())
+                    .put("index.max_result_window", 100000) //最大查询结果数
                     .put("index.mapping.total_fields.limit", 2000));
 
             //创建索引

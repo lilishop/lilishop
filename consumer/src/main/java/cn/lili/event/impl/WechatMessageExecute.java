@@ -39,7 +39,6 @@ public class WechatMessageExecute implements OrderStatusChangeEvent, TradeEvent 
     public void orderChange(OrderMessage orderMessage) {
 
         switch (orderMessage.getNewStatus()) {
-            case PAID:
             case UNDELIVERED:
             case DELIVERED:
             case STAY_PICKED_UP:

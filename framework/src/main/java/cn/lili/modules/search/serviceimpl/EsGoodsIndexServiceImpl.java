@@ -66,6 +66,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
@@ -178,7 +179,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                     skuCountQueryWrapper.eq("auth_flag", GoodsAuthEnum.PASS.name());
                     skuCountQueryWrapper.eq("market_enable", GoodsStatusEnum.UPPER.name());
                     skuCountQueryWrapper.eq("delete_flag", false);
-                    skuCountQueryWrapper.ge("quantity", 0);
+                    skuCountQueryWrapper.gt("quantity", 0);
                     resultMap = new HashMap<>();
                     resultMap.put(KEY_SUCCESS, 0L);
                     resultMap.put(KEY_FAIL, 0L);
@@ -234,6 +235,9 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                         long count = esGoodsIndices.stream().filter(j -> j.getGoodsId().equals(esGoodsIndex.getGoodsId())).count();
                         if (count >= 1) {
                             skuSource -= count;
+                        }
+                        if (skuSource <= 0) {
+                            skuSource = 1;
                         }
                         esGoodsIndex.setSkuSource(skuSource);
 
@@ -672,14 +676,30 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Override
     public void deleteEsGoodsPromotionByPromotionKey(String promotionsKey) {
         ThreadUtil.execAsync(() -> {
-            BulkRequest bulkRequest = new BulkRequest();
-            for (EsGoodsIndex goodsIndex : this.goodsIndexRepository.findAll()) {
-                UpdateRequest updateRequest = this.removePromotionByPromotionKey(goodsIndex, promotionsKey);
-                if (updateRequest != null) {
-                    bulkRequest.add(updateRequest);
+            for (int i = 0; ; i++) {
+                BulkRequest bulkRequest = new BulkRequest();
+
+                NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+                nativeSearchQueryBuilder.withQuery(QueryBuilders.matchAllQuery());
+                nativeSearchQueryBuilder.withPageable(PageRequest.of(i, 1000));
+                try {
+                    SearchHits<EsGoodsIndex> esGoodsIndices = this.restTemplate.search(nativeSearchQueryBuilder.build(), EsGoodsIndex.class);
+                    if (esGoodsIndices.isEmpty() || esGoodsIndices.getSearchHits().isEmpty()) {
+                        break;
+                    }
+                    for (SearchHit<EsGoodsIndex> searchHit : esGoodsIndices.getSearchHits()) {
+                        EsGoodsIndex goodsIndex = searchHit.getContent();
+                        UpdateRequest updateRequest = this.removePromotionByPromotionKey(goodsIndex, promotionsKey);
+                        if (updateRequest != null) {
+                            bulkRequest.add(updateRequest);
+                        }
+                    }
+                    this.executeBulkUpdateRequest(bulkRequest);
+                } catch (Exception e) {
+                    log.error("删除索引中指定的促销活动id的促销活动失败！key: {}", promotionsKey, e);
+                    return;
                 }
             }
-            this.executeBulkUpdateRequest(bulkRequest);
         });
     }
 

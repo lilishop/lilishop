@@ -122,6 +122,9 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         } else {
             //获取用户信息 非自己评价时，读取数据库
             member = memberService.getById(order.getMemberId());
+            if (member == null) {
+                throw new ServiceException(ResultCode.USER_NOT_EXIST);
+            }
         }
         //获取商品信息
         GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(memberEvaluationDTO.getSkuId());

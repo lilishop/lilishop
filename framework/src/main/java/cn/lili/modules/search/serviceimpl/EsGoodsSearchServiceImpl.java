@@ -84,11 +84,12 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
         //如果搜索词不为空，且明显不是sql注入，那么就将搜索词加入热搜词
         //PS:线上环境运行很多客户反馈被sql攻击，写在了搜索热词里，这里控制命中关键字就不做热词统计，如果线上比较严格可以调用关键词替换，不过不建议这么做
-        if (CharSequenceUtil.isNotBlank(searchDTO.getKeyword()) && !SqlFilter.hit(searchDTO.getKeyword())) {
+        if (CharSequenceUtil.isNotBlank(searchDTO.getKeyword()) && Boolean.FALSE.equals(SqlFilter.hit(searchDTO.getKeyword()))) {
             cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), searchDTO.getKeyword());
         }
         NativeSearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(searchDTO, pageVo);
         NativeSearchQuery searchQuery = searchQueryBuilder.build();
+        searchQuery.setTrackTotalHits(true);
         log.debug("searchGoods DSL:{}", searchQuery.getQuery());
         SearchHits<EsGoodsIndex> search = restTemplate.search(searchQuery, EsGoodsIndex.class);
         return SearchHitSupport.searchPageFor(search, searchQuery.getPageable());
