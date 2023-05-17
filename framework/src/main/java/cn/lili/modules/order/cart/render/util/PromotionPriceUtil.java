@@ -172,7 +172,7 @@ public class PromotionPriceUtil {
     }
 
     /**
-     * 特殊情况处理，如参与多个促销活动，部分商品在其他促销计算后的金额不足以满足与当前参与的促销活动的优惠金额
+     * 特殊情况处理，如参与多个促销活动，部分商品在其他促销计算后的金额不足以满足与当前参与的促销活动的优惠金额（只计算使用优惠券不足的情况）
      *
      * @param skuVOList          获取购物车信息
      * @param skuPromotionDetail 参与活动的商品，以及商品总金额
@@ -202,7 +202,7 @@ public class PromotionPriceUtil {
                 double point = CurrencyUtil.div(k.getPriceDetailDTO().getGoodsPrice(), totalPrice, 4);
                 //商品优惠金额
                 Double skuDiscountPrice = CurrencyUtil.mul(discountPrice, point);
-                return skuDiscountPrice > k.getPriceDetailDTO().getCouponPrice();
+                return k.getPriceDetailDTO().getCouponPrice() > 0 && skuDiscountPrice > k.getPriceDetailDTO().getCouponPrice();
             }
             return false;
         }).collect(Collectors.toList());
