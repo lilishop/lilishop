@@ -25,6 +25,8 @@ public class PromotionTimeTriggerExecutor implements TimeTriggerExecutor {
      */
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private PintuanService pintuanService;
 
 
     @Override
@@ -36,7 +38,7 @@ public class PromotionTimeTriggerExecutor implements TimeTriggerExecutor {
             //拼团订单自动处理
             orderService.agglomeratePintuanOrder(pintuanOrderMessage.getPintuanId(), pintuanOrderMessage.getOrderSn());
         }
-        Pintuan pintuan = JSONUtil.toBean(JSONUtil.parseObj(object), Pintuan.class);
+        Pintuan pintuan = pintuanService.getById(pintuanOrderMessage.getPintuanId());
         if (pintuan != null && pintuan.getId() != null) {
             this.orderService.checkFictitiousOrder(pintuan.getId(), pintuan.getRequiredNum(), pintuan.getFictitious());
         }
