@@ -1,10 +1,8 @@
 package cn.lili.modules.order.cart.service;
 
 
-import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
-import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.TradeParams;
 import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.entity.vo.ReceiptVO;
@@ -15,7 +13,7 @@ import java.util.List;
  * 购物车业务层
  *
  * @author Chopper
- * @date 2020-03-23 12:29 下午
+ * @since 2020-03-23 12:29 下午
  */
 public interface CartService {
 
@@ -56,16 +54,9 @@ public interface CartService {
      * @param skuId    要写入的skuId
      * @param num      要加入购物车的数量
      * @param cartType 购物车类型
+     * @param cover    是否覆盖购物车的数量，如果为否则累加，否则直接覆盖
      */
-    void add(String skuId, Integer num, String cartType);
-
-    /**
-     * 更新商品数量
-     *
-     * @param skuId 要写入的skuId
-     * @param num   要加入购物车的数量
-     */
-    void updateNum(String skuId, int num);
+    void add(String skuId, Integer num, String cartType, Boolean cover);
 
 
     /**
@@ -107,13 +98,6 @@ public interface CartService {
     void clean();
 
     /**
-     * 清空购物车无效数据
-     *
-     * @param way 购物车类型
-     */
-    void cleanChecked(CartTypeEnum way);
-
-    /**
      * 重新写入
      *
      * @param tradeDTO 购物车构建器最终要构建的成品
@@ -130,6 +114,14 @@ public interface CartService {
     void shippingAddress(String shippingAddressId, String way);
 
     /**
+     * 选择自提地址
+     *
+     * @param shopAddressId 收货地址id
+     * @param way               购物车类型
+     */
+    void shippingSelfAddress(String shopAddressId, String way);
+
+    /**
      * 选择发票
      *
      * @param receiptVO 发票信息
@@ -141,11 +133,10 @@ public interface CartService {
     /**
      * 选择配送方式
      *
-     * @param storeId        店铺id
      * @param deliveryMethod 配送方式
      * @param way            购物车类型
      */
-    void shippingMethod(String storeId, String deliveryMethod, String way);
+    void shippingMethod(String deliveryMethod, String way);
 
     /**
      * 获取购物车商品数量
@@ -166,18 +157,23 @@ public interface CartService {
 
     /**
      * 创建交易
+     * 1.获取购物车类型，不同的购物车类型有不同的订单逻辑
+     * 购物车类型：购物车、立即购买、虚拟商品、拼团、积分
+     * 2.校验用户的收件人信息
+     * 3.设置交易的基础参数
+     * 4.交易信息存储到缓存中
+     * 5.创建交易
+     * 6.清除购物车选择数据
      *
      * @param tradeParams 创建交易参数
      * @return 交易信息
      */
     Trade createTrade(TradeParams tradeParams);
 
-    /**
-     * 检查商品是否在配送范围
-     *
-     * @param skuList       商品列表
-     * @param memberAddress 配送地址
+    /***
+     * 获取可使用的配送方式
+     * @param way
+     * @return
      */
-    void checkAddressScope(List<CartSkuVO> skuList, MemberAddress memberAddress);
-
+    List<String> shippingMethodList(String way);
 }

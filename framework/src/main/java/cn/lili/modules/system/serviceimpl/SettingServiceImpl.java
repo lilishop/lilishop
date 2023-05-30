@@ -13,11 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
  * 配置业务层实现
  *
  * @author Chopper
- * @date 2020/11/17 3:52 下午
+ * @since 2020/11/17 3:52 下午
  */
 @Service
-@Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting> implements SettingService {
 
     @Override

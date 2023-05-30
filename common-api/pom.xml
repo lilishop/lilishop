@@ -7,17 +7,17 @@
     <parent>
         <groupId>cn.lili</groupId>
         <artifactId>lili-shop-parent</artifactId>
-        <version>1.0.1</version>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>cn.lili</groupId>
     <artifactId>common-api</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>cn.lili</groupId>
             <artifactId>framework</artifactId>
-            <version>1.0.1</version>
+            <version>${revision}</version>
         </dependency>
     </dependencies>
 

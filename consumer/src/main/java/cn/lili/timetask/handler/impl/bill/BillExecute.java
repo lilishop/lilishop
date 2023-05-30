@@ -1,12 +1,11 @@
 package cn.lili.timetask.handler.impl.bill;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.lili.modules.store.entity.dto.StoreSettlementDay;
-import cn.lili.modules.store.mapper.StoreDetailMapper;
 import cn.lili.modules.store.service.BillService;
+import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.timetask.handler.EveryDayExecute;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,16 +15,21 @@ import java.util.List;
  * 店铺结算执行
  *
  * @author Bulbasaur
- * @date 2021/2/18 3:45 下午
+ * @since 2021/2/18 3:45 下午
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BillExecute implements EveryDayExecute {
 
-    //结算单
-    private final BillService billService;
-    //店铺详情
-    private final StoreDetailMapper storeDetailMapper;
+    /**
+     * 结算单
+     */
+    @Autowired
+    private BillService billService;
+    /**
+     * 店铺详情
+     */
+    @Autowired
+    private StoreDetailService storeDetailService;
 
     /**
      * 1.查询今日待结算的商家
@@ -35,20 +39,22 @@ public class BillExecute implements EveryDayExecute {
     @Override
     public void execute() {
 
-        //获取当前时间的前一天
-        String day = "," + DateUtil.date().dayOfMonth() + ",";
+        //获取当前天数
+        int day = DateUtil.date().dayOfMonth();
 
         //获取待结算商家列表
-        List<StoreSettlementDay> storeList = storeDetailMapper.getSettlementStore(new QueryWrapper<StoreSettlementDay>().like("settlement_cycle", day));
+        List<StoreSettlementDay> storeList = storeDetailService.getSettlementStore(day);
 
+        //获取当前时间
+        DateTime endTime = DateUtil.date();
         //批量商家结算
         for (StoreSettlementDay storeSettlementDay : storeList) {
 
             //生成结算单
-            billService.createBill(storeSettlementDay.getStoreId(), storeSettlementDay.getSettlementDay());
+            billService.createBill(storeSettlementDay.getStoreId(), storeSettlementDay.getSettlementDay(), endTime);
 
             //修改店铺结算时间
-            storeDetailMapper.updateSettlementDay(storeSettlementDay.getStoreId(), DateUtil.date());
+            storeDetailService.updateSettlementDay(storeSettlementDay.getStoreId(), endTime);
         }
     }
 }

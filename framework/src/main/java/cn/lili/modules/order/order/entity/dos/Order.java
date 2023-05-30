@@ -1,28 +1,31 @@
 package cn.lili.modules.order.order.entity.dos;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.base.BaseEntity;
+import cn.lili.common.enums.ClientTypeEnum;
+import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
-import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
-import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
-import cn.lili.modules.order.order.entity.enums.DeliverStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
-import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
-import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
+import cn.lili.modules.order.cart.entity.dto.MemberCouponDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
+import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
+import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
+import cn.lili.modules.order.order.entity.enums.*;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 import java.util.Optional;
 
@@ -30,13 +33,13 @@ import java.util.Optional;
  * 订单
  *
  * @author Chopper
- * @date 2020/11/17 7:30 下午
+ * @since 2020/11/17 7:30 下午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-@Entity
-@Table(name = "li_order")
 @TableName("li_order")
 @ApiModel(value = "订单")
+@NoArgsConstructor
 public class Order extends BaseEntity {
 
 
@@ -57,6 +60,7 @@ public class Order extends BaseEntity {
     private String memberId;
 
     @ApiModelProperty(value = "用户名")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String memberName;
 
     /**
@@ -79,10 +83,14 @@ public class Order extends BaseEntity {
     @ApiModelProperty(value = "第三方付款流水号")
     private String receivableNo;
 
+    /**
+     * @see  PaymentMethodEnum
+     */
     @ApiModelProperty(value = "支付方式")
     private String paymentMethod;
 
     @ApiModelProperty(value = "支付时间")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date paymentTime;
 
@@ -119,7 +127,6 @@ public class Order extends BaseEntity {
     @ApiModelProperty(value = "优惠的金额")
     private Double discountPrice;
 
-    //修改金额
     @ApiModelProperty(value = "修改价格")
     private Double updatePrice;
 
@@ -165,7 +172,7 @@ public class Order extends BaseEntity {
     private Boolean needReceipt;
 
     @ApiModelProperty(value = "是否为其他订单下的订单，如果是则为依赖订单的sn，否则为空")
-    private String parentOrderSn;
+    private String parentOrderSn = "";
 
     @ApiModelProperty(value = "是否为某订单类型的订单，如果是则为订单类型的id，否则为空")
     private String promotionId;
@@ -176,15 +183,20 @@ public class Order extends BaseEntity {
     @ApiModelProperty(value = "订单类型")
     private String orderType;
 
-    @Column(columnDefinition = "TEXT")
-    @ApiModelProperty(value = "价格详情")
+    /**
+     * @see OrderPromotionTypeEnum
+     */
+    @ApiModelProperty(value = "订单促销类型")
+    private String orderPromotionType;
+
+    @ApiModelProperty(value = "价格价格详情")
     private String priceDetail;
 
     @ApiModelProperty(value = "订单是否支持原路退回")
     private Boolean canReturn;
 
     @ApiModelProperty(value = "提货码")
-    private String qrCode;
+    private String verificationCode;
 
     @ApiModelProperty(value = "分销员ID")
     private String distributionId;
@@ -195,52 +207,108 @@ public class Order extends BaseEntity {
     @ApiModelProperty(value = "使用的平台会员优惠券id")
     private String usePlatformMemberCouponId;
 
-    public Order() {
+    @ApiModelProperty(value = "qrCode  实物为提货码  虚拟货物为账号")
+    private String qrCode;
 
-    }
+    @ApiModelProperty(value = "自提点地址")
+    private String storeAddressPath;
 
+    @ApiModelProperty(value = "自提点电话")
+    private String storeAddressMobile;
+
+    @ApiModelProperty(value = "自提点地址经纬度")
+    private String storeAddressCenter;
+
+    /**
+     * 构建订单
+     *
+     * @param cartVO   购物车VO
+     * @param tradeDTO 交易DTO
+     */
     public Order(CartVO cartVO, TradeDTO tradeDTO) {
         String oldId = this.getId();
-        if (tradeDTO.getMemberAddress() != null) {
-            BeanUtil.copyProperties(tradeDTO.getMemberAddress(), this);
-        }
         BeanUtil.copyProperties(tradeDTO, this);
         BeanUtil.copyProperties(cartVO.getPriceDetailDTO(), this);
         BeanUtil.copyProperties(cartVO, this);
-        this.setId(oldId);
-        this.setOrderType(OrderTypeEnum.NORMAL.name());
-        if (cartVO.getSkuList().get(0).getPromotions() != null) {
-            Optional<String> pintuanId = cartVO.getSkuList().get(0).getPromotions().stream().filter(i -> i.getPromotionType().equals(PromotionTypeEnum.PINTUAN.name())).map(PromotionGoods::getPromotionId).findFirst();
-            if (pintuanId.isPresent()) {
-                promotionId = pintuanId.get();
-                this.setOrderType(OrderTypeEnum.PINTUAN.name());
-                if (tradeDTO.getParentOrderSn() == null) {
-                    this.setParentOrderSn("");
-                }
-            }
-        }
+        //填写订单类型
+        this.setTradeType(cartVO, tradeDTO);
+        setId(oldId);
+
+        //设置默认支付状态
         this.setOrderStatus(OrderStatusEnum.UNPAID.name());
         this.setPayStatus(PayStatusEnum.UNPAID.name());
         this.setDeliverStatus(DeliverStatusEnum.UNDELIVERED.name());
-        this.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());
-        this.setConsigneeAddressPath(tradeDTO.getMemberAddress().getConsigneeAddressPath());
-        this.setConsigneeDetail(tradeDTO.getMemberAddress().getDetail());
-        this.setConsigneeMobile(tradeDTO.getMemberAddress().getMobile());
-        this.setConsigneeName(tradeDTO.getMemberAddress().getName());
-        if (tradeDTO.getPlatformCoupon() != null) {
-            this.setUsePlatformMemberCouponId(tradeDTO.getPlatformCoupon().getMemberCoupon().getId());
-        }
-        if (tradeDTO.getStoreCoupons() != null && !tradeDTO.getStoreCoupons().isEmpty()) {
-            StringBuilder storeCouponIds = new StringBuilder();
-            for (String s : tradeDTO.getStoreCoupons().keySet()) {
-                storeCouponIds.append(s).append(",");
-            }
-            this.setUseStoreMemberCouponIds(storeCouponIds.toString());
-        }
         this.setTradeSn(tradeDTO.getSn());
         this.setRemark(cartVO.getRemark());
         this.setFreightPrice(tradeDTO.getPriceDetailDTO().getFreightPrice());
+        //会员收件信息
+        if(DeliveryMethodEnum.LOGISTICS.name().equals(cartVO.getDeliveryMethod())){
+            this.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());
+            this.setConsigneeAddressPath(tradeDTO.getMemberAddress().getConsigneeAddressPath());
+            this.setConsigneeDetail(tradeDTO.getMemberAddress().getDetail());
+            this.setConsigneeMobile(tradeDTO.getMemberAddress().getMobile());
+            this.setConsigneeName(tradeDTO.getMemberAddress().getName());
+        }
+        //自提点信息
+        if(DeliveryMethodEnum.SELF_PICK_UP.name().equals(cartVO.getDeliveryMethod())){
+            this.setStoreAddressPath(tradeDTO.getStoreAddress().getAddress());
+            this.setStoreAddressMobile(tradeDTO.getStoreAddress().getMobile());
+            this.setStoreAddressCenter(tradeDTO.getStoreAddress().getCenter());
+        }
+        //平台优惠券判定
+        if (tradeDTO.getPlatformCoupon() != null) {
+            this.setUsePlatformMemberCouponId(tradeDTO.getPlatformCoupon().getMemberCoupon().getId());
+        }
+        //店铺优惠券判定
+        if (tradeDTO.getStoreCoupons() != null && !tradeDTO.getStoreCoupons().isEmpty()) {
+            StringBuilder storeCouponIds = new StringBuilder();
+            for (MemberCouponDTO value : tradeDTO.getStoreCoupons().values()) {
+                storeCouponIds.append(value.getMemberCoupon().getId()).append(",");
+            }
+            this.setUseStoreMemberCouponIds(storeCouponIds.toString());
+        }
+
     }
+
+
+    /**
+     * 填写交易（订单）类型
+     * 1.判断是普通、促销订单
+     * 2.普通订单进行区分：实物订单、虚拟订单
+     * 3.促销订单判断货物进行区分实物、虚拟商品。
+     * 4.拼团订单需要填写父订单ID
+     *
+     * @param cartVO   购物车VO
+     * @param tradeDTO 交易DTO
+     */
+    private void setTradeType(CartVO cartVO, TradeDTO tradeDTO) {
+
+        //判断是否为普通订单、促销订单
+        if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.CART) || tradeDTO.getCartTypeEnum().equals(CartTypeEnum.BUY_NOW)) {
+            this.setOrderType(OrderTypeEnum.NORMAL.name());
+            this.setOrderPromotionType(OrderPromotionTypeEnum.NORMAL.name());
+        } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.VIRTUAL)) {
+            this.setOrderType(OrderTypeEnum.VIRTUAL.name());
+            this.setOrderPromotionType(OrderPromotionTypeEnum.NORMAL.name());
+        } else {
+            //促销订单（拼团、积分）-判断购买的是虚拟商品还是实物商品
+            String goodsType = cartVO.getCheckedSkuList().get(0).getGoodsSku().getGoodsType();
+            if (CharSequenceUtil.isEmpty(goodsType) || goodsType.equals(GoodsTypeEnum.PHYSICAL_GOODS.name())) {
+                this.setOrderType(OrderTypeEnum.NORMAL.name());
+            } else {
+                this.setOrderType(OrderTypeEnum.VIRTUAL.name());
+            }
+            //填写订单的促销类型
+            this.setOrderPromotionType(tradeDTO.getCartTypeEnum().name());
+
+            //判断是否为拼团订单，如果为拼团订单获取拼团ID，判断是否为主订单
+            if (tradeDTO.getCartTypeEnum().name().equals(PromotionTypeEnum.PINTUAN.name()) && cartVO.getCheckedSkuList().get(0).getPromotionMap() != null && !cartVO.getCheckedSkuList().get(0).getPromotionMap().isEmpty()) {
+                Optional<String> pintuanPromotions = cartVO.getCheckedSkuList().get(0).getPromotionMap().keySet().stream().filter(i -> i.contains(PromotionTypeEnum.PINTUAN.name())).findFirst();
+                pintuanPromotions.ifPresent(s -> promotionId = s.split("-")[1]);
+            }
+        }
+    }
+
 
     public PriceDetailDTO getPriceDetailDTO() {
 
@@ -254,5 +322,6 @@ public class Order extends BaseEntity {
     public void setPriceDetailDTO(PriceDetailDTO priceDetail) {
         this.priceDetail = JSONUtil.toJsonStr(priceDetail);
     }
+
 
 }

@@ -1,7 +1,7 @@
 package cn.lili.controller.member;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
@@ -13,7 +13,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,16 +22,16 @@ import javax.validation.constraints.NotNull;
  * 管理端,会员商品评价接口
  *
  * @author Bulbasaur
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @RestController
 @Api(tags = "管理端,会员商品评价接口")
-@RequestMapping("/manager/memberEvaluation")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping("/manager/member/evaluation")
 public class MemberEvaluationManagerController {
+    @Autowired
+    private MemberEvaluationService memberEvaluationService;
 
-    private final MemberEvaluationService memberEvaluationService;
-
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "通过id获取评论")
     @ApiImplicitParam(name = "id", value = "评价ID", required = true, dataType = "String", paramType = "path")
     @GetMapping(value = "/get/{id}")
@@ -45,9 +44,10 @@ public class MemberEvaluationManagerController {
     @GetMapping(value = "/getByPage")
     public ResultMessage<IPage<MemberEvaluationListVO>> getByPage(EvaluationQueryParams evaluationQueryParams, PageVO page) {
 
-        return ResultUtil.data(memberEvaluationService.queryPage(evaluationQueryParams, page));
+        return ResultUtil.data(memberEvaluationService.queryPage(evaluationQueryParams));
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "修改评价状态")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "评价ID", required = true, paramType = "path"),
@@ -55,20 +55,16 @@ public class MemberEvaluationManagerController {
     })
     @GetMapping(value = "/updateStatus/{id}")
     public ResultMessage<Object> updateStatus(@PathVariable String id, @NotNull String status) {
-        if (memberEvaluationService.updateStatus(id, status)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        return ResultUtil.error(ResultCode.ERROR);
+        memberEvaluationService.updateStatus(id, status);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "删除评论")
     @ApiImplicitParam(name = "id", value = "评价ID", required = true, dataType = "String", paramType = "path")
     @PutMapping(value = "/delete/{id}")
     public ResultMessage<IPage<Object>> delete(@PathVariable String id) {
-        if (memberEvaluationService.delete(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        return ResultUtil.error(ResultCode.ERROR);
+        memberEvaluationService.delete(id);
+        return ResultUtil.success();
     }
 
 }

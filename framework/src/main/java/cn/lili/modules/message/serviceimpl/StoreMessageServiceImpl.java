@@ -1,23 +1,20 @@
 package cn.lili.modules.message.serviceimpl;
 
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.message.entity.dos.StoreMessage;
 import cn.lili.modules.message.entity.vos.StoreMessageQueryVO;
 import cn.lili.modules.message.mapper.StoreMessageMapper;
 import cn.lili.modules.message.service.StoreMessageService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.elasticsearch.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,21 +22,16 @@ import java.util.List;
  * 消息发送业务层实现
  *
  * @author Chopper
- * @date 2020/11/17 3:48 下午
+ * @since 2020/11/17 3:48 下午
  */
 @Service
-@Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreMessageServiceImpl extends ServiceImpl<StoreMessageMapper, StoreMessage> implements StoreMessageService {
-
-    private final StoreMessageMapper storeMessageMapper;
 
     @Override
     public boolean deleteByMessageId(String messageId) {
         StoreMessage storeMessage = this.getById(messageId);
         if (storeMessage != null) {
-            int result = storeMessageMapper.deleteById(messageId);
-            return result > 0;
+            return this.removeById(messageId);
         }
         return false;
 
@@ -50,11 +42,11 @@ public class StoreMessageServiceImpl extends ServiceImpl<StoreMessageMapper, Sto
 
         QueryWrapper<StoreMessage> queryWrapper = new QueryWrapper<>();
         //消息id查询
-        if (StringUtils.isNotEmpty(storeMessageQueryVO.getMessageId())) {
+        if (CharSequenceUtil.isNotEmpty(storeMessageQueryVO.getMessageId())) {
             queryWrapper.eq("message_id", storeMessageQueryVO.getMessageId());
         }
         //商家id
-        if (StringUtils.isNotEmpty(storeMessageQueryVO.getStoreId())) {
+        if (CharSequenceUtil.isNotEmpty(storeMessageQueryVO.getStoreId())) {
             queryWrapper.eq("store_id", storeMessageQueryVO.getStoreId());
         }
         //状态查询
@@ -62,7 +54,7 @@ public class StoreMessageServiceImpl extends ServiceImpl<StoreMessageMapper, Sto
             queryWrapper.eq("status", storeMessageQueryVO.getStatus());
         }
         queryWrapper.orderByDesc("status");
-        return storeMessageMapper.queryByParams(PageUtil.initPage(pageVO), queryWrapper);
+        return this.baseMapper.queryByParams(PageUtil.initPage(pageVO), queryWrapper);
 
     }
 
@@ -80,8 +72,7 @@ public class StoreMessageServiceImpl extends ServiceImpl<StoreMessageMapper, Sto
                 throw new ResourceNotFoundException(ResultCode.USER_AUTHORITY_ERROR.message());
             }
             storeMessage.setStatus(status);
-            int result = this.storeMessageMapper.updateById(storeMessage);
-            return result > 0;
+            return this.updateById(storeMessage);
         }
         return false;
     }

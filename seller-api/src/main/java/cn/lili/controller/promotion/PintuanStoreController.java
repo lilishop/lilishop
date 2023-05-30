@@ -1,26 +1,33 @@
 package cn.lili.controller.promotion;
 
+import cn.hutool.core.util.ArrayUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
+import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.promotion.entity.dto.PromotionGoodsDTO;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
-import cn.lili.modules.promotion.entity.vos.PintuanSearchParams;
+import cn.lili.modules.promotion.entity.dos.Pintuan;
+import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.dto.search.PintuanSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.entity.vos.PintuanVO;
-import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.service.PintuanService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 店铺端,拼团管理接口
@@ -31,88 +38,90 @@ import java.util.Date;
 @RestController
 @Api(tags = "店铺端,拼团管理接口")
 @RequestMapping("/store/promotion/pintuan")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PintuanStoreController {
 
-    private final PintuanService pintuanService;
-    private final PromotionGoodsService promotionGoodsService;
+    @Autowired
+    private PintuanService pintuanService;
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
 
 
     @GetMapping
     @ApiOperation(value = "根据条件分页查询拼团活动列表")
-    public ResultMessage<IPage<PintuanVO>> getPintuanByPage(PintuanSearchParams queryParam, PageVO pageVo) {
-        AuthUser currentUser = UserContext.getCurrentUser();
+    public ResultMessage<IPage<Pintuan>> getPintuanByPage(PintuanSearchParams queryParam, PageVO pageVo) {
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         queryParam.setStoreId(currentUser.getStoreId());
-        IPage<PintuanVO> pintuanByPageFromMongo = pintuanService.getPintuanByPageFromMongo(queryParam, pageVo);
-        return ResultUtil.data(pintuanByPageFromMongo);
+        return ResultUtil.data(pintuanService.pageFindAll(queryParam, pageVo));
     }
 
     @GetMapping(value = "/{id}")
     @ApiOperation(value = "通过id获取")
     public ResultMessage<PintuanVO> get(@PathVariable String id) {
-        return ResultUtil.data(pintuanService.getPintuanByIdFromMongo(id));
+        PintuanVO pintuan = OperationalJudgment.judgment(pintuanService.getPintuanVO(id));
+        return ResultUtil.data(pintuan);
     }
 
     @GetMapping("/goods/{pintuanId}")
     @ApiOperation(value = "根据条件分页查询拼团活动商品列表")
-    public ResultMessage<IPage<PromotionGoodsDTO>> getPintuanGoodsByPage(@PathVariable String pintuanId, PageVO pageVo) {
+    public ResultMessage<IPage<PromotionGoods>> getPintuanGoodsByPage(@PathVariable String pintuanId, PageVO pageVo) {
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
+        searchParams.setStoreId(currentUser.getStoreId());
         searchParams.setPromotionId(pintuanId);
         searchParams.setPromotionType(PromotionTypeEnum.PINTUAN.name());
-        IPage<PromotionGoodsDTO> promotionGoods = promotionGoodsService.getPromotionGoods(searchParams, pageVo);
-        return ResultUtil.data(promotionGoods);
+        return ResultUtil.data(promotionGoodsService.pageFindAll(searchParams, pageVo));
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json")
     @ApiOperation(value = "添加拼团活动")
-    public ResultMessage<String> addPintuan(@RequestBody PintuanVO pintuan) {
-        AuthUser currentUser = UserContext.getCurrentUser();
+    public ResultMessage<String> addPintuan(@RequestBody @Validated PintuanVO pintuan) {
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         pintuan.setStoreId(currentUser.getStoreId());
         pintuan.setStoreName(currentUser.getStoreName());
-        if (pintuanService.addPintuan(pintuan)) {
+        if (pintuanService.savePromotions(pintuan)) {
             return ResultUtil.success(ResultCode.PINTUAN_ADD_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.PINTUAN_ADD_ERROR);
+        throw new ServiceException(ResultCode.PINTUAN_ADD_ERROR);
     }
 
     @PutMapping(consumes = "application/json", produces = "application/json")
     @ApiOperation(value = "修改拼团活动")
-    public ResultMessage<String> editPintuan(@RequestBody PintuanVO pintuan) {
-        AuthUser currentUser = UserContext.getCurrentUser();
+    public ResultMessage<String> editPintuan(@RequestBody @Validated PintuanVO pintuan) {
+        OperationalJudgment.judgment(pintuanService.getById(pintuan.getId()));
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         pintuan.setStoreId(currentUser.getStoreId());
         pintuan.setStoreName(currentUser.getStoreName());
-        if (pintuanService.modifyPintuan(pintuan)) {
+        if (pintuan.getPromotionGoodsList() != null && !pintuan.getPromotionGoodsList().isEmpty()) {
+            List<String> skuIds = pintuan.getPromotionGoodsList().stream().map(PromotionGoods::getSkuId).collect(Collectors.toList());
+            pintuan.setScopeId(ArrayUtil.join(skuIds.toArray(), ","));
+        } else {
+            pintuan.setScopeId(null);
+        }
+        if (pintuanService.updatePromotions(pintuan)) {
             return ResultUtil.success(ResultCode.PINTUAN_EDIT_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.PINTUAN_EDIT_ERROR);
+        throw new ServiceException(ResultCode.PINTUAN_EDIT_ERROR);
     }
 
-    @PutMapping("/open/{pintuanId}")
-    @ApiOperation(value = "手动开启拼团活动")
+    @PutMapping("/status/{pintuanId}")
+    @ApiOperation(value = "操作拼团活动状态")
     public ResultMessage<String> openPintuan(@PathVariable String pintuanId, Long startTime, Long endTime) {
-        if (pintuanService.openPintuan(pintuanId, new Date(startTime), new Date(endTime))) {
+        OperationalJudgment.judgment(pintuanService.getById(pintuanId));
+        if (pintuanService.updateStatus(Collections.singletonList(pintuanId), startTime, endTime)) {
             return ResultUtil.success(ResultCode.PINTUAN_MANUAL_OPEN_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.PINTUAN_MANUAL_OPEN_ERROR);
+        throw new ServiceException(ResultCode.PINTUAN_MANUAL_OPEN_ERROR);
 
-    }
-
-    @PutMapping("/close/{pintuanId}")
-    @ApiOperation(value = "手动关闭拼团活动")
-    public ResultMessage<String> closePintuan(@PathVariable String pintuanId) {
-        if (pintuanService.closePintuan(pintuanId)) {
-            return ResultUtil.success(ResultCode.PINTUAN_MANUAL_CLOSE_SUCCESS);
-        }
-        return ResultUtil.error(ResultCode.PINTUAN_MANUAL_CLOSE_ERROR);
     }
 
     @DeleteMapping("/{pintuanId}")
     @ApiOperation(value = "手动删除拼团活动")
     public ResultMessage<String> deletePintuan(@PathVariable String pintuanId) {
-        if (pintuanService.deletePintuan(pintuanId)) {
+        OperationalJudgment.judgment(pintuanService.getById(pintuanId));
+        if (pintuanService.removePromotions(Collections.singletonList(pintuanId))) {
             return ResultUtil.success(ResultCode.PINTUAN_DELETE_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.PINTUAN_DELETE_ERROR);
+        throw new ServiceException(ResultCode.PINTUAN_DELETE_ERROR);
     }
 
 }

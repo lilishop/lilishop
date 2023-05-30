@@ -11,7 +11,7 @@ import java.util.Map;
  * 物流信息
  *
  * @author Chopper
- * @date 2021/1/18 3:28 下午
+ * @since 2021/1/18 3:28 下午
  */
 @Data
 @NoArgsConstructor
@@ -26,7 +26,7 @@ public class Traces {
     /**
      * 物流单号
      */
-    private String LogisticCode;
+    private String logisticCode;
 
     /**
      * 物流详细信息

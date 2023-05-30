@@ -1,9 +1,11 @@
 package cn.lili.modules.order.order.entity.vo;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -11,9 +13,10 @@ import java.util.List;
  * 订单vo
  *
  * @author Bulbasaur
- * @date 2020/11/28 11:38
+ * @since 2020/11/28 11:38
  */
 @Data
+@NoArgsConstructor
 public class OrderVO extends Order {
 
 
@@ -23,4 +26,8 @@ public class OrderVO extends Order {
     private List<OrderItem> orderItems;
 
 
+    public OrderVO (Order order,List<OrderItem> orderItems){
+        BeanUtil.copyProperties(order, this);
+        this.setOrderItems(orderItems);
+    }
 }

@@ -17,10 +17,13 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 public class SpelUtil {
 
 
-    // spel表达式解析器
+    /**
+     * spel表达式解析器
+     */
     private static SpelExpressionParser spelExpressionParser = new SpelExpressionParser();
-
-    // 参数名发现器
+    /**
+     * 参数名发现器
+     */
     private static DefaultParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
     /**
@@ -30,8 +33,8 @@ public class SpelUtil {
      * @param spel
      * @return
      */
-    public static String compileParams(JoinPoint joinPoint, String spel) { // Spel表达式解析日志信息
-        // 获得方法参数名数组
+    public static String compileParams(JoinPoint joinPoint, String spel) { //Spel表达式解析日志信息
+        //获得方法参数名数组
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 
         String[] parameterNames = parameterNameDiscoverer.getParameterNames(signature.getMethod());
@@ -41,7 +44,8 @@ public class SpelUtil {
             //获取方法参数值
             Object[] args = joinPoint.getArgs();
             for (int i = 0; i < args.length; i++) {
-                context.setVariable(parameterNames[i], args[i]); // 替换spel里的变量值为实际值， 比如 #user -->  user对象
+                //替换spel里的变量值为实际值， 比如 #user -->  user对象
+                context.setVariable(parameterNames[i], args[i]);
             }
             return spelExpressionParser.parseExpression(spel).getValue(context).toString();
         }
@@ -55,8 +59,8 @@ public class SpelUtil {
      * @param spel
      * @return
      */
-    public static String compileParams(JoinPoint joinPoint, Object rvt, String spel) { // Spel表达式解析日志信息
-        // 获得方法参数名数组
+    public static String compileParams(JoinPoint joinPoint, Object rvt, String spel) { //Spel表达式解析日志信息
+        //获得方法参数名数组
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 
         String[] parameterNames = parameterNameDiscoverer.getParameterNames(signature.getMethod());
@@ -66,7 +70,8 @@ public class SpelUtil {
             //获取方法参数值
             Object[] args = joinPoint.getArgs();
             for (int i = 0; i < args.length; i++) {
-                context.setVariable(parameterNames[i], args[i]); // 替换spel里的变量值为实际值， 比如 #user -->  user对象
+                //替换spel里的变量值为实际值， 比如 #user -->  user对象
+                context.setVariable(parameterNames[i], args[i]);
             }
             context.setVariable("rvt", rvt);
             return spelExpressionParser.parseExpression(spel).getValue(context).toString();

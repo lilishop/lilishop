@@ -1,14 +1,13 @@
 package cn.lili.controller.passport.connect;
 
 
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.connect.service.ConnectService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,15 +17,15 @@ import java.util.List;
  * 买家端,app/小程序 联合登录
  *
  * @author Chopper
- * @date 2020-11-25 19:29
+ * @since 2020-11-25 19:29
  */
 @RestController
 @Api(tags = "买家端,app/小程序 联合登录")
-@RequestMapping("/buyer/connect/bind")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping("/buyer/passport/connect/bind")
 public class ConnectBuyerBindController {
 
-    private final ConnectService connectService;
+    @Autowired
+    private ConnectService connectService;
 
     @ApiOperation(value = "unionID 绑定")
     @ApiImplicitParams({

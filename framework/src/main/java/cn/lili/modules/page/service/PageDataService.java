@@ -12,7 +12,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 页面业务层
  *
  * @author Bulbasaur
- * @date 2020/12/10 17:23
+ * @since 2020/12/10 17:23
  */
 public interface PageDataService extends IService<PageData> {
 
@@ -74,4 +74,12 @@ public interface PageDataService extends IService<PageData> {
      * @return
      */
     IPage<PageDataListVO> getPageDataList(PageVO pageVO, PageDataDTO pageDataDTO);
+
+
+    /**
+     * 获取专题信息
+     * @param id id
+     * @return
+     */
+    PageData getSpecial(String id);
 }

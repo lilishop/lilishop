@@ -9,15 +9,14 @@ import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.TradeService;
-import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
 import cn.lili.modules.payment.kit.dto.PayParam;
-import cn.lili.modules.payment.kit.enums.CashierEnum;
+import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
+import cn.lili.modules.payment.entity.enums.CashierEnum;
 import cn.lili.modules.payment.kit.params.CashierExecute;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
 import cn.lili.modules.system.entity.dto.BaseSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,19 +28,27 @@ import java.util.stream.Collectors;
  * 整笔交易信息获取
  *
  * @author Chopper
- * @date 2021-01-25 20:00
+ * @since 2021-01-25 20:00
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TradeCashier implements CashierExecute {
 
-    //交易
-    private final TradeService tradeService;
-    //订单
-    private final OrderService orderService;
-    //设置
-    private final SettingService settingService;
+    /**
+     * 交易
+     */
+    @Autowired
+    private TradeService tradeService;
+    /**
+     * 订单
+     */
+    @Autowired
+    private OrderService orderService;
+    /**
+     * 设置
+     */
+    @Autowired
+    private SettingService settingService;
 
 
     @Override
@@ -112,7 +119,7 @@ public class TradeCashier implements CashierExecute {
         if (payParam.getOrderType().equals(CashierEnum.TRADE.name())) {
             Trade trade = tradeService.getBySn(payParam.getSn());
             if (trade != null) {
-                return trade.equals(PayStatusEnum.PAID.name());
+                return PayStatusEnum.PAID.name().equals(trade.getPayStatus());
             } else {
                 throw new ServiceException(ResultCode.PAY_NOT_EXIST_ORDER);
             }

@@ -1,16 +1,20 @@
 package cn.lili.modules.distribution.service;
 
+import cn.hutool.core.date.DateTime;
 import cn.lili.modules.distribution.entity.dos.DistributionOrder;
 import cn.lili.modules.distribution.entity.vos.DistributionOrderSearchParams;
+import cn.lili.modules.order.order.entity.dos.OrderItem;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 
 /**
  * 分销订单业务层
  *
  * @author pikachu
- * @date 2020-03-15 10:46:33
+ * @since 2020-03-15 10:46:33
  */
 public interface DistributionOrderService extends IService<DistributionOrder> {
 
@@ -27,7 +31,7 @@ public interface DistributionOrderService extends IService<DistributionOrder> {
      *
      * @param orderSn 订单编号
      */
-    void payOrder(String orderSn);
+    void calculationDistribution(String orderSn);
 
     /**
      * 取消订单
@@ -45,4 +49,17 @@ public interface DistributionOrderService extends IService<DistributionOrder> {
      */
     void refundOrder(String afterSaleSn);
 
+    /**
+     * 分销订单状态修改
+     *
+     * @param orderItems
+     */
+    void updateDistributionOrderStatus(List<OrderItem> orderItems);
+
+    /**
+     * 分销订单结算
+     * @param dateTime
+     * @param distributionOrderStatus
+     */
+    void updateRebate(DateTime dateTime, String distributionOrderStatus);
 }

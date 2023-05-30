@@ -7,7 +7,7 @@ import java.util.List;
  * 订单出库的类型枚举
  *
  * @author Chopper
- * @date 2020/11/17 7:27 下午
+ * @since 2020/11/17 7:27 下午
  */
 public enum OrderOutTypeEnum {
 
@@ -15,7 +15,7 @@ public enum OrderOutTypeEnum {
      * 出库类型枚举
      */
     GOODS("商品"),
-    SECKILL_GOODS("限时抢购商品");
+    SECKILL_GOODS("秒杀活动商品");
 
 
     private final String description;

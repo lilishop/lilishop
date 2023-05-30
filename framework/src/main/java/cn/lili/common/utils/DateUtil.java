@@ -23,7 +23,25 @@ public class DateUtil {
     /**
      * 当天的开始时间
      *
-     * @return
+     * @return 今天开始时间
+     */
+    public static Long getDayOfStart() {
+        return DateUtil.getDateline() / (60 * 24 * 60);
+    }
+
+    /**
+     * 指定日的开始时间
+     *
+     * @return 指定日时间
+     */
+    public static Long getDayOfStart(Date date) {
+        return date.getTime() / (60 * 24 * 60);
+    }
+
+    /**
+     * 当天的开始时间
+     *
+     * @return 今天开始时间
      */
     public static Date startOfTodDayTime() {
         Calendar calendar = Calendar.getInstance();
@@ -37,7 +55,8 @@ public class DateUtil {
     /**
      * 当天的开始时间
      *
-     * @return
+     * @param date 时间
+     * @return 根据传入的时间获取开始时间
      */
     public static Date startOfTodDayTime(Date date) {
         Calendar calendar = Calendar.getInstance();
@@ -51,7 +70,7 @@ public class DateUtil {
     /**
      * 当天的开始时间
      *
-     * @return
+     * @return 今天开始时间
      */
     public static long startOfTodDay() {
         Calendar calendar = Calendar.getInstance();
@@ -63,14 +82,10 @@ public class DateUtil {
         return date.getTime() / 1000;
     }
 
-    public static void main(String[] args) {
-
-    }
-
     /**
      * 当天的结束时间
      *
-     * @return
+     * @return 今天结束时间
      */
     public static Date endOfDate() {
         Calendar calendar = Calendar.getInstance();
@@ -84,9 +99,13 @@ public class DateUtil {
     /**
      * 当天的结束时间
      *
-     * @return
+     * @param date 传入日期
+     * @return 获得传入日期当天结束时间
      */
     public static Date endOfDate(Date date) {
+        if (date == null) {
+            date = new Date();
+        }
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.set(Calendar.HOUR_OF_DAY, 23);
@@ -122,7 +141,7 @@ public class DateUtil {
      *
      * @param date    字符串日期
      * @param pattern 日期格式
-     * @return
+     * @return date
      */
     public static Date toDate(String date, String pattern) {
         if ("".equals("" + date)) {
@@ -145,21 +164,21 @@ public class DateUtil {
     /**
      * 获取上个月的开始结束时间
      *
-     * @return
+     * @return 上个月的开始结束时间
      */
     public static Long[] getLastMonth() {
-        // 取得系统当前时间
+        //取得系统当前时间
         Calendar cal = Calendar.getInstance();
         int year = cal.get(Calendar.YEAR);
         int month = cal.get(Calendar.MONTH) + 1;
 
-        // 取得系统当前时间所在月第一天时间对象
+        //取得系统当前时间所在月第一天时间对象
         cal.set(Calendar.DAY_OF_MONTH, 1);
 
-        // 日期减一,取得上月最后一天时间对象
+        //日期减一,取得上月最后一天时间对象
         cal.add(Calendar.DAY_OF_MONTH, -1);
 
-        // 输出上月最后一天日期
+        //输出上月最后一天日期
         int day = cal.get(Calendar.DAY_OF_MONTH);
 
         String months = "";
@@ -171,12 +190,12 @@ public class DateUtil {
             year--;
             month = 12;
         }
-        if (!(String.valueOf(month).length() > 1)) {
+        if (String.valueOf(month).length() <= 1) {
             months = "0" + month;
         } else {
             months = String.valueOf(month);
         }
-        if (!(String.valueOf(day).length() > 1)) {
+        if (String.valueOf(day).length() <= 1) {
             days = "0" + day;
         } else {
             days = String.valueOf(day);
@@ -194,18 +213,29 @@ public class DateUtil {
     /**
      * 把日期转换成字符串型
      *
-     * @param date    日期
-     * @return
+     * @param date 日期
+     * @return 字符串时间
      */
     public static String toString(Date date) {
-        return toString(date,STANDARD_FORMAT);
+        return toString(date, STANDARD_FORMAT);
     }
+
+    /**
+     * 把日期转换成字符串型
+     *
+     * @param date 日期
+     * @return 字符串时间
+     */
+    public static String toString(Long date) {
+        return toString(date, STANDARD_FORMAT);
+    }
+
     /**
      * 把日期转换成字符串型
      *
      * @param date    日期
      * @param pattern 类型
-     * @return
+     * @return 字符串时间
      */
     public static String toString(Date date, String pattern) {
         if (date == null) {
@@ -229,7 +259,7 @@ public class DateUtil {
      *
      * @param time    时间戳
      * @param pattern 格式
-     * @return
+     * @return 字符串时间
      */
     public static String toString(Long time, String pattern) {
         if (time > 0) {
@@ -237,8 +267,7 @@ public class DateUtil {
                 time = time * 1000;
             }
             Date date = new Date(time);
-            String str = DateUtil.toString(date, pattern);
-            return str;
+            return DateUtil.toString(date, pattern);
         }
         return "";
     }
@@ -262,7 +291,7 @@ public class DateUtil {
      * @return 时间戳
      */
     public static long getDateline(String date) {
-        return toDate(date, STANDARD_DATE_FORMAT).getTime() / 1000;
+        return Objects.requireNonNull(toDate(date, STANDARD_DATE_FORMAT)).getTime() / 1000;
     }
 
     /**
@@ -300,14 +329,14 @@ public class DateUtil {
      * @return 时间戳
      */
     public static long getDateline(String date, String pattern) {
-        return toDate(date, pattern).getTime() / 1000;
+        return Objects.requireNonNull(toDate(date, pattern)).getTime() / 1000;
     }
 
     /**
      * 获取几个月之前的日期时间戳
      *
      * @param beforeMonth 几个月之前
-     * @return
+     * @return 时间戳
      */
     public static long getBeforeMonthDateline(int beforeMonth) {
         SimpleDateFormat format = new SimpleDateFormat(STANDARD_FORMAT);
@@ -319,6 +348,22 @@ public class DateUtil {
         Date m = c.getTime();
         String mon = format.format(m);
         return getDateline(mon, STANDARD_FORMAT);
+    }
+
+    /**
+     * 获取当前天的结束时间
+     *
+     * @return 当前天的开始时间
+     */
+    public static Date getCurrentDayStartTime() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(Calendar.SECOND, cal.get(Calendar.SECOND) - 1);
+        return cal.getTime();
     }
 
     /**
@@ -339,6 +384,21 @@ public class DateUtil {
     }
 
     /**
+     * 获取干净的时间
+     *
+     * @return 时间对象
+     */
+    public static Calendar getCleanCalendar() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal;
+    }
+
+    /**
      * 获取延时时间（秒）
      *
      * @param startTime 开始时间
@@ -346,7 +406,7 @@ public class DateUtil {
      */
     public static Integer getDelayTime(Long startTime) {
         int time = Math.toIntExact((startTime - System.currentTimeMillis()) / 1000);
-        // 如果时间为负数则改为一秒后执行
+        //如果时间为负数则改为一秒后执行
         if (time <= 0) {
             time = 1;
         }

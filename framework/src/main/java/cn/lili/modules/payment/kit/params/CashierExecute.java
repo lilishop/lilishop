@@ -2,14 +2,14 @@ package cn.lili.modules.payment.kit.params;
 
 import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
 import cn.lili.modules.payment.kit.dto.PayParam;
-import cn.lili.modules.payment.kit.enums.CashierEnum;
+import cn.lili.modules.payment.entity.enums.CashierEnum;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
 
 /**
  * 收银台接口
  *
  * @author Chopper
- * @date 2021-01-25 19:08
+ * @since 2021-01-25 19:08
  */
 public interface CashierExecute {
 

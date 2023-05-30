@@ -1,6 +1,7 @@
 package cn.lili.controller.distribution;
 
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.distribution.entity.dos.DistributionCash;
 import cn.lili.modules.distribution.entity.vos.DistributionCashSearchParams;
@@ -10,7 +11,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,15 +20,15 @@ import javax.validation.constraints.NotNull;
  * 管理端,分销佣金管理接口
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
+ * @since 2020-03-14 23:04:56
  */
 @RestController
 @Api(tags = "管理端,分销佣金管理接口")
 @RequestMapping("/manager/distribution/cash")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DistributionCashManagerController {
 
-    private final DistributionCashService distributorCashService;
+    @Autowired
+    private DistributionCashService distributorCashService;
 
     @ApiOperation(value = "通过id获取分销佣金详情")
     @GetMapping(value = "/get/{id}")
@@ -44,6 +44,7 @@ public class DistributionCashManagerController {
     }
 
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "审核")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "分销佣金ID", required = true, paramType = "path", dataType = "String"),

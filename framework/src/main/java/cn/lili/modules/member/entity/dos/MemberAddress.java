@@ -1,27 +1,24 @@
 package cn.lili.modules.member.entity.dos;
 
-import cn.lili.base.BaseEntity;
-import cn.lili.common.validation.Mobile;
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
+import cn.lili.common.validation.Phone;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 /**
  * 会员地址
  *
  * @author Chopper
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Data
-@Entity
-@Table(name = "li_member_address")
 @TableName("li_member_address")
 @ApiModel(value = "会员地址")
 public class MemberAddress extends BaseEntity {
@@ -35,8 +32,9 @@ public class MemberAddress extends BaseEntity {
     @ApiModelProperty(value = "收货人姓名")
     private String name;
 
-    @Mobile
+    @Phone
     @ApiModelProperty(value = "手机号码")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String mobile;
 
     @NotBlank(message = "地址不能为空")
@@ -51,7 +49,6 @@ public class MemberAddress extends BaseEntity {
     @ApiModelProperty(value = "详细地址")
     private String detail;
 
-    @NotNull(message = "是否默认不能为空")
     @ApiModelProperty(value = "是否为默认收货地址")
     private Boolean isDefault;
 

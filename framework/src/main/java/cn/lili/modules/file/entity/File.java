@@ -1,6 +1,6 @@
 package cn.lili.modules.file.entity;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
@@ -8,18 +8,14 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 文件系统
  *
  * @author Chopper
- * @date 2020/11/26 15:35
+ * @since 2020/11/26 15:35
  */
 @Data
-@Entity
-@Table(name = "li_file")
 @TableName("li_file")
 @ApiModel(value = "文件")
 public class File extends BaseEntity {

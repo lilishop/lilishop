@@ -1,7 +1,6 @@
 package cn.lili.modules.goods.entity.dto;
 
 import cn.lili.modules.goods.entity.dos.DraftGoods;
-import cn.lili.modules.goods.entity.dos.GoodsParams;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -22,7 +21,7 @@ public class DraftGoodsDTO extends DraftGoods {
 
     @ApiModelProperty(value = "商品参数")
     @Valid
-    private List<GoodsParams> goodsParamsList;
+    private List<GoodsParamsDTO> goodsParamsDTOList;
 
     @ApiModelProperty(value = "商品图片")
     private List<String> goodsGalleryList;
@@ -30,5 +29,11 @@ public class DraftGoodsDTO extends DraftGoods {
     @ApiModelProperty(value = "sku列表")
     @Valid
     private List<Map<String, Object>> skuList;
+
+    /**
+     * 批发商品规则
+     */
+    @ApiModelProperty(value = "批发商品规则")
+    private List<WholesaleDTO> wholesaleList;
 
 }

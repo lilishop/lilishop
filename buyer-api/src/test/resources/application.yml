@@ -2,9 +2,6 @@ server:
   servlet:
     context-path: /
 
-  # 正式部署时候，解开此处配置，防止文件夹被清除导致的文件上传失败问题
-  #    multipart:
-  #      location: /Users/lifenlong/Desktop/ceshi
   tomcat:
     uri-encoding: UTF-8
     threads:
@@ -28,25 +25,11 @@ spring:
     admin:
       client:
         url: http://192.168.0.116:8000
-  # mongodb
-  data:
-    mongodb:
-      host: 192.168.0.116
-      port: 27017
-      database: lilishop
-      username: root
-      password: lilishop
-      authentication-database: admin
-  #      replica-set-name: mongoreplset
   cache:
     type: redis
   #amqp
   #  rabbitmq:
   #    host: 192.168.0.116
-  jpa:
-    # 自动生成表结构
-    generate-ddl: true
-    open-in-view: false
   # Redis
   redis:
     host: 192.168.0.116
@@ -118,13 +101,13 @@ spring:
     #            standard:
     #              sharding-column: create_time
     #              #分表策略
-    #              precise-algorithm-class-name: cn.lili.config.sharding.CreateTimeShardingTableAlgorithm
+    #              precise-algorithm-class-name: cn.lili.mybatis.sharding.CreateTimeShardingTableAlgorithm
     #              #范围查询实现
-    #              range-algorithm-class-name: cn.lili.config.sharding.CreateTimeShardingTableAlgorithm
+    #              range-algorithm-class-name: cn.lili.mybatis.sharding.CreateTimeShardingTableAlgorithm
     props:
       #是否打印逻辑SQL语句和实际SQL语句，建议调试时打印，在生产环境关闭
       sql:
-        show: true
+        show: false
 
 # 忽略鉴权url
 ignored:
@@ -157,14 +140,10 @@ ignored:
     - /doc.html
     - /swagger-resources/**
     - /swagger/**
-    - /**/**.js
-    - /**/**.png
-    - /**/**.css
     - /webjars/**
     - /v2/api-docs
     - /configuration/ui
     - /boot-admin
-  statics:
     - /**/*.js
     - /**/*.css
     - /**/*.png
@@ -197,7 +176,6 @@ logging:
     cn.lili: info
   #    org.hibernate: debug
   #    org.springframework: debug
-  #    org.springframework.data.mongodb.core: debug
   file:
     # 指定路径
     path: lili-logs
@@ -261,7 +239,8 @@ lili:
     #      account:
     #        username: elastic
     #        password: LiLiShopES
-
+    logstash:
+      server: 127.0.0.1:4560
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group

@@ -1,25 +1,23 @@
 package cn.lili.modules.member.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 浏览历史
  *
  * @author Chopper
- * @date 2020/11/17 7:22 下午
+ * @since 2020/11/17 7:22 下午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-@Entity
-@Table(name = "li_foot_print")
 @TableName("li_foot_print")
 @ApiModel(value = "浏览历史")
 @NoArgsConstructor
@@ -31,6 +29,9 @@ public class FootPrint extends BaseEntity {
 
     @ApiModelProperty(value = "会员ID")
     private String memberId;
+
+    @ApiModelProperty(value = "店铺Id")
+    private String storeId;
 
     @ApiModelProperty(value = "商品ID")
     private String goodsId;

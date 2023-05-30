@@ -5,13 +5,13 @@ import cn.lili.common.utils.SpringContextUtil;
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
+import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.kit.Payment;
-import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
-import cn.lili.modules.payment.service.PaymentService;
-import lombok.RequiredArgsConstructor;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,62 +19,47 @@ import org.springframework.stereotype.Service;
  * 支付
  *
  * @author Chopper
- * @date 2021-03-13 16:58
+ * @since 2021-03-13 16:58
  */
+@Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PaymentExecute implements OrderStatusChangeEvent {
 
-    //支付日志
-    private final PaymentService paymentService;
-    //订单
-    private final OrderService orderService;
+    /**
+     * 订单
+     */
+    @Autowired
+    private OrderService orderService;
 
     @Override
     public void orderChange(OrderMessage orderMessage) {
 
-        switch (orderMessage.getNewStatus()) {
-            case CANCELLED:
-                Order order = orderService.getBySn(orderMessage.getOrderSn());
-                //未付款不做处理 直接返回
-                if (order.getPayStatus() == PayStatusEnum.UNPAID.name()) {
-                    return;
-                }
+        if (orderMessage.getNewStatus() == OrderStatusEnum.CANCELLED) {
+            Order order = orderService.getBySn(orderMessage.getOrderSn());
 
-                PaymentMethodEnum paymentMethodEnum = PaymentMethodEnum.valueOf(order.getPaymentMethod());
-                //进行退款操作
-                switch (paymentMethodEnum) {
-                    case WALLET:
-                    case ALIPAY:
-                    case WECHAT:
-                        //获取支付方式
-                        Payment payment =
-                                (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
+            //如果未付款，则不去要退回相关代码执行
+            if (order.getPayStatus().equals(PayStatusEnum.UNPAID.name())) {
+                return;
+            }
+            PaymentMethodEnum paymentMethodEnum = PaymentMethodEnum.valueOf(order.getPaymentMethod());
 
-                        RefundLog refundLog = RefundLog.builder()
-                                .isRefund(false)
-                                .totalAmount(order.getFlowPrice())
-                                .payPrice(order.getFlowPrice())
-                                .memberId(order.getMemberId())
-                                .paymentName(order.getPaymentMethod())
-                                .afterSaleNo("订单取消")
-                                .orderSn(order.getSn())
-                                .paymentReceivableNo(order.getReceivableNo())
-                                .outOrderNo("AF" + SnowFlake.getIdStr())
-                                .outOrderNo("AF" + SnowFlake.getIdStr())
-                                .refundReason("订单取消")
-                                .build();
-                        payment.cancel(refundLog);
-                        break;
-                    case BANK_TRANSFER:
-                        break;
-                }
-            default:
-                break;
+            //获取支付方式
+            Payment payment =
+                    (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
+
+            RefundLog refundLog = RefundLog.builder()
+                    .isRefund(false)
+                    .totalAmount(order.getFlowPrice())
+                    .payPrice(order.getFlowPrice())
+                    .memberId(order.getMemberId())
+                    .paymentName(order.getPaymentMethod())
+                    .afterSaleNo("订单取消")
+                    .orderSn(order.getSn())
+                    .paymentReceivableNo(order.getReceivableNo())
+                    .outOrderNo("AF" + SnowFlake.getIdStr())
+                    .refundReason("订单取消")
+                    .build();
+            payment.refund(refundLog);
         }
-
-
     }
-
-
 }

@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * 专题活动数据处理层
  *
  * @author Bulbasaur
- * @date 2020/12/7 11:26
+ * @since 2020/12/7 11:26
  */
 public interface SpecialMapper extends BaseMapper<Special> {
 }

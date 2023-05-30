@@ -1,32 +1,36 @@
 package cn.lili.controller.passport;
 
+import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.token.Token;
-import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.ResultUtil;
-import cn.lili.common.utils.StringUtils;
+import cn.lili.common.security.enums.UserEnums;
+import cn.lili.common.security.token.Token;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.vo.SearchVO;
+import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.permission.entity.dos.AdminUser;
 import cn.lili.modules.permission.entity.dto.AdminUserDTO;
 import cn.lili.modules.permission.entity.vo.AdminUserVO;
 import cn.lili.modules.permission.service.AdminUserService;
-import cn.lili.modules.permission.service.DepartmentService;
+import cn.lili.modules.verification.entity.enums.VerificationEnums;
+import cn.lili.modules.verification.service.VerificationService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -39,23 +43,38 @@ import java.util.List;
 @Slf4j
 @RestController
 @Api(tags = "管理员")
-@RequestMapping("/manager/user")
-@Transactional
+@RequestMapping("/manager/passport/user")
 @Validated
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AdminUserManagerController {
+    @Autowired
+    private AdminUserService adminUserService;
+    /**
+     * 会员
+     */
+    @Autowired
+    private MemberService memberService;
 
-    private final AdminUserService adminUserService;
+    @Autowired
+    private VerificationService verificationService;
 
-    private final DepartmentService departmentService;
-
-
-    @GetMapping(value = "/login")
+    @PostMapping(value = "/login")
     @ApiOperation(value = "登录管理员")
-    public ResultMessage<Token> login(String username, String password) {
-        return ResultUtil.data(adminUserService.login(username, password));
+    public ResultMessage<Token> login(@NotNull(message = "用户名不能为空") @RequestParam String username,
+                                      @NotNull(message = "密码不能为空") @RequestParam String password,
+                                      @RequestHeader String uuid) {
+        if (verificationService.check(uuid, VerificationEnums.LOGIN)) {
+            return ResultUtil.data(adminUserService.login(username, password));
+        } else {
+            throw new ServiceException(ResultCode.VERIFICATION_ERROR);
+        }
     }
 
+    @ApiOperation(value = "注销接口")
+    @PostMapping("/logout")
+    public ResultMessage<Object> logout() {
+        this.memberService.logout(UserEnums.MANAGER);
+        return ResultUtil.success();
+    }
 
     @ApiOperation(value = "刷新token")
     @GetMapping("/refresh/{refreshToken}")
@@ -66,17 +85,14 @@ public class AdminUserManagerController {
 
     @GetMapping(value = "/info")
     @ApiOperation(value = "获取当前登录用户接口")
-    public ResultMessage<AdminUserVO> getUserInfo() {
+    public ResultMessage<AdminUser> getUserInfo() {
         AuthUser tokenUser = UserContext.getCurrentUser();
         if (tokenUser != null) {
-            AdminUserVO adminUser = new AdminUserVO(adminUserService.findByUsername(tokenUser.getUsername()));
-            if (StringUtils.isNotEmpty(adminUser.getDepartmentId())) {
-                adminUser.setDepartmentTitle(departmentService.getById(adminUser.getDepartmentId()).getTitle());
-            }
+            AdminUser adminUser = adminUserService.findByUsername(tokenUser.getUsername());
             adminUser.setPassword(null);
             return ResultUtil.data(adminUser);
         }
-        return ResultUtil.error(ResultCode.USER_NOT_LOGIN);
+        throw new ServiceException(ResultCode.USER_NOT_LOGIN);
     }
 
     @PutMapping(value = "/edit")
@@ -86,23 +102,24 @@ public class AdminUserManagerController {
         AuthUser tokenUser = UserContext.getCurrentUser();
         if (tokenUser != null) {
             //查询当前管理员
-            AdminUser adminUserDB = adminUserService.findByUsername(tokenUser.getUsername());
-            adminUserDB.setAvatar(adminUser.getAvatar());
-            adminUserDB.setNickName(adminUser.getNickName());
-            if (!adminUserService.updateById(adminUserDB)) {
-                return ResultUtil.error(ResultCode.USER_EDIT_ERROR);
+            AdminUser oldAdminUser = adminUserService.findByUsername(tokenUser.getUsername());
+            oldAdminUser.setAvatar(adminUser.getAvatar());
+            oldAdminUser.setNickName(adminUser.getNickName());
+            if (!adminUserService.updateById(oldAdminUser)) {
+                throw new ServiceException(ResultCode.USER_EDIT_ERROR);
             }
             return ResultUtil.success(ResultCode.USER_EDIT_SUCCESS);
         }
-        return ResultUtil.error(ResultCode.USER_NOT_LOGIN);
+        throw new ServiceException(ResultCode.USER_NOT_LOGIN);
     }
 
     @PutMapping(value = "/admin/edit")
     @ApiOperation(value = "超级管理员修改其他管理员资料")
-    public ResultMessage<Object> edit(AdminUser adminUser,
+    @DemoSite
+    public ResultMessage<Object> edit(@Valid AdminUser adminUser,
                                       @RequestParam(required = false) List<String> roles) {
         if (!adminUserService.updateAdminUser(adminUser, roles)) {
-            return ResultUtil.error(ResultCode.USER_EDIT_ERROR);
+            throw new ServiceException(ResultCode.USER_EDIT_ERROR);
         }
         return ResultUtil.success(ResultCode.USER_EDIT_SUCCESS);
     }
@@ -116,6 +133,7 @@ public class AdminUserManagerController {
      */
     @PutMapping(value = "/editPassword")
     @ApiOperation(value = "修改密码")
+    @DemoSite
     public ResultMessage<Object> editPassword(String password, String newPassword) {
         adminUserService.editPassword(password, newPassword);
         return ResultUtil.success(ResultCode.USER_EDIT_SUCCESS);
@@ -123,6 +141,7 @@ public class AdminUserManagerController {
 
     @PostMapping(value = "/resetPassword/{ids}")
     @ApiOperation(value = "重置密码")
+    @DemoSite
     public ResultMessage<Object> resetPassword(@PathVariable List ids) {
         adminUserService.resetPassword(ids);
         return ResultUtil.success(ResultCode.USER_EDIT_SUCCESS);
@@ -141,36 +160,47 @@ public class AdminUserManagerController {
 
     @PostMapping
     @ApiOperation(value = "添加用户")
-    public ResultMessage<Object> register(AdminUserDTO adminUser,
+    public ResultMessage<Object> register(@Valid AdminUserDTO adminUser,
                                           @RequestParam(required = false) List<String> roles) {
+        int rolesMaxSize = 10;
         try {
-            if (roles != null & roles.size() >= 10) {
-                return ResultUtil.error(ResultCode.PERMISSION_BEYOND_TEN);
+            if (roles != null && roles.size() >= rolesMaxSize) {
+                throw new ServiceException(ResultCode.PERMISSION_BEYOND_TEN);
             }
             adminUserService.saveAdminUser(adminUser, roles);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("添加用户错误", e);
         }
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @PutMapping(value = "/enable/{userId}")
     @ApiOperation(value = "禁/启 用 用户")
+    @DemoSite
     public ResultMessage<Object> disable(@ApiParam("用户唯一id标识") @PathVariable String userId, Boolean status) {
         AdminUser user = adminUserService.getById(userId);
         if (user == null) {
-            return ResultUtil.error(ResultCode.USER_NOT_EXIST);
+            throw new ServiceException(ResultCode.USER_NOT_EXIST);
         }
         user.setStatus(status);
         adminUserService.updateById(user);
-        return ResultUtil.success(ResultCode.SUCCESS);
+
+        //登出用户
+        if (Boolean.FALSE.equals(status)) {
+            List<String> userIds = new ArrayList<>();
+            userIds.add(userId);
+            adminUserService.logout(userIds);
+        }
+
+        return ResultUtil.success();
     }
 
     @DeleteMapping(value = "/{ids}")
     @ApiOperation(value = "批量通过ids删除")
+    @DemoSite
     public ResultMessage<Object> delAllByIds(@PathVariable List<String> ids) {
         adminUserService.deleteCompletely(ids);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 }

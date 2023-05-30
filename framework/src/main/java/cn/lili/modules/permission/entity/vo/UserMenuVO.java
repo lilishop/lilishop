@@ -7,7 +7,7 @@ import lombok.Data;
  * RoleMenuVO
  *
  * @author Chopper
- * @date 2020-11-24 11:45
+ * @since 2020-11-24 11:45
  */
 @Data
 public class UserMenuVO extends Menu {
@@ -17,6 +17,12 @@ public class UserMenuVO extends Menu {
     /**
      * 是否是超级管理员
      */
-    private Boolean isSupper;
+    private Boolean isSuper;
 
+    public Boolean getSuper() {
+        if (this.isSuper == null) {
+            return false;
+        }
+        return isSuper;
+    }
 }

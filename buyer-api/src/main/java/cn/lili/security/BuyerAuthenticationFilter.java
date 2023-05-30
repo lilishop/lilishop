@@ -1,18 +1,19 @@
 package cn.lili.security;
 
 import cn.hutool.core.util.StrUtil;
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.enums.SecurityEnum;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.common.token.SecretKeyUtil;
+import cn.lili.common.security.token.SecretKeyUtil;
 import cn.lili.common.utils.ResponseUtil;
 import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -34,8 +35,7 @@ import java.util.List;
  *
  * @author Chopper
  * @version v4.1
- * @date 2020/11/17 3:37 下午
- * @Description:
+ * @since 2020/11/17 3:37 下午
  * @since
  */
 @Slf4j
@@ -45,7 +45,8 @@ public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
     /**
      * 缓存
      */
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
 
     /**
      * 自定义构造器
@@ -65,7 +66,7 @@ public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
         //从header中获取jwt
         String jwt = request.getHeader(SecurityEnum.HEADER_TOKEN.getValue());
         try {
-            // 如果没有token 则return
+            //如果没有token 则return
             if (StrUtil.isBlank(jwt)) {
                 chain.doFilter(request, response);
                 return;
@@ -97,8 +98,8 @@ public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
             String json = claims.get(SecurityEnum.USER_CONTEXT.getValue()).toString();
             AuthUser authUser = new Gson().fromJson(json, AuthUser.class);
 
-            // 校验redis中是否有权限
-            if (cache.hasKey(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MEMBER) + jwt)) {
+            //校验redis中是否有权限
+            if (cache.hasKey(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.MEMBER,authUser.getId()) + jwt)) {
                 //构造返回信息
                 List<GrantedAuthority> auths = new ArrayList<>();
                 auths.add(new SimpleGrantedAuthority("ROLE_" + authUser.getRole().name()));

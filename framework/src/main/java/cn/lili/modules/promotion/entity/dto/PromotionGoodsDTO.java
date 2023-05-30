@@ -4,6 +4,7 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 
@@ -11,16 +12,14 @@ import lombok.NoArgsConstructor;
  * 促销商品数据传输对象
  *
  * @author paulG
- * @date 2020/10/9
+ * @since 2020/10/9
  **/
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 public class PromotionGoodsDTO extends PromotionGoods {
 
     private static final long serialVersionUID = 9206970681612883421L;
-
-    @ApiModelProperty(value = "原价")
-    private Double originPrice;
 
     @ApiModelProperty(value = "商品id")
     private String goodsId;

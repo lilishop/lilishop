@@ -1,5 +1,6 @@
 package cn.lili.modules.order.order.serviceimpl;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
@@ -8,30 +9,21 @@ import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
 import cn.lili.modules.order.order.mapper.OrderItemMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.util.Date;
 import java.util.List;
 
 /**
  * 子订单业务层实现
  *
  * @author Chopper
- * @date 2020/11/17 7:38 下午
+ * @since 2020/11/17 7:38 下午
  */
 @Service
-@Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem> implements OrderItemService {
-
-    private final OrderItemMapper orderItemMapper;
 
     @Override
     public void updateCommentStatus(String orderItemSn, CommentStatusEnum commentStatusEnum) {
@@ -63,7 +55,7 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         queryWrapper.eq(OrderItem::getOrderSn, orderSn).eq(OrderItem::getSkuId, skuId);
         OrderItem orderItem = getOne(queryWrapper);
         if (orderItem == null) {
-            throw new ServiceException("当前订单项不存在！");
+            throw new ServiceException(ResultCode.ORDER_ITEM_NOT_EXIST);
         }
         orderItem.setComplainId(complainId);
         orderItem.setComplainStatus(complainStatusEnum.name());
@@ -85,10 +77,9 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
     }
 
     @Override
-    public List<OrderItem> waitEvaluate(Date date) {
-        QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.ge("o.complete_time", date);
-        queryWrapper.eq("oi.comment_status", CommentStatusEnum.UNFINISHED.name());
-        return orderItemMapper.waitEvaluate(queryWrapper);
+    public OrderItem getByOrderSnAndSkuId(String orderSn, String skuId) {
+        return this.getOne(new LambdaQueryWrapper<OrderItem>()
+                .eq(OrderItem::getOrderSn, orderSn)
+                .eq(OrderItem::getSkuId, skuId));
     }
 }

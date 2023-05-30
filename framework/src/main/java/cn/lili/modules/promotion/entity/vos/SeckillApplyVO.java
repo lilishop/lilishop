@@ -5,10 +5,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 限时抢购申请视图对象
+ * 秒杀活动申请视图对象
  *
  * @author paulG
- * @date 2020/8/21
+ * @since 2020/8/21
  **/
 @Data
 public class SeckillApplyVO extends SeckillApply {

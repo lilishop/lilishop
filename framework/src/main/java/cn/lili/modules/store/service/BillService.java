@@ -1,22 +1,21 @@
 package cn.lili.modules.store.service;
 
-import cn.lili.common.vo.PageVO;
-import cn.lili.modules.order.order.entity.dos.StoreFlow;
+import cn.hutool.core.date.DateTime;
 import cn.lili.modules.store.entity.dos.Bill;
 import cn.lili.modules.store.entity.dto.BillSearchParams;
-import cn.lili.modules.store.entity.enums.BillStatusEnum;
 import cn.lili.modules.store.entity.vos.BillListVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.cache.annotation.CacheConfig;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
 /**
  * 结算单业务层
  *
  * @author Chopper
- * @date 2020/11/17 4:28 下午
+ * @since 2020/11/17 4:28 下午
  */
 @CacheConfig(cacheNames = "bill")
 public interface BillService extends IService<Bill> {
@@ -26,8 +25,9 @@ public interface BillService extends IService<Bill> {
      *
      * @param storeId   商家ID
      * @param startTime 开始时间
+     * @param endTime   结束时间
      */
-    void createBill(String storeId, Date startTime);
+    void createBill(String storeId, Date startTime, DateTime endTime);
 
 
     /**
@@ -38,24 +38,6 @@ public interface BillService extends IService<Bill> {
      * @param endTime 结束时间
      */
     void immediatelyBill(String storeId, Long endTime);
-
-    /**
-     * 根据结算单ID获取商家流水
-     *
-     * @param pageVO 分页
-     * @param id     结算单ID
-     * @return 商家流水
-     */
-    IPage<StoreFlow> getStoreFlow(String id, String type, PageVO pageVO);
-
-    /**
-     * 根据结算单ID获取商家流水
-     *
-     * @param pageVO 分页
-     * @param id     结算单ID
-     * @return 商家流水
-     */
-    IPage<StoreFlow> getDistributionFlow(String id, PageVO pageVO);
 
     /**
      * 获取结算单分页
@@ -82,10 +64,9 @@ public interface BillService extends IService<Bill> {
     boolean complete(String id);
 
     /**
-     * 商家待结算数量
-     *
-     * @return 待结算商家数量
+     * 下载结算单
+     * @response response
+     * @param id 结算单ID
      */
-    Integer billNum(BillStatusEnum billStatusEnum);
-
+    void download(HttpServletResponse response, String id);
 }

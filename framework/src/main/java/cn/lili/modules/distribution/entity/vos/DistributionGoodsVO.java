@@ -5,14 +5,13 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
 import java.util.Date;
 
 /**
  * 分销商品信息
  *
  * @author pikachu
- * @date 2020-03-26 09:04:53
+ * @since 2020-03-26 09:04:53
  */
 @Data
 public class DistributionGoodsVO {
@@ -23,7 +22,6 @@ public class DistributionGoodsVO {
     @ApiModelProperty(value = "商品名称")
     private String goodsName;
 
-    @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "规格")
     private String specs;
 
@@ -38,6 +36,9 @@ public class DistributionGoodsVO {
 
     @ApiModelProperty(value = "商品编号")
     private String sn;
+
+    @ApiModelProperty(value = "商品ID")
+    private String goodsId;
 
     @ApiModelProperty(value = "规格ID")
     private String skuId;

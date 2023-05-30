@@ -15,7 +15,6 @@ import java.util.Date;
  * 日期搜索参数
  *
  * @author Chopper
- * @date 2020/11/26 14:43
  */
 @Data
 @AllArgsConstructor
@@ -32,8 +31,7 @@ public class SearchVO implements Serializable {
         if (StringUtils.isEmpty(startDate)) {
             return null;
         }
-        Date date = DateUtil.toDate(startDate, DateUtil.STANDARD_DATE_FORMAT);
-        return date;
+        return DateUtil.toDate(startDate, DateUtil.STANDARD_DATE_FORMAT);
     }
 
     public Date getConvertEndDate() {

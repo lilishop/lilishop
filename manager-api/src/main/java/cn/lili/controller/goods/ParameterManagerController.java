@@ -1,14 +1,14 @@
 package cn.lili.controller.goods;
 
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Parameters;
 import cn.lili.modules.goods.service.ParametersService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,15 +18,16 @@ import javax.validation.Valid;
  * 管理端,分类绑定参数组管理接口
  *
  * @author Bulbasaur
- * @date: 2020/11/26 16:15
+ * @since 2020/11/26 16:15
  */
 @RestController
 @Api(tags = "管理端,分类绑定参数组管理接口")
 @RequestMapping("/manager/goods/parameters")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ParameterManagerController {
 
-    private final ParametersService parametersService;
+    @Autowired
+    private ParametersService parametersService;
+
 
     @ApiOperation(value = "添加参数")
     @PostMapping
@@ -35,7 +36,7 @@ public class ParameterManagerController {
         if (parametersService.save(parameters)) {
             return ResultUtil.data(parameters);
         }
-        return ResultUtil.error(ResultCode.PARAMETER_SAVE_ERROR);
+        throw new ServiceException(ResultCode.PARAMETER_SAVE_ERROR);
 
     }
 
@@ -43,10 +44,10 @@ public class ParameterManagerController {
     @PutMapping
     public ResultMessage<Parameters> update(@Valid Parameters parameters) {
 
-        if (parametersService.updateById(parameters)) {
+        if (parametersService.updateParameter(parameters)) {
             return ResultUtil.data(parameters);
         }
-        return ResultUtil.error(ResultCode.PARAMETER_UPDATE_ERROR);
+        throw new ServiceException(ResultCode.PARAMETER_UPDATE_ERROR);
     }
 
     @ApiOperation(value = "通过id删除参数")
@@ -54,7 +55,7 @@ public class ParameterManagerController {
     @DeleteMapping(value = "/{id}")
     public ResultMessage<Object> delById(@PathVariable String id) {
         parametersService.removeById(id);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
 
     }
 

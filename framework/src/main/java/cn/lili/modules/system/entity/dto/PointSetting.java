@@ -11,7 +11,7 @@ import java.util.List;
  * 积分设置
  *
  * @author Chopper
- * @date 2020/11/17 7:59 下午
+ * @since 2020/11/17 7:59 下午
  */
 @Data
 public class PointSetting implements Serializable {
@@ -20,7 +20,10 @@ public class PointSetting implements Serializable {
     @ApiModelProperty(value = "注册")
     private Integer register;
 
-    @ApiModelProperty(value = "1积分等于多少元")
+    @ApiModelProperty(value = "消费1元赠送多少积分")
+    private Integer consumer;
+
+    @ApiModelProperty(value = "积分付款X积分=1元")
     private Integer money;
 
     @ApiModelProperty(value = "每日签到积分")
@@ -32,5 +35,38 @@ public class PointSetting implements Serializable {
     @ApiModelProperty(value = "积分具体设置")
     private List<PointSettingItem> pointSettingItems = new ArrayList<>();
 
+    public Integer getRegister() {
+        if (register == null || register < 0) {
+            return 0;
+        }
+        return register;
+    }
 
+    public Integer getMoney() {
+        if (money == null || money < 0) {
+            return 0;
+        }
+        return money;
+    }
+
+    public Integer getConsumer() {
+        if (consumer == null || consumer < 0) {
+            return 0;
+        }
+        return consumer;
+    }
+
+    public Integer getSignIn() {
+        if (signIn == null || signIn < 0) {
+            return 0;
+        }
+        return signIn;
+    }
+
+    public Integer getComment() {
+        if (comment == null || comment < 0) {
+            return 0;
+        }
+        return comment;
+    }
 }

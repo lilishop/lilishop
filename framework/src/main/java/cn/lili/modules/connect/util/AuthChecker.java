@@ -1,7 +1,7 @@
 package cn.lili.modules.connect.util;
 
 
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.modules.connect.config.AuthConfig;
 import cn.lili.modules.connect.config.ConnectAuth;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
@@ -47,9 +47,9 @@ public class AuthChecker {
         if (!GlobalAuthUtils.isHttpProtocol(redirectUri) && !GlobalAuthUtils.isHttpsProtocol(redirectUri)) {
             throw new AuthException(AuthResponseStatus.ILLEGAL_REDIRECT_URI, connectAuth);
         }
-        // 支付宝在创建回调地址时，不允许使用localhost或者127.0.0.1
+        //支付宝在创建回调地址时，不允许使用localhost或者106.124.130.167
         if (ConnectAuthEnum.ALIPAY == connectAuth && GlobalAuthUtils.isLocalHost(redirectUri)) {
-            // The redirect uri of alipay is forbidden to use localhost or 127.0.0.1
+            //The redirect uri of alipay is forbidden to use localhost or 106.124.130.167
             throw new AuthException(AuthResponseStatus.ILLEGAL_REDIRECT_URI, connectAuth);
         }
     }
@@ -66,7 +66,7 @@ public class AuthChecker {
     public static void checkCode(ConnectAuth connectAuth, AuthCallback callback) {
         String code = callback.getCode();
         if (connectAuth == ConnectAuthEnum.ALIPAY) {
-            code = callback.getAuth_code();
+            code = callback.getAuthCode();
         }
         if (StringUtils.isEmpty(code)) {
             throw new AuthException(AuthResponseStatus.ILLEGAL_CODE, connectAuth);

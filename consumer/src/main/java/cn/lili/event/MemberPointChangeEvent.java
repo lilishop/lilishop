@@ -6,7 +6,7 @@ import cn.lili.modules.member.entity.dto.MemberPointMessage;
  * 会员积分改变消息
  *
  * @author Chopper
- * @date 2020/11/17 7:13 下午
+ * @since 2020/11/17 7:13 下午
  */
 public interface MemberPointChangeEvent {
 

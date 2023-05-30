@@ -8,12 +8,19 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 交易业务层
  *
  * @author Chopper
- * @date 2020/11/17 7:37 下午
+ * @since 2020/11/17 7:37 下午
  */
 public interface TradeService extends IService<Trade> {
 
     /**
      * 创建交易
+     * 1.订单数据校验
+     * 2.积分预处理
+     * 3.优惠券预处理
+     * 4.添加交易
+     * 5.添加订单
+     * 6.将交易写入缓存供消费者调用
+     * 7.发送交易创建消息
      *
      * @param tradeDTO 购物车视图
      * @return 交易

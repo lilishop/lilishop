@@ -12,7 +12,6 @@ import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.timetask.handler.EveryMinuteExecute;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,16 +23,21 @@ import java.util.stream.Collectors;
  * 订单自动取消（每分钟执行）
  *
  * @author paulG
- * @date 2021/3/11
+ * @since 2021/3/11
  **/
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CancelOrderTaskExecute implements EveryMinuteExecute {
-    //订单
-    private final OrderService orderService;
-    //设置
-    private final SettingService settingService;
+    /**
+     * 订单
+     */
+    @Autowired
+    private OrderService orderService;
+    /**
+     * 设置
+     */
+    @Autowired
+    private SettingService settingService;
 
 
     @Override
@@ -41,11 +45,11 @@ public class CancelOrderTaskExecute implements EveryMinuteExecute {
         Setting setting = settingService.get(SettingEnum.ORDER_SETTING.name());
         OrderSetting orderSetting = JSONUtil.toBean(setting.getSettingValue(), OrderSetting.class);
         if (orderSetting != null && orderSetting.getAutoCancel() != null) {
-            // 订单自动取消时间 = 当前时间 - 自动取消时间分钟数
+            //订单自动取消时间 = 当前时间 - 自动取消时间分钟数
             DateTime cancelTime = DateUtil.offsetMinute(DateUtil.date(), -orderSetting.getAutoCancel());
             LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Order::getOrderStatus, OrderStatusEnum.UNPAID.name());
-            // 订单创建时间 <= 订单自动取消时间
+            //订单创建时间 <= 订单自动取消时间
             queryWrapper.le(Order::getCreateTime, cancelTime);
             List<Order> list = orderService.list(queryWrapper);
             List<String> cancelSnList = list.stream().map(Order::getSn).collect(Collectors.toList());

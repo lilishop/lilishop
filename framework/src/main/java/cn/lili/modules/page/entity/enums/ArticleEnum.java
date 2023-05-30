@@ -4,7 +4,7 @@ package cn.lili.modules.page.entity.enums;
  * 文章分类枚举
  *
  * @author Bulbasaur
- * @date 2020/12/7 10:50
+ * @since 2020/12/7 10:50
  */
 public enum ArticleEnum {
 
@@ -24,6 +24,10 @@ public enum ArticleEnum {
      * 证照信息
      */
     LICENSE_INFORMATION,
+    /**
+     * 店铺入驻
+     */
+    STORE_REGISTER,
     /**
      * 其他文章
      */

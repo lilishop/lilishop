@@ -1,22 +1,22 @@
 package cn.lili.modules.payment.kit;
 
-import cn.hutool.core.net.URLEncoder;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.payment.entity.RefundLog;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.dto.PayParam;
-import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
+import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
+import cn.lili.modules.wallet.entity.dto.TransferResultDTO;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.nio.charset.StandardCharsets;
 
 /**
  * 支付接口
  *
  * @author Chopper
- * @date 2020-12-21 09:32
+ * @since 2020-12-21 09:32
  */
 public interface Payment {
     /**
@@ -38,7 +38,7 @@ public interface Payment {
      * @param payParam api参数
      * @return 公众号内部支付参数
      */
-    default ResultMessage<Object> JSApiPay(HttpServletRequest request, PayParam payParam) {
+    default ResultMessage<Object> jsApiPay(HttpServletRequest request, PayParam payParam) {
         throw new ServiceException(ResultCode.PAY_ERROR);
     }
 
@@ -85,17 +85,6 @@ public interface Payment {
         throw new ServiceException(ResultCode.PAY_ERROR);
     }
 
-
-    /**
-     * 取消支付订单
-     *
-     * @param refundLog 支付参数
-     */
-    default void cancel(RefundLog refundLog) {
-        throw new ServiceException(ResultCode.PAY_ERROR);
-    }
-
-
     /**
      * 回调
      *
@@ -124,6 +113,13 @@ public interface Payment {
     }
 
     /**
+     * 提现
+     */
+    default TransferResultDTO transfer(MemberWithdrawApply memberWithdrawApply) {
+        throw new ServiceException(ResultCode.PAY_ERROR);
+    }
+
+    /**
      * 支付回调地址
      *
      * @param api               api地址
@@ -131,7 +127,7 @@ public interface Payment {
      * @return 回调地址
      */
     default String callbackUrl(String api, PaymentMethodEnum paymentMethodEnum) {
-        return api + "/buyer/cashier/callback/" + paymentMethodEnum.name();
+        return api + "/buyer/payment/cashier/callback/" + paymentMethodEnum.name();
     }
 
     /**
@@ -142,7 +138,7 @@ public interface Payment {
      * @return 异步通知地址
      */
     default String notifyUrl(String api, PaymentMethodEnum paymentMethodEnum) {
-        return api + "/buyer/cashier/notify/" + paymentMethodEnum.name();
+        return api + "/buyer/payment/cashier/notify/" + paymentMethodEnum.name();
     }
 
     /**
@@ -153,14 +149,7 @@ public interface Payment {
      * @return 异步通知地址
      */
     default String refundNotifyUrl(String api, PaymentMethodEnum paymentMethodEnum) {
-        return api + "/buyer/cashier/refund/notify/" + paymentMethodEnum.name();
-    }
-
-    public static void main(String[] args) {
-        String str = "orderType=TRADE&sn=O202104271386961176205721601";
-        System.out.println(str.length());
-        URLEncoder urlEncoder = new URLEncoder();
-        System.out.println(urlEncoder.encode(str, StandardCharsets.UTF_8));
+        return api + "/buyer/payment/cashierRefund/notify/" + paymentMethodEnum.name();
     }
 
 }

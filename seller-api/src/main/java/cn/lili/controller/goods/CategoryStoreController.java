@@ -1,7 +1,7 @@
 package cn.lili.controller.goods;
 
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.vos.CategoryBrandVO;
 import cn.lili.modules.goods.entity.vos.CategoryVO;
@@ -12,49 +12,50 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 店铺端,商品分类接口
  *
  * @author Chopper
- * @date 2021/2/20 2:26 下午
+ * @since 2021/2/20 2:26 下午
  */
 @RestController
 @Api(tags = "店铺端,商品分类接口")
 @RequestMapping("/store/goods/category")
 @CacheConfig(cacheNames = "category")
-@Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategoryStoreController {
 
     /**
      * 分类
      */
-    private final CategoryService categoryService;
+    @Autowired
+    private CategoryService categoryService;
     /**
      * 分类品牌
      */
-    private final CategoryBrandService categoryBrandService;
+    @Autowired
+    private CategoryBrandService categoryBrandService;
     /**
      * 店铺详情
      */
-    private final StoreDetailService storeDetailService;
+    @Autowired
+    private StoreDetailService storeDetailService;
 
     @ApiOperation(value = "获取店铺经营的分类")
     @GetMapping(value = "/all")
     public ResultMessage<List<CategoryVO>> getListAll() {
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         //获取店铺经营范围
-        String goodsManagementCategory = storeDetailService.getStoreDetail(UserContext.getCurrentUser().getStoreId()).getGoodsManagementCategory();
+        String goodsManagementCategory = storeDetailService.getStoreDetail(storeId).getGoodsManagementCategory();
         return ResultUtil.data(this.categoryService.getStoreCategory(goodsManagementCategory.split(",")));
     }
 

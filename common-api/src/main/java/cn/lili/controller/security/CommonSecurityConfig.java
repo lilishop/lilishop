@@ -1,9 +1,5 @@
 package cn.lili.controller.security;
 
-import cn.lili.common.cache.Cache;
-import cn.lili.common.security.CustomAccessDeniedHandler;
-import cn.lili.config.properties.IgnoredUrlsProperties;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -18,30 +14,19 @@ import org.springframework.web.cors.CorsConfigurationSource;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/11/14 16:20
  */
 @Slf4j
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CommonSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     /**
-     * 忽略验权配置
-     */
-    private final IgnoredUrlsProperties ignoredUrlsProperties;
-
-    /**
      * spring security -》 权限不足处理
      */
-    private final CustomAccessDeniedHandler accessDeniedHandler;
-
-
-    private final Cache<String> cache;
-
-    private final CorsConfigurationSource corsConfigurationSource;
+    @Autowired
+    private CorsConfigurationSource corsConfigurationSource;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -50,18 +35,18 @@ public class CommonSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests();
         registry
                 .and()
-                // 禁止网页iframe
+                //禁止网页iframe
                 .headers().frameOptions().disable()
                 .and()
                 .authorizeRequests()
-                // 任何请求
+                //任何请求
                 .anyRequest()
-                // 需要身份认证
+                //需要身份认证
                 .permitAll()
                 .and()
-                // 允许跨域
+                //允许跨域
                 .cors().configurationSource(corsConfigurationSource).and()
-                // 关闭跨站请求防护
+                //关闭跨站请求防护
                 .csrf().disable();
     }
 

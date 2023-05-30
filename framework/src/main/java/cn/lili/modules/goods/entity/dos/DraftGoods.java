@@ -1,30 +1,28 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.http.HtmlUtil;
 import cn.lili.modules.goods.entity.enums.DraftGoodsSaveType;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.Max;
 
 /**
  * 草稿商品
  *
  * @author pikachu
- * @date 2020-02-23 9:14:33
+ * @since 2020-02-23 9:14:33
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-@Entity
-@Table(name = "li_draft_goods")
 @TableName("li_draft_goods")
 @ApiModel(value = "草稿商品")
 @AllArgsConstructor
@@ -36,9 +34,10 @@ public class DraftGoods extends BaseEntity {
     @ApiModelProperty(value = "商品名称")
     private String goodsName;
 
-    @Length(max = 30, message = "商品规格编号太长，不能超过30个字符")
-    @ApiModelProperty(value = "商品编号")
-    private String sn;
+    @Max(value = 99999999, message = "价格不能超过99999999")
+    @ApiModelProperty(value = "商品价格")
+    private Double price;
+
 
     @ApiModelProperty(value = "品牌id")
     private String brandId;
@@ -52,9 +51,6 @@ public class DraftGoods extends BaseEntity {
     @ApiModelProperty(value = "卖点")
     private String sellingPoint;
 
-    @ApiModelProperty(value = "重量")
-    @Max(value = 99999999, message = "重量不能超过99999999")
-    private Double weight;
     /**
      * @see GoodsStatusEnum
      */
@@ -64,13 +60,9 @@ public class DraftGoods extends BaseEntity {
     @ApiModelProperty(value = "详情")
     private String intro;
 
-    @Max(value = 99999999, message = "价格不能超过99999999")
-    @ApiModelProperty(value = "商品价格")
-    private Double price;
 
-    @Max(value = 99999999, message = "成本价格99999999")
-    @ApiModelProperty(value = "成本价格")
-    private Double cost;
+    @ApiModelProperty(value = "商品移动端详情")
+    private String mobileIntro;
 
     @ApiModelProperty(value = "购买数量")
     private Integer buyCount;
@@ -112,23 +104,18 @@ public class DraftGoods extends BaseEntity {
     @ApiModelProperty(value = "运费模板id")
     private String templateId;
 
-    @ApiModelProperty(value = "运费承担者")
-    private String freightPayer;
-
     @ApiModelProperty(value = "是否自营")
     private Boolean selfOperated;
-    /**
-     * 商品移动端详情
-     */
-    @ApiModelProperty(value = "商品移动端详情")
-    private String mobileIntro;
 
     @ApiModelProperty(value = "商品视频")
     private String goodsVideo;
 
     @ApiModelProperty(value = "是否为推荐商品")
-    private boolean recommend;
+    private Boolean recommend;
 
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
+     */
     @ApiModelProperty(value = "销售模式")
     private String salesModel;
 
@@ -138,20 +125,36 @@ public class DraftGoods extends BaseEntity {
     @ApiModelProperty(value = "草稿商品保存类型")
     private String saveType;
 
-    @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "分类名称JSON")
     private String categoryNameJson;
 
-    @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "商品参数JSON")
     private String goodsParamsListJson;
 
-    @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "商品图片JSON")
     private String goodsGalleryListJson;
 
-    @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "sku列表JSON")
     private String skuListJson;
+
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型", required = true)
+    private String goodsType;
+
+    public String getIntro() {
+        if (CharSequenceUtil.isNotEmpty(intro)) {
+            return HtmlUtil.unescape(intro);
+        }
+        return intro;
+    }
+
+    public String getMobileIntro() {
+        if (CharSequenceUtil.isNotEmpty(mobileIntro)) {
+            return HtmlUtil.unescape(mobileIntro);
+        }
+        return mobileIntro;
+    }
 
 }

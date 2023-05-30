@@ -1,25 +1,28 @@
 package cn.lili.modules.store.serviceimpl;
 
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
-import cn.lili.common.enums.SwitchEnum;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.goods.entity.dos.Goods;
-import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
-import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.member.entity.dos.Clerk;
+import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.entity.dos.Member;
-import cn.lili.modules.member.entity.dos.StoreCollection;
+import cn.lili.modules.member.entity.dto.ClerkAddDTO;
+import cn.lili.modules.member.entity.dto.CollectionDTO;
+import cn.lili.modules.member.service.ClerkService;
+import cn.lili.modules.member.service.FootprintService;
 import cn.lili.modules.member.service.MemberService;
-import cn.lili.modules.member.service.StoreCollectionService;
-import cn.lili.modules.page.service.PageDataService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.entity.dto.*;
@@ -29,62 +32,89 @@ import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.mapper.StoreMapper;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.store.service.StoreService;
+import cn.lili.mybatis.util.PageUtil;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.StoreTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 店铺业务层实现
  *
  * @author pikachu
- * @date 2020-03-07 16:18:56
+ * @since 2020-03-07 16:18:56
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements StoreService {
 
-    //店铺
-    private final StoreMapper storeMapper;
-    //会员
+    /**
+     * 会员
+     */
+    @Autowired
     private MemberService memberService;
-    //商品
+
+    /**
+     * 店员
+     */
+    @Autowired
+    private ClerkService clerkService;
+    /**
+     * 商品
+     */
+    @Autowired
     private GoodsService goodsService;
-    //商品SKU
+
+    @Autowired
     private GoodsSkuService goodsSkuService;
-    //店铺详情
+    /**
+     * 店铺详情
+     */
+    @Autowired
     private StoreDetailService storeDetailService;
-    //页面
-    private PageDataService pageDataService;
-    //店铺收藏
-    private final StoreCollectionService storeCollectionService;
+
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
+
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
+
+    @Autowired
+    private FootprintService footprintService;
+
+    @Autowired
+    private Cache cache;
 
     @Override
     public IPage<StoreVO> findByConditionPage(StoreSearchParams storeSearchParams, PageVO page) {
-        return storeMapper.getStoreList(PageUtil.initPage(page), storeSearchParams.queryWrapper());
+        return this.baseMapper.getStoreList(PageUtil.initPage(page), storeSearchParams.queryWrapper());
     }
 
     @Override
     public StoreVO getStoreDetail() {
-        StoreVO storeVO = storeMapper.getStoreDetail(UserContext.getCurrentUser().getStoreId());
-        storeVO.setNickName(UserContext.getCurrentUser().getNickName());
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        StoreVO storeVO = this.baseMapper.getStoreDetail(currentUser.getStoreId());
+        storeVO.setNickName(currentUser.getNickName());
         return storeVO;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Store add(AdminStoreApplyDTO adminStoreApplyDTO) {
 
         //判断店铺名称是否存在
-        QueryWrapper queryWrapper = Wrappers.query();
+        QueryWrapper<Store> queryWrapper = Wrappers.query();
         queryWrapper.eq("store_name", adminStoreApplyDTO.getStoreName());
         if (this.getOne(queryWrapper) != null) {
             throw new ServiceException(ResultCode.STORE_NAME_EXIST_ERROR);
@@ -96,34 +126,35 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             throw new ServiceException(ResultCode.USER_NOT_EXIST);
         }
         //判断是否拥有店铺
-        if (SwitchEnum.OPEN.name().equals(member.getHaveStore())) {
+        if (Boolean.TRUE.equals(member.getHaveStore())) {
             throw new ServiceException(ResultCode.STORE_APPLY_DOUBLE_ERROR);
         }
 
         //添加店铺
-        Store store=new Store(member,adminStoreApplyDTO);
+        Store store = new Store(member, adminStoreApplyDTO);
         this.save(store);
 
         //判断是否存在店铺详情，如果没有则进行新建，如果存在则进行修改
-        StoreDetail storeDetail = new StoreDetail(store,adminStoreApplyDTO);
+        StoreDetail storeDetail = new StoreDetail(store, adminStoreApplyDTO);
 
         storeDetailService.save(storeDetail);
 
         //设置会员-店铺信息
         memberService.update(new LambdaUpdateWrapper<Member>()
-                .eq(Member::getId,member.getId())
-                .set(Member::getHaveStore,SwitchEnum.OPEN.name())
-                .set(Member::getStoreId,store.getId()));
+                .eq(Member::getId, member.getId())
+                .set(Member::getHaveStore, true)
+                .set(Member::getStoreId, store.getId()));
         return store;
 
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Store edit(StoreEditDTO storeEditDTO) {
         if (storeEditDTO != null) {
             //判断店铺名是否唯一
             Store storeTmp = getOne(new QueryWrapper<Store>().eq("store_name", storeEditDTO.getStoreName()));
-            if (storeTmp != null && !StringUtils.equals(storeTmp.getId(), storeEditDTO.getStoreId())) {
+            if (storeTmp != null && !CharSequenceUtil.equals(storeTmp.getId(), storeEditDTO.getStoreId())) {
                 throw new ServiceException(ResultCode.STORE_NAME_EXIST_ERROR);
             }
             //修改店铺详细信息
@@ -145,13 +176,21 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         if (store != null) {
             BeanUtil.copyProperties(storeEditDTO, store);
             store.setId(storeEditDTO.getStoreId());
-            this.updateById(store);
+            boolean result = this.updateById(store);
+            if (result) {
+                storeDetailService.updateStoreGoodsInfo(store);
+            }
+            String destination = rocketmqCustomProperties.getStoreTopic() + ":" + StoreTagsEnum.EDIT_STORE_SETTING.name();
+            //发送订单变更mq消息
+            rocketMQTemplate.asyncSend(destination, store, RocketmqSendCallbackBuilder.commonCallback());
         }
+
+        cache.remove(CachePrefix.STORE.getPrefix() + storeEditDTO.getStoreId());
         return store;
     }
 
     /**
-     * 修改店铺详细细腻
+     * 修改店铺详细信息
      *
      * @param storeEditDTO 修改店铺信息
      */
@@ -162,19 +201,34 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean audit(String id, Integer passed) {
-        Store store = storeMapper.selectById(id);
+        Store store = this.getById(id);
         if (store == null) {
             throw new ServiceException(ResultCode.STORE_NOT_EXIST);
         }
         if (passed == 0) {
             store.setStoreDisable(StoreStatusEnum.OPEN.value());
-            //添加店铺页面
-            pageDataService.addStorePageData(store.getId());
+            //修改会员 表示已有店铺
+            Member member = memberService.getById(store.getMemberId());
+            member.setHaveStore(true);
+            member.setStoreId(id);
+            memberService.updateById(member);
+            //创建店员
+            ClerkAddDTO clerkAddDTO = new ClerkAddDTO();
+            clerkAddDTO.setMemberId(member.getId());
+            clerkAddDTO.setIsSuper(true);
+            clerkAddDTO.setShopkeeper(true);
+            clerkAddDTO.setStoreId(id);
+            clerkService.saveClerk(clerkAddDTO);
+            //设定商家的结算日
+            storeDetailService.update(new LambdaUpdateWrapper<StoreDetail>()
+                    .eq(StoreDetail::getStoreId, id)
+                    .set(StoreDetail::getSettlementDay, new DateTime()));
         } else {
             store.setStoreDisable(StoreStatusEnum.REFUSED.value());
         }
-
+        cache.remove(CachePrefix.STORE.getPrefix() + store.getId());
         return this.updateById(store);
     }
 
@@ -182,12 +236,25 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     public boolean disable(String id) {
         Store store = this.getById(id);
         if (store != null) {
-            store.setStoreDisable(StoreStatusEnum.CLOSED.value());
 
+            LambdaUpdateWrapper<Store> storeLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+            storeLambdaUpdateWrapper.eq(Store::getId, id);
+            storeLambdaUpdateWrapper.set(Store::getStoreDisable, StoreStatusEnum.CLOSED.value());
+            boolean update = this.update(storeLambdaUpdateWrapper);
             //下架所有此店铺商品
-            goodsService.underStoreGoods(id);
-            return this.updateById(store);
+            if (update) {
+                goodsService.underStoreGoods(id);
+            }
+
+            //删除店员token
+            clerkService.list(new LambdaQueryWrapper<Clerk>().eq(Clerk::getStoreId, id)).forEach(clerk -> {
+                cache.vagueDel(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.STORE, clerk.getMemberId()));
+                cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(UserEnums.STORE, clerk.getMemberId()));
+            });
+
+            return update;
         }
+
         throw new ServiceException(ResultCode.STORE_NOT_EXIST);
     }
 
@@ -205,20 +272,39 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     public boolean applyFirstStep(StoreCompanyDTO storeCompanyDTO) {
         //获取当前操作的店铺
         Store store = getStoreByMember();
-        //如果没有申请过店铺，新增店铺
-        if (!Optional.ofNullable(store).isPresent()) {
-            Member member = memberService.getById(UserContext.getCurrentUser().getId());
+
+        //店铺为空，则新增店铺
+        if (store == null) {
+            AuthUser authUser = Objects.requireNonNull(UserContext.getCurrentUser());
+            Member member = memberService.getById(authUser.getId());
+            //根据会员创建店铺
             store = new Store(member);
+            BeanUtil.copyProperties(storeCompanyDTO, store);
             this.save(store);
             StoreDetail storeDetail = new StoreDetail();
             storeDetail.setStoreId(store.getId());
             BeanUtil.copyProperties(storeCompanyDTO, storeDetail);
             return storeDetailService.save(storeDetail);
+        } else {
+
+            //校验迪纳普状态
+            checkStoreStatus(store);
+            //复制参数 修改已存在店铺
+            BeanUtil.copyProperties(storeCompanyDTO, store);
+            this.updateById(store);
+            //判断是否存在店铺详情，如果没有则进行新建，如果存在则进行修改
+            StoreDetail storeDetail = storeDetailService.getStoreDetail(store.getId());
+            //如果店铺详情为空，则new ，否则复制对象，然后保存即可。
+            if (storeDetail == null) {
+                storeDetail = new StoreDetail();
+                storeDetail.setStoreId(store.getId());
+                BeanUtil.copyProperties(storeCompanyDTO, storeDetail);
+                return storeDetailService.save(storeDetail);
+            } else {
+                BeanUtil.copyProperties(storeCompanyDTO, storeDetail);
+                return storeDetailService.updateById(storeDetail);
+            }
         }
-        //判断是否存在店铺详情，如果没有则进行新建，如果存在则进行修改
-        StoreDetail storeDetail = storeDetailService.getStoreDetail(store.getId());
-        BeanUtil.copyProperties(storeCompanyDTO, storeDetail);
-        return storeDetailService.updateById(storeDetail);
     }
 
     @Override
@@ -226,6 +312,8 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
 
         //获取当前操作的店铺
         Store store = getStoreByMember();
+        //校验店铺状态
+        checkStoreStatus(store);
         StoreDetail storeDetail = storeDetailService.getStoreDetail(store.getId());
         //设置店铺的银行信息
         BeanUtil.copyProperties(storeBankDTO, storeDetail);
@@ -236,6 +324,11 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     public boolean applyThirdStep(StoreOtherInfoDTO storeOtherInfoDTO) {
         //获取当前操作的店铺
         Store store = getStoreByMember();
+
+        //校验店铺状态
+        checkStoreStatus(store);
+        BeanUtil.copyProperties(storeOtherInfoDTO, store);
+
         StoreDetail storeDetail = storeDetailService.getStoreDetail(store.getId());
         //设置店铺的其他信息
         BeanUtil.copyProperties(storeOtherInfoDTO, storeDetail);
@@ -246,91 +339,77 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         //修改店铺详细信息
         storeDetailService.updateById(storeDetail);
         //设置店铺名称,修改店铺信息
-        store.setStoreName(storeOtherInfoDTO.getStoreName());
         store.setStoreDisable(StoreStatusEnum.APPLYING.name());
-        store.setStoreCenter(storeOtherInfoDTO.getStoreCenter());
-        store.setStoreDesc(storeOtherInfoDTO.getStoreDesc());
-        store.setStoreLogo(storeOtherInfoDTO.getStoreLogo());
         return this.updateById(store);
     }
 
-    @Override
-    public Integer auditNum() {
-        LambdaQueryWrapper<Store> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(Store::getStoreDisable, StoreStatusEnum.APPLYING.name());
-        return this.count(queryWrapper);
+    /**
+     * 申请店铺时 对店铺状态进行校验判定
+     *
+     * @param store 店铺
+     */
+    private void checkStoreStatus(Store store) {
+
+        //如果店铺状态为已开启、已关闭、申请中，则抛出异常
+        if (store.getStoreDisable().equals(StoreStatusEnum.OPEN.name())
+                || store.getStoreDisable().equals(StoreStatusEnum.CLOSED.name())
+                || store.getStoreDisable().equals(StoreStatusEnum.APPLYING.name())
+        ) {
+            throw new ServiceException(ResultCode.STORE_STATUS_ERROR);
+        }
+
     }
 
     @Override
-    public Integer storeNum() {
-        LambdaQueryWrapper<Store> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(Store::getStoreDisable, StoreStatusEnum.OPEN.name());
-        return this.count(queryWrapper);
-    }
-
-    @Override
-    public Integer todayStoreNum() {
-        LambdaQueryWrapper<Store> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(Store::getStoreDisable, StoreStatusEnum.OPEN.name());
-        queryWrapper.gt(Store::getCreateTime, DateUtil.beginOfDay(new DateTime()));
-        return this.count(queryWrapper);
-    }
-
-    @Override
-    public void updateStoreGoodsNum(String storeId) {
-        //获取店铺已上架已审核通过商品数量
-        Integer goodsNum=goodsService.count(new LambdaQueryWrapper<Goods>()
-                .eq(Goods::getStoreId,storeId)
-                .eq(Goods::getIsAuth, GoodsAuthEnum.PASS.name())
-                .eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name()));
+    public void updateStoreGoodsNum(String storeId, Long num) {
         //修改店铺商品数量
         this.update(new LambdaUpdateWrapper<Store>()
-                .set(Store::getGoodsNum,goodsNum)
-                .eq(Store::getId,storeId));
+                .set(Store::getGoodsNum, num)
+                .eq(Store::getId, storeId));
     }
 
     @Override
-    public void updateStoreCollectionNum(String goodsId) {
-        String storeId=goodsSkuService.getById(goodsId).getStoreId();
-        //获取店铺收藏数量
-        Integer collectionNum=storeCollectionService.count(new LambdaQueryWrapper<StoreCollection>()
-                .eq(StoreCollection::getStoreId,storeId));
-        //修改店铺收藏数量
-        this.update(new LambdaUpdateWrapper<Store>()
-                .set(Store::getCollectionNum,collectionNum)
-                .eq(Store::getId,storeId));
+    public void updateStoreCollectionNum(CollectionDTO collectionDTO) {
+        baseMapper.updateCollection(collectionDTO.getId(), collectionDTO.getNum());
+    }
+
+    @Override
+    public void storeToClerk() {
+        //清空店铺信息方便重新导入不会有重复数据
+        clerkService.remove(new LambdaQueryWrapper<Clerk>().eq(Clerk::getShopkeeper, true));
+        List<Clerk> clerkList = new ArrayList<>();
+        //遍历已开启的店铺
+        for (Store store : this.list(new LambdaQueryWrapper<Store>().eq(Store::getDeleteFlag, false).eq(Store::getStoreDisable,
+                StoreStatusEnum.OPEN.name()))) {
+            clerkList.add(new Clerk(store));
+        }
+        clerkService.saveBatch(clerkList);
+    }
+
+    @Override
+    public List<GoodsSku> getToMemberHistory(String memberId) {
+        AuthUser currentUser = UserContext.getCurrentUser();
+        List<String> skuIdList = new ArrayList<>();
+        for (FootPrint footPrint :
+                footprintService.list(new LambdaUpdateWrapper<FootPrint>().eq(FootPrint::getStoreId, currentUser.getStoreId()).eq(FootPrint::getMemberId, memberId))) {
+            if (footPrint.getSkuId() != null) {
+                skuIdList.add(footPrint.getSkuId());
+            }
+        }
+        return goodsSkuService.getGoodsSkuByIdFromCache(skuIdList);
     }
 
     /**
      * 获取当前登录操作的店铺
      *
-     * @return
+     * @return 店铺信息
      */
     private Store getStoreByMember() {
-        LambdaQueryWrapper<Store> lambdaQueryWrapper = Wrappers.lambdaQuery();
-        lambdaQueryWrapper.eq(Store::getMemberId, UserContext.getCurrentUser().getId());
-        return this.getOne(lambdaQueryWrapper);
-    }
-
-    @Autowired
-    public void setGoodsService(GoodsService goodsService) {
-        this.goodsService = goodsService;
-    }
-    @Autowired
-    public void setGoodsSkuService(GoodsSkuService goodsSkuService) {
-        this.goodsSkuService = goodsSkuService;
-    }
-    @Autowired
-    public void setPageDataService(PageDataService pageDataService) {
-        this.pageDataService = pageDataService;
-    }
-    @Autowired
-    public void setMemberService(MemberService memberService) {
-        this.memberService = memberService;
-    }
-    @Autowired
-    public void setStoreDetailService(StoreDetailService storeDetailService) {
-        this.storeDetailService = storeDetailService;
+        LambdaQueryWrapper<Store> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        if (UserContext.getCurrentUser() != null) {
+            lambdaQueryWrapper.eq(Store::getMemberId, UserContext.getCurrentUser().getId());
+        }
+        return this.getOne(lambdaQueryWrapper, false);
     }
 
 }

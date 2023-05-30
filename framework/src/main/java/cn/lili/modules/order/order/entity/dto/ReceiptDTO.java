@@ -3,13 +3,12 @@ package cn.lili.modules.order.order.entity.dto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Column;
 
 /**
  * 发票子内容
  *
  * @author Bulbasaur
- * @date 2020/11/28 11:44
+ * @since 2020/11/28 11:44
  */
 @Data
 public class ReceiptDTO {
@@ -21,7 +20,6 @@ public class ReceiptDTO {
     private String goodsName;
 
     @ApiModelProperty(value = "规格")
-    @Column(columnDefinition = "TEXT")
     private String specs;
 
     @ApiModelProperty(value = "数量")

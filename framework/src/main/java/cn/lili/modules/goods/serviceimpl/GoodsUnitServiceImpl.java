@@ -14,11 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
  * 计量单位业务层实现
  *
  * @author Bulbasaur
- * @date 2020/11/26 16:13
+ * @since 2020/11/26 16:13
  */
 @Service
-@Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsUnitServiceImpl extends ServiceImpl<GoodsUnitMapper, GoodsUnit> implements GoodsUnitService {
 
 }

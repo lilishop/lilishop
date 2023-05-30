@@ -1,21 +1,19 @@
 package cn.lili.controller.promotion;
 
-import cn.hutool.core.date.DateUtil;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.promotion.entity.dto.PromotionGoodsDTO;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
+import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.PintuanMemberVO;
 import cn.lili.modules.promotion.entity.vos.PintuanShareVO;
-import cn.lili.modules.promotion.entity.vos.PromotionGoodsSearchParams;
 import cn.lili.modules.promotion.service.PintuanService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,28 +26,26 @@ import java.util.List;
  * 买家端,拼团接口
  *
  * @author paulG
- * @date 2021/2/20
+ * @since 2021/2/20
  **/
 @Api(tags = "买家端,拼团接口")
 @RestController
 @RequestMapping("/buyer/promotion/pintuan")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PintuanBuyerController {
-
-    private final PromotionGoodsService promotionGoodsService;
-
-    private final PintuanService pintuanService;
+    @Autowired
+    private PromotionGoodsService promotionGoodsService;
+    @Autowired
+    private PintuanService pintuanService;
 
     @ApiOperation(value = "获取拼团商品")
     @GetMapping
-    public ResultMessage<IPage<PromotionGoodsDTO>> getPintuanCategory(String goodsName, String categoryPath, PageVO pageVo) {
+    public ResultMessage<IPage<PromotionGoods>> getPintuanCategory(String goodsName, String categoryPath, PageVO pageVo) {
         PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
         searchParams.setGoodsName(goodsName);
         searchParams.setPromotionType(PromotionTypeEnum.PINTUAN.name());
-        searchParams.setPromotionStatus(PromotionStatusEnum.START.name());
+        searchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
         searchParams.setCategoryPath(categoryPath);
-        searchParams.setEndTime(DateUtil.date().getTime());
-        return ResultUtil.data(promotionGoodsService.getPromotionGoods(searchParams, pageVo));
+        return ResultUtil.data(promotionGoodsService.pageFindAll(searchParams, pageVo));
     }
 
 

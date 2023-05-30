@@ -12,7 +12,7 @@ import java.util.List;
  * 店铺运费模板
  *
  * @author Bulbasaur
- * @date 2020/11/24 14:29
+ * @since 2020/11/24 14:29
  */
 @Data
 public class FreightTemplateVO extends FreightTemplate {

@@ -1,7 +1,7 @@
 package cn.lili.modules.system.entity.dto.payment;
 
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
-import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
+import cn.lili.common.enums.ClientTypeEnum;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.system.entity.dto.payment.dto.PaymentSupportForm;
 import cn.lili.modules.system.entity.dto.payment.dto.PaymentSupportItem;
 import lombok.Data;
@@ -14,7 +14,7 @@ import java.util.List;
  * 支持的支付方式
  *
  * @author Chopper
- * @date 2021-01-26 15:52
+ * @since 2021-01-26 15:52
  */
 @Data
 @Accessors(chain = true)

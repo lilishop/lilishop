@@ -1,46 +1,44 @@
 package cn.lili.modules.purchase.serviceimpl;
 
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.purchase.entity.dos.PurchaseOrder;
-import cn.lili.modules.purchase.entity.vos.PurchaseOrderVO;
+import cn.lili.modules.purchase.entity.dos.PurchaseOrderItem;
 import cn.lili.modules.purchase.entity.params.PurchaseOrderSearchParams;
+import cn.lili.modules.purchase.entity.vos.PurchaseOrderVO;
 import cn.lili.modules.purchase.mapper.PurchaseOrderMapper;
 import cn.lili.modules.purchase.service.PurchaseOrderItemService;
 import cn.lili.modules.purchase.service.PurchaseOrderService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
  * 采购单业务层实现
  *
  * @author Bulbasaur
- * @date 2020/11/26 16:13
+ * @since 2020/11/26 16:13
  */
 @Service
-@Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, PurchaseOrder> implements PurchaseOrderService {
-
-    private final PurchaseOrderItemService purchaseOrderItemService;
+    @Autowired
+    private PurchaseOrderItemService purchaseOrderItemService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public PurchaseOrderVO addPurchaseOrder(PurchaseOrderVO purchaseOrderVO) {
         PurchaseOrder purchaseOrder = new PurchaseOrder();
         BeanUtil.copyProperties(purchaseOrderVO, purchaseOrder);
         //添加采购单
         purchaseOrder.setStatus("OPEN");
+        purchaseOrder.setMemberId(UserContext.getCurrentUser().getId());
         this.save(purchaseOrder);
         //添加采购单子内容
         purchaseOrderItemService.addPurchaseOrderItem(purchaseOrder.getId(), purchaseOrderVO.getPurchaseOrderItems());
@@ -55,9 +53,8 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
         BeanUtil.copyProperties(purchaseOrder, purchaseOrderVO);
 
         //获取采购单子内容
-        Map<String, Object> map = new HashMap<>();
-        map.put("purchaseOrderId", id);
-        purchaseOrderVO.setPurchaseOrderItems(purchaseOrderItemService.listByMap(map));
+        purchaseOrderVO.setPurchaseOrderItems(purchaseOrderItemService.list(
+                new LambdaQueryWrapper<PurchaseOrderItem>().eq(PurchaseOrderItem::getPurchaseOrderId,id)));
         return purchaseOrderVO;
     }
 
@@ -65,24 +62,19 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
     public IPage<PurchaseOrder> page(PurchaseOrderSearchParams purchaseOrderSearchParams) {
 
         LambdaQueryWrapper<PurchaseOrder> lambdaQueryWrapper = Wrappers.lambdaQuery();
-        if (purchaseOrderSearchParams.getMemberId() != null) {
-            lambdaQueryWrapper.eq(PurchaseOrder::getMemberId, purchaseOrderSearchParams.getMemberId());
-        }
-        if (purchaseOrderSearchParams.getCategoryId() != null) {
-            lambdaQueryWrapper.eq(PurchaseOrder::getCategoryId, purchaseOrderSearchParams.getCategoryId());
-        }
-        if (purchaseOrderSearchParams.getStatus() != null) {
-            lambdaQueryWrapper.eq(PurchaseOrder::getStatus, purchaseOrderSearchParams.getStatus());
-        }
 
-        Page page = new Page();
-        page.setSize(purchaseOrderSearchParams.getPageSize());
-        page.setPages(purchaseOrderSearchParams.getPageNumber());
-        IPage<PurchaseOrder> purchaseOrders = this.page(page, lambdaQueryWrapper);
-        return purchaseOrders;
+        lambdaQueryWrapper.eq(purchaseOrderSearchParams.getMemberId() != null,
+                PurchaseOrder::getMemberId, purchaseOrderSearchParams.getMemberId());
+        lambdaQueryWrapper.eq(purchaseOrderSearchParams.getCategoryId() != null,
+                PurchaseOrder::getCategoryId, purchaseOrderSearchParams.getCategoryId());
+        lambdaQueryWrapper.eq(purchaseOrderSearchParams.getStatus() != null,
+                PurchaseOrder::getStatus, purchaseOrderSearchParams.getStatus());
+        lambdaQueryWrapper.orderByDesc(PurchaseOrder::getCreateTime);
+        return this.page(PageUtil.initPage(purchaseOrderSearchParams), lambdaQueryWrapper);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean close(String id) {
         PurchaseOrder purchaseOrder = this.getById(id);
         purchaseOrder.setStatus("CLOSE");

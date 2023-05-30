@@ -1,5 +1,6 @@
 package cn.lili.timetask.handler.impl.goods;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.lili.modules.goods.mapper.GoodsMapper;
@@ -7,10 +8,9 @@ import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.mapper.MemberEvaluationMapper;
 import cn.lili.timetask.handler.EveryDayExecute;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -18,15 +18,20 @@ import java.util.Map;
  * 商品定时器
  *
  * @author Chopper
- * @date 2021/3/18 3:23 下午
+ * @since 2021/3/18 3:23 下午
  */
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GoodsExecute implements EveryDayExecute {
-    //会员评价
-    private final MemberEvaluationMapper memberEvaluationMapper;
-    //商品
-    private final GoodsMapper goodsMapper;
+    /**
+     * 会员评价
+     */
+    @Resource
+    private MemberEvaluationMapper memberEvaluationMapper;
+    /**
+     * 商品
+     */
+    @Resource
+    private GoodsMapper goodsMapper;
 
     /**
      * 查询已上架的商品的评价数量并赋值
@@ -39,9 +44,8 @@ public class GoodsExecute implements EveryDayExecute {
                 new QueryWrapper<MemberEvaluation>()
                         .between("create_time", DateUtil.yesterday(), new DateTime()));
 
-        System.out.println("评论数量" + list.size());
         for (Map<String, Object> map : list) {
-            goodsMapper.addGoodsCommentNum(Integer.parseInt(map.get("num").toString()), map.get("goods_id").toString());
+            goodsMapper.addGoodsCommentNum(Convert.toInt(map.get("num").toString()), map.get("goods_id").toString());
         }
 
     }

@@ -1,296 +1,276 @@
 package cn.lili.modules.promotion.serviceimpl;
 
-import cn.lili.common.delayqueue.DelayQueueTools;
-import cn.lili.common.delayqueue.DelayQueueType;
-import cn.lili.common.delayqueue.PromotionMessage;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.map.MapBuilder;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.trigger.interfaces.TimeTrigger;
-import cn.lili.common.trigger.model.TimeExecuteConstant;
-import cn.lili.common.trigger.model.TimeTriggerMsg;
-import cn.lili.common.utils.DateUtil;
-import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.StringUtils;
-import cn.lili.common.vo.PageVO;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
-import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
-import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.SeckillSearchParams;
+import cn.lili.modules.promotion.entity.enums.PromotionsApplyStatusEnum;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.mapper.SeckillMapper;
-import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.service.SeckillService;
 import cn.lili.modules.promotion.tools.PromotionTools;
-import cn.lili.modules.search.service.EsGoodsIndexService;
+import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.SeckillSetting;
+import cn.lili.modules.system.entity.enums.SettingEnum;
+import cn.lili.modules.system.service.SettingService;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 /**
- * 限时抢购业务层实现
+ * 秒杀活动业务层实现
  *
  * @author Chopper
- * @date 2020/8/21
+ * @since 2020/8/21
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class SeckillServiceImpl extends ServiceImpl<SeckillMapper, Seckill> implements SeckillService {
+@Slf4j
+public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMapper, Seckill> implements SeckillService {
 
-    //延时任务
-    private final TimeTrigger timeTrigger;
-    //Mongo
-    private final MongoTemplate mongoTemplate;
-    //Rocketmq
-    private final RocketmqCustomProperties rocketmqCustomProperties;
-    //商品索引
-    private EsGoodsIndexService goodsIndexService;
-    //促销商品
-    private PromotionGoodsService promotionGoodsService;
-    //秒杀申请
+    /**
+     * 设置
+     */
+    @Autowired
+    private SettingService settingService;
+
+    @Autowired
     private SeckillApplyService seckillApplyService;
 
-    @Override
-    public IPage<Seckill> getSeckillByPageFromMysql(SeckillSearchParams queryParam, PageVO pageVo) {
-        QueryWrapper<Seckill> queryWrapper = queryParam.wrapper();
-        return page(PageUtil.initPage(pageVo), queryWrapper);
-    }
+    /**
+     * rocketMq配置
+     */
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
 
     /**
-     * 从mongo中根据条件获取限时抢购分页列表
-     *
-     * @param queryParam 查询参数
-     * @param pageVo     分页参数
-     * @return 限时抢购分页列表
+     * rocketMq
      */
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
+
+
     @Override
-    public IPage<SeckillVO> getSeckillByPageFromMongo(SeckillSearchParams queryParam, PageVO pageVo) {
-        IPage<SeckillVO> seckill = new Page<>(pageVo.getPageNumber(), pageVo.getPageSize());
-        if (queryParam == null) {
-            queryParam = new SeckillSearchParams();
+    public SeckillVO getSeckillDetail(String id) {
+        Seckill seckill = this.checkSeckillExist(id);
+        SeckillVO seckillVO = new SeckillVO();
+        BeanUtils.copyProperties(seckill, seckillVO);
+        SeckillSearchParams searchParams = new SeckillSearchParams();
+        searchParams.setSeckillId(id);
+        seckillVO.setSeckillApplyList(this.seckillApplyService.getSeckillApplyList(searchParams));
+        return seckillVO;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void init() {
+        //清除演示数据
+
+        List<Seckill> seckillList = this.list();
+        for (Seckill seckill : seckillList) {
+            seckill.setStartTime(null);
+            seckill.setEndTime(null);
+            this.updateEsGoodsIndex(seckill);
         }
-        Query query = queryParam.mongoQuery();
-        pageVo.setNotConvert(true);
-        PromotionTools.mongoQueryPageParam(query, pageVo);
-        seckill.setCurrent(pageVo.getPageNumber());
-        seckill.setSize(pageVo.getPageSize());
-        List<SeckillVO> seckillVOS = this.mongoTemplate.find(query, SeckillVO.class);
-        seckill.setRecords(seckillVOS);
-        seckill.setTotal(this.mongoTemplate.count(queryParam.mongoQuery(), SeckillVO.class));
-        return seckill;
-    }
+        this.remove(new QueryWrapper<>());
 
-    /**
-     * 从mongo中获取限时抢购信息
-     *
-     * @param id 限时抢购id
-     * @return 限时抢购信息
-     */
-    @Override
-    public SeckillVO getSeckillByIdFromMongo(String id) {
-        return this.checkSeckillExist(id);
-    }
+        Setting setting = settingService.get(SettingEnum.SECKILL_SETTING.name());
+        SeckillSetting seckillSetting = new Gson().fromJson(setting.getSettingValue(), SeckillSetting.class);
 
-    @Override
-    public boolean saveSeckill(SeckillVO seckill) {
-        // 检查限时抢购参数
-        checkSeckillParam(seckill, seckill.getStoreId());
-        seckill.setPromotionStatus(PromotionStatusEnum.NEW.name());
-        // 保存到MYSQL中
-        boolean result = this.save(seckill);
-        // 保存到MONGO中
-        this.mongoTemplate.save(seckill);
-        this.addSeckillStartTask(seckill);
-        return result;
-    }
-
-    @Override
-    public void storeApply(String storeId, String seckillId) {
-        Seckill seckill = this.getById(seckillId);
-        String storeIds;
-        if (!StringUtils.isEmpty(seckill.getStoreIds())) {
-            storeIds = seckill.getStoreIds() + storeId + ",";
-        } else {
-            storeIds = storeId + ",";
-        }
-        seckill.setStoreIds(storeIds);
-        this.updateById(seckill);
-    }
-
-    @Override
-    public boolean modifySeckill(SeckillVO seckillVO) {
-        // 检查该限时抢购是否存在
-        SeckillVO seckill = checkSeckillExist(seckillVO.getId());
-        if (PromotionStatusEnum.START.name().equals(seckillVO.getPromotionStatus())) {
-            throw new ServiceException("活动已经开始，不能进行编辑删除操作");
-        }
-        // 检查限时抢购参数
-        this.checkSeckillParam(seckillVO, seckillVO.getStoreId());
-
-        // 更新到MYSQL中
-        boolean result = this.updateById(seckillVO);
-        // 保存到MONGO中
-        this.mongoTemplate.save(seckillVO);
-        if (seckill.getStartTime().getTime() != seckillVO.getStartTime().getTime()) {
-            PromotionMessage promotionMessage = new PromotionMessage(seckillVO.getId(), PromotionTypeEnum.SECKILL.name(), PromotionStatusEnum.START.name(), seckillVO.getStartTime(), seckillVO.getEndTime());
-            // 更新延时任务
-            this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                    promotionMessage,
-                    seckill.getStartTime().getTime(),
-                    seckillVO.getStartTime().getTime(),
-                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                    DateUtil.getDelayTime(seckillVO.getStartTime().getTime()),
-                    rocketmqCustomProperties.getPromotionTopic());
-        }
-        return result;
-    }
-
-    @Override
-    public void deleteSeckill(String id) {
-        Seckill seckill = checkSeckillExist(id);
-        if (PromotionStatusEnum.CLOSE.name().equals(seckill.getPromotionStatus()) || PromotionStatusEnum.END.name().equals(seckill.getPromotionStatus())) {
-            // 更新限时抢购状态为关闭，标示删除标志
-            LambdaUpdateWrapper<Seckill> updateWrapper = new LambdaUpdateWrapper<Seckill>().eq(Seckill::getId, id).set(Seckill::getDeleteFlag, true).set(Seckill::getPromotionStatus, PromotionStatusEnum.CLOSE.name());
-            this.update(updateWrapper);
-            LambdaUpdateWrapper<SeckillApply> seckillApplyLambdaUpdateWrapper = new LambdaUpdateWrapper<SeckillApply>().eq(SeckillApply::getSeckillId, id).set(SeckillApply::getDeleteFlag, true);
-            this.seckillApplyService.update(seckillApplyLambdaUpdateWrapper);
-            this.mongoTemplate.remove(new Query().addCriteria(Criteria.where("id").is(id)), SeckillVO.class);
-            LambdaUpdateWrapper<PromotionGoods> promotionGoodsQueryWrapper = new LambdaUpdateWrapper<PromotionGoods>().eq(PromotionGoods::getPromotionId, id).set(PromotionGoods::getDeleteFlag, true);
-            this.promotionGoodsService.update(promotionGoodsQueryWrapper);
-            this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                    seckill.getStartTime().getTime(),
-                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (PromotionTypeEnum.SECKILL.name() + seckill.getId())),
-                    rocketmqCustomProperties.getPromotionTopic());
-        } else {
-            throw new ServiceException("该限时抢购活动的状态不能删除");
-        }
-    }
-
-    /**
-     * 开启一个限时抢购
-     *
-     * @param id 限时抢购编号
-     */
-    @Override
-    public void openSeckill(String id) {
-        SeckillVO seckillVO = checkSeckillExist(id);
-        PromotionTools.checkPromotionTime(seckillVO.getStartTime().getTime(), seckillVO.getEndTime().getTime());
-        if (PromotionStatusEnum.NEW.name().equals(seckillVO.getPromotionStatus()) || PromotionStatusEnum.CLOSE.name().equals(seckillVO.getPromotionStatus())) {
-            LambdaUpdateWrapper<Seckill> updateWrapper = new LambdaUpdateWrapper<Seckill>().eq(Seckill::getId, id).set(Seckill::getPromotionStatus, PromotionStatusEnum.START.name());
-            this.update(updateWrapper);
-            seckillVO.setPromotionStatus(PromotionStatusEnum.START.name());
-            this.mongoTemplate.save(seckillVO);
-            this.addSeckillStartTask(seckillVO);
+        for (int i = 1; i <= PRE_CREATION; i++) {
+            Seckill seckill = new Seckill(i, seckillSetting.getHours(), seckillSetting.getSeckillRule());
+            this.savePromotions(seckill);
         }
     }
 
     @Override
-    public void closeSeckill(String id) {
-        SeckillVO seckillVO = checkSeckillExist(id);
-        if (PromotionStatusEnum.NEW.name().equals(seckillVO.getPromotionStatus()) || PromotionStatusEnum.START.name().equals(seckillVO.getPromotionStatus())) {
-            LambdaUpdateWrapper<Seckill> updateWrapper = new LambdaUpdateWrapper<Seckill>().eq(Seckill::getId, id).set(Seckill::getPromotionStatus, PromotionStatusEnum.CLOSE.name());
-            this.update(updateWrapper);
-            seckillVO.setPromotionStatus(PromotionStatusEnum.CLOSE.name());
-            this.mongoTemplate.save(seckillVO);
-            if (PromotionStatusEnum.CLOSE.name().equals(seckillVO.getPromotionStatus())) {
-                LambdaQueryWrapper<PromotionGoods> deleteWrapper = new LambdaQueryWrapper<>();
-                deleteWrapper.eq(PromotionGoods::getPromotionId, seckillVO.getId());
-                promotionGoodsService.remove(deleteWrapper);
-                if (seckillVO.getSeckillApplyList() != null) {
-                    List<String> skuIds = seckillVO.getSeckillApplyList().stream().map(SeckillApply::getSkuId).collect(Collectors.toList());
-                    this.goodsIndexService.deleteEsGoodsPromotionIndexByList(skuIds, PromotionTypeEnum.SECKILL);
-                }
-                this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                        seckillVO.getStartTime().getTime(),
-                        DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (PromotionTypeEnum.SECKILL.name() + seckillVO.getId())),
-                        rocketmqCustomProperties.getPromotionTopic());
-            }
-        } else {
-            throw new ServiceException("该限时抢购活动的状态不能关闭");
-        }
-    }
-
-    @Override
-    public Integer getApplyNum() {
-        LambdaQueryWrapper<Seckill> queryWrapper = Wrappers.lambdaQuery();
-        //秒杀申请时间未超过当前时间
-        queryWrapper.le(Seckill::getApplyEndTime, cn.hutool.core.date.DateUtil.date());
-        queryWrapper.eq(Seckill::getPromotionStatus, PromotionStatusEnum.NEW.name());
+    public long getApplyNum() {
+        DateTime now = DateUtil.date();
+        LambdaQueryWrapper<Seckill> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.ge(Seckill::getApplyEndTime, now);
+        queryWrapper.le(Seckill::getStartTime, now);
+        queryWrapper.ge(Seckill::getEndTime, now);
         return this.count(queryWrapper);
     }
 
-    private void addSeckillStartTask(SeckillVO seckill) {
-        PromotionMessage promotionMessage = new PromotionMessage(seckill.getId(), PromotionTypeEnum.SECKILL.name(), PromotionStatusEnum.START.name(), seckill.getStartTime(), seckill.getEndTime());
-        TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                seckill.getStartTime().getTime(),
-                promotionMessage,
-                DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                rocketmqCustomProperties.getPromotionTopic());
-        // 发送促销活动开始的延时任务
-        this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(seckill.getStartTime().getTime()));
+    @Override
+    public void updateSeckillGoodsNum(String seckillId) {
+        Seckill seckill = this.getById(seckillId);
+        if (seckill != null) {
+            SeckillSearchParams searchParams = new SeckillSearchParams();
+            searchParams.setSeckillId(seckillId);
+            LambdaUpdateWrapper<Seckill> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(Seckill::getId, seckillId);
+            updateWrapper.set(Seckill::getGoodsNum,
+                    this.seckillApplyService.getSeckillApplyCount(searchParams));
+            this.update(updateWrapper);
+
+        }
     }
 
     /**
-     * 检查该限时抢购是否存在
+     * 通用促销更新
+     * 调用顺序:
+     * 1. checkStatus 检查促销状态
+     * 2. checkPromotions 检查促销参数
+     * 3. saveOrUpdate 保存促销信息
+     * 4. updatePromotionGoods 更新促销商品信息
+     * 5. updateEsGoodsIndex 更新商品索引促销信息
      *
-     * @param id 限时抢购编号
-     * @return 限时抢购信息
+     * @param promotions 促销信息
+     * @return 是否更新成功
      */
-    private SeckillVO checkSeckillExist(String id) {
-        SeckillVO seckill = this.mongoTemplate.findById(id, SeckillVO.class);
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updatePromotions(Seckill promotions) {
+        this.checkStatus(promotions);
+        this.checkPromotions(promotions);
+        //如果申请结束时间在当前时间之前
+        if (promotions.getApplyEndTime().before(new Date()) || promotions.getApplyEndTime().after(promotions.getStartTime())) {
+            throw new ServiceException(ResultCode.STORE_NAME_EXIST_ERROR);
+        }
+        boolean result = this.updateById(promotions);
+        seckillApplyService.updateSeckillApplyTime(promotions);
+        return result;
+    }
+
+
+    /**
+     * 更新商品索引限时抢购信息
+     *
+     * @param seckill 限时抢购信息
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateEsGoodsSeckill(Seckill seckill, List<SeckillApply> seckillApplies) {
+        if (seckillApplies != null && !seckillApplies.isEmpty()) {
+            // 更新促销范围
+            seckill.setScopeId(ArrayUtil.join(seckillApplies.stream().map(SeckillApply::getSkuId).toArray(), ","));
+            UpdateWrapper<Seckill> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("id", seckill.getId());
+            updateWrapper.set("scope_id", seckill.getScopeId());
+            this.update(updateWrapper);
+            //循环秒杀商品数据，将数据按照时间段进行存储
+            for (SeckillApply seckillApply : seckillApplies) {
+                if (seckillApply.getPromotionApplyStatus().equals(PromotionsApplyStatusEnum.PASS.name())) {
+                    this.setSeckillApplyTime(seckill, seckillApply);
+                }
+            }
+            if (!seckillApplies.isEmpty()) {
+                this.updateEsGoodsIndex(seckill);
+            }
+        }
+    }
+
+    /**
+     * 删除商品索引限时抢购信息
+     *
+     * @param seckill 限时抢购信息
+     * @param skuIds  商品skuId列表
+     */
+    @Override
+    public void deleteEsGoodsSeckill(Seckill seckill, List<String> skuIds) {
+        Map<Object, Object> build = MapBuilder.create().put("promotionKey", this.getPromotionType() + "-" + seckill.getId()).put("scopeId", ArrayUtil.join(skuIds.toArray(), ",")).build();
+        //删除商品促销消息
+        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.DELETE_GOODS_INDEX_PROMOTIONS.name();
+        //发送mq消息
+        rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(build), RocketmqSendCallbackBuilder.commonCallback());
+    }
+
+    @Override
+    public void setSeckillApplyTime(Seckill seckill, SeckillApply seckillApply) {
+        //下一个时间，默认为当天结束时间
+        int nextHour = PromotionTools.nextHour(seckill.getHours().split(","), seckillApply.getTimeLine());
+
+        String format = DateUtil.format(seckill.getStartTime(), DatePattern.NORM_DATE_PATTERN);
+        DateTime parseStartTime = DateUtil.parse((format + " " + seckillApply.getTimeLine()), "yyyy-MM-dd HH");
+        DateTime parseEndTime = DateUtil.parse((format + " " + nextHour), "yyyy-MM-dd HH");
+        //如果是当天最后的时间段则设置到当天结束时间的59分59秒
+        if (nextHour == seckillApply.getTimeLine()) {
+            parseEndTime = DateUtil.parse((format + " " + nextHour + ":59:59"), DatePattern.NORM_DATETIME_PATTERN);
+        }
+        seckill.setStartTime(parseStartTime);
+        //当时商品的秒杀活动活动结束时间为下个时间段的开始
+        seckill.setEndTime(parseEndTime);
+    }
+
+    /**
+     * 检查该秒杀活动是否存在
+     *
+     * @param id 秒杀活动编号
+     * @return 秒杀活动信息
+     */
+    private Seckill checkSeckillExist(String id) {
+        Seckill seckill = this.getById(id);
         if (seckill == null) {
-            throw new ServiceException("当前限时抢购活动不存在");
+            throw new ServiceException(ResultCode.SECKILL_NOT_EXIST_ERROR);
         }
         return seckill;
     }
 
     /**
-     * 检查限时抢购参数
+     * 初始化促销字段
      *
-     * @param seckill 限时抢购信息
-     * @param storeId 卖家编号
+     * @param promotions 促销实体
      */
-    private void checkSeckillParam(SeckillVO seckill, String storeId) {
-        seckill.checkTime();
-        // 同一时间段内相同的活动
-        QueryWrapper<Seckill> queryWrapper = PromotionTools.checkActiveTime(seckill.getStartTime(), seckill.getEndTime(), PromotionTypeEnum.SECKILL, storeId, seckill.getId());
-        int sameNum = this.count(queryWrapper);
-        // 当前时间段是否存在同类活动
-        if (sameNum > 0) {
-            throw new ServiceException("当前时间内已存在同类活动");
+    @Override
+    public void initPromotion(Seckill promotions) {
+        super.initPromotion(promotions);
+        if (promotions.getStartTime() != null && promotions.getEndTime() == null) {
+            promotions.setEndTime(DateUtil.endOfDay(promotions.getStartTime()));
         }
     }
 
-    @Autowired
-    public void setEsGoodsIndexService(EsGoodsIndexService goodsIndexService) {
-        this.goodsIndexService = goodsIndexService;
+    /**
+     * 检查促销状态
+     *
+     * @param promotions 促销实体
+     */
+    @Override
+    public void checkStatus(Seckill promotions) {
+        super.checkStatus(promotions);
+        if (promotions.getStartTime() != null && CharSequenceUtil.isNotEmpty(promotions.getHours())) {
+            Integer[] split = Convert.toIntArray(promotions.getHours().split(","));
+            Arrays.sort(split);
+            String startTimeStr = DateUtil.format(promotions.getStartTime(), DatePattern.NORM_DATE_PATTERN) + " " + split[0] + ":00";
+            promotions.setStartTime(DateUtil.parse(startTimeStr, DatePattern.NORM_DATETIME_MINUTE_PATTERN));
+            promotions.setEndTime(DateUtil.endOfDay(promotions.getStartTime()));
+        }
     }
 
-    @Autowired
-    public void setPromotionGoodsService(PromotionGoodsService promotionGoodsService) {
-        this.promotionGoodsService = promotionGoodsService;
+    /**
+     * 当前促销类型
+     *
+     * @return 当前促销类型
+     */
+    @Override
+    public PromotionTypeEnum getPromotionType() {
+        return PromotionTypeEnum.SECKILL;
     }
-
-    @Autowired
-    public void setSeckillApplyService(SeckillApplyService seckillApplyService) {
-        this.seckillApplyService = seckillApplyService;
-    }
-
 }

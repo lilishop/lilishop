@@ -1,6 +1,7 @@
 package cn.lili.modules.order.order.entity.vo;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.enums.DeliverStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
@@ -15,7 +16,7 @@ import java.io.Serializable;
  * 订单可进行的操作
  *
  * @author Chopper
- * @date 2020/11/17 7:29 下午
+ * @since 2020/11/17 7:29 下午
  */
 @Data
 public class AllowOperation implements Serializable {
@@ -63,14 +64,17 @@ public class AllowOperation implements Serializable {
         }
 
         //新订单
-        if (CharSequenceUtil.equalsAny(status, OrderStatusEnum.UNPAID.name(), OrderStatusEnum.PAID.name(), OrderStatusEnum.UNDELIVERED.name())) {
+        if (CharSequenceUtil.equalsAny(status, OrderStatusEnum.UNPAID.name(), OrderStatusEnum.PAID.name(), OrderStatusEnum.UNDELIVERED.name(), OrderStatusEnum.STAY_PICKED_UP.name())) {
             this.cancel = true;
         }
         //新订单，允许支付
         this.pay = status.equals(OrderStatusEnum.UNPAID.name()) && payStatus.equals(PayStatusEnum.UNPAID.name());
 
-        //订单未发货，就可以编辑收货人信息
-        this.editConsignee = order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name()) && !status.equals(OrderStatusEnum.CANCELLED.name());
+        //可编辑订单收件人信息=实物订单 && 订单未发货 && 订单未取消 && 订单不是自提
+        this.editConsignee = order.getOrderType().equals(OrderTypeEnum.NORMAL.name())
+                && order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name())
+                && !status.equals(OrderStatusEnum.CANCELLED.name())
+                && !order.getDeliveryMethod().equals(DeliveryMethodEnum.SELF_PICK_UP.name());
 
         //是否允许被发货
         this.ship = editConsignee && status.equals(OrderStatusEnum.UNDELIVERED.name());
@@ -81,7 +85,8 @@ public class AllowOperation implements Serializable {
         //是否允许查看物流信息
         this.showLogistics = order.getDeliverStatus().equals(DeliverStatusEnum.DELIVERED.name()) && status.equals(OrderStatusEnum.DELIVERED.name());
 
-        this.take = order.getOrderType().equals(OrderTypeEnum.FICTITIOUS.name()) && order.getOrderStatus().equals(OrderStatusEnum.TAKE.name());
+        //虚拟订单 或 自提订单可以核销
+        this.take = (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name()) && order.getOrderStatus().equals(OrderStatusEnum.TAKE.name())) || (order.getDeliveryMethod().equals(DeliveryMethodEnum.SELF_PICK_UP.name()) && order.getOrderStatus().equals(OrderStatusEnum.STAY_PICKED_UP.name()));
     }
 
     /**
@@ -119,7 +124,7 @@ public class AllowOperation implements Serializable {
         //是否允许查看物流信息
         this.showLogistics = order.getDeliverStatus().equals(DeliverStatusEnum.DELIVERED.name()) && status.equals(OrderStatusEnum.DELIVERED.name());
 
-        this.take = order.getOrderType().equals(OrderTypeEnum.FICTITIOUS.name()) && order.getOrderStatus().equals(OrderStatusEnum.TAKE.name());
+        this.take = order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name()) && order.getOrderStatus().equals(OrderStatusEnum.TAKE.name());
     }
 
 

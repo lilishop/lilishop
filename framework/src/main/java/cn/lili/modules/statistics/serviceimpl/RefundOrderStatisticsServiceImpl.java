@@ -1,41 +1,35 @@
 package cn.lili.modules.statistics.serviceimpl;
 
 import cn.lili.common.utils.DateUtil;
-import cn.lili.common.utils.PageUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
-import cn.lili.modules.statistics.mapper.RefundOrderStatisticsDataMapper;
-import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
-import cn.lili.modules.statistics.model.enums.TimeTypeEnum;
-import cn.lili.modules.statistics.model.vo.RefundOrderStatisticsDataVO;
+import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
+import cn.lili.modules.statistics.entity.enums.TimeTypeEnum;
+import cn.lili.modules.statistics.entity.vo.RefundOrderStatisticsDataVO;
+import cn.lili.modules.statistics.mapper.RefundOrderStatisticsMapper;
 import cn.lili.modules.statistics.service.RefundOrderStatisticsService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
  * 退款订单统计业务层实现
  *
  * @author Bulbasaur
- * @date 2020/12/10 11:30
+ * @since 2020/12/10 11:30
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class RefundOrderStatisticsServiceImpl extends ServiceImpl<RefundOrderStatisticsDataMapper, StoreFlow> implements RefundOrderStatisticsService {
-
-    //退款统计
-    private final RefundOrderStatisticsDataMapper refundOrderStatisticsDataMapper;
+public class RefundOrderStatisticsServiceImpl extends ServiceImpl<RefundOrderStatisticsMapper, StoreFlow> implements RefundOrderStatisticsService {
 
     @Override
     public IPage<RefundOrderStatisticsDataVO> getRefundOrderStatisticsData(PageVO pageVO, StatisticsQueryParam statisticsQueryParam) {
         QueryWrapper queryWrapper = getQueryWrapper(statisticsQueryParam);
-        return refundOrderStatisticsDataMapper.getRefundStatisticsData(PageUtil.initPage(pageVO), queryWrapper);
+        return this.baseMapper.getRefundStatisticsData(PageUtil.initPage(pageVO), queryWrapper);
     }
 
     @Override

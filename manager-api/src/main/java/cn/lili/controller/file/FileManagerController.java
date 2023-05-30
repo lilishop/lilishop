@@ -1,7 +1,6 @@
 package cn.lili.controller.file;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.vo.SearchVO;
@@ -11,7 +10,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,15 +20,15 @@ import java.util.List;
  * 管理端,文件管理管理接口
  *
  * @author Chopper
- * @date 2020/11/26 15:41
+ * @since 2020/11/26 15:41
  */
 @RestController
-@Api(tags = "管理端,文件管理管理接口")
-@RequestMapping("/manager/file")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@Api(tags = "管理端,文件管理接口")
+@RequestMapping("/manager/common/file")
 public class FileManagerController {
 
-    private final FileService fileService;
+    @Autowired
+    private FileService fileService;
 
 
     @ApiOperation(value = "管理端管理所有图片")
@@ -55,7 +53,7 @@ public class FileManagerController {
     @DeleteMapping(value = "/delete/{ids}")
     public ResultMessage delete(@PathVariable List<String> ids) {
         fileService.batchDelete(ids);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 }

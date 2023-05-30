@@ -1,7 +1,7 @@
 package cn.lili.modules.permission.service;
 
-import cn.lili.modules.permission.entity.dto.MenuSearchParams;
 import cn.lili.modules.permission.entity.dos.Menu;
+import cn.lili.modules.permission.entity.dto.MenuSearchParams;
 import cn.lili.modules.permission.entity.vo.MenuVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.cache.annotation.CacheConfig;
@@ -12,7 +12,7 @@ import java.util.List;
  * 权限业务层
  *
  * @author Chopper
- * @date 2020/11/17 3:45 下午
+ * @since 2020/11/17 3:45 下午
  */
 @CacheConfig(cacheNames = "{menu}")
 public interface MenuService extends IService<Menu> {
@@ -62,5 +62,13 @@ public interface MenuService extends IService<Menu> {
      * @param ids
      */
     void deleteIds(List<String> ids);
+
+    /**
+     * 添加更新菜单
+     *
+     * @param menu 菜单数据
+     * @return 是否成功
+     */
+    boolean saveOrUpdateMenu(Menu menu);
 
 }

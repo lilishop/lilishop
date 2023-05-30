@@ -4,9 +4,6 @@ server:
   servlet:
     context-path: /
 
-  # 正式部署时候，解开此处配置，防止文件夹被清除导致的文件上传失败问题
-  #    multipart:
-  #      location: /Users/lifenlong/Desktop/ceshi
   tomcat:
     uri-encoding: UTF-8
     threads:
@@ -25,28 +22,15 @@ management:
       exposure:
         include: '*'
 spring:
+  application:
+    name: common-api
   # 要在其中注册的Spring Boot Admin Server的URL。
   boot:
     admin:
       client:
         url: http://127.0.0.1:8000
-  # mongodb
-  data:
-    mongodb:
-      host: 127.0.0.1
-      port: 27017
-      database: lilishop
-      username: root
-      password: lilishop
-      authentication-database: admin
-  #      replica-set-name: mongoreplset
   cache:
     type: redis
-
-  jpa:
-    # 自动生成表结构
-    generate-ddl: true
-    open-in-view: false
   # Redis
   redis:
     host: 127.0.0.1
@@ -118,13 +102,13 @@ spring:
     #            standard:
     #              sharding-column: create_time
     #              #分表策略
-    #              precise-algorithm-class-name: cn.lili.config.sharding.CreateTimeShardingTableAlgorithm
+    #              precise-algorithm-class-name: cn.lili.mybatis.sharding.CreateTimeShardingTableAlgorithm
     #              #范围查询实现
-    #              range-algorithm-class-name: cn.lili.config.sharding.CreateTimeShardingTableAlgorithm
+    #              range-algorithm-class-name: cn.lili.mybatis.sharding.CreateTimeShardingTableAlgorithm
     props:
       #是否打印逻辑SQL语句和实际SQL语句，建议调试时打印，在生产环境关闭
       sql:
-        show: true
+        show: false
 
 # 忽略鉴权url
 ignored:
@@ -135,37 +119,19 @@ ignored:
     - /MP_verify_qSyvBPhDsPdxvOhC.txt
     - /weixin/**
     - /source/**
-    - /buyer/mini-program/**
-    - /buyer/cashier/**
-    - /buyer/pageData/**
-    - /buyer/article/**
-    - /buyer/goods/**
-    - /buyer/category/**
-    - /buyer/shop/**
-    - /buyer/connect/**
-    - /buyer/members/smsLogin
-    - /buyer/members/refresh/*
-    - /buyer/members/refresh**
-    - /buyer/promotion/pintuan
-    - /buyer/promotion/seckill
-    - /buyer/memberEvaluation/**/goodsEvaluation
-    - /buyer/memberEvaluation/**/evaluationNumber
-    - /store/login/**
-    - /manager/user/login
-    - /manager/user/refresh/**
+    - /common/common/slider/**
+    - /common/common/sms/**
+    - /common/common/logo
+    - /common/common/site
     - /druid/**
     - /swagger-ui.html
     - /doc.html
     - /swagger-resources/**
     - /swagger/**
-    - /**/**.js
-    - /**/**.png
-    - /**/**.css
     - /webjars/**
     - /v2/api-docs
     - /configuration/ui
     - /boot-admin
-  statics:
     - /**/*.js
     - /**/*.css
     - /**/*.png
@@ -193,27 +159,51 @@ mybatis-plus:
 
 # 日志
 logging:
+  config: classpath:logback-spring.xml
   # 输出级别
   level:
-    cn.lili: info
+    root: info
   #    org.hibernate: debug
   #    org.springframework: debug
-  #    org.springframework.data.mongodb.core: debug
   file:
     # 指定路径
     path: lili-logs
-    # 最大保存天数
-    max-history: 7
-    # 每个文件最大大小
-    max-size: 5MB
+  logback:
+    rollingpolicy:
+      # 最大保存天数
+      max-history: 7
+      # 每个文件最大大小
+      max-file-size: 5MB
 #加密参数
 jasypt:
   encryptor:
     password: lili
 
 lili:
+  #验证码设置
+  verification-code:
+    #图形验证码有效时间 秒 包含滑块验证码有效时间， 以及验证通过之后，缓存中存储的验证结果有效时间
+    effectiveTime: 300
+    #水印
+    watermark: LILI-SHOP
+    #干扰项数量 最大2 默认0
+    interfereNum: 0
+    #允许误差像素
+    faultTolerant: 3
+  #短信模版配置
+  sms:
+    #登录
+    LOGIN: SMS_205755300
+    #注册
+    REGISTER: SMS_205755298
+    #找回密码
+    FIND_USER: SMS_205755301
+    #设置密码
+    UPDATE_PASSWORD: SMS_205755297
+    #支付密码
+    WALLET_PASSWORD: SMS_205755301
   system:
-    isDemoSite: true
+    isTestModel: true
   statistics:
     # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数
     onlineMember: 48
@@ -262,7 +252,8 @@ lili:
     #      account:
     #        username: elastic
     #        password: LiLiShopES
-
+    logstash:
+      server: 127.0.0.1:4560
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group

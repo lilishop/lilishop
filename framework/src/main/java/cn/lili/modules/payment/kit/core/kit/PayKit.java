@@ -8,6 +8,7 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.digest.HmacAlgorithm;
 import cn.lili.modules.payment.kit.core.XmlHelper;
 import cn.lili.modules.payment.kit.core.enums.RequestMethodEnums;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -30,9 +31,9 @@ import java.util.*;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/12/18 15:24
  */
+@Slf4j
 public class PayKit {
 
     /**
@@ -43,7 +44,7 @@ public class PayKit {
      * @return sha256 字符串
      */
     public static String hmacSha256(String data, String key) {
-        return SecureUtil.hmac(HmacAlgorithm.HmacSHA256, key).digestHex(data, CharsetUtil.UTF_8);
+        return SecureUtil.hmac(HmacAlgorithm.HmacSHA256, key).digestHex(data);
     }
 
     /**
@@ -144,7 +145,7 @@ public class PayKit {
         for (int i = 0; i < keys.size(); i++) {
             String key = keys.get(i);
             String value = params.get(key);
-            // 拼接时，不包括最后一个&字符
+            //拼接时，不包括最后一个&字符
             if (i == keys.size() - 1) {
                 if (quotes) {
                     content.append(key).append("=").append('"').append(encode ? urlEncode(value) : value).append('"');
@@ -173,7 +174,7 @@ public class PayKit {
         try {
             return URLEncoder.encode(src, CharsetUtil.UTF_8).replace("+", "%20");
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            log.error("URL 编码错误",e);
             return null;
         }
     }
@@ -194,7 +195,7 @@ public class PayKit {
         for (Map.Entry<String, String> entry : params.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            // 略过空值
+            //略过空值
             if (StrUtil.isEmpty(value)) {
                 continue;
             }
@@ -320,9 +321,9 @@ public class PayKit {
         if (StrUtil.isEmpty(signMessage)) {
             return null;
         }
-        // 获取商户私钥
+        //获取商户私钥
         PrivateKey privateKey = PayKit.getPrivateKey(keyPath);
-        // 生成签名
+        //生成签名
         return RsaKit.encryptByPrivateKey(signMessage, privateKey);
     }
 
@@ -338,7 +339,7 @@ public class PayKit {
         if (StrUtil.isEmpty(signMessage)) {
             return null;
         }
-        // 生成签名
+        //生成签名
         return RsaKit.encryptByPrivateKey(signMessage, privateKey);
     }
 

@@ -1,25 +1,21 @@
 package cn.lili.modules.permission.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 角色
  *
  * @author Chopper
- * @date 2020/11/19 11:57
+ * @since 2020/11/19 11:57
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Entity
-@Table(name = "li_role")
 @TableName("li_role")
 @ApiModel(value = "角色")
 public class Role extends BaseEntity {

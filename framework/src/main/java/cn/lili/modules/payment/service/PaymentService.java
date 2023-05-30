@@ -1,16 +1,12 @@
 package cn.lili.modules.payment.service;
 
-import cn.lili.modules.order.order.entity.vo.PaymentLog;
 import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 /**
  * 支付日志 业务层
  *
  * @author Chopper
- * @date 2020-12-19 09:25
+ * @since 2020-12-19 09:25
  */
 public interface PaymentService {
 
@@ -29,13 +25,4 @@ public interface PaymentService {
      */
     void adminPaySuccess(PaymentSuccessParams paymentSuccessParams);
 
-
-    /**
-     * 获取支付日志
-     *
-     * @param initPage
-     * @param initWrapper
-     * @return
-     */
-    IPage<PaymentLog> page(Page<PaymentLog> initPage, QueryWrapper<PaymentLog> initWrapper);
 }

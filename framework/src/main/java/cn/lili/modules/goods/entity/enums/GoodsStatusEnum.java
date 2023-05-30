@@ -4,7 +4,7 @@ package cn.lili.modules.goods.entity.enums;
  * 商品类型枚举
  *
  * @author pikachu
- * @date 2020-02-26 23:24:13
+ * @since 2020-02-26 23:24:13
  */
 public enum GoodsStatusEnum {
     /**

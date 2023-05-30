@@ -1,11 +1,11 @@
 package cn.lili.modules.order.order.entity.vo;
 
-import cn.lili.common.utils.StringUtils;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
-import cn.lili.modules.order.order.entity.enums.*;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.ClientTypeEnum;
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
-import jdk.nashorn.internal.objects.annotations.Getter;
 import lombok.Data;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -19,7 +19,7 @@ import java.util.List;
  * 用于订单列表查看
  *
  * @author Chopper
- * @date 2020-08-17 20:28
+ * @since 2020-08-17 20:28
  */
 @Data
 public class OrderSimpleVO {
@@ -36,13 +36,13 @@ public class OrderSimpleVO {
     private Date createTime;
 
     /**
-     * @see OrderStatusEnum
+     * @see cn.lili.modules.order.order.entity.enums.OrderStatusEnum
      */
     @ApiModelProperty(value = "订单状态")
     private String orderStatus;
 
     /**
-     * @see PayStatusEnum
+     * @see cn.lili.modules.order.order.entity.enums.PayStatusEnum
      */
     @ApiModelProperty(value = "付款状态")
     private String payStatus;
@@ -55,6 +55,7 @@ public class OrderSimpleVO {
     private Date paymentTime;
 
     @ApiModelProperty(value = "用户名")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String memberName;
 
     @ApiModelProperty(value = "店铺名称")
@@ -102,21 +103,21 @@ public class OrderSimpleVO {
     @Setter
     private String groupGoodsPrice;
     /**
-     * @see OrderItemAfterSaleStatusEnum
+     * @see cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum
      */
     @ApiModelProperty(hidden = true, value = "item 售后状态", allowableValues = "NOT_APPLIED(未申请),ALREADY_APPLIED(已申请),EXPIRED(已失效不允许申请售后)")
     @Setter
     private String groupAfterSaleStatus;
 
     /**
-     * @see OrderComplaintStatusEnum
+     * @see cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum
      */
     @ApiModelProperty(hidden = true, value = "item 投诉状态")
     @Setter
     private String groupComplainStatus;
 
     /**
-     * @see CommentStatusEnum
+     * @see cn.lili.modules.order.order.entity.enums.CommentStatusEnum
      */
     @ApiModelProperty(hidden = true, value = "item 评价状态")
     @Setter
@@ -124,45 +125,75 @@ public class OrderSimpleVO {
 
 
     /**
-     * @see OrderTypeEnum
+     * @see cn.lili.modules.order.order.entity.enums.OrderTypeEnum
      */
     @ApiModelProperty(value = "订单类型")
     private String orderType;
 
     /**
-     * @see DeliverStatusEnum
+     * @see cn.lili.modules.order.order.entity.enums.DeliverStatusEnum
      */
     @ApiModelProperty(value = "货运状态")
     private String deliverStatus;
 
-    @Getter
+    /**
+     * @see cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum
+     */
+    @ApiModelProperty(value = "订单促销类型")
+    private String orderPromotionType;
+
     public List<OrderItemVO> getOrderItems() {
-        if (StringUtils.isEmpty(groupGoodsId)) {
+        if (CharSequenceUtil.isEmpty(groupGoodsId)) {
             return new ArrayList<>();
         }
         List<OrderItemVO> orderItemVOS = new ArrayList<>();
-        String[] orderItemsSn = groupOrderItemsSn.split(",");
+
+
         String[] goodsId = groupGoodsId.split(",");
-        String[] skuId = groupSkuId.split(",");
-        String[] num = groupNum.split(",");
-        String[] image = groupImages.split(",");
-        String[] name = groupName.split(",");
-        String[] afterSaleStatus = groupAfterSaleStatus.split(",");
-        String[] complainStatus = groupComplainStatus.split(",");
-        String[] commentStatus = groupCommentStatus.split(",");
-        String[] goodsPrice = groupGoodsPrice.split(",");
-//        String goodsId, String skuId, Integer num, String image, String name, String afterSaleStatus
+
         for (int i = 0; i < goodsId.length; i++) {
-            orderItemVOS.add(new OrderItemVO(orderItemsSn[i], goodsId[i], skuId[i], num[i], image[i], name[i], afterSaleStatus[i], complainStatus[i], commentStatus[i], Double.parseDouble(goodsPrice[i])));
+            orderItemVOS.add(this.getOrderItemVO(i));
         }
         return orderItemVOS;
 
     }
 
+    private OrderItemVO getOrderItemVO(int i) {
+        OrderItemVO orderItemVO = new OrderItemVO();
+        orderItemVO.setGoodsId(groupGoodsId.split(",")[i]);
+        if (CharSequenceUtil.isNotEmpty(groupOrderItemsSn)) {
+            orderItemVO.setSn(groupOrderItemsSn.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupSkuId)) {
+            orderItemVO.setSkuId(groupSkuId.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupName)) {
+            orderItemVO.setName(groupName.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupNum) && groupNum.split(",").length == groupGoodsId.split(",").length) {
+            orderItemVO.setNum(groupNum.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupImages) && groupImages.split(",").length == groupGoodsId.split(",").length) {
+            orderItemVO.setImage(groupImages.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupAfterSaleStatus) && groupAfterSaleStatus.split(",").length == groupGoodsId.split(",").length) {
+            orderItemVO.setAfterSaleStatus(groupAfterSaleStatus.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupComplainStatus) && groupComplainStatus.split(",").length == groupGoodsId.split(",").length) {
+            orderItemVO.setComplainStatus(groupComplainStatus.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupCommentStatus) && groupCommentStatus.split(",").length == groupGoodsId.split(",").length) {
+            orderItemVO.setCommentStatus(groupCommentStatus.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupGoodsPrice) && groupGoodsPrice.split(",").length == groupGoodsId.split(",").length) {
+            orderItemVO.setGoodsPrice(Double.parseDouble(groupGoodsPrice.split(",")[i]));
+        }
+        return orderItemVO;
+    }
+
     /**
      * 初始化自身状态
      */
-    @Getter
     public AllowOperation getAllowOperationVO() {
         //设置订单的可操作状态
         return new AllowOperation(this);

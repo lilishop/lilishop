@@ -1,8 +1,10 @@
 package cn.lili.modules.statistics.util;
 
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.modules.statistics.model.dto.StatisticsQueryParam;
-import cn.lili.modules.statistics.model.enums.SearchTypeEnum;
+import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
+import cn.lili.modules.statistics.entity.enums.SearchTypeEnum;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -11,7 +13,7 @@ import java.util.Date;
  * 统计缓存后缀工具
  *
  * @author Chopper
- * @date 2021-01-15 15:30
+ * @since 2021-01-15 15:30
  */
 public class StatisticsDateUtil {
 
@@ -26,7 +28,7 @@ public class StatisticsDateUtil {
         Date[] dateArray = new Date[2];
 
         Calendar calendar = Calendar.getInstance();
-        // 时间归到今天凌晨0点
+        //时间归到今天凌晨0点
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
@@ -72,6 +74,8 @@ public class StatisticsDateUtil {
                 //获取过去七天
                 dateArray[1] = calendar.getTime();
                 break;
+            default:
+                throw new ServiceException(ResultCode.ERROR);
         }
         return dateArray;
     }
@@ -88,7 +92,14 @@ public class StatisticsDateUtil {
         Date[] dateArray = new Date[2];
 
         Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month, 0);
+
+        //时间归到今天凌晨0点
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        calendar.set(year, month, 1);
         dateArray[1] = calendar.getTime();
         calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
         dateArray[0] = calendar.getTime();
@@ -115,6 +126,32 @@ public class StatisticsDateUtil {
             Calendar calendar = Calendar.getInstance();
             return getDateArray(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
         }
+    }
+
+
+    /**
+     * 根据一个日期，获取这一天的开始时间和结束时间
+     *
+     * @param queryDate
+     * @return
+     */
+    public static Date[] getDateArray(Date queryDate) {
+
+        Date[] dateArray = new Date[2];
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(queryDate);
+        //时间归到今天凌晨0点
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        dateArray[0] = calendar.getTime();
+
+        calendar.set(Calendar.DAY_OF_YEAR, calendar.get(Calendar.DAY_OF_YEAR) + 1);
+        calendar.set(Calendar.SECOND, calendar.get(Calendar.SECOND) - 1);
+
+        dateArray[1] = calendar.getTime();
+        return dateArray;
     }
 
 }

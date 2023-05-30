@@ -1,6 +1,6 @@
 package cn.lili.controller.store;
 
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.message.entity.dos.StoreMessage;
@@ -9,9 +9,7 @@ import cn.lili.modules.message.service.StoreMessageService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,17 +19,15 @@ import org.springframework.web.bind.annotation.RestController;
  * 管理端,店铺消息消息管理接口
  *
  * @author pikachu
- * @date: 2020/12/6 16:09
+ * @since 2020/12/6 16:09
  */
-@Transactional
 @RestController
 @Api(tags = "管理端,店铺消息消息管理接口")
-@RequestMapping("/manager/message/store")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping("/manager/other/storeMessage")
 public class StoreMessageManagerController {
 
-    private final StoreMessageService storeMessageService;
-
+    @Autowired
+    private StoreMessageService storeMessageService;
 
     @GetMapping
     @ApiOperation(value = "多条件分页获取")

@@ -1,55 +1,58 @@
 package cn.lili.modules.order.order.serviceimpl;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.aop.syslog.annotation.SystemLogPoint;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.utils.CurrencyUtil;
-import cn.lili.common.utils.OperationalJudgment;
-import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
-import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
-import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.mapper.TradeMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderPriceService;
 import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
-import cn.lili.modules.payment.kit.plugin.bankTransfer.BankTransferPlugin;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import lombok.RequiredArgsConstructor;
+import cn.lili.modules.payment.kit.plugin.bank.BankTransferPlugin;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
- * @author liushuai(liushuai711 @ gmail.com)
- * @version v4.1
- * @Description:
- * @since 2021/4/28 3:48 下午
+ * 订单价格业务层实现
+ *
+ * @author Chopper
+ * @since 2020/11/17 7:36 下午
  */
+@Slf4j
 @Service
-@Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderPriceServiceImpl implements OrderPriceService {
 
-    //线下收款
-    private final BankTransferPlugin bankTransferPlugin;
-
-    private final OrderItemService orderItemService;
-
-    //交易数据层
-    private final TradeMapper tradeMapper;
-    //订单
-    private final OrderService orderService;
-    //商品分类
-    private final CategoryService categoryService;
+    /**
+     * 线下收款
+     */
+    @Autowired
+    private BankTransferPlugin bankTransferPlugin;
+    /**
+     * 订单货物
+     */
+    @Autowired
+    private OrderItemService orderItemService;
+    /**
+     * 交易数据层
+     */
+    @Resource
+    private TradeMapper tradeMapper;
+    /**
+     * 订单
+     */
+    @Autowired
+    private OrderService orderService;
 
     @Override
     @SystemLogPoint(description = "修改订单价格", customerLog = "'订单编号:'+#orderSn +'，价格修改为：'+#orderPrice")
@@ -58,9 +61,6 @@ public class OrderPriceServiceImpl implements OrderPriceService {
 
         //修改订单金额
         Order order = updateOrderPrice(orderSn, orderPrice);
-
-        //修改订单货物金额
-        updateOrderItemPrice(order);
 
         //修改交易金额
         tradeMapper.updateTradePrice(order.getTradeSn());
@@ -77,14 +77,6 @@ public class OrderPriceServiceImpl implements OrderPriceService {
         }
 
         bankTransferPlugin.callBack(order);
-
-        //发送订单状态变化消息
-        OperationalJudgment.judgment(orderService.getBySn(orderSn));
-        OrderMessage orderMessage = new OrderMessage();
-        orderMessage.setOrderSn(orderSn);
-        orderMessage.setPaymentMethod(PaymentMethodEnum.BANK_TRANSFER.name());
-        orderMessage.setNewStatus(OrderStatusEnum.PAID);
-        orderService.sendUpdateStatusMessage(orderMessage);
     }
 
 
@@ -109,19 +101,19 @@ public class OrderPriceServiceImpl implements OrderPriceService {
         //获取订单价格信息
         PriceDetailDTO orderPriceDetailDTO = order.getPriceDetailDTO();
 
-        //如果未修改过金额则记录订单原始价格
-        if (orderPriceDetailDTO.getOriginalPrice() == null) {
-            orderPriceDetailDTO.setOriginalPrice(order.getFlowPrice());
-        }
-
         //修改订单价格
-        order.setFlowPrice(orderPrice);
+        order.setUpdatePrice(CurrencyUtil.sub(orderPrice, orderPriceDetailDTO.getOriginalPrice()));
+
         //订单修改金额=使用订单原始金额-修改后金额
-        orderPriceDetailDTO.setUpdatePrice(CurrencyUtil.sub(orderPriceDetailDTO.getOriginalPrice(), orderPrice));
-        orderPriceDetailDTO.setFlowPrice(orderPrice);
+        orderPriceDetailDTO.setUpdatePrice(CurrencyUtil.sub(orderPrice, orderPriceDetailDTO.getOriginalPrice()));
+        order.setFlowPrice(orderPriceDetailDTO.getFlowPrice());
         //修改订单
-        order.setPriceDetail(JSONUtil.toJsonStr(orderPriceDetailDTO));
+        order.setPriceDetailDTO(orderPriceDetailDTO);
         orderService.updateById(order);
+
+        //修改子订单
+        updateOrderItemPrice(order);
+
         return order;
     }
 
@@ -137,40 +129,42 @@ public class OrderPriceServiceImpl implements OrderPriceService {
      */
     private void updateOrderItemPrice(Order order) {
         List<OrderItem> orderItems = orderItemService.getByOrderSn(order.getSn());
+
+        //获取总数，入欧最后一个则将其他orderitem的修改金额累加，然后进行扣减
+        Integer index = orderItems.size();
+        Double countUpdatePrice = 0D;
         for (OrderItem orderItem : orderItems) {
 
             //获取订单货物价格信息
             PriceDetailDTO priceDetailDTO = orderItem.getPriceDetailDTO();
 
-            //如果未修改过金额则记录订单原始价格
-            if (priceDetailDTO.getOriginalPrice() == null) {
-                priceDetailDTO.setOriginalPrice(orderItem.getFlowPrice());
+            index--;
+            //如果是最后一个
+            if (index == 0) {
+                //记录修改金额
+                priceDetailDTO.setUpdatePrice(CurrencyUtil.sub(order.getUpdatePrice(), countUpdatePrice));
+                //修改订单货物金额
+                orderItem.setFlowPrice(priceDetailDTO.getFlowPrice());
+                orderItem.setUnitPrice(CurrencyUtil.div(priceDetailDTO.getFlowPrice(), orderItem.getNum()));
+                orderItem.setPriceDetail(JSONUtil.toJsonStr(priceDetailDTO));
+
+            } else {
+
+                //SKU占总订单 金额的百分比
+                Double priceFluctuationRatio = CurrencyUtil.div(priceDetailDTO.getOriginalPrice(), order.getPriceDetailDTO().getOriginalPrice(), 4);
+
+                //记录修改金额
+                priceDetailDTO.setUpdatePrice(CurrencyUtil.mul(order.getUpdatePrice(), priceFluctuationRatio));
+
+                //修改订单货物金额
+                orderItem.setFlowPrice(priceDetailDTO.getFlowPrice());
+                orderItem.setUnitPrice(CurrencyUtil.div(priceDetailDTO.getFlowPrice(), orderItem.getNum()));
+                orderItem.setPriceDetail(JSONUtil.toJsonStr(priceDetailDTO));
+                countUpdatePrice = CurrencyUtil.add(countUpdatePrice, priceDetailDTO.getUpdatePrice());
             }
-
-            //获取订单货物占订单金额的百分比
-            Double priceFluctuationRatio = CurrencyUtil.div(priceDetailDTO.getOriginalPrice(), order.getPriceDetailDTO().getOriginalPrice());
-
-            //计算修改后的订单货物金额
-            double flowPrice = CurrencyUtil.mul(order.getFlowPrice(), priceFluctuationRatio);
-
-            // 记录修改金额
-            priceDetailDTO.setUpdatePrice(CurrencyUtil.sub(priceDetailDTO.getOriginalPrice(), flowPrice));
-            priceDetailDTO.setFlowPrice(flowPrice);
-
-            //计算平台佣金=交易金额*分类佣金比例/100
-            Double platFormCommission = CurrencyUtil.div(CurrencyUtil.mul(flowPrice, categoryService.getById(orderItem.getCategoryId()).getCommissionRate()), 100);
-            priceDetailDTO.setPlatFormCommission(platFormCommission);
-
-            // 最终结算金额 = 流水金额-平台佣金-分销提佣
-            double billPrice = CurrencyUtil.sub(CurrencyUtil.sub(priceDetailDTO.getFlowPrice(),priceDetailDTO.getPlatFormCommission()),
-                    priceDetailDTO.getDistributionCommission());
-            priceDetailDTO.setBillPrice(billPrice);
-
-            //修改订单货物金额
-            orderItem.setFlowPrice(flowPrice);
-            orderItem.setPriceDetail(JSONUtil.toJsonStr(priceDetailDTO));
-            orderItemService.update(orderItem, new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getId, orderItem.getId()));
         }
+        orderItemService.updateBatchById(orderItems);
+
     }
 
 }

@@ -7,20 +7,20 @@ import lombok.Data;
  * 会员店铺收藏VO
  *
  * @author pikachu
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Data
 public class StoreCollectionVO {
 
     @ApiModelProperty(value = "店铺id")
-    private String storeId;
+    private String id;
 
     @ApiModelProperty(value = "店铺名称")
     private String storeName;
 
     @ApiModelProperty(value = "店铺Logo")
-    private String logo;
+    private String storeLogo;
 
     @ApiModelProperty(value = "是否自营")
-    private boolean selfOperated;
+    private Boolean selfOperated;
 }

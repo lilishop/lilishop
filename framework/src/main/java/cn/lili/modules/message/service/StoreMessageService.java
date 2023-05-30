@@ -9,10 +9,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 消息发送业务层
+ * 店铺接收消息业务层
  *
  * @author Chopper
- * @date 2020/11/17 3:44 下午
+ * @since 2020/11/17 3:44 下午
  */
 public interface StoreMessageService extends IService<StoreMessage> {
 
@@ -20,21 +20,22 @@ public interface StoreMessageService extends IService<StoreMessage> {
     /**
      * 通过消息id删除
      *
-     * @param messageId
+     * @param messageId 消息ID
+     * @return 操作结果
      */
     boolean deleteByMessageId(String messageId);
 
     /**
      * 多条件分页获取
      *
-     * @param storeMessageQueryVO
-     * @param pageVO
-     * @return
+     * @param storeMessageQueryVO 店铺消息查询VO
+     * @param pageVO              分页
+     * @return 店铺消息分页
      */
     IPage<StoreMessage> getPage(StoreMessageQueryVO storeMessageQueryVO, PageVO pageVO);
 
     /**
-     * 保存消息信息
+     * 保存店铺消息信息
      *
      * @param messages 消息
      * @return

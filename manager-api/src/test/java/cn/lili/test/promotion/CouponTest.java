@@ -1,23 +1,23 @@
 package cn.lili.test.promotion;
 
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.vo.PageVO;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
-import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.entity.enums.*;
-import cn.lili.modules.promotion.entity.vos.CouponSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.CouponSearchParams;
+import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
+import cn.lili.modules.promotion.entity.enums.CouponTypeEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.service.CouponService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,21 +26,12 @@ import java.util.List;
  * @author paulG
  * @since 2020/10/29
  **/
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 class CouponTest {
 
     @Autowired
     private CouponService couponService;
-
-    @Autowired
-    private GoodsSkuService goodsSkuService;
-
-    @Autowired
-    private RocketMQTemplate rocketMQTemplate;
-
-    @Autowired
-    private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Test
     void addCoupon() {
@@ -49,18 +40,17 @@ class CouponTest {
         couponVO.setCouponType(CouponTypeEnum.DISCOUNT.name());
         couponVO.setDescription(couponVO.getCouponName() + " are expensive");
         couponVO.setGetType(CouponGetEnum.FREE.name());
-        couponVO.setPromotionStatus(PromotionStatusEnum.NEW.name());
-//        couponVO.setStoreId("0");
-//        couponVO.setStoreName("platform");
+//       couponVO.setStoreId("0");
+//       couponVO.setStoreName("platform");
         couponVO.setStoreId("131");
         couponVO.setStoreName("小米自营旗舰店");
         couponVO.setPublishNum(1000);
         couponVO.setCouponLimitNum(0);
         couponVO.setConsumeThreshold(500D);
-//        couponVO.setPrice(200D);
+//       couponVO.setPrice(200D);
         couponVO.setCouponDiscount(0.1D);
 
-        couponVO.setScopeType(CouponScopeTypeEnum.PORTION_GOODS.name());
+        couponVO.setScopeType(PromotionsScopeTypeEnum.PORTION_GOODS.name());
         couponVO.setScopeId("121");
         couponVO.setStartTime(cn.hutool.core.date.DateUtil.parse("2020-11-30 15:58:00"));
         couponVO.setEndTime(cn.hutool.core.date.DateUtil.parse("2020-12-30 23:50:00"));
@@ -71,7 +61,7 @@ class CouponTest {
             couponVO.setPromotionName(couponVO.getPrice() + "元券");
         }
         List<PromotionGoods> promotionGoodsList = new ArrayList<>();
-//        GoodsSku sku121 = goodsSkuService.getGoodsSkuByIdFromCache("121");
+//       GoodsSku sku121 = goodsSkuService.getGoodsSkuByIdFromCache("121");
         PromotionGoods promotionGoods = new PromotionGoods();
         promotionGoods.setPrice(0.0);
         promotionGoods.setLimitNum(0);
@@ -81,24 +71,23 @@ class CouponTest {
         promotionGoods.setTitle(couponVO.getPromotionName());
         promotionGoods.setPromotionId(couponVO.getId());
         promotionGoods.setQuantity(1000);
-        promotionGoods.setPromotionStatus(couponVO.getPromotionStatus());
         promotionGoods.setPromotionType(PromotionTypeEnum.COUPON.name());
         promotionGoodsList.add(promotionGoods);
 //
-//        GoodsSku sku50112 = goodsSkuService.getGoodsSkuByIdFromCache("50112");
-//        promotionGoods = new PromotionGoods(sku50112);
-//        promotionGoods.setPrice(80000d);
-//        promotionGoods.setLimitNum(0);
-//        promotionGoods.setPromotionQuantity(1000);
-//        promotionGoods.setNum(1000);
-//        promotionGoods.setStartTime(couponVO.getStartTime());
-//        promotionGoods.setEndTime(couponVO.getEndTime());
-//        promotionGoods.setTitle(couponVO.getPromotionName());
-//        promotionGoods.setPromotionStatus(couponVO.getPromotionStatus());
-//        promotionGoodsList.add(promotionGoods);
+//       GoodsSku sku50112 = goodsSkuService.getGoodsSkuByIdFromCache("50112");
+//       promotionGoods = new PromotionGoods(sku50112);
+//       promotionGoods.setPrice(80000d);
+//       promotionGoods.setLimitNum(0);
+//       promotionGoods.setPromotionQuantity(1000);
+//       promotionGoods.setNum(1000);
+//       promotionGoods.setStartTime(couponVO.getStartTime());
+//       promotionGoods.setEndTime(couponVO.getEndTime());
+//       promotionGoods.setTitle(couponVO.getPromotionName());
+//       promotionGoods.setPromotionStatus(couponVO.getPromotionStatus());
+//       promotionGoodsList.add(promotionGoods);
 //
         couponVO.setPromotionGoodsList(promotionGoodsList);
-        Assertions.assertNotNull(couponService.add(couponVO));
+        Assertions.assertNotNull(couponService.savePromotions(couponVO));
     }
 
     @Test
@@ -109,7 +98,6 @@ class CouponTest {
         couponVO.setCouponType(CouponTypeEnum.DISCOUNT.name());
         couponVO.setDescription(couponVO.getId() + " is expensive");
         couponVO.setGetType(CouponGetEnum.FREE.name());
-        couponVO.setPromotionStatus(PromotionStatusEnum.START.name());
         couponVO.setStoreId("132");
         couponVO.setStoreName("联想自营旗舰店");
         couponVO.setStoreCommission(99.99D);
@@ -118,7 +106,7 @@ class CouponTest {
         couponVO.setCouponDiscount(10D);
         couponVO.setPrice(0D);
 
-        couponVO.setScopeType(CouponScopeTypeEnum.PORTION_GOODS.name());
+        couponVO.setScopeType(PromotionsScopeTypeEnum.PORTION_GOODS.name());
         couponVO.setScopeId("134,133");
         couponVO.setStartTime(cn.hutool.core.date.DateUtil.parse("2020-11-10 17:01:00"));
         couponVO.setEndTime(cn.hutool.core.date.DateUtil.parse("2020-11-10 17:10:00"));
@@ -143,7 +131,6 @@ class CouponTest {
         promotionGoods.setStartTime(couponVO.getStartTime());
         promotionGoods.setEndTime(couponVO.getEndTime());
         promotionGoods.setTitle(couponVO.getPromotionName());
-        promotionGoods.setPromotionStatus(couponVO.getPromotionStatus());
         promotionGoodsList.add(promotionGoods);
 
         promotionGoods = new PromotionGoods();
@@ -159,40 +146,27 @@ class CouponTest {
         promotionGoods.setStartTime(couponVO.getStartTime());
         promotionGoods.setEndTime(couponVO.getEndTime());
         promotionGoods.setTitle(couponVO.getPromotionName());
-        promotionGoods.setPromotionStatus(couponVO.getPromotionStatus());
         promotionGoodsList.add(promotionGoods);
 
         couponVO.setPromotionGoodsList(promotionGoodsList);
-        Assertions.assertNotNull(couponService.updateCoupon(couponVO));
+        Assertions.assertTrue(couponService.updatePromotions(couponVO));
     }
 
     @Test
-    void searchFromMongo() {
+    void search() {
         CouponSearchParams queryParam = new CouponSearchParams();
         queryParam.setStoreId("");
         PageVO pageVo = new PageVO();
         pageVo.setPageNumber(0);
         pageVo.setPageSize(10);
-        IPage<CouponVO> couponsByPageFromMongo = couponService.getCouponsByPageFromMongo(queryParam, pageVo);
-        Assertions.assertNotNull(couponsByPageFromMongo);
-        couponsByPageFromMongo.getRecords().forEach(System.out::println);
-    }
-
-    @Test
-    void searchFromMysql() {
-        CouponSearchParams queryParam = new CouponSearchParams();
-
-        PageVO pageVo = new PageVO();
-        pageVo.setPageNumber(0);
-        pageVo.setPageSize(10);
-        IPage<Coupon> coupons = couponService.getCouponsByPage(queryParam, pageVo);
-        Assertions.assertNotNull(coupons);
-        coupons.getRecords().forEach(System.out::println);
+        IPage<Coupon> couponsByPage = couponService.pageFindAll(queryParam, pageVo);
+        Assertions.assertNotNull(couponsByPage);
+        couponsByPage.getRecords().forEach(System.out::println);
     }
 
     @Test
     void delete() {
-//        Assertions.assertTrue(couponService.deleteCoupon("1326001296591577088"));
+//       Assertions.assertTrue(couponService.deleteCoupon("1326001296591577088"));
         GoodsStatusEnum goodsStatusEnum = GoodsStatusEnum.DOWN;
         System.out.println("name::  " + goodsStatusEnum.name());
         System.out.println("description::  " + goodsStatusEnum.description());

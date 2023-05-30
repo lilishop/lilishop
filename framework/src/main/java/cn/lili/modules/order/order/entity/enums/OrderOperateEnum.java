@@ -4,7 +4,7 @@ package cn.lili.modules.order.order.entity.enums;
  * 订单的操作方式枚举
  *
  * @author Chopper
- * @date 2020/11/17 7:26 下午
+ * @since 2020/11/17 7:26 下午
  */
 public enum OrderOperateEnum {
 

@@ -1,24 +1,19 @@
 package cn.lili.modules.order.order.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 发票
  *
  * @author Bulbasaur
- * @date 2020/11/28 11:38
+ * @since 2020/11/28 11:38
  */
 @Data
-@Entity
-@Table(name = "li_receipt")
 @TableName("li_receipt")
 @ApiModel(value = "发票")
 public class Receipt extends BaseEntity {
@@ -55,7 +50,6 @@ public class Receipt extends BaseEntity {
     @ApiModelProperty(value = "发票状态 0未开 1已开")
     private Integer receiptStatus;
 
-    @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "发票详情")
     private String receiptDetail;
 

@@ -1,10 +1,9 @@
 package cn.lili.controller.payment;
 
 import cn.lili.modules.payment.kit.RefundSupport;
-import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,16 +16,15 @@ import javax.servlet.http.HttpServletRequest;
  * 买家端,退款回调
  *
  * @author Chopper
- * @date 2020-12-18 16:59
+ * @since 2020-12-18 16:59
  */
 @Api(tags = "买家端,退款回调")
 @RestController
-@RequestMapping("/buyer/cashier/refund")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping("/buyer/payment/cashierRefund")
 public class CashierRefundController {
 
-
-    private final RefundSupport refundSupport;
+    @Autowired
+    private RefundSupport refundSupport;
 
 
     @ApiOperation(value = "退款通知")

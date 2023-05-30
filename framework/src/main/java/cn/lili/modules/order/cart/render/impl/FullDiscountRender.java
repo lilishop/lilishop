@@ -1,103 +1,202 @@
 package cn.lili.modules.order.cart.render.impl;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.common.utils.CurrencyUtil;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
-import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
-import cn.lili.modules.promotion.entity.dos.PromotionGoods;
-import cn.lili.modules.promotion.service.FullDiscountService;
+import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.order.cart.render.CartRenderStep;
-import lombok.RequiredArgsConstructor;
+import cn.lili.modules.order.cart.render.util.PromotionPriceUtil;
+import cn.lili.modules.order.order.entity.dto.DiscountPriceItem;
+import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
+import cn.lili.modules.promotion.entity.dos.FullDiscount;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * FullDiscountRender
+ * 满减优惠渲染
  *
  * @author Chopper
- * @date 2020-04-01 10:27 上午
+ * @since 2020-04-01 10:27 上午
  */
 @Service
-@Order(1)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FullDiscountRender implements CartRenderStep {
 
-    private final FullDiscountService fullDiscountService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
+
+    @Override
+    public RenderStepEnums step() {
+        return RenderStepEnums.FULL_DISCOUNT;
+    }
 
     @Override
     public void render(TradeDTO tradeDTO) {
 
-        // 获取购物车中所有的商品
-        List<CartSkuVO> cartSkuList = tradeDTO.getSkuList();
+        //店铺集合
+        List<CartVO> cartList = tradeDTO.getCartList();
 
-        // 渲染的购物车
-        List<CartVO> cartList = new ArrayList<>();
+        //循环店铺购物车
+        for (CartVO cart : cartList) {
+            List<CartSkuVO> fullDiscountSkuList = cart.getSkuList().stream()
+                    .filter(i -> i.getPromotionMap() != null && !i.getPromotionMap().isEmpty() && i.getPromotionMap().keySet().stream().anyMatch(j -> j.contains(PromotionTypeEnum.FULL_DISCOUNT.name())))
+                    .collect(Collectors.toList());
 
-        // 确定有哪些商家
-        List<String> storeIds = new ArrayList<>();
+            if (!fullDiscountSkuList.isEmpty()) {
+                Optional<Map.Entry<String, Object>> fullDiscountOptional = fullDiscountSkuList.get(0).getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.FULL_DISCOUNT.name())).findFirst();
 
-        // 根据店铺分组
-        Map<String, List<CartSkuVO>> storeCollect = cartSkuList.parallelStream().collect(Collectors.groupingBy(CartSkuVO::getStoreId));
-        for (Map.Entry<String, List<CartSkuVO>> storeCart : storeCollect.entrySet()) {
-            if (!storeCart.getValue().isEmpty()) {
-                storeIds.add(storeCart.getKey());
-                CartVO cartVO = new CartVO(storeCart.getValue().get(0));
-                if (CharSequenceUtil.isEmpty(cartVO.getDeliveryMethod())) {
-                    cartVO.setDeliveryMethod(DeliveryMethodEnum.LOGISTICS.name());
-                }
-                cartVO.setSkuList(storeCart.getValue());
-                storeCart.getValue().stream().filter(i -> Boolean.TRUE.equals(i.getChecked())).findFirst().ifPresent(cartSkuVO -> cartVO.setChecked(true));
-                cartList.add(cartVO);
+                if (fullDiscountOptional.isPresent()) {
+                    JSONObject promotionsObj = JSONUtil.parseObj(fullDiscountOptional.get().getValue());
+                    FullDiscount fullDiscount = promotionsObj.toBean(FullDiscount.class);
+                    FullDiscountVO fullDiscountVO = new FullDiscountVO(fullDiscount);
 
-            }
-        }
+                    //如果有赠品，则将赠品信息写入
+                    if (Boolean.TRUE.equals(fullDiscount.getGiftFlag())) {
+                        GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(fullDiscount.getGiftId());
+                        fullDiscountVO.setGiftSkuId(fullDiscount.getGiftId());
+                        fullDiscountVO.setGiftSkuName(goodsSku.getGoodsName());
+                    }
 
-        List<FullDiscountVO> fullDiscounts = fullDiscountService.currentPromotion(storeIds);
-        for (FullDiscountVO fullDiscount : fullDiscounts) {
-            if (fullDiscount.getPromotionGoodsList() != null || fullDiscount.getNumber() == -1) {
-                for (CartVO cart : cartList) {
-                    if (fullDiscount.getStoreId().equals(cart.getStoreId())) {
-                        cart.setFullDiscount(fullDiscount);
-                        List<String> skuIds;
-                        if (fullDiscount.getNumber() != -1) {
-                            skuIds = initFullDiscountGoods(fullDiscount, cartSkuList);
-                        } else {
-                            skuIds = cart.getSkuList().stream().map(i -> i.getGoodsSku().getId()).collect(Collectors.toList());
+                    //写入满减活动
+                    cart.setFullDiscount(fullDiscountVO);
+                    Map<String, Double> skuPriceDetail = new HashMap<>(16);
+                    for (CartSkuVO cartSkuVO : cart.getSkuList()) {
+                        if (PromotionsScopeTypeEnum.PORTION_GOODS.name().equals(fullDiscountVO.getScopeType()) && fullDiscountVO.getScopeId() != null && !fullDiscountVO.getScopeId().contains(cartSkuVO.getGoodsSku().getId())) {
+                            continue;
                         }
-                        cart.setFullDiscountSkuIds(skuIds);
+                        skuPriceDetail.put(cartSkuVO.getGoodsSku().getId(), cartSkuVO.getPriceDetailDTO().getGoodsPrice());
+                    }
+                    if (!skuPriceDetail.isEmpty()) {
+                        //记录参与满减活动的sku
+                        cart.setFullDiscountSkuIds(new ArrayList<>(skuPriceDetail.keySet()));
+
+                        Double countPrice = countPrice(skuPriceDetail);
+
+
+                        if (isFull(countPrice, cart)) {
+                            //如果减现金
+                            if (Boolean.TRUE.equals(fullDiscount.getFullMinusFlag())) {
+                                PromotionPriceUtil.recountPrice(tradeDTO, skuPriceDetail, fullDiscount.getFullMinus(), PromotionTypeEnum.FULL_DISCOUNT, fullDiscountVO.getId());
+                            }
+                            //打折
+                            else if (Boolean.TRUE.equals(fullDiscount.getFullRateFlag())) {
+                                this.renderFullRate(cart, skuPriceDetail, CurrencyUtil.div(fullDiscount.getFullRate(), 10), fullDiscountVO.getId());
+                            }
+                            //渲染满优惠
+                            renderFullMinus(cart);
+                        }
                     }
                 }
             }
+
         }
 
-        tradeDTO.setCartList(cartList);
     }
 
     /**
-     * 获取参与满优惠的商品id
+     * 渲染满折
      *
-     * @param fullDiscount 满优惠信息
-     * @param cartSkuVOS 购物车商品sku信息
-     * @return 参与满优惠的商品id
+     * @param cart
+     * @param skuPriceDetail
      */
-    public List<String> initFullDiscountGoods(FullDiscountVO fullDiscount, List<CartSkuVO> cartSkuVOS) {
-        List<String> goodsIds = new ArrayList<>();
-        for (PromotionGoods promotionGoods : fullDiscount.getPromotionGoodsList()) {
-            for (CartSkuVO cartSkuVO : cartSkuVOS) {
-                if (cartSkuVO.getGoodsSku().getId().equals(promotionGoods.getSkuId())) {
-                    goodsIds.add(promotionGoods.getSkuId());
-                }
-            }
-        }
-        return goodsIds;
+    private void renderFullRate(CartVO cart, Map<String, Double> skuPriceDetail, Double rate, String activityId) {
+
+        List<CartSkuVO> cartSkuVOS = cart.getCheckedSkuList().stream().filter(cartSkuVO -> skuPriceDetail.containsKey(cartSkuVO.getGoodsSku().getId())).collect(Collectors.toList());
+
+        // 循环计算扣减金额
+        cartSkuVOS.forEach(cartSkuVO -> {
+            PriceDetailDTO priceDetailDTO = cartSkuVO.getPriceDetailDTO();
+
+
+            Double discountPrice = CurrencyUtil.mul(priceDetailDTO.getGoodsPrice(),
+                    CurrencyUtil.sub(1, rate)
+            );
+            //优惠金额=旧的优惠金额+商品金额*商品折扣比例
+            priceDetailDTO.setDiscountPrice(
+                    CurrencyUtil.add(priceDetailDTO.getDiscountPrice(), discountPrice
+                    )
+            );
+            //优惠金额=旧的优惠金额+商品金额*商品折扣比例
+            priceDetailDTO.addDiscountPriceItem(DiscountPriceItem
+                    .builder()
+                    .discountPrice(discountPrice)
+                    .promotionTypeEnum(PromotionTypeEnum.FULL_DISCOUNT)
+                    .promotionId(activityId)
+                    .skuId(cartSkuVO.getGoodsSku().getId())
+                    .goodsId(cartSkuVO.getGoodsSku().getGoodsId())
+
+                    .build());
+
+        });
+
     }
 
+    /**
+     * 渲染满减优惠
+     *
+     * @param cartVO 购物车满优惠渲染
+     */
+    private void renderFullMinus(CartVO cartVO) {
+        //获取参与活动的商品总价
+        FullDiscountVO fullDiscount = cartVO.getFullDiscount();
+
+        if (Boolean.TRUE.equals(fullDiscount.getCouponFlag())) {
+            cartVO.getGiftCouponList().add(fullDiscount.getCouponId());
+        }
+        if (Boolean.TRUE.equals(fullDiscount.getGiftFlag())) {
+            cartVO.setGiftList(Arrays.asList(fullDiscount.getGiftId().split(",")));
+        }
+        if (Boolean.TRUE.equals(fullDiscount.getPointFlag())) {
+            cartVO.setGiftPoint(fullDiscount.getPoint());
+        }
+        //如果满足，判定是否免邮，免邮的话需要渲染一边sku
+        if (Boolean.TRUE.equals(fullDiscount.getFreeFreightFlag())) {
+            for (CartSkuVO skuVO : cartVO.getCheckedSkuList()) {
+                skuVO.setIsFreeFreight(true);
+            }
+        }
+    }
+
+
+    /**
+     * 是否满足满优惠
+     *
+     * @param cart 购物车展示信息
+     * @return 是否满足满优惠
+     */
+    private boolean isFull(Double price, CartVO cart) {
+        if (cart.getFullDiscount().getFullMoney() <= price) {
+            cart.setPromotionNotice("正在参与满优惠活动[" + cart.getFullDiscount().getPromotionName() + "]" + cart.getFullDiscount().notice());
+            return true;
+        } else {
+            cart.setPromotionNotice("还差" + CurrencyUtil.sub(cart.getFullDiscount().getFullMoney(), price) + " 即可参与活动（" + cart.getFullDiscount().getPromotionName() + "）" + cart.getFullDiscount().notice());
+            return false;
+        }
+    }
+
+    /**
+     * 统计参与满减商品价格
+     *
+     * @param skuPriceMap sku价格
+     * @return 总价
+     */
+    private Double countPrice(Map<String, Double> skuPriceMap) {
+        double count = 0d;
+
+        for (Double price : skuPriceMap.values()) {
+            count = CurrencyUtil.add(count, price);
+        }
+
+        return count;
+    }
 }

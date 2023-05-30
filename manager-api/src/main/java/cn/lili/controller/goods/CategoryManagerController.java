@@ -1,8 +1,9 @@
 package cn.lili.controller.goods;
 
+import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.ResultUtil;
-import cn.lili.common.utils.StringUtils;
+import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.vos.CategoryVO;
@@ -12,7 +13,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.web.bind.annotation.*;
@@ -25,24 +25,25 @@ import java.util.List;
  * 管理端,商品分类接口
  *
  * @author pikachu
- * @date 2020-02-27 15:18:56
+ * @since 2020-02-27 15:18:56
  */
 @RestController
 @Api(tags = "管理端,商品分类接口")
 @RequestMapping("/manager/goods/category")
 @CacheConfig(cacheNames = "category")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CategoryManagerController {
 
     /**
      * 分类
      */
-    private final CategoryService categoryService;
+    @Autowired
+    private CategoryService categoryService;
 
     /**
      * 商品
      */
-    private final GoodsService goodsService;
+    @Autowired
+    private GoodsService goodsService;
 
     @ApiOperation(value = "查询某分类下的全部子分类列表")
     @ApiImplicitParam(name = "parentId", value = "父id，顶级为0", required = true, dataType = "String", paramType = "path")
@@ -54,50 +55,36 @@ public class CategoryManagerController {
     @ApiOperation(value = "查询全部分类列表")
     @GetMapping(value = "/allChildren")
     public ResultMessage<List<CategoryVO>> list() {
-        return ResultUtil.data(this.categoryService.listAllChildrenDB());
+        return ResultUtil.data(this.categoryService.listAllChildren());
     }
 
     @PostMapping
+    @DemoSite
     @ApiOperation(value = "添加商品分类")
     public ResultMessage<Category> saveCategory(@Valid Category category) {
-
-        //不能添加重复的分类名称
-        Category category1 = new Category();
-        category1.setName(category.getName());
-        List<Category> list = categoryService.findByAllBySortOrder(category1);
-        if (StringUtils.isNotEmpty(list)) {
-            return ResultUtil.error(ResultCode.CATEGORY_NOT_EXIST);
-        }
-        // 非顶级分类
-        if (category.getParentId() != null && !category.getParentId().equals("0")) {
+        //非顶级分类
+        if (category.getParentId() != null && !"0".equals(category.getParentId())) {
             Category parent = categoryService.getById(category.getParentId());
             if (parent == null) {
-                return ResultUtil.error(ResultCode.CATEGORY_PARENT_NOT_EXIST);
+                throw new ServiceException(ResultCode.CATEGORY_PARENT_NOT_EXIST);
             }
             if (category.getLevel() >= 4) {
-                return ResultUtil.error(ResultCode.CATEGORY_BEYOND_THREE);
+                throw new ServiceException(ResultCode.CATEGORY_BEYOND_THREE);
             }
         }
         if (categoryService.saveCategory(category)) {
             return ResultUtil.data(category);
         }
-        return ResultUtil.error(ResultCode.CATEGORY_SAVE_ERROR);
+        throw new ServiceException(ResultCode.CATEGORY_SAVE_ERROR);
     }
 
     @PutMapping
+    @DemoSite
     @ApiOperation(value = "修改商品分类")
-    public ResultMessage<Category> updateCategory(CategoryVO category) {
+    public ResultMessage<Category> updateCategory(@Valid CategoryVO category) {
         Category catTemp = categoryService.getById(category.getId());
         if (catTemp == null) {
-            return ResultUtil.error(ResultCode.CATEGORY_PARENT_NOT_EXIST);
-        }
-        //不能添加重复的分类名称
-        Category category1 = new Category();
-        category1.setName(category.getName());
-        category1.setId(category.getId());
-        List<Category> list = categoryService.findByAllBySortOrder(category1);
-        if (StringUtils.isNotEmpty(list)) {
-            return ResultUtil.error(ResultCode.CATEGORY_NAME_IS_EXIST);
+            throw new ServiceException(ResultCode.CATEGORY_NOT_EXIST);
         }
 
         categoryService.updateCategory(category);
@@ -105,38 +92,40 @@ public class CategoryManagerController {
     }
 
     @DeleteMapping(value = "/{id}")
-    @ApiImplicitParam(name = "goodsId", value = "分类ID", required = true, paramType = "path", dataType = "String")
+    @DemoSite
+    @ApiImplicitParam(name = "id", value = "分类ID", required = true, paramType = "path", dataType = "String")
     @ApiOperation(value = "通过id删除分类")
     public ResultMessage<Category> delAllByIds(@NotNull @PathVariable String id) {
         Category category = new Category();
         category.setParentId(id);
         List<Category> list = categoryService.findByAllBySortOrder(category);
         if (list != null && !list.isEmpty()) {
-            return ResultUtil.error(ResultCode.CATEGORY_HAS_CHILDREN);
+            throw new ServiceException(ResultCode.CATEGORY_HAS_CHILDREN);
 
         }
-        // 查询某商品分类的商品数量
-        Integer count = goodsService.getGoodsCountByCategory(id);
+        //查询某商品分类的商品数量
+        long count = goodsService.getGoodsCountByCategory(id);
         if (count > 0) {
-            return ResultUtil.error(ResultCode.CATEGORY_HAS_GOODS);
+            throw new ServiceException(ResultCode.CATEGORY_HAS_GOODS);
         }
         categoryService.delete(id);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
     @PutMapping(value = "/disable/{id}")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "goodsId", value = "分类ID", required = true, paramType = "path", dataType = "String")
     })
+    @DemoSite
     @ApiOperation(value = "后台 禁用/启用 分类")
     public ResultMessage<Object> disable(@PathVariable String id, @RequestParam Boolean enableOperations) {
 
         Category category = categoryService.getById(id);
         if (category == null) {
-            return ResultUtil.error(ResultCode.CATEGORY_NOT_EXIST);
+            throw new ServiceException(ResultCode.CATEGORY_NOT_EXIST);
         }
         categoryService.updateCategoryStatus(id, enableOperations);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 }

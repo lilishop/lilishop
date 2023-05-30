@@ -11,7 +11,7 @@ import java.util.Date;
  * 会员评价VO
  *
  * @author Bulbasaur
- * @date 2020/11/30 15:00
+ * @since 2020/11/30 15:00
  */
 @Data
 public class MemberEvaluationListVO {
@@ -35,12 +35,19 @@ public class MemberEvaluationListVO {
     private String status;
 
     @ApiModelProperty(value = "回复状态")
-    private boolean replyStatus;
+    private Boolean replyStatus;
 
     @ApiModelProperty(value = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
+    @ApiModelProperty(value = "物流评分")
+    private Integer deliveryScore;
 
+    @ApiModelProperty(value = "服务评分")
+    private Integer serviceScore;
+
+    @ApiModelProperty(value = "描述评分")
+    private Integer descriptionScore;
 }

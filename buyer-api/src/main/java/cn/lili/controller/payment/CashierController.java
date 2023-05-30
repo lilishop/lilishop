@@ -1,19 +1,19 @@
 package cn.lili.controller.payment;
 
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.payment.kit.CashierSupport;
 import cn.lili.modules.payment.kit.dto.PayParam;
-import cn.lili.modules.payment.kit.enums.PaymentClientEnum;
-import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
+import cn.lili.modules.payment.entity.enums.PaymentClientEnum;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
-import cn.lili.modules.payment.service.PaymentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,18 +25,16 @@ import javax.servlet.http.HttpServletResponse;
  * 买家端,收银台接口
  *
  * @author Chopper
- * @date 2020-12-18 16:59
+ * @since 2020-12-18 16:59
  */
+@Slf4j
 @RestController
 @Api(tags = "买家端,收银台接口")
-@RequestMapping("/buyer/cashier")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping("/buyer/payment/cashier")
 public class CashierController {
 
-
-    private final CashierSupport cashierSupport;
-
-    private final PaymentService paymentService;
+    @Autowired
+    private CashierSupport cashierSupport;
 
 
     @ApiImplicitParams({
@@ -67,8 +65,11 @@ public class CashierController {
 
         try {
             return cashierSupport.payment(paymentMethodEnum, paymentClientEnum, request, response, payParam);
+        } catch (ServiceException se) {
+            log.info("支付异常", se);
+            throw se;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("收银台支付错误", e);
         }
         return null;
 

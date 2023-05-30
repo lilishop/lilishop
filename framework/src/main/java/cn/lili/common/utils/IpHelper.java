@@ -4,7 +4,6 @@ package cn.lili.common.utils;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpUtil;
-import cn.lili.modules.connect.util.IpUtils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
@@ -23,27 +22,31 @@ import javax.servlet.http.HttpServletRequest;
 @Component
 public class IpHelper {
 
-    //qq lbs 地区查询key
+    /**
+     * qq lbs 地区查询key
+     */
     @Value("${lili.lbs.key}")
     private String key;
-    //qq lbs 地区查询key
+    /**
+     * qq lbs 地区查询key
+     */
     @Value("${lili.lbs.sk}")
     private String sk;
 
-    private static final String api = "https://apis.map.qq.com";
+    private static final String API = "https://apis.map.qq.com";
 
 
     /**
      * 获取IP返回地理信息
      *
-     * @param
-     * @return
+     * @param request 请求参数
+     * @return 城市信息
      */
     public String getIpCity(HttpServletRequest request) {
 
         String url = "/ws/location/v1/ip?key=" + key + "&ip=" + IpUtils.getIpAddress(request);
         String sign = SecureUtil.md5(url + sk);
-        url = api + url + "&sign=" + sign;
+        url = API + url + "&sign=" + sign;
         String result = "未知";
         try {
             String json = HttpUtil.get(url, 3000);

@@ -1,7 +1,7 @@
 package cn.lili.modules.goods.entity.vos;
 
 
-import cn.lili.modules.goods.entity.dos.GoodsParams;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -9,10 +9,10 @@ import lombok.Data;
  * 商品关联参数的VO
  *
  * @author pikachu
- * @date 2020-02-26 23:24:13
+ * @since 2020-02-26 23:24:13
  */
 @Data
-public class GoodsParamsVO extends GoodsParams {
+public class GoodsParamsVO extends GoodsParamsDTO {
 
     private static final long serialVersionUID = -4904700751774005326L;
     @ApiModelProperty("1 输入项   2 选择项")

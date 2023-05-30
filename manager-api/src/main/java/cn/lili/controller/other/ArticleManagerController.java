@@ -1,7 +1,6 @@
 package cn.lili.controller.other;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.page.entity.dos.Article;
 import cn.lili.modules.page.entity.dto.ArticleSearchParams;
@@ -13,7 +12,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,18 +21,18 @@ import javax.validation.Valid;
  * 管理端,文章接口
  *
  * @author pikachu
- * @date 2020-05-06 15:18:56
+ * @since 2020-05-06 15:18:56
  */
 @RestController
 @Api(tags = "管理端,文章接口")
-@RequestMapping("/manager/article")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping("/manager/other/article")
 public class ArticleManagerController {
 
     /**
      * 文章
      */
-    private final ArticleService articleService;
+    @Autowired
+    private ArticleService articleService;
 
     @ApiOperation(value = "查看文章")
     @ApiImplicitParam(name = "id", value = "文章ID", required = true, dataType = "String", paramType = "path")
@@ -44,38 +42,67 @@ public class ArticleManagerController {
         return ResultUtil.data(articleService.getById(id));
     }
 
+    @ApiOperation(value = "根据类型查看文章")
+    @ApiImplicitParam(name = "type", value = "文章类型", required = true, dataType = "String", paramType = "path")
+    @GetMapping(value = "/type/{type}")
+    public ResultMessage<Article> getByType(@PathVariable String type) {
+
+        return ResultUtil.data(articleService.customGetByType(type));
+    }
+
     @ApiOperation(value = "分页获取")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "categoryId", value = "文章分类ID", dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "title", value = "标题", dataType = "String", paramType = "query")
+            @ApiImplicitParam(name = "categoryId", value = "文章分类ID", paramType = "query"),
+            @ApiImplicitParam(name = "title", value = "标题", paramType = "query")
     })
     @GetMapping(value = "/getByPage")
     public ResultMessage<IPage<ArticleVO>> getByPage(ArticleSearchParams articleSearchParams) {
-        return ResultUtil.data(articleService.articlePage(articleSearchParams));
+        return ResultUtil.data(articleService.managerArticlePage(articleSearchParams));
     }
 
     @ApiOperation(value = "添加文章")
-    @PostMapping
-    public ResultMessage<Article> save(@Valid Article article) {
+    @PostMapping(consumes = "application/json", produces = "application/json")
+    public ResultMessage<Article> save(@RequestBody Article article) {
         article.setType(ArticleEnum.OTHER.name());
         articleService.save(article);
         return ResultUtil.data(article);
     }
 
-    @ApiOperation(value = "修改文章")
-    @ApiImplicitParam(name = "id", value = "文章ID", required = true, dataType = "String", paramType = "path")
-    @PutMapping("update/{id}")
-    public ResultMessage<Article> update(@Valid Article article, @PathVariable("id") String id) {
+    @ApiOperation(value = "修改文章--文章id")
+    @ApiImplicitParam(name = "id", value = "文章ID", required = true, paramType = "path")
+    @PutMapping(value = "update/{id}", consumes = "application/json", produces = "application/json")
+    public ResultMessage<Article> update(@RequestBody Article article, @PathVariable("id") String id) {
         article.setId(id);
         return ResultUtil.data(articleService.updateArticle(article));
     }
+
+    @ApiOperation(value = "修改文章--文章类型")
+    @ApiImplicitParam(name = "type", value = "文章类型", required = true, paramType = "path")
+    @PutMapping(value = "updateArticle/{type}", consumes = "application/json", produces = "application/json")
+    public ResultMessage<Article> updateArticle(@RequestBody Article article, @PathVariable("type") String type,String id) {
+        article.setId(id);
+        article.setType(type);
+        return ResultUtil.data(articleService.updateArticleType(article));
+    }
+
+    @ApiOperation(value = "修改文章状态")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "文章ID", required = true, paramType = "path"),
+            @ApiImplicitParam(name = "status", value = "操作状态", required = true, paramType = "query")
+    })
+    @PutMapping("update/status/{id}")
+    public ResultMessage<Article> updateStatus(@PathVariable("id") String id, boolean status) {
+        articleService.updateArticleStatus(id, status);
+        return ResultUtil.success();
+    }
+
 
     @ApiOperation(value = "批量删除")
     @ApiImplicitParam(name = "id", value = "文章ID", required = true, dataType = "String", paramType = "path")
     @DeleteMapping(value = "/delByIds/{id}")
     public ResultMessage<Object> delAllByIds(@PathVariable String id) {
         articleService.customRemove(id);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 

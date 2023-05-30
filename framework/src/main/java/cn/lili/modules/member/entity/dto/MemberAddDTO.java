@@ -11,13 +11,12 @@ import javax.validation.constraints.Size;
  * 添加会员DTO
  *
  * @author Bulbasaur
- * @date 2020/12/14 16:31
+ * @since 2020/12/14 16:31
  */
 @Data
 public class MemberAddDTO {
-
     @NotEmpty(message = "会员用户名必填")
-    @Size(min = 6, max = 30)
+    @Size(max = 30,message = "会员用户名最长30位")
     @ApiModelProperty(value = "会员用户名")
     private String username;
 

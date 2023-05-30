@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+    <!--应用名称-->
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name"/>
+    <!--日志文件保存路径-->
+    <springProperty scope="context" name="LOG_FILE_PATH" source="logging.file.path"/>
+    <springProperty scope="context" name="LOGSTASH_SERVER" source="lili.data.logstash.server"/>
+    <contextName>${APP_NAME}</contextName>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE_PATH}/${APP_NAME}-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="RocketmqClientAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE_PATH}/rocketmq.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE_PATH}/rocketmq/rocketmq-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>30MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yy-MM-dd.HH:mm:ss.SSS} [%-16t] %-5p %-22c{0} %X{ServiceId} - %m%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="RocketmqClient" additivity="false">
+        <level value="info" />
+        <appender-ref ref="RocketmqClientAppender"/>
+    </logger>
+
+
+    <!--输出到elk的LOGSTASH-->
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <!-- 配置elk日志收集 配饰的是 LOGSTASH 的地址-->
+        <destination>${LOGSTASH_SERVER}</destination>
+        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">
+            <providers>
+                <timestamp>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+            </providers>
+            <!--自定义字段 区分项目-->
+            <customFields>{"appName":"${APP_NAME}"}</customFields>
+        </encoder>
+    </appender>
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="LOGSTASH"/>
+    </root>
+</configuration>

@@ -1,10 +1,8 @@
 package cn.lili.modules.member.service;
 
-import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
 import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
-import cn.lili.modules.member.entity.dto.StoreEvaluationQueryParams;
 import cn.lili.modules.member.entity.vo.EvaluationNumberVO;
 import cn.lili.modules.member.entity.vo.MemberEvaluationListVO;
 import cn.lili.modules.member.entity.vo.MemberEvaluationVO;
@@ -15,7 +13,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 会员商品评价业务层
  *
  * @author Bulbasaur
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 public interface MemberEvaluationService extends IService<MemberEvaluation> {
 
@@ -25,23 +23,15 @@ public interface MemberEvaluationService extends IService<MemberEvaluation> {
      * @param evaluationQueryParams 评价查询
      * @return 评价分页
      */
-    IPage<MemberEvaluation> queryByParams(EvaluationQueryParams evaluationQueryParams);
-
-    /**
-     * 商家查询会员的评价分页列表
-     *
-     * @param storeEvaluationQueryParams 评价查询
-     * @return 会员的评价分页
-     */
-    IPage<MemberEvaluationListVO> queryByParams(StoreEvaluationQueryParams storeEvaluationQueryParams);
+    IPage<MemberEvaluation> managerQuery(EvaluationQueryParams evaluationQueryParams);
 
     /**
      * 查询评价分页列表
+     *
      * @param evaluationQueryParams 评价查询条件
-     * @param page 分页查询参数
      * @return 评价分页列表
      */
-    IPage<MemberEvaluationListVO> queryPage(EvaluationQueryParams evaluationQueryParams, PageVO page);
+    IPage<MemberEvaluationListVO> queryPage(EvaluationQueryParams evaluationQueryParams);
 
     /**
      * 添加会员评价
@@ -51,9 +41,11 @@ public interface MemberEvaluationService extends IService<MemberEvaluation> {
      * 4.发送用户评价消息修改商品的评价数量以及好评率
      *
      * @param memberEvaluationDTO 评论
+     * @param isSelf              是否自己操作（true：买家操作/false 系统操作）
      * @return 操作状态
      */
-    MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO);
+    MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO, Boolean isSelf);
+
     /**
      * 根据ID查询会员评价
      *
@@ -65,7 +57,7 @@ public interface MemberEvaluationService extends IService<MemberEvaluation> {
     /**
      * 更改评论状态
      *
-     * @param id 评价ID
+     * @param id     评价ID
      * @param status 状态
      * @return 会员评价
      */
@@ -85,12 +77,13 @@ public interface MemberEvaluationService extends IService<MemberEvaluation> {
      * @param id         评价ID
      * @param reply      回复内容
      * @param replyImage 回复图片
-     *
+     * @return 操作状态
      */
     boolean reply(String id, String reply, String replyImage);
 
     /**
      * 获取商品评价数量
+     *
      * @param goodsId 商品ID
      * @return 评价数量数据
      */
@@ -98,14 +91,24 @@ public interface MemberEvaluationService extends IService<MemberEvaluation> {
 
     /**
      * 获取今天新增的评价数量
+     *
      * @return 今日评价数量
      */
-    Integer todayMemberEvaluation();
+    long todayMemberEvaluation();
 
     /**
      * 获取等待回复评价数量
+     *
      * @return 等待回复评价数量
      */
-    Integer getWaitReplyNum();
+    long getWaitReplyNum();
+
+    /**
+     * 统计商品评价数量
+     *
+     * @param evaluationQueryParams 查询条件
+     * @return 商品评价数量
+     */
+    long getEvaluationCount(EvaluationQueryParams evaluationQueryParams);
 
 }

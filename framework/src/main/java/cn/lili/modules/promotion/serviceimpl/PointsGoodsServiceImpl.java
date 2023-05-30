@@ -1,182 +1,146 @@
 package cn.lili.modules.promotion.serviceimpl;
 
-import cn.hutool.core.util.StrUtil;
-import cn.lili.common.delayqueue.DelayQueueTools;
-import cn.lili.common.delayqueue.DelayQueueType;
-import cn.lili.common.delayqueue.PromotionMessage;
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.trigger.interfaces.TimeTrigger;
-import cn.lili.common.trigger.model.TimeExecuteConstant;
-import cn.lili.common.trigger.model.TimeTriggerMsg;
-import cn.lili.common.utils.DateUtil;
-import cn.lili.common.vo.PageVO;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.entity.dos.PointsGoods;
-import cn.lili.modules.promotion.entity.enums.PromotionStatusEnum;
-import cn.lili.modules.promotion.entity.enums.PromotionTypeEnum;
-import cn.lili.modules.promotion.entity.vos.PointsGoodsSearchParams;
+import cn.lili.modules.promotion.entity.dos.PromotionGoods;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.entity.vos.PointsGoodsVO;
 import cn.lili.modules.promotion.mapper.PointsGoodsMapper;
 import cn.lili.modules.promotion.service.PointsGoodsService;
+import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.tools.PromotionTools;
-import cn.lili.modules.search.service.EsGoodsIndexService;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
+import cn.lili.modules.search.utils.EsIndexUtil;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * 积分商品业务层实现
  *
  * @author paulG
- * @date 2020/8/21
+ * @since 2020/8/21
  **/
 @Service
-@Transactional(rollbackFor = Exception.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, PointsGoods> implements PointsGoodsService {
+@Slf4j
+public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<PointsGoodsMapper, PointsGoods> implements PointsGoodsService {
 
-    //延时任务
-    private final TimeTrigger timeTrigger;
-    //Mongo
-    private final MongoTemplate mongoTemplate;
-    //Rocketmq
-    private final RocketmqCustomProperties rocketmqCustomProperties;
-    //规格商品
-    private final GoodsSkuService goodsSkuService;
-    //Es商品
+    /**
+     * 促销商品
+     */
     @Autowired
-    private EsGoodsIndexService goodsIndexService;
+    private PromotionGoodsService promotionGoodsService;
+    /**
+     * 规格商品
+     */
+    @Autowired
+    private GoodsSkuService goodsSkuService;
 
     /**
-     * 批量添加积分商品
-     *
-     * @param pointsGoodsList 积分商品列表
-     * @return 是否添加成功
+     * rocketMq配置
      */
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
+
+    /**
+     * rocketMq
+     */
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
+
+
     @Override
-    public boolean addPointsGoods(List<PointsGoodsVO> pointsGoodsList) {
-        List<PointsGoods> pointsGoodsList1 = new ArrayList<>();
-        for (PointsGoodsVO pointsGoods : pointsGoodsList) {
-            GoodsSku goodsSku = this.checkSkuExist(pointsGoods.getSkuId());
-            this.checkParam(pointsGoods, goodsSku);
-            pointsGoods.setGoodsSku(goodsSku);
-            PromotionTools.checkPromotionTime(pointsGoods.getStartTime().getTime(), pointsGoods.getEndTime().getTime());
+    @Transactional(rollbackFor = Exception.class)
+    public boolean savePointsGoodsBatch(List<PointsGoods> promotionsList) {
+        List<PromotionGoods> promotionGoodsList = new ArrayList<>();
+        for (PointsGoods pointsGoods : promotionsList) {
+            this.initPromotion(pointsGoods);
+            this.checkPromotions(pointsGoods);
             if (this.checkSkuDuplicate(pointsGoods.getSkuId(), null) == null) {
-                pointsGoods.setPromotionStatus(PromotionStatusEnum.NEW.name());
                 pointsGoods.setPromotionName("积分商品活动");
-                pointsGoodsList1.add(pointsGoods);
             } else {
-                throw new ServiceException("商品id为" + pointsGoods.getSkuId() + "的商品已参加积分商品活动！");
+                throw new ServiceException(ResultCode.PROMOTION_LOG_EXIST, "商品id为" + pointsGoods.getSkuId() +
+                        "的商品已参加积分商品活动！");
             }
+            GoodsSku goodsSku = this.checkSkuExist(pointsGoods.getSkuId());
+            pointsGoods.setStoreId(goodsSku.getStoreId());
+            pointsGoods.setStoreName(goodsSku.getStoreName());
+
         }
-        this.saveBatch(pointsGoodsList1);
-        for (PointsGoodsVO pointsGoods : pointsGoodsList) {
-            this.mongoTemplate.save(pointsGoods);
-            this.addPointsGoodsPromotionTask(pointsGoods);
+        boolean saveBatch = this.saveBatch(promotionsList);
+        if (saveBatch) {
+            for (PointsGoods pointsGoods : promotionsList) {
+                GoodsSku goodsSku = this.checkSkuExist(pointsGoods.getSkuId());
+                PromotionGoods promotionGoods = new PromotionGoods(pointsGoods, goodsSku);
+                promotionGoods.setPromotionType(PromotionTypeEnum.POINTS_GOODS.name());
+                promotionGoods.setScopeId(pointsGoods.getSkuId());
+                promotionGoodsList.add(promotionGoods);
+            }
+            boolean saveOrUpdateBatch = this.promotionGoodsService.saveOrUpdateBatch(promotionGoodsList);
+            if (saveOrUpdateBatch) {
+                for (PointsGoods pointsGoods : promotionsList) {
+                    this.updateEsGoodsIndex(pointsGoods);
+                }
+            }
+
         }
-        return true;
+        return saveBatch;
     }
 
     /**
-     * 更新一个积分商品
+     * 积分商品更新
      *
-     * @param pointsGoods 编辑的积分商品信息
+     * @param promotions 促销信息
      * @return 是否更新成功
      */
     @Override
-    public boolean updatePointsGoods(PointsGoodsVO pointsGoods) {
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updatePromotions(PointsGoods promotions) {
         boolean result = false;
-        PointsGoodsVO pointsGoodsVO = this.checkExist(pointsGoods.getId());
-        GoodsSku goodsSku = this.checkSkuExist(pointsGoods.getSkuId());
-        this.checkParam(pointsGoods, goodsSku);
-        pointsGoods.setGoodsSku(goodsSku);
-        if (this.checkSkuDuplicate(pointsGoods.getSkuId(), pointsGoods.getId()) == null) {
-            if (PromotionStatusEnum.START.name().equals(pointsGoods.getPromotionStatus()) || PromotionStatusEnum.END.name().equals(pointsGoods.getPromotionStatus())) {
-                throw new ServiceException("当前活动已开始/结束，无法编辑！");
+        this.checkStatus(promotions);
+        this.checkPromotions(promotions);
+        if (this.checkSkuDuplicate(promotions.getSkuId(), promotions.getId()) == null) {
+            result = this.updateById(promotions);
+            if (this.updatePromotionsGoods(promotions)) {
+                this.updateEsGoodsIndex(promotions);
             }
-            PromotionTools.checkPromotionTime(pointsGoods.getStartTime().getTime(), pointsGoods.getEndTime().getTime());
-            result = this.updateById(pointsGoods);
-            this.mongoTemplate.save(pointsGoods);
-            if (pointsGoods.getStartTime().getTime() != pointsGoodsVO.getStartTime().getTime()) {
-                PromotionMessage promotionMessage = new PromotionMessage(pointsGoods.getId(), PromotionTypeEnum.POINTS_GOODS.name(), PromotionStatusEnum.START.name(), pointsGoods.getStartTime(), pointsGoods.getEndTime());
-                // 更新延时任务
-                this.timeTrigger.edit(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                        promotionMessage,
-                        pointsGoodsVO.getStartTime().getTime(),
-                        pointsGoods.getStartTime().getTime(),
-                        DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                        DateUtil.getDelayTime(pointsGoods.getStartTime().getTime()),
-                        rocketmqCustomProperties.getPromotionTopic());
-            }
-
         }
         return result;
     }
 
     /**
-     * 批量更新积分商品状态
+     * 移除促销活动
      *
-     * @param ids             积分商品id集合
-     * @param promotionStatus 更新的状态
-     * @return 是否更新成功
+     * @param ids 促销活动id集合
+     * @return 是否移除成功
      */
     @Override
-    public boolean updatePointsGoodsPromotionStatus(List<String> ids, String promotionStatus) {
+    @Transactional(rollbackFor = Exception.class)
+    public boolean removePromotions(List<String> ids) {
         for (String id : ids) {
-            PointsGoodsVO pointsGoodsVO = this.checkExist(id);
-            pointsGoodsVO.setPromotionStatus(PromotionStatusEnum.valueOf(promotionStatus).name());
-            this.updateById(pointsGoodsVO);
-            this.mongoTemplate.save(pointsGoodsVO);
-            if (promotionStatus.equals(PromotionStatusEnum.START.name())) {
-                this.addPointsGoodsPromotionTask(pointsGoodsVO);
-            } else {
-                this.goodsIndexService.deleteEsGoodsPromotionIndexByList(Collections.singletonList(pointsGoodsVO.getSkuId()), PromotionTypeEnum.POINTS_GOODS);
-                this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                        pointsGoodsVO.getStartTime().getTime(),
-                        DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (PromotionTypeEnum.POINTS_GOODS.name() + pointsGoodsVO.getId())),
-                        rocketmqCustomProperties.getPromotionTopic());
+            PointsGoods pointsGoods = this.getById(id);
+            if (pointsGoods == null) {
+                log.error(ResultCode.POINT_GOODS_NOT_EXIST.message());
+                ids.remove(id);
             }
         }
-        return true;
-    }
-
-    /**
-     * 批量删除积分商品
-     *
-     * @param ids 积分商品id集合
-     * @return 是否删除成功
-     */
-    @Override
-    public boolean deletePointsGoods(List<String> ids) {
-        List<String> skuIds = new ArrayList<>();
-        for (String id : ids) {
-            PointsGoodsVO pointsGoodsVO = this.checkExist(id);
-            this.timeTrigger.delete(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                    pointsGoodsVO.getStartTime().getTime(),
-                    DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (PromotionTypeEnum.POINTS_GOODS.name() + pointsGoodsVO.getId())),
-                    rocketmqCustomProperties.getPromotionTopic());
-            skuIds.add(pointsGoodsVO.getSkuId());
-        }
-        boolean result = this.removeByIds(ids);
-        this.goodsIndexService.deleteEsGoodsPromotionIndexByList(skuIds, PromotionTypeEnum.POINTS_GOODS);
-        Query query = new Query();
-        query.addCriteria(new Criteria("id").in(ids));
-        this.mongoTemplate.remove(query, PointsGoodsVO.class);
-        return result;
+        this.promotionGoodsService.deletePromotionGoods(ids);
+        return this.removeByIds(ids);
     }
 
     /**
@@ -187,77 +151,106 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
      */
     @Override
     public PointsGoodsVO getPointsGoodsDetail(String id) {
-        return this.checkExist(id);
+        PointsGoods pointsGoods = this.checkExist(id);
+        PointsGoodsVO pointsGoodsVO = new PointsGoodsVO();
+        BeanUtils.copyProperties(pointsGoods, pointsGoodsVO);
+        pointsGoodsVO.setGoodsSku(this.checkSkuExist(pointsGoods.getSkuId()));
+        return pointsGoodsVO;
     }
 
     /**
-     * 根据SkuID获取积分详情
+     * 根据ID获取积分详情
      *
-     * @param skuId@return 积分详情
+     * @param skuId 商品SkuId
+     * @return 积分详情
      */
     @Override
-    public PointsGoods getPointsGoodsDetailBySkuId(String skuId) {
-        LambdaQueryWrapper<PointsGoods> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(PointsGoods::getSkuId, skuId).eq(PointsGoods::getPromotionStatus, PromotionStatusEnum.START.name());
-        List<PointsGoods> list = this.list(queryWrapper);
-        if (list.size() == 1) {
-            return list.get(0);
+    public PointsGoodsVO getPointsGoodsDetailBySkuId(String skuId) {
+        QueryWrapper<PointsGoods> queryWrapper = new QueryWrapper<PointsGoods>().eq("sku_id", skuId);
+        queryWrapper.and(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START));
+        PointsGoods pointsGoods = this.getOne(queryWrapper, false);
+        if (pointsGoods == null) {
+            log.error("skuId为" + skuId + "的积分商品不存在！");
+            throw new ServiceException();
         }
-        return null;
+        PointsGoodsVO pointsGoodsVO = new PointsGoodsVO();
+        BeanUtils.copyProperties(pointsGoods, pointsGoodsVO);
+        pointsGoodsVO.setGoodsSku(this.checkSkuExist(pointsGoods.getSkuId()));
+        return pointsGoodsVO;
     }
 
     /**
-     * 根据条件查询积分商品
+     * 检查促销参数
      *
-     * @param searchParams 积分商品查询参数
-     * @param page         分页参数
-     * @return 积分商品查询结果
+     * @param promotions 促销实体
      */
     @Override
-    public IPage<PointsGoodsVO> getPointsGoodsByPage(PointsGoodsSearchParams searchParams, PageVO page) {
-        IPage<PointsGoodsVO> pointsGoodsPage = new Page<>();
-        Query query = searchParams.mongoQuery();
-        if (page != null) {
-            PromotionTools.mongoQueryPageParam(query, page);
-            pointsGoodsPage.setSize(page.getPageSize());
-            pointsGoodsPage.setCurrent(page.getPageNumber());
+    public void checkPromotions(PointsGoods promotions) {
+        super.checkPromotions(promotions);
+        GoodsSku goodsSku = this.checkSkuExist(promotions.getSkuId());
+        if (promotions.getActiveStock() > goodsSku.getQuantity()) {
+            throw new ServiceException(ResultCode.POINT_GOODS_ACTIVE_STOCK_ERROR);
         }
-        List<PointsGoodsVO> pointsGoodsVOS = this.mongoTemplate.find(query, PointsGoodsVO.class);
-        pointsGoodsPage.setRecords(pointsGoodsVOS);
-        pointsGoodsPage.setTotal(this.mongoTemplate.count(searchParams.mongoQuery(), PointsGoodsVO.class));
-        return pointsGoodsPage;
     }
 
-
     /**
-     * 添加积分商品mq任务
+     * 检查促销状态
      *
-     * @param pointsGoods 积分商品信息
+     * @param promotions 促销实体
      */
-    private void addPointsGoodsPromotionTask(PointsGoodsVO pointsGoods) {
-        PromotionMessage promotionMessage = new PromotionMessage(pointsGoods.getId(), PromotionTypeEnum.POINTS_GOODS.name(), PromotionStatusEnum.START.name(), pointsGoods.getStartTime(), pointsGoods.getEndTime());
-        TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
-                promotionMessage.getStartTime().getTime(),
-                promotionMessage,
-                DelayQueueTools.wrapperUniqueKey(DelayQueueType.PROMOTION, (promotionMessage.getPromotionType() + promotionMessage.getPromotionId())),
-                rocketmqCustomProperties.getPromotionTopic());
-        // 发送促销活动开始的延时任务
-        this.timeTrigger.addDelay(timeTriggerMsg, DateUtil.getDelayTime(promotionMessage.getStartTime().getTime()));
+    @Override
+    public void checkStatus(PointsGoods promotions) {
+        super.checkStatus(promotions);
     }
 
     /**
-     * 检查mongo中积分商品存在
+     * 更新促销商品信息
+     *
+     * @param promotions 促销实体
+     * @return 是否更新成功
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updatePromotionsGoods(PointsGoods promotions) {
+        this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(promotions.getId()));
+        return this.promotionGoodsService.save(new PromotionGoods(promotions, this.checkSkuExist(promotions.getSkuId())));
+    }
+
+    /**
+     * 更新促销信息到商品索引
+     *
+     * @param promotions 促销实体
+     */
+    @Override
+    public void updateEsGoodsIndex(PointsGoods promotions) {
+        super.updateEsGoodsIndex(promotions);
+        Map<String, Object> query = MapUtil.builder(new HashMap<String, Object>()).put("id", promotions.getSkuId()).build();
+        Map<String, Object> update = MapUtil.builder(new HashMap<String, Object>()).put("points", promotions.getPoints()).build();
+        //修改规格索引,发送mq消息
+        Map<String, Object> updateIndexFieldsMap = EsIndexUtil.getUpdateIndexFieldsMap(query, update);
+        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX_FIELD.name();
+        rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(updateIndexFieldsMap), RocketmqSendCallbackBuilder.commonCallback());
+    }
+
+
+    @Override
+    public PromotionTypeEnum getPromotionType() {
+        return PromotionTypeEnum.POINTS_GOODS;
+    }
+
+    /**
+     * 检查积分商品存在
      *
      * @param id 积分商品id
      * @return 积分商品信息
      */
-    private PointsGoodsVO checkExist(String id) {
-        PointsGoodsVO pointsGoodsVO = this.mongoTemplate.findById(id, PointsGoodsVO.class);
-        if (pointsGoodsVO == null) {
+    private PointsGoods checkExist(String id) {
+        PointsGoods pointsGoods = this.getById(id);
+        if (pointsGoods == null) {
             log.error("id为" + id + "的积分商品不存在！");
             throw new ServiceException();
         }
-        return pointsGoodsVO;
+        return pointsGoods;
     }
 
     /**
@@ -268,13 +261,15 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
      * @return 积分商品信息
      */
     private PointsGoods checkSkuDuplicate(String skuId, String id) {
-        LambdaQueryWrapper<PointsGoods> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(PointsGoods::getSkuId, skuId);
-        if (StrUtil.isNotEmpty(id)) {
-            queryWrapper.ne(PointsGoods::getId, id);
+        QueryWrapper<PointsGoods> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("sku_id", skuId);
+        if (CharSequenceUtil.isNotEmpty(id)) {
+            queryWrapper.ne("id", id);
         }
-        queryWrapper.ne(PointsGoods::getPromotionStatus, PromotionStatusEnum.END.name());
-        return this.getOne(queryWrapper);
+        queryWrapper.and(i -> i
+                .or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START))
+                .or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.NEW)));
+        return this.getOne(queryWrapper, false);
     }
 
     /**
@@ -284,7 +279,7 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
      * @return 商品sku
      */
     private GoodsSku checkSkuExist(String skuId) {
-        GoodsSku goodsSku = this.goodsSkuService.getGoodsSkuByIdFromCache(skuId);
+        GoodsSku goodsSku = this.goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(skuId);
         if (goodsSku == null) {
             log.error("商品ID为" + skuId + "的商品不存在！");
             throw new ServiceException();
@@ -292,15 +287,4 @@ public class PointsGoodsServiceImpl extends ServiceImpl<PointsGoodsMapper, Point
         return goodsSku;
     }
 
-    /**
-     * 检查参与积分商品参数
-     *
-     * @param pointsGoods 积分商品信息
-     * @param goodsSku    商品sku信息
-     */
-    private void checkParam(PointsGoods pointsGoods, GoodsSku goodsSku) {
-        if (pointsGoods.getActiveStock() > goodsSku.getQuantity()) {
-            throw new ServiceException("活动库存数量不能高于商品库存");
-        }
-    }
 }

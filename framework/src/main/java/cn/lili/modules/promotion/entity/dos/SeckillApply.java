@@ -1,28 +1,25 @@
 package cn.lili.modules.promotion.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.modules.promotion.entity.enums.PromotionsApplyStatusEnum;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 /**
- * 限时抢购申请实体类
+ * 秒杀活动申请实体类
  *
  * @author Chopper
- * @date 2020-03-19 10:44 上午
+ * @since 2020-03-19 10:44 上午
  */
 @Data
-@Entity
-@Table(name = "li_seckill_apply")
 @TableName("li_seckill_apply")
-@ApiModel(value = "限时抢购申请")
+@ApiModel(value = "秒杀活动申请")
 public class SeckillApply extends BaseEntity {
 
     private static final long serialVersionUID = 5440164641970820989L;
@@ -62,7 +59,7 @@ public class SeckillApply extends BaseEntity {
     private Integer quantity;
 
     /**
-     * @see cn.lili.modules.promotion.entity.enums.PromotionApplyStatusEnum
+     * @see PromotionsApplyStatusEnum
      */
     @ApiModelProperty(value = "APPLY(\"申请\"), PASS(\"通过\"), REFUSE(\"拒绝\")")
     private String promotionApplyStatus;

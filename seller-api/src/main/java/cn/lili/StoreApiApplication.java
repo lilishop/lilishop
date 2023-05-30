@@ -6,7 +6,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -14,10 +13,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * 商家后台 API
  *
  * @author Chopper
- * @date 2020/11/16 10:03 下午
+ * @since 2020/11/16 10:03 下午
  */
 @SpringBootApplication
-@EnableJpaAuditing
 @EnableCaching
 @EnableAsync
 public class StoreApiApplication {
@@ -30,7 +28,7 @@ public class StoreApiApplication {
     }
 
     public static void main(String[] args) {
-
+        System.setProperty("rocketmq.client.logUseSlf4j","true");
         System.setProperty("es.set.netty.runtime.available.processors", "false");
         SpringApplication.run(StoreApiApplication.class, args);
     }

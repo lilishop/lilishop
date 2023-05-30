@@ -1,95 +1,72 @@
 package cn.lili.modules.promotion.service;
 
-import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.Seckill;
-import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
+import cn.lili.modules.promotion.entity.dos.SeckillApply;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * 秒杀业务层
  *
  * @author Chopper
- * @date 2020/11/18 9:45 上午
+ * @since 2020/11/18 9:45 上午
  */
-public interface SeckillService extends IService<Seckill> {
-
-
-    /**
-     * 从mysql中根据条件获取限时抢购分页列表
-     *
-     * @param queryParam 查询参数
-     * @param pageVo     分页参数
-     * @return 限时抢购分页列表
-     */
-    IPage<Seckill> getSeckillByPageFromMysql(SeckillSearchParams queryParam, PageVO pageVo);
+public interface SeckillService extends AbstractPromotionsService<Seckill> {
 
     /**
-     * 从mongo中根据条件获取限时抢购分页列表
-     *
-     * @param queryParam 查询参数
-     * @param pageVo     分页参数
-     * @return 限时抢购分页列表
+     * 预创建活动数量
      */
-    IPage<SeckillVO> getSeckillByPageFromMongo(SeckillSearchParams queryParam, PageVO pageVo);
+    Integer PRE_CREATION = 7;
 
     /**
-     * 从mongo中获取限时抢购信息
+     * 获取秒杀活动信息
      *
-     * @param id 限时抢购id
-     * @return 限时抢购信息
+     * @param id 秒杀活动id
+     * @return 秒杀活动信息
      */
-    SeckillVO getSeckillByIdFromMongo(String id);
+    SeckillVO getSeckillDetail(String id);
 
     /**
-     * 保存限时抢购
-     *
-     * @param seckill 限时抢购信息
-     * @return 是否保存成功
+     * 初始化秒杀活动，默认开启三十天的秒杀活动
      */
-    boolean saveSeckill(SeckillVO seckill);
-
-    /**
-     * 商家报名限时抢购活动
-     *
-     * @param storeId   商家编号
-     * @param seckillId 限时抢购编号
-     */
-    void storeApply(String storeId, String seckillId);
-
-    /**
-     * 修改限时抢购
-     *
-     * @param seckillVO 限时抢购信息
-     * @return 是否修改成功
-     */
-    boolean modifySeckill(SeckillVO seckillVO);
-
-    /**
-     * 删除限时抢购
-     *
-     * @param id 限时抢购编号
-     */
-    void deleteSeckill(String id);
-
-    /**
-     * 开启一个限时抢购
-     *
-     * @param id 限时抢购编号
-     */
-    void openSeckill(String id);
-
-    /**
-     * 关闭一个限时抢购
-     *
-     * @param id 限时抢购编号
-     */
-    void closeSeckill(String id);
+    void init();
 
     /**
      * 获取当前可参与的活动数量
+     *
      * @return 可参与活动数量
      */
-    Integer getApplyNum();
+    long getApplyNum();
+
+    /**
+     * 更新秒杀活动的商品数量
+     *
+     * @param seckillId 秒杀活动ID
+     */
+    void updateSeckillGoodsNum(String seckillId);
+
+    /**
+     * 更新商品索引限时抢购信息
+     *
+     * @param seckill        限时抢购信息
+     * @param seckillApplies 限时抢购商品列表
+     */
+    void updateEsGoodsSeckill(Seckill seckill, List<SeckillApply> seckillApplies);
+
+    /**
+     * 删除商品索引限时抢购信息
+     *
+     * @param seckill 限时抢购信息
+     * @param skuIds  商品skuId列表
+     */
+    void deleteEsGoodsSeckill(Seckill seckill, List<String> skuIds);
+
+    /**
+     * 设置秒杀活动的每个参与活动商品的详细时间
+     *
+     * @param seckill      秒杀活动信息
+     * @param seckillApply 申请参与秒杀活动的商品信息
+     */
+    void setSeckillApplyTime(Seckill seckill, SeckillApply seckillApply);
 }

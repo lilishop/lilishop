@@ -1,10 +1,11 @@
 package cn.lili.modules.connect.service;
 
-import cn.lili.common.cache.CachePrefix;
-import cn.lili.common.token.Token;
+import cn.lili.cache.CachePrefix;
+import cn.lili.common.security.token.Token;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.entity.dto.WechatMPLoginParams;
+import cn.lili.modules.member.entity.dto.ConnectQueryDTO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.naming.NoPermissionException;
@@ -28,22 +29,13 @@ public interface ConnectService extends IService<Connect> {
     String CONNECT_TYPE = "CONNECT_TYPE";
 
     /**
-     * 联合登陆
-     *
-     * @param type
-     * @param unionid
-     * @return
-     */
-    Token unionLoginCallback(String type, String unionid, String uuid,boolean longTerm) throws NoPermissionException;
-
-    /**
      * 联合登陆对象直接登录
      *
-     * @param type     第三方登录类型
      * @param authUser 第三方登录返回封装类
      * @param uuid     用户uuid
+     * @return token
      */
-    Token unionLoginCallback(String type, ConnectAuthUser authUser, String uuid);
+    Token unionLoginCallback(ConnectAuthUser authUser, String uuid);
 
     /**
      * 绑定
@@ -81,21 +73,36 @@ public interface ConnectService extends IService<Connect> {
         return CachePrefix.CONNECT_AUTH.getPrefix() + type + uuid;
     }
 
-    /**
-     * app联合登录 回调
-     *
-     * @param authUser 登录对象
-     * @param uuid     uuid
-     * @return
-     */
-    Token appLoginCallback(ConnectAuthUser authUser, String uuid);
-
 
     /**
      * 微信一键登录
      * 小程序自动登录 没有账户自动注册
      *
-     * @return
+     * @param params 微信小程序登录参数
+     * @return token
      */
     Token miniProgramAutoLogin(WechatMPLoginParams params);
+
+    /**
+     * 根据查询dto获取查询对象
+     *
+     * @param connectQueryDTO
+     * @return
+     */
+    Connect queryConnect(ConnectQueryDTO connectQueryDTO);
+
+    /**
+     * 根据会员id删除记录
+     *
+     * @param userId 会员id
+     */
+    void deleteByMemberId(String userId);
+
+    /**
+     * 绑定第三方平台用户
+     * @param userId 用户ID
+     * @param unionId 第三方平台用户ID
+     * @param type 平台类型
+     */
+    void loginBindUser(String userId, String unionId, String type);
 }

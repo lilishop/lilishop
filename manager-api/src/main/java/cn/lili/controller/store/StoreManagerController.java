@@ -1,14 +1,14 @@
 package cn.lili.controller.store;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.aop.annotation.DemoSite;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.goods.entity.vos.CategoryVO;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dto.AdminStoreApplyDTO;
 import cn.lili.modules.store.entity.dto.StoreEditDTO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
+import cn.lili.modules.store.entity.vos.StoreManagementCategoryVO;
 import cn.lili.modules.store.entity.vos.StoreSearchParams;
 import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.service.StoreDetailService;
@@ -19,7 +19,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,26 +29,27 @@ import java.util.List;
  * 管理端,店铺管理接口
  *
  * @author Bulbasaur
- * @date: 2020/12/6 16:09
+ * @since 2020/12/6 16:09
  */
 @Api(tags = "管理端,店铺管理接口")
 @RestController
-@RequestMapping("/manager/store")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping("/manager/store/store")
 public class StoreManagerController {
 
     /**
      * 店铺
      */
-    private final StoreService storeService;
+    @Autowired
+    private StoreService storeService;
     /**
      * 店铺详情
      */
-    private final StoreDetailService storeDetailService;
+    @Autowired
+    private StoreDetailService storeDetailService;
 
     @ApiOperation(value = "获取店铺分页列表")
     @GetMapping("/all")
-    public ResultMessage<List<Store>> getALL() {
+    public ResultMessage<List<Store>> getAll() {
         return ResultUtil.data(storeService.list(new QueryWrapper<Store>().eq("store_disable", "OPEN")));
     }
 
@@ -63,6 +63,7 @@ public class StoreManagerController {
     @ApiImplicitParam(name = "storeId", value = "店铺ID", required = true, paramType = "path", dataType = "String")
     @GetMapping(value = "/get/detail/{storeId}")
     public ResultMessage<StoreDetailVO> detail(@PathVariable String storeId) {
+        // todo 对于刚提交审核的信息需要等待缓存失效后才能操作,否则缓存信息还在
         return ResultUtil.data(storeDetailService.getStoreDetailVO(storeId));
     }
 
@@ -88,33 +89,31 @@ public class StoreManagerController {
     @PutMapping(value = "/audit/{id}/{passed}")
     public ResultMessage<Object> audit(@PathVariable String id, @PathVariable Integer passed) {
         storeService.audit(id, passed);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
+
+    @DemoSite
     @ApiOperation(value = "关闭店铺")
     @ApiImplicitParam(name = "id", value = "店铺id", required = true, dataType = "String", paramType = "path")
     @PutMapping(value = "/disable/{id}")
     public ResultMessage<Store> disable(@PathVariable String id) {
-        if (storeService.disable(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        return ResultUtil.error(ResultCode.ERROR);
+        storeService.disable(id);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "开启店铺")
     @ApiImplicitParam(name = "id", value = "店铺id", required = true, dataType = "String", paramType = "path")
     @PutMapping(value = "/enable/{id}")
     public ResultMessage<Store> enable(@PathVariable String id) {
-        if (storeService.enable(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        return ResultUtil.error(ResultCode.ERROR);
+        storeService.enable(id);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "查询一级分类列表")
     @ApiImplicitParam(name = "storeId", value = "店铺id", required = true, dataType = "String", paramType = "path")
-    @GetMapping(value = "/ManagementCategory/{storeId}")
-    public ResultMessage<List<CategoryVO>> firstCategory(String storeId) {
+    @GetMapping(value = "/managementCategory/{storeId}")
+    public ResultMessage<List<StoreManagementCategoryVO>> firstCategory(@PathVariable String storeId) {
         return ResultUtil.data(this.storeDetailService.goodsManagementCategory(storeId));
     }
 
@@ -127,5 +126,12 @@ public class StoreManagerController {
             return ResultUtil.data(list.get(0));
         }
         return ResultUtil.data(null);
+    }
+
+    @ApiOperation(value = "将所有店铺导入店员表")
+    @PostMapping("store/to/clerk")
+    public ResultMessage<Object> storeToClerk(){
+        this.storeService.storeToClerk();
+        return ResultUtil.success();
     }
 }

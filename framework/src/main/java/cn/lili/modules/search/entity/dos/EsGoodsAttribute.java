@@ -9,8 +9,9 @@ import java.io.Serializable;
 
 /**
  * 商品属性索引
+ *
  * @author paulG
- * @date 2020/10/14
+ * @since 2020/10/14
  **/
 @Data
 @NoArgsConstructor
@@ -32,7 +33,7 @@ public class EsGoodsAttribute implements Serializable {
     /**
      * 属性名称
      */
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Text, fielddata = true)
     private String name;
 
     /**
@@ -44,14 +45,22 @@ public class EsGoodsAttribute implements Serializable {
     /**
      * 属性值
      */
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Text, fielddata = true)
     private String value;
 
-    public EsGoodsAttribute(Integer type,String nameId,String name,String valueId,String value){
-        this.type=type;
-        this.nameId=nameId;
-        this.name=name;
-        this.valueId=valueId;
-        this.value=value;
+
+    /**
+     * 排序
+     */
+    @Field(type = FieldType.Integer)
+    private Integer sort;
+
+    public EsGoodsAttribute(Integer type, String nameId, String name, String valueId, String value, Integer sort) {
+        this.type = type;
+        this.nameId = nameId;
+        this.name = name;
+        this.valueId = valueId;
+        this.value = value;
+        this.sort = sort;
     }
 }

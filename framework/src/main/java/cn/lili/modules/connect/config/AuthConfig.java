@@ -1,6 +1,7 @@
 package cn.lili.modules.connect.config;
 
 import cn.lili.modules.connect.entity.dto.AuthCallback;
+import cn.lili.modules.connect.request.BaseAuthRequest;
 import com.xkcoding.http.config.HttpConfig;
 import lombok.*;
 
@@ -85,7 +86,7 @@ public class AuthConfig {
 
     /**
      * 忽略校验 {@code state} 参数，默认不开启。当 {@code ignoreCheckState} 为 {@code true} 时，
-     * {@link cn.lili.modules.connect.request.AuthDefaultRequest#login(AuthCallback)}} 将不会校验 {@code state} 的合法性。
+     * {@link BaseAuthRequest#login(AuthCallback)}} 将不会校验 {@code state} 的合法性。
      * <p>
      * 使用场景：当且仅当使用自实现 {@code state} 校验逻辑时开启
      * <p>

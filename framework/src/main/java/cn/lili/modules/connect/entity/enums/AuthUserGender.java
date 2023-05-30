@@ -1,8 +1,8 @@
 package cn.lili.modules.connect.entity.enums;
 
+import cn.lili.common.utils.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 
@@ -51,7 +51,8 @@ public enum AuthUserGender {
      * @since 1.13.2
      */
     public static AuthUserGender getWechatRealGender(String originalGender) {
-        if (StringUtils.isEmpty(originalGender) || "0".equals(originalGender)) {
+        String noGender="0";
+        if (StringUtils.isEmpty(originalGender) || noGender.equals(originalGender)) {
             return AuthUserGender.UNKNOWN;
         }
         return getRealGender(originalGender);

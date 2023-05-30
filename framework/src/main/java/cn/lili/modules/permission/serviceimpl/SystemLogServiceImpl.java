@@ -1,99 +1,119 @@
 package cn.lili.modules.permission.serviceimpl;
 
-import cn.lili.common.utils.DateUtil;
-import cn.lili.common.utils.StringUtils;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
-import cn.lili.modules.base.entity.systemlog.SystemLogVO;
+import cn.lili.modules.permission.entity.vo.SystemLogVO;
+import cn.lili.modules.permission.repository.SystemLogRepository;
 import cn.lili.modules.permission.service.SystemLogService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import lombok.RequiredArgsConstructor;
+import org.elasticsearch.common.unit.Fuzziness;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * 系统日志
  *
  * @author Chopper
- * @date 2020/11/17 3:45 下午
+ * @since 2020/11/17 3:45 下午
  */
 @Service
-@Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SystemLogServiceImpl implements SystemLogService {
 
+    @Autowired
+    private SystemLogRepository systemLogRepository;
 
-    private final MongoTemplate mongoTemplate;
+    /**
+     * ES
+     */
+    @Autowired
+    private ElasticsearchOperations restTemplate;
 
     @Override
     public void saveLog(SystemLogVO systemLogVO) {
-        mongoTemplate.save(systemLogVO);
+        systemLogRepository.save(systemLogVO);
     }
 
     @Override
     public void deleteLog(List<String> id) {
-        mongoTemplate.remove(new Query().addCriteria(Criteria.where("id").is(id)), SystemLogVO.class);
+        for (String s : id) {
+            systemLogRepository.deleteById(s);
+        }
     }
 
     @Override
     public void flushAll() {
-        mongoTemplate.dropCollection(SystemLogVO.class);
+        systemLogRepository.deleteAll();
     }
 
     @Override
     public IPage<SystemLogVO> queryLog(String storeId, String operatorName, String key, SearchVO searchVo, PageVO pageVO) {
-        Query query = new Query();
-
-        if (StringUtils.isNotEmpty(storeId)) {
-            query.addCriteria(Criteria.where("storeId").is(storeId));
+        pageVO.setNotConvert(true);
+        IPage<SystemLogVO> iPage = new Page<>();
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+        if (pageVO.getPageNumber() != null && pageVO.getPageSize() != null) {
+            int pageNumber = pageVO.getPageNumber() - 1;
+            if (pageNumber < 0) {
+                pageNumber = 0;
+            }
+            Pageable pageable = PageRequest.of(pageNumber, pageVO.getPageSize());
+            //分页
+            nativeSearchQueryBuilder.withPageable(pageable);
+            iPage.setCurrent(pageVO.getPageNumber());
+            iPage.setSize(pageVO.getPageSize());
         }
 
-        if (StringUtils.isNotEmpty(operatorName)) {
-            query.addCriteria(Criteria.where("username").regex(Pattern.compile("^.*" + operatorName + ".*$", Pattern.CASE_INSENSITIVE)));
+        if (CharSequenceUtil.isNotEmpty(storeId)) {
+            nativeSearchQueryBuilder.withFilter(QueryBuilders.matchQuery("storeId", storeId));
         }
 
-        if (StringUtils.isNotEmpty(key)) {
-            query.addCriteria(new Criteria().orOperator(
-                    Criteria.where("requestUrl").regex(Pattern.compile("^.*" + key + ".*$", Pattern.CASE_INSENSITIVE)),
-                    Criteria.where("requestParam").regex(Pattern.compile("^.*" + key + ".*$", Pattern.CASE_INSENSITIVE)),
-                    Criteria.where("responseBody").regex(Pattern.compile("^.*" + key + ".*$", Pattern.CASE_INSENSITIVE)),
-                    Criteria.where("name").regex(Pattern.compile("^.*" + key + ".*$", Pattern.CASE_INSENSITIVE))
-            ));
+        if (CharSequenceUtil.isNotEmpty(operatorName)) {
+            nativeSearchQueryBuilder.withQuery(QueryBuilders.matchQuery("username", operatorName));
+        }
+
+        if (CharSequenceUtil.isNotEmpty(key)) {
+            MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders.multiMatchQuery(key, "requestUrl", "requestParam", "responseBody", "name");
+            multiMatchQueryBuilder.fuzziness(Fuzziness.AUTO);
+            nativeSearchQueryBuilder.withFilter(multiMatchQueryBuilder);
         }
         //时间有效性判定
         if (searchVo.getConvertStartDate() != null && searchVo.getConvertEndDate() != null) {
-            System.out.println(DateUtil.toString(searchVo.getConvertStartDate(), DateUtil.STANDARD_FORMAT));
-            System.out.println(DateUtil.toString(searchVo.getConvertEndDate(), DateUtil.STANDARD_FORMAT));
-
+            BoolQueryBuilder filterBuilder = new BoolQueryBuilder();
             //大于方法
-            Criteria gt = Criteria.where("createTime").gt(searchVo.getConvertStartDate());
-            //小于方法
-            Criteria lt = Criteria.where("createTime").lte(searchVo.getConvertEndDate());
-            query.addCriteria(new Criteria().andOperator(gt, lt));
+            filterBuilder.filter(
+                    QueryBuilders.rangeQuery("createTime")
+                            .gte(searchVo.getConvertStartDate().getTime())
+                            .lte(searchVo.getConvertEndDate().getTime()));
 
+            nativeSearchQueryBuilder.withFilter(filterBuilder);
         }
 
-        IPage<SystemLogVO> iPage = new Page<>();
+        if (CharSequenceUtil.isNotEmpty(pageVO.getOrder()) && CharSequenceUtil.isNotEmpty(pageVO.getSort())) {
+            nativeSearchQueryBuilder.withSort(SortBuilders.fieldSort(pageVO.getSort()).order(SortOrder.valueOf(pageVO.getOrder().toUpperCase())));
+        } else {
+            nativeSearchQueryBuilder.withSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC));
+        }
 
-        iPage.setTotal(mongoTemplate.count(query, SystemLogVO.class));
-        query.with(PageRequest.of(pageVO.getMongoPageNumber(), pageVO.getPageSize()));
+        SearchHits<SystemLogVO> searchResult = restTemplate.search(nativeSearchQueryBuilder.build(), SystemLogVO.class);
 
-        query.with(Sort.by(Sort.Direction.DESC, "createTime"));
+        iPage.setTotal(searchResult.getTotalHits());
 
-        List<SystemLogVO> systemLogVOS = mongoTemplate.find(query, SystemLogVO.class);
-        iPage.setCurrent(pageVO.getPageNumber());
-        iPage.setSize(pageVO.getPageSize());
-        iPage.setRecords(systemLogVOS);
+        iPage.setRecords(searchResult.getSearchHits().stream().map(SearchHit::getContent).collect(Collectors.toList()));
         return iPage;
     }
 

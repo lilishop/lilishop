@@ -5,7 +5,6 @@ package cn.lili.modules.connect.entity.enums;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/11/25 18:20
  */
 public enum ConnectEnum {
@@ -14,9 +13,8 @@ public enum ConnectEnum {
      */
     QQ("QQ登录"),
     WEIBO("微博联合登录"),
-    WECHAT("微信联合登录"),//只存放unionid
-    WECHAT_OPEN_ID("微信openid登录"),
-    WECHAT_MP_OPEN_ID("微信openid登录"),
+    //只存放unionid
+    WECHAT("微信联合登录"),
     ALIPAY("支付宝登录"),
     APPLE("苹果登录");
 

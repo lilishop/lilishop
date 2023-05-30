@@ -2,17 +2,17 @@ package cn.lili.modules.order.order.entity.dos;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.base.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.SnowFlake;
+import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
+import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
-import cn.lili.modules.promotion.entity.dto.BasePromotion;
-import cn.lili.modules.order.cart.entity.dto.TradeDTO;
-import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
-import cn.lili.modules.order.cart.entity.vo.CartVO;
+import cn.lili.modules.promotion.entity.vos.PromotionSkuVO;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -20,20 +20,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.stream.Collectors;
 
 /**
  * 子订单
  *
  * @author Chopper
- * @date 2020/11/17 7:30 下午
+ * @since 2020/11/17 7:30 下午
  */
 @Data
-@Entity
-@Table(name = "li_order_item")
 @TableName("li_order_item")
 @ApiModel(value = "子订单")
 @NoArgsConstructor
@@ -56,27 +51,37 @@ public class OrderItem extends BaseEntity {
 
     @ApiModelProperty(value = "商品ID")
     private String goodsId;
+
     @ApiModelProperty(value = "货品ID")
     private String skuId;
+
     @ApiModelProperty(value = "销售量")
     private Integer num;
+
     @ApiModelProperty(value = "交易编号")
     private String tradeSn;
+
     @ApiModelProperty(value = "图片")
     private String image;
+
     @ApiModelProperty(value = "商品名称")
     private String goodsName;
+
     @ApiModelProperty(value = "分类ID")
     private String categoryId;
+
     @ApiModelProperty(value = "快照id")
     private String snapshotId;
+
     @ApiModelProperty(value = "规格json")
-    @Column(columnDefinition = "TEXT")
     private String specs;
+
     @ApiModelProperty(value = "促销类型")
     private String promotionType;
+
     @ApiModelProperty(value = "促销id")
     private String promotionId;
+
     @ApiModelProperty(value = "销售金额")
     private Double goodsPrice;
 
@@ -95,7 +100,6 @@ public class OrderItem extends BaseEntity {
     @ApiModelProperty(value = "售后状态")
     private String afterSaleStatus;
 
-    @Column(columnDefinition = "TEXT")
     @ApiModelProperty(value = "价格详情")
     private String priceDetail;
 
@@ -108,6 +112,10 @@ public class OrderItem extends BaseEntity {
     @ApiModelProperty(value = "交易投诉id")
     private String complainId;
 
+    @ApiModelProperty(value = "退货商品数量")
+    private Integer returnGoodsNumber;
+
+
     public OrderItem(CartSkuVO cartSkuVO, CartVO cartVO, TradeDTO tradeDTO) {
         String oldId = this.getId();
         BeanUtil.copyProperties(cartSkuVO.getGoodsSku(), this);
@@ -115,8 +123,8 @@ public class OrderItem extends BaseEntity {
         BeanUtil.copyProperties(cartSkuVO, this);
         this.setId(oldId);
         if (cartSkuVO.getPriceDetailDTO().getJoinPromotion() != null && !cartSkuVO.getPriceDetailDTO().getJoinPromotion().isEmpty()) {
-            this.setPromotionType(CollUtil.join(cartSkuVO.getPriceDetailDTO().getJoinPromotion().stream().map(BasePromotion::getPromotionName).collect(Collectors.toList()), ","));
-            this.setPromotionId(CollUtil.join(cartSkuVO.getPriceDetailDTO().getJoinPromotion().stream().map(BasePromotion::getId).collect(Collectors.toList()), ","));
+            this.setPromotionType(CollUtil.join(cartSkuVO.getPriceDetailDTO().getJoinPromotion().stream().map(PromotionSkuVO::getPromotionType).collect(Collectors.toList()), ","));
+            this.setPromotionId(CollUtil.join(cartSkuVO.getPriceDetailDTO().getJoinPromotion().stream().map(PromotionSkuVO::getActivityId).collect(Collectors.toList()), ","));
         }
         this.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.NEW.name());
         this.setCommentStatus(CommentStatusEnum.NEW.name());

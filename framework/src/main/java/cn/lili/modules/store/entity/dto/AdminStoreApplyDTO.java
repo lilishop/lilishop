@@ -1,6 +1,6 @@
 package cn.lili.modules.store.entity.dto;
 
-import com.baomidou.mybatisplus.annotation.TableField;
+import cn.lili.common.validation.Mobile;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
@@ -11,7 +11,7 @@ import javax.validation.constraints.*;
  * 后台添加店铺信息DTO
  *
  * @author Bulbasaur
- * @date 2020/12/12 11:35
+ * @since 2020/12/12 11:35
  */
 @Data
 public class AdminStoreApplyDTO {
@@ -40,7 +40,7 @@ public class AdminStoreApplyDTO {
     private String goodsManagementCategory;
 
     @ApiModelProperty(value = "是否自营")
-    private boolean selfOperated;
+    private Boolean selfOperated;
 
     @ApiModelProperty(value = "地址名称， '，'分割")
     private String storeAddressPath;
@@ -57,6 +57,7 @@ public class AdminStoreApplyDTO {
     @ApiModelProperty(value = "公司名称")
     private String companyName;
 
+    @Mobile
     @ApiModelProperty(value = "公司电话")
     private String companyPhone;
 
@@ -98,7 +99,6 @@ public class AdminStoreApplyDTO {
     @ApiModelProperty(value = "营业执照号")
     private String licenseNum;
 
-    @Size(min = 1, max = 200, message = "法定经营范围长度为1-200位字符")
     @ApiModelProperty(value = "法定经营范围")
     private String scope;
 

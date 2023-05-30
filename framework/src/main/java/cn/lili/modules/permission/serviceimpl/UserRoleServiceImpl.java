@@ -5,8 +5,6 @@ import cn.lili.modules.permission.mapper.UserRoleMapper;
 import cn.lili.modules.permission.service.UserRoleService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,20 +15,16 @@ import java.util.List;
  * 用户权限业务层实现
  *
  * @author Chopper
- * @date 2020/11/17 3:52 下午
+ * @since 2020/11/17 3:52 下午
  */
 @Service
-@Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> implements UserRoleService {
-
-    private final UserRoleMapper userRoleMapper;
 
     @Override
     public List<UserRole> listByUserId(String userId) {
         QueryWrapper<UserRole> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
-        return userRoleMapper.selectList(queryWrapper);
+        return this.baseMapper.selectList(queryWrapper);
     }
 
     @Override
@@ -42,12 +36,13 @@ public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> i
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateUserRole(String userId, List<UserRole> userRoles) {
 
         //删除
         QueryWrapper<UserRole> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
-        userRoleMapper.delete(queryWrapper);
+        this.remove(queryWrapper);
 
         //保存
         this.saveBatch(userRoles);

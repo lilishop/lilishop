@@ -15,7 +15,7 @@ import java.util.Date;
  * 会员信息修改DTO
  *
  * @author Bulbasaur
- * @date 2020/12/11 14:39
+ * @since 2020/12/11 14:39
  */
 @Data
 public class MemberEditDTO {
@@ -38,7 +38,7 @@ public class MemberEditDTO {
     private Integer sex;
 
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+  @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "会员生日")
     private Date birthday;
 

@@ -1,15 +1,16 @@
 package cn.lili.modules.order.order.entity.dos;
 
-import cn.lili.base.BaseEntity;
-import cn.lili.modules.order.order.entity.enums.ComplaintStatusEnum;
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
+import cn.lili.modules.order.aftersale.entity.enums.ComplaintStatusEnum;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
@@ -18,9 +19,8 @@ import java.util.Date;
  * @author paulG
  * @since 2020/12/4
  **/
+@EqualsAndHashCode(callSuper = true)
 @Data
-@Entity
-@Table(name = "li_order_complaint")
 @TableName("li_order_complaint")
 @ApiModel(value = "订单交易投诉")
 public class OrderComplaint extends BaseEntity {
@@ -97,6 +97,7 @@ public class OrderComplaint extends BaseEntity {
     private String memberId;
 
     @ApiModelProperty(value = "会员名称")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String memberName;
 
     @ApiModelProperty(value = "收货人")

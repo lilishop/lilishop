@@ -1,6 +1,8 @@
 package cn.lili.modules.store.service;
 
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.member.entity.dto.CollectionDTO;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dto.*;
 import cn.lili.modules.store.entity.vos.StoreSearchParams;
@@ -8,11 +10,13 @@ import cn.lili.modules.store.entity.vos.StoreVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * 店铺业务层
  *
  * @author pikachu
- * @date 2020/11/18 11:45 上午
+ * @since 2020/11/18 11:45 上午
  */
 public interface StoreService extends IService<Store> {
 
@@ -21,7 +25,6 @@ public interface StoreService extends IService<Store> {
      * 用于展示店铺列表
      *
      * @param entity
-     * @param page
      * @return
      */
     IPage<StoreVO> findByConditionPage(StoreSearchParams entity, PageVO page);
@@ -38,6 +41,7 @@ public interface StoreService extends IService<Store> {
      * 用于后台添加店铺
      *
      * @param adminStoreApplyDTO 后台添加店铺信息
+     * @return 店铺
      */
     Store add(AdminStoreApplyDTO adminStoreApplyDTO);
 
@@ -45,6 +49,7 @@ public interface StoreService extends IService<Store> {
      * 编辑店铺
      *
      * @param storeEditDTO 店铺修改信息
+     * @return 店铺
      */
     Store edit(StoreEditDTO storeEditDTO);
 
@@ -53,6 +58,7 @@ public interface StoreService extends IService<Store> {
      *
      * @param id     店铺ID
      * @param passed 审核结果
+     * @return 操作结果
      */
     boolean audit(String id, Integer passed);
 
@@ -98,35 +104,31 @@ public interface StoreService extends IService<Store> {
      */
     boolean applyThirdStep(StoreOtherInfoDTO storeOtherInfoDTO);
 
-    /**
-     * 获取待审核店铺数量
-     * @return 待审核店铺数量
-     */
-    Integer auditNum();
-
-    /**
-     * 获取所有店铺数量
-     *
-     * @return 店铺总数
-     */
-    Integer storeNum();
-
-    /**
-     * 获取今天的店铺数量
-     *
-     * @return 今天的店铺数量
-     */
-    Integer todayStoreNum();
 
     /**
      * 更新店铺商品数量
+     *
      * @param storeId 店铺ID
+     * @param num     商品数量
      */
-    void updateStoreGoodsNum(String storeId);
+    void updateStoreGoodsNum(String storeId, Long num);
 
     /**
      * 更新店铺收藏数量
-     * @param goodsId 店铺ID
+     *
+     * @param collectionDTO 收藏信息
      */
-    void updateStoreCollectionNum(String goodsId);
+    void updateStoreCollectionNum(CollectionDTO collectionDTO);
+
+    /**
+     * 重新生成所有店铺
+     */
+    void storeToClerk();
+
+    /**
+     * 店铺获取该会员的访问记录
+     * @param memberId 会员Id
+     * @return
+     */
+    List<GoodsSku> getToMemberHistory(String memberId);
 }

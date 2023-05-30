@@ -1,18 +1,17 @@
 package cn.lili.modules.search.entity.dos;
 
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.elasticsearch.EsSuffix;
-import cn.lili.common.utils.StringUtils;
+import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.elasticsearch.EsSuffix;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
+import cn.lili.modules.promotion.tools.PromotionTools;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -25,13 +24,14 @@ import java.util.Map;
 
 /**
  * 商品索引
+ *
  * @author paulG
- * @date 2020/10/13
  **/
 @Data
-@Document(indexName = "#{elasticsearchProperties.indexPrefix}_" + EsSuffix.GOODS_INDEX_NAME)
+@Document(indexName = "#{@elasticsearchProperties.indexPrefix}_" + EsSuffix.GOODS_INDEX_NAME, createIndex = false)
 @ToString
 @NoArgsConstructor
+@Accessors(chain = true)
 public class EsGoodsIndex implements Serializable {
 
     private static final long serialVersionUID = -6856471777036048874L;
@@ -97,23 +97,51 @@ public class EsGoodsIndex implements Serializable {
     /**
      * 品牌id
      */
-    @Field(type = FieldType.Integer, fielddata = true)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("品牌id")
     private String brandId;
 
     /**
+     * 品牌名称
+     */
+    @Field(type = FieldType.Text, fielddata = true)
+    @ApiModelProperty("品牌名称")
+    private String brandName;
+
+    /**
+     * 品牌图片地址
+     */
+    @Field(type = FieldType.Text, fielddata = true)
+    @ApiModelProperty("品牌图片地址")
+    private String brandUrl;
+
+    /**
      * 分类path
      */
-    @Field(type = FieldType.Keyword, fielddata = true)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("分类path")
     private String categoryPath;
 
     /**
+     * 分类名称path
+     */
+    @Field(type = FieldType.Text, fielddata = true)
+    @ApiModelProperty("分类名称path")
+    private String categoryNamePath;
+
+    /**
      * 店铺分类id
      */
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Text, fielddata = true)
     @ApiModelProperty("店铺分类id")
     private String storeCategoryPath;
+
+    /**
+     * 店铺分类名称
+     */
+    @Field(type = FieldType.Keyword)
+    @ApiModelProperty("店铺分类名称")
+    private String storeCategoryNamePath;
 
     /**
      * 商品价格
@@ -187,6 +215,8 @@ public class EsGoodsIndex implements Serializable {
 
     /**
      * 销售模式
+     *
+     * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
      */
     @Field(type = FieldType.Text)
     @ApiModelProperty("销售模式")
@@ -197,7 +227,7 @@ public class EsGoodsIndex implements Serializable {
      */
     @Field(type = FieldType.Text)
     @ApiModelProperty("审核状态")
-    private String isAuth;
+    private String authFlag;
 
     /**
      * 卖点
@@ -221,9 +251,19 @@ public class EsGoodsIndex implements Serializable {
     private String goodsVideo;
 
     @ApiModelProperty("商品发布时间")
-    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @Field(type = FieldType.Date, format = DateFormat.basic_date_time)
-    private Date releaseTime;
+    @Field(type = FieldType.Date)
+    private Long releaseTime;
+
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型", required = true)
+    @Field(type = FieldType.Text)
+    private String goodsType;
+
+    @ApiModelProperty(value = "商品sku基础分数", required = true)
+    @Field(type = FieldType.Integer)
+    private Integer skuSource;
 
     /**
      * 商品属性（参数和规格）
@@ -235,13 +275,85 @@ public class EsGoodsIndex implements Serializable {
      * 商品促销活动集合
      * key 为 促销活动类型
      *
-     * @see cn.lili.modules.promotion.entity.enums.PromotionTypeEnum
+     * @see PromotionTypeEnum
      * value 为 促销活动实体信息
      */
-    @Field(type = FieldType.Nested)
-    @ApiModelProperty("商品促销活动集合，key 为 促销活动类型，value 为 促销活动实体信息 ")
-    private Map<String, Object> promotionMap;
+    @Field(type = FieldType.Text)
+    @ApiModelProperty("商品促销活动集合JSON，key 为 促销活动类型，value 为 促销活动实体信息 ")
+    private String promotionMapJson;
 
+
+    public EsGoodsIndex(GoodsSku sku) {
+        if (sku != null) {
+            this.id = sku.getId();
+            this.goodsId = sku.getGoodsId();
+            this.goodsName = sku.getGoodsName();
+            this.price = sku.getPrice();
+            this.storeName = sku.getStoreName();
+            this.storeId = sku.getStoreId();
+            this.thumbnail = sku.getThumbnail();
+            this.categoryPath = sku.getCategoryPath();
+            this.goodsVideo = sku.getGoodsVideo();
+            this.mobileIntro = sku.getMobileIntro();
+            this.buyCount = sku.getBuyCount() != null ? sku.getBuyCount() : 0;
+            this.commentNum = sku.getCommentNum();
+            this.small = sku.getSmall();
+            this.brandId = sku.getBrandId();
+            this.sn = sku.getSn();
+            this.storeCategoryPath = sku.getStoreCategoryPath();
+            this.sellingPoint = sku.getSellingPoint();
+            this.selfOperated = sku.getSelfOperated();
+            this.salesModel = sku.getSalesModel();
+            this.marketEnable = sku.getMarketEnable();
+            this.authFlag = sku.getAuthFlag();
+            this.intro = sku.getIntro();
+            this.grade = sku.getGrade();
+            this.recommend = sku.getRecommend();
+            this.goodsType = sku.getGoodsType();
+            this.releaseTime = new Date().getTime();
+        }
+    }
+
+    /**
+     * 参数索引增加
+     *
+     * @param sku            商品sku信息
+     * @param goodsParamDTOS 商品参数信息
+     */
+    public EsGoodsIndex(GoodsSku sku, List<GoodsParamsDTO> goodsParamDTOS) {
+        this(sku);
+        //如果参数不为空
+        if (goodsParamDTOS != null && !goodsParamDTOS.isEmpty()) {
+            //接受不了参数索引
+            List<EsGoodsAttribute> attributes = new ArrayList<>();
+            //循环参数分组
+            goodsParamDTOS.forEach(goodsParamGroup -> {
+                //如果参数有配置，则增加索引
+                if (goodsParamGroup.getGoodsParamsItemDTOList() != null && !goodsParamGroup.getGoodsParamsItemDTOList().isEmpty()) {
+                    //循环分组的内容
+                    goodsParamGroup.getGoodsParamsItemDTOList().forEach(goodsParam -> {
+                                //如果字段需要索引，则增加索引字段
+                                if (goodsParam.getIsIndex() != null && goodsParam.getIsIndex() == 1) {
+                                    EsGoodsAttribute attribute = new EsGoodsAttribute();
+                                    attribute.setType(1);
+                                    attribute.setName(goodsParam.getParamName());
+                                    attribute.setValue(goodsParam.getParamValue());
+                                    attribute.setSort(goodsParam.getSort());
+                                    attributes.add(attribute);
+                                }
+                            }
+                    );
+                }
+
+            });
+            this.attrList = attributes;
+        }
+    }
+
+    public EsGoodsIndex(GoodsSku sku, Date createDate) {
+        this(sku);
+        this.releaseTime = createDate.getTime();
+    }
 
     public void setGoodsSku(GoodsSku sku) {
         if (sku != null) {
@@ -265,54 +377,18 @@ public class EsGoodsIndex implements Serializable {
             this.selfOperated = sku.getSelfOperated();
             this.salesModel = sku.getSalesModel();
             this.marketEnable = sku.getMarketEnable();
-            this.isAuth = sku.getIsAuth();
+            this.authFlag = sku.getAuthFlag();
             this.intro = sku.getIntro();
             this.grade = sku.getGrade();
-            this.releaseTime = new Date();
+            this.releaseTime = new Date().getTime();
         }
     }
 
-    public EsGoodsIndex(GoodsSku sku) {
-        if (sku != null) {
-            this.id = sku.getId();
-            this.goodsId = sku.getGoodsId();
-            this.goodsName = sku.getGoodsName();
-            this.price = sku.getPrice();
-            this.storeName = sku.getStoreName();
-            this.storeId = sku.getStoreId();
-            this.thumbnail = sku.getThumbnail();
-            this.categoryPath = sku.getCategoryPath();
-            this.goodsVideo = sku.getGoodsVideo();
-            this.mobileIntro = sku.getMobileIntro();
-            this.buyCount = sku.getBuyCount();
-            this.commentNum = sku.getCommentNum();
-            this.small = sku.getSmall();
-            this.brandId = sku.getBrandId();
-            this.sn = sku.getSn();
-            this.storeCategoryPath = sku.getStoreCategoryPath();
-            this.sellingPoint = sku.getSellingPoint();
-            this.selfOperated = sku.getSelfOperated();
-            this.salesModel = sku.getSalesModel();
-            this.marketEnable = sku.getMarketEnable();
-            this.isAuth = sku.getIsAuth();
-            this.intro = sku.getIntro();
-            this.grade = sku.getGrade();
-            this.releaseTime = new Date();
-            if (StringUtils.isNotEmpty(sku.getSpecs())) {
-                List<EsGoodsAttribute> attributes = new ArrayList<>();
-                JSONObject jsonObject = JSONUtil.parseObj(sku.getSpecs());
-                for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-                    if (!entry.getKey().equals("images")) {
-                        EsGoodsAttribute attribute = new EsGoodsAttribute();
-                        attribute.setType(0);
-                        attribute.setName(entry.getKey());
-                        attribute.setValue(entry.getValue().toString());
-                        attributes.add(attribute);
-                    }
-                }
-                this.attrList = attributes;
-            }
-        }
+    public Map<String, Object> getOriginPromotionMap() {
+        return JSONUtil.parseObj(this.promotionMapJson);
+    }
 
+    public Map<String, Object> getPromotionMap() {
+        return PromotionTools.filterInvalidPromotionsMap(JSONUtil.parseObj(this.promotionMapJson));
     }
 }

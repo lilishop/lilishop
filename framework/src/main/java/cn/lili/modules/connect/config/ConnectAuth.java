@@ -9,7 +9,6 @@ import cn.lili.modules.connect.exception.AuthException;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/12/4 12:17
  */
 public interface ConnectAuth {

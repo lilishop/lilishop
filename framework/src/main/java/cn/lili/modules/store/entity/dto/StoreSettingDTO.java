@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
  * 店铺设置
  *
  * @author Bulbasaur
- * @date 2020/12/16 15:15
+ * @since 2020/12/16 15:15
  */
 @Data
 public class StoreSettingDTO {
@@ -31,6 +31,12 @@ public class StoreSettingDTO {
 
     @NotEmpty
     @ApiModelProperty(value = "经纬度")
-    private String center;
+    private String storeCenter;
+
+    @ApiModelProperty(value = "默认页面是否开启")
+    private Boolean pageShow;
+
+    @ApiModelProperty(value = "是否开启自提")
+    private Boolean selfPickFlag;
 
 }

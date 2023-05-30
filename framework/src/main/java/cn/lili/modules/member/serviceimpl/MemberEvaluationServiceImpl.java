@@ -2,25 +2,21 @@ package cn.lili.modules.member.serviceimpl;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.common.rocketmq.tags.GoodsTagsEnum;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.common.utils.PageUtil;
-import cn.lili.common.utils.StringUtils;
-import cn.lili.common.vo.PageVO;
-import cn.lili.config.rocketmq.RocketmqCustomProperties;
+import cn.lili.common.sensitive.SensitiveWordsFilter;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
 import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
-import cn.lili.modules.member.entity.dto.StoreEvaluationQueryParams;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.entity.vo.EvaluationNumberVO;
 import cn.lili.modules.member.entity.vo.MemberEvaluationListVO;
@@ -33,8 +29,9 @@ import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.modules.system.utils.CharacterConstant;
-import cn.lili.modules.system.utils.SensitiveWordsFilter;
+import cn.lili.mybatis.util.PageUtil;
+import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -42,12 +39,12 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -55,60 +52,86 @@ import java.util.Map;
  * 会员商品评价业务层实现
  *
  * @author Bulbasaur
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Service
-@Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMapper, MemberEvaluation> implements MemberEvaluationService {
 
-    //会员评价数据层
-    private final MemberEvaluationMapper memberEvaluationMapper;
-    //订单
-    private final OrderService orderService;
-    //子订单
-    private final OrderItemService orderItemService;
-    //会员
-    private final MemberService memberService;
-    //商品
-    private final GoodsSkuService goodsSkuService;
-    //rocketMq
-    private final RocketMQTemplate rocketMQTemplate;
-    //rocketMq配置
-    private final RocketmqCustomProperties rocketmqCustomProperties;
+    /**
+     * 会员评价数据层
+     */
+    @Resource
+    private MemberEvaluationMapper memberEvaluationMapper;
+    /**
+     * 订单
+     */
+    @Autowired
+    private OrderService orderService;
+    /**
+     * 子订单
+     */
+    @Autowired
+    private OrderItemService orderItemService;
+    /**
+     * 会员
+     */
+    @Autowired
+    private MemberService memberService;
+    /**
+     * 商品
+     */
+    @Autowired
+    private GoodsSkuService goodsSkuService;
+    /**
+     * rocketMq
+     */
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
+    /**
+     * rocketMq配置
+     */
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Override
-    public IPage<MemberEvaluation> queryByParams(EvaluationQueryParams queryParams) {
+    public IPage<MemberEvaluation> managerQuery(EvaluationQueryParams queryParams) {
         //获取评价分页
         return this.page(PageUtil.initPage(queryParams), queryParams.queryWrapper());
     }
 
     @Override
-    public IPage<MemberEvaluationListVO> queryByParams(StoreEvaluationQueryParams storeEvaluationQueryParams) {
-        return memberEvaluationMapper.getMemberEvaluationList(PageUtil.initPage(storeEvaluationQueryParams), storeEvaluationQueryParams.queryWrapper());
+    public IPage<MemberEvaluationListVO> queryPage(EvaluationQueryParams evaluationQueryParams) {
+        return memberEvaluationMapper.getMemberEvaluationList(PageUtil.initPage(evaluationQueryParams), evaluationQueryParams.queryWrapper());
     }
 
     @Override
-    public IPage<MemberEvaluationListVO> queryPage(EvaluationQueryParams evaluationQueryParams, PageVO page) {
-        return memberEvaluationMapper.getMemberEvaluationList(PageUtil.initPage(page), evaluationQueryParams.queryWrapper());
-    }
-
-    @Override
-    public MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO) {
+    @Transactional(rollbackFor = Exception.class)
+    public MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO, Boolean isSelf) {
         //获取子订单信息
         OrderItem orderItem = orderItemService.getBySn(memberEvaluationDTO.getOrderItemSn());
         //获取订单信息
         Order order = orderService.getBySn(orderItem.getOrderSn());
         //检测是否可以添加会员评价
-        checkMemberEvaluation(orderItem,order);
-        //获取用户信息
-        Member member = memberService.getUserInfo();
+        Member member;
+
+        checkMemberEvaluation(orderItem, order);
+
+        if (Boolean.TRUE.equals(isSelf)) {
+            //自我评价商品时，获取当前登录用户信息
+            member = memberService.getUserInfo();
+        } else {
+            //获取用户信息 非自己评价时，读取数据库
+            member = memberService.getById(order.getMemberId());
+            if (member == null) {
+                throw new ServiceException(ResultCode.USER_NOT_EXIST);
+            }
+        }
         //获取商品信息
         GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(memberEvaluationDTO.getSkuId());
         //新增用户评价
         MemberEvaluation memberEvaluation = new MemberEvaluation(memberEvaluationDTO, goodsSku, member, order);
         //过滤商品咨询敏感词
-        memberEvaluation.setContent(SensitiveWordsFilter.filter(memberEvaluation.getContent(), CharacterConstant.WILDCARD_STAR));
+        memberEvaluation.setContent(SensitiveWordsFilter.filter(memberEvaluation.getContent()));
         //添加评价
         this.save(memberEvaluation);
 
@@ -146,7 +169,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         UpdateWrapper<MemberEvaluation> updateWrapper = Wrappers.update();
         updateWrapper.set("reply_status", true);
         updateWrapper.set("reply", reply);
-        if (StringUtils.isNotEmpty(replyImage)) {
+        if (CharSequenceUtil.isNotEmpty(replyImage)) {
             updateWrapper.set("have_reply_image", true);
             updateWrapper.set("reply_image", replyImage);
         }
@@ -157,7 +180,8 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
     @Override
     public EvaluationNumberVO getEvaluationNumber(String goodsId) {
         EvaluationNumberVO evaluationNumberVO = new EvaluationNumberVO();
-        List<Map<String, Object>> list = memberEvaluationMapper.getEvaluationNumber(goodsId);
+        List<Map<String, Object>> list = this.baseMapper.getEvaluationNumber(goodsId);
+
 
         Integer good = 0;
         Integer moderate = 0;
@@ -183,25 +207,37 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
     }
 
     @Override
-    public Integer todayMemberEvaluation() {
-        return this.count(new LambdaQueryWrapper<MemberEvaluation>().gt(MemberEvaluation::getCreateTime, DateUtil.beginOfDay(new DateTime())));
+    public long todayMemberEvaluation() {
+        return this.count(new LambdaQueryWrapper<MemberEvaluation>().ge(MemberEvaluation::getCreateTime, DateUtil.beginOfDay(new DateTime())));
     }
 
     @Override
-    public Integer getWaitReplyNum() {
+    public long getWaitReplyNum() {
         QueryWrapper<MemberEvaluation> queryWrapper = Wrappers.query();
-        queryWrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
+        queryWrapper.eq(CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
                 "store_id", UserContext.getCurrentUser().getStoreId());
         queryWrapper.eq("reply_status", false);
         return this.count(queryWrapper);
     }
 
     /**
-     * 检测会员评价
-     * @param orderItem 子订单
-     * @param order 订单
+     * 统计商品评价数量
+     *
+     * @param evaluationQueryParams 查询条件
+     * @return 商品评价数量
      */
-    public void checkMemberEvaluation(OrderItem orderItem,Order order){
+    @Override
+    public long getEvaluationCount(EvaluationQueryParams evaluationQueryParams) {
+        return this.count(evaluationQueryParams.queryWrapper());
+    }
+
+    /**
+     * 检测会员评价
+     *
+     * @param orderItem 子订单
+     * @param order     订单
+     */
+    public void checkMemberEvaluation(OrderItem orderItem, Order order) {
 
         //根据子订单编号判断是否评价过
         if (orderItem.getCommentStatus().equals(CommentStatusEnum.FINISHED.name())) {
@@ -209,7 +245,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         }
 
         //判断是否是当前会员的订单
-        if (!order.getMemberId().equals(UserContext.getCurrentUser().getId())) {
+        if (UserContext.getCurrentUser() != null && !order.getMemberId().equals(UserContext.getCurrentUser().getId())) {
             throw new ServiceException(ResultCode.ORDER_NOT_USER);
         }
     }

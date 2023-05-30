@@ -4,7 +4,7 @@ package cn.lili.modules.system.entity.enums;
  * 系统设置常量
  *
  * @author Chopper
- * @date 2020/9/11 17:03
+ * @since 2020/9/11 17:03
  */
 public enum SettingEnum {
     //基础配置
@@ -17,16 +17,22 @@ public enum SettingEnum {
     EMAIL_SETTING,
     //商品设置
     GOODS_SETTING,
-    //快递鸟设置
-    KUAIDI_SETTING,
+    //快递设置
+    LOGISTICS_SETTING,
     //订单配置
     ORDER_SETTING,
     //阿里OSS配置
     OSS_SETTING,
-    //阿里短信配置 
+    //阿里短信配置
     SMS_SETTING,
     //积分设置
     POINT_SETTING,
+    //经验值设置
+    EXPERIENCE_SETTING,
+    //秒杀活动设置
+    SECKILL_SETTING,
+    //IM 配置
+    IM_SETTING,
 
     //微信 联合登陆设置
     WECHAT_CONNECT,
@@ -39,4 +45,8 @@ public enum SettingEnum {
     ALIPAY_PAYMENT,
     //微信支付设置
     WECHAT_PAYMENT,
+    //银联支付设置
+    UNIONPAY_PAYMENT,
+    //热词设置
+    HOT_WORDS
 }

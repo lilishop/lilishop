@@ -1,18 +1,17 @@
 package cn.lili.modules.goods.entity.dos;
 
-import cn.lili.base.BaseEntity;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import java.util.Date;
 
@@ -20,13 +19,13 @@ import java.util.Date;
  * 商品sku
  *
  * @author pikachu
- * @date 2020-02-23 9:14:33
+ * @since 2020-02-23 9:14:33
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-@Entity
-@Table(name = "li_goods_sku")
 @TableName("li_goods_sku")
 @ApiModel(value = "商品sku对象")
+@NoArgsConstructor
 public class GoodsSku extends BaseEntity {
 
     private static final long serialVersionUID = 4865908658161118934L;
@@ -35,7 +34,6 @@ public class GoodsSku extends BaseEntity {
     private String goodsId;
 
     @ApiModelProperty(value = "规格信息json", hidden = true)
-    @Column(columnDefinition = "TEXT")
     @JsonIgnore
     private String specs;
 
@@ -46,7 +44,7 @@ public class GoodsSku extends BaseEntity {
     private String freightTemplateId;
 
     @ApiModelProperty(value = "是否是促销商品")
-    private Boolean isPromotion;
+    private Boolean promotionFlag;
 
     @ApiModelProperty(value = "促销价")
     private Double promotionPrice;
@@ -80,7 +78,6 @@ public class GoodsSku extends BaseEntity {
     private String marketEnable;
 
     @ApiModelProperty(value = "商品详情")
-    @Column(columnDefinition = "TEXT")
     private String intro;
 
     @Max(value = 99999999, message = "价格不能超过99999999")
@@ -131,13 +128,11 @@ public class GoodsSku extends BaseEntity {
     @ApiModelProperty(value = "运费模板id")
     private String templateId;
 
-    @ApiModelProperty(value = "运费承担者")
-    private String freightPayer;
     /**
      * @see GoodsAuthEnum
      */
     @ApiModelProperty(value = "审核状态")
-    private String isAuth;
+    private String authFlag;
 
     @ApiModelProperty(value = "审核信息")
     private String authMessage;
@@ -149,24 +144,70 @@ public class GoodsSku extends BaseEntity {
     private Boolean selfOperated;
 
     @ApiModelProperty(value = "商品移动端详情")
-    @Column(columnDefinition = "TEXT")
     private String mobileIntro;
 
     @ApiModelProperty(value = "商品视频")
     private String goodsVideo;
 
     @ApiModelProperty(value = "是否为推荐商品", required = true)
-    private boolean recommend;
+    private Boolean recommend;
 
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
+     */
     @ApiModelProperty(value = "销售模式", required = true)
     private String salesModel;
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
+     */
+    @ApiModelProperty(value = "商品类型", required = true)
+    private String goodsType;
+
+    public Double getWeight() {
+        if (weight == null) {
+            return 0d;
+        }
+        return weight;
+    }
 
     @Override
-    public Date getUpdateTime() {
-        if (super.getUpdateTime() == null) {
+    public Date getCreateTime() {
+        if (super.getCreateTime() == null) {
             return new Date(1593571928);
         } else {
-            return super.getUpdateTime();
+            return super.getCreateTime();
         }
     }
+
+    /**
+     * 设置规格商品的基本商品信息
+     *
+     * @param goods 基本商品信息
+     */
+    public GoodsSku(Goods goods) {
+        //商品基本信息
+        this.goodsId = goods.getId();
+        this.goodsName = goods.getGoodsName();
+        this.goodsType = goods.getGoodsType();
+
+        this.selfOperated = goods.getSelfOperated();
+        this.sellingPoint = goods.getSellingPoint();
+        this.categoryPath = goods.getCategoryPath();
+        this.brandId = goods.getBrandId();
+        this.marketEnable = goods.getMarketEnable();
+        this.intro = goods.getIntro();
+        this.mobileIntro = goods.getMobileIntro();
+        this.goodsUnit = goods.getGoodsUnit();
+        this.grade = 100D;
+        //商品状态
+        this.authFlag = goods.getAuthFlag();
+        this.salesModel = goods.getSalesModel();
+        //卖家信息
+        this.storeId = goods.getStoreId();
+        this.storeName = goods.getStoreName();
+        this.storeCategoryPath = goods.getStoreCategoryPath();
+        this.freightTemplateId = goods.getTemplateId();
+        this.recommend = goods.getRecommend();
+    }
+
 }

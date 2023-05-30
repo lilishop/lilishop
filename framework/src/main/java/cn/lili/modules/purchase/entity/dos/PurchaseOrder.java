@@ -1,27 +1,23 @@
 package cn.lili.modules.purchase.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
  * 供求单
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
+ * @since 2020-03-14 23:04:56
  */
 @Data
-@Entity
 @ApiModel(value = "供求单")
 @TableName("li_purchase_order")
-@Table(name = "li_purchase_order")
 public class PurchaseOrder extends BaseEntity {
 
     @ApiModelProperty(value = "标题")

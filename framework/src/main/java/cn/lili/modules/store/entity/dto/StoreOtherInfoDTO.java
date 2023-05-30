@@ -11,7 +11,7 @@ import javax.validation.constraints.Size;
  * 店铺入驻其他信息
  *
  * @author Bulbasaur
- * @date 2020/12/7 16:16
+ * @since 2020/12/7 16:16
  */
 @Data
 public class StoreOtherInfoDTO {
@@ -36,5 +36,17 @@ public class StoreOtherInfoDTO {
     @NotBlank(message = "店铺经营类目不能为空")
     @ApiModelProperty(value = "店铺经营类目")
     private String goodsManagementCategory;
+
+    @NotBlank(message = "地址不能为空")
+    @ApiModelProperty(value = "地址名称， '，'分割")
+    private String storeAddressPath;
+
+    @NotBlank(message = "地址ID不能为空")
+    @ApiModelProperty(value = "地址id，'，'分割 ")
+    private String storeAddressIdPath;
+
+    @NotBlank(message = "地址详情")
+    @ApiModelProperty(value = "地址详情")
+    private String storeAddressDetail;
 
 }

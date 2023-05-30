@@ -1,5 +1,6 @@
 package cn.lili.modules.payment.kit.plugin.alipay;
 
+import cn.hutool.http.HtmlUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.*;
 import com.alipay.api.domain.*;
@@ -22,7 +23,7 @@ import java.util.Map;
  * 支付宝支付
  *
  * @author Chopper
- * @date 2020/12/15 19:26
+ * @since 2020/12/15 19:26
  */
 
 public class AliPayApi {
@@ -244,7 +245,7 @@ public class AliPayApi {
      */
     public static AlipayTradePayResponse tradePayToResponse(AlipayTradePayModel model, String notifyUrl) throws AlipayApiException {
         AlipayTradePayRequest request = new AlipayTradePayRequest();
-        // 填充业务参数
+        //填充业务参数
         request.setBizModel(model);
         request.setNotifyUrl(notifyUrl);
         return doExecute(request);
@@ -316,7 +317,7 @@ public class AliPayApi {
         if (response.isSuccess()) {
             return true;
         } else {
-            // 调用查询接口查询数据
+            //调用查询接口查询数据
             JSONObject jsonObject = JSONObject.parseObject(result);
             String outBizNo = jsonObject.getJSONObject("alipay_fund_trans_toaccount_transfer_response").getString("out_biz_no");
             AlipayFundTransOrderQueryModel queryModel = new AlipayFundTransOrderQueryModel();
@@ -941,7 +942,7 @@ public class AliPayApi {
      * @return 转化后的Map
      */
     public static Map<String, String> toMap(HttpServletRequest request) {
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<String, String>(16);
         Map<String, String[]> requestParams = request.getParameterMap();
         for (Iterator<String> iter = requestParams.keySet().iterator(); iter.hasNext(); ) {
             String name = iter.next();
@@ -950,7 +951,7 @@ public class AliPayApi {
             for (int i = 0; i < values.length; i++) {
                 valueStr = (i == values.length - 1) ? valueStr + values[i] : valueStr + values[i] + ",";
             }
-            params.put(name, valueStr);
+            params.put(name, HtmlUtil.unescape(valueStr));
         }
         return params;
     }

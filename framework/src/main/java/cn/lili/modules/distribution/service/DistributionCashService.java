@@ -12,21 +12,23 @@ import org.springframework.web.bind.annotation.RequestParam;
  * 分销佣金业务层
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
+ * @since 2020-03-14 23:04:56
  */
 public interface DistributionCashService extends IService<DistributionCash> {
 
     /**
      * 提交分销提现申请
      *
-     * @param applyMoney
+     * @param applyMoney 申请金额
+     * @return 操作状态
      */
     Boolean cash(Double applyMoney);
 
     /**
      * 获取当前会员的分销提现分页列表
      *
-     * @return
+     * @param page 分页
+     * @return 申请提现分页
      */
     IPage<DistributionCash> getDistributionCash(PageVO page);
 
@@ -47,10 +49,4 @@ public interface DistributionCashService extends IService<DistributionCash> {
      */
     DistributionCash audit(@PathVariable String id, @RequestParam String result);
 
-    /**
-     * 待处理分销员提现申请数量
-     *
-     * @return 待处理分销员提现申请数量
-     */
-    Integer newDistributionCash();
 }

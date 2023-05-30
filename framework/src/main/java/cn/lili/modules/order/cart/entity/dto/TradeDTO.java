@@ -1,14 +1,17 @@
 package cn.lili.modules.order.cart.entity.dto;
 
 import cn.lili.modules.member.entity.dos.MemberAddress;
-import cn.lili.modules.order.cart.entity.enums.SuperpositionPromotionEnum;
-import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
-import cn.lili.modules.order.order.entity.vo.OrderVO;
-import cn.lili.modules.order.order.entity.vo.ReceiptVO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
+import cn.lili.modules.order.cart.entity.enums.SuperpositionPromotionEnum;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
 import cn.lili.modules.order.cart.entity.vo.CartVO;
 import cn.lili.modules.order.cart.entity.vo.PriceDetailVO;
+import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
+import cn.lili.modules.order.order.entity.vo.OrderVO;
+import cn.lili.modules.order.order.entity.vo.ReceiptVO;
+import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
+import cn.lili.modules.store.entity.dos.StoreAddress;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -17,12 +20,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 购物车视图
  *
  * @author Chopper
- * @date 2020-03-25 2:30 下午
+ * @since 2020-03-25 2:30 下午
  */
 @Data
 public class TradeDTO implements Serializable {
@@ -53,22 +57,16 @@ public class TradeDTO implements Serializable {
     @ApiModelProperty(value = "是否需要发票")
     private Boolean needReceipt;
 
+
+    @ApiModelProperty(value = "不支持配送方式")
+    private List<CartSkuVO> notSupportFreight;
+
     /**
      * 购物车类型
      */
     private CartTypeEnum cartTypeEnum;
-
     /**
-     * key 为商家id
-     * value 为商家优惠券
-     * 商家优惠券
-     */
-    private Map<String, MemberCouponDTO> storeCoupons;
-
-    /**
-     * key 为商家id
-     * value 为商家优惠券
-     * 商家优惠券
+     * 店铺备注
      */
     private List<StoreRemarkDTO> storeRemark;
 
@@ -88,9 +86,31 @@ public class TradeDTO implements Serializable {
     private MemberCouponDTO platformCoupon;
 
     /**
+     * key 为商家id
+     * value 为商家优惠券
+     * 店铺优惠券
+     */
+    private Map<String, MemberCouponDTO> storeCoupons;
+
+    /**
+     * 可用优惠券列表
+     */
+    private List<MemberCoupon> canUseCoupons;
+
+    /**
+     * 无法使用优惠券无法使用的原因
+     */
+    private List<MemberCouponVO> cantUseCoupons;
+
+    /**
      * 收货地址
      */
     private MemberAddress memberAddress;
+
+    /**
+     * 自提地址
+     */
+    private StoreAddress storeAddress;
 
     /**
      * 客户端类型
@@ -118,17 +138,36 @@ public class TradeDTO implements Serializable {
     private List<OrderVO> orderVO;
 
     public TradeDTO(CartTypeEnum cartTypeEnum) {
+        this.cartTypeEnum = cartTypeEnum;
+
         this.skuList = new ArrayList<>();
         this.cartList = new ArrayList<>();
         this.skuPromotionDetail = new HashMap<>();
         this.storeCoupons = new HashMap<>();
-        this.storeCoupons = new HashMap<>();
         this.priceDetailDTO = new PriceDetailDTO();
-        this.cartTypeEnum = cartTypeEnum;
+        this.cantUseCoupons = new ArrayList<>();
+        this.canUseCoupons = new ArrayList<>();
         this.needReceipt = false;
     }
 
     public TradeDTO() {
         this(CartTypeEnum.CART);
+    }
+
+    /**
+     * 过滤购物车中已选择的sku
+     *
+     * @return
+     */
+    public List<CartSkuVO> getCheckedSkuList() {
+        if (skuList != null && !skuList.isEmpty()) {
+            return skuList.stream().filter(CartSkuVO::getChecked).collect(Collectors.toList());
+        }
+        return skuList;
+    }
+
+    public void removeCoupon() {
+        this.canUseCoupons = new ArrayList<>();
+        this.cantUseCoupons = new ArrayList<>();
     }
 }

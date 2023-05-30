@@ -1,6 +1,7 @@
 package cn.lili.modules.payment.kit.core.kit;
 
 import cn.lili.modules.payment.kit.core.http.AbstractHttpDelegate;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
@@ -13,6 +14,7 @@ import java.util.Map;
  *
  * @author
  */
+@Slf4j
 public class HttpKit {
 
     private static AbstractHttpDelegate delegate = new DefaultHttpKit();
@@ -44,7 +46,7 @@ public class HttpKit {
                 try {
                     br.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("readData错误",e);
                 }
             }
         }
@@ -57,7 +59,7 @@ public class HttpKit {
      * @return 转化后的 Map
      */
     public static Map<String, String> toMap(HttpServletRequest request) {
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>(16);
         Map<String, String[]> requestParams = request.getParameterMap();
         for (String name : requestParams.keySet()) {
             String[] values = requestParams.get(name);

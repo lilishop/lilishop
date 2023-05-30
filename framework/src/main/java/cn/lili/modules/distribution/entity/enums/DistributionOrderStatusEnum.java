@@ -4,9 +4,10 @@ package cn.lili.modules.distribution.entity.enums;
  * 分销员订单状态
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
  */
 public enum DistributionOrderStatusEnum {
+    //未完成
+    NO_COMPLETED("未完成"),
     //待结算（冻结）
     WAIT_BILL("待结算"),
     //待提现

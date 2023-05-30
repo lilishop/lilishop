@@ -6,7 +6,7 @@ import java.util.Calendar;
  * 统计缓存后缀工具
  *
  * @author Chopper
- * @date 2021-01-15 15:30
+ * @since 2021-01-15 15:30
  */
 public class StatisticsSuffix {
 
@@ -16,7 +16,7 @@ public class StatisticsSuffix {
      *
      * @return
      */
-    public static String suffix() {  // 取得系统当前时间
+    public static String suffix() {  //取得系统当前时间
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH) + 1;
@@ -30,7 +30,7 @@ public class StatisticsSuffix {
      *
      * @return
      */
-    public static String suffix(Calendar calendar) {  // 取得系统当前时间
+    public static String suffix(Calendar calendar) {  //取得系统当前时间
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH) + 1;
         int day = calendar.get(Calendar.DAY_OF_MONTH);

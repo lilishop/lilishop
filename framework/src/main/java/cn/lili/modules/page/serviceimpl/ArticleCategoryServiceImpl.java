@@ -1,10 +1,9 @@
 package cn.lili.modules.page.serviceimpl;
 
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.page.entity.dos.Article;
 import cn.lili.modules.page.entity.dos.ArticleCategory;
 import cn.lili.modules.page.entity.enums.ArticleCategoryEnum;
@@ -15,7 +14,6 @@ import cn.lili.modules.page.service.ArticleCategoryService;
 import cn.lili.modules.page.service.ArticleService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,56 +26,61 @@ import java.util.List;
  * 文章分类业务层实现
  *
  * @author pikachu
- * @date 2020-05-5 15:10:16
+ * @since 2020-05-5 15:10:16
  */
 @Service
-@Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMapper, ArticleCategory> implements ArticleCategoryService {
 
-    //缓存
-    private final Cache cache;
-    //文章
+    /**
+     * 缓存
+     */
+    @Autowired
+    private Cache cache;
+    /**
+     * 文章
+     */
+    @Autowired
     private ArticleService articleService;
+    /**
+     * 顶级父分类ID
+     */
+    private String parentId = "0";
+    /**
+     * 最大分类等级
+     */
+    private int maxLevel = 2;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ArticleCategory saveArticleCategory(ArticleCategory articleCategory) {
-        //不能添加重复的分类名称
-        List<ArticleCategory> list = this.list(
-                new LambdaQueryWrapper<ArticleCategory>().eq(ArticleCategory::getArticleCategoryName, articleCategory.getArticleCategoryName()));
-        if (StringUtils.isNotEmpty(list)) {
-            throw new ServiceException(ResultCode.SUCCESS.ARTICLE_CATEGORY_NAME_EXIST);
-        }
-        // 非顶级分类
-        if (articleCategory.getParentId() != null && !articleCategory.getParentId().equals("0")) {
+        //非顶级分类
+        if (articleCategory.getParentId() != null && !parentId.equals(articleCategory.getParentId())) {
             ArticleCategory parent = this.getById(articleCategory.getParentId());
             if (parent == null) {
                 throw new ServiceException(ResultCode.ARTICLE_CATEGORY_PARENT_NOT_EXIST);
             }
-            if (articleCategory.getLevel() >= 2) {
+            if (articleCategory.getLevel() >= maxLevel) {
                 throw new ServiceException(ResultCode.ARTICLE_CATEGORY_BEYOND_TWO);
             }
         }
         articleCategory.setType(ArticleCategoryEnum.OTHER.name());
-        if (this.save(articleCategory)) {
-            //清除文章分类缓存
-            this.clearCache();
-            return articleCategory;
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        this.save(articleCategory);
+        //清除文章分类缓存
+        this.clearCache();
+        return articleCategory;
     }
 
 
     @Override
     public ArticleCategory updateArticleCategory(ArticleCategory articleCategory) {
-        // 非顶级分类校验是否存在
-        if (!articleCategory.getParentId().equals("0")) {
+        //非顶级分类校验是否存在
+        if (!parentId.equals(articleCategory.getParentId())) {
             ArticleCategory parent = this.getById(articleCategory.getParentId());
             if (parent == null) {
                 throw new ServiceException(ResultCode.ARTICLE_CATEGORY_PARENT_NOT_EXIST);
             }
-            // 替换catPath 根据path规则来匹配级别
-            if (articleCategory.getLevel() >= 2) {
+            //替换catPath 根据path规则来匹配级别
+            if (articleCategory.getLevel() >= maxLevel) {
                 throw new ServiceException(ResultCode.ARTICLE_CATEGORY_BEYOND_TWO);
             }
         }
@@ -92,7 +95,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
             this.clearCache();
             return category;
         }
-        throw new ServiceException(ResultCode.ERROR);
+        return null;
     }
 
     @Override
@@ -113,7 +116,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
             throw new ServiceException(ResultCode.ARTICLE_CATEGORY_HAS_ARTICLE);
         }
         //判断是否为默认的分类
-        if(!this.getById(id).getType().equals(ArticleEnum.OTHER.name())){
+        if (!this.getById(id).getType().equals(ArticleEnum.OTHER.name())) {
             throw new ServiceException(ResultCode.ARTICLE_CATEGORY_NO_DELETION);
         }
 
@@ -125,11 +128,11 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
 
     @Override
     public List<ArticleCategoryVO> allChildren() {
-        // 从缓存取所有的分类
+        //从缓存取所有的分类
         Object all = cache.get(CachePrefix.ARTICLE_CATEGORY.getPrefix());
         List<ArticleCategoryVO> articleCategories;
         if (all == null) {
-            // 调用初始化分类缓存方法
+            //调用初始化分类缓存方法
             articleCategories = initCategory();
         } else {
             articleCategories = (List<ArticleCategoryVO>) all;

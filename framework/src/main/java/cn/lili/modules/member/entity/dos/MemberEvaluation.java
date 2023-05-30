@@ -1,11 +1,13 @@
 package cn.lili.modules.member.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.SwitchEnum;
-import cn.lili.common.utils.StringUtils;
+import cn.lili.common.security.sensitive.Sensitive;
+import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,19 +15,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 /**
  * 会员商品评价
  *
  * @author Bulbasaur
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Data
-@Entity
-@Table(name = "li_member_evaluation")
 @TableName("li_member_evaluation")
 @ApiModel(value = "会员商品评价")
 @NoArgsConstructor
@@ -54,6 +52,7 @@ public class MemberEvaluation extends BaseEntity {
 
     @NotNull
     @ApiModelProperty(value = "会员名称")
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String memberName;
 
     @NotNull
@@ -81,7 +80,7 @@ public class MemberEvaluation extends BaseEntity {
     private String content;
 
     @ApiModelProperty(value = "评价图片")
-    private String image;
+    private String images;
 
     @NotNull
     @ApiModelProperty(value = "状态  OPEN 正常 ,CLOSE 关闭 ")
@@ -93,11 +92,11 @@ public class MemberEvaluation extends BaseEntity {
     @ApiModelProperty(value = "评价回复图片")
     private String replyImage;
 
-    @ApiModelProperty(value = "评论是否有图片 1 有 ,0 没有")
-    private boolean haveImage;
+    @ApiModelProperty(value = "评论是否有图片 true 有 ,false 没有")
+    private Boolean haveImage;
 
-    @ApiModelProperty(value = "回复是否有图片 1 有 ,0 没有")
-    private boolean haveReplyImage;
+    @ApiModelProperty(value = "回复是否有图片 true 有 ,false 没有")
+    private Boolean haveReplyImage;
 
     @ApiModelProperty(value = "回复状态")
     private boolean replyStatus;
@@ -112,28 +111,28 @@ public class MemberEvaluation extends BaseEntity {
     private Integer descriptionScore;
 
 
-    public MemberEvaluation(MemberEvaluationDTO memberEvaluationDTO, GoodsSku goodsSku, Member member,Order order){
+    public MemberEvaluation(MemberEvaluationDTO memberEvaluationDTO, GoodsSku goodsSku, Member member, Order order) {
         //复制评价信息
         BeanUtils.copyProperties(memberEvaluationDTO, this);
         //设置会员
-        this.memberId=member.getId();
+        this.memberId = member.getId();
         //会员名称
-        this.memberName=member.getNickName();
+        this.memberName = member.getNickName();
         //设置会员头像
-        this.memberProfile=member.getFace();
+        this.memberProfile = member.getFace();
         //商品名称
-        this.goodsName=goodsSku.getGoodsName();
+        this.goodsName = goodsSku.getGoodsName();
         //商品图片
-        this.goodsImage=goodsSku.getThumbnail();
+        this.goodsImage = goodsSku.getThumbnail();
         //设置店铺ID
-        this.storeId=order.getStoreId();
+        this.storeId = order.getStoreId();
         //设置店铺名称
-        this.storeName=order.getStoreName();
+        this.storeName = order.getStoreName();
         //设置订单编号
-        this.orderNo=order.getSn();
+        this.orderNo = order.getSn();
         //是否包含图片
-        this.haveImage=StringUtils.isNotEmpty(memberEvaluationDTO.getImages());
+        this.haveImage = CharSequenceUtil.isNotEmpty(memberEvaluationDTO.getImages());
         //默认开启评价
-        this.status=SwitchEnum.OPEN.name();
+        this.status = SwitchEnum.OPEN.name();
     }
 }

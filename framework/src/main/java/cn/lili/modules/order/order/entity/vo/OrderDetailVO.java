@@ -7,7 +7,7 @@ import cn.lili.modules.order.order.entity.dos.Receipt;
 import cn.lili.modules.order.order.entity.enums.DeliverStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
-import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.trade.entity.dos.OrderLog;
 import io.swagger.annotations.ApiModelProperty;
@@ -21,7 +21,7 @@ import java.util.List;
  * 订单详情VO
  *
  * @author Chopper
- * @date 2020/11/17 7:29 下午
+ * @since 2020/11/17 7:29 下午
  */
 @Data
 @NoArgsConstructor

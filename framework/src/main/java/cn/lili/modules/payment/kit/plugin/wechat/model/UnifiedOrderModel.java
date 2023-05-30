@@ -1,5 +1,7 @@
 package cn.lili.modules.payment.kit.plugin.wechat.model;
 
+import cn.hutool.json.JSONUtil;
+import cn.lili.common.utils.StringUtils;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -8,7 +10,7 @@ import lombok.experimental.Accessors;
  * 统一下单-商户门店信息
  *
  * @author Chopper
- * @date 2020/12/17 17:58
+ * @since 2020/12/17 17:58
  */
 
 @Data
@@ -42,6 +44,7 @@ public class UnifiedOrderModel {
      * 商品描述
      */
     private String description;
+
     /**
      * 商户订单号
      */
@@ -82,6 +85,7 @@ public class UnifiedOrderModel {
      * 场景信息
      */
     private SceneInfo scene_info;
+
 }
 
 

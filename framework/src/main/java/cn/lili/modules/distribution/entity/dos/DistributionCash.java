@@ -1,7 +1,7 @@
 package cn.lili.modules.distribution.entity.dos;
 
-import cn.lili.base.BaseEntity;
-import cn.lili.modules.distribution.entity.enums.DistributionCashStatusEnum;
+import cn.lili.modules.wallet.entity.enums.WithdrawStatusEnum;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -12,19 +12,15 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
  * 分销佣金
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
+ * @since 2020-03-14 23:04:56
  */
 @Data
-@Entity
-@Table(name = "li_distribution_cash")
 @TableName("li_distribution_cash")
 @ApiModel(value = "分销佣金")
 @NoArgsConstructor
@@ -59,7 +55,7 @@ public class DistributionCash extends BaseEntity {
         this.sn = sn;
         this.distributionId = distributionId;
         this.price = price;
-        this.distributionCashStatus = DistributionCashStatusEnum.APPLY.name();
+        this.distributionCashStatus = WithdrawStatusEnum.APPLY.name();
         this.distributionName = memberName;
     }
 }

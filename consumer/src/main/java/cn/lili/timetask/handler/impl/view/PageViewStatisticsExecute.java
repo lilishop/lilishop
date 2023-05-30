@@ -1,14 +1,13 @@
 package cn.lili.timetask.handler.impl.view;
 
-import cn.lili.common.cache.Cache;
-import cn.lili.common.cache.CachePrefix;
+import cn.hutool.core.convert.Convert;
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.common.utils.DateUtil;
-import cn.lili.modules.statistics.model.dos.PlatformViewData;
-import cn.lili.modules.statistics.service.PlatformViewDataService;
+import cn.lili.modules.statistics.entity.dos.PlatformViewData;
+import cn.lili.modules.statistics.service.PlatformViewService;
 import cn.lili.timetask.handler.EveryDayExecute;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,16 +23,21 @@ import java.util.List;
  * 统计 入库
  *
  * @author Chopper
- * @date 2021-01-15 18:20
+ * @since 2021-01-15 18:20
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PageViewStatisticsExecute implements EveryDayExecute {
-    //缓存
-    private final Cache cache;
-    //平台PV统计
-    private final PlatformViewDataService platformViewDataService;
+    /**
+     * 缓存
+     */
+    @Autowired
+    private Cache cache;
+    /**
+     * 平台PV统计
+     */
+    @Autowired
+    private PlatformViewService platformViewService;
 
     @Override
     public void execute() {
@@ -119,7 +123,7 @@ public class PageViewStatisticsExecute implements EveryDayExecute {
     @Transactional(rollbackFor = Exception.class)
     void batchSave(List<String> pvKeys, List<String> uvKeys, List<PlatformViewData> platformViewData) {
         log.debug("批量保存流量数据，共计【{}】条", platformViewData.size());
-        platformViewDataService.saveBatch(platformViewData);
+        platformViewService.saveBatch(platformViewData);
         //批量删除缓存key
         cache.multiDel(pvKeys);
         cache.multiDel(uvKeys);
@@ -167,15 +171,15 @@ class PageViewStatistics {
         //将字符串解析成需要的对象
         str = str.substring(str.indexOf("}") + 2);
         String[] dateStr = str.split("-");
-        Integer year = Integer.parseInt(dateStr[0]);
-        Integer month = Integer.parseInt(dateStr[1]);
+        Integer year = Convert.toInt(dateStr[0]);
+        Integer month = Convert.toInt(dateStr[1]);
         Integer day;
         //是否有店铺id
         if (dateStr.length > 3) {
-            day = Integer.parseInt(dateStr[2]);
+            day = Convert.toInt(dateStr[2]);
             this.storeId = dateStr[3];
         } else {
-            day = Integer.parseInt(dateStr[2]);
+            day = Convert.toInt(dateStr[2]);
         }
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, year);
@@ -186,7 +190,6 @@ class PageViewStatistics {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         this.date = calendar.getTime();
-        System.out.println(DateUtil.toString(date,DateUtil.STANDARD_FORMAT));
     }
 
 }

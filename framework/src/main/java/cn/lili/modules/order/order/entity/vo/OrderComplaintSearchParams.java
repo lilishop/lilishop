@@ -1,8 +1,8 @@
 package cn.lili.modules.order.order.entity.vo;
 
 import cn.hutool.core.util.StrUtil;
+import cn.lili.modules.order.aftersale.entity.enums.ComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.dos.OrderComplaint;
-import cn.lili.modules.order.order.entity.enums.ComplaintStatusEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -11,7 +11,7 @@ import lombok.Data;
  * 订单投诉查询参数
  *
  * @author paulG
- * @date 2020/12/4
+ * @since 2020/12/4
  **/
 @Data
 public class OrderComplaintSearchParams {

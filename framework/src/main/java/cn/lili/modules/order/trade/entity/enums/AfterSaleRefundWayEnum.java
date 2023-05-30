@@ -8,8 +8,13 @@ package cn.lili.modules.order.trade.entity.enums;
  **/
 public enum AfterSaleRefundWayEnum {
 
-
+    /**
+     * "原路退回"
+     */
     ORIGINAL("原路退回"),
+    /**
+     * "线下支付"
+     */
     OFFLINE("线下支付");
 
     private final String description;

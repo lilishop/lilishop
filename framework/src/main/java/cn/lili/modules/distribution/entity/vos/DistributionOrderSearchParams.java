@@ -16,7 +16,7 @@ import java.util.Date;
  * 分销员对象
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
+ * @since 2020-03-14 23:04:56
  */
 @Data
 @ApiModel(value = "分销订单查询对象")
@@ -30,7 +30,7 @@ public class DistributionOrderSearchParams extends PageVO {
     @ApiModelProperty(value = "订单sn")
     private String orderSn;
 
-    @ApiModelProperty(value = "分销员ID",hidden = true)
+    @ApiModelProperty(value = "分销员ID", hidden = true)
     private String distributionId;
 
     @ApiModelProperty(value = "分销订单状态")
@@ -55,9 +55,10 @@ public class DistributionOrderSearchParams extends PageVO {
         queryWrapper.like(StringUtils.isNotBlank(distributionName), "distribution_name", distributionName);
         queryWrapper.eq(StringUtils.isNotBlank(distributionOrderStatus), "distribution_order_status", distributionOrderStatus);
         queryWrapper.eq(StringUtils.isNotBlank(orderSn), "order_sn", orderSn);
-        queryWrapper.eq(StringUtils.isNotBlank(StringUtils.toString(distributionId)), "distribution_id", distributionId);
-        queryWrapper.eq(StringUtils.isNotBlank(StringUtils.toString(storeId)), "store_id", storeId);
+        queryWrapper.eq(StringUtils.isNotBlank(distributionId), "distribution_id", distributionId);
+        queryWrapper.eq(StringUtils.isNotBlank(storeId), "store_id", storeId);
         if (endTime != null && startTime != null) {
+            endTime = DateUtil.endOfDate(endTime);
             queryWrapper.between("create_time", startTime, endTime);
         }
         return queryWrapper;

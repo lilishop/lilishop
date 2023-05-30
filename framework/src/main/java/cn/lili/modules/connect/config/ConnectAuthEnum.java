@@ -6,13 +6,12 @@ package cn.lili.modules.connect.config;
  *
  * @author Chopper
  * @version v4.0
- * @Description:
  * @since 2020/12/4 14:10
  */
 public enum ConnectAuthEnum implements ConnectAuth {
 
     /**
-     * 微信开放平台
+     * 微信公众号登录
      */
     WECHAT {
         @Override
@@ -33,6 +32,7 @@ public enum ConnectAuthEnum implements ConnectAuth {
 
     /**
      * 微信开放平台
+     * 微信PC登录
      */
     WECHAT_PC {
         @Override

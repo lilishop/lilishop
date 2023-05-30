@@ -11,7 +11,7 @@ import cn.lili.modules.permission.service.DepartmentRoleService;
 import cn.lili.modules.permission.service.DepartmentService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,29 +23,25 @@ import java.util.List;
  * 部门业务层实现
  *
  * @author Chopper
- * @date 2020/11/17 3:47 下午
+ * @since 2020/11/17 3:47 下午
  */
+@Slf4j
 @Service
-@Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Department> implements DepartmentService {
 
-    //管理员
+    /**
+     * 管理员
+     */
+    @Autowired
     private AdminUserService adminUserService;
-    //部门角色
+    /**
+     * 部门角色
+     */
+    @Autowired
     private DepartmentRoleService departmentRoleService;
 
-    @Autowired
-    public void setDepartmentRoleService(DepartmentRoleService departmentRoleService) {
-        this.departmentRoleService = departmentRoleService;
-    }
-
-    @Autowired
-    public void setAdminUserService(AdminUserService adminUserService) {
-        this.adminUserService = adminUserService;
-    }
-
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteByIds(List<String> ids) {
         QueryWrapper<AdminUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("department_id", ids);
@@ -66,7 +62,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
 
             List<DepartmentVO> tree = new ArrayList<>();
             all.forEach(item -> {
-                if (item.getParentId().equals("0")) {
+                if ("0".equals(item.getParentId())) {
                     initChild(item, all);
                     tree.add(item);
                 }
@@ -74,7 +70,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
 
             return tree;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("部门业务错误", e);
             return null;
         }
     }

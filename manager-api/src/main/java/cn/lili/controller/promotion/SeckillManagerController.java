@@ -1,113 +1,96 @@
 package cn.lili.controller.promotion;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.security.AuthUser;
-import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
-import cn.lili.modules.promotion.entity.enums.SeckillApplyStatusEnum;
-import cn.lili.modules.promotion.entity.vos.SeckillSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.SeckillSearchParams;
 import cn.lili.modules.promotion.entity.vos.SeckillVO;
 import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.service.SeckillService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+
 /**
- * 管理端,限时抢购接口
+ * 管理端,秒杀活动接口
  *
  * @author paulG
- * @date 2020/8/20
+ * @since 2020/8/20
  **/
 @RestController
-@Api(tags = "管理端,限时抢购接口")
+@Api(tags = "管理端,秒杀活动接口")
 @RequestMapping("/manager/promotion/seckill")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SeckillManagerController {
+    @Autowired
+    private SeckillService seckillService;
+    @Autowired
+    private SeckillApplyService seckillApplyService;
 
-    private final SeckillService seckillService;
-    private final SeckillApplyService seckillApplyService;
 
-    @PostMapping
-    @ApiOperation(value = "添加限时抢购")
-    public ResultMessage<Seckill> addSeckill(SeckillVO seckillVO) {
-        AuthUser currentUser = UserContext.getCurrentUser();
-        seckillVO.setStoreId(currentUser.getId());
-        seckillVO.setStoreName(currentUser.getUsername());
-        seckillVO.setSeckillApplyStatus(SeckillApplyStatusEnum.NOT_APPLY.name());
-        if (seckillService.saveSeckill(seckillVO)) {
-            return ResultUtil.data(seckillVO);
-        }
-        return ResultUtil.error(ResultCode.ERROR);
+    @ApiOperation(value = "初始化秒杀活动(初始化方法，默认初始化30天内的活动）")
+    @GetMapping("/init")
+    public void addSeckill() {
+        seckillService.init();
     }
 
-    @PutMapping
-    @ApiOperation(value = "修改限时抢购")
-    public ResultMessage<Seckill> updateSeckill(SeckillVO seckillVO) {
-        AuthUser currentUser = UserContext.getCurrentUser();
-        seckillVO.setStoreId(currentUser.getId());
-        seckillVO.setStoreName(currentUser.getUsername());
-        if (seckillService.modifySeckill(seckillVO)) {
-            return ResultUtil.data(seckillVO);
-        }
-        return ResultUtil.error(ResultCode.ERROR);
+
+    @ApiOperation(value = "修改秒杀活动")
+    @PutMapping(consumes = "application/json", produces = "application/json")
+    public ResultMessage<Seckill> updateSeckill(@RequestBody SeckillVO seckillVO) {
+        seckillService.updatePromotions(seckillVO);
+        return ResultUtil.data(seckillVO);
     }
 
-    @GetMapping(value = "/{id}")
     @ApiOperation(value = "通过id获取")
+    @ApiImplicitParam(name = "id", value = "秒杀活动ID", required = true, dataType = "String", paramType = "path")
+    @GetMapping(value = "/{id}")
     public ResultMessage<Seckill> get(@PathVariable String id) {
         Seckill seckill = seckillService.getById(id);
         return ResultUtil.data(seckill);
     }
 
+    @ApiOperation(value = "分页查询秒杀活动列表")
     @GetMapping
-    @ApiOperation(value = "分页查询限时抢购列表")
-    public ResultMessage<IPage<SeckillVO>> getAll(SeckillSearchParams param, PageVO pageVo) {
-        pageVo.setNotConvert(true);
-        IPage<SeckillVO> page = seckillService.getSeckillByPageFromMongo(param, pageVo);
-        return ResultUtil.data(page);
+    public ResultMessage<IPage<Seckill>> getAll(SeckillSearchParams param, PageVO pageVo) {
+        return ResultUtil.data(seckillService.pageFindAll(param, pageVo));
     }
 
+    @ApiOperation(value = "删除一个秒杀活动")
+    @ApiImplicitParam(name = "id", value = "秒杀活动ID", required = true, dataType = "String", paramType = "path")
     @DeleteMapping("/{id}")
-    @ApiOperation(value = "删除一个限时抢购")
     public ResultMessage<Object> deleteSeckill(@PathVariable String id) {
-        seckillService.deleteSeckill(id);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        seckillService.removePromotions(Collections.singletonList(id));
+        return ResultUtil.success();
     }
 
-    @PutMapping("/close/{id}")
-    @ApiOperation(value = "关闭一个限时抢购")
-    public ResultMessage<Object> closeSeckill(@PathVariable String id) {
-        seckillService.closeSeckill(id);
-        return ResultUtil.success(ResultCode.SUCCESS);
+    @ApiOperation(value = "操作秒杀活动状态")
+    @ApiImplicitParam(name = "id", value = "秒杀活动ID", required = true, dataType = "String", paramType = "path")
+    @PutMapping("/status/{id}")
+    public ResultMessage<Object> updateSeckillStatus(@PathVariable String id, Long startTime, Long endTime) {
+        seckillService.updateStatus(Collections.singletonList(id), startTime, endTime);
+        return ResultUtil.success();
     }
 
-    @PutMapping("/open/{id}")
-    @ApiOperation(value = "一个限时抢购")
-    public ResultMessage<Object> openSeckill(@PathVariable String id) {
-        seckillService.openSeckill(id);
-        return ResultUtil.success(ResultCode.SUCCESS);
-    }
-
+    @ApiOperation(value = "获取秒杀活动申请列表")
     @GetMapping("/apply")
-    @ApiOperation(value = "获取限时抢购申请列表")
     public ResultMessage<IPage<SeckillApply>> getSeckillApply(SeckillSearchParams param, PageVO pageVo) {
-        IPage<SeckillApply> seckillApply = seckillApplyService.getSeckillApplyFromMongo(param, pageVo);
+        IPage<SeckillApply> seckillApply = seckillApplyService.getSeckillApplyPage(param, pageVo);
         return ResultUtil.data(seckillApply);
     }
 
-    @PutMapping("/apply/audit/{ids}")
-    @ApiOperation(value = "审核多个限时抢购申请")
-    public ResultMessage<Object> auditSeckillApply(@PathVariable String[] ids, String seckillId, String applyStatus, String failReason) {
-        seckillApplyService.auditBatchApply(ids, seckillId, applyStatus, failReason);
-        return ResultUtil.success(ResultCode.SUCCESS);
+    @DeleteMapping("/apply/{seckillId}/{id}")
+    @ApiOperation(value = "删除秒杀活动申请")
+    public ResultMessage<String> deleteSeckillApply(@PathVariable String seckillId, @PathVariable String id) {
+        seckillApplyService.removeSeckillApply(seckillId, id);
+        return ResultUtil.success();
     }
+
 
 }

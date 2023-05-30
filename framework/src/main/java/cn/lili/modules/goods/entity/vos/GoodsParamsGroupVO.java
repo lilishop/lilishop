@@ -10,7 +10,7 @@ import java.util.List;
  * 商品参数vo
  *
  * @author pikachu
- * @date 2020-02-26 23:24:13
+ * @since 2020-02-26 23:24:13
  */
 @Data
 public class GoodsParamsGroupVO implements Serializable {

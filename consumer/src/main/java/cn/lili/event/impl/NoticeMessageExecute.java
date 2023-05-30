@@ -2,21 +2,21 @@ package cn.lili.event.impl;
 
 import cn.lili.event.*;
 import cn.lili.modules.member.entity.dto.MemberPointMessage;
-import cn.lili.modules.member.entity.dto.MemberWithdrawalMessage;
-import cn.lili.modules.member.entity.enums.MemberWithdrawalDestinationEnum;
+import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.message.entity.dto.NoticeMessageDTO;
 import cn.lili.modules.message.entity.enums.NoticeMessageNodeEnum;
 import cn.lili.modules.message.entity.enums.NoticeMessageParameterEnum;
 import cn.lili.modules.message.service.NoticeMessageService;
+import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
-import cn.lili.modules.order.order.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
-import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
+import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleTypeEnum;
-import lombok.RequiredArgsConstructor;
+import cn.lili.modules.wallet.entity.dto.MemberWithdrawalMessage;
+import cn.lili.modules.wallet.entity.enums.WithdrawStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,15 +28,15 @@ import java.util.Map;
  * 通知类消息实现
  *
  * @author Chopper
- * @date 2020-07-03 11:20
+ * @since 2020-07-03 11:20
  **/
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent, AfterSaleStatusChangeEvent, MemberPointChangeEvent, MemberWithdrawalEvent {
 
-    private final NoticeMessageService noticeMessageService;
-
-    private final OrderService orderService;
+    @Autowired
+    private NoticeMessageService noticeMessageService;
+    @Autowired
+    private OrderService orderService;
 
 
     @Override
@@ -45,7 +45,7 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
         NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
         noticeMessageDTO.setMemberId(tradeDTO.getMemberId());
         noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.ORDER_CREATE_SUCCESS);
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>(2);
         params.put("goods", tradeDTO.getSkuList().get(0).getGoodsSku().getGoodsName());
         noticeMessageDTO.setParameter(params);
         //保存站内信
@@ -59,8 +59,8 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
         NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
         //如果订单状态不为空
         if (orderDetailVO != null) {
-            Map<String, String> params = new HashMap<>();
-            switch (orderMessage.getNewStatus()){
+            Map<String, String> params = new HashMap<>(2);
+            switch (orderMessage.getNewStatus()) {
                 //如果订单新的状态为已取消 则发送取消订单站内信
                 case CANCELLED:
                     params.put(NoticeMessageParameterEnum.CANCEL_REASON.getType(), orderDetailVO.getOrder().getCancelReason());
@@ -83,7 +83,7 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
                     break;
                 //如果是拼团订单，发送拼团成功消息
                 case UNDELIVERED:
-                    if(orderDetailVO.getOrder().getOrderType().equals(OrderTypeEnum.PINTUAN.name())){
+                    if (OrderPromotionTypeEnum.PINTUAN.name().equals(orderDetailVO.getOrder().getOrderPromotionType())) {
                         //拼团成功消息
                         noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.PINTUAN_SUCCESS);
                     }
@@ -95,8 +95,12 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
             //添加站内信参数
             params.put(NoticeMessageParameterEnum.GOODS.getType(), orderDetailVO.getOrderItems().get(0).getGoodsName());
             noticeMessageDTO.setParameter(params);
-            //保存站内信
-            noticeMessageService.noticeMessage(noticeMessageDTO);
+
+            //如果有消息，则发送消息
+            if (noticeMessageDTO.getNoticeMessageNodeEnum() != null) {
+                //保存站内信
+                noticeMessageService.noticeMessage(noticeMessageDTO);
+            }
         }
     }
 
@@ -104,7 +108,7 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
     public void afterSaleStatusChange(AfterSale afterSale) {
         NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
         noticeMessageDTO.setMemberId(afterSale.getMemberId());
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>(2);
         params.put("goods", afterSale.getGoodsName());
         params.put("refuse", afterSale.getAuditRemark());
         noticeMessageDTO.setParameter(params);
@@ -149,11 +153,14 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
 
     @Override
     public void memberPointChange(MemberPointMessage memberPointMessage) {
+        if (memberPointMessage == null) {
+            return;
+        }
         //组织站内信参数
         NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
         noticeMessageDTO.setMemberId(memberPointMessage.getMemberId());
-        Map<String, String> params = new HashMap<>();
-        if (memberPointMessage.getType().equals(1)) {
+        Map<String, String> params = new HashMap<>(2);
+        if (memberPointMessage.getType().equals(PointTypeEnum.INCREASE.name())) {
             params.put("expenditure_points", "0");
             params.put("income_points", memberPointMessage.getPoint().toString());
         } else {
@@ -169,28 +176,32 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
 
     @Override
     public void memberWithdrawal(MemberWithdrawalMessage memberWithdrawalMessage) {
-
-        //如果提现到余额
-        if (memberWithdrawalMessage.getDestination().equals(MemberWithdrawalDestinationEnum.WALLET.name())) {
-
-            //组织参数
-            NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
-            noticeMessageDTO.setMemberId(memberWithdrawalMessage.getMemberId());
-            Map<String, String> params = new HashMap<>();
-            params.put("income", memberWithdrawalMessage.getPrice().toString());
-            noticeMessageDTO.setParameter(params);
-            noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_SUCCESS);
-            //发送提现申请成功消息
-            noticeMessageService.noticeMessage(noticeMessageDTO);
-
-            params.put("income", memberWithdrawalMessage.getPrice().toString());
-            params.put("expenditure", "0");
-            noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_CHANGE);
-            noticeMessageDTO.setParameter(params);
-            //发送余额变动消息
-            noticeMessageService.noticeMessage(noticeMessageDTO);
+        NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
+        noticeMessageDTO.setMemberId(memberWithdrawalMessage.getMemberId());
+        Map<String, String> params = new HashMap<>(2);
+        switch (WithdrawStatusEnum.valueOf(memberWithdrawalMessage.getStatus())) {
+            case APPLY:
+                //如果提现状态为申请则发送申请提现站内消息
+                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_CREATE);
+                break;
+            case FAIL_AUDITING:
+                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_AUDIT_ERROR);
+                break;
+            case SUCCESS:
+                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_SUCCESS);
+                break;
+            case ERROR:
+                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_ERROR);
+                break;
+            case VIA_AUDITING:
+                noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_WITHDRAWAL_AUDIT_SUCCESS);
+            default:
+                break;
         }
 
-
+        params.put("price", memberWithdrawalMessage.getPrice().toString());
+        noticeMessageDTO.setParameter(params);
+        //发送提现申请消息
+        noticeMessageService.noticeMessage(noticeMessageDTO);
     }
 }

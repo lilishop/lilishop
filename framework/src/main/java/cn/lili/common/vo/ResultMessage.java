@@ -9,7 +9,6 @@ import java.io.Serializable;
  * 前后端交互VO
  *
  * @author Chopper
- * @date 2020/11/26 14:40
  */
 @Data
 public class ResultMessage<T> implements Serializable {

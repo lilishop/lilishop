@@ -7,10 +7,10 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 限时抢购时刻视图对象
+ * 秒杀活动时刻视图对象
  *
  * @author paulG
- * @date 2020/8/27
+ * @since 2020/8/27
  **/
 @Data
 public class SeckillTimelineVO implements Serializable {
@@ -26,7 +26,7 @@ public class SeckillTimelineVO implements Serializable {
     @ApiModelProperty(value = "距离本组活动开始的时间，秒为单位。如果活动的开始时间是10点，服务器时间为8点，距离开始还有多少时间")
     private Long distanceStartTime;
 
-    @ApiModelProperty(value = "本组活动内的限时抢购商品列表")
+    @ApiModelProperty(value = "本组活动内的秒杀活动商品列表")
     private List<SeckillGoodsVO> seckillGoodsList;
 
 }

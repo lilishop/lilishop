@@ -16,11 +16,17 @@ import java.util.List;
  * 文章业务层
  *
  * @author pikachu
- * @date 2020/11/18 11:40 上午
+ * @since 2020/11/18 11:40 上午
  */
 @CacheConfig(cacheNames = "{article}")
 public interface ArticleService extends IService<Article> {
 
+    /**
+     * 管理端获取文章
+     * @param articleSearchParams
+     * @return
+     */
+    IPage<ArticleVO> managerArticlePage(ArticleSearchParams articleSearchParams);
     /**
      * 获取文章分页
      *
@@ -47,7 +53,7 @@ public interface ArticleService extends IService<Article> {
     Article updateArticle(Article article);
 
     /**
-     * 删除文章
+     * 删除文章--id
      *
      * @param id
      */
@@ -58,6 +64,7 @@ public interface ArticleService extends IService<Article> {
      * 读取文章
      *
      * @param id
+     * @return 文章
      */
     @Cacheable(key = "#id")
     Article customGet(String id);
@@ -66,7 +73,26 @@ public interface ArticleService extends IService<Article> {
      * 读取文章
      *
      * @param type
+     * @return 文章
      */
     @Cacheable(key = "#type")
     Article customGetByType(String type);
+
+    /**
+     * 修改文章状态
+     *
+     * @param id     文章ID
+     * @param status 显示状态
+     * @return 操作状态
+     */
+    @CacheEvict(key = "#id")
+    Boolean updateArticleStatus(String id, boolean status);
+
+    /**
+     * 修改文章--文章类型修改
+     * @param article
+     * @return
+     */
+    @CacheEvict(key = "#article.type")
+    Article updateArticleType(Article article);
 }

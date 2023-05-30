@@ -2,7 +2,6 @@ package cn.lili.modules.payment.kit.plugin.alipay;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.enums.MessageCode;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.SpringContextUtil;
@@ -20,7 +19,7 @@ import java.util.Date;
  * AliPayApiConfigKit
  *
  * @author Chopper
- * @date 2020-12-16 09:31
+ * @since 2020-12-16 09:31
  */
 public class AliPayApiConfigKit {
 
@@ -74,7 +73,7 @@ public class AliPayApiConfigKit {
         certAlipayRequest.setAlipayPublicCertPath(setting.getAlipayPublicCertPath());
         certAlipayRequest.setRootCertPath(setting.getRootCertPath());
         defaultAlipayClient = new DefaultAlipayClient(certAlipayRequest);
-        nextRebuildDate = DateUtil.date(new Date().getTime() + refreshInterval);
+        nextRebuildDate = DateUtil.date(System.currentTimeMillis()+ refreshInterval);
         return defaultAlipayClient;
     }
 }

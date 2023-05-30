@@ -1,6 +1,6 @@
 package cn.lili.controller.other;
 
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.page.entity.dos.Article;
 import cn.lili.modules.page.entity.dto.ArticleSearchParams;
@@ -11,7 +11,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,18 +21,18 @@ import org.springframework.web.bind.annotation.RestController;
  * 店铺端,文章接口
  *
  * @author pikachu
- * @date 2020-05-06 15:18:56
+ * @since 2020-05-06 15:18:56
  */
 @RestController
 @Api(tags = "店铺端,文章接口")
-@RequestMapping("/store/article")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping("/store/other/article")
 public class ArticleStoreController {
 
     /**
      * 文章
      */
-    private final ArticleService articleService;
+    @Autowired
+    private ArticleService articleService;
 
     @ApiOperation(value = "分页获取")
     @ApiImplicitParams({

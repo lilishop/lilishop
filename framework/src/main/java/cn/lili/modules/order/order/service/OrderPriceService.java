@@ -3,10 +3,10 @@ package cn.lili.modules.order.order.service;
 import cn.lili.modules.order.order.entity.dos.Order;
 
 /**
- * @author liushuai(liushuai711 @ gmail.com)
- * @version v4.1
- * @Description:
- * @since 2021/4/28 3:47 下午
+ * 订单价格
+ *
+ * @author Chopper
+ * @since 2020/11/17 7:36 下午
  */
 public interface OrderPriceService {
 
@@ -16,6 +16,7 @@ public interface OrderPriceService {
      *
      * @param orderSn    订单编号
      * @param orderPrice 订单价格
+     * @return 订单
      */
     Order updatePrice(String orderSn, Double orderPrice);
 

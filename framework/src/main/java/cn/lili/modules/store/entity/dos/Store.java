@@ -1,6 +1,6 @@
 package cn.lili.modules.store.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.store.entity.dto.AdminStoreApplyDTO;
@@ -13,8 +13,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
@@ -24,11 +22,9 @@ import java.util.Date;
  * 店铺
  *
  * @author pikachu
- * @date 2020-02-18 15:18:56
+ * @since 2020-02-18 15:18:56
  */
 @Data
-@Entity
-@Table(name = "li_store")
 @TableName("li_store")
 @ApiModel(value = "店铺")
 @NoArgsConstructor
@@ -86,7 +82,7 @@ public class Store extends BaseEntity {
     @ApiModelProperty(value = "服务评分")
     private Double serviceScore;
 
-    @ApiModelProperty(value = "物流描述")
+    @ApiModelProperty(value = "物流评分")
     private Double deliveryScore;
 
     @ApiModelProperty(value = "商品数量")
@@ -94,6 +90,35 @@ public class Store extends BaseEntity {
 
     @ApiModelProperty(value = "收藏数量")
     private Integer collectionNum;
+
+    @ApiModelProperty(value = "腾讯云智服唯一标识")
+    private String yzfSign;
+
+    @ApiModelProperty(value = "腾讯云智服小程序唯一标识")
+    private String yzfMpSign;
+
+    @ApiModelProperty(value = "udesk IM标识")
+    private String merchantEuid;
+
+    public Boolean getPageShow() {
+        if(pageShow == null){
+            return false;
+        }
+        return pageShow;
+    }
+
+    public Boolean getSelfPickFlag() {
+        if(selfPickFlag == null){
+            return false;
+        }
+        return selfPickFlag;
+    }
+
+    @ApiModelProperty(value = "默认页面是否开启")
+    private Boolean pageShow;
+
+    @ApiModelProperty(value = "是否开启自提")
+    private Boolean selfPickFlag;
 
     public Store(Member member) {
         this.memberId = member.getId();
@@ -103,11 +128,13 @@ public class Store extends BaseEntity {
         deliveryScore = 5.0;
         serviceScore = 5.0;
         descriptionScore = 5.0;
-        goodsNum=0;
-        collectionNum=0;
+        goodsNum = 0;
+        collectionNum = 0;
+        this.selfPickFlag = false;
+        this.pageShow = false;
     }
 
-    public Store(Member member,AdminStoreApplyDTO adminStoreApplyDTO) {
+    public Store(Member member, AdminStoreApplyDTO adminStoreApplyDTO) {
         BeanUtil.copyProperties(adminStoreApplyDTO, this);
 
         this.memberId = member.getId();
@@ -117,8 +144,10 @@ public class Store extends BaseEntity {
         deliveryScore = 5.0;
         serviceScore = 5.0;
         descriptionScore = 5.0;
-        goodsNum=0;
-        collectionNum=0;
+        goodsNum = 0;
+        collectionNum = 0;
+        this.selfPickFlag = false;
+        this.pageShow = false;
     }
 
 }

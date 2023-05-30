@@ -1,25 +1,20 @@
 package cn.lili.modules.permission.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  * 管理员类
  *
  * @author Chopper
- * @date 2020/11/19 11:42
+ * @since 2020/11/19 11:42
  */
 @Data
-@Entity
-@Table(name = "li_admin_user")
 @TableName("li_admin_user")
 @ApiModel(value = "管理员")
 public class AdminUser extends BaseEntity {
@@ -27,23 +22,25 @@ public class AdminUser extends BaseEntity {
     private static final long serialVersionUID = 2918352800205024873L;
 
     @ApiModelProperty(value = "用户名")
-    @Column(unique = true, nullable = false, columnDefinition = "varchar(200)")
+    @Length(max = 20,message = "用户名长度不能超过20个字符")
     private String username;
 
     @ApiModelProperty(value = "密码")
     private String password;
 
     @ApiModelProperty(value = "昵称")
+    @Length(max = 10,message = "昵称长度不能超过10个字符")
     private String nickName;
 
     @ApiModelProperty(value = "手机")
+    @Length(max = 11,message = "手机号长度不能超过11")
     private String mobile;
 
     @ApiModelProperty(value = "邮件")
+    @Length(max = 100,message = "邮箱长度不能超过100")
     private String email;
 
     @ApiModelProperty(value = "用户头像")
-    @Column(length = 1000)
     private String avatar = "https://i.loli.net/2020/11/19/LyN6JF7zZRskdIe.png";
 
     @ApiModelProperty(value = "是否是超级管理员 超级管理员/普通管理员")

@@ -1,9 +1,10 @@
 package cn.lili.controller.setting;
 
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.enums.SwitchEnum;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.BeanUtil;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.message.entity.dos.NoticeMessage;
@@ -15,7 +16,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.EnumUtils;
 import org.elasticsearch.ResourceNotFoundException;
@@ -30,16 +30,15 @@ import java.util.List;
  * 管理端,会员站内信管理接口
  *
  * @author Chopper
- * @date: 2020/11/17 4:31 下午
+ * @since 2020/11/17 4:31 下午
  */
 @Slf4j
 @RestController
 @Api(tags = "管理端,会员站内信管理接口")
-@RequestMapping("/manager/noticeMessage")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping("/manager/setting/noticeMessage")
 public class NoticeMessageManagerController {
-
-    private final NoticeMessageService noticeMessageService;
+    @Autowired
+    private NoticeMessageService noticeMessageService;
 
     @ApiOperation(value = "消息模板分页")
     @GetMapping
@@ -96,11 +95,8 @@ public class NoticeMessageManagerController {
         if (noticeMessage != null) {
             noticeMessage.setNoticeContent(noticeContent);
             noticeMessage.setNoticeTitle(noticeTitle);
-            boolean result = noticeMessageService.updateById(noticeMessage);
-            if (result) {
-                return ResultUtil.data(noticeMessage);
-            }
-            return ResultUtil.error(ResultCode.ERROR);
+            noticeMessageService.updateById(noticeMessage);
+            return ResultUtil.data(noticeMessage);
         }
         throw new ResourceNotFoundException(ResultCode.NOTICE_NOT_EXIST.message());
     }
@@ -121,12 +117,10 @@ public class NoticeMessageManagerController {
             if (b) {
                 //赋值执行修改操作
                 messageTemplate.setNoticeStatus(status);
-                boolean result = noticeMessageService.updateById(messageTemplate);
-                if (result) {
-                    return ResultUtil.data(messageTemplate);
-                }
+                noticeMessageService.updateById(messageTemplate);
+                return ResultUtil.data(messageTemplate);
             }
-            return ResultUtil.error(ResultCode.ERROR);
+            throw new ServiceException(ResultCode.NOTICE_ERROR);
         }
         throw new ResourceNotFoundException(ResultCode.NOTICE_NOT_EXIST.message());
     }

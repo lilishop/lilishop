@@ -1,24 +1,20 @@
 package cn.lili.modules.system.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 /**
  * 行政地区
  * @author Chopper
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Data
-@Entity
-@Table(name = "li_region")
 @TableName("li_region")
 @ApiModel(value = "行政地区")
 public class Region extends BaseEntity {

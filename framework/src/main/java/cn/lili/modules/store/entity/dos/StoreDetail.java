@@ -4,9 +4,10 @@ package cn.lili.modules.store.entity.dos;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.lili.common.validation.Mobile;
+import cn.lili.common.validation.Phone;
 import cn.lili.modules.store.entity.dto.AdminStoreApplyDTO;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -16,35 +17,25 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Date;
 
 /**
  * 店铺详细
  *
  * @author pikachu
- * @date 2020-02-18 15:18:56
+ * @since 2020-02-18 15:18:56
  */
 @Data
-@Entity
-@Table(name = "li_store_detail")
 @TableName("li_store_detail")
 @ApiModel(value = "店铺详细")
 @NoArgsConstructor
-public class StoreDetail {
+public class StoreDetail extends BaseIdEntity {
 
     private static final long serialVersionUID = 4949782642253898816L;
-
-    @Id
-    @TableId
-    @TableField
-    @Column(columnDefinition = "bigint(20)")
-    @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id;
 
     @NotBlank(message = "店铺不能为空")
     @ApiModelProperty(value = "店铺id")
@@ -93,7 +84,7 @@ public class StoreDetail {
     private String linkName;
 
     @NotBlank(message = "手机号不能为空")
-    @Pattern(regexp = "^[1][3,4,5,6,7,8,9][0-9]{9}$", message = "手机号格式有误")
+    @Phone
     @ApiModelProperty(value = "联系人电话")
     private String linkPhone;
 
@@ -101,7 +92,6 @@ public class StoreDetail {
     @ApiModelProperty(value = "营业执照号")
     private String licenseNum;
 
-    @Size(min = 1, max = 200, message = "法定经营范围长度为1-200位字符")
     @ApiModelProperty(value = "法定经营范围")
     private String scope;
 
@@ -145,7 +135,6 @@ public class StoreDetail {
 
     @NotBlank(message = "店铺经营类目不能为空")
     @ApiModelProperty(value = "店铺经营类目")
-    @Column(columnDefinition = "TEXT")
     private String goodsManagementCategory;
 
     @ApiModelProperty(value = "结算周期")
@@ -168,6 +157,7 @@ public class StoreDetail {
     private String ddCode;
 
     //店铺退货收件地址
+
     @ApiModelProperty(value = "收货人姓名")
     private String salesConsigneeName;
 
@@ -184,13 +174,27 @@ public class StoreDetail {
     private String salesConsigneeDetail;
 
 
-    public StoreDetail(Store store, AdminStoreApplyDTO adminStoreApplyDTO){
-        this.storeId=store.getId();
+    //店铺发货地址
+    @ApiModelProperty(value = "发货人姓名")
+    private String salesConsignorName;
+
+    @ApiModelProperty(value = "发件人手机")
+    private String salesConsignorMobile;
+
+    @ApiModelProperty(value = "发件人地址Id， '，'分割")
+    private String salesConsignorAddressId;
+
+    @ApiModelProperty(value = "发件人地址名称， '，'分割")
+    private String salesConsignorAddressPath;
+
+    @ApiModelProperty(value = "发件人详细地址")
+    private String salesConsignorDetail;
+
+    public StoreDetail(Store store, AdminStoreApplyDTO adminStoreApplyDTO) {
+        this.storeId = store.getId();
         //设置店铺公司信息、设置店铺银行信息、设置店铺其他信息
         BeanUtil.copyProperties(adminStoreApplyDTO, this);
-        this.settlementDay= DateUtil.date();
-        this.stockWarning=10;
+        this.settlementDay = DateUtil.date();
+        this.stockWarning = 10;
     }
-
-
 }

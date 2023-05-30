@@ -1,15 +1,14 @@
 package cn.lili.controller.common;
 
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.base.service.RegionService;
 import cn.lili.modules.system.entity.dos.Region;
 import cn.lili.modules.system.entity.vo.RegionVO;
+import cn.lili.modules.system.service.RegionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,16 +19,14 @@ import java.util.List;
  * 地址信息接口
  *
  * @author Chopper
- * @date: 2020/11/16 10:07 下午
  */
 @RestController
 @Api(tags = "地址信息接口")
-@RequestMapping("/common/region")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping("/common/common/region")
 public class RegionController {
 
-
-    private final RegionService regionService;
+    @Autowired
+    private RegionService regionService;
 
     @ApiOperation(value = "点地图获取地址信息")
     @ApiImplicitParams({
@@ -41,6 +38,11 @@ public class RegionController {
         return ResultUtil.data(regionService.getRegion(cityCode,townName));
     }
 
+    @GetMapping(value = "/name")
+    @ApiOperation(value = "根据名字获取地区地址id")
+    public ResultMessage<String> getItemByLastName(String lastName) {
+        return ResultUtil.data(regionService.getItemByLastName(lastName));
+    }
 
     @GetMapping(value = "/item/{id}")
     @ApiImplicitParam(name = "id", value = "地区ID", required = true, dataType = "String", paramType = "path")

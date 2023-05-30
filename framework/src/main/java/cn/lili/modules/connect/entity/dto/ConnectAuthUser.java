@@ -1,7 +1,9 @@
 package cn.lili.modules.connect.entity.dto;
 
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.connect.config.ConnectAuthEnum;
 import cn.lili.modules.connect.entity.enums.AuthUserGender;
+import cn.lili.modules.connect.entity.enums.ConnectEnum;
 import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -65,8 +67,15 @@ public class ConnectAuthUser implements Serializable {
     private AuthUserGender gender;
     /**
      * 用户来源
+     * 例如：QQ、微信、微博等
      */
-    private String source;
+    private ConnectEnum source;
+
+    /**
+     * 类型-客户端类型
+     * 例如：PC、WAP、小程序
+     */
+    private ClientTypeEnum type;
     /**
      * 用户授权的token信息
      */
@@ -80,5 +89,10 @@ public class ConnectAuthUser implements Serializable {
      * 联合登陆类型
      */
     private ConnectAuthEnum connectEnum;
+
+    /**
+     * 手机号
+     */
+    private String phone;
 
 }

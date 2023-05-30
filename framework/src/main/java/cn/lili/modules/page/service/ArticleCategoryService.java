@@ -11,7 +11,7 @@ import java.util.List;
  * 文章分类业务层
  *
  * @author Bulbasaur
- * @date 2020/11/24 17:07
+ * @since 2020/11/24 17:07
  */
 public interface ArticleCategoryService extends IService<ArticleCategory> {
 
@@ -19,6 +19,7 @@ public interface ArticleCategoryService extends IService<ArticleCategory> {
      * 添加文章分类
      *
      * @param articleCategory 文章分类
+     * @return 文章分类
      */
     ArticleCategory saveArticleCategory(ArticleCategory articleCategory);
 
@@ -26,6 +27,7 @@ public interface ArticleCategoryService extends IService<ArticleCategory> {
      * 修改文章分类
      *
      * @param articleCategory 文章分类
+     * @return 文章分类
      */
     ArticleCategory updateArticleCategory(ArticleCategory articleCategory);
 
@@ -40,6 +42,7 @@ public interface ArticleCategoryService extends IService<ArticleCategory> {
      * 删除文章分类
      *
      * @param id 文章分类id
+     * @return 操作状态
      */
     boolean deleteById(String id);
 

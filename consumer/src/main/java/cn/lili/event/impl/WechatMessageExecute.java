@@ -2,11 +2,10 @@ package cn.lili.event.impl;
 
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.event.TradeEvent;
-import cn.lili.modules.message.util.WechatMessageUtil;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.vo.OrderVO;
-import lombok.RequiredArgsConstructor;
+import cn.lili.modules.wechat.util.WechatMessageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WechatMessageExecute implements OrderStatusChangeEvent, TradeEvent {
 
     @Autowired
@@ -41,15 +39,16 @@ public class WechatMessageExecute implements OrderStatusChangeEvent, TradeEvent 
     public void orderChange(OrderMessage orderMessage) {
 
         switch (orderMessage.getNewStatus()) {
-            case PAID:
             case UNDELIVERED:
             case DELIVERED:
+            case STAY_PICKED_UP:
             case COMPLETED:
                 try {
                     wechatMessageUtil.sendWechatMessage(orderMessage.getOrderSn());
                 } catch (Exception e) {
                     log.error("微信消息发送失败", e);
                 }
+                break;
             default:
                 break;
         }

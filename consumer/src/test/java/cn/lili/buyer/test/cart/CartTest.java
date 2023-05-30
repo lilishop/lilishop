@@ -3,17 +3,17 @@ package cn.lili.buyer.test.cart;
 import cn.lili.event.impl.StockUpdateExecute;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
-import cn.lili.modules.payment.kit.enums.PaymentMethodEnum;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * 订单库存扣减
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 class CartTest {
 

@@ -1,12 +1,10 @@
 package cn.lili.trigger;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.cache.Cache;
-import cn.lili.common.trigger.interfaces.TimeTriggerExecutor;
-import cn.lili.common.trigger.model.TimeTriggerMsg;
-import cn.lili.common.trigger.util.TimeTriggerUtil;
+import cn.lili.cache.Cache;
+import cn.lili.trigger.model.TimeTriggerMsg;
+import cn.lili.trigger.util.DelayQueueTools;
 import cn.lili.common.utils.SpringContextUtil;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
@@ -17,20 +15,19 @@ import org.springframework.stereotype.Component;
  * 事件触发消费者
  *
  * @author paulG
- * @date 2020/11/17 7:19 下午
+ * @since 2020/11/17 7:19 下午
  */
 @Component
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RocketMQMessageListener(topic = "${lili.data.rocketmq.promotion-topic}", consumerGroup = "${lili.data.rocketmq.promotion-group}")
 public class TimeTriggerConsumer implements RocketMQListener<TimeTriggerMsg> {
-
-    private final Cache<Integer> cache;
+    @Autowired
+    private Cache<Integer> cache;
 
     @Override
     public void onMessage(TimeTriggerMsg timeTriggerMsg) {
         try {
-            String key = TimeTriggerUtil.generateKey(timeTriggerMsg.getTriggerExecutor(), timeTriggerMsg.getTriggerTime(), timeTriggerMsg.getUniqueKey());
+            String key = DelayQueueTools.generateKey(timeTriggerMsg.getTriggerExecutor(), timeTriggerMsg.getTriggerTime(), timeTriggerMsg.getUniqueKey());
 
             if (cache.get(key) == null) {
                 log.info("执行器执行被取消：{} | 任务标识：{}", timeTriggerMsg.getTriggerExecutor(), timeTriggerMsg.getUniqueKey());

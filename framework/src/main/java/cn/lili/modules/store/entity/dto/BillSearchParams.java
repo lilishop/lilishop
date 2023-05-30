@@ -15,7 +15,7 @@ import org.springframework.format.annotation.DateTimeFormat;
  * 结算单搜索参数
  *
  * @author Chopper
- * @date 2021/3/17 6:08 下午
+ * @since 2021/3/17 6:08 下午
  */
 @Data
 public class BillSearchParams extends PageVO {
@@ -51,6 +51,10 @@ public class BillSearchParams extends PageVO {
         //创建时间
         if (StringUtils.isNotEmpty(startDate) && StringUtils.isNotEmpty(endDate)) {
             wrapper.between("create_time", startDate, endDate);
+        } else if (StringUtils.isNotEmpty(startDate)) {
+            wrapper.ge("create_time", startDate);
+        } else if (StringUtils.isNotEmpty(endDate)) {
+            wrapper.le("create_time", endDate);
         }
         //账单号
         wrapper.eq(StringUtils.isNotEmpty(sn), "sn", sn);
@@ -58,7 +62,7 @@ public class BillSearchParams extends PageVO {
         wrapper.eq(StringUtils.isNotEmpty(billStatus), "bill_status", billStatus);
         //店铺名称
         wrapper.eq(StringUtils.isNotEmpty(storeName), "store_name", storeName);
-        // 按卖家查询
+        //按卖家查询
         wrapper.eq(StringUtils.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()),
                 "store_id", UserContext.getCurrentUser().getStoreId());
         return wrapper;

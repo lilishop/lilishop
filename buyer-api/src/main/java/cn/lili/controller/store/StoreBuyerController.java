@@ -1,25 +1,24 @@
 package cn.lili.controller.store;
 
-import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.statistics.aop.PageViewPoint;
-import cn.lili.modules.statistics.aop.enums.PageViewEnum;
+import cn.lili.modules.goods.entity.vos.StoreGoodsLabelVO;
+import cn.lili.modules.goods.service.StoreGoodsLabelService;
+import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dto.StoreBankDTO;
 import cn.lili.modules.store.entity.dto.StoreCompanyDTO;
 import cn.lili.modules.store.entity.dto.StoreOtherInfoDTO;
 import cn.lili.modules.store.entity.vos.*;
 import cn.lili.modules.store.service.StoreDetailService;
-import cn.lili.modules.store.service.StoreGoodsLabelService;
 import cn.lili.modules.store.service.StoreService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,26 +30,28 @@ import java.util.List;
  * 买家端,店铺接口
  *
  * @author Bulbasaur
- * @date: 2020/11/17 2:32 下午
+ * @since 2020/11/17 2:32 下午
  */
 @RestController
-@RequestMapping("/buyer/store")
+@RequestMapping("/buyer/store/store")
 @Api(tags = "买家端,店铺接口")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StoreBuyerController {
 
     /**
      * 店铺
      */
-    private final StoreService storeService;
+    @Autowired
+    private StoreService storeService;
     /**
      * 店铺商品分类
      */
-    private final StoreGoodsLabelService storeGoodsLabelService;
+    @Autowired
+    private StoreGoodsLabelService storeGoodsLabelService;
     /**
      * 店铺详情
      */
-    private final StoreDetailService storeDetailService;
+    @Autowired
+    private StoreDetailService storeDetailService;
 
     @ApiOperation(value = "获取店铺列表分页")
     @GetMapping
@@ -58,12 +59,32 @@ public class StoreBuyerController {
         return ResultUtil.data(storeService.findByConditionPage(entity, page));
     }
 
+    @GetMapping("/store")
+    @ApiOperation(value = "im-获取店铺信息")
+    public ResultMessage<Store> getStoreUser() {
+        AuthUser authUser = UserContext.getCurrentUser();
+        return ResultUtil.data(storeService.getById(authUser.getStoreId()));
+    }
+
+    @GetMapping("/store/{storeId}")
+    @ApiImplicitParam(name = "storeId", value = "店铺Id", required = true, dataType = "String", paramType = "path")
+    @ApiOperation(value = "im-店铺ID获取店铺信息")
+    public ResultMessage<Store> getStoreUserDetail(@PathVariable String storeId) {
+        return ResultUtil.data(storeService.getById(storeId));
+    }
+
     @ApiOperation(value = "通过id获取店铺信息")
     @ApiImplicitParam(name = "id", value = "店铺ID", required = true, paramType = "path")
     @GetMapping(value = "/get/detail/{id}")
-    @PageViewPoint(type = PageViewEnum.STORE, id = "#id")
     public ResultMessage<StoreBasicInfoVO> detail(@NotNull @PathVariable String id) {
         return ResultUtil.data(storeDetailService.getStoreBasicInfoDTO(id));
+    }
+
+    @ApiOperation(value = "通过id获取店铺详细信息-营业执照")
+    @ApiImplicitParam(name = "id", value = "店铺ID", required = true, paramType = "path")
+    @GetMapping(value = "/get/licencePhoto/{id}")
+    public ResultMessage<StoreOtherVO> licencePhoto(@NotNull @PathVariable String id) {
+        return ResultUtil.data(storeDetailService.getStoreOtherVO(id));
     }
 
     @ApiOperation(value = "通过id获取店铺商品分类")
@@ -78,28 +99,22 @@ public class StoreBuyerController {
     @ApiOperation(value = "申请店铺第一步-填写企业信息")
     @PutMapping(value = "/apply/first")
     public ResultMessage<Object> applyFirstStep(StoreCompanyDTO storeCompanyDTO) {
-        if (storeService.applyFirstStep(storeCompanyDTO)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        return ResultUtil.error(ResultCode.ERROR);
+        storeService.applyFirstStep(storeCompanyDTO);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "申请店铺第二步-填写银行信息")
     @PutMapping(value = "/apply/second")
     public ResultMessage<Object> applyFirstStep(StoreBankDTO storeBankDTO) {
-        if (storeService.applySecondStep(storeBankDTO)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        return ResultUtil.error(ResultCode.ERROR);
+        storeService.applySecondStep(storeBankDTO);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "申请店铺第三步-填写其他信息")
     @PutMapping(value = "/apply/third")
     public ResultMessage<Object> applyFirstStep(StoreOtherInfoDTO storeOtherInfoDTO) {
-        if (storeService.applyThirdStep(storeOtherInfoDTO)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        return ResultUtil.error(ResultCode.ERROR);
+        storeService.applyThirdStep(storeOtherInfoDTO);
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "获取当前登录会员的店铺信息-入驻店铺")

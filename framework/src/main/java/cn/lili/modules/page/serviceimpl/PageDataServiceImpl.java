@@ -1,11 +1,14 @@
 package cn.lili.modules.page.serviceimpl;
 
-import cn.lili.common.enums.SwitchEnum;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.SwitchEnum;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.utils.PageUtil;
+import cn.lili.common.properties.SystemSettingProperties;
+import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.base.entity.enums.ClientTypeEnum;
 import cn.lili.modules.page.entity.dos.PageData;
 import cn.lili.modules.page.entity.dto.PageDataDTO;
 import cn.lili.modules.page.entity.enums.PageEnum;
@@ -13,28 +16,32 @@ import cn.lili.modules.page.entity.vos.PageDataListVO;
 import cn.lili.modules.page.entity.vos.PageDataVO;
 import cn.lili.modules.page.mapper.PageDataMapper;
 import cn.lili.modules.page.service.PageDataService;
+import cn.lili.mybatis.util.PageUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 楼层装修管理业务层实现
  *
  * @author Bulbasaur
- * @date 2020/12/11 9:15
+ * @since 2020/12/11 9:15
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> implements PageDataService {
 
-    private final PageDataMapper pageDataMapper;
+
+    @Autowired
+    private SystemSettingProperties systemSettingProperties;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void addStorePageData(String storeId) {
         //设置店铺的PC页面
         PageData pageData = new PageData();
@@ -54,24 +61,68 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public PageData addPageData(PageData pageData) {
+
+
+        //演示站点判定
+        if (systemSettingProperties.getDemoSite()) {
+            //如果开启页面，并且是平台楼层装修
+            if (pageData.getPageShow().equals(SwitchEnum.OPEN.name()) && pageData.getPageType().equals(PageEnum.INDEX.name())) {
+                pageData.setPageShow(SwitchEnum.CLOSE.name());
+            }
+        }
+
+
+        //如果页面为发布，则关闭其他页面，开启此页面
+        if (pageData.getPageShow().equals(SwitchEnum.OPEN.name())) {
+            LambdaUpdateWrapper<PageData> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+            lambdaUpdateWrapper.eq(CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()), PageData::getNum, UserContext.getCurrentUser().getStoreId());
+            lambdaUpdateWrapper.eq(PageData::getPageType, pageData.getPageType());
+            lambdaUpdateWrapper.eq(PageData::getPageClientType, pageData.getPageClientType());
+            lambdaUpdateWrapper.set(PageData::getPageShow, SwitchEnum.CLOSE.name());
+            this.update(lambdaUpdateWrapper);
+        } else {
+            pageData.setPageShow(SwitchEnum.CLOSE.name());
+        }
         this.save(pageData);
         return pageData;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public PageData updatePageData(PageData pageData) {
+        //如果页面为发布，则关闭其他页面，开启此页面
+        if (pageData.getPageShow() != null && pageData.getPageShow().equals(SwitchEnum.OPEN.name())) {
+            LambdaUpdateWrapper<PageData> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
+            lambdaUpdateWrapper.eq(CharSequenceUtil.isNotEmpty(pageData.getPageType()), PageData::getPageType, pageData.getPageType());
+            lambdaUpdateWrapper.eq(CharSequenceUtil.isNotEmpty(pageData.getPageClientType()), PageData::getPageClientType, pageData.getPageClientType());
+            lambdaUpdateWrapper.eq(PageData::getNum, pageData.getNum());
+            lambdaUpdateWrapper.set(PageData::getPageShow, SwitchEnum.CLOSE.name());
+            this.update(lambdaUpdateWrapper);
+        } else {
+            pageData.setPageShow(SwitchEnum.CLOSE.name());
+        }
+
         LambdaUpdateWrapper<PageData> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.set(PageData::getPageData, pageData.getPageData());
         lambdaUpdateWrapper.eq(PageData::getId, pageData.getId());
+        lambdaUpdateWrapper.eq(CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()), PageData::getPageType, PageEnum.STORE.name());
+        lambdaUpdateWrapper.eq(CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()), PageData::getNum, UserContext.getCurrentUser().getStoreId());
         this.updateById(pageData);
         return pageData;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public PageData releasePageData(String id) {
-        PageData pageData = this.getById(id);
-
+        PageData pageData = this.getOne(new LambdaQueryWrapper<PageData>()
+                .eq(CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()), PageData::getPageType, PageEnum.STORE.name())
+                .eq(CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()), PageData::getNum, UserContext.getCurrentUser().getStoreId())
+                .eq(PageData::getId, id));
+        if (pageData == null) {
+            throw new ServiceException(ResultCode.PAGE_NOT_EXIST);
+        }
 
         //如果已经发布，不能重复发布
         if (pageData.getPageShow().equals(SwitchEnum.OPEN.name())) {
@@ -98,10 +149,18 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean removePageData(String id) {
-        PageData pageData = this.getById(id);
+        PageData pageData = this.getOne(new LambdaQueryWrapper<PageData>()
+                .eq(CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()), PageData::getPageType, PageEnum.STORE.name())
+                .eq(CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name()), PageData::getNum, UserContext.getCurrentUser().getStoreId())
+                .eq(PageData::getId, id));
+        if (pageData == null) {
+            throw new ServiceException(ResultCode.PAGE_NOT_EXIST);
+        }
+
         //专题则直接进行删除
-        if (pageData.getPageType().equals(PageEnum.SPECIAL)) {
+        if (pageData.getPageType().equals(PageEnum.SPECIAL.name())) {
             return this.removeById(id);
         }
         //店铺、平台首页需要判断是否开启，开启则无法删除
@@ -113,11 +172,11 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
         queryWrapper.eq(pageData.getPageType() != null, "page_type", pageData.getPageType());
         queryWrapper.eq(pageData.getPageClientType() != null, "page_client_type", pageData.getPageClientType());
         //如果为店铺页面需要设置店铺ID
-        if (pageData.getPageType().equals(PageEnum.STORE)) {
+        if (pageData.getPageType().equals(PageEnum.STORE.name())) {
             queryWrapper.eq(pageData.getNum() != null, "num", pageData.getNum());
         }
         //判断是否为唯一的页面
-        if (pageDataMapper.getPageDataNum(queryWrapper) == 1) {
+        if (this.baseMapper.getPageDataNum(queryWrapper) == 1) {
             throw new ServiceException(ResultCode.PAGE_DELETE_ERROR);
         }
         return this.removeById(id);
@@ -137,7 +196,7 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
 
         queryWrapper.eq("page_client_type", pageDataDTO.getPageClientType());
 
-        return pageDataMapper.getPageData(queryWrapper);
+        return this.baseMapper.getPageData(queryWrapper);
     }
 
     @Override
@@ -147,7 +206,12 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
         queryWrapper.eq(pageDataDTO.getNum() != null, "num", pageDataDTO.getNum());
         queryWrapper.eq(pageDataDTO.getPageClientType() != null, "page_client_type", pageDataDTO.getPageClientType());
 
-        return pageDataMapper.getPageDataList(PageUtil.initPage(pageVO), queryWrapper);
+        return this.baseMapper.getPageDataList(PageUtil.initPage(pageVO), queryWrapper);
 
+    }
+
+    @Override
+    public PageData getSpecial(String id) {
+        return this.getById(id);
     }
 }

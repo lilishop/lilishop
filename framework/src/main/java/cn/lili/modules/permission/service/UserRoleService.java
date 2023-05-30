@@ -9,7 +9,7 @@ import java.util.List;
  * 管理员业务层
  *
  * @author Chopper
- * @date 2020/11/17 3:46 下午
+ * @since 2020/11/17 3:46 下午
  */
 public interface UserRoleService extends IService<UserRole> {
 
@@ -32,8 +32,8 @@ public interface UserRoleService extends IService<UserRole> {
     /**
      * 更新用户拥有的角色
      *
-     * @param userId
-     * @return
+     * @param userId    角色
+     * @param userRoles 角色权限
      */
     void updateUserRole(String userId, List<UserRole> userRoles);
 

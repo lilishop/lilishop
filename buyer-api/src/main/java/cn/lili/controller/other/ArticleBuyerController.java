@@ -1,6 +1,6 @@
 package cn.lili.controller.other;
 
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.page.entity.dos.Article;
 import cn.lili.modules.page.entity.dto.ArticleSearchParams;
@@ -12,7 +12,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,23 +25,24 @@ import java.util.List;
  * 买家端,文章接口
  *
  * @author Chopper
- * @date: 2020/11/16 10:02 下午
+ * @since 2020/11/16 10:02 下午
  */
 @RestController
 @Api(tags = "买家端,文章接口")
-@RequestMapping("/buyer/article")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping("/buyer/other/article")
 public class ArticleBuyerController {
 
     /**
      * 文章
      */
-    private final ArticleService articleService;
+    @Autowired
+    private ArticleService articleService;
 
     /**
      * 文章分类
      */
-    private final ArticleCategoryService articleCategoryService;
+    @Autowired
+    private ArticleCategoryService articleCategoryService;
 
     @ApiOperation(value = "获取文章分类列表")
     @GetMapping(value = "/articleCategory/list")

@@ -6,7 +6,7 @@ import cn.lili.common.utils.SpelUtil;
 import cn.lili.common.utils.ThreadPoolUtil;
 import cn.lili.modules.order.trade.entity.dos.OrderLog;
 import cn.lili.modules.order.trade.service.OrderLogService;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
@@ -21,14 +21,15 @@ import java.util.Map;
  * 订单操作日志
  *
  * @author Chopper
- * @date: 2020/11/17 7:22 下午
+ * @since 2020/11/17 7:22 下午
  */
+@Slf4j
 @Aspect
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderOperationLogAspect {
 
-    private final OrderLogService orderLogService;
+    @Autowired
+    private OrderLogService orderLogService;
 
     @After("@annotation(cn.lili.modules.order.order.aop.OrderLogPoint)")
     public void doAfter(JoinPoint joinPoint) {
@@ -48,7 +49,7 @@ public class OrderOperationLogAspect {
             //调用线程保存
             ThreadPoolUtil.getPool().execute(new SaveOrderLogThread(orderLog, orderLogService));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("订单日志错误",e);
         }
     }
 
@@ -61,7 +62,7 @@ public class OrderOperationLogAspect {
      */
     private static Map<String, String> spelFormat(JoinPoint joinPoint) throws Exception {
 
-        Map<String, String> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>(2);
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         OrderLogPoint orderLogPoint = signature.getMethod().getAnnotation(OrderLogPoint.class);
         String description = SpelUtil.compileParams(joinPoint, orderLogPoint.description());

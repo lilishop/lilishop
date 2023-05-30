@@ -1,27 +1,32 @@
 package cn.lili.modules.promotion.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
+import cn.lili.modules.promotion.entity.enums.CouponRangeDayEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
  * 会员优惠券实体类
  *
  * @author Chopper
- * @date 2020-03-19 10:44 上午
+ * @since 2020-03-19 10:44 上午
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-@Entity
-@Table(name = "li_member_coupon")
 @TableName("li_member_coupon")
 @ApiModel(value = "会员优惠券")
 public class MemberCoupon extends BaseEntity {
@@ -31,7 +36,7 @@ public class MemberCoupon extends BaseEntity {
     @ApiModelProperty(value = "从哪个模版领取的优惠券")
     private String couponId;
 
-    @ApiModelProperty(value = "商家id，如果是平台发送，这个值为 platform")
+    @ApiModelProperty(value = "商家id，如果是平台发送，这个值为 0")
     private String storeId;
 
     @ApiModelProperty(value = "商家名称，如果是平台，这个值为 platform")
@@ -53,7 +58,7 @@ public class MemberCoupon extends BaseEntity {
     private String memberId;
 
     /**
-     * @see cn.lili.modules.promotion.entity.enums.CouponScopeTypeEnum
+     * @see PromotionsScopeTypeEnum
      */
     @ApiModelProperty(value = "关联范围类型")
     private String scopeType;
@@ -68,15 +73,16 @@ public class MemberCoupon extends BaseEntity {
 
 
     @ApiModelProperty(value = "范围关联的id")
-    @Column(columnDefinition = "TEXT")
     private String scopeId;
 
     @ApiModelProperty(value = "使用起始时间")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd HH:mm:ss || yyyy-MM-dd || yyyy/MM/dd HH:mm:ss|| yyyy/MM/dd ||epoch_millis")
     private Date startTime;
 
     @ApiModelProperty(value = "使用截止时间")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd HH:mm:ss || yyyy-MM-dd || yyyy/MM/dd HH:mm:ss|| yyyy/MM/dd ||epoch_millis")
     private Date endTime;
     /**
      * @see cn.lili.modules.promotion.entity.enums.CouponGetEnum
@@ -85,13 +91,14 @@ public class MemberCoupon extends BaseEntity {
     private String getType;
 
     @ApiModelProperty(value = "是否是平台优惠券")
-    private Boolean isPlatform;
+    private Boolean platformFlag;
 
     @ApiModelProperty(value = "店铺承担比例")
     private Double storeCommission;
 
     @ApiModelProperty(value = "核销时间")
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd HH:mm:ss || yyyy-MM-dd || yyyy/MM/dd HH:mm:ss|| yyyy/MM/dd ||epoch_millis")
     private Date consumptionTime;
 
     /**
@@ -113,15 +120,14 @@ public class MemberCoupon extends BaseEntity {
         setScopeType(coupon.getScopeType());
         setScopeId(coupon.getScopeId());
         setCouponType(coupon.getCouponType());
-        setStartTime(coupon.getStartTime());
-        setEndTime(coupon.getEndTime());
+        setStartTime(coupon.getStartTime() == null ? new Date() : coupon.getStartTime());
+
         setGetType(coupon.getGetType());
         setStoreCommission(coupon.getStoreCommission());
+        if (coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {
+            setEndTime(coupon.getEndTime());
+        } else {
+            setEndTime(DateUtil.endOfDay(DateUtil.offset(new DateTime(), DateField.DAY_OF_YEAR, (coupon.getEffectiveDays() - 1))));
+        }
     }
-
-    public boolean canUse() {
-        return this.getMemberCouponStatus().equals(MemberCouponStatusEnum.NEW.name());
-    }
-
-
 }

@@ -1,12 +1,13 @@
 package cn.lili.controller.member;
 
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.cache.limit.annotation.LimitPoint;
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.MemberSign;
 import cn.lili.modules.member.service.MemberSignService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,16 +20,17 @@ import java.util.List;
  * 会员签到控制器
  *
  * @author pikachu
- * @date: 2020/11/16 10:07 下午
+ * @since 2020/11/16 10:07 下午
  */
 @RestController
 @Api(tags = "买家端，会员签到API")
 @RequestMapping("/buyer/members/sign")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MemberSignBuyerController {
+    @Autowired
+    private MemberSignService memberSignService;
 
-    private final MemberSignService memberSignService;
 
+    @PreventDuplicateSubmissions
     @PostMapping
     @ApiOperation(value = "会员签到")
     public ResultMessage<Boolean> memberSign() {

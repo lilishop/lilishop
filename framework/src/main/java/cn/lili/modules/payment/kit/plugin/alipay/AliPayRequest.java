@@ -13,6 +13,7 @@ import com.alipay.api.request.AlipayTradePrecreateRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.alipay.api.response.AlipayTradePrecreateResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -22,9 +23,9 @@ import java.io.PrintWriter;
  * 支付宝支付
  *
  * @author Chopper
- * @date 2020/12/15 19:26
+ * @since 2020/12/15 19:26
  */
-
+@Slf4j
 public class AliPayRequest {
 
     /**
@@ -40,7 +41,7 @@ public class AliPayRequest {
     public static void wapPay(HttpServletResponse response, AlipayTradeWapPayModel model, String returnUrl, String notifyUrl) throws AlipayApiException, IOException {
         String form = wapPayStr(model, returnUrl, notifyUrl);
         response.setContentType("text/html;charset=UTF-8");
-
+        log.info("支付表单{}", form);
         PrintWriter out = response.getWriter();
         out.write(form);
         out.flush();

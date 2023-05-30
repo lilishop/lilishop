@@ -10,7 +10,7 @@ import lombok.Data;
  * 商品查询条件
  *
  * @author pikachu
- * @date 2020-02-24 19:27:20
+ * @since 2020-02-24 19:27:20
  */
 @Data
 public class ArticleSearchParams extends PageVO {
@@ -28,7 +28,6 @@ public class ArticleSearchParams extends PageVO {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq(StringUtils.isNotBlank(categoryId), "category_id", categoryId);
         queryWrapper.like(StringUtils.isNotBlank(title), "title", title);
-        //queryWrapper.orderByAsc("a.sort");
         return queryWrapper;
     }
 }

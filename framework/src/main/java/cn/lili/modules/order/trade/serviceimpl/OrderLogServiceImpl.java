@@ -17,17 +17,15 @@ import java.util.List;
  * 订单日志业务层实现
  *
  * @author Chopper
- * @date 2020-02-25 14:10:16
+ * @since 2020-02-25 14:10:16
  */
 @Service
-@Transactional
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrderLogServiceImpl extends ServiceImpl<OrderLogMapper, OrderLog> implements OrderLogService {
 
     @Override
     public List<OrderLog> getOrderLog(String orderSn) {
-        LambdaQueryWrapper<OrderLog> lambdaQueryWrapper= Wrappers.lambdaQuery();
-        lambdaQueryWrapper.eq(OrderLog::getOrderSn,orderSn);
+        LambdaQueryWrapper<OrderLog> lambdaQueryWrapper = Wrappers.lambdaQuery();
+        lambdaQueryWrapper.eq(OrderLog::getOrderSn, orderSn);
         return this.list(lambdaQueryWrapper);
     }
 }

@@ -7,7 +7,7 @@ import lombok.Data;
  * 文章VO
  *
  * @author Chopper
- * @date 2021-03-26 11:32
+ * @since 2021-03-26 11:32
  */
 @Data
 public class ArticleVO {
@@ -24,6 +24,6 @@ public class ArticleVO {
     @ApiModelProperty(value = "文章排序")
     private Integer sort;
 
-    @ApiModelProperty(value = "状态, allowableValues = OPEN,CLOSE")
-    private String openStatus;
+    @ApiModelProperty(value = "开启状态")
+    private Boolean openStatus;
 }

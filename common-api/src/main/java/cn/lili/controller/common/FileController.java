@@ -1,12 +1,12 @@
 package cn.lili.controller.common;
 
-import cn.lili.common.cache.Cache;
+import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.common.utils.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.vo.SearchVO;
@@ -17,7 +17,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,17 +27,18 @@ import java.util.List;
  * 文件管理管理接口
  *
  * @author Chopper
- * @date 2020/11/26 15:41
+ * @since 2020/11/26 15:41
  */
 @RestController
-@Api(tags = "文件管理管理接口")
-@RequestMapping("/common/file")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@Api(tags = "文件管理接口")
+@RequestMapping("/common/common/file")
 public class FileController {
 
-    private final FileService fileService;
+    @Autowired
+    private FileService fileService;
 
-    private final Cache cache;
+    @Autowired
+    private Cache cache;
 
     @ApiOperation(value = "获取自己的图片资源")
     @GetMapping
@@ -78,9 +78,8 @@ public class FileController {
                 }
                 throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
             case MANAGER:
-                if (file.getUserEnums().equals(authUser.getRole().name())) {
-                    break;
-                }
+                break;
+            default:
                 throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
         fileService.updateById(file);
@@ -93,7 +92,7 @@ public class FileController {
 
         AuthUser authUser = UserContext.getAuthUser(cache, accessToken);
         fileService.batchDelete(ids, authUser);
-        return ResultUtil.success(ResultCode.SUCCESS);
+        return ResultUtil.success();
     }
 
 }

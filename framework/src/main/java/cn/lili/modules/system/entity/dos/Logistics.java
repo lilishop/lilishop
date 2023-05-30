@@ -1,24 +1,20 @@
 package cn.lili.modules.system.entity.dos;
 
-import cn.lili.base.BaseEntity;
+import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 
 /**
  * 物流公司设置
  *
  * @author Chopper
- * @date 2020/11/17 8:01 下午
+ * @since 2020/11/17 8:01 下午
  */
 @Data
-@Entity
-@Table(name = "li_logistics")
 @TableName("li_logistics")
 @ApiModel(value = "物流公司")
 public class Logistics extends BaseEntity {

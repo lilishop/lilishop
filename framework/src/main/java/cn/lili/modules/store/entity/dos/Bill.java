@@ -1,9 +1,9 @@
 package cn.lili.modules.store.entity.dos;
 
 import cn.lili.modules.store.entity.enums.BillStatusEnum;
+import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -12,31 +12,21 @@ import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
  * 结算单
  *
  * @author Chopper
- * @date 2020/11/17 4:27 下午
+ * @since 2020/11/17 4:27 下午
  */
 @Data
-@Entity
-@Table(name = "li_bill")
 @TableName("li_bill")
 @ApiModel(value = "结算单")
-public class Bill  {
+public class Bill extends BaseIdEntity {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @TableId
-    @TableField
-    @ApiModelProperty(value = "唯一标识", hidden = true)
-    private String id ;
 
     @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd")
@@ -86,11 +76,6 @@ public class Bill  {
     @ApiModelProperty(value = "支行联行号")
     private String bankCode;
 
-    ////开始算钱啦
-    //billPrice=orderPrice-refundPrice
-    // -commissionPrice+refundCommissionPrice
-    // -distributionCommission+distributionRefundCommission
-    // +siteCouponCommission-siteCouponRefundCommission
     @ApiModelProperty(value = "结算周期内订单付款总金额")
     private Double orderPrice;
 
@@ -115,6 +100,22 @@ public class Bill  {
     @ApiModelProperty(value = "退货平台优惠券补贴返还")
     private Double siteCouponRefundCommission;
 
+    @ApiModelProperty(value = "积分商品结算价格")
+    private Double pointSettlementPrice;
+
+    @ApiModelProperty(value = "砍价商品结算价格")
+    private Double kanjiaSettlementPrice;
+
+
+    /**
+     * 开始算钱啦
+     * billPrice(最终结算金额) =
+     *   orderPrice(结算周期内订单付款总金额) - refundPrice(退单金额)
+     * - commissionPrice(平台收取佣金) + refundCommissionPrice(退单产生退还佣金金额)
+     * - distributionCommission(分销返现支出) + distributionRefundCommission(分销订单退还，返现佣金返还)
+     * + siteCouponCommission(平台优惠券补贴) - siteCouponRefundCommission(退货平台优惠券补贴返还)
+     * + kanjiaSettlementPrice(砍价商品结算价格) + pointSettlementPrice(pointSettlementPrice)
+     */
     @ApiModelProperty(value = "最终结算金额")
     private Double billPrice;
 

@@ -1,6 +1,6 @@
 package cn.lili.modules.order.order.serviceimpl;
 
-import cn.lili.common.utils.PageUtil;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.order.entity.dos.OrderComplaintCommunication;
 import cn.lili.modules.order.order.entity.vo.OrderComplaintCommunicationSearchParams;
@@ -11,8 +11,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-
 /**
  * 交易投诉通信业务层实现
  *
@@ -20,7 +18,6 @@ import javax.transaction.Transactional;
  * @since 2020/12/5
  **/
 @Service
-@Transactional
 public class OrderComplaintCommunicationServiceImpl extends ServiceImpl<OrderComplainCommunicationMapper, OrderComplaintCommunication> implements OrderComplaintCommunicationService {
 
     @Override

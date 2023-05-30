@@ -1,5 +1,7 @@
 package cn.lili.modules.payment.kit.params.dto;
 
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.utils.StringUtils;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
@@ -11,11 +13,13 @@ import java.util.List;
  * 支付参数
  *
  * @author Chopper
- * @date 2021-01-25 19:09
+ * @since 2021-01-25 19:09
  */
 @Data
 @ToString
 public class CashierParam {
+
+    static final Long MAX_DETAIL_LENGTH = 30L;
 
     @ApiModelProperty(value = "价格")
     private Double price;
@@ -41,4 +45,11 @@ public class CashierParam {
 
     @ApiModelProperty(value = "剩余余额")
     private Double walletValue;
+
+    public String getDetail() {
+        if (CharSequenceUtil.isEmpty(detail)) {
+            return "清单详细";
+        }
+        return StringUtils.filterSpecialChart(StringUtils.sub(detail, 30));
+    }
 }

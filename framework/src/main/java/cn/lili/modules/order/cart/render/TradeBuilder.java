@@ -1,63 +1,54 @@
 package cn.lili.modules.order.cart.render;
 
+import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
-import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
-import cn.lili.modules.order.cart.entity.vo.CartVO;
+import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
+import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
+import cn.lili.modules.order.cart.service.CartService;
 import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.service.TradeService;
-import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
-import cn.lili.modules.order.cart.service.CartService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * TradeBuilder
+ * 交易构造&&创建
  *
  * @author Chopper
- * @date2020-04-01 9:47 下午
+ * @since2020-04-01 9:47 下午
  */
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TradeBuilder {
-    //购物车渲染
-    private final List<CartRenderStep> cartRenderSteps;
-    //交易
-    private final TradeService tradeService;
 
     /**
-     * 渲染整比交易
+     * 购物车渲染步骤
      */
-    int[] defaultRender = {0, 1, 2, 4, 5, 6, 7};
-
+    @Autowired
+    private List<CartRenderStep> cartRenderSteps;
     /**
-     * 购物车购物车渲染
+     * 交易
      */
-    int[] cartRender = {0, 1, 2, 5};
-
+    @Autowired
+    private TradeService tradeService;
     /**
-     * 0-> 校验商品 1-》 满优惠渲染 2->渲染优惠 3->优惠券渲染 4->计算运费 5->计算价格 6->分销渲染 7->扩展操作
+     * 购物车业务
      */
+    @Autowired
     private CartService cartService;
 
-    @Autowired
-    public void setCartService(CartService cartService) {
-        this.cartService = cartService;
-    }
 
     /**
      * 构造购物车
+     * 购物车与结算信息不一致的地方主要是优惠券计算和运费计算，其他规则都是一致都
      *
      * @param checkedWay 购物车类型
      * @return 购物车展示信息
      */
     public TradeDTO buildCart(CartTypeEnum checkedWay) {
+        //读取对应购物车的商品信息
         TradeDTO tradeDTO = cartService.readDTO(checkedWay);
 
         //购物车需要将交易中的优惠券取消掉
@@ -67,54 +58,82 @@ public class TradeBuilder {
         }
 
         //按照计划进行渲染
-        for (int index : cartRender) {
-            try {
-                cartRenderSteps.get(index).render(tradeDTO);
-            } catch (Exception e) {
-                log.error("购物车渲染异常：", e);
-            }
-        }
+        renderCartBySteps(tradeDTO, RenderStepStatement.cartRender);
         return tradeDTO;
     }
 
     /**
-     * 构造一笔交易
-     *
-     * @param checkedWay 购物车类型
-     * @return 购物车展示信息
+     * 构造结算页面
      */
-    public TradeDTO buildTrade(CartTypeEnum checkedWay) {
+    public TradeDTO buildChecked(CartTypeEnum checkedWay) {
+        //读取对应购物车的商品信息
         TradeDTO tradeDTO = cartService.readDTO(checkedWay);
-        List<CartSkuVO> collect = tradeDTO.getSkuList().parallelStream().filter(i -> Boolean.TRUE.equals(i.getChecked())).collect(Collectors.toList());
-        if (checkedWay.equals(CartTypeEnum.PINTUAN)) {
-            for (CartSkuVO cartSkuVO : collect) {
-                cartSkuVO.setPintuanId("");
-            }
+        //需要对购物车渲染
+        if (isSingle(checkedWay)) {
+            renderCartBySteps(tradeDTO, RenderStepStatement.checkedSingleRender);
+        } else if (checkedWay.equals(CartTypeEnum.PINTUAN)) {
+            renderCartBySteps(tradeDTO, RenderStepStatement.pintuanTradeRender);
+        } else {
+            renderCartBySteps(tradeDTO, RenderStepStatement.checkedRender);
         }
-        tradeDTO.setSkuList(collect);
-        //按照计划进行渲染
-        for (int index : defaultRender) {
-            cartRenderSteps.get(index).render(tradeDTO);
-        }
-        List<CartVO> cartVOList = new ArrayList<>();
-        for (CartVO i : tradeDTO.getCartList()) {
-            i.setSkuList(i.getSkuList().stream().filter(j -> Boolean.TRUE.equals(j.getChecked())).collect(Collectors.toList()));
-            cartVOList.add(i);
-        }
-        tradeDTO.setCartList(cartVOList);
+
         return tradeDTO;
     }
 
     /**
      * 创建一笔交易
+     * 1.构造交易
+     * 2.创建交易
      *
-     * @param checkedWay    购物车类型
-     * @param parentOrderSn 是否为其他订单下的订单，如果是则为依赖订单的sn，否则为空
+     * @param tradeDTO 交易模型
      * @return 交易信息
      */
-    public Trade createTrade(CartTypeEnum checkedWay, String parentOrderSn) {
-        TradeDTO tradeDTO = this.buildTrade(checkedWay);
-        tradeDTO.setParentOrderSn(parentOrderSn);
+    public Trade createTrade(TradeDTO tradeDTO) {
+
+        //需要对购物车渲染
+        if (isSingle(tradeDTO.getCartTypeEnum())) {
+            renderCartBySteps(tradeDTO, RenderStepStatement.singleTradeRender);
+        } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)) {
+            renderCartBySteps(tradeDTO, RenderStepStatement.pintuanTradeRender);
+        } else {
+            renderCartBySteps(tradeDTO, RenderStepStatement.tradeRender);
+        }
+
+        //添加order订单及order_item子订单并返回
         return tradeService.createTrade(tradeDTO);
+    }
+
+    /**
+     * 是否为单品渲染
+     *
+     * @param checkedWay 购物车类型
+     * @return 返回是否单品
+     */
+    private boolean isSingle(CartTypeEnum checkedWay) {
+        //拼团   积分   砍价商品
+
+        return (checkedWay.equals(CartTypeEnum.POINTS) || checkedWay.equals(CartTypeEnum.KANJIA));
+    }
+
+    /**
+     * 根据渲染步骤，渲染购物车信息
+     *
+     * @param tradeDTO      交易DTO
+     * @param defaultRender 渲染枚举
+     */
+    private void renderCartBySteps(TradeDTO tradeDTO, RenderStepEnums[] defaultRender) {
+        for (RenderStepEnums step : defaultRender) {
+            for (CartRenderStep render : cartRenderSteps) {
+                try {
+                    if (render.step().equals(step)) {
+                        render.render(tradeDTO);
+                    }
+                } catch (ServiceException e) {
+                    throw e;
+                } catch (Exception e) {
+                    log.error("购物车{}渲染异常：", render.getClass(), e);
+                }
+            }
+        }
     }
 }

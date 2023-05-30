@@ -1,204 +1,176 @@
 ## Lilishop B2B2C商城系统
 
-### 介绍
+#### 欢迎交流需求，交流业务，交流技术（基础问题自行解决，其他问题先看文档后提问）
+
+#### 不用削尖脑袋往老群里加，老群活跃度较低，很多潜水党，新群相对而言活跃一些 :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: 
+
+#### PS： **演示站点所有环境均部署master分支。如果有演示站点问题，可以反馈，如果演示站点没问题本地运行有问题，需自行处理** 
+
+##### 交流 qq 1群 961316482（已满）
+##### 交流 qq 2群 875294241（已满）
+##### 交流 qq 3群 263785057（已满）
+##### 交流 qq 4群 674617534 (已满)
+##### 交流 qq 5群 594675235 
+
+##### 体验 公众号/小程序/APP 体验，扫描二维码
+
+![image-20210511171611793](https://static.pickmall.cn/images/h5-qrcode.png)
+
+[![star](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop/stargazers)
+&nbsp;&nbsp;![github](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=#181717)
+
+
+### 商城介绍
 **官网**：https://pickmall.cn
 
-Lilishop 是一款Java开发，基于SpringBoot的B2B2C多用户商城，前端使用 Vue、uniapp-app开发 **系统全端全部代码开源**
+Lilishop商城系统支持商家入驻，后端基于SpringBoot 研发，前端使用 Vue、uniapp开发， **系统全端全部代码开源**
 
-商城展示端包含 PC、H5、小程序、APP。
+前后端分离，支持分布式部署，支持Docker，各个API独立，并且有独立的消费者。
 
-商城包含 会员模块、**第三方登录模块**、**第三方支付模块**、**楼层装修模块**、订单模块、分销模块、文章模块、系统设置模块、流量分析模块
+### 商城 API/消费者 聚合版
+api不需要单独部署，只需启动一个jar包就可以正常运转 如有需要，可以点击跳转
+https://gitee.com/beijing_hongye_huicheng/lilishop-simplify
 
-系统包含各种中间件、搜索引擎、多级缓存、分布式事务、分布式任务调度等，支持Docker，支持k8s。是一款高性能，支持高并发等商城系统。
+### 开发/使用/常见问题 帮助文档
 
-开箱即用，简单配置即可部署一套属于您的系统。
+https://docs.pickmall.cn
 
-完美支持二开、学生毕业设计答辩等各个场景
+### 项目地址
 
-### 文档
+gitee : https://gitee.com/beijing_hongye_huicheng
 
-**产品文档**（需求、架构、使用、部署、开发）：https://docs.pickmall.cn
+github 镜像: https://github.com/lilishop?tab=repositories
 
+商城UI 项目下3个文件夹 
+buyer：买家PC端，seller：商家端，manager：后台管理端
 
-### 项目链接
-
-**Java后台**：https://gitee.com/beijing_hongye_huicheng/lili-shop.git
-
-**Vue后台前端**： https://gitee.com/beijing_hongye_huicheng/lili-shop-ui.git
-
-**Uni-app**：https://gitee.com/beijing_hongye_huicheng/lili-shop-uniapp.git
-
-**docker一键部署**：https://gitee.com/beijing_hongye_huicheng/docker.git
 
 ### 演示地址
+PS：手机验证码为 ‘111111’
 
-**运营后台**：https://admin-b2b2c.pickmall.cn 账号：admin/123456
+**平台管理端**：https://admin-b2b2c.pickmall.cn 账号：admin/123456
 
-**店铺后台**：https://store-b2b2c.pickmall.cn 账号：13011111111/111111
+**店铺管理端**：https://store-b2b2c.pickmall.cn 账号：13011111111/111111
 
-**用户前台**：https://pc-b2b2c.pickmall.cn
+**商城PC页面**：https://pc-b2b2c.pickmall.cn
 
-**移动端**：https://m-b2b2c.pickmall.cn
+**商城 小程序/公众号/APP**：扫描二维码
 
-![image-20210511171611793](https://pickmall.cn/assets/imgs/h5-qrcode.png)
+![image-20210511171611793](https://static.pickmall.cn/images/h5-qrcode.png)
 
-### 3行命令搭建本地环境
+### 快速本地部署
 
-#### 下载docker脚本
-`git clone https://gitee.com/beijing_hongye_huicheng/docker.git `
-##### 部署基础环境
-`docker-compose up -d`
-##### 部署应用
-`docker-compose -f docker-compose-application.yml up -d`
+[点击跳转](https://docs.pickmall.cn/deploy/%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87.html)
 
-### 交流群
+**商城数据库**
+使用docker-compose部署数据库，自动初始化数据库，不需要手动下载等操作
 
-**QQ群**：961316482
-
-
-
-### 技术选型
-
-##### Java后台
-
-| 说明           | 框架            |
-| -------------- | --------------- |
-| 基础框架       | Spring Boot     |
-| MVC框架        | Spring MVC      |
-| 持久框架       | Mybatis-Plus    |
-| 程序构建       | Maven           |
-| 关系型数据库   | MySQL           |
-| 消息中间件AMQP | RocketMQ        |
-| 缓存           | Redis +MongoDB  |
-| 搜索引擎       | Elasticsearch   |
-| 安全框架       | Spring Security |
-| 数据库连接池   | Druid           |
-| 数据库分库分表 | sharding        |
-| 定时任务       | xxl-job         |
-| 负载均衡       | Nginx           |
-| 静态资源       | 阿里云OSS       |
-| 短信           | 阿里云短信      |
-| 日志处理       | Log4j           |
-| 接口规范       | RESTful         |
-| 接口文档       | Swagger         |
-| 认证           | JWT             |
-
-##### 前端-运营后台、店铺后台
-
-| 说明       | 框架       |
-| ---------- | ---------- |
-| 构建工具   | webpack    |
-| JS版本     | ES6        |
-| 基础JS框架 | Vue.js     |
-| 视频播放器 | Dplayer    |
-| 路由管理   | Vue Router |
-| 状态管理   | Vuex       |
-| 基础UI库   | iView      |
-| UI界面基于 | iView      |
-| 网络请求   | axios      |
-| CSS预处理  | scss       |
-| 代码检查   | ESLint     |
-| 数据可视化 | AntV g2    |
-| 地图引擎   | amap       |
-
-##### 前端-移动端
-
-| 说明      | 架构    |
-| --------- | ------- |
-| 基础UI库  | uViewui |
-| 基础框架  | uni-app |
-| CSS预处理 | scss    |
-| 地图引擎  | amap    |
+如果手动部署，才需要获取sql [点击跳转](https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql) （PS：这里有与tag版本一致的sql，如果是历史版本，则docker项目也切换至历史版本获取sql即可，历史版本升级则根据java相聚的根目录DB目录下的升级sql，按需执行）。
 
 
 
 ### 功能列表
 
-<table>
-  <tr><td colspan="2">运营后台功能</td></tr>
-  <tr><td>首页</td><td>平台统计、待办事项、流量统计</td></tr>
-  <tr><td rowspan="5">会员</td><td>会员列表</td></tr>
-  <tr><td>评价列表</td></tr>
-  <tr><td>积分历史</td></tr>
-  <tr><td>会员资金</td></tr>
-  <tr><td>充值记录</td></tr>
-  <tr><td rowspan="6">订单</td><td>商品订单</td></tr>
-  <tr><td>订单售后</td></tr>
-  <tr><td>交易投诉</td></tr>
-  <tr><td>售后原因</td></tr>
-  <tr><td>收款流水</td></tr>
-  <tr><td>退款流水</td></tr>
-  <tr><td rowspan="6">商品</td><td>商品列表</td></tr>
-  <tr><td>商品审核</td></tr>
-  <tr><td>商品分类</td></tr>
-  <tr><td>商品品牌</td></tr>
-  <tr><td>商品规格</td></tr>
-  <tr><td>计量单位</td></tr>
-  <tr><td rowspan="5">促销</td><td>优惠券</td></tr>
-  <tr><td>秒杀活动</td></tr>
-  <tr><td>拼团活动</td></tr>
-  <tr><td>积分商品</td></tr>
-  <tr><td>积分分类</td></tr>
-  <tr><td rowspan="5">店铺</td><td>店铺管理</td></tr>
-  <tr><td>店铺结算</td></tr>
-  <tr><td>店铺结算</td></tr>
-  <tr><td>店铺结算</td></tr>
-  <tr><td>店铺对账</td></tr>
-  <tr><td rowspan="9">运营</td><td>店铺对账</td></tr>
-  <tr><td>PC端楼层装修</td></tr>
-  <tr><td>移动端楼层装修</td></tr>
-  <tr><td>分销管理</td></tr>
-  <tr><td>文章管理</td></tr>
-  <tr><td>意见反馈</td></tr>
-  <tr><td>站内信</td></tr>
-   <tr><td>短信管理</td></tr>
-   <tr><td>APP版本管理</td></tr>
-   <tr><td rowspan="4">统计</td><td>会员统计</td></tr>
-   <tr><td>订单统计</td></tr>
-   <tr><td>商品统计</td></tr>
-   <tr><td>流量统计</td></tr>
-   <tr><td rowspan="11">设置</td><td>用户管理</td></tr>
-   <tr><td>菜单管理</td></tr>
-   <tr><td>部门管理</td></tr>
-   <tr><td>系统设置</td></tr>
-   <tr><td>OSS资源</td></tr>
-   <tr><td>行政地区</td></tr>
-   <tr><td>物流公司</td></tr>
-   <tr><td>信任登录</td></tr>
-   <tr><td>支付设置</td></tr>
-   <tr><td>验证码管理</td></tr>
-   <tr><td>敏感词管理</td></tr>
-</table>
 
-<table>
-  <tr><td colspan="2">店铺后台功能列表</td></tr>
-  <tr><td rowspan="3">首页</td><td>店铺信息</td></tr>
-  <tr><td>待办事项</td></tr>
-  <tr><td>平台公告</td></tr>
-  <tr><td rowspan="3">商品</td><td>商品发布</td></tr>
-  <tr><td>商品列表</td></tr>
-  <tr><td>店铺商品分类</td></tr>
-  <tr><td rowspan="5">订单</td><td>商品订单</td></tr>
-  <tr><td>退货管理</td></tr>
-  <tr><td>退款管理</td></tr>
-  <tr><td>投诉管理</td></tr>
-  <tr><td>评价管理</td></tr>
-  <tr><td rowspan="3">财务</td><td>财务对账</td></tr>
-  <tr><td>店铺结算</td></tr>
-  <tr><td>发票管理</td></tr>
-  <tr><td rowspan="5">促销</td><td>拼团管理</td></tr>
-  <tr><td>秒杀活动</td></tr>
-  <tr><td>满额活动</td></tr>
-  <tr><td>优惠券</td></tr>
-  <tr><td>分销商品</td></tr>
-  <tr><td rowspan="2">统计</td><td>商品统计</td></tr>
-  <tr><td>订单统计</td></tr>
-  <tr><td rowspan="5">设置</td><td>配送模板</td></tr>
-  <tr><td>物流公司</td></tr>
-  <tr><td>店铺设置</td></tr>
-  <tr><td>自提点管理</td></tr>
-  <tr><td>系统消息</td></tr>
-</table>
 
-### 授权
-Lilishop学习免费，限制商用，如果需要商业使用请联系我们。QQ3409056806
+#### 平台管理端功能
+
+![平台管理端功能](https://static.pickmall.cn/images/other/managerList1.jpg)
+
+
+
+#### 卖家功能
+
+![商家端功能](https://static.pickmall.cn/images/other/storeList.jpg)
+
+
+### 商城前端功能展示
+
+#### 商城移动端
+
+<img src="https://static.pickmall.cn/images/other/app.gif" alt="移动端功能展示" style="zoom:50%;" />
+
+#### 平台管理端
+
+![管理端功能展示](https://static.pickmall.cn/images/other/manager.gif)
+
+
+### 技术选型
+
+#### 架构图
+
+![技术选型](https://lili-system.oss-cn-beijing.aliyuncs.com/docs/%E6%9E%B6%E6%9E%84.png)
+
+##### 后台技术选型
+
+| 说明           | 框架            | 说明           |               |
+| -------------- | --------------- | -------------- | ------------- |
+| 基础框架       | Spring Boot     | MVC框架        | Spring MVC    |
+| 持久框架       | Mybatis-Plus    | 程序构建       | Maven         |
+| 关系型数据库   | MySQL           | 消息中间件AMQP | RocketMQ      |
+| 缓存           | Redis +MongoDB  | 搜索引擎       | Elasticsearch |
+| 安全框架       | Spring Security | 数据库连接池   | Druid         |
+| 数据库分库分表 | sharding        | 定时任务       | xxl-job       |
+| 负载均衡       | Nginx           | 静态资源       | 阿里云OSS     |
+| 短信           | 阿里云短信      | 认证           | JWT           |
+| 日志处理       | Log4j           | 接口规范       | RESTful       |
+
+##### 前端-运营后台、店铺后台
+
+| 说明       | 框架       | 说明       | 框架    |
+| ---------- | ---------- | ---------- | ------- |
+| 构建工具   | webpack    | JS版本     | ES6     |
+| 基础JS框架 | Vue.js     | 视频播放器 | Dplayer |
+| 路由管理   | Vue Router | 状态管理   | Vuex    |
+| 基础UI库   | iView      | UI界面基于 | iView   |
+| 网络请求   | axios      |            |         |
+
+##### 前端-移动端
+
+| 说明      | 架构    | 说明     | 架构    |
+| --------- | ------- | -------- | ------- |
+| 基础UI库  | uViewui | 基础框架 | uni-app |
+| CSS预处理 | scss    | 地图引擎 | amap    |
+
+### 版本升级
+
+```
+系统后续会提供多场景解决方案。
+更多架构：微服务、Saas、中台等，都会支持。 支持差价升级商业授权
+```
+
+### 商业授权
+商业版本与开源版本代码一致，没有区分
+
+商业使用需要授权，授权方式可选择联系官网客服，或者qq群联系群主。
+
+商业授权模式为永久授权，支持永久升级。
+
+商业案例由于涉及部分多层二开关系，如需了解可以咨询销售。
+
+
+### 开源须知
+1.仅允许用于个人学习研究使用.
+
+2.禁止将本开源的代码和资源进行任何形式任何名义的出售.
+
+3.软件受国家计算机软件著作权保护（登记号：2021SR0805085）。
+
+4.限制商用，如果需要商业使用请联系我们。QQ3409056806.或者加入qq群联系群主。
+
+
+
+### 交流群
+
+##### 交流 qq 1群 961316482（已满）
+##### 交流 qq 2群 875294241（已满）
+##### 交流 qq 3群 263785057（已满）
+##### 交流 qq 4群 674617534（已满）
+##### 交流 qq 5群 594675235 
+
+### 附录
+有人有自己的学习视频、学习记录文档、希望宣传关联开源项目等均可以私聊仓库所有者。
+
+类似：
+
+清晨敲代码同学的分析: https://blog.csdn.net/vaevaevae233/category_12103567.html

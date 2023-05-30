@@ -9,7 +9,7 @@ import java.io.Serializable;
  * 基础设置
  *
  * @author Chopper
- * @date 2020/11/17 7:58 下午
+ * @since 2020/11/17 7:58 下午
  */
 @Data
 public class BaseSetting implements Serializable {
@@ -25,11 +25,20 @@ public class BaseSetting implements Serializable {
     @ApiModelProperty(value = "后端logo")
     private String domainLogo;
 
+    @ApiModelProperty(value = "后端icon")
+    private String domainIcon;
+
     @ApiModelProperty(value = "买家端logo")
     private String buyerSideLogo;
 
+    @ApiModelProperty(value = "买家端icon")
+    private String buyerSideIcon;
+
     @ApiModelProperty(value = "商家端logo")
     private String storeSideLogo;
+
+    @ApiModelProperty(value = "商家端icon")
+    private String storeSideIcon;
 
     @ApiModelProperty(value = "站点地址")
     private String staticPageAddress;

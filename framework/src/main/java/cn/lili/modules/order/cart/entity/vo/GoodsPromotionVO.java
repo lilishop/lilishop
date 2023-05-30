@@ -1,5 +1,6 @@
 package cn.lili.modules.order.cart.entity.vo;
 
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,7 +13,7 @@ import java.util.Date;
  * 商品促销VO
  *
  * @author Chopper
- * @date 2020-04-01 10:42 上午
+ * @since 2020-04-01 10:42 上午
  */
 @Data
 @ApiModel(description = "购物车中")
@@ -30,7 +31,7 @@ public class GoodsPromotionVO implements Serializable {
     private String promotionId;
 
     /**
-     * @see cn.lili.modules.promotion.entity.enums.PromotionTypeEnum
+     * @see PromotionTypeEnum
      */
     @ApiModelProperty(value = "活动工具类型")
     private String promotionType;

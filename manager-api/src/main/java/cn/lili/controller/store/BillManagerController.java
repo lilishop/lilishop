@@ -1,10 +1,10 @@
 package cn.lili.controller.store;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
+import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.store.entity.dos.Bill;
 import cn.lili.modules.store.entity.dto.BillSearchParams;
 import cn.lili.modules.store.entity.vos.BillListVO;
@@ -14,7 +14,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,15 +23,17 @@ import javax.validation.constraints.NotNull;
  * 管理端,商家结算单接口
  *
  * @author Chopper
- * @date: 2020/11/17 7:23 下午
+ * @since 2020/11/17 7:23 下午
  */
 @RestController
 @Api(tags = "管理端,商家结算单接口")
-@RequestMapping("/manager/store/bill")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping("/manager/order/bill")
 public class BillManagerController {
+    @Autowired
+    private BillService billService;
 
-    private final BillService billService;
+    @Autowired
+    private StoreFlowService storeFlowService;
 
     @ApiOperation(value = "通过id获取结算单")
     @ApiImplicitParam(name = "id", value = "结算单ID", required = true, paramType = "path")
@@ -54,17 +55,15 @@ public class BillManagerController {
     })
     @GetMapping(value = "/{id}/getStoreFlow")
     public ResultMessage<IPage<StoreFlow>> getStoreFlow(@PathVariable String id, String flowType, PageVO pageVO) {
-        return ResultUtil.data(billService.getStoreFlow(id, flowType, pageVO));
+        return ResultUtil.data(storeFlowService.getStoreFlow(id, flowType, pageVO));
     }
 
     @ApiOperation(value = "支付结算单")
     @ApiImplicitParam(name = "id", value = "结算单ID", required = true, paramType = "path")
     @PutMapping(value = "/pay/{id}")
     public ResultMessage<Object> pay(@PathVariable String id) {
-        if (billService.complete(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
-        }
-        return ResultUtil.error(ResultCode.ERROR);
+        billService.complete(id);
+        return ResultUtil.success();
     }
 
 }

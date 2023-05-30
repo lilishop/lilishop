@@ -1,7 +1,8 @@
 package cn.lili.modules.permission.service;
 
 
-import cn.lili.common.token.Token;
+import cn.lili.common.security.enums.UserEnums;
+import cn.lili.common.security.token.Token;
 import cn.lili.modules.permission.entity.dos.AdminUser;
 import cn.lili.modules.permission.entity.dto.AdminUserDTO;
 import cn.lili.modules.permission.entity.vo.AdminUserVO;
@@ -17,7 +18,7 @@ import java.util.List;
  * 用户业务层
  *
  * @author Chopper
- * @date 2020/11/17 3:42 下午
+ * @since 2020/11/17 3:42 下午
  */
 @CacheConfig(cacheNames = "{adminuser}")
 public interface AdminUserService extends IService<AdminUser> {
@@ -83,10 +84,11 @@ public interface AdminUserService extends IService<AdminUser> {
 
 
     /**
-     * 登录
+     * 用户登录
      *
-     * @param username
-     * @param password
+     * @param username 用户名
+     * @param password 密码
+     * @return token
      */
     Token login(String username, String password);
 
@@ -94,8 +96,22 @@ public interface AdminUserService extends IService<AdminUser> {
      * 刷新token
      *
      * @param refreshToken
-     * @return
+     * @return token
      */
-    Object refreshToken(String refreshToken);
+    Token refreshToken(String refreshToken);
+
+    /**
+     * 登出
+     *
+     * @param userEnums token角色类型
+     */
+    void logout(UserEnums userEnums);
+
+    /**
+     * 登出
+     *
+     * @param adminUserIds 用户id
+     */
+    void logout(List<String> adminUserIds);
 
 }

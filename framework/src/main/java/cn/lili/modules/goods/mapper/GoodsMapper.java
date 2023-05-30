@@ -10,25 +10,41 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 /**
  * 规格项数据处理层
  *
  * @author pikachu
- * @date 2020-02-18 15:18:56
+ * @since 2020-02-18 15:18:56
  */
 public interface GoodsMapper extends BaseMapper<Goods> {
 
     /**
-     * 下架所有商家商品
+     * 根据店铺ID获取商品ID列表
      *
-     * @param storeId
+     * @param storeId 店铺ID
+     * @return 商品ID列表
      */
-    @Update("update li_goods set market_enable = 0 WHERE store_id = #{storeId}")
-    void underStoreGoods(String storeId);
+    @Select("SELECT id FROM li_goods WHERE store_id = #{storeId}")
+    List<String> getGoodsIdByStoreId(String storeId);
 
+    /**
+     * 添加商品评价数量
+     *
+     * @param commentNum 评价数量
+     * @param goodsId    商品ID
+     */
     @Update("UPDATE li_goods SET comment_num = comment_num + #{commentNum} WHERE id = #{goodsId}")
     void addGoodsCommentNum(Integer commentNum, String goodsId);
 
+    /**
+     * 查询商品VO分页
+     *
+     * @param page         分页
+     * @param queryWrapper 查询条件
+     * @return 商品VO分页
+     */
     @Select("select g.* from li_goods as g ")
     IPage<GoodsVO> queryByParams(IPage<GoodsVO> page, @Param(Constants.WRAPPER) Wrapper<GoodsVO> queryWrapper);
 }

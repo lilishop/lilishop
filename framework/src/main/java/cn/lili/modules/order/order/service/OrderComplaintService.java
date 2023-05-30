@@ -14,7 +14,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 交易投诉业务层
  *
  * @author paulG
- * @date 2020/12/4
+ * @since 2020/12/4
  **/
 public interface OrderComplaintService extends IService<OrderComplaint> {
 
@@ -68,11 +68,11 @@ public interface OrderComplaintService extends IService<OrderComplaint> {
     OrderComplaint updateOrderComplainByStatus(OrderComplaintOperationParams operationParam);
 
     /**
-     * 获取新投诉数量
+     * 待处理投诉数量
      *
-     * @return 新投诉
+     * @return 待处理投诉数量
      */
-    Integer newComplainNum();
+    long waitComplainNum();
 
     /**
      * 取消交易投诉
@@ -84,7 +84,9 @@ public interface OrderComplaintService extends IService<OrderComplaint> {
 
     /**
      * 店铺申诉
+     *
      * @param storeAppealVO
+     * @return 操作状态
      */
     boolean appeal(StoreAppealVO storeAppealVO);
 }

@@ -22,12 +22,15 @@ public class ThreadPoolUtil {
     /**
      * 线程缓冲队列
      */
-    private static final BlockingQueue<Runnable> bqueue = new ArrayBlockingQueue<Runnable>(100);
-    private static final ThreadPoolExecutor pool = new ThreadPoolExecutor(SIZE_CORE_POOL, SIZE_MAX_POOL, ALIVE_TIME, TimeUnit.MILLISECONDS, bqueue, new ThreadPoolExecutor.CallerRunsPolicy());
-    public static ThreadPoolExecutor threadPool;
+    private static final BlockingQueue<Runnable> BQUEUE = new ArrayBlockingQueue<Runnable>(100);
+    private static final ThreadPoolExecutor POOL = new ThreadPoolExecutor(SIZE_CORE_POOL, SIZE_MAX_POOL, ALIVE_TIME, TimeUnit.MILLISECONDS, BQUEUE, new ThreadPoolExecutor.CallerRunsPolicy());
+    /**
+     * volatile禁止指令重排
+     */
+    public static volatile ThreadPoolExecutor threadPool;
 
     static {
-        pool.prestartAllCoreThreads();
+        POOL.prestartAllCoreThreads();
     }
 
     /**
@@ -49,29 +52,27 @@ public class ThreadPoolUtil {
     }
 
     /**
-     * dcs获取线程池
+     * DCL获取线程池
      *
      * @return 线程池对象
      */
     public static ThreadPoolExecutor getThreadPool() {
         if (threadPool != null) {
             return threadPool;
-        } else {
-            synchronized (ThreadPoolUtil.class) {
-                if (threadPool == null) {
-                    threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-                    return threadPool;
-                }
-                return threadPool;
+        }
+        synchronized (ThreadPoolUtil.class) {
+            if (threadPool == null) {
+                threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
             }
         }
+        return threadPool;
     }
 
     public static ThreadPoolExecutor getPool() {
-        return pool;
+        return POOL;
     }
 
     public static void main(String[] args) {
-        System.out.println(pool.getPoolSize());
+        System.out.println(POOL.getPoolSize());
     }
 }

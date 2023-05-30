@@ -1,64 +1,85 @@
 package cn.lili.event.impl;
 
+import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.json.JSONUtil;
 import cn.lili.event.AfterSaleStatusChangeEvent;
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.modules.distribution.entity.dos.DistributionOrder;
 import cn.lili.modules.distribution.entity.enums.DistributionOrderStatusEnum;
 import cn.lili.modules.distribution.mapper.DistributionOrderMapper;
 import cn.lili.modules.distribution.service.DistributionOrderService;
-import cn.lili.modules.order.order.entity.dos.AfterSale;
+import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
+import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.DistributionSetting;
+import cn.lili.modules.system.entity.enums.SettingEnum;
+import cn.lili.modules.system.service.SettingService;
 import cn.lili.timetask.handler.EveryDayExecute;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 /**
  * 分销订单入库
  *
  * @author Chopper
- * @date 2020-07-03 11:20
+ * @since 2020-07-03 11:20
  */
+@Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DistributionOrderExecute implements OrderStatusChangeEvent, EveryDayExecute, AfterSaleStatusChangeEvent {
 
-    //分销订单
-    private final DistributionOrderService distributionOrderService;
-    //分销订单持久层
-    private final DistributionOrderMapper distributionOrderMapper;
+    /**
+     * 分销订单
+     */
+    @Autowired
+    private DistributionOrderService distributionOrderService;
+
+    @Autowired
+    private SettingService settingService;
 
 
     @Override
     public void orderChange(OrderMessage orderMessage) {
 
         switch (orderMessage.getNewStatus()) {
-            case PAID: {
+            //订单带校验/订单代发货/待自提，则记录分销信息
+            case TAKE:
+            case STAY_PICKED_UP:
+            case UNDELIVERED: {
                 //记录分销订单
-                distributionOrderService.payOrder(orderMessage.getOrderSn());
+                distributionOrderService.calculationDistribution(orderMessage.getOrderSn());
                 break;
             }
             case CANCELLED: {
                 //修改分销订单状态
                 distributionOrderService.cancelOrder(orderMessage.getOrderSn());
+                break;
             }
-            break;
+            default: {
+                break;
+            }
         }
     }
 
     @Override
     public void execute() {
-        //计算分销提佣
-        distributionOrderMapper.rebate(DistributionOrderStatusEnum.WAIT_BILL.name(), new DateTime());
+        log.info("分销订单定时开始执行");
+        //设置结算天数(解冻日期)
+        Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
+        DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
+        //解冻时间
+        DateTime dateTime = new DateTime();
+        //当前时间-结算天数=最终结算时间
+        dateTime = dateTime.offsetNew(DateField.DAY_OF_MONTH, -distributionSetting.getCashDay());
+        //分销人员订单结算
+        distributionOrderService.updateRebate(dateTime,DistributionOrderStatusEnum.WAIT_BILL.name());
 
-        //修改分销订单状态
-        distributionOrderService.update(new LambdaUpdateWrapper<DistributionOrder>()
-                .eq(DistributionOrder::getDistributionOrderStatus, DistributionOrderStatusEnum.WAIT_BILL.name())
-                .le(DistributionOrder::getSettleCycle, new DateTime())
-                .set(DistributionOrder::getDistributionOrderStatus, DistributionOrderStatusEnum.WAIT_CASH.name()));
     }
 
     @Override

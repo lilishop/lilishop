@@ -1,7 +1,9 @@
 package cn.lili.controller.distribution;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultCode;
-import cn.lili.common.utils.ResultUtil;
+import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.distribution.entity.dos.Distribution;
@@ -12,7 +14,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,15 +23,15 @@ import javax.validation.constraints.NotNull;
  * 管理端,分销员管理接口
  *
  * @author pikachu
- * @date 2020-03-14 23:04:56
+ * @since 2020-03-14 23:04:56
  */
 @RestController
 @Api(tags = "管理端,分销员管理接口")
-@RequestMapping("/manager/distribution")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping("/manager/distribution/distribution")
 public class DistributionManagerController {
 
-    private final DistributionService distributionService;
+    @Autowired
+    private DistributionService distributionService;
 
     @ApiOperation(value = "分页获取")
     @GetMapping(value = "/getByPage")
@@ -39,6 +40,7 @@ public class DistributionManagerController {
     }
 
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "清退分销商")
     @PutMapping(value = "/retreat/{id}")
     @ApiImplicitParams({
@@ -46,13 +48,14 @@ public class DistributionManagerController {
     })
     public ResultMessage<Object> retreat(@PathVariable String id) {
         if (distributionService.retreat(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
+            return ResultUtil.success();
         } else {
-            return ResultUtil.error(ResultCode.DISTRIBUTION_RETREAT_ERROR);
+            throw new ServiceException(ResultCode.DISTRIBUTION_RETREAT_ERROR);
         }
 
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "恢复分销商")
     @PutMapping(value = "/resume/{id}")
     @ApiImplicitParams({
@@ -60,13 +63,14 @@ public class DistributionManagerController {
     })
     public ResultMessage<Object> resume(@PathVariable String id) {
         if (distributionService.resume(id)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
+            return ResultUtil.success();
         } else {
-            return ResultUtil.error(ResultCode.DISTRIBUTION_RETREAT_ERROR);
+            throw new ServiceException(ResultCode.DISTRIBUTION_RETREAT_ERROR);
         }
 
     }
 
+    @PreventDuplicateSubmissions
     @ApiOperation(value = "审核分销商")
     @PutMapping(value = "/audit/{id}")
     @ApiImplicitParams({
@@ -75,9 +79,9 @@ public class DistributionManagerController {
     })
     public ResultMessage<Object> audit(@NotNull @PathVariable String id, @NotNull String status) {
         if (distributionService.audit(id, status)) {
-            return ResultUtil.success(ResultCode.SUCCESS);
+            return ResultUtil.success();
         } else {
-            return ResultUtil.error(ResultCode.DISTRIBUTION_AUDIT_ERROR);
+            throw new ServiceException(ResultCode.DISTRIBUTION_AUDIT_ERROR);
         }
 
     }

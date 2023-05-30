@@ -1,10 +1,13 @@
 package cn.lili.test.elasticsearch;
 
 import cn.hutool.json.JSONUtil;
+import cn.lili.cache.Cache;
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.service.PromotionService;
 import cn.lili.modules.search.entity.dos.EsGoodsAttribute;
@@ -17,22 +20,20 @@ import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.data.elasticsearch.core.SearchPage;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author paulG
  * @since 2020/10/14
  **/
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 class EsTest {
 
@@ -49,49 +50,78 @@ class EsTest {
     private GoodsSkuService goodsSkuService;
 
     @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+    private GoodsService goodsService;
+
+    @Autowired
+    private Cache cache;
 
     @Autowired
     private PromotionService promotionService;
 
 
+    public static void main(String[] args) {
+//        PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS);
+//        String safeHTML = policy.sanitize("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-");
+//        System.out.println(safeHTML);
+//        System.out.println(Sanitizers.FORMATTING.and(Sanitizers.FORMATTING).sanitize("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-"));
+//        System.out.println(HtmlUtil.unescape(safeHTML));
+//        System.out.println(HtmlUtil.filter("+ADw-script+AD4-alert(document.cookie)+ADw-/script+AD4-"));
+//        Date dt1 = new Date(2021, 12, 10);
+//        Date dt2 = new Date(2021, 12, 14);
+        for (int i = 0; i < 1000; i++) {
+
+            Goods goods = new Goods();
+            goods.setGoodsName("测试商品" + i);
+//            goods.setAuthFlag();
+        }
+
+//
+
+    }
+
+    @Test
+    void cleanInvalidPromotion() {
+        this.esGoodsIndexService.cleanInvalidPromotion();
+        Assertions.assertTrue(true);
+    }
+
     @Test
     void searchGoods() {
         EsGoodsSearchDTO goodsSearchDTO = new EsGoodsSearchDTO();
-//        goodsSearchDTO.setKeyword("黄");
-        goodsSearchDTO.setProp("IETF_HTTP/3");
-//        goodsSearchDTO.setPrice("100_20000");
-//        goodsSearchDTO.setStoreCatId(1L);
-//        goodsSearchDTO.setBrandId(123L);
-//        goodsSearchDTO.setCategoryId(2L);
-//        goodsSearchDTO.setNameIds(Arrays.asList("1344113311566553088", "1344113367694729216"));
+//       goodsSearchDTO.setKeyword("黄");
+//        goodsSearchDTO.setProp("IETF_HTTP/3");
+//       goodsSearchDTO.setPrice("100_20000");
+//       goodsSearchDTO.setStoreCatId(1L);
+//       goodsSearchDTO.setBrandId(123L);
+//       goodsSearchDTO.setCategoryId(2L);
+//       goodsSearchDTO.setNameIds(Arrays.asList("1344113311566553088", "1344113367694729216"));
         PageVO pageVo = new PageVO();
         pageVo.setPageNumber(0);
         pageVo.setPageSize(100);
         pageVo.setOrder("desc");
         pageVo.setNotConvert(true);
-        Page<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(goodsSearchDTO, pageVo);
+        SearchPage<EsGoodsIndex> esGoodsIndices = goodsSearchService.searchGoods(goodsSearchDTO, pageVo);
         Assertions.assertNotNull(esGoodsIndices);
         esGoodsIndices.getContent().forEach(System.out::println);
-//        esGoodsIndices.getContent().forEach(i -> {
-//            if (i.getPromotionMap() != null){
-//                String s = i.getPromotionMap().keySet().parallelStream().filter(j -> j.contains(PromotionTypeEnum.FULL_DISCOUNT.name())).findFirst().orElse(null);
-//                if (s != null) {
-//                    FullDiscount basePromotion = (FullDiscount) i.getPromotionMap().get(s);
-//                    System.out.println(basePromotion);
-//                }
-//            }
-//        });
+//       esGoodsIndices.getContent().forEach(i -> {
+//           if (i.getPromotionMap() != null){
+//               String s = i.getPromotionMap().keySet().parallelStream().filter(j -> j.contains(PromotionTypeEnum.FULL_DISCOUNT.name())).findFirst().orElse(null);
+//               if (s != null) {
+//                   FullDiscount basePromotion = (FullDiscount) i.getPromotionMap().get(s);
+//                   System.out.println(basePromotion);
+//               }
+//           }
+//       });
 
     }
 
     @Test
     void aggregationSearch() {
         EsGoodsSearchDTO goodsSearchDTO = new EsGoodsSearchDTO();
-        // goodsSearchDTO.setKeyword("电脑");
-        // goodsSearchDTO.setProp("颜色_故宫文创@版本_小新Pro13s");
-//        goodsSearchDTO.setCategoryId("2");
-//        goodsSearchDTO.setPrice("100_20000");
+        //goodsSearchDTO.setKeyword("电脑");
+        //goodsSearchDTO.setProp("颜色_故宫文创@版本_小新Pro13s");
+//       goodsSearchDTO.setCategoryId("2");
+//       goodsSearchDTO.setPrice("100_20000");
         PageVO pageVo = new PageVO();
         pageVo.setPageNumber(0);
         pageVo.setPageSize(10);
@@ -105,18 +135,16 @@ class EsTest {
     @Test
     void init() {
         LambdaQueryWrapper<GoodsSku> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(GoodsSku::getIsAuth, GoodsAuthEnum.PASS.name());
+        queryWrapper.eq(GoodsSku::getAuthFlag, GoodsAuthEnum.PASS.name());
         queryWrapper.eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
         List<GoodsSku> list = goodsSkuService.list(queryWrapper);
         List<EsGoodsIndex> esGoodsIndices = new ArrayList<>();
         for (GoodsSku goodsSku : list) {
             EsGoodsIndex index = new EsGoodsIndex(goodsSku);
-            Map<String, Object> goodsCurrentPromotionMap = promotionService.getGoodsCurrentPromotionMap(index);
-            index.setPromotionMap(goodsCurrentPromotionMap);
             esGoodsIndices.add(index);
-            stringRedisTemplate.opsForValue().set(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity().toString());
+            cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
         }
-        esGoodsIndexService.initIndex(esGoodsIndices);
+        esGoodsIndexService.initIndex(esGoodsIndices, true);
         Assertions.assertTrue(true);
     }
 
@@ -154,62 +182,7 @@ class EsTest {
 
     @Test
     void updateIndex() {
-//        EsGoodsIndex goodsIndex = new EsGoodsIndex();
-//        goodsIndex.setId("121");
-//        goodsIndex.setBrandId("113");
-//        goodsIndex.setGoodsId("113");
-//        goodsIndex.setCategoryPath("0|1");
-//        goodsIndex.setBuyCount(100);
-//        goodsIndex.setCommentNum(100);
-//        goodsIndex.setGoodsName("惠普（HP）战66 三代AMD版14英寸轻薄笔记本电脑（锐龙7nm 六核R5-4500U 16G 512G 400尼特高色域一年上门 ）");
-//        goodsIndex.setGrade(100D);
-//        goodsIndex.setHighPraiseNum(100);
-//        goodsIndex.setIntro("I'd like a cup of tea, please");
-//        goodsIndex.setIsAuth("1");
-//        goodsIndex.setMarketEnable("1");
-//        goodsIndex.setMobileIntro("I want something cold to drink");
-//        goodsIndex.setPoint(100);
-//        goodsIndex.setPrice(100D);
-//        goodsIndex.setSelfOperated(true);
-//        goodsIndex.setStoreId("113");
-//        goodsIndex.setStoreName("惠普自营官方旗舰店");
-//        goodsIndex.setStoreCategoryPath("1");
-//        goodsIndex.setThumbnail("picture");
-//        goodsIndex.setSn("A113");
-//        Map<String, BasePromotion> promotionMap = new HashMap<>();
-//        Coupon coupon = new Coupon();
-//        coupon.setStoreId("113");
-//        coupon.setStoreName("惠普自营官方旗舰店");
-//        coupon.setPromotionStatus(PromotionStatusEnum.START.name());
-//        coupon.setReceivedNum(0);
-//        coupon.setConsumeLimit(11D);
-//        coupon.setCouponLimitNum(10);
-//        coupon.setCouponName("满11减10");
-//        coupon.setCouponType(CouponTypeEnum.PRICE.name());
-//        coupon.setGetType(CouponGetEnum.FREE.name());
-//        coupon.setPrice(10D);
-//        promotionMap.put(PromotionTypeEnum.COUPON.name(), coupon);
-//        goodsIndex.setPromotionMap(promotionMap);
-//        List<EsGoodsAttribute> esGoodsAttributeList = new ArrayList<>();
-//        EsGoodsAttribute attribute = new EsGoodsAttribute();
-//        attribute.setType(0);
-//        attribute.setName("颜色");
-//        attribute.setValue("14英寸");
-//        esGoodsAttributeList.add(attribute);
-//        esGoodsAttributeList.add(attribute);
-//        attribute = new EsGoodsAttribute();
-//        attribute.setName("版本");
-//        attribute.setValue("【战66新品】R5-4500 8G 256G");
-//        esGoodsAttributeList.add(attribute);
-//        attribute = new EsGoodsAttribute();
-//        attribute.setName("配置");
-//        attribute.setValue("i5 8G 512G 2G独显");
-//        esGoodsAttributeList.add(attribute);
-//        goodsIndex.setAttrList(esGoodsAttributeList);
-//        GoodsSku goodsSkuByIdFromCache = goodsSkuService.getGoodsSkuByIdFromCache("121");
-//        EsGoodsIndex goodsIndex = new EsGoodsIndex(goodsSkuByIdFromCache);
         EsGoodsIndex byId = esGoodsIndexService.findById("121");
-        byId.setPromotionMap(null);
         esGoodsIndexService.updateIndex(byId);
         Assertions.assertTrue(true);
     }
@@ -234,7 +207,7 @@ class EsTest {
         goodsIndex.setGrade(100D);
         goodsIndex.setHighPraiseNum(100);
         goodsIndex.setIntro("I'd like a cup of tea, please");
-        goodsIndex.setIsAuth("1");
+        goodsIndex.setAuthFlag("1");
         goodsIndex.setMarketEnable("1");
         goodsIndex.setMobileIntro("I want something cold to drink");
         goodsIndex.setPoint(0);

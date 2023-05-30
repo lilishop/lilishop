@@ -7,8 +7,18 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * 商品参数业务层
  *
  * @author pikachu
- * @date 2020-03-02 16:18:56
+ * @since 2020-03-02 16:18:56
  */
 public interface ParametersService extends IService<Parameters> {
+
+
+
+    /**
+     * 更新参数组信息
+     *
+     * @param parameters 参数组信息
+     * @return 是否更新成功
+     */
+    boolean updateParameter(Parameters parameters);
 
 }
