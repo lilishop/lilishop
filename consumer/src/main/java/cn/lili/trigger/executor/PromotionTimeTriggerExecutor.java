@@ -3,6 +3,7 @@ package cn.lili.trigger.executor;
 import cn.hutool.json.JSONUtil;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
+import cn.lili.modules.promotion.service.PintuanService;
 import cn.lili.trigger.TimeTriggerExecutor;
 import cn.lili.trigger.message.PintuanOrderMessage;
 import cn.lili.trigger.model.TimeExecuteConstant;
