@@ -223,7 +223,7 @@ public class AliPayPlugin implements Payment {
     @Override
     public void callBack(HttpServletRequest request) {
         log.info("支付同步回调：");
-        callback(request);
+        checkPaymentResult(request);
 
     }
 
@@ -274,9 +274,9 @@ public class AliPayPlugin implements Payment {
     /**
      * 验证支付结果
      *
-     * @param request
+     * @param request 请求
      */
-    private void callback(HttpServletRequest request) {
+    private void checkPaymentResult(HttpServletRequest request) {
         try {
             AlipayPaymentSetting alipayPaymentSetting = alipayPaymentSetting();
             //获取支付宝反馈信息
