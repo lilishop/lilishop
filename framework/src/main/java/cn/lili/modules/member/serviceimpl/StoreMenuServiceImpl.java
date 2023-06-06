@@ -86,9 +86,9 @@ public class StoreMenuServiceImpl extends ServiceImpl<StoreMenuMapper, StoreMenu
 
     @Override
     public List<StoreMenu> findUserList(String userId, String clerkId) {
-        String cacheKey = CachePrefix.STORE_USER_MENU.getPrefix() + clerkId;
+        String cacheKey = CachePrefix.STORE_USER_MENU.getPrefix() + userId;
         List<StoreMenu> menuList = (List<StoreMenu>) cache.get(cacheKey);
-        if (menuList == null) {
+        if (menuList == null || menuList.isEmpty()) {
             menuList = this.baseMapper.findByUserId(clerkId);
             cache.put(cacheKey, menuList);
         }

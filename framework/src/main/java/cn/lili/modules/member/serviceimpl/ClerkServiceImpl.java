@@ -20,6 +20,7 @@ import cn.lili.modules.member.entity.vo.ClerkVO;
 import cn.lili.modules.member.mapper.ClerkMapper;
 import cn.lili.modules.member.service.*;
 import cn.lili.mybatis.util.PageUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -169,6 +170,17 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
                 //角色赋值
                 if (!clerkEditDTO.getRoles().isEmpty()) {
                     clerk.setRoleIds(CharSequenceUtil.join(",", clerkEditDTO.getRoles()));
+                    //添加店员用户角色
+                    List<StoreClerkRole> storeClerkRoleList = new ArrayList<>();
+
+                    clerkEditDTO.getRoles().forEach(a -> storeClerkRoleList.add(StoreClerkRole.builder().clerkId(clerk.getId()).roleId(a).build()));
+
+                    storeClerkRoleService.saveBatch(storeClerkRoleList);
+                } else {
+                    clerk.setRoleIds("");
+                    LambdaQueryWrapper<StoreClerkRole> queryWrapper = new LambdaQueryWrapper<>();
+                    queryWrapper.eq(StoreClerkRole::getClerkId, clerk.getId());
+                    storeClerkRoleService.remove(queryWrapper);
                 }
             }
 
@@ -179,19 +191,12 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
                 } else {
                     throw new ServiceException(ResultCode.PERMISSION_NOT_FOUND_ERROR);
                 }
+            } else {
+                clerk.setDepartmentId("");
             }
 
-            //判断用户角色权限不为超级会员且权限路径不为空
-            if (Boolean.FALSE.equals(clerkEditDTO.getIsSuper()) && clerkEditDTO.getRoles() != null) {
-                //添加店员用户角色
-                List<StoreClerkRole> storeClerkRoleList = new ArrayList<>();
-
-                clerkEditDTO.getRoles().forEach(a -> storeClerkRoleList.add(StoreClerkRole.builder().clerkId(clerk.getId()).roleId(a).build()));
-
-                storeClerkRoleService.saveBatch(storeClerkRoleList);
-                cache.vagueDel(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE) + UserContext.getCurrentUser().getId());
-                cache.vagueDel(CachePrefix.STORE_USER_MENU.getPrefix() + UserContext.getCurrentUser().getId());
-            }
+            cache.vagueDel(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE) + clerk.getMemberId());
+            cache.vagueDel(CachePrefix.STORE_USER_MENU.getPrefix() + clerk.getMemberId());
             clerk.setIsSuper(clerkEditDTO.getIsSuper());
             this.updateById(clerk);
             return clerk;
