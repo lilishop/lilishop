@@ -1,9 +1,12 @@
 package cn.lili.security;
 
 import cn.lili.cache.Cache;
+import cn.lili.common.properties.IgnoredUrlsProperties;
 import cn.lili.common.security.CustomAccessDeniedHandler;
 import cn.lili.common.utils.SpringContextUtil;
-import cn.lili.common.properties.IgnoredUrlsProperties;
+import cn.lili.modules.member.service.ClerkService;
+import cn.lili.modules.member.service.StoreMenuRoleService;
+import cn.lili.modules.member.token.StoreTokenGenerate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +43,15 @@ public class StoreSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private Cache<String> cache;
 
+    @Autowired
+    private StoreTokenGenerate storeTokenGenerate;
+
+    @Autowired
+    private StoreMenuRoleService storeMenuRoleService;
+
+    @Autowired
+    private ClerkService clerkService;
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -74,7 +86,7 @@ public class StoreSecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler)
                 .and()
                 //添加JWT认证过滤器
-                .addFilter(new StoreAuthenticationFilter(authenticationManager(), cache));
+                .addFilter(new StoreAuthenticationFilter(authenticationManager(), storeTokenGenerate, storeMenuRoleService, clerkService, cache));
     }
 
 }

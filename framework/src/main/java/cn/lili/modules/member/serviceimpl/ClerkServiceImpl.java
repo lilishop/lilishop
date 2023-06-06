@@ -170,8 +170,6 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
                 if (!clerkEditDTO.getRoles().isEmpty()) {
                     clerk.setRoleIds(CharSequenceUtil.join(",", clerkEditDTO.getRoles()));
                 }
-                cache.vagueDel(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE) + UserContext.getCurrentUser().getId());
-                cache.vagueDel(CachePrefix.STORE_USER_MENU.getPrefix() + UserContext.getCurrentUser().getId());
             }
 
             //部门校验
@@ -181,6 +179,18 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
                 } else {
                     throw new ServiceException(ResultCode.PERMISSION_NOT_FOUND_ERROR);
                 }
+            }
+
+            //判断用户角色权限不为超级会员且权限路径不为空
+            if (Boolean.FALSE.equals(clerkEditDTO.getIsSuper()) && clerkEditDTO.getRoles() != null) {
+                //添加店员用户角色
+                List<StoreClerkRole> storeClerkRoleList = new ArrayList<>();
+
+                clerkEditDTO.getRoles().forEach(a -> storeClerkRoleList.add(StoreClerkRole.builder().clerkId(clerk.getId()).roleId(a).build()));
+
+                storeClerkRoleService.saveBatch(storeClerkRoleList);
+                cache.vagueDel(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE) + UserContext.getCurrentUser().getId());
+                cache.vagueDel(CachePrefix.STORE_USER_MENU.getPrefix() + UserContext.getCurrentUser().getId());
             }
             clerk.setIsSuper(clerkEditDTO.getIsSuper());
             this.updateById(clerk);

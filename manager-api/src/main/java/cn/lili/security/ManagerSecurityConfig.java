@@ -1,8 +1,10 @@
 package cn.lili.security;
 
 import cn.lili.cache.Cache;
-import cn.lili.common.security.CustomAccessDeniedHandler;
 import cn.lili.common.properties.IgnoredUrlsProperties;
+import cn.lili.common.security.CustomAccessDeniedHandler;
+import cn.lili.modules.permission.service.MenuService;
+import cn.lili.modules.system.token.ManagerTokenGenerate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -25,22 +27,24 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class ManagerSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
+    @Autowired
+    public MenuService menuService;
     /**
      * 忽略验权配置
      */
     @Autowired
     private IgnoredUrlsProperties ignoredUrlsProperties;
-
     /**
      * spring security -》 权限不足处理
      */
     @Autowired
     private CustomAccessDeniedHandler accessDeniedHandler;
-
     @Autowired
     private Cache<String> cache;
     @Autowired
     private CorsConfigurationSource corsConfigurationSource;
+    @Autowired
+    private ManagerTokenGenerate managerTokenGenerate;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -73,7 +77,7 @@ public class ManagerSecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler)
                 .and()
                 //添加JWT认证过滤器
-                .addFilter(new ManagerAuthenticationFilter(authenticationManager(), cache));
+                .addFilter(new ManagerAuthenticationFilter(authenticationManager(), menuService, managerTokenGenerate, cache));
     }
 
 }

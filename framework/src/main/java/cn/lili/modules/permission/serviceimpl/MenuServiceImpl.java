@@ -17,7 +17,6 @@ import cn.lili.modules.permission.entity.vo.UserMenuVO;
 import cn.lili.modules.permission.mapper.MenuMapper;
 import cn.lili.modules.permission.service.MenuService;
 import cn.lili.modules.permission.service.RoleMenuService;
-import cn.lili.modules.system.token.ManagerTokenGenerate;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -43,8 +42,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Autowired
     private RoleMenuService roleMenuService;
 
-    @Autowired
-    private ManagerTokenGenerate managerTokenGenerate;
 
     @Autowired
     private Cache cache;
@@ -82,11 +79,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             menuList = this.baseMapper.findByUserId(userId);
             //每5分钟重新确认用户权限
             cache.put(cacheKey, menuList, 300L);
-        }
-        String permissionCacheKey = CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + userId;
-        Map<String, List<String>> permission = (Map<String, List<String>>) cache.get(permissionCacheKey);
-        if (permission == null || permission.isEmpty()) {
-            cache.put(permissionCacheKey, this.managerTokenGenerate.permissionList(this.findAllMenu(userId)));
         }
         return menuList;
     }

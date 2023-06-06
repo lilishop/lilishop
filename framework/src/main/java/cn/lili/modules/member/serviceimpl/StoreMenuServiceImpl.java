@@ -18,7 +18,6 @@ import cn.lili.modules.member.mapper.StoreMenuMapper;
 import cn.lili.modules.member.service.ClerkService;
 import cn.lili.modules.member.service.StoreMenuRoleService;
 import cn.lili.modules.member.service.StoreMenuService;
-import cn.lili.modules.member.token.StoreTokenGenerate;
 import cn.lili.modules.permission.entity.dto.MenuSearchParams;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -56,8 +55,6 @@ public class StoreMenuServiceImpl extends ServiceImpl<StoreMenuMapper, StoreMenu
     private ClerkService clerkService;
 
 
-    @Autowired
-    private StoreTokenGenerate storeTokenGenerate;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -95,14 +92,6 @@ public class StoreMenuServiceImpl extends ServiceImpl<StoreMenuMapper, StoreMenu
             menuList = this.baseMapper.findByUserId(clerkId);
             cache.put(cacheKey, menuList);
         }
-
-        String permissionCacheKey = CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE) + userId;
-        Map<String, List<String>> permission = (Map<String, List<String>>) cache.get(permissionCacheKey);
-        if (permission == null || permission.isEmpty()) {
-            permission = storeTokenGenerate.permissionList(storeMenuRoleService.findAllMenu(clerkId, userId));
-            cache.put(permissionCacheKey, permission);
-        }
-
         return menuList;
     }
 
