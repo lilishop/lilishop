@@ -27,7 +27,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -59,11 +58,6 @@ public class PlatformViewServiceImpl extends ServiceImpl<PlatformViewMapper, Pla
      */
     @Autowired
     private Cache cache;
-    /**
-     * 平台流量统计
-     */
-    @Resource
-    private PlatformViewMapper platformViewMapper;
 
     @Override
     public Long online() {
@@ -250,7 +244,7 @@ public class PlatformViewServiceImpl extends ServiceImpl<PlatformViewMapper, Pla
             } else {
                 queryWrapper.eq("store_id", -1);
             }
-            return platformViewMapper.count(queryWrapper);
+            return this.baseMapper.count(queryWrapper);
         }
     }
 

@@ -1,13 +1,18 @@
 package cn.lili.modules.member.service;
 
+import cn.hutool.core.date.DateTime;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
 import cn.lili.modules.member.entity.dto.MemberEvaluationDTO;
 import cn.lili.modules.member.entity.vo.EvaluationNumberVO;
 import cn.lili.modules.member.entity.vo.MemberEvaluationListVO;
 import cn.lili.modules.member.entity.vo.MemberEvaluationVO;
+import cn.lili.modules.member.entity.vo.StoreRatingVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 会员商品评价业务层
@@ -110,5 +115,9 @@ public interface MemberEvaluationService extends IService<MemberEvaluation> {
      * @return 商品评价数量
      */
     long getEvaluationCount(EvaluationQueryParams evaluationQueryParams);
+
+    List<Map<String, Object>> memberEvaluationNum(DateTime startDate, DateTime endDate);
+
+    StoreRatingVO getStoreRatingVO(String storeId, String status);
 
 }

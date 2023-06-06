@@ -21,6 +21,7 @@ import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.entity.vo.EvaluationNumberVO;
 import cn.lili.modules.member.entity.vo.MemberEvaluationListVO;
 import cn.lili.modules.member.entity.vo.MemberEvaluationVO;
+import cn.lili.modules.member.entity.vo.StoreRatingVO;
 import cn.lili.modules.member.mapper.MemberEvaluationMapper;
 import cn.lili.modules.member.service.MemberEvaluationService;
 import cn.lili.modules.member.service.MemberService;
@@ -44,7 +45,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -57,11 +57,6 @@ import java.util.Map;
 @Service
 public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMapper, MemberEvaluation> implements MemberEvaluationService {
 
-    /**
-     * 会员评价数据层
-     */
-    @Resource
-    private MemberEvaluationMapper memberEvaluationMapper;
     /**
      * 订单
      */
@@ -101,7 +96,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
 
     @Override
     public IPage<MemberEvaluationListVO> queryPage(EvaluationQueryParams evaluationQueryParams) {
-        return memberEvaluationMapper.getMemberEvaluationList(PageUtil.initPage(evaluationQueryParams), evaluationQueryParams.queryWrapper());
+        return this.baseMapper.getMemberEvaluationList(PageUtil.initPage(evaluationQueryParams), evaluationQueryParams.queryWrapper());
     }
 
     @Override
@@ -229,6 +224,20 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
     @Override
     public long getEvaluationCount(EvaluationQueryParams evaluationQueryParams) {
         return this.count(evaluationQueryParams.queryWrapper());
+    }
+
+    @Override
+    public List<Map<String, Object>> memberEvaluationNum(DateTime startDate, DateTime endDate) {
+        return this.baseMapper.memberEvaluationNum(new QueryWrapper<MemberEvaluation>()
+                .between("create_time", startDate, endDate));
+    }
+
+    @Override
+    public StoreRatingVO getStoreRatingVO(String storeId, String status) {
+        LambdaQueryWrapper<MemberEvaluation> lambdaQueryWrapper = Wrappers.lambdaQuery();
+        lambdaQueryWrapper.eq(MemberEvaluation::getStoreId, storeId);
+        lambdaQueryWrapper.eq(MemberEvaluation::getStatus, SwitchEnum.OPEN.name());
+        return this.baseMapper.getStoreRatingVO(lambdaQueryWrapper);
     }
 
     /**

@@ -1,7 +1,7 @@
 package cn.lili.modules.order.order.service;
 
-import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.order.entity.dos.Trade;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -43,5 +43,7 @@ public interface TradeService extends IService<Trade> {
      * @param paymentName  支付方式
      */
     void payTrade(String tradeSn, String paymentName, String receivableNo);
+
+    void updateTradePrice(String tradeSn);
 
 }

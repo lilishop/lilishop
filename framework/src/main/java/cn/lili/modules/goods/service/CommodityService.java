@@ -43,4 +43,8 @@ public interface CommodityService extends IService<Commodity> {
      * @return 直播商品分页
      */
     IPage<CommodityVO> commodityList(PageVO pageVO, String name, String auditStatus);
+
+    List<Commodity> getCommodityByRoomId(Integer roomId);
+
+    List<String> getSimpleCommodityByRoomId(Integer roomId);
 }

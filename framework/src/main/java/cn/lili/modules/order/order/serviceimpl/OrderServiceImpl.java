@@ -18,9 +18,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
-import cn.lili.modules.logistics.entity.enums.LogisticsEnum;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
-import cn.lili.modules.member.service.StoreLogisticsService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
@@ -34,7 +32,6 @@ import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.entity.vo.OrderVO;
 import cn.lili.modules.order.order.entity.vo.PaymentLog;
-import cn.lili.modules.order.order.mapper.OrderItemMapper;
 import cn.lili.modules.order.order.mapper.OrderMapper;
 import cn.lili.modules.order.order.service.*;
 import cn.lili.modules.order.trade.entity.dos.OrderLog;
@@ -46,7 +43,6 @@ import cn.lili.modules.store.entity.dto.StoreDeliverGoodsAddressDTO;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.entity.dos.Logistics;
-import cn.lili.modules.system.entity.dto.LogisticsSetting;
 import cn.lili.modules.system.entity.vo.Traces;
 import cn.lili.modules.system.service.LogisticsService;
 import cn.lili.mybatis.util.PageUtil;
@@ -75,7 +71,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
@@ -100,11 +95,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Autowired
     private TimeTrigger timeTrigger;
-    /**
-     * 订单货物数据层
-     */
-    @Resource
-    private OrderItemMapper orderItemMapper;
     /**
      * 发票
      */
@@ -285,10 +275,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (order == null) {
             throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
         }
-        QueryWrapper<OrderItem> orderItemWrapper = new QueryWrapper<>();
-        orderItemWrapper.eq(ORDER_SN_COLUMN, orderSn);
         //查询订单项信息
-        List<OrderItem> orderItems = orderItemMapper.selectList(orderItemWrapper);
+        List<OrderItem> orderItems = orderItemService.getByOrderSn(orderSn);
         //查询订单日志信息
         List<OrderLog> orderLogs = orderLogService.getOrderLog(orderSn);
         //查询发票信息

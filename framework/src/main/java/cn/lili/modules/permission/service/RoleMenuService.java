@@ -1,7 +1,6 @@
 package cn.lili.modules.permission.service;
 
 import cn.lili.modules.permission.entity.dos.RoleMenu;
-import cn.lili.modules.permission.entity.vo.UserMenuVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -21,15 +20,6 @@ public interface RoleMenuService extends IService<RoleMenu> {
      * @return
      */
     List<RoleMenu> findByRoleId(String roleId);
-
-
-    /**
-     * 根据角色集合获取拥有的菜单具体权限
-     *
-     * @param userId
-     * @return
-     */
-    List<UserMenuVO> findAllMenu(String userId);
 
 
     /**

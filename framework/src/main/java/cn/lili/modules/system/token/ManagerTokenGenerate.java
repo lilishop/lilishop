@@ -11,7 +11,7 @@ import cn.lili.common.security.token.TokenUtil;
 import cn.lili.common.security.token.base.AbstractTokenGenerate;
 import cn.lili.modules.permission.entity.dos.AdminUser;
 import cn.lili.modules.permission.entity.vo.UserMenuVO;
-import cn.lili.modules.permission.service.RoleMenuService;
+import cn.lili.modules.permission.service.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +33,7 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate<AdminUser> {
     @Autowired
     private TokenUtil tokenUtil;
     @Autowired
-    private RoleMenuService roleMenuService;
+    private MenuService menuService;
     @Autowired
     private Cache cache;
 
@@ -50,7 +50,7 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate<AdminUser> {
                 .longTerm(longTerm)
                 .build();
 
-        List<UserMenuVO> userMenuVOList = roleMenuService.findAllMenu(authUser.getId());
+        List<UserMenuVO> userMenuVOList = menuService.findAllMenu(authUser.getId());
         //缓存权限列表
         cache.put(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + authUser.getId(), this.permissionList(userMenuVOList));
 
@@ -68,7 +68,7 @@ public class ManagerTokenGenerate extends AbstractTokenGenerate<AdminUser> {
      * @param userMenuVOList
      * @return
      */
-    private Map<String, List<String>> permissionList(List<UserMenuVO> userMenuVOList) {
+    public Map<String, List<String>> permissionList(List<UserMenuVO> userMenuVOList) {
         Map<String, List<String>> permission = new HashMap<>(2);
 
         List<String> superPermissions = new ArrayList<>();

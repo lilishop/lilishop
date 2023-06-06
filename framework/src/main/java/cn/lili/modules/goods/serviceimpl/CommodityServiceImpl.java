@@ -121,4 +121,14 @@ public class CommodityServiceImpl extends ServiceImpl<CommodityMapper, Commodity
                         .eq(Objects.requireNonNull(UserContext.getCurrentUser()).getRole().equals(UserEnums.STORE), "c.store_id", UserContext.getCurrentUser().getStoreId())
                         .orderByDesc("create_time"));
     }
+
+    @Override
+    public List<Commodity> getCommodityByRoomId(Integer roomId) {
+        return this.baseMapper.getCommodityByRoomId(roomId);
+    }
+
+    @Override
+    public List<String> getSimpleCommodityByRoomId(Integer roomId) {
+        return this.baseMapper.getSimpleCommodityByRoomId(roomId);
+    }
 }
