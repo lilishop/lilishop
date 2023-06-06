@@ -2,6 +2,7 @@ package cn.lili.modules.member.service;
 
 import cn.lili.modules.member.entity.dos.StoreMenu;
 import cn.lili.modules.member.entity.vo.StoreMenuVO;
+import cn.lili.modules.member.entity.vo.StoreUserMenuVO;
 import cn.lili.modules.permission.entity.dto.MenuSearchParams;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.cache.annotation.CacheConfig;
@@ -30,7 +31,7 @@ public interface StoreMenuService extends IService<StoreMenu> {
      * @param userId
      * @return
      */
-    List<StoreMenu> findUserList(String userId);
+    List<StoreMenu> findUserList(String userId, String clerkId);
 
 
     /**
@@ -70,5 +71,7 @@ public interface StoreMenuService extends IService<StoreMenu> {
      * @return 是否成功
      */
     boolean saveOrUpdateMenu(StoreMenu storeMenu);
+
+    List<StoreUserMenuVO> getUserRoleMenu(String clerkId);
 
 }

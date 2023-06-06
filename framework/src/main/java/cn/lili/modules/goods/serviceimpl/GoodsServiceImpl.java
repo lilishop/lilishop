@@ -170,7 +170,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         //检查商品
         this.checkGoods(goods);
         //向goods加入图片
-        if (goodsOperationDTO.getGoodsGalleryList().size() > 0 ) {
+        if (goodsOperationDTO.getGoodsGalleryList().size() > 0) {
             this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
         }
         //添加商品参数
@@ -188,7 +188,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         }
         this.generateEs(goods);
     }
-
 
 
     @Override
@@ -497,13 +496,17 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Override
     public void categoryGoodsName(String categoryId) {
         //获取分类下的商品
-        List<Goods> list = this.list(new LambdaQueryWrapper<Goods>().like(Goods::getCategoryPath,categoryId));
-        list.parallelStream().forEach(goods->{
+        List<Goods> list = this.list(new LambdaQueryWrapper<Goods>().like(Goods::getCategoryPath, categoryId));
+        list.parallelStream().forEach(goods -> {
             //移除redis中商品缓存
             cache.remove(CachePrefix.GOODS.getPrefix() + goods.getId());
         });
     }
 
+    @Override
+    public void addGoodsCommentNum(Integer commentNum, String goodsId) {
+        this.baseMapper.addGoodsCommentNum(commentNum, goodsId);
+    }
 
     /**
      * 更新商品状态

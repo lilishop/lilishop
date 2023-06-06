@@ -123,7 +123,7 @@ public class StoreAuthenticationFilter extends BasicAuthenticationFilter {
 
 
         //如果不是超级管理员， 则鉴权
-        if (!authUser.getIsSuper()) {
+        if (Boolean.FALSE.equals(authUser.getIsSuper())) {
             //获取缓存中的权限
             Map<String, List<String>> permission =
                     (Map<String, List<String>>) cache.get(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE) + authUser.getId());

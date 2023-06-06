@@ -1,8 +1,11 @@
 package cn.lili.modules.member.serviceimpl;
 
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.modules.member.entity.dos.StoreRole;
 import cn.lili.modules.member.mapper.StoreRoleMapper;
 import cn.lili.modules.member.service.StoreClerkRoleService;
@@ -41,6 +44,9 @@ public class StoreRoleServiceImpl extends ServiceImpl<StoreRoleMapper, StoreRole
     @Autowired
     private StoreMenuRoleService storeMenuRoleService;
 
+    @Autowired
+    private Cache cache;
+
     @Override
     public List<StoreRole> findByDefaultRole(Boolean defaultRole) {
         QueryWrapper<StoreRole> queryWrapper = new QueryWrapper<>();
@@ -73,6 +79,8 @@ public class StoreRoleServiceImpl extends ServiceImpl<StoreRoleMapper, StoreRole
         this.removeByIds(roleIds);
         //删除角色与菜单关联
         storeMenuRoleService.remove(queryWrapper);
+        cache.vagueDel(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE));
+        cache.vagueDel(CachePrefix.STORE_USER_MENU.getPrefix());
     }
 
     @Override
@@ -86,6 +94,8 @@ public class StoreRoleServiceImpl extends ServiceImpl<StoreRoleMapper, StoreRole
         if (!storeRoleTemp.getStoreId().equals(UserContext.getCurrentUser().getStoreId())) {
             throw new ServiceException(ResultCode.PERMISSION_ROLE_NOT_FOUND_ERROR);
         }
+        cache.vagueDel(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE));
+        cache.vagueDel(CachePrefix.STORE_USER_MENU.getPrefix());
         return updateById(storeRole);
     }
 

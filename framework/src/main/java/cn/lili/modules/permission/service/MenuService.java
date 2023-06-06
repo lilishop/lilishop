@@ -3,6 +3,7 @@ package cn.lili.modules.permission.service;
 import cn.lili.modules.permission.entity.dos.Menu;
 import cn.lili.modules.permission.entity.dto.MenuSearchParams;
 import cn.lili.modules.permission.entity.vo.MenuVO;
+import cn.lili.modules.permission.entity.vo.UserMenuVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.cache.annotation.CacheConfig;
 
@@ -70,5 +71,13 @@ public interface MenuService extends IService<Menu> {
      * @return 是否成功
      */
     boolean saveOrUpdateMenu(Menu menu);
+
+    /**
+     * 根据角色集合获取拥有的菜单具体权限
+     *
+     * @param userId
+     * @return
+     */
+    List<UserMenuVO> findAllMenu(String userId);
 
 }

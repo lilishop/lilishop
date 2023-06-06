@@ -15,7 +15,6 @@ import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
-import cn.lili.modules.order.order.mapper.OrderItemMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -24,13 +23,11 @@ import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.timetask.handler.EveryDayExecute;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,8 +50,6 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
      */
     @Autowired
     private OrderItemService orderItemService;
-    @Resource
-    private OrderItemMapper orderItemMapper;
     /**
      * 设置
      */
@@ -148,10 +143,7 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getAutoEvaluation());
 
         //订单完成时间 <= 订单自动好评时间
-        QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.le("o.complete_time", receiveTime);
-        queryWrapper.eq("oi.comment_status", CommentStatusEnum.UNFINISHED.name());
-        List<OrderItem> orderItems = orderItemMapper.waitOperationOrderItem(queryWrapper);
+        List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(receiveTime, CommentStatusEnum.UNFINISHED.name());
 
         //判断是否有符合条件的订单，进行自动评价处理
         if (!orderItems.isEmpty()) {
@@ -191,10 +183,7 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getCloseAfterSale());
 
         //关闭售后订单=未售后订单+小于订单关闭售后申请时间
-        QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.le("o.complete_time", receiveTime);
-        queryWrapper.eq("oi.after_sale_status", OrderItemAfterSaleStatusEnum.NOT_APPLIED.name());
-        List<OrderItem> orderItems = orderItemMapper.waitOperationOrderItem(queryWrapper);
+        List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(receiveTime, OrderItemAfterSaleStatusEnum.NOT_APPLIED.name());
 
         //判断是否有符合条件的订单，关闭允许售后申请处理
         if (!orderItems.isEmpty()) {
@@ -235,10 +224,7 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getCloseComplaint());
 
         //关闭售后订单=未售后订单+小于订单关闭售后申请时间
-        QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.le("o.complete_time", receiveTime);
-        queryWrapper.eq("oi.complain_status", OrderComplaintStatusEnum.NO_APPLY.name());
-        List<OrderItem> orderItems = orderItemMapper.waitOperationOrderItem(queryWrapper);
+        List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(receiveTime, OrderComplaintStatusEnum.NO_APPLY.name());
 
         //判断是否有符合条件的订单，关闭允许售后申请处理
         if (!orderItems.isEmpty()) {

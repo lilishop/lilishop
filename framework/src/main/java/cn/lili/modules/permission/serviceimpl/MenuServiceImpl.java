@@ -13,15 +13,18 @@ import cn.lili.modules.permission.entity.dos.Menu;
 import cn.lili.modules.permission.entity.dos.RoleMenu;
 import cn.lili.modules.permission.entity.dto.MenuSearchParams;
 import cn.lili.modules.permission.entity.vo.MenuVO;
+import cn.lili.modules.permission.entity.vo.UserMenuVO;
 import cn.lili.modules.permission.mapper.MenuMapper;
 import cn.lili.modules.permission.service.MenuService;
 import cn.lili.modules.permission.service.RoleMenuService;
+import cn.lili.modules.system.token.ManagerTokenGenerate;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -41,9 +44,13 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     private RoleMenuService roleMenuService;
 
     @Autowired
-    private Cache<List<Menu>> cache;
+    private ManagerTokenGenerate managerTokenGenerate;
+
+    @Autowired
+    private Cache cache;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteIds(List<String> ids) {
         QueryWrapper<RoleMenu> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("menu_id", ids);
@@ -51,6 +58,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         if (roleMenuService.count(queryWrapper) > 0) {
             throw new ServiceException(ResultCode.PERMISSION_MENU_ROLE_ERROR);
         }
+        cache.vagueDel(CachePrefix.USER_MENU.getPrefix(UserEnums.MANAGER));
+        cache.vagueDel(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER));
         this.removeByIds(ids);
     }
 
@@ -68,11 +77,16 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public List<Menu> findUserList(String userId) {
         String cacheKey = CachePrefix.USER_MENU.getPrefix(UserEnums.MANAGER) + userId;
-        List<Menu> menuList = cache.get(cacheKey);
+        List<Menu> menuList = (List<Menu>) cache.get(cacheKey);
         if (menuList == null) {
             menuList = this.baseMapper.findByUserId(userId);
             //每5分钟重新确认用户权限
             cache.put(cacheKey, menuList, 300L);
+        }
+        String permissionCacheKey = CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + userId;
+        Map<String, List<String>> permission = (Map<String, List<String>>) cache.get(permissionCacheKey);
+        if (permission == null || permission.isEmpty()) {
+            cache.put(permissionCacheKey, this.managerTokenGenerate.permissionList(this.findAllMenu(userId)));
         }
         return menuList;
     }
@@ -84,12 +98,16 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      * @return 是否成功
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean saveOrUpdateMenu(Menu menu) {
-        if (CharSequenceUtil.isNotEmpty(menu.getId())) {
-
-        }
         cache.vagueDel(CachePrefix.USER_MENU.getPrefix(UserEnums.MANAGER));
+        cache.vagueDel(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER));
         return this.saveOrUpdate(menu);
+    }
+
+    @Override
+    public List<UserMenuVO> findAllMenu(String userId) {
+        return this.baseMapper.getUserRoleMenu(userId);
     }
 
     @Override

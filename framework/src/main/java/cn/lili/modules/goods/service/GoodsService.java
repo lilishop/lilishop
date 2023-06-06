@@ -190,4 +190,7 @@ public interface GoodsService extends IService<Goods> {
      * @param categoryId 分类ID
      */
     void categoryGoodsName(String categoryId);
+
+
+    void addGoodsCommentNum(Integer commentNum, String goodsId);
 }
