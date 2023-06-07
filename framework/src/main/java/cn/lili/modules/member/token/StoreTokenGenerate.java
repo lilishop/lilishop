@@ -57,7 +57,7 @@ public class StoreTokenGenerate extends AbstractTokenGenerate<Member> {
         if (clerk == null) {
             throw new ServiceException(ResultCode.CLERK_NOT_FOUND_ERROR);
         }
-        if (!clerk.getStatus()) {
+        if (Boolean.FALSE.equals(clerk.getStatus())) {
             throw new ServiceException(ResultCode.CLERK_DISABLED_ERROR);
         }
         //获取当前用户权限
@@ -96,7 +96,7 @@ public class StoreTokenGenerate extends AbstractTokenGenerate<Member> {
      * @param userMenuVOList
      * @return
      */
-    private Map<String, List<String>> permissionList(List<StoreUserMenuVO> userMenuVOList) {
+    public Map<String, List<String>> permissionList(List<StoreUserMenuVO> userMenuVOList) {
         Map<String, List<String>> permission = new HashMap<>(2);
 
         List<String> superPermissions = new ArrayList<>();

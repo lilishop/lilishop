@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolationException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 异常处理
@@ -112,7 +113,8 @@ public class GlobalControllerExceptionHandler {
 //   protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
 //       if (ex instanceof MethodArgumentNotValidException) {
 //           MethodArgumentNotValidException exception = (MethodArgumentNotValidException) ex;
-//           return new ResponseEntity<>(new ResultUtil<>().setErrorMsg(exception.getBindingResult().getAllErrors().get(0).getDefaultMessage()), status);
+//           return new ResponseEntity<>(new ResultUtil<>().setErrorMsg(exception.getBindingResult().getAllErrors().get(0).getDefaultMessage()),
+//           status);
 //       }
 //       if (ex instanceof MethodArgumentTypeMismatchException) {
 //           MethodArgumentTypeMismatchException exception = (MethodArgumentTypeMismatchException) ex;
@@ -138,10 +140,18 @@ public class GlobalControllerExceptionHandler {
 
         BindException exception = (BindException) e;
         List<FieldError> fieldErrors = exception.getBindingResult().getFieldErrors();
-        for (FieldError error : fieldErrors) {
-            return ResultUtil.error(ResultCode.PARAMS_ERROR.code(), error.getDefaultMessage());
+        // 错误消息处理
+        try {
+            if (!fieldErrors.isEmpty()) {
+                return ResultUtil.error(ResultCode.PARAMS_ERROR.code(),
+                        fieldErrors.stream()
+                                .map(FieldError::getDefaultMessage) // 获取每个对象的名称字段
+                                .collect(Collectors.joining(", ")));
+            }
+            return ResultUtil.error(ResultCode.PARAMS_ERROR);
+        } catch (Exception ex) {
+            return ResultUtil.error(ResultCode.PARAMS_ERROR);
         }
-        return ResultUtil.error(ResultCode.PARAMS_ERROR);
     }
 
     /**

@@ -7,11 +7,13 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.vo.SearchVO;
 import cn.lili.modules.member.entity.dos.Clerk;
 import cn.lili.modules.member.entity.dos.StoreMenu;
 import cn.lili.modules.member.entity.dos.StoreMenuRole;
 import cn.lili.modules.member.entity.vo.StoreMenuVO;
+import cn.lili.modules.member.entity.vo.StoreUserMenuVO;
 import cn.lili.modules.member.mapper.StoreMenuMapper;
 import cn.lili.modules.member.service.ClerkService;
 import cn.lili.modules.member.service.StoreMenuRoleService;
@@ -24,6 +26,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -43,7 +46,7 @@ public class StoreMenuServiceImpl extends ServiceImpl<StoreMenuMapper, StoreMenu
     private StoreMenuRoleService storeMenuRoleService;
 
     @Autowired
-    private Cache<List<StoreMenu>> cache;
+    private Cache cache;
 
     /**
      * 店员
@@ -51,7 +54,10 @@ public class StoreMenuServiceImpl extends ServiceImpl<StoreMenuMapper, StoreMenu
     @Autowired
     private ClerkService clerkService;
 
+
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteIds(List<String> ids) {
         QueryWrapper<StoreMenuRole> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("menu_id", ids);
@@ -59,6 +65,8 @@ public class StoreMenuServiceImpl extends ServiceImpl<StoreMenuMapper, StoreMenu
         if (storeMenuRoleService.count(queryWrapper) > 0) {
             throw new ServiceException(ResultCode.PERMISSION_MENU_ROLE_ERROR);
         }
+        cache.vagueDel(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE));
+        cache.vagueDel(CachePrefix.STORE_USER_MENU.getPrefix());
         this.removeByIds(ids);
     }
 
@@ -72,16 +80,16 @@ public class StoreMenuServiceImpl extends ServiceImpl<StoreMenuMapper, StoreMenu
         //获取当前登录用户的店员信息
         Clerk clerk = clerkService.getOne(new LambdaQueryWrapper<Clerk>().eq(Clerk::getMemberId, authUser.getId()));
         //获取当前店员角色的菜单列表
-        List<StoreMenu> userMenus = this.baseMapper.findByUserId(clerk.getId());
+        List<StoreMenu> userMenus = this.findUserList(authUser.getId(), clerk.getId());
         return this.tree(userMenus);
     }
 
     @Override
-    public List<StoreMenu> findUserList(String userId) {
-        String cacheKey = CachePrefix.STORE_MENU_USER_ID.getPrefix() + userId;
-        List<StoreMenu> menuList = cache.get(cacheKey);
-        if (menuList == null) {
-            menuList = this.baseMapper.findByUserId(userId);
+    public List<StoreMenu> findUserList(String userId, String clerkId) {
+        String cacheKey = CachePrefix.STORE_USER_MENU.getPrefix() + userId;
+        List<StoreMenu> menuList = (List<StoreMenu>) cache.get(cacheKey);
+        if (menuList == null || menuList.isEmpty()) {
+            menuList = this.baseMapper.findByUserId(clerkId);
             cache.put(cacheKey, menuList);
         }
         return menuList;
@@ -94,11 +102,18 @@ public class StoreMenuServiceImpl extends ServiceImpl<StoreMenuMapper, StoreMenu
      * @return 是否成功
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean saveOrUpdateMenu(StoreMenu storeMenu) {
         if (CharSequenceUtil.isNotEmpty(storeMenu.getId())) {
-            cache.vagueDel(CachePrefix.STORE_MENU_USER_ID.getPrefix());
+            cache.vagueDel(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE));
+            cache.vagueDel(CachePrefix.STORE_USER_MENU.getPrefix());
         }
         return this.saveOrUpdate(storeMenu);
+    }
+
+    @Override
+    public List<StoreUserMenuVO> getUserRoleMenu(String clerkId) {
+        return this.baseMapper.getUserRoleMenu(clerkId);
     }
 
     @Override

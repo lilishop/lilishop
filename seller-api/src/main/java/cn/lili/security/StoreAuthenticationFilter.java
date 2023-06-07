@@ -10,6 +10,10 @@ import cn.lili.common.security.enums.SecurityEnum;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.SecretKeyUtil;
 import cn.lili.common.utils.ResponseUtil;
+import cn.lili.modules.member.entity.dos.Clerk;
+import cn.lili.modules.member.service.ClerkService;
+import cn.lili.modules.member.service.StoreMenuRoleService;
+import cn.lili.modules.member.token.StoreTokenGenerate;
 import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -43,9 +47,21 @@ public class StoreAuthenticationFilter extends BasicAuthenticationFilter {
 
     private final Cache cache;
 
+    private final StoreTokenGenerate storeTokenGenerate;
+
+    private final StoreMenuRoleService storeMenuRoleService;
+
+    private final ClerkService clerkService;
+
     public StoreAuthenticationFilter(AuthenticationManager authenticationManager,
+                                     StoreTokenGenerate storeTokenGenerate,
+                                     StoreMenuRoleService storeMenuRoleService,
+                                     ClerkService clerkService,
                                      Cache cache) {
         super(authenticationManager);
+        this.storeTokenGenerate = storeTokenGenerate;
+        this.storeMenuRoleService = storeMenuRoleService;
+        this.clerkService = clerkService;
         this.cache = cache;
     }
 
@@ -123,11 +139,20 @@ public class StoreAuthenticationFilter extends BasicAuthenticationFilter {
 
 
         //如果不是超级管理员， 则鉴权
-        if (!authUser.getIsSuper()) {
+        if (Boolean.FALSE.equals(authUser.getIsSuper())) {
+
+            String permissionCacheKey = CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE) + authUser.getId();
             //获取缓存中的权限
             Map<String, List<String>> permission =
-                    (Map<String, List<String>>) cache.get(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE) + authUser.getId());
-
+                    (Map<String, List<String>>) cache.get(permissionCacheKey);
+            if (permission == null || permission.isEmpty()) {
+                //根据会员id查询店员信息
+                Clerk clerk = clerkService.getClerkByMemberId(authUser.getId());
+                if (clerk != null) {
+                    permission = storeTokenGenerate.permissionList(storeMenuRoleService.findAllMenu(clerk.getId(), authUser.getId()));
+                    cache.put(permissionCacheKey, permission);
+                }
+            }
             //获取数据(GET 请求)权限
             if (request.getMethod().equals(RequestMethod.GET.name())) {
                 //如果用户的超级权限和查阅权限都不包含当前请求的api

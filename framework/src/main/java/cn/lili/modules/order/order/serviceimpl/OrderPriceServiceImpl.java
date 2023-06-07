@@ -10,17 +10,16 @@ import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
-import cn.lili.modules.order.order.mapper.TradeMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderPriceService;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.order.order.service.TradeService;
 import cn.lili.modules.payment.kit.plugin.bank.BankTransferPlugin;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -46,8 +45,8 @@ public class OrderPriceServiceImpl implements OrderPriceService {
     /**
      * 交易数据层
      */
-    @Resource
-    private TradeMapper tradeMapper;
+    @Autowired
+    private TradeService tradeService;
     /**
      * 订单
      */
@@ -63,7 +62,7 @@ public class OrderPriceServiceImpl implements OrderPriceService {
         Order order = updateOrderPrice(orderSn, orderPrice);
 
         //修改交易金额
-        tradeMapper.updateTradePrice(order.getTradeSn());
+        tradeService.updateTradePrice(order.getTradeSn());
         return order;
     }
 

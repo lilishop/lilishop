@@ -46,6 +46,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser> implements AdminUserService {
+    /**
+     * 角色长度
+     */
+    private final int rolesMaxSize = 10;
     @Autowired
     private UserRoleService userRoleService;
     @Autowired
@@ -56,14 +60,8 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     private MenuService menuService;
     @Autowired
     private ManagerTokenGenerate managerTokenGenerate;
-
     @Autowired
     private Cache cache;
-
-    /**
-     * 角色长度
-     */
-    private final int rolesMaxSize = 10;
 
     @Override
     public IPage<AdminUserVO> adminUserPage(Page initPage, QueryWrapper<AdminUser> initWrapper) {
@@ -102,7 +100,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
             }
             result.add(adminUserVO);
         });
-        Page<AdminUserVO> pageResult = new Page(adminUserPage.getCurrent(), adminUserPage.getSize(), adminUserPage.getTotal());
+        Page<AdminUserVO> pageResult = new Page<>(adminUserPage.getCurrent(), adminUserPage.getSize(), adminUserPage.getTotal());
         pageResult.setRecords(result);
         return pageResult;
 
@@ -163,13 +161,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
 
     @Override
     public AdminUser findByUsername(String username) {
-
-        AdminUser user = getOne(new LambdaQueryWrapper<AdminUser>().eq(AdminUser::getUsername, username));
-
-        if (user == null) {
-            return null;
-        }
-        return user;
+        return getOne(new LambdaQueryWrapper<AdminUser>().eq(AdminUser::getUsername, username), false);
     }
 
 
@@ -185,11 +177,11 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
             }
             adminUser.setRoleIds(CharSequenceUtil.join(",", roles));
 
+            updateRole(adminUser.getId(), roles);
         } else {
             adminUser.setRoleIds("");
         }
 
-        updateRole(adminUser.getId(), roles);
         this.updateById(adminUser);
         return true;
     }
@@ -208,8 +200,9 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void resetPassword(List<String> ids) {
-        LambdaQueryWrapper<AdminUser> lambdaQueryWrapper = new LambdaQueryWrapper();
+        LambdaQueryWrapper<AdminUser> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.in(AdminUser::getId, ids);
         List<AdminUser> adminUsers = this.list(lambdaQueryWrapper);
         String password = StringUtils.md5("123456");
@@ -239,6 +232,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteCompletely(List<String> ids) {
         //彻底删除超级管理员
         this.removeByIds(ids);
@@ -269,5 +263,7 @@ public class AdminUserServiceImpl extends ServiceImpl<AdminUserMapper, AdminUser
         List<UserRole> userRoles = new ArrayList<>(roles.size());
         roles.forEach(id -> userRoles.add(new UserRole(userId, id)));
         userRoleService.updateUserRole(userId, userRoles);
+        cache.vagueDel(CachePrefix.USER_MENU.getPrefix(UserEnums.MANAGER));
+        cache.vagueDel(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER));
     }
 }

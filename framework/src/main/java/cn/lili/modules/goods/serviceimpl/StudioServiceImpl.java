@@ -16,8 +16,8 @@ import cn.lili.modules.goods.entity.dos.Studio;
 import cn.lili.modules.goods.entity.dos.StudioCommodity;
 import cn.lili.modules.goods.entity.enums.StudioStatusEnum;
 import cn.lili.modules.goods.entity.vos.StudioVO;
-import cn.lili.modules.goods.mapper.CommodityMapper;
 import cn.lili.modules.goods.mapper.StudioMapper;
+import cn.lili.modules.goods.service.CommodityService;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.StudioCommodityService;
 import cn.lili.modules.goods.service.StudioService;
@@ -39,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +57,8 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
     private WechatLivePlayerUtil wechatLivePlayerUtil;
     @Autowired
     private StudioCommodityService studioCommodityService;
-    @Resource
-    private CommodityMapper commodityMapper;
+    @Autowired
+    private CommodityService commodityService;
     @Autowired
     private TimeTrigger timeTrigger;
     @Autowired
@@ -141,7 +140,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
         //获取直播间信息
         BeanUtil.copyProperties(studio, studioVO);
         //获取直播间商品信息
-        studioVO.setCommodityList(commodityMapper.getCommodityByRoomId(studioVO.getRoomId()));
+        studioVO.setCommodityList(commodityService.getCommodityByRoomId(studioVO.getRoomId()));
         return studioVO;
     }
 
@@ -183,7 +182,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             studio.setRoomGoodsNum(studio.getRoomGoodsNum() != null ? studio.getRoomGoodsNum() + 1 : 1);
             //设置直播间默认的商品（前台展示）只展示两个
             if (studio.getRoomGoodsNum() < 3) {
-                studio.setRoomGoodsList(JSONUtil.toJsonStr(commodityMapper.getSimpleCommodityByRoomId(roomId)));
+                studio.setRoomGoodsList(JSONUtil.toJsonStr(commodityService.getSimpleCommodityByRoomId(roomId)));
             }
             return this.updateById(studio);
         }
@@ -205,7 +204,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             studio.setRoomGoodsNum(studio.getRoomGoodsNum() - 1);
             //设置直播间默认的商品（前台展示）只展示两个
             if (studio.getRoomGoodsNum() < 3) {
-                studio.setRoomGoodsList(JSONUtil.toJsonStr(commodityMapper.getSimpleCommodityByRoomId(roomId)));
+                studio.setRoomGoodsList(JSONUtil.toJsonStr(commodityService.getSimpleCommodityByRoomId(roomId)));
             }
             return this.updateById(studio);
         }
@@ -229,7 +228,7 @@ public class StudioServiceImpl extends ServiceImpl<StudioMapper, Studio> impleme
             //获取直播间信息
             BeanUtil.copyProperties(record, studioVO);
             //获取直播间商品信息
-            studioVO.setCommodityList(commodityMapper.getCommodityByRoomId(studioVO.getRoomId()));
+            studioVO.setCommodityList(commodityService.getCommodityByRoomId(studioVO.getRoomId()));
             studioVOS.add(studioVO);
         }
         page.setRecords(studioVOS);

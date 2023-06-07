@@ -156,6 +156,10 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
 
         afterSaleApplyVO.setAccountType(order.getPaymentMethod());
         afterSaleApplyVO.setApplyRefundPrice(CurrencyUtil.div(orderItem.getFlowPrice(), orderItem.getNum()));
+        //如果已经退货或者退款过，则返回最大售后数量重新设置
+        if (orderItem.getReturnGoodsNumber() != null) {
+            afterSaleApplyVO.setNum(orderItem.getNum() - orderItem.getReturnGoodsNumber());
+        }
         afterSaleApplyVO.setNum(orderItem.getNum());
         afterSaleApplyVO.setGoodsId(orderItem.getGoodsId());
         afterSaleApplyVO.setGoodsName(orderItem.getGoodsName());

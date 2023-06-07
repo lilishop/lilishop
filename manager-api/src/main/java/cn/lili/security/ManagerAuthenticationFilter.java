@@ -10,6 +10,8 @@ import cn.lili.common.security.enums.SecurityEnum;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.SecretKeyUtil;
 import cn.lili.common.utils.ResponseUtil;
+import cn.lili.modules.permission.service.MenuService;
+import cn.lili.modules.system.token.ManagerTokenGenerate;
 import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -43,10 +45,18 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
 
     private final Cache cache;
 
+    public final MenuService menuService;
+
+    private final ManagerTokenGenerate managerTokenGenerate;
+
     public ManagerAuthenticationFilter(AuthenticationManager authenticationManager,
+                                       MenuService menuService,
+                                       ManagerTokenGenerate managerTokenGenerate,
                                        Cache cache) {
         super(authenticationManager);
         this.cache = cache;
+        this.menuService = menuService;
+        this.managerTokenGenerate = managerTokenGenerate;
     }
 
     @SneakyThrows
@@ -85,10 +95,14 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
 
         //如果不是超级管理员， 则鉴权
         if (Boolean.FALSE.equals(authUser.getIsSuper())) {
+            String permissionCacheKey = CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + authUser.getId();
             //获取缓存中的权限
             Map<String, List<String>> permission =
-                    (Map<String, List<String>>) cache.get(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.MANAGER) + authUser.getId());
-
+                    (Map<String, List<String>>) cache.get(permissionCacheKey);
+            if (permission == null || permission.isEmpty()) {
+                permission = managerTokenGenerate.permissionList(this.menuService.findAllMenu(authUser.getId()));
+                cache.put(permissionCacheKey, permission);
+            }
             //获取数据(GET 请求)权限
             if (request.getMethod().equals(RequestMethod.GET.name())) {
                 //如果用户的超级权限和查阅权限都不包含当前请求的api

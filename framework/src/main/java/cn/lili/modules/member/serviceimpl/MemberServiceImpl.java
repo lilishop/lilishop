@@ -249,7 +249,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         try {
 //            String username = UuidUtils.getUUID();
             Member member = new Member(authUser.getUsername(), UuidUtils.getUUID(), authUser.getAvatar(), authUser.getNickname(),
-                    authUser.getGender() != null ? Convert.toInt(authUser.getGender().getCode()) : 0,authUser.getPhone());
+                    authUser.getGender() != null ? Convert.toInt(authUser.getGender().getCode()) : 0, authUser.getPhone());
             member.setPassword(DEFAULT_PASSWORD);
             // 发送会员注册信息
             registerHandler(member);
@@ -306,7 +306,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         member.setId(SnowFlake.getIdStr());
         //保存会员
         this.save(member);
-
+        UserContext.settingInviter(member.getId(), cache);
         // 发送会员注册信息
         applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("new member register", rocketmqCustomProperties.getMemberTopic(),
                 MemberTagsEnum.MEMBER_REGISTER.name(), member));
@@ -700,7 +700,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
         if (CharSequenceUtil.isNotEmpty(currentUserToken)) {
             cache.remove(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums, authUser.getId()) + currentUserToken);
-            cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums, authUser.getId()) );
+            cache.vagueDel(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums, authUser.getId()));
         }
     }
 
