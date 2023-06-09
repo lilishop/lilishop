@@ -32,7 +32,8 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
      * @return 缓存商品库存key
      */
     static String getPromotionGoodsStockCacheKey(PromotionTypeEnum typeEnum, String promotionId, String skuId) {
-        return "{" + CachePrefix.PROMOTION_GOODS_STOCK.name() + "_" + typeEnum.name() + "}_" + promotionId + "_" + skuId;
+        //ps: 2023-06-09 促销商品库存与普通商品库存不在同一槽内，会导致库存扣减lua脚本无法执行
+        return CachePrefix.SKU_STOCK.getPrefix() + "_" + typeEnum.name() + "_" + promotionId + "_" + skuId;
     }
 
     /**
@@ -48,7 +49,7 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
     /**
      * 获取sku所有有效活动
      *
-     * @param skus    商品skuId
+     * @param skus 商品skuId
      * @return 促销商品集合
      */
     List<PromotionGoods> findSkuValidPromotions(List<GoodsSkuDTO> skus);
@@ -140,8 +141,8 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
     /**
      * 更新促销活动商品库存
      *
-     * @param skuId      商品skuId
-     * @param quantity  库存
+     * @param skuId    商品skuId
+     * @param quantity 库存
      */
     void updatePromotionGoodsStock(String skuId, Integer quantity);
 
@@ -184,7 +185,7 @@ public interface PromotionGoodsService extends IService<PromotionGoods> {
     /**
      * 获取当前商品促销信息
      *
-     * @param dataSku 商品sku信息
+     * @param dataSku  商品sku信息
      * @param cartType 购物车类型
      * @return 当前商品促销信息
      */
