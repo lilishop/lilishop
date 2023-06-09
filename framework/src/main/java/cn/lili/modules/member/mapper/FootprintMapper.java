@@ -3,7 +3,6 @@ package cn.lili.modules.member.mapper;
 import cn.lili.modules.member.entity.dos.FootPrint;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 浏览历史数据处理层
@@ -17,7 +16,6 @@ public interface FootprintMapper extends BaseMapper<FootPrint> {
      *
      * @param memberId 会员ID
      */
-    @Transactional(rollbackFor = Exception.class)
     @Delete("DELETE li_foot_print " +
             "FROM li_foot_print " +
             "LEFT JOIN ( " +
