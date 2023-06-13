@@ -1,7 +1,7 @@
 package cn.lili.modules.order.order.service;
 
-import cn.hutool.core.date.DateTime;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
+import cn.lili.modules.order.order.entity.dto.OrderItemOperationDTO;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
@@ -68,5 +68,5 @@ public interface OrderItemService extends IService<OrderItem> {
      */
     OrderItem getByOrderSnAndSkuId(String orderSn, String skuId);
 
-    List<OrderItem> waitOperationOrderItem(DateTime receiveTime, String commentStatus);
+    List<OrderItem> waitOperationOrderItem(OrderItemOperationDTO orderItemOperationDTO);
 }

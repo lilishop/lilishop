@@ -1,9 +1,10 @@
 package cn.lili.modules.order.order.serviceimpl;
 
-import cn.hutool.core.date.DateTime;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
+import cn.lili.modules.order.order.entity.dto.OrderItemOperationDTO;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
@@ -86,10 +87,12 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
     }
 
     @Override
-    public List<OrderItem> waitOperationOrderItem(DateTime receiveTime, String commentStatus) {
+    public List<OrderItem> waitOperationOrderItem(OrderItemOperationDTO dto) {
         QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.le("o.complete_time", receiveTime);
-        queryWrapper.eq("oi.comment_status", CommentStatusEnum.UNFINISHED.name());
+        queryWrapper.le("o.complete_time", dto.getReceiveTime());
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(dto.getCommentStatus()), "oi.comment_status", dto.getCommentStatus());
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(dto.getAfterSaleStatus()), "oi.after_sale_status", dto.getAfterSaleStatus());
+        queryWrapper.eq(CharSequenceUtil.isNotEmpty(dto.getComplainStatus()), "oi.complain_status", dto.getComplainStatus());
         return this.baseMapper.waitOperationOrderItem(queryWrapper);
     }
 }

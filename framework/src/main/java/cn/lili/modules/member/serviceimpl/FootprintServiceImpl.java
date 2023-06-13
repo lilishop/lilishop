@@ -16,7 +16,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -39,7 +38,6 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
     private GoodsSkuService goodsSkuService;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public FootPrint saveFootprint(FootPrint footPrint) {
         LambdaQueryWrapper<FootPrint> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(FootPrint::getMemberId, footPrint.getMemberId());
