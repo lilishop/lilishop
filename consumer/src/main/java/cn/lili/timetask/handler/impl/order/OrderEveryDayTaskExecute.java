@@ -11,6 +11,7 @@ import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
+import cn.lili.modules.order.order.entity.dto.OrderItemOperationDTO;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
@@ -143,7 +144,8 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getAutoEvaluation());
 
         //订单完成时间 <= 订单自动好评时间
-        List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(receiveTime, CommentStatusEnum.UNFINISHED.name());
+        OrderItemOperationDTO orderItemOperationDTO = OrderItemOperationDTO.builder().receiveTime(receiveTime).commentStatus(CommentStatusEnum.UNFINISHED.name()).build();
+        List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(orderItemOperationDTO);
 
         //判断是否有符合条件的订单，进行自动评价处理
         if (!orderItems.isEmpty()) {
@@ -183,7 +185,8 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getCloseAfterSale());
 
         //关闭售后订单=未售后订单+小于订单关闭售后申请时间
-        List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(receiveTime, OrderItemAfterSaleStatusEnum.NOT_APPLIED.name());
+        OrderItemOperationDTO build = OrderItemOperationDTO.builder().receiveTime(receiveTime).afterSaleStatus(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name()).build();
+        List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(build);
 
         //判断是否有符合条件的订单，关闭允许售后申请处理
         if (!orderItems.isEmpty()) {
@@ -224,7 +227,8 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getCloseComplaint());
 
         //关闭售后订单=未售后订单+小于订单关闭售后申请时间
-        List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(receiveTime, OrderComplaintStatusEnum.NO_APPLY.name());
+        OrderItemOperationDTO build = OrderItemOperationDTO.builder().receiveTime(receiveTime).complainStatus(OrderComplaintStatusEnum.NO_APPLY.name()).build();
+        List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(build);
 
         //判断是否有符合条件的订单，关闭允许售后申请处理
         if (!orderItems.isEmpty()) {
