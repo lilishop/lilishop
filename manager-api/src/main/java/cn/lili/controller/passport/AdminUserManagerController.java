@@ -168,10 +168,11 @@ public class AdminUserManagerController {
                 throw new ServiceException(ResultCode.PERMISSION_BEYOND_TEN);
             }
             adminUserService.saveAdminUser(adminUser, roles);
+            return ResultUtil.success();
         } catch (Exception e) {
             log.error("添加用户错误", e);
+            return ResultUtil.error(ResultCode.USER_ADD_ERROR);
         }
-        return ResultUtil.success();
     }
 
     @PutMapping(value = "/enable/{userId}")
