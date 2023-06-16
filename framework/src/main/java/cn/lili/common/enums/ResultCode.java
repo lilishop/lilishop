@@ -511,6 +511,7 @@ public enum ResultCode {
     CONNECT_NOT_EXIST(90000, "登录方式不存在！"),
     ELASTICSEARCH_INDEX_INIT_ERROR(90003, "索引初始化失败！"),
     PURCHASE_ORDER_DEADLINE_ERROR(90004, "供求单，已超过报名截止时间"),
+    USER_ADD_ERROR(90005, "用户添加失败"),
     INDEX_BUILDING(90005, "索引正在生成");
 
 
