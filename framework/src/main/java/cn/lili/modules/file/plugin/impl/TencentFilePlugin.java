@@ -14,7 +14,6 @@ import com.qcloud.cos.exception.CosServiceException;
 import com.qcloud.cos.http.HttpProtocol;
 import com.qcloud.cos.model.DeleteObjectsRequest;
 import com.qcloud.cos.model.ObjectMetadata;
-import com.qcloud.cos.model.PutObjectRequest;
 import com.qcloud.cos.region.Region;
 import lombok.extern.slf4j.Slf4j;
 
@@ -66,7 +65,6 @@ public class TencentFilePlugin implements FilePlugin {
      * @return
      */
     private String getUrlPrefix() {
-//        return "https://" + ossSetting.getTencentCOSBucket() + "." + ossSetting.getTencentCOSEndPoint() + "/";
         return "https://" + ossSetting.getTencentCOSBucket() + ".cos" + ossSetting.getTencentCOSEndPoint() + ".myqcloud.com/";
     }
 
@@ -108,7 +106,7 @@ public class TencentFilePlugin implements FilePlugin {
 
         try {
             List<DeleteObjectsRequest.KeyVersion> delObjects = new ArrayList<>();
-            for (String key:keys) {
+            for (String key : keys) {
                 delObjects.add(new DeleteObjectsRequest.KeyVersion(key));
             }
             cosClient.deleteObjects(new DeleteObjectsRequest(ossSetting.getTencentCOSBucket()).withKeys(delObjects));

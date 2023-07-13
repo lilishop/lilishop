@@ -112,9 +112,9 @@ public class KdniaoPlugin implements LogisticsPlugin {
     }
 
     @Override
-    public Map<String,Object> labelOrder(LabelOrderDTO labelOrderDTO) {
+    public Map<String, Object> labelOrder(LabelOrderDTO labelOrderDTO) {
         try {
-            Map<String,Object> resultMap = new HashMap();
+            Map<String, Object> resultMap = new HashMap();
             //订单
             Order order = labelOrderDTO.getOrder();
             //订单货物
@@ -206,7 +206,7 @@ public class KdniaoPlugin implements LogisticsPlugin {
             }
 
             JSONObject orderJson = JSONObject.parseObject(obj.getString("Order"));
-            resultMap.put("printTemplate",obj.getString("PrintTemplate"));
+            resultMap.put("printTemplate", obj.getString("PrintTemplate"));
             return resultMap;
         } catch (Exception e) {
             e.printStackTrace();

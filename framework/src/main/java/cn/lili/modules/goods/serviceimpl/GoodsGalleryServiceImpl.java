@@ -2,7 +2,6 @@ package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.modules.file.entity.enums.OssEnum;
-import cn.lili.modules.file.util.FileUtil;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
 import cn.lili.modules.goods.mapper.GoodsGalleryMapper;
 import cn.lili.modules.goods.service.GoodsGalleryService;
@@ -108,7 +107,7 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
                 return url + "?x-oss-process=style/" + width + "X" + height;
             case HUAWEI_OBS:
                 //缩略图全路径
-                return url + "?image/resize,m_fixed,h_"+height+",w_"+width;
+                return url + "?image/resize,m_fixed,h_" + height + ",w_" + width;
             case TENCENT_COS:
                 //缩略图全路径
                 return url + "?imageMogr2/thumbnail/" + width + "x" + height;
