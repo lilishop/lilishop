@@ -63,7 +63,7 @@ public class KdniaoPlugin implements LogisticsPlugin {
             Map<String, String> params = new HashMap<>(8);
             params.put("RequestData", urlEncoder(requestData, "UTF-8"));
             params.put("EBusinessID", logisticsSetting.getKdniaoEbusinessID());
-            params.put("RequestType", "1002");
+            params.put("RequestType", logisticsSetting.getRequestType());
             String dataSign = encrypt(requestData, logisticsSetting.getKdniaoAppKey(), "UTF-8");
             params.put("DataSign", urlEncoder(dataSign, "UTF-8"));
             params.put("DataType", "2");

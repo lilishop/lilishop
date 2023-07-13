@@ -31,10 +31,10 @@ public class OssSetting implements Serializable {
      * 阿里云-储存空间
      */
     private String aliyunOSSBucketName = "";
-    /**
-     * 阿里云-存放路径路径
-     */
-    private String aliyunOSSPicLocation = "";
+//    /**
+//     * 阿里云-存放路径路径
+//     */
+//    private String aliyunOSSPicLocation = "";
     /**
      * 阿里云-密钥id
      */
