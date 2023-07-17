@@ -769,7 +769,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     this.systemCancel(entry.getKey(), reason);
                 } else {
                     for (Order order : entry.getValue()) {
-                        this.systemCancel(order.getSn(), reason);
+                        if (!CharSequenceUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.COMPLETED.name(), OrderStatusEnum.DELIVERED.name(), OrderStatusEnum.TAKE.name(), OrderStatusEnum.STAY_PICKED_UP.name())) {
+                            this.systemCancel(order.getSn(), reason);
+                        }
                     }
                 }
             } else if (Boolean.TRUE.equals(fictitious)) {
@@ -785,7 +787,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @param entry       订单列表
      * @param requiredNum 必须参团人数
      */
-    private void fictitiousPintuan(Map.Entry<String, List<Order>> entry, Integer requiredNum) {
+    @Transactional(rollbackFor = Exception.class)
+    public void fictitiousPintuan(Map.Entry<String, List<Order>> entry, Integer requiredNum) {
         Map<String, List<Order>> listMap = entry.getValue().stream().collect(Collectors.groupingBy(Order::getPayStatus));
         //未付款订单
         List<Order> unpaidOrders = listMap.get(PayStatusEnum.UNPAID.name());
@@ -813,9 +816,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 paidOrders.add(order);
             }
             for (Order paidOrder : paidOrders) {
-                paidOrder.setOrderStatus(OrderStatusEnum.UNDELIVERED.name());
-                this.updateById(paidOrder);
-                orderStatusMessage(paidOrder);
+                if (!CharSequenceUtil.equalsAny(paidOrder.getOrderStatus(), OrderStatusEnum.COMPLETED.name(), OrderStatusEnum.DELIVERED.name(), OrderStatusEnum.TAKE.name(), OrderStatusEnum.STAY_PICKED_UP.name())) {
+                    if (OrderTypeEnum.NORMAL.name().equals(paidOrder.getOrderType())) {
+                        paidOrder.setOrderStatus(OrderStatusEnum.UNDELIVERED.name());
+                    } else if (OrderTypeEnum.VIRTUAL.name().equals(paidOrder.getOrderType())) {
+                        paidOrder.setOrderStatus(OrderStatusEnum.TAKE.name());
+                    }
+                    this.updateById(paidOrder);
+                    orderStatusMessage(paidOrder);
+                }
             }
         }
     }
@@ -871,7 +880,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      * @param pintuanId     拼团活动ID
      * @param parentOrderSn 拼团父订单编号
      */
-    private void checkPintuanOrder(String pintuanId, String parentOrderSn) {
+    @Transactional(rollbackFor = Exception.class)
+    public void checkPintuanOrder(String pintuanId, String parentOrderSn) {
         //获取拼团配置
         Pintuan pintuan = pintuanService.getById(pintuanId);
         List<Order> list = this.getPintuanOrder(pintuanId, parentOrderSn);
@@ -881,6 +891,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             PintuanOrderMessage pintuanOrderMessage = new PintuanOrderMessage();
             //开团结束时间
             long startTime = DateUtil.offsetHour(new Date(), 24).getTime();
+            if (DateUtil.compare(DateUtil.offsetHour(pintuan.getStartTime(), 24), pintuan.getEndTime()) > 0) {
+                startTime = pintuan.getEndTime().getTime();
+            }
             pintuanOrderMessage.setOrderSn(parentOrderSn);
             pintuanOrderMessage.setPintuanId(pintuanId);
             TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.PROMOTION_EXECUTOR,
@@ -923,7 +936,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      *
      * @param orderList 需要更新拼团状态为成功的拼团订单列表
      */
-    private void pintuanOrderSuccess(List<Order> orderList) {
+    @Transactional(rollbackFor = Exception.class)
+    public void pintuanOrderSuccess(List<Order> orderList) {
         for (Order order : orderList) {
             if (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
                 this.virtualOrderConfirm(order.getSn());
