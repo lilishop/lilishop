@@ -32,6 +32,11 @@ public class LogisticsSetting implements Serializable {
     private String kdniaoAppKey;
 
     /**
+     * 调用端口
+     */
+    private String requestType;
+
+    /**
      * 快递100 授权码，请申请企业版获取
      */
     private String kuaidi100Customer;

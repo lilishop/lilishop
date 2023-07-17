@@ -48,7 +48,7 @@ public class HuaweiSmsPlugin implements SmsPlugin {
     @Override
     public void sendSmsCode(String signName, String mobile, Map<String, String> param, String templateCode) {
         try {
-            this.sendSms(signName, mobile, "[" + param.values() + "]", templateCode);
+            this.sendSms(signName, mobile, param.values() + "", templateCode);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -115,7 +115,7 @@ public class HuaweiSmsPlugin implements SmsPlugin {
 
         //条件必填,国内短信关注,当templateId指定的模板类型为通用模板时生效且必填,必须是已审核通过的,与模板类型一致的签名名称
         //国际/港澳台短信不用关注该参数
-        String signature = signName; //签名名称
+        String signature = smsSetting.getHuaweiSignature(); //签名名称
 
         //必填,全局号码格式(包含国家码),示例:+8615123456789,多个号码之间用英文逗号分隔
         String receiver = mobile; //短信接收人号码
