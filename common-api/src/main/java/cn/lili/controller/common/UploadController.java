@@ -75,7 +75,7 @@ public class UploadController {
         }
 
 
-        if (!CharSequenceUtil.containsAny(file.getContentType().toLowerCase(), "image")) {
+        if (!CharSequenceUtil.containsAny(Objects.requireNonNull(file.getContentType()).toLowerCase(), "image", "video")) {
             throw new ServiceException(ResultCode.FILE_TYPE_NOT_SUPPORT);
         }
 
