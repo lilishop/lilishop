@@ -122,7 +122,7 @@ public class Kuaidi100Plugin implements LogisticsPlugin {
     }
 
     @Override
-    public Map<String,Object> labelOrder(LabelOrderDTO labelOrderDTO) {
+    public Map<String, Object> labelOrder(LabelOrderDTO labelOrderDTO) {
         try {
             //订单
             Order order = labelOrderDTO.getOrder();

@@ -189,7 +189,7 @@ public class GoodsSku extends BaseEntity {
         this.goodsId = goods.getId();
         this.goodsName = goods.getGoodsName();
         this.goodsType = goods.getGoodsType();
-
+        this.goodsVideo = goods.getGoodsVideo();
         this.selfOperated = goods.getSelfOperated();
         this.sellingPoint = goods.getSellingPoint();
         this.categoryPath = goods.getCategoryPath();
