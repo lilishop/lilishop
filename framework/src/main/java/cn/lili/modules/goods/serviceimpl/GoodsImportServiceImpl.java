@@ -175,14 +175,24 @@ public class GoodsImportServiceImpl implements GoodsImportService {
                 }
             }
 
-            String categoryId = objects.get(2).toString().substring(0, objects.get(2).toString().indexOf("-"));
+            String categoryId = null;
+            try {
+                categoryId = objects.get(2).toString().substring(0, objects.get(2).toString().indexOf("-"));
+            } catch (Exception e) {
+                throw new ServiceException("请选择商品分类");
+            }
 
             Category category = categoryService.getCategoryById(categoryId);
             if (category == null) {
                 throw new ServiceException("商品分类不存在：" + objects.get(2).toString().substring(objects.get(2).toString().indexOf("-")));
             }
 
-            String templateId = objects.get(3).toString().substring(0, objects.get(3).toString().indexOf("-"));
+            String templateId = null;
+            try {
+                templateId = objects.get(3).toString().substring(0, objects.get(3).toString().indexOf("-"));
+            } catch (Exception e) {
+                throw new ServiceException("请选择物流模板");
+            }
             FreightTemplateVO freightTemplateVO = freightTemplateService.getFreightTemplate(templateId);
             if (freightTemplateVO == null) {
                 throw new ServiceException("配送模板不存在：" + objects.get(3).toString().substring(objects.get(3).toString().indexOf("-")));

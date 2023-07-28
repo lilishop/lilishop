@@ -50,6 +50,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -71,7 +72,6 @@ import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -416,14 +416,20 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         }
         update.setScript(new Script(script.toString()));
         update.setConflicts("proceed");
-        try {
-            BulkByScrollResponse bulkByScrollResponse = client.updateByQuery(update, RequestOptions.DEFAULT);
-            if (bulkByScrollResponse.getVersionConflicts() > 0) {
-                throw new RetryException("更新商品索引失败，es内容版本冲突");
+
+        this.client.updateByQueryAsync(update, RequestOptions.DEFAULT, new ActionListener<BulkByScrollResponse>() {
+            @Override
+            public void onResponse(BulkByScrollResponse bulkByScrollResponse) {
+                if (bulkByScrollResponse.getVersionConflicts() > 0) {
+                    throw new RetryException("更新商品索引失败，es内容版本冲突");
+                }
             }
-        } catch (IOException e) {
-            log.error("更新商品索引异常", e);
-        }
+
+            @Override
+            public void onFailure(Exception e) {
+                log.error("更新商品索引异常", e);
+            }
+        });
     }
 
     /**
@@ -433,24 +439,32 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
      */
     @Override
     public void updateBulkIndex(List<EsGoodsIndex> goodsIndices) {
-        try {
-            //索引名称拼接
-            String indexName = getIndexName();
+        //索引名称拼接
+        String indexName = getIndexName();
 
-            BulkRequest request = new BulkRequest();
+        BulkRequest request = new BulkRequest();
 
-            for (EsGoodsIndex goodsIndex : goodsIndices) {
-                UpdateRequest updateRequest = new UpdateRequest(indexName, goodsIndex.getId());
+        for (EsGoodsIndex goodsIndex : goodsIndices) {
+            UpdateRequest updateRequest = new UpdateRequest(indexName, goodsIndex.getId());
 
-                JSONObject jsonObject = JSONUtil.parseObj(goodsIndex);
-                jsonObject.set("releaseTime", goodsIndex.getReleaseTime());
-                updateRequest.doc(jsonObject);
-                request.add(updateRequest);
-            }
-            client.bulk(request, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            log.error("批量更新商品索引异常", e);
+            JSONObject jsonObject = JSONUtil.parseObj(goodsIndex);
+            jsonObject.set("releaseTime", goodsIndex.getReleaseTime());
+            updateRequest.doc(jsonObject);
+            request.add(updateRequest);
         }
+        this.client.bulkAsync(request, RequestOptions.DEFAULT, new ActionListener<BulkResponse>() {
+            @Override
+            public void onResponse(BulkResponse bulkItemResponses) {
+                if (bulkItemResponses.hasFailures()) {
+                    throw new RetryException("批量更新商品索引失败，es内容版本冲突");
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                log.error("批量更新商品索引异常", e);
+            }
+        });
     }
 
     /**
@@ -469,14 +483,21 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         deleteByQueryRequest.setQuery(boolQueryBuilder);
         deleteByQueryRequest.indices(getIndexName());
         deleteByQueryRequest.setConflicts("proceed");
-        try {
-            BulkByScrollResponse bulkByScrollResponse = client.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
-            if (bulkByScrollResponse.getVersionConflicts() > 0) {
-                throw new RetryException("删除索引失败，es内容版本冲突");
+        this.client.deleteByQueryAsync(deleteByQueryRequest, RequestOptions.DEFAULT, new ActionListener<BulkByScrollResponse>() {
+
+            @Override
+            public void onResponse(BulkByScrollResponse bulkByScrollResponse) {
+                if (bulkByScrollResponse.getVersionConflicts() > 0) {
+                    throw new RetryException("删除索引失败，es内容版本冲突");
+                }
             }
-        } catch (IOException e) {
-            log.error("删除索引异常", e);
-        }
+
+            @Override
+            public void onFailure(Exception e) {
+                throw new RetryException("删除索引失败，" + e.getMessage());
+            }
+        });
+
     }
 
     /**
@@ -883,16 +904,22 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         if (bulkRequest.requests().isEmpty()) {
             return;
         }
-        try {
-            BulkResponse responses = this.client.bulk(bulkRequest, RequestOptions.DEFAULT);
-            if (responses.hasFailures()) {
-                log.info("批量更新商品索引的促销信息中出现部分异常：{}", responses.buildFailureMessage());
-            } else {
-                log.info("批量更新商品索引的促销信息结果：{}", responses.status());
+        this.client.bulkAsync(bulkRequest, RequestOptions.DEFAULT, new ActionListener<BulkResponse>() {
+            @Override
+            public void onResponse(BulkResponse bulkItemResponses) {
+                if (bulkItemResponses.hasFailures()) {
+                    log.info("批量更新商品索引的促销信息中出现部分异常：{}", bulkItemResponses.buildFailureMessage());
+                } else {
+                    log.info("批量更新商品索引的促销信息结果：{}", bulkItemResponses.status());
+                }
             }
-        } catch (IOException e) {
-            log.error("批量更新商品索引的促销信息出现异常！", e);
-        }
+
+            @Override
+            public void onFailure(Exception e) {
+                log.error("批量更新商品索引的促销信息出现异常！", e);
+            }
+        });
+
     }
 
     /**

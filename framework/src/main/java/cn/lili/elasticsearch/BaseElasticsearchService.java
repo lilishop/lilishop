@@ -389,11 +389,17 @@ public abstract class BaseElasticsearchService {
      */
     protected void deleteIndexRequest(String index) {
         DeleteIndexRequest deleteIndexRequest = buildDeleteIndexRequest(index);
-        try {
-            client.indices().delete(deleteIndexRequest, COMMON_OPTIONS);
-        } catch (IOException e) {
-            throw new ElasticsearchException("删除索引 {" + index + "} 失败：" + e.getMessage());
-        }
+        client.indices().deleteAsync(deleteIndexRequest, COMMON_OPTIONS, new ActionListener<AcknowledgedResponse>() {
+            @Override
+            public void onResponse(AcknowledgedResponse acknowledgedResponse) {
+                log.info("删除索引 {} 成功", index);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                log.error("删除索引 {} 失败", index, e);
+            }
+        });
     }
 
     /**
