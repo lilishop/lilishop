@@ -8,7 +8,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.nio.reactor.IOReactorConfig;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -39,33 +39,44 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
     @Override
     @Bean
     public RestHighLevelClient elasticsearchClient() {
-        RestClientBuilder restBuilder = RestClient
-                .builder(this.getHttpHosts());
-        restBuilder.setHttpClientConfigCallback(httpClientBuilder ->
-                httpClientBuilder
-                        .setKeepAliveStrategy(getConnectionKeepAliveStrategy())
-                        .setMaxConnPerRoute(10).
-                        setDefaultIOReactorConfig(IOReactorConfig.custom().setIoThreadCount(1).build()));
         String username = elasticsearchProperties.getAccount().getUsername();
         String password = elasticsearchProperties.getAccount().getPassword();
-        if (username != null && password != null) {
-            final CredentialsProvider credential = new BasicCredentialsProvider();
-            credential.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
-            restBuilder.setHttpClientConfigCallback(httpClientBuilder ->
-                    httpClientBuilder
-                            .setDefaultCredentialsProvider(credential)
-                            .setKeepAliveStrategy(getConnectionKeepAliveStrategy())
-                            .setMaxConnPerRoute(10)
-                            .setDefaultIOReactorConfig(IOReactorConfig.custom().setIoThreadCount(Runtime.getRuntime().availableProcessors()).build()));
-        }
+        final CredentialsProvider credential = createCredentialsIfNotNull(username, password);
 
-        restBuilder.setRequestConfigCallback(requestConfigBuilder ->
-                requestConfigBuilder.setConnectTimeout(1000) //time until a connection with the server is established.
-                        .setSocketTimeout(12 * 1000) //time of inactivity to wait for packets[data] to receive.
-                        .setConnectionRequestTimeout(-1)); //time to fetch a connection from the connection pool 0 for infinite.
+        RestClientBuilder restBuilder = createRestClientBuilderWithConfig(credential);
 
         client = new RestHighLevelClient(restBuilder);
         return client;
+    }
+
+    private CredentialsProvider createCredentialsIfNotNull(String username, String password) {
+        if (username == null || password == null) {
+            return null;
+        }
+        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
+        return credentialsProvider;
+    }
+
+    private RestClientBuilder createRestClientBuilderWithConfig(CredentialsProvider credentialsProvider) {
+        return RestClient
+                .builder(this.getHttpHosts())
+                .setHttpClientConfigCallback(httpClientBuilder -> configureHttpClientBuilder(httpClientBuilder, credentialsProvider))
+                .setRequestConfigCallback(requestConfigBuilder ->
+                        requestConfigBuilder
+                                .setConnectTimeout(1000)
+                                .setSocketTimeout(12 * 1000));
+    }
+
+    private HttpAsyncClientBuilder configureHttpClientBuilder(HttpAsyncClientBuilder httpClientBuilder,
+                                                              CredentialsProvider credentialsProvider) {
+        httpClientBuilder
+                .setKeepAliveStrategy(getConnectionKeepAliveStrategy())
+                .setMaxConnPerRoute(10);
+        if (credentialsProvider != null) {
+            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+        }
+        return httpClientBuilder;
     }
 
     private HttpHost[] getHttpHosts() {
