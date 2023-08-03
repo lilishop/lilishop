@@ -19,6 +19,15 @@ import java.util.Map;
 @CacheConfig(cacheNames = "{regions}")
 public interface RegionService extends IService<Region> {
 
+
+    /**
+     * 更新地区
+     *
+     * @param region 地区
+     * @return
+     */
+    @CacheEvict(allEntries = true)
+    boolean updateById(Region region);
     /**
      * 同步行政数据
      *

@@ -16,6 +16,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -35,6 +36,13 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
 
     @Autowired
     private Cache cache;
+
+
+    @Override
+    @Transactional
+    public boolean updateById(Region region) {
+        return super.updateById(region);
+    }
 
     @Override
     public void synchronizationData(String url) {
