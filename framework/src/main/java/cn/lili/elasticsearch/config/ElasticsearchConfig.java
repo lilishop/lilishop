@@ -9,6 +9,7 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.apache.http.impl.nio.reactor.IOReactorConfig;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -72,7 +73,12 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
                                                               CredentialsProvider credentialsProvider) {
         httpClientBuilder
                 .setKeepAliveStrategy(getConnectionKeepAliveStrategy())
-                .setMaxConnPerRoute(10);
+                .setMaxConnPerRoute(10)
+                .setDefaultIOReactorConfig(
+                        IOReactorConfig
+                                .custom()
+                                .setIoThreadCount(Runtime.getRuntime().availableProcessors())
+                                .build());
         if (credentialsProvider != null) {
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
         }

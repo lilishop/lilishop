@@ -455,8 +455,9 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         this.client.bulkAsync(request, RequestOptions.DEFAULT, new ActionListener<BulkResponse>() {
             @Override
             public void onResponse(BulkResponse bulkItemResponses) {
-                if (bulkItemResponses.hasFailures()) {
-                    throw new RetryException("批量更新商品索引失败，es内容版本冲突");
+                log.info("批量更新商品索引结果：{}", bulkItemResponses.buildFailureMessage());
+                if (bulkItemResponses.hasFailures() && bulkItemResponses.getItems().length > 0) {
+                    throw new RetryException("批量更新商品索引失败，" + bulkItemResponses.buildFailureMessage());
                 }
             }
 
