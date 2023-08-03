@@ -58,7 +58,7 @@ public class NoticeMessageExecute implements TradeEvent, OrderStatusChangeEvent,
         OrderDetailVO orderDetailVO = orderService.queryDetail(orderMessage.getOrderSn());
         NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
         //如果订单状态不为空
-        if (orderDetailVO != null) {
+        if (orderDetailVO != null && orderDetailVO.getOrderItems() != null && !orderDetailVO.getOrderItems().isEmpty()) {
             Map<String, String> params = new HashMap<>(2);
             switch (orderMessage.getNewStatus()) {
                 //如果订单新的状态为已取消 则发送取消订单站内信
