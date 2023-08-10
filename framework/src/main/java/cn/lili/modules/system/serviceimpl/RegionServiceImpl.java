@@ -44,6 +44,17 @@ public class RegionServiceImpl extends ServiceImpl<RegionMapper, Region> impleme
         return super.updateById(region);
     }
 
+    @Transactional
+    @Override
+    public boolean save(Region region) {
+        return super.save(region);
+    }
+
+    @Override
+    public boolean removeByIds(List<String> idList) {
+        return super.removeByIds(idList);
+    }
+
     @Override
     public void synchronizationData(String url) {
         try {
