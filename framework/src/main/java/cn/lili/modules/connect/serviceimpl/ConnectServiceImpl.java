@@ -276,7 +276,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             if(member==null){
                 LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<Connect>();
                 //使用UnionId登录
-                if (StrUtil.isNotBlank(authUser.getToken().getUnionId())) {
+                if (authUser.getToken() != null && StrUtil.isNotBlank(authUser.getToken().getUnionId())) {
                     queryWrapper.eq(Connect::getUnionId, authUser.getToken().getUnionId())
                             .eq(Connect::getUnionType, authUser.getSource());
                 } else {
