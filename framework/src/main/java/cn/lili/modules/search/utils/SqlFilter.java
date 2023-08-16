@@ -20,7 +20,7 @@ public class SqlFilter {
             "TABLE", "INDEX", "VIEW", "DROP", "ALTER", "COLUMN", "ADD", "SET", "GROUP", "BY",
             "HAVING", "ORDER", "ASC", "DESC", "LIKE", "IN", "BETWEEN", "IS", "NULL", "TRUE", "FALSE",
             "JOIN", "LEFT", "RIGHT", "INNER", "OUTER", "FULL", "ON", "AS", "DISTINCT", "COUNT",
-            "MAX", "MIN", "SUM", "AVG"
+            "MAX", "MIN", "SUM", "AVG", "IF", "RAND", "UPDATEXML", "EXTRACTVALUE", "LOAD_FILE", "SLEEP","OFFSET"
     ));
 
 
