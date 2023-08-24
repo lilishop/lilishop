@@ -116,7 +116,11 @@ public class CheckDataRender implements CartRenderStep {
             //商品上架状态判定  sku为空、sku非上架状态、sku审核不通过
             boolean checkGoodsStatus = dataSku == null || !GoodsAuthEnum.PASS.name().equals(dataSku.getAuthFlag()) || !GoodsStatusEnum.UPPER.name().equals(dataSku.getMarketEnable());
             //商品有效性判定 sku不为空且sku的更新时间不为空且sku的更新时间在购物车sku的更新时间之后
-            boolean checkGoodsValid = dataSku != null && dataSku.getUpdateTime() != null && dataSku.getUpdateTime().after(cartSkuVO.getGoodsSku().getUpdateTime());
+            boolean checkGoodsValid = dataSku != null &&
+                    dataSku.getUpdateTime() != null &&
+                    cartSkuVO.getGoodsSku() != null &&
+                    cartSkuVO.getGoodsSku().getUpdateTime() != null &&
+                    dataSku.getUpdateTime().after(cartSkuVO.getGoodsSku().getUpdateTime());
 
 
             if (checkGoodsStatus || checkGoodsValid) {
