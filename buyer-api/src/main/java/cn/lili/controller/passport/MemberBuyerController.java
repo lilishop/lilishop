@@ -28,7 +28,6 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.validation.constraints.NotNull;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 
@@ -96,7 +95,7 @@ public class MemberBuyerController {
                 deferredResult.setResult(new ResponseEntity<>(ResultUtil.error(ResultCode.ERROR), HttpStatus.OK));
                 Thread.currentThread().interrupt();
             }
-        }, Executors.newCachedThreadPool());
+        });
         return deferredResult;
     }
 
