@@ -1,8 +1,9 @@
 package cn.lili.modules.search.utils;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import cn.lili.common.utils.StringUtils;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * sql 关键字过滤
@@ -15,13 +16,17 @@ import java.util.Set;
 
 public class SqlFilter {
 
-    private static final Set<String> SQL_KEYWORDS = new HashSet<>(Arrays.asList(
-            "SELECT", "FROM", "WHERE", "AND", "OR", "NOT", "INSERT", "UPDATE", "DELETE", "CREATE",
-            "TABLE", "INDEX", "VIEW", "DROP", "ALTER", "COLUMN", "ADD", "SET", "GROUP", "BY",
-            "HAVING", "ORDER", "ASC", "DESC", "LIKE", "IN", "BETWEEN", "IS", "NULL", "TRUE", "FALSE",
-            "JOIN", "LEFT", "RIGHT", "INNER", "OUTER", "FULL", "ON", "AS", "DISTINCT", "COUNT",
-            "MAX", "MIN", "SUM", "AVG"
-    ));
+
+    // SQL注入过滤
+    static final String SQL_KEYWORDS_PATTERN =
+            "(?i)(SELECT|FROM|WHERE|CONCAT|AND|NOT|INSERT|UPDATE|DELETE" +
+                    "|TABLE|INDEX|VIEW|DROP|ALTER|COLUMN|ADD|SET|GROUP|BY" +
+                    "|HAVING|ORDER|ASC|DESC|LIKE|IN|BETWEEN|IS|NULL|TRUE|FALSE" +
+                    "|JOIN|LEFT|RIGHT|INNER|OUTER|FULL|ON|AS|DISTINCT|COUNT" +
+                    "|MAX|MIN|SUM|AVG|IF|RAND|UPDATEXML|EXTRACTVALUE|LOAD_FILE|SLEEP|OFFSET)";
+    // OR 影响排序字段 sort，所以暂时不过滤
+    // CREATE 影响常用排序字段， CREATE_TIME，所以暂时不过滤
+    static final Pattern keywordPattern = Pattern.compile(SQL_KEYWORDS_PATTERN, Pattern.CASE_INSENSITIVE);
 
 
     /**
@@ -31,29 +36,12 @@ public class SqlFilter {
      * @return
      */
     public static Boolean hit(String sql) {
-        String[] tokens = sql.split("\\s+");
-        for (String token : tokens) {
-            if (!SQL_KEYWORDS.contains(token.toUpperCase())) {
-                return true;
-            }
+        if (StringUtils.isEmpty(sql)) {
+            return false;
         }
-        return false;
+        Matcher matcher = keywordPattern.matcher(sql);
+        return matcher.find();
     }
 
-    /**
-     * 关键字替换
-     *
-     * @param sql
-     * @return
-     */
-    public static String filterSql(String sql) {
-        String[] tokens = sql.split("\\s+");
-        StringBuilder filteredSql = new StringBuilder();
-        for (String token : tokens) {
-            if (!SQL_KEYWORDS.contains(token.toUpperCase())) {
-                filteredSql.append(token).append(" ");
-            }
-        }
-        return filteredSql.toString().trim();
-    }
+
 }

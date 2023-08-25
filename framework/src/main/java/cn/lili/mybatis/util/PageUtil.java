@@ -1,15 +1,17 @@
 package cn.lili.mybatis.util;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
+import cn.lili.modules.search.utils.SqlFilter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,19 +24,21 @@ import java.util.List;
  * @version v4.0
  * @since 2020/11/26 15:23
  */
+@Slf4j
 public class PageUtil {
 
+    //有order by 注入风险，限制长度
+    static final Integer orderByLengthLimit = 20;
 
     /**
      * Mybatis-Plus分页封装
      *
      * @param page 分页VO
-     * @param <T> 范型
+     * @param <T>  范型
      * @return 分页响应
      */
     public static <T> Page<T> initPage(PageVO page) {
 
-        Page<T> p;
         int pageNumber = page.getPageNumber();
         int pageSize = page.getPageSize();
         String sort = page.getSort();
@@ -49,28 +53,37 @@ public class PageUtil {
         if (pageSize > 100) {
             pageSize = 100;
         }
-        if (StrUtil.isNotBlank(sort)) {
-            Boolean isAsc = false;
-            if (StrUtil.isBlank(order)) {
-                isAsc = false;
-            } else {
+
+        Page<T> p = new Page<>(pageNumber, pageSize);
+
+        if (CharSequenceUtil.isNotBlank(sort)) {
+
+            if (sort.length() > orderByLengthLimit || SqlFilter.hit(sort)) {
+                log.error("排序字段长度超过限制或包含sql关键字，请关注：{}", sort);
+                return p;
+            }
+
+            boolean isAsc = false;
+            if (!CharSequenceUtil.isBlank(order)) {
                 if ("desc".equals(order.toLowerCase())) {
                     isAsc = false;
                 } else if ("asc".equals(order.toLowerCase())) {
                     isAsc = true;
                 }
             }
-            p = new Page<>(pageNumber, pageSize);
+
             if (isAsc) {
                 p.addOrder(OrderItem.asc(sort));
             } else {
                 p.addOrder(OrderItem.desc(sort));
             }
 
-        } else {
-            p = new Page<>(pageNumber, pageSize);
         }
         return p;
+    }
+
+    private void orderByHandler() {
+
     }
 
     /**
@@ -87,14 +100,14 @@ public class PageUtil {
     /**
      * 生成条件搜索 全对象对比
      *
-     * @param object 对象
+     * @param object   对象
      * @param searchVo 查询条件
      * @return 查询wrapper
      */
     public static <T> QueryWrapper<T> initWrapper(Object object, SearchVO searchVo) {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
         //创建时间区间判定
-        if (searchVo != null && StrUtil.isNotBlank(searchVo.getStartDate()) && StrUtil.isNotBlank(searchVo.getEndDate())) {
+        if (searchVo != null && CharSequenceUtil.isNotBlank(searchVo.getStartDate()) && CharSequenceUtil.isNotBlank(searchVo.getEndDate())) {
             Date start = DateUtil.parse(searchVo.getStartDate());
             Date end = DateUtil.parse(searchVo.getEndDate());
             queryWrapper.between("create_time", start, DateUtil.endOfDay(end));
@@ -156,8 +169,8 @@ public class PageUtil {
      * 转换分页类型
      *
      * @param originPage 原分页
-     * @param records 新分页数据
-     * @param <T> 新类型
+     * @param records    新分页数据
+     * @param <T>        新类型
      * @return 新类型分页
      */
     public static <T> IPage<T> convertPage(IPage originPage, List<T> records) {

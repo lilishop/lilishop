@@ -232,8 +232,15 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
         KanjiaActivityGoodsVO kanJiaActivityGoodsVO = new KanjiaActivityGoodsVO();
         //获取砍价商品
         KanjiaActivityGoods kanJiaActivityGoods = this.getById(id);
+        if (kanJiaActivityGoods == null) {
+            throw new ServiceException(ResultCode.KANJIA_ACTIVITY_NOT_FOUND_ERROR);
+        }
         //获取商品SKU
         GoodsSku goodsSku = this.goodsSkuService.getCanPromotionGoodsSkuByIdFromCache(kanJiaActivityGoods.getSkuId());
+
+        if (goodsSku == null) {
+            throw new ServiceException(ResultCode.KANJIA_ACTIVITY_NOT_FOUND_ERROR);
+        }
         //填写活动商品价格、剩余数量
         kanJiaActivityGoodsVO.setGoodsSku(goodsSku);
         kanJiaActivityGoodsVO.setStock(kanJiaActivityGoods.getStock());

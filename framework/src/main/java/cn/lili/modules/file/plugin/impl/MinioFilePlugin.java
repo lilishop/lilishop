@@ -7,6 +7,7 @@ import cn.lili.modules.file.plugin.FilePlugin;
 import cn.lili.modules.system.entity.dto.OssSetting;
 import io.minio.*;
 import io.minio.errors.ErrorResponseException;
+import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
 import lombok.extern.slf4j.Slf4j;
 
@@ -96,8 +97,20 @@ public class MinioFilePlugin implements FilePlugin {
             return;
         }
         MinioClient ossClient = getOssClient();
-        List<DeleteObject> objectList = key.stream().map(DeleteObject::new).collect(Collectors.toList());
-        ossClient.removeObjects(RemoveObjectsArgs.builder().objects(objectList).bucket(ossSetting.getM_bucketName()).build());
+        List<DeleteObject> objectList = key.stream().map(DeleteObject::new).collect(Collectors.toList()); Iterable<Result<DeleteError>> results =
+                ossClient.removeObjects(RemoveObjectsArgs.builder().objects(objectList).bucket(ossSetting.getM_bucketName()).build());
+        for (Result<DeleteError> result : results) {
+            DeleteError error = null;
+            try {
+                error = result.get();
+                log.error(
+                        "Error in deleting object " + error.objectName() + "; " + error.message());
+            } catch (Exception e) {
+
+                log.error(
+                        "Error in deleting object " + e.getMessage());
+            }
+        }
     }
 
 

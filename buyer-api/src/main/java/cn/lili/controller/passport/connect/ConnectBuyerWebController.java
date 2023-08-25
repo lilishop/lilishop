@@ -76,8 +76,8 @@ public class ConnectBuyerWebController {
     }
 
     @ApiOperation(value = "APP-unionID登录")
-    @GetMapping("/app/login")
-    public ResultMessage<Token> unionLogin(ConnectAuthUser authUser, @RequestHeader("uuid") String uuid) {
+    @PostMapping("/app/login")
+    public ResultMessage<Token> unionLogin(@RequestBody ConnectAuthUser authUser, @RequestHeader("uuid") String uuid) {
         try {
             return ResultUtil.data(connectService.unionLoginCallback(authUser, uuid));
         } catch (Exception e) {
