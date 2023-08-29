@@ -56,6 +56,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 商品业务层实现
@@ -426,7 +427,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         LambdaUpdateWrapper<Goods> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.set(Goods::getTemplateId, templateId);
         lambdaUpdateWrapper.in(Goods::getId, goodsIds);
-        cache.multiDel(goodsIds);
+        List<String> goodsCache = goodsIds.stream().map(item -> CachePrefix.GOODS.getPrefix() + item).collect(Collectors.toList());
+        cache.multiDel(goodsCache);
         return this.update(lambdaUpdateWrapper);
     }
 
@@ -548,7 +550,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (!GoodsStatusEnum.UPPER.name().equals(goods.getMarketEnable()) || !GoodsAuthEnum.PASS.name().equals(goods.getAuthFlag())) {
             return;
         }
-        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("生成商品", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.GENERATOR_GOODS_INDEX.name(), goods.getId()));
+        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("生成商品", rocketmqCustomProperties.getGoodsTopic(),
+                GoodsTagsEnum.GENERATOR_GOODS_INDEX.name(), goods.getId()));
     }
 
     /**
@@ -558,7 +561,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
      */
     @Transactional
     public void updateEsGoods(List<String> goodsIds) {
-        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.UPDATE_GOODS_INDEX.name(), goodsIds));
+        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品", rocketmqCustomProperties.getGoodsTopic(),
+                GoodsTagsEnum.UPDATE_GOODS_INDEX.name(), goodsIds));
     }
 
     /**
@@ -568,7 +572,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
      */
     @Transactional
     public void deleteEsGoods(List<String> goodsIds) {
-        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("删除商品", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.GOODS_DELETE.name(), JSONUtil.toJsonStr(goodsIds)));
+        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("删除商品", rocketmqCustomProperties.getGoodsTopic(),
+                GoodsTagsEnum.GOODS_DELETE.name(), JSONUtil.toJsonStr(goodsIds)));
     }
 
     /**
