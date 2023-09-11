@@ -23,7 +23,8 @@ public class ThreadPoolUtil {
      * 线程缓冲队列
      */
     private static final BlockingQueue<Runnable> BQUEUE = new ArrayBlockingQueue<Runnable>(100);
-    private static final ThreadPoolExecutor POOL = new ThreadPoolExecutor(SIZE_CORE_POOL, SIZE_MAX_POOL, ALIVE_TIME, TimeUnit.MILLISECONDS, BQUEUE, new ThreadPoolExecutor.CallerRunsPolicy());
+    private static final ThreadPoolExecutor POOL = new ThreadPoolExecutor(SIZE_CORE_POOL, SIZE_MAX_POOL, ALIVE_TIME, TimeUnit.MILLISECONDS, BQUEUE,
+            new ThreadPoolExecutor.CallerRunsPolicy());
     /**
      * volatile禁止指令重排
      */
@@ -34,7 +35,7 @@ public class ThreadPoolUtil {
     }
 
     /**
-     * 无返回值直接执行, 管他娘的
+     * 执行方法
      *
      * @param runnable
      */
@@ -43,7 +44,7 @@ public class ThreadPoolUtil {
     }
 
     /**
-     * 返回值直接执行, 管他娘的
+     * 提交返回值
      *
      * @param callable
      */
