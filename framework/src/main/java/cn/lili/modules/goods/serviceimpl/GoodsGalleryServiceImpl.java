@@ -101,7 +101,7 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
         switch (OssEnum.valueOf(ossSetting.getType())) {
             case MINIO:
                 //缩略图全路径
-                return url + "?x-oss-process=style/" + width + "X" + height;
+                return url;
             case ALI_OSS:
                 //缩略图全路径
                 return url + "?x-oss-process=style/" + width + "X" + height;
