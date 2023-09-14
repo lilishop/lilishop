@@ -1,6 +1,6 @@
 package cn.lili.modules.order.order.entity.vo;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.modules.order.aftersale.entity.enums.ComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.dos.OrderComplaint;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -39,22 +39,22 @@ public class OrderComplaintSearchParams {
 
     public LambdaQueryWrapper<OrderComplaint> lambdaQueryWrapper() {
         LambdaQueryWrapper<OrderComplaint> queryWrapper = new LambdaQueryWrapper<>();
-        if (StrUtil.isNotEmpty(status)) {
+        if (CharSequenceUtil.isNotEmpty(status)) {
             queryWrapper.eq(OrderComplaint::getComplainStatus, status);
         }
-        if (StrUtil.isNotEmpty(orderSn)) {
-            queryWrapper.eq(OrderComplaint::getOrderSn, orderSn);
+        if (CharSequenceUtil.isNotEmpty(orderSn)) {
+            queryWrapper.like(OrderComplaint::getOrderSn, orderSn);
         }
-        if (StrUtil.isNotEmpty(storeName)) {
+        if (CharSequenceUtil.isNotEmpty(storeName)) {
             queryWrapper.like(OrderComplaint::getStoreName, storeName);
         }
-        if (StrUtil.isNotEmpty(storeId)) {
+        if (CharSequenceUtil.isNotEmpty(storeId)) {
             queryWrapper.eq(OrderComplaint::getStoreId, storeId);
         }
-        if (StrUtil.isNotEmpty(memberName)) {
+        if (CharSequenceUtil.isNotEmpty(memberName)) {
             queryWrapper.like(OrderComplaint::getMemberName, memberName);
         }
-        if (StrUtil.isNotEmpty(memberId)) {
+        if (CharSequenceUtil.isNotEmpty(memberId)) {
             queryWrapper.eq(OrderComplaint::getMemberId, memberId);
         }
         queryWrapper.eq(OrderComplaint::getDeleteFlag, false);
