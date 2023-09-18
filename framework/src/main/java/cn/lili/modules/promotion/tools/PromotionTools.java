@@ -55,9 +55,9 @@ public class PromotionTools {
         DateTime now = DateUtil.date();
 
         //如果活动起始时间小于现在时间
-        if (now.after(startTime)) {
-            throw new ServiceException(ResultCode.PROMOTION_START_TIME_ERROR);
-        }
+//        if (now.after(startTime)) {
+//            throw new ServiceException(ResultCode.PROMOTION_START_TIME_ERROR);
+//        }
         //如果活动结束时间小于现在时间
         if (endTime != null && now.after(endTime)) {
             throw new ServiceException(ResultCode.PROMOTION_END_TIME_ERROR);
