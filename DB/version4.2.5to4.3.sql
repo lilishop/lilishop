@@ -84,7 +84,7 @@ ALTER TABLE li_foot_print  ADD `store_id` varchar(255) DEFAULT NULL COMMENT '店
 
 
 /**
-  订单增加自提信息
+  用户提现申请增加字段
  */
 ALTER TABLE li_member_withdraw_apply ADD `real_name` varchar(255) DEFAULT NULL;
 ALTER TABLE li_member_withdraw_apply ADD  `connect_number` varchar(255) DEFAULT NULL;

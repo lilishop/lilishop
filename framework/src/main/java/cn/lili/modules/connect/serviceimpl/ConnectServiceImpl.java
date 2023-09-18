@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
-import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -125,24 +124,18 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     @Transactional
     public Token miniProgramAutoLogin(WechatMPLoginParams params) {
 
-        Object cacheData = cache.get(CachePrefix.WECHAT_SESSION_PARAMS.getPrefix() + params.getUuid());
         Map<String, String> map = new HashMap<>(3);
-        if (cacheData == null) {
-            //得到微信小程序联合登陆信息
-            JSONObject json = this.getConnect(params.getCode());
-            //存储session key 后续登录用得到
-            String sessionKey = json.getStr("session_key");
-            String unionId = json.getStr("unionid");
-            String openId = json.getStr("openid");
-            map.put("sessionKey", sessionKey);
-            map.put("unionId", unionId);
-            map.put("openId", openId);
-            cache.put(CachePrefix.WECHAT_SESSION_PARAMS.getPrefix() + params.getUuid(), map, 900L);
-        } else {
-            map = (Map<String, String>) cacheData;
-        }
-        //微信联合登陆参数
+        //得到微信小程序联合登陆信息
+        JSONObject json = this.getConnect(params.getCode());
+        //存储session key 后续登录用得到
+        String sessionKey = json.getStr("session_key");
+        String unionId = json.getStr("unionid");
+        String openId = json.getStr("openid");
+        map.put("sessionKey", sessionKey);
+        map.put("unionId", unionId);
+        map.put("openId", openId);
 
+        //微信联合登陆参数
         return phoneMpBindAndLogin(map.get("sessionKey"), params, map.get("openId"), map.get("unionId"));
     }
 
@@ -217,7 +210,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
                         connectQueryDTO.getUnionType())
                 .eq(CharSequenceUtil.isNotEmpty(connectQueryDTO.getUnionId()), Connect::getUnionId,
                         connectQueryDTO.getUnionId());
-        return this.getOne(queryWrapper,false);
+        return this.getOne(queryWrapper, false);
     }
 
     @Override
@@ -267,13 +260,13 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     private Token unionLoginCallback(ConnectAuthUser authUser, boolean longTerm) {
 
         try {
-            Member member =null;
+            Member member = null;
             //判断是否传递手机号，如果传递手机号则使用手机号登录
-            if(StrUtil.isNotBlank(authUser.getPhone())){
+            if (StrUtil.isNotBlank(authUser.getPhone())) {
                 member = memberService.findByMobile(authUser.getPhone());
             }
             //如果未查到手机号的会员则使用第三方登录
-            if(member==null){
+            if (member == null) {
                 LambdaQueryWrapper<Connect> queryWrapper = new LambdaQueryWrapper<Connect>();
                 //使用UnionId登录
                 if (authUser.getToken() != null && StrUtil.isNotBlank(authUser.getToken().getUnionId())) {
