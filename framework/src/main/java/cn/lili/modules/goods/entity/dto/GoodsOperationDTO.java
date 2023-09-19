@@ -2,7 +2,6 @@ package cn.lili.modules.goods.entity.dto;
 
 import cn.lili.common.validation.EnumValue;
 import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
-import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
@@ -96,7 +95,8 @@ public class GoodsOperationDTO implements Serializable {
     @ApiModelProperty(value = "是否有规格", hidden = true)
     private String haveSpec;
 
-    @ApiModelProperty(value = "销售模式", required = true)
+    @ApiModelProperty(value = "商品单位", required = true)
+    @NotEmpty(message = "商品单位不能为空")
     private String goodsUnit;
 
     @ApiModelProperty(value = "商品描述")
