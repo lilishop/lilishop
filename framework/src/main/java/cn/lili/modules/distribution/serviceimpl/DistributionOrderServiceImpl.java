@@ -16,6 +16,7 @@ import cn.lili.modules.distribution.entity.vos.DistributionOrderSearchParams;
 import cn.lili.modules.distribution.mapper.DistributionOrderMapper;
 import cn.lili.modules.distribution.service.DistributionOrderService;
 import cn.lili.modules.distribution.service.DistributionService;
+import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
@@ -189,28 +190,27 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
     }
 
     @Override
-    public void refundOrder(String afterSaleSn) {
+    public void refundOrder(AfterSale afterSale) {
         //判断是否为分销订单
-        StoreFlow storeFlow = storeFlowService.queryOne(StoreFlowQueryDTO.builder().justDistribution(true).refundSn(afterSaleSn).build());
-        if (storeFlow != null) {
-
+        StoreFlow refundStoreFlow = storeFlowService.queryOne(StoreFlowQueryDTO.builder().justDistribution(true).refundSn(afterSale.getSn()).build());
+        if (refundStoreFlow != null) {
             //获取收款分销订单
             DistributionOrder distributionOrder = this.getOne(new LambdaQueryWrapper<DistributionOrder>()
-                    .eq(DistributionOrder::getOrderItemSn, storeFlow.getOrderItemSn()));
+                    .eq(DistributionOrder::getOrderItemSn, afterSale.getOrderItemSn()));
             //分销订单不存在，则直接返回
             if (distributionOrder == null) {
                 return;
             }
-            if (distributionOrder.getDistributionOrderStatus().equals(DistributionOrderStatusEnum.WAIT_BILL.name())) {
-                this.update(new LambdaUpdateWrapper<DistributionOrder>()
-                        .eq(DistributionOrder::getOrderItemSn, storeFlow.getOrderItemSn())
-                        .set(DistributionOrder::getDistributionOrderStatus, DistributionOrderStatusEnum.CANCEL.name()));
+
+            distributionOrder.setSellBackRebate(CurrencyUtil.add(distributionOrder.getSellBackRebate(), refundStoreFlow.getDistributionRebate()));
+            distributionOrder.setRebate(CurrencyUtil.sub(distributionOrder.getSellBackRebate(), refundStoreFlow.getDistributionRebate()));
+            if (distributionOrder.getRebate() == 0) {
+                distributionOrder.setDistributionOrderStatus(DistributionOrderStatusEnum.REFUND.name());
             }
-            //如果已结算则创建退款分销订单
-            else {
-                //修改分销员提成金额
-                distributionService.subCanRebate(CurrencyUtil.sub(0, storeFlow.getDistributionRebate()), distributionOrder.getDistributionId());
-            }
+            this.updateById(distributionOrder);
+
+//            修改分销员提成金额
+            distributionService.subCanRebate(CurrencyUtil.sub(0, refundStoreFlow.getDistributionRebate()), distributionOrder.getDistributionId());
         }
     }
 
@@ -310,7 +310,8 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
      * @param distributionList 分销列表
      * @return
      */
-    public Distribution checkDistribution(String distributionId, List<DistributionOrder> list, List<Distribution> distributionList) {
+    public Distribution checkDistribution(String
+                                                  distributionId, List<DistributionOrder> list, List<Distribution> distributionList) {
         //获取所有待结算订单分销人员信息
         Distribution distribution = distributionList.parallelStream().filter(a -> StrUtil.equals(a.getId(), distributionId)).collect(Collectors.toList()).get(0);
 
