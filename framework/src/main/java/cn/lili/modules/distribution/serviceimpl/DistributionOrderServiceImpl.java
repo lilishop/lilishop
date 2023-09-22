@@ -201,9 +201,13 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
             if (distributionOrder == null) {
                 return;
             }
+            if (distributionOrder.getSellBackRebate() == null) {
+                distributionOrder.setSellBackRebate(refundStoreFlow.getDistributionRebate());
+            } else {
+                distributionOrder.setSellBackRebate(CurrencyUtil.add(distributionOrder.getSellBackRebate(), refundStoreFlow.getDistributionRebate()));
+            }
 
-            distributionOrder.setSellBackRebate(CurrencyUtil.add(distributionOrder.getSellBackRebate(), refundStoreFlow.getDistributionRebate()));
-            distributionOrder.setRebate(CurrencyUtil.sub(distributionOrder.getSellBackRebate(), refundStoreFlow.getDistributionRebate()));
+            distributionOrder.setRebate(CurrencyUtil.sub(distributionOrder.getRebate(), refundStoreFlow.getDistributionRebate()));
             if (distributionOrder.getRebate() == 0) {
                 distributionOrder.setDistributionOrderStatus(DistributionOrderStatusEnum.REFUND.name());
             }
