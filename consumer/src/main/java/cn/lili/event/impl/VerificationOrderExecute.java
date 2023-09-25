@@ -42,8 +42,8 @@ public class VerificationOrderExecute implements OrderStatusChangeEvent {
                     .eq(Order::getSn, orderMessage.getOrderSn()));
             //修改虚拟订单货物可以进行售后、投诉
             orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn, orderMessage.getOrderSn())
-                    .set(OrderItem::getAfterSaleStatus, OrderItemAfterSaleStatusEnum.NOT_APPLIED)
-                    .set(OrderItem::getCommentStatus, OrderComplaintStatusEnum.NO_APPLY));
+                    .set(OrderItem::getAfterSaleStatus, OrderItemAfterSaleStatusEnum.ALREADY_APPLIED)
+                    .set(OrderItem::getCommentStatus, OrderComplaintStatusEnum.COMPLETE));
         }
     }
 

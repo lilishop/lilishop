@@ -321,14 +321,16 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     @OrderLogPoint(description = "'订单['+#orderSn+']系统取消，原因为：'+#reason", orderSn = "#orderSn")
     @Transactional(rollbackFor = Exception.class)
-    public void systemCancel(String orderSn, String reason) {
+    public void systemCancel(String orderSn, String reason,Boolean refundMoney) {
         Order order = this.getBySn(orderSn);
         order.setOrderStatus(OrderStatusEnum.CANCELLED.name());
         order.setCancelReason(reason);
         this.updateById(order);
-        //生成店铺退款流水
-        this.generatorStoreRefundFlow(order);
-        orderStatusMessage(order);
+        if(refundMoney){
+            //生成店铺退款流水
+            this.generatorStoreRefundFlow(order);
+            orderStatusMessage(order);
+        }
     }
 
     /**
@@ -772,12 +774,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 //如果未开启虚拟成团且已参团人数小于成团人数，则自动取消订单
                 String reason = "拼团活动结束订单未付款，系统自动取消订单";
                 if (CharSequenceUtil.isNotEmpty(entry.getKey())) {
-                    this.systemCancel(entry.getKey(), reason);
+                    this.systemCancel(entry.getKey(), reason,true);
                 } else {
                     for (Order order : entry.getValue()) {
                         if (!CharSequenceUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.COMPLETED.name(), OrderStatusEnum.DELIVERED.name(),
                                 OrderStatusEnum.TAKE.name(), OrderStatusEnum.STAY_PICKED_UP.name())) {
-                            this.systemCancel(order.getSn(), reason);
+                            this.systemCancel(order.getSn(), reason,true);
                         }
                     }
                 }
@@ -802,7 +804,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //未付款订单自动取消
         if (unpaidOrders != null && !unpaidOrders.isEmpty()) {
             for (Order unpaidOrder : unpaidOrders) {
-                this.systemCancel(unpaidOrder.getSn(), "拼团活动结束订单未付款，系统自动取消订单");
+                this.systemCancel(unpaidOrder.getSn(), "拼团活动结束订单未付款，系统自动取消订单",false);
             }
         }
         List<Order> paidOrders = listMap.get(PayStatusEnum.PAID.name());
@@ -963,7 +965,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private void pintuanOrderFailed(List<Order> list) {
         for (Order order : list) {
             try {
-                this.systemCancel(order.getSn(), "拼团人数不足，拼团失败！");
+                this.systemCancel(order.getSn(), "拼团人数不足，拼团失败！",true);
             } catch (Exception e) {
                 log.error("拼团订单取消失败", e);
             }

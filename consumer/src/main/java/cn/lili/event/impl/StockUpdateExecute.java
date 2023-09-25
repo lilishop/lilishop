@@ -222,7 +222,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
      * @param orderSn 失败入库订单信息
      */
     private void errorOrder(String orderSn) {
-        orderService.systemCancel(orderSn, outOfStockMessage);
+        orderService.systemCancel(orderSn, outOfStockMessage,true);
     }
 
 

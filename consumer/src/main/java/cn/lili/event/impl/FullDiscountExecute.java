@@ -104,7 +104,7 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
             searchParams.setOrderPromotionType(OrderPromotionTypeEnum.GIFT.name());
             List<Order> orders = orderService.queryListByParams(searchParams);
             if (orders != null && !orders.isEmpty()) {
-                orderService.systemCancel(orders.get(0).getSn(),"主订单取消，赠送订单字段自动取消");
+                orderService.systemCancel(orders.get(0).getSn(),"主订单取消，赠送订单字段自动取消",true);
             }
         }
     }
