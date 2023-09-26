@@ -64,7 +64,8 @@ public class AllowOperation implements Serializable {
         }
 
         //新订单
-        if (CharSequenceUtil.equalsAny(status, OrderStatusEnum.UNPAID.name(), OrderStatusEnum.PAID.name(), OrderStatusEnum.UNDELIVERED.name(), OrderStatusEnum.STAY_PICKED_UP.name())) {
+        if (CharSequenceUtil.equalsAny(status, OrderStatusEnum.UNPAID.name(), OrderStatusEnum.PAID.name(), OrderStatusEnum.UNDELIVERED.name(),
+                OrderStatusEnum.STAY_PICKED_UP.name(), OrderStatusEnum.TAKE.name())) {
             this.cancel = true;
         }
         //新订单，允许支付
@@ -86,7 +87,8 @@ public class AllowOperation implements Serializable {
         this.showLogistics = order.getDeliverStatus().equals(DeliverStatusEnum.DELIVERED.name()) && status.equals(OrderStatusEnum.DELIVERED.name());
 
         //虚拟订单 或 自提订单可以核销
-        this.take = (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name()) && order.getOrderStatus().equals(OrderStatusEnum.TAKE.name())) || (order.getDeliveryMethod().equals(DeliveryMethodEnum.SELF_PICK_UP.name()) && order.getOrderStatus().equals(OrderStatusEnum.STAY_PICKED_UP.name()));
+        this.take =
+                (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name()) && order.getOrderStatus().equals(OrderStatusEnum.TAKE.name())) || (order.getDeliveryMethod().equals(DeliveryMethodEnum.SELF_PICK_UP.name()) && order.getOrderStatus().equals(OrderStatusEnum.STAY_PICKED_UP.name()));
     }
 
     /**
@@ -104,8 +106,10 @@ public class AllowOperation implements Serializable {
             this.editPrice = true;
         }
 
-        //新订单
-        if (CharSequenceUtil.equalsAny(status, OrderStatusEnum.UNPAID.name(), OrderStatusEnum.PAID.name(), OrderStatusEnum.UNDELIVERED.name())) {
+        //取消判定
+        if (CharSequenceUtil.equalsAny(status, OrderStatusEnum.UNPAID.name(), OrderStatusEnum.PAID.name(), OrderStatusEnum.UNDELIVERED.name(),
+                OrderStatusEnum.STAY_PICKED_UP.name(),
+                OrderStatusEnum.TAKE.name())) {
             this.cancel = true;
 
         }

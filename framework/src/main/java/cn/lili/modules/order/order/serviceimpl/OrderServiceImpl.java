@@ -171,7 +171,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orders.add(order);
             String message = "订单[" + item.getSn() + "]创建";
             //记录日志
-            orderLogs.add(new OrderLog(item.getSn(), UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), message));
+            orderLogs.add(new OrderLog(item.getSn(), UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(),
+                    UserContext.getCurrentUser().getUsername(), message));
             item.getCheckedSkuList().forEach(
                     sku -> {
                         orderItems.add(new OrderItem(sku, item, tradeDTO));
@@ -260,7 +261,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Order::getOrderPromotionType, PromotionTypeEnum.PINTUAN.name());
         queryWrapper.eq(Order::getPromotionId, pintuanId);
-        queryWrapper.nested(i -> i.eq(Order::getPayStatus, PayStatusEnum.PAID.name()).or(j -> j.eq(Order::getOrderStatus, OrderStatusEnum.PAID.name())));
+        queryWrapper.nested(i -> i.eq(Order::getPayStatus, PayStatusEnum.PAID.name()).or(j -> j.eq(Order::getOrderStatus,
+                OrderStatusEnum.PAID.name())));
         return this.list(queryWrapper);
     }
 
@@ -299,7 +301,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 OrderStatusEnum.UNDELIVERED.name(),
                 OrderStatusEnum.UNPAID.name(),
                 OrderStatusEnum.STAY_PICKED_UP.name(),
-                OrderStatusEnum.PAID.name())) {
+                OrderStatusEnum.PAID.name(),
+                OrderStatusEnum.TAKE.name())) {
 
             order.setOrderStatus(OrderStatusEnum.CANCELLED.name());
             order.setCancelReason(reason);
@@ -411,7 +414,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         BeanUtil.copyProperties(memberAddressDTO, order);
         this.updateById(order);
 
-        OrderLog orderLog = new OrderLog(orderSn, UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), message);
+        OrderLog orderLog = new OrderLog(orderSn, UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(),
+                UserContext.getCurrentUser().getUsername(), message);
         orderLogService.save(orderLog);
 
         return order;
@@ -458,8 +462,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public Order shunFengDelivery(String orderSn) {
         OrderDetailVO orderDetailVO = this.queryDetail(orderSn);
         String logisticsNo = logisticsService.sfCreateOrder(orderDetailVO);
-        Logistics logistics = logisticsService.getOne(new LambdaQueryWrapper<Logistics>().eq(Logistics::getCode,"SF"));
-        return delivery(orderSn,logisticsNo,logistics.getId());
+        Logistics logistics = logisticsService.getOne(new LambdaQueryWrapper<Logistics>().eq(Logistics::getCode, "SF"));
+        return delivery(orderSn, logisticsNo, logistics.getId());
     }
 
     @Override
@@ -476,7 +480,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Order order = this.getBySn(orderSn);
         //获取店家信息
         StoreDeliverGoodsAddressDTO storeDeliverGoodsAddressDTO = storeDetailService.getStoreDeliverGoodsAddressDto(order.getStoreId());
-        String from = storeDeliverGoodsAddressDTO.getSalesConsignorAddressPath().substring(0, storeDeliverGoodsAddressDTO.getSalesConsignorAddressPath().indexOf(",") - 1);
+        String from = storeDeliverGoodsAddressDTO.getSalesConsignorAddressPath().substring(0,
+                storeDeliverGoodsAddressDTO.getSalesConsignorAddressPath().indexOf(",") - 1);
         String to = order.getConsigneeAddressPath().substring(0, order.getConsigneeAddressPath().indexOf(",") - 1);
         //获取踪迹信息
         return logisticsService.getLogisticMapTrack(order.getLogisticsCode(), order.getLogisticsNo(), order.getConsigneeMobile(), from, to);
@@ -584,7 +589,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void sendUpdateStatusMessage(OrderMessage orderMessage) {
-        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("发送订单变更mq消息", rocketmqCustomProperties.getOrderTopic(), OrderTagsEnum.STATUS_CHANGE.name(), JSONUtil.toJsonStr(orderMessage)));
+        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("发送订单变更mq消息", rocketmqCustomProperties.getOrderTopic(),
+                OrderTagsEnum.STATUS_CHANGE.name(), JSONUtil.toJsonStr(orderMessage)));
     }
 
     @Override
@@ -771,7 +777,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     this.systemCancel(entry.getKey(), reason,true);
                 } else {
                     for (Order order : entry.getValue()) {
-                        if (!CharSequenceUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.COMPLETED.name(), OrderStatusEnum.DELIVERED.name(), OrderStatusEnum.TAKE.name(), OrderStatusEnum.STAY_PICKED_UP.name())) {
+                        if (!CharSequenceUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.COMPLETED.name(), OrderStatusEnum.DELIVERED.name(),
+                                OrderStatusEnum.TAKE.name(), OrderStatusEnum.STAY_PICKED_UP.name())) {
                             this.systemCancel(order.getSn(), reason,true);
                         }
                     }
@@ -818,7 +825,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 paidOrders.add(order);
             }
             for (Order paidOrder : paidOrders) {
-                if (!CharSequenceUtil.equalsAny(paidOrder.getOrderStatus(), OrderStatusEnum.COMPLETED.name(), OrderStatusEnum.DELIVERED.name(), OrderStatusEnum.TAKE.name(), OrderStatusEnum.STAY_PICKED_UP.name())) {
+                if (!CharSequenceUtil.equalsAny(paidOrder.getOrderStatus(), OrderStatusEnum.COMPLETED.name(), OrderStatusEnum.DELIVERED.name(),
+                        OrderStatusEnum.TAKE.name(), OrderStatusEnum.STAY_PICKED_UP.name())) {
                     if (OrderTypeEnum.NORMAL.name().equals(paidOrder.getOrderType())) {
                         paidOrder.setOrderStatus(OrderStatusEnum.UNDELIVERED.name());
                     } else if (OrderTypeEnum.VIRTUAL.name().equals(paidOrder.getOrderType())) {
