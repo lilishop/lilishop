@@ -1,6 +1,7 @@
 package cn.lili.controller.common;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
@@ -21,10 +22,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
@@ -55,7 +53,7 @@ public class UploadController {
     @PostMapping(value = "/file")
     public ResultMessage<Object> upload(MultipartFile file,
                                         String base64,
-                                        @RequestHeader String accessToken) {
+                                        @RequestHeader String accessToken, @RequestParam String directoryPath) {
 
 
         AuthUser authUser = UserContext.getAuthUser(cache, accessToken);
@@ -89,6 +87,12 @@ public class UploadController {
         try {
             InputStream inputStream = file.getInputStream();
             //上传至第三方云服务或服务器
+            String scene = UserContext.getCurrentUser().getRole().name();
+            if (StrUtil.equalsAny(UserContext.getCurrentUser().getRole().name(), UserEnums.MEMBER.name(), UserEnums.STORE.name(), UserEnums.SEAT.name())) {
+                scene = scene + "/" + authUser.getId();
+            }
+            fileKey = scene + "/" + directoryPath + "/" + fileKey;
+            //上传至第三方云服务或服务器
             result = filePluginFactory.filePlugin().inputStreamUpload(inputStream, fileKey);
             //保存数据信息至数据库
             newFile.setName(file.getOriginalFilename());
@@ -103,6 +107,15 @@ public class UploadController {
                 newFile.setOwnerId(authUser.getStoreId());
             } else {
                 newFile.setOwnerId(authUser.getId());
+            }
+
+            //存储文件目录
+            if (StrUtil.isNotEmpty(directoryPath)) {
+                if (directoryPath.indexOf("/") > 0) {
+                    newFile.setFileDirectoryId(directoryPath.substring(directoryPath.lastIndexOf("/") + 1));
+                } else {
+                    newFile.setFileDirectoryId(directoryPath);
+                }
             }
             fileService.save(newFile);
         } catch (Exception e) {

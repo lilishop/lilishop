@@ -24,6 +24,12 @@ public interface FileService extends IService<File> {
      * @param ids
      */
     void batchDelete(List<String> ids);
+    /**
+     * 根据文件夹ID批量删除
+     *
+     * @param directoryId 文件夹ID
+     */
+    void batchDeleteByDirectory(String directoryId);
 
     /**
      * 所有者批量删除
@@ -37,22 +43,19 @@ public interface FileService extends IService<File> {
     /**
      * 自定义搜索分页
      *
-     * @param file
-     * @param searchVO
-     * @param pageVo
+
+     * @param fileOwnerDTO 文件查询
+
      * @return
      */
-    IPage<File> customerPage(File file, SearchVO searchVO, PageVO pageVo);
+    IPage<File> customerPage(FileOwnerDTO fileOwnerDTO);
 
     /**
      * 所属文件数据查询
      *
-     * @param file
-     * @param searchVO
-     * @param pageVo
-     * @param ownerDTO
+     * @param ownerDTO 文件查询
      * @return
      */
-    IPage<File> customerPageOwner(FileOwnerDTO ownerDTO, File file, SearchVO searchVO, PageVO pageVo);
+    IPage<File> customerPageOwner(FileOwnerDTO ownerDTO);
 
 }
