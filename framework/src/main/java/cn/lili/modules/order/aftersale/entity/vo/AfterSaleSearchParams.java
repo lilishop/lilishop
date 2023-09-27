@@ -22,6 +22,11 @@ import java.util.Date;
 @Data
 public class AfterSaleSearchParams extends PageVO {
 
+    private static final long serialVersionUID = 28604026820923515L;
+
+    @ApiModelProperty(value = "关键字")
+    private String keyword;
+
     @ApiModelProperty(value = "售后服务单号")
     private String sn;
 

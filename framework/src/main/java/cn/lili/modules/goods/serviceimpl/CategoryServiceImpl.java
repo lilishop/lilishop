@@ -8,6 +8,7 @@ import cn.lili.common.event.TransactionCommitSendMQEvent;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.dos.Category;
+import cn.lili.modules.goods.entity.dto.CategorySearchParams;
 import cn.lili.modules.goods.entity.vos.CategoryVO;
 import cn.lili.modules.goods.mapper.CategoryMapper;
 import cn.lili.modules.goods.service.CategoryBrandService;
@@ -165,10 +166,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     }
 
     @Override
-    public List<CategoryVO> listAllChildren() {
+    public List<CategoryVO> listAllChildren(CategorySearchParams categorySearchParams) {
 
         //获取全部分类
-        List<Category> list = this.list();
+        List<Category> list = this.list(categorySearchParams.queryWrapper());
 
         //构造分类树
         List<CategoryVO> categoryVOList = new ArrayList<>();
