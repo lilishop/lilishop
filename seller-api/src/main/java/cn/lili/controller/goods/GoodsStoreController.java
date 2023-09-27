@@ -117,7 +117,7 @@ public class GoodsStoreController {
 
     @ApiOperation(value = "修改商品")
     @PutMapping(value = "/update/{goodsId}", consumes = "application/json", produces = "application/json")
-    public ResultMessage<GoodsOperationDTO> update(@RequestBody GoodsOperationDTO goodsOperationDTO, @PathVariable String goodsId) {
+    public ResultMessage<GoodsOperationDTO> update(@Valid @RequestBody GoodsOperationDTO goodsOperationDTO, @PathVariable String goodsId) {
         goodsService.editGoods(goodsOperationDTO, goodsId);
         return ResultUtil.success();
     }

@@ -54,7 +54,7 @@ public class CancelOrderTaskExecute implements EveryMinuteExecute {
             List<Order> list = orderService.list(queryWrapper);
             List<String> cancelSnList = list.stream().map(Order::getSn).collect(Collectors.toList());
             for (String sn : cancelSnList) {
-                orderService.systemCancel(sn, "超时未支付自动取消");
+                orderService.systemCancel(sn, "超时未支付自动取消",false);
             }
         }
     }

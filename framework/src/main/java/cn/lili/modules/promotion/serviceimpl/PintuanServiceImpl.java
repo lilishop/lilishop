@@ -213,6 +213,9 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
      */
     private void setPintuanOrderInfo(List<Order> orders, PintuanShareVO pintuanShareVO, String skuId) {
         for (Order order : orders) {
+            if (pintuanShareVO.getPintuanMemberVOS().stream().anyMatch(i -> i.getMemberId().equals(order.getMemberId()))) {
+                continue;
+            }
             Member member = memberService.getById(order.getMemberId());
             PintuanMemberVO memberVO = new PintuanMemberVO(member);
             if (CharSequenceUtil.isEmpty(order.getParentOrderSn())) {
