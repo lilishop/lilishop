@@ -3,6 +3,7 @@ package cn.lili.modules.distribution.service;
 import cn.hutool.core.date.DateTime;
 import cn.lili.modules.distribution.entity.dos.DistributionOrder;
 import cn.lili.modules.distribution.entity.vos.DistributionOrderSearchParams;
+import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -47,7 +48,7 @@ public interface DistributionOrderService extends IService<DistributionOrder> {
      *
      * @param afterSaleSn 售后单号
      */
-    void refundOrder(String afterSaleSn);
+    void refundOrder(AfterSale afterSale);
 
     /**
      * 分销订单状态修改

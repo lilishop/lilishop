@@ -43,4 +43,7 @@ public class File extends BaseEntity {
 
     @ApiModelProperty(value = "用户类型")
     private String userEnums;
+
+    @ApiModelProperty(value = "文件夹ID")
+    private String fileDirectoryId;
 }
