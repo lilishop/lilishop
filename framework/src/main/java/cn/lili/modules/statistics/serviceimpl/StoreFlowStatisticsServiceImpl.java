@@ -134,7 +134,7 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
         //查询下单人数的sql
         queryWrapper.select("count(DISTINCT member_id) AS num");
         //获取查询结果
-        Map memberNum = this.getMap(queryWrapper);
+        Map memberNum = orderStatisticsService.getMap(queryWrapper);
         //写入下单人数
         orderOverviewVO.setOrderMemberNum(memberNum != null && memberNum.containsKey("num") ? (Long) memberNum.get("num") : 0L);
     }
