@@ -7,6 +7,7 @@ import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.promotion.entity.dos.Coupon;
@@ -21,6 +22,12 @@ import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
 import cn.lili.modules.promotion.mapper.CouponActivityMapper;
 import cn.lili.modules.promotion.service.*;
 import cn.lili.modules.promotion.tools.PromotionTools;
+import cn.lili.trigger.enums.DelayTypeEnums;
+import cn.lili.trigger.interfaces.TimeTrigger;
+import cn.lili.trigger.message.CouponActivityMessage;
+import cn.lili.trigger.model.TimeExecuteConstant;
+import cn.lili.trigger.model.TimeTriggerMsg;
+import cn.lili.trigger.util.DelayQueueTools;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import groovy.util.logging.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +67,16 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
 
     @Autowired
     private Cache<List<CouponActivityVO>> cache;
+    /**
+     * 延时任务
+     */
+    @Autowired
+    private TimeTrigger timeTrigger;
+    /**
+     * RocketMQ
+     */
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Override
     public CouponActivityVO getCouponActivityVO(String couponActivityId) {
@@ -67,9 +84,31 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
         return new CouponActivityVO(couponActivity, couponActivityItemService.getCouponActivityItemListVO(couponActivityId));
     }
 
+
+    @Override
+    public void specify(CouponActivity couponActivity) {
+
+        //如果开始时间为空，则表示活动关闭
+        if (couponActivity.getStartTime() == null) {
+            return;
+        }
+
+        TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(TimeExecuteConstant.COUPON_ACTIVITY_EXECUTOR,
+                couponActivity.getStartTime().getTime(),
+                CouponActivityMessage.builder().couponActivityId(couponActivity.getId()).build(),
+                DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.COUPON_ACTIVITY, couponActivity.getId()),
+                rocketmqCustomProperties.getPromotionTopic());
+        //发送促销活动开始的延时任务
+        timeTrigger.addDelay(timeTriggerMsg);
+    }
+
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void specify(CouponActivity couponActivity) {
+    public void specifyCoupon(String couponActivityId) {
+
+        //获取优惠券活动
+        CouponActivity couponActivity = this.getById(couponActivityId);
         //获取活动优惠券发送范围
         List<Map<String, Object>> member = this.getMemberList(couponActivity);
 
@@ -92,7 +131,6 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
                 sendCoupon(memberList, couponActivityItems);
             }
         }
-
     }
 
     /**
@@ -119,8 +157,6 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
      */
     @Override
     public void checkPromotions(CouponActivity couponActivity) {
-        super.checkPromotions(couponActivity);
-
         if (couponActivity instanceof CouponActivityDTO) {
             CouponActivityDTO couponActivityDTO = (CouponActivityDTO) couponActivity;
             //指定会员判定
@@ -170,6 +206,7 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
             // 精准发券 则立即发放
             case SPECIFY:
                 this.specify(couponActivity);
+                this.resetCache(couponActivity.getCouponActivityType());
                 break;
             //其他活动则是缓存模块，根据缓存中的优惠券活动信息来确认发放优惠券测略
             case INVITE_NEW:
@@ -259,7 +296,7 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
      * @return
      */
     private List<CouponActivityVO> ongoingActivities(List<CouponActivityVO> activityVOS) {
-        if (activityVOS == null || activityVOS.size() == 0) {
+        if (activityVOS == null || activityVOS.isEmpty()) {
             return new ArrayList<>();
         }
         return activityVOS.stream().filter(item -> {
