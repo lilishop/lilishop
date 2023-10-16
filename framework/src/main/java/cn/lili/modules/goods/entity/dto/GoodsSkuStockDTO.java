@@ -12,6 +12,9 @@ import lombok.Data;
 @Data
 public class GoodsSkuStockDTO {
 
+    @ApiModelProperty(value = "商品id")
+    private String goodsId;
+
     @ApiModelProperty(value = "商品skuId")
     private String skuId;
 
