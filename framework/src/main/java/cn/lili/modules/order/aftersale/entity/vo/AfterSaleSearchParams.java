@@ -25,7 +25,7 @@ public class AfterSaleSearchParams extends PageVO {
     private static final long serialVersionUID = 28604026820923515L;
 
     @ApiModelProperty(value = "关键字")
-    private String keyword;
+    private String keywords;
 
     @ApiModelProperty(value = "售后服务单号")
     private String sn;
@@ -76,6 +76,10 @@ public class AfterSaleSearchParams extends PageVO {
 
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
+        if (CharSequenceUtil.isNotEmpty(keywords)) {
+            queryWrapper.and(wrapper -> wrapper.like("sn", keywords).or().like("order_sn", keywords).or().like("goods_name", keywords));
+        }
+
         if (CharSequenceUtil.isNotEmpty(sn)) {
             queryWrapper.like("sn", sn);
         }
