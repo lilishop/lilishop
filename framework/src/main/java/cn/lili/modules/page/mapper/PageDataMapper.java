@@ -34,7 +34,7 @@ public interface PageDataMapper extends BaseMapper<PageData> {
      * @return 页面数量
      */
     @Select("SELECT COUNT(id) FROM li_page_data ${ew.customSqlSegment}")
-    Integer getPageDataNum(@Param(Constants.WRAPPER) Wrapper<Integer> queryWrapper);
+    Integer getPageDataNum(@Param(Constants.WRAPPER) Wrapper<PageData> queryWrapper);
 
     /**
      * 获取页面数据分页
