@@ -64,6 +64,9 @@ public class CouponBuyerController {
     @GetMapping("/activity")
     @ApiOperation(value = "自动领取优惠券")
     public ResultMessage<List<MemberCoupon>> activity() {
+        if (UserContext.getCurrentUser() == null) {
+            return ResultUtil.success();
+        }
         return ResultUtil.data(couponActivityService.trigger(
                 CouponActivityTrigger.builder()
                         .couponActivityTypeEnum(CouponActivityTypeEnum.AUTO_COUPON)

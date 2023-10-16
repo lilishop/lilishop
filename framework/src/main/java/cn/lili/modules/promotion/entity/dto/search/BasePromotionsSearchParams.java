@@ -71,7 +71,11 @@ public class BasePromotionsSearchParams {
             queryWrapper.eq("scope_type", scopeType);
         }
         if (CharSequenceUtil.isNotEmpty(storeId)) {
-            queryWrapper.in("store_id", Arrays.asList(storeId.split(",")));
+            if ("store".equals(storeId)) {
+                queryWrapper.ne("store_id", PromotionTools.PLATFORM_ID);
+            } else {
+                queryWrapper.in("store_id", Arrays.asList(storeId.split(",")));
+            }
         }
         queryWrapper.eq("delete_flag", false);
         return queryWrapper;
