@@ -612,14 +612,12 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //获取商品信息
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
 
-        EvaluationQueryParams queryParams = new EvaluationQueryParams();
-        queryParams.setGrade(EvaluationGradeEnum.GOOD.name());
-        queryParams.setSkuId(goodsSku.getId());
         //好评数量
-        long highPraiseNum = memberEvaluationService.getEvaluationCount(queryParams);
+        long highPraiseNum = memberEvaluationService.getEvaluationCount(EvaluationQueryParams.builder().grade(EvaluationGradeEnum.GOOD.name()).skuId(skuId).build());
 
         //更新商品评价数量
-        goodsSku.setCommentNum(goodsSku.getCommentNum() != null ? goodsSku.getCommentNum() + 1 : 1);
+        long commentNum = memberEvaluationService.getEvaluationCount(EvaluationQueryParams.builder().skuId(skuId).build());
+        goodsSku.setCommentNum((int) commentNum);
 
         //好评率
         double grade = NumberUtil.mul(NumberUtil.div(highPraiseNum, goodsSku.getCommentNum().doubleValue(), 2), 100);
@@ -640,6 +638,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
         //修改商品的评价数量
         goodsService.updateGoodsCommentNum(goodsSku.getGoodsId());
+        clearCache(skuId);
     }
 
     /**
