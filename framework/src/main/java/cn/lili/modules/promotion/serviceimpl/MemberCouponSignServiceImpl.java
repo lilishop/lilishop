@@ -1,19 +1,17 @@
 package cn.lili.modules.promotion.serviceimpl;
 
-import cn.lili.cache.Cache;
-import cn.lili.cache.CachePrefix;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.modules.promotion.entity.dos.CouponActivity;
 import cn.lili.modules.promotion.entity.dos.MemberCouponSign;
+import cn.lili.modules.promotion.entity.enums.CouponActivityTypeEnum;
 import cn.lili.modules.promotion.entity.enums.CouponFrequencyEnum;
 import cn.lili.modules.promotion.entity.vos.CouponActivityVO;
 import cn.lili.modules.promotion.mapper.MemberCouponSignMapper;
 import cn.lili.modules.promotion.service.MemberCouponSignService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,15 +31,11 @@ import java.util.List;
 public class MemberCouponSignServiceImpl extends ServiceImpl<MemberCouponSignMapper, MemberCouponSign> implements MemberCouponSignService {
 
 
-    @Autowired
-    private Cache cache;
-
     @Override
     public void clean() {
         LambdaQueryWrapper<MemberCouponSign> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.lt(MemberCouponSign::getInvalidTime, DateUtil.getCurrentDayStartTime());
         this.baseMapper.delete(queryWrapper);
-        cache.remove(CachePrefix.MEMBER_COUPON_SIGN.getPrefix());
     }
 
     @Override
@@ -115,6 +109,9 @@ public class MemberCouponSignServiceImpl extends ServiceImpl<MemberCouponSignMap
 
                     throw new ServiceException();
             }
+        } else if (activity.getCouponActivityType().equals(CouponActivityTypeEnum.SPECIFY.name())) {
+            //精准发券 则标记失效时间为活动结束时间 防止同一个活动同一周期被多次领取
+            return activity.getEndTime();
         } else {
             throw new ServiceException();
         }

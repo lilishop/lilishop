@@ -18,4 +18,8 @@ public interface TimeExecuteConstant {
      */
     public static final String BROADCAST_EXECUTOR = "broadcastTimeTriggerExecutor";
 
+    /**
+     * 促销延迟加载执行器
+     */
+    public static final String COUPON_ACTIVITY_EXECUTOR = "couponActivityExecutor";
 }

@@ -24,6 +24,9 @@ public enum CouponFrequencyEnum {
     }
 
     public static boolean exist(String name) {
+        if (name == null) {
+            return false;
+        }
         try {
             CouponFrequencyEnum.valueOf(name);
         } catch (IllegalArgumentException e) {

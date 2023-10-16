@@ -33,6 +33,13 @@ public interface CouponActivityService extends AbstractPromotionsService<CouponA
     void specify(CouponActivity couponActivity);
 
     /**
+     * 精准发券
+     *
+     * @param couponActivityId 精准发券活动ID
+     */
+    void specifyCoupon(String couponActivityId);
+
+    /**
      * 用户优惠券活动触发
      *
      * @return 优惠券列表
