@@ -6,6 +6,7 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Category;
+import cn.lili.modules.goods.entity.dto.CategorySearchParams;
 import cn.lili.modules.goods.entity.vos.CategoryVO;
 import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.goods.service.GoodsService;
@@ -54,8 +55,8 @@ public class CategoryManagerController {
 
     @ApiOperation(value = "查询全部分类列表")
     @GetMapping(value = "/allChildren")
-    public ResultMessage<List<CategoryVO>> list() {
-        return ResultUtil.data(this.categoryService.listAllChildren());
+    public ResultMessage<List<CategoryVO>> list(CategorySearchParams categorySearchParams) {
+        return ResultUtil.data(this.categoryService.listAllChildren(categorySearchParams));
     }
 
     @PostMapping

@@ -3,7 +3,6 @@ package cn.lili.modules.goods.serviceimpl;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
@@ -148,7 +147,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
         if (!goodsSkus.isEmpty()) {
             this.saveOrUpdateBatch(goodsSkus);
-            this.updateStock(goodsSkus);
+            this.updateGoodsStock(goodsSkus);
         }
     }
 
@@ -199,7 +198,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                     skuList.stream().map(BaseEntity::getId).collect(Collectors.toList()));
             this.remove(unnecessarySkuIdsQuery);
             this.saveOrUpdateBatch(skuList);
-            this.updateStock(skuList);
+            this.updateGoodsStock(skuList);
         }
     }
 
@@ -385,7 +384,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             List<GoodsSku> goodsSkus = this.getGoodsSkuListByGoodsId(goods.getId());
             for (GoodsSku sku : goodsSkus) {
                 cache.remove(GoodsSkuService.getCacheKeys(sku.getId()));
-                cache.put(GoodsSkuService.getCacheKeys(sku.getId()), sku);
+                if (GoodsStatusEnum.UPPER.name().equals(goods.getMarketEnable()) && GoodsAuthEnum.PASS.name().equals(goods.getAuthFlag())) {
+                    cache.put(GoodsSkuService.getCacheKeys(sku.getId()), sku);
+                }
             }
         }
     }
@@ -520,8 +521,23 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateStocks(List<GoodsSkuStockDTO> goodsSkuStockDTOS) {
-        for (GoodsSkuStockDTO goodsSkuStockDTO : goodsSkuStockDTOS) {
-            this.updateStock(goodsSkuStockDTO.getSkuId(), goodsSkuStockDTO.getQuantity());
+        List<String> skuIds = goodsSkuStockDTOS.stream().map(GoodsSkuStockDTO::getSkuId).collect(Collectors.toList());
+        List<GoodsSkuStockDTO> goodsSkuStockList = this.baseMapper.queryStocks(GoodsSearchParams.builder().ids(skuIds).build().queryWrapper());
+        Map<String, List<GoodsSkuStockDTO>> groupByGoodsIds = goodsSkuStockList.stream().collect(Collectors.groupingBy(GoodsSkuStockDTO::getGoodsId));
+
+        //统计每个商品的库存
+        for (Map.Entry<String, List<GoodsSkuStockDTO>> entry : groupByGoodsIds.entrySet()) {
+            //库存
+            Integer quantity = 0;
+            for (GoodsSkuStockDTO goodsSku : entry.getValue()) {
+                goodsSkuStockDTOS.stream().filter(i -> i.getSkuId().equals(goodsSku.getSkuId())).findFirst().ifPresent(i -> goodsSku.setQuantity(i.getQuantity()));
+                if (entry.getKey().equals(goodsSku.getGoodsId())) {
+                    quantity += goodsSku.getQuantity();
+                }
+                this.updateStock(goodsSku.getSkuId(), goodsSku.getQuantity());
+            }
+            //保存商品库存结果
+            goodsService.updateStock(entry.getKey(), quantity);
         }
     }
 
@@ -531,28 +547,23 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         GoodsSku goodsSku = getGoodsSkuByIdFromCache(skuId);
         if (goodsSku != null) {
             //判断商品sku是否已经下架(修改商品库存为0时  会自动下架商品),再次更新商品库存时 需更新商品索引
-            Boolean isFlag = goodsSku.getQuantity()<= 0;
+            boolean isFlag = goodsSku.getQuantity() <= 0;
 
             goodsSku.setQuantity(quantity);
-            boolean update =
-                    this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
+            boolean update = this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
             if (update) {
                 cache.remove(CachePrefix.GOODS.getPrefix() + goodsSku.getGoodsId());
             }
             cache.put(GoodsSkuService.getCacheKeys(skuId), goodsSku);
             cache.put(GoodsSkuService.getStockCacheKey(skuId), quantity);
 
-            //更新商品库存
-            List<GoodsSku> goodsSkus = new ArrayList<>();
-            goodsSkus.add(goodsSku);
-            this.updateGoodsStuck(goodsSkus);
             this.promotionGoodsService.updatePromotionGoodsStock(goodsSku.getId(), quantity);
             //商品库存为0是删除商品索引
             if (quantity <= 0) {
                 goodsIndexService.deleteIndexById(goodsSku.getId());
             }
             //商品SKU库存为0并且商品sku状态为上架时更新商品库存
-            if(isFlag && StrUtil.equals(goodsSku.getMarketEnable(),GoodsStatusEnum.UPPER.name())) {
+            if (isFlag && CharSequenceUtil.equals(goodsSku.getMarketEnable(), GoodsStatusEnum.UPPER.name())) {
                 List<String> goodsIds = new ArrayList<>();
                 goodsIds.add(goodsSku.getGoodsId());
                 applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.UPDATE_GOODS_INDEX.name(), goodsIds));
@@ -575,22 +586,18 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateGoodsStuck(List<GoodsSku> goodsSkus) {
-        Map<String, List<GoodsSku>> groupByGoodsIds =
-                goodsSkus.stream().collect(Collectors.groupingBy(GoodsSku::getGoodsId));
-        //获取相关的sku集合
-        LambdaQueryWrapper<GoodsSku> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.in(GoodsSku::getGoodsId, groupByGoodsIds.keySet());
-        List<GoodsSku> goodsSkuList = this.list(lambdaQueryWrapper);
+    public void updateGoodsStock(List<GoodsSku> goodsSkus) {
+        Map<String, List<GoodsSku>> groupByGoodsIds = goodsSkus.stream().collect(Collectors.groupingBy(GoodsSku::getGoodsId));
 
         //统计每个商品的库存
         for (String goodsId : groupByGoodsIds.keySet()) {
             //库存
             Integer quantity = 0;
-            for (GoodsSku goodsSku : goodsSkuList) {
+            for (GoodsSku goodsSku : goodsSkus) {
                 if (goodsId.equals(goodsSku.getGoodsId())) {
                     quantity += goodsSku.getQuantity();
                 }
+                this.updateStock(goodsSku.getId(), goodsSku.getQuantity());
             }
             //保存商品库存结果
             goodsService.updateStock(goodsId, quantity);
@@ -605,20 +612,18 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //获取商品信息
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
 
-        EvaluationQueryParams queryParams = new EvaluationQueryParams();
-        queryParams.setGrade(EvaluationGradeEnum.GOOD.name());
-        queryParams.setSkuId(goodsSku.getId());
         //好评数量
-        long highPraiseNum = memberEvaluationService.getEvaluationCount(queryParams);
+        long highPraiseNum = memberEvaluationService.getEvaluationCount(EvaluationQueryParams.builder().grade(EvaluationGradeEnum.GOOD.name()).skuId(skuId).build());
 
         //更新商品评价数量
-        goodsSku.setCommentNum(goodsSku.getCommentNum() != null ? goodsSku.getCommentNum() + 1 : 1);
+        long commentNum = memberEvaluationService.getEvaluationCount(EvaluationQueryParams.builder().skuId(skuId).build());
+        goodsSku.setCommentNum((int) commentNum);
 
         //好评率
         double grade = NumberUtil.mul(NumberUtil.div(highPraiseNum, goodsSku.getCommentNum().doubleValue(), 2), 100);
         goodsSku.setGrade(grade);
         //修改规格
-        this.update(goodsSku);
+        this.updateGoodsSkuGrade(skuId, grade, goodsSku.getCommentNum());
 
 
         //修改规格索引,发送mq消息
@@ -633,6 +638,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
         //修改商品的评价数量
         goodsService.updateGoodsCommentNum(goodsSku.getGoodsId());
+        clearCache(skuId);
     }
 
     /**
@@ -667,22 +673,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         return this.count(queryWrapper);
     }
 
-    /**
-     * 修改库存
-     *
-     * @param goodsSkus 商品SKU
-     */
-    private void updateStock(List<GoodsSku> goodsSkus) {
-        //总库存数量
-        Integer quantity = 0;
-        for (GoodsSku sku : goodsSkus) {
-            this.updateStock(sku.getId(), sku.getQuantity());
-            quantity += sku.getQuantity();
-        }
-        //修改商品库存
-        goodsService.updateStock(goodsSkus.get(0).getGoodsId(), quantity);
-    }
-
 
     /**
      * 批量渲染商品sku
@@ -698,6 +688,23 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             extendOldSkuValue(goodsSku);
             this.renderImages(goodsSku);
         }
+    }
+
+    @Override
+    public void updateGoodsSkuBuyCount(String skuId, int buyCount) {
+        LambdaUpdateWrapper<GoodsSku> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(GoodsSku::getId, skuId);
+        updateWrapper.set(GoodsSku::getBuyCount, buyCount);
+        this.update(updateWrapper);
+    }
+
+    @Override
+    public void updateGoodsSkuGrade(String skuId, double grade, int commentNum) {
+        LambdaUpdateWrapper<GoodsSku> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(GoodsSku::getId, skuId);
+        updateWrapper.set(GoodsSku::getGrade, grade);
+        updateWrapper.set(GoodsSku::getCommentNum, commentNum);
+        this.update(updateWrapper);
     }
 
     /**

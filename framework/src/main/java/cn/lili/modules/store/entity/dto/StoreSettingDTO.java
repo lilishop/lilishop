@@ -3,8 +3,6 @@ package cn.lili.modules.store.entity.dto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotEmpty;
-
 /**
  * 店铺设置
  *
@@ -29,7 +27,6 @@ public class StoreSettingDTO {
     @ApiModelProperty(value = "详细地址")
     private String storeAddressDetail;
 
-    @NotEmpty
     @ApiModelProperty(value = "经纬度")
     private String storeCenter;
 

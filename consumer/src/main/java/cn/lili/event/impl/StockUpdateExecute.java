@@ -322,8 +322,6 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         for (int i = 0; i < skuStocks.size(); i++) {
             goodsSkus.get(i).setQuantity(Convert.toInt(skuStocks.get(i).toString()));
         }
-        //批量修改商品库存
-        goodsSkuService.updateBatchById(goodsSkus);
 
         //促销库存处理
         if (!promotionKey.isEmpty()) {
@@ -336,7 +334,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
             promotionGoodsService.updatePromotionGoodsStock(promotionGoods);
         }
         //商品库存，包含sku库存集合，批量更新商品库存相关
-        goodsSkuService.updateGoodsStuck(goodsSkus);
+        goodsSkuService.updateGoodsStock(goodsSkus);
 
         log.info("订单确认，库存同步：商品信息--{}；促销信息---{}", goodsSkus, promotionGoods);
 
@@ -369,8 +367,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         }
         log.info("订单取消，库存还原：{}", goodsSkus);
         //批量修改商品库存
-        goodsSkuService.updateBatchById(goodsSkus);
-        goodsSkuService.updateGoodsStuck(goodsSkus);
+        goodsSkuService.updateGoodsStock(goodsSkus);
 
     }
 }

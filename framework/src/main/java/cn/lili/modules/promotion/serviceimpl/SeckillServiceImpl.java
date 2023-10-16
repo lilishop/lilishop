@@ -245,6 +245,9 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
         if (promotions.getStartTime() != null && promotions.getEndTime() == null) {
             promotions.setEndTime(DateUtil.endOfDay(promotions.getStartTime()));
         }
+        if (promotions.getApplyEndTime() == null && promotions.getStartTime() != null) {
+            promotions.setApplyEndTime(promotions.getStartTime());
+        }
     }
 
     /**

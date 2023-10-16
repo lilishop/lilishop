@@ -209,7 +209,7 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      *
      * @param goodsSkus
      */
-    void updateGoodsStuck(List<GoodsSku> goodsSkus);
+    void updateGoodsStock(List<GoodsSku> goodsSkus);
 
     /**
      * 更新SKU评价数量
@@ -249,4 +249,21 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * @param goodsOperationDTO 商品操作信息
      */
     void renderGoodsSkuList(List<GoodsSku> goodsSkuList, GoodsOperationDTO goodsOperationDTO);
+
+    /**
+     * 更新商品sku购买数量
+     *
+     * @param skuId   skuId
+     * @param buyCount 购买数量
+     */
+    void updateGoodsSkuBuyCount(String skuId, int buyCount);
+
+    /**
+     * 更新商品sku评分
+     *
+     * @param skuId   skuId
+     * @param grade   评分
+     * @param commentNum 评论数量
+     */
+    void updateGoodsSkuGrade(String skuId, double grade,int commentNum);
 }

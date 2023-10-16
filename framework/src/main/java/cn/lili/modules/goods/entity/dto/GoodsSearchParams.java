@@ -1,5 +1,6 @@
 package cn.lili.modules.goods.entity.dto;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
@@ -9,6 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * 商品查询条件
@@ -33,6 +35,9 @@ public class GoodsSearchParams extends PageVO {
 
     @ApiModelProperty(value = "商品编号")
     private String id;
+
+    @ApiModelProperty(value = "商品编号")
+    private List<String> ids;
 
     @ApiModelProperty(value = "商家ID")
     private String storeId;
@@ -132,6 +137,8 @@ public class GoodsSearchParams extends PageVO {
         if (CharSequenceUtil.isNotEmpty(salesModel)) {
             queryWrapper.eq("sales_model", salesModel);
         }
+
+        queryWrapper.in(CollUtil.isNotEmpty(ids), "id", ids);
 
         queryWrapper.eq("delete_flag", false);
         this.betweenWrapper(queryWrapper);

@@ -26,7 +26,7 @@ import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.mapper.GoodsMapper;
 import cn.lili.modules.goods.service.*;
-import cn.lili.modules.member.entity.dos.MemberEvaluation;
+import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
 import cn.lili.modules.store.entity.dos.FreightTemplate;
@@ -446,19 +446,19 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
         //获取商品信息
         Goods goods = this.getById(goodsId);
-        //修改商品评价数量
-        goods.setCommentNum(goods.getCommentNum() + 1);
 
-        //修改商品好评率
-        LambdaQueryWrapper<MemberEvaluation> goodEvaluationQueryWrapper = new LambdaQueryWrapper<>();
-        goodEvaluationQueryWrapper.eq(MemberEvaluation::getId, goodsId);
-        goodEvaluationQueryWrapper.eq(MemberEvaluation::getGrade, EvaluationGradeEnum.GOOD.name());
+        //修改商品评价数量
+        long commentNum = memberEvaluationService.getEvaluationCount(EvaluationQueryParams.builder().goodsId(goodsId).build());
+        goods.setCommentNum((int) (commentNum));
+
         //好评数量
-        long highPraiseNum = memberEvaluationService.count(goodEvaluationQueryWrapper);
+        long highPraiseNum = memberEvaluationService.getEvaluationCount(EvaluationQueryParams.builder().goodsId(goodsId).grade(EvaluationGradeEnum.GOOD.name()).build());
         //好评率
         double grade = NumberUtil.mul(NumberUtil.div(highPraiseNum, goods.getCommentNum().doubleValue(), 2), 100);
         goods.setGrade(grade);
         this.updateById(goods);
+
+        cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
     }
 
     /**

@@ -255,12 +255,6 @@ public class OrderComplaintServiceImpl extends ServiceImpl<OrderComplaintMapper,
                 throw new ServiceException(ResultCode.COMPLAINT_ARBITRATION_RESULT_ERROR);
             }
             orderComplaint.setArbitrationResult(operationParam.getArbitrationResult());
-        } else if (complaintStatusEnum == ComplaintStatusEnum.COMMUNICATION) {
-            if (CharSequenceUtil.isEmpty(operationParam.getAppealContent()) || operationParam.getImages() == null) {
-                throw new ServiceException(ResultCode.COMPLAINT_APPEAL_CONTENT_ERROR);
-            }
-            orderComplaint.setContent(operationParam.getAppealContent());
-            orderComplaint.setImages(operationParam.getImages().get(0));
         }
     }
 

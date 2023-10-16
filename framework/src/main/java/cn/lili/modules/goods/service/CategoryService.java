@@ -2,6 +2,7 @@ package cn.lili.modules.goods.service;
 
 
 import cn.lili.modules.goods.entity.dos.Category;
+import cn.lili.modules.goods.entity.dto.CategorySearchParams;
 import cn.lili.modules.goods.entity.vos.CategoryVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -69,9 +70,10 @@ public interface CategoryService extends IService<Category> {
      * 查询所有的分类，父子关系
      * 数据库获取
      *
+     * @param categorySearchParams 查询参数
      * @return 所有的分类，父子关系
      */
-    List<CategoryVO> listAllChildren();
+    List<CategoryVO> listAllChildren(CategorySearchParams categorySearchParams);
 
     /**
      * 获取指定分类的分类名称

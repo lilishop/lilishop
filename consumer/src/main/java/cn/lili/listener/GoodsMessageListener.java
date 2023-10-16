@@ -492,7 +492,7 @@ public class GoodsMessageListener implements RocketMQListener<MessageExt> {
                 }
                 int buyCount = goodsSku.getBuyCount() + goodsCompleteMessage.getBuyNum();
                 goodsSku.setBuyCount(buyCount);
-                goodsSkuService.update(goodsSku);
+                goodsSkuService.updateGoodsSkuBuyCount(goodsSku.getId(), buyCount);
 
                 this.goodsIndexService.updateIndex(MapUtil.builder(new HashMap<String, Object>()).put("id", goodsCompleteMessage.getSkuId()).build(), MapUtil.builder(new HashMap<String, Object>()).put("buyCount", buyCount).build());
 

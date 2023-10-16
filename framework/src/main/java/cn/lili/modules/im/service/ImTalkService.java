@@ -1,6 +1,7 @@
 package cn.lili.modules.im.service;
 
 import cn.lili.modules.im.entity.dos.ImTalk;
+import cn.lili.modules.im.entity.dto.IMTalkQueryParams;
 import cn.lili.modules.im.entity.vo.ImTalkVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -45,13 +46,13 @@ public interface ImTalkService extends IService<ImTalk> {
 
     /**
      * 获取用户聊天列表
-     * @return
+     * @return 用户聊天列表
      */
-    List<ImTalkVO> getUserTalkList();
+    List<ImTalkVO> getUserTalkList(IMTalkQueryParams imTalkQueryParams);
 
     /**
      * 获取商家聊天列表
-     * @return
+     * @return 商家聊天列表
      */
-    List<ImTalkVO> getStoreTalkList();
+    List<ImTalkVO> getStoreTalkList(IMTalkQueryParams imTalkQueryParams);
 }

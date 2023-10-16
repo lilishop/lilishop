@@ -4,8 +4,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.vo.PageVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 /**
  * 评价查询条件
@@ -15,7 +14,12 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class EvaluationQueryParams extends PageVO {
+
+    private static final long serialVersionUID = 2038158669175297129L;
 
     @ApiModelProperty(value = "ID")
     private String id;
