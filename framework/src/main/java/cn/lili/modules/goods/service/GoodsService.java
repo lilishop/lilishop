@@ -161,8 +161,9 @@ public interface GoodsService extends IService<Goods> {
      * 更新商品评价数量
      *
      * @param goodsId 商品ID
+     * @param skuId skuID
      */
-    void updateGoodsCommentNum(String goodsId);
+    void updateGoodsCommentNum(String goodsId, String skuId);
 
     /**
      * 更新商品的购买数量
