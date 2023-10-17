@@ -611,10 +611,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
 
         //好评数量
-        long highPraiseNum = memberEvaluationService.getEvaluationCount(EvaluationQueryParams.builder().grade(EvaluationGradeEnum.GOOD.name()).skuId(skuId).build());
+        long highPraiseNum = memberEvaluationService.getEvaluationCount(EvaluationQueryParams.builder().status("OPEN").grade(EvaluationGradeEnum.GOOD.name()).skuId(skuId).build());
 
         //更新商品评价数量
-        long commentNum = memberEvaluationService.getEvaluationCount(EvaluationQueryParams.builder().skuId(skuId).build());
+        long commentNum = memberEvaluationService.getEvaluationCount(EvaluationQueryParams.builder().status("OPEN").skuId(skuId).build());
         goodsSku.setCommentNum((int) commentNum);
 
         //好评率
