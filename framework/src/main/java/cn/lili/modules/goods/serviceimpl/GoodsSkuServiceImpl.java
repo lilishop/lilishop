@@ -1,6 +1,5 @@
 package cn.lili.modules.goods.serviceimpl;
 
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONObject;
@@ -49,7 +48,6 @@ import cn.lili.modules.promotion.service.MemberCouponService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
-import cn.lili.modules.search.utils.EsIndexUtil;
 import cn.lili.mybatis.BaseEntity;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
@@ -625,19 +623,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //修改规格
         this.updateGoodsSkuGrade(skuId, grade, goodsSku.getCommentNum());
 
-
-        //修改规格索引,发送mq消息
-        Map<String, Object> updateIndexFieldsMap =
-                EsIndexUtil.getUpdateIndexFieldsMap(MapUtil.builder(new HashMap<String, Object>()).put("id",
-                        goodsSku.getId()).build(), MapUtil.builder(new HashMap<String, Object>()).put("commentNum",
-                        goodsSku.getCommentNum()).put("highPraiseNum", highPraiseNum).put("grade", grade).build());
-        String destination =
-                rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX_FIELD.name();
-        rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(updateIndexFieldsMap),
-                RocketmqSendCallbackBuilder.commonCallback());
-
         //修改商品的评价数量
-        goodsService.updateGoodsCommentNum(goodsSku.getGoodsId());
+        goodsService.updateGoodsCommentNum(goodsSku.getGoodsId(), skuId);
         clearCache(skuId);
     }
 
