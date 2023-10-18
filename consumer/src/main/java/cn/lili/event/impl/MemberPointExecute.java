@@ -15,6 +15,7 @@ import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
+import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
@@ -134,9 +135,10 @@ public class MemberPointExecute implements MemberRegisterEvent, GoodsCommentComp
     @Override
     public void afterSaleStatusChange(AfterSale afterSale) {
         if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.COMPLETE.name())) {
+            Order order = orderService.getBySn(afterSale.getOrderSn());
             //获取积分设置
             PointSetting pointSetting = getPointSetting();
-            if (pointSetting.getConsumer() == 0) {
+            if (pointSetting.getConsumer() == 0 || !OrderStatusEnum.COMPLETED.name().equals(order.getOrderStatus())) {
                 return;
             }
             //计算扣除积分数量
