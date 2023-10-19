@@ -109,7 +109,7 @@ public class WechatMpCodeUtil {
                 shortLink = shortLinkService.queryShortLinks(shortLink).get(0);
             }
             String accessToken = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
-            Map<String, String> params = new HashMap<>(4);
+            Map<String, Object> params = new HashMap<>(4);
             params.put("page", page);
             params.put("scene", shortLink.getId());
             params.put("width", "280");
