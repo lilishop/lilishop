@@ -568,10 +568,8 @@ public class CartServiceImpl implements CartService {
         tradeDTO.setStoreRemark(tradeParams.getRemark());
         tradeDTO.setParentOrderSn(tradeParams.getParentOrderSn());
         //订单无收货地址校验
-        if(tradeDTO.getStoreAddress() == null){
-            if (tradeDTO.getMemberAddress() == null) {
-                throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
-            }
+        if (!tradeDTO.getCartTypeEnum().equals(CartTypeEnum.VIRTUAL) && tradeDTO.getStoreAddress() == null && tradeDTO.getMemberAddress() == null) {
+            throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
         }
         //构建交易
         Trade trade = tradeBuilder.createTrade(tradeDTO);
@@ -584,10 +582,10 @@ public class CartServiceImpl implements CartService {
         List<String> list = new ArrayList<String>();
         list.add(DeliveryMethodEnum.LOGISTICS.name());
         TradeDTO tradeDTO = this.getCheckedTradeDTO(CartTypeEnum.valueOf(way));
-        if(tradeDTO.getCartList().size()==1){
+        if (tradeDTO.getCartList().size() == 1) {
             for (CartVO cartVO : tradeDTO.getCartList()) {
                 Store store = storeService.getById(cartVO.getStoreId());
-                if(store.getSelfPickFlag() != null && store.getSelfPickFlag()){
+                if (store.getSelfPickFlag() != null && store.getSelfPickFlag()) {
                     list.add(DeliveryMethodEnum.SELF_PICK_UP.name());
                 }
             }
