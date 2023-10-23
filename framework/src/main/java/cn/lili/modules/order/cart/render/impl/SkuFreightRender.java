@@ -50,7 +50,7 @@ public class SkuFreightRender implements CartRenderStep {
             return;
         }
         //选择物流的时候计算价格
-        if(DeliveryMethodEnum.LOGISTICS.name().equals(tradeDTO.getCartList().get(0).getDeliveryMethod())){
+        if (DeliveryMethodEnum.LOGISTICS.name().equals(tradeDTO.getCartList().get(0).getDeliveryMethod())) {
             if (memberAddress != null) {
                 //运费分组信息
                 Map<String, List<String>> freightGroups = freightTemplateGrouping(cartSkuVOS);
@@ -116,7 +116,7 @@ public class SkuFreightRender implements CartRenderStep {
                     }
                 }
             }
-        }else{
+        } else {
             //自提清空不配送商品
             tradeDTO.setNotSupportFreight(null);
         }
