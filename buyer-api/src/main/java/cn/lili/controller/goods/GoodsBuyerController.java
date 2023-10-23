@@ -6,6 +6,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.goods.entity.dos.Goods;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.service.GoodsService;
@@ -99,6 +100,12 @@ public class GoodsBuyerController {
     @GetMapping
     public ResultMessage<IPage<Goods>> getByPage(GoodsSearchParams goodsSearchParams) {
         return ResultUtil.data(goodsService.queryByParams(goodsSearchParams));
+    }
+
+    @ApiOperation(value = "获取商品sku列表")
+    @GetMapping("/sku")
+    public ResultMessage<List<GoodsSku>> getSkuByPage(GoodsSearchParams goodsSearchParams) {
+        return ResultUtil.data(goodsSkuService.getGoodsSkuByList(goodsSearchParams));
     }
 
     @ApiOperation(value = "从ES中获取商品信息")
