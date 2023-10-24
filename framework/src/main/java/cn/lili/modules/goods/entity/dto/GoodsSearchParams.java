@@ -101,6 +101,9 @@ public class GoodsSearchParams extends PageVO {
         if (CharSequenceUtil.isNotEmpty(id)) {
             queryWrapper.in("id", Arrays.asList(id.split(",")));
         }
+        if (CollUtil.isNotEmpty(ids)) {
+            queryWrapper.in("id", ids);
+        }
         if (CharSequenceUtil.isNotEmpty(storeId)) {
             queryWrapper.eq("store_id", storeId);
         }

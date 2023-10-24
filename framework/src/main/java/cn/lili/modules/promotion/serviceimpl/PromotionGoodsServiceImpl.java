@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
@@ -109,7 +110,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
         queryWrapper.and(i -> i.or(j -> j.in(SKU_ID_COLUMN, skuIds))
                 .or(n -> n.eq("scope_type", PromotionsScopeTypeEnum.ALL.name()))
                 .or(n -> n.and(k -> k.eq("scope_type", PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name())
-                        .and(l -> l.in("scope_id", categoriesPath)))));
+                        .and(l -> l.in(CollUtil.isNotEmpty(categoriesPath), "scope_id", categoriesPath)))));
         queryWrapper.and(i -> i.or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START)).or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.NEW)));
         return this.list(queryWrapper);
     }

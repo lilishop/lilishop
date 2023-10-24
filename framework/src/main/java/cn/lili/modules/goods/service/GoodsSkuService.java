@@ -212,13 +212,6 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     void updateGoodsStock(List<GoodsSku> goodsSkus);
 
     /**
-     * 更新SKU评价数量
-     *
-     * @param skuId SKUId
-     */
-    void updateGoodsSkuCommentNum(String skuId);
-
-    /**
      * 根据商品id获取全部skuId的集合
      *
      * @param goodsId goodsId
@@ -261,9 +254,10 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     /**
      * 更新商品sku评分
      *
+     * @param goodsId goodsId
      * @param skuId   skuId
      * @param grade   评分
      * @param commentNum 评论数量
      */
-    void updateGoodsSkuGrade(String skuId, double grade,int commentNum);
+    void updateGoodsSkuGrade(String goodsId, String skuId, double grade,int commentNum);
 }

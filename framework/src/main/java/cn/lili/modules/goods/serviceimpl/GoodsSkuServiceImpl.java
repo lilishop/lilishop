@@ -1,7 +1,6 @@
 package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
@@ -36,8 +35,6 @@ import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.goods.sku.GoodsSkuBuilder;
 import cn.lili.modules.goods.sku.render.SalesModelRender;
 import cn.lili.modules.member.entity.dos.FootPrint;
-import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
-import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
@@ -604,30 +601,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void updateGoodsSkuCommentNum(String skuId) {
-        //获取商品信息
-        GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
-
-        //好评数量
-        long highPraiseNum = memberEvaluationService.getEvaluationCount(EvaluationQueryParams.builder().status("OPEN").grade(EvaluationGradeEnum.GOOD.name()).skuId(skuId).build());
-
-        //更新商品评价数量
-        long commentNum = memberEvaluationService.getEvaluationCount(EvaluationQueryParams.builder().status("OPEN").skuId(skuId).build());
-        goodsSku.setCommentNum((int) commentNum);
-
-        //好评率
-        double grade = NumberUtil.mul(NumberUtil.div(highPraiseNum, goodsSku.getCommentNum().doubleValue(), 2), 100);
-        goodsSku.setGrade(grade);
-        //修改规格
-        this.updateGoodsSkuGrade(skuId, grade, goodsSku.getCommentNum());
-
-        //修改商品的评价数量
-        goodsService.updateGoodsCommentNum(goodsSku.getGoodsId(), skuId);
-        clearCache(skuId);
-    }
-
     /**
      * 根据商品id获取全部skuId的集合
      *
@@ -686,12 +659,13 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     @Override
-    public void updateGoodsSkuGrade(String skuId, double grade, int commentNum) {
+    public void updateGoodsSkuGrade(String goodsId, String skuId, double grade, int commentNum) {
         LambdaUpdateWrapper<GoodsSku> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(GoodsSku::getId, skuId);
+        updateWrapper.eq(GoodsSku::getGoodsId, goodsId);
         updateWrapper.set(GoodsSku::getGrade, grade);
         updateWrapper.set(GoodsSku::getCommentNum, commentNum);
         this.update(updateWrapper);
+        clearCache(skuId);
     }
 
     /**

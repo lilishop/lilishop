@@ -14,10 +14,7 @@ import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.modules.goods.entity.dos.Category;
-import cn.lili.modules.goods.entity.dos.Goods;
-import cn.lili.modules.goods.entity.dos.GoodsGallery;
-import cn.lili.modules.goods.entity.dos.Wholesale;
+import cn.lili.modules.goods.entity.dos.*;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
@@ -444,10 +441,19 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateGoodsCommentNum(String goodsId, String skuId) {
+        GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(skuId);
+        if (goodsSku == null) {
+            return;
+        }
 
         //获取商品信息
         Goods goods = this.getById(goodsId);
+
+        if (goods == null) {
+            return;
+        }
 
         //修改商品评价数量
         long commentNum = memberEvaluationService.getEvaluationCount(EvaluationQueryParams.builder().goodsId(goodsId).status("OPEN").build());
@@ -458,9 +464,17 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         //好评率
         double grade = NumberUtil.mul(NumberUtil.div(highPraiseNum, goods.getCommentNum().doubleValue(), 2), 100);
         goods.setGrade(grade);
-        this.updateById(goods);
+        LambdaUpdateWrapper<Goods> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(Goods::getId, goodsId);
+        updateWrapper.set(Goods::getCommentNum, goods.getCommentNum());
+        updateWrapper.set(Goods::getGrade, goods.getGrade());
+        this.update(updateWrapper);
 
         cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
+
+
+        // 修改商品sku评价数量
+        this.goodsSkuService.updateGoodsSkuGrade(goodsId, skuId, grade, goods.getCommentNum());
 
         Map<String, Object> updateIndexFieldsMap = EsIndexUtil.getUpdateIndexFieldsMap(MapUtil.builder(new HashMap<String, Object>()).put("id", skuId).build(), MapUtil.builder(new HashMap<String, Object>()).put("commentNum", goods.getCommentNum()).put("highPraiseNum", highPraiseNum).put("grade", grade).build());
         applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品索引信息", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.UPDATE_GOODS_INDEX_FIELD.name(), JSONUtil.toJsonStr(updateIndexFieldsMap)));
