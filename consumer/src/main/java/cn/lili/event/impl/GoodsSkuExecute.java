@@ -7,6 +7,7 @@ import cn.lili.event.GoodsCommentCompleteEvent;
 import cn.lili.event.StoreSettingChangeEvent;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
+import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.MemberEvaluation;
 import cn.lili.modules.store.entity.dos.Store;
@@ -32,11 +33,14 @@ public class GoodsSkuExecute implements GoodsCommentCompleteEvent, StoreSettingC
     private GoodsSkuService goodsSkuService;
 
     @Autowired
+    private GoodsService goodsService;
+
+    @Autowired
     private Cache cache;
 
     @Override
     public void goodsComment(MemberEvaluation memberEvaluation) {
-        goodsSkuService.updateGoodsSkuCommentNum(memberEvaluation.getSkuId());
+        goodsService.updateGoodsCommentNum(memberEvaluation.getGoodsId(), memberEvaluation.getSkuId());
     }
 
     @Override
