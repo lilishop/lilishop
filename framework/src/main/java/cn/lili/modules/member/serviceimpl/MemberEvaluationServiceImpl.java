@@ -194,6 +194,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         evaluationNumberVO.setWorse(worse);
         evaluationNumberVO.setHaveImage(this.count(new QueryWrapper<MemberEvaluation>()
                 .eq("have_image", 1)
+                .eq("status", SwitchEnum.OPEN.name())
                 .eq("goods_id", goodsId)));
 
         return evaluationNumberVO;

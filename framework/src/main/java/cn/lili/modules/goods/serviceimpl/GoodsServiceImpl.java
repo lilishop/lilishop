@@ -474,7 +474,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
 
         // 修改商品sku评价数量
-        this.goodsSkuService.updateGoodsSkuGrade(goodsId, skuId, grade, goods.getCommentNum());
+        this.goodsSkuService.updateGoodsSkuGrade(goodsId, grade, goods.getCommentNum());
 
         Map<String, Object> updateIndexFieldsMap = EsIndexUtil.getUpdateIndexFieldsMap(MapUtil.builder(new HashMap<String, Object>()).put("goodsId", goodsId).build(), MapUtil.builder(new HashMap<String, Object>()).put("commentNum", goods.getCommentNum()).put("highPraiseNum", highPraiseNum).put("grade", grade).build());
         applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品索引信息", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.UPDATE_GOODS_INDEX_FIELD.name(), JSONUtil.toJsonStr(updateIndexFieldsMap)));

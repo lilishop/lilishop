@@ -255,9 +255,8 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * 更新商品sku评分
      *
      * @param goodsId goodsId
-     * @param skuId   skuId
      * @param grade   评分
      * @param commentNum 评论数量
      */
-    void updateGoodsSkuGrade(String goodsId, String skuId, double grade,int commentNum);
+    void updateGoodsSkuGrade(String goodsId, double grade,int commentNum);
 }
