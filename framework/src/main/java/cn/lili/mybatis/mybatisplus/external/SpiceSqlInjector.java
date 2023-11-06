@@ -28,6 +28,7 @@ public class SpiceSqlInjector extends DefaultSqlInjector {
         // methodList.add(new InsertBatchSomeColumn(t -> !t.isLogicDelete() && !"update_time".equals(t.getColumn())));
         // 要逻辑删除 t.isLogicDelete() 默认不要
         methodList.add(new InsertBatchSomeColumn(t -> !t.isLogicDelete()));
+        methodList.add(new InsertIgnoreBatchAllColumn());
         return methodList;
     }
 }

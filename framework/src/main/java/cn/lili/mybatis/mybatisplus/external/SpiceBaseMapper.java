@@ -1,5 +1,6 @@
 package cn.lili.mybatis.mybatisplus.external;
 
+
 import java.util.List;
 
 /**
@@ -16,4 +17,6 @@ public interface SpiceBaseMapper<T> {
      * @return 成功插入的数据条数
      */
     long insertBatchSomeColumn(List<T> entityList);
+
+    int insertIgnoreBatchAllColumn(List<T> list);
 }
