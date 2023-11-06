@@ -368,7 +368,6 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             keywordsList.forEach(item -> customWordsArrayList.add(new CustomWords(item)));
             //这里采用先批量删除再插入的方法，故意这么做。否则需要挨个匹配是否存在，性能消耗更大
             if (CollUtil.isNotEmpty(customWordsArrayList)) {
-                customWordsService.deleteBathByName(keywordsList);
                 customWordsService.insertBatchCustomWords(customWordsArrayList);
             }
         } catch (Exception e) {
