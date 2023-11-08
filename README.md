@@ -1,9 +1,27 @@
-## Lilishop B2B2C商城系统
+## Lilishop 商城系统
+
+
+### 商城介绍
+**官网**：https://pickmall.cn
+
+Lilishop商城系统支持商家入驻，后端基于SpringBoot 研发，前端使用 Vue、uniapp开发， **系统全端全部代码开源**
+
+前后端分离，支持分布式部署，支持Docker，各个API独立，并且有独立的消费者。
+
+### 商城 API/消费者 聚合版
+api不需要单独部署，只需启动一个jar包就可以正常运转 如有需要，可以点击跳转
+https://gitee.com/beijing_hongye_huicheng/lilishop-simplify
+
+### 开发/使用/常见问题 帮助文档
+
+https://docs.pickmall.cn
+
 
 #### 欢迎交流需求，交流业务，交流技术（基础问题自行解决，其他问题先看文档后提问）
 
 #### 不用削尖脑袋往老群里加，老群活跃度较低，很多潜水党，新群相对而言活跃一些 :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: 
 
+#### 开发新手或者不熟悉的同学在群内提问或新开Issue提问前，请先阅读[【提问的智慧】](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)，并确保已查阅过 [【在线文档】](https://docs.pickmall.cn/) ，避免浪费大家的宝贵时间；
 
 ##### 交流 qq 1群 961316482 (1群扩建至2000人，还有300坑)
 ##### 交流 qq 2群 875294241（已满）
@@ -22,21 +40,6 @@
 
 #### PS： **演示站点所有环境均部署master分支。如果有演示站点问题，可以反馈，如果演示站点没问题本地运行有问题，需自行处理** 
 
-
-### 商城介绍
-**官网**：https://pickmall.cn
-
-Lilishop商城系统支持商家入驻，后端基于SpringBoot 研发，前端使用 Vue、uniapp开发， **系统全端全部代码开源**
-
-前后端分离，支持分布式部署，支持Docker，各个API独立，并且有独立的消费者。
-
-### 商城 API/消费者 聚合版
-api不需要单独部署，只需启动一个jar包就可以正常运转 如有需要，可以点击跳转
-https://gitee.com/beijing_hongye_huicheng/lilishop-simplify
-
-### 开发/使用/常见问题 帮助文档
-
-https://docs.pickmall.cn
 
 ### 项目地址
 
