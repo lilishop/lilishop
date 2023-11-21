@@ -1,23 +1,4 @@
-## Lilishop B2B2C商城系统
-
-#### 欢迎交流需求，交流业务，交流技术（基础问题自行解决，其他问题先看文档后提问）
-
-#### 不用削尖脑袋往老群里加，老群活跃度较低，很多潜水党，新群相对而言活跃一些 :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: 
-
-#### PS： **演示站点所有环境均部署master分支。如果有演示站点问题，可以反馈，如果演示站点没问题本地运行有问题，需自行处理** 
-
-##### 交流 qq 1群 961316482
-##### 交流 qq 2群 875294241（已满）
-##### 交流 qq 3群 263785057（已满）
-##### 交流 qq 4群 674617534 (已满)
-##### 交流 qq 5群 594675235 (已满)
-
-##### 体验 公众号/小程序/APP 体验，扫描二维码
-
-![image-20210511171611793](https://static.pickmall.cn/images/h5-qrcode.png)
-
-[![star](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop/stargazers)
-&nbsp;&nbsp;![github](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=#181717)
+## Lilishop 商城系统
 
 
 ### 商城介绍
@@ -34,6 +15,31 @@ https://gitee.com/beijing_hongye_huicheng/lilishop-simplify
 ### 开发/使用/常见问题 帮助文档
 
 https://docs.pickmall.cn
+
+
+#### 欢迎交流需求，交流业务，交流技术（基础问题自行解决，其他问题先看文档后提问）
+
+#### 不用削尖脑袋往老群里加，老群活跃度较低，很多潜水党，新群相对而言活跃一些 :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: 
+
+#### 开发新手或者不熟悉的同学在群内提问或新开Issue提问前，请先阅读[【提问的智慧】](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)，并确保已查阅过 [【在线文档】](https://docs.pickmall.cn/) ，避免浪费大家的宝贵时间；
+
+##### 交流 qq 1群 961316482 (1群扩建至2000人，还有300坑)
+##### 交流 qq 2群 875294241（已满）
+##### 交流 qq 3群 263785057（已满）
+##### 交流 qq 4群 674617534 (已满)
+##### 交流 qq 5群 594675235 (已满)
+##### 交流 qq 6群 917026848
+
+##### 体验 公众号/小程序/APP 体验，扫描二维码
+
+![image-20210511171611793](https://static.pickmall.cn/images/h5-qrcode.png)
+
+[![star](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop/stargazers)
+&nbsp;&nbsp;![github](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=#181717)
+
+
+#### PS： **演示站点所有环境均部署master分支。如果有演示站点问题，可以反馈，如果演示站点没问题本地运行有问题，需自行处理** 
+
 
 ### 项目地址
 
