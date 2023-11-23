@@ -97,6 +97,11 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
     @Override
     public Page<EsGoodsIndex> searchGoodsByPage(EsGoodsSearchDTO searchDTO, PageVO pageVo) {
+        // 判断商品索引是否存在
+        if (!restTemplate.indexOps(EsGoodsIndex.class).exists()) {
+            return null;
+        }
+
         SearchPage<EsGoodsIndex> esGoodsIndices = this.searchGoods(searchDTO, pageVo);
         Page<EsGoodsIndex> resultPage = new Page<>();
         if (esGoodsIndices != null && !esGoodsIndices.getContent().isEmpty()) {
@@ -112,6 +117,11 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
 
     @Override
     public EsGoodsRelatedInfo getSelector(EsGoodsSearchDTO goodsSearch, PageVO pageVo) {
+        // 判断商品索引是否存在
+        if (!restTemplate.indexOps(EsGoodsIndex.class).exists()) {
+            return null;
+        }
+
         NativeSearchQueryBuilder builder = createSearchQueryBuilder(goodsSearch, pageVo);
         //分类
         AggregationBuilder categoryNameBuilder = AggregationBuilders.terms("categoryNameAgg").field("categoryNamePath.keyword");

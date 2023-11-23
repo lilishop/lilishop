@@ -255,17 +255,23 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
             //删除商品促销消息
             applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("删除商品促销事件", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.DELETE_GOODS_INDEX_PROMOTIONS.name(), JSONUtil.toJsonStr(build)));
         } else {
-
-            String esPromotionKey = this.getPromotionType().name() + "-" + promotions.getId();
-            Map<String, Object> map = new HashMap<>();
-            // es促销key
-            map.put("esPromotionKey", esPromotionKey);
-            // 促销类型全路径名
-            map.put("promotionsType", promotions.getClass().getName());
-            // 促销实体
-            map.put("promotions", promotions);
-            applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品索引促销事件", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.UPDATE_GOODS_INDEX_PROMOTIONS.name(), JSONUtil.toJsonStr(map)));
+            this.sendUpdateEsGoodsMsg(promotions);
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void sendUpdateEsGoodsMsg(T promotions) {
+
+        String esPromotionKey = this.getPromotionType().name() + "-" + promotions.getId();
+        Map<String, Object> map = new HashMap<>();
+        // es促销key
+        map.put("esPromotionKey", esPromotionKey);
+        // 促销类型全路径名
+        map.put("promotionsType", promotions.getClass().getName());
+        // 促销实体
+        map.put("promotions", promotions);
+        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品索引促销事件", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.UPDATE_GOODS_INDEX_PROMOTIONS.name(), JSONUtil.toJsonStr(map)));
     }
 
     @Override
