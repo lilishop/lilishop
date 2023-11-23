@@ -122,6 +122,13 @@ public interface AbstractPromotionsService<T extends BasePromotions> extends ISe
     void updateEsGoodsIndex(T promotions);
 
     /**
+     * 发送更新商品索引消息
+     *
+     * @param promotions 促销实体
+     */
+    void sendUpdateEsGoodsMsg(T promotions);
+
+    /**
      * 当前促销类型
      *
      * @return 当前促销类型
