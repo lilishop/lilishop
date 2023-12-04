@@ -15,12 +15,14 @@ public enum VerificationEnums {
      * 找回用户
      * 修改密码
      * 支付钱包密码
+     * 绑定手机号
      */
     LOGIN,
     REGISTER,
     FIND_USER,
     UPDATE_PASSWORD,
-    WALLET_PASSWORD;
+    WALLET_PASSWORD,
+    BIND_MOBILE;
 }
 
 

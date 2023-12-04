@@ -82,6 +82,7 @@ public class SmsUtilAliImplService implements SmsUtil {
                 break;
             }
             //注册
+            case BIND_MOBILE:
             case REGISTER: {
                 templateCode = smsTemplateProperties.getREGISTER();
                 break;
