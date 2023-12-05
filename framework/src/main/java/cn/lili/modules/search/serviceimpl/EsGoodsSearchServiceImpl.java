@@ -7,6 +7,7 @@ import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
+import cn.lili.elasticsearch.EmptyPage;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
@@ -122,7 +123,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             return null;
         }
 
-        NativeSearchQueryBuilder builder = createSearchQueryBuilder(goodsSearch, pageVo);
+        NativeSearchQueryBuilder builder = createSearchQueryBuilder(goodsSearch, null);
         //分类
         AggregationBuilder categoryNameBuilder = AggregationBuilders.terms("categoryNameAgg").field("categoryNamePath.keyword");
         builder.addAggregation(AggregationBuilders.terms("categoryAgg").field("categoryPath").subAggregation(categoryNameBuilder));
@@ -137,6 +138,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         AggregationBuilder sortBuilder = AggregationBuilders.sum("sortAgg").field(ATTR_SORT);
         AggregationBuilder paramsNameBuilder = AggregationBuilders.terms("nameAgg").field(ATTR_NAME).subAggregation(sortBuilder).order(BucketOrder.aggregation("sortAgg", false)).subAggregation(valuesBuilder);
         builder.addAggregation(AggregationBuilders.nested("attrAgg", ATTR_PATH).subAggregation(paramsNameBuilder));
+        builder.withPageable(new EmptyPage());
         NativeSearchQuery searchQuery = builder.build();
         SearchHits<EsGoodsIndex> search = restTemplate.search(searchQuery, EsGoodsIndex.class);
 
@@ -615,17 +617,11 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     private List<FunctionScoreQueryBuilder.FilterFunctionBuilder> buildFunctionSearch() {
         List<FunctionScoreQueryBuilder.FilterFunctionBuilder> filterFunctionBuilders = new ArrayList<>();
 
-//        GaussDecayFunctionBuilder skuNoScore = ScoreFunctionBuilders.gaussDecayFunction("skuSource", 100, 10).setWeight(2);
-//        FunctionScoreQueryBuilder.FilterFunctionBuilder skuNoBuilder = new FunctionScoreQueryBuilder.FilterFunctionBuilder(skuNoScore);
-//        filterFunctionBuilders.add(skuNoBuilder);
+        // 修改分数算法为无，数字最大分数越高
         FieldValueFactorFunctionBuilder skuNoScore = ScoreFunctionBuilders.fieldValueFactorFunction("skuSource").modifier(FieldValueFactorFunction.Modifier.LOG1P).setWeight(3);
         FunctionScoreQueryBuilder.FilterFunctionBuilder skuNoBuilder = new FunctionScoreQueryBuilder.FilterFunctionBuilder(skuNoScore);
         filterFunctionBuilders.add(skuNoBuilder);
 
-        // 修改分数算法为无，数字最大分数越高
-//        FieldValueFactorFunctionBuilder buyCountScore = ScoreFunctionBuilders.fieldValueFactorFunction("buyCount").modifier(FieldValueFactorFunction.Modifier.NONE).setWeight(10);
-//        FunctionScoreQueryBuilder.FilterFunctionBuilder buyCountBuilder = new FunctionScoreQueryBuilder.FilterFunctionBuilder(buyCountScore);
-//        filterFunctionBuilders.add(buyCountBuilder);
         return filterFunctionBuilders;
     }
 
