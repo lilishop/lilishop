@@ -659,13 +659,13 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     @Override
-    public void updateGoodsSkuGrade(String goodsId, String skuId, double grade, int commentNum) {
+    public void updateGoodsSkuGrade(String goodsId, double grade, int commentNum) {
         LambdaUpdateWrapper<GoodsSku> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(GoodsSku::getGoodsId, goodsId);
         updateWrapper.set(GoodsSku::getGrade, grade);
         updateWrapper.set(GoodsSku::getCommentNum, commentNum);
         this.update(updateWrapper);
-        clearCache(skuId);
+        this.getSkuIdsByGoodsId(goodsId).forEach(this::clearCache);
     }
 
     /**
