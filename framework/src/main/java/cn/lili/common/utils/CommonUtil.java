@@ -34,4 +34,11 @@ public class CommonUtil {
         return sb.toString();
     }
 
+    /**
+     * 获取特定字符 + 6位随机数
+     * @return
+     */
+    public static String getSpecialStr(String value) {
+        return value + getRandomNum();
+    }
 }
