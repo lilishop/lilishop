@@ -21,7 +21,7 @@ public enum OrderStatusEnum {
      * 虚拟订单需要核验商品
      */
     TAKE("待核验"),
-    CANCELLED("已取消");
+    CANCELLED("已关闭");
 
     private final String description;
 

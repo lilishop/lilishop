@@ -34,6 +34,12 @@ public interface OrderItemService extends IService<OrderItem> {
     void updateAfterSaleStatus(String orderItemSn, OrderItemAfterSaleStatusEnum orderItemAfterSaleStatusEnum);
 
     /**
+     * 更新售后状态
+     * @param orderItem
+     */
+    void updateByAfterSale(OrderItem orderItem);
+
+    /**
      * 更新订单可投诉状态
      *
      * @param orderSn            订单sn

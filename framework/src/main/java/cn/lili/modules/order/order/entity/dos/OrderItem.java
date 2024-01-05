@@ -11,6 +11,7 @@ import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
+import cn.lili.modules.order.order.entity.enums.RefundStatusEnum;
 import cn.lili.modules.promotion.entity.vos.PromotionSkuVO;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -115,6 +116,14 @@ public class OrderItem extends BaseEntity {
     @ApiModelProperty(value = "退货商品数量")
     private Integer returnGoodsNumber;
 
+    /**
+     * @see cn.lili.modules.order.order.entity.enums.RefundStatusEnum
+     */
+    @ApiModelProperty(value = "退款状态")
+    private String isRefund;
+
+    @ApiModelProperty(value = "退款金额")
+    private Double refundPrice;
 
     public OrderItem(CartSkuVO cartSkuVO, CartVO cartVO, TradeDTO tradeDTO) {
         String oldId = this.getId();
@@ -144,6 +153,13 @@ public class OrderItem extends BaseEntity {
         this.setSn(SnowFlake.createStr("OI"));
 
 
+    }
+
+    public String getIsRefund() {
+        if (isRefund == null) {
+            return RefundStatusEnum.NO_REFUND.name();
+        }
+        return isRefund;
     }
 
     public PriceDetailDTO getPriceDetailDTO() {
