@@ -22,3 +22,46 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 ALTER TABLE li_file
     ADD file_directory_id varchar(255) COMMENT '文件夹ID';
+
+/**
+  订单包裹
+ */
+CREATE TABLE `li_order_package` (
+                                    `id` bigint NOT NULL COMMENT 'ID',
+                                    `create_by` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '创建者',
+                                    `create_time` datetime(6) DEFAULT NULL COMMENT '创建时间',
+                                    `delete_flag` bit(1) DEFAULT NULL COMMENT '是否删除',
+                                    `update_by` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '修改者',
+                                    `update_time` datetime(6) DEFAULT NULL COMMENT '修改时间',
+                                    `package_no` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '包裹单号',
+                                    `order_sn` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '订单编号',
+                                    `logistics_no` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '发货单号',
+                                    `logistics_code` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '物流公司CODE',
+                                    `logistics_name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '物流公司名称',
+                                    `consignee_mobile` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '收件人手机',
+                                    `status` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '状态',
+                                    PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin ROW_FORMAT=DYNAMIC;
+
+/**
+  分包货物
+ */
+CREATE TABLE `li_order_package_item` (
+                                         `id` bigint NOT NULL COMMENT 'ID',
+                                         `create_by` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '创建者',
+                                         `create_time` datetime(6) DEFAULT NULL COMMENT '创建时间',
+                                         `delete_flag` bit(1) DEFAULT NULL COMMENT '是否删除',
+                                         `update_by` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '修改者',
+                                         `update_time` datetime(6) DEFAULT NULL COMMENT '修改时间',
+                                         `package_no` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '包裹单号',
+                                         `order_sn` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '订单编号',
+                                         `order_item_sn` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL COMMENT '子订单编号',
+                                         `deliver_number` int DEFAULT NULL COMMENT '发货数量',
+                                         `logistics_time` datetime(6) DEFAULT NULL COMMENT '发货时间',
+                                         `goods_name` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL,
+                                         `thumbnail` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL,
+                                         PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin ROW_FORMAT=DYNAMIC;
+
+
+ALTER TABLE li_order_item ADD  `deliver_number` int DEFAULT NULL COMMENT '发货数量';
