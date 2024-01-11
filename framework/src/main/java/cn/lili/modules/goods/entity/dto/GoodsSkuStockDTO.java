@@ -21,5 +21,8 @@ public class GoodsSkuStockDTO {
     @ApiModelProperty(value = "库存")
     private Integer quantity;
 
+    @ApiModelProperty(value = "预警库存")
+    private Integer alertQuantity;
+
 
 }

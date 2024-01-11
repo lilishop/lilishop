@@ -115,6 +115,15 @@ public class OrderItem extends BaseEntity {
     @ApiModelProperty(value = "退货商品数量")
     private Integer returnGoodsNumber;
 
+    @ApiModelProperty(value = "已发货数量")
+    private Integer deliverNumber;
+
+    public Integer getDeliverNumber() {
+        if(deliverNumber == null){
+            return 0;
+        }
+        return deliverNumber;
+    }
 
     public OrderItem(CartSkuVO cartSkuVO, CartVO cartVO, TradeDTO tradeDTO) {
         String oldId = this.getId();

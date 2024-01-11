@@ -93,7 +93,8 @@ public class GoodsStoreController {
         StoreDetail storeDetail = OperationalJudgment.judgment(storeDetailService.getStoreDetail(storeId));
         Integer stockWarnNum = storeDetail.getStockWarning();
         goodsSearchParams.setStoreId(storeId);
-        goodsSearchParams.setLeQuantity(stockWarnNum);
+//        goodsSearchParams.setLeQuantity(stockWarnNum);
+        goodsSearchParams.setAlertQuantity(true);
         goodsSearchParams.setMarketEnable(GoodsStatusEnum.UPPER.name());
         IPage<GoodsSku> goodsSku = goodsSkuService.getGoodsSkuByPage(goodsSearchParams);
         StockWarningVO stockWarning = new StockWarningVO(stockWarnNum, goodsSku);
@@ -179,6 +180,21 @@ public class GoodsStoreController {
         List<String> filterGoodsSkuIds = goodsSkuList.stream().map(GoodsSku::getId).collect(Collectors.toList());
         List<GoodsSkuStockDTO> collect = updateStockList.stream().filter(i -> filterGoodsSkuIds.contains(i.getSkuId())).collect(Collectors.toList());
         goodsSkuService.updateStocks(collect);
+        return ResultUtil.success();
+    }
+
+    @ApiOperation(value = "修改商品预警库存")
+    @PutMapping(value = "/update/alert/stocks", consumes = "application/json")
+    public ResultMessage<Object> updateAlertQuantity(@RequestBody List<GoodsSkuStockDTO> updateStockList) {
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        // 获取商品skuId集合
+        List<String> goodsSkuIds = updateStockList.stream().map(GoodsSkuStockDTO::getSkuId).collect(Collectors.toList());
+        // 根据skuId集合查询商品信息
+        List<GoodsSku> goodsSkuList = goodsSkuService.list(new LambdaQueryWrapper<GoodsSku>().in(GoodsSku::getId, goodsSkuIds).eq(GoodsSku::getStoreId, storeId));
+        // 过滤不符合当前店铺的商品
+        List<String> filterGoodsSkuIds = goodsSkuList.stream().map(GoodsSku::getId).collect(Collectors.toList());
+        List<GoodsSkuStockDTO> collect = updateStockList.stream().filter(i -> filterGoodsSkuIds.contains(i.getSkuId())).collect(Collectors.toList());
+        goodsSkuService.updateAlertQuantity(collect);
         return ResultUtil.success();
     }
 

@@ -205,6 +205,7 @@ public enum ResultCode {
     POINT_NOT_ENOUGH(31015, "当前会员积分不足购买当前积分商品！"),
     ORDER_LABEL_ORDER_ERROR(31016, "订单不能打印电子面单"),
     ORDER_PRICE_ERROR(31017,"订单金额不能小于等于0"),
+    ORDER_PACKAGE_NOT_EXIST(31017, "当前订单包裹不存在！"),
 
 
     /**

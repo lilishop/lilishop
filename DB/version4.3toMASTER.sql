@@ -65,3 +65,5 @@ CREATE TABLE `li_order_package_item` (
 
 
 ALTER TABLE li_order_item ADD  `deliver_number` int DEFAULT NULL COMMENT '发货数量';
+
+ALTER TABLE li_goods_sku ADD  `alert_quantity` int DEFAULT NULL COMMENT '预警库存';

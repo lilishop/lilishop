@@ -9,11 +9,14 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.statistics.mapper.GoodsStatisticsMapper;
 import cn.lili.modules.statistics.service.GoodsStatisticsService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -26,6 +29,9 @@ import java.util.Objects;
  */
 @Service
 public class GoodsStatisticsServiceImpl extends ServiceImpl<GoodsStatisticsMapper, Goods> implements GoodsStatisticsService {
+
+    @Autowired
+    private GoodsSkuService goodsSkuService;
 
     @Override
     public long goodsNum(GoodsStatusEnum goodsStatusEnum, GoodsAuthEnum goodsAuthEnum) {
@@ -44,6 +50,17 @@ public class GoodsStatisticsServiceImpl extends ServiceImpl<GoodsStatisticsMappe
                 Goods::getStoreId, currentUser.getStoreId());
 
         return this.count(queryWrapper);
+    }
+
+    @Override
+    public long alertQuantityNum() {
+        QueryWrapper queryWrapper = new QueryWrapper();
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        queryWrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.STORE.name()),
+                "store_id", currentUser.getStoreId());
+        queryWrapper.eq("market_enable",GoodsStatusEnum.UPPER.name());
+        queryWrapper.apply("quantity < alert_quantity");
+        return goodsSkuService.count(queryWrapper);
     }
 
     @Override

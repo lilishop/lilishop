@@ -6,6 +6,7 @@ import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
+import cn.lili.modules.order.order.entity.dto.PartDeliveryParamsDTO;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.entity.vo.PaymentLog;
@@ -310,5 +311,13 @@ public interface OrderService extends IService<Order> {
      * @return 是否成功
      */
     boolean checkFictitiousOrder(String pintuanId, Integer requiredNum, Boolean fictitious);
+
+    /**
+     * 订单部分发货
+     *
+     * @param partDeliveryParamsDTO 参数
+     * @return 订单
+     */
+    Order partDelivery(PartDeliveryParamsDTO partDeliveryParamsDTO);
 
 }

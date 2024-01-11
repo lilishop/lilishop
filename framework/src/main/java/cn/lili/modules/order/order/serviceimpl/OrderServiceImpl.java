@@ -23,10 +23,7 @@ import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
 import cn.lili.modules.order.order.entity.dos.*;
-import cn.lili.modules.order.order.entity.dto.OrderBatchDeliverDTO;
-import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
-import cn.lili.modules.order.order.entity.dto.OrderMessage;
-import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
+import cn.lili.modules.order.order.entity.dto.*;
 import cn.lili.modules.order.order.entity.enums.*;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
@@ -145,6 +142,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Autowired
     private StoreDetailService storeDetailService;
+
+    /**
+     * 订单包裹
+     */
+    @Autowired
+    private OrderPackageService orderPackageService;
+    /**
+     * 订单包裹货物
+     */
+    @Autowired
+    private OrderPackageItemService orderPackageItemService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -788,6 +796,74 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             }
         }
         return false;
+    }
+
+    @Override
+    public Order partDelivery(PartDeliveryParamsDTO partDeliveryParamsDTO) {
+        String logisticsId = partDeliveryParamsDTO.getLogisticsId();
+        String orderSn = partDeliveryParamsDTO.getOrderSn();
+        String invoiceNumber = partDeliveryParamsDTO.getLogisticsNo();
+
+        //获取对应物流
+        Logistics logistics = logisticsService.getById(logisticsId);
+        if (logistics == null) {
+            throw new ServiceException(ResultCode.ORDER_LOGISTICS_ERROR);
+        }
+        Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
+        List<OrderItem> orderItemList = orderItemService.getByOrderSn(orderSn);
+
+        OrderPackage orderPackage = new OrderPackage();
+        orderPackage.setPackageNo(SnowFlake.createStr("OP"));
+        orderPackage.setOrderSn(orderSn);
+        orderPackage.setLogisticsNo(invoiceNumber);
+        orderPackage.setLogisticsCode(logistics.getCode());
+        orderPackage.setLogisticsName(logistics.getName());
+        orderPackage.setStatus("1");
+        orderPackage.setConsigneeMobile(order.getConsigneeMobile());
+        orderPackageService.save(orderPackage);
+        List<OrderLog> orderLogList = new ArrayList<>();
+        for (PartDeliveryDTO partDeliveryDTO : partDeliveryParamsDTO.getPartDeliveryDTOList()) {
+            for (OrderItem orderItem : orderItemList) {
+                //寻找订单货物进行判断
+                if (partDeliveryDTO.getOrderItemId().equals(orderItem.getId())) {
+                    if ((partDeliveryDTO.getDeliveryNum() + orderItem.getDeliverNumber()) > orderItem.getNum()) {
+                        throw new ServiceException("发货数量不正确!");
+                    }
+                    orderItem.setDeliverNumber((partDeliveryDTO.getDeliveryNum() + orderItem.getDeliverNumber()));
+
+                    // 记录分包裹中每个item子单的具体发货信息
+                    OrderPackageItem orderPackageItem = new OrderPackageItem();
+                    orderPackageItem.setOrderSn(orderSn);
+                    orderPackageItem.setPackageNo(orderPackage.getPackageNo());
+                    orderPackageItem.setOrderItemSn(orderItem.getSn());
+                    orderPackageItem.setDeliverNumber(partDeliveryDTO.getDeliveryNum());
+                    orderPackageItem.setLogisticsTime(new Date());
+                    orderPackageItem.setGoodsName(orderItem.getGoodsName());
+                    orderPackageItem.setThumbnail(orderItem.getImage());
+                    orderPackageItemService.save(orderPackageItem);
+                    OrderLog orderLog = new OrderLog(orderSn, UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), "订单 [ " + orderSn + " ]商品 [ " + orderItem.getGoodsName() + " ]发货，发货数量: [ " + partDeliveryDTO.getDeliveryNum() + " ]，发货单号[ " + invoiceNumber + " ]");
+                    orderLogList.add(orderLog);
+                }
+            }
+        }
+        //修改订单货物
+        orderItemService.updateBatchById(orderItemList);
+
+
+        orderLogService.saveBatch(orderLogList);
+        //判断订单货物是否全部发货完毕
+        Boolean delivery = true;
+        for (OrderItem orderItem : orderItemList) {
+            if (orderItem.getDeliverNumber() < orderItem.getNum()) {
+                delivery = false;
+                break;
+            }
+        }
+        //是否全部发货
+        if (delivery) {
+            return delivery(orderSn, invoiceNumber, logisticsId);
+        }
+        return order;
     }
 
     /**
