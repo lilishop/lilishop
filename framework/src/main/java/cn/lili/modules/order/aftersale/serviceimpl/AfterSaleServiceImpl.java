@@ -215,7 +215,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
                     afterSaleStatusEnum = AfterSaleStatusEnum.WAIT_REFUND;
                 }
             } else {
-                afterSaleStatusEnum = AfterSaleStatusEnum.COMPLETE;
+                afterSaleStatusEnum = AfterSaleStatusEnum.PASS;
             }
         } else {
             afterSaleStatusEnum = AfterSaleStatusEnum.REFUSE;
@@ -290,7 +290,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             throw new ServiceException(ResultCode.AFTER_STATUS_ERROR);
         }
         AfterSaleStatusEnum afterSaleStatusEnum;
-        String pass = "PASS";
+        String pass = AfterSaleStatusEnum.PASS.name();
         //判断审核状态
         //在线支付 则直接进行退款
         if (pass.equals(serviceStatus) &&
