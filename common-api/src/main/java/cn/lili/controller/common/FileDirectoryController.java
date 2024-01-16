@@ -40,6 +40,7 @@ public class FileDirectoryController {
     @PostMapping
     public ResultMessage<FileDirectory> addSceneFileList(@RequestBody @Valid FileDirectory fileDirectory) {
         fileDirectory.setDirectoryType(UserContext.getCurrentUser().getRole().name());
+        fileDirectory.setOwnerId(UserContext.getCurrentUser().getId());
         fileDirectoryService.save(fileDirectory);
         return ResultUtil.data(fileDirectory);
     }
@@ -48,6 +49,7 @@ public class FileDirectoryController {
     @PutMapping
     public ResultMessage<FileDirectory> editSceneFileList(@RequestBody @Valid FileDirectory fileDirectory) {
         fileDirectory.setDirectoryType(UserContext.getCurrentUser().getRole().name());
+        fileDirectory.setOwnerId(UserContext.getCurrentUser().getId());
         fileDirectoryService.updateById(fileDirectory);
         return ResultUtil.data(fileDirectory);
     }
