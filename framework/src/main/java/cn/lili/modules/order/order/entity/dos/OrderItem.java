@@ -125,6 +125,16 @@ public class OrderItem extends BaseEntity {
     @ApiModelProperty(value = "退款金额")
     private Double refundPrice;
 
+    @ApiModelProperty(value = "已发货数量")
+    private Integer deliverNumber;
+
+    public Integer getDeliverNumber() {
+        if(deliverNumber == null){
+            return 0;
+        }
+        return deliverNumber;
+    }
+
     public OrderItem(CartSkuVO cartSkuVO, CartVO cartVO, TradeDTO tradeDTO) {
         String oldId = this.getId();
         BeanUtil.copyProperties(cartSkuVO.getGoodsSku(), this);

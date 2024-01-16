@@ -181,7 +181,6 @@ public class GoodsStoreController {
         goodsSkuService.updateStocks(collect);
         return ResultUtil.success();
     }
-
     @ApiOperation(value = "通过id获取商品信息")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "path"),

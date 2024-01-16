@@ -536,6 +536,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
     }
 
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateStock(String skuId, Integer quantity) {
