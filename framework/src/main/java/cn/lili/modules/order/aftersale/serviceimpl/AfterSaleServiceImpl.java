@@ -215,7 +215,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
                     afterSaleStatusEnum = AfterSaleStatusEnum.WAIT_REFUND;
                 }
             } else {
-                afterSaleStatusEnum = AfterSaleStatusEnum.PASS;
+                afterSaleStatusEnum = AfterSaleStatusEnum.COMPLETE;
             }
         } else {
             afterSaleStatusEnum = AfterSaleStatusEnum.REFUSE;

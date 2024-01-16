@@ -56,6 +56,14 @@ public class OrderItemVO {
     @ApiModelProperty(value = "评论状态:未评论(UNFINISHED),待追评(WAIT_CHASE),评论完成(FINISHED)，")
     private String commentStatus;
 
+    /**
+     * @see cn.lili.modules.order.order.entity.enums.RefundStatusEnum
+     */
+    @ApiModelProperty(value = "退款状态")
+    private String isRefund;
+
+    @ApiModelProperty(value = "退款金额")
+    private String refundPrice;
 
     public void setSn(String sn) {
         this.sn = sn;
