@@ -1,10 +1,13 @@
 package cn.lili.event.impl;
 
+import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.event.AfterSaleStatusChangeEvent;
 import cn.lili.event.TradeEvent;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
+import cn.lili.modules.order.order.entity.enums.RefundStatusEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.TradeService;
@@ -43,16 +46,27 @@ public class OrderStatusHandlerExecute implements TradeEvent, AfterSaleStatusCha
 
     @Override
     public void afterSaleStatusChange(AfterSale afterSale) {
+        Order order = orderService.getBySn(afterSale.getOrderSn());
+        OrderItem orderItem = orderItemService.getBySn(afterSale.getOrderItemSn());
+
         if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.COMPLETE.name())) {
+            if (orderItem.getReturnGoodsNumber().equals(orderItem.getNum())) {
+                orderItem.setIsRefund(RefundStatusEnum.ALL_REFUND.name());
+            } else {
+                orderItem.setIsRefund(RefundStatusEnum.PART_REFUND.name());
+            }
+            orderItem.setRefundPrice(CurrencyUtil.add(afterSale.getActualRefundPrice(), orderItem.getRefundPrice()));
+            orderItemService.updateByAfterSale(orderItem);
+
             //循环订单货物，判断是否已经全部售后
             List<OrderItem> orderItems = orderItemService.getByOrderSn(afterSale.getOrderSn());
             // 总退货数量
             int returnCount = 0;
             // 总购买数量
             int deliverCount = 0;
-            for (OrderItem orderItem : orderItems) {
-                returnCount += orderItem.getReturnGoodsNumber();
-                deliverCount += orderItem.getNum();
+            for (OrderItem item : orderItems) {
+                returnCount += item.getReturnGoodsNumber();
+                deliverCount += item.getNum();
             }
             if (returnCount == deliverCount) {
                 orderService.systemCancel(afterSale.getOrderSn(),"订单货物全部退款",false);

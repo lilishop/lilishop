@@ -26,6 +26,7 @@ import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -273,6 +274,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     }
 
     @Override
+    @SystemLogPoint(description = "更新促销活动商品库存", customerLog = "操作的skuId:['+#skuId+']', 修改后的库存:['+#quantity+']'")
     public void updatePromotionGoodsStock(String skuId, Integer quantity) {
         LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(PromotionGoods::getSkuId, skuId);

@@ -142,6 +142,12 @@ public class OrderSimpleVO {
     @ApiModelProperty(value = "订单促销类型")
     private String orderPromotionType;
 
+    @ApiModelProperty(value = "是否退款")
+    private String groupIsRefund;
+
+    @ApiModelProperty(value = "退款金额")
+    private String groupRefundPrice;
+
     public List<OrderItemVO> getOrderItems() {
         if (CharSequenceUtil.isEmpty(groupGoodsId)) {
             return new ArrayList<>();
@@ -187,6 +193,12 @@ public class OrderSimpleVO {
         }
         if (CharSequenceUtil.isNotEmpty(groupGoodsPrice) && groupGoodsPrice.split(",").length == groupGoodsId.split(",").length) {
             orderItemVO.setGoodsPrice(Double.parseDouble(groupGoodsPrice.split(",")[i]));
+        }
+        if (CharSequenceUtil.isNotEmpty(groupIsRefund) && groupIsRefund.split(",").length == groupGoodsId.split(",").length) {
+            orderItemVO.setIsRefund(groupIsRefund.split(",")[i]);
+        }
+        if (CharSequenceUtil.isNotEmpty(groupRefundPrice) && groupRefundPrice.split(",").length == groupGoodsId.split(",").length) {
+            orderItemVO.setRefundPrice(groupRefundPrice.split(",")[i]);
         }
         return orderItemVO;
     }

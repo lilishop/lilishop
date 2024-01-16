@@ -33,6 +33,7 @@ import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.service.FreightTemplateService;
 import cn.lili.modules.store.service.StoreService;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.GoodsSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -165,6 +166,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @SystemLogPoint(description = "添加商品", customerLog = "'新增商品名称:['+#goodsOperationDTO.goodsName+']'")
     public void addGoods(GoodsOperationDTO goodsOperationDTO) {
         Goods goods = new Goods(goodsOperationDTO);
         //检查商品
@@ -192,6 +194,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @SystemLogPoint(description = "修改商品", customerLog = "'操作的商品ID:['+#goodsId+']'")
     public void editGoods(GoodsOperationDTO goodsOperationDTO, String goodsId) {
         Goods goods = new Goods(goodsOperationDTO);
         goods.setId(goodsId);
@@ -290,6 +293,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @SystemLogPoint(description = "审核商品", customerLog = "'操作的商品ID:['+#goodsIds+']', '操作后商品状态:['+#goodsAuthEnum+']'")
     @Transactional(rollbackFor = Exception.class)
     public boolean auditGoods(List<String> goodsIds, GoodsAuthEnum goodsAuthEnum) {
         List<String> goodsCacheKeys = new ArrayList<>();
@@ -312,6 +316,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @SystemLogPoint(description = "商品状态操作", customerLog = "'操作类型:['+#goodsStatusEnum+']', 操作对象:['+#goodsIds+']', 操作原因:['+#underReason+']'")
     public Boolean updateGoodsMarketAble(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, String underReason) {
         boolean result;
 
@@ -343,6 +348,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
      * @return 更新结果
      */
     @Override
+    @SystemLogPoint(description = "店铺关闭下架商品", customerLog = "'操作类型:['+#goodsStatusEnum+']', 操作对象:['+#storeId+']', 操作原因:['+#underReason+']'")
     public Boolean updateGoodsMarketAbleByStoreId(String storeId, GoodsStatusEnum goodsStatusEnum, String underReason) {
 
 
@@ -358,6 +364,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @SystemLogPoint(description = "管理员关闭下架商品", customerLog = "'操作类型:['+#goodsStatusEnum+']', 操作对象:['+#goodsIds+']', 操作原因:['+#underReason+']'")
     @Transactional(rollbackFor = Exception.class)
     public Boolean managerUpdateGoodsMarketAble(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, String underReason) {
         boolean result;
@@ -386,6 +393,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @SystemLogPoint(description = "删除商品", customerLog = "操作对象:['+#goodsIds+']'")
     public Boolean deleteGoods(List<String> goodsIds) {
 
         LambdaUpdateWrapper<Goods> updateWrapper = this.getUpdateWrapperByStoreAuthority();
@@ -432,6 +440,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @SystemLogPoint(description = "修改商品库存", customerLog = "操作的商品ID:['+#goodsId+']', 修改后的库存:['+#quantity+']'")
     public void updateStock(String goodsId, Integer quantity) {
         LambdaUpdateWrapper<Goods> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
         lambdaUpdateWrapper.set(Goods::getQuantity, quantity);

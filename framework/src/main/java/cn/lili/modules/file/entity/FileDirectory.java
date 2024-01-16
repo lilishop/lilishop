@@ -9,6 +9,7 @@ import lombok.Data;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 @Data
 @TableName("li_file_directory")
@@ -26,7 +27,9 @@ public class FileDirectory extends BaseEntity {
     private String ownerId;
     @ApiModelProperty(value = "父分类ID")
     private String parentId;
+
     @ApiModelProperty(value = "层级")
+    @NotNull(message = "层级不能为空")
     @Min(value = 0, message = "层级最小为0")
     @Max(value = 2, message = "层级最大为2")
     private Integer level;

@@ -11,6 +11,7 @@ import cn.lili.modules.member.entity.dto.MemberAddDTO;
 import cn.lili.modules.member.entity.vo.MemberSearchVO;
 import cn.lili.modules.member.entity.vo.MemberVO;
 import cn.lili.modules.member.service.MemberService;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -51,6 +52,7 @@ public class MemberManagerController {
     }
 
     @ApiOperation(value = "添加会员")
+    @SystemLogPoint(description = "添加会员", customerLog = "'新增会员名称: ['+#member.username+']'")
     @PostMapping
     public ResultMessage<Member> save(@Valid MemberAddDTO member) {
 
@@ -59,6 +61,7 @@ public class MemberManagerController {
 
     @DemoSite
     @PreventDuplicateSubmissions
+    @SystemLogPoint(description = "修改会员信息", customerLog = "'修改的会员名称: ['+#managerMemberEditDTO.username+']'")
     @ApiOperation(value = "修改会员基本信息")
     @PutMapping
     public ResultMessage<Member> update(@Valid ManagerMemberEditDTO managerMemberEditDTO) {
@@ -67,6 +70,7 @@ public class MemberManagerController {
 
     @DemoSite
     @PreventDuplicateSubmissions
+    @SystemLogPoint(description = "修改会员状态", customerLog = "'修改的会员名称: ['+#memberIds+']', '是否开启: ['+#disabled+']'")
     @ApiOperation(value = "修改会员状态,开启关闭会员")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "memberIds", value = "会员ID", required = true, dataType = "String", allowMultiple = true, paramType = "query"),

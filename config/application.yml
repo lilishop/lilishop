@@ -24,12 +24,12 @@ spring:
   boot:
     admin:
       client:
-        url: http://192.168.0.108:8000
+        url: http://127.0.0.1:8000
   cache:
     type: redis
   # Redis
   redis:
-    host: 192.168.31.108
+    host: 192.168.31.100
     port: 30379
     password: lilishop
     lettuce:
@@ -60,7 +60,7 @@ spring:
       default-datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://192.168.31.108:30306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://192.168.31.100:30306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
         username: root
         password: lilishop
         maxActive: 50
@@ -241,16 +241,16 @@ lili:
     sk: zhNKVrJK6UPOhqIjn8AQvG37b9sz6
   #域名
   domain:
-    pc: http://192.168.0.108:8888
-    wap: http://192.168.0.108:8888
-    seller: http://192.168.0.108:8888
-    admin: http://192.168.0.108:8888
+    pc: http://127.0.0.1:8888
+    wap: http://127.0.0.1:8888
+    seller: http://127.0.0.1:8888
+    admin: http://127.0.0.1:8888
   #api地址
   api:
     buyer: https://z171l91606.51mypc.cn
-    base: http://192.168.0.108:8888
-    manager: http://192.168.0.108:8888
-    seller: http://192.168.0.108:8888
+    base: http://127.0.0.1:8888
+    manager: http://127.0.0.1:8888
+    seller: http://127.0.0.1:8888
 
   # jwt 细节设定
   jwt-setting:
@@ -269,7 +269,7 @@ lili:
   data:
     elasticsearch:
       cluster-name: elasticsearch
-      cluster-nodes: 192.168.31.108:30920
+      cluster-nodes: 192.168.31.100:30920
       index:
         number-of-replicas: 0
         number-of-shards: 3
@@ -280,7 +280,7 @@ lili:
     #        password: LiLiShopES
 
     logstash:
-      server: 127.0.0.1:4560
+      server: 192.168.31.100:30560
     rocketmq:
       promotion-topic: shop_lili_promotion_topic
       promotion-group: shop_lili_promotion_group
@@ -301,7 +301,7 @@ lili:
       after-sale-topic: shop_lili_after_sale_topic
       after-sale-group: shop_lili_after_sale_group
 rocketmq:
-  name-server: 192.168.31.108:30876
+  name-server: 192.168.31.100:30876
   isVIPChannel: false
   producer:
     group: lili_group
@@ -310,7 +310,7 @@ rocketmq:
 xxl:
   job:
     admin:
-      addresses: http://192.168.31.108:30001/xxl-job-admin
+      addresses: http://192.168.31.100:30001/xxl-job-admin
     executor:
       appname: xxl-job-executor-lilishop
       address:

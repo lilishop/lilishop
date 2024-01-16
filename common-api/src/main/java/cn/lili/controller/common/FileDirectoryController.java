@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -37,16 +38,18 @@ public class FileDirectoryController {
 
     @ApiOperation(value = "添加文件目录")
     @PostMapping
-    public ResultMessage<FileDirectory> addSceneFileList(@RequestBody FileDirectory fileDirectory) {
+    public ResultMessage<FileDirectory> addSceneFileList(@RequestBody @Valid FileDirectory fileDirectory) {
         fileDirectory.setDirectoryType(UserContext.getCurrentUser().getRole().name());
+        fileDirectory.setOwnerId(UserContext.getCurrentUser().getId());
         fileDirectoryService.save(fileDirectory);
         return ResultUtil.data(fileDirectory);
     }
 
     @ApiOperation(value = "修改文件目录")
     @PutMapping
-    public ResultMessage<FileDirectory> editSceneFileList(@RequestBody FileDirectory fileDirectory) {
+    public ResultMessage<FileDirectory> editSceneFileList(@RequestBody @Valid FileDirectory fileDirectory) {
         fileDirectory.setDirectoryType(UserContext.getCurrentUser().getRole().name());
+        fileDirectory.setOwnerId(UserContext.getCurrentUser().getId());
         fileDirectoryService.updateById(fileDirectory);
         return ResultUtil.data(fileDirectory);
     }

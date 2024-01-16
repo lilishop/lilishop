@@ -44,6 +44,15 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         this.update(lambdaUpdateWrapper);
     }
 
+    @Override
+    public void updateByAfterSale(OrderItem orderItem) {
+        LambdaUpdateWrapper<OrderItem> lambdaUpdateWrapper = new LambdaUpdateWrapper<OrderItem>()
+                .eq(OrderItem::getSn, orderItem.getSn())
+                .set(OrderItem::getIsRefund, orderItem.getIsRefund())
+                .set(OrderItem::getRefundPrice, orderItem.getRefundPrice());
+        this.update(lambdaUpdateWrapper);
+    }
+
     /**
      * 更新订单可投诉状态
      *

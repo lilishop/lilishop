@@ -1,10 +1,12 @@
 package cn.lili.modules.file.serviceimpl;
 
 import cn.lili.common.security.enums.UserEnums;
+import cn.lili.modules.distribution.entity.dos.DistributionOrder;
 import cn.lili.modules.file.entity.FileDirectory;
 import cn.lili.modules.file.entity.dto.FileDirectoryDTO;
 import cn.lili.modules.file.mapper.FileDirectoryMapper;
 import cn.lili.modules.file.service.FileDirectoryService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,8 +36,7 @@ public class FileDirectoryServiceImpl extends ServiceImpl<FileDirectoryMapper, F
 
     @Override
     public List<FileDirectoryDTO> getFileDirectoryList(String scene) {
-
-        List<FileDirectory> fileDirectoryList = this.list();
+        List<FileDirectory> fileDirectoryList = this.list(new LambdaQueryWrapper<FileDirectory>().eq(FileDirectory::getOwnerId, scene));
         List<FileDirectoryDTO> fileDirectoryDTOList = new ArrayList<>();
 
         fileDirectoryList.forEach(item -> {
