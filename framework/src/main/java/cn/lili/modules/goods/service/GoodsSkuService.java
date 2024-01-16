@@ -188,8 +188,6 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      */
     void updateStocks(List<GoodsSkuStockDTO> goodsSkuStockDTOS);
 
-    void updateAlertQuantity(List<GoodsSkuStockDTO> goodsSkuStockDTOS);
-
     /**
      * 更新SKU库存
      *

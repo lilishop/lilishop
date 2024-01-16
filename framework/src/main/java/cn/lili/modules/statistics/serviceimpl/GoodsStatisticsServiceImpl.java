@@ -53,17 +53,6 @@ public class GoodsStatisticsServiceImpl extends ServiceImpl<GoodsStatisticsMappe
     }
 
     @Override
-    public long alertQuantityNum() {
-        QueryWrapper queryWrapper = new QueryWrapper();
-        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        queryWrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.STORE.name()),
-                "store_id", currentUser.getStoreId());
-        queryWrapper.eq("market_enable",GoodsStatusEnum.UPPER.name());
-        queryWrapper.apply("quantity < alert_quantity");
-        return goodsSkuService.count(queryWrapper);
-    }
-
-    @Override
     public long todayUpperNum() {
         LambdaQueryWrapper<Goods> queryWrapper = Wrappers.lambdaQuery();
         queryWrapper.eq(Goods::getMarketEnable, GoodsStatusEnum.UPPER.name());

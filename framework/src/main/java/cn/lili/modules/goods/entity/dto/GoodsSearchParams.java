@@ -90,9 +90,6 @@ public class GoodsSearchParams extends PageVO {
     @ApiModelProperty(value = "销售模式", required = true)
     private String salesModel;
 
-    @ApiModelProperty(value = "预警库存")
-    private Boolean alertQuantity;
-
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
         if (CharSequenceUtil.isNotEmpty(goodsId)) {
@@ -136,9 +133,6 @@ public class GoodsSearchParams extends PageVO {
         }
         if (recommend != null) {
             queryWrapper.le("recommend", recommend);
-        }
-        if(alertQuantity != null && alertQuantity){
-            queryWrapper.apply("quantity < alert_quantity");
         }
         if (CharSequenceUtil.isNotEmpty(goodsType)) {
             queryWrapper.eq("goods_type", goodsType);

@@ -536,26 +536,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
     }
 
-    @Override
-    public void updateAlertQuantity(List<GoodsSkuStockDTO> goodsSkuStockDTOS) {
-        List<GoodsSku> goodsSkuList = new ArrayList<>();
-        List<String> skuIds = goodsSkuStockDTOS.stream().map(GoodsSkuStockDTO::getSkuId).collect(Collectors.toList());
-        List<GoodsSkuStockDTO> goodsSkuStockList = this.baseMapper.queryStocks(GoodsSearchParams.builder().ids(skuIds).build().queryWrapper());
-        List<String> goodsIdList = goodsSkuStockList.stream().map(GoodsSkuStockDTO::getGoodsId).collect(Collectors.toList());
-        HashSet<String> uniqueSet = new HashSet<>(goodsIdList);
-        // 将去重后的元素转回列表
-        List<String> uniqueGoodsIdList = new ArrayList<>(uniqueSet);
-        for (String goodsId : uniqueGoodsIdList) {
-            cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
-        }
-
-        for (GoodsSkuStockDTO goodsSkuStockDTO : goodsSkuStockDTOS) {
-            GoodsSku goodsSku = this.getById(goodsSkuStockDTO.getSkuId());
-            goodsSku.setAlertQuantity(goodsSkuStockDTO.getAlertQuantity());
-            goodsSkuList.add(goodsSku);
-        }
-        this.updateBatchById(goodsSkuList);
-    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
