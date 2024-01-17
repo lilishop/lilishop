@@ -52,7 +52,7 @@ public class MemberManagerController {
     }
 
     @ApiOperation(value = "添加会员")
-    @SystemLogPoint(description = "添加会员", customerLog = "'新增会员名称: ['+#member.username+']'")
+    @SystemLogPoint(description = "添加会员", customerLog = "'新增用户名称: ['+#member.username+']'")
     @PostMapping
     public ResultMessage<Member> save(@Valid MemberAddDTO member) {
 
@@ -61,7 +61,7 @@ public class MemberManagerController {
 
     @DemoSite
     @PreventDuplicateSubmissions
-    @SystemLogPoint(description = "修改会员信息", customerLog = "'修改的会员名称: ['+#managerMemberEditDTO.username+']'")
+    @SystemLogPoint(description = "修改会员信息", customerLog = "'修改的用户名称: ['+#managerMemberEditDTO.username+']'")
     @ApiOperation(value = "修改会员基本信息")
     @PutMapping
     public ResultMessage<Member> update(@Valid ManagerMemberEditDTO managerMemberEditDTO) {
@@ -70,7 +70,7 @@ public class MemberManagerController {
 
     @DemoSite
     @PreventDuplicateSubmissions
-    @SystemLogPoint(description = "修改会员状态", customerLog = "'修改的会员名称: ['+#memberIds+']', '是否开启: ['+#disabled+']'")
+    @SystemLogPoint(description = "修改会员状态", customerLog = "'修改的会员名称: ['+#memberIds+']，是否开启: ['+#disabled+']'")
     @ApiOperation(value = "修改会员状态,开启关闭会员")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "memberIds", value = "会员ID", required = true, dataType = "String", allowMultiple = true, paramType = "query"),
