@@ -189,6 +189,18 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     void updateStocks(List<GoodsSkuStockDTO> goodsSkuStockDTOS);
 
     /**
+     * 更新SKU预警库存
+     * @param goodsSkuStockDTOS sku库存修改实体
+     */
+    void batchUpdateAlertQuantity(List<GoodsSkuStockDTO> goodsSkuStockDTOS);
+
+    /**
+     * 更新SKU预警库存
+     * @param goodsSkuStockDTO sku库存修改实体
+     */
+    void updateAlertQuantity(GoodsSkuStockDTO goodsSkuStockDTO);
+
+    /**
      * 更新SKU库存
      *
      * @param skuId    SKUId

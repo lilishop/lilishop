@@ -186,7 +186,7 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         Map<String, Object> map = storeFlowStatisticsService.getOrderStatisticsPrice();
         storeIndexStatisticsVO.setOrderNum(Convert.toInt(map.get("num").toString()));
         storeIndexStatisticsVO.setOrderPrice(map.get("price") != null ? Double.parseDouble(map.get("price").toString()) : 0.0);
-
+        storeIndexStatisticsVO.setAlertQuantityNum(goodsStatisticsService.alertQuantityNum());
         //访问量
         StatisticsQueryParam queryParam = new StatisticsQueryParam();
         queryParam.setSearchType(SearchTypeEnum.TODAY.name());

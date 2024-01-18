@@ -59,4 +59,15 @@ public class GoodsStatisticsServiceImpl extends ServiceImpl<GoodsStatisticsMappe
         queryWrapper.ge(Goods::getCreateTime, DateUtil.beginOfDay(new DateTime()));
         return this.count(queryWrapper);
     }
+
+    @Override
+    public long alertQuantityNum() {
+        QueryWrapper queryWrapper = new QueryWrapper();
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        queryWrapper.eq(CharSequenceUtil.equals(currentUser.getRole().name(), UserEnums.STORE.name()),
+                "store_id", currentUser.getStoreId());
+        queryWrapper.eq("market_enable",GoodsStatusEnum.UPPER.name());
+        queryWrapper.apply("quantity < alert_quantity");
+        return goodsSkuService.count(queryWrapper);
+    }
 }

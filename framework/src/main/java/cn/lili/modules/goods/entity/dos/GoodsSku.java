@@ -164,11 +164,21 @@ public class GoodsSku extends BaseEntity {
     @ApiModelProperty(value = "商品类型", required = true)
     private String goodsType;
 
+    @ApiModelProperty(value = "预警数量")
+    private Integer alertQuantity;
+
     public Double getWeight() {
         if (weight == null) {
             return 0d;
         }
         return weight;
+    }
+
+    public Integer getalertQuantity() {
+        if(alertQuantity == null){
+            return 0;
+        }
+        return alertQuantity;
     }
 
     @Override
@@ -200,6 +210,7 @@ public class GoodsSku extends BaseEntity {
         this.mobileIntro = goods.getMobileIntro();
         this.goodsUnit = goods.getGoodsUnit();
         this.grade = 100D;
+        this.alertQuantity = 0;
         //商品状态
         this.authFlag = goods.getAuthFlag();
         this.salesModel = goods.getSalesModel();

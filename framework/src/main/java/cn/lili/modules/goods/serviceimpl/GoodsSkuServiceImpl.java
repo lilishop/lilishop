@@ -536,6 +536,36 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
     }
 
+    @Override
+    public void updateAlertQuantity(GoodsSkuStockDTO goodsSkuStockDTO) {
+        GoodsSku goodsSku = this.getById(goodsSkuStockDTO.getSkuId());
+        goodsSku.setAlertQuantity(goodsSkuStockDTO.getAlertQuantity());
+        //清除缓存，防止修改预警后直接修改商品导致预警数值错误
+        cache.remove(CachePrefix.GOODS.getPrefix() + goodsSku.getGoodsId());
+        this.update(goodsSku);
+    }
+
+    @Override
+    public void batchUpdateAlertQuantity(List<GoodsSkuStockDTO> goodsSkuStockDTOS) {
+        List<GoodsSku> goodsSkuList = new ArrayList<>();
+        List<String> skuIds = goodsSkuStockDTOS.stream().map(GoodsSkuStockDTO::getSkuId).collect(Collectors.toList());
+        List<GoodsSkuStockDTO> goodsSkuStockList = this.baseMapper.queryStocks(GoodsSearchParams.builder().ids(skuIds).build().queryWrapper());
+        List<String> goodsIdList = goodsSkuStockList.stream().map(GoodsSkuStockDTO::getGoodsId).collect(Collectors.toList());
+        HashSet<String> uniqueSet = new HashSet<>(goodsIdList);
+        // 将去重后的元素转回列表
+        List<String> uniqueGoodsIdList = new ArrayList<>(uniqueSet);
+        for (String goodsId : uniqueGoodsIdList) {
+            cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
+        }
+        //修改预警库存
+        for (GoodsSkuStockDTO goodsSkuStockDTO : goodsSkuStockDTOS) {
+            GoodsSku goodsSku = this.getById(goodsSkuStockDTO.getSkuId());
+            goodsSku.setAlertQuantity(goodsSkuStockDTO.getAlertQuantity());
+            goodsSkuList.add(goodsSku);
+        }
+        this.updateBatchById(goodsSkuList);
+    }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
