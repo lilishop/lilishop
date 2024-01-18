@@ -64,7 +64,7 @@ public class GoodsSkuBuilder {
         Map<String, Object> specMap = new LinkedHashMap<>();
 
         // 原始规格项
-        String[] ignoreOriginKeys = {"id", "sn", "cost", "price", "quantity", "weight"};
+        String[] ignoreOriginKeys = {"id", "sn", "cost", "price", "quantity", "weight", "alertQuantity"};
         //获取规格信息
         for (Map.Entry<String, Object> spec : skuInfo.entrySet()) {
             //保存新增规格信息
@@ -91,6 +91,7 @@ public class GoodsSkuBuilder {
         goodsSku.setQuantity(Convert.toInt(skuInfo.get("quantity"), 0));
         goodsSku.setSpecs(JSONUtil.toJsonStr(specMap));
         goodsSku.setSimpleSpecs(simpleSpecs.toString());
+        goodsSku.setAlertQuantity(Convert.toInt(skuInfo.get("alertQuantity"), 0));
     }
 
 

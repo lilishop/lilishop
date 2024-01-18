@@ -27,4 +27,7 @@ public interface GoodsStatisticsService extends IService<Goods> {
      * @return 今天的已上架的商品数量
      */
     long todayUpperNum();
+
+    long alertQuantityNum();
+
 }

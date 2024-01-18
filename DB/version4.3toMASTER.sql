@@ -63,10 +63,21 @@ CREATE TABLE `li_order_package_item` (
                                          PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin ROW_FORMAT=DYNAMIC;
 
-
+/*
+    订单货物增加发货数量
+*/
 ALTER TABLE li_order_item ADD  `deliver_number` int DEFAULT NULL COMMENT '发货数量';
 
 ALTER TABLE li_goods_sku ADD  `alert_quantity` int DEFAULT NULL COMMENT '预警库存';
+
+/*
+    sku增加预警库存
+*/
+ALTER TABLE li_goods_sku ADD  `alert_quantity` int DEFAULT NULL COMMENT '预警库存';
+/*
+    增加库存预警菜单
+*/
+INSERT INTO `lilishop`.`li_store_menu`(`id`, `create_by`, `create_time`, `delete_flag`, `update_by`, `update_time`, `description`, `front_route`, `icon`, `level`, `name`, `parent_id`, `path`, `sort_order`, `title`, `permission`) VALUES (1349237928434098177, NULL, '2022-01-11 22:35:45.000000', b'0', NULL, '2022-01-11 22:37:05', NULL, 'goods/goods-seller/alertQuantity', 'ios-american-football', 2, 'alert-goods-quantity', '1348810864748945408', 'alert-goods-quantity', '1.14', '库存预警', NULL);
 
 /**
   交易唤醒表，增加交易流水详情
