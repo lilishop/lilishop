@@ -65,7 +65,7 @@ public class TencentFilePlugin implements FilePlugin {
      * @return
      */
     private String getUrlPrefix() {
-        return "https://" + ossSetting.getTencentCOSBucket() + ".cos" + ossSetting.getTencentCOSRegion() + ".myqcloud.com/";
+        return "https://" + ossSetting.getTencentCOSBucket() + ".cos." + ossSetting.getTencentCOSRegion() + ".myqcloud.com/";
     }
 
     @Override

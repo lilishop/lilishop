@@ -239,7 +239,7 @@ public class GoodsImportServiceImpl implements GoodsImportService {
 
             //获取父
             Category parentCategory = categoryService.getCategoryById(goodsImportDTO.getCategory().getParentId());
-            goodsOperationDTO.setCategoryPath(parentCategory.getParentId() + "," + parentCategory.getId() + "," + goodsImportDTO.getCategory().getParentId());
+            goodsOperationDTO.setCategoryPath(parentCategory.getParentId() + "," + parentCategory.getId() + "," + goodsImportDTO.getCategory().getId());
             //添加商品
             goodsService.addGoods(goodsOperationDTO);
         }
