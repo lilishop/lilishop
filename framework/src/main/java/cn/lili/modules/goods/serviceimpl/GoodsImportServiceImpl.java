@@ -33,7 +33,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -203,15 +205,11 @@ public class GoodsImportServiceImpl implements GoodsImportService {
             goodsImportDTO.setCategory(category);
             goodsImportDTO.setTemplate(templateId);
             goodsImportDTO.setGoodsUnit(objects.get(4).toString().substring(objects.get(4).toString().indexOf("-") + 1));
-            goodsImportDTO.setRelease(objects.get(5).toString().equals("上架") ? true : false);
+            goodsImportDTO.setRelease(objects.get(5).toString().equals("上架"));
 
-            List<Map<String, String>> images = new ArrayList<>();
             List<String> goodsGalleryList = new ArrayList<>();
-            Map<String, String> map = new HashMap<>();
-            map.put("url", objects.get(6).toString());
-            images.add(map);
             goodsGalleryList.add(objects.get(6).toString());
-            goodsImportDTO.setImages(images);
+            goodsImportDTO.setImages(goodsGalleryList);
             goodsImportDTO.setGoodsGalleryList(goodsGalleryList);
 
             goodsImportDTO.setCost(Convert.toDouble(objects.get(7)));
