@@ -32,18 +32,5 @@ public class SpecValueVO implements Serializable {
      * 规格图片
      */
     @ApiModelProperty(value = "规格的图片")
-    private List<SpecImages> specImage;
-
-    @Data
-    public static class SpecImages implements Serializable {
-
-        private static final long serialVersionUID = 1816357809660916086L;
-
-        private String url;
-
-        private String name;
-
-        private String status;
-
-    }
+    private List<String> specImage;
 }

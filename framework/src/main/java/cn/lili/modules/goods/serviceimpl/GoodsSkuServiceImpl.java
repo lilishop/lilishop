@@ -334,6 +334,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             }
 
         }
+        goodsSkuDetail.getGoodsGalleryList().addAll(goodsVO.getGoodsGalleryList());
         map.put("data", goodsSkuDetail);
 
         //获取分类
@@ -474,13 +475,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             SpecValueVO specValueVO = new SpecValueVO();
             if ("images".equals(entry.getKey())) {
                 specValueVO.setSpecName(entry.getKey());
-                if (entry.getValue().toString().contains("url")) {
-                    List<SpecValueVO.SpecImages> specImages = JSONUtil.toList(JSONUtil.parseArray(entry.getValue()),
-                            SpecValueVO.SpecImages.class);
-                    specValueVO.setSpecImage(specImages);
-                    goodsGalleryList =
-                            specImages.stream().map(SpecValueVO.SpecImages::getUrl).collect(Collectors.toList());
-                }
+                List<String> specImages = JSONUtil.toList(JSONUtil.parseArray(entry.getValue()),
+                        String.class);
+                specValueVO.setSpecImage(specImages);
+                goodsGalleryList = new ArrayList<>(specImages);
             } else {
                 specValueVO.setSpecName(entry.getKey());
                 specValueVO.setSpecValue(entry.getValue().toString());

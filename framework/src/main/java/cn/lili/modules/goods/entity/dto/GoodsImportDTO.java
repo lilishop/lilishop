@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 商品导入DTO
@@ -36,7 +35,7 @@ public class GoodsImportDTO {
     private Boolean release;
 
     @ApiModelProperty(value = "商品图片")
-    private List<Map<String, String>> images;
+    private List<String> images;
     private List<String> goodsGalleryList;
 
     @ApiModelProperty(value = "成本价")
