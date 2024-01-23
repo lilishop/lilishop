@@ -103,8 +103,15 @@ public class Bill extends BaseIdEntity {
     @ApiModelProperty(value = "积分商品结算价格")
     private Double pointSettlementPrice;
 
+    @ApiModelProperty(value = "退货积分补贴返还")
+    private Double pointRefundSettlementPrice;
+
     @ApiModelProperty(value = "砍价商品结算价格")
     private Double kanjiaSettlementPrice;
+
+    @ApiModelProperty(value = "退货砍价补贴返还")
+    private Double kanjiaRefundSettlementPrice;
+
 
 
     /**

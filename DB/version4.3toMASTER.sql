@@ -88,3 +88,34 @@ ALTER TABLE li_order_item ADD `is_refund` varchar(255) DEFAULT NULL COMMENT '是
   交易表增加订单状态字段
  */
 ALTER TABLE li_order_item ADD `refund_price` decimal(10,2) DEFAULT NULL COMMENT '退款金额';
+
+/**
+  结算单表，增加砍价/积分退款金额字段
+ */
+ALTER TABLE li_bill  ADD `point_refund_settlement_price` decimal(10,2) DEFAULT NULL COMMENT '退货积分补贴返还';
+ALTER TABLE li_bill  ADD `kanjia_refund_settlement_price` decimal(10,2) DEFAULT NULL COMMENT '退货砍价补贴返还';
+
+UPDATE li_bill b
+SET b.point_refund_settlement_price =IFNULL((
+SELECT
+   SUM( point_settlement_price )
+FROM
+   li_store_flow sf
+WHERE
+   sf.flow_type = 'REFUND'
+   AND sf.store_id=b.store_id
+   AND sf.create_time BETWEEN b.start_time
+   AND b.end_time),0)
+
+UPDATE li_bill b
+SET b.kanjia_refund_settlement_price =IFNULL((
+ SELECT
+   SUM( kanjia_settlement_price )
+ FROM
+   li_store_flow sf
+ WHERE
+   sf.flow_type = 'REFUND'
+   AND sf.store_id=b.store_id
+   AND sf.create_time BETWEEN b.start_time
+   AND b.end_time),0);
+

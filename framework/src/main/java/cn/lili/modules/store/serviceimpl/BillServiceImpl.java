@@ -95,12 +95,16 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         if (refundBill != null) {
             //退单金额
             bill.setRefundPrice(refundBill.getRefundPrice() != null ? refundBill.getRefundPrice() : 0D);
-            //退单产生退还佣金金额
+            //退单 平台服务费返还
             bill.setRefundCommissionPrice(refundBill.getRefundCommissionPrice() != null ? refundBill.getRefundCommissionPrice() : 0D);
-            //分销订单退还，返现佣金返还
+            //退单 分销佣金返还
             bill.setDistributionRefundCommission(refundBill.getDistributionRefundCommission() != null ? refundBill.getDistributionRefundCommission() : 0D);
-            //退货平台优惠券补贴返还
+            //退单 平台优惠券补贴返还
             bill.setSiteCouponRefundCommission(refundBill.getSiteCouponRefundCommission() != null ? refundBill.getSiteCouponRefundCommission() : 0D);
+            //退单 平台优惠券补贴返还
+            bill.setPointRefundSettlementPrice(refundBill.getPointRefundSettlementPrice() != null ? refundBill.getPointRefundSettlementPrice() : 0D);
+            //退单 砍价补贴返还
+            bill.setKanjiaRefundSettlementPrice(refundBill.getKanjiaRefundSettlementPrice() != null ? refundBill.getKanjiaRefundSettlementPrice() : 0D);
             //退款金额=店铺最终退款结算金额
             refundPrice = refundBill.getBillPrice() != null ? refundBill.getBillPrice() : 0D;
         }
