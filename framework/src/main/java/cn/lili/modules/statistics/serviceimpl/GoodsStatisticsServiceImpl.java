@@ -68,6 +68,7 @@ public class GoodsStatisticsServiceImpl extends ServiceImpl<GoodsStatisticsMappe
                 "store_id", currentUser.getStoreId());
         queryWrapper.eq("market_enable",GoodsStatusEnum.UPPER.name());
         queryWrapper.apply("quantity < alert_quantity");
+        queryWrapper.gt("alert_quantity",0);
         return goodsSkuService.count(queryWrapper);
     }
 }

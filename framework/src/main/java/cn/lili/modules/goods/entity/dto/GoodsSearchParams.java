@@ -132,7 +132,7 @@ public class GoodsSearchParams extends PageVO {
             queryWrapper.le("quantity", leQuantity);
         }
         if (geQuantity != null) {
-            queryWrapper.ge("quantity", geQuantity);
+            queryWrapper.gt("quantity", geQuantity);
         }
         if (recommend != null) {
             queryWrapper.le("recommend", recommend);
@@ -145,6 +145,7 @@ public class GoodsSearchParams extends PageVO {
         }
         if(alertQuantity != null && alertQuantity){
             queryWrapper.apply("quantity <= alert_quantity");
+            queryWrapper.ge("alert_quantity", 0);
         }
         queryWrapper.in(CollUtil.isNotEmpty(ids), "id", ids);
 
