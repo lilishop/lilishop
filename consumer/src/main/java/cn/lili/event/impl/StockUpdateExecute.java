@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -189,28 +190,33 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         //如果促销类型需要库存判定，则做对应处理
         orderItems.forEach(orderItem -> {
             if (orderItem.getPromotionType() != null) {
-                //如果此促销有库存概念，则计入
-                if (PromotionTypeEnum.haveStock(orderItem.getPromotionType())) {
+                String[] skuPromotions = orderItem.getPromotionType().split(",");
+                for (int i = 0; i < skuPromotions.length; i++) {
+                    int currentIndex = i;
+                    //如果此促销有库存概念，则计入
+                    Arrays.stream(PromotionTypeEnum.haveStockPromotion).filter(promotionTypeEnum -> promotionTypeEnum.name().equals(skuPromotions[currentIndex]))
+                            .findFirst()
+                            .ifPresent(promotionTypeEnum -> {
+                                String promotionId = orderItem.getPromotionId().split(",")[currentIndex];
+                                String cacheKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, promotionId, orderItem.getSkuId());
 
-                    PromotionTypeEnum promotionTypeEnum = PromotionTypeEnum.valueOf(orderItem.getPromotionType());
-
-                    String cacheKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, orderItem.getPromotionId(), orderItem.getSkuId());
-
-                    switch (promotionTypeEnum) {
-                        case KANJIA:
-                            cache.put(cacheKey, kanjiaActivityGoodsService.getKanjiaGoodsBySkuId(orderItem.getSkuId()).getStock());
-                            return;
-                        case POINTS_GOODS:
-                            cache.put(cacheKey, pointsGoodsService.getPointsGoodsDetailBySkuId(orderItem.getSkuId()).getActiveStock());
-                            return;
-                        case SECKILL:
-                        case PINTUAN:
-                            cache.put(cacheKey, promotionGoodsService.getPromotionGoodsStock(promotionTypeEnum, orderItem.getPromotionId(), orderItem.getSkuId()));
-                            return;
-                        default:
-                            break;
-                    }
+                                switch (promotionTypeEnum) {
+                                    case KANJIA:
+                                        cache.put(cacheKey, kanjiaActivityGoodsService.getKanjiaGoodsBySkuId(orderItem.getSkuId()).getStock());
+                                        return;
+                                    case POINTS_GOODS:
+                                        cache.put(cacheKey, pointsGoodsService.getPointsGoodsDetailBySkuId(orderItem.getSkuId()).getActiveStock());
+                                        return;
+                                    case SECKILL:
+                                    case PINTUAN:
+                                        cache.put(cacheKey, promotionGoodsService.getPromotionGoodsStock(promotionTypeEnum, promotionId, orderItem.getSkuId()));
+                                        return;
+                                    default:
+                                        break;
+                                }
+                            });
                 }
+
             }
         });
     }
@@ -222,7 +228,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
      * @param orderSn 失败入库订单信息
      */
     private void errorOrder(String orderSn) {
-        orderService.systemCancel(orderSn, outOfStockMessage,true);
+        orderService.systemCancel(orderSn, outOfStockMessage, true);
     }
 
 
@@ -236,13 +242,17 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
     private void setPromotionStock(List<String> keys, List<String> values, OrderItem sku) {
         if (sku.getPromotionType() != null) {
             //如果此促销有库存概念，则计入
-            if (!PromotionTypeEnum.haveStock(sku.getPromotionType())) {
-                return;
+            String[] skuPromotions = sku.getPromotionType().split(",");
+            for (int i = 0; i < skuPromotions.length; i++) {
+                int currentIndex = i;
+                Arrays.stream(PromotionTypeEnum.haveStockPromotion).filter(promotionTypeEnum -> promotionTypeEnum.name().equals(skuPromotions[currentIndex]))
+                        .findFirst()
+                        .ifPresent(promotionTypeEnum -> {
+                            keys.add(PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, sku.getPromotionId().split(",")[currentIndex], sku.getSkuId()));
+                            int num = -sku.getNum();
+                            values.add(Integer.toString(num));
+                        });
             }
-            PromotionTypeEnum promotionTypeEnum = PromotionTypeEnum.valueOf(sku.getPromotionType());
-            keys.add(PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, sku.getPromotionId(), sku.getSkuId()));
-            int i = -sku.getNum();
-            values.add(Integer.toString(i));
         }
     }
 
@@ -277,41 +287,51 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
             goodsSku.setId(orderItem.getSkuId());
             goodsSku.setGoodsId(orderItem.getGoodsId());
             //如果有促销信息
-            if (null != orderItem.getPromotionType() && null != orderItem.getPromotionId() && PromotionTypeEnum.haveStock(orderItem.getPromotionType())) {
+            if (null != orderItem.getPromotionType() && null != orderItem.getPromotionId()) {
                 //如果促销有库存信息
-                PromotionTypeEnum promotionTypeEnum = PromotionTypeEnum.valueOf(orderItem.getPromotionType());
+                String[] skuPromotions = orderItem.getPromotionType().split(",");
+                for (int i = 0; i < skuPromotions.length; i++) {
+                    int currentIndex = i;
+                    Arrays.stream(PromotionTypeEnum.haveStockPromotion).filter(promotionTypeEnum -> promotionTypeEnum.name().equals(skuPromotions[currentIndex]))
+                            .findFirst()
+                            .ifPresent(promotionTypeEnum -> {
+                                //修改砍价商品库存
+                                String promotionId = orderItem.getPromotionId().split(",")[currentIndex];
 
-                //修改砍价商品库存
-                if (promotionTypeEnum.equals(PromotionTypeEnum.KANJIA)) {
-                    KanjiaActivity kanjiaActivity = kanjiaActivityService.getById(orderItem.getPromotionId());
-                    KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO = kanjiaActivityGoodsService.getKanjiaGoodsDetail(kanjiaActivity.getKanjiaActivityGoodsId());
+                                //修改砍价商品库存
+                                if (promotionTypeEnum.equals(PromotionTypeEnum.KANJIA)) {
+                                    KanjiaActivity kanjiaActivity = kanjiaActivityService.getById(promotionId);
+                                    KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO = kanjiaActivityGoodsService.getKanjiaGoodsDetail(kanjiaActivity.getKanjiaActivityGoodsId());
 
-                    Integer stock = Integer.parseInt(cache.get(PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, orderItem.getPromotionId(), orderItem.getSkuId())).toString());
-                    kanjiaActivityGoodsDTO.setStock(stock);
+                                    Integer stock = Integer.parseInt(cache.get(PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, promotionId, orderItem.getSkuId())).toString());
+                                    kanjiaActivityGoodsDTO.setStock(stock);
 
-                    kanjiaActivityGoodsService.updateById(kanjiaActivityGoodsDTO);
-                    //修改积分商品库存
-                } else if (promotionTypeEnum.equals(PromotionTypeEnum.POINTS_GOODS)) {
-                    PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsDetail(orderItem.getPromotionId());
-                    Integer stock = Integer.parseInt(cache.get(PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, orderItem.getPromotionId(), orderItem.getSkuId())).toString());
-                    pointsGoodsVO.setActiveStock(stock);
-                    pointsGoodsService.updateById(pointsGoodsVO);
-                } else {
-                    PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
-                    searchParams.setPromotionType(promotionTypeEnum.name());
-                    searchParams.setPromotionId(orderItem.getPromotionId());
-                    searchParams.setSkuId(orderItem.getSkuId());
-                    PromotionGoods pGoods = promotionGoodsService.getPromotionsGoods(searchParams);
-                    //记录需要更新的促销库存信息
-                    promotionKey.add(
-                            PromotionGoodsService.getPromotionGoodsStockCacheKey(
-                                    promotionTypeEnum,
-                                    orderItem.getPromotionId(), orderItem.getSkuId())
-                    );
-                    if (pGoods != null) {
-                        promotionGoods.add(pGoods);
-                    }
+                                    kanjiaActivityGoodsService.updateById(kanjiaActivityGoodsDTO);
+                                    //修改积分商品库存
+                                } else if (promotionTypeEnum.equals(PromotionTypeEnum.POINTS_GOODS)) {
+                                    PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsDetail(promotionId);
+                                    Integer stock = Integer.parseInt(cache.get(PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, promotionId, orderItem.getSkuId())).toString());
+                                    pointsGoodsVO.setActiveStock(stock);
+                                    pointsGoodsService.updateById(pointsGoodsVO);
+                                } else {
+                                    PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
+                                    searchParams.setPromotionType(promotionTypeEnum.name());
+                                    searchParams.setPromotionId(promotionId);
+                                    searchParams.setSkuId(orderItem.getSkuId());
+                                    PromotionGoods pGoods = promotionGoodsService.getPromotionsGoods(searchParams);
+                                    //记录需要更新的促销库存信息
+                                    promotionKey.add(
+                                            PromotionGoodsService.getPromotionGoodsStockCacheKey(
+                                                    promotionTypeEnum,
+                                                    promotionId, orderItem.getSkuId())
+                                    );
+                                    if (pGoods != null) {
+                                        promotionGoods.add(pGoods);
+                                    }
+                                }
+                            });
                 }
+
             }
             goodsSkus.add(goodsSku);
         }
