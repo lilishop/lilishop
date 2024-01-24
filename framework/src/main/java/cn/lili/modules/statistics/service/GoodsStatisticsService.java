@@ -28,6 +28,10 @@ public interface GoodsStatisticsService extends IService<Goods> {
      */
     long todayUpperNum();
 
+    /**
+     * 预警库存数
+     * @return
+     */
     long alertQuantityNum();
 
 }
