@@ -328,7 +328,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             }
 
         }
-        goodsSkuDetail.getGoodsGalleryList().addAll(goodsVO.getGoodsGalleryList());
+        if (goodsSkuDetail.getGoodsGalleryList() == null || goodsSkuDetail.getGoodsGalleryList().isEmpty()) {
+            goodsSkuDetail.setGoodsGalleryList(goodsVO.getGoodsGalleryList());
+        } else {
+            goodsSkuDetail.getGoodsGalleryList().addAll(goodsVO.getGoodsGalleryList());
+        }
         map.put("data", goodsSkuDetail);
 
         //获取分类
