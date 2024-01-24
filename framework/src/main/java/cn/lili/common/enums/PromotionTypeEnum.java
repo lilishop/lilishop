@@ -23,7 +23,7 @@ public enum PromotionTypeEnum {
     /**
      * 有促销库存的活动类型
      */
-    static final PromotionTypeEnum[] haveStockPromotion = new PromotionTypeEnum[]{PINTUAN, SECKILL, KANJIA, POINTS_GOODS};
+    public static final PromotionTypeEnum[] haveStockPromotion = new PromotionTypeEnum[]{PINTUAN, SECKILL, KANJIA, POINTS_GOODS};
 
     private final String description;
 

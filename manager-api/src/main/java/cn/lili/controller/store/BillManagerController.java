@@ -1,6 +1,8 @@
 package cn.lili.controller.store;
 
+import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
@@ -17,6 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -65,5 +68,16 @@ public class BillManagerController {
         billService.complete(id);
         return ResultUtil.success();
     }
+
+    @ApiOperation(value = "下载结算单", produces = "application/octet-stream")
+    @ApiImplicitParam(name = "id", value = "结算单ID", required = true, paramType = "path", dataType = "String")
+    @GetMapping(value = "/downLoad/{id}")
+    public void downLoadDeliverExcel(@PathVariable String id) {
+        OperationalJudgment.judgment(billService.getById(id));
+        HttpServletResponse response = ThreadContextHolder.getHttpResponse();
+        billService.download(response, id);
+
+    }
+
 
 }

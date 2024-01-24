@@ -28,6 +28,10 @@ public class InsertIgnoreBatchAllColumn extends AbstractMethod {
     @Accessors(chain = true)
     private Predicate<TableFieldInfo> predicate;
 
+    protected InsertIgnoreBatchAllColumn(String methodName) {
+        super(methodName);
+    }
+
     @SuppressWarnings("Duplicates")
     @Override
     public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
@@ -36,7 +40,7 @@ public class InsertIgnoreBatchAllColumn extends AbstractMethod {
         String sqlTemplate = "<script>\nINSERT IGNORE INTO %s %s VALUES %s\n</script>";
 
         List<TableFieldInfo> fieldList = tableInfo.getFieldList();
-        String insertSqlColumn = tableInfo.getKeyInsertSqlColumn(true, false) +
+        String insertSqlColumn = tableInfo.getKeyInsertSqlColumn(true, "", false) +
                 this.filterTableFieldInfo(fieldList, predicate, TableFieldInfo::getInsertSqlColumn, EMPTY);
         String columnScript = LEFT_BRACKET + insertSqlColumn.substring(0, insertSqlColumn.length() - 1) + RIGHT_BRACKET;
         String insertSqlProperty = tableInfo.getKeyInsertSqlProperty(true, ENTITY_DOT, false) +

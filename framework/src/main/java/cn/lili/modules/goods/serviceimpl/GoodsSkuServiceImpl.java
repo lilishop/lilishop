@@ -35,7 +35,6 @@ import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.goods.sku.GoodsSkuBuilder;
 import cn.lili.modules.goods.sku.render.SalesModelRender;
 import cn.lili.modules.member.entity.dos.FootPrint;
-import cn.lili.modules.member.service.MemberEvaluationService;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.search.PromotionGoodsSearchParams;
@@ -98,11 +97,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    /**
-     * 会员评价
-     */
-    @Autowired
-    private MemberEvaluationService memberEvaluationService;
     /**
      * 商品
      */
@@ -334,6 +328,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             }
 
         }
+        if (goodsSkuDetail.getGoodsGalleryList() == null || goodsSkuDetail.getGoodsGalleryList().isEmpty()) {
+            goodsSkuDetail.setGoodsGalleryList(goodsVO.getGoodsGalleryList());
+        } else {
+            goodsSkuDetail.getGoodsGalleryList().addAll(goodsVO.getGoodsGalleryList());
+        }
         map.put("data", goodsSkuDetail);
 
         //获取分类
@@ -474,13 +473,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             SpecValueVO specValueVO = new SpecValueVO();
             if ("images".equals(entry.getKey())) {
                 specValueVO.setSpecName(entry.getKey());
-                if (entry.getValue().toString().contains("url")) {
-                    List<SpecValueVO.SpecImages> specImages = JSONUtil.toList(JSONUtil.parseArray(entry.getValue()),
-                            SpecValueVO.SpecImages.class);
-                    specValueVO.setSpecImage(specImages);
-                    goodsGalleryList =
-                            specImages.stream().map(SpecValueVO.SpecImages::getUrl).collect(Collectors.toList());
-                }
+                List<String> specImages = JSONUtil.toList(JSONUtil.parseArray(entry.getValue()),
+                        String.class);
+                specValueVO.setSpecImage(specImages);
+                goodsGalleryList = new ArrayList<>(specImages);
             } else {
                 specValueVO.setSpecName(entry.getKey());
                 specValueVO.setSpecValue(entry.getValue().toString());
@@ -677,7 +673,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         salesModelRenders.stream().filter(i -> i.getSalesMode().equals(goodsOperationDTO.getSalesModel())).findFirst().ifPresent(i -> i.renderBatch(goodsSkuList, goodsOperationDTO));
         for (GoodsSku goodsSku : goodsSkuList) {
             extendOldSkuValue(goodsSku);
-            this.renderImages(goodsSku);
+            this.renderImages(goodsSku, goodsOperationDTO.getGoodsGalleryList());
         }
     }
 
@@ -709,7 +705,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         extendOldSkuValue(goodsSku);
         // 商品销售模式渲染器
         salesModelRenders.stream().filter(i -> i.getSalesMode().equals(goodsOperationDTO.getSalesModel())).findFirst().ifPresent(i -> i.renderSingle(goodsSku, goodsOperationDTO));
-        this.renderImages(goodsSku);
+        this.renderImages(goodsSku, goodsOperationDTO.getGoodsGalleryList());
     }
 
     /**
@@ -734,16 +730,20 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      *
      * @param goodsSku sku
      */
-    void renderImages(GoodsSku goodsSku) {
+    void renderImages(GoodsSku goodsSku, List<String> goodsImages) {
         JSONObject jsonObject = JSONUtil.parseObj(goodsSku.getSpecs());
-        List<Map<String, String>> images = jsonObject.get("images", List.class);
+        List<String> images = jsonObject.getBeanList("images", String.class);
+        GoodsGallery goodsGallery;
         if (images != null && !images.isEmpty()) {
-            GoodsGallery goodsGallery = goodsGalleryService.getGoodsGallery(images.get(0).get("url"));
-            goodsSku.setBig(goodsGallery.getOriginal());
-            goodsSku.setOriginal(goodsGallery.getOriginal());
-            goodsSku.setThumbnail(goodsGallery.getThumbnail());
-            goodsSku.setSmall(goodsGallery.getSmall());
+            goodsGallery = goodsGalleryService.getGoodsGallery(images.get(0));
+        } else {
+            goodsGallery = goodsGalleryService.getGoodsGallery(goodsImages.get(0));
         }
+
+        goodsSku.setBig(goodsGallery.getOriginal());
+        goodsSku.setOriginal(goodsGallery.getOriginal());
+        goodsSku.setThumbnail(goodsGallery.getThumbnail());
+        goodsSku.setSmall(goodsGallery.getSmall());
     }
 
     /**
