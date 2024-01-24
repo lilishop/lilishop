@@ -96,7 +96,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                     keys.add(GoodsSkuService.getStockCacheKey(orderItem.getSkuId()));
                     int i = -orderItem.getNum();
                     values.add(Integer.toString(i));
-                    setPromotionStock(keys, values, orderItem);
+                    setPromotionStock(keys, values, orderItem, true);
                 }
 
                 List<Integer> stocks = cache.multiGet(keys);
@@ -134,6 +134,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                         keys.add(GoodsSkuService.getStockCacheKey(orderItem.getSkuId()));
                         int i = orderItem.getNum();
                         values.add(Integer.toString(i));
+                        setPromotionStock(keys, values, orderItem, false);
                     }
                     //批量脚本执行库存回退
                     Boolean skuResult = stringRedisTemplate.execute(quantityScript, keys, values.toArray());
@@ -239,7 +240,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
      * @param values 缓存value值
      * @param sku    购物车信息
      */
-    private void setPromotionStock(List<String> keys, List<String> values, OrderItem sku) {
+    private void setPromotionStock(List<String> keys, List<String> values, OrderItem sku, boolean deduction) {
         if (sku.getPromotionType() != null) {
             //如果此促销有库存概念，则计入
             String[] skuPromotions = sku.getPromotionType().split(",");
@@ -249,7 +250,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                         .findFirst()
                         .ifPresent(promotionTypeEnum -> {
                             keys.add(PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, sku.getPromotionId().split(",")[currentIndex], sku.getSkuId()));
-                            int num = -sku.getNum();
+                            int num = deduction ? -sku.getNum() : sku.getNum();
                             values.add(Integer.toString(num));
                         });
             }
@@ -371,6 +372,69 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         List<GoodsSku> goodsSkus = new ArrayList<>();
         //sku库存key 集合
         List<String> skuKeys = new ArrayList<>();
+        //促销商品
+        List<PromotionGoods> promotionGoods = new ArrayList<>();
+        //促销库存key 集合
+        List<String> promotionKey = new ArrayList<>();
+
+        //循环订单
+        for (OrderItem orderItem : order.getOrderItems()) {
+            skuKeys.add(GoodsSkuService.getStockCacheKey(orderItem.getSkuId()));
+
+            GoodsSku goodsSku = new GoodsSku();
+            goodsSku.setId(orderItem.getSkuId());
+            goodsSku.setGoodsId(orderItem.getGoodsId());
+            //如果有促销信息
+            if (null != orderItem.getPromotionType() && null != orderItem.getPromotionId()) {
+
+                //如果促销有库存信息
+                String[] skuPromotions = orderItem.getPromotionType().split(",");
+                for (int i = 0; i < skuPromotions.length; i++) {
+                    int currentIndex = i;
+                    Arrays.stream(PromotionTypeEnum.haveStockPromotion).filter(promotionTypeEnum -> promotionTypeEnum.name().equals(skuPromotions[currentIndex]))
+                            .findFirst()
+                            .ifPresent(promotionTypeEnum -> {
+                                //修改砍价商品库存
+                                String promotionId = orderItem.getPromotionId().split(",")[currentIndex];
+                                //修改砍价商品库存
+                                if (promotionTypeEnum.equals(PromotionTypeEnum.KANJIA)) {
+                                    KanjiaActivity kanjiaActivity = kanjiaActivityService.getById(promotionId);
+                                    KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO = kanjiaActivityGoodsService.getKanjiaGoodsDetail(kanjiaActivity.getKanjiaActivityGoodsId());
+
+                                    Integer stock = Integer.parseInt(cache.get(PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, promotionId, orderItem.getSkuId())).toString());
+                                    kanjiaActivityGoodsDTO.setStock(stock);
+
+                                    kanjiaActivityGoodsService.updateById(kanjiaActivityGoodsDTO);
+                                    //修改积分商品库存
+                                } else if (promotionTypeEnum.equals(PromotionTypeEnum.POINTS_GOODS)) {
+                                    PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsDetail(promotionId);
+                                    Integer stock = Integer.parseInt(cache.get(PromotionGoodsService.getPromotionGoodsStockCacheKey(promotionTypeEnum, promotionId, orderItem.getSkuId())).toString());
+                                    pointsGoodsVO.setActiveStock(stock);
+                                    pointsGoodsService.updateById(pointsGoodsVO);
+                                } else {
+                                    PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
+                                    searchParams.setPromotionType(promotionTypeEnum.name());
+                                    searchParams.setPromotionId(promotionId);
+                                    searchParams.setSkuId(orderItem.getSkuId());
+                                    PromotionGoods pGoods = promotionGoodsService.getPromotionsGoods(searchParams);
+                                    //记录需要更新的促销库存信息
+                                    promotionKey.add(
+                                            PromotionGoodsService.getPromotionGoodsStockCacheKey(
+                                                    promotionTypeEnum,
+                                                    promotionId, orderItem.getSkuId())
+                                    );
+                                    if (pGoods != null) {
+                                        promotionGoods.add(pGoods);
+                                    }
+                                }
+                            });
+                }
+
+
+            }
+            goodsSkus.add(goodsSku);
+        }
+
         //循环订单
         for (OrderItem orderItem : order.getOrderItems()) {
             skuKeys.add(GoodsSkuService.getStockCacheKey(orderItem.getSkuId()));
@@ -384,6 +448,16 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         //循环写入商品SKU库存
         for (int i = 0; i < skuStocks.size(); i++) {
             goodsSkus.get(i).setQuantity(Convert.toInt(skuStocks.get(i).toString()));
+        }
+        //促销库存处理
+        if (!promotionKey.isEmpty()) {
+            List promotionStocks = cache.multiGet(promotionKey);
+            for (int i = 0; i < promotionKey.size(); i++) {
+                promotionGoods.get(i).setQuantity(Convert.toInt(promotionStocks.get(i).toString()));
+                Integer num = promotionGoods.get(i).getNum();
+                promotionGoods.get(i).setNum((num != null ? num : 0) + order.getOrder().getGoodsNum());
+            }
+            promotionGoodsService.updatePromotionGoodsStock(promotionGoods);
         }
         log.info("订单取消，库存还原：{}", goodsSkus);
         //批量修改商品库存
