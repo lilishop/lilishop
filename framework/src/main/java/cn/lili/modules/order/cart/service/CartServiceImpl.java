@@ -16,6 +16,7 @@ import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.member.entity.dos.Member;
@@ -568,7 +569,7 @@ public class CartServiceImpl implements CartService {
         tradeDTO.setStoreRemark(tradeParams.getRemark());
         tradeDTO.setParentOrderSn(tradeParams.getParentOrderSn());
         //订单无收货地址校验
-        if (!tradeDTO.getCartTypeEnum().equals(CartTypeEnum.VIRTUAL) && tradeDTO.getStoreAddress() == null && tradeDTO.getMemberAddress() == null) {
+        if (tradeDTO.getStoreAddress() == null && tradeDTO.getMemberAddress() == null && !GoodsTypeEnum.VIRTUAL_GOODS.name().equals(tradeDTO.getCheckedSkuList().get(0).getGoodsSku().getGoodsType())) {
             throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
         }
         //构建交易

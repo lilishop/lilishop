@@ -5,6 +5,7 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
+import cn.lili.modules.order.aftersale.service.AfterSaleService;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
@@ -61,6 +62,8 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
     @Autowired
     private BillService billService;
 
+    @Autowired
+    private AfterSaleService afterSaleService;
     /**
      * 店铺订单支付流水
      *
@@ -119,15 +122,27 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         //分销佣金 =（分销佣金/订单商品数量）* 售后商品数量
         storeFlow.setDistributionRebate(CurrencyUtil.mul(CurrencyUtil.div(payStoreFlow.getDistributionRebate(), payStoreFlow.getNum()), afterSale.getNum()));
         //流水金额 = 支付最终结算金额
-        storeFlow.setFinalPrice(payStoreFlow.getBillPrice());
-        //最终结算金额 =实际退款金额
-        storeFlow.setBillPrice(afterSale.getActualRefundPrice());
+        storeFlow.setFinalPrice(afterSale.getActualRefundPrice());
         //站点优惠券补贴返还金额=(站点优惠券补贴金额/购买商品数量)*退款商品数量
-        storeFlow.setSiteCouponCommission(CurrencyUtil.mul(CurrencyUtil.div(payStoreFlow.getSiteCouponCommission(), payStoreFlow.getNum()), afterSale.getNum()));
+        storeFlow.setSiteCouponCommission(CurrencyUtil.mul(CurrencyUtil.div(payStoreFlow.getSiteCouponCommission() == null ? 0 : payStoreFlow.getSiteCouponCommission(), payStoreFlow.getNum()), afterSale.getNum()));
         //平台优惠券 使用金额
         storeFlow.setSiteCouponPrice(payStoreFlow.getSiteCouponPrice());
         //站点优惠券佣金比例
         storeFlow.setSiteCouponPoint(payStoreFlow.getSiteCouponPoint());
+
+        // 退单结算金额 相当于付款结算金额反计算逻辑，对平台收取的佣金，分销收取的佣金进行返还，对平台优惠券的补贴应该相加
+        // 由于退单的结算金额为正数，所以需要将结算金额计算方式，相较于付款结算金额计算方式进行反转
+
+        // 退款结算金额 = flowPrice(实际退款金额) + storeCouponCommission(getSiteCouponCommission) - platFormCommission(平台收取交易佣金) - distributionCommission(单品分销返现支出) ")
+
+        storeFlow.setBillPrice(
+                CurrencyUtil.add(
+                        afterSale.getActualRefundPrice(),
+                        storeFlow.getSiteCouponCommission(),
+                        -storeFlow.getCommissionPrice(),
+                        -storeFlow.getDistributionRebate()
+                )
+        );
         //退款日志
         RefundLog refundLog = refundLogService.queryByAfterSaleSn(afterSale.getSn());
         //第三方流水单号
@@ -136,6 +151,8 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         storeFlow.setPaymentName(refundLog.getPaymentName());
         this.save(storeFlow);
     }
+
+
 
     @Override
     public IPage<StoreFlow> getStoreFlow(StoreFlowQueryDTO storeFlowQueryDTO) {

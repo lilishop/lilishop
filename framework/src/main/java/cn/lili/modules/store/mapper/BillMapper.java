@@ -57,6 +57,6 @@ public interface BillMapper extends BaseMapper<Bill> {
             ",IFNULL(SUM( site_coupon_commission ),0) AS siteCouponRefundCommission" +
             ",IFNULL(SUM( kanjia_settlement_price ),0) AS kanjiaRefundSettlementPrice" +
             ",IFNULL(SUM( point_settlement_price ),0) AS pointRefundSettlementPrice" +
-            ",IFNULL(SUM( final_price ),0) AS billPrice FROM li_store_flow ${ew.customSqlSegment}")
+            ",IFNULL(SUM( bill_price ),0) AS billPrice FROM li_store_flow ${ew.customSqlSegment}")
     Bill getRefundBill(@Param(Constants.WRAPPER) QueryWrapper<Bill> queryWrapper);
 }
