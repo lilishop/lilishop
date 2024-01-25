@@ -107,10 +107,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public List<CategoryVO> categoryTree() {
-//        List<CategoryVO> categoryVOList = (List<CategoryVO>) cache.get(CachePrefix.CATEGORY.getPrefix());
-//        if (categoryVOList != null) {
-//            return categoryVOList;
-//        }
+        List<CategoryVO> categoryVOList = (List<CategoryVO>) cache.get(CachePrefix.CATEGORY.getPrefix());
+        if (categoryVOList != null) {
+            return categoryVOList;
+        }
 
         //获取全部分类
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
@@ -118,7 +118,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         List<Category> list = this.list(queryWrapper);
 
         //构造分类树
-        List<CategoryVO> categoryVOList = new ArrayList<>();
+        categoryVOList = new ArrayList<>();
         for (Category category : list) {
             if ("0".equals(category.getParentId())) {
                 CategoryVO categoryVO = new CategoryVO(category);
