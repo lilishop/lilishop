@@ -393,15 +393,6 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
                     goodsVO.setGoodsImage(goodsSku.getThumbnail());
                     goodsVO.setGoodsId(goodsSku.getGoodsId());
                     goodsVO.setGoodsName(goodsSku.getGoodsName());
-                    String promotionGoodsStockCacheKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(
-                            PromotionTypeEnum.SECKILL,
-                            seckillId, seckillApply.getSkuId());
-                    Object quantity = cache.get(promotionGoodsStockCacheKey);
-                    if (quantity != null) {
-                        goodsVO.setQuantity((Integer) quantity);
-                    } else {
-                        cache.put(promotionGoodsStockCacheKey, seckillApply.getQuantity());
-                    }
                     seckillGoodsVoS.add(goodsVO);
                 }
             }

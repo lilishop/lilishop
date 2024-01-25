@@ -195,10 +195,10 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     @Override
     public Integer getPromotionGoodsStock(PromotionTypeEnum typeEnum, String promotionId, String skuId) {
         String promotionStockKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(typeEnum, promotionId, skuId);
-        String promotionGoodsStock = stringRedisTemplate.opsForValue().get(promotionStockKey);
+        Object promotionGoodsStock = cache.get(promotionStockKey);
 
         //库存如果不为空，则直接返回
-        if (promotionGoodsStock != null && CharSequenceUtil.isNotEmpty(promotionGoodsStock)) {
+        if (promotionGoodsStock != null) {
             return Convert.toInt(promotionGoodsStock);
         }
         //如果为空
@@ -213,7 +213,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
                 return 0;
             }
             //否则写入新的促销商品库存
-            stringRedisTemplate.opsForValue().set(promotionStockKey, promotionGoods.getQuantity().toString());
+            cache.put(promotionStockKey, promotionGoods.getQuantity());
             return promotionGoods.getQuantity();
         }
     }
@@ -269,7 +269,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
             updateWrapper.set(PromotionGoods::getQuantity, promotionGoods.getQuantity()).set(PromotionGoods::getNum, promotionGoods.getNum());
 
             this.update(updateWrapper);
-            stringRedisTemplate.opsForValue().set(promotionStockKey, promotionGoods.getQuantity().toString());
+            cache.put(promotionStockKey, promotionGoods.getQuantity());
         }
     }
 
@@ -277,12 +277,14 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     @SystemLogPoint(description = "更新促销活动商品库存", customerLog = "'操作的skuId:['+#skuId+']，修改后的库存:['+#quantity+']'")
     public void updatePromotionGoodsStock(String skuId, Integer quantity) {
         LambdaQueryWrapper<PromotionGoods> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.notIn(PromotionGoods::getPromotionType, Arrays.stream(PromotionTypeEnum.haveIndependanceStockPromotion).map(Enum::name).collect(Collectors.toList()));
         queryWrapper.eq(PromotionGoods::getSkuId, skuId);
         this.list(queryWrapper).forEach(promotionGoods -> {
             String promotionStockKey = PromotionGoodsService.getPromotionGoodsStockCacheKey(PromotionTypeEnum.valueOf(promotionGoods.getPromotionType()), promotionGoods.getPromotionId(), promotionGoods.getSkuId());
             cache.remove(promotionStockKey);
         });
         LambdaUpdateWrapper<PromotionGoods> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.notIn(PromotionGoods::getPromotionType, Arrays.stream(PromotionTypeEnum.haveIndependanceStockPromotion).map(Enum::name).collect(Collectors.toList()));
         updateWrapper.eq(PromotionGoods::getSkuId, skuId);
         updateWrapper.set(PromotionGoods::getQuantity, quantity);
         this.update(updateWrapper);

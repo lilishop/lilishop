@@ -271,6 +271,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         queryWrapper.eq(Order::getPromotionId, pintuanId);
         queryWrapper.nested(i -> i.eq(Order::getPayStatus, PayStatusEnum.PAID.name()).or(j -> j.eq(Order::getOrderStatus,
                 OrderStatusEnum.PAID.name())));
+        queryWrapper.ne(Order::getOrderStatus, OrderStatusEnum.CANCELLED.name());
         return this.list(queryWrapper);
     }
 
@@ -302,7 +303,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
         //如果订单促销类型不为空&&订单是拼团订单，并且订单未成团，则抛出异常
         if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())
-                && !CharSequenceUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.UNDELIVERED.name(), OrderStatusEnum.STAY_PICKED_UP.name())) {
+                && !CharSequenceUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.TAKE.name(), OrderStatusEnum.UNDELIVERED.name(), OrderStatusEnum.STAY_PICKED_UP.name())) {
             throw new ServiceException(ResultCode.ORDER_CAN_NOT_CANCEL);
         }
         if (CharSequenceUtil.equalsAny(order.getOrderStatus(),
@@ -1011,6 +1012,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //拼团sn=开团订单sn 或者 参团订单的开团订单sn
         queryWrapper.and(i -> i.eq(Order::getSn, parentOrderSn)
                 .or(j -> j.eq(Order::getParentOrderSn, parentOrderSn)));
+        queryWrapper.ne(Order::getOrderStatus, OrderStatusEnum.CANCELLED.name());
         //参团后的订单数（人数）
         return this.list(queryWrapper);
     }
