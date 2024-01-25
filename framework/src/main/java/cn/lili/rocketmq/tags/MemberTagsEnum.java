@@ -24,6 +24,10 @@ public enum MemberTagsEnum {
      */
     MEMBER_WITHDRAWAL("会员提现"),
     /**
+     * 会员提现
+     */
+    DISTRIBUTION_WITHDRAWAL("分销提现"),
+    /**
      * 会员信息更改
      */
     MEMBER_INFO_EDIT("会员信息更改"),
