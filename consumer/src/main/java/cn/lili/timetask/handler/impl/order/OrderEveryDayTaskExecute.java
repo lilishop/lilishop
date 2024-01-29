@@ -183,7 +183,6 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         }
         //订单关闭售后申请时间 = 当前时间 - 自动关闭售后申请天数
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getCloseAfterSale());
-
         //关闭售后订单=未售后订单+小于订单关闭售后申请时间
         OrderItemOperationDTO build = OrderItemOperationDTO.builder().receiveTime(receiveTime).afterSaleStatus(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name()).build();
         List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(build);
@@ -199,6 +198,7 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
                     .set(OrderItem::getAfterSaleStatus, OrderItemAfterSaleStatusEnum.EXPIRED.name())
                     .in(OrderItem::getId, orderItemIdList);
             orderItemService.update(lambdaUpdateWrapper);
+            orderItemService.expiredAfterSaleStatusExecuteByAfterSale(receiveTime);
             //修改订售后状态
             List<OrderItem> orderItemsList = orderItems.stream()
                     .map((orderItem) -> {

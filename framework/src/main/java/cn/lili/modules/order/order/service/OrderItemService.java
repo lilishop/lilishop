@@ -1,5 +1,6 @@
 package cn.lili.modules.order.order.service;
 
+import cn.hutool.core.date.DateTime;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dto.OrderItemOperationDTO;
 import cn.lili.modules.order.order.entity.enums.CommentStatusEnum;
@@ -75,4 +76,6 @@ public interface OrderItemService extends IService<OrderItem> {
     OrderItem getByOrderSnAndSkuId(String orderSn, String skuId);
 
     List<OrderItem> waitOperationOrderItem(OrderItemOperationDTO orderItemOperationDTO);
+
+    void expiredAfterSaleStatusExecuteByAfterSale(DateTime receiveTime);
 }

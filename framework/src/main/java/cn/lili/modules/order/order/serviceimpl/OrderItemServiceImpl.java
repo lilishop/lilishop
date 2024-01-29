@@ -1,5 +1,6 @@
 package cn.lili.modules.order.order.serviceimpl;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
@@ -103,5 +104,10 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         queryWrapper.eq(CharSequenceUtil.isNotEmpty(dto.getAfterSaleStatus()), "oi.after_sale_status", dto.getAfterSaleStatus());
         queryWrapper.eq(CharSequenceUtil.isNotEmpty(dto.getComplainStatus()), "oi.complain_status", dto.getComplainStatus());
         return this.baseMapper.waitOperationOrderItem(queryWrapper);
+    }
+
+    @Override
+    public void expiredAfterSaleStatusExecuteByAfterSale(DateTime receiveTime) {
+        this.baseMapper.expiredAfterSaleStatusExecuteByAfterSale(receiveTime);
     }
 }
