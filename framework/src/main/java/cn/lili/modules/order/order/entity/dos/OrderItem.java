@@ -172,6 +172,13 @@ public class OrderItem extends BaseEntity {
         return isRefund;
     }
 
+    public double getRefundPrice() {
+        if (refundPrice == null) {
+            return 0;
+        }
+        return refundPrice;
+    }
+
     public PriceDetailDTO getPriceDetailDTO() {
         return JSONUtil.toBean(priceDetail, PriceDetailDTO.class);
     }
