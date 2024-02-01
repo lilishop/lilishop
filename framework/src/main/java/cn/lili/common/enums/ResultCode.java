@@ -419,7 +419,7 @@ public enum ResultCode {
     STORE_CLOSE_ERROR(50006, "店铺关闭，请联系管理员"),
     STORE_DELIVER_GOODS_ADDRESS(50007,"请填写商家发货地址"),
     FREIGHT_TEMPLATE_NOT_EXIST(50010, "当前模版不存在"),
-    STORE_STATUS_ERROR(50011, "店铺状态异常，无法申请"),
+    STORE_STATUS_ERROR(50011, "店铺在申请中或审核中，请勿重复操作"),
     STORE_DELIVER_ADDRESS_EXIST(50012,"请填写发货地址"),
 
     /**

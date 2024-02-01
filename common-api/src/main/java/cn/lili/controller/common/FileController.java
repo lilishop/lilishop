@@ -1,12 +1,14 @@
 package cn.lili.controller.common;
 
 import cn.lili.cache.Cache;
+import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
+import cn.lili.common.utils.ResponseUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.file.entity.File;
 import cn.lili.modules.file.entity.dto.FileOwnerDTO;
@@ -44,6 +46,11 @@ public class FileController {
     public ResultMessage<IPage<File>> getFileList(@RequestHeader String accessToken, FileOwnerDTO fileOwnerDTO) {
 
         AuthUser authUser = UserContext.getAuthUser(cache, accessToken);
+        if (authUser == null) {
+            ResponseUtil.output(ThreadContextHolder.getHttpResponse(), 403, ResponseUtil.resultMap(false,
+                    403, "登录已失效，请重新登录"));
+            return null;
+        }
         //只有买家才写入自己id
         if (authUser.getRole().equals(UserEnums.MEMBER)) {
             fileOwnerDTO.setOwnerId(authUser.getId());
