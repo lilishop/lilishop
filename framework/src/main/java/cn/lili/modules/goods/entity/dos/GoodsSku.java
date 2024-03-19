@@ -174,7 +174,7 @@ public class GoodsSku extends BaseEntity {
         return weight;
     }
 
-    public Integer getalertQuantity() {
+    public Integer getAlertQuantity() {
         if(alertQuantity == null){
             return 0;
         }
