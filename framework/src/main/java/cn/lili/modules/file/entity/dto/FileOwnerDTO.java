@@ -25,6 +25,9 @@ public class FileOwnerDTO extends PageVO {
     @ApiModelProperty(value = "拥有者id")
     private String ownerId;
 
+    @ApiModelProperty(value = "拥有者名称")
+    private String ownerName;
+
     @ApiModelProperty(value = "用户类型")
     private String userEnums;
 

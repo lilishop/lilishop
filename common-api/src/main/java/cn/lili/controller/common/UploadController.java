@@ -105,8 +105,10 @@ public class UploadController {
             //如果是店铺，则记录店铺id
             if (authUser.getRole().equals(UserEnums.STORE)) {
                 newFile.setOwnerId(authUser.getStoreId());
+                newFile.setOwnerName(authUser.getStoreName());
             } else {
                 newFile.setOwnerId(authUser.getId());
+                newFile.setOwnerName(authUser.getNickName());
             }
 
             //存储文件目录

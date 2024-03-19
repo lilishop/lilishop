@@ -80,23 +80,25 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
 
         //如果分销员非空并未审核则提示用户请等待，如果分销员为拒绝状态则重新提交申请
         if (Optional.ofNullable(distribution).isPresent()) {
-            if (distribution.getDistributionStatus().equals(DistributionStatusEnum.APPLY.name())) {
-                throw new ServiceException(ResultCode.DISTRIBUTION_IS_APPLY);
-            } else if (distribution.getDistributionStatus().equals(DistributionStatusEnum.REFUSE.name())) {
-                distribution.setDistributionStatus(DistributionStatusEnum.APPLY.name());
-                BeanUtil.copyProperties(distributionApplyDTO, distribution);
-                this.updateById(distribution);
-                return distribution;
+            switch (DistributionStatusEnum.valueOf(distribution.getDistributionStatus())) {
+                case REFUSE:
+                case RETREAT:
+                    distribution.setDistributionStatus(DistributionStatusEnum.APPLY.name());
+                    BeanUtil.copyProperties(distributionApplyDTO, distribution);
+                    this.updateById(distribution);
+                    return distribution;
+                default:
+                    throw new ServiceException(ResultCode.DISTRIBUTION_IS_APPLY);
             }
+        }else{
+            //如果未申请分销员则新增进行申请
+            //获取当前登录用户
+            Member member = memberService.getUserInfo();
+            //新建分销员
+            distribution = new Distribution(member.getId(), member.getNickName(), distributionApplyDTO);
+            //添加分销员
+            this.save(distribution);
         }
-        //如果未申请分销员则新增进行申请
-        //获取当前登录用户
-        Member member = memberService.getUserInfo();
-        //新建分销员
-        distribution = new Distribution(member.getId(), member.getNickName(), distributionApplyDTO);
-        //添加分销员
-        this.save(distribution);
-
         return distribution;
     }
 
