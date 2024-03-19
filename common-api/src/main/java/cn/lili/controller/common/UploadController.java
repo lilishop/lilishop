@@ -108,6 +108,7 @@ public class UploadController {
                 newFile.setOwnerName(authUser.getStoreName());
             } else {
                 newFile.setOwnerId(authUser.getId());
+                newFile.setOwnerName(authUser.getNickName());
             }
 
             //存储文件目录

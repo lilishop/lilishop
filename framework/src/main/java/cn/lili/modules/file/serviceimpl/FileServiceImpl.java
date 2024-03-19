@@ -88,6 +88,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
     public IPage<File> customerPage(FileOwnerDTO fileOwnerDTO) {
         LambdaQueryWrapper<File> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.like(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getName()), File::getName, fileOwnerDTO.getName())
+                .like(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getOwnerName()), File::getOwnerName, fileOwnerDTO.getOwnerName())
                 .eq(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getFileDirectoryId()),File::getFileDirectoryId, fileOwnerDTO.getFileDirectoryId())
                 .like(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getFileKey()), File::getFileKey, fileOwnerDTO.getFileKey())
                 .like(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getFileType()), File::getFileType, fileOwnerDTO.getFileType())
