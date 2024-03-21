@@ -63,7 +63,6 @@ public class AppVersionManagerController {
             @ApiImplicitParam(name = "id", value = "主键", required = true, dataType = "String", paramType = "path")
     })
     public ResultMessage<Object> edit(@Valid AppVersion appVersion, @PathVariable String id) {
-
         if(this.appVersionService.checkAppVersion(appVersion)){
             if(this.appVersionService.updateById(appVersion)){
                 return ResultUtil.success();

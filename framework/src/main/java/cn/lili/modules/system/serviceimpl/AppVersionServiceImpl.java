@@ -2,6 +2,7 @@ package cn.lili.modules.system.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.system.entity.dos.AppVersion;
 import cn.lili.modules.system.mapper.AppVersionMapper;
 import cn.lili.modules.system.service.AppVersionService;
@@ -26,9 +27,16 @@ public class AppVersionServiceImpl extends ServiceImpl<AppVersionMapper, AppVers
 
     @Override
     public boolean checkAppVersion(AppVersion appVersion) {
-        //检测版本是否存在
+        if (null == appVersion) {
+            throw new ServiceException(ResultCode.APP_VERSION_PARAM_ERROR);
+        }
+        if (StringUtils.isBlank(appVersion.getType())) {
+            throw new ServiceException(ResultCode.APP_VERSION_TYPE_ERROR);
+        }
+        //检测版本是否存在（同类型APP下版本不允许重复）
         if (null != this.getOne(new LambdaQueryWrapper<AppVersion>()
                 .eq(AppVersion::getVersion, appVersion.getVersion())
+                .eq(AppVersion::getType, appVersion.getType())
                 .ne(appVersion.getId() != null, AppVersion::getId, appVersion.getId()))) {
             throw new ServiceException(ResultCode.APP_VERSION_EXIST);
         }

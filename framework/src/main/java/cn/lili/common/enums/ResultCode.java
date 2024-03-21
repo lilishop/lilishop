@@ -496,6 +496,9 @@ public enum ResultCode {
     WECHAT_MP_MESSAGE_TMPL_ERROR(80306, "未能获取到微信模版消息id"),
     WECHAT_ERROR(80307, "微信接口异常"),
     APP_VERSION_EXIST(80307, "APP版本已存在"),
+    APP_VERSION_PARAM_ERROR(80308, "添加APP版本参数异常"),
+    // 未选择APP类型
+    APP_VERSION_TYPE_ERROR(80308, "请选择有效的APP类型"),
 
     /**
      * IM
