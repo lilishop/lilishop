@@ -73,7 +73,7 @@ public class TradeCashier implements CashierExecute {
             for (Order order : orders) {
                 //如果订单已支付，则不能发器支付
                 if (order.getPayStatus().equals(PayStatusEnum.PAID.name())) {
-                    throw new ServiceException(ResultCode.PAY_PARTIAL_ERROR);
+                    throw new ServiceException(ResultCode.PAY_DOUBLE_ERROR);
                 }
                 //如果订单状态不是待付款，则抛出异常
                 if (!order.getOrderStatus().equals(OrderStatusEnum.UNPAID.name())) {
