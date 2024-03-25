@@ -183,4 +183,40 @@ public class StoreEditDTO {
     @ApiModelProperty(value = "腾讯云智服小程序唯一标识")
     private String yzfMpSign;
 
+    public String getSalesConsigneeName() {
+        return getDefaultValue(salesConsigneeName);
+    }
+
+    public String getSalesConsigneeMobile() {
+        return getDefaultValue(salesConsigneeMobile);
+    }
+
+    public String getSalesConsigneeAddressId() {
+        return getDefaultValue(salesConsigneeAddressId);
+    }
+
+    public String getSalesConsigneeAddressPath() {
+        return getDefaultValue(salesConsigneeAddressPath);
+    }
+
+    public String getSalesConsigneeDetail() {
+        return getDefaultValue(salesConsigneeDetail);
+    }
+
+    public String getYzfSign() {
+        return getDefaultValue(yzfSign);
+    }
+
+    public String getYzfMpSign() {
+        return getDefaultValue(yzfMpSign);
+    }
+
+    /**
+     * JSON转换中的null 会转成 "null"
+     * @param value
+     * @return
+     */
+    private String getDefaultValue(String value){
+        return (value == null || "null".equals(value)) ? "" : value;
+    }
 }

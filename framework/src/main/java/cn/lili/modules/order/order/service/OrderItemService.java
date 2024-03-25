@@ -77,5 +77,5 @@ public interface OrderItemService extends IService<OrderItem> {
 
     List<OrderItem> waitOperationOrderItem(OrderItemOperationDTO orderItemOperationDTO);
 
-    void expiredAfterSaleStatusExecuteByAfterSale(DateTime receiveTime);
+    void expiredAfterSaleStatus(DateTime expiredTime);
 }

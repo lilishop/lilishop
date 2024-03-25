@@ -40,8 +40,12 @@ import cn.lili.modules.store.entity.dto.StoreDeliverGoodsAddressDTO;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.modules.system.entity.dos.Logistics;
+import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.OrderSetting;
+import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.entity.vo.Traces;
 import cn.lili.modules.system.service.LogisticsService;
+import cn.lili.modules.system.service.SettingService;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
@@ -153,6 +157,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Autowired
     private OrderPackageItemService orderPackageItemService;
+
+    @Autowired
+    private SettingService settingService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -558,11 +565,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Transactional(rollbackFor = Exception.class)
     public void complete(Order order, String orderSn) {//修改订单状态为完成
         this.updateStatus(orderSn, OrderStatusEnum.COMPLETED);
-
         //修改订单货物可以进行评价
         orderItemService.update(new UpdateWrapper<OrderItem>().eq(ORDER_SN_COLUMN, orderSn)
                 .set("comment_status", CommentStatusEnum.UNFINISHED));
         this.update(new LambdaUpdateWrapper<Order>().eq(Order::getSn, orderSn).set(Order::getCompleteTime, new Date()));
+
+        //修改订单投诉状态
+        updateOrderComplainStatus(orderSn);
+
         //发送订单状态改变消息
         OrderMessage orderMessage = new OrderMessage();
         orderMessage.setNewStatus(OrderStatusEnum.COMPLETED);
@@ -1135,5 +1145,27 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (!verificationCode.equals(order.getVerificationCode())) {
             throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
         }
+    }
+
+    /**
+     * 根据订单设置修改订单投诉状态
+     * @param orderSn
+     */
+    private void updateOrderComplainStatus(String orderSn) {
+        Setting setting = settingService.get(SettingEnum.ORDER_SETTING.name());
+        //订单设置
+        OrderSetting orderSetting = JSONUtil.toBean(setting.getSettingValue(), OrderSetting.class);
+        if (orderSetting == null) {
+            return;
+        }
+        //设置投诉天数大于0 则走每日定时任务处理，=0 则即可关闭订单的投诉状态
+        if (orderSetting.getCloseComplaint() > 0) {
+            return;
+        }
+        //关闭订单投诉状态
+        LambdaUpdateWrapper<OrderItem> lambdaUpdateWrapper = new LambdaUpdateWrapper<OrderItem>()
+                .eq(OrderItem::getOrderSn, orderSn)
+                .set(OrderItem::getComplainStatus, OrderComplaintStatusEnum.EXPIRED.name());
+        orderItemService.update(lambdaUpdateWrapper);
     }
 }
