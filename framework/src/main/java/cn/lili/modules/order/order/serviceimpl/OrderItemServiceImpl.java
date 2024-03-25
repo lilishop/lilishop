@@ -106,10 +106,6 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
         return this.baseMapper.waitOperationOrderItem(queryWrapper);
     }
 
-    @Override
-    public void expiredAfterSaleStatusExecuteByAfterSale(DateTime receiveTime) {
-        this.baseMapper.expiredAfterSaleStatusExecuteByAfterSale(receiveTime);
-    }
 
     @Override
     public void expiredAfterSaleStatus(DateTime expiredTime) {
