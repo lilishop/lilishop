@@ -177,10 +177,6 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
      * @param orderSetting 订单设置
      */
     private void closeAfterSale(OrderSetting orderSetting) {
-        //为0则不限制
-        if (orderSetting.getCloseAfterSale() == null || orderSetting.getCloseAfterSale() == 0) {
-            return;
-        }
         //订单关闭售后申请时间 = 当前时间 - 自动关闭售后申请天数
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getCloseAfterSale());
         //关闭售后订单=未售后订单+小于订单关闭售后申请时间
@@ -189,25 +185,9 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
         //判断是否有符合条件的订单，关闭允许售后申请处理
         if (!orderItems.isEmpty()) {
-
-            //获取订单货物ID
-            List<String> orderItemIdList = orderItems.stream().map(OrderItem::getId).collect(Collectors.toList());
-
-            //修改订单售后状态
-            LambdaUpdateWrapper<OrderItem> lambdaUpdateWrapper = new LambdaUpdateWrapper<OrderItem>()
-                    .set(OrderItem::getAfterSaleStatus, OrderItemAfterSaleStatusEnum.EXPIRED.name())
-                    .in(OrderItem::getId, orderItemIdList);
-            orderItemService.update(lambdaUpdateWrapper);
-            orderItemService.expiredAfterSaleStatusExecuteByAfterSale(receiveTime);
-            //修改订售后状态
-            List<OrderItem> orderItemsList = orderItems.stream()
-                    .map((orderItem) -> {
-                        orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.EXPIRED.name());
-                        return orderItem;
-                    })
-                    .collect(Collectors.toList());
+            orderItemService.expiredAfterSaleStatus(receiveTime);
             //修改对应分销订单状态
-            distributionOrderService.updateDistributionOrderStatus(orderItemsList);
+            distributionOrderService.updateDistributionOrderStatus(orderItems);
         }
 
     }

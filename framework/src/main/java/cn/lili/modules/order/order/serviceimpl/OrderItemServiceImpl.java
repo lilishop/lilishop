@@ -110,4 +110,10 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemMapper, OrderItem
     public void expiredAfterSaleStatusExecuteByAfterSale(DateTime receiveTime) {
         this.baseMapper.expiredAfterSaleStatusExecuteByAfterSale(receiveTime);
     }
+
+    @Override
+    public void expiredAfterSaleStatus(DateTime expiredTime) {
+        this.baseMapper.expiredAfterSaleStatus(expiredTime);
+        this.baseMapper.expiredAfterSaleStatusExecuteByAfterSale(expiredTime);
+    }
 }

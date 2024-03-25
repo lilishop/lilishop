@@ -30,6 +30,15 @@ public interface OrderItemMapper extends BaseMapper<OrderItem> {
     List<OrderItem> waitOperationOrderItem(@Param(Constants.WRAPPER) Wrapper<OrderSimpleVO> queryWrapper);
 
     /**
+     * 未申请售后的订单，进行售后过期标识
+     *
+     * @param expiredTime 过期时间
+     */
+    @Update("update li_order_item  oi INNER JOIN li_order AS o ON oi.order_sn=o.sn  set after_sale_status = 'EXPIRED' where after_sale_status = " +
+            "'NOT_APPLIED' and o.complete_time < #{expiredTime}")
+    void expiredAfterSaleStatus(DateTime expiredTime);
+
+    /**
      * 检查售后表，根据售后表中的业务判定是否需要更新售后状态
      *
      * @param expiredTime 过期时间
