@@ -118,10 +118,10 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
         //查询流水金额和订单数量
         queryWrapper.select("SUM(flow_price) AS price , COUNT(0) AS num");
         //获取查询结果
-        Map order = orderStatisticsService.getMap(queryWrapper);
+        Map<String, Object> order = orderStatisticsService.getMap(queryWrapper);
         //赋予订单数和流水金额
-        orderOverviewVO.setOrderNum(order != null && order.containsKey("num") ? (Long) order.get("num") : 0L);
-        orderOverviewVO.setOrderAmount(order != null && order.containsKey("price") ? (double) order.get("price") : 0L);
+        orderOverviewVO.setOrderNum(order != null && order.containsKey("num") ? Long.parseLong(order.get("num").toString()) : 0L);
+        orderOverviewVO.setOrderAmount(order != null && order.containsKey("price") ? Double.parseDouble(order.get("price").toString()) : 0L);
 
         //查询下单人数
         queryWrapper = Wrappers.query();
@@ -136,7 +136,7 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
         //获取查询结果
         Map memberNum = orderStatisticsService.getMap(queryWrapper);
         //写入下单人数
-        orderOverviewVO.setOrderMemberNum(memberNum != null && memberNum.containsKey("num") ? (Long) memberNum.get("num") : 0L);
+        orderOverviewVO.setOrderMemberNum(memberNum != null && memberNum.containsKey("num") ? Long.parseLong(memberNum.get("num").toString()) : 0L);
     }
 
     /**
@@ -157,9 +157,8 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
         queryWrapper.eq("flow_type", FlowTypeEnum.PAY.name());
         Map payment = this.getMap(queryWrapper);
 
-        orderOverviewVO.setPaymentOrderNum(payment != null && payment.containsKey("num") ? (Long) payment.get("num") : 0L);
-        orderOverviewVO.setPaymentAmount(payment != null && payment.containsKey("price") ? (Double) payment.get("price") : 0D);
-
+        orderOverviewVO.setPaymentOrderNum(payment != null && payment.containsKey("num") ? Long.parseLong(payment.get("num").toString()) : 0L);
+        orderOverviewVO.setPaymentAmount(payment != null && payment.containsKey("price") ? Double.parseDouble(payment.get("price").toString()) : 0D);
 
         //如果有店铺id传入，则查询店铺
         if (StringUtils.isNotEmpty(statisticsQueryParam.getStoreId())) {
@@ -186,8 +185,10 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
         }
         queryWrapper.eq("flow_type", FlowTypeEnum.REFUND.name());
         Map payment = this.getMap(queryWrapper);
-        orderOverviewVO.setRefundOrderNum(payment != null && payment.containsKey("num") ? (Long) payment.get("num") : 0L);
-        orderOverviewVO.setRefundOrderPrice(payment != null && payment.containsKey("price") ? (Double) payment.get("price") : 0D);
+
+        orderOverviewVO.setRefundOrderNum(payment != null && payment.containsKey("num") ? Long.parseLong(payment.get("num").toString()) : 0L);
+        orderOverviewVO.setRefundOrderPrice(payment != null && payment.containsKey("price") ? Double.parseDouble(payment.get("price").toString()) :
+                0D);
     }
 
 
