@@ -98,4 +98,21 @@ public class MemberVO implements Serializable {
     public MemberVO(Member member) {
         BeanUtil.copyProperties(member, this);
     }
+
+    public String getRegionId() {
+        return getDefaultValue(regionId);
+    }
+
+    public String getRegion() {
+        return getDefaultValue(region);
+    }
+
+    /**
+     * JSON转换中的null 会转成 "null"
+     * @param value
+     * @return
+     */
+    private String getDefaultValue(String value){
+        return (value == null || "null".equals(value)) ? "" : value;
+    }
 }
