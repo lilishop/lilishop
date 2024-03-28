@@ -310,7 +310,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
         //如果订单促销类型不为空&&订单是拼团订单，并且订单未成团，则抛出异常
         if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())
-                && !CharSequenceUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.TAKE.name(), OrderStatusEnum.UNDELIVERED.name(), OrderStatusEnum.STAY_PICKED_UP.name())) {
+            && !CharSequenceUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.TAKE.name(), OrderStatusEnum.UNDELIVERED.name(),
+                OrderStatusEnum.STAY_PICKED_UP.name())) {
             throw new ServiceException(ResultCode.ORDER_CAN_NOT_CANCEL);
         }
         if (CharSequenceUtil.equalsAny(order.getOrderStatus(),
@@ -337,12 +338,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     @OrderLogPoint(description = "'订单['+#orderSn+']系统取消，原因为：'+#reason", orderSn = "#orderSn")
     @Transactional(rollbackFor = Exception.class)
-    public void systemCancel(String orderSn, String reason,Boolean refundMoney) {
+    public void systemCancel(String orderSn, String reason, Boolean refundMoney) {
         Order order = this.getBySn(orderSn);
         order.setOrderStatus(OrderStatusEnum.CANCELLED.name());
         order.setCancelReason(reason);
         this.updateById(order);
-        if(refundMoney){
+        if (refundMoney) {
             //生成店铺退款流水
             this.generatorStoreRefundFlow(order);
             orderStatusMessage(order);
@@ -533,10 +534,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public Order getOrderByVerificationCode(String verificationCode) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
-        return this.getOne(new LambdaQueryWrapper<Order>()
+        Order order = this.getOne(new LambdaQueryWrapper<Order>()
                 .in(Order::getOrderStatus, OrderStatusEnum.TAKE.name(), OrderStatusEnum.STAY_PICKED_UP.name())
                 .eq(Order::getStoreId, storeId)
                 .eq(Order::getVerificationCode, verificationCode));
+        if (order == null) {
+            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+        }
+        return order;
     }
 
     @Override
@@ -729,7 +734,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Trade trade = tradeService.getBySn(order.getTradeSn());
         //如果交易不为空，则返回交易的金额，否则返回订单金额
         if (CharSequenceUtil.isNotEmpty(trade.getPayStatus())
-                && trade.getPayStatus().equals(PayStatusEnum.PAID.name())) {
+            && trade.getPayStatus().equals(PayStatusEnum.PAID.name())) {
             return trade.getFlowPrice();
         }
         return order.getFlowPrice();
@@ -792,12 +797,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 //如果未开启虚拟成团且已参团人数小于成团人数，则自动取消订单
                 String reason = "拼团活动结束订单未付款，系统自动取消订单";
                 if (CharSequenceUtil.isNotEmpty(entry.getKey())) {
-                    this.systemCancel(entry.getKey(), reason,true);
+                    this.systemCancel(entry.getKey(), reason, true);
                 } else {
                     for (Order order : entry.getValue()) {
                         if (!CharSequenceUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.COMPLETED.name(), OrderStatusEnum.DELIVERED.name(),
                                 OrderStatusEnum.TAKE.name(), OrderStatusEnum.STAY_PICKED_UP.name())) {
-                            this.systemCancel(order.getSn(), reason,true);
+                            this.systemCancel(order.getSn(), reason, true);
                         }
                     }
                 }
@@ -851,7 +856,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     orderPackageItem.setGoodsName(orderItem.getGoodsName());
                     orderPackageItem.setThumbnail(orderItem.getImage());
                     orderPackageItemService.save(orderPackageItem);
-                    OrderLog orderLog = new OrderLog(orderSn, UserContext.getCurrentUser().getId(), UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), "订单 [ " + orderSn + " ]商品 [ " + orderItem.getGoodsName() + " ]发货，发货数量: [ " + partDeliveryDTO.getDeliveryNum() + " ]，发货单号[ " + invoiceNumber + " ]");
+                    OrderLog orderLog = new OrderLog(orderSn, UserContext.getCurrentUser().getId(),
+                            UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), "订单 [ " + orderSn + " ]商品" +
+                                                                                                                          " [ " + orderItem.getGoodsName() + " ]发货，发货数量: [ " + partDeliveryDTO.getDeliveryNum() + " ]，发货单号[ " + invoiceNumber + " ]");
                     orderLogList.add(orderLog);
                 }
             }
@@ -890,7 +897,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //未付款订单自动取消
         if (unpaidOrders != null && !unpaidOrders.isEmpty()) {
             for (Order unpaidOrder : unpaidOrders) {
-                this.systemCancel(unpaidOrder.getSn(), "拼团活动结束订单未付款，系统自动取消订单",false);
+                this.systemCancel(unpaidOrder.getSn(), "拼团活动结束订单未付款，系统自动取消订单", false);
             }
         }
         List<Order> paidOrders = listMap.get(PayStatusEnum.PAID.name());
@@ -1052,7 +1059,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private void pintuanOrderFailed(List<Order> list) {
         for (Order order : list) {
             try {
-                this.systemCancel(order.getSn(), "拼团人数不足，拼团失败！",true);
+                this.systemCancel(order.getSn(), "拼团人数不足，拼团失败！", true);
             } catch (Exception e) {
                 log.error("拼团订单取消失败", e);
             }
@@ -1149,6 +1156,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     /**
      * 根据订单设置修改订单投诉状态
+     *
      * @param orderSn
      */
     private void updateOrderComplainStatus(String orderSn) {
