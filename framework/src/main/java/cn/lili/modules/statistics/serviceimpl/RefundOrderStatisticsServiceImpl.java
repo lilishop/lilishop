@@ -37,7 +37,7 @@ public class RefundOrderStatisticsServiceImpl extends ServiceImpl<RefundOrderSta
 
         QueryWrapper queryWrapper = getQueryWrapper(statisticsQueryParam);
         queryWrapper.select("SUM(final_price) AS price");
-        return (Double) this.getMap(queryWrapper).get("price");
+        return Double.parseDouble(this.getMap(queryWrapper).get("price").toString());
     }
 
 

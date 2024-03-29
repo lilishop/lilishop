@@ -135,9 +135,9 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         //下单统计
         Map<String, Object> map = storeFlowStatisticsService.getOrderStatisticsPrice();
         //今日下单数
-        indexStatisticsVO.setTodayOrderNum(map.get("num") == null ? 0L : (Long) map.get("num"));
+        indexStatisticsVO.setTodayOrderNum(map.get("num") == null ? 0L : Long.parseLong(map.get("num").toString()));
         //今日下单金额
-        indexStatisticsVO.setTodayOrderPrice(map.get("price") == null ? 0D : (Double) map.get("price"));
+        indexStatisticsVO.setTodayOrderPrice(map.get("price") == null ? 0D : Double.parseDouble(map.get("price").toString()));
 
         //今日新增会员数量
         indexStatisticsVO.setTodayMemberNum(memberStatisticsService.todayMemberNum());
