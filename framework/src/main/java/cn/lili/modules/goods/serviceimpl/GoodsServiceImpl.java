@@ -441,10 +441,11 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
-    @SystemLogPoint(description = "修改商品库存", customerLog = "'操作的商品ID:['+#goodsId+']，修改后的库存:['+#quantity+']'")
-    public void updateStock(String goodsId, Integer quantity) {
+    @SystemLogPoint(description = "同步商品库存", customerLog = "'同步商品商品ID的库存:['+#goodsId+']'")
+    public void updateStock(String goodsId) {
         LambdaUpdateWrapper<Goods> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.set(Goods::getQuantity, quantity);
+        Integer stock = goodsSkuService.getGoodsStock(goodsId);
+        lambdaUpdateWrapper.set(Goods::getQuantity, stock);
         lambdaUpdateWrapper.eq(Goods::getId, goodsId);
         cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
         this.update(lambdaUpdateWrapper);

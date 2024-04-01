@@ -271,4 +271,12 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * @param commentNum 评论数量
      */
     void updateGoodsSkuGrade(String goodsId, double grade,int commentNum);
+
+    /**
+     * 获取最新商品库存
+     *
+     * @param goodsId 商品ID
+     * @return 库存数量
+     */
+    Integer getGoodsStock(String goodsId);
 }

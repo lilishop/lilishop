@@ -153,9 +153,8 @@ public interface GoodsService extends IService<Goods> {
      * 修改商品库存数量
      *
      * @param goodsId  商品ID
-     * @param quantity 库存数量
      */
-    void updateStock(String goodsId, Integer quantity);
+    void updateStock(String goodsId);
 
     /**
      * 更新商品评价数量

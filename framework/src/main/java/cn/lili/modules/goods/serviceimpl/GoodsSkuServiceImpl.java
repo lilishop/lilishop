@@ -519,16 +519,13 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //统计每个商品的库存
         for (Map.Entry<String, List<GoodsSkuStockDTO>> entry : groupByGoodsIds.entrySet()) {
             //库存
-            Integer quantity = 0;
             for (GoodsSkuStockDTO goodsSku : entry.getValue()) {
                 goodsSkuStockDTOS.stream().filter(i -> i.getSkuId().equals(goodsSku.getSkuId())).findFirst().ifPresent(i -> goodsSku.setQuantity(i.getQuantity()));
-                if (entry.getKey().equals(goodsSku.getGoodsId())) {
-                    quantity += goodsSku.getQuantity();
-                }
+
                 this.updateStock(goodsSku.getSkuId(), goodsSku.getQuantity());
             }
             //保存商品库存结果
-            goodsService.updateStock(entry.getKey(), quantity);
+            goodsService.updateStock(entry.getKey());
         }
     }
 
@@ -588,7 +585,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             if (isFlag && CharSequenceUtil.equals(goodsSku.getMarketEnable(), GoodsStatusEnum.UPPER.name())) {
                 List<String> goodsIds = new ArrayList<>();
                 goodsIds.add(goodsSku.getGoodsId());
-                applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.UPDATE_GOODS_INDEX.name(), goodsIds));
+                applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品", rocketmqCustomProperties.getGoodsTopic(),
+                        GoodsTagsEnum.UPDATE_GOODS_INDEX.name(), goodsIds));
             }
         }
     }
@@ -622,7 +620,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 this.updateStock(goodsSku.getId(), goodsSku.getQuantity());
             }
             //保存商品库存结果
-            goodsService.updateStock(goodsId, quantity);
+            goodsService.updateStock(goodsId);
         }
 
 
@@ -656,7 +654,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     public Long countSkuNum(String storeId) {
         LambdaQueryWrapper<GoodsSku> queryWrapper = new LambdaQueryWrapper<>();
 
-        queryWrapper.eq(GoodsSku::getStoreId, storeId).eq(GoodsSku::getDeleteFlag, Boolean.FALSE).eq(GoodsSku::getAuthFlag, GoodsAuthEnum.PASS.name()).eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
+        queryWrapper.eq(GoodsSku::getStoreId, storeId).eq(GoodsSku::getDeleteFlag, Boolean.FALSE).eq(GoodsSku::getAuthFlag,
+                GoodsAuthEnum.PASS.name()).eq(GoodsSku::getMarketEnable, GoodsStatusEnum.UPPER.name());
         return this.count(queryWrapper);
     }
 
@@ -693,6 +692,19 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         updateWrapper.set(GoodsSku::getCommentNum, commentNum);
         this.update(updateWrapper);
         this.getSkuIdsByGoodsId(goodsId).forEach(this::clearCache);
+    }
+
+    @Override
+    public Integer getGoodsStock(String goodsId) {
+        List<String> skuIds = this.getSkuIdsByGoodsId(goodsId);
+
+        Integer stock = 0;
+
+        for (String skuId : skuIds) {
+            stock += this.getStock(skuId);
+        }
+        return stock;
+
     }
 
     /**
