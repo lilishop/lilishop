@@ -129,14 +129,14 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
                     distributionService.addRebate(rebate, order.getDistributionId());
 
                     //如果天数写0则立即进行结算
-                    if (distributionSetting.getCashDay().equals(0)) {
-                        DateTime dateTime = new DateTime();
-                        dateTime = dateTime.offsetNew(DateField.DAY_OF_MONTH, -distributionSetting.getCashDay());
-                        //防止事务失效，采用上下文获取bean
-                        DistributionOrderService bean = SpringContextUtil.getBean(DistributionOrderService.class);
-                        //分销订单结算
-                        bean.updateRebate(dateTime, DistributionOrderStatusEnum.WAIT_BILL.name());
-                    }
+//                    if (distributionSetting.getCashDay().equals(0)) {
+//                        DateTime dateTime = new DateTime();
+//                        dateTime = dateTime.offsetNew(DateField.DAY_OF_MONTH, -distributionSetting.getCashDay());
+//                        //防止事务失效，采用上下文获取bean
+//                        DistributionOrderService bean = SpringContextUtil.getBean(DistributionOrderService.class);
+//                        //分销订单结算
+//                        bean.updateRebate(dateTime, DistributionOrderStatusEnum.WAIT_BILL.name());
+//                    }
                 }
 
 
