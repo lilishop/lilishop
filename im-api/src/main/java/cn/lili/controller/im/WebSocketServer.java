@@ -1,6 +1,7 @@
 package cn.lili.controller.im;
 
 import cn.hutool.json.JSONUtil;
+import cn.lili.cache.Cache;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
@@ -15,17 +16,20 @@ import cn.lili.modules.im.service.ImTalkService;
 import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.websocket.OnClose;
+import javax.websocket.OnError;
+import javax.websocket.OnMessage;
+import javax.websocket.OnOpen;
+import javax.websocket.Session;
+import javax.websocket.server.PathParam;
+import javax.websocket.server.ServerEndpoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import javax.websocket.*;
-import javax.websocket.server.PathParam;
-import javax.websocket.server.ServerEndpoint;
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author liushuai
@@ -37,18 +41,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WebSocketServer {
     /**
+     * 在线人数 PS 注意，只能单节点，如果多节点部署需要自行寻找方案
+     */
+    private static ConcurrentHashMap<String, Session> sessionPools = new ConcurrentHashMap<>();
+    /**
      * 消息服务
      */
     private final ImMessageService imMessageService;
-
     private final ImTalkService imTalkService;
-
-    /**
-     * 在线人数
-     * PS 注意，只能单节点，如果多节点部署需要自行寻找方案
-     */
-    private static ConcurrentHashMap<String, Session> sessionPools = new ConcurrentHashMap<>();
-
+    private final Cache cache;
 
     /**
      * 建立连接
@@ -58,15 +59,15 @@ public class WebSocketServer {
     @OnOpen
     public void onOpen(@PathParam("accessToken") String accessToken, Session session) {
 
-
-        AuthUser authUser = UserContext.getAuthUser(accessToken);
+        AuthUser authUser = UserContext.getAuthUser(cache, accessToken);
 
         String sessionId = UserEnums.STORE.equals(authUser.getRole()) ? authUser.getStoreId() : authUser.getId();
         //如果已有会话，则进行下线提醒。
         if (sessionPools.containsKey(sessionId)) {
             log.info("用户重复登陆，旧用户下线");
             Session oldSession = sessionPools.get(sessionId);
-            sendMessage(oldSession, MessageVO.builder().messageResultType(MessageResultType.OFFLINE).result("用户异地登陆").build());
+            sendMessage(oldSession,
+                MessageVO.builder().messageResultType(MessageResultType.OFFLINE).result("用户异地登陆").build());
             try {
                 oldSession.close();
             } catch (Exception e) {
@@ -116,9 +117,10 @@ public class WebSocketServer {
                 ImMessage imMessage = new ImMessage(messageOperation);
                 imMessageService.save(imMessage);
                 //修改最后消息信息
-                imTalkService.update(new LambdaUpdateWrapper<ImTalk>().eq(ImTalk::getId, messageOperation.getTalkId()).set(ImTalk::getLastTalkMessage, messageOperation.getContext())
-                        .set(ImTalk::getLastTalkTime, imMessage.getCreateTime())
-                        .set(ImTalk::getLastMessageType, imMessage.getMessageType()));
+                imTalkService.update(new LambdaUpdateWrapper<ImTalk>().eq(ImTalk::getId, messageOperation.getTalkId())
+                    .set(ImTalk::getLastTalkMessage, messageOperation.getContext())
+                    .set(ImTalk::getLastTalkTime, imMessage.getCreateTime())
+                    .set(ImTalk::getLastMessageType, imMessage.getMessageType()));
                 //发送消息
                 sendMessage(messageOperation.getTo(), new MessageVO(MessageResultType.MESSAGE, imMessage));
                 break;
@@ -128,10 +130,12 @@ public class WebSocketServer {
                 }
                 break;
             case UNREAD:
-                sendMessage(authUser.getId(), new MessageVO(MessageResultType.UN_READ, imMessageService.unReadMessages(accessToken)));
+                sendMessage(authUser.getId(),
+                    new MessageVO(MessageResultType.UN_READ, imMessageService.unReadMessages(accessToken)));
                 break;
             case HISTORY:
-                sendMessage(authUser.getId(), new MessageVO(MessageResultType.HISTORY, imMessageService.historyMessage(accessToken, messageOperation.getTo())));
+                sendMessage(authUser.getId(), new MessageVO(MessageResultType.HISTORY,
+                    imMessageService.historyMessage(accessToken, messageOperation.getTo())));
                 break;
             default:
                 break;
@@ -175,6 +179,5 @@ public class WebSocketServer {
     public void onError(Session session, Throwable throwable) {
         log.error("socket异常: {}", session.getId(), throwable);
     }
-
 
 }
