@@ -148,6 +148,9 @@ public class Order extends BaseEntity {
     @ApiModelProperty(value = "买家订单备注")
     private String remark;
 
+    @ApiModelProperty(value = "卖家订单备注")
+    private String sellerRemark;
+
     @ApiModelProperty(value = "订单取消原因")
     private String cancelReason;
 

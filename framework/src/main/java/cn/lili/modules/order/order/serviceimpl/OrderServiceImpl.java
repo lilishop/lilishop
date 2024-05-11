@@ -883,6 +883,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         return order;
     }
 
+    @Override
+    public Order updateSellerRemark(String orderSn, String sellerRemark) {
+        Order order = this.getBySn(orderSn);
+        order.setSellerRemark(sellerRemark);
+        this.updateById(order);
+        return order;
+    }
+
     /**
      * 虚拟成团
      *

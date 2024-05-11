@@ -148,6 +148,9 @@ public class OrderSimpleVO {
     @ApiModelProperty(value = "退款金额")
     private String groupRefundPrice;
 
+    @ApiModelProperty(value = "卖家订单备注")
+    private String sellerRemark;
+
     public List<OrderItemVO> getOrderItems() {
         if (CharSequenceUtil.isEmpty(groupGoodsId)) {
             return new ArrayList<>();

@@ -251,4 +251,11 @@ public class OrderStoreController {
     public ResultMessage<Object> delivery(@RequestBody PartDeliveryParamsDTO partDeliveryParamsDTO) {
         return ResultUtil.data(orderService.partDelivery(partDeliveryParamsDTO));
     }
+
+    @ApiOperation(value = "卖家订单备注")
+    @PutMapping("/{orderSn}/sellerRemark")
+    public ResultMessage<Object> sellerRemark(@PathVariable String orderSn, @RequestParam String sellerRemark) {
+        orderService.updateSellerRemark(orderSn, sellerRemark);
+        return ResultUtil.success();
+    }
 }

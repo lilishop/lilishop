@@ -127,4 +127,11 @@ public class OrderManagerController {
     public ResultMessage<Object> getTraces(@NotBlank(message = "订单编号不能为空") @PathVariable String orderSn) {
         return ResultUtil.data(orderService.getTraces(orderSn));
     }
+
+    @ApiOperation(value = "卖家订单备注")
+    @PutMapping("/{orderSn}/sellerRemark")
+    public ResultMessage<Object> sellerRemark(@PathVariable String orderSn, @RequestParam String sellerRemark) {
+        orderService.updateSellerRemark(orderSn, sellerRemark);
+        return ResultUtil.success();
+    }
 }

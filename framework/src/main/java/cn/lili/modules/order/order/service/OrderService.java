@@ -320,4 +320,12 @@ public interface OrderService extends IService<Order> {
      */
     Order partDelivery(PartDeliveryParamsDTO partDeliveryParamsDTO);
 
+    /**
+     * 卖家订单备注
+     *
+     * @param orderSn 订单编号
+     * @param sellerRemark  卖家订单备注
+     * @return 订单
+     */
+    Order updateSellerRemark(String orderSn, String sellerRemark);
 }
