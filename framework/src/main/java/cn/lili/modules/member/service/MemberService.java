@@ -135,10 +135,9 @@ public interface MemberService extends IService<Member> {
     /**
      * 注销账号
      *
-     * @param password 密码
      * @return 操作结果
      */
-    void cancellation(String password);
+    void cancellation();
     /**
      * 修改当前会员的手机号
      *

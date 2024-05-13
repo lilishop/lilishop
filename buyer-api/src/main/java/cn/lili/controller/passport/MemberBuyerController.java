@@ -272,12 +272,9 @@ public class MemberBuyerController {
     }
 
     @ApiOperation(value = "注销账号")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "password", value = "密码", required = true, paramType = "query")
-    })
     @PutMapping("/cancellation")
-    public ResultMessage<Member> cancellation(@NotNull(message = "密码不能为空") @RequestParam String password) {
-        memberService.cancellation(password);
+    public ResultMessage<Member> cancellation() {
+        memberService.cancellation();
         return ResultUtil.success();
     }
 

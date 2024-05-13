@@ -375,19 +375,17 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @Override
-    public void cancellation(String password) {
+    public void cancellation() {
 
         AuthUser tokenUser = UserContext.getCurrentUser();
         if (tokenUser == null) {
             throw new ServiceException(ResultCode.USER_NOT_LOGIN);
         }
         Member member = this.getById(tokenUser.getId());
-        if (member.getPassword().equals(new BCryptPasswordEncoder().encode(password))) {
-            //删除联合登录
-            connectService.deleteByMemberId(member.getId());
-            //混淆用户信息
-            this.confusionMember(member);
-        }
+        //删除联合登录
+        connectService.deleteByMemberId(member.getId());
+        //混淆用户信息
+        this.confusionMember(member);
     }
 
     /**
