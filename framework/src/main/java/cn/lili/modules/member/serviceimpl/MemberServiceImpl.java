@@ -395,7 +395,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
      */
     private void confusionMember(Member member) {
         member.setUsername(UuidUtils.getUUID());
-        member.setMobile(UuidUtils.getUUID() + member.getMobile());
+        member.setMobile(member.getMobile());
         member.setNickName("用户已注销");
         member.setDisabled(false);
         this.updateById(member);
