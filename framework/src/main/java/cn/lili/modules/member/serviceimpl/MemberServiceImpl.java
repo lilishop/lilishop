@@ -292,6 +292,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             member = new Member(mobilePhone, UuidUtils.getUUID(), mobilePhone);
             registerHandler(member);
         }
+        //判断用户是否有效
+        if (member.getDisabled().equals(false) || member.getDeleteFlag().equals(true)) {
+            throw new ServiceException(ResultCode.USER_STATUS_ERROR);
+        }
         loginBindUser(member);
         return memberTokenGenerate.createToken(member, false);
     }
