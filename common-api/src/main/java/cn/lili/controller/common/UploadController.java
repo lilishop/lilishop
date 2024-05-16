@@ -55,6 +55,9 @@ public class UploadController {
                                         String base64,
                                         @RequestHeader String accessToken, @RequestParam String directoryPath) {
 
+        if(StrUtil.isBlank(directoryPath)){
+            directoryPath = "default";
+        }
 
         AuthUser authUser = UserContext.getAuthUser(cache, accessToken);
         //如果用户未登录，则无法上传图片
