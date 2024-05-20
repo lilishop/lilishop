@@ -2,6 +2,7 @@ package cn.lili.modules.order.order.entity.dos;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -187,4 +188,10 @@ public class OrderItem extends BaseEntity {
         this.priceDetail = JSONUtil.toJsonStr(priceDetail);
     }
 
+    public String getAfterSaleStatus() {
+        if (PromotionTypeEnum.isAfterSale(this.getPromotionType())) {
+            return OrderItemAfterSaleStatusEnum.EXPIRED.name();
+        }
+        return afterSaleStatus;
+    }
 }

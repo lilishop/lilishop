@@ -1,5 +1,7 @@
 package cn.lili.modules.order.order.entity.enums;
 
+import java.util.EnumSet;
+
 /**
  * 订单促销类型枚举
  *
@@ -27,6 +29,15 @@ public enum OrderPromotionTypeEnum {
     /**
      * 砍价订单
      */
-    KANJIA
+    KANJIA;
 
+    /**
+     * 判断订单类型是否可售后
+     * GIFT\POINTS\KANJIA 三种促销类型的订单不可进行售后
+     * @return true 不可售后 false 可售后
+     */
+    public static boolean isAfterSale(String orderPromotionType) {
+        EnumSet<OrderPromotionTypeEnum> noAfterSale = EnumSet.of(OrderPromotionTypeEnum.GIFT, OrderPromotionTypeEnum.POINTS, OrderPromotionTypeEnum.KANJIA);
+        return noAfterSale.contains(OrderPromotionTypeEnum.valueOf(orderPromotionType));
+    }
 }
