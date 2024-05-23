@@ -661,7 +661,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             this.pintuanOrderSuccess(list);
         } else if (Boolean.FALSE.equals(pintuan.getFictitious()) && pintuan.getRequiredNum() > list.size()) {
             //如果未开启虚拟成团且当前订单数量不足成团数量，则认为拼团失败
-            this.pintuanOrderFailed(list);
+            this.pintuanOrderFailed(parentOrderSn);
         }
     }
 
@@ -1062,9 +1062,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     /**
      * 根据提供的拼团订单列表更新拼团状态为拼团失败
      *
-     * @param list 需要更新拼团状态为失败的拼团订单列表
+     * @param parentOrderSn 拼团订单sn
      */
-    private void pintuanOrderFailed(List<Order> list) {
+    private void pintuanOrderFailed(String parentOrderSn) {
+        List<Order> list = this.list(new LambdaQueryWrapper<Order>().eq(Order::getParentOrderSn, parentOrderSn).or().eq(Order::getSn, parentOrderSn));
         for (Order order : list) {
             try {
                 this.systemCancel(order.getSn(), "拼团人数不足，拼团失败！", true);
