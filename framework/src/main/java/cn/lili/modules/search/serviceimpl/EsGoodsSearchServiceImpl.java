@@ -88,6 +88,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), searchDTO.getKeyword());
         }
         NativeSearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(searchDTO, pageVo);
+//        searchQueryBuilder.withCollapseField("goodsId");
         NativeSearchQuery searchQuery = searchQueryBuilder.build();
         searchQuery.setTrackTotalHits(true);
         log.debug("searchGoods DSL:{}", searchQuery.getQuery());
@@ -130,6 +131,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         //品牌
         AggregationBuilder brandNameBuilder = AggregationBuilders.terms(ATTR_BRAND_NAME).field("brandName.keyword");
         builder.addAggregation(AggregationBuilders.terms("brandIdNameAgg").field(ATTR_BRAND_ID).size(Integer.MAX_VALUE).subAggregation(brandNameBuilder));
+
         AggregationBuilder brandUrlBuilder = AggregationBuilders.terms(ATTR_BRAND_URL).field("brandUrl.keyword");
         builder.addAggregation(AggregationBuilders.terms("brandIdUrlAgg").field(ATTR_BRAND_ID).size(Integer.MAX_VALUE).subAggregation(brandUrlBuilder));
         //参数

@@ -205,10 +205,19 @@ public class PromotionTools {
         try {
             //移除无效促销活动
             return map.entrySet().stream().filter(Objects::nonNull).filter(i -> {
-                JSONObject promotionsObj = JSONUtil.parseObj(i.getValue());
-                BasePromotions basePromotions = promotionsObj.toBean(BasePromotions.class);
-                if (basePromotions != null && basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
-                    return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
+                try {
+                    if (JSONUtil.isTypeJSON(JSONUtil.toJsonStr(i.getValue()))) {
+                        JSONObject promotionsObj = JSONUtil.parseObj(i.getValue());
+                        BasePromotions basePromotions = promotionsObj.toBean(BasePromotions.class);
+                        if (basePromotions != null && basePromotions.getStartTime() != null && basePromotions.getEndTime() != null) {
+                            return basePromotions.getStartTime().getTime() <= System.currentTimeMillis() && basePromotions.getEndTime().getTime() >= System.currentTimeMillis();
+                        }
+                    } else {
+                        return false;
+                    }
+                } catch (Exception ee) {
+                    log.debug("转换异常促销活动信息：{}", i);
+                    return false;
                 }
                 return i.getValue() != null;
             }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> newValue));
