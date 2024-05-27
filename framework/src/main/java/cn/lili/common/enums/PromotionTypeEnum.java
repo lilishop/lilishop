@@ -1,6 +1,9 @@
 package cn.lili.common.enums;
 
 
+import cn.lili.common.utils.StringUtils;
+
+import java.util.Arrays;
 import java.util.EnumSet;
 
 /**
@@ -55,12 +58,27 @@ public enum PromotionTypeEnum {
     }
 
     /**
-     * 判断订单类型是否可售后
-     * POINTS\KANJIA 三种促销类型的订单不可进行售后
-     * @return true 不可售后 false 可售后
+     * 判断促销类型是否有效
+     * @param typeEnumValue
+     * @return
      */
-    public static boolean isAfterSale(String promotionType) {
+    public static boolean isValid(String typeEnumValue) {
+        if (StringUtils.isBlank(typeEnumValue)) {
+            return false;
+        }
+        return Arrays.stream(PromotionTypeEnum.values()).anyMatch(c -> c.name().equals(typeEnumValue));
+    }
+
+    /**
+     * 判断订单类型是否可售后
+     * POINTS\KANJIA 两种促销类型的订单不可进行售后
+     * @return true 可售后 false 不可售后
+     */
+    public static boolean isCanAfterSale(String promotionType) {
+        if (!isValid(promotionType)) {
+            return true;
+        }
         EnumSet<PromotionTypeEnum> noAfterSale = EnumSet.of(PromotionTypeEnum.KANJIA, PromotionTypeEnum.POINTS_GOODS);
-        return noAfterSale.contains(PromotionTypeEnum.valueOf(promotionType));
+        return !noAfterSale.contains(PromotionTypeEnum.valueOf(promotionType));
     }
 }

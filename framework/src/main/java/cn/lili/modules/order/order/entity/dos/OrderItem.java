@@ -189,7 +189,7 @@ public class OrderItem extends BaseEntity {
     }
 
     public String getAfterSaleStatus() {
-        if (PromotionTypeEnum.isAfterSale(this.getPromotionType())) {
+        if (!PromotionTypeEnum.isCanAfterSale(this.promotionType)) {
             return OrderItemAfterSaleStatusEnum.EXPIRED.name();
         }
         return afterSaleStatus;

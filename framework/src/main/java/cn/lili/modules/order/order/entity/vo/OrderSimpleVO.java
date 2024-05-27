@@ -188,7 +188,7 @@ public class OrderSimpleVO {
             orderItemVO.setImage(groupImages.split(",")[i]);
         }
         if (CharSequenceUtil.isNotEmpty(groupAfterSaleStatus) && groupAfterSaleStatus.split(",").length == groupGoodsId.split(",").length) {
-            if (OrderPromotionTypeEnum.isAfterSale(this.orderPromotionType)) {
+            if (!OrderPromotionTypeEnum.isCanAfterSale(this.orderPromotionType)) {
                 orderItemVO.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.EXPIRED.name());
             } else {
                 orderItemVO.setAfterSaleStatus(groupAfterSaleStatus.split(",")[i]);
@@ -222,7 +222,7 @@ public class OrderSimpleVO {
 
     public String getGroupAfterSaleStatus() {
         // 不可售后的订单类型集合
-        if (OrderPromotionTypeEnum.isAfterSale(this.orderPromotionType)) {
+        if (!OrderPromotionTypeEnum.isCanAfterSale(this.orderPromotionType)) {
             return OrderItemAfterSaleStatusEnum.EXPIRED.name();
         }
         return groupAfterSaleStatus;
