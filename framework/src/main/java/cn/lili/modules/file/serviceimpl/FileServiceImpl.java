@@ -42,7 +42,9 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
         List<File> files = this.list(queryWrapper);
         List<String> keys = new ArrayList<>();
         files.forEach(item -> keys.add(item.getFileKey()));
-        filePluginFactory.filePlugin().deleteFile(keys);
+        if(!keys.isEmpty()) {
+            filePluginFactory.filePlugin().deleteFile(keys);
+        }
         this.remove(queryWrapper);
     }
 
