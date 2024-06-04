@@ -743,6 +743,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      * @param goodsSku sku
      */
     void renderImages(GoodsSku goodsSku, List<String> goodsImages) {
+        if (goodsImages == null || goodsImages.isEmpty()) {
+            return;
+        }
         JSONObject jsonObject = JSONUtil.parseObj(goodsSku.getSpecs());
         List<String> images = jsonObject.getBeanList("images", String.class);
         GoodsGallery goodsGallery;
