@@ -107,7 +107,9 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
             //获取已参团人数
             this.setMemberVONum(memberVO, pintuan.getRequiredNum(), order.getSn());
             memberVO.setOrderSn(order.getSn());
-            members.add(memberVO);
+            if (memberVO.getToBeGroupedNum() > 0) {
+                members.add(memberVO);
+            }
         }
         return members;
     }
