@@ -67,13 +67,19 @@ public class CouponBuyerController {
         if (UserContext.getCurrentUser() == null) {
             return ResultUtil.success();
         }
-        return ResultUtil.data(couponActivityService.trigger(
+        List<MemberCoupon> memberCouponList = couponActivityService.trigger(
                 CouponActivityTrigger.builder()
                         .couponActivityTypeEnum(CouponActivityTypeEnum.AUTO_COUPON)
                         .nickName(UserContext.getCurrentUser().getNickName())
                         .userId(UserContext.getCurrentUser().getId())
-                        .build())
-        );
+                        .build());
+        memberCouponList.addAll(couponActivityService.trigger(
+                CouponActivityTrigger.builder()
+                        .couponActivityTypeEnum(CouponActivityTypeEnum.SPECIFY)
+                        .nickName(UserContext.getCurrentUser().getNickName())
+                        .userId(UserContext.getCurrentUser().getId())
+                        .build()));
+        return ResultUtil.data(memberCouponList);
     }
 
     @GetMapping
