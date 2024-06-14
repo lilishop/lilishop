@@ -231,11 +231,20 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
             couponActivities = memberCouponSignService.receiveCoupon(couponActivities);
         }
 
+        /**
+         * 自动领取优惠券判定同时，将精准发券功能同时判定
+         */
+        if (couponActivityTrigger.getCouponActivityTypeEnum().equals(CouponActivityTypeEnum.SPECIFY)) {
+
+            couponActivities.addAll(memberCouponSignService.receiveCoupon(currentCouponActivity(CouponActivityTypeEnum.SPECIFY.name())));
+        }
+
+
         //优惠券发放列表
         List<CouponActivityItemVO> couponActivityItemVOS = new ArrayList<>();
 
         //准备发放优惠券活动的列表
-        couponActivities.stream().forEach(item -> couponActivityItemVOS.addAll(item.getCouponActivityItems()));
+        couponActivities.forEach(item -> couponActivityItemVOS.addAll(item.getCouponActivityItems()));
 
         AuthUser authUser = new AuthUser();
         authUser.setId(couponActivityTrigger.getUserId());
