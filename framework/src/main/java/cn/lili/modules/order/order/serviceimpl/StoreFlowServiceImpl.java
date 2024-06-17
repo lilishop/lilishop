@@ -226,8 +226,10 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         if (storeFlowQueryDTO.getBill() != null) {
             Bill bill = storeFlowQueryDTO.getBill();
             lambdaQueryWrapper.eq(CharSequenceUtil.isNotEmpty(bill.getStoreId()), StoreFlow::getStoreId, bill.getStoreId());
-            lambdaQueryWrapper.between(bill.getStartTime() != null && bill.getEndTime() != null,
-                    StoreFlow::getCreateTime, bill.getStartTime(), bill.getEndTime());
+            lambdaQueryWrapper.ge(bill.getStartTime() != null && bill.getEndTime() != null,
+                    StoreFlow::getCreateTime, bill.getStartTime());
+            lambdaQueryWrapper.lt(bill.getStartTime() != null && bill.getEndTime() != null,
+                    StoreFlow::getCreateTime, bill.getEndTime());
         }
         return lambdaQueryWrapper;
     }
