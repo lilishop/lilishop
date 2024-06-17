@@ -286,7 +286,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public Token mobilePhoneLogin(String mobilePhone) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("mobile", mobilePhone);
-        Member member = this.baseMapper.selectOne(queryWrapper);
+        Member member = this.baseMapper.selectOne(queryWrapper, false);
         //如果手机号不存在则自动注册用户
         if (member == null) {
             member = new Member(mobilePhone, UuidUtils.getUUID(), mobilePhone);
