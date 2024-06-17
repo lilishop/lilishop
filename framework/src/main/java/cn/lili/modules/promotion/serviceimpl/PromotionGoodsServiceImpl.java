@@ -1,15 +1,12 @@
 package cn.lili.modules.promotion.serviceimpl;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
@@ -34,7 +31,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,11 +48,6 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
 
     private static final String SKU_ID_COLUMN = "sku_id";
 
-    /**
-     * Redis
-     */
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
     /**
      * 秒杀活动申请
      */
@@ -96,22 +87,12 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     }
 
     @Override
-    public List<PromotionGoods> findSkuValidPromotions(List<GoodsSkuDTO> skus) {
-        List<String> categories = skus.stream().map(GoodsSku::getCategoryPath).collect(Collectors.toList());
-        List<String> skuIds = skus.stream().map(GoodsSku::getId).collect(Collectors.toList());
-        List<String> categoriesPath = new ArrayList<>();
-        categories.forEach(i -> {
-                    if (CharSequenceUtil.isNotEmpty(i)) {
-                        categoriesPath.addAll(Arrays.asList(i.split(",")));
-                    }
-                }
-        );
+    public List<PromotionGoods> findSkuValidPromotions(List<String> skuIds) {
         QueryWrapper<PromotionGoods> queryWrapper = new QueryWrapper<>();
 
         queryWrapper.and(i -> i.or(j -> j.in(SKU_ID_COLUMN, skuIds))
                 .or(n -> n.eq("scope_type", PromotionsScopeTypeEnum.ALL.name()))
-                .or(n -> n.and(k -> k.eq("scope_type", PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name())
-                        .and(l -> l.in(CollUtil.isNotEmpty(categoriesPath), "scope_id", categoriesPath)))));
+                .or(n -> n.and(k -> k.eq("scope_type", PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name()))));
         queryWrapper.and(i -> i.or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START)).or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.NEW)));
         return this.list(queryWrapper);
     }
