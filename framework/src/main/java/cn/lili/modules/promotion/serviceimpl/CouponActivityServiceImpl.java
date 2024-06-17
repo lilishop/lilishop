@@ -227,16 +227,8 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
         /**
          * 自动发送优惠券则需要补足日志
          */
-        if (couponActivityTrigger.getCouponActivityTypeEnum().equals(CouponActivityTypeEnum.AUTO_COUPON)) {
+        if (couponActivityTrigger.getCouponActivityTypeEnum().equals(CouponActivityTypeEnum.AUTO_COUPON) || couponActivityTrigger.getCouponActivityTypeEnum().equals(CouponActivityTypeEnum.SPECIFY)) {
             couponActivities = memberCouponSignService.receiveCoupon(couponActivities);
-        }
-
-        /**
-         * 自动领取优惠券判定同时，将精准发券功能同时判定
-         */
-        if (couponActivityTrigger.getCouponActivityTypeEnum().equals(CouponActivityTypeEnum.SPECIFY)) {
-
-            couponActivities.addAll(memberCouponSignService.receiveCoupon(currentCouponActivity(CouponActivityTypeEnum.SPECIFY.name())));
         }
 
 
