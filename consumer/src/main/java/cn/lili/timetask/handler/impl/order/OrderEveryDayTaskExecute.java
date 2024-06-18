@@ -25,12 +25,12 @@ import cn.lili.modules.system.service.SettingService;
 import cn.lili.timetask.handler.EveryDayExecute;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author paulG
@@ -92,7 +92,7 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         }
         try {
             //关闭允许售后申请
-            closeAfterSale(orderSetting);
+            this.closeAfterSale(orderSetting);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -110,7 +110,6 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
      * @param orderSetting 订单设置
      */
     private void completedOrder(OrderSetting orderSetting) {
-
 
         //订单自动收货时间 = 当前时间 - 自动收货时间天数
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getAutoReceive());
@@ -144,7 +143,9 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getAutoEvaluation());
 
         //订单完成时间 <= 订单自动好评时间
-        OrderItemOperationDTO orderItemOperationDTO = OrderItemOperationDTO.builder().receiveTime(receiveTime).commentStatus(CommentStatusEnum.UNFINISHED.name()).build();
+        OrderItemOperationDTO orderItemOperationDTO =
+            OrderItemOperationDTO.builder().receiveTime(receiveTime).commentStatus(CommentStatusEnum.UNFINISHED.name())
+                .build();
         List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(orderItemOperationDTO);
 
         //判断是否有符合条件的订单，进行自动评价处理
@@ -170,25 +171,23 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         }
     }
 
-
     /**
      * 关闭允许售后申请
      *
      * @param orderSetting 订单设置
      */
-    private void closeAfterSale(OrderSetting orderSetting) {
+    @Transactional(rollbackFor = Exception.class)
+    public void closeAfterSale(OrderSetting orderSetting) {
         //订单关闭售后申请时间 = 当前时间 - 自动关闭售后申请天数
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getCloseAfterSale());
-        //关闭售后订单=未售后订单+小于订单关闭售后申请时间
-        OrderItemOperationDTO build = OrderItemOperationDTO.builder().receiveTime(receiveTime).afterSaleStatus(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name()).build();
-        List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(build);
 
-        //判断是否有符合条件的订单，关闭允许售后申请处理
-        if (!orderItems.isEmpty()) {
-            orderItemService.expiredAfterSaleStatus(receiveTime);
-            //修改对应分销订单状态
-            distributionOrderService.updateDistributionOrderStatus(orderItems);
-        }
+//        OrderItemOperationDTO build = OrderItemOperationDTO.builder().receiveTime(receiveTime)
+//            .afterSaleStatus(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name()).build();
+//        List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(build);
+        //关闭售后订单=未售后订单+小于订单关闭售后申请时间
+        orderItemService.expiredAfterSaleStatus(receiveTime);
+        //修改对应分销订单状态
+        distributionOrderService.updateDistributionOrderStatus();
 
     }
 
@@ -207,7 +206,8 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         DateTime receiveTime = DateUtil.offsetDay(DateUtil.date(), -orderSetting.getCloseComplaint());
 
         //关闭售后订单=未售后订单+小于订单关闭售后申请时间
-        OrderItemOperationDTO build = OrderItemOperationDTO.builder().receiveTime(receiveTime).complainStatus(OrderComplaintStatusEnum.NO_APPLY.name()).build();
+        OrderItemOperationDTO build = OrderItemOperationDTO.builder().receiveTime(receiveTime)
+            .complainStatus(OrderComplaintStatusEnum.NO_APPLY.name()).build();
         List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(build);
 
         //判断是否有符合条件的订单，关闭允许售后申请处理
@@ -217,9 +217,9 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
             List<String> orderItemIdList = orderItems.stream().map(OrderItem::getId).collect(Collectors.toList());
 
             //修改订单投诉状态
-            LambdaUpdateWrapper<OrderItem> lambdaUpdateWrapper = new LambdaUpdateWrapper<OrderItem>()
-                    .set(OrderItem::getComplainStatus, OrderItemAfterSaleStatusEnum.EXPIRED.name())
-                    .in(OrderItem::getId, orderItemIdList);
+            LambdaUpdateWrapper<OrderItem> lambdaUpdateWrapper =
+                new LambdaUpdateWrapper<OrderItem>().set(OrderItem::getComplainStatus,
+                    OrderItemAfterSaleStatusEnum.EXPIRED.name()).in(OrderItem::getId, orderItemIdList);
             orderItemService.update(lambdaUpdateWrapper);
         }
 

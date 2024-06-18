@@ -45,17 +45,13 @@ public interface DistributionOrderService extends IService<DistributionOrder> {
     /**
      * 订单退款
      * 记录分销订单
-     *
-     * @param afterSaleSn 售后单号
      */
     void refundOrder(AfterSale afterSale);
 
     /**
      * 分销订单状态修改
-     *
-     * @param orderItems
      */
-    void updateDistributionOrderStatus(List<OrderItem> orderItems);
+    void updateDistributionOrderStatus();
 
     /**
      * 分销订单结算
