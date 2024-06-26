@@ -4,10 +4,12 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.event.TransactionCommitSendMQEvent;
@@ -16,6 +18,7 @@ import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
+import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
@@ -64,7 +67,11 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -283,8 +290,26 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    public List<OrderExportDTO> queryExportOrder(OrderSearchParams orderSearchParams) {
-        return this.baseMapper.queryExportOrder(orderSearchParams.queryWrapper());
+    public void queryExportOrder(HttpServletResponse response, OrderSearchParams orderSearchParams) {
+
+        XSSFWorkbook workbook = initOrderExportData(this.baseMapper.queryExportOrder(orderSearchParams.queryWrapper()));
+        try {
+            // 设置响应头
+            String fileName = URLEncoder.encode("订单列表", "UTF-8");
+            response.setContentType("application/vnd.ms-excel;charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
+
+            ServletOutputStream out = response.getOutputStream();
+            workbook.write(out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                workbook.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -310,7 +335,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
         //如果订单促销类型不为空&&订单是拼团订单，并且订单未成团，则抛出异常
         if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())
-            && !CharSequenceUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.TAKE.name(), OrderStatusEnum.UNDELIVERED.name(),
+                && !CharSequenceUtil.equalsAny(order.getOrderStatus(), OrderStatusEnum.TAKE.name(), OrderStatusEnum.UNDELIVERED.name(),
                 OrderStatusEnum.STAY_PICKED_UP.name())) {
             throw new ServiceException(ResultCode.ORDER_CAN_NOT_CANCEL);
         }
@@ -734,7 +759,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Trade trade = tradeService.getBySn(order.getTradeSn());
         //如果交易不为空，则返回交易的金额，否则返回订单金额
         if (CharSequenceUtil.isNotEmpty(trade.getPayStatus())
-            && trade.getPayStatus().equals(PayStatusEnum.PAID.name())) {
+                && trade.getPayStatus().equals(PayStatusEnum.PAID.name())) {
             return trade.getFlowPrice();
         }
         return order.getFlowPrice();
@@ -858,7 +883,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     orderPackageItemService.save(orderPackageItem);
                     OrderLog orderLog = new OrderLog(orderSn, UserContext.getCurrentUser().getId(),
                             UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), "订单 [ " + orderSn + " ]商品" +
-                                                                                                                          " [ " + orderItem.getGoodsName() + " ]发货，发货数量: [ " + partDeliveryDTO.getDeliveryNum() + " ]，发货单号[ " + invoiceNumber + " ]");
+                            " [ " + orderItem.getGoodsName() + " ]发货，发货数量: [ " + partDeliveryDTO.getDeliveryNum() + " ]，发货单号[ " + invoiceNumber + " ]");
                     orderLogList.add(orderLog);
                 }
             }
@@ -1184,5 +1209,133 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .eq(OrderItem::getOrderSn, orderSn)
                 .set(OrderItem::getComplainStatus, OrderComplaintStatusEnum.EXPIRED.name());
         orderItemService.update(lambdaUpdateWrapper);
+    }
+
+    /**
+     * 初始化填充订单导出数据
+     *
+     * @param orderExportDTOList 导出的订单数据
+     * @return 订单导出列表
+     */
+    private XSSFWorkbook initOrderExportData(List<OrderExportDTO> orderExportDTOList) {
+        List<OrderExportDetailDTO> orderExportDetailDTOList = new ArrayList<>();
+        for (OrderExportDTO orderExportDTO : orderExportDTOList) {
+            OrderExportDetailDTO orderExportDetailDTO = new OrderExportDetailDTO();
+            BeanUtil.copyProperties(orderExportDTO, orderExportDetailDTO);
+            //金额
+            PriceDetailDTO priceDetailDTO = JSONUtil.toBean(orderExportDTO.getPriceDetail(), PriceDetailDTO.class);
+            orderExportDetailDTO.setFreightPrice(priceDetailDTO.getFreightPrice());
+            orderExportDetailDTO.setDiscountPrice(CurrencyUtil.add(priceDetailDTO.getDiscountPrice(), priceDetailDTO.getCouponPrice()));
+            orderExportDetailDTO.setUpdatePrice(priceDetailDTO.getUpdatePrice());
+            orderExportDetailDTO.setStoreMarketingCost(priceDetailDTO.getSiteCouponCommission());
+            orderExportDetailDTO.setSiteMarketingCost(CurrencyUtil.sub(orderExportDetailDTO.getDiscountPrice(), orderExportDetailDTO.getStoreMarketingCost()));
+            //地址
+            if (StrUtil.isNotBlank(orderExportDTO.getConsigneeAddressPath())) {
+                String[] receiveAddress = orderExportDTO.getConsigneeAddressPath().split(",");
+                orderExportDetailDTO.setProvince(receiveAddress[0]);
+                orderExportDetailDTO.setCity(receiveAddress[1]);
+                orderExportDetailDTO.setDistrict(receiveAddress.length > 2 ? receiveAddress[2] : "");
+                orderExportDetailDTO.setStreet(receiveAddress.length > 3 ? receiveAddress[3] : "");
+            }
+
+            //状态
+            orderExportDetailDTO.setOrderStatus(OrderStatusEnum.valueOf(orderExportDTO.getOrderStatus()).description());
+            orderExportDetailDTO.setPaymentMethod(CharSequenceUtil.isNotBlank(orderExportDTO.getPaymentMethod()) ? PaymentMethodEnum.valueOf(orderExportDTO.getPaymentMethod()).paymentName() : "");
+            orderExportDetailDTO.setClientType(ClientTypeEnum.valueOf(orderExportDTO.getClientType()).value());
+            orderExportDetailDTO.setOrderType(orderExportDTO.getOrderType().equals(OrderTypeEnum.NORMAL.name()) ? "普通订单" : "虚拟订单");
+            orderExportDetailDTO.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.valueOf(orderExportDTO.getAfterSaleStatus()).description());
+
+            //时间
+            orderExportDetailDTO.setCreateTime(DateUtil.formatDateTime(orderExportDTO.getCreateTime()));
+            orderExportDetailDTO.setPaymentTime(DateUtil.formatDateTime(orderExportDTO.getPaymentTime()));
+            orderExportDetailDTO.setLogisticsTime(DateUtil.formatDateTime(orderExportDTO.getLogisticsTime()));
+            orderExportDetailDTO.setCompleteTime(DateUtil.formatDateTime(orderExportDTO.getCompleteTime()));
+            orderExportDetailDTOList.add(orderExportDetailDTO);
+        }
+
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("订单列表");
+
+        // 创建表头
+        Row header = sheet.createRow(0);
+        String[] headers = {"主订单编号", "子订单编号", "选购商品", "商品数量", "商品ID", "商品单价", "订单应付金额",
+                "运费", "优惠总金额", "平台优惠", "商家优惠", "商家改价", "支付方式", "收件人", "收件人手机号",
+                "省", "市", "区", "街道", "详细地址", "买家留言", "订单提交时间", "支付完成时间", "来源",
+                "订单状态", "订单类型", "售后状态", "取消原因", "发货时间", "完成时间", "店铺"};
+
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = header.createCell(i);
+            cell.setCellValue(headers[i]);
+        }
+        // 填充数据
+        for (int i = 0; i < orderExportDetailDTOList.size(); i++) {
+            OrderExportDetailDTO dto = orderExportDetailDTOList.get(i);
+            Row row = sheet.createRow(i + 1);
+            row.createCell(0).setCellValue(dto.getOrderSn());
+            row.createCell(1).setCellValue(dto.getOrderItemSn());
+            row.createCell(2).setCellValue(dto.getGoodsName());
+            row.createCell(3).setCellValue(dto.getNum());
+            row.createCell(4).setCellValue(dto.getGoodsId());
+            row.createCell(5).setCellValue(dto.getUnitPrice());
+            row.createCell(6).setCellValue(dto.getFlowPrice());
+            row.createCell(7).setCellValue(dto.getFreightPrice());
+            row.createCell(8).setCellValue(dto.getDiscountPrice());
+            row.createCell(9).setCellValue(dto.getSiteMarketingCost());
+            row.createCell(10).setCellValue(dto.getStoreMarketingCost());
+            row.createCell(11).setCellValue(dto.getUpdatePrice());
+            row.createCell(12).setCellValue(dto.getPaymentMethod());
+            row.createCell(13).setCellValue(dto.getConsigneeName());
+            row.createCell(14).setCellValue(dto.getConsigneeMobile());
+            row.createCell(15).setCellValue(dto.getProvince());
+            row.createCell(16).setCellValue(dto.getCity());
+            row.createCell(17).setCellValue(dto.getDistrict());
+            row.createCell(18).setCellValue(dto.getStreet());
+            row.createCell(19).setCellValue(dto.getConsigneeDetail());
+            row.createCell(20).setCellValue(dto.getRemark());
+            row.createCell(21).setCellValue(dto.getCreateTime());
+            row.createCell(22).setCellValue(dto.getPaymentTime());
+            row.createCell(23).setCellValue(dto.getClientType());
+            row.createCell(24).setCellValue(dto.getOrderStatus());
+            row.createCell(25).setCellValue(dto.getOrderType());
+            row.createCell(26).setCellValue(dto.getAfterSaleStatus());
+            row.createCell(27).setCellValue(dto.getCancelReason());
+            row.createCell(28).setCellValue(dto.getLogisticsTime());
+            row.createCell(29).setCellValue(dto.getCompleteTime());
+            row.createCell(30).setCellValue(dto.getStoreName());
+        }
+
+        //修改列宽
+//        sheet.setColumnWidth(0, 30 * 256);
+//        sheet.setColumnWidth(1, 30 * 256);
+//        sheet.setColumnWidth(2, 30 * 256);
+//        sheet.setColumnWidth(3, 8 * 256);
+//        sheet.setColumnWidth(4, 20 * 256);
+//        sheet.setColumnWidth(5, 10 * 256);
+//        sheet.setColumnWidth(6, 10 * 256);
+//        sheet.setColumnWidth(7, 10 * 256);
+//        sheet.setColumnWidth(8, 10 * 256);
+//        sheet.setColumnWidth(9, 10 * 256);
+//        sheet.setColumnWidth(10, 10 * 256);
+//        sheet.setColumnWidth(11, 10 * 256);
+//        sheet.setColumnWidth(12, 10 * 256);
+//        sheet.setColumnWidth(13, 10 * 256);
+//        sheet.setColumnWidth(14, 16 * 256);
+//        sheet.setColumnWidth(15, 10 * 256);
+//        sheet.setColumnWidth(16, 10 * 256);
+//        sheet.setColumnWidth(17, 10 * 256);
+//        sheet.setColumnWidth(18, 10 * 256);
+//        sheet.setColumnWidth(19, 30 * 256);
+//        sheet.setColumnWidth(20, 20 * 256);
+//        sheet.setColumnWidth(21, 20 * 256);
+//        sheet.setColumnWidth(22, 20 * 256);
+//        sheet.setColumnWidth(23, 10 * 256);
+//        sheet.setColumnWidth(24, 10 * 256);
+//        sheet.setColumnWidth(25, 10 * 256);
+//        sheet.setColumnWidth(26, 10 * 256);
+//        sheet.setColumnWidth(27, 20 * 256);
+//        sheet.setColumnWidth(28, 20 * 256);
+//        sheet.setColumnWidth(29, 20 * 256);
+//        sheet.setColumnWidth(30, 20 * 256);
+        return workbook;
     }
 }

@@ -4,12 +4,8 @@ import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.util.Date;
 
 /**
  * 订单导出DTO
@@ -18,7 +14,7 @@ import java.util.Date;
  *
  */
 @Data
-public class OrderExportDTO {
+public class OrderExportDetailDTO {
 
     @ApiModelProperty(value = "主订单编号")
     private String orderSn;
@@ -34,28 +30,38 @@ public class OrderExportDTO {
     private Double unitPrice;
     @ApiModelProperty(value = "订单应付金额")
     private Double flowPrice;
-    @ApiModelProperty(value = "价格内容")
-    private String priceDetail;
+    @ApiModelProperty(value = "运费")
+    private Double freightPrice;
+    @ApiModelProperty(value = "优惠总金额")
+    private Double discountPrice;
+    @ApiModelProperty(value = "平台")
+    private Double siteMarketingCost;
+    @ApiModelProperty(value = "商家优惠")
+    private Double storeMarketingCost;
+    @ApiModelProperty(value = "商家改价")
+    private Double updatePrice;
     @ApiModelProperty(value = "支付方式")
     private String paymentMethod;
     @ApiModelProperty(value = "收件人")
     private String consigneeName;
     @ApiModelProperty(value = "收件人手机")
     private String consigneeMobile;
-    @ApiModelProperty(value = "收件人地址")
-    private String consigneeAddressPath;
+    @ApiModelProperty(value = "省")
+    private String province;
+    @ApiModelProperty(value = "市")
+    private String city;
+    @ApiModelProperty(value = "区")
+    private String district;
+    @ApiModelProperty(value = "街道")
+    private String street;
     @ApiModelProperty(value = "详细地址")
     private String consigneeDetail;
     @ApiModelProperty(value = "买家留言")
     private String remark;
-    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ApiModelProperty(value = "订单提交时间")
-    private Date createTime;
+    private String createTime;
     @ApiModelProperty(value = "支付完成时间")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date paymentTime;
+    private String paymentTime;
     /**
      * @see ClientTypeEnum
      */
@@ -79,12 +85,9 @@ public class OrderExportDTO {
     @ApiModelProperty(value = "取消原因")
     private String cancelReason;
     @ApiModelProperty(value = "发货时间")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date logisticsTime;
+    private String logisticsTime;
     @ApiModelProperty(value = "完成时间")
-    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date completeTime;
+    private String completeTime;
     @ApiModelProperty(value = "店铺")
     private String storeName;
 }

@@ -99,7 +99,7 @@ public interface OrderService extends IService<Order> {
      * @param orderSearchParams 查询参数
      * @return 导出订单列表
      */
-    List<OrderExportDTO> queryExportOrder(OrderSearchParams orderSearchParams);
+    void queryExportOrder(HttpServletResponse response,OrderSearchParams orderSearchParams) ;
 
 
     /**

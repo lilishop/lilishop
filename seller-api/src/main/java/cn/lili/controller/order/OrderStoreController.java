@@ -207,8 +207,9 @@ public class OrderStoreController {
 
     @ApiOperation(value = "查询订单导出列表")
     @GetMapping("/queryExportOrder")
-    public ResultMessage<List<OrderExportDTO>> queryExportOrder(OrderSearchParams orderSearchParams) {
-        return ResultUtil.data(orderService.queryExportOrder(orderSearchParams));
+    public void queryExportOrder(OrderSearchParams orderSearchParams) {
+        HttpServletResponse response = ThreadContextHolder.getHttpResponse();
+        orderService.queryExportOrder(response,orderSearchParams);
     }
 
     @PreventDuplicateSubmissions

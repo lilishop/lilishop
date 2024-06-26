@@ -37,10 +37,30 @@ public interface OrderMapper extends BaseMapper<Order> {
      * @param queryWrapper 查询条件
      * @return 导出订单DTO列表
      */
-    @Select("SELECT o.sn,o.create_time,o.member_name,o.consignee_name,o.consignee_mobile,o.consignee_address_path,o.consignee_detail," +
-            "o.payment_method, o.logistics_name,o.freight_price,oi.goods_price,o.discount_price,o.flow_price,oi.goods_name,oi.num," +
-            "o.remark,o.order_status,o.pay_status,o.deliver_status,o.need_receipt,o.store_name FROM li_order o LEFT JOIN li_order_item oi " +
-            "ON oi.order_sn=o.sn ${ew.customSqlSegment}")
+    @Select("SELECT o.sn AS order_sn," +
+            "oi.sn AS order_item_sn," +
+            "oi.goods_name AS goods_name," +
+            "oi.num AS num," +
+            "oi.goods_id AS goods_id," +
+            "oi.unit_price AS unit_price," +
+            "oi.flow_price AS flow_price," +
+            "oi.price_detail AS price_detail," +
+            "o.payment_method AS payment_method," +
+            "o.consignee_name AS consignee_name," +
+            "o.consignee_mobile AS consignee_mobile," +
+            "o.consignee_address_path AS consignee_address_path," +
+            "o.consignee_detail AS consignee_detail," +
+            "o.remark AS remark," +
+            "o.create_time AS create_time," +
+            "o.payment_time AS payment_time," +
+            "o.client_type AS client_type," +
+            "o.order_status AS order_status," +
+            "o.order_type AS order_type," +
+            "oi.after_sale_status AS after_sale_status," +
+            "o.logistics_time AS logistics_time," +
+            "o.complete_time AS complete_time," +
+            "o.store_name AS store_name " +
+            " FROM li_order o LEFT JOIN li_order_item oi ON oi.order_sn = o.sn ${ew.customSqlSegment}")
     List<OrderExportDTO> queryExportOrder(@Param(Constants.WRAPPER) Wrapper<OrderSimpleVO> queryWrapper);
 
     /**

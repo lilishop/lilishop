@@ -3,6 +3,7 @@ package cn.lili.controller.order;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.NumberUtil;
 import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
+import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
@@ -15,14 +16,12 @@ import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.service.OrderPriceService;
 import cn.lili.modules.order.order.service.OrderService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -59,8 +58,9 @@ public class OrderManagerController {
 
     @ApiOperation(value = "查询订单导出列表")
     @GetMapping("/queryExportOrder")
-    public ResultMessage<List<OrderExportDTO>> queryExportOrder(OrderSearchParams orderSearchParams) {
-        return ResultUtil.data(orderService.queryExportOrder(orderSearchParams));
+    public void queryExportOrder(OrderSearchParams orderSearchParams) {
+        HttpServletResponse response = ThreadContextHolder.getHttpResponse();
+        orderService.queryExportOrder(response,orderSearchParams);
     }
 
 
