@@ -49,7 +49,7 @@
         <de.codecentric>2.6.6</de.codecentric>
         <userAgentUtils>1.21</userAgentUtils>
         <poi-version>5.1.0</poi-version>
-        <poi-ooxml-version>5.1.0</poi-ooxml-version>
+        <poi-ooxml-version>5.2.3</poi-ooxml-version>
         <logstash-logback-encoder>7.1.1</logstash-logback-encoder>
         <zxing>3.5.0</zxing>
         <slf4j-api>1.7.36</slf4j-api>
