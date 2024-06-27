@@ -27,6 +27,7 @@ public class GoodsSearchParams extends PageVO {
 
     private static final long serialVersionUID = 2544015852728566887L;
 
+
     @ApiModelProperty(value = "商品编号")
     private String goodsId;
 

@@ -23,4 +23,19 @@ public class GoodsSkuStockDTO {
 
     @ApiModelProperty(value = "预警库存")
     private Integer alertQuantity;
+
+    @ApiModelProperty(value = "规格信息")
+    private String simpleSpecs;
+
+    @ApiModelProperty(value = "商品编号")
+    private String sn;
+
+    @ApiModelProperty(value = "商品名称")
+    private String goodsName;
+
+    /**
+     * @see cn.lili.modules.goods.entity.enums.GoodsStockTypeEnum
+     */
+    @ApiModelProperty(value = "类型")
+    private String type;
 }

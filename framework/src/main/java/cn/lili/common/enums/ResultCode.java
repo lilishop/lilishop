@@ -89,6 +89,7 @@ public enum ResultCode {
     VIRTUAL_GOODS_NOT_NEED_TEMP(11015, "虚拟商品无需选择配送模板"),
     GOODS_NOT_EXIST_STORE(11017, "当前用户无权操作此商品"),
     GOODS_TYPE_ERROR(11016, "需选择商品类型"),
+    GOODS_STOCK_IMPORT_ERROR(11018, "导入商品库存失败，请检查表格数据"),
 
     /**
      * 参数

@@ -12,7 +12,9 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -146,7 +148,20 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * @return 商品sku信息
      */
     IPage<GoodsSku> getGoodsSkuByPage(GoodsSearchParams searchParams);
+    /**
+     * 查询导出商品库存
+     *
+     * @param searchParams 查询参数
+     * @return 导出商品库存
+     */
+    void queryExportStock(HttpServletResponse response, GoodsSearchParams searchParams);
 
+    /**
+     * 导入商品库存
+     * @param storeId 店铺ID
+     * @param files 文件
+     */
+    void importStock(String storeId, MultipartFile files);
 
     /**
      * 分页查询商品sku信息
@@ -187,6 +202,7 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * @param goodsSkuStockDTOS sku库存修改实体
      */
     void updateStocks(List<GoodsSkuStockDTO> goodsSkuStockDTOS);
+    void updateStocksByType(List<GoodsSkuStockDTO> goodsSkuStockDTOS);
 
     /**
      * 更新SKU预警库存
@@ -207,6 +223,7 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * @param quantity 设置的库存数量
      */
     void updateStock(String skuId, Integer quantity);
+    void updateStock(String skuId, Integer quantity,String type);
 
     /**
      * 获取商品sku库存

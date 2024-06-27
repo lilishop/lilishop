@@ -1,6 +1,7 @@
 package cn.lili.controller.goods;
 
 import cn.lili.common.aop.annotation.DemoSite;
+import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.RetryException;
@@ -34,8 +35,11 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
@@ -66,14 +70,7 @@ public class GoodsStoreController {
      */
     @Autowired
     private GoodsSkuService goodsSkuService;
-    /**
-     * 店铺详情
-     */
-    @Autowired
-    private StoreDetailService storeDetailService;
 
-    @Autowired
-    private EsGoodsIndexService esGoodsIndexService;
 
     @ApiOperation(value = "分页获取商品列表")
     @GetMapping(value = "/list")
@@ -230,5 +227,28 @@ public class GoodsStoreController {
         }
 
     }
+
+
+    @ApiOperation(value = "分页获取商品Sku列表")
+    @GetMapping(value = "/queryExportStock")
+    public void queryExportStock(GoodsSearchParams goodsSearchParams) {
+        //获取当前登录商家账号
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        goodsSearchParams.setStoreId(storeId);
+
+        HttpServletResponse response = ThreadContextHolder.getHttpResponse();
+        goodsSkuService.queryExportStock(response,goodsSearchParams);
+    }
+
+    @ApiOperation(value = "上传商品库存列表")
+    @PostMapping(value = "/importStockExcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResultMessage<Object> importStockExcel(@RequestPart("files") MultipartFile files) {
+        //获取当前登录商家账号
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        goodsSkuService.importStock(storeId,files);
+        return ResultUtil.success(ResultCode.SUCCESS);
+    }
+
+
 
 }

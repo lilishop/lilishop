@@ -3,6 +3,8 @@ package cn.lili.modules.goods.mapper;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
+import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
+import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -115,6 +117,7 @@ public interface GoodsSkuMapper extends BaseMapper<GoodsSku> {
     @Select("SELECT *,g.params as params FROM li_goods_sku gs inner join li_goods g on gs.goods_id = g.id ${ew.customSqlSegment}")
     IPage<GoodsSkuDTO> queryByParams(IPage<GoodsSkuDTO> page, @Param(Constants.WRAPPER) Wrapper<GoodsSkuDTO> queryWrapper);
 
-    @Select("SELECT id as sku_id, quantity, goods_id FROM li_goods_sku ${ew.customSqlSegment}")
+    @Select("SELECT id as sku_id, quantity, goods_id,simple_specs,sn,goods_name FROM li_goods_sku ${ew.customSqlSegment}")
     List<GoodsSkuStockDTO> queryStocks(@Param(Constants.WRAPPER) Wrapper<GoodsSku> queryWrapper);
+
 }
