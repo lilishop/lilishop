@@ -14,17 +14,25 @@ import lombok.experimental.Accessors;
 public class WechatPaymentSetting {
 
     /**
-     * APP应用id
+     * JSAPI支付应用ID
      */
-    private String appId;
+    private String jsapiAppId;
     /**
-     * 小程序应用id
+     * native支付应用ID
+     */
+    private String nativeAppId;
+    /**
+     * 小程序支付应用id
      */
     private String mpAppId;
     /**
-     * 服务号应用id
+     * H5支付应用ID
      */
-    private String serviceAppId;
+    private String h5AppId;
+    /**
+     * APP支付应用ID
+     */
+    private String appAppId;
     /**
      * 商户号
      */

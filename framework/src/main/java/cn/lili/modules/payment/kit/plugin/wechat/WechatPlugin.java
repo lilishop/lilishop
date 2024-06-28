@@ -140,7 +140,7 @@ public class WechatPlugin implements Payment {
 
 
             WechatPaymentSetting setting = wechatPaymentSetting();
-            String appid = setting.getServiceAppId();
+            String appid = setting.getH5AppId();
             if (appid == null) {
                 throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
             }
@@ -199,7 +199,7 @@ public class WechatPlugin implements Payment {
             String attach = URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
 
             WechatPaymentSetting setting = wechatPaymentSetting();
-            String appid = setting.getServiceAppId();
+            String appid = setting.getJsapiAppId();
             if (appid == null) {
                 throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
             }
@@ -264,7 +264,7 @@ public class WechatPlugin implements Payment {
             String attach = URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
 
             WechatPaymentSetting setting = wechatPaymentSetting();
-            String appid = setting.getAppId();
+            String appid = setting.getJsapiAppId();
             if (appid == null) {
                 throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
             }
@@ -332,7 +332,7 @@ public class WechatPlugin implements Payment {
 
             WechatPaymentSetting setting = wechatPaymentSetting();
 
-            String appid = setting.getServiceAppId();
+            String appid = setting.getNativeAppId();
             if (appid == null) {
                 throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
             }
