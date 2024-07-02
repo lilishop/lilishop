@@ -4,6 +4,8 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.order.order.entity.dto.StoreFlowQueryDTO;
+import cn.lili.modules.store.entity.dos.Bill;
+import cn.lili.modules.store.entity.dto.BillSearchParams;
 import cn.lili.modules.store.entity.vos.StoreFlowPayDownloadVO;
 import cn.lili.modules.store.entity.vos.StoreFlowRefundDownloadVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -25,6 +27,12 @@ public interface StoreFlowService extends IService<StoreFlow> {
      * @param orderSn 订单编号
      */
     void payOrder(String orderSn);
+
+    /**
+     * 订单取消
+     * @param orderSn 订单
+     */
+    void orderCancel(String orderSn);
 
     /**
      * 订单退款
@@ -93,4 +101,24 @@ public interface StoreFlowService extends IService<StoreFlow> {
      * @return 商家流水集合
      */
     List<StoreFlow> listStoreFlow(StoreFlowQueryDTO storeFlowQueryDTO);
+
+    /**
+     * 修改分账状态
+     */
+    void updateProfitSharingStatus();
+
+    /**
+     * 获取退款的流水
+     *
+     * @param searchParams
+     * @return
+     */
+    Bill getRefundBill(BillSearchParams searchParams);
+    /**
+     * 获取订单的流水
+     *
+     * @param searchParams
+     * @return
+     */
+    Bill getOrderBill(BillSearchParams searchParams);
 }

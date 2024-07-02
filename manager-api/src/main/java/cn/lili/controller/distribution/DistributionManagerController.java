@@ -9,6 +9,7 @@ import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dto.DistributionSearchParams;
 import cn.lili.modules.distribution.service.DistributionService;
+import cn.lili.modules.goods.entity.vos.BrandVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -17,6 +18,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -83,6 +85,17 @@ public class DistributionManagerController {
         } else {
             throw new ServiceException(ResultCode.DISTRIBUTION_AUDIT_ERROR);
         }
+    }
 
+
+    @ApiOperation(value = "更新数据")
+    @ApiImplicitParam(name = "id", value = "品牌ID", required = true, dataType = "String", paramType = "path")
+    @PutMapping("/{id}")
+    public ResultMessage<Distribution> update(@PathVariable String id, @Valid Distribution distribution) {
+        distribution.setId(id);
+        if (distributionService.updateById(distribution)) {
+            return ResultUtil.data(distribution);
+        }
+        throw new ServiceException(ResultCode.DISTRIBUTION_EDIT_ERROR);
     }
 }

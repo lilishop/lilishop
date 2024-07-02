@@ -1,5 +1,12 @@
 package cn.lili.modules.distribution.serviceimpl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
+import cn.lili.common.context.ThreadContextHolder;
+import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
@@ -13,6 +20,14 @@ import cn.lili.modules.distribution.entity.vos.DistributionCashSearchParams;
 import cn.lili.modules.distribution.mapper.DistributionCashMapper;
 import cn.lili.modules.distribution.service.DistributionCashService;
 import cn.lili.modules.distribution.service.DistributionService;
+import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
+import cn.lili.modules.order.order.entity.dto.OrderExportDetailDTO;
+import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
+import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
+import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
+import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
+import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
 import cn.lili.modules.wallet.entity.dto.MemberWithdrawalMessage;
 import cn.lili.modules.wallet.entity.enums.DepositServiceTypeEnum;
@@ -25,12 +40,23 @@ import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.swagger.annotations.ApiOperation;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -76,7 +102,7 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
             distribution.setCommissionFrozen(CurrencyUtil.add(distribution.getCommissionFrozen(), applyMoney));
             distributionService.updateById(distribution);
             //提现申请记录
-            DistributionCash distributionCash = new DistributionCash("D" + SnowFlake.getId(), distribution.getId(), applyMoney, distribution.getMemberName());
+            DistributionCash distributionCash = new DistributionCash("D" + SnowFlake.getId(),applyMoney, distribution);
             boolean result = this.save(distributionCash);
             if (result) {
                 //发送提现消息
@@ -110,6 +136,28 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
     }
 
     @Override
+    public void queryExport(HttpServletResponse response, DistributionCashSearchParams distributionCashSearchParams) {
+        XSSFWorkbook workbook = initExportData(this.list(distributionCashSearchParams.queryWrapper()));
+        try {
+            // 设置响应头
+            String fileName = URLEncoder.encode("分销提现列表", "UTF-8");
+            response.setContentType("application/vnd.ms-excel;charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
+
+            ServletOutputStream out = response.getOutputStream();
+            workbook.write(out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                workbook.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public DistributionCash audit(String id, String result) {
 
@@ -123,17 +171,12 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
             //获取分销员
             Distribution distribution = distributionService.getById(distributorCash.getDistributionId());
             if (distribution != null && distribution.getDistributionStatus().equals(DistributionStatusEnum.PASS.name())) {
-                MemberWithdrawalMessage memberWithdrawalMessage = new MemberWithdrawalMessage();
                 //审核通过
                 if (result.equals(WithdrawStatusEnum.VIA_AUDITING.name())) {
-                    memberWithdrawalMessage.setStatus(WithdrawStatusEnum.VIA_AUDITING.name());
                     //分销记录操作
                     distributorCash.setDistributionCashStatus(WithdrawStatusEnum.VIA_AUDITING.name());
                     distributorCash.setPayTime(new Date());
-                    //提现到余额
-                    memberWalletService.increase(new MemberWalletUpdateDTO(distributorCash.getPrice(), distribution.getMemberId(), "分销[" + distributorCash.getSn() + "]佣金提现到余额[" + distributorCash.getPrice() + "]", DepositServiceTypeEnum.WALLET_COMMISSION.name()));
                 } else {
-                    memberWithdrawalMessage.setStatus(WithdrawStatusEnum.FAIL_AUDITING.name());
                     //分销员可提现金额退回
                     distribution.setCanRebate(CurrencyUtil.add(distribution.getCanRebate(), distributorCash.getPrice()));
                     distributorCash.setDistributionCashStatus(WithdrawStatusEnum.FAIL_AUDITING.name());
@@ -142,14 +185,7 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
                 //分销员金额相关处理
                 distributionService.updateById(distribution);
                 //修改分销提现申请
-                boolean bool = this.updateById(distributorCash);
-                //if (bool) {
-                //    //组织会员提现审核消息
-                //    memberWithdrawalMessage.setMemberId(distribution.getMemberId());
-                //    memberWithdrawalMessage.setPrice(distributorCash.getPrice());
-                //    String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_WITHDRAWAL.name();
-                //    rocketMQTemplate.asyncSend(destination, memberWithdrawalMessage, RocketmqSendCallbackBuilder.commonCallback());
-                //}
+                this.updateById(distributorCash);
                 return distributorCash;
             }
             throw new ServiceException(ResultCode.DISTRIBUTION_NOT_EXIST);
@@ -157,4 +193,38 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
         throw new ServiceException(ResultCode.DISTRIBUTION_CASH_NOT_EXIST);
 
     }
+
+    /**
+     * 初始化填充导出数据
+     *
+     * @param distributionCashList 导出的数据
+     * @return 填充导出数据
+     */
+    private XSSFWorkbook initExportData(List<DistributionCash> distributionCashList) {
+
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("订单列表");
+
+        // 创建表头
+        Row header = sheet.createRow(0);
+        String[] headers = {"编号", "姓名", "身份证号", "结算银行开户行名称", "结算银行开户账号", "结算银行开户支行名称"};
+
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = header.createCell(i);
+            cell.setCellValue(headers[i]);
+        }
+        // 填充数据
+        for (int i = 0; i < distributionCashList.size(); i++) {
+            DistributionCash distributionCash = distributionCashList.get(i);
+            Row row = sheet.createRow(i + 1);
+            row.createCell(0).setCellValue(distributionCash.getSn());
+            row.createCell(1).setCellValue(distributionCash.getName());
+            row.createCell(2).setCellValue(distributionCash.getIdNumber());
+            row.createCell(3).setCellValue(distributionCash.getSettlementBankAccountName());
+            row.createCell(4).setCellValue(distributionCash.getSettlementBankAccountNum());
+            row.createCell(5).setCellValue(distributionCash.getSettlementBankBranchName());
+        }
+        return workbook;
+    }
+
 }

@@ -13,25 +13,32 @@ import org.apache.ibatis.annotations.Update;
  */
 public interface DistributionMapper extends BaseMapper<Distribution> {
 
-    /**
-     * 修改分销员可提现金额
-     *
-     * @param commissionFrozen      分销金额
-     * @param distributionId 分销员ID
-     */
-    @Update("UPDATE li_distribution set commission_frozen = (IFNULL(commission_frozen,0)+#{commissionFrozen}) " +
-            ", rebate_total=(IFNULL(rebate_total,0)+#{commissionFrozen})  WHERE id = #{distributionId}")
-    void subCanRebate(Double commissionFrozen, String distributionId);
+    @Update("UPDATE li_distribution set commission_frozen = (IFNULL(commission_frozen,0) - #{commissionFrozen}) " +
+            ", rebate_total=(IFNULL(rebate_total,0) - #{commissionFrozen}) " +
+            ", distribution_order_count=(IFNULL(distribution_order_count,0)-1) " +
+            " WHERE id = #{distributionId}")
+    void subRebate(Double commissionFrozen, String distributionId, Double distributionOrderPrice);
 
-    /**
-     * 添加分销金额
-     *
-     * @param commissionFrozen      分销金额
-     * @param distributionId 分销员ID
-     */
     @Update("UPDATE li_distribution set commission_frozen = (IFNULL(commission_frozen,0)+#{commissionFrozen}) " +
             ", rebate_total=(IFNULL(rebate_total,0)+#{commissionFrozen}) " +
-            ", distribution_order_count=(IFNULL(distribution_order_count,0)+1) WHERE id = #{distributionId}")
-    void addCanRebate(Double commissionFrozen, String distributionId);
+            ", distribution_order_price=(IFNULL(distribution_order_price,0)+#{distributionOrderPrice}) " +
+            ", distribution_order_count=(IFNULL(distribution_order_count,0)+1) " +
+            " WHERE id = #{distributionId}")
+    void addRebate(Double commissionFrozen, String distributionId, Double distributionOrderPrice);
+
+
+    @Update("UPDATE li_distribution SET commission_frozen = (IFNULL(commission_frozen,0) - #{rebate}) " +
+            ",can_rebate=(IFNULL(can_rebate,0) + #{rebate}) " +
+            " WHERE id = #{distributionId}")
+    void addCanRebate(Double rebate, String distributionId);
+
+    @Update("UPDATE li_distribution SET can_rebate=(IFNULL(can_rebate,0) - #{rebate}),cash_rebate=(IFNULL(cash_rebate,0) + #{rebate}) " +
+            " WHERE id = #{distributionId}")
+    void addCashRebate(Double rebate, String distributionId);
+
+
+    @Update("UPDATE li_distribution SET cash_rebate=(IFNULL(cash_rebate,0) - #{rebate}) " +
+            " WHERE id = #{distributionId}")
+    void subCashRebate(Double rebate, String distributionId);
 
 }

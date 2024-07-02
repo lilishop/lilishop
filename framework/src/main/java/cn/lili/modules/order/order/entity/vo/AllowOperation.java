@@ -107,11 +107,8 @@ public class AllowOperation implements Serializable {
         }
 
         //取消判定
-        if (CharSequenceUtil.equalsAny(status, OrderStatusEnum.UNPAID.name(), OrderStatusEnum.PAID.name(), OrderStatusEnum.UNDELIVERED.name(),
-                OrderStatusEnum.STAY_PICKED_UP.name(),
-                OrderStatusEnum.TAKE.name())) {
+        if (CharSequenceUtil.equalsAny(status, OrderStatusEnum.UNPAID.name(), OrderStatusEnum.PAID.name(), OrderStatusEnum.UNDELIVERED.name())) {
             this.cancel = true;
-
         }
         //新订单，允许支付
         this.pay = status.equals(OrderStatusEnum.UNPAID.name());

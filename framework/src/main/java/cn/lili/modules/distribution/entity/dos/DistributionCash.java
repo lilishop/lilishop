@@ -9,9 +9,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.validation.constraints.NotBlank;
 import java.util.Date;
 
 /**
@@ -51,11 +53,30 @@ public class DistributionCash extends BaseEntity {
     @ApiModelProperty(value = "状态")
     private String distributionCashStatus;
 
-    public DistributionCash(String sn, String distributionId, Double price, String memberName) {
+
+
+    @ApiModelProperty(value = "会员姓名")
+    private String name;
+    @ApiModelProperty(value = "身份证号")
+    private String idNumber;
+    @ApiModelProperty(value = "结算银行开户行名称")
+    private String settlementBankAccountName;
+    @ApiModelProperty(value = "结算银行开户账号")
+    private String settlementBankAccountNum;
+    @ApiModelProperty(value = "结算银行开户支行名称")
+    private String settlementBankBranchName;
+
+    public DistributionCash(String sn,Double price, Distribution distribution) {
         this.sn = sn;
-        this.distributionId = distributionId;
+        this.distributionId = distribution.getId();
         this.price = price;
         this.distributionCashStatus = WithdrawStatusEnum.APPLY.name();
-        this.distributionName = memberName;
+        this.distributionName = distribution.getMemberName();
+
+        this.name = distribution.getName();
+        this.idNumber = distribution.getIdNumber();
+        this.settlementBankAccountName = distribution.getSettlementBankAccountName();
+        this.settlementBankAccountNum = distribution.getSettlementBankAccountNum();
+        this.settlementBankBranchName = distribution.getSettlementBankBranchName();
     }
 }

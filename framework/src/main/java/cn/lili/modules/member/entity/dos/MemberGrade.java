@@ -24,13 +24,16 @@ public class MemberGrade extends BaseEntity {
     private String gradeName;
 
     @NotNull
-    @ApiModelProperty(value = "等级图片")
+    @ApiModelProperty(value = "等级图片 1029*498")
     private String gradeImage;
 
     @NotNull
-    @ApiModelProperty(value = "所需经验值")
-    private Integer experienceValue;
+    @ApiModelProperty(value = "会员等级")
+    private Integer level;
 
-    @ApiModelProperty(value = "是否为默认等级")
-    private Boolean isDefault;
+    @ApiModelProperty(value = "累计实付")
+    private Double payPrice;
+
+    @ApiModelProperty(value = "累计购买次数")
+    private Integer count;
 }

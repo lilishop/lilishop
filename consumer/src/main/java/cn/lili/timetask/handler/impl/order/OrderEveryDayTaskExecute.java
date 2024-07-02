@@ -18,6 +18,10 @@ import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.order.order.service.StoreFlowService;
+import cn.lili.modules.store.entity.dto.StoreSettlementDay;
+import cn.lili.modules.store.service.BillService;
+import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.OrderSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -29,6 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,6 +69,20 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
     @Autowired
     private DistributionOrderService distributionOrderService;
+
+    @Autowired
+    private StoreFlowService storeFlowService;
+
+    /**
+     * 结算单
+     */
+    @Autowired
+    private BillService billService;
+    /**
+     * 店铺详情
+     */
+    @Autowired
+    private StoreDetailService storeDetailService;
 
     /**
      * 执行每日任务
@@ -102,6 +121,22 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+
+        //修改分账状态
+        try {
+            storeFlowService.updateProfitSharingStatus();
+        } catch (Exception e) {
+            log.error("修改分账状态失败", e);
+        }
+
+        //生成店铺结算单
+        try {
+            createBill();
+        } catch (Exception e) {
+            log.error("生成店铺结算单", e);
+        }
+
+
     }
 
     /**
@@ -186,8 +221,6 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
 //        List<OrderItem> orderItems = orderItemService.waitOperationOrderItem(build);
         //关闭售后订单=未售后订单+小于订单关闭售后申请时间
         orderItemService.expiredAfterSaleStatus(receiveTime);
-        //修改对应分销订单状态
-        distributionOrderService.updateDistributionOrderStatus();
 
     }
 
@@ -223,6 +256,31 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
             orderItemService.update(lambdaUpdateWrapper);
         }
 
+    }
+
+    /**
+     * 1.查询今日待结算的商家
+     * 2.查询商家上次结算日期，生成本次结算单
+     * 3.记录商家结算日
+     */
+    private void createBill() {
+        //获取当前天数
+        int day = DateUtil.date().dayOfMonth();
+
+        //获取待结算商家列表
+        List<StoreSettlementDay> storeList = storeDetailService.getSettlementStore(day);
+
+        //获取当前时间
+        DateTime endTime = DateUtil.date();
+        //批量商家结算
+        for (StoreSettlementDay storeSettlementDay : storeList) {
+
+            //生成结算单
+            billService.createBill(storeSettlementDay.getStoreId(), storeSettlementDay.getSettlementDay(), endTime);
+
+            //修改店铺结算时间
+            storeDetailService.updateSettlementDay(storeSettlementDay.getStoreId(), endTime);
+        }
     }
 
 }

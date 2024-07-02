@@ -8,6 +8,7 @@ import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.kit.Payment;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
@@ -30,6 +31,8 @@ public class PaymentExecute implements OrderStatusChangeEvent {
      */
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private StoreFlowService storeFlowService;
 
     @Override
     public void orderChange(OrderMessage orderMessage) {
@@ -60,6 +63,8 @@ public class PaymentExecute implements OrderStatusChangeEvent {
                     .refundReason("订单取消")
                     .build();
             payment.refund(refundLog);
+
+
         }
     }
 }

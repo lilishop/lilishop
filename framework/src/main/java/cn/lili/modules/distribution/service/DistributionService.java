@@ -78,18 +78,42 @@ public interface DistributionService extends IService<Distribution> {
     void checkDistributionSetting();
 
     /**
-     * 修改可提现金额
-     *
-     * @param canRebate      修改金额
-     * @param distributionId 分销员ID
-     */
-    void subCanRebate(Double canRebate, String distributionId);
-
-    /**
-     * 添加分销金额
+     * 添加分销冻结金额
+     * 创建分销订单时进行调用
      *
      * @param rebate         金额
      * @param distributionId 分销员ID
+     * @param distributionOrderPrice 分销订单金额
      */
-    void addRebate(Double rebate, String distributionId);
+    void addRebate(Double rebate, String distributionId, Double distributionOrderPrice);
+
+    /**
+     * 扣减分销冻结金额
+     * 订单取消/退款时进行调用
+     *
+     * @param rebate      佣金
+     * @param distributionId 分销员ID
+     */
+    void subRebate(Double rebate, String distributionId, Double distributionOrderPrice);
+
+    /**
+     * 添加分销可提现金额
+     * 订单完成时进行调用
+     * @param rebate 佣金
+     * @param distributionId 分销员ID
+     */
+    void addCanRebate(Double rebate, String distributionId);
+
+    /**
+     * 添加提现金额
+     * @param rebate
+     * @param distributionId
+     */
+    void addCashRebate(Double rebate, String distributionId);
+    /**
+     * 扣减提现金额
+     * @param rebate
+     * @param distributionId
+     */
+    void subCashRebate(Double rebate, String distributionId);
 }

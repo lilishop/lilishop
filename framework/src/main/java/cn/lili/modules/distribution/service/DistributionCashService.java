@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * 分销佣金业务层
  *
@@ -39,6 +41,9 @@ public interface DistributionCashService extends IService<DistributionCash> {
      * @return 分销员提现分页列表
      */
     IPage<DistributionCash> getDistributionCash(DistributionCashSearchParams distributionCashSearchParams);
+
+
+    void queryExport(HttpServletResponse response,DistributionCashSearchParams distributionCashSearchParams);
 
     /**
      * 审核分销提现申请

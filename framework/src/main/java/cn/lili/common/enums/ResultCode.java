@@ -174,6 +174,7 @@ public enum ResultCode {
     DISTRIBUTION_RETREAT_ERROR(22004, "分销员清退失败"),
     DISTRIBUTION_CASH_NOT_EXIST(22005, "分销员提现记录不存在"),
     DISTRIBUTION_GOODS_DOUBLE(22006, "不能重复添加分销商品"),
+    DISTRIBUTION_EDIT_ERROR(22007, "修改分销员失败"),
 
     /**
      * 购物车

@@ -79,6 +79,8 @@ public class DistributionOrder extends BaseIdEntity {
     private String image;
     @ApiModelProperty(value = "商品数量")
     private Integer num;
+    @ApiModelProperty(value = "退款商品数量")
+    private Integer refundNum;
 
     public DistributionOrder(StoreFlow storeFlow) {
         distributionOrderStatus = DistributionOrderStatusEnum.NO_COMPLETED.name();
@@ -95,6 +97,8 @@ public class DistributionOrder extends BaseIdEntity {
         specs = storeFlow.getSpecs();
         image = storeFlow.getImage();
         num = storeFlow.getNum();
+        refundNum=0;
+        sellBackRebate=0D;
     }
 
 }

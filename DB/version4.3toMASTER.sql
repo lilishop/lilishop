@@ -119,3 +119,60 @@ SET b.kanjia_refund_settlement_price =IFNULL((
    AND sf.create_time BETWEEN b.start_time
    AND b.end_time),0);
 
+
+
+/**
+  交易唤醒表，增加交易流水详情
+ */
+ALTER TABLE li_order_item ADD `is_refund` varchar(255) DEFAULT NULL COMMENT '是否退款';
+
+/**
+  交易表增加订单状态字段
+ */
+ALTER TABLE li_order_item ADD `refund_price` decimal(10,2) DEFAULT NULL COMMENT '退款金额';
+
+
+
+/**
+    文件表增加拥有者名称
+ */
+ALTER TABLE li_file ADD `owner_name` varchar(255) DEFAULT NULL COMMENT '拥有者名称';
+
+/**
+  初始化文件拥有者名称
+ */
+UPDATE li_file f JOIN li_store s ON f.owner_id = s.id
+    SET f.owner_name = s.store_name
+WHERE user_enums = 'STORE';
+
+UPDATE li_file f JOIN li_admin_user a ON f.owner_id = a.id
+    SET f.owner_name = a.nick_name
+WHERE user_enums = 'MANAGER';
+
+UPDATE li_file f JOIN li_member m ON f.owner_id = m.id
+    SET f.owner_name = m.nick_name
+WHERE user_enums = 'MEMBER';
+
+ALTER TABLE `li_order`
+    ADD COLUMN `seller_remark` varchar(255) NULL COMMENT '商家订单备注' AFTER `remark`;
+
+
+ALTER TABLE `li_distribution_cash`
+    ADD COLUMN `name` varchar(255) NULL COMMENT '会员姓名';
+ALTER TABLE `li_distribution_cash`
+    ADD COLUMN `id_number` varchar(255) NULL COMMENT '身份证号' ;
+ALTER TABLE `li_distribution_cash`
+    ADD COLUMN `settlement_bank_account_name` varchar(255) NULL COMMENT '结算银行开户行名称' ;
+ALTER TABLE `li_distribution_cash`
+    ADD COLUMN `settlement_bank_account_num` varchar(255) NULL COMMENT '结算银行开户账号' ;
+ALTER TABLE `li_distribution_cash`
+    ADD COLUMN `settlement_bank_branch_name` varchar(255) NULL COMMENT '结算银行开户支行名称' ;
+
+ALTER TABLE `li_distribution` ADD `distribution_order_price` decimal(10,2) DEFAULT NULL COMMENT '分销订单金额';
+
+ALTER TABLE `li_distribution_order` ADD  `refund_num` int DEFAULT NULL COMMENT '退款商品数量';
+
+ALTER TABLE `li_store_flow` ADD  `bill_time` datetime(6) DEFAULT NULL COMMENT '结算时间';
+ALTER TABLE `li_store_flow` ADD  `full_refund` bit(1) DEFAULT NULL COMMENT '是否全部退款';
+ALTER TABLE `li_store_flow` ADD  `profit_sharing_status` varchar(255) NULL COMMENT '分账状态';
+ALTER TABLE `li_store_flow` ADD  `profit_sharing` varchar(255) NULL COMMENT '分账详情';

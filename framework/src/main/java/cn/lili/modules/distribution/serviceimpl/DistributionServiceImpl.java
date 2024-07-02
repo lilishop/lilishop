@@ -90,7 +90,7 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
                 default:
                     throw new ServiceException(ResultCode.DISTRIBUTION_IS_APPLY);
             }
-        }else{
+        } else {
             //如果未申请分销员则新增进行申请
             //获取当前登录用户
             Member member = memberService.getUserInfo();
@@ -181,14 +181,30 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
         }
     }
 
+
     @Override
-    public void subCanRebate(Double canRebate, String distributionId) {
-        this.baseMapper.subCanRebate(canRebate, distributionId);
+    public void subRebate(Double canRebate, String distributionId, Double distributionOrderPrice) {
+        this.baseMapper.subRebate(canRebate, distributionId, distributionOrderPrice);
     }
 
     @Override
-    public void addRebate(Double rebate, String distributionId) {
+    public void addRebate(Double rebate, String distributionId, Double distributionOrderPrice) {
+        this.baseMapper.addRebate(rebate, distributionId, distributionOrderPrice);
+    }
+
+    @Override
+    public void addCanRebate(Double rebate, String distributionId) {
         this.baseMapper.addCanRebate(rebate, distributionId);
+    }
+
+    @Override
+    public void addCashRebate(Double rebate, String distributionId) {
+        this.baseMapper.addCashRebate(rebate, distributionId);
+    }
+
+    @Override
+    public void subCashRebate(Double rebate, String distributionId) {
+        this.baseMapper.subCashRebate(rebate, distributionId);
     }
 
 }

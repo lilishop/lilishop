@@ -1,16 +1,20 @@
 package cn.lili.modules.order.order.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.distribution.service.DistributionOrderService;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
-import cn.lili.modules.order.aftersale.service.AfterSaleService;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
+import cn.lili.modules.order.order.entity.dto.StoreFlowProfitSharingDTO;
 import cn.lili.modules.order.order.entity.dto.StoreFlowQueryDTO;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
+import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
+import cn.lili.modules.order.order.entity.enums.ProfitSharingStatusEnum;
 import cn.lili.modules.order.order.mapper.StoreFlowMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
@@ -18,9 +22,11 @@ import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.service.RefundLogService;
 import cn.lili.modules.store.entity.dos.Bill;
+import cn.lili.modules.store.entity.dto.BillSearchParams;
 import cn.lili.modules.store.entity.vos.StoreFlowPayDownloadVO;
 import cn.lili.modules.store.entity.vos.StoreFlowRefundDownloadVO;
 import cn.lili.modules.store.service.BillService;
+import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -31,6 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -63,7 +71,8 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
     private BillService billService;
 
     @Autowired
-    private AfterSaleService afterSaleService;
+    private DistributionOrderService distributionOrderService;
+
     /**
      * 店铺订单支付流水
      *
@@ -79,9 +88,40 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         //循环子订单记录流水
         for (OrderItem item : orderItems) {
             StoreFlow storeFlow = new StoreFlow(order, item, FlowTypeEnum.PAY);
+            saveProfitSharing(storeFlow);
+
             //添加付款交易流水
             this.save(storeFlow);
         }
+    }
+
+    @Override
+    public void orderCancel(String orderSn) {
+        //根据订单编号获取订单数据
+        Order order = orderService.getBySn(orderSn);
+        // 判断订单是否是付款
+        if (!PayStatusEnum.PAID.name()
+                .equals((order.getPayStatus()))) {
+            return;
+        }
+        List<OrderItem> items = orderItemService.getByOrderSn(order.getSn());
+        List<StoreFlow> storeFlows = new ArrayList<>();
+
+        //修改付款记录
+        this.update(new LambdaUpdateWrapper<StoreFlow>()
+                .eq(StoreFlow::getOrderSn, order.getSn())
+                .set(StoreFlow::getBillTime, new Date())
+                .set(StoreFlow::getProfitSharingStatus, ProfitSharingStatusEnum.ORDER_CANCEL.name())
+                .set(StoreFlow::getFullRefund, true));
+
+        //记录退款记录
+        for (OrderItem item : items) {
+            StoreFlow storeFlow = new StoreFlow(order, item, FlowTypeEnum.REFUND);
+            storeFlow.setProfitSharingStatus(ProfitSharingStatusEnum.ORDER_CANCEL.name());
+            storeFlow.setBillTime(new Date());
+            storeFlows.add(storeFlow);
+        }
+        this.saveBatch(storeFlows);
     }
 
 
@@ -108,6 +148,7 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         storeFlow.setSkuId(afterSale.getSkuId());
         storeFlow.setImage(afterSale.getGoodsImage());
         storeFlow.setSpecs(afterSale.getSpecs());
+
 
 
         //获取付款信息
@@ -149,14 +190,58 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         storeFlow.setTransactionId(refundLog.getReceivableNo());
         //支付方式
         storeFlow.setPaymentName(refundLog.getPaymentName());
+
+
+
+        //修改付款的StoreFlow
+        StoreFlowProfitSharingDTO storeFlowProfitSharingDTO = JSONUtil.toBean(payStoreFlow.getProfitSharing(), StoreFlowProfitSharingDTO.class);
+        if (storeFlow.getBillPrice()
+                .equals(payStoreFlow.getFinalPrice())) {
+            payStoreFlow.setFullRefund(true);
+            storeFlowProfitSharingDTO.setPrice(0D);
+            storeFlowProfitSharingDTO.setStorePrice(0D);
+            storeFlowProfitSharingDTO.setPlatformPrice(0D);
+            storeFlowProfitSharingDTO.setDistributionPrice(0D);
+            storeFlowProfitSharingDTO.setSubsidies(0D);
+            payStoreFlow.setBillTime(new Date());
+            payStoreFlow.setProfitSharingStatus(ProfitSharingStatusEnum.ORDER_CANCEL.name());
+            //设置退款时间
+            storeFlow.setBillTime(new Date());
+        } else {
+            //计算 累计订单退款金额，修改分账信息
+            Integer refundNum = this.baseMapper.getRefundNum(payStoreFlow.getOrderItemSn());
+            refundNum = refundNum == null ? 0 : refundNum;
+            int allNum = storeFlow.getNum() + refundNum;
+            Double proportion = CurrencyUtil.div((payStoreFlow.getNum() - allNum), payStoreFlow.getNum());
+            if (proportion.equals(0D)) {
+                payStoreFlow.setFullRefund(true);
+                storeFlowProfitSharingDTO.setPrice(0D);
+                storeFlowProfitSharingDTO.setStorePrice(0D);
+                storeFlowProfitSharingDTO.setPlatformPrice(0D);
+                storeFlowProfitSharingDTO.setDistributionPrice(0D);
+                storeFlowProfitSharingDTO.setSubsidies(0D);
+                payStoreFlow.setBillTime(new Date());
+                payStoreFlow.setProfitSharingStatus(ProfitSharingStatusEnum.ORDER_CANCEL.name());
+                //设置退款时间
+                storeFlow.setBillTime(new Date());
+            } else {
+                storeFlowProfitSharingDTO.setPrice(CurrencyUtil.mul(payStoreFlow.getFinalPrice(), proportion));
+                storeFlowProfitSharingDTO.setStorePrice(CurrencyUtil.mul(payStoreFlow.getBillPrice(), proportion));
+                storeFlowProfitSharingDTO.setPlatformPrice(CurrencyUtil.mul(payStoreFlow.getCommissionPrice(), proportion));
+                storeFlowProfitSharingDTO.setSubsidies(CurrencyUtil.mul(payStoreFlow.getSiteCouponCommission(), proportion));
+                storeFlowProfitSharingDTO.setDistributionPrice(CurrencyUtil.mul(payStoreFlow.getDistributionRebate(), proportion));
+            }
+        }
+        payStoreFlow.setProfitSharing(JSONUtil.toJsonStr(storeFlowProfitSharingDTO));
+        //修改付款流水
+        this.updateById(payStoreFlow);
+        //保存退款流水·
         this.save(storeFlow);
     }
 
 
-
     @Override
     public IPage<StoreFlow> getStoreFlow(StoreFlowQueryDTO storeFlowQueryDTO) {
-
         return this.page(PageUtil.initPage(storeFlowQueryDTO.getPageVO()), generatorQueryWrapper(storeFlowQueryDTO));
     }
 
@@ -193,6 +278,28 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         return this.list(generatorQueryWrapper(storeFlowQueryDTO));
     }
 
+    @Override
+    public void updateProfitSharingStatus() {
+        //获取已完成的列表，进行相关的处理
+        List<StoreFlow> storeFlowList = this.baseMapper.completeList();
+
+        for (StoreFlow storeFlow : storeFlowList) {
+            distributionOrderService.completeOrder(storeFlow);
+        }
+        this.baseMapper.updateProfitSharingStatus();
+    }
+
+    @Override
+    public Bill getRefundBill(BillSearchParams searchParams) {
+        return this.baseMapper.getRefundBill(searchParams.queryWrapper());
+    }
+
+    @Override
+    public Bill getOrderBill(BillSearchParams searchParams) {
+        return this.baseMapper.getOrderBill(searchParams.queryWrapper());
+    }
+
+
     /**
      * 生成查询wrapper
      *
@@ -227,10 +334,36 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
             Bill bill = storeFlowQueryDTO.getBill();
             lambdaQueryWrapper.eq(CharSequenceUtil.isNotEmpty(bill.getStoreId()), StoreFlow::getStoreId, bill.getStoreId());
             lambdaQueryWrapper.ge(bill.getStartTime() != null && bill.getEndTime() != null,
-                    StoreFlow::getCreateTime, bill.getStartTime());
+                    StoreFlow::getBillTime, bill.getStartTime());
             lambdaQueryWrapper.lt(bill.getStartTime() != null && bill.getEndTime() != null,
-                    StoreFlow::getCreateTime, bill.getEndTime());
+                    StoreFlow::getBillTime, bill.getEndTime());
         }
         return lambdaQueryWrapper;
+    }
+
+
+    /**
+     * 添加分账内容
+     *
+     * @param storeFlow 店铺流水
+     */
+    private void saveProfitSharing(StoreFlow storeFlow) {
+
+        StoreFlowProfitSharingDTO storeFlowProfitSharingDTO = new StoreFlowProfitSharingDTO();
+        //店铺获取
+        storeFlowProfitSharingDTO.setStorePrice(storeFlow.getBillPrice());
+        //平台佣金
+        storeFlowProfitSharingDTO.setPlatformPrice(storeFlow.getCommissionPrice());
+        //分销佣金
+        storeFlowProfitSharingDTO.setDistributionPrice(storeFlow.getDistributionRebate());
+        //总金额
+        storeFlowProfitSharingDTO.setPrice(storeFlow.getFinalPrice());
+        //平台补差
+        storeFlowProfitSharingDTO.setSubsidies(storeFlow.getSiteCouponCommission());
+        //分账详情
+        storeFlow.setProfitSharing(JSONUtil.toJsonStr(storeFlowProfitSharingDTO));
+        //分账状态
+        storeFlow.setProfitSharingStatus(ProfitSharingStatusEnum.WAIT_COMPLETE.name());
+
     }
 }

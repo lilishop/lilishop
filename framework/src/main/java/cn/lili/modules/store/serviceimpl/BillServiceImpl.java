@@ -30,10 +30,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -41,9 +37,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 结算单业务层实现
@@ -92,8 +90,30 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         //店铺结算单号
         bill.setSn(SnowFlake.createStr("B"));
 
+        //结算金额初始化
+        initBillPrice(bill, storeId, startTime, endTime);
+        //添加结算单
+        this.save(bill);
+
+    }
+
+    /**
+     * 结算单金额初始化
+     *
+     * @param bill      结算单
+     * @param storeId   店铺ID
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     */
+    private void initBillPrice(Bill bill, String storeId, Date startTime, DateTime endTime) {
+
         //退款结算信息
-        Bill refundBill = this.baseMapper.getRefundBill(new QueryWrapper<Bill>().eq("store_id", storeId).eq("flow_type", FlowTypeEnum.REFUND.name()).between("create_time", startTime, endTime));
+        Bill refundBill = storeFlowService.getRefundBill(BillSearchParams.builder()
+                .storeId(storeId)
+                .flowType(FlowTypeEnum.REFUND.name())
+                .startTime(startTime)
+                .endTime(endTime)
+                .build());
         //店铺退款金额
         if (refundBill != null) {
             //退单金额
@@ -112,10 +132,13 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         }
 
 
-        /**
-         *  @TODO 入账结算信息
-         */
-        Bill orderBill = this.baseMapper.getOrderBill(new QueryWrapper<Bill>().eq("store_id", storeId).eq("flow_type", FlowTypeEnum.PAY.name()).between("create_time", startTime, endTime));
+        //入账
+        Bill orderBill = this.storeFlowService.getOrderBill(BillSearchParams.builder()
+                .storeId(storeId)
+                .flowType(FlowTypeEnum.PAY.name())
+                .startTime(startTime)
+                .endTime(endTime)
+                .build());
         //店铺入款结算金额
 
         if (orderBill != null) {
@@ -131,15 +154,11 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
             bill.setPointSettlementPrice(orderBill.getPointSettlementPrice() != null ? orderBill.getPointSettlementPrice() : 0D);
             //砍价商品结算价格
             bill.setKanjiaSettlementPrice(orderBill.getKanjiaSettlementPrice() != null ? orderBill.getKanjiaSettlementPrice() : 0D);
-
         }
         //最终结算金额=入款结算金额-退款结算金额
         Double finalPrice = CurrencyUtil.sub(orderBill.getBillPrice(), refundBill.getBillPrice());
         //店铺最终结算金额=最终结算金额
         bill.setBillPrice(finalPrice);
-
-        //添加结算单
-        this.save(bill);
 
     }
 
@@ -222,54 +241,53 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         //创建Excel工作薄对象
         ExcelWriter writer = ExcelUtil.getWriterWithSheet("店铺结算单");
         writer.setSheet("店铺结算单");
-        Map<String,Object> map=new LinkedHashMap<>();
-        map.put("创建时间",DateUtil.format(bill.getCreateTime(), "yyyy-MM-dd"));
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("创建时间", DateUtil.format(bill.getCreateTime(), "yyyy-MM-dd"));
         writer.setColumnWidth(0, 15);
-        map.put("账单号",bill.getSn());
+        map.put("账单号", bill.getSn());
         writer.setColumnWidth(1, 30);
-        map.put("结算开始时间",DateUtil.format(bill.getStartTime(), "yyyy-MM-dd"));
+        map.put("结算开始时间", DateUtil.format(bill.getStartTime(), "yyyy-MM-dd"));
         writer.setColumnWidth(2, 15);
-        map.put("结算结束时间",DateUtil.format(bill.getEndTime(), "yyyy-MM-dd"));
+        map.put("结算结束时间", DateUtil.format(bill.getEndTime(), "yyyy-MM-dd"));
         writer.setColumnWidth(3, 15);
-        map.put("账单状态",BillStatusEnum.valueOf(bill.getBillStatus()).description());
-        map.put("店铺名称",bill.getStoreName());
+        map.put("账单状态", BillStatusEnum.valueOf(bill.getBillStatus()).description());
+        map.put("店铺名称", bill.getStoreName());
         writer.setColumnWidth(5, 15);
-        map.put("平台付款时间",DateUtil.format(bill.getPayTime(), "yyyy-MM-dd"));
+        map.put("平台付款时间", DateUtil.format(bill.getPayTime(), "yyyy-MM-dd"));
         writer.setColumnWidth(6, 15);
-        map.put("银行开户名",bill.getBankAccountName());
+        map.put("银行开户名", bill.getBankAccountName());
         writer.setColumnWidth(7, 15);
-        map.put("银行账号",bill.getBankAccountNumber());
+        map.put("银行账号", bill.getBankAccountNumber());
         writer.setColumnWidth(8, 15);
-        map.put("开户行",bill.getBankName());
+        map.put("开户行", bill.getBankName());
         writer.setColumnWidth(9, 15);
-        map.put("联行号",bill.getBankCode());
-        map.put("订单金额",bill.getOrderPrice());
-        map.put("退单金额",bill.getRefundPrice());
-        map.put("平台收取服务费",bill.getCommissionPrice());
+        map.put("联行号", bill.getBankCode());
+        map.put("订单金额", bill.getOrderPrice());
+        map.put("退单金额", bill.getRefundPrice());
+        map.put("平台收取服务费", bill.getCommissionPrice());
         writer.setColumnWidth(13, 15);
-        map.put("退单退回平台服务费",bill.getRefundCommissionPrice());
+        map.put("退单退回平台服务费", bill.getRefundCommissionPrice());
         writer.setColumnWidth(14, 25);
-        map.put("分销佣金",bill.getDistributionCommission());
-        map.put("退单退还分销佣金",bill.getDistributionRefundCommission());
+        map.put("分销佣金", bill.getDistributionCommission());
+        map.put("退单退还分销佣金", bill.getDistributionRefundCommission());
         writer.setColumnWidth(16, 20);
-        map.put("平台优惠券补贴",bill.getSiteCouponCommission());
+        map.put("平台优惠券补贴", bill.getSiteCouponCommission());
         writer.setColumnWidth(17, 15);
-        map.put("退单退回平台优惠券补贴",bill.getSiteCouponRefundCommission());
+        map.put("退单退回平台优惠券补贴", bill.getSiteCouponRefundCommission());
         writer.setColumnWidth(18, 25);
-        map.put("积分商品补贴",bill.getSiteCouponCommission());
+        map.put("积分商品补贴", bill.getSiteCouponCommission());
         writer.setColumnWidth(19, 15);
-        map.put("积分商品补贴",bill.getPointSettlementPrice());
+        map.put("积分商品补贴", bill.getPointSettlementPrice());
         writer.setColumnWidth(20, 15);
-        map.put("退单退回积分商品补贴",bill.getPointRefundSettlementPrice());
+        map.put("退单退回积分商品补贴", bill.getPointRefundSettlementPrice());
         writer.setColumnWidth(21, 25);
-        map.put("砍价商品补贴",bill.getKanjiaSettlementPrice());
+        map.put("砍价商品补贴", bill.getKanjiaSettlementPrice());
         writer.setColumnWidth(22, 15);
-        map.put("退单退回砍价补贴",bill.getKanjiaRefundSettlementPrice());
+        map.put("退单退回砍价补贴", bill.getKanjiaRefundSettlementPrice());
         writer.setColumnWidth(23, 25);
-        map.put("最终结算金额",bill.getBillPrice());
+        map.put("最终结算金额", bill.getBillPrice());
         writer.setColumnWidth(24, 15);
-        writer.writeRow(map,true);
-
+        writer.writeRow(map, true);
 
 
         writer.setSheet("入账订单");

@@ -1,11 +1,13 @@
 package cn.lili.controller.distribution;
 
 import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
+import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.distribution.entity.dos.DistributionCash;
 import cn.lili.modules.distribution.entity.vos.DistributionCashSearchParams;
 import cn.lili.modules.distribution.service.DistributionCashService;
+import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -14,6 +16,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -53,6 +56,14 @@ public class DistributionCashManagerController {
     @PostMapping(value = "/audit/{id}")
     public ResultMessage<DistributionCash> audit(@PathVariable String id, @NotNull String result) {
         return ResultUtil.data(distributorCashService.audit(id, result));
+    }
+
+
+    @ApiOperation(value = "查询分销提现导出列表")
+    @GetMapping("/queryExport")
+    public void queryExport(DistributionCashSearchParams distributionCashSearchParams) {
+        HttpServletResponse response = ThreadContextHolder.getHttpResponse();
+        distributorCashService.queryExport(response,distributionCashSearchParams);
     }
 }
 

@@ -23,9 +23,5 @@ public class DistributionSetting implements Serializable {
      * 分销关系绑定天数
      */
     private Integer distributionDay;
-    /**
-     * 分销结算天数
-     */
-    private Integer cashDay;
 
 }

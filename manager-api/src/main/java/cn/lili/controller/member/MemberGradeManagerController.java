@@ -2,7 +2,6 @@ package cn.lili.controller.member;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.MemberGrade;
@@ -51,11 +50,11 @@ public class MemberGradeManagerController {
             @ApiImplicitParam(name = "id", value = "会员等级ID", required = true, paramType = "path")
     })
     @PostMapping(value = "/add")
-    public ResultMessage<Object> daa(@Validated  MemberGrade memberGrade) {
+    public ResultMessage<Object> daa(@Validated MemberGrade memberGrade) {
         if (memberGradeService.save(memberGrade)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        throw new ServiceException(ResultCode.ERROR);
+        return ResultUtil.error(ResultCode.ERROR);
     }
 
     @ApiOperation(value = "修改会员等级")
@@ -63,24 +62,21 @@ public class MemberGradeManagerController {
             @ApiImplicitParam(name = "id", value = "会员等级ID", required = true, paramType = "path")
     })
     @PutMapping(value = "/update/{id}")
-    public ResultMessage<Object> update(@PathVariable String id,MemberGrade memberGrade) {
+    public ResultMessage<Object> update(@PathVariable String id, MemberGrade memberGrade) {
         if (memberGradeService.updateById(memberGrade)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        throw new ServiceException(ResultCode.ERROR);
+        return ResultUtil.error(ResultCode.ERROR);
     }
-
 
 
     @ApiOperation(value = "删除会员等级")
     @ApiImplicitParam(name = "id", value = "会员等级ID", required = true, dataType = "String", paramType = "path")
     @DeleteMapping(value = "/delete/{id}")
     public ResultMessage<IPage<Object>> delete(@PathVariable String id) {
-        if(memberGradeService.getById(id).getIsDefault()){
-            throw new ServiceException(ResultCode.USER_GRADE_IS_DEFAULT);
-        }else if(memberGradeService.removeById(id)){
+        if (memberGradeService.removeById(id)) {
             return ResultUtil.success(ResultCode.SUCCESS);
         }
-        throw new ServiceException(ResultCode.ERROR);
+        return ResultUtil.error(ResultCode.ERROR);
     }
 }

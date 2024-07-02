@@ -27,17 +27,13 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class DistributionOrderExecute implements OrderStatusChangeEvent, EveryDayExecute, AfterSaleStatusChangeEvent {
+public class DistributionOrderExecute implements OrderStatusChangeEvent, AfterSaleStatusChangeEvent {
 
     /**
      * 分销订单
      */
     @Autowired
     private DistributionOrderService distributionOrderService;
-
-    @Autowired
-    private SettingService settingService;
-
 
     @Override
     public void orderChange(OrderMessage orderMessage) {
@@ -60,21 +56,6 @@ public class DistributionOrderExecute implements OrderStatusChangeEvent, EveryDa
                 break;
             }
         }
-    }
-
-    @Override
-    public void execute() {
-        log.info("分销订单定时开始执行");
-        //设置结算天数(解冻日期)
-        Setting setting = settingService.get(SettingEnum.DISTRIBUTION_SETTING.name());
-        DistributionSetting distributionSetting = JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class);
-        //解冻时间
-        DateTime dateTime = new DateTime();
-        //当前时间-结算天数=最终结算时间
-        dateTime = dateTime.offsetNew(DateField.DAY_OF_MONTH, -distributionSetting.getCashDay());
-        //分销人员订单结算
-        distributionOrderService.updateRebate(dateTime, DistributionOrderStatusEnum.WAIT_BILL.name());
-
     }
 
     @Override

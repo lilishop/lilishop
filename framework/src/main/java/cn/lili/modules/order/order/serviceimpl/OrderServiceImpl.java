@@ -168,6 +168,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private SettingService settingService;
 
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void intoDB(TradeDTO tradeDTO) {
@@ -351,7 +352,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             //修改订单
             this.updateById(order);
             //生成店铺退款流水
-            this.generatorStoreRefundFlow(order);
+            storeFlowService.orderCancel(orderSn);
+            //发送消息
             orderStatusMessage(order);
             return order;
         } else {
@@ -370,7 +372,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         this.updateById(order);
         if (refundMoney) {
             //生成店铺退款流水
-            this.generatorStoreRefundFlow(order);
+            storeFlowService.orderCancel(orderSn);
             orderStatusMessage(order);
         }
     }
@@ -978,24 +980,24 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         this.sendUpdateStatusMessage(orderMessage);
     }
 
-    /**
-     * 生成店铺退款流水
-     *
-     * @param order 订单信息
-     */
-    private void generatorStoreRefundFlow(Order order) {
-        // 判断订单是否是付款
-        if (!PayStatusEnum.PAID.name().equals((order.getPayStatus()))) {
-            return;
-        }
-        List<OrderItem> items = orderItemService.getByOrderSn(order.getSn());
-        List<StoreFlow> storeFlows = new ArrayList<>();
-        for (OrderItem item : items) {
-            StoreFlow storeFlow = new StoreFlow(order, item, FlowTypeEnum.REFUND);
-            storeFlows.add(storeFlow);
-        }
-        storeFlowService.saveBatch(storeFlows);
-    }
+//    /**
+//     * 生成店铺退款流水
+//     *
+//     * @param order 订单信息
+//     */
+//    private void generatorStoreRefundFlow(Order order) {
+//        // 判断订单是否是付款
+//        if (!PayStatusEnum.PAID.name().equals((order.getPayStatus()))) {
+//            return;
+//        }
+//        List<OrderItem> items = orderItemService.getByOrderSn(order.getSn());
+//        List<StoreFlow> storeFlows = new ArrayList<>();
+//        for (OrderItem item : items) {
+//            StoreFlow storeFlow = new StoreFlow(order, item, FlowTypeEnum.REFUND);
+//            storeFlows.add(storeFlow);
+//        }
+//        storeFlowService.saveBatch(storeFlows);
+//    }
 
     /**
      * 此方法只提供内部调用，调用前应该做好权限处理

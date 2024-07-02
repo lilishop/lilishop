@@ -1,5 +1,6 @@
 package cn.lili.modules.order.order.entity.dos;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.utils.BeanUtil;
@@ -8,6 +9,7 @@ import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
+import cn.lili.modules.order.order.entity.enums.ProfitSharingStatusEnum;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
@@ -141,6 +143,24 @@ public class StoreFlow extends BaseIdEntity {
     @ApiModelProperty(value = "创建时间", hidden = true)
     private Date createTime;
 
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @TableField(fill = FieldFill.INSERT)
+    @ApiModelProperty(value = "结算时间", hidden = true)
+    private Date billTime;
+
+    @ApiModelProperty(value = "是否全部退款，true为全部退款")
+    private Boolean fullRefund;
+
+    /**
+     * @see ProfitSharingStatusEnum
+     */
+    @ApiModelProperty(value = "分账状态")
+    private String profitSharingStatus;
+
+    @ApiModelProperty(value = "实际分账金额DTO", hidden = true)
+    private String profitSharing;
+
 
     public StoreFlow(Order order, OrderItem item, FlowTypeEnum flowTypeEnum) {
         //获取订单促销类型,如果为促销订单则获取促销商品并获取结算价
@@ -196,6 +216,10 @@ public class StoreFlow extends BaseIdEntity {
         this.setPaymentName(order.getPaymentMethod());
         //添加第三方支付流水号
         this.setTransactionId(order.getReceivableNo());
-
+        //默认结算时间180天
+        if (flowTypeEnum.equals(FlowTypeEnum.PAY)) {
+            this.billTime = DateUtil.offsetDay(new Date(), 180);
+            this.fullRefund = false;
+        }
     }
 }
