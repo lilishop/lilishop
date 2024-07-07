@@ -94,11 +94,6 @@ public class WechatPlugin implements Payment {
     @Autowired
     private RefundLogService refundLogService;
     /**
-     * API域名
-     */
-    @Autowired
-    private ApiProperties apiProperties;
-    /**
      * 配置
      */
     @Autowired
@@ -151,7 +146,7 @@ public class WechatPlugin implements Payment {
                     .setOut_trade_no(outOrderNo)
                     .setTime_expire(timeExpire)
                     .setAttach(attach)
-                    .setNotify_url(notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.WECHAT))
+                    .setNotify_url(notifyUrl(wechatPaymentSetting().getCallbackUrl(),PaymentMethodEnum.WECHAT))
                     .setAmount(new Amount().setTotal(fen)).setScene_info(sceneInfo);
 
             log.info("统一下单参数 {}", JSONUtil.toJsonStr(unifiedOrderModel));
@@ -210,7 +205,7 @@ public class WechatPlugin implements Payment {
                     .setOut_trade_no(outOrderNo)
                     .setTime_expire(timeExpire)
                     .setAttach(attach)
-                    .setNotify_url(notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.WECHAT))
+                    .setNotify_url(notifyUrl(wechatPaymentSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT))
                     .setAmount(new Amount().setTotal(fen))
                     .setPayer(payer);
 
@@ -275,7 +270,7 @@ public class WechatPlugin implements Payment {
                     .setOut_trade_no(outOrderNo)
                     .setTime_expire(timeExpire)
                     .setAttach(attach)
-                    .setNotify_url(notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.WECHAT))
+                    .setNotify_url(notifyUrl(wechatPaymentSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT))
                     .setAmount(new Amount().setTotal(fen));
 
 
@@ -344,7 +339,7 @@ public class WechatPlugin implements Payment {
                     .setTime_expire(timeExpire)
                     //回传参数
                     .setAttach(attach)
-                    .setNotify_url(notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.WECHAT))
+                    .setNotify_url(notifyUrl(wechatPaymentSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT))
                     .setAmount(new Amount().setTotal(fen));
 
             log.info("统一下单参数 {}", JSONUtil.toJsonStr(unifiedOrderModel));
@@ -417,7 +412,7 @@ public class WechatPlugin implements Payment {
                     .setOut_trade_no(outOrderNo)
                     .setTime_expire(timeExpire)
                     .setAttach(attach)
-                    .setNotify_url(notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.WECHAT))
+                    .setNotify_url(notifyUrl(wechatPaymentSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT))
                     .setAmount(new Amount().setTotal(fen))
                     .setPayer(payer);
 
@@ -618,7 +613,7 @@ public class WechatPlugin implements Payment {
                     .setOut_refund_no(refundLog.getOutOrderNo())
                     .setReason(refundLog.getRefundReason())
                     .setAmount(amount)
-                    .setNotify_url(refundNotifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.WECHAT));
+                    .setNotify_url(refundNotifyUrl(wechatPaymentSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT));
 
             WechatPaymentSetting setting = wechatPaymentSetting();
 

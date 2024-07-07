@@ -209,21 +209,8 @@ lili:
     interfereNum: 1
     #允许误差像素
     faultTolerant: 3
-  #短信模版配置
-  sms:
-    #登录
-    LOGIN: SMS_205755300
-    #注册
-    REGISTER: SMS_205755298
-    #找回密码
-    FIND_USER: SMS_205755301
-    #设置密码
-    UPDATE_PASSWORD: SMS_205755297
-    #支付密码
-    WALLET_PASSWORD: SMS_205755301
   system:
     isDemoSite: false
-    isTestModel: true
   #     脱敏级别：
   #     0：不做脱敏处理
   #     1：管理端用户手机号等信息脱敏

@@ -9,6 +9,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.*;
+import cn.lili.modules.system.entity.dto.connect.ConnectSetting;
 import cn.lili.modules.system.entity.dto.connect.QQConnectSetting;
 import cn.lili.modules.system.entity.dto.connect.WechatConnectSetting;
 import cn.lili.modules.system.entity.dto.payment.AlipayPaymentSetting;
@@ -53,7 +54,7 @@ public class SettingManagerController {
                     "WECHAT_PC_CONNECT,WECHAT_WAP_CONNECT,WECHAT_APP_CONNECT,WECHAT_MP_CONNECT," +
                     "QQ_WEB_CONNECT,QQ_APP_CONNECT," +
                     "QQ_WEB_CONNECT,QQ_APP_CONNECT,WEIBO_CONNECT,ALIPAY_CONNECT," +
-                    "PAYMENT_SUPPORT,ALIPAY_PAYMENT,WECHAT_PAYMENT,SECKILL_SETTING,EXPERIENCE_SETTING,IM")
+                    "PAYMENT_SUPPORT,ALIPAY_PAYMENT,WECHAT_PAYMENT,SECKILL_SETTING,EXPERIENCE_SETTING,IM,CONNECT_SETTING")
     public ResultMessage saveConfig(@PathVariable String key, @RequestBody String configValue) {
         SettingEnum settingEnum = SettingEnum.valueOf(key);
         //获取系统配置
@@ -164,6 +165,10 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new QQConnectSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), QQConnectSetting.class));
+            case CONNECT_SETTING:
+                return setting == null ?
+                        ResultUtil.data(new ConnectSetting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), ConnectSetting.class));
             case PAYMENT_SUPPORT:
                 return setting == null ?
                         ResultUtil.data(new PaymentSupportSetting(new PaymentSupportForm())) :

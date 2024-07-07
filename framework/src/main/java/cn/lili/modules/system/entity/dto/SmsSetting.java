@@ -18,6 +18,30 @@ public class SmsSetting implements Serializable {
      * 类型
      */
     private String type;
+    /**
+     * 是否测试模式
+     */
+    private Boolean isTestModel;
+    /**
+     * 登录短信模板CODE
+     */
+    private String loginTemplateCode;
+    /**
+     * 注册短信模板CODE
+     */
+    private String registerTemplateCode;
+    /**
+     * 找回密码短信模板CODE
+     */
+    private String findPasswordTemplateCode;
+    /**
+     * 设置密码短信模板CODE
+     */
+    private String walletPasswordTemplateCode;
+    /**
+     * 支付密码短信模板CODE
+     */
+    private String payPasswordTemplateCode;
 
     /**
      * key

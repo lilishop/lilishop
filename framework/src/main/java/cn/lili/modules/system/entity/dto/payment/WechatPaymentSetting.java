@@ -57,4 +57,8 @@ public class WechatPaymentSetting {
      * apiv3私钥
      */
     private String apiKey3;
+    /**
+     * 回调API地址
+     */
+    private String callbackUrl;
 }

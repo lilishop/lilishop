@@ -38,4 +38,9 @@ public class AlipayPaymentSetting {
      */
     private String rootCertPath;
 
+    /**
+     * 回调API地址
+     */
+    private String callbackUrl;
+
 }

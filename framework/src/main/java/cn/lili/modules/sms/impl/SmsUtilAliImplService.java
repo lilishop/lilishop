@@ -116,7 +116,7 @@ public class SmsUtilAliImplService implements SmsUtil {
                 return;
         }
         //如果是测试模式 默认验证码 6个1
-        if (systemSettingProperties.getIsTestModel()) {
+        if (smsSetting.getIsTestModel()) {
             code = "111111";
             log.info("测试模式 - 接收手机：{},验证码：{}", mobile, code);
         } else {

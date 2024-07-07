@@ -34,10 +34,14 @@ public enum SettingEnum {
     //IM 配置
     IM_SETTING,
 
+    //登录设置
+    CONNECT_SUPPORT,
     //微信 联合登陆设置
     WECHAT_CONNECT,
     //QQ 浏览器 联合登录设置
     QQ_CONNECT,
+    //登录设置
+    CONNECT_SETTING,
 
     //各端支持支付设置
     PAYMENT_SUPPORT,

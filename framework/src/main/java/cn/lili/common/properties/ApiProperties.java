@@ -14,23 +14,23 @@ import org.springframework.context.annotation.Configuration;
 public class ApiProperties {
 
 
-    /**
-     * 买家api
-     */
-    private String buyer;
+//    /**
+//     * 买家api
+//     */
+//    private String buyer;
 
-    /**
-     * 管理端域名
-     */
-    private String store;
-
-    /**
-     * 管理端域名
-     */
-    private String manager;
-
-    /**
-     * 管理端域名
-     */
-    private String common;
+//    /**
+//     * 管理端域名
+//     */
+//    private String store;
+//
+//    /**
+//     * 管理端域名
+//     */
+//    private String manager;
+//
+//    /**
+//     * 管理端域名
+//     */
+//    private String common;
 }

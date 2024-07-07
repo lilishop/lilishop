@@ -73,11 +73,6 @@ public class AliPayPlugin implements Payment {
     @Autowired
     private SettingService settingService;
     /**
-     * API域名
-     */
-    @Autowired
-    private ApiProperties apiProperties;
-    /**
      * 域名配置
      */
     @Autowired
@@ -87,6 +82,7 @@ public class AliPayPlugin implements Payment {
     public ResultMessage<Object> h5pay(HttpServletRequest request, HttpServletResponse response, PayParam payParam) {
 
         CashierParam cashierParam = cashierSupport.cashierParam(payParam);
+        AlipayPaymentSetting alipayPaymentSetting = alipayPaymentSetting();
         //请求订单编号
         String outTradeNo = SnowFlake.getIdStr();
         //准备支付参数
@@ -102,8 +98,8 @@ public class AliPayPlugin implements Payment {
         payModel.setProductCode("QUICK_WAP_PAY");
         try {
             log.info("支付宝H5支付：{}", JSONUtil.toJsonStr(payModel));
-            AliPayRequest.wapPay(response, payModel, callbackUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY),
-                    notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY));
+            AliPayRequest.wapPay(response, payModel, callbackUrl(alipayPaymentSetting.getCallbackUrl(), PaymentMethodEnum.ALIPAY),
+                    notifyUrl(alipayPaymentSetting.getCallbackUrl(), PaymentMethodEnum.ALIPAY));
         } catch (Exception e) {
             log.error("H5支付异常", e);
             throw new ServiceException(ResultCode.ALIPAY_EXCEPTION);
@@ -122,6 +118,7 @@ public class AliPayPlugin implements Payment {
         try {
 
             CashierParam cashierParam = cashierSupport.cashierParam(payParam);
+            AlipayPaymentSetting alipayPaymentSetting = alipayPaymentSetting();
             //请求订单编号
             String outTradeNo = SnowFlake.getIdStr();
 
@@ -139,7 +136,7 @@ public class AliPayPlugin implements Payment {
             payModel.setProductCode("QUICK_MSECURITY_PAY");
 
             log.info("支付宝APP支付：{}", payModel);
-            String orderInfo = AliPayRequest.appPayToResponse(payModel, notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY)).getBody();
+            String orderInfo = AliPayRequest.appPayToResponse(payModel, notifyUrl(alipayPaymentSetting.getCallbackUrl(), PaymentMethodEnum.ALIPAY)).getBody();
             log.info("支付宝APP支付返回内容：{}", orderInfo);
             return ResultUtil.data(orderInfo);
         } catch (AlipayApiException e) {
@@ -156,6 +153,7 @@ public class AliPayPlugin implements Payment {
 
         try {
             CashierParam cashierParam = cashierSupport.cashierParam(payParam);
+            AlipayPaymentSetting alipayPaymentSetting = alipayPaymentSetting();
 
             AlipayTradePrecreateModel payModel = new AlipayTradePrecreateModel();
 
@@ -172,7 +170,7 @@ public class AliPayPlugin implements Payment {
             payModel.setOutTradeNo(outTradeNo);
             log.info("支付宝扫码：{}", payModel);
             String resultStr =
-                    AliPayRequest.tradePrecreatePayToResponse(payModel, notifyUrl(apiProperties.getBuyer(), PaymentMethodEnum.ALIPAY)).getBody();
+                    AliPayRequest.tradePrecreatePayToResponse(payModel, notifyUrl(alipayPaymentSetting.getCallbackUrl(), PaymentMethodEnum.ALIPAY)).getBody();
 
             log.info("支付宝扫码交互返回：{}", resultStr);
             JSONObject jsonObject = JSONObject.parseObject(resultStr);
@@ -338,7 +336,7 @@ public class AliPayPlugin implements Payment {
     }
 
     /**
-     * 获取微信支付配置
+     * 获取支付宝配置
      *
      * @return
      */
