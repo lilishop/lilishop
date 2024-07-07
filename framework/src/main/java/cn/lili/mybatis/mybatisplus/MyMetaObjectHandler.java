@@ -32,7 +32,9 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         }
         //有值，则写入
         if (metaObject.hasGetter("deleteFlag")) {
-            this.setFieldValByName("deleteFlag", false, metaObject);
+            if (metaObject.getValue("deleteFlag") == null) {
+                this.setFieldValByName("deleteFlag", false, metaObject);
+            }
         }
         if (metaObject.hasGetter("id")) {
             //如果已经配置id，则不再写入

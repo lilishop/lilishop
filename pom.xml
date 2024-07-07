@@ -48,7 +48,7 @@
         <knife4j.version>2.0.9</knife4j.version>
         <de.codecentric>2.6.6</de.codecentric>
         <userAgentUtils>1.21</userAgentUtils>
-        <poi-version>5.1.0</poi-version>
+        <poi-version>5.2.3</poi-version>
         <poi-ooxml-version>5.2.3</poi-ooxml-version>
         <logstash-logback-encoder>7.1.1</logstash-logback-encoder>
         <zxing>3.5.0</zxing>

@@ -1235,7 +1235,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             if (StrUtil.isNotBlank(orderExportDTO.getConsigneeAddressPath())) {
                 String[] receiveAddress = orderExportDTO.getConsigneeAddressPath().split(",");
                 orderExportDetailDTO.setProvince(receiveAddress[0]);
-                orderExportDetailDTO.setCity(receiveAddress[1]);
+                orderExportDetailDTO.setCity(receiveAddress.length > 1 ?receiveAddress[1]:"");
                 orderExportDetailDTO.setDistrict(receiveAddress.length > 2 ? receiveAddress[2] : "");
                 orderExportDetailDTO.setStreet(receiveAddress.length > 3 ? receiveAddress[3] : "");
             }
@@ -1278,13 +1278,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             row.createCell(2).setCellValue(dto.getGoodsName());
             row.createCell(3).setCellValue(dto.getNum());
             row.createCell(4).setCellValue(dto.getGoodsId());
-            row.createCell(5).setCellValue(dto.getUnitPrice());
-            row.createCell(6).setCellValue(dto.getFlowPrice());
-            row.createCell(7).setCellValue(dto.getFreightPrice());
-            row.createCell(8).setCellValue(dto.getDiscountPrice());
-            row.createCell(9).setCellValue(dto.getSiteMarketingCost());
-            row.createCell(10).setCellValue(dto.getStoreMarketingCost());
-            row.createCell(11).setCellValue(dto.getUpdatePrice());
+            row.createCell(5).setCellValue(dto.getUnitPrice()!=null?dto.getUnitPrice():0);
+            row.createCell(6).setCellValue(dto.getFlowPrice()!=null?dto.getFlowPrice():0);
+            row.createCell(7).setCellValue(dto.getFreightPrice()!=null?dto.getFreightPrice():0);
+            row.createCell(8).setCellValue(dto.getDiscountPrice()!=null?dto.getDiscountPrice():0);
+            row.createCell(9).setCellValue(dto.getSiteMarketingCost()!=null?dto.getSiteMarketingCost():0);
+            row.createCell(10).setCellValue(dto.getStoreMarketingCost()!=null?dto.getStoreMarketingCost():0);
+            row.createCell(11).setCellValue(dto.getUpdatePrice()!=null?dto.getUpdatePrice():0);
             row.createCell(12).setCellValue(dto.getPaymentMethod());
             row.createCell(13).setCellValue(dto.getConsigneeName());
             row.createCell(14).setCellValue(dto.getConsigneeMobile());
