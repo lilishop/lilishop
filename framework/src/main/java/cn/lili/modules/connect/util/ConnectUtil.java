@@ -107,8 +107,8 @@ public class ConnectUtil {
         //缓存写入登录结果，300秒有效
         cache.put(CachePrefix.CONNECT_RESULT.getPrefix() + callback.getCode(), resultMessage, 300L);
 
-        Setting setting = settingService.get(SettingEnum.CONNECT_SUPPORT.name());
-        ConnectSetting connectSetting = JSONUtil.toBean(setting.getSettingValue(),  ConnectSetting.class);
+        //登录设置
+        ConnectSetting connectSetting = JSONUtil.toBean(settingService.get(SettingEnum.CONNECT_SETTING.name()).getSettingValue(), ConnectSetting.class);
 
         //跳转地址
         String url = this.check(httpServletRequest.getHeader("user-agent")) ?
