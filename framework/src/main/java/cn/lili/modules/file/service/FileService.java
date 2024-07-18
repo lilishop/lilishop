@@ -32,6 +32,13 @@ public interface FileService extends IService<File> {
     void batchDeleteByDirectory(String directoryId);
 
     /**
+     * 根据文件夹ID查看是否有文件
+     * @param directoryId 文件夹ID
+     * @return
+     */
+    Boolean countByDirectory(String directoryId);
+
+    /**
      * 所有者批量删除
      *
      * @param ids      ID

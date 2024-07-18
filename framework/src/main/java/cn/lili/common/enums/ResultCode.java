@@ -42,6 +42,7 @@ public enum ResultCode {
     PLATFORM_NOT_SUPPORTED_IM(1006, "平台未开启IM"),
     STORE_NOT_SUPPORTED_IM(1007, "店铺未开启IM"),
     UNINITIALIZED_PASSWORD(1008, "非初始化密码，无法进行初始化设置"),
+    FILE_DIRECTORY_NOT_EMPTY(1012, "文件夹下有文件，请删除所有文件后删除文件夹！"),
     /**
      * 分类
      */

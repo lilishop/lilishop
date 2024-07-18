@@ -60,6 +60,11 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
     }
 
     @Override
+    public Boolean countByDirectory(String directoryId) {
+        return this.count(new LambdaQueryWrapper<File>().eq(File::getFileDirectoryId, directoryId))>0;
+    }
+
+    @Override
     public void batchDelete(List<String> ids, AuthUser authUser) {
         LambdaQueryWrapper<File> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(File::getId, ids);

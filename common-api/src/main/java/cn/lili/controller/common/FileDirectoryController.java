@@ -1,5 +1,6 @@
 package cn.lili.controller.common;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
@@ -57,8 +58,10 @@ public class FileDirectoryController {
     @ApiOperation(value = "删除文件目录")
     @DeleteMapping("/{id}")
     public ResultMessage<Object> deleteSceneFileList(@PathVariable String id) {
-        //删除文件夹下面的图片
-        fileService.batchDeleteByDirectory(id);
+        //检测文件夹下是否包含图片
+        if(fileService.countByDirectory(id)){
+            return ResultUtil.error(ResultCode.FILE_DIRECTORY_NOT_EMPTY);
+        }
         //删除目录
         fileDirectoryService.removeById(id);
         return ResultUtil.success();
