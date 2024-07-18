@@ -176,7 +176,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
                 continue;
             }
             //获取秒杀活动时间段
-            DateTime startTime = DateUtil.offsetHour(seckill.getStartTime(), seckillApply.getTimeLine());
+            DateTime startTime = DateUtil.offsetHour(DateUtil.beginOfDay(seckill.getStartTime()), seckillApply.getTimeLine());
             //检测是否可以发布促销商品
             checkSeckillGoodsSku(seckill, seckillApply, goodsSku, startTime);
             //设置秒杀申请默认内容
