@@ -20,6 +20,7 @@ import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.entity.enums.SourceEnum;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.member.entity.dto.ConnectQueryDTO;
+import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
@@ -48,6 +49,7 @@ import cn.lili.modules.system.service.SettingService;
 import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
 import cn.lili.modules.wallet.entity.dto.TransferResultDTO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -161,6 +163,8 @@ public class WechatPlugin implements Payment {
                     JSONUtil.toJsonStr(unifiedOrderModel)
             );
 
+            updateOrderPayNo(payParam,outOrderNo);
+
             return ResultUtil.data(JSONUtil.toJsonStr(response.getBody()));
         } catch (Exception e) {
             log.error("微信H5支付错误", e);
@@ -232,6 +236,8 @@ public class WechatPlugin implements Payment {
                 Map<String, String> map = WxPayKit.jsApiCreateSign(appid, prepayId, setting.getApiclient_key());
                 log.info("唤起支付参数:{}", map);
 
+                updateOrderPayNo(payParam,outOrderNo);
+
                 return ResultUtil.data(map);
             }
             log.error("微信支付参数验证错误，请及时处理");
@@ -299,6 +305,8 @@ public class WechatPlugin implements Payment {
                         setting.getApiclient_key(), SignType.MD5);
                 log.info("唤起支付参数:{}", map);
 
+                updateOrderPayNo(payParam,outOrderNo);
+
                 return ResultUtil.data(map);
             }
             log.error("微信支付参数验证错误，请及时处理");
@@ -359,6 +367,8 @@ public class WechatPlugin implements Payment {
             log.info("verifySignature: {}", verifySignature);
 
             if (verifySignature) {
+                updateOrderPayNo(payParam,outOrderNo);
+
                 return ResultUtil.data(new JSONObject(response.getBody()).getStr("code_url"));
             } else {
                 log.error("微信支付参数验证错误，请及时处理");
@@ -438,7 +448,7 @@ public class WechatPlugin implements Payment {
                 String prepayId = jsonObject.getStr("prepay_id");
                 Map<String, String> map = WxPayKit.jsApiCreateSign(appid, prepayId, setting.getApiclient_key());
                 log.info("唤起支付参数:{}", map);
-
+                updateOrderPayNo(payParam,outOrderNo);
                 return ResultUtil.data(map);
             }
             log.error("微信支付参数验证错误，请及时处理");
@@ -782,5 +792,22 @@ public class WechatPlugin implements Payment {
                 nonce.getBytes(StandardCharsets.UTF_8),
                 cipherText
         );
+    }
+
+    /**
+     * 修改订单支付单号
+     * @param payParam 支付参数
+     * @param outOrderNo 订单号
+     */
+    private void updateOrderPayNo(PayParam payParam,String outOrderNo ){
+        if(payParam.getOrderType().equals("ORDER")){
+            orderService.update(new LambdaUpdateWrapper<Order>()
+                    .eq(Order::getSn,payParam.getSn())
+                    .set(Order::getPayOrderNo,outOrderNo));
+        }else if(payParam.getOrderType().equals("TRADE")){
+            orderService.update(new LambdaUpdateWrapper<Order>()
+                    .eq(Order::getTradeSn,payParam.getSn())
+                    .set(Order::getPayOrderNo,outOrderNo));
+        }
     }
 }
