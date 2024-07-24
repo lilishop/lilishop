@@ -167,8 +167,12 @@ public class MemberBuyerController {
                                             @RequestHeader String uuid) {
         if (smsUtil.verifyCode(mobile, VerificationEnums.BIND_MOBILE, uuid, code)) {
             Member member = memberService.findByUsername(username);
+            Member memberByMobile = memberService.findByMobile(mobile);
             if (member == null) {
                 throw new ServiceException(ResultCode.USER_NOT_EXIST);
+            }
+            if(memberByMobile != null){
+                throw new ServiceException(ResultCode.USER_MOBILE_REPEATABLE_ERROR);
             }
             return ResultUtil.data(memberService.changeMobile(member.getId(), mobile));
         } else {
