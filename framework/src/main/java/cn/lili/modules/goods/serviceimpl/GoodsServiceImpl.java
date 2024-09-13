@@ -437,6 +437,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         lambdaUpdateWrapper.in(Goods::getId, goodsIds);
         List<String> goodsCache = goodsIds.stream().map(item -> CachePrefix.GOODS.getPrefix() + item).collect(Collectors.toList());
         cache.multiDel(goodsCache);
+        goodsSkuService.freight(goodsIds, templateId);
         return this.update(lambdaUpdateWrapper);
     }
 
