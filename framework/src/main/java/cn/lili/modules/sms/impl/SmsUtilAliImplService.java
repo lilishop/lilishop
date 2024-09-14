@@ -5,8 +5,6 @@ import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.properties.SmsTemplateProperties;
-import cn.lili.common.properties.SystemSettingProperties;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CommonUtil;
 import cn.lili.modules.member.entity.dos.Member;
@@ -48,12 +46,6 @@ public class SmsUtilAliImplService implements SmsUtil {
     @Autowired
     private SmsPluginFactory smsPluginFactory;
 
-    @Autowired
-    private SmsTemplateProperties smsTemplateProperties;
-
-    @Autowired
-    private SystemSettingProperties systemSettingProperties;
-
     @Override
     public void sendSmsCode(String mobile, VerificationEnums verificationEnums, String uuid) {
         //获取短信配置
@@ -78,18 +70,18 @@ public class SmsUtilAliImplService implements SmsUtil {
         switch (verificationEnums) {
             //登录
             case LOGIN: {
-                templateCode = smsTemplateProperties.getLOGIN();
+                templateCode = smsSetting.getLoginTemplateCode();
                 break;
             }
             //注册
             case BIND_MOBILE:
             case REGISTER: {
-                templateCode = smsTemplateProperties.getREGISTER();
+                templateCode = smsSetting.getRegisterTemplateCode();
                 break;
             }
             //找回密码
             case FIND_USER: {
-                templateCode = smsTemplateProperties.getFIND_USER();
+                templateCode = smsSetting.getFindPasswordTemplateCode();
                 break;
             }
             //修改密码
@@ -100,7 +92,7 @@ public class SmsUtilAliImplService implements SmsUtil {
                 }
                 //更新为用户最新手机号
                 mobile = member.getMobile();
-                templateCode = smsTemplateProperties.getUPDATE_PASSWORD();
+                templateCode = smsSetting.getFindPasswordTemplateCode();
                 break;
             }
             //设置支付密码
@@ -108,7 +100,7 @@ public class SmsUtilAliImplService implements SmsUtil {
                 Member member = memberService.getById(UserContext.getCurrentUser().getId());
                 //更新为用户最新手机号
                 mobile = member.getMobile();
-                templateCode = smsTemplateProperties.getWALLET_PASSWORD();
+                templateCode = smsSetting.getWalletPasswordTemplateCode();
                 break;
             }
             //如果不是有效的验证码手段，则此处不进行短信操作
