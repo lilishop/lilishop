@@ -888,6 +888,17 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     }
 
+    @Override
+    public Boolean freight(List<String> goodsId, String templateId) {
+        LambdaUpdateWrapper<GoodsSku> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.in(GoodsSku::getGoodsId, goodsId);
+        updateWrapper.set(GoodsSku::getFreightTemplateId, templateId);
+        updateWrapper.set(GoodsSku::getUpdateTime, new Date());
+        List<String> skuIds = this.list(updateWrapper).stream().map(GoodsSku::getId).collect(Collectors.toList());
+        skuIds.forEach(this::clearCache);
+        return this.update(updateWrapper);
+    }
+
     /**
      * 渲染商品sku
      *
