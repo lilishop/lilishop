@@ -233,7 +233,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     private Member findMember(String userName) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", userName).or().eq("mobile", userName);
-        return this.getOne(queryWrapper);
+        return this.getOne(queryWrapper, false);
     }
 
     @Override
