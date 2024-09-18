@@ -137,7 +137,7 @@ public class WechatMPServiceImpl implements WechatMPService {
         map.put("upload_time", DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now()));
 
         //支付者，支付者信息
-        Connect connect = connectService.queryConnect(ConnectQueryDTO.builder().userId(UserContext.getCurrentUser().getId()).unionType(SourceEnum.WECHAT_MP_OPEN_ID.name()).build());
+        Connect connect = connectService.queryConnect(ConnectQueryDTO.builder().userId(order.getMemberId()).unionType(SourceEnum.WECHAT_MP_OPEN_ID.name()).build());
         if (connect == null) {
             return;
         }
@@ -263,7 +263,7 @@ public class WechatMPServiceImpl implements WechatMPService {
         private String out_trade_no;
 
         public OrderKey(Order order) {
-            this.order_number_type = 2;
+            this.order_number_type = 1;
             this.out_trade_no = order.getPayOrderNo();
             this.transaction_id = order.getReceivableNo();
         }

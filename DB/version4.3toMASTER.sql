@@ -105,7 +105,7 @@ WHERE
    sf.flow_type = 'REFUND'
    AND sf.store_id=b.store_id
    AND sf.create_time BETWEEN b.start_time
-   AND b.end_time),0)
+   AND b.end_time),0);
 
 UPDATE li_bill b
 SET b.kanjia_refund_settlement_price =IFNULL((
