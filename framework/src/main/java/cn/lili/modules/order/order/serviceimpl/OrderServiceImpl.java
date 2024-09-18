@@ -22,6 +22,7 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
+import cn.lili.modules.order.aftersale.entity.enums.ComplaintStatusEnum;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
@@ -470,7 +471,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public Order delivery(String orderSn, String logisticsNo, String logisticsId) {
         Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
         //如果订单未发货，并且订单状态值等于待发货
-        if (order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name()) && order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())) {
+        if ((order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name()) || order.getDeliverStatus().equals(DeliverStatusEnum.PARTS_DELIVERED.name())) &&
+                (order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name()) || order.getOrderStatus().equals(OrderStatusEnum.PARTS_DELIVERED.name()))) {
             //获取对应物流
             Logistics logistics = logisticsService.getById(logisticsId);
             if (logistics == null) {
@@ -872,7 +874,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                         throw new ServiceException("发货数量不正确!");
                     }
                     orderItem.setDeliverNumber((partDeliveryDTO.getDeliveryNum() + orderItem.getDeliverNumber()));
-
                     // 记录分包裹中每个item子单的具体发货信息
                     OrderPackageItem orderPackageItem = new OrderPackageItem();
                     orderPackageItem.setOrderSn(orderSn);
@@ -906,6 +907,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //是否全部发货
         if (delivery) {
             return delivery(orderSn, invoiceNumber, logisticsId);
+        }else if(order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name()) || order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())){
+            //更改订单状态为部分发货
+            order.setDeliverStatus(DeliverStatusEnum.PARTS_DELIVERED.name());
+            order.setOrderStatus(OrderStatusEnum.PARTS_DELIVERED.name());
+            this.updateById(order);
         }
         return order;
     }

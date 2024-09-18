@@ -73,18 +73,18 @@ public class AllowOperation implements Serializable {
 
         //可编辑订单收件人信息=实物订单 && 订单未发货 && 订单未取消 && 订单不是自提
         this.editConsignee = order.getOrderType().equals(OrderTypeEnum.NORMAL.name())
-                && order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name())
+                && (order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name()) || order.getDeliverStatus().equals(DeliverStatusEnum.PARTS_DELIVERED.name()))
                 && !status.equals(OrderStatusEnum.CANCELLED.name())
                 && !order.getDeliveryMethod().equals(DeliveryMethodEnum.SELF_PICK_UP.name());
 
         //是否允许被发货
-        this.ship = editConsignee && status.equals(OrderStatusEnum.UNDELIVERED.name());
+        this.ship = editConsignee && (status.equals(OrderStatusEnum.UNDELIVERED.name()) || order.getDeliverStatus().equals(DeliverStatusEnum.PARTS_DELIVERED.name()));
 
         //是否允许被收货
         this.rog = status.equals(OrderStatusEnum.DELIVERED.name());
 
         //是否允许查看物流信息
-        this.showLogistics = order.getDeliverStatus().equals(DeliverStatusEnum.DELIVERED.name()) && status.equals(OrderStatusEnum.DELIVERED.name());
+        this.showLogistics = (order.getDeliverStatus().equals(DeliverStatusEnum.DELIVERED.name()) ||  order.getDeliverStatus().equals(DeliverStatusEnum.PARTS_DELIVERED.name())) && (status.equals(OrderStatusEnum.DELIVERED.name()) || status.equals(OrderStatusEnum.PARTS_DELIVERED.name()));
 
         //虚拟订单 或 自提订单可以核销
         this.take =
