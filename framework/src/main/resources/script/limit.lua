@@ -2,7 +2,7 @@ local c
 c = redis.call('get',KEYS[1])
 -- 调用不超过最大值，则直接返回
 if c and tonumber(c) > tonumber(ARGV[1]) then
-    return c;
+    return tonumber(c);
 end
 -- 执行计算器自加
 c = redis.call('incr',KEYS[1])
