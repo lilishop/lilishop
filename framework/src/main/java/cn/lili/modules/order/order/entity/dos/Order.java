@@ -243,7 +243,7 @@ public class Order extends BaseEntity {
         this.setDeliverStatus(DeliverStatusEnum.UNDELIVERED.name());
         this.setTradeSn(tradeDTO.getSn());
         this.setRemark(cartVO.getRemark());
-        this.setFreightPrice(tradeDTO.getPriceDetailDTO().getFreightPrice());
+        this.setFreightPrice(cartVO.getPriceDetailDTO().getFreightPrice());
         //会员收件信息
         if (tradeDTO.getMemberAddress() != null && DeliveryMethodEnum.LOGISTICS.name().equals(cartVO.getDeliveryMethod())) {
             this.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());

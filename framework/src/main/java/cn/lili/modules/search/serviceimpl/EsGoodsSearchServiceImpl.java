@@ -88,7 +88,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
             cache.incrementScore(CachePrefix.HOT_WORD.getPrefix(), searchDTO.getKeyword());
         }
         NativeSearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder(searchDTO, pageVo);
-//        searchQueryBuilder.withCollapseField("goodsId");
+//        searchQueryBuilder.withCollapseField("goodsId.keyword");
         NativeSearchQuery searchQuery = searchQueryBuilder.build();
         searchQuery.setTrackTotalHits(true);
         log.debug("searchGoods DSL:{}", searchQuery.getQuery());

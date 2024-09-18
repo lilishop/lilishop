@@ -296,4 +296,13 @@ public interface GoodsSkuService extends IService<GoodsSku> {
      * @return 库存数量
      */
     Integer getGoodsStock(String goodsId);
+
+    /**
+     * 更新sku运费模版
+     *
+     * @param goodsId 商品id
+     * @param templateId 运费模版id
+     * @return 操作结果
+     */
+    Boolean freight(List<String> goodsId, String templateId);
 }
