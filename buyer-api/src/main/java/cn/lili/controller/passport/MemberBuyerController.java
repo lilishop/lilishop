@@ -29,7 +29,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import javax.validation.constraints.NotNull;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 买家端,会员接口
@@ -73,6 +73,8 @@ public class MemberBuyerController {
                 new ResponseEntity<>(ResultUtil.error(ResultCode.ERROR), HttpStatus.OK);
         int timeoutSecond = 20;
         DeferredResult<ResponseEntity<Object>> deferredResult = new DeferredResult<>(timeoutSecond * 1000L, timeoutResponseEntity);
+         // 用于记录重试次数
+        AtomicInteger retryCount = new AtomicInteger(0);
         CompletableFuture.runAsync(() -> {
             try {
                 int i = 0;
@@ -83,7 +85,16 @@ public class MemberBuyerController {
                             && (QRCodeLoginSessionStatusEnum.WAIT_SCANNING.getCode() == status
                             || QRCodeLoginSessionStatusEnum.SCANNING.getCode() == status)) {
                         //睡眠一秒种，继续等待结果
-                        TimeUnit.SECONDS.sleep(1);
+                        //TimeUnit.SECONDS.sleep(1);
+                        
+                        // 应用指数退避策略
+                        int baseSleepTime = 1000;  // 基础退避时间（毫秒）
+                        int maxSleepTime = 10000;  // 最大退避时间（毫秒）
+
+                        int sleepTime = Math.min(maxSleepTime, baseSleepTime * (1 + retryCount.getAndIncrement()));
+                        int randomFactor = (int) (Math.random() * (sleepTime / 2));  // 随机化因子
+
+                        TimeUnit.MILLISECONDS.sleep(sleepTime + randomFactor);
                     } else {
                         deferredResult.setResult(new ResponseEntity<>(ResultUtil.data(queryResult), HttpStatus.OK));
                         break;
