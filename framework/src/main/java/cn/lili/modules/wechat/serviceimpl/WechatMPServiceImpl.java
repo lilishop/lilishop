@@ -15,6 +15,7 @@ import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -79,7 +80,7 @@ public class WechatMPServiceImpl implements WechatMPService {
         Order order = orderService.getBySn(orderSn);
         //是否是微信小程序订单 && 微信支付
         if (!order.getClientType().equals(ClientTypeEnum.WECHAT_MP.name())
-                || !order.getPaymentMethod().equals(ClientTypeEnum.WECHAT_MP.name())) {
+                || !order.getPaymentMethod().equals(PaymentMethodEnum.WECHAT.name())) {
             return;
         }
         //是否开通发货信息管理
