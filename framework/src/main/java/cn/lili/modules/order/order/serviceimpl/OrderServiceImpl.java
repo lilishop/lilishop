@@ -843,6 +843,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Order partDelivery(PartDeliveryParamsDTO partDeliveryParamsDTO) {
         String logisticsId = partDeliveryParamsDTO.getLogisticsId();
         String orderSn = partDeliveryParamsDTO.getOrderSn();
