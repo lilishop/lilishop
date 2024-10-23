@@ -185,13 +185,13 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
                 .or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.START))
                 .or(PromotionTools.queryPromotionStatus(PromotionsStatusEnum.NEW)));
 
-        if (kanJiaActivityGoodsDTO != null && kanJiaActivityGoodsDTO.getStartTime() != null) {
-            queryWrapper.ge("start_time", kanJiaActivityGoodsDTO.getStartTime());
-        }
-
-        if (kanJiaActivityGoodsDTO != null && kanJiaActivityGoodsDTO.getEndTime() != null) {
-            queryWrapper.le("end_time", kanJiaActivityGoodsDTO.getEndTime());
-        }
+//        if (kanJiaActivityGoodsDTO != null && kanJiaActivityGoodsDTO.getStartTime() != null) {
+//            queryWrapper.ge("start_time", kanJiaActivityGoodsDTO.getStartTime());
+//        }
+//
+//        if (kanJiaActivityGoodsDTO != null && kanJiaActivityGoodsDTO.getEndTime() != null) {
+//            queryWrapper.le("end_time", kanJiaActivityGoodsDTO.getEndTime());
+//        }
 
         return this.getOne(queryWrapper);
 
