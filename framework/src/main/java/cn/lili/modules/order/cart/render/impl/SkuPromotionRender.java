@@ -141,6 +141,7 @@ public class SkuPromotionRender implements CartRenderStep {
                         KanjiaActivitySearchParams kanjiaActivitySearchParams = new KanjiaActivitySearchParams();
                         kanjiaActivitySearchParams.setGoodsSkuId(cartSkuVO.getGoodsSku().getId());
                         kanjiaActivitySearchParams.setMemberId(Objects.requireNonNull(UserContext.getCurrentUser()).getId());
+                        kanjiaActivitySearchParams.setKanjiaActivityId(cartSkuVO.getKanjiaId());
                         kanjiaActivitySearchParams.setStatus(KanJiaStatusEnum.SUCCESS.name());
                         KanjiaActivityVO kanjiaActivityVO = kanjiaActivityService.getKanjiaActivityVO(kanjiaActivitySearchParams);
                         //可以砍价金额购买，则处理信息
