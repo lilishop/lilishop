@@ -211,6 +211,10 @@ public class KanjiaActivityServiceImpl extends ServiceImpl<KanJiaActivityMapper,
         //获取随机砍价金额
         BigDecimal bigDecimal = RandomUtil.randomBigDecimal(Convert.toBigDecimal(kanjiaActivityGoods.getLowestPrice()),
                 Convert.toBigDecimal(kanjiaActivityGoods.getHighestPrice()));
+
+        if(bigDecimal.setScale(2, RoundingMode.UP).doubleValue() > surplusPrice){
+            return surplusPrice;
+        }
         return bigDecimal.setScale(2, RoundingMode.UP).doubleValue();
 
     }
