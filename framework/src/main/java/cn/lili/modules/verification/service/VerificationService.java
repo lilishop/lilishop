@@ -40,4 +40,13 @@ public interface VerificationService {
      * @return 操作结果
      */
     boolean check(String uuid, VerificationEnums verificationEnums);
+
+
+    /**
+     * 检测是否可以生成验证码
+     *
+     * @param type    验证码类型
+     * @param filePath 文件路径
+     */
+    Boolean checkCreateVerification(String type, String filePath);
 }
