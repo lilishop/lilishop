@@ -247,10 +247,15 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
     private PointsGoods checkExist(String id) {
         PointsGoods pointsGoods = this.getById(id);
         if (pointsGoods == null) {
-            log.error("id为" + id + "的积分商品不存在！");
+            log.error("id为{}的积分商品不存在！", id);
             throw new ServiceException();
         }
         return pointsGoods;
+    }
+
+    @Override
+    public boolean allowExistSame() {
+        return true;
     }
 
     /**
