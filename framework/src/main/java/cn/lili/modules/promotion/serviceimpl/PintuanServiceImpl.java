@@ -241,8 +241,12 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
 
     private void setMemberVONum(PintuanMemberVO memberVO, Integer requiredNum, String orderSn) {
         long count = this.orderService.queryCountByPromotion(PromotionTypeEnum.PINTUAN.name(), PayStatusEnum.PAID.name(), orderSn, orderSn);
-        //获取待参团人数
+        Order order = orderService.getBySn(orderSn);
         long toBoGrouped = requiredNum - count;
+        if(order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())){
+            toBoGrouped = 0L;
+        }
+        //获取待参团人数
         memberVO.setGroupNum(requiredNum);
         memberVO.setGroupedNum(count);
         memberVO.setToBeGroupedNum(toBoGrouped);
