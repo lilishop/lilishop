@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.serviceimpl;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapBuilder;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
@@ -12,6 +13,7 @@ import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.search.BasePromotionsSearchParams;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.service.AbstractPromotionsService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.tools.PromotionTools;
@@ -26,7 +28,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
+
+import static cn.lili.modules.promotion.tools.PromotionTools.queryPromotionStatus;
 
 /**
  * @author paulG
@@ -215,7 +220,7 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
      * 更新促销商品信息
      *
      * @param promotions 促销实体
-     * @return
+     * @return 是否更新成功
      */
     @Override
     @Transactional(rollbackFor = {Exception.class})
@@ -283,12 +288,53 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
         if (promotions.getStartTime() == null || promotions.getEndTime() == null) {
             return;
         }
-        QueryWrapper<T> queryWrapper = PromotionTools.checkActiveTime(promotions.getStartTime(), promotions.getEndTime(), this.getPromotionType(), promotions.getStoreId(), promotions.getId());
-        long sameNum = this.count(queryWrapper);
-        //当前时间段是否存在同类活动
-        if (sameNum > 0) {
-            throw new ServiceException(ResultCode.PROMOTION_SAME_ACTIVE_EXIST);
-        }
+
+        // 遍历编辑活动开始时间的当天开始时间到结束的当天结束时间内的活动
+        QueryWrapper<T> querySameWrapper = getSameWrapper(promotions);
+
+        this.list(querySameWrapper).forEach(promotion -> {
+            if (promotion.getStartTime() == null || promotion.getEndTime() == null) {
+                return;
+            }
+
+            if (isOverlapping(promotions.getStartTime(), promotions.getEndTime(), promotion.getStartTime(), promotion.getEndTime())) {
+                throw new ServiceException(ResultCode.PROMOTION_SAME_ACTIVE_EXIST);
+            }
+
+        });
+
+    }
+
+    /**
+     * 获取相同时间段的促销活动
+     *
+     * @param promotions 促销活动
+     * @return 相同时间段的促销活动
+     * @param <T> 促销活动类型
+     */
+    private static <T extends BasePromotions> @NotNull QueryWrapper<T> getSameWrapper(T promotions) {
+        QueryWrapper<T> querySameWrapper = new QueryWrapper<>();
+        querySameWrapper.eq("store_id", promotions.getStoreId());
+        querySameWrapper.eq("delete_flag", false);
+        querySameWrapper.ne("id", promotions.getId());
+        querySameWrapper.and(i -> i.or(queryPromotionStatus(PromotionsStatusEnum.NEW)).or(queryPromotionStatus(PromotionsStatusEnum.START)));
+        querySameWrapper.and(i -> i.or(j -> j.between("start_time", DateUtil.beginOfDay(promotions.getStartTime()), DateUtil.endOfDay(promotions.getEndTime()))
+                .or().between("end_time", DateUtil.beginOfDay(promotions.getStartTime()), DateUtil.endOfDay(promotions.getEndTime()))));
+        return querySameWrapper;
+    }
+
+    /**
+     * 判断两个时间段是否有交集
+     *
+     * @param a1 原时间段开始时间
+     * @param a2 原时间段结束时间
+     * @param b1 新时间段开始时间
+     * @param b2 新时间段结束时间
+     * @return 是否有交集
+     */
+    public static boolean isOverlapping(Date a1, Date a2, Date b1, Date b2) {
+        // 两个时间段有交集的条件是：b1在a1和a2之间，或者b2在a1和a2之间，或者a1在b1和b2之间
+        return (b1.before(a2) && b2.after(a1)) || (b1.before(a1) && b2.after(a2)) || (a1.before(b1) && a2.after(b2));
     }
 
 }
