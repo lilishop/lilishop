@@ -352,6 +352,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             order.setCancelReason(reason);
             //修改订单
             this.updateById(order);
+            //订单货物设置全部退款
+            orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn,orderSn).set(OrderItem::getIsRefund,RefundStatusEnum.ALL_REFUND.name()));
             //生成店铺退款流水
             storeFlowService.orderCancel(orderSn);
             //发送消息
@@ -371,6 +373,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setOrderStatus(OrderStatusEnum.CANCELLED.name());
         order.setCancelReason(reason);
         this.updateById(order);
+        //订单货物设置全部退款
+        orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn,orderSn).set(OrderItem::getIsRefund,RefundStatusEnum.ALL_REFUND.name()));
         if (refundMoney) {
             //生成店铺退款流水
             storeFlowService.orderCancel(orderSn);
