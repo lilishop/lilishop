@@ -72,6 +72,7 @@ import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -484,20 +485,12 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         deleteByQueryRequest.setQuery(boolQueryBuilder);
         deleteByQueryRequest.indices(getIndexName());
         deleteByQueryRequest.setConflicts("proceed");
-        this.client.deleteByQueryAsync(deleteByQueryRequest, RequestOptions.DEFAULT, new ActionListener<BulkByScrollResponse>() {
 
-            @Override
-            public void onResponse(BulkByScrollResponse bulkByScrollResponse) {
-                if (bulkByScrollResponse.getVersionConflicts() > 0) {
-                    throw new RetryException("删除索引失败，es内容版本冲突");
-                }
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                throw new RetryException("删除索引失败，" + e.getMessage());
-            }
-        });
+        try {
+            this.client.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            log.error("删除索引出现异常", e);
+        }
 
     }
 
