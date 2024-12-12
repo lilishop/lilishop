@@ -121,6 +121,13 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         }
         //获取商品信息
         GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(memberEvaluationDTO.getSkuId());
+
+        // 商品是否存在
+        if (goodsSku == null) {
+            log.error("商品不存在，商品ID：" + memberEvaluationDTO.getSkuId());
+            return null;
+        }
+
         //新增用户评价
         MemberEvaluation memberEvaluation = new MemberEvaluation(memberEvaluationDTO, goodsSku, member, order);
         //过滤商品咨询敏感词
