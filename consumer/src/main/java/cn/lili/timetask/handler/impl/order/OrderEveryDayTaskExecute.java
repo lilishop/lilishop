@@ -29,13 +29,13 @@ import cn.lili.modules.system.service.SettingService;
 import cn.lili.timetask.handler.EveryDayExecute;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author paulG
@@ -198,8 +198,9 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
                 try {
                     memberEvaluationService.addMemberEvaluation(memberEvaluationDTO, false);
-
                 } catch (Exception e) {
+                    // 修改订单货物评价状态为已评价避免无限调用评价异常
+                    orderItemService.updateCommentStatus(orderItem.getSn(), CommentStatusEnum.FINISHED);
                     log.error(e.getMessage(), e);
                 }
             }
