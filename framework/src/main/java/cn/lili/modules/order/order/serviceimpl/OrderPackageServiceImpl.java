@@ -54,8 +54,8 @@ public class OrderPackageServiceImpl extends ServiceImpl<OrderPackageMapper, Ord
             orderPackageVO.setOrderPackageItemList(orderPackageItemList);
             String str = orderPackage.getConsigneeMobile();
             str = str.substring(str.length() - 4);
-//            Traces traces = logisticsService.getLogisticTrack(orderPackage.getLogisticsCode(), orderPackage.getLogisticsNo(), str);
-//            orderPackageVO.setTraces(traces);
+            Traces traces = logisticsService.getLogisticTrack(orderPackage.getLogisticsCode(), orderPackage.getLogisticsNo(), str);
+            orderPackageVO.setTraces(traces);
             orderPackageVOS.add(orderPackageVO);
         });
 

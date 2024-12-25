@@ -865,7 +865,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderPackage.setPackageNo(SnowFlake.createStr("OP"));
         orderPackage.setOrderSn(orderSn);
         orderPackage.setLogisticsNo(invoiceNumber);
-        orderPackage.setLogisticsCode(logistics.getCode());
+        orderPackage.setLogisticsCode(logistics.getId());
         orderPackage.setLogisticsName(logistics.getName());
         orderPackage.setStatus("1");
         orderPackage.setConsigneeMobile(order.getConsigneeMobile());
