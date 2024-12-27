@@ -288,7 +288,7 @@ lili:
       after-sale-topic: shop_lili_after_sale_topic
       after-sale-group: shop_lili_after_sale_group
 rocketmq:
-  name-server: 192.168.31.100:30876
+  name-server: 192.168.31.100:9876
   isVIPChannel: false
   producer:
     group: lili_group
