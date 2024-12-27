@@ -165,7 +165,7 @@ public class WechatApi {
      * @param mchId        商户Id
      * @param serialNo     商户 API 证书序列号
      * @param platSerialNo 平台序列号，接口中包含敏感信息时必传
-     * @param keyPath      apiclient_key.pem 证书路径
+     * @param keyPath      apiclient_key.pem 证书
      * @param body         接口请求参数
      * @param nonceStr     随机字符库
      * @param timestamp    时间戳
@@ -175,12 +175,12 @@ public class WechatApi {
      * @throws Exception 接口执行异常
      */
     public static PaymentHttpResponse v3(RequestMethodEnums method, String urlPrefix, String urlSuffix,
-                                         String mchId, String serialNo, String platSerialNo, String keyPath,
+                                         String mchId, String serialNo, String platSerialNo, String key,
                                          String body, String nonceStr, long timestamp, String authType,
                                          File file) throws Exception {
         //构建 Authorization
         String authorization = WxPayKit.buildAuthorization(method, urlSuffix, mchId, serialNo,
-                keyPath, body, nonceStr, timestamp, authType);
+                key, body, nonceStr, timestamp, authType);
 
         if (StrUtil.isEmpty(platSerialNo)) {
             platSerialNo = serialNo;
@@ -252,17 +252,17 @@ public class WechatApi {
      * @param mchId        商户Id
      * @param serialNo     商户 API 证书序列号
      * @param platSerialNo 平台序列号
-     * @param keyPath      apiclient_key.pem 证书路径
+     * @param key      apiclient_key.pem 证书
      * @param body         接口请求参数
      * @return {@link PaymentHttpResponse} 请求返回的结果
      * @throws Exception 接口执行异常
      */
     public static PaymentHttpResponse v3(RequestMethodEnums method, String urlPrefix, String urlSuffix, String mchId,
-                                         String serialNo, String platSerialNo, String keyPath, String body) throws Exception {
+                                         String serialNo, String platSerialNo, String key, String body) throws Exception {
         long timestamp = System.currentTimeMillis() / 1000;
         String authType = "WECHATPAY2-SHA256-RSA2048";
         String nonceStr = WxPayKit.generateStr();
-        return v3(method, urlPrefix, urlSuffix, mchId, serialNo, platSerialNo, keyPath, body, nonceStr, timestamp, authType, null);
+        return v3(method, urlPrefix, urlSuffix, mchId, serialNo, platSerialNo, key, body, nonceStr, timestamp, authType, null);
     }
 
     /**

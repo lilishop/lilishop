@@ -41,14 +41,14 @@ public class WechatPaymentSetting {
      * 私钥
      */
     private String apiclient_key;
-    /**
-     * pem 证书
-     */
-    private String apiclient_cert_pem;
-    /**
-     * p12 证书
-     */
-    private String apiclient_cert_p12;
+//    /**
+//     * pem 证书
+//     */
+//    private String apiclient_cert_pem;
+//    /**
+//     * p12 证书
+//     */
+//    private String apiclient_cert_p12;
     /**
      * 商户证书序列号
      */

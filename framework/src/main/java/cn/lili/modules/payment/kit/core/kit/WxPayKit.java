@@ -449,7 +449,7 @@ public class WxPayKit {
      * @param urlSuffix 可通过 WxApiType 来获取，URL挂载参数需要自行拼接
      * @param mchId     商户Id
      * @param serialNo  商户 API 证书序列号
-     * @param keyPath   key.pem 证书路径
+     * @param key   key.pem 证书
      * @param body      接口请求参数
      * @param nonceStr  随机字符库
      * @param timestamp 时间戳
@@ -458,11 +458,11 @@ public class WxPayKit {
      * @throws Exception 异常信息
      */
     public static String buildAuthorization(RequestMethodEnums method, String urlSuffix, String mchId,
-                                            String serialNo, String keyPath, String body, String nonceStr,
+                                            String serialNo, String key, String body, String nonceStr,
                                             long timestamp, String authType) throws Exception {
         //构建签名参数
         String buildSignMessage = PayKit.buildSignMessage(method, urlSuffix, timestamp, nonceStr, body);
-        String signature = PayKit.createSign(buildSignMessage, keyPath);
+        String signature = PayKit.createSign(buildSignMessage, key);
         //根据平台规则生成请求头 authorization
         return PayKit.getAuthorization(mchId, serialNo, nonceStr, String.valueOf(timestamp), signature, authType);
     }
