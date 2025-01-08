@@ -331,6 +331,24 @@ public class PayKit {
      * v3 接口创建签名
      *
      * @param signMessage 待签名的参数
+     * @param key     key.pem 证书
+     * @return 生成 v3 签名
+     * @throws Exception 异常信息
+     */
+    public static String createPublicSign(String signMessage, String key) throws Exception {
+        if (StrUtil.isEmpty(signMessage)) {
+            return null;
+        }
+        //获取商户私钥
+        PrivateKey privateKey = PayKit.getPublicKey(key);
+        //生成签名
+        return RsaKit.encryptByPrivateKey(signMessage, privateKey);
+    }
+
+    /**
+     * v3 接口创建签名
+     *
+     * @param signMessage 待签名的参数
      * @param privateKey  商户私钥
      * @return 生成 v3 签名
      * @throws Exception 异常信息
@@ -387,6 +405,23 @@ public class PayKit {
         String privateKey = key
                 .replace("-----BEGIN PRIVATE KEY-----", "")
                 .replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\s+", "");
+
+        return RsaKit.loadPrivateKey(privateKey);
+    }
+
+    /**
+     * 获取商户公钥
+     *
+     * @param key 商户私钥证书
+     * @return {@link PrivateKey} 商户私钥
+     * @throws Exception 异常信息
+     */
+    public static PrivateKey getPublicKey(String key) throws Exception {
+//        String originalKey = FileUtil.readUtf8String(keyPath);
+        String privateKey = key
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "")
                 .replaceAll("\\s+", "");
 
         return RsaKit.loadPrivateKey(privateKey);

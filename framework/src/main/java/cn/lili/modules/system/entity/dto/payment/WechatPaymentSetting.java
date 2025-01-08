@@ -38,9 +38,21 @@ public class WechatPaymentSetting {
      */
     private String mchId;
     /**
+     * 商户证书序列号
+     */
+    private String serialNumber;
+    /**
      * 私钥
      */
-    private String apiclient_key;
+    private String apiclientKey;
+    /**
+     * 公钥ID
+     */
+    private String publicId;
+    /**
+     * 公钥
+     */
+    private String publicKey;
 //    /**
 //     * pem 证书
 //     */
@@ -49,10 +61,7 @@ public class WechatPaymentSetting {
 //     * p12 证书
 //     */
 //    private String apiclient_cert_p12;
-    /**
-     * 商户证书序列号
-     */
-    private String serialNumber;
+
     /**
      * apiv3私钥
      */
