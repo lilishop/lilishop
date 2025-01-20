@@ -118,7 +118,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public Member getUserInfo() {
         AuthUser tokenUser = UserContext.getCurrentUser();
         if (tokenUser != null) {
-            return this.findByUsername(tokenUser.getUsername());
+            Member member = this.findByUsername(tokenUser.getUsername());
+            if(member != null && member.getDisabled()){
+                throw new ServiceException(ResultCode.USER_STATUS_ERROR);
+            }
+            return member;
         }
         throw new ServiceException(ResultCode.USER_NOT_LOGIN);
     }
