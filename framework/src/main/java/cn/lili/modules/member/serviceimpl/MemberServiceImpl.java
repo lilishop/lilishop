@@ -119,7 +119,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         AuthUser tokenUser = UserContext.getCurrentUser();
         if (tokenUser != null) {
             Member member = this.findByUsername(tokenUser.getUsername());
-            if(member != null && member.getDisabled()){
+            if(member != null && !member.getDisabled()){
                 throw new ServiceException(ResultCode.USER_STATUS_ERROR);
             }
             return member;
