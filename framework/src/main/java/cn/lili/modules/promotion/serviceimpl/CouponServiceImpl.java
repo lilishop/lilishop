@@ -286,7 +286,10 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
     public void updateEsGoodsIndex(Coupon promotions) {
         Coupon coupon = JSONUtil.parse(promotions).toBean(Coupon.class);
         if (!CouponRangeDayEnum.DYNAMICTIME.name().equals(coupon.getRangeDayType()) && promotions.getStartTime() == null && promotions.getEndTime() == null) {
-            Map<Object, Object> build = MapBuilder.create().put("promotionKey", this.getPromotionType() + "-" + promotions.getId()).put("scopeId", promotions.getScopeId()).build();
+            Map<Object, Object> build = MapBuilder.create().put("promotionKey", this.getPromotionType() + "-" + promotions.getId()).build();
+            if(promotions.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS.name())){
+                build.put("scopeId", promotions.getScopeId());
+            }
             //删除商品促销消息
             applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("删除商品促销事件", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.DELETE_GOODS_INDEX_PROMOTIONS.name(), JSONUtil.toJsonStr(build)));
         } else {
