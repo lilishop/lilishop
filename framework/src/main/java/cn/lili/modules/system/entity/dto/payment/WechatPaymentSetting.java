@@ -53,6 +53,11 @@ public class WechatPaymentSetting {
      * 公钥
      */
     private String publicKey;
+
+    /**
+     * 微信验证方式：公钥/证书(KEY/CERT)
+     */
+    private String publicType;
 //    /**
 //     * pem 证书
 //     */

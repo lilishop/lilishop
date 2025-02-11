@@ -1,9 +1,7 @@
 package cn.lili.modules.payment.kit.plugin.wechat;
 
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.net.URLEncoder;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
@@ -24,8 +22,6 @@ import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.CashierSupport;
 import cn.lili.modules.payment.kit.Payment;
-import cn.lili.modules.payment.kit.core.PaymentHttpResponse;
-import cn.lili.modules.payment.kit.core.enums.RequestMethodEnums;
 import cn.lili.modules.payment.kit.core.enums.SignType;
 import cn.lili.modules.payment.kit.core.kit.HttpKit;
 import cn.lili.modules.payment.kit.core.kit.IpKit;
@@ -34,9 +30,8 @@ import cn.lili.modules.payment.kit.core.utils.DateTimeZoneUtil;
 import cn.lili.modules.payment.kit.dto.PayParam;
 import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
-import cn.lili.modules.payment.kit.plugin.wechat.enums.WechatApiEnum;
-import cn.lili.modules.payment.kit.plugin.wechat.enums.WechatDomain;
-import cn.lili.modules.payment.kit.plugin.wechat.model.*;
+import cn.lili.modules.payment.kit.plugin.wechat.model.H5Info;
+import cn.lili.modules.payment.kit.plugin.wechat.model.SceneInfo;
 import cn.lili.modules.payment.service.PaymentService;
 import cn.lili.modules.payment.service.RefundLogService;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -58,7 +53,6 @@ import com.wechat.pay.java.core.exception.ValidationException;
 import com.wechat.pay.java.core.notification.NotificationConfig;
 import com.wechat.pay.java.core.notification.NotificationParser;
 import com.wechat.pay.java.core.notification.RequestParam;
-import com.wechat.pay.java.core.util.StringUtil;
 import com.wechat.pay.java.service.payments.app.AppService;
 import com.wechat.pay.java.service.payments.h5.H5Service;
 import com.wechat.pay.java.service.payments.jsapi.JsapiService;
@@ -85,7 +79,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 微信支付
@@ -164,7 +157,13 @@ public class WechatPlugin implements Payment {
                 throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
             }
 
-            Config config =this.getConfig(setting);
+            Config config =null;
+            if(setting.getPublicType().equals("CERT")){
+                config=this.getCertificateConfig(setting);
+            }else {
+                config=this.getPublicKeyConfig(setting);
+            }
+
             // 构建service
             H5Service service = new H5Service.Builder().config(config).build();
 
@@ -221,7 +220,12 @@ public class WechatPlugin implements Payment {
                 throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
             }
 
-            Config config =this.getConfig(setting);
+            Config config =null;
+            if(setting.getPublicType().equals("CERT")){
+                config=this.getCertificateConfig(setting);
+            }else {
+                config=this.getPublicKeyConfig(setting);
+            }
             // 构建service
             JsapiService service = new JsapiService.Builder().config(config).build();
 
@@ -275,7 +279,12 @@ public class WechatPlugin implements Payment {
                 throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
             }
 
-            Config config =this.getConfig(setting);
+            Config config =null;
+            if(setting.getPublicType().equals("CERT")){
+                config=this.getCertificateConfig(setting);
+            }else {
+                config=this.getPublicKeyConfig(setting);
+            }
             // 构建service
             AppService service = new AppService.Builder().config(config).build();
 
@@ -331,7 +340,12 @@ public class WechatPlugin implements Payment {
                 throw new ServiceException(ResultCode.WECHAT_PAYMENT_NOT_SETTING);
             }
 
-            Config config =this.getConfig(setting);
+            Config config =null;
+            if(setting.getPublicType().equals("CERT")){
+                config=this.getCertificateConfig(setting);
+            }else {
+                config=this.getPublicKeyConfig(setting);
+            }
             // 构建service
             NativePayService service = new NativePayService.Builder().config(config).build();
 
@@ -395,7 +409,12 @@ public class WechatPlugin implements Payment {
 
             WechatPaymentSetting setting = wechatPaymentSetting();
 
-            Config config =this.getConfig(setting);
+            Config config =null;
+            if(setting.getPublicType().equals("CERT")){
+                config=this.getCertificateConfig(setting);
+            }else {
+                config=this.getPublicKeyConfig(setting);
+            }
             // 构建service
             JsapiService service = new JsapiService.Builder().config(config).build();
 
@@ -491,7 +510,12 @@ public class WechatPlugin implements Payment {
             //获取微信设置
             WechatPaymentSetting setting = wechatPaymentSetting();
 
-            Config config =this.getConfig(setting);
+            Config config =null;
+            if(setting.getPublicType().equals("CERT")){
+                config=this.getCertificateConfig(setting);
+            }else {
+                config=this.getPublicKeyConfig(setting);
+            }
             // 构建service
             TransferBatchService service = new TransferBatchService.Builder().config(config).build();
 
@@ -547,14 +571,24 @@ public class WechatPlugin implements Payment {
                 .build();
 
         WechatPaymentSetting setting = wechatPaymentSetting();
-
-        NotificationConfig config = new RSAAutoCertificateConfig.Builder()
-                .merchantId(setting.getMchId())
-                .privateKey(setting.getApiclientKey())
-                .merchantSerialNumber(setting.getSerialNumber())
-                .apiV3Key(setting.getApiKey3())
-                .build();
-
+        NotificationConfig config=null;
+        if(setting.getPublicType().equals("CERT")) {
+             config = new RSAAutoCertificateConfig.Builder()
+                    .merchantId(setting.getMchId())
+                    .privateKey(setting.getApiclientKey())
+                    .merchantSerialNumber(setting.getSerialNumber())
+                    .apiV3Key(setting.getApiKey3())
+                    .build();
+        }else{
+             config = new RSAPublicKeyConfig.Builder()
+                     .merchantId(setting.getMchId())
+                     .apiV3Key(setting.getApiKey3())
+                     .privateKey(setting.getApiclientKey())
+                     .merchantSerialNumber(setting.getSerialNumber())
+                     .publicKeyId(setting.getPublicId())
+                     .publicKey(setting.getPublicKey())
+                     .build();
+        }
 
         // 初始化 NotificationParser
         NotificationParser parser = new NotificationParser(config);
@@ -596,7 +630,12 @@ public class WechatPlugin implements Payment {
             //获取微信设置
             WechatPaymentSetting setting = wechatPaymentSetting();
 
-            Config config =this.getConfig(setting);
+            Config config =null;
+            if(setting.getPublicType().equals("CERT")){
+                config=this.getCertificateConfig(setting);
+            }else {
+                config=this.getPublicKeyConfig(setting);
+            }
             // 构建service
             RefundService refundService = new RefundService.Builder().config(config).build();
 
@@ -619,49 +658,45 @@ public class WechatPlugin implements Payment {
 
     @Override
     public void refundNotify(HttpServletRequest request) {
-        String timestamp = request.getHeader("Wechatpay-Timestamp");
-        String nonce = request.getHeader("Wechatpay-Nonce");
-        String serialNo = request.getHeader("Wechatpay-Serial");
-        String signature = request.getHeader("Wechatpay-Signature");
+        // 构造 RequestParam
+        RequestParam requestParam = new RequestParam.Builder()
+                .serialNumber(request.getHeader("Wechatpay-Serial"))
+                .nonce(request.getHeader("Wechatpay-Nonce"))
+                .signature(request.getHeader("Wechatpay-Signature"))
+                .timestamp(request.getHeader("Wechatpay-Timestamp"))
+                .body(HttpKit.readData(request))
+                .build();
 
-        log.info("timestamp:{} nonce:{} serialNo:{} signature:{}", timestamp, nonce, serialNo, signature);
-        String result = HttpKit.readData(request);
-        log.info("微信退款通知密文 {}", result);
-        JSONObject ciphertext = JSONUtil.parseObj(result);
         WechatPaymentSetting setting = wechatPaymentSetting();
-        try { //校验服务器端响应¬
-            String plainText = WxPayKit.verifyNotify(serialNo, result, signature, nonce, timestamp,
-                    wechatPaymentSetting().getApiKey3(), Objects.requireNonNull(setting.getPublicKey()));
-            log.info("微信退款通知明文 {}", plainText);
+        NotificationConfig config=null;
+        if(setting.getPublicType().equals("CERT")) {
+            config = new RSAAutoCertificateConfig.Builder()
+                    .merchantId(setting.getMchId())
+                    .privateKey(setting.getApiclientKey())
+                    .merchantSerialNumber(setting.getSerialNumber())
+                    .apiV3Key(setting.getApiKey3())
+                    .build();
+        }else{
+            config = new RSAPublicKeyConfig.Builder()
+                    .merchantId(setting.getMchId())
+                    .apiV3Key(setting.getApiKey3())
+                    .privateKey(setting.getApiclientKey())
+                    .merchantSerialNumber(setting.getSerialNumber())
+                    .publicKeyId(setting.getPublicId())
+                    .publicKey(setting.getPublicKey())
+                    .build();
+        }
 
-            if (("REFUND.SUCCESS").equals(ciphertext.getStr("event_type"))) {
-                log.info("退款成功 {}", plainText);
-                //校验服务器端响应
-                JSONObject jsonObject = JSONUtil.parseObj(plainText);
-                String transactionId = jsonObject.getStr("transaction_id");
-                String refundId = jsonObject.getStr("refund_id");
-
-                RefundLog refundLog = refundLogService.getOne(new LambdaQueryWrapper<RefundLog>().eq(RefundLog::getPaymentReceivableNo,
-                        transactionId));
-                if (refundLog != null) {
-                    refundLog.setIsRefund(true);
-                    refundLog.setReceivableNo(refundId);
-                    refundLogService.saveOrUpdate(refundLog);
-                }
-
-            } else {
-                log.info("退款失败 {}", plainText);
-                JSONObject jsonObject = JSONUtil.parseObj(plainText);
-                String transactionId = jsonObject.getStr("transaction_id");
-                String refundId = jsonObject.getStr("refund_id");
-
-                RefundLog refundLog = refundLogService.getOne(new LambdaQueryWrapper<RefundLog>().eq(RefundLog::getPaymentReceivableNo,
-                        transactionId));
-                if (refundLog != null) {
-                    refundLog.setReceivableNo(refundId);
-                    refundLog.setErrorMessage(ciphertext.getStr("summary"));
-                    refundLogService.saveOrUpdate(refundLog);
-                }
+        // 初始化 NotificationParser
+        NotificationParser parser = new NotificationParser(config);
+        try {
+            Refund refund = parser.parse(requestParam, Refund.class);
+            RefundLog refundLog = refundLogService.getOne(new LambdaQueryWrapper<RefundLog>().eq(RefundLog::getPaymentReceivableNo,
+                    refund.getTransactionId()));
+            if (refundLog != null) {
+                refundLog.setIsRefund(true);
+                refundLog.setReceivableNo(refund.getRefundId());
+                refundLogService.saveOrUpdate(refundLog);
             }
         } catch (Exception e) {
             log.error("微信退款失败", e);
@@ -685,11 +720,11 @@ public class WechatPlugin implements Payment {
     }
 
     /**
-     * 获取微信支付配置
+     * 获取微信公钥配置
      * @param setting
      * @return
      */
-    private RSAPublicKeyConfig getConfig(WechatPaymentSetting setting){
+    private RSAPublicKeyConfig getPublicKeyConfig(WechatPaymentSetting setting){
         return
                 new RSAPublicKeyConfig.Builder()
                         .merchantId(setting.getMchId())
@@ -701,6 +736,19 @@ public class WechatPlugin implements Payment {
                         .build();
     }
 
+    /**
+     * 获取微信证书配置
+     * @param setting
+     * @return
+     */
+    private RSAAutoCertificateConfig getCertificateConfig(WechatPaymentSetting setting) {
+        return new RSAAutoCertificateConfig.Builder()
+                .merchantId(setting.getMchId())
+                .privateKey(setting.getApiclientKey())
+                .merchantSerialNumber(setting.getSerialNumber())
+                .apiV3Key(setting.getApiKey3())
+                .build();
+    }
 
     /**
      * 修改订单支付单号
