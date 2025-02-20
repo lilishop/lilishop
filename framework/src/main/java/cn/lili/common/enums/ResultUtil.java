@@ -131,4 +131,13 @@ public class ResultUtil<T> {
         return this.resultMessage;
     }
 
+
+    /**
+     * 返回失败
+     *
+     * @return 消息
+     */
+    public static <T> ResultMessage<T> error() {
+        return new ResultUtil<T>().setErrorMsg(ResultCode.ERROR);
+    }
 }
