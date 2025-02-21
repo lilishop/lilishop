@@ -102,8 +102,18 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
     public MemberEvaluationDTO addMemberEvaluation(MemberEvaluationDTO memberEvaluationDTO, Boolean isSelf) {
         //获取子订单信息
         OrderItem orderItem = orderItemService.getBySn(memberEvaluationDTO.getOrderItemSn());
+
+        if (orderItem == null) {
+            throw new ServiceException(ResultCode.ORDER_ITEM_NOT_EXIST);
+        }
+
         //获取订单信息
         Order order = orderService.getBySn(orderItem.getOrderSn());
+
+        if (order == null) {
+            throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
+        }
+
         //检测是否可以添加会员评价
         Member member;
 
@@ -119,8 +129,14 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
                 throw new ServiceException(ResultCode.USER_NOT_EXIST);
             }
         }
+
         //获取商品信息
         GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(memberEvaluationDTO.getSkuId());
+
+        if (goodsSku == null) {
+            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+        }
+
         //新增用户评价
         MemberEvaluation memberEvaluation = new MemberEvaluation(memberEvaluationDTO, goodsSku, member, order);
         //过滤商品咨询敏感词

@@ -125,13 +125,21 @@ public final class CurrencyUtil {
         return (int) price;
     }
 
+    public static Long getFenLong(Double money) {
+        BigDecimal bigDecimalValue = BigDecimal.valueOf(money);
+        // 乘以 100 并四舍五入到最接近的整数
+        BigDecimal fenValue = bigDecimalValue.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP);
+
+        return fenValue.longValue();
+    }
+
     /**
      * 金额转分
      *
      * @param money 金额
      * @return double类型分
      */
-    public static double reversalFen(Double money) {
+    public static double reversalFen(Integer money) {
         return div(money, 100);
     }
 }

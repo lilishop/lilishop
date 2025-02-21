@@ -312,13 +312,18 @@ public class RsaKit {
      */
     public static PrivateKey loadPrivateKey(String privateKeyStr) throws Exception {
         try {
+
+
             byte[] buffer = Base64.decode(privateKeyStr);
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buffer);
             KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
             return keyFactory.generatePrivate(keySpec);
+
+
         } catch (NoSuchAlgorithmException e) {
             throw new Exception("无此算法");
         } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
             throw new Exception("私钥非法");
         } catch (NullPointerException e) {
             throw new Exception("私钥数据为空");

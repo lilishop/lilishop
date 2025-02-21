@@ -38,21 +38,35 @@ public class WechatPaymentSetting {
      */
     private String mchId;
     /**
-     * 私钥
-     */
-    private String apiclient_key;
-    /**
-     * pem 证书
-     */
-    private String apiclient_cert_pem;
-    /**
-     * p12 证书
-     */
-    private String apiclient_cert_p12;
-    /**
      * 商户证书序列号
      */
     private String serialNumber;
+    /**
+     * 私钥
+     */
+    private String apiclientKey;
+    /**
+     * 公钥ID
+     */
+    private String publicId;
+    /**
+     * 公钥
+     */
+    private String publicKey;
+
+    /**
+     * 微信验证方式：公钥/证书(KEY/CERT)
+     */
+    private String publicType;
+//    /**
+//     * pem 证书
+//     */
+//    private String apiclient_cert_pem;
+//    /**
+//     * p12 证书
+//     */
+//    private String apiclient_cert_p12;
+
     /**
      * apiv3私钥
      */

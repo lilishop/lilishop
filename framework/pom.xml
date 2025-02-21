@@ -468,6 +468,11 @@
             <scope>runtime</scope>
             <classifier>osx-aarch_64</classifier>
         </dependency>
+        <dependency>
+            <groupId>com.github.wechatpay-apiv3</groupId>
+            <artifactId>wechatpay-java</artifactId>
+            <version>0.2.15</version>
+        </dependency>
     </dependencies>
 
 

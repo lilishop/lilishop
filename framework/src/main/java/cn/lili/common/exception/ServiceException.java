@@ -15,12 +15,11 @@ public class ServiceException extends RuntimeException {
 
     private static final long serialVersionUID = 3447728300174142127L;
 
-    public static final String DEFAULT_MESSAGE = "网络错误，请稍后重试！";
 
     /**
      * 异常消息
      */
-    private String msg = DEFAULT_MESSAGE;
+    private String msg = ResultCode.ERROR.message();
 
     /**
      * 错误码
