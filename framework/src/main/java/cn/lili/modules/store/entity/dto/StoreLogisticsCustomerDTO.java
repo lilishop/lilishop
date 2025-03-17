@@ -38,4 +38,7 @@ public class StoreLogisticsCustomerDTO {
     @ApiModelProperty(value = "快递类型")
     private String expType;
 
+    @ApiModelProperty(value = "电子面单客户账户名称")
+    private String partnerName;
+
 }
