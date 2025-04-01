@@ -33,16 +33,16 @@ public class StoreLogistics extends BaseEntity {
     @NotNull
     private String logisticsId;
 
-    @ApiModelProperty(value = "客户代码")
+    @ApiModelProperty(value = "电子面单客户账户、月结账号、客户代码")
     private String customerName;
 
-    @ApiModelProperty(value = "客户密码")
+    @ApiModelProperty(value = "客户密码、电子面单密码")
     private String customerPwd;
 
-    @ApiModelProperty(value = "密钥")
+    @ApiModelProperty(value = "电子面单密钥")
     private String monthCode;
 
-    @ApiModelProperty(value = "归属网点/网点编码")
+    @ApiModelProperty(value = "归属网点/网点编码,电子面单承载编号")
     private String sendSite;
 
     @ApiModelProperty(value = "收件快递员")
@@ -57,6 +57,11 @@ public class StoreLogistics extends BaseEntity {
     @ApiModelProperty(value = "快递类型")
     private String expType;
 
+    @ApiModelProperty(value = "电子面单客户账户名称")
+    private String partnerName;
+
+
+
     public StoreLogistics(StoreLogisticsCustomerDTO storeLogisticsCustomerDTO){
         this.customerName=storeLogisticsCustomerDTO.getCustomerName();
         this.customerPwd=storeLogisticsCustomerDTO.getCustomerPwd();
@@ -66,6 +71,7 @@ public class StoreLogistics extends BaseEntity {
         this.faceSheetFlag=storeLogisticsCustomerDTO.isFaceSheetFlag();
         this.payType = storeLogisticsCustomerDTO.getPayType();
         this.expType = storeLogisticsCustomerDTO.getExpType();
+        this.partnerName = storeLogisticsCustomerDTO.getPartnerName();
     }
 
 

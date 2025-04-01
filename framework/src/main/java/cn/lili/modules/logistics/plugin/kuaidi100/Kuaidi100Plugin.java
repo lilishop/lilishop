@@ -28,6 +28,7 @@ import com.kuaidi100.sdk.request.labelV2.OrderReq;
 import com.kuaidi100.sdk.response.QueryTrackData;
 import com.kuaidi100.sdk.response.QueryTrackMapResp;
 import com.kuaidi100.sdk.response.QueryTrackResp;
+import com.kuaidi100.sdk.response.labelV2.OrderResult;
 import com.kuaidi100.sdk.response.samecity.OrderResp;
 import com.kuaidi100.sdk.utils.SignUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -140,25 +141,74 @@ public class Kuaidi100Plugin implements LogisticsPlugin {
             StoreLogistics storeLogistics = labelOrderDTO.getStoreLogistics();
 
 
-            ManInfo recManInfo = new ManInfo();
-            recManInfo.setName(order.getConsigneeName());
-            recManInfo.setMobile(order.getConsigneeMobile());
-            recManInfo.setPrintAddr(consigneeAddress[0] + consigneeAddress[1] + consigneeAddress[2] + consigneeAddress[3] + order.getConsigneeDetail());
-
-            ManInfo sendManInfo = new ManInfo();
-            sendManInfo.setName(storeDeliverGoodsAddressDTO.getSalesConsignorName());
-            sendManInfo.setMobile(storeDeliverGoodsAddressDTO.getSalesConsignorMobile());
-            sendManInfo.setPrintAddr(consignorAddress[0] + consignorAddress[1] + consignorAddress[2] + consignorAddress[3] + storeDeliverGoodsAddressDTO.getSalesConsignorDetail());
 
             OrderReq orderReq = new OrderReq();
+            //打印类型，NON：只下单不打印（默认）； IMAGE:生成图片短链；HTML:生成html短链； CLOUD:使用快递100云打印机打印，使用CLOUD时siid必填
+            orderReq.setPrintType(PrintType.HTML);
+            //电子面单客户账户或月结账号，需贵司向当地快递公司网点申请（参考电子面单申请指南）； 是否必填该属性，请查看参数字典
+            orderReq.setPartnerId(storeLogistics.getCustomerName());
+            //电子面单密码，需贵司向当地快递公司网点申请； 是否必填该属性，请查看参数字典
+            if(storeLogistics.getCustomerPwd()!=null){
+                orderReq.setPartnerKey(storeLogistics.getCustomerPwd());
+            }
+
+            //电子面单密钥，需贵司向当地快递公司网点申请； 是否必填该属性，请查看参数字典
+            if(storeLogistics.getMonthCode()!=null) {
+                orderReq.setPartnerSecret(storeLogistics.getMonthCode());
+            }
+            //电子面单客户账户名称，需贵司向当地快递公司网点申请； 是否必填该属性，请查看参数字典
+            if(storeLogistics.getPartnerName()!=null) {
+                orderReq.setPartnerName(storeLogistics.getPartnerName());
+            }
+//            orderReq.setNet();
+            //	电子面单承载编号，需贵司向当地快递公司网点申请； 是否必填该属性，请查看参数字典
+            if(storeLogistics.getSendSite()!=null) {
+                orderReq.setCode(storeLogistics.getSendSite());
+            }
+            //电子面单承载快递员名，需贵司向当地快递公司网点申请； 是否必填该属性，请查看参数字典
+            if(storeLogistics.getSendStaff()!=null) {
+                orderReq.setCheckMan(storeLogistics.getSendStaff());
+            }
+
+            //快递公司的编码，一律用小写字母，请查看参数字典
             orderReq.setKuaidicom(logistics.getCode());
-            orderReq.setCount(1);
+            //收件人信息
+            ManInfo manInfo=new ManInfo();
+            //收件人姓名
+            manInfo.setName(order.getConsigneeName());
+            //收件人的手机号，手机号和电话号二者其一必填
+            manInfo.setMobile(order.getConsigneeMobile());
+            //收件人的电话号，手机号和电话号二者其一必填
+//            manInfo.setTel("");
+            //收件人所在完整地址，如广东深圳市南山区科技南十二路金蝶软件园B10
+            manInfo.setPrintAddr(consigneeAddress[0]+consigneeAddress[1]+consigneeAddress[2]+consigneeAddress[3]+order.getConsigneeDetail());
+            orderReq.setRecMan(manInfo);
+            ManInfo sendMan=new ManInfo();
+            //	寄件人信息
+            sendMan.setName(storeDeliverGoodsAddressDTO.getSalesConsignorName());
+            //	寄件人的手机号，手机号和电话号二者其一必填
+            sendMan.setMobile(storeDeliverGoodsAddressDTO.getSalesConsignorMobile());
+            //寄件人的电话号，手机号和电话号二者其一必填
+//            sendMan.setTel("");
+            //寄件人所在的完整地址，如广东深圳市南山区科技南十二路金蝶软件园B10
+            sendMan.setPrintAddr(consignorAddress[0]+consignorAddress[1]+consignorAddress[2]+consignorAddress[3]+storeDeliverGoodsAddressDTO.getSalesConsignorDetail());
+            //寄件人所在公司名称
+//            sendMan.setCompany("");
+            orderReq.setSendMan(sendMan);
+            //物品名称,例：文件
+            String goodsName="";
+            for (OrderItem orderItem : orderItems) {
+                goodsName+=orderItem.getGoodsName() + "',";
+            }
+
+            orderReq.setCargo(goodsName);
+            //	包裹总数量。
+            orderReq.setCount(orderItems.size());
+            //打印设备，通过打印机输出的设备码进行获取，printType为CLOUD时必填
+//            orderReq.setSiid("");
+
             // orderReq.setSiid(siid);
             //orderReq.setTempId("60f6c17c7c223700131d8bc3");
-            orderReq.setSendMan(sendManInfo);
-            orderReq.setRecMan(recManInfo);
-
-            orderReq.setPrintType(PrintType.CLOUD);
 
             String param = new Gson().toJson(orderReq);
             String t = System.currentTimeMillis() + "";
@@ -167,14 +217,19 @@ public class Kuaidi100Plugin implements LogisticsPlugin {
             printReq.setT(t);
             printReq.setKey(logisticsSetting.getKuaidi100Key());
             printReq.setSign(SignUtils.printSign(param, t, logisticsSetting.getKuaidi100Key(), logisticsSetting.getKuaidi100Customer()));
-            printReq.setMethod(ApiInfoConstant.ORDER);
+            printReq.setMethod(ApiInfoConstant.NEW_TEMPLATE_URL);
             printReq.setParam(param);
 
             IBaseClient baseClient = new LabelV2();
             HttpResult result = baseClient.execute(printReq);
             System.out.println(result.getBody());
-            QueryTrackMapResp queryTrackMapResp = new Gson().fromJson(result.getBody(), QueryTrackMapResp.class);
-            OrderResp orderResp = new Gson().fromJson(result.getBody(), OrderResp.class);
+
+
+
+            OrderResult orderResult = new Gson().fromJson(result.getBody(), OrderResult.class);
+            log.info("电子面单响应：{}", orderResult);
+            System.out.println("快递单号："+orderResult.getKdComOrderNum());
+            System.out.println("面单短链："+orderResult.getLabel());
 
         } catch (Exception e) {
             e.printStackTrace();

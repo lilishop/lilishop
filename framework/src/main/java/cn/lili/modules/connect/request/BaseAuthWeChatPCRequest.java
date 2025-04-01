@@ -55,7 +55,7 @@ public class BaseAuthWeChatPCRequest extends BaseAuthRequest {
 
         return ConnectAuthUser.builder()
                 .rawUserInfo(object)
-                .username(object.getString("nickname"))
+                .username(object.getString("unionid"))
                 .nickname(object.getString("nickname"))
                 .avatar(object.getString("headimgurl"))
                 .location(location)
