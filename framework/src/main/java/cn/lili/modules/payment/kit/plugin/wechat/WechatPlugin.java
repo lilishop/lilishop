@@ -30,8 +30,6 @@ import cn.lili.modules.payment.kit.core.utils.DateTimeZoneUtil;
 import cn.lili.modules.payment.kit.dto.PayParam;
 import cn.lili.modules.payment.kit.dto.PaymentSuccessParams;
 import cn.lili.modules.payment.kit.params.dto.CashierParam;
-import cn.lili.modules.payment.kit.plugin.wechat.model.H5Info;
-import cn.lili.modules.payment.kit.plugin.wechat.model.SceneInfo;
 import cn.lili.modules.payment.service.PaymentService;
 import cn.lili.modules.payment.service.RefundLogService;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -55,6 +53,8 @@ import com.wechat.pay.java.core.notification.NotificationParser;
 import com.wechat.pay.java.core.notification.RequestParam;
 import com.wechat.pay.java.service.payments.app.AppService;
 import com.wechat.pay.java.service.payments.h5.H5Service;
+import com.wechat.pay.java.service.payments.h5.model.H5Info;
+import com.wechat.pay.java.service.payments.h5.model.SceneInfo;
 import com.wechat.pay.java.service.payments.jsapi.JsapiService;
 import com.wechat.pay.java.service.payments.model.Transaction;
 import com.wechat.pay.java.service.payments.nativepay.NativePayService;
@@ -135,10 +135,10 @@ public class WechatPlugin implements Payment {
 
             //支付参数准备
             SceneInfo sceneInfo = new SceneInfo();
-            sceneInfo.setPayer_client_ip(IpKit.getRealIp(request));
+            sceneInfo.setPayerClientIp(IpKit.getRealIp(request));
             H5Info h5Info = new H5Info();
             h5Info.setType("WAP");
-            sceneInfo.setH5_info(h5Info);
+            sceneInfo.setH5Info(h5Info);
 
             //支付金额
             Integer fen = CurrencyUtil.fen(cashierParam.getPrice());
@@ -178,7 +178,7 @@ public class WechatPlugin implements Payment {
             prepayRequest.setAttach(attach);
             prepayRequest.setTimeExpire(timeExpire);
             prepayRequest.setOutTradeNo(outOrderNo);
-
+            prepayRequest.setSceneInfo(sceneInfo);
             // 调用下单方法，得到应答
             com.wechat.pay.java.service.payments.h5.model.PrepayResponse response = service.prepay(prepayRequest);
             updateOrderPayNo(payParam,outOrderNo);
