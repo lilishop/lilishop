@@ -647,11 +647,11 @@ public class CartServiceImpl implements CartService {
                     skuPrice.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
                 } else {
                     cartPrice = CurrencyUtil.add(cartPrice, CurrencyUtil.mul(goodsSku.getPrice(), cartSkuVO.getNum()));
-                    skuPrice.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
+                    skuPrice.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.mul(goodsSku.getPrice(), cartSkuVO.getNum()));
                 }
             } else {
-                cartPrice = CurrencyUtil.add(cartPrice, CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
-                skuPrice.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
+                cartPrice = CurrencyUtil.add(cartPrice, CurrencyUtil.mul(goodsSku.getPrice(), cartSkuVO.getNum()));
+                skuPrice.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.mul(goodsSku.getPrice(), cartSkuVO.getNum()));
             }
         }
 
