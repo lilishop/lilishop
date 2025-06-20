@@ -1,0 +1,38 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Technical Architecture
+
+## Backend Stack
+- Spring Boot - Core framework
+- Spring MVC - Web framework
+- Mybatis-Plus - ORM framework
+- Spring Security - Security framework
+- JWT - Authentication
+- RocketMQ - Message queue
+- Redis & MongoDB - Caching
+- Elasticsearch - Search engine
+- MySQL - Primary database
+- Sharding - Database sharding
+- XXL-Job - Distributed scheduling
+
+## Frontend Stack
+### Admin & Seller Portals ([admin/](mdc:admin))
+- Vue.js - Frontend framework
+- iView - UI components
+- Vuex - State management
+- Vue Router - Routing
+- Axios - HTTP client
+
+### Mobile Applications
+- Uni-app - Cross-platform framework
+- uViewui - UI components
+- SCSS - Styling
+
+## Infrastructure
+- Nginx - Load balancing & reverse proxy
+- Aliyun OSS - Object storage
+- Docker - Containerization
+- Docker Compose - Container orchestration
