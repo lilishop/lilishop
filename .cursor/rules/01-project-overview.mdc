@@ -1,0 +1,30 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Lilishop Project Overview
+
+This is a comprehensive B2B2C e-commerce system built with Spring Boot (backend) and Vue/uniapp (frontend). The project supports multi-tenant merchant access and distributed deployment.
+
+## Key Project Components
+
+### Backend APIs
+- [buyer-api/](mdc:buyer-api) - Buyer-facing APIs for shopping functionality
+- [seller-api/](mdc:seller-api) - Merchant-facing APIs for store management
+- [manager-api/](mdc:manager-api) - Platform admin APIs
+- [common-api/](mdc:common-api) - Shared API components
+- [im-api/](mdc:im-api) - Instant messaging APIs
+
+### Core Components
+- [framework/](mdc:framework) - Core framework and shared utilities
+- [consumer/](mdc:consumer) - Message queue consumers
+- [config/](mdc:config) - System configuration files
+
+### Documentation
+- [docs/](mdc:docs) - Project documentation
+- [README.md](mdc:README.md) - Project overview and setup instructions
+
+### Build & Deployment
+- [pom.xml](mdc:pom.xml) - Maven project configuration
+- [deploy-api.yml](mdc:deploy-api.yml) - Deployment configuration

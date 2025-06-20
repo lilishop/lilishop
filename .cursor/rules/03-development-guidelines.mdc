@@ -1,0 +1,43 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Development Guidelines
+
+## Project Setup
+1. Ensure you have the following prerequisites:
+   - JDK 1.8+
+   - Maven 3.x
+   - MySQL 5.7+
+   - Redis
+   - RocketMQ
+   - Elasticsearch
+   - Node.js 12+
+
+## Database Setup
+- Initial database scripts can be found in [DB/](mdc:DB)
+- For Docker deployment, refer to docker-compose configuration
+
+## API Development Guidelines
+1. All new APIs should be placed in appropriate modules:
+   - Customer-facing APIs in [buyer-api/](mdc:buyer-api)
+   - Merchant APIs in [seller-api/](mdc:seller-api)
+   - Admin APIs in [manager-api/](mdc:manager-api)
+   - Shared components in [common-api/](mdc:common-api)
+
+2. Follow RESTful API conventions:
+   - Use appropriate HTTP methods (GET, POST, PUT, DELETE)
+   - Use consistent URL patterns
+   - Implement proper error handling
+
+## Security Guidelines
+1. All sensitive operations must be authenticated
+2. Use Spring Security for access control
+3. Store sensitive configuration in environment variables
+4. Never commit sensitive credentials to version control
+
+## Testing
+1. Write unit tests for critical business logic
+2. Ensure API endpoints are properly documented
+3. Test both success and error scenarios

@@ -1,0 +1,37 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Deployment Guide
+
+## Local Development Setup
+1. Clone the repository
+2. Import as Maven project
+3. Configure environment variables in [config/](mdc:config)
+4. Start required services (MySQL, Redis, RocketMQ, Elasticsearch)
+5. Run individual API modules
+
+## Docker Deployment
+- Use [deploy-api.yml](mdc:deploy-api.yml) for container configuration
+- Execute [docker-image.sh](mdc:docker-image.sh) to build images
+
+## Production Deployment
+1. Configure load balancer (Nginx recommended)
+2. Set up database replication/clustering
+3. Configure message queue clusters
+4. Set up monitoring and logging
+5. Configure CDN for static assets
+
+## Configuration Files
+- Database: [DB/](mdc:DB)
+- API deployment: [deploy-api.yml](mdc:deploy-api.yml)
+- Docker scripts: [docker-image.sh](mdc:docker-image.sh)
+
+## Deployment Checklist
+1. Database migration and backup
+2. Environment variable configuration
+3. Service dependencies verification
+4. SSL certificate setup
+5. Monitoring and alerting setup
+6. Backup and recovery procedures
