@@ -1,11 +1,11 @@
 # Lilishop B2B2C 商城系统
 
-![GitHub Stars](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=github)
-![Gitee Stars](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)
-![License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7.18-brightgreen)
-![Vue.js](https://img.shields.io/badge/Vue.js-2.x-green)
-![uni-app](https://img.shields.io/badge/uni--app-3.x-green)
+[![GitHub Stars](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=github)](https://github.com/hongyehuicheng/lilishop)
+[![Gitee Stars](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.html)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7.18-brightgreen)](https://spring.io/projects/spring-boot)
+[![Vue.js](https://img.shields.io/badge/Vue.js-2.x-green)](https://vuejs.org/)
+[![uni-app](https://img.shields.io/badge/uni--app-3.x-green)](https://uniapp.dcloud.io/)
 
 ---
 
