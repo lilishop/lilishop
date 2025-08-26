@@ -1,14 +1,17 @@
 package cn.lili.modules.statistics.service;
 
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.OrderOverviewVO;
 import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -34,6 +37,22 @@ public interface OrderStatisticsService extends IService<Order> {
      * @return 订单总数量
      */
     long orderNum(String orderStatus);
+    /**
+     * 获取订单总数量
+     *
+     * @param paymentMethod 支付方式
+     * @param dates  时间
+     *
+     * @return 订单总数量
+     */
+    long orderNum(String paymentMethod, Date[] dates);
+
+    /**
+     * 获取所有优惠金额去除退款金额
+     * @param dates
+     * @return
+     */
+    Double getDiscountPrice(Date[] dates);
 
     /**
      * 图表统计
@@ -51,4 +70,64 @@ public interface OrderStatisticsService extends IService<Order> {
      * @return
      */
     IPage<OrderSimpleVO> getStatistics(StatisticsQueryParam statisticsQueryParam, PageVO pageVO);
+
+    /**
+     * 获取付款订单数量 不含全部退款
+     *
+     * @param dates 时间
+     * @return 付款订单数量
+     */
+    long getPayOrderNum(Date[] dates);
+
+    /**
+     * 获取付款订单金额去除退款金额
+     *
+     * @param dates 时间
+     * @param paymentMethodEnum 支付方式
+     * @param deliveryMethodEnum 配送方式
+     * @return 付款订单金额
+     */
+    Double getPayOrderPrice(Date[] dates, PaymentMethodEnum paymentMethodEnum, DeliveryMethodEnum deliveryMethodEnum);
+
+    /**
+     * 获取商品价格
+     * @param dates 时间
+     * @return
+     */
+    Double getGoodsPrice(Date[] dates);
+
+    /**
+     * 获取运费
+     * @param dates 时间
+     * @return
+     */
+    Double getFreight(Date[] dates);
+
+    /**
+     * 获取分销返佣
+     * @param dates
+     * @return
+     */
+    Double getDistribution(Date[] dates);
+
+    /**
+     * 获取退款订单数
+     * @param dates
+     * @return
+     */
+    Long getRefundNum(Date[] dates);
+
+    /**
+     * 获取退款金额
+     * @param dates
+     * @return
+     */
+    Double getRefundPrice(Date[] dates);
+
+    /**
+     * 获取退款率
+     * @param dates
+     * @return
+     */
+    Double getRefundRate(Date[] dates);
 }

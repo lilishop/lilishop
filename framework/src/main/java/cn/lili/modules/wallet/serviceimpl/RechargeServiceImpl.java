@@ -10,6 +10,7 @@ import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.trade.entity.vo.RechargeQueryVO;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.wallet.entity.dos.Recharge;
 import cn.lili.modules.wallet.entity.dto.MemberWalletUpdateDTO;
 import cn.lili.modules.wallet.entity.enums.DepositServiceTypeEnum;
@@ -17,6 +18,7 @@ import cn.lili.modules.wallet.mapper.RechargeMapper;
 import cn.lili.modules.wallet.service.MemberWalletService;
 import cn.lili.modules.wallet.service.RechargeService;
 import cn.lili.mybatis.util.PageUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -115,5 +117,16 @@ public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> i
             recharge.setPayStatus(PayStatusEnum.CANCEL.name());
             this.updateById(recharge);
         }
+    }
+
+    @Override
+    public Double getRecharge(Date[] dates, PaymentMethodEnum paymentMethodEnum) {
+        LambdaQueryWrapper<Recharge> queryWrapper = new LambdaQueryWrapper<Recharge>();
+        queryWrapper.eq(Recharge::getPayStatus, PayStatusEnum.PAID.name());
+        queryWrapper.between(Recharge::getPayTime, dates[0], dates[1]);
+        if(paymentMethodEnum!=null){
+            queryWrapper.eq(Recharge::getRechargeWay,paymentMethodEnum.name());
+        }
+        return this.baseMapper.getRecharge(queryWrapper);
     }
 }

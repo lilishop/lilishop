@@ -2,9 +2,12 @@ package cn.lili.modules.wallet.service;
 
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.trade.entity.vo.RechargeQueryVO;
+import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.wallet.entity.dos.Recharge;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.Date;
 
 /**
  * 预存款充值业务层
@@ -56,4 +59,10 @@ public interface RechargeService extends IService<Recharge> {
      */
     void rechargeOrderCancel(String sn);
 
+    /**
+     * 获取周期内的充值金额
+     *
+     * @return
+     */
+    Double getRecharge(Date[] dates, PaymentMethodEnum paymentMethodEnum);
 }
