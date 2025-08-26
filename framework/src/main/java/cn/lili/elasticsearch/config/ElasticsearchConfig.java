@@ -66,14 +66,16 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
                 .setRequestConfigCallback(requestConfigBuilder ->
                         requestConfigBuilder
                                 .setConnectTimeout(1000)
-                                .setSocketTimeout(12 * 1000));
+                                .setSocketTimeout(12 * 1000)
+                                .setConnectionRequestTimeout(1000));
     }
 
     private HttpAsyncClientBuilder configureHttpClientBuilder(HttpAsyncClientBuilder httpClientBuilder,
                                                               CredentialsProvider credentialsProvider) {
         httpClientBuilder
                 .setKeepAliveStrategy(getConnectionKeepAliveStrategy())
-                .setMaxConnPerRoute(10)
+                .setMaxConnPerRoute(50)
+                .setMaxConnTotal(200)
                 .setDefaultIOReactorConfig(
                         IOReactorConfig
                                 .custom()
