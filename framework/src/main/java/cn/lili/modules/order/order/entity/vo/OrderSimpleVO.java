@@ -56,6 +56,9 @@ public class OrderSimpleVO {
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date paymentTime;
 
+    @ApiModelProperty(value = "用户ID")
+    private String memberId;
+
     @ApiModelProperty(value = "用户名")
     @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String memberName;
