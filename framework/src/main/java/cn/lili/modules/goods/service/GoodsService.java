@@ -5,6 +5,7 @@ import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.entity.vos.GoodsNumVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.store.entity.dos.Store;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -82,6 +83,14 @@ public interface GoodsService extends IService<Goods> {
      * @return 商品分页
      */
     IPage<Goods> queryByParams(GoodsSearchParams goodsSearchParams);
+
+    /**
+     * 获取商品数量
+     *
+     * @param goodsSearchParams 查询参数
+     * @return 商品数量
+     */
+    GoodsNumVO getGoodsNumVO(GoodsSearchParams goodsSearchParams);
 
 
     /**
@@ -191,6 +200,11 @@ public interface GoodsService extends IService<Goods> {
      */
     void categoryGoodsName(String categoryId);
 
-
+    /**
+     * 添加商品评价数量
+     *
+     * @param commentNum 评价数量
+     * @param goodsId    商品ID
+     */
     void addGoodsCommentNum(Integer commentNum, String goodsId);
 }

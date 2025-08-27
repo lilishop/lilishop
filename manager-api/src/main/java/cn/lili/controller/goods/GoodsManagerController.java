@@ -11,6 +11,7 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.entity.vos.GoodsNumVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
@@ -53,6 +54,12 @@ public class GoodsManagerController {
         return ResultUtil.data(goodsService.queryByParams(goodsSearchParams));
     }
 
+    @ApiOperation(value = "获取商品数量")
+    @GetMapping(value = "/goodsNumber")
+    public ResultMessage<GoodsNumVO> getGoodsNumVO(GoodsSearchParams goodsSearchParams) {
+        return ResultUtil.data(goodsService.getGoodsNumVO(goodsSearchParams));
+    }
+
     @ApiOperation(value = "分页获取商品列表")
     @GetMapping(value = "/sku/list")
     public ResultMessage<IPage<GoodsSku>> getSkuByPage(GoodsSearchParams goodsSearchParams) {
@@ -67,31 +74,15 @@ public class GoodsManagerController {
     }
 
     @PreventDuplicateSubmissions
-    @ApiOperation(value = "管理员下架商品", notes = "管理员下架商品时使用")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "query", allowMultiple = true),
-            @ApiImplicitParam(name = "reason", value = "下架理由", required = true, paramType = "query")
-    })
-    @DemoSite
-    @PutMapping(value = "/{goodsId}/under")
-    public ResultMessage<Object> underGoods(@PathVariable String goodsId, @NotEmpty(message = "下架原因不能为空") @RequestParam String reason) {
-        List<String> goodsIds = Arrays.asList(goodsId.split(","));
-        if (Boolean.TRUE.equals(goodsService.managerUpdateGoodsMarketAble(goodsIds, GoodsStatusEnum.DOWN, reason))) {
-            return ResultUtil.success();
-        }
-        throw new ServiceException(ResultCode.GOODS_UNDER_ERROR);
-    }
-
-    @PreventDuplicateSubmissions
     @ApiOperation(value = "管理员审核商品", notes = "管理员审核商品")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "goodsIds", value = "商品ID", required = true, paramType = "path", allowMultiple = true, dataType = "int"),
             @ApiImplicitParam(name = "authFlag", value = "审核结果", required = true, paramType = "query", dataType = "string")
     })
-    @PutMapping(value = "{goodsIds}/auth")
-    public ResultMessage<Object> auth(@PathVariable List<String> goodsIds, @RequestParam String authFlag) {
+    @PutMapping(value = "auth")
+    public ResultMessage<Object> auth(@RequestParam List<String> goodsId, @RequestParam String authFlag) {
         //校验商品是否存在
-        if (goodsService.auditGoods(goodsIds, GoodsAuthEnum.valueOf(authFlag))) {
+        if (goodsService.auditGoods(goodsId, GoodsAuthEnum.valueOf(authFlag))) {
             return ResultUtil.success();
         }
         throw new ServiceException(ResultCode.GOODS_AUTH_ERROR);
@@ -100,15 +91,31 @@ public class GoodsManagerController {
 
     @PreventDuplicateSubmissions
     @ApiOperation(value = "管理员上架商品", notes = "管理员上架商品时使用")
-    @PutMapping(value = "/{goodsId}/up")
+    @PutMapping(value = "/up")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, allowMultiple = true)
     })
-    public ResultMessage<Object> unpGoods(@PathVariable List<String> goodsId) {
+    public ResultMessage<Object> unpGoods(@RequestParam List<String> goodsId) {
         if (Boolean.TRUE.equals(goodsService.updateGoodsMarketAble(goodsId, GoodsStatusEnum.UPPER, ""))) {
             return ResultUtil.success();
         }
         throw new ServiceException(ResultCode.GOODS_UPPER_ERROR);
+    }
+
+    @PreventDuplicateSubmissions
+    @ApiOperation(value = "管理员下架商品", notes = "管理员下架商品时使用")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "goodsId", value = "商品ID", required = true, paramType = "query", allowMultiple = true),
+            @ApiImplicitParam(name = "reason", value = "下架理由", required = true, paramType = "query")
+    })
+    @DemoSite
+    @PutMapping(value = "under")
+    public ResultMessage<Object> underGoods(@RequestParam List<String> goodsId, @NotEmpty(message = "下架原因不能为空") @RequestParam String reason) {
+
+        if (Boolean.TRUE.equals(goodsService.managerUpdateGoodsMarketAble(goodsId, GoodsStatusEnum.DOWN, reason))) {
+            return ResultUtil.success();
+        }
+        throw new ServiceException(ResultCode.GOODS_UNDER_ERROR);
     }
 
 

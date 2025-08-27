@@ -70,6 +70,9 @@ public class GoodsSearchParams extends PageVO {
     @ApiModelProperty(value = "审核状态")
     private String authFlag;
 
+    @ApiModelProperty(value = "商品状态")
+    private String goodsStatus;
+
     @ApiModelProperty(value = "库存数量")
     private Integer leQuantity;
 
@@ -119,6 +122,23 @@ public class GoodsSearchParams extends PageVO {
         }
         if (CharSequenceUtil.isNotEmpty(storeCategoryPath)) {
             queryWrapper.like("store_category_path", storeCategoryPath);
+        }
+        if (CharSequenceUtil.isNotEmpty(goodsStatus)) {
+            if(goodsStatus.equals(GoodsStatusEnum.UPPER.name())){
+                //审核通过+已上架
+                queryWrapper.eq("auth_flag", GoodsAuthEnum.PASS.name());
+                queryWrapper.eq("market_enable", GoodsStatusEnum.UPPER.name());
+            }else if(goodsStatus.equals(GoodsStatusEnum.DOWN.name())){
+                //审核通过+未上架
+                queryWrapper.eq("auth_flag", GoodsAuthEnum.PASS.name());
+                queryWrapper.eq("market_enable", GoodsStatusEnum.DOWN.name());
+            }else if(goodsStatus.equals(GoodsAuthEnum.TOBEAUDITED.name())){
+                //待审核
+                queryWrapper.eq("auth_flag", GoodsAuthEnum.TOBEAUDITED.name());
+            }else if(goodsStatus.equals(GoodsAuthEnum.REFUSE.name())){
+                //审核拒绝
+                queryWrapper.eq("auth_flag", GoodsAuthEnum.REFUSE.name());
+            }
         }
         if (selfOperated != null) {
             queryWrapper.eq("self_operated", selfOperated);
