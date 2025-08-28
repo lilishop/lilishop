@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * 预存款业务层实现
@@ -124,7 +125,7 @@ public class RechargeServiceImpl extends ServiceImpl<RechargeMapper, Recharge> i
         LambdaQueryWrapper<Recharge> queryWrapper = new LambdaQueryWrapper<Recharge>();
         queryWrapper.eq(Recharge::getPayStatus, PayStatusEnum.PAID.name());
         queryWrapper.between(Recharge::getPayTime, dates[0], dates[1]);
-        if(paymentMethodEnum!=null){
+        if(Objects.nonNull(paymentMethodEnum)){
             queryWrapper.eq(Recharge::getRechargeWay,paymentMethodEnum.name());
         }
         return this.baseMapper.getRecharge(queryWrapper);

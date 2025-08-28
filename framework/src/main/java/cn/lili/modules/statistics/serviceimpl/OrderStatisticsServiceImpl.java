@@ -186,10 +186,10 @@ public class OrderStatisticsServiceImpl extends ServiceImpl<OrderStatisticsMappe
         queryWrapper.between("oi.create_time", dates[0], dates[1]);
         queryWrapper.ne("oi.is_refund", RefundStatusEnum.ALL_REFUND.name());
 
-        if(paymentMethodEnum!=null){
+        if(Objects.nonNull(paymentMethodEnum)){
             queryWrapper.eq("o.payment_method",paymentMethodEnum.name());
         }
-        if(deliveryMethodEnum!=null){
+        if(Objects.nonNull(deliveryMethodEnum)){
             if(DeliveryMethodEnum.VIRTUAL.equals(deliveryMethodEnum)){
                 queryWrapper.eq("o.order_type", OrderTypeEnum.VIRTUAL.name());
             }else{

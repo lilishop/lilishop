@@ -1,5 +1,6 @@
 package cn.lili.modules.member.entity.dos;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.modules.member.entity.dto.ClerkAddDTO;
 import cn.lili.modules.store.entity.dos.Store;
@@ -59,7 +60,7 @@ public class Clerk extends BaseEntity {
      * @param clerkAddDTO
      */
     public Clerk(ClerkAddDTO clerkAddDTO) {
-        if (clerkAddDTO.getRoles()!=null && !clerkAddDTO.getRoles().isEmpty()) {
+        if (CollUtil.isNotEmpty(clerkAddDTO.getRoles()) && !clerkAddDTO.getRoles().isEmpty()) {
             this.roleIds = CharSequenceUtil.join(",", clerkAddDTO.getRoles());
         }
         this.memberId = clerkAddDTO.getMemberId();

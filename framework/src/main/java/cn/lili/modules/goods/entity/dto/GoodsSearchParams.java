@@ -11,6 +11,7 @@ import lombok.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 商品查询条件
@@ -99,6 +100,8 @@ public class GoodsSearchParams extends PageVO {
 
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
+        
+        // 统一使用 CharSequenceUtil.isNotEmpty() 处理字符串
         if (CharSequenceUtil.isNotEmpty(goodsId)) {
             queryWrapper.eq("goods_id", goodsId);
         }
@@ -108,9 +111,12 @@ public class GoodsSearchParams extends PageVO {
         if (CharSequenceUtil.isNotEmpty(id)) {
             queryWrapper.in("id", Arrays.asList(id.split(",")));
         }
+        
+        // 统一使用 CollUtil.isNotEmpty() 处理集合
         if (CollUtil.isNotEmpty(ids)) {
             queryWrapper.in("id", ids);
         }
+        
         if (CharSequenceUtil.isNotEmpty(storeId)) {
             queryWrapper.eq("store_id", storeId);
         }
@@ -125,51 +131,53 @@ public class GoodsSearchParams extends PageVO {
         }
         if (CharSequenceUtil.isNotEmpty(goodsStatus)) {
             if(goodsStatus.equals(GoodsStatusEnum.UPPER.name())){
-                //审核通过+已上架
                 queryWrapper.eq("auth_flag", GoodsAuthEnum.PASS.name());
                 queryWrapper.eq("market_enable", GoodsStatusEnum.UPPER.name());
             }else if(goodsStatus.equals(GoodsStatusEnum.DOWN.name())){
-                //审核通过+未上架
                 queryWrapper.eq("auth_flag", GoodsAuthEnum.PASS.name());
                 queryWrapper.eq("market_enable", GoodsStatusEnum.DOWN.name());
             }else if(goodsStatus.equals(GoodsAuthEnum.TOBEAUDITED.name())){
-                //待审核
                 queryWrapper.eq("auth_flag", GoodsAuthEnum.TOBEAUDITED.name());
             }else if(goodsStatus.equals(GoodsAuthEnum.REFUSE.name())){
-                //审核拒绝
                 queryWrapper.eq("auth_flag", GoodsAuthEnum.REFUSE.name());
             }
         }
-        if (selfOperated != null) {
+        
+        // 统一使用 Objects.nonNull() 处理对象非空判断
+        if (Objects.nonNull(selfOperated)) {
             queryWrapper.eq("self_operated", selfOperated);
         }
+        
         if (CharSequenceUtil.isNotEmpty(marketEnable)) {
             queryWrapper.eq("market_enable", marketEnable);
         }
         if (CharSequenceUtil.isNotEmpty(authFlag)) {
             queryWrapper.eq("auth_flag", authFlag);
         }
-        if (leQuantity != null) {
+        
+        if (Objects.nonNull(leQuantity)) {
             queryWrapper.le("quantity", leQuantity);
         }
-        if (geQuantity != null) {
+        if (Objects.nonNull(geQuantity)) {
             queryWrapper.gt("quantity", geQuantity);
         }
-        if (recommend != null) {
+        if (Objects.nonNull(recommend)) {
             queryWrapper.le("recommend", recommend);
         }
+        
         if (CharSequenceUtil.isNotEmpty(goodsType)) {
             queryWrapper.eq("goods_type", goodsType);
         }
         if (CharSequenceUtil.isNotEmpty(salesModel)) {
             queryWrapper.eq("sales_model", salesModel);
         }
-        if(alertQuantity != null && alertQuantity){
+        
+        if(Objects.nonNull(alertQuantity) && alertQuantity){
             queryWrapper.apply("quantity <= alert_quantity");
             queryWrapper.ge("alert_quantity", 0);
         }
+        
         queryWrapper.in(CollUtil.isNotEmpty(ids), "id", ids);
-
         queryWrapper.eq("delete_flag", false);
         this.betweenWrapper(queryWrapper);
         return queryWrapper;

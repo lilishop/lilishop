@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * 流量数据展示VO
@@ -36,14 +37,14 @@ public class PlatformViewVO {
     }
 
     public Long getPvNum() {
-        if(pvNum==null){
+        if(Objects.isNull(pvNum)){
             return 0L;
         }
         return pvNum;
     }
 
     public Long getUvNum() {
-        if(uvNum==null){
+        if(Objects.isNull(uvNum)){
             return 0L;
         }
         return uvNum;
