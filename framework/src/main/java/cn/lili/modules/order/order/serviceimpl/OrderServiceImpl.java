@@ -22,17 +22,13 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
-import cn.lili.modules.order.aftersale.entity.enums.ComplaintStatusEnum;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
 import cn.lili.modules.order.order.entity.dos.*;
 import cn.lili.modules.order.order.entity.dto.*;
 import cn.lili.modules.order.order.entity.enums.*;
-import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
-import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
-import cn.lili.modules.order.order.entity.vo.OrderVO;
-import cn.lili.modules.order.order.entity.vo.PaymentLog;
+import cn.lili.modules.order.order.entity.vo.*;
 import cn.lili.modules.order.order.mapper.OrderMapper;
 import cn.lili.modules.order.order.service.*;
 import cn.lili.modules.order.trade.entity.dos.OrderLog;
@@ -223,6 +219,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         queryWrapper.groupBy("o.id");
         queryWrapper.orderByDesc("o.id");
         return this.baseMapper.queryByParams(PageUtil.initPage(orderSearchParams), queryWrapper);
+    }
+
+    @Override
+    public OrderNumVO getOrderNumVO(OrderSearchParams orderSearchParams) {
+        return this.baseMapper.getOrderNumVO(orderSearchParams.queryWrapper());
     }
 
     /**
@@ -785,7 +786,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     private void checkBatchDeliver(List<OrderBatchDeliverDTO> list) {
 
-        List<Logistics> logistics = logisticsService.list();
+        Map<String, String> logisticsMap = logisticsService.list().stream()
+                .collect(Collectors.toMap(Logistics::getName, Logistics::getId));
         for (OrderBatchDeliverDTO orderBatchDeliverDTO : list) {
             //查看订单号是否存在-是否是当前店铺的订单
             Order order = this.getOne(new LambdaQueryWrapper<Order>()
@@ -797,11 +799,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 throw new ServiceException("订单编号：'" + orderBatchDeliverDTO.getOrderSn() + " '不能发货");
             }
             //获取物流公司
-            logistics.forEach(item -> {
-                if (item.getName().equals(orderBatchDeliverDTO.getLogisticsName())) {
-                    orderBatchDeliverDTO.setLogisticsId(item.getId());
-                }
-            });
+            String logisticsId = logisticsMap.get(orderBatchDeliverDTO.getLogisticsName());
+            if (logisticsId != null) {
+                orderBatchDeliverDTO.setLogisticsId(logisticsId);
+            }
             if (CharSequenceUtil.isEmpty(orderBatchDeliverDTO.getLogisticsId())) {
                 throw new ServiceException("物流公司：'" + orderBatchDeliverDTO.getLogisticsName() + " '不存在");
             }

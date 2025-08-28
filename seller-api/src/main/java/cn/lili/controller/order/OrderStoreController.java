@@ -11,10 +11,10 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.member.service.StoreLogisticsService;
-import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.dto.PartDeliveryParamsDTO;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
+import cn.lili.modules.order.order.entity.vo.OrderNumVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.service.OrderPackageService;
 import cn.lili.modules.order.order.service.OrderPriceService;
@@ -82,6 +82,11 @@ public class OrderStoreController {
         return ResultUtil.data(orderService.queryByParams(orderSearchParams));
     }
 
+    @ApiOperation(value = "获取订单数量")
+    @GetMapping(value = "/orderNum")
+    public ResultMessage<OrderNumVO> getOrderNumVO(OrderSearchParams orderSearchParams) {
+        return ResultUtil.data(orderService.getOrderNumVO(orderSearchParams));
+    }
 
     @ApiOperation(value = "订单明细")
     @ApiImplicitParams({

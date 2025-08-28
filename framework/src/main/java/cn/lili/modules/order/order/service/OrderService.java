@@ -3,11 +3,11 @@ package cn.lili.modules.order.order.service;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
-import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.dto.PartDeliveryParamsDTO;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
+import cn.lili.modules.order.order.entity.vo.OrderNumVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.entity.vo.PaymentLog;
 import cn.lili.modules.system.entity.vo.Traces;
@@ -53,6 +53,14 @@ public interface OrderService extends IService<Order> {
      * @return 简短订单分页
      */
     IPage<OrderSimpleVO> queryByParams(OrderSearchParams orderSearchParams);
+
+    /**
+     * 获取订单数量
+     *
+     * @param orderSearchParams 查询参数
+     * @return 订单数量
+     */
+    OrderNumVO getOrderNumVO(OrderSearchParams orderSearchParams);
 
     /**
      * 订单信息

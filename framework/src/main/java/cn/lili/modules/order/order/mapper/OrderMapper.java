@@ -2,6 +2,7 @@ package cn.lili.modules.order.order.mapper;
 
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
+import cn.lili.modules.order.order.entity.vo.OrderNumVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.entity.vo.PaymentLog;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -97,6 +98,17 @@ public interface OrderMapper extends BaseMapper<Order> {
             " FROM li_order o LEFT JOIN li_order_item AS oi on o.sn = oi.order_sn ${ew.customSqlSegment} ")
     IPage<OrderSimpleVO> queryByParams(IPage<OrderSimpleVO> page, @Param(Constants.WRAPPER) Wrapper<OrderSimpleVO> queryWrapper);
 
+    @Select("select COUNT(CASE WHEN order_status = 'UNPAID' THEN 1 END) as waitPayNum,"+
+            "COUNT(CASE WHEN order_status = 'PAID' THEN 1 END) as waitDeliveryNum,"+
+            "COUNT(CASE WHEN order_status = 'UNDELIVERED' THEN 1 END) as waitShipNum,"+
+            "COUNT(CASE WHEN order_status = 'PARTS_DELIVERED' THEN 1 END) as partsDeliveredNumNum,"+
+            "COUNT(CASE WHEN order_status = 'DELIVERED' THEN 1 END) as deliveredNum,"+
+            "COUNT(CASE WHEN order_status = 'TAKE' THEN 1 END) as waitCheckNum,"+
+            "COUNT(CASE WHEN order_status = 'STAY_PICKED_UP' THEN 1 END) as waitSelfPickNum,"+
+            "COUNT(CASE WHEN order_status = 'COMPLETED' THEN 1 END) as finishNum,"+
+            "COUNT(CASE WHEN order_status = 'CANCELLED' THEN 1 END) as closeNum "+
+            " FROM li_order o LEFT JOIN li_order_item AS oi on o.sn = oi.order_sn ${ew.customSqlSegment} ")
+    OrderNumVO getOrderNumVO(@Param(Constants.WRAPPER) Wrapper<OrderSimpleVO> queryWrapper);
     /**
      * 查询订单信息
      *
