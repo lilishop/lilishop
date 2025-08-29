@@ -4,6 +4,7 @@ import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
+import cn.lili.modules.order.aftersale.entity.vo.AfterSaleNumVO;
 import cn.lili.modules.order.aftersale.entity.vo.AfterSaleSearchParams;
 import cn.lili.modules.order.aftersale.entity.vo.AfterSaleVO;
 import cn.lili.modules.order.aftersale.service.AfterSaleService;
@@ -41,6 +42,12 @@ public class AfterSaleManagerController {
     @GetMapping(value = "/page")
     public ResultMessage<IPage<AfterSaleVO>> getByPage(AfterSaleSearchParams searchParams) {
         return ResultUtil.data(afterSaleService.getAfterSalePages(searchParams));
+    }
+
+    @ApiOperation(value = "获取售后数量")
+    @GetMapping(value = "/afterSaleNumVO")
+    public ResultMessage<AfterSaleNumVO> getAfterSaleNumVO(AfterSaleSearchParams afterSaleSearchParams) {
+        return ResultUtil.data(afterSaleService.getAfterSaleNumVO(afterSaleSearchParams));
     }
 
     @ApiOperation(value = "获取导出售后服务列表列表")
