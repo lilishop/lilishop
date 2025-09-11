@@ -743,7 +743,7 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     }
 
     private void executeCleanInvalidPromotions() {
-        for (int i = 1; ; i++) {
+        for (int i = 0; ; i++) {
             org.springframework.data.domain.Page<EsGoodsIndex> all = goodsIndexRepository.findAll(PageRequest.of(i, 1000));
             if (all.isEmpty()) {
                 break;
@@ -758,6 +758,9 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
                         BasePromotions promotion = promotionJson.toBean(BasePromotions.class);
                         return promotion.getEndTime() != null && promotion.getEndTime().getTime() < DateUtil.date().getTime();
                     });
+
+                    // 更新回 goodsIndex 对象
+                    goodsIndex.setPromotionMapJson(JSONUtil.toJsonStr(promotionMap));
                 }
             }
             goodsIndexRepository.saveAll(all);
