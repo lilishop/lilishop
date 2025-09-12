@@ -165,3 +165,9 @@ ALTER TABLE `li_store_flow` ADD  `profit_sharing` varchar(255) NULL COMMENT '分
 
 INSERT INTO `lilishop`.`li_setting` (`id`, `create_by`, `create_time`, `delete_flag`, `update_by`, `update_time`, `setting_value`) VALUES ('CONNECT_SETTING', 'admin', '2024-07-07 13:55:38.686000', b'0', NULL, NULL, '{\"callbackUrl\":\"https://buyer-api.pickmall.cn\",\"pc\":\"https://pc-b2b2c.pickmall.cn\",\"wap\":\"https://m-b2b2c.pickmall.cn\"}');
 UPDATE `lilishop`.`li_setting` SET `create_by` = 'admin', `create_time` = '2021-01-23 02:18:03.299000', `delete_flag` = b'0', `update_by` = 'admin', `update_time` = '2024-07-07 13:53:44.732000', `setting_value` = '{\"accessKeyId\":\"test\",\"tencentSdkAppId\":\"null\",\"registerTemplateCode\":\"SMS_205755298\",\"huaweiSender\":\"null\",\"signName\":\"lili\",\"tencentSecretId\":\"null\",\"huaweiAppKey\":\"null\",\"isTestModel\":\"true\",\"tencentSecretKey\":\"null\",\"type\":\"ALI\",\"accessSecret\":\"test\",\"tencentSignName\":\"null\",\"huaweiSignature\":\"null\",\"payPasswordTemplateCode\":\"SMS_205755301\",\"walletPasswordTemplateCode\":\"SMS_205755297\",\"findPasswordTemplateCode\":\"SMS_205755301\",\"huaweiAppSecret\":\"null\",\"loginTemplateCode\":\"SMS_205755300\"}' WHERE `id` = 'SMS_SETTING';
+
+
+
+ALTER TABLE li_store_logistics ADD `partner_name` varchar(255) DEFAULT NULL COMMENT '电子面单客户账户名称';
+
+
