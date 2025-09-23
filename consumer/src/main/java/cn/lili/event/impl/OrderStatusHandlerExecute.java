@@ -4,6 +4,8 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.event.AfterSaleStatusChangeEvent;
 import cn.lili.event.TradeEvent;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
+import cn.lili.modules.order.aftersale.entity.vo.AfterSaleSearchParams;
+import cn.lili.modules.order.aftersale.service.AfterSaleService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
@@ -34,6 +36,8 @@ public class OrderStatusHandlerExecute implements TradeEvent, AfterSaleStatusCha
     private OrderItemService orderItemService;
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private AfterSaleService afterSaleService;
 
     @Override
     public void orderCreate(TradeDTO tradeDTO) {
@@ -64,10 +68,16 @@ public class OrderStatusHandlerExecute implements TradeEvent, AfterSaleStatusCha
             int returnCount = 0;
             // 总购买数量
             int deliverCount = 0;
-            for (OrderItem item : orderItems) {
-                returnCount += item.getReturnGoodsNumber();
-                deliverCount += item.getNum();
+            //获取订单货物已完成售后的数量
+            AfterSaleSearchParams saleSearchParams = new AfterSaleSearchParams();
+            saleSearchParams.setOrderSn(afterSale.getOrderSn());
+            saleSearchParams.setServiceStatus(AfterSaleStatusEnum.COMPLETE.name());
+            List<AfterSale> afterSales = afterSaleService.exportAfterSaleOrder(saleSearchParams);
+            for (AfterSale sale : afterSales) {
+                returnCount += sale.getNum();
             }
+            //订单货物购买总数
+            deliverCount = order.getGoodsNum();
             if (returnCount == deliverCount) {
                 orderService.systemCancel(afterSale.getOrderSn(),"订单货物全部退款",false);
             }
