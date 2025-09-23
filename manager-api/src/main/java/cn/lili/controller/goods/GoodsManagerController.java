@@ -80,9 +80,9 @@ public class GoodsManagerController {
             @ApiImplicitParam(name = "authFlag", value = "审核结果", required = true, paramType = "query", dataType = "string")
     })
     @PutMapping(value = "auth")
-    public ResultMessage<Object> auth(@RequestParam List<String> goodsId, @RequestParam String authFlag) {
+    public ResultMessage<Object> auth(@RequestParam List<String> goodsIds, @RequestParam String authFlag) {
         //校验商品是否存在
-        if (goodsService.auditGoods(goodsId, GoodsAuthEnum.valueOf(authFlag))) {
+        if (goodsService.auditGoods(goodsIds, GoodsAuthEnum.valueOf(authFlag))) {
             return ResultUtil.success();
         }
         throw new ServiceException(ResultCode.GOODS_AUTH_ERROR);
