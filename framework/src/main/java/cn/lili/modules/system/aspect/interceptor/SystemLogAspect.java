@@ -1,15 +1,15 @@
 package cn.lili.modules.system.aspect.interceptor;
 
-import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.IpHelper;
+import cn.lili.common.utils.IpUtils;
 import cn.lili.common.utils.SpelUtil;
 import cn.lili.common.utils.ThreadPoolUtil;
 import cn.lili.modules.permission.entity.vo.SystemLogVO;
-import cn.lili.common.utils.IpUtils;
 import cn.lili.modules.permission.service.SystemLogService;
+import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -37,7 +37,7 @@ import java.util.Map;
 public class SystemLogAspect {
 
     /**
-     * 启动线程异步记录日志
+     * 记录方法开始时间
      */
     private static final ThreadLocal<Date> BEGIN_TIME_THREAD_LOCAL = new NamedThreadLocal<>("SYSTEM-LOG");
 
@@ -75,6 +75,11 @@ public class SystemLogAspect {
     @AfterReturning(returning = "rvt", pointcut = "controllerAspect()")
     public void after(JoinPoint joinPoint, Object rvt) {
         try {
+
+            if (request == null || rvt == null) {
+                return;
+            }
+
             Map map = spelFormat(joinPoint, rvt);
             String description = map.get("description").toString();
             String customerLog = map.get("customerLog").toString();
