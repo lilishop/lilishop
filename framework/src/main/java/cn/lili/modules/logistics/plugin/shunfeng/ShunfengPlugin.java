@@ -22,13 +22,13 @@ import com.sf.csim.express.service.HttpClientUtil;
 import com.sf.csim.express.service.IServiceCodeStandard;
 import com.sf.csim.express.service.code.ExpressServiceCodeEnum;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
  * 顺丰插件
+ *
  * @author admin
  */
 @Slf4j
@@ -43,7 +43,8 @@ public class ShunfengPlugin implements LogisticsPlugin {
      **/
     private LogisticsSetting logisticsSetting;
 
-    public ShunfengPlugin(){}
+    public ShunfengPlugin() {
+    }
 
     public ShunfengPlugin(LogisticsSetting logisticsSetting) {
         this.logisticsSetting = logisticsSetting;
@@ -63,7 +64,7 @@ public class ShunfengPlugin implements LogisticsPlugin {
     public String createOrder(OrderDetailVO orderDetailVO) {
         StoreDetailService storeService = SpringContextUtil.getBean(StoreDetailService.class);
         StoreDeliverGoodsAddressDTO storeDeliverGoodsAddressDTO = storeService.getStoreDeliverGoodsAddressDto(orderDetailVO.getOrder().getStoreId());
-        if(storeDeliverGoodsAddressDTO == null){
+        if (storeDeliverGoodsAddressDTO == null) {
             throw new ServiceException(ResultCode.STORE_DELIVER_ADDRESS_EXIST);
         }
         try {
@@ -109,7 +110,7 @@ public class ShunfengPlugin implements LogisticsPlugin {
 
             String result = sendPost(ExpressServiceCodeEnum.EXP_RECE_CREATE_ORDER, msgDataMap);
             JSONObject resultData = JSONUtil.parseObj(result).getJSONObject("apiResultData");
-            if(Boolean.TRUE.toString().equals(resultData.get("success").toString())){
+            if (Boolean.TRUE.toString().equals(resultData.get("success").toString())) {
                 return resultData.getJSONObject("msgData").getJSONArray("waybillNoInfoList").getJSONObject(0).get("waybillNo").toString();
             }
             throw new ServiceException(resultData.get("errorMsg").toString());
@@ -142,10 +143,10 @@ public class ShunfengPlugin implements LogisticsPlugin {
             msgDataMap.put("trackingNumber", trackingNumber);
             JSONObject result = JSONUtil.parseObj(sendPost(ExpressServiceCodeEnum.EXP_RECE_SEARCH_ROUTES, msgDataMap));
             JSONObject resultData = result.getJSONObject("apiResultData");
-            if(Boolean.TRUE.toString().equals(resultData.get("success").toString())){
+            if (Boolean.TRUE.toString().equals(resultData.get("success").toString())) {
                 JSONArray routesJson = resultData.getJSONObject("msgData").getJSONArray("routeResps").getJSONObject(0).getJSONArray("routes");
                 List<Map> routes = routesJson.toList(Map.class);
-                return new Traces(logistics.getName(),expNo,routes);
+                return new Traces(logistics.getName(), expNo, routes);
             }
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
@@ -165,7 +166,7 @@ public class ShunfengPlugin implements LogisticsPlugin {
      * @return
      */
     @Override
-    public Map<String,Object> labelOrder(LabelOrderDTO labelOrderDTO) {
+    public Map<String, Object> labelOrder(LabelOrderDTO labelOrderDTO) {
         try {
             Map<String, Object> msgDataMap = new HashMap<>();
             //模板编码
@@ -174,15 +175,15 @@ public class ShunfengPlugin implements LogisticsPlugin {
             //业务数据
             Map<String, Object> documents = new HashMap<>();
             documents.put("masterWaybillNo", labelOrderDTO.getOrder().getLogisticsNo());
-            msgDataMap.put("documents",documents);
-            msgDataMap.put("sync",true);
+            msgDataMap.put("documents", documents);
+            msgDataMap.put("sync", true);
             /**
              * 版本号，传固定值:2.0
              */
             msgDataMap.put("version", "2.0");
             JSONObject result = JSONUtil.parseObj(sendPost(ExpressServiceCodeEnum.COM_RECE_CLOUD_PRINT_WAYBILLS, msgDataMap));
             JSONObject resultData = result.getJSONObject("apiResultData");
-            if(Boolean.TRUE.toString().equals(resultData.get("success").toString())){
+            if (Boolean.TRUE.toString().equals(resultData.get("success").toString())) {
                 return resultData.getJSONObject("obj").getJSONArray("files").toList(Map.class).get(0);
             }
             throw new ServiceException(resultData.getJSONArray("errorMessage").get(0).toString());
@@ -205,13 +206,13 @@ public class ShunfengPlugin implements LogisticsPlugin {
             //校验类型 1，电话号码校验 2，月结卡号校验
             msgDataMap.put("checkType", 1);
             //校验值 当校验类型为1时传电话号码 当校验类型为2时传月结卡号
-            List<String> mobileList= new ArrayList<>();
+            List<String> mobileList = new ArrayList<>();
             mobileList.add(checkNos);
             msgDataMap.put("checkNos", mobileList);
             JSONObject result = JSONUtil.parseObj(sendPost(ExpressServiceCodeEnum.EXP_RECE_SEARCH_PROMITM, msgDataMap));
             JSONObject resultData = result.getJSONObject("apiResultData");
-            if(Boolean.TRUE.toString().equals(resultData.get("success").toString())){
-                return  resultData.getJSONObject("msgData").get("promiseTm").toString();
+            if (Boolean.TRUE.toString().equals(resultData.get("success").toString())) {
+                return resultData.getJSONObject("msgData").get("promiseTm").toString();
             }
             throw new ServiceException(resultData.get("errorMsg").toString());
         } catch (UnsupportedEncodingException e) {
@@ -220,7 +221,6 @@ public class ShunfengPlugin implements LogisticsPlugin {
     }
 
     private String sendPost(IServiceCodeStandard standardService, Map<String, Object> msgDataMap) throws UnsupportedEncodingException {
-        CallExpressServiceTools tools = CallExpressServiceTools.getInstance();
         Map<String, String> params = new HashMap<String, String>();
         String timeStamp = String.valueOf(System.currentTimeMillis());
         // 顾客编码
@@ -231,7 +231,7 @@ public class ShunfengPlugin implements LogisticsPlugin {
         params.put("timestamp", timeStamp);
         params.put("msgData", JSONUtil.toJsonStr(msgDataMap));
 
-        params.put("msgDigest", tools.getMsgDigest(params.get("msgData"), timeStamp, logisticsSetting.getCheckWord()));
+        params.put("msgDigest", CallExpressServiceTools.getMsgDigest(params.get("msgData"), timeStamp, logisticsSetting.getCheckWord()));
         String result = HttpClientUtil.post(logisticsSetting.getCallUrl(), params);
 
         log.info("===调用地址 ===" + logisticsSetting.getCallUrl());
