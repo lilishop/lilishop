@@ -2,7 +2,6 @@ package cn.lili.modules.order.aftersale.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.event.TransactionCommitSendMQEvent;
@@ -18,6 +17,7 @@ import cn.lili.modules.order.aftersale.aop.AfterSaleLogPoint;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.aftersale.entity.dto.AfterSaleDTO;
 import cn.lili.modules.order.aftersale.entity.vo.AfterSaleApplyVO;
+import cn.lili.modules.order.aftersale.entity.vo.AfterSaleNumVO;
 import cn.lili.modules.order.aftersale.entity.vo.AfterSaleSearchParams;
 import cn.lili.modules.order.aftersale.entity.vo.AfterSaleVO;
 import cn.lili.modules.order.aftersale.mapper.AfterSaleMapper;
@@ -39,16 +39,13 @@ import cn.lili.modules.system.entity.dos.Logistics;
 import cn.lili.modules.system.entity.vo.Traces;
 import cn.lili.modules.system.service.LogisticsService;
 import cn.lili.mybatis.util.PageUtil;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.AfterSaleTagsEnum;
-import cn.lili.rocketmq.tags.OrderTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -56,6 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -98,11 +96,6 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
      */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
-    /**
-     * RocketMQ
-     */
-    @Autowired
-    private RocketMQTemplate rocketMQTemplate;
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
@@ -110,6 +103,55 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     @Override
     public IPage<AfterSaleVO> getAfterSalePages(AfterSaleSearchParams saleSearchParams) {
         return baseMapper.queryByParams(PageUtil.initPage(saleSearchParams), saleSearchParams.queryWrapper());
+    }
+
+    @Override
+    public AfterSaleNumVO getAfterSaleNumVO(AfterSaleSearchParams saleSearchParams) {
+        AfterSaleNumVO afterSaleNumVO = new AfterSaleNumVO();
+        
+        // 获取基础查询条件
+        QueryWrapper<AfterSale> baseWrapper = saleSearchParams.queryWrapper();
+        
+        // 使用聚合查询一次性获取所有状态的售后数量
+        List<Map<String, Object>> results = this.baseMapper.selectMaps(
+            baseWrapper.select(
+                "COUNT(CASE WHEN service_status = 'APPLY' THEN 1 END) as applyNum",
+                "COUNT(CASE WHEN service_status = 'PASS' THEN 1 END) as passNum",
+                "COUNT(CASE WHEN service_status = 'REFUSE' THEN 1 END) as refuseNum",
+                "COUNT(CASE WHEN service_status = 'BUYER_RETURN' THEN 1 END) as buyerReturnNum",
+                "COUNT(CASE WHEN service_status = 'SELLER_CONFIRM' THEN 1 END) as sellerConfirmNum",
+                "COUNT(CASE WHEN service_status = 'SELLER_TERMINATION' THEN 1 END) as sellerTerminationNum",
+                "COUNT(CASE WHEN service_status = 'BUYER_CANCEL' THEN 1 END) as buyerCancelNum",
+                "COUNT(CASE WHEN service_status = 'WAIT_REFUND' THEN 1 END) as waitRefundNum",
+                "COUNT(CASE WHEN service_status = 'COMPLETE' THEN 1 END) as completeNum"
+            )
+        );
+        
+        if (!results.isEmpty()) {
+            Map<String, Object> result = results.get(0);
+            afterSaleNumVO.setApplyNum(((Number) result.get("applyNum")).intValue());
+            afterSaleNumVO.setPassNum(((Number) result.get("passNum")).intValue());
+            afterSaleNumVO.setRefuseNum(((Number) result.get("refuseNum")).intValue());
+            afterSaleNumVO.setBuyerReturnNum(((Number) result.get("buyerReturnNum")).intValue());
+            afterSaleNumVO.setSellerConfirmNum(((Number) result.get("sellerConfirmNum")).intValue());
+            afterSaleNumVO.setSellerTerminationNum(((Number) result.get("sellerTerminationNum")).intValue());
+            afterSaleNumVO.setBuyerCancelNum(((Number) result.get("buyerCancelNum")).intValue());
+            afterSaleNumVO.setWaitRefundNum(((Number) result.get("waitRefundNum")).intValue());
+            afterSaleNumVO.setCompleteNum(((Number) result.get("completeNum")).intValue());
+        } else {
+            // 如果没有结果，设置默认值为0
+            afterSaleNumVO.setApplyNum(0);
+            afterSaleNumVO.setPassNum(0);
+            afterSaleNumVO.setRefuseNum(0);
+            afterSaleNumVO.setBuyerReturnNum(0);
+            afterSaleNumVO.setSellerConfirmNum(0);
+            afterSaleNumVO.setSellerTerminationNum(0);
+            afterSaleNumVO.setBuyerCancelNum(0);
+            afterSaleNumVO.setWaitRefundNum(0);
+            afterSaleNumVO.setCompleteNum(0);
+        }
+        
+        return afterSaleNumVO;
     }
 
     @Override

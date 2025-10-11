@@ -86,20 +86,23 @@ public class AfterSaleSearchParams extends PageVO {
         if (CharSequenceUtil.isNotEmpty(orderSn)) {
             queryWrapper.like("order_sn", orderSn);
         }
-        //按买家查询
-        if (CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.MEMBER.name())) {
-            queryWrapper.eq("member_id", UserContext.getCurrentUser().getId());
-        }
-        //按卖家查询
-        if (CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name())) {
-            queryWrapper.eq("store_id", UserContext.getCurrentUser().getStoreId());
+        if(UserContext.getCurrentUser() != null){
+            //按买家查询
+            if (CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.MEMBER.name())) {
+                queryWrapper.eq("member_id", UserContext.getCurrentUser().getId());
+            }
+            //按卖家查询
+            if (CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.STORE.name())) {
+                queryWrapper.eq("store_id", UserContext.getCurrentUser().getStoreId());
+            }
+
+            if (CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.MANAGER.name())
+                    && CharSequenceUtil.isNotEmpty(storeId)
+            ) {
+                queryWrapper.eq("store_id", storeId);
+            }
         }
 
-        if (CharSequenceUtil.equals(UserContext.getCurrentUser().getRole().name(), UserEnums.MANAGER.name())
-                && CharSequenceUtil.isNotEmpty(storeId)
-        ) {
-            queryWrapper.eq("store_id", storeId);
-        }
         if (CharSequenceUtil.isNotEmpty(memberName)) {
             queryWrapper.like("member_name", memberName);
         }

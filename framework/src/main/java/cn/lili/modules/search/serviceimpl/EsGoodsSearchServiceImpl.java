@@ -68,6 +68,8 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
     private static final String ATTR_BRAND_URL = "brandUrlAgg";
     private static final String ATTR_NAME_KEY = "nameList";
     private static final String ATTR_VALUE_KEY = "valueList";
+    // 限制 terms 聚合 size，防止内存压力
+    private static final int MAX_AGG_SIZE = 200;
     /**
      * ES
      */
@@ -122,23 +124,24 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         if (!restTemplate.indexOps(EsGoodsIndex.class).exists()) {
             return null;
         }
-
         NativeSearchQueryBuilder builder = createSearchQueryBuilder(goodsSearch, null);
         //分类
-        AggregationBuilder categoryNameBuilder = AggregationBuilders.terms("categoryNameAgg").field("categoryNamePath.keyword");
-        builder.addAggregation(AggregationBuilders.terms("categoryAgg").field("categoryPath").subAggregation(categoryNameBuilder));
+        AggregationBuilder categoryNameBuilder = AggregationBuilders.terms("categoryNameAgg").field("categoryNamePath.keyword").size(MAX_AGG_SIZE);
+        builder.addAggregation(AggregationBuilders.terms("categoryAgg").field("categoryPath").size(MAX_AGG_SIZE).subAggregation(categoryNameBuilder));
 
         //品牌
-        AggregationBuilder brandNameBuilder = AggregationBuilders.terms(ATTR_BRAND_NAME).field("brandName.keyword");
-        builder.addAggregation(AggregationBuilders.terms("brandIdNameAgg").field(ATTR_BRAND_ID).size(Integer.MAX_VALUE).subAggregation(brandNameBuilder));
+        AggregationBuilder brandNameBuilder = AggregationBuilders.terms(ATTR_BRAND_NAME).field("brandName.keyword").size(1);
+        builder.addAggregation(AggregationBuilders.terms("brandIdNameAgg").field(ATTR_BRAND_ID).size(MAX_AGG_SIZE).subAggregation(brandNameBuilder));
 
-        AggregationBuilder brandUrlBuilder = AggregationBuilders.terms(ATTR_BRAND_URL).field("brandUrl.keyword");
-        builder.addAggregation(AggregationBuilders.terms("brandIdUrlAgg").field(ATTR_BRAND_ID).size(Integer.MAX_VALUE).subAggregation(brandUrlBuilder));
+        AggregationBuilder brandUrlBuilder = AggregationBuilders.terms(ATTR_BRAND_URL).field("brandUrl.keyword").size(1);
+        builder.addAggregation(AggregationBuilders.terms("brandIdUrlAgg").field(ATTR_BRAND_ID).size(MAX_AGG_SIZE).subAggregation(brandUrlBuilder));
         //参数
-        AggregationBuilder valuesBuilder = AggregationBuilders.terms("valueAgg").field(ATTR_VALUE);
+        AggregationBuilder valuesBuilder = AggregationBuilders.terms("valueAgg").field(ATTR_VALUE).size(MAX_AGG_SIZE);
         AggregationBuilder sortBuilder = AggregationBuilders.sum("sortAgg").field(ATTR_SORT);
-        AggregationBuilder paramsNameBuilder = AggregationBuilders.terms("nameAgg").field(ATTR_NAME).subAggregation(sortBuilder).order(BucketOrder.aggregation("sortAgg", false)).subAggregation(valuesBuilder);
+        AggregationBuilder paramsNameBuilder = AggregationBuilders.terms("nameAgg").field(ATTR_NAME).size(MAX_AGG_SIZE)
+                .subAggregation(sortBuilder).order(BucketOrder.aggregation("sortAgg", false)).subAggregation(valuesBuilder);
         builder.addAggregation(AggregationBuilders.nested("attrAgg", ATTR_PATH).subAggregation(paramsNameBuilder));
+
         NativeSearchQuery searchQuery = builder.build();
         searchQuery.setMaxResults(0);
         SearchHits<EsGoodsIndex> search = restTemplate.search(searchQuery, EsGoodsIndex.class);
@@ -227,35 +230,57 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
      */
     private List<SelectorOptions> convertBrandOptions(EsGoodsSearchDTO goodsSearch, List<? extends Terms.Bucket> brandBuckets, List<? extends Terms.Bucket> brandUrlBuckets) {
         List<SelectorOptions> brandOptions = new ArrayList<>();
-        for (int i = 0; i < brandBuckets.size(); i++) {
-            String brandId = brandBuckets.get(i).getKey().toString();
-            //当商品品牌id为0时，代表商品没有选择品牌，所以过滤掉品牌选择器
-            //当品牌id为空并且
-            if (brandId.equals("0") ||
-                    (CharSequenceUtil.isNotEmpty(goodsSearch.getBrandId())
-                            && Arrays.asList(goodsSearch.getBrandId().split("@")).contains(brandId))) {
+        // 以 brandId 为 key 构建 URL 桶索引，避免按下标对齐产生越界/错位
+        Map<String, Terms.Bucket> brandUrlBucketMap = new HashMap<>();
+        if (brandUrlBuckets != null) {
+            for (Terms.Bucket urlBucket : brandUrlBuckets) {
+                if (urlBucket != null && urlBucket.getKey() != null) {
+                    brandUrlBucketMap.put(urlBucket.getKey().toString(), urlBucket);
+                }
+            }
+        }
+
+        Set<String> selectedBrandIds = new HashSet<>();
+        if (CharSequenceUtil.isNotEmpty(goodsSearch.getBrandId())) {
+            selectedBrandIds.addAll(Arrays.asList(goodsSearch.getBrandId().split("@")));
+        }
+
+        for (Terms.Bucket bucket : brandBuckets) {
+            if (bucket == null || bucket.getKey() == null) {
+                continue;
+            }
+            String brandId = bucket.getKey().toString();
+            // 排除无品牌或已选择品牌
+            if ("0".equals(brandId) || (!selectedBrandIds.isEmpty() && selectedBrandIds.contains(brandId))) {
                 continue;
             }
 
+            // 品牌名
             String brandName = "";
-            if (brandBuckets.get(i).getAggregations() != null && brandBuckets.get(i).getAggregations().get(ATTR_BRAND_NAME) != null) {
-                ParsedStringTerms aggregation = brandBuckets.get(i).getAggregations().get(ATTR_BRAND_NAME);
-                brandName = this.getAggregationsBrandOptions(aggregation);
-                if (StringUtils.isEmpty(brandName)) {
-                    continue;
+            Aggregations nameAggs = bucket.getAggregations();
+            if (nameAggs != null) {
+                Aggregation nameAgg = nameAggs.get(ATTR_BRAND_NAME);
+                if (nameAgg instanceof ParsedStringTerms) {
+                    brandName = this.getAggregationsBrandOptions((ParsedStringTerms) nameAgg);
                 }
+            }
+            if (StringUtils.isEmpty(brandName)) {
+                continue;
             }
 
+            // 品牌 URL
             String brandUrl = "";
-            if (brandUrlBuckets != null && !brandUrlBuckets.isEmpty() &&
-                    brandUrlBuckets.get(i).getAggregations() != null &&
-                    brandUrlBuckets.get(i).getAggregations().get(ATTR_BRAND_URL) != null) {
-                ParsedStringTerms aggregation = brandUrlBuckets.get(i).getAggregations().get(ATTR_BRAND_URL);
-                brandUrl = this.getAggregationsBrandOptions(aggregation);
-                if (StringUtils.isEmpty(brandUrl)) {
-                    continue;
+            Terms.Bucket urlBucket = brandUrlBucketMap.get(brandId);
+            if (urlBucket != null && urlBucket.getAggregations() != null) {
+                Aggregation urlAgg = urlBucket.getAggregations().get(ATTR_BRAND_URL);
+                if (urlAgg instanceof ParsedStringTerms) {
+                    brandUrl = this.getAggregationsBrandOptions((ParsedStringTerms) urlAgg);
                 }
             }
+            if (StringUtils.isEmpty(brandUrl)) {
+                continue;
+            }
+
             SelectorOptions so = new SelectorOptions();
             so.setName(brandName);
             so.setValue(brandId);
@@ -475,7 +500,7 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         //品牌判定
         if (CharSequenceUtil.isNotEmpty(searchDTO.getBrandId())) {
             String[] brands = searchDTO.getBrandId().split("@");
-            filterBuilder.must(QueryBuilders.termsQuery(ATTR_BRAND_ID, brands));
+            filterBuilder.filter(QueryBuilders.termsQuery(ATTR_BRAND_ID, brands));
         }
         if (searchDTO.getRecommend() != null) {
             filterBuilder.filter(QueryBuilders.termQuery("recommend", searchDTO.getRecommend()));

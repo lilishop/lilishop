@@ -15,6 +15,7 @@ import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.entity.vos.GoodsNumVO;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.entity.vos.StockWarningVO;
@@ -79,6 +80,12 @@ public class GoodsStoreController {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         goodsSearchParams.setStoreId(storeId);
         return ResultUtil.data(goodsService.queryByParams(goodsSearchParams));
+    }
+
+    @ApiOperation(value = "获取商品数量")
+    @GetMapping(value = "/goodsNumber")
+    public ResultMessage<GoodsNumVO> getGoodsNumVO(GoodsSearchParams goodsSearchParams) {
+        return ResultUtil.data(goodsService.getGoodsNumVO(goodsSearchParams));
     }
 
     @ApiOperation(value = "分页获取商品Sku列表")

@@ -1,6 +1,7 @@
 package cn.lili.modules.statistics.mapper;
 
 import cn.lili.modules.order.order.entity.dos.Order;
+import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -60,4 +61,24 @@ public interface OrderStatisticsMapper extends BaseMapper<Order> {
             " FROM li_order o INNER JOIN li_order_item AS oi on o.sn = oi.order_sn ${ew.customSqlSegment} ")
     IPage<OrderSimpleVO> queryByParams(IPage<OrderSimpleVO> page, @Param(Constants.WRAPPER) Wrapper<OrderSimpleVO> queryWrapper);
 
+
+    /**
+     * 查询已付款未全部退款的订单数量
+     */
+    @Select("SELECT COALESCE(COUNT(DISTINCT order_sn), 0)  FROM li_order_item ${ew.customSqlSegment} ")
+    Long getPayOrderNum(@Param(Constants.WRAPPER) Wrapper<OrderItem> queryWrapper);
+    /**
+     * 查询已付款未全部退款的订单金额
+     */
+    @Select("SELECT COALESCE(SUM( oi.flow_price )- SUM( oi.refund_price ), 0) FROM li_order_item oi INNER JOIN li_order o ON o.sn=oi.order_sn ${ew.customSqlSegment} ")
+    Double getPayOrderPrice(@Param(Constants.WRAPPER) Wrapper<OrderItem> queryWrapper);
+    
+    /**
+     * 查询商品价格
+     */
+    @Select("SELECT COALESCE(SUM(goods_price), 0) FROM li_order_item ${ew.customSqlSegment} ")
+    Double getGoodsPrice(@Param(Constants.WRAPPER) Wrapper<OrderItem> queryWrapper);
+    
+    @Select("SELECT COALESCE(SUM( oi.refund_price ), 0) FROM li_order_item oi INNER JOIN li_order o ON o.sn=oi.order_sn ${ew.customSqlSegment} ")
+    Double getRefundPrice(@Param(Constants.WRAPPER) Wrapper<OrderItem> queryWrapper);
 }

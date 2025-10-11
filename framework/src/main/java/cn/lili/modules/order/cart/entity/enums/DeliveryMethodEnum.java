@@ -19,7 +19,11 @@ public enum DeliveryMethodEnum {
     /**
      * "物流"
      */
-    LOGISTICS("物流");
+    LOGISTICS("物流"),
+    /**
+     * 虚拟发货
+     */
+    VIRTUAL("虚拟发货");
 
     private final String description;
 

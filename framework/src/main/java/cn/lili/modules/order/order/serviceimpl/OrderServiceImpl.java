@@ -22,17 +22,13 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
-import cn.lili.modules.order.aftersale.entity.enums.ComplaintStatusEnum;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.order.aop.OrderLogPoint;
 import cn.lili.modules.order.order.entity.dos.*;
 import cn.lili.modules.order.order.entity.dto.*;
 import cn.lili.modules.order.order.entity.enums.*;
-import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
-import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
-import cn.lili.modules.order.order.entity.vo.OrderVO;
-import cn.lili.modules.order.order.entity.vo.PaymentLog;
+import cn.lili.modules.order.order.entity.vo.*;
 import cn.lili.modules.order.order.mapper.OrderMapper;
 import cn.lili.modules.order.order.service.*;
 import cn.lili.modules.order.trade.entity.dos.OrderLog;
@@ -223,6 +219,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         queryWrapper.groupBy("o.id");
         queryWrapper.orderByDesc("o.id");
         return this.baseMapper.queryByParams(PageUtil.initPage(orderSearchParams), queryWrapper);
+    }
+
+    @Override
+    public OrderNumVO getOrderNumVO(OrderSearchParams orderSearchParams) {
+        return this.baseMapper.getOrderNumVO(orderSearchParams.queryWrapper());
     }
 
     /**
@@ -785,7 +786,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     private void checkBatchDeliver(List<OrderBatchDeliverDTO> list) {
 
-        List<Logistics> logistics = logisticsService.list();
+        Map<String, String> logisticsMap = logisticsService.list().stream()
+                .collect(Collectors.toMap(Logistics::getName, Logistics::getId));
         for (OrderBatchDeliverDTO orderBatchDeliverDTO : list) {
             //查看订单号是否存在-是否是当前店铺的订单
             Order order = this.getOne(new LambdaQueryWrapper<Order>()
@@ -797,11 +799,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 throw new ServiceException("订单编号：'" + orderBatchDeliverDTO.getOrderSn() + " '不能发货");
             }
             //获取物流公司
-            logistics.forEach(item -> {
-                if (item.getName().equals(orderBatchDeliverDTO.getLogisticsName())) {
-                    orderBatchDeliverDTO.setLogisticsId(item.getId());
-                }
-            });
+            String logisticsId = logisticsMap.get(orderBatchDeliverDTO.getLogisticsName());
+            if (logisticsId != null) {
+                orderBatchDeliverDTO.setLogisticsId(logisticsId);
+            }
             if (CharSequenceUtil.isEmpty(orderBatchDeliverDTO.getLogisticsId())) {
                 throw new ServiceException("物流公司：'" + orderBatchDeliverDTO.getLogisticsName() + " '不存在");
             }
@@ -1289,13 +1290,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             row.createCell(2).setCellValue(dto.getGoodsName());
             row.createCell(3).setCellValue(dto.getNum());
             row.createCell(4).setCellValue(dto.getGoodsId());
-            row.createCell(5).setCellValue(dto.getUnitPrice()!=null?dto.getUnitPrice():0);
-            row.createCell(6).setCellValue(dto.getFlowPrice()!=null?dto.getFlowPrice():0);
-            row.createCell(7).setCellValue(dto.getFreightPrice()!=null?dto.getFreightPrice():0);
-            row.createCell(8).setCellValue(dto.getDiscountPrice()!=null?dto.getDiscountPrice():0);
-            row.createCell(9).setCellValue(dto.getSiteMarketingCost()!=null?dto.getSiteMarketingCost():0);
-            row.createCell(10).setCellValue(dto.getStoreMarketingCost()!=null?dto.getStoreMarketingCost():0);
-            row.createCell(11).setCellValue(dto.getUpdatePrice()!=null?dto.getUpdatePrice():0);
+            row.createCell(5).setCellValue(Objects.nonNull(dto.getUnitPrice())?dto.getUnitPrice():0);
+            row.createCell(6).setCellValue(Objects.nonNull(dto.getFlowPrice())?dto.getFlowPrice():0);
+            row.createCell(7).setCellValue(Objects.nonNull(dto.getFreightPrice())?dto.getFreightPrice():0);
+            row.createCell(8).setCellValue(Objects.nonNull(dto.getDiscountPrice())?dto.getDiscountPrice():0);
+            row.createCell(9).setCellValue(Objects.nonNull(dto.getSiteMarketingCost())?dto.getSiteMarketingCost():0);
+            row.createCell(10).setCellValue(Objects.nonNull(dto.getStoreMarketingCost())?dto.getStoreMarketingCost():0);
+            row.createCell(11).setCellValue(Objects.nonNull(dto.getUpdatePrice())?dto.getUpdatePrice():0);
             row.createCell(12).setCellValue(dto.getPaymentMethod());
             row.createCell(13).setCellValue(dto.getConsigneeName());
             row.createCell(14).setCellValue(dto.getConsigneeMobile());

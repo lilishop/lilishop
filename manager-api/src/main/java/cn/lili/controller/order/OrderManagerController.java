@@ -9,9 +9,9 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
-import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
+import cn.lili.modules.order.order.entity.vo.OrderNumVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.service.OrderPriceService;
 import cn.lili.modules.order.order.service.OrderService;
@@ -54,6 +54,12 @@ public class OrderManagerController {
     @GetMapping
     public ResultMessage<IPage<OrderSimpleVO>> queryMineOrder(OrderSearchParams orderSearchParams) {
         return ResultUtil.data(orderService.queryByParams(orderSearchParams));
+    }
+
+    @ApiOperation(value = "获取订单数量")
+    @GetMapping(value = "/orderNum")
+    public ResultMessage<OrderNumVO> getOrderNumVO(OrderSearchParams orderSearchParams) {
+        return ResultUtil.data(orderService.getOrderNumVO(orderSearchParams));
     }
 
     @ApiOperation(value = "查询订单导出列表")

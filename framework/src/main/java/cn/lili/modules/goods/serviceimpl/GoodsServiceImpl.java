@@ -20,6 +20,7 @@ import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.entity.vos.GoodsNumVO;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.mapper.GoodsMapper;
@@ -279,6 +280,40 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Override
     public IPage<Goods> queryByParams(GoodsSearchParams goodsSearchParams) {
         return this.page(PageUtil.initPage(goodsSearchParams), goodsSearchParams.queryWrapper());
+    }
+
+    @Override
+    public GoodsNumVO getGoodsNumVO(GoodsSearchParams goodsSearchParams) {
+        GoodsNumVO goodsNumVO = new GoodsNumVO();
+        
+        // 获取基础查询条件
+        QueryWrapper<Goods> baseWrapper = goodsSearchParams.queryWrapper();
+        
+        // 使用聚合查询一次性获取所有状态的商品数量
+        List<Map<String, Object>> results = this.baseMapper.selectMaps(
+            baseWrapper.select(
+                "COUNT(CASE WHEN auth_flag = 'PASS' AND market_enable = 'UPPER' THEN 1 END) as upperGoodsNum",
+                "COUNT(CASE WHEN auth_flag = 'PASS' AND market_enable = 'DOWN' THEN 1 END) as downGoodsNum",
+                "COUNT(CASE WHEN auth_flag = 'TOBEAUDITED' THEN 1 END) as auditGoodsNum",
+                "COUNT(CASE WHEN auth_flag = 'REFUSE' THEN 1 END) as refuseGoodsNum"
+            )
+        );
+        
+        if (!results.isEmpty()) {
+            Map<String, Object> result = results.get(0);
+            goodsNumVO.setUpperGoodsNum(((Number) result.get("upperGoodsNum")).intValue());
+            goodsNumVO.setDownGoodsNum(((Number) result.get("downGoodsNum")).intValue());
+            goodsNumVO.setAuditGoodsNum(((Number) result.get("auditGoodsNum")).intValue());
+            goodsNumVO.setRefuseGoodsNum(((Number) result.get("refuseGoodsNum")).intValue());
+        } else {
+            // 如果没有结果，设置默认值为0
+            goodsNumVO.setUpperGoodsNum(0);
+            goodsNumVO.setDownGoodsNum(0);
+            goodsNumVO.setAuditGoodsNum(0);
+            goodsNumVO.setRefuseGoodsNum(0);
+        }
+        
+        return goodsNumVO;
     }
 
     /**

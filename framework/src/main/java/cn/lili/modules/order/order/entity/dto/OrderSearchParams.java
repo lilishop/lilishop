@@ -63,9 +63,6 @@ public class OrderSearchParams extends PageVO {
     @ApiModelProperty(value = "关键字 商品名称/买家名称/店铺名称")
     private String keywords;
 
-    @ApiModelProperty(value = "付款方式")
-    private String paymentType;
-
     /**
      * @see OrderTypeEnum
      * @see cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum
@@ -121,7 +118,11 @@ public class OrderSearchParams extends PageVO {
 
         //关键字查询
         if (CharSequenceUtil.isNotEmpty(keywords)) {
-            wrapper.and(keyWrapper -> keyWrapper.like("o.sn", keywords).or().like("oi.goods_name", keywords));
+            wrapper.and(keyWrapper -> keyWrapper.like("o.sn", keywords).or()
+                    .like("oi.goods_name", keywords).or()
+                    .like("o.consignee_name", keywords).or()
+                    .like("o.consignee_mobile", keywords).or()
+                    .like("o.store_name", keywords));
         }
         if (currentUser != null) {
             //按卖家查询
@@ -156,9 +157,6 @@ public class OrderSearchParams extends PageVO {
 
         //按商品名称查询
         wrapper.like(CharSequenceUtil.isNotEmpty(goodsName), "oi.goods_name", goodsName);
-
-        //付款方式
-        wrapper.like(CharSequenceUtil.isNotEmpty(paymentType), "o.payment_type", paymentType);
 
         //按支付方式
         wrapper.eq(CharSequenceUtil.isNotEmpty(paymentMethod), "o.payment_method", paymentMethod);

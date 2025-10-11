@@ -638,18 +638,20 @@ public class CartServiceImpl implements CartService {
             if (Boolean.FALSE.equals(cartSkuVO.getChecked())) {
                 continue;
             }
+            //使用优惠券时判断最新的sku价格。与后面渲染一致
+            GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(cartSkuVO.getGoodsSku().getId());
             //有促销金额则用促销金额，否则用商品原价
             if (cartSkuVO.getPromotionMap() != null && !cartSkuVO.getPromotionMap().isEmpty()) {
                 if (cartSkuVO.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.PINTUAN.name()) || i.contains(PromotionTypeEnum.SECKILL.name()))) {
                     cartPrice = CurrencyUtil.add(cartPrice, CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
                     skuPrice.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
                 } else {
-                    cartPrice = CurrencyUtil.add(cartPrice, CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
-                    skuPrice.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
+                    cartPrice = CurrencyUtil.add(cartPrice, CurrencyUtil.mul(goodsSku.getPrice(), cartSkuVO.getNum()));
+                    skuPrice.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.mul(goodsSku.getPrice(), cartSkuVO.getNum()));
                 }
             } else {
-                cartPrice = CurrencyUtil.add(cartPrice, CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
-                skuPrice.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.mul(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getNum()));
+                cartPrice = CurrencyUtil.add(cartPrice, CurrencyUtil.mul(goodsSku.getPrice(), cartSkuVO.getNum()));
+                skuPrice.put(cartSkuVO.getGoodsSku().getId(), CurrencyUtil.mul(goodsSku.getPrice(), cartSkuVO.getNum()));
             }
         }
 

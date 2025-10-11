@@ -4,6 +4,7 @@ package cn.lili.modules.order.aftersale.service;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.aftersale.entity.dto.AfterSaleDTO;
 import cn.lili.modules.order.aftersale.entity.vo.AfterSaleApplyVO;
+import cn.lili.modules.order.aftersale.entity.vo.AfterSaleNumVO;
 import cn.lili.modules.order.aftersale.entity.vo.AfterSaleSearchParams;
 import cn.lili.modules.order.aftersale.entity.vo.AfterSaleVO;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
@@ -29,6 +30,9 @@ public interface AfterSaleService extends IService<AfterSale> {
      * @return 分页售后信息
      */
     IPage<AfterSaleVO> getAfterSalePages(AfterSaleSearchParams saleSearchParams);
+
+
+    AfterSaleNumVO getAfterSaleNumVO(AfterSaleSearchParams saleSearchParams);
 
     /**
      * 查询导出售后信息

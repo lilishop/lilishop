@@ -1,5 +1,6 @@
 package cn.lili.modules.logistics.plugin.kuaidi100;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.modules.logistics.LogisticsPlugin;
 import cn.lili.modules.logistics.entity.dto.LabelOrderDTO;
 import cn.lili.modules.logistics.entity.enums.LogisticsEnum;
@@ -148,25 +149,25 @@ public class Kuaidi100Plugin implements LogisticsPlugin {
             //电子面单客户账户或月结账号，需贵司向当地快递公司网点申请（参考电子面单申请指南）； 是否必填该属性，请查看参数字典
             orderReq.setPartnerId(storeLogistics.getCustomerName());
             //电子面单密码，需贵司向当地快递公司网点申请； 是否必填该属性，请查看参数字典
-            if(storeLogistics.getCustomerPwd()!=null){
+            if(CharSequenceUtil.isNotEmpty(storeLogistics.getCustomerPwd())){
                 orderReq.setPartnerKey(storeLogistics.getCustomerPwd());
             }
 
             //电子面单密钥，需贵司向当地快递公司网点申请； 是否必填该属性，请查看参数字典
-            if(storeLogistics.getMonthCode()!=null) {
+            if(CharSequenceUtil.isNotEmpty(storeLogistics.getMonthCode())) {
                 orderReq.setPartnerSecret(storeLogistics.getMonthCode());
             }
             //电子面单客户账户名称，需贵司向当地快递公司网点申请； 是否必填该属性，请查看参数字典
-            if(storeLogistics.getPartnerName()!=null) {
+            if(CharSequenceUtil.isNotEmpty(storeLogistics.getPartnerName())) {
                 orderReq.setPartnerName(storeLogistics.getPartnerName());
             }
 //            orderReq.setNet();
             //	电子面单承载编号，需贵司向当地快递公司网点申请； 是否必填该属性，请查看参数字典
-            if(storeLogistics.getSendSite()!=null) {
+            if(CharSequenceUtil.isNotEmpty(storeLogistics.getSendSite())) {
                 orderReq.setCode(storeLogistics.getSendSite());
             }
             //电子面单承载快递员名，需贵司向当地快递公司网点申请； 是否必填该属性，请查看参数字典
-            if(storeLogistics.getSendStaff()!=null) {
+            if(CharSequenceUtil.isNotEmpty(storeLogistics.getSendStaff())) {
                 orderReq.setCheckMan(storeLogistics.getSendStaff());
             }
 

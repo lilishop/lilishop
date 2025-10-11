@@ -212,14 +212,27 @@ public class CouponRender implements CartRenderStep {
         MemberCouponDTO platformCoupon = tradeDTO.getPlatformCoupon();
         //如果有勾选平台优惠券
         if (platformCoupon != null) {
-            renderSku(tradeDTO, platformCoupon);
+            //判断该优惠券是否可以使用，如果可以进行价格渲染，如果不可以使用，去掉该优惠券的使用
+            boolean checkFlag = tradeDTO.getCanUseCoupons().stream().anyMatch(item -> item.getCouponId().equals(platformCoupon.getMemberCoupon().getCouponId()));
+            if(checkFlag){
+                renderSku(tradeDTO, platformCoupon);
+            }else{
+                tradeDTO.setPlatformCoupon(null);
+            }
         }
         //计算商家优惠券
         Map<String, MemberCouponDTO> map = tradeDTO.getStoreCoupons();
         if (map != null && map.size() > 0) {
             for (MemberCouponDTO memberCouponDTO : map.values()) {
-                renderSku(tradeDTO, memberCouponDTO);
+                //判断该优惠券是否可以使用，如果可以进行价格渲染，如果不可以使用，去掉该优惠券的使用
+                boolean storeCouponCheck = tradeDTO.getCanUseCoupons().stream().anyMatch(item -> item.getCouponId().equals(memberCouponDTO.getMemberCoupon().getCouponId()));
+                if(storeCouponCheck){
+                    renderSku(tradeDTO, memberCouponDTO);
+                }else{
+                    map.values().remove(memberCouponDTO);
+                }
             }
+            tradeDTO.setStoreCoupons(map);
         }
     }
 

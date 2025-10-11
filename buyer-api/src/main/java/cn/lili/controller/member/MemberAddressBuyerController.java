@@ -59,7 +59,7 @@ public class MemberAddressBuyerController {
     public ResultMessage<MemberAddress> addShippingAddress(@Valid MemberAddress shippingAddress) {
         //添加会员地址
         shippingAddress.setMemberId(Objects.requireNonNull(UserContext.getCurrentUser()).getId());
-        if(shippingAddress.getIsDefault()==null){
+        if(Objects.isNull(shippingAddress.getIsDefault())){
             shippingAddress.setIsDefault(false);
         }
         return ResultUtil.data(memberAddressService.saveMemberAddress(shippingAddress));
