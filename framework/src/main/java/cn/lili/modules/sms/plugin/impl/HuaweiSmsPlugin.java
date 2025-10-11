@@ -303,14 +303,15 @@ public class HuaweiSmsPlugin implements SmsPlugin {
     static void trustAllHttpsCertificates() throws Exception {
         TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
+                    @Override
                     public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
                         return;
                     }
-
+                    @Override
                     public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
                         return;
                     }
-
+                    @Override
                     public X509Certificate[] getAcceptedIssuers() {
                         return null;
                     }

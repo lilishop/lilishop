@@ -335,6 +335,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @DemoSite
+    @Override
     public Member modifyPass(String oldPassword, String newPassword) {
         AuthUser tokenUser = UserContext.getCurrentUser();
         if (tokenUser == null) {

@@ -59,6 +59,7 @@ public class ShunfengPlugin implements LogisticsPlugin {
      *
      * @param orderDetailVO
      */
+    @Override
     public String createOrder(OrderDetailVO orderDetailVO) {
         StoreDetailService storeService = SpringContextUtil.getBean(StoreDetailService.class);
         StoreDeliverGoodsAddressDTO storeDeliverGoodsAddressDTO = storeService.getStoreDeliverGoodsAddressDto(orderDetailVO.getOrder().getStoreId());
