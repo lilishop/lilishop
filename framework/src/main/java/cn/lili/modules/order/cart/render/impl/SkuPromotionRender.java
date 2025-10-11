@@ -267,8 +267,8 @@ public class SkuPromotionRender implements CartRenderStep {
             }
         }
 
-
-        if (quantity != null && cartSkuVO.getNum() > (Integer) quantity) {//设置购物车未选中
+        //设置购物车未选中
+        if (quantity != null && cartSkuVO.getNum() > (Integer) quantity) {
             cartSkuVO.setChecked(false);
             //设置失效消息
             cartSkuVO.setErrorMessage("促销商品库存不足,现有库存数量[" + quantity + "]");

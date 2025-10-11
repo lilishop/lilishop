@@ -535,7 +535,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         try (InputStream inputStream = file.getInputStream()) {
             // 使用 WorkbookFactory.create 方法读取 Excel 文件
             Workbook workbook = WorkbookFactory.create(inputStream);
-            Sheet sheet = workbook.getSheetAt(0); // 我们只读取第一个sheet
+            // 我们只读取第一个sheet
+            Sheet sheet = workbook.getSheetAt(0);
 
             // 检查第一个sheet的行数是否超过10002行
             if (sheet.getPhysicalNumberOfRows() > 10002) {
@@ -1039,7 +1040,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         // 设置下拉列表数据验证
         DataValidationHelper validationHelper = templateSheet.getDataValidationHelper();
         DataValidationConstraint constraint = validationHelper.createExplicitListConstraint(new String[]{"增", "减"});
-        CellRangeAddressList addressList = new CellRangeAddressList(2, 10001, 2, 2); // 从第3行到第10002行，第3列
+        // 从第3行到第10002行，第3列
+        CellRangeAddressList addressList = new CellRangeAddressList(2, 10001, 2, 2);
         DataValidation validation = validationHelper.createValidation(constraint, addressList);
         validation.setSuppressDropDownArrow(true);
         validation.setShowErrorBox(true);

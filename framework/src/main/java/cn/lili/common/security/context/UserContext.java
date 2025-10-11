@@ -92,8 +92,9 @@ public class UserContext {
         try {
             //获取token的信息
             Claims claims
-                    = Jwts.parser()
+                    = Jwts.parserBuilder()
                     .setSigningKey(SecretKeyUtil.generalKeyByDecoders())
+                    .build()
                     .parseClaimsJws(accessToken).getBody();
             //获取存储在claims中的用户信息
             String json = claims.get(SecurityEnum.USER_CONTEXT.getValue()).toString();

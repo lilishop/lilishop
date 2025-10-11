@@ -863,7 +863,8 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 //        log.info("ES修改商品活动索引-原商品索引信息:{}", goodsIndex);
 //        log.info("ES修改商品活动索引-原商品索引活动信息:{}", promotionMap);
         //如果活动已结束
-        if (promotion.getPromotionStatus().equals(PromotionsStatusEnum.END.name()) || promotion.getPromotionStatus().equals(PromotionsStatusEnum.CLOSE.name())) {//如果存在活动
+        //如果存在活动
+        if (promotion.getPromotionStatus().equals(PromotionsStatusEnum.END.name()) || promotion.getPromotionStatus().equals(PromotionsStatusEnum.CLOSE.name())) {
             //删除活动
             promotionMap.remove(key);
         } else {

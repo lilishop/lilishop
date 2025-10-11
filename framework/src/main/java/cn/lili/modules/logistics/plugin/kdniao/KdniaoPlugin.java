@@ -131,50 +131,67 @@ public class KdniaoPlugin implements LogisticsPlugin {
             StoreLogistics storeLogistics = labelOrderDTO.getStoreLogistics();
 
             //组装快递鸟应用级参数
-            String resultDate = "{" +
-                    "'OrderCode': '" + order.getSn() + "'," + //订单编码
-                    "'ShipperCode': '" + logistics.getCode() + "'," +   //快递公司编码
-                    "'CustomerName': '" + storeLogistics.getCustomerName() + "'," +//客户编码
-                    "'CustomerPwd': '" + storeLogistics.getCustomerPwd() + "'," +     //客户密码
-                    "'MonthCode': '" + storeLogistics.getMonthCode() + "'," +       //密钥
-                    "'SendSite': '" + storeLogistics.getSendSite() + "'," +         //归属网点
-                    "'SendStaff': '" + storeLogistics.getSendStaff() + "'," +       //收件快递员
-                    "'PayType': " + storeLogistics.getPayType() + "," +
-                    "'ExpType': " + storeLogistics.getExpType() + "," +
-                    //发件人信息
-                    "'Sender': {" +
-                    "'Name': '" + storeDeliverGoodsAddressDTO.getSalesConsignorName() + "'," +
-                    "'Mobile': '" + storeDeliverGoodsAddressDTO.getSalesConsignorMobile() + "'," +
-                    "'ProvinceName': '" + consignorAddress[0] + "'," +   //省
-                    "'CityName': '" + consignorAddress[1] + "'," +       //市
-                    "'ExpAreaName': '" + consignorAddress[2] + "'," +    //区
-                    "'Address': '" + storeDeliverGoodsAddressDTO.getSalesConsignorDetail() + "'" +   //发件人详细地址
-                    "}," +
-                    //收件人信息
-                    "'Receiver': {" +
-                    "'Name': '" + order.getConsigneeName() + "'," +
-                    "'Mobile': '" + order.getConsigneeMobile() + "'," +
-                    "'ProvinceName': '" + ConsigneeAddress[0] + "'," +     //省
-                    "'CityName': '" + ConsigneeAddress[1] + "'," +       //市
-                    "'ExpAreaName': '" + ConsigneeAddress[2] + "'," +    //区
-                    "'Address': '" + order.getConsigneeDetail() + "'" +  //收件人详细地址
-                    "}," +
-                    //商品信息
-                    "'Commodity': [";
+            String resultDate = "{"
+                    // 订单编码
+                    + "'OrderCode': '" + order.getSn() + "',"
+                    // 快递公司编码
+                    + "'ShipperCode': '" + logistics.getCode() + "',"
+                    // 客户编码
+                    + "'CustomerName': '" + storeLogistics.getCustomerName() + "',"
+                    // 客户密码
+                    + "'CustomerPwd': '" + storeLogistics.getCustomerPwd() + "',"
+                    // 密钥
+                    + "'MonthCode': '" + storeLogistics.getMonthCode() + "',"
+                    // 归属网点
+                    + "'SendSite': '" + storeLogistics.getSendSite() + "',"
+                    // 收件快递员
+                    + "'SendStaff': '" + storeLogistics.getSendStaff() + "',"
+                    + "'PayType': " + storeLogistics.getPayType() + ","
+                    + "'ExpType': " + storeLogistics.getExpType() + ","
+                    // 发件人信息
+                    + "'Sender': {"
+                    + "'Name': '" + storeDeliverGoodsAddressDTO.getSalesConsignorName() + "',"
+                    + "'Mobile': '" + storeDeliverGoodsAddressDTO.getSalesConsignorMobile() + "',"
+                    // 省
+                    + "'ProvinceName': '" + consignorAddress[0] + "',"
+                    // 市
+                    + "'CityName': '" + consignorAddress[1] + "',"
+                    // 区
+                    + "'ExpAreaName': '" + consignorAddress[2] + "',"
+                    // 发件人详细地址
+                    + "'Address': '" + storeDeliverGoodsAddressDTO.getSalesConsignorDetail() + "'"
+                    + "},"
+                    // 收件人信息
+                    + "'Receiver': {"
+                    + "'Name': '" + order.getConsigneeName() + "',"
+                    + "'Mobile': '" + order.getConsigneeMobile() + "',"
+                    // 省
+                    + "'ProvinceName': '" + ConsigneeAddress[0] + "',"
+                    // 市
+                    + "'CityName': '" + ConsigneeAddress[1] + "',"
+                    // 区
+                    + "'ExpAreaName': '" + ConsigneeAddress[2] + "',"
+                    // 收件人详细地址
+                    + "'Address': '" + order.getConsigneeDetail() + "'"
+                    + "},"
+                    // 商品信息
+                    + "'Commodity': [";
 
             //子订单信息
             for (OrderItem orderItem : orderItems) {
-                resultDate = resultDate + "{" +
-                        "'GoodsName': '" + orderItem.getGoodsName() + "'," +
-                        "'Goodsquantity': '" + orderItem.getNum() + "'" +
-                        "},";
+                resultDate = resultDate + "{"
+                        + "'GoodsName': '" + orderItem.getGoodsName() + "',"
+                        + "'Goodsquantity': '" + orderItem.getNum() + "'"
+                        + "},";
             }
-            resultDate = resultDate + "]," +
-                    "'Quantity': " + orderItems.size() + "," +  //包裹数
-                    "'IsReturnPrintTemplate':1," +  //生成电子面单模板
-                    "'Remark': '" + order.getRemark() + "'" +//商家备注
-                    "}";
-
+            resultDate = resultDate + "],"
+                    // 包裹数
+                    + "'Quantity': " + orderItems.size() + ","
+                    // 生成电子面单模板
+                    + "'IsReturnPrintTemplate':1,"
+                    // 商家备注
+                    + "'Remark': '" + order.getRemark() + "'"
+                    + "}";
 
             //组织系统级参数
             Map<String, String> params = new HashMap<>();
@@ -200,9 +217,9 @@ public class KdniaoPlugin implements LogisticsPlugin {
             JSONObject obj = JSONObject.parseObject(result);
             log.info("电子面单响应：{}", result);
             if (!"100".equals(obj.getString("ResultCode"))) {
-//                resultMap.put("Reason",obj.getString("Reason"));
+                //                resultMap.put("Reason",obj.getString("Reason"));
                 throw new ServiceException(obj.getString("Reason"));
-//                return resultMap;
+                //                return resultMap;
             }
 
             JSONObject orderJson = JSONObject.parseObject(obj.getString("Order"));

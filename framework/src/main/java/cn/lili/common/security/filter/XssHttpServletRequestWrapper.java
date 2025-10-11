@@ -144,7 +144,6 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     public ServletInputStream getInputStream() throws IOException {
 
         BufferedReader bufferedReader = null;
-
         InputStreamReader reader = null;
 
         //获取输入流
@@ -163,47 +162,55 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
                 //继续读取下一行流，直到line为空
                 line = bufferedReader.readLine();
             }
-            if (CharSequenceUtil.isNotEmpty(body) && Boolean.TRUE.equals(JSONUtil.isJsonObj(body.toString()))) {
-                //将body转换为map
-                Map<String, Object> map = JSONUtil.parseObj(body.toString());
-                //创建空的map用于存储结果
-                Map<String, Object> resultMap = new HashMap<>(map.size());
-                //遍历数组
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    //如果map.get(key)获取到的是字符串就需要进行处理，如果不是直接存储resultMap
-                    if (map.get(entry.getKey()) instanceof String) {
-                        resultMap.put(entry.getKey(), filterXss(entry.getKey(), entry.getValue().toString()));
-                    } else {
-                        resultMap.put(entry.getKey(), entry.getValue());
-                    }
+
+            // 兼容替换：不再使用过时的 JSONUtil.isJsonObj(String)，改为尝试解析并捕获异常
+            if (CharSequenceUtil.isNotEmpty(body)) {
+                Map<String, Object> map = null;
+                try {
+                    map = JSONUtil.parseObj(body.toString());
+                } catch (Exception ignore) {
+                    map = null;
                 }
-
-                //将resultMap转换为json字符串
-                String resultStr = JSONUtil.toJsonStr(resultMap);
-                //将json字符串转换为字节
-                final ByteArrayInputStream resultBIS = new ByteArrayInputStream(resultStr.getBytes(StandardCharsets.UTF_8));
-
-                //实现接口
-                return new ServletInputStream() {
-                    @Override
-                    public boolean isFinished() {
-                        return false;
+                if (map != null) {
+                    //创建空的map用于存储结果
+                    Map<String, Object> resultMap = new HashMap<>(map.size());
+                    //遍历数组
+                    for (Map.Entry<String, Object> entry : map.entrySet()) {
+                        //如果map.get(key)获取到的是字符串就需要进行处理，如果不是直接存储resultMap
+                        if (map.get(entry.getKey()) instanceof String) {
+                            resultMap.put(entry.getKey(), filterXss(entry.getKey(), entry.getValue().toString()));
+                        } else {
+                            resultMap.put(entry.getKey(), entry.getValue());
+                        }
                     }
 
-                    @Override
-                    public boolean isReady() {
-                        return false;
-                    }
+                    //将resultMap转换为json字符串
+                    String resultStr = JSONUtil.toJsonStr(resultMap);
+                    //将json字符串转换为字节
+                    final ByteArrayInputStream resultBIS = new ByteArrayInputStream(resultStr.getBytes(StandardCharsets.UTF_8));
 
-                    @Override
-                    public void setReadListener(ReadListener readListener) {
-                    }
+                    //实现接口
+                    return new ServletInputStream() {
+                        @Override
+                        public boolean isFinished() {
+                            return false;
+                        }
 
-                    @Override
-                    public int read() {
-                        return resultBIS.read();
-                    }
-                };
+                        @Override
+                        public boolean isReady() {
+                            return false;
+                        }
+
+                        @Override
+                        public void setReadListener(ReadListener readListener) {
+                        }
+
+                        @Override
+                        public int read() {
+                            return resultBIS.read();
+                        }
+                    };
+                }
             }
 
             //将json字符串转换为字节

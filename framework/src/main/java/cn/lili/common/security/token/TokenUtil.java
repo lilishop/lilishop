@@ -65,8 +65,9 @@ public class TokenUtil {
 
         Claims claims;
         try {
-            claims = Jwts.parser()
+            claims = Jwts.parserBuilder()
                     .setSigningKey(SecretKeyUtil.generalKeyByDecoders())
+                    .build()
                     .parseClaimsJws(oldRefreshToken).getBody();
         } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException |
                  IllegalArgumentException e) {

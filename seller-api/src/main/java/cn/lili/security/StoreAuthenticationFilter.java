@@ -98,13 +98,14 @@ public class StoreAuthenticationFilter extends BasicAuthenticationFilter {
 
         try {
             Claims claims
-                    = Jwts.parser()
+                    = Jwts.parserBuilder()
                     .setSigningKey(SecretKeyUtil.generalKeyByDecoders())
+                    .build()
                     .parseClaimsJws(jwt).getBody();
             //获取存储在claims中的用户信息
             String json = claims.get(SecurityEnum.USER_CONTEXT.getValue()).toString();
             AuthUser authUser = new Gson().fromJson(json, AuthUser.class);
-
+    
             //校验redis中是否有权限
             if (cache.hasKey(CachePrefix.ACCESS_TOKEN.getPrefix(UserEnums.STORE, authUser.getId()) + jwt)) {
                 //用户角色
