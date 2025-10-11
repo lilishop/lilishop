@@ -158,7 +158,7 @@ public class WechatPlugin implements Payment {
             }
 
             Config config =null;
-            if(setting.getPublicType().equals("CERT")){
+            if("CERT".equals(setting.getPublicType())){
                 config=this.getCertificateConfig(setting);
             }else {
                 config=this.getPublicKeyConfig(setting);
@@ -221,7 +221,7 @@ public class WechatPlugin implements Payment {
             }
 
             Config config =null;
-            if(setting.getPublicType().equals("CERT")){
+            if("CERT".equals(setting.getPublicType())){
                 config=this.getCertificateConfig(setting);
             }else {
                 config=this.getPublicKeyConfig(setting);
@@ -280,7 +280,7 @@ public class WechatPlugin implements Payment {
             }
 
             Config config =null;
-            if(setting.getPublicType().equals("CERT")){
+            if("CERT".equals(setting.getPublicType())){
                 config=this.getCertificateConfig(setting);
             }else {
                 config=this.getPublicKeyConfig(setting);
@@ -341,7 +341,7 @@ public class WechatPlugin implements Payment {
             }
 
             Config config =null;
-            if(setting.getPublicType().equals("CERT")){
+            if("CERT".equals(setting.getPublicType())){
                 config=this.getCertificateConfig(setting);
             }else {
                 config=this.getPublicKeyConfig(setting);
@@ -410,7 +410,7 @@ public class WechatPlugin implements Payment {
             WechatPaymentSetting setting = wechatPaymentSetting();
 
             Config config =null;
-            if(setting.getPublicType().equals("CERT")){
+            if("CERT".equals(setting.getPublicType())){
                 config=this.getCertificateConfig(setting);
             }else {
                 config=this.getPublicKeyConfig(setting);
@@ -511,7 +511,7 @@ public class WechatPlugin implements Payment {
             WechatPaymentSetting setting = wechatPaymentSetting();
 
             Config config =null;
-            if(setting.getPublicType().equals("CERT")){
+            if("CERT".equals(setting.getPublicType())){
                 config=this.getCertificateConfig(setting);
             }else {
                 config=this.getPublicKeyConfig(setting);
@@ -572,7 +572,7 @@ public class WechatPlugin implements Payment {
 
         WechatPaymentSetting setting = wechatPaymentSetting();
         NotificationConfig config=null;
-        if(setting.getPublicType().equals("CERT")) {
+        if("CERT".equals(setting.getPublicType())){
              config = new RSAAutoCertificateConfig.Builder()
                     .merchantId(setting.getMchId())
                     .privateKey(setting.getApiclientKey())
@@ -631,7 +631,7 @@ public class WechatPlugin implements Payment {
             WechatPaymentSetting setting = wechatPaymentSetting();
 
             Config config =null;
-            if(setting.getPublicType().equals("CERT")){
+            if("CERT".equals(setting.getPublicType())){
                 config=this.getCertificateConfig(setting);
             }else {
                 config=this.getPublicKeyConfig(setting);
@@ -669,7 +669,7 @@ public class WechatPlugin implements Payment {
 
         WechatPaymentSetting setting = wechatPaymentSetting();
         NotificationConfig config=null;
-        if(setting.getPublicType().equals("CERT")) {
+        if("CERT".equals(setting.getPublicType())){
             config = new RSAAutoCertificateConfig.Builder()
                     .merchantId(setting.getMchId())
                     .privateKey(setting.getApiclientKey())
@@ -756,11 +756,11 @@ public class WechatPlugin implements Payment {
      * @param outOrderNo 订单号
      */
     private void updateOrderPayNo(PayParam payParam,String outOrderNo ){
-        if(payParam.getOrderType().equals("ORDER")){
+        if("ORDER".equals(payParam.getOrderType())){
             orderService.update(new LambdaUpdateWrapper<Order>()
                     .eq(Order::getSn,payParam.getSn())
                     .set(Order::getPayOrderNo,outOrderNo));
-        }else if(payParam.getOrderType().equals("TRADE")){
+        }else if("TRADE".equals(payParam.getOrderType())){
             orderService.update(new LambdaUpdateWrapper<Order>()
                     .eq(Order::getTradeSn,payParam.getSn())
                     .set(Order::getPayOrderNo,outOrderNo));

@@ -205,7 +205,7 @@ public class GoodsImportServiceImpl implements GoodsImportService {
             goodsImportDTO.setCategory(category);
             goodsImportDTO.setTemplate(templateId);
             goodsImportDTO.setGoodsUnit(objects.get(4).toString().substring(objects.get(4).toString().indexOf("-") + 1));
-            goodsImportDTO.setRelease(objects.get(5).toString().equals("上架"));
+            goodsImportDTO.setRelease("上架".equals(objects.get(5).toString()));
 
             List<String> goodsGalleryList = new ArrayList<>();
             goodsGalleryList.add(objects.get(6).toString());
