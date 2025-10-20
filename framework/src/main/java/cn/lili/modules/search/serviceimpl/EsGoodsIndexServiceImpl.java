@@ -2,6 +2,7 @@ package cn.lili.modules.search.serviceimpl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ReflectUtil;
@@ -18,16 +19,15 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.elasticsearch.BaseElasticsearchService;
 import cn.lili.elasticsearch.EsSuffix;
 import cn.lili.elasticsearch.config.ElasticsearchProperties;
+import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
+import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
-import cn.lili.modules.goods.service.BrandService;
-import cn.lili.modules.goods.service.CategoryService;
-import cn.lili.modules.goods.service.GoodsSkuService;
-import cn.lili.modules.goods.service.StoreGoodsLabelService;
+import cn.lili.modules.goods.service.*;
 import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
@@ -38,13 +38,16 @@ import cn.lili.modules.promotion.tools.PromotionTools;
 import cn.lili.modules.search.entity.dos.CustomWords;
 import cn.lili.modules.search.entity.dos.EsGoodsAttribute;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
+import cn.lili.modules.search.entity.dto.EsDeleteDTO;
 import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
 import cn.lili.modules.search.repository.EsGoodsIndexRepository;
 import cn.lili.modules.search.service.CustomWordsService;
 import cn.lili.modules.search.service.EsGoodsIndexService;
 import cn.lili.modules.search.service.EsGoodsSearchService;
+import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -65,10 +68,13 @@ import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.SearchPage;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
@@ -111,6 +117,8 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
     @Autowired
     private GoodsSkuService goodsSkuService;
     @Autowired
+    private GoodsService goodsService;
+    @Autowired
     private BrandService brandService;
 
     @Autowired
@@ -118,6 +126,8 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
 
     @Autowired
     private StoreGoodsLabelService storeGoodsLabelService;
+    @Autowired
+    private EsGoodsSearchService esGoodsSearchService;
     @Autowired
     private Cache<Object> cache;
     /**
@@ -143,6 +153,126 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
         HashSet<String> h = new HashSet<>(list);
         list.clear();
         list.addAll(h);
+    }
+
+    @Override
+    public Boolean deleteGoodsDown() {
+        List<Goods> goodsList = goodsService.list(new LambdaQueryWrapper<Goods>().eq(Goods::getMarketEnable, GoodsStatusEnum.DOWN.name()));
+        for (Goods goods : goodsList) {
+            this.deleteIndex(
+                    EsDeleteDTO.builder()
+                            .queryFields(MapUtil.builder(new HashMap<String, Object>()).put("goodsId", goods.getId()).build())
+                            .clazz(EsGoodsIndex.class)
+                            .build());
+        }
+        return true;
+    }
+
+    @Override
+    public Boolean delSkuIndex() {
+        PageVO pageVO = new PageVO();
+        EsGoodsSearchDTO goodsSearchParams = new EsGoodsSearchDTO();
+        log.error("开始");
+        try {
+            List<Object> searchFilters = new ArrayList<>();
+            for (int i = 1; ; i++) {
+
+                log.error("第" + i + "页");
+
+                pageVO.setPageSize(1000);
+                pageVO.setPageNumber(i);
+                pageVO.setNotConvert(true);
+                pageVO.setSort("_id");
+                pageVO.setOrder("asc");
+
+                NativeSearchQueryBuilder searchQueryBuilder = esGoodsSearchService.createSearchQueryBuilder(goodsSearchParams, pageVO);
+
+
+                searchQueryBuilder.withSourceFilter(new FetchSourceFilter(new String[]{"_id"}, null));
+
+                Pageable pageable = PageRequest.of(0, 1000);
+                //分页
+                searchQueryBuilder.withPageable(pageable);
+                NativeSearchQuery query = searchQueryBuilder.build();
+                EsGoodsSearchDTO searchDTO = new EsGoodsSearchDTO();
+                SearchPage<EsGoodsIndex> searchHits = goodsSearchService.searchGoods(query, EsGoodsIndex.class);
+
+                if (searchHits == null || searchHits.isEmpty()) {
+                    break;
+                }
+
+                List<String> idList = searchHits.getSearchHits().stream().map(SearchHit::getContent).map(EsGoodsIndex::getId).collect(Collectors.toList());
+                LambdaQueryWrapper<GoodsSku> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.select(GoodsSku::getId);
+                queryWrapper.in(GoodsSku::getId, idList);
+                List<GoodsSku> goodsSkus = goodsSkuService.list(queryWrapper);
+
+                idList.forEach(id -> {
+                    if (goodsSkus.stream().noneMatch(goodsSku -> goodsSku.getId().equals(id))) {
+                        log.error("[{}]不存在，进行删除", id);
+                        this.deleteIndexById(id);
+                    }
+                });
+
+
+                if (!searchHits.getSearchHits().getSearchHit(idList.size() -1).getSortValues().isEmpty()) {
+                    searchFilters = searchHits.getSearchHits().getSearchHit(idList.size() -1).getSortValues();
+                }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("结束了");
+        return true;
+    }
+
+    @Override
+    public Boolean goodsCache() {
+        GoodsSearchParams searchParams = new GoodsSearchParams();
+        searchParams.setAuthFlag(GoodsAuthEnum.PASS.name());
+        searchParams.setMarketEnable(GoodsStatusEnum.UPPER.name());
+
+        for (int i = 1; ; i++) {
+            try {
+                IPage<Goods> pagePage = new Page<>();
+                searchParams.setPageSize(1000);
+                searchParams.setPageNumber(i);
+                pagePage = goodsService.queryByParams(searchParams);
+
+                if (pagePage == null || CollUtil.isEmpty(pagePage.getRecords())) {
+                    break;
+                }
+                for (Goods goods : pagePage.getRecords()) {
+                    cache.remove(CachePrefix.GOODS.getPrefix() + goods.getId());
+                    goodsService.getGoodsVO(goods.getId());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        for (int i = 1; ; i++) {
+            try {
+                IPage<GoodsSkuDTO> skuIPage = new Page<>();
+                searchParams.setPageSize(1000);
+                searchParams.setPageNumber(i);
+                skuIPage = goodsSkuService.getGoodsSkuDTOByPage(PageUtil.initPage(searchParams),
+                        searchParams.queryWrapper());
+
+                if (skuIPage == null || CollUtil.isEmpty(skuIPage.getRecords())) {
+                    break;
+                }
+                for (GoodsSkuDTO goodsSkuDTO : skuIPage.getRecords()) {
+                    GoodsSku goodsSku = goodsSkuService.getById(goodsSkuDTO.getId());
+                    cache.put(GoodsSkuService.getCacheKeys(goodsSkuDTO.getId()), goodsSku,600L);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
     }
 
     @Override
@@ -492,6 +622,20 @@ public class EsGoodsIndexServiceImpl extends BaseElasticsearchService implements
             log.error("删除索引出现异常", e);
         }
 
+    }
+
+    /**
+     * 删除索引
+     *
+     * @param esDeleteDTO 删除索引参数
+     */
+    private void deleteIndex(EsDeleteDTO esDeleteDTO) {
+        if (esDeleteDTO.getIds() != null && !esDeleteDTO.getIds().isEmpty()) {
+            this.deleteIndexByIds(esDeleteDTO.getIds());
+        }
+        if (esDeleteDTO.getQueryFields() != null && esDeleteDTO.getQueryFields().size() > 0) {
+            this.deleteIndex(esDeleteDTO.getQueryFields());
+        }
     }
 
     /**

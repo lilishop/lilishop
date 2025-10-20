@@ -273,7 +273,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             goodsVO.setWholesaleList(wholesaleList);
         }
 
-        cache.put(CachePrefix.GOODS.getPrefix() + goodsId, goodsVO);
+        cache.put(CachePrefix.GOODS.getPrefix() + goodsId, goodsVO,7200L);
         return goodsVO;
     }
 

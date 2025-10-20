@@ -41,6 +41,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.*;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -95,6 +96,12 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
         searchQuery.setTrackTotalHits(true);
         log.debug("searchGoods DSL:{}", searchQuery.getQuery());
         SearchHits<EsGoodsIndex> search = restTemplate.search(searchQuery, EsGoodsIndex.class);
+        return SearchHitSupport.searchPageFor(search, searchQuery.getPageable());
+    }
+
+    @Override
+    public <T> SearchPage<T> searchGoods(Query searchQuery, Class<T> clazz) {
+        SearchHits<T> search = restTemplate.search(searchQuery, clazz);
         return SearchHitSupport.searchPageFor(search, searchQuery.getPageable());
     }
 
@@ -402,7 +409,8 @@ public class EsGoodsSearchServiceImpl implements EsGoodsSearchService {
      * @param pageVo    分页参数
      * @return es搜索builder
      */
-    private NativeSearchQueryBuilder createSearchQueryBuilder(EsGoodsSearchDTO searchDTO, PageVO pageVo) {
+    @Override
+    public NativeSearchQueryBuilder createSearchQueryBuilder(EsGoodsSearchDTO searchDTO, PageVO pageVo) {
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
         if (pageVo != null) {
             int pageNumber = pageVo.getPageNumber() - 1;
