@@ -87,6 +87,7 @@ public class PromotionServiceImpl implements PromotionService {
      * @param goodsSkuId 商品skuId
      * @return 当前促销活动集合
      */
+    @Override
     public Map<String, Object> getGoodsSkuPromotionMap(String storeId, String goodsSkuId) {
         String storeIds = storeId + "," + PromotionTools.PLATFORM_ID;
         List<PromotionGoods> promotionGoodsList = promotionGoodsService.findSkuValidPromotion(goodsSkuId, storeIds);
@@ -99,7 +100,7 @@ public class PromotionServiceImpl implements PromotionService {
         promotionGoodsService.deletePromotionGoodsByGoods(goodsIds);
         kanjiaActivityGoodsService.deleteByGoodsIds(goodsIds);
     }
-
+    @Override
     public Map<String, Object> wrapperPromotionMapList(List<PromotionGoods> promotionGoodsList) {
         Map<String, Object> promotionMap = new HashMap<>();
         for (PromotionGoods promotionGoods : promotionGoodsList) {

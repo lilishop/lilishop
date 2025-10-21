@@ -164,7 +164,8 @@ public class GlobalControllerExceptionHandler {
             if (!fieldErrors.isEmpty()) {
                 return ResultUtil.error(ResultCode.PARAMS_ERROR.code(),
                         fieldErrors.stream()
-                                .map(FieldError::getDefaultMessage) // 获取每个对象的名称字段
+                                // 获取每个对象的名称字段
+                                .map(FieldError::getDefaultMessage)
                                 .collect(Collectors.joining(", ")));
             }
             return ResultUtil.error(ResultCode.PARAMS_ERROR);
@@ -187,6 +188,7 @@ public class GlobalControllerExceptionHandler {
         ConstraintViolationException exception = (ConstraintViolationException) e;
         return ResultUtil.error(ResultCode.PARAMS_ERROR.code(), exception.getMessage());
     }
+
     /**
      * 拼接错误消息
      *

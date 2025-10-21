@@ -1,13 +1,10 @@
 package cn.lili.modules.payment.kit.plugin.alipay;
 
-import cn.hutool.core.net.URLDecoder;
-import cn.hutool.core.net.URLEncoder;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.properties.ApiProperties;
 import cn.lili.common.properties.DomainProperties;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.SnowFlake;
@@ -40,7 +37,6 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -90,13 +86,14 @@ public class AliPayPlugin implements Payment {
         payModel.setBody(cashierParam.getTitle());
         payModel.setSubject(cashierParam.getDetail());
         payModel.setTotalAmount(cashierParam.getPrice() + "");
-        //回传数据
-        payModel.setPassbackParams(URLEncoder.createAll().encode(BeanUtil.formatKeyValuePair(payParam), StandardCharsets.UTF_8));
         //3分钟超时
         payModel.setTimeoutExpress("3m");
         payModel.setOutTradeNo(outTradeNo);
         payModel.setProductCode("QUICK_WAP_PAY");
         try {
+            // Passback params moved into try to handle checked exception
+            payModel.setPassbackParams(java.net.URLEncoder.encode(BeanUtil.formatKeyValuePair(payParam), "UTF-8"));
+
             log.info("支付宝H5支付：{}", JSONUtil.toJsonStr(payModel));
             AliPayRequest.wapPay(response, payModel, callbackUrl(alipayPaymentSetting.getCallbackUrl(), PaymentMethodEnum.ALIPAY),
                     notifyUrl(alipayPaymentSetting.getCallbackUrl(), PaymentMethodEnum.ALIPAY));
@@ -130,8 +127,8 @@ public class AliPayPlugin implements Payment {
 
             //3分钟超时
             payModel.setTimeoutExpress("3m");
-            //回传数据
-            payModel.setPassbackParams(URLEncoder.createAll().encode(BeanUtil.formatKeyValuePair(payParam), StandardCharsets.UTF_8));
+            //回传数据（替换 Hutool 的 URLEncoder 为 JDK 的 java.net.URLEncoder）
+            payModel.setPassbackParams(java.net.URLEncoder.encode(BeanUtil.formatKeyValuePair(payParam), "UTF-8"));
             payModel.setOutTradeNo(outTradeNo);
             payModel.setProductCode("QUICK_MSECURITY_PAY");
 
@@ -164,8 +161,8 @@ public class AliPayPlugin implements Payment {
             payModel.setSubject(cashierParam.getDetail());
             payModel.setTotalAmount(cashierParam.getPrice() + "");
 
-            //回传数据
-            payModel.setPassbackParams(URLEncoder.createAll().encode(BeanUtil.formatKeyValuePair(payParam), StandardCharsets.UTF_8));
+            //回传数据（替换 Hutool 的 URLEncoder 为 JDK 的 java.net.URLEncoder）
+            payModel.setPassbackParams(java.net.URLEncoder.encode(BeanUtil.formatKeyValuePair(payParam), "UTF-8"));
             payModel.setTimeoutExpress("3m");
             payModel.setOutTradeNo(outTradeNo);
             log.info("支付宝扫码：{}", payModel);
@@ -314,7 +311,8 @@ public class AliPayPlugin implements Payment {
                 return;
             }
             String payParamStr = map.get("passback_params");
-            String payParamJson = URLDecoder.decode(payParamStr, StandardCharsets.UTF_8);
+            // java.net.URLDecoder.decode throws UnsupportedEncodingException, add catch below
+            String payParamJson = java.net.URLDecoder.decode(payParamStr, "UTF-8");
             PayParam payParam = BeanUtil.formatKeyValuePair(payParamJson, new PayParam());
 
 
@@ -331,6 +329,8 @@ public class AliPayPlugin implements Payment {
             }
         } catch (AlipayApiException e) {
             log.error("支付回调通知异常", e);
+        } catch (java.io.UnsupportedEncodingException e) {
+            log.error("URL 解码异常", e);
         }
 
     }

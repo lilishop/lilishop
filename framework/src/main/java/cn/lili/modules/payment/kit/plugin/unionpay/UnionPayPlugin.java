@@ -1,6 +1,5 @@
 package cn.lili.modules.payment.kit.plugin.unionpay;
 
-import cn.hutool.core.net.URLEncoder;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
@@ -67,7 +66,7 @@ public class UnionPayPlugin implements Payment {
             String ip = IpKit.getRealIp(request);
             //第三方付款订单
             String outOrderNo = SnowFlake.getIdStr();
-            String attach = URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
+            String attach = java.net.URLEncoder.encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8.name());
             Map<String, String> params = UnifiedOrderModel.builder()
                     .service(ServiceEnum.NATIVE.toString())
                     .mch_id(unionPaymentSetting.getUnionPayMachId())
@@ -94,12 +93,10 @@ public class UnionPayPlugin implements Payment {
     @Override
     public ResultMessage<Object> appPay(HttpServletRequest request, PayParam payParam) {
         try {
-
             CashierParam cashierParam = cashierSupport.cashierParam(payParam);
             UnionPaymentSetting unionPaymentSetting = this.unionPaymentSetting();
             String notifyUrl = unionPaymentSetting.getUnionPayDomain().concat("/unionPay/payNotify");
-            String attach = URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
-
+            String attach = java.net.URLEncoder.encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8.name());
             //用户ip
             String ip = IpKit.getRealIp(request);
             Map<String, String> params = UnifiedOrderModel.builder()
@@ -135,9 +132,7 @@ public class UnionPayPlugin implements Payment {
         } catch (Exception e) {
             log.error(e.getMessage());
             e.printStackTrace();
-
             return null;
-
         }
     }
 
@@ -147,10 +142,12 @@ public class UnionPayPlugin implements Payment {
         String buyerId="";
         CashierParam cashierParam = cashierSupport.cashierParam(payParam);
         UnionPaymentSetting unionPaymentSetting = this.unionPaymentSetting();
-        String attach = URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
+        // 将 attach 的编码移动到 try 内，避免方法外部的受检异常
+        // String attach = URLEncoder.createDefault().encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8);
         //用户ip
         String ip = IpKit.getRealIp(request);
         try {
+            String attach = java.net.URLEncoder.encode(JSONUtil.toJsonStr(payParam), StandardCharsets.UTF_8.name());
             if (StrUtil.isEmpty(buyerLogonId) && StrUtil.isEmpty(buyerId)) {
                  log.error("buyer_logon_id buyer_id 不能同时为空");
                 return null;

@@ -105,22 +105,22 @@ public class HuaweiSmsPlugin implements SmsPlugin {
     }
 
 
+    // 发送短信
     private void sendSms(String signName, String mobile, String param, String templateCode) throws Exception {
         //必填,请参考"开发准备"获取如下数据,替换为实际值
-        String url = "https://smsapi.cn-north-4.myhuaweicloud.com:443/sms/batchSendSms/v1"; //APP接入地址(在控制台"应用管理"页面获取)+接口访问URI
-        String appKey = smsSetting.getHuaweiAppKey(); //APP_Key
-        String appSecret = smsSetting.getHuaweiAppSecret(); //APP_Secret
-        String sender = smsSetting.getHuaweiSender(); //国内短信签名通道号或国际/港澳台短信通道号
-        String templateId = templateCode; //模板ID
+        //APP接入地址(在控制台"应用管理"页面获取)+接口访问URI
+        String url = "https://smsapi.cn-north-4.myhuaweicloud.com:443/sms/batchSendSms/v1";
+        String appKey = smsSetting.getHuaweiAppKey();
+        String appSecret = smsSetting.getHuaweiAppSecret();
+        String sender = smsSetting.getHuaweiSender();
 
-        //条件必填,国内短信关注,当templateId指定的模板类型为通用模板时生效且必填,必须是已审核通过的,与模板类型一致的签名名称
-        //国际/港澳台短信不用关注该参数
-        String signature = smsSetting.getHuaweiSignature(); //签名名称
+        // 模板ID
+        String templateId = templateCode;
 
-        //必填,全局号码格式(包含国家码),示例:+8615123456789,多个号码之间用英文逗号分隔
-        String receiver = mobile; //短信接收人号码
+        // 签名名称
+        String signature = smsSetting.getHuaweiSignature();
 
-        //选填,短信状态报告接收地址,推荐使用域名,为空或者不填表示不接收状态报告
+        String receiver = mobile;
         String statusCallBack = "";
 
         /**
@@ -130,7 +130,8 @@ public class HuaweiSmsPlugin implements SmsPlugin {
          * 模板中的每个变量都必须赋值，且取值不能为空
          * 查看更多模板和变量规范:产品介绍>模板和变量规范
          */
-        String templateParas = param; //模板变量，此处以单变量验证码短信为例，请客户自行生成6位验证码，并定义为字符串类型，以杜绝首位0丢失的问题（例如：002569变成了2569）。
+        //模板变量，此处以单变量验证码短信为例，请客户自行生成6位验证码，并定义为字符串类型，以杜绝首位0丢失的问题（例如：002569变成了2569）。
+        String templateParas = param;
 
         //请求Body,不携带签名名称时,signature请填null
         String body = buildRequestBody(sender, receiver, templateId, templateParas, statusCallBack, signature);
@@ -179,12 +180,14 @@ public class HuaweiSmsPlugin implements SmsPlugin {
 
             connection.connect();
             out = new OutputStreamWriter(connection.getOutputStream());
-            out.write(body); //发送请求Body参数
+
+            // 发送请求Body参数
+            out.write(body);
             out.flush();
             out.close();
 
             int status = connection.getResponseCode();
-            if (200 == status) { //200
+            if (200 == status) {
                 is = connection.getInputStream();
             } else { //400/401
                 is = connection.getErrorStream();
@@ -194,7 +197,9 @@ public class HuaweiSmsPlugin implements SmsPlugin {
             while ((line = in.readLine()) != null) {
                 result.append(line);
             }
-            System.out.println(result.toString()); //打印响应消息实体
+
+            // 打印响应消息实体
+            System.out.println(result.toString());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -275,8 +280,12 @@ public class HuaweiSmsPlugin implements SmsPlugin {
             return null;
         }
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        String time = sdf.format(new Date()); //Created
-        String nonce = UUID.randomUUID().toString().replace("-", ""); //Nonce
+
+        // Created
+        String time = sdf.format(new Date());
+
+        // Nonce
+        String nonce = UUID.randomUUID().toString().replace("-", "");
 
         MessageDigest md;
         byte[] passwordDigest = null;
@@ -289,8 +298,8 @@ public class HuaweiSmsPlugin implements SmsPlugin {
             e.printStackTrace();
         }
 
-        //如果JDK版本是1.8,请加载原生Base64类,并使用如下代码
-        String passwordDigestBase64Str = Base64.getEncoder().encodeToString(passwordDigest); //PasswordDigest
+        // PasswordDigest
+        String passwordDigestBase64Str = Base64.getEncoder().encodeToString(passwordDigest);
         //如果JDK版本低于1.8,请加载三方库提供Base64类,并使用如下代码
         //String passwordDigestBase64Str = Base64.encodeBase64String(passwordDigest); //PasswordDigest
         //若passwordDigestBase64Str中包含换行符,请执行如下代码进行修正
@@ -303,14 +312,15 @@ public class HuaweiSmsPlugin implements SmsPlugin {
     static void trustAllHttpsCertificates() throws Exception {
         TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
+                    @Override
                     public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
                         return;
                     }
-
+                    @Override
                     public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
                         return;
                     }
-
+                    @Override
                     public X509Certificate[] getAcceptedIssuers() {
                         return null;
                     }

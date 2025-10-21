@@ -27,6 +27,7 @@ public interface RegionService extends IService<Region> {
      * @return
      */
     @CacheEvict(allEntries = true)
+    @Override
     boolean updateById(Region region);
     /**
      * 更新地区
@@ -35,6 +36,7 @@ public interface RegionService extends IService<Region> {
      * @return
      */
     @CacheEvict(allEntries = true)
+    @Override
     boolean save(Region region);
 
 

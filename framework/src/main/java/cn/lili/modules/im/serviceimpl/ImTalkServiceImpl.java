@@ -46,7 +46,7 @@ public class ImTalkServiceImpl extends ServiceImpl<ImTalkMapper, ImTalk> impleme
 
     @Autowired
     private ImMessageService imMessageService;
-
+    @Override
     public ImTalk getTalkByUser(String userId) {
         LambdaQueryWrapper<ImTalk> queryWrapper = new LambdaQueryWrapper<>();
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());

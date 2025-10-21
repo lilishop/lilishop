@@ -6,6 +6,8 @@ import cn.lili.modules.search.entity.dos.EsGoodsRelatedInfo;
 import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.data.elasticsearch.core.SearchPage;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.Query;
 
 import java.util.List;
 
@@ -25,6 +27,16 @@ public interface EsGoodsSearchService {
      * @return 搜索结果
      */
     SearchPage<EsGoodsIndex> searchGoods(EsGoodsSearchDTO searchDTO, PageVO pageVo);
+
+    /**
+     * 搜索商品
+     *
+     * @param searchQuery 搜索条件
+     * @param clazz       搜索结果类
+     * @param <T>         泛型
+     * @return 搜索结果
+     */
+    <T> SearchPage<T> searchGoods(Query searchQuery, Class<T> clazz);
 
     /**
      * 商品搜索
@@ -59,4 +71,13 @@ public interface EsGoodsSearchService {
      * @return 商品索引
      */
     EsGoodsIndex getEsGoodsById(String id);
+
+    /**
+     * 创建搜索条件
+     *
+     * @param searchDTO 搜索参数
+     * @param pageVo    分页参数
+     * @return 搜索条件
+     */
+    NativeSearchQueryBuilder createSearchQueryBuilder(EsGoodsSearchDTO searchDTO, PageVO pageVo);
 }

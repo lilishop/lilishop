@@ -18,7 +18,6 @@
 -   **Gitee 仓库**: <https://gitee.com/beijing_hongye_huicheng/lilishop>
 -   **GitHub 仓库**: <https://github.com/lilishop/lilishop>
 
-> **聚合版**: 为简化部署，我们提供了API聚合版，仅需启动单个JAR包即可运行。详情请访问：[lilishop-simplify](https://gitee.com/beijing_hongye_huicheng/lilishop-simplify)
 
 ---
 
@@ -53,7 +52,7 @@
 
 #### 环境准备与部署
 详细的本地部署指南，请参考官方文档：
-[**部署文档 -> 环境准备**](https://docs.pickmall.cn/deploy/%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87.html)
+[**部署文档 -> 环境准备**](https://docs.pickmall.cn/deply/deply.html)
 
 #### 数据库初始化
 -   **推荐方式**: 使用项目提供的 `docker-compose` 配置，可自动完成数据库（MySQL, Redis, Elasticsearch等）的部署与初始化。
@@ -156,9 +155,11 @@
 
 ### 9. 社区与支持
 
-我们欢迎任何形式的交流与贡献。在提问前，请先查阅 [官方文档](https://docs.pickmall.cn/) 和 [常见问题](https://docs.pickmall.cn/faq/常见问题.html)，并参考 [《提问的智慧》](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md) 以便高效沟通。
+我们欢迎任何形式的交流与贡献。在提问前，请先查阅 [官方文档](https://docs.pickmall.cn/) ，并参考 [《提问的智慧》](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md) 以便高效沟通。
 
--   **微信交流群**:
+-   **[在线客服](https://work.weixin.qq.com/kfid/kfc4d8dc24a73c15f44)**
+-   **微信交流1群（已满）**
+-   **微信交流2群**:
     ![微信群](https://lilishop-wechat.oss-cn-beijing.aliyuncs.com/wechat.jpg)
 
 -   **社区贡献内容**:

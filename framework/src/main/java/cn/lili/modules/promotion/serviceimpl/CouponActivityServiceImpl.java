@@ -411,9 +411,12 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
         //判断优惠券的发送范围，获取会员列表
 
         List<String> ids = new ArrayList<>();
-        if (JSONUtil.isJsonArray(couponActivity.getActivityScopeInfo())) {
-            JSONArray array = JSONUtil.parseArray(couponActivity.getActivityScopeInfo());
+        String scopeInfo = couponActivity.getActivityScopeInfo();
+        try {
+            JSONArray array = JSONUtil.parseArray(scopeInfo);
             ids = array.toList(Map.class).stream().map(i -> i.get("id").toString()).collect(Collectors.toList());
+        } catch (Exception ignore) {
+            // 非数组或格式错误时忽略，保持 ids 为空列表
         }
         return memberService.listFieldsByMemberIds("id,nick_name", ids);
     }
