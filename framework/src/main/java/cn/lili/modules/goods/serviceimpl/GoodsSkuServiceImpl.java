@@ -724,8 +724,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             if (quantity <= 0) {
                 goodsIndexService.deleteIndexById(goodsSku.getId());
             }
-            //商品SKU库存为0并且商品sku状态为上架时更新商品库存
-            if (isFlag && CharSequenceUtil.equals(goodsSku.getMarketEnable(), GoodsStatusEnum.UPPER.name())) {
+            //库存从<=0恢复到>0并且商品状态为上架时重建商品索引
+            if (isFlag && quantity > 0 && CharSequenceUtil.equals(goodsSku.getMarketEnable(), GoodsStatusEnum.UPPER.name())) {
                 List<String> goodsIds = new ArrayList<>();
                 goodsIds.add(goodsSku.getGoodsId());
                 applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品", rocketmqCustomProperties.getGoodsTopic(),
@@ -739,6 +739,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     public void updateStock(String skuId, Integer quantity, String type) {
         GoodsSku goodsSku = getGoodsSkuByIdFromCache(skuId);
         if (goodsSku != null) {
+            //判断商品sku是否已经下架(修改商品库存为0时  会自动下架商品),再次更新商品库存时 需更新商品索引
+            boolean isFlag = goodsSku.getQuantity() <= 0;
 
             //计算修改库存
             if (type.equals(GoodsStockTypeEnum.ADD.name())) {
@@ -747,9 +749,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 quantity = Convert.toInt(NumberUtil.sub(goodsSku.getQuantity(), quantity));
             }
             goodsSku.setQuantity(quantity);
-
-            //判断商品sku是否已经下架(修改商品库存为0时  会自动下架商品),再次更新商品库存时 需更新商品索引
-            boolean isFlag = goodsSku.getQuantity() <= 0;
 
             boolean update = this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
             if (update) {
@@ -763,8 +762,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             if (quantity <= 0) {
                 goodsIndexService.deleteIndexById(goodsSku.getId());
             }
-            //商品SKU库存为0并且商品sku状态为上架时更新商品库存
-            if (isFlag && CharSequenceUtil.equals(goodsSku.getMarketEnable(), GoodsStatusEnum.UPPER.name())) {
+            //库存从<=0恢复到>0并且商品状态为上架时重建商品索引
+            if (isFlag && quantity > 0 && CharSequenceUtil.equals(goodsSku.getMarketEnable(), GoodsStatusEnum.UPPER.name())) {
                 List<String> goodsIds = new ArrayList<>();
                 goodsIds.add(goodsSku.getGoodsId());
                 applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品", rocketmqCustomProperties.getGoodsTopic(),
