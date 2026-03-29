@@ -37,7 +37,7 @@ public class PreventDuplicateSubmissionsInterceptor {
     @Before("@annotation(preventDuplicateSubmissions)")
     public void interceptor(PreventDuplicateSubmissions preventDuplicateSubmissions) {
 
-        try {
+        try {//极致的败笔实现
             String redisKey = getParams(preventDuplicateSubmissions.userIsolation());
             Long count = cache.incr(redisKey, preventDuplicateSubmissions.expire());
             log.debug("防重复提交：params-{},value-{}", redisKey, count);

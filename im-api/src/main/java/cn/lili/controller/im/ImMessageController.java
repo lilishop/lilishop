@@ -71,8 +71,8 @@ public class ImMessageController {
 
     @GetMapping(value = "/newMessage")
     @ApiOperation(value = "查看是否有新消息")
-    public ResultMessage<Boolean> hasNewMessage(String accessToken) {
-        return ResultUtil.data(imMessageService.hasNewMessage(accessToken));
+    public ResultMessage<Boolean> hasNewMessage() {
+        return ResultUtil.data(imMessageService.hasNewMessage());
     }
 
     @GetMapping(value = "/unreadMessage")

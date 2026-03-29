@@ -76,6 +76,12 @@ public class AuthUser implements Serializable {
      * 租户id
      */
     private String tenantId;
+    //用户accessToken
+    private String accessToken;
+
+    private String inviter;
+
+    private String uuid;
 
 
     public AuthUser(String username, String id, String nickName, String face, UserEnums role) {

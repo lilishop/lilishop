@@ -210,6 +210,23 @@ public class RedisCache implements Cache {
 
     @Override
     public Long incr(String key, long liveTime) {
+        /*
+        Spring 团队为了强行在分布式环境里模仿出 Java 本地 AtomicLong(initialValue) 的语义，在 RedisAtomicLong 的 initialize() 源码里，玩了这么一出：
+        只要你实例化这个对象，或者传了初始值，它底层就会调用 redisOperations.opsForValue().setIfAbsent(key, initialValue)。
+
+        也就是先发一条 SETNX 命令去试探/占坑：
+
+        如果坑不在，我就放个 0 进去。
+
+        然后等你调用 getAndIncrement() 的时候，再发一条 INCR 命令去加 1。
+
+        3. 为什么说它极具误导性？
+        这就是你觉得它“非常具有误导性”的核心原因！
+        原本 Redis 一次 INCR 网络请求就能完美搞定的原子操作，硬生生被这个包装类拆成了：
+        SETNX (初始化)  ->  INCR (加一)  ->  EXPIRE (你自己写的超时)
+
+        这不仅白白浪费了多次网络 RTT（往返时间），最致命的是：这三个指令是分开发送的，完全丧失了原子性！ 只要在 SETNX 和 EXPIRE 之间服务器发生哪怕一毫秒的宕机或网络抖动，你的这个 Key 就会变成一个永远存在的“幽灵死 Key”。
+         */
         RedisAtomicLong entityIdCounter = new RedisAtomicLong(key, redisTemplate.getConnectionFactory());
         Long increment = entityIdCounter.getAndIncrement();
         //初始设置过期时间

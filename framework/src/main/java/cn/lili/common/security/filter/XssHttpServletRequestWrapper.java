@@ -216,6 +216,40 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             //将json字符串转换为字节
             final ByteArrayInputStream bis = new ByteArrayInputStream(body.toString().getBytes());
             //实现接口
+
+            /*
+            这俩方法到底是干嘛的？（Servlet 3.1 的宏伟蓝图）
+            在早期的 Java EE（Servlet 3.0 之前）里，读取输入流只有那个最经典的 read() 方法。这种读取是**阻塞式（Blocking I/O）**的，数据没来，线程就死等。
+
+            但是到了 Servlet 3.1，官方为了支持非阻塞 I/O (NIO)，在 ServletInputStream 这个抽象类里强行塞进了三个新方法：
+
+            isFinished()：数据读完了吗？
+
+            isReady()：现在可以无阻塞地读数据了吗？
+
+            setReadListener(...)：注册一个监听器，等有数据了叫我。
+
+            这套机制的设计初衷是非常牛逼的，它是为了让 Tomcat 这种容器能在高并发下更高效地复用线程。
+
+            🤦‍♂️ 2. 为什么大家都无脑 return false？（工程师的极致敷衍）
+            理想很丰满，现实极其骨感！大厂的开源作者们为什么在这里如此“敷衍”？
+
+            第一点：Spring MVC 根本不用它！
+            咱们平时写的 @RestController + @RequestBody，底层走的是 Spring 的 HttpMessageConverter（比如 Jackson）。而 Spring MVC 默认就是同步阻塞模型！Jackson 在解析 JSON 的时候，它是直接去调那个老掉牙的 read() 方法，直到读出 -1 为止。它从头到尾根本就不会去调用 isFinished() 和 isReady()！
+
+            第二点：完美实现它的成本极高！
+            既然你的框架不调，但我继承了 ServletInputStream 这个类，编译器（IDEA）又拿刀架在我脖子上，逼着我必须 Override 这三个抽象方法。
+            写开源大佬心想：“既然这玩意儿在同步框架里永远不被调用，那我随便写个 return false 糊弄一下编译器就行了呗！”（其实严谨一点，isFinished 应该写 bis.available() == 0，isReady 应该写 true。但因为反正没人调，所以大家索性全填 false 摆烂了 😂）。
+
+            💣 3. 架构师的 X 光：这种“敷衍”会埋下什么雷？
+            老哥，既然是架构推演，大刀必须砍到底！
+            这种无脑 return false 的 Filter 代码，在传统的 Spring Boot（Spring WebMVC）里跑得极其欢快，稳如老狗。
+
+            但是！一旦系统架构升级，灾难就会降临！
+            如果你把这段代码原封不动地搬到了 Spring WebFlux（全异步响应式编程） 或者启用了 Servlet 3.1 纯异步处理的网关项目里。
+            底层框架真的会去调用 isReady()，结果得到一个 false，框架就会认为：“哦，流还没准备好，那我挂起线程等一会。”
+            结果：你的请求直接死锁（Hang 住），彻底超时，整个系统当场崩溃！
+             */
             return new ServletInputStream() {
                 @Override
                 public boolean isFinished() {
@@ -258,7 +292,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private String cleanXSS(String value) {
         if (value != null) {
-            // 自定义策略
+            // 自定义策略 HtmlPolicyBuilder 是目前业界公认最强的白名单 XSS 过滤组件
             PolicyFactory policy = new HtmlPolicyBuilder()
                     .allowStandardUrlProtocols()
                     //所有允许的标签

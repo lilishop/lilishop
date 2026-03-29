@@ -60,9 +60,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-/**
+/** 继承 ServiceImpl 的原因
  * 会员接口业务层实现
- *
+ * 白嫖几十个 CRUD 方法
+ * 如果在传统的 MyBatis 时代，即使你要根据 ID 查一个会员，或者更新一个会员的名字，你都得在 Service 里写一遍，再去 Mapper 里写一遍，甚至还要去 XML 里写一段 <select> 或 <update>。
+ * 但在 MyBatis-Plus 里，只要你的类写了这行代码：
+ * extends ServiceImpl<MemberMapper, Member>
  * @author Chopper
  * @since 2021-03-29 14:10:16
  */
@@ -98,6 +101,23 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
 
+
+/*
+    当业务代码里执行了一句 publisher.publishEvent(new TransactionCommitSendMQEvent(...)) 时，Spring 底层到底发生了什么？
+
+    第一步：大喇叭广播（Publish）
+    业务类调用发布方法。此时，事件对象被直接塞进了 Spring 的核心上下文（ApplicationContext）中。
+
+    第二步：幕后黑手路由（Multicaster 核心分发）
+    Spring 容器里藏着一个极其低调但极其核心的组件，叫 ApplicationEventMulticaster（事件多播器）。它就像总机接线员，收到事件后，它会去内存的缓存字典里查：“全应用有谁订阅了 TransactionCommitSendMQEvent 这个类？”
+
+    第三步：精准打击（Listener Execution）
+    多播器找到对应的监听器类后，利用 Java 的反射机制，直接调用那个被 @EventListener 标注的方法，把这封“信”（Event 对象）作为参数传进去。
+
+    💣 致命细节（同步 vs 异步）：
+    默认情况下，Spring Event 是绝对同步的！也就是说，发布事件的线程，会一直等所有的监听器把代码执行完，才会继续往下走。如果监听器里写了个 Thread.sleep(10000)，你的主业务直接卡死 10 秒！
+    (如果想异步，必须在监听器上加 @Async 注解，让它扔到线程池里去跑。)
+ */
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
     /**
@@ -703,7 +723,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public void logout(UserEnums userEnums) {
         String currentUserToken = UserContext.getCurrentUserToken();
 
-        AuthUser authUser = UserContext.getAuthUser(currentUserToken);
+        AuthUser authUser = UserContext.getAuthUser();
 
         if (CharSequenceUtil.isNotEmpty(currentUserToken)) {
             cache.remove(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums, authUser.getId()) + currentUserToken);

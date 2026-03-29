@@ -17,34 +17,29 @@ public interface ImMessageService extends IService<ImMessage> {
      * 阅读消息
      *
      * @param talkId 对话Id
-     * @param accessToken 验证token
      */
-    void read(String talkId, String accessToken);
+    void read(String talkId);
 
     /**
      * 未读消息列表
      *
-     * @param accessToken 验证token
      * @return 未读消息列表
      */
-    List<ImMessage> unReadMessages(String accessToken);
+    List<ImMessage> unReadMessages();
 
     /**
      * 历史消息
      *
-     * @param accessToken 验证token
      * @param to 接收人
      *
      * @return 历史消息列表
      */
-    List<ImMessage> historyMessage(String accessToken, String to);
+    List<ImMessage> historyMessage(String to);
 
     /**
      * 是否有新消息
-     * @param accessToken 验证token
-     * @return
      */
-    Boolean hasNewMessage(String accessToken);
+    Boolean hasNewMessage();
 
     /**
      * 分页获取消息列表

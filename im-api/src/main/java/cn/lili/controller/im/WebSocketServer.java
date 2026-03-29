@@ -32,10 +32,18 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * @author liushuai
+ * 前端伪装术（Sec-WebSocket-Protocol）
+ * 让前端绝对不要再把 Token 拼在 URL 后面裸奔了！
+ * 标准的前端 WebSocket API 虽然不能自定义 Header，但它支持**“子协议（SubProtocol）”**！
+ * 前端这么写：
+ * JavaScript
+ * // 前端大神的骚操作：把 Token 伪装成子协议传过来！
+ * const token = "eyJhbGciOiJIUzI1Ni...真实Token...";
+ * const ws = new WebSocket("ws://localhost:8080/lili/webSocket", [token]);
+ * 这样，Token 就会被包装在 HTTP 请求头的 Sec-WebSocket-Protocol 字段里，安全且符合标准！
  */
 @Component
-@ServerEndpoint(value = "/lili/webSocket/{accessToken}", configurator = CustomSpringConfigurator.class)
+@ServerEndpoint(value = "/lili/webSocket", configurator = CustomSpringConfigurator.class)
 @Scope("prototype")
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -81,8 +89,8 @@ public class WebSocketServer {
      * 关闭连接
      */
     @OnClose
-    public void onClose(@PathParam("accessToken") String accessToken) {
-        AuthUser authUser = UserContext.getAuthUser(accessToken);
+    public void onClose() {
+        AuthUser authUser = UserContext.getAuthUser();
         log.info("用户断开断开连接:{}", JSONUtil.toJsonStr(authUser));
         sessionPools.remove(authUser);
     }
@@ -90,25 +98,39 @@ public class WebSocketServer {
     /**
      * 发送消息
      *
-     * @param msg
+     * @param message
      * @throws IOException
      */
     @OnMessage
-    public void onMessage(@PathParam("accessToken") String accessToken, String msg) {
-        log.info("发送消息：{}", msg);
-        MessageOperation messageOperation = JSON.parseObject(msg, MessageOperation.class);
-        operation(accessToken, messageOperation);
+    public void onMessage(String message, Session session) {
+        // 1. 从当前 WebSocket 会话中取出握手时存入的用户信息
+        AuthUser user = (AuthUser) session.getUserProperties().get("CURRENT_USER");
+        log.info("发送消息：{}", message);
+        try {
+            // 2. 👑 移花接木：把用户信息强行注入当前线程的 UserContext！
+            UserContext.set(user);
+
+            MessageOperation messageOperation = JSON.parseObject(message, MessageOperation.class);
+            operation(messageOperation);
+            // 3. 愉快地调用你的 Service 吧！
+            // 此时无论底层的 Service 怎么调用 UserContext.getCurrentUser()，都能完美拿到！
+            // memberService.doSomething();
+            log.info("用户 [{}] 发来了消息: {}", UserContext.getCurrentUserId(), message);
+
+        } finally {
+            // 4. 🧹 架构师的底线：不管发生什么，执行完必须清空当前线程的上下文！
+            UserContext.clear();
+        }
     }
 
     /**
      * IM操作
      *
-     * @param accessToken
      * @param messageOperation
      */
-    private void operation(String accessToken, MessageOperation messageOperation) {
+    private void operation(MessageOperation messageOperation) {
 
-        AuthUser authUser = UserContext.getAuthUser(accessToken);
+        AuthUser authUser = UserContext.getAuthUser();
         switch (messageOperation.getOperationType()) {
             case PING:
                 break;
@@ -126,16 +148,16 @@ public class WebSocketServer {
                 break;
             case READ:
                 if (!StringUtils.isEmpty(messageOperation.getContext())) {
-                    imMessageService.read(messageOperation.getTalkId(), accessToken);
+                    imMessageService.read(messageOperation.getTalkId());
                 }
                 break;
             case UNREAD:
                 sendMessage(authUser.getId(),
-                    new MessageVO(MessageResultType.UN_READ, imMessageService.unReadMessages(accessToken)));
+                    new MessageVO(MessageResultType.UN_READ, imMessageService.unReadMessages()));
                 break;
             case HISTORY:
                 sendMessage(authUser.getId(), new MessageVO(MessageResultType.HISTORY,
-                    imMessageService.historyMessage(accessToken, messageOperation.getTo())));
+                    imMessageService.historyMessage(messageOperation.getTo())));
                 break;
             default:
                 break;

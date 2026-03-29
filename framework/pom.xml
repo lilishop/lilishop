@@ -464,6 +464,13 @@
             <artifactId>wechatpay-java</artifactId>
             <version>0.2.15</version>
         </dependency>
+        <!-- Source: https://mvnrepository.com/artifact/com.alibaba/transmittable-thread-local -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>transmittable-thread-local</artifactId>
+            <version>${transmittable-thread-local.version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 
