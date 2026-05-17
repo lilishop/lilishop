@@ -45,8 +45,17 @@ Docker Ecommerce Deployment
 
 - Website: https://pickmall.cn
 - Documentation: https://docs.pickmall.cn
-- GitHub: https://github.com/lilishop/lilishop
-- Gitee: https://gitee.com/beijing_hongye_huicheng/lilishop
+
+## Project Repositories
+
+Lilishop is split across 4 sibling repositories, mirrored on both GitHub and Gitee:
+
+| Repository | Purpose | GitHub | Gitee |
+| :--- | :--- | :--- | :--- |
+| **lilishop** | Backend services (Spring Boot / Java 21) | [github.com/lilishop/lilishop](https://github.com/lilishop/lilishop) | [gitee.com/beijing_hongye_huicheng/lilishop](https://gitee.com/beijing_hongye_huicheng/lilishop) |
+| **lilishop-ui** | PC web frontends (admin / seller / buyer / IM) | [github.com/lilishop/lilishop-ui](https://github.com/lilishop/lilishop-ui) | [gitee.com/beijing_hongye_huicheng/lilishop-ui](https://gitee.com/beijing_hongye_huicheng/lilishop-ui) |
+| **lilishop-uniapp** | Buyer mobile client (H5 / Mini Program / App) | [github.com/lilishop/lilishop-uniapp](https://github.com/lilishop/lilishop-uniapp) | [gitee.com/beijing_hongye_huicheng/lilishop-uniapp](https://gitee.com/beijing_hongye_huicheng/lilishop-uniapp) |
+| **docker** | Infrastructure docker-compose configs | [github.com/lilishop/docker](https://github.com/lilishop/docker) | [gitee.com/beijing_hongye_huicheng/docker](https://gitee.com/beijing_hongye_huicheng/docker) |
 
 ---
 

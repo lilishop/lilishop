@@ -39,8 +39,17 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 
 -   **官方网站**: <https://pickmall.cn>
 -   **官方文档**: <https://docs.pickmall.cn>
--   **Gitee 仓库**: <https://gitee.com/beijing_hongye_huicheng/lilishop>
--   **GitHub 仓库**: <https://github.com/lilishop/lilishop>
+
+#### 项目仓库
+
+Lilishop 由 4 个独立仓库组成，均同步托管于 GitHub 与 Gitee：
+
+| 仓库 | 说明 | GitHub | Gitee |
+| :--- | :--- | :--- | :--- |
+| **lilishop** | 后端服务（Spring Boot / Java 21） | [github.com/lilishop/lilishop](https://github.com/lilishop/lilishop) | [gitee.com/beijing_hongye_huicheng/lilishop](https://gitee.com/beijing_hongye_huicheng/lilishop) |
+| **lilishop-ui** | PC 端 Web 前端（管理端 / 商家端 / 买家端 / IM） | [github.com/lilishop/lilishop-ui](https://github.com/lilishop/lilishop-ui) | [gitee.com/beijing_hongye_huicheng/lilishop-ui](https://gitee.com/beijing_hongye_huicheng/lilishop-ui) |
+| **lilishop-uniapp** | 买家端移动应用（H5 / 小程序 / APP） | [github.com/lilishop/lilishop-uniapp](https://github.com/lilishop/lilishop-uniapp) | [gitee.com/beijing_hongye_huicheng/lilishop-uniapp](https://gitee.com/beijing_hongye_huicheng/lilishop-uniapp) |
+| **docker** | 基础设施 docker-compose 配置 | [github.com/lilishop/docker](https://github.com/lilishop/docker) | [gitee.com/beijing_hongye_huicheng/docker](https://gitee.com/beijing_hongye_huicheng/docker) |
 
 
 ---
