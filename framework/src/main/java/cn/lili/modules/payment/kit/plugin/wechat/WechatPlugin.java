@@ -40,10 +40,21 @@ import cn.lili.modules.wallet.entity.dto.TransferResultDTO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.core.RSAPublicKeyConfig;
+import com.wechat.pay.java.core.cipher.PrivacyEncryptor;
 import com.wechat.pay.java.core.exception.ValidationException;
+import com.wechat.pay.java.core.http.Constant;
+import com.wechat.pay.java.core.http.DefaultHttpClientBuilder;
+import com.wechat.pay.java.core.http.HttpClient;
+import com.wechat.pay.java.core.http.HttpHeaders;
+import com.wechat.pay.java.core.http.HttpMethod;
+import com.wechat.pay.java.core.http.HttpRequest;
+import com.wechat.pay.java.core.http.HttpResponse;
+import com.wechat.pay.java.core.http.JsonRequestBody;
+import com.wechat.pay.java.core.http.MediaType;
 import com.wechat.pay.java.core.notification.NotificationConfig;
 import com.wechat.pay.java.core.notification.NotificationParser;
 import com.wechat.pay.java.core.notification.RequestParam;
@@ -61,10 +72,6 @@ import com.wechat.pay.java.service.refund.RefundService;
 import com.wechat.pay.java.service.refund.model.AmountReq;
 import com.wechat.pay.java.service.refund.model.CreateRequest;
 import com.wechat.pay.java.service.refund.model.Refund;
-import com.wechat.pay.java.service.transferbatch.TransferBatchService;
-import com.wechat.pay.java.service.transferbatch.model.InitiateBatchTransferRequest;
-import com.wechat.pay.java.service.transferbatch.model.InitiateBatchTransferResponse;
-import com.wechat.pay.java.service.transferbatch.model.TransferDetailInput;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -73,6 +80,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -85,7 +93,6 @@ import java.util.Map;
 @Slf4j
 @Component
 public class WechatPlugin implements Payment {
-
     /**
      * 收银台
      */
@@ -476,9 +483,24 @@ public class WechatPlugin implements Payment {
             //获取用户OPENID
             WechatConnectSetting wechatConnectSetting = new Gson().fromJson(settingService.get(SettingEnum.WECHAT_CONNECT.name()).getSettingValue()
                     , WechatConnectSetting.class);
-            String source = resolveWechatOpenIdUnionType(withdrawalSetting, wechatConnectSetting);
-            if (StringUtils.isEmpty(source)) {
-                return TransferResultDTO.builder().result(false).response("微信提现配置缺失：无法识别 openId 渠道").build();
+            String source = "";
+            for (WechatConnectSettingItem wechatConnectSettingItem : wechatConnectSetting.getWechatConnectSettingItems()) {
+                if (wechatConnectSettingItem.getAppId().equals(withdrawalSetting.getWechatAppId())) {
+                    switch (wechatConnectSettingItem.getClientType()) {
+                        case "PC":
+                            source = SourceEnum.WECHAT_PC_OPEN_ID.name();
+                            break;
+                        case "H5":
+                            source = SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name();
+                            break;
+                        case "MP":
+                            source = SourceEnum.WECHAT_MP_OPEN_ID.name();
+                            break;
+                        case "APP":
+                            source = SourceEnum.WECHAT_APP_OPEN_ID.name();
+                            break;
+                    }
+                }
             }
 
 
@@ -499,46 +521,43 @@ public class WechatPlugin implements Payment {
             } else {
                 config = this.getPublicKeyConfig(setting);
             }
-            // 构建service
-            TransferBatchService service = new TransferBatchService.Builder().config(config).build();
 
-            InitiateBatchTransferRequest request = new InitiateBatchTransferRequest();
+            MerchantTransferWithAuthorizationRequest request = new MerchantTransferWithAuthorizationRequest();
             request.setAppid(withdrawalSetting.getWechatAppId());
-            String outBatchNo = SnowFlake.createStr("T");
-            request.setOutBatchNo(outBatchNo);
-            request.setBatchName("用户提现");
-            request.setBatchRemark("用户提现");
+            request.setOutBillNo(SnowFlake.createStr("T"));
+            request.setTransferSceneId("1000");
+            request.setTransferRemark("用户提现");
             Long amountFen = CurrencyUtil.getFenLong(memberWithdrawApply.getApplyMoney());
             if (amountFen == null || amountFen <= 0) {
                 return TransferResultDTO.builder().result(false).response("提现金额异常").build();
             }
-            request.setTotalAmount(amountFen);
-            request.setTotalNum(1);
-            request.setTransferSceneId("1000");
+            request.setTransferAmount(amountFen);
+            request.setOpenid(connect.getUnionId());
+            request.setTransferSceneReportInfos(buildWithdrawTransferSceneReportInfos());
 
-            List<TransferDetailInput> transferDetailListList = new ArrayList<>();
-            {
-                TransferDetailInput transferDetailInput = new TransferDetailInput();
-                transferDetailInput.setOutDetailNo(SnowFlake.createStr("TD"));
-                transferDetailInput.setTransferAmount(amountFen);
-                transferDetailInput.setTransferRemark("用户提现");
-                transferDetailInput.setOpenid(connect.getUnionId());
-                if (amountFen >= 200000 && StringUtils.isEmpty(memberWithdrawApply.getRealName())) {
-                    return TransferResultDTO.builder().result(false).response("微信提现金额>=2000元需填写真实姓名").build();
-                }
-                if (amountFen >= 30 && !StringUtils.isEmpty(memberWithdrawApply.getRealName())) {
-                    transferDetailInput.setUserName(memberWithdrawApply.getRealName());
-                }
-                transferDetailListList.add(transferDetailInput);
+            UserRecvStyle userRecvStyle=new UserRecvStyle();
+            userRecvStyle.setType("CONFIRM_PAGE");
+            request.setUserRecvStyle(userRecvStyle);
+            MerchantTransferWithAuthorizationResult transferResult = createMerchantTransferWithAuthorization(config, request);
+            MerchantTransferWithAuthorizationResponse response = transferResult.getResponse();
+            log.error("微信提现响应 outBillNo={}, statusCode={}, response={}", request.outBillNo, transferResult.getStatusCode(), response);
+
+            if (transferResult.getStatusCode() == 200
+                    && response != null
+                    && "WAIT_USER_CONFIRM".equals(response.getState())) {
+                return TransferResultDTO.builder()
+                        .result(true)
+                        .response("")
+                        .outBillNo(request.getOutBillNo())
+                        .wechatPackage(response.getPackageInfo())
+                        .build();
             }
-            request.setTransferDetailList(transferDetailListList);
-
-            // 调用下单方法，得到应答
-            InitiateBatchTransferResponse response = service.initiateBatchTransfer(request);
-            log.info("微信提现响应 outBatchNo={}, response={}", outBatchNo, response);
 
 
-            boolean accepted = response != null && !StringUtils.isEmpty(response.getBatchId());
+            boolean accepted = response != null
+                    && !StringUtils.isEmpty(response.getTransferBillNo())
+                    && !"FAIL".equals(response.getState())
+                    && !"CANCELLED".equals(response.getState());
             return TransferResultDTO.builder().result(accepted).response(accepted ? null : JSONUtil.toJsonStr(response)).build();
             //根据自身业务进行接下来的任务处理
         } catch (Exception e) {
@@ -548,47 +567,38 @@ public class WechatPlugin implements Payment {
 
     }
 
-    private String resolveWechatOpenIdUnionType(WithdrawalSetting withdrawalSetting, WechatConnectSetting wechatConnectSetting) {
-        if (withdrawalSetting != null && !StringUtils.isEmpty(withdrawalSetting.getWechatAppIdSource())) {
-            String wechatAppIdSource = withdrawalSetting.getWechatAppIdSource();
-            switch (wechatAppIdSource) {
-                case "PC":
-                    return SourceEnum.WECHAT_PC_OPEN_ID.name();
-                case "H5":
-                    return SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name();
-                case "MP":
-                    return SourceEnum.WECHAT_MP_OPEN_ID.name();
-                case "APP":
-                    return SourceEnum.WECHAT_APP_OPEN_ID.name();
-                default:
-                    return "";
-            }
-        }
-        if (wechatConnectSetting == null || wechatConnectSetting.getWechatConnectSettingItems() == null) {
-            return "";
-        }
-        for (WechatConnectSettingItem wechatConnectSettingItem : wechatConnectSetting.getWechatConnectSettingItems()) {
-            if (wechatConnectSettingItem == null) {
-                continue;
-            }
-            if (!withdrawalSetting.getWechatAppId().equals(wechatConnectSettingItem.getAppId())) {
-                continue;
-            }
-            String clientType = wechatConnectSettingItem.getClientType();
-            switch (clientType) {
-                case "PC":
-                    return SourceEnum.WECHAT_PC_OPEN_ID.name();
-                case "H5":
-                    return SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name();
-                case "MP":
-                    return SourceEnum.WECHAT_MP_OPEN_ID.name();
-                case "APP":
-                    return SourceEnum.WECHAT_APP_OPEN_ID.name();
-                default:
-                    return "";
-            }
-        }
-        return "";
+    private List<TransferSceneReportInfo> buildWithdrawTransferSceneReportInfos() {
+        List<TransferSceneReportInfo> reportInfos = new ArrayList<>();
+        TransferSceneReportInfo reportInfo = new TransferSceneReportInfo();
+        reportInfo.setInfoType("活动名称");
+        reportInfo.setInfoContent("新会员有礼");
+        reportInfos.add(reportInfo);
+        TransferSceneReportInfo reportInfo1 = new TransferSceneReportInfo();
+        reportInfo1.setInfoType("奖励说明");
+        reportInfo1.setInfoContent("奖励");
+        reportInfos.add(reportInfo1);
+        return reportInfos;
+    }
+
+    private MerchantTransferWithAuthorizationResult createMerchantTransferWithAuthorization(Config config,
+                                                                                            MerchantTransferWithAuthorizationRequest request) {
+        HttpClient httpClient = new DefaultHttpClientBuilder().config(config).build();
+        PrivacyEncryptor encryptor = config.createEncryptor();
+        HttpHeaders headers = new HttpHeaders();
+        headers.addHeader(Constant.ACCEPT, MediaType.APPLICATION_JSON.getValue());
+        headers.addHeader(Constant.CONTENT_TYPE, MediaType.APPLICATION_JSON.getValue());
+        headers.addHeader(Constant.WECHAT_PAY_SERIAL, encryptor.getWechatpaySerial());
+        HttpRequest httpRequest = new HttpRequest.Builder()
+                .httpMethod(HttpMethod.POST)
+                .url("https://api.mch.weixin.qq.com/v3/fund-app/mch-transfer/transfer-bills")
+                .headers(headers)
+                .body(new JsonRequestBody.Builder().body(new Gson().toJson(request)).build())
+                .build();
+        HttpResponse<MerchantTransferWithAuthorizationResponse> response = httpClient.execute(
+                httpRequest,
+                MerchantTransferWithAuthorizationResponse.class
+        );
+        return new MerchantTransferWithAuthorizationResult(200, response.getServiceResponse());
     }
 
     /**
@@ -808,5 +818,67 @@ public class WechatPlugin implements Payment {
                     .eq(Order::getTradeSn, payParam.getSn())
                     .set(Order::getPayOrderNo, outOrderNo));
         }
+    }
+
+    @lombok.Data
+    private static class MerchantTransferWithAuthorizationRequest {
+        @SerializedName("appid")
+        private String appid;
+        @SerializedName("out_bill_no")
+        private String outBillNo;
+        @SerializedName("transfer_scene_id")
+        private String transferSceneId;
+        @SerializedName("openid")
+        private String openid;
+        @SerializedName("user_name")
+        private String userName;
+        @SerializedName("transfer_amount")
+        private Long transferAmount;
+        @SerializedName("transfer_remark")
+        private String transferRemark;
+        @SerializedName("user_recv_perception")
+        private String userRecvPerception;
+        @SerializedName("transfer_scene_report_infos")
+        private List<TransferSceneReportInfo> transferSceneReportInfos;
+        @SerializedName("user_recv_style")
+        private UserRecvStyle userRecvStyle;
+    }
+    @lombok.Data
+    private static class UserRecvStyle {
+        @SerializedName("type")
+        private String type;
+    }
+
+    @lombok.Data
+    private static class TransferSceneReportInfo {
+        @SerializedName("info_type")
+        private String infoType;
+        @SerializedName("info_content")
+        private String infoContent;
+    }
+
+    @lombok.AllArgsConstructor
+    @lombok.Data
+    private static class MerchantTransferWithAuthorizationResult {
+        private Integer statusCode;
+        private MerchantTransferWithAuthorizationResponse response;
+    }
+
+    @lombok.Data
+    private static class MerchantTransferWithAuthorizationResponse {
+        @SerializedName("out_bill_no")
+        private String outBillNo;
+        @SerializedName("transfer_bill_no")
+        private String transferBillNo;
+        @SerializedName("create_time")
+        private String createTime;
+        @SerializedName("state")
+        private String state;
+        @SerializedName("package_info")
+        private String packageInfo;
+        @SerializedName("user_display_name")
+        private String userDisplayName;
+        @SerializedName("out_authorization_no")
+        private String outAuthorizationNo;
     }
 }

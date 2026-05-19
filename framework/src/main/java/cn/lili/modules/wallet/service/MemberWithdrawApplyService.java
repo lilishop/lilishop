@@ -4,6 +4,7 @@ package cn.lili.modules.wallet.service;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
 import cn.lili.modules.wallet.entity.vo.MemberWithdrawApplyQueryVO;
+import cn.lili.modules.wallet.entity.vo.WechatTransferInfoVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -34,4 +35,12 @@ public interface MemberWithdrawApplyService extends IService<MemberWithdrawApply
      */
     IPage<MemberWithdrawApply> getMemberWithdrawPage(PageVO pageVO, MemberWithdrawApplyQueryVO memberWithdrawApplyQueryVO);
 
+
+    /**
+     * 查询微信转账信息
+     *
+     * @param id 申请提现ID
+     * @return 微信转账信息
+     */
+    WechatTransferInfoVO getWechatTransferInfo(String id);
 }

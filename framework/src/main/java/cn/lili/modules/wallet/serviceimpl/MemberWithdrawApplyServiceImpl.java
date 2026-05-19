@@ -1,16 +1,23 @@
 package cn.lili.modules.wallet.serviceimpl;
 
 
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.WithdrawalSetting;
+import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
+import cn.lili.modules.system.entity.enums.SettingEnum;
+import cn.lili.modules.system.service.SettingService;
 import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
 import cn.lili.modules.wallet.entity.dto.MemberWithdrawalMessage;
 import cn.lili.modules.wallet.entity.enums.WithdrawStatusEnum;
 import cn.lili.modules.wallet.entity.vo.MemberWalletVO;
 import cn.lili.modules.wallet.entity.vo.MemberWithdrawApplyQueryVO;
+import cn.lili.modules.wallet.entity.vo.WechatTransferInfoVO;
 import cn.lili.modules.wallet.mapper.MemberWithdrawApplyMapper;
 import cn.lili.modules.wallet.service.MemberWalletService;
 import cn.lili.modules.wallet.service.MemberWithdrawApplyService;
@@ -20,6 +27,7 @@ import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.gson.Gson;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -42,6 +50,8 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
     private RocketMQTemplate rocketMQTemplate;
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
+    @Autowired
+    private SettingService settingService;
 
     /**
      * 客户余额
@@ -110,5 +120,18 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
         queryWrapper.orderByDesc("create_time");
         //查询返回数据
         return this.baseMapper.selectPage(PageUtil.initPage(pageVO), queryWrapper);
+    }
+
+    @Override
+    public WechatTransferInfoVO getWechatTransferInfo(String id) {
+        WechatTransferInfoVO wechatTransferInfoVO=new WechatTransferInfoVO();
+        WithdrawalSetting withdrawalSetting = new Gson().fromJson(settingService.get(SettingEnum.WITHDRAWAL_SETTING.name()).getSettingValue(),
+                WithdrawalSetting.class);
+        Setting systemSetting = settingService.get(SettingEnum.WECHAT_PAYMENT.name());
+        WechatPaymentSetting wechatPaymentSetting = JSONUtil.toBean(systemSetting.getSettingValue(), WechatPaymentSetting.class);
+        wechatTransferInfoVO.setAppId(withdrawalSetting.getWechatAppId());
+        wechatTransferInfoVO.setMchId(wechatPaymentSetting.getMchId());
+        wechatTransferInfoVO.setWechatPackage(this.getById(id).getWechatPackage());
+        return wechatTransferInfoVO;
     }
 }

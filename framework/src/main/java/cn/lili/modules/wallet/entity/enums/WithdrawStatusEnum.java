@@ -29,6 +29,11 @@ public enum WithdrawStatusEnum {
      * 审核未通过
      */
     D_FAIL_AUDITING("分销提现审核未通过"),
+
+    /**
+     * 等待用户确认
+     */
+    WAIT_USER_CONFIRM("等待用户确认"),
     /**
      * 提现成功
      */
