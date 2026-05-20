@@ -43,4 +43,10 @@ public interface MemberWithdrawApplyService extends IService<MemberWithdrawApply
      * @return 微信转账信息
      */
     WechatTransferInfoVO getWechatTransferInfo(String id);
+
+    /**
+     * 转账成功
+     * @param outBillNo
+     */
+    void transferSuccess(String outBillNo);
 }

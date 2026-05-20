@@ -100,4 +100,15 @@ public class CashierController {
     public ResultMessage<Boolean> paymentResult(PayParam payParam) {
         return ResultUtil.data(cashierSupport.paymentResult(payParam));
     }
+
+
+    @Operation(summary = "转账异步通知")
+    @RequestMapping(value = "/transfer/notify/{paymentMethod}", method = {RequestMethod.GET, RequestMethod.POST})
+    public void transferNotifyUrl(HttpServletRequest request, @PathVariable String paymentMethod) {
+
+        PaymentMethodEnum paymentMethodEnum = PaymentMethodEnum.valueOf(paymentMethod);
+
+        cashierSupport.notify(paymentMethodEnum, request);
+
+    }
 }

@@ -37,6 +37,7 @@ import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
 import cn.lili.modules.wallet.entity.dto.TransferResultDTO;
+import cn.lili.modules.wallet.service.MemberWithdrawApplyService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.google.gson.Gson;
@@ -128,6 +129,9 @@ public class WechatPlugin implements Payment {
      */
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private MemberWithdrawApplyService memberWithdrawApplyService;
+
 
 
     @Override
@@ -464,6 +468,63 @@ public class WechatPlugin implements Payment {
         }
     }
 
+    @Override
+    public void transferNotify(HttpServletRequest request) {
+        // 构造 RequestParam
+        RequestParam requestParam = new RequestParam.Builder()
+                .serialNumber(request.getHeader("Wechatpay-Serial"))
+                .nonce(request.getHeader("Wechatpay-Nonce"))
+                .signature(request.getHeader("Wechatpay-Signature"))
+                .timestamp(request.getHeader("Wechatpay-Timestamp"))
+                .body(HttpKit.readData(request))
+                .build();
+
+        WechatPaymentSetting setting = wechatPaymentSetting();
+        NotificationConfig config = null;
+        if ("CERT".equals(setting.getPublicType())) {
+            config = new RSAAutoCertificateConfig.Builder()
+                    .merchantId(setting.getMchId())
+                    .privateKey(setting.getApiclientKey())
+                    .merchantSerialNumber(setting.getSerialNumber())
+                    .apiV3Key(setting.getApiKey3())
+                    .build();
+        } else {
+            config = new RSAPublicKeyConfig.Builder()
+                    .merchantId(setting.getMchId())
+                    .apiV3Key(setting.getApiKey3())
+                    .privateKey(setting.getApiclientKey())
+                    .merchantSerialNumber(setting.getSerialNumber())
+                    .publicKeyId(setting.getPublicId())
+                    .publicKey(setting.getPublicKey())
+                    .build();
+        }
+
+        // 初始化 NotificationParser
+        NotificationParser parser = new NotificationParser(config);
+
+        try {
+            MerchantTransferNotifyResource transferNotifyResource = parser.parse(requestParam, MerchantTransferNotifyResource.class);
+            if (transferNotifyResource == null || StringUtils.isEmpty(transferNotifyResource.getOutBillNo())) {
+                log.warn("微信提现回调解析成功，但未获取到 outBillNo");
+                return;
+            }
+            log.info("微信提现回调，outBillNo={}, state={}, transferBillNo={}",
+                    transferNotifyResource.getOutBillNo(), transferNotifyResource.getState(), transferNotifyResource.getTransferBillNo());
+            if ("SUCCESS".equals(transferNotifyResource.getState())) {
+                memberWithdrawApplyService.transferSuccess(transferNotifyResource.getOutBillNo());
+                return;
+            }
+            log.warn("微信提现回调为非成功终态，outBillNo={}, state={}, failReason={}",
+                    transferNotifyResource.getOutBillNo(), transferNotifyResource.getState(), transferNotifyResource.getFailReason());
+        } catch (ValidationException e) {
+            // 签名验证失败，返回 401 UNAUTHORIZED 状态码
+            log.error("sign verification failed", e);
+
+        } catch (Exception e) {
+            log.error("微信提现回调处理异常", e);
+        }
+    }
+
     /**
      * 微信提现
      * 文档地址：https://pay.weixin.qq.com/docs/merchant/apis/batch-transfer-to-balance/transfer-batch/initiate-batch-transfer.html
@@ -533,6 +594,7 @@ public class WechatPlugin implements Payment {
             }
             request.setTransferAmount(amountFen);
             request.setOpenid(connect.getUnionId());
+            request.setNotifyUrl(transferNotifyUrl(wechatPaymentSetting().getCallbackUrl(), PaymentMethodEnum.WECHAT));
             request.setTransferSceneReportInfos(buildWithdrawTransferSceneReportInfos());
 
             UserRecvStyle userRecvStyle=new UserRecvStyle();
@@ -830,6 +892,8 @@ public class WechatPlugin implements Payment {
         private String transferSceneId;
         @SerializedName("openid")
         private String openid;
+        @SerializedName("notify_url")
+        private String notifyUrl;
         @SerializedName("user_name")
         private String userName;
         @SerializedName("transfer_amount")
@@ -880,5 +944,17 @@ public class WechatPlugin implements Payment {
         private String userDisplayName;
         @SerializedName("out_authorization_no")
         private String outAuthorizationNo;
+    }
+
+    @lombok.Data
+    private static class MerchantTransferNotifyResource {
+        @SerializedName("out_bill_no")
+        private String outBillNo;
+        @SerializedName("transfer_bill_no")
+        private String transferBillNo;
+        @SerializedName("state")
+        private String state;
+        @SerializedName("fail_reason")
+        private String failReason;
     }
 }

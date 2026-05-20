@@ -104,6 +104,15 @@ public interface Payment {
     }
 
     /**
+     * 转账 异步通知
+     *
+     * @param request HttpServletRequest
+     */
+    default void transferNotify(HttpServletRequest request) {
+        throw new ServiceException(ResultCode.PAY_ERROR);
+    }
+
+    /**
      * 退款异步通知
      *
      * @param request HttpServletRequest
@@ -152,4 +161,14 @@ public interface Payment {
         return api + "/buyer/payment/cashierRefund/notify/" + paymentMethodEnum.name();
     }
 
+    /**
+     * 支付异步通知地址
+     *
+     * @param api               api地址
+     * @param paymentMethodEnum 支付类型
+     * @return 异步通知地址
+     */
+    default String transferNotifyUrl(String api, PaymentMethodEnum paymentMethodEnum) {
+        return api + "/buyer/payment/transfer/notify/" + paymentMethodEnum.name();
+    }
 }

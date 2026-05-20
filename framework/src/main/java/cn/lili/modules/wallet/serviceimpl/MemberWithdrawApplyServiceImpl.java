@@ -21,10 +21,13 @@ import cn.lili.modules.wallet.entity.vo.WechatTransferInfoVO;
 import cn.lili.modules.wallet.mapper.MemberWithdrawApplyMapper;
 import cn.lili.modules.wallet.service.MemberWalletService;
 import cn.lili.modules.wallet.service.MemberWithdrawApplyService;
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
@@ -133,5 +136,33 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
         wechatTransferInfoVO.setMchId(wechatPaymentSetting.getMchId());
         wechatTransferInfoVO.setWechatPackage(this.getById(id).getWechatPackage());
         return wechatTransferInfoVO;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void transferSuccess(String outBillNo) {
+        if (StringUtils.isEmpty(outBillNo)) {
+            return;
+        }
+        MemberWithdrawApply memberWithdrawApply = this.getOne(new LambdaQueryWrapper<MemberWithdrawApply>()
+                .eq(MemberWithdrawApply::getOutBillNo, outBillNo)
+                .eq(MemberWithdrawApply::getApplyStatus, WithdrawStatusEnum.WAIT_USER_CONFIRM.name()));
+        if (memberWithdrawApply == null) {
+            return;
+        }
+        boolean updated = this.update(new LambdaUpdateWrapper<MemberWithdrawApply>()
+                .eq(MemberWithdrawApply::getId, memberWithdrawApply.getId())
+                .eq(MemberWithdrawApply::getApplyStatus, WithdrawStatusEnum.WAIT_USER_CONFIRM.name())
+                .set(MemberWithdrawApply::getApplyStatus, WithdrawStatusEnum.SUCCESS.name()));
+        if (!updated) {
+            return;
+        }
+        MemberWithdrawalMessage memberWithdrawalMessage = new MemberWithdrawalMessage();
+        memberWithdrawalMessage.setMemberWithdrawApplyId(memberWithdrawApply.getId());
+        memberWithdrawalMessage.setStatus(WithdrawStatusEnum.SUCCESS.name());
+        memberWithdrawalMessage.setMemberId(memberWithdrawApply.getMemberId());
+        memberWithdrawalMessage.setPrice(memberWithdrawApply.getApplyMoney());
+        String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_WITHDRAWAL.name();
+        rocketMQTemplate.asyncSend(destination, memberWithdrawalMessage, RocketmqSendCallbackBuilder.commonCallback());
     }
 }
