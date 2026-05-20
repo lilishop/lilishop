@@ -602,7 +602,7 @@ public class WechatPlugin implements Payment {
             request.setUserRecvStyle(userRecvStyle);
             MerchantTransferWithAuthorizationResult transferResult = createMerchantTransferWithAuthorization(config, request);
             MerchantTransferWithAuthorizationResponse response = transferResult.getResponse();
-            log.error("微信提现响应 outBillNo={}, statusCode={}, response={}", request.outBillNo, transferResult.getStatusCode(), response);
+            log.info("微信提现响应 outBillNo={}, statusCode={}, response={}", request.outBillNo, transferResult.getStatusCode(), response);
 
             if (transferResult.getStatusCode() == 200
                     && response != null

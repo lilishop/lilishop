@@ -108,7 +108,7 @@ public class CashierController {
 
         PaymentMethodEnum paymentMethodEnum = PaymentMethodEnum.valueOf(paymentMethod);
 
-        cashierSupport.notify(paymentMethodEnum, request);
+        cashierSupport.transferNotify(paymentMethodEnum, request);
 
     }
 }
