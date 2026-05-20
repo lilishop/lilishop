@@ -493,7 +493,7 @@ public class WechatPlugin implements Payment {
                         case "H5":
                             source = SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name();
                             break;
-                        case "MP":
+                        case "WECHAT_MP":
                             source = SourceEnum.WECHAT_MP_OPEN_ID.name();
                             break;
                         case "APP":
