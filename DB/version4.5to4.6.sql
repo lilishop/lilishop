@@ -472,3 +472,6 @@ ALTER TABLE `li_store_flow`
 ALTER TABLE `li_bill`
     ADD COLUMN `gift_card_subsidy` decimal(10,2) DEFAULT 0.00 COMMENT '礼品卡平台补贴（结算周期内）' AFTER `kanjia_refund_settlement_price`,
     ADD COLUMN `gift_card_refund_subsidy` decimal(10,2) DEFAULT 0.00 COMMENT '退货礼品卡平台补贴返还' AFTER `gift_card_subsidy`;
+
+
+INSERT INTO `li_menu` (`id`, `create_by`, `create_time`, `delete_flag`, `update_by`, `update_time`, `description`, `front_route`, `icon`, `level`, `name`, `parent_id`, `path`, `sort_order`, `title`, `front_component`, `permission`) VALUES (2057668382760361986, 'admin', '2026-05-22 11:42:27', b'0', 'admin', '2026-05-22 11:43:13', NULL, 'promotions/gift-card-cash/gift-card-cash-activity', NULL, 2, 'promotions/gift-card-cash', '1367049214198022144', 'promotions/gift-card-cash', 10.00, '礼品卡', NULL, '/manager/promotion/giftCardCash*');
