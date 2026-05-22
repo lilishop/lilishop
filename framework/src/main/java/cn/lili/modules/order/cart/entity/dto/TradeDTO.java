@@ -10,12 +10,14 @@ import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.vo.OrderVO;
 import cn.lili.modules.order.order.entity.vo.ReceiptVO;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.vos.GiftCardCashMemberCardVO;
 import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
 import cn.lili.modules.store.entity.dos.StoreAddress;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -98,6 +100,11 @@ public class TradeDTO implements Serializable {
     private List<MemberCoupon> canUseCoupons;
 
     /**
+     * 可用礼品卡列表
+     */
+    private List<GiftCardCashMemberCardVO> canUseGiftCards;
+
+    /**
      * 无法使用优惠券无法使用的原因
      */
     private List<MemberCouponVO> cantUseCoupons;
@@ -137,6 +144,18 @@ public class TradeDTO implements Serializable {
      */
     private List<OrderVO> orderVO;
 
+    @Schema(description = "礼品卡抵扣总金额")
+    private BigDecimal giftCardDeductTotal;
+
+    @Schema(description = "现金实付总金额（订单差额）")
+    private BigDecimal cashPayTotal;
+
+    @Schema(description = "礼品卡抵扣明细")
+    private List<cn.lili.modules.promotion.entity.vos.GiftCardCashDeductPreviewVO.DeductItem> giftCardDeductItems;
+
+    @Schema(description = "已选礼品卡ID列表")
+    private List<String> selectedGiftCardIds;
+
     public TradeDTO(CartTypeEnum cartTypeEnum) {
         this.cartTypeEnum = cartTypeEnum;
 
@@ -147,7 +166,12 @@ public class TradeDTO implements Serializable {
         this.priceDetailDTO = new PriceDetailDTO();
         this.cantUseCoupons = new ArrayList<>();
         this.canUseCoupons = new ArrayList<>();
+        this.canUseGiftCards = new ArrayList<>();
         this.needReceipt = false;
+        this.giftCardDeductTotal = BigDecimal.ZERO;
+        this.cashPayTotal = BigDecimal.ZERO;
+        this.giftCardDeductItems = new ArrayList<>();
+        this.selectedGiftCardIds = new ArrayList<>();
     }
 
     public TradeDTO() {

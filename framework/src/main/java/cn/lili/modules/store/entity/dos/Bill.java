@@ -114,6 +114,12 @@ public class Bill extends BaseIdEntity {
     @Schema(description = "退货砍价补贴返还")
     private Double kanjiaRefundSettlementPrice;
 
+    @Schema(description = "礼品卡平台补贴（结算周期内）")
+    private Double giftCardSubsidy;
+
+    @Schema(description = "退货礼品卡平台补贴返还")
+    private Double giftCardRefundSubsidy;
+
 
     /**
      * 开始算钱啦
@@ -122,6 +128,7 @@ public class Bill extends BaseIdEntity {
      * - commissionPrice(平台收取佣金) + refundCommissionPrice(退单产生退还佣金金额)
      * - distributionCommission(分销返现支出) + distributionRefundCommission(分销订单退还，返现佣金返还)
      * + siteCouponCommission(平台优惠券补贴) - siteCouponRefundCommission(退货平台优惠券补贴返还)
+     * + giftCardSubsidy(礼品卡平台补贴) - giftCardRefundSubsidy(退货礼品卡补贴返还)
      * + kanjiaSettlementPrice(砍价商品结算价格) + pointSettlementPrice(pointSettlementPrice)
      */
     @Schema(description = "最终结算金额")

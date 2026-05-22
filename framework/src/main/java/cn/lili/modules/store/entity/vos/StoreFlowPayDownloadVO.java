@@ -38,8 +38,14 @@ public class StoreFlowPayDownloadVO {
     @Schema(description = "销售量")
     private Integer num;
 
-    @Schema(description = "流水金额")
+    @Schema(description = "流水金额（用户实付现金）")
     private Double finalPrice;
+
+    @Schema(description = "礼品卡平台补贴金额")
+    private Double giftCardSubsidyPrice;
+
+    @Schema(description = "商家结算计费基数")
+    private Double settlementBasePrice;
 
     @Schema(description = "平台收取交易佣金")
     private Double commissionPrice;

@@ -48,6 +48,9 @@ public class PriceDetailDTO implements Serializable {
     @Schema(description = "优惠券金额")
     private Double couponPrice;
 
+    @Schema(description = "礼品卡抵扣金额")
+    private Double giftCardPrice;
+
     //===========end discount price =============
 
 
@@ -61,7 +64,7 @@ public class PriceDetailDTO implements Serializable {
     private Double platFormCommissionPoint;
 
 
-    @Schema(description = "平台收取交易佣金=(flowPrice(流水金额) * platFormCommissionPoint(平台佣金比例))/100")
+    @Schema(description = "平台收取交易佣金=(结算计费基数 * platFormCommissionPoint)/100；有礼品卡时基数=flowPrice+giftCardPrice，否则=flowPrice")
     private Double platFormCommission;
 
     //=========end distribution==========
@@ -88,13 +91,13 @@ public class PriceDetailDTO implements Serializable {
 
     @Schema(description = "流水金额(入账 出帐金额) = " +
             "goodsPrice(商品总金额（商品原价）) + freightPrice(配送费) - " +
-            "discountPrice(优惠金额) - couponPrice(优惠券金额) + updatePrice(订单修改金额)")
+            "discountPrice(活动优惠金额) - couponPrice(优惠券优惠金额) + updatePrice(订单修改金额)-giftCardPrice(礼品卡抵扣金额)")
     private Double flowPrice;
 
     @Schema(description = "结算价格 与 商家/供应商 结算价格（例如积分商品/砍价商品）")
     private Double settlementPrice;
 
-    @Schema(description = "最终结算金额 = flowPrice(流水金额) - platFormCommission(平台收取交易佣金) - distributionCommission(单品分销返现支出)")
+    @Schema(description = "最终结算金额(普通订单)=结算计费基数-platFormCommission-distributionCommission；积分/砍价且settlementPrice>0时直接取settlementPrice")
     private Double billPrice;
 
     /**
@@ -143,6 +146,7 @@ public class PriceDetailDTO implements Serializable {
         payPoint = 0L;
         discountPrice = 0d;
         couponPrice = 0d;
+        giftCardPrice = 0d;
 
         distributionCommission = 0d;
         platFormCommissionPoint = 0d;
@@ -176,29 +180,43 @@ public class PriceDetailDTO implements Serializable {
 
 
     /**
+     * 商家结算/平台佣金计费基数：应付现金(flowPrice) + 礼品卡抵扣（礼品卡由平台承担，仍按抵扣前金额计佣）
+     */
+    private double commissionSettlementBase() {
+        double giftCard = giftCardPrice != null ? giftCardPrice : 0;
+        if (giftCard > 0) {
+            return CurrencyUtil.add(flowPrice, giftCard);
+        }
+        return flowPrice;
+    }
+
+    /**
      * 全部重新计算
      */
     public void recount() {
-        //流水金额(入账 出帐金额) = "流水金额(入账 出帐金额) = goodsPrice + freight - discountPrice - couponPrice + updatePrice"
+        //流水金额(入账 出帐金额) = goodsPrice + freight - discountPrice - couponPrice - giftCardPrice + updatePrice
         this.flowPrice = CurrencyUtil.sub(
                 CurrencyUtil.add(goodsPrice, freightPrice),
                 CurrencyUtil.add(discountPrice,
-                        couponPrice != null ? couponPrice : 0));
+                        couponPrice != null ? couponPrice : 0,
+                        giftCardPrice != null ? giftCardPrice : 0));
         if (updatePrice != 0) {
             flowPrice = CurrencyUtil.add(flowPrice, updatePrice);
         }
 
-        //计算平台佣金  流水金额*平台佣金比例
+        double settlementBase = commissionSettlementBase();
+
+        // 平台佣金按结算计费基数计算（礼品卡全额抵扣时 flowPrice 为 0，仍可按订单原金额计佣）
         if (platFormCommissionPoint != null && getPlatFormCommissionPoint() > 0) {
-            platFormCommission = CurrencyUtil.div(CurrencyUtil.mul(flowPrice, platFormCommissionPoint), 100);
+            platFormCommission = CurrencyUtil.div(CurrencyUtil.mul(settlementBase, platFormCommissionPoint), 100);
         }
 
         //如果结算信息包含结算金额，则最终结算金额直接等于该交易 平台与商户的结算金额
         if (settlementPrice > 0) {
             billPrice = settlementPrice;
         } else {
-            //如果是普通订单最终结算金额 = flowPrice - platFormCommission - distributionCommission 流水金额-平台佣金-分销佣金
-            billPrice = CurrencyUtil.sub(flowPrice, platFormCommission, distributionCommission);
+            // 普通订单：商家结算 = 计费基数 - 平台佣金 - 分销佣金
+            billPrice = CurrencyUtil.sub(settlementBase, platFormCommission, distributionCommission);
         }
     }
 
@@ -214,6 +232,7 @@ public class PriceDetailDTO implements Serializable {
         payPoint = payPoint + priceDetailDTO.getPayPoint();
         discountPrice = CurrencyUtil.add(discountPrice, priceDetailDTO.getDiscountPrice());
         couponPrice = CurrencyUtil.add(couponPrice, priceDetailDTO.getCouponPrice());
+        giftCardPrice = CurrencyUtil.add(giftCardPrice, priceDetailDTO.getGiftCardPrice());
 
         distributionCommission = CurrencyUtil.add(distributionCommission, priceDetailDTO.getDistributionCommission());
         platFormCommission = CurrencyUtil.add(platFormCommission, priceDetailDTO.getPlatFormCommission());
@@ -279,6 +298,13 @@ public class PriceDetailDTO implements Serializable {
             return 0D;
         }
         return couponPrice;
+    }
+
+    public Double getGiftCardPrice() {
+        if (giftCardPrice == null || giftCardPrice <= 0) {
+            return 0D;
+        }
+        return giftCardPrice;
     }
 
     public Double getDistributionCommission() {
@@ -386,6 +412,11 @@ public class PriceDetailDTO implements Serializable {
     public void setCouponPrice(Double couponPrice) {
         this.couponPrice = couponPrice;
         promotionPriceHandler();
+        this.recount();
+    }
+
+    public void setGiftCardPrice(Double giftCardPrice) {
+        this.giftCardPrice = giftCardPrice;
         this.recount();
     }
 

@@ -44,7 +44,8 @@ public class PaymentSupportForm {
 
         List<PaymentMethodEnum> keys = new ArrayList<>();
         for (PaymentMethodEnum paymentMethodEnum : PaymentMethodEnum.values()) {
-            if (paymentMethodEnum.equals(PaymentMethodEnum.BANK_TRANSFER)){
+            if (paymentMethodEnum.equals(PaymentMethodEnum.BANK_TRANSFER)
+                    || paymentMethodEnum.equals(PaymentMethodEnum.NOT_ACTUALLY_PAID)) {
                 continue;
             }
             keys.add(paymentMethodEnum);

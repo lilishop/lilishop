@@ -326,6 +326,21 @@ public enum ResultCode {
     COUPON_DO_NOT_RECEIVER(41030, "当前优惠券不允许主动领取"),
 
     /**
+     * 礼品卡（现金卡）
+     */
+    GIFT_CARD_CASH_CREATE_QUANTITY_ERROR(41142, "制卡数量须在1-10000之间"),
+    GIFT_CARD_CASH_ACTIVITY_NOT_FOUND(41150, "礼品卡活动不存在"),
+    GIFT_CARD_CASH_ACTIVITY_OVER_STOCK(41151, "超出活动库存，无法继续制卡"),
+    GIFT_CARD_CASH_ACTIVITY_EDIT_FORBIDDEN(41152, "活动已产生制卡记录，不能修改面额与核心规则"),
+    GIFT_CARD_CASH_ACTIVITY_DELETE_FORBIDDEN(41153, "活动下已有制卡或凭证数据，不能删除"),
+    GIFT_CARD_CASH_ACTIVITY_STOCK_LT_PRODUCED(41154, "活动库存不能小于已占用张数（制卡+发卡）"),
+    GIFT_CARD_CASH_CREATE_BATCH_NOT_FOUND(41144, "制卡批次不存在"),
+    GIFT_CARD_CASH_MEMBER_NOT_FOUND(41145, "手机号未找到对应会员"),
+    GIFT_CARD_CASH_ISSUE_IMPORT_ERROR(41146, "发卡导入文件解析失败"),
+    GIFT_CARD_CASH_ISSUE_POOL_INSUFFICIENT(41147, "活动库存不足，请减少发卡数量或提高活动总库存"),
+    GIFT_CARD_CASH_ISSUE_ROW_ERROR(41148, "发卡导入数据有误"),
+
+    /**
      * 拼团
      */
     PINTUAN_MANUAL_OPEN_SUCCESS(42001, "手动开启拼团活动成功"),

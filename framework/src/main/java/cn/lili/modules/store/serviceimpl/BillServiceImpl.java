@@ -130,6 +130,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
             bill.setPointRefundSettlementPrice(refundBill.getPointRefundSettlementPrice() != null ? refundBill.getPointRefundSettlementPrice() : 0D);
             //退单 砍价补贴返还
             bill.setKanjiaRefundSettlementPrice(refundBill.getKanjiaRefundSettlementPrice() != null ? refundBill.getKanjiaRefundSettlementPrice() : 0D);
+            bill.setGiftCardRefundSubsidy(refundBill.getGiftCardRefundSubsidy() != null ? refundBill.getGiftCardRefundSubsidy() : 0D);
 
         }
 
@@ -156,6 +157,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
             bill.setPointSettlementPrice(orderBill.getPointSettlementPrice() != null ? orderBill.getPointSettlementPrice() : 0D);
             //砍价商品结算价格
             bill.setKanjiaSettlementPrice(orderBill.getKanjiaSettlementPrice() != null ? orderBill.getKanjiaSettlementPrice() : 0D);
+            bill.setGiftCardSubsidy(orderBill.getGiftCardSubsidy() != null ? orderBill.getGiftCardSubsidy() : 0D);
         }
         //最终结算金额=入款结算金额-退款结算金额
         Double finalPrice = CurrencyUtil.sub(orderBill.getBillPrice(), refundBill.getBillPrice());

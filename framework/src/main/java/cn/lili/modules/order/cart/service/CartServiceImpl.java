@@ -58,7 +58,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.math.BigDecimal;
 import java.util.stream.Collectors;
+import java.util.LinkedHashSet;
 
 /**
  * 购物车业务层实现
@@ -557,6 +559,38 @@ public class CartServiceImpl implements CartService {
                 tradeDTO.getStoreCoupons().remove(memberCoupon.getStoreId());
             }
         }
+        this.resetTradeDTO(tradeDTO);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void selectGiftCard(String credentialId, String way, boolean use) {
+        CartTypeEnum cartTypeEnum = getCartType(way);
+        TradeDTO tradeDTO = this.readDTO(cartTypeEnum);
+        List<String> selectedIds = new ArrayList<>();
+        if (CollUtil.isNotEmpty(tradeDTO.getSelectedGiftCardIds())) {
+            selectedIds.addAll(tradeDTO.getSelectedGiftCardIds());
+        }
+        if (use) {
+            if (CharSequenceUtil.isBlank(credentialId)) {
+                throw new ServiceException(ResultCode.PARAMS_ERROR, "礼品卡ID不能为空");
+            }
+            if (!selectedIds.contains(credentialId)) {
+                selectedIds.add(credentialId);
+            }
+        } else {
+            if (CharSequenceUtil.isBlank(credentialId)) {
+                selectedIds.clear();
+            } else {
+                selectedIds.removeIf(id -> Objects.equals(id, credentialId));
+            }
+        }
+        if (CollUtil.isEmpty(selectedIds)) {
+            tradeDTO.setSelectedGiftCardIds(new ArrayList<>());
+            this.resetTradeDTO(tradeDTO);
+            return;
+        }
+        tradeDTO.setSelectedGiftCardIds(new ArrayList<>(new LinkedHashSet<>(selectedIds)));
         this.resetTradeDTO(tradeDTO);
     }
 

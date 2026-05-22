@@ -35,7 +35,10 @@ import cn.lili.modules.order.order.mapper.OrderMapper;
 import cn.lili.modules.order.order.service.*;
 import cn.lili.modules.order.trade.entity.dos.OrderLog;
 import cn.lili.modules.order.trade.service.OrderLogService;
+import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
+import cn.lili.modules.payment.kit.Payment;
+import cn.lili.modules.promotion.service.GiftCardCashService;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.service.PintuanService;
 import cn.lili.modules.store.entity.dto.StoreDeliverGoodsAddressDTO;
@@ -58,6 +61,7 @@ import cn.lili.trigger.message.PintuanOrderMessage;
 import cn.lili.trigger.model.TimeExecuteConstant;
 import cn.lili.trigger.model.TimeTriggerMsg;
 import cn.lili.trigger.util.DelayQueueTools;
+import cn.lili.common.utils.SpringContextUtil;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -84,6 +88,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.stream.Collectors;
 
 /**
@@ -172,6 +178,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private SettingService settingService;
 
+    @Autowired
+    private GiftCardCashService giftCardCashService;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -212,6 +221,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             orderVOS.add(orderVO);
         });
         tradeDTO.setOrderVO(orderVOS);
+        // 礼品卡按订单/订单项分摊并写入礼品卡使用记录（下沉至礼品卡服务）
+        giftCardCashService.applyGiftCardUsageOnOrderCreate(tradeDTO, orders, orderItems);
         //批量保存订单
         this.saveBatch(orders);
         //批量保存 子订单
@@ -362,6 +373,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             this.updateById(order);
             //订单货物设置全部退款
             orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn,orderSn).set(OrderItem::getIsRefund,RefundStatusEnum.ALL_REFUND.name()));
+            // 订单取消退款：礼品卡部分先回卡，现金部分再走原支付渠道
+            refundCanceledOrderBySplit(order, reason);
             //生成店铺退款流水
             storeFlowService.orderCancel(orderSn);
             //发送消息
@@ -384,10 +397,55 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //订单货物设置全部退款
         orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn,orderSn).set(OrderItem::getIsRefund,RefundStatusEnum.ALL_REFUND.name()));
         if (refundMoney) {
+            // 订单取消退款：礼品卡部分先回卡，现金部分再走原支付渠道
+            refundCanceledOrderBySplit(order, reason);
             //生成店铺退款流水
             storeFlowService.orderCancel(orderSn);
             orderStatusMessage(order);
         }
+    }
+
+    /**
+     * 取消订单退款统一逻辑：礼品卡先回卡，剩余金额原路退支付渠道。
+     */
+    private void refundCanceledOrderBySplit(Order order, String reason) {
+        if (order == null) {
+            return;
+        }
+        if (!PayStatusEnum.PAID.name().equals(order.getPayStatus())) {
+            giftCardCashService.resolveChannelRefundAfterGiftCard(order.getSn(), BigDecimal.ZERO);
+            return;
+        }
+        BigDecimal channelRefund = giftCardCashService.resolveChannelRefundAfterGiftCard(order.getSn(), toMoney(order.getFlowPrice()));
+        if (channelRefund.compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
+        if (CharSequenceUtil.isBlank(order.getPaymentMethod())) {
+            throw new ServiceException(ResultCode.PAY_NOT_SUPPORT);
+        }
+        RefundLog refundLog = RefundLog.builder()
+                .isRefund(false)
+                .totalAmount(channelRefund.doubleValue())
+                .payPrice(channelRefund.doubleValue())
+                .memberId(order.getMemberId())
+                .paymentName(order.getPaymentMethod())
+                .afterSaleNo("ORDER_CANCEL")
+                .paymentReceivableNo(order.getReceivableNo())
+                .outOrderNo("OC" + SnowFlake.getIdStr())
+                .orderSn(order.getSn())
+                .refundReason(reason)
+                .build();
+        PaymentMethodEnum paymentMethodEnum = PaymentMethodEnum.paymentNameOf(order.getPaymentMethod());
+        if (paymentMethodEnum == null) {
+            throw new ServiceException(ResultCode.PAY_NOT_SUPPORT);
+        }
+        Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
+        payment.refund(refundLog);
+    }
+
+    private BigDecimal toMoney(Double value) {
+        return value == null ? BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP)
+                : BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP);
     }
 
     /**

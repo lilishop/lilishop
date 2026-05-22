@@ -174,6 +174,12 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         storeFlow.setSiteCouponPrice(payStoreFlow.getSiteCouponPrice());
         //站点优惠券佣金比例
         storeFlow.setSiteCouponPoint(payStoreFlow.getSiteCouponPoint());
+        storeFlow.setGiftCardSubsidyPrice(CurrencyUtil.mul(
+                CurrencyUtil.div(payStoreFlow.getGiftCardSubsidyPrice() == null ? 0 : payStoreFlow.getGiftCardSubsidyPrice(), payStoreFlow.getNum()),
+                afterSale.getNum()));
+        storeFlow.setSettlementBasePrice(CurrencyUtil.mul(
+                CurrencyUtil.div(payStoreFlow.getSettlementBasePrice() == null ? 0 : payStoreFlow.getSettlementBasePrice(), payStoreFlow.getNum()),
+                afterSale.getNum()));
 
         // 退单结算金额 相当于付款结算金额反计算逻辑，对平台收取的佣金，分销收取的佣金进行返还，对平台优惠券的补贴应该相加
         // 由于退单的结算金额为正数，所以需要将结算金额计算方式，相较于付款结算金额计算方式进行反转
@@ -190,10 +196,12 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         );
         //退款日志
         RefundLog refundLog = refundLogService.queryByAfterSaleSn(afterSale.getSn());
-        //第三方流水单号
-        storeFlow.setTransactionId(refundLog.getReceivableNo());
-        //支付方式
-        storeFlow.setPaymentName(refundLog.getPaymentName());
+        if (refundLog != null) {
+            //第三方流水单号
+            storeFlow.setTransactionId(refundLog.getReceivableNo());
+            //支付方式
+            storeFlow.setPaymentName(refundLog.getPaymentName());
+        }
 
 
 
@@ -232,7 +240,11 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
                 storeFlowProfitSharingDTO.setPrice(CurrencyUtil.mul(payStoreFlow.getFinalPrice(), proportion));
                 storeFlowProfitSharingDTO.setStorePrice(CurrencyUtil.mul(payStoreFlow.getBillPrice(), proportion));
                 storeFlowProfitSharingDTO.setPlatformPrice(CurrencyUtil.mul(payStoreFlow.getCommissionPrice(), proportion));
-                storeFlowProfitSharingDTO.setSubsidies(CurrencyUtil.mul(payStoreFlow.getSiteCouponCommission(), proportion));
+                storeFlowProfitSharingDTO.setSubsidies(CurrencyUtil.mul(
+                        CurrencyUtil.add(
+                                payStoreFlow.getSiteCouponCommission() == null ? 0 : payStoreFlow.getSiteCouponCommission(),
+                                payStoreFlow.getGiftCardSubsidyPrice() == null ? 0 : payStoreFlow.getGiftCardSubsidyPrice()),
+                        proportion));
                 storeFlowProfitSharingDTO.setDistributionPrice(CurrencyUtil.mul(payStoreFlow.getDistributionRebate(), proportion));
             }
         }
@@ -362,8 +374,10 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
         storeFlowProfitSharingDTO.setDistributionPrice(storeFlow.getDistributionRebate());
         //总金额
         storeFlowProfitSharingDTO.setPrice(storeFlow.getFinalPrice());
-        //平台补差
-        storeFlowProfitSharingDTO.setSubsidies(storeFlow.getSiteCouponCommission());
+        // 平台补差（站点优惠券 + 礼品卡补贴）
+        storeFlowProfitSharingDTO.setSubsidies(CurrencyUtil.add(
+                storeFlow.getSiteCouponCommission() == null ? 0 : storeFlow.getSiteCouponCommission(),
+                storeFlow.getGiftCardSubsidyPrice() == null ? 0 : storeFlow.getGiftCardSubsidyPrice()));
         //分账详情
         storeFlow.setProfitSharing(JSONUtil.toJsonStr(storeFlowProfitSharingDTO));
         //分账状态
