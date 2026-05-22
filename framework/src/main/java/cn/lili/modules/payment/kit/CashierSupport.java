@@ -145,6 +145,21 @@ public class CashierSupport {
     }
 
     /**
+     * 支付通知
+     *
+     * @param paymentMethodEnum 支付渠道
+     */
+    public void transferNotify(PaymentMethodEnum paymentMethodEnum,
+                       HttpServletRequest request) {
+
+        log.info("转账异步通知：支付类型：{}", paymentMethodEnum.name());
+
+        //获取支付插件
+        Payment payment = (Payment) SpringContextUtil.getBean(paymentMethodEnum.getPlugin());
+        payment.transferNotify(request);
+    }
+
+    /**
      * 用户提现
      *
      * @param paymentMethodEnum   支付渠道
