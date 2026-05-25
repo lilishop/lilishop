@@ -9,12 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
@@ -51,12 +52,11 @@ public class ManagerSecurityConfig {
     private CorsConfigurationSource corsConfigurationSource;
     @Autowired
     private ManagerTokenGenerate managerTokenGenerate;
-    // 新增：用于获取 AuthenticationManager
     @Autowired
     private AuthenticationConfiguration authenticationConfiguration;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
         // 禁止网页 iframe
         http.headers(h -> h.frameOptions(f -> f.disable()))
             .authorizeHttpRequests(auth -> {
@@ -84,9 +84,8 @@ public class ManagerSecurityConfig {
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable());
 
-        // 添加 JWT 认证过滤器（保持你原有的构造参数）
         http.addFilter(new ManagerAuthenticationFilter(
-            authenticationConfiguration.getAuthenticationManager(),
+            authenticationManager,
             menuService,
             managerTokenGenerate,
             cache,
@@ -94,5 +93,13 @@ public class ManagerSecurityConfig {
         ));
 
         return http.build();
+    }
+
+    /**
+     * 显式暴露 AuthenticationManager，避免自动配置变更导致 JWT 过滤器注入失败
+     */
+    @Bean
+    public AuthenticationManager authenticationManager() throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 }

@@ -250,7 +250,7 @@ public class EsGoodsIndex implements Serializable {
 
     @Schema(description = "商品发布时间")
     @Field(type = FieldType.Date)
-    private Long releaseTime;
+    private Date releaseTime;
 
     /**
      * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
@@ -309,7 +309,7 @@ public class EsGoodsIndex implements Serializable {
             this.grade = sku.getGrade();
             this.recommend = sku.getRecommend();
             this.goodsType = sku.getGoodsType();
-            this.releaseTime = new Date().getTime();
+            this.releaseTime = new Date();
         }
     }
 
@@ -344,7 +344,7 @@ public class EsGoodsIndex implements Serializable {
 
     public EsGoodsIndex(GoodsSku sku, Date createDate) {
         this(sku);
-        this.releaseTime = createDate.getTime();
+        this.releaseTime = createDate;
     }
 
     public void setGoodsSku(GoodsSku sku) {
@@ -373,7 +373,7 @@ public class EsGoodsIndex implements Serializable {
             this.authFlag = sku.getAuthFlag();
             this.intro = sku.getIntro();
             this.grade = sku.getGrade();
-            this.releaseTime = new Date().getTime();
+            this.releaseTime = new Date();
         }
     }
 

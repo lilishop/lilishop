@@ -60,43 +60,6 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
 
-  shardingsphere:
-    datasource:
-      #  数据库名称，可自定义，可以为多个，以逗号隔开，每个在这里定义的库，都要在下面定义连接属性
-      names: default-datasource
-      default-datasource:
-        type: com.alibaba.druid.pool.DruidDataSource
-        driverClassName: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://192.168.31.100:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-        username: root
-        password: lilishop
-        maxActive: 20
-        initialSize: 5
-        maxWait: 60000
-        minIdle: 5
-        timeBetweenEvictionRunsMillis: 60000
-        minEvictableIdleTimeMillis: 300000
-        validationQuery: SELECT 1 FROM DUAL
-        testWhileIdle: true
-        testOnBorrow: false
-        testOnReturn: false
-        #是否缓存preparedStatement，也就是PSCache。在mysql下建议关闭。 PSCache对支持游标的数据库性能提升巨大，比如说oracle。
-        poolPreparedStatements: false
-        #要启用PSCache，-1为关闭 必须配置大于0，当大于0时，poolPreparedStatements自动触发修改为true  可以把这个数值配置大一些，比如说100
-        maxOpenPreparedStatements: -1
-        #配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
-        filters: stat,wall,log4j2
-        #通过connectProperties属性来打开mergeSql功能；慢SQL记录
-        connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
-        #合并多个DruidDataSource的监控数据
-        useGlobalDataSourceStat: true
-        loginUsername: druid
-        loginPassword: druid
-    props:
-      #是否打印逻辑SQL语句和实际SQL语句，建议调试时打印，在生产环境关闭
-      sql:
-        show: true
-
 # 忽略鉴权url
 ignored:
   urls:
@@ -142,6 +105,7 @@ springdoc:
   api-docs:
     enabled: true
   swagger-ui:
+    enabled: true
     path: /swagger-ui/index.html
   packages-to-scan: cn.lili.controller
   paths-to-match: /manager/**
@@ -193,6 +157,7 @@ lili:
         number-of-shards: 3
       index-prefix: lili
       schema: http
+      compatibility-version: 7
     #      account:
     #        username: elastic
     #        password: LiLiShopES

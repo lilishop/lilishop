@@ -2,7 +2,7 @@ package cn.lili.common.security.sensitive;
 
 import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

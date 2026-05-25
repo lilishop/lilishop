@@ -171,7 +171,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
-    public final long getGoodsCountByCategory(String categoryId) {
+    public long getGoodsCountByCategory(String categoryId) {
         QueryWrapper<Goods> queryWrapper = Wrappers.query();
         queryWrapper.like("category_path", categoryId);
         queryWrapper.eq("delete_flag", false);
