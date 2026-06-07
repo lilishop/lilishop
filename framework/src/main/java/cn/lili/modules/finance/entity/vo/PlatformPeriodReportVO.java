@@ -55,6 +55,18 @@ public class PlatformPeriodReportVO {
     @Schema(description = "退砍价补贴")
     private Double refundKanjiaSubsidy;
 
+    @Schema(description = "限时直降补贴")
+    private Double flashDiscountSubsidy;
+
+    @Schema(description = "退限时直降补贴")
+    private Double refundFlashDiscountSubsidy;
+
+    @Schema(description = "第N件优惠补贴")
+    private Double nthItemSubsidy;
+
+    @Schema(description = "退第N件优惠补贴")
+    private Double refundNthItemSubsidy;
+
     @Schema(description = "分销支出")
     private Double distributionExpense;
 

@@ -40,6 +40,10 @@ public interface FinanceReportMapper {
                    IFNULL(SUM(CASE WHEN sf.flow_type = 'REFUND' THEN sf.point_settlement_price ELSE 0 END), 0) AS refundPointSubsidy,
                    IFNULL(SUM(CASE WHEN sf.flow_type = 'PAY' THEN sf.kanjia_settlement_price ELSE 0 END), 0) AS kanjiaSubsidy,
                    IFNULL(SUM(CASE WHEN sf.flow_type = 'REFUND' THEN sf.kanjia_settlement_price ELSE 0 END), 0) AS refundKanjiaSubsidy,
+                   IFNULL(SUM(CASE WHEN sf.flow_type = 'PAY' THEN sf.flash_discount_subsidy ELSE 0 END), 0) AS flashDiscountSubsidy,
+                   IFNULL(SUM(CASE WHEN sf.flow_type = 'REFUND' THEN sf.flash_discount_subsidy ELSE 0 END), 0) AS refundFlashDiscountSubsidy,
+                   IFNULL(SUM(CASE WHEN sf.flow_type = 'PAY' THEN sf.nth_item_subsidy ELSE 0 END), 0) AS nthItemSubsidy,
+                   IFNULL(SUM(CASE WHEN sf.flow_type = 'REFUND' THEN sf.nth_item_subsidy ELSE 0 END), 0) AS refundNthItemSubsidy,
                    IFNULL(SUM(CASE WHEN sf.flow_type = 'PAY' THEN sf.distribution_rebate ELSE 0 END), 0) AS distributionExpense,
                    IFNULL(SUM(CASE WHEN sf.flow_type = 'REFUND' THEN sf.distribution_rebate ELSE 0 END), 0) AS refundDistribution,
                    IFNULL(SUM(CASE WHEN sf.flow_type = 'PAY' THEN sf.bill_price ELSE 0 END), 0)

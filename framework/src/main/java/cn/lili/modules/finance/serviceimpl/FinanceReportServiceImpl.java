@@ -73,7 +73,8 @@ public class FinanceReportServiceImpl implements FinanceReportService {
             writer.setSheet("平台经营报表");
             writer.writeHeadRow(List.of("周期", "GMV", "退款", "净GMV", "佣金收入", "退佣返还",
                     "券补贴", "退券补贴", "礼品卡补贴", "退礼品卡补贴", "积分补贴", "退积分补贴",
-                    "砍价补贴", "退砍价补贴", "分销支出", "退分销", "商家应结"));
+                    "砍价补贴", "退砍价补贴", "直降补贴", "退直降补贴",
+                    "第N件补贴", "退第N件补贴", "分销支出", "退分销", "商家应结"));
             writeRows(writer, data.stream().map(this::platformRow).toList());
         });
     }
@@ -133,7 +134,8 @@ public class FinanceReportServiceImpl implements FinanceReportService {
                 row.getCommissionIncome(), row.getRefundCommission(), row.getCouponSubsidy(),
                 row.getRefundCouponSubsidy(), row.getGiftCardSubsidy(), row.getRefundGiftCardSubsidy(),
                 row.getPointSubsidy(), row.getRefundPointSubsidy(), row.getKanjiaSubsidy(),
-                row.getRefundKanjiaSubsidy(), row.getDistributionExpense(), row.getRefundDistribution(),
+                row.getRefundKanjiaSubsidy(), row.getFlashDiscountSubsidy(), row.getRefundFlashDiscountSubsidy(),
+                row.getNthItemSubsidy(), row.getRefundNthItemSubsidy(), row.getDistributionExpense(), row.getRefundDistribution(),
                 row.getStoreSettlementTotal());
     }
 

@@ -13,6 +13,7 @@ public enum RenderStepEnums {
     COUPON("优惠券价格渲染"),
     SKU_PROMOTION("商品促销计算"),
     FULL_DISCOUNT("满减计算"),
+    NTH_ITEM_DISCOUNT("第N件优惠计算"),
     GIFT_CARD("礼品卡计算"),
     SKU_FREIGHT("运费计算"),
     DISTRIBUTION("分配需要分配的促销金额"),

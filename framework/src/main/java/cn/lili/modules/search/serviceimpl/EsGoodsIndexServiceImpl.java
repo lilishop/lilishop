@@ -610,7 +610,7 @@ public class EsGoodsIndexServiceImpl extends ElasticsearchIndexAbstractService i
             PromotionGoods promotionsGoods = promotionGoodsService.getPromotionsGoods(searchParams);
             clazz = addUpdateQuery(promotion, key, updateQueries, clazz, goodsIndex);
             // 如果促销活动为秒杀或者拼团设置促销价格
-            if (promotionsGoods != null && (PromotionTypeEnum.SECKILL.name().equals(promotionsGoods.getPromotionType()) || PromotionTypeEnum.PINTUAN.name().equals(promotionsGoods.getPromotionType()))) {
+            if (promotionsGoods != null && isSkuDisplayPromotion(promotionsGoods.getPromotionType())) {
                 updateQueries.add(UpdateQuery.builder(id).withDocument(Document.from(MapUtil.builder(PROMOTION_PRICE, promotionsGoods.getPrice()).build())).build());
             }
 
@@ -645,9 +645,7 @@ public class EsGoodsIndexServiceImpl extends ElasticsearchIndexAbstractService i
             clazz = addUpdateQuery(promotion, key, updateQueries, clazz, goodsIndex);
 
             // 如果促销活动为秒杀、满减或拼团，设置促销价格
-            if (goodsIndex != null &&
-                    (PromotionTypeEnum.SECKILL.name().equals(promotionGoods.getPromotionType()) ||
-                            PromotionTypeEnum.PINTUAN.name().equals(promotionGoods.getPromotionType()))) {
+            if (goodsIndex != null && isSkuDisplayPromotion(promotionGoods.getPromotionType())) {
                 updateQueries.add(UpdateQuery.builder(goodsIndex.getId())
                         .withDocument(Document.from(MapUtil.builder(PROMOTION_PRICE, promotionGoods.getPrice()).build()))
                         .build());
@@ -1076,13 +1074,12 @@ public class EsGoodsIndexServiceImpl extends ElasticsearchIndexAbstractService i
             log.warn("封装促销信息失败，跳过写入 promotionMapJson。skuId={}, error={}", index.getId(), e.getMessage());
         }
 
-        // 提取秒杀/拼团的促销价格（单次过滤取首个）
-        final String SECKILL = PromotionTypeEnum.SECKILL.name();
-        final String PINTUAN = PromotionTypeEnum.PINTUAN.name();
+        // 提取单品促销价格（秒杀/拼团/直降/会员价/预售，取最低价）
         Double promotionPrice = promotionGoods.stream()
-                .filter(pg -> SECKILL.equals(pg.getPromotionType()) || PINTUAN.equals(pg.getPromotionType()))
+                .filter(pg -> isSkuDisplayPromotion(pg.getPromotionType()))
                 .map(PromotionGoods::getPrice)
-                .findFirst()
+                .filter(Objects::nonNull)
+                .min(Double::compareTo)
                 .orElse(null);
 
         if (promotionPrice != null) {
@@ -1153,6 +1150,15 @@ public class EsGoodsIndexServiceImpl extends ElasticsearchIndexAbstractService i
             indexOps.delete();
             indexOps.createWithMapping();
         }
+    }
+
+    private boolean isSkuDisplayPromotion(String promotionType) {
+        if (promotionType == null) {
+            return false;
+        }
+        return PromotionTypeEnum.SECKILL.name().equals(promotionType)
+                || PromotionTypeEnum.PINTUAN.name().equals(promotionType)
+                || PromotionTypeEnum.FLASH_DISCOUNT.name().equals(promotionType);
     }
 
 }
