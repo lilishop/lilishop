@@ -20,6 +20,15 @@ management:
 spring:
   application:
     name: lilishop-all
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.elasticsearch.ReactiveElasticsearchClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ReactiveElasticsearchRepositoriesAutoConfiguration
+      - org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration
   servlet:
     multipart:
       max-file-size: 20MB
@@ -32,6 +41,9 @@ spring:
       fail-on-empty-beans: false
 
   data:
+    elasticsearch:
+      repositories:
+        enabled: false
     redis:
       host: 192.168.31.100
       port: 30379
@@ -155,15 +167,6 @@ lili:
   data:
     elasticsearch:
       enabled: false
-      cluster-name: elasticsearch
-      cluster-nodes: 192.168.31.100:9200
-      index:
-        number-of-replicas: 0
-        number-of-shards: 3
-      index-prefix: lili
-      schema: http
-    logstash:
-      server: 192.168.31.100:4560
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
@@ -186,22 +189,7 @@ lili:
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
 
-# RocketMQ 暂保留连接配置（Phase 2 将整体替换为 Spring Event + Redisson）
-rocketmq:
-  name-server: 192.168.31.100:9876
-  producer:
-    group: lili_group
-    send-message-timeout: 30000
-
 # XXL-Job（来自原 consumer 模块）
 xxl:
   job:
-    admin:
-      addresses: http://192.168.31.100:9001/xxl-job-admin
-    executor:
-      appname: xxl-job-executor-lilishop
-      address:
-      ip:
-      port: 8891
-      logpath: ./xxl-job/executor
-      logretentiondays: 7
+    enabled: false

@@ -20,6 +20,7 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
  **/
 @Slf4j
 @Configuration
+@ConditionalOnProperty(value = "lili.data.elasticsearch.enabled", havingValue = "true", matchIfMissing = true)
 @EnableElasticsearchRepositories(basePackages = "cn.lili.modules.*.repository")
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
 

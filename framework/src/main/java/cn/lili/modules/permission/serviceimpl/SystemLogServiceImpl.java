@@ -33,6 +33,7 @@ import java.util.List;
  * @since 2020/11/17 3:45 下午
  */
 @Service
+@ConditionalOnProperty(value = "lili.data.elasticsearch.enabled", havingValue = "true", matchIfMissing = true)
 public class SystemLogServiceImpl implements SystemLogService {
 
     @Autowired
