@@ -1,12 +1,14 @@
 # Lilishop(PickMall) 开源商城系统
 
-[![GitHub Stars](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=github)](https://github.com/hongyehuicheng/lilishop)
+[![GitHub Stars](https://img.shields.io/github/stars/lilishop/lilishop.svg?style=social&logo=github)](https://github.com/lilishop/lilishop)
 [![Gitee Stars](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](./LICENSE)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
+
 <p align="right">
   简体中文 | <a href="./README.en.md">English</a>
 </p>
-
-LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开源商城系统，支持 B2B2C 多商户商城、小程序商城、微服务商城、直播电商、分销返佣、秒杀活动、Docker 私有化部署。
 
 ## 核心特性
 
@@ -29,6 +31,11 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 - Java商城系统二次开发
 - 开源商城源码学习
 - 多商户电商平台
+
+LILISHOP（PickMall）是一套基于 **Spring Boot 3** 与 **Vue / uni-app** 构建的 **Java 开源商城系统**，定位为可商用、可二次开发的 **B2B2C 多商户电商平台**。代码采用前后端分离架构，后端模块化、支持分布式部署，前端覆盖 PC、H5、微信小程序与 Android / iOS APP。系统内置直播电商、分销返佣、秒杀拼团、优惠券、积分会员、可视化装修等完整电商业务模块，并提供 Docker 镜像与 docker-compose 配置，便于私有化部署到企业服务器或 Kubernetes 集群。
+
+> **本仓库**: Lilishop 后端服务（Spring Boot 3 / Java 21 多模块工程）。前端、移动端、基础设施分别位于 `lilishop-ui`、`lilishop-uniapp`、`docker` 仓库——GitHub 与 Gitee 完整地址见下方 [项目仓库](#项目仓库) 表。
+
 ---
 
 ### 1. 项目简介
@@ -77,7 +84,7 @@ Lilishop 由 4 个独立仓库组成，均同步托管于 GitHub 与 Gitee：
     -   密码: `111111`
 -   **商城PC端**: <https://pc-b2b2c.pickmall.cn>
 -   **微信小程序**:
-    ![移动端体验二维码](https://static.pickmall.cn/images/h5-qrcode.png)
+    ![Lilishop 买家端微信小程序体验二维码](https://static.pickmall.cn/images/h5-qrcode.png)
 
 ---
 
@@ -97,7 +104,7 @@ Lilishop 由 4 个独立仓库组成，均同步托管于 GitHub 与 Gitee：
 ### 5. 技术架构
 
 #### 5.1 架构图
-![系统架构图](https://lili-system.oss-cn-beijing.aliyuncs.com/docs/%E6%9E%B6%E6%9E%84.png)
+![Lilishop B2B2C 商城系统架构图：Spring Boot 微服务 + Vue 前端 + RocketMQ 消息队列 + Elasticsearch 搜索引擎](https://lili-system.oss-cn-beijing.aliyuncs.com/docs/%E6%9E%B6%E6%9E%84.png)
 
 #### 5.2 后端技术栈
 
@@ -159,4 +166,4 @@ Lilishop 由 4 个独立仓库组成，均同步托管于 GitHub 与 Gitee：
 -   **[在线客服](https://work.weixin.qq.com/kfid/kfc4d8dc24a73c15f44)**
 -   **微信交流1群（已满）**
 -   **微信交流2群**:
-    ![微信群](https://lilishop-wechat.oss-cn-beijing.aliyuncs.com/wechat.jpg)
+    ![Lilishop 开源商城系统微信交流群二维码](https://lilishop-wechat.oss-cn-beijing.aliyuncs.com/wechat.jpg)

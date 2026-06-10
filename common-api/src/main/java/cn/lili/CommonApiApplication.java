@@ -1,22 +1,9 @@
 package cn.lili;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cache.annotation.EnableCaching;
-
 /**
- * 基础API
+ * 历史入口类：单体合并后由 {@link LilishopApplication} 统一启动。
  *
  * @author Chopper
- * @since 2020/11/17 3:38 下午
  */
-@EnableCaching
-@SpringBootApplication
 public class CommonApiApplication {
-
-    public static void main(String[] args) {
-        System.setProperty("rocketmq.client.logUseSlf4j","true");
-        SpringApplication.run(CommonApiApplication.class, args);
-    }
-
 }

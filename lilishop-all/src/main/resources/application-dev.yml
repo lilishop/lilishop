@@ -1,0 +1,23 @@
+# 开发环境覆盖：替换 192.168.31.100 为你本地中间件地址
+spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: lilishop
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: lilishop
+
+lili:
+  data:
+    elasticsearch:
+      enabled: false
+      cluster-nodes: 127.0.0.1:9200
+      schema: http
+    logstash:
+      server: 127.0.0.1:4560
+
+rocketmq:
+  name-server: 127.0.0.1:9876

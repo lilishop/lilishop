@@ -1,0 +1,207 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  tomcat:
+    uri-encoding: UTF-8
+    threads:
+      min-spare: 50
+      max: 1000
+
+management:
+  health:
+    elasticsearch:
+      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+spring:
+  application:
+    name: lilishop-all
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+  cache:
+    type: redis
+  jackson:
+    time-zone: GMT+8
+    serialization:
+      fail-on-empty-beans: false
+
+  data:
+    redis:
+      host: 192.168.31.100
+      port: 30379
+      password: lilishop
+      lettuce:
+        pool:
+          max-active: 200
+          max-wait: 20s
+          max-idle: 10
+          min-idle: 8
+
+  datasource:
+    url: jdbc:mysql://192.168.31.100:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: lilishop
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+
+# 合并后的 ignored.urls 白名单（来自 6 个模块）
+ignored:
+  urls:
+    - /editor-app/**
+    - /MP_verify_qSyvBPhDsPdxvOhC.txt
+    - /weixin/**
+    - /source/**
+    - /favicon.ico
+    - /static/**
+    - /public/**
+    - /resources/**
+    - /META-INF/resources/**
+    - /druid/**
+    - /swagger-ui.html
+    - /swagger-ui
+    - /swagger-ui/
+    - /swagger-ui/**
+    - /v3/api-docs
+    - /v3/api-docs/**
+    # buyer 公开接口
+    - /buyer/payment/cashier/**
+    - /buyer/payment/cashierRefund/**
+    - /buyer/other/pageData/**
+    - /buyer/other/article/**
+    - /buyer/other/wechat/h5/callback
+    - /buyer/goods/**
+    - /buyer/store/**
+    - /buyer/passport/connect/**
+    - /buyer/members/**
+    - /buyer/passport/member/**
+    - /buyer/passport/member/refresh/**
+    - /buyer/promotion/pintuan/**
+    - /buyer/promotion/seckill/**
+    - /buyer/promotion/pointsGoods/**
+    - /buyer/promotion/coupon
+    - /buyer/member/evaluation/*/goodsEvaluation
+    - /buyer/member/evaluation/*/evaluationNumber
+    - /buyer/other/appVersion/**
+    - /buyer/broadcast/studio/**
+    # store 公开接口
+    - /store/passport/login/**
+    - /store/passport/login/refresh/**
+    # manager 公开接口
+    - /manager/passport/user/login
+    - /manager/passport/user/refresh/**
+    - /manager/other/elasticsearch
+    - /manager/other/customWords
+    # common 公开接口
+    - /common/common/slider/**
+    - /common/common/sms/**
+    - /common/common/logo
+    - /common/common/site
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/*.xml
+  configuration:
+    cache-enabled: true
+
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    root: info
+  file:
+    path: lili-logs
+  logback:
+    rollingpolicy:
+      max-history: 7
+      max-file-size: 5MB
+
+jasypt:
+  encryptor:
+    password: lili
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui/index.html
+  packages-to-scan: cn.lili.controller
+  # 合并后扫描所有模块路径
+  paths-to-match:
+    - /buyer/**
+    - /store/**
+    - /manager/**
+    - /common/**
+    - /im/**
+    - /seat/**
+
+lili:
+  system:
+    isDemoSite: false
+  statistics:
+    onlineMember: 48
+    currentOnlineUpdate: 600
+  jwt-setting:
+    tokenExpireTime: 259200
+  cache:
+    timeout: 1500
+  thread:
+    corePoolSize: 5
+    maxPoolSize: 50
+    queueCapacity: 50
+  data:
+    elasticsearch:
+      enabled: false
+      cluster-name: elasticsearch
+      cluster-nodes: 192.168.31.100:9200
+      index:
+        number-of-replicas: 0
+        number-of-shards: 3
+      index-prefix: lili
+      schema: http
+    logstash:
+      server: 192.168.31.100:4560
+    rocketmq:
+      promotion-topic: lili_promotion_topic
+      promotion-group: lili_promotion_group
+      msg-ext-topic: lili_msg_topic
+      msg-ext-group: lili_msg_group
+      goods-topic: lili_goods_topic
+      goods-group: lili_goods_group
+      order-topic: lili_order_topic
+      order-group: lili_order_group
+      member-topic: lili_member_topic
+      member-group: lili_member_group
+      store-topic: lili_store_topic
+      store-group: lili_store_group
+      other-topic: lili_other_topic
+      other-group: lili_other_group
+      notice-topic: lili_notice_topic
+      notice-group: lili_notice_group
+      notice-send-topic: lili_send_notice_topic
+      notice-send-group: lili_send_notice_group
+      after-sale-topic: lili_after_sale_topic
+      after-sale-group: lili_after_sale_group
+
+# RocketMQ 暂保留连接配置（Phase 2 将整体替换为 Spring Event + Redisson）
+rocketmq:
+  name-server: 192.168.31.100:9876
+  producer:
+    group: lili_group
+    send-message-timeout: 30000
+
+# XXL-Job（来自原 consumer 模块）
+xxl:
+  job:
+    admin:
+      addresses: http://192.168.31.100:9001/xxl-job-admin
+    executor:
+      appname: xxl-job-executor-lilishop
+      address:
+      ip:
+      port: 8891
+      logpath: ./xxl-job/executor
+      logretentiondays: 7

@@ -73,6 +73,7 @@
         <module>buyer-api</module>
         <module>consumer</module>
         <module>im-api</module>
+        <module>lilishop-all</module>
 
     </modules>
 
@@ -82,4 +83,24 @@
             <url>file:///${project.basedir}/maven-repository</url>
         </repository>
     </repositories>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>1.18.34</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>
