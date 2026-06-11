@@ -1,13 +1,12 @@
 package cn.lili.modules.goods.serviceimpl;
 
 
-import cn.lili.modules.file.entity.enums.OssEnum;
+import cn.lili.modules.file.service.FileUrlService;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
 import cn.lili.modules.goods.mapper.GoodsGalleryMapper;
 import cn.lili.modules.goods.service.GoodsGalleryService;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.GoodsSetting;
-import cn.lili.modules.system.entity.dto.OssSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -34,6 +33,9 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
      */
     @Autowired
     private SettingService settingService;
+
+    @Autowired
+    private FileUrlService fileUrlService;
 
 
     @Override
@@ -97,24 +99,7 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
      * @return
      */
     private String getUrl(String url, Integer width, Integer height) {
-        Setting setting = settingService.get(SettingEnum.OSS_SETTING.name());
-        OssSetting ossSetting = JSON.parseObject(setting.getSettingValue(), OssSetting.class);
-        switch (OssEnum.valueOf(ossSetting.getType())) {
-            case MINIO:
-            case LOCAL:
-                //缩略图全路径
-                return url;
-            case ALI_OSS:
-                //缩略图全路径
-                return url + "?x-oss-process=style/" + width + "X" + height;
-            case HUAWEI_OBS:
-                //缩略图全路径
-                return url + "?image/resize,m_fixed,h_" + height + ",w_" + width;
-            case TENCENT_COS:
-                //缩略图全路径
-                return url + "?imageMogr2/thumbnail/" + width + "x" + height;
-        }
-        return url;
+        return fileUrlService.toImageUrl(url, width, height);
     }
 
 }

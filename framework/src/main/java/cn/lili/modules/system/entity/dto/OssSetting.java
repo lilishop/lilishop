@@ -123,6 +123,16 @@ public class OssSetting implements Serializable {
      */
     private String localFileUrlPrefix;
 
+    /**
+     * CDN 加速开关，关闭时接口继续返回原始存储地址
+     */
+    private Boolean cdnEnabled = false;
+
+    /**
+     * CDN 访问前缀，例如 https://cdn.example.com
+     */
+    private String cdnUrlPrefix;
+
     public String getType() {
         //默认给阿里云oss存储类型
         if (StringUtils.isEmpty(type)) {
