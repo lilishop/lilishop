@@ -6,6 +6,8 @@ import cn.lili.modules.promotion.entity.dos.BasePromotions;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.service.EsGoodsIndexService;
+import cn.lili.modules.goods.service.GoodsSkuService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,10 @@ import java.util.Map;
 @Service
 @ConditionalOnProperty(value = "lili.data.elasticsearch.enabled", havingValue = "false")
 public class EsGoodsIndexServiceNoop implements EsGoodsIndexService {
+
+    @Autowired
+    private GoodsSkuService goodsSkuService;
+
     @Override
     public Boolean deleteGoodsDown() {
         return true;
@@ -47,7 +53,7 @@ public class EsGoodsIndexServiceNoop implements EsGoodsIndexService {
 
     @Override
     public EsGoodsIndex findEsGoodsIndexById(String id) {
-        return null;
+        return findById(id);
     }
 
     @Override
@@ -109,7 +115,8 @@ public class EsGoodsIndexServiceNoop implements EsGoodsIndexService {
 
     @Override
     public EsGoodsIndex findById(String id) {
-        return null;
+        GoodsSku goodsSku = goodsSkuService.getGoodsSkuByIdFromCache(id);
+        return getResetEsGoodsIndex(goodsSku);
     }
 
     @Override
@@ -124,6 +131,11 @@ public class EsGoodsIndexServiceNoop implements EsGoodsIndexService {
 
     @Override
     public EsGoodsIndex getResetEsGoodsIndex(GoodsSku goodsSku) {
-        return null;
+        if (goodsSku == null || Boolean.TRUE.equals(goodsSku.getDeleteFlag())) {
+            return null;
+        }
+        EsGoodsIndex goodsIndex = new EsGoodsIndex(goodsSku);
+        goodsIndex.setPromotionMapJson("{}");
+        return goodsIndex;
     }
 }

@@ -153,6 +153,8 @@ lili:
     interfereNum: 0
     #允许误差像素
     faultTolerant: 3
+    #登录验证码放行，普通部署默认关闭
+    loginBypassEnabled: false
   system:
     isTestModel: true
   statistics:

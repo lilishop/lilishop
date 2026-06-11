@@ -303,7 +303,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         //商品规格
         GoodsSkuVO goodsSkuDetail = this.getGoodsSkuVO(goodsSku);
 
-        Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
+        Map<String, Object> promotionMap = goodsIndex == null ? Collections.emptyMap() : goodsIndex.getPromotionMap();
         AuthUser currentUser = UserContext.getCurrentUser();
         //设置当前商品的促销价格
         if (promotionMap != null && !promotionMap.isEmpty()) {

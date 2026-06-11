@@ -35,6 +35,11 @@ public class VerificationCodeProperties {
      */
     private Integer faultTolerant = 3;
 
+    /**
+     * 登录验证码放行开关，仅供本地 all-in-one 验收环境按需开启。
+     */
+    private Boolean loginBypassEnabled = false;
+
 
     public String getWatermark() {
         return watermark;
