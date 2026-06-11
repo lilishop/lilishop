@@ -1,10 +1,13 @@
 package cn.lili.modules.file.plugin;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import com.alibaba.fastjson2.JSON;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.properties.LocalFileProperties;
 import cn.lili.modules.file.entity.enums.OssEnum;
 import cn.lili.modules.file.plugin.impl.AliFilePlugin;
 import cn.lili.modules.file.plugin.impl.HuaweiFilePlugin;
+import cn.lili.modules.file.plugin.impl.LocalFilePlugin;
 import cn.lili.modules.file.plugin.impl.MinioFilePlugin;
 import cn.lili.modules.file.plugin.impl.TencentFilePlugin;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -27,6 +30,8 @@ public class FilePluginFactory {
 
     @Autowired
     private SettingService settingService;
+    @Autowired
+    private LocalFileProperties localFileProperties;
 
 
     /**
@@ -39,9 +44,11 @@ public class FilePluginFactory {
         OssSetting ossSetting = null;
         try {
             Setting setting = settingService.get(SettingEnum.OSS_SETTING.name());
-
-            ossSetting = JSON.parseObject(setting.getSettingValue(), OssSetting.class);
-
+            if (setting == null || CharSequenceUtil.isBlank(setting.getSettingValue())) {
+                ossSetting = this.createDefaultLocalSetting();
+            } else {
+                ossSetting = JSON.parseObject(setting.getSettingValue(), OssSetting.class);
+            }
 
             switch (OssEnum.valueOf(ossSetting.getType())) {
 
@@ -53,6 +60,9 @@ public class FilePluginFactory {
                     return new HuaweiFilePlugin(ossSetting);
                 case TENCENT_COS:
                     return new TencentFilePlugin(ossSetting);
+                case LOCAL:
+                    fillLocalDefault(ossSetting);
+                    return new LocalFilePlugin(ossSetting);
                 default:
                     throw new ServiceException();
             }
@@ -61,5 +71,20 @@ public class FilePluginFactory {
         }
     }
 
+    private OssSetting createDefaultLocalSetting() {
+        OssSetting ossSetting = new OssSetting();
+        ossSetting.setType(OssEnum.LOCAL.name());
+        fillLocalDefault(ossSetting);
+        return ossSetting;
+    }
+
+    private void fillLocalDefault(OssSetting ossSetting) {
+        if (CharSequenceUtil.isBlank(ossSetting.getLocalFilePath())) {
+            ossSetting.setLocalFilePath(localFileProperties.getPath());
+        }
+        if (CharSequenceUtil.isBlank(ossSetting.getLocalFileUrlPrefix())) {
+            ossSetting.setLocalFileUrlPrefix(localFileProperties.getUrlPrefix());
+        }
+    }
 
 }

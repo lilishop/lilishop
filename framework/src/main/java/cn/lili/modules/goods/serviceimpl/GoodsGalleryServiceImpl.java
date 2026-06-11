@@ -101,6 +101,7 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
         OssSetting ossSetting = JSON.parseObject(setting.getSettingValue(), OssSetting.class);
         switch (OssEnum.valueOf(ossSetting.getType())) {
             case MINIO:
+            case LOCAL:
                 //缩略图全路径
                 return url;
             case ALI_OSS:

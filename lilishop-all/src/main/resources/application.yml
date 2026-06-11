@@ -70,6 +70,7 @@ ignored:
     - /weixin/**
     - /source/**
     - /favicon.ico
+    - /files/**
     - /static/**
     - /public/**
     - /resources/**
@@ -153,6 +154,9 @@ springdoc:
 lili:
   system:
     isDemoSite: false
+  local-file:
+    path: data/uploads
+    url-prefix: /files
   statistics:
     onlineMember: 48
     currentOnlineUpdate: 600

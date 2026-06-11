@@ -15,9 +15,6 @@ import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.file.entity.File;
 import cn.lili.modules.file.plugin.FilePluginFactory;
 import cn.lili.modules.file.service.FileService;
-import cn.lili.modules.system.entity.dos.Setting;
-import cn.lili.modules.system.entity.enums.SettingEnum;
-import cn.lili.modules.system.service.SettingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +40,6 @@ public class UploadController {
     @Autowired
     private FileService fileService;
     @Autowired
-    private SettingService settingService;
-    @Autowired
     private FilePluginFactory filePluginFactory;
     @Autowired
     private Cache cache;
@@ -66,10 +61,6 @@ public class UploadController {
         }
         if (file == null) {
             throw new ServiceException(ResultCode.FILE_NOT_EXIST_ERROR);
-        }
-        Setting setting = settingService.get(SettingEnum.OSS_SETTING.name());
-        if (setting == null || CharSequenceUtil.isBlank(setting.getSettingValue())) {
-            throw new ServiceException(ResultCode.OSS_NOT_EXIST);
         }
         if (CharSequenceUtil.isEmpty(file.getContentType())) {
             throw new ServiceException(ResultCode.IMAGE_FILE_EXT_ERROR);

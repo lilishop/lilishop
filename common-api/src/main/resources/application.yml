@@ -110,6 +110,7 @@ ignored:
     - /common/common/site
     - /druid/**
     - /swagger-ui.html
+    - /files/**
 
 # Mybatis-plus
 mybatis-plus:
@@ -143,6 +144,9 @@ jasypt:
     password: lili
 
 lili:
+  local-file:
+    path: data/uploads
+    url-prefix: /files
   #验证码设置
   verification-code:
     #图形验证码有效时间 秒 包含滑块验证码有效时间， 以及验证通过之后，缓存中存储的验证结果有效时间
