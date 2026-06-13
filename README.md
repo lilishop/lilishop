@@ -10,6 +10,28 @@
   简体中文 | <a href="./README.en.md">English</a>
 </p>
 
+## All-In-One 一键启动
+
+想快速体验完整商城，不需要分别部署后端、PC、商家端、运营端、IM、H5、MySQL 和 Redis。安装 Docker Desktop 后，直接执行下面脚本，按提示输入 IP/域名、端口、密码和数据目录即可启动单镜像单容器环境。
+
+macOS / Linux:
+
+```bash
+curl -fsSL https://gitee.com/beijing_hongye_huicheng/docker/raw/allinone-lite-mysql-redis/install/install-lilishop.sh -o install-lilishop.sh
+chmod +x install-lilishop.sh
+./install-lilishop.sh
+```
+
+Windows PowerShell:
+
+```powershell
+Invoke-WebRequest -Uri "https://gitee.com/beijing_hongye_huicheng/docker/raw/allinone-lite-mysql-redis/install/install-lilishop.ps1" -OutFile "install-lilishop.ps1"
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\install-lilishop.ps1
+```
+
+默认镜像：`ccr.ccs.tencentyun.com/lilishop/lilishop-all-in-one:lite`。启动后可访问买家 PC、商家端、运营端、IM Web、uniapp H5 和后端 API。更多说明见 [docker/all-in-one 文档](https://gitee.com/beijing_hongye_huicheng/docker/tree/allinone-lite-mysql-redis/all-in-one)。
+
 ## 核心特性
 
 - Java商城系统
