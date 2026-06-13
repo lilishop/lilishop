@@ -15,3 +15,9 @@ lili:
       schema: http
     logstash:
       server: 127.0.0.1:4560
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

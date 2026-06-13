@@ -36,7 +36,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 - Java商城系统
 - 开源商城系统
-- SpringBoot商城系统
+- Spring Boot 4商城系统
 - SpringCloud微服务商城
 - B2B2C商城源码
 - 多商户商城系统
@@ -63,7 +63,7 @@ LILISHOP（PickMall）是一套基于 **Spring Boot 3** 与 **Vue / uni-app** �
 ### 1. 项目简介
 
 **Lilishop** 是一款功能完善的B2B2C多商户商城系统，采用前后端分离架构，全端代码开源。
-后端基于 **SpringBoot3** 构建，具备高内聚、低耦合的特性，支持分布式部署。
+后端基于 **Spring Boot 4**（Java 21）构建，具备高内聚、低耦合的特性，支持分布式部署。
 前端覆盖PC、H5、小程序和APP，基于 **Vue** 和 **uni-app** 开发。
 
 -   **官方网站**: <https://pickmall.cn>
@@ -132,14 +132,13 @@ Lilishop 由 4 个独立仓库组成，均同步托管于 GitHub 与 Gitee：
 
 | 技术            | 选型            | 版本   | 备注/用途  |
 | :-------------- | :-------------- | :----- | :--------- |
-| 核心框架        | Spring Boot     | 3.5.6  | 简化应用开发 |
-| ORM框架         | MyBatis-Plus    | 3.5.8 | 数据持久化  |
+| 核心框架        | Spring Boot     | 4.0.5  | 简化应用开发（需 JDK 21） |
+| ORM框架         | MyBatis-Plus    | 3.5.15 | 数据持久化  |
 | 数据库          | MySQL (LTS)     | 8.3.0  | 关系型数据存储 |
 | 消息队列        | RocketMQ        | 2.3.4  | 异步任务与解耦 |
 | 缓存            | Redis           | -  | 数据缓存    |
-| 搜索引擎        | Elasticsearch   | -  | 商品搜索   |
+| 搜索引擎        | Elasticsearch   | 7.x  | 商品搜索（客户端 elasticsearch-java 9.x） |
 | 安全框架        | Spring Security | -  | 认证与授权  |
-| 分库分表        | ShardingSphere  | 4.0.0  | 数据水平扩展 |
 | 定时任务        | XXL-Job         | 2.3.0  | 分布式任务调度 |
 | 认证方案        | JWT             | -      | Token 方案 |
 
@@ -162,6 +161,29 @@ Lilishop 由 4 个独立仓库组成，均同步托管于 GitHub 与 Gitee：
 | 核心框架  | uni-app | 跨平台开发框架 |
 | UI库      | uViewUI | 丰富的组件库   |
 | CSS预处理 | SCSS    | 样式开发       |
+
+#### 5.4 Elasticsearch 搜索回归（Spring Boot 4 升级后）
+
+集群为 **Elasticsearch 7.x** 时，请配置 REST API 兼容版本（默认 `7`）：
+
+```yaml
+lili:
+  data:
+    elasticsearch:
+      compatibility-version: 7
+```
+
+在 manager-api 模块执行搜索集成测试（需 Redis、MySQL、ES 均可访问，且已有商品索引）：
+
+```powershell
+$env:JAVA_HOME="C:\Program Files\Java\jdk-21.0.3"
+$env:LILISHOP_ES_REGRESSION="true"
+mvn test -pl manager-api "-Drevision=4.3" "-DskipTests=false" "-Dtest=EsSearchCompatibilityTest" "-Dsurefire.failIfNoSpecifiedTests=false"
+```
+
+覆盖场景：集群连通、商品分页搜索、筛选聚合、按 ID 查询。
+
+---
 
 ### 6.功能列表
 

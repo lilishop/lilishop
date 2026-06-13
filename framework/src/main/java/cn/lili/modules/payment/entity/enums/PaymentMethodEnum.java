@@ -28,7 +28,11 @@ public enum PaymentMethodEnum {
     /**
      * 线下转账
      */
-    BANK_TRANSFER("bankTransferPlugin", "线下转账");
+    BANK_TRANSFER("bankTransferPlugin", "线下转账"),
+    /**
+     * 未实际支付
+     */
+    NOT_ACTUALLY_PAID("notActuallyPaidPlugin", "未实际支付");
 
     /**
      * 插件id 调用对象，需要实现payment接口

@@ -8,11 +8,13 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.payment.entity.RefundLog;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
+import cn.lili.modules.promotion.service.GiftCardCashService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 
 /**
  * 退款支持
@@ -33,6 +35,8 @@ public class RefundSupport {
      */
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private GiftCardCashService giftCardCashService;
 
     /**
      * 售后退款
@@ -41,10 +45,17 @@ public class RefundSupport {
      */
     public void refund(AfterSale afterSale) {
         Order order = orderService.getBySn(afterSale.getOrderSn());
+        BigDecimal channelRefund = giftCardCashService.resolveChannelRefundAfterGiftCardForAfterSale(afterSale);
+        double channelRefundAmount = channelRefund.doubleValue();
+        if (channelRefundAmount <= 0D) {
+            // 全额回卡，不调用第三方退款通道，仅记录退款流水
+            storeFlowService.refundOrder(afterSale);
+            return;
+        }
         RefundLog refundLog = RefundLog.builder()
                 .isRefund(false)
-                .totalAmount(afterSale.getActualRefundPrice())
-                .payPrice(afterSale.getActualRefundPrice())
+                .totalAmount(channelRefundAmount)
+                .payPrice(channelRefundAmount)
                 .memberId(afterSale.getMemberId())
                 .paymentName(order.getPaymentMethod())
                 .afterSaleNo(afterSale.getSn())

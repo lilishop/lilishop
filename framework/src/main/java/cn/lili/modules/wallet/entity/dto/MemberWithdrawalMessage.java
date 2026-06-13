@@ -24,4 +24,7 @@ public class MemberWithdrawalMessage {
     @Schema(description = "提现状态")
     private String status;
 
+    @Schema(description = "延迟重试次数")
+    private Integer retryCount;
+
 }

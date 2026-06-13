@@ -21,3 +21,9 @@ xxl:
   job:
     admin:
       addresses: http://127.0.0.1:9001/xxl-job-admin
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

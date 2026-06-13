@@ -111,16 +111,22 @@ public class StoreFlow extends BaseIdEntity {
     @Schema(description = "站点优惠券补贴金额")
     private Double siteCouponCommission;
 
+    @Schema(description = "礼品卡平台补贴金额（抵扣金额，由平台承担）")
+    private Double giftCardSubsidyPrice;
+
     @Schema(description = "单品分销返现支出")
     private Double distributionRebate;
 
     @Schema(description = "平台收取交易佣金")
     private Double commissionPrice;
 
-    @Schema(description = "流水金额")
+    @Schema(description = "流水金额（用户实际支付现金，已扣礼品卡）")
     private Double finalPrice;
 
-    @Schema(description = "最终结算金额")
+    @Schema(description = "商家结算计费基数（有礼品卡时=finalPrice+giftCardSubsidyPrice）")
+    private Double settlementBasePrice;
+
+    @Schema(description = "最终结算金额（商家入账）")
     private Double billPrice;
 
     @Schema(description = "第三方交易流水号")
@@ -192,13 +198,14 @@ public class StoreFlow extends BaseIdEntity {
         /**
          * @TODO 计算平台佣金
          */
-        //店铺流水金额=goodsPrice(商品总金额（商品原价）)+ freightPrice(配送费) - discountPrice(优惠金额) - couponPrice(优惠券金额) + updatePrice(订单修改金额)
+        double giftCardSubsidy = priceDetailDTO.getGiftCardPrice();
+        this.setGiftCardSubsidyPrice(giftCardSubsidy);
         this.setFinalPrice(item.getPriceDetailDTO().getFlowPrice());
-        //平台收取交易佣金=(flowPrice(流水金额) * platFormCommissionPoint(平台佣金比例))/100
+        this.setSettlementBasePrice(giftCardSubsidy > 0
+                ? CurrencyUtil.add(this.getFinalPrice(), giftCardSubsidy)
+                : this.getFinalPrice());
         this.setCommissionPrice(item.getPriceDetailDTO().getPlatFormCommission());
-        //单品分销返现支出
         this.setDistributionRebate(item.getPriceDetailDTO().getDistributionCommission());
-        //最终结算金额=flowPrice(流水金额) - platFormCommission(平台收取交易佣金) - distributionCommission(单品分销返现支出)
         this.setBillPrice(item.getPriceDetailDTO().getBillPrice());
         //兼容为空，以及普通订单操作
         if (CharSequenceUtil.isNotEmpty(promotionType)) {

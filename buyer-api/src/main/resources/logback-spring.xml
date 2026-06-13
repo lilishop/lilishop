@@ -31,10 +31,13 @@
             <pattern>%d{yy-MM-dd.HH:mm:ss.SSS} [%-16t] %-5p %-22c{0} %X{ServiceId} - %m%n</pattern>
         </encoder>
     </appender>
-    <logger name="RocketmqClient" additivity="false">
-        <level value="info" />
+    <logger name="RocketmqClient" additivity="false" level="INFO">
         <appender-ref ref="RocketmqClientAppender"/>
     </logger>
+    <!-- ES 未开启 xpack.security 时，集群会返回 HTTP 299 Warning，客户端会打 WARN，开发环境忽略 -->
+    <springProfile name="!prod">
+        <logger name="co.elastic.clients.transport.rest5_client.low_level.Rest5Client" level="ERROR"/>
+    </springProfile>
 
 
     <springProfile name="prod">
@@ -53,8 +56,7 @@
     </springProfile>
 
     <springProfile name="prod">
-        <root>
-            <level value="INFO"/>
+        <root level="INFO">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>
             <appender-ref ref="LOGSTASH"/>
@@ -62,8 +64,7 @@
     </springProfile>
 
     <springProfile name="!prod">
-        <root>
-            <level value="INFO"/>
+        <root level="INFO">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>
         </root>

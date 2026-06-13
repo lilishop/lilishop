@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.6</version>
+        <version>4.0.5</version>
         <relativePath/>
     </parent>
 
@@ -25,7 +25,7 @@
         <docker-registry>registry.cn-beijing.aliyuncs.com/lili-images</docker-registry>
         <images-version>1</images-version>
         <alipay-sdk-version>4.22.32.ALL</alipay-sdk-version>
-        <mybatis-plus-version>3.5.8</mybatis-plus-version>
+        <mybatis-plus-version>3.5.15</mybatis-plus-version>
         <Hutool-version>5.8.41</Hutool-version>
         <TinyPinyin-verions>2.0.3.RELEASE</TinyPinyin-verions>
         <jasypt-version>3.0.4</jasypt-version>
@@ -39,7 +39,6 @@
         <aliyun-sdk-dysms-version>2.0.9</aliyun-sdk-dysms-version>
         <rocketmq-version>2.3.4</rocketmq-version>
         <jwt-version>0.13.0</jwt-version>
-        <sharding-jdbc-version>4.0.0</sharding-jdbc-version>
         <druid-version>1.2.16</druid-version>
         <simple-http-version>1.0.3</simple-http-version>
         <antlr4-version>4.7.2</antlr4-version>

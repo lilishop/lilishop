@@ -13,7 +13,7 @@ import cn.lili.modules.im.entity.vo.MessageOperation;
 import cn.lili.modules.im.entity.vo.MessageVO;
 import cn.lili.modules.im.service.ImMessageService;
 import cn.lili.modules.im.service.ImTalkService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -45,6 +45,7 @@ public class WebSocketServer {
     private final ImMessageService imMessageService;
     private final ImTalkService imTalkService;
     private final Cache cache;
+    private final JsonMapper jsonMapper;
 
     /**
      * 建立连接
@@ -94,8 +95,7 @@ public class WebSocketServer {
     public void onMessage(@PathParam("accessToken") String accessToken, String msg) {
         log.info("发送消息：{}", msg);
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            MessageOperation messageOperation = objectMapper.readValue(msg, MessageOperation.class);
+            MessageOperation messageOperation = jsonMapper.readValue(msg, MessageOperation.class);
             operation(accessToken, messageOperation);
         } catch (Exception e) {
             log.error("消息解析失败: {}", msg, e);

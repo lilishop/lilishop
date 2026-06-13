@@ -95,6 +95,7 @@ public interface StoreFlowMapper extends BaseMapper<StoreFlow> {
     @Select("SELECT IFNULL(SUM( final_price ),0) AS refundPrice,IFNULL(SUM( commission_price ),0) AS refundCommissionPrice" +
             ",IFNULL(SUM( distribution_rebate ),0) AS distributionRefundCommission" +
             ",IFNULL(SUM( site_coupon_commission ),0) AS siteCouponRefundCommission" +
+            ",IFNULL(SUM( gift_card_subsidy_price ),0) AS giftCardRefundSubsidy" +
             ",IFNULL(SUM( point_settlement_price ),0) AS pointSettlementPrice " +
             ",IFNULL(SUM( kanjia_settlement_price ),0) AS kanjiaSettlementPrice " +
             ",IFNULL(SUM( bill_price ),0) AS billPrice " +
@@ -112,6 +113,7 @@ public interface StoreFlowMapper extends BaseMapper<StoreFlow> {
             ",IFNULL(SUM( commission_price ),0) AS commissionPrice" +
             ",IFNULL(SUM( distribution_rebate ),0) AS distributionCommission" +
             ",IFNULL(SUM( site_coupon_commission ),0) AS siteCouponCommission" +
+            ",IFNULL(SUM( gift_card_subsidy_price ),0) AS giftCardSubsidy" +
             ",IFNULL(SUM( point_settlement_price ),0) AS pointSettlementPrice " +
             ",IFNULL(SUM( kanjia_settlement_price ),0) AS kanjiaSettlementPrice " +
             ",IFNULL(SUM( bill_price ),0) AS billPrice " +

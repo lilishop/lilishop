@@ -97,7 +97,7 @@ public abstract class ElasticsearchIndexAbstractService extends BaseElasticsearc
 
 
         log.debug("更新商品索引的的部分属性，查询条件：{}，更新字段：{}, 类型: {}", queryFields, updateFields, clazz);
-        UpdateQuery updateQuery = UpdateQuery.builder(builder.build()).withScript(script.toString()).withLang("painless").withScriptType(ScriptType.INLINE)
+        UpdateQuery updateQuery = UpdateQuery.builder(builder.build()).withScript(script.toString()).withLang("painless")
                 .withAbortOnVersionConflict(false).build();
         try {
             ByQueryResponse byQueryResponse = this.client.updateByQuery(updateQuery, this.client.getIndexCoordinatesFor(clazz));

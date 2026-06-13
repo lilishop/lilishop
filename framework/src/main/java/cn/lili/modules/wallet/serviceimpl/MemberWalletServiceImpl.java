@@ -340,7 +340,14 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         //失败则恢复冻结金额
 
         if (transferResultDTO.getResult()) {
-            memberWithdrawApply.setApplyStatus(WithdrawStatusEnum.SUCCESS.name());
+
+            if("WECHAT".equals(withdrawalSetting.getType())){
+                memberWithdrawApply.setApplyStatus(WithdrawStatusEnum.WAIT_USER_CONFIRM.name());
+                memberWithdrawApply.setOutBillNo(transferResultDTO.getOutBillNo());
+                memberWithdrawApply.setWechatPackage(transferResultDTO.getWechatPackage());
+            }else{
+                memberWithdrawApply.setApplyStatus(WithdrawStatusEnum.SUCCESS.name());
+            }
         } else {
             memberWithdrawApply.setApplyStatus(WithdrawStatusEnum.ERROR.name());
             memberWithdrawApply.setErrorMessage(transferResultDTO.getResponse());

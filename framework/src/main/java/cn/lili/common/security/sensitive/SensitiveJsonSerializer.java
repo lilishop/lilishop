@@ -5,17 +5,13 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.ContextualSerializer;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import cn.lili.common.utils.SpringContextUtil;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.BeanProperty;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.ser.std.StdSerializer;
 
-import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -26,65 +22,51 @@ import java.util.Objects;
  * @Description:
  * @since 2021/9/10 16:46
  */
-public class SensitiveJsonSerializer extends JsonSerializer<String>
-        implements ContextualSerializer, ApplicationContextAware {
+public class SensitiveJsonSerializer extends StdSerializer<String> {
+
     private SensitiveStrategy strategy;
 
-    //系统配置
-    private SystemSettingProperties systemSettingProperties;
+    public SensitiveJsonSerializer() {
+        super(String.class);
+    }
+
+    private SensitiveJsonSerializer(SensitiveStrategy strategy) {
+        super(String.class);
+        this.strategy = strategy;
+    }
 
     @Override
-    public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        // 字段序列化处理
+    public void serialize(String value, JsonGenerator gen, SerializationContext serializers) {
         gen.writeString(strategy.desensitizer().apply(value));
     }
 
     @Override
-    public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) throws JsonMappingException {
-
-        // 判定是否 需要脱敏处理
+    public ValueSerializer<?> createContextual(SerializationContext prov, BeanProperty property) {
         if (desensitization()) {
-            //获取敏感枚举
             Sensitive annotation = property.getAnnotation(Sensitive.class);
-            //如果有敏感注解，则加入脱敏规则
             if (Objects.nonNull(annotation) && Objects.equals(String.class, property.getType().getRawClass())) {
-                this.strategy = annotation.strategy();
-                return this;
+                return new SensitiveJsonSerializer(annotation.strategy());
             }
         }
-        return prov.findValueSerializer(property.getType(), property);
-
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        systemSettingProperties = applicationContext.getBean(SystemSettingProperties.class);
+        return prov.findValueSerializer(property.getType());
     }
 
     /**
      * 是否需要脱敏处理
-     *
-     * @return
      */
     private boolean desensitization() {
-
-        //当前用户
         AuthUser authUser = UserContext.getCurrentUser();
-        //默认脱敏
         if (authUser == null) {
             return false;
         }
 
-        //如果是店铺
+        SystemSettingProperties systemSettingProperties = SpringContextUtil.getBean(SystemSettingProperties.class);
+
         if (authUser.getRole().equals(UserEnums.STORE)) {
-            //店铺需要进行脱敏，则脱敏处理
             return systemSettingProperties.getSensitiveLevel() == 2;
         }
 
-
-        //如果是店铺
         if (authUser.getRole().equals(UserEnums.MANAGER)) {
-            //店铺需要进行脱敏，则脱敏处理
             return systemSettingProperties.getSensitiveLevel() >= 1;
         }
 

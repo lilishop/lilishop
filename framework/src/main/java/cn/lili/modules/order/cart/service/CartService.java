@@ -156,6 +156,15 @@ public interface CartService {
     void selectCoupon(String couponId, String way, boolean use);
 
     /**
+     * 选择礼品卡
+     *
+     * @param credentialId 礼品卡凭证ID
+     * @param way          购物车类型
+     * @param use          true使用 false弃用
+     */
+    void selectGiftCard(String credentialId, String way, boolean use);
+
+    /**
      * 创建交易
      * 1.获取购物车类型，不同的购物车类型有不同的订单逻辑
      * 购物车类型：购物车、立即购买、虚拟商品、拼团、积分

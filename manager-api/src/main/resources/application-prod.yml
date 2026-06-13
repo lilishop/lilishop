@@ -17,3 +17,9 @@ lili:
       server: 127.0.0.1:4560
 rocketmq:
   name-server: 127.0.0.1:9876
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

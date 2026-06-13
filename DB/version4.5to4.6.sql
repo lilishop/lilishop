@@ -364,3 +364,140 @@ INSERT INTO `li_menu` (`id`, `create_by`, `create_time`, `delete_flag`, `update_
 INSERT INTO `li_menu` (`id`, `create_by`, `create_time`, `delete_flag`, `update_by`, `update_time`, `description`, `front_route`, `icon`, `level`, `name`, `parent_id`, `path`, `sort_order`, `title`, `front_component`, `permission`) VALUES (2054458120364294145, 'admin', '2026-05-13 15:06:01', b'0', 'admin', '2026-05-14 18:25:54', NULL, 'member-benefit', NULL, 2, 'member-benefit', '2053037117402689538', 'member-benefit', 4.00, '客户权益', NULL, '');
 
 INSERT INTO `li_setting` (`id`, `create_by`, `create_time`, `delete_flag`, `update_by`, `update_time`, `setting_value`) VALUES ('EXPERIENCE_SETTING', 'admin', '2026-05-09 17:48:35.153000', b'0', 'admin', '2026-05-14 18:37:25.848000', '{\"items\":[{\"ruleKey\":\"CONSUME\",\"ruleName\":\"消费\",\"enabled\":false,\"value\":1,\"maxValue\":null},{\"ruleKey\":\"REGISTER\",\"ruleName\":\"注册\",\"enabled\":false,\"value\":10,\"maxValue\":null},{\"ruleKey\":\"SIGN_IN\",\"ruleName\":\"签到\",\"enabled\":false,\"value\":10,\"maxValue\":null},{\"ruleKey\":\"COMMENT\",\"ruleName\":\"评价\",\"enabled\":false,\"value\":5,\"maxValue\":null},{\"ruleKey\":\"SHARE\",\"ruleName\":\"分享商城\",\"enabled\":false,\"value\":1,\"maxValue\":100},{\"ruleKey\":\"PROFILE\",\"ruleName\":\"完善信息\",\"enabled\":false,\"value\":10,\"maxValue\":null},{\"ruleKey\":\"FOLLOW_STORE\",\"ruleName\":\"关注店铺\",\"enabled\":false,\"value\":1,\"maxValue\":100},{\"ruleKey\":\"BIND_WECHAT\",\"ruleName\":\"绑定微信\",\"enabled\":false,\"value\":100,\"maxValue\":null},{\"ruleKey\":\"ADD_ADDRESS\",\"ruleName\":\"添加收货地址\",\"enabled\":false,\"value\":10,\"maxValue\":null},{\"ruleKey\":\"SHARE_REGISTER\",\"ruleName\":\"分享注册\",\"enabled\":false,\"value\":1,\"maxValue\":100},{\"ruleKey\":\"SHARE_BUY\",\"ruleName\":\"分享购买\",\"enabled\":false,\"value\":1,\"maxValue\":100}],\"description\":\"签到领京豆活动规则\\n • 活动说明 参与活动前请认真阅读活动规则，参与本次活动即视为用户同意并接受本规则的全部内容。\\n • 活动举办方 本活动由京东举办。\\n • 活动时间（本活动所有时间均以北京时间为准） 1. 活动时间：2024年11月15日12:00:00至2025年12月31日23:59:59\\n • 活动玩法 1. 活动条件：符合【京东注册】条件的用户可参与本次签到领京豆活动。本次活动仅限京东普通个人用户参与，企业用户、渠道经销商、专卖店、批发商用户、异常用户不予参与。 2. 签到玩法：活动期间内，用户可通过【京东首页-京豆ICON-签到领京豆】或者【京东首页-我的-京豆】入口来访签到，可获得签到奖励。每位京东用户【每天】仅可参与【1】次本活动，超过前述次数限制的将被视为无效。3. 连签玩法：当连续签到至规定天数时，当天签到可额外获得京豆奖励。过程中任意一天中断签到，则本轮次连续签到周期从头开始计算奖励（例如：后天可领取第7天的签到奖励，但第6天时没有签到，则第7天签到时不可领取奖励，将从第1天开始计算签到进程和奖励）。完成一个轮次的连续签到后，循环下一个连签奖励周期重新开始（例\"}');
+
+ALTER TABLE `li_member_withdraw_apply`
+    ADD COLUMN `out_bill_no` varchar(64) DEFAULT NULL COMMENT '第三方转账单号',
+  ADD COLUMN `wechat_package` varchar(1024) DEFAULT NULL COMMENT '微信等待用户确认信息';
+
+
+CREATE TABLE `li_gift_card_cash_activity` (
+  `id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `create_time` datetime(6) DEFAULT NULL,
+  `delete_flag` bit(1) DEFAULT b'0',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `update_time` datetime(6) DEFAULT NULL,
+
+  `gift_card_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '活动名称/礼品卡名称',
+  `card_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT 'CASH' COMMENT 'CASH/PICKUP(本期未实现)',
+  `face_value` decimal(12,2) NOT NULL COMMENT '单卡面额',
+  `validity_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT 'LONG_TERM',
+  `valid_end_time` datetime(6) DEFAULT NULL,
+  `valid_months_after_activate` int DEFAULT NULL,
+  `stock_total` int NOT NULL COMMENT '活动库存：最多可制凭证张数',
+
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_li_gift_card_cash_activity_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin ROW_FORMAT=DYNAMIC COMMENT='现金礼品卡活动';
+
+CREATE TABLE `li_gift_card_cash_create_batch` (
+  `id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `create_time` datetime(6) DEFAULT NULL,
+  `delete_flag` bit(1) DEFAULT b'0',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `update_time` datetime(6) DEFAULT NULL,
+
+  `activity_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '所属活动',
+  `quantity` int NOT NULL COMMENT '本批次制卡张数',
+  `batch_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '本批备注（可选）',
+  `create_user_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '制卡人',
+  `create_user_mobile` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '制卡人手机号',
+
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_li_gift_card_cash_create_batch_activity` (`activity_id`),
+  KEY `idx_li_gift_card_cash_create_batch_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin ROW_FORMAT=DYNAMIC COMMENT='现金礼品卡制卡批次';
+
+CREATE TABLE `li_gift_card_cash_issue_batch` (
+  `id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `create_time` datetime(6) DEFAULT NULL,
+  `delete_flag` bit(1) DEFAULT b'0',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `update_time` datetime(6) DEFAULT NULL,
+
+  `activity_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '活动ID',
+  `create_batch_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '制卡批次（活动池发放时为空）',
+  `issue_user_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '发卡人',
+  `issue_user_mobile` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '发卡人手机号',
+  `total_cards` int NOT NULL COMMENT '本次发卡总张数',
+  `total_rows` int NOT NULL COMMENT '导入有效行数',
+
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_li_gift_card_cash_issue_batch_activity` (`activity_id`),
+  KEY `idx_li_gift_card_cash_issue_batch_create` (`create_batch_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin ROW_FORMAT=DYNAMIC COMMENT='现金礼品卡发卡/发送记录';
+
+CREATE TABLE `li_gift_card_cash_credential` (
+  `id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `create_time` datetime(6) DEFAULT NULL,
+  `delete_flag` bit(1) DEFAULT b'0',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `update_time` datetime(6) DEFAULT NULL,
+
+  `activity_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `create_batch_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '制卡批次ID（制卡写入；导入发卡可为空）',
+  `issue_batch_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `member_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '发卡后会员ID',
+  `bind_time` datetime(6) DEFAULT NULL COMMENT '绑定时间（用户与卡绑定时写入）',
+  `activate_member_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '激活会员ID',
+  `activate_time` datetime(6) DEFAULT NULL COMMENT '激活时间（激活后方可使用）',
+  `expire_time` datetime(6) DEFAULT NULL COMMENT '卡到期时间（按活动有效期规则计算）',
+
+  `card_no` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `card_secret` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `face_value` decimal(12,2) NOT NULL COMMENT '单卡面额',
+  `balance` decimal(12,2) DEFAULT NULL COMMENT '当前余额（发卡后初始化为面额）',
+  `status` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'UNISSUED/BOUND/VOIDED/EXPIRED',
+
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_li_gift_card_cash_credential_card_no` (`card_no`),
+  KEY `idx_li_gift_card_cash_cred_activity_status` (`activity_id`,`status`),
+  KEY `idx_li_gift_card_cash_cred_batch_status` (`create_batch_id`,`status`),
+  KEY `idx_li_gift_card_cash_cred_issue` (`issue_batch_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin ROW_FORMAT=DYNAMIC COMMENT='现金礼品卡卡密凭证';
+
+CREATE TABLE `li_order_gift_card_record` (
+  `id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `create_time` datetime(6) DEFAULT NULL,
+  `delete_flag` bit(1) DEFAULT b'0',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `update_time` datetime(6) DEFAULT NULL,
+  `order_sn` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '订单号',
+  `trade_sn` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '交易号',
+  `member_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '会员ID',
+  `credential_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '礼品卡凭证ID',
+  `card_no` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '礼品卡卡号',
+  `deduct_amount` decimal(12,2) DEFAULT 0.00 COMMENT '本次抵扣金额',
+  `change_amount` decimal(12,2) DEFAULT 0.00 COMMENT '变动金额',
+  `balance_after` decimal(12,2) DEFAULT 0.00 COMMENT '变动后余额',
+  `flow_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '流水方向：INCREASE/DECREASE',
+  `biz_type` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '业务类型',
+  `biz_sn` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '业务单号',
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_li_order_gift_card_order` (`order_sn`),
+  KEY `idx_li_order_gift_card_trade` (`trade_sn`),
+  KEY `idx_li_order_gift_card_member` (`member_id`),
+  KEY `idx_li_order_gift_card_credential` (`credential_id`),
+  KEY `idx_li_order_gift_card_biz` (`biz_type`,`biz_sn`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin ROW_FORMAT=DYNAMIC COMMENT='订单礼品卡使用流水';
+
+
+
+ALTER TABLE `li_order`
+    ADD COLUMN `deduction_method` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '抵扣方式' AFTER `payment_method`;
+
+    -- 店铺流水/结算单：礼品卡平台补贴
+ALTER TABLE `li_store_flow`
+    ADD COLUMN `gift_card_subsidy_price` decimal(10,2) DEFAULT 0.00 COMMENT '礼品卡平台补贴金额' AFTER `site_coupon_commission`,
+    ADD COLUMN `settlement_base_price` decimal(10,2) DEFAULT 0.00 COMMENT '商家结算计费基数' AFTER `final_price`;
+
+ALTER TABLE `li_bill`
+    ADD COLUMN `gift_card_subsidy` decimal(10,2) DEFAULT 0.00 COMMENT '礼品卡平台补贴（结算周期内）' AFTER `kanjia_refund_settlement_price`,
+    ADD COLUMN `gift_card_refund_subsidy` decimal(10,2) DEFAULT 0.00 COMMENT '退货礼品卡平台补贴返还' AFTER `gift_card_subsidy`;
+
+
+INSERT INTO `li_menu` (`id`, `create_by`, `create_time`, `delete_flag`, `update_by`, `update_time`, `description`, `front_route`, `icon`, `level`, `name`, `parent_id`, `path`, `sort_order`, `title`, `front_component`, `permission`) VALUES (2057668382760361986, 'admin', '2026-05-22 11:42:27', b'0', 'admin', '2026-05-22 11:43:13', NULL, 'promotions/gift-card-cash/gift-card-cash-activity', NULL, 2, 'promotions/gift-card-cash', '1367049214198022144', 'promotions/gift-card-cash', 10.00, '礼品卡', NULL, '/manager/promotion/giftCardCash*');

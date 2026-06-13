@@ -293,7 +293,7 @@ public class EsGoodsSearchServiceNoop implements EsGoodsSearchService {
         Comparator<EsGoodsIndex> comparator = switch (pageVo.getSort()) {
             case "price" -> Comparator.comparing(EsGoodsIndex::getPrice, Comparator.nullsLast(Double::compareTo));
             case "buyCount" -> Comparator.comparing(EsGoodsIndex::getBuyCount, Comparator.nullsLast(Integer::compareTo));
-            case "releaseTime" -> Comparator.comparing(EsGoodsIndex::getReleaseTime, Comparator.nullsLast(Long::compareTo));
+            case "releaseTime" -> Comparator.comparing(EsGoodsIndex::getReleaseTime, Comparator.nullsLast(java.util.Date::compareTo));
             default -> null;
         };
         if (comparator == null) {

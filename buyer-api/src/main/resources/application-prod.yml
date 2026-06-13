@@ -20,3 +20,9 @@ rocketmq:
   producer:
     group: lili_group
     send-message-timeout: 30000
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

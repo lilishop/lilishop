@@ -968,7 +968,6 @@ public class EsGoodsIndexServiceImpl extends ElasticsearchIndexAbstractService i
         // 3) 构造脚本更新请求：将 JSON 字符串写入 _source.promotionMapJson
         return UpdateQuery.builder(goodsIndex.getId())
                 .withParams(params)
-                .withScriptType(org.springframework.data.elasticsearch.core.query.ScriptType.INLINE)
                 .withScript("ctx._source.promotionMapJson = params.promotionMap;")
                 .withRetryOnConflict(3)
                 .build();

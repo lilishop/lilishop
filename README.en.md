@@ -84,13 +84,13 @@ One codebase supports:
 
 Built with:
 
-- Spring Boot
+- Java 21
+- Spring Boot 4
 - Spring Cloud
 - Redis
 - RocketMQ
 - Elasticsearch
 - Docker
-- ShardingSphere
 
 Supports distributed deployment and high concurrency ecommerce scenarios.
 
@@ -114,8 +114,8 @@ Supports distributed deployment and high concurrency ecommerce scenarios.
 
 ### Backend
 
-- Java
-- Spring Boot
+- Java 21
+- Spring Boot 4
 - Spring Cloud
 - MyBatis Plus
 - MySQL

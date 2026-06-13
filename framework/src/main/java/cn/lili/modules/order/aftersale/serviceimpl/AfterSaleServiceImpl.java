@@ -182,7 +182,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         Order order = OperationalJudgment.judgment(orderService.getBySn(orderItem.getOrderSn()));
 
         //订单未支付，不能申请申请售后
-        if (order.getPaymentMethod() == null) {
+        if (!order.getPayStatus().equals(PayStatusEnum.PAID.name())) {
             throw new ServiceException(ResultCode.AFTER_SALES_NOT_PAY_ERROR);
         }
         //判断支付方式是否为线上支付
@@ -201,7 +201,10 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         }
 
         afterSaleApplyVO.setAccountType(order.getPaymentMethod());
-        afterSaleApplyVO.setApplyRefundPrice(CurrencyUtil.div(orderItem.getFlowPrice(), orderItem.getNum()));
+        afterSaleApplyVO.setApplyRefundPrice(CurrencyUtil.div(
+                CurrencyUtil.add(orderItem.getFlowPrice(),
+                        orderItem.getPriceDetailDTO().getGiftCardPrice()),
+                orderItem.getNum()));
         //如果已经退货或者退款过，则返回最大售后数量重新设置
         if (orderItem.getReturnGoodsNumber() != null) {
             afterSaleApplyVO.setNum(orderItem.getNum() - orderItem.getReturnGoodsNumber());
@@ -440,6 +443,10 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         //写入商家信息
         OrderItem orderItem = orderItemService.getBySn(afterSaleDTO.getOrderItemSn());
         Order order = OperationalJudgment.judgment(orderService.getBySn(orderItem.getOrderSn()));
+
+        //流水金额=实际支付金额+补贴金额(礼品卡)
+        Double flowPrice=CurrencyUtil.add(orderItem.getFlowPrice(),
+                orderItem.getPriceDetailDTO().getGiftCardPrice());
         afterSale.setStoreId(order.getStoreId());
         afterSale.setStoreName(order.getStoreName());
 
@@ -447,7 +454,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         afterSale.setGoodsImage(orderItem.getImage());
         afterSale.setGoodsName(orderItem.getGoodsName());
         afterSale.setSpecs(orderItem.getSpecs());
-        afterSale.setFlowPrice(orderItem.getFlowPrice());
+        afterSale.setFlowPrice(flowPrice);
 
         //写入交易流水号
         afterSale.setTradeSn(order.getTradeSn());
@@ -470,10 +477,10 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
 
         if (afterSale.getNum().equals(orderItem.getNum())) {
             //计算退回金额
-            afterSale.setApplyRefundPrice(orderItem.getFlowPrice());
+            afterSale.setApplyRefundPrice(flowPrice);
         } else {
             //单价计算
-            double utilPrice = CurrencyUtil.div(orderItem.getPriceDetailDTO().getFlowPrice(), orderItem.getNum());
+            double utilPrice = CurrencyUtil.div(flowPrice, orderItem.getNum());
             afterSale.setApplyRefundPrice(CurrencyUtil.mul(afterSale.getNum(), utilPrice));
         }
 

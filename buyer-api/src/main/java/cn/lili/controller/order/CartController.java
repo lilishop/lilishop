@@ -242,6 +242,16 @@ public class CartController {
         return ResultUtil.success();
     }
 
+    @Operation(summary = "选择礼品卡")
+    @Parameter(name = "way", description = "购物车购买：CART/立即购买：BUY_NOW/拼团购买：PINTUAN / 积分购买：POINT ", required = true)
+    @Parameter(name = "credentialId", description = "礼品卡凭证id（used=false且不传则清空全部）")
+    @Parameter(name = "used", description = "使用true 弃用false ", required = true)
+    @GetMapping("/select/giftCard")
+    public ResultMessage<Object> selectGiftCard(String way, String credentialId, boolean used) {
+        this.cartService.selectGiftCard(credentialId, way, used);
+        return ResultUtil.success();
+    }
+
 
     @PreventDuplicateSubmissions
     @Operation(summary = "创建交易")

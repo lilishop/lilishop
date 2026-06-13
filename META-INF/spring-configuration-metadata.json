@@ -1,0 +1,746 @@
+{
+  "groups": [
+    {
+      "name": "springdoc",
+      "type": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.api-docs",
+      "type": "org.springdoc.core.properties.SpringDocConfigProperties$ApiDocs",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "sourceMethod": "getApiDocs()"
+    },
+    {
+      "name": "springdoc.api-docs.groups",
+      "type": "org.springdoc.core.properties.SpringDocConfigProperties$Groups",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$ApiDocs",
+      "sourceMethod": "getGroups()"
+    },
+    {
+      "name": "springdoc.cache",
+      "type": "org.springdoc.core.properties.SpringDocConfigProperties$Cache",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "sourceMethod": "getCache()"
+    },
+    {
+      "name": "springdoc.model-converters",
+      "type": "org.springdoc.core.properties.SpringDocConfigProperties$ModelConverters",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "sourceMethod": "getModelConverters()"
+    },
+    {
+      "name": "springdoc.model-converters.deprecating-converter",
+      "type": "org.springdoc.core.properties.SpringDocConfigProperties$ModelConverters$DeprecatingConverter",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$ModelConverters",
+      "sourceMethod": "getDeprecatingConverter()"
+    },
+    {
+      "name": "springdoc.model-converters.pageable-converter",
+      "type": "org.springdoc.core.properties.SpringDocConfigProperties$ModelConverters$PageableConverter",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$ModelConverters",
+      "sourceMethod": "getPageableConverter()"
+    },
+    {
+      "name": "springdoc.model-converters.polymorphic-converter",
+      "type": "org.springdoc.core.properties.SpringDocConfigProperties$ModelConverters$PolymorphicConverter",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$ModelConverters",
+      "sourceMethod": "getPolymorphicConverter()"
+    },
+    {
+      "name": "springdoc.sort-converter",
+      "type": "org.springdoc.core.properties.SpringDocConfigProperties$SortConverter",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "sourceMethod": "getSortConverter()"
+    },
+    {
+      "name": "springdoc.swagger-ui",
+      "type": "org.springdoc.core.properties.SwaggerUiConfigProperties",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.csrf",
+      "type": "org.springdoc.core.properties.SwaggerUiConfigProperties$Csrf",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties",
+      "sourceMethod": "getCsrf()"
+    },
+    {
+      "name": "springdoc.swagger-ui.oauth",
+      "type": "org.springdoc.core.properties.SwaggerUiOAuthProperties",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiOAuthProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.syntax-highlight",
+      "type": "org.springdoc.core.properties.SwaggerUiConfigProperties$SyntaxHighlight",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties",
+      "sourceMethod": "getSyntaxHighlight()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "springdoc.allowed-locales",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Allowed locales for i18n.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.api-docs.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to generate and serve an OpenAPI document.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$ApiDocs",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.api-docs.groups.enabled",
+      "type": "java.lang.Boolean",
+      "description": "The Enabled.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$Groups",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.api-docs.path",
+      "type": "java.lang.String",
+      "description": "Path to the generated OpenAPI documentation. For a yaml file, append \".yaml\" to the path.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$ApiDocs"
+    },
+    {
+      "name": "springdoc.api-docs.resolve-extensions-properties",
+      "type": "java.lang.Boolean",
+      "description": "The Resolve extensions properties.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$ApiDocs",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.api-docs.resolve-schema-properties",
+      "type": "java.lang.Boolean",
+      "description": "The Resolve schema properties.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$ApiDocs",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.api-docs.version",
+      "type": "org.springdoc.core.properties.SpringDocConfigProperties$ApiDocs$OpenApiVersion",
+      "description": "The OpenAPI version.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$ApiDocs",
+      "defaultValue": "openapi-3-1"
+    },
+    {
+      "name": "springdoc.auto-tag-classes",
+      "type": "java.lang.Boolean",
+      "description": "The Auto tag classes.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "springdoc.cache.disabled",
+      "type": "java.lang.Boolean",
+      "description": "The Disabled.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$Cache",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.consumes-to-match",
+      "type": "java.util.List<java.lang.String>",
+      "description": "The Consumes to match.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.default-consumes-media-type",
+      "type": "java.lang.String",
+      "description": "The Default consumes media type.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.default-flat-param-object",
+      "type": "java.lang.Boolean",
+      "description": "The param default flatten",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.default-produces-media-type",
+      "type": "java.lang.String",
+      "description": "The Default produces media type.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.default-support-form-data",
+      "type": "java.lang.Boolean",
+      "description": "convert query param to form data when consumes is multipart\/form-data",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.disable-i18n",
+      "type": "java.lang.Boolean",
+      "description": "The Disable i18n.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.enable-data-rest",
+      "type": "java.lang.Boolean",
+      "description": "The Enable hateoas.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "springdoc.enable-default-api-docs",
+      "type": "java.lang.Boolean",
+      "description": "The Enable default api docs.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "springdoc.enable-extra-schemas",
+      "type": "java.lang.Boolean",
+      "description": "The Enable extra schemas resolution.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.enable-groovy",
+      "type": "java.lang.Boolean",
+      "description": "The Enable groovy.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "springdoc.enable-hateoas",
+      "type": "java.lang.Boolean",
+      "description": "The Enable hateoas.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "springdoc.enable-javadoc",
+      "type": "java.lang.Boolean",
+      "description": "The Enable javadoc.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "springdoc.enable-kotlin",
+      "type": "java.lang.Boolean",
+      "description": "The Enable kotlin.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "springdoc.enable-spring-security",
+      "type": "java.lang.Boolean",
+      "description": "The Enable spring security.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "springdoc.explicit-object-schema",
+      "type": "java.lang.Boolean",
+      "description": "Set explicit-object-schema to true to always include type: object in the schema, or to false to omit type: object.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.group-configs",
+      "type": "java.util.Set<org.springdoc.core.properties.SpringDocConfigProperties$GroupConfig>",
+      "description": "The Group configs.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.headers-to-match",
+      "type": "java.util.List<java.lang.String>",
+      "description": "The Headers to match.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.model-and-view-allowed",
+      "type": "java.lang.Boolean",
+      "description": "The Model and view allowed.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.model-converters.deprecating-converter.enabled",
+      "type": "java.lang.Boolean",
+      "description": "The Enabled.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$ModelConverters$DeprecatingConverter",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.model-converters.pageable-converter.enabled",
+      "type": "java.lang.Boolean",
+      "description": "The Enabled.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$ModelConverters$PageableConverter",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.model-converters.polymorphic-converter.enabled",
+      "type": "java.lang.Boolean",
+      "description": "The Enabled.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$ModelConverters$PolymorphicConverter",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.nullable-request-parameter-enabled",
+      "type": "java.lang.Boolean",
+      "description": "The Nullable request parameter enabled.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.open-api",
+      "type": "io.swagger.v3.oas.models.OpenAPI",
+      "description": "The Open api.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.override-with-generic-response",
+      "type": "java.lang.Boolean",
+      "description": "The Override with generic response.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.packages-to-exclude",
+      "type": "java.util.List<java.lang.String>",
+      "description": "The Packages to exclude.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.packages-to-scan",
+      "type": "java.util.List<java.lang.String>",
+      "description": "The Packages to scan.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.paths-to-exclude",
+      "type": "java.util.List<java.lang.String>",
+      "description": "The Paths to exclude.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.paths-to-match",
+      "type": "java.util.List<java.lang.String>",
+      "description": "The Paths to match.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.pre-loading-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Allow for pre-loading OpenAPI",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.pre-loading-locales",
+      "type": "java.util.List<java.lang.String>",
+      "description": "locale list to pre-loading",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.produces-to-match",
+      "type": "java.util.List<java.lang.String>",
+      "description": "The Produces to match.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties"
+    },
+    {
+      "name": "springdoc.remove-broken-reference-definitions",
+      "type": "java.lang.Boolean",
+      "description": "The Remove broken reference definitions.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "springdoc.show-actuator",
+      "type": "java.lang.Boolean",
+      "description": "The Show actuator.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.show-login-endpoint",
+      "type": "java.lang.Boolean",
+      "description": "The Show login endpoint.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.show-oauth2-endpoints",
+      "type": "java.lang.Boolean",
+      "description": "The Show oauth 2 endpoint.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.show-spring-cloud-functions",
+      "type": "java.lang.Boolean",
+      "description": "The Show spring cloud functions.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "springdoc.sort-converter.enabled",
+      "type": "java.lang.Boolean",
+      "description": "The Enabled.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties$SortConverter",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.swagger-ui.config-url",
+      "type": "java.lang.String",
+      "description": "URL to fetch external configuration document from.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.csrf.cookie-name",
+      "type": "java.lang.String",
+      "description": "The Cookie name.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties$Csrf"
+    },
+    {
+      "name": "springdoc.swagger-ui.csrf.enabled",
+      "type": "java.lang.Boolean",
+      "description": "The Enabled.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties$Csrf",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.swagger-ui.csrf.header-name",
+      "type": "java.lang.String",
+      "description": "The Header name.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties$Csrf"
+    },
+    {
+      "name": "springdoc.swagger-ui.csrf.local-storage-key",
+      "type": "java.lang.String",
+      "description": "The Local storage key.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties$Csrf"
+    },
+    {
+      "name": "springdoc.swagger-ui.csrf.session-storage-key",
+      "type": "java.lang.String",
+      "description": "The Session storage key.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties$Csrf"
+    },
+    {
+      "name": "springdoc.swagger-ui.csrf.use-local-storage",
+      "type": "java.lang.Boolean",
+      "description": "Use Local storage.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties$Csrf",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.swagger-ui.csrf.use-session-storage",
+      "type": "java.lang.Boolean",
+      "description": "Use Session storage.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties$Csrf",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.swagger-ui.deep-linking",
+      "type": "java.lang.Boolean",
+      "description": "Enables or disables deep linking for tags and operations. @see <a href=\"https:\/\/github.com\/swagger-api\/swagger-ui\/blob\/master\/docs\/usage\/deep-linking.md\">deep-linking.md<\/a>",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.default-model-expand-depth",
+      "type": "java.lang.Integer",
+      "description": "The default expansion depth for the model on the model-example section.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.default-model-rendering",
+      "type": "java.lang.String",
+      "description": "Controls how the model is shown when the API is first rendered.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.default-models-expand-depth",
+      "type": "java.lang.Integer",
+      "description": "The default expansion depth for models (set to -1 completely hide the models).",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.disable-swagger-default-url",
+      "type": "java.lang.Boolean",
+      "description": "The Disable swagger default url.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.swagger-ui.display-operation-id",
+      "type": "java.lang.Boolean",
+      "description": "Controls the display of operationId in operations list.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.display-request-duration",
+      "type": "java.lang.Boolean",
+      "description": "Controls the display of the request duration (in milliseconds) for Try-It-Out requests.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.doc-expansion",
+      "type": "java.lang.String",
+      "description": "Controls the default expansion setting for the operations and tags.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.document-title",
+      "type": "java.lang.String",
+      "description": "The Document title.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to generate and serve an OpenAPI document.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.swagger-ui.filter",
+      "type": "java.lang.String",
+      "description": "If set, enables filtering. The top bar will show an edit box that could be used to filter the tagged operations that are shown.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.groups-order",
+      "type": "org.springdoc.core.properties.AbstractSwaggerUiConfigProperties$Direction",
+      "description": "The Groups order.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties",
+      "defaultValue": "asc"
+    },
+    {
+      "name": "springdoc.swagger-ui.layout",
+      "type": "java.lang.String",
+      "description": "The name of a component available via the plugin system to use as the top-level layout for Swagger UI.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.max-displayed-tags",
+      "type": "java.lang.Integer",
+      "description": "If set, limits the number of tagged operations displayed to at most this many.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.oauth.additional-query-string-params",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "The Additional query string params.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiOAuthProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.oauth.app-name",
+      "type": "java.lang.String",
+      "description": "The App name.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiOAuthProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.oauth.client-id",
+      "type": "java.lang.String",
+      "description": "The Client id.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiOAuthProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.oauth.client-secret",
+      "type": "java.lang.String",
+      "description": "The Client secret.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiOAuthProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.oauth.config-parameters",
+      "type": "java.util.Map<java.lang.String,java.lang.Object>",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiOAuthProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.oauth.realm",
+      "type": "java.lang.String",
+      "description": "The Realm.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiOAuthProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.oauth.scope-separator",
+      "type": "java.lang.String",
+      "description": "The Scope separator.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiOAuthProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.oauth.scopes",
+      "type": "java.util.List<java.lang.String>",
+      "description": "The Scopes selected by default upon authentication.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiOAuthProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.oauth.use-basic-authentication-with-access-code-grant",
+      "type": "java.lang.Boolean",
+      "description": "The Use basic authentication with access code grant.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiOAuthProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.oauth.use-pkce-with-authorization-code-grant",
+      "type": "java.lang.Boolean",
+      "description": "The Use pkce with authorization code grant.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiOAuthProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.oauth2-redirect-url",
+      "type": "java.lang.String",
+      "description": "OAuth redirect URL.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.operations-sorter",
+      "type": "java.lang.String",
+      "description": "Apply a sort to the operation list of each API",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.path",
+      "type": "java.lang.String",
+      "description": "The path for the Swagger UI pages to load.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.persist-authorization",
+      "type": "java.lang.Boolean",
+      "description": "The Persist authorization.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.query-config-enabled",
+      "type": "java.lang.Boolean",
+      "description": "The Query config enabled.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.show-common-extensions",
+      "type": "java.lang.Boolean",
+      "description": "Controls the display of extensions",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.show-extensions",
+      "type": "java.lang.Boolean",
+      "description": "Controls the display of vendor extension (x-) fields and values.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.supported-submit-methods",
+      "type": "java.util.List<java.lang.String>",
+      "description": "The supported try it out methods",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.syntax-highlight.activated",
+      "type": "java.lang.Boolean",
+      "description": "The Activated.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties$SyntaxHighlight"
+    },
+    {
+      "name": "springdoc.swagger-ui.syntax-highlight.theme",
+      "type": "java.lang.String",
+      "description": "The Theme.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties$SyntaxHighlight"
+    },
+    {
+      "name": "springdoc.swagger-ui.tags-sorter",
+      "type": "java.lang.String",
+      "description": "Apply a sort to the tag list of each API",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.try-it-out-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Try it out enabled",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.url",
+      "type": "java.lang.String",
+      "description": "The Url.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.urls",
+      "type": "java.util.Set<org.springdoc.core.properties.AbstractSwaggerUiConfigProperties$SwaggerUrl>",
+      "description": "The Urls.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.urls-primary-name",
+      "type": "java.lang.String",
+      "description": "The Urls primary name.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.use-root-path",
+      "type": "java.lang.Boolean",
+      "description": "The Use root path.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.swagger-ui.validator-url",
+      "type": "java.lang.String",
+      "description": "URL to validate specs against.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.version",
+      "type": "java.lang.String",
+      "description": "The Swagger ui version.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.swagger-ui.with-credentials",
+      "type": "java.lang.Boolean",
+      "description": "The With credentials.",
+      "sourceType": "org.springdoc.core.properties.SwaggerUiConfigProperties"
+    },
+    {
+      "name": "springdoc.trim-kotlin-indent",
+      "type": "java.lang.Boolean",
+      "description": "The trim kotlin indent.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.use-arbitrary-schemas",
+      "type": "java.lang.Boolean",
+      "description": "When set to true, schemas without a defined type will be deserialized as an ArbitrarySchema (with no type), instead of an ObjectSchema with type: object.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.use-fqn",
+      "type": "java.lang.Boolean",
+      "description": "Use fully qualified name",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.use-management-port",
+      "type": "java.lang.Boolean",
+      "description": "If set to true, exposes the swagger-ui on the actuator management port.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.writer-with-default-pretty-printer",
+      "type": "java.lang.Boolean",
+      "description": "The Writer with default pretty printer.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "springdoc.writer-with-order-by-keys",
+      "type": "java.lang.Boolean",
+      "description": "The Writer with order by keys.",
+      "sourceType": "org.springdoc.core.properties.SpringDocConfigProperties",
+      "defaultValue": false
+    }
+  ],
+  "hints": [],
+  "ignored": {
+    "properties": []
+  }
+}

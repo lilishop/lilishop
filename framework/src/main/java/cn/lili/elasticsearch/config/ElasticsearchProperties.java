@@ -8,8 +8,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import jakarta.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author paulG
@@ -89,8 +87,11 @@ public class ElasticsearchProperties {
     private Account account = new Account();
 
     /**
-     * 索引配置信息
+     * REST API 兼容版本（连接 Elasticsearch 7.x 集群时设为 7）
      */
+    @Builder.Default
+    private Integer compatibilityVersion = 7;
+
     @Data
     public static class Index {
 
