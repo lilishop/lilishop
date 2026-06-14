@@ -6,6 +6,30 @@
   简体中文 | <a href="./README.en.md">English</a>
 </p>
 
+## All-In-One 一键启动
+
+如果只是想快速体验完整商城，不需要分别部署后端、PC、商家端、运营端、IM Web、H5、MySQL 和 Redis。安装 Docker Desktop 后，可以直接下载 `docker` 仓库 `allinone-lite-mysql-redis` 分支的一键安装脚本，按提示输入 IP/域名、端口、密码和数据目录，即可启动单镜像单容器体验环境。
+
+macOS / Linux:
+
+```bash
+curl -fsSL https://gitee.com/beijing_hongye_huicheng/docker/raw/allinone-lite-mysql-redis/install/install-lilishop.sh -o install-lilishop.sh
+chmod +x install-lilishop.sh
+./install-lilishop.sh
+```
+
+Windows PowerShell:
+
+```powershell
+Invoke-WebRequest -Uri "https://gitee.com/beijing_hongye_huicheng/docker/raw/allinone-lite-mysql-redis/install/install-lilishop.ps1" -OutFile "install-lilishop.ps1"
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\install-lilishop.ps1
+```
+
+默认镜像：`ccr.ccs.tencentyun.com/lilishop/lilishop-all-in-one:lite`。启动后可访问买家 PC、商家端、运营端、IM Web 会话/消息页、uniapp H5 和后端 API。更多说明见 [docker/all-in-one 文档](https://gitee.com/beijing_hongye_huicheng/docker/tree/allinone-lite-mysql-redis/all-in-one)。
+
+All-In-One `lite` 是本地体验和演示形态：一个容器内包含应用、前端资源、H5、MariaDB、Redis 和本地文件存储。它不是生产高可用架构，也不内置 Elasticsearch、RocketMQ、XXL-Job、Kibana、Logstash 或 RocketMQ Dashboard；搜索、消息和定时任务逻辑在 lite 环境中使用 MySQL / Redis / 本地调度兼容实现。
+
 LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开源商城系统，支持 B2B2C 多商户商城、小程序商城、微服务商城、直播电商、分销返佣、秒杀活动、Docker 私有化部署。
 
 ## 核心特性
@@ -85,46 +109,20 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 
 ---
 
-### 5. 技术架构
+### 5. 架构文档边界
 
-#### 5.1 架构图
-![系统架构图](https://lili-system.oss-cn-beijing.aliyuncs.com/docs/%E6%9E%B6%E6%9E%84.png)
+本仓库首页不再维护不完整的系统架构图和技术栈表，避免与实际源码、部署形态和分支差异产生偏差。当前仓库主要说明后端源码定位、在线演示、部署入口和验证补充。
 
-#### 5.2 后端技术栈
+完整架构请以官方文档及四个源码仓库为准：
 
-| 技术            | 选型            | 版本   | 备注/用途  |
-| :-------------- | :-------------- | :----- | :--------- |
-| 核心框架        | Spring Boot     | 4.0.5  | 简化应用开发（需 JDK 21） |
-| ORM框架         | MyBatis-Plus    | 3.5.15 | 数据持久化  |
-| 数据库          | MySQL (LTS)     | 8.3.0  | 关系型数据存储 |
-| 消息队列        | RocketMQ        | 2.3.4  | 异步任务与解耦 |
-| 缓存            | Redis           | -  | 数据缓存    |
-| 搜索引擎        | Elasticsearch   | 7.x  | 商品搜索（客户端 elasticsearch-java 9.x） |
-| 安全框架        | Spring Security | -  | 认证与授权  |
-| 定时任务        | XXL-Job         | 2.3.0  | 分布式任务调度 |
-| 认证方案        | JWT             | -      | Token 方案 |
+- 后端源码：`lilishop`
+- PC / 商家端 / 运营端 / IM Web：`lilishop-ui`
+- H5 / 小程序 / APP：`lilishop-uniapp`
+- 部署、SQL、镜像与启动脚本：`docker`
 
-#### 5.3 前端技术栈
+All-In-One 仅用于本地体验、演示或验证，不代表生产高可用部署架构。生产部署应按实际访问量、稳定性、监控、备份和扩缩容要求拆分数据库、缓存、搜索、消息、任务调度、前端静态资源和后端服务。
 
-**管理端 (平台/商家)**
-
-| 技术       | 选型       | 备注/用途  |
-| :--------- | :--------- | :--------- |
-| JS框架     | Vue.js     | 核心框架   |
-| UI库       | iView      | 界面组件   |
-| 状态管理   | Vuex       | 全局状态管理 |
-| 路由       | Vue Router | 页面路由   |
-| HTTP客户端 | axios      | API请求    |
-
-**移动端 (H5/小程序/APP)**
-
-| 技术      | 选型    | 备注/用途      |
- | :-------- | :------ | :------------- |
-| 核心框架  | uni-app | 跨平台开发框架 |
-| UI库      | uViewUI | 丰富的组件库   |
-| CSS预处理 | SCSS    | 样式开发       |
-
-#### 5.4 Elasticsearch 搜索回归（Spring Boot 4 升级后）
+#### Elasticsearch 搜索回归（Spring Boot 4 升级后）
 
 集群为 **Elasticsearch 7.x** 时，请配置 REST API 兼容版本（默认 `7`）：
 
@@ -147,7 +145,7 @@ mvn test -pl manager-api "-Drevision=4.3" "-DskipTests=false" "-Dtest=EsSearchCo
 
 ---
 
-### 6.功能列表
+### 6. 功能列表
 
 [功能清单](https://bdwx2tfwwt.feishu.cn/sheets/FFQKscQKDhUx60to1k9cbMngnYb?from=from_copylink)
 
