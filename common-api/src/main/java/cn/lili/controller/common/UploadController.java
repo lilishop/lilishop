@@ -50,9 +50,7 @@ public class UploadController {
                                         String base64,
                                         @RequestHeader String accessToken, @RequestParam String directoryPath) {
 
-        if(StrUtil.isBlank(directoryPath)){
-            directoryPath = "default";
-        }
+        directoryPath = normalizeDirectoryPath(directoryPath);
 
         AuthUser authUser = UserContext.getAuthUser(cache, accessToken);
         //如果用户未登录，则无法上传图片
@@ -130,5 +128,15 @@ public class UploadController {
             return scene + "/" + authUser.getId();
         }
         return scene;
+    }
+
+    private String normalizeDirectoryPath(String directoryPath) {
+        directoryPath = StrUtil.trimToEmpty(directoryPath);
+        if (StrUtil.isBlank(directoryPath)
+                || "undefined".equalsIgnoreCase(directoryPath)
+                || "null".equalsIgnoreCase(directoryPath)) {
+            return "default";
+        }
+        return directoryPath;
     }
 }

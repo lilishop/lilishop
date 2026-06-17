@@ -160,28 +160,21 @@ https://pc-b2b2c.pickmall.cn
 
 ## Quick Start
 
-The fastest path is to bring up the infrastructure with Docker Compose, then run any backend service from source. Full deployment guide: [docs.pickmall.cn/deply/deply.html](https://docs.pickmall.cn/deply/deply.html).
+The fastest path on this branch is the All-In-One image, which exposes one HTTP entrypoint and proxies backend traffic through `/api/`. Full deployment guide: [docs.pickmall.cn/deply/deply.html](https://docs.pickmall.cn/deply/deply.html).
 
 > The clone URLs below use GitHub; substitute the Gitee mirror (`gitee.com/beijing_hongye_huicheng/<repo>.git`) if it's closer to you — see the [Project Repositories](#project-repositories) table for full URLs.
 
 ```bash
-# 1. Bring up MySQL, Redis, Elasticsearch, RocketMQ, XXL-Job, etc.
+# 1. Start the All-In-One image.
 git clone https://github.com/lilishop/docker.git && cd docker
-docker compose up -d
+./install/install-lilishop.sh
 
-# 2. Build the backend (tests skipped by default — see parent pom)
+# 2. Build the unified backend if you are developing from source.
 git clone https://github.com/lilishop/lilishop.git && cd lilishop
-mvn clean package
-
-# 3. Run a service locally — for example the buyer-facing API (port 8888)
-mvn -pl buyer-api spring-boot:run -Dspring-boot.run.profiles=dev
-
-# 4. Build and run the web frontends
-git clone https://github.com/lilishop/lilishop-ui.git
-cd lilishop-ui/buyer && yarn install && yarn dev
+mvn -pl lilishop-all -am -DskipTests package
 ```
 
-Supported deployment modes: **Docker / docker-compose**, bare-metal **Linux**, **Kubernetes** (manifests are provided in `lilishop/deploy-api.yml`), and the **mobile client** is built with HBuilderX or the `uni` CLI from the `lilishop-uniapp` repository (see the [Project Repositories](#project-repositories) table).
+Supported deployment mode on this branch is **All-In-One**. The mobile client is built with HBuilderX or the `uni` CLI from the `lilishop-uniapp` repository (see the [Project Repositories](#project-repositories) table).
 
 ---
 
@@ -193,11 +186,11 @@ Yes. Full source for the backend, all four web frontends, the mobile client, and
 
 ### Does it support a true microservice architecture?
 
-Yes. The backend is split into independent Spring Boot services — `buyer-api`, `seller-api`, `manager-api`, `im-api`, `common-api`, and a RocketMQ `consumer` — each deployable on its own port and scalable independently. ShardingSphere is integrated for database sharding, and XXL-Job handles distributed scheduling.
+The current branch focuses on `lilishop-all` as the unified backend entrypoint. Historical split modules still exist in source for code organization, but deployment and documentation should expose the All-In-One entrypoint instead of separate API ports.
 
 ### Can I deploy it with Docker and Kubernetes?
 
-Yes. The `docker` repo (see [Project Repositories](#project-repositories)) provides `docker-compose` configs for MySQL, Redis, Elasticsearch, RocketMQ, Logstash, Kibana, and XXL-Job. Kubernetes manifests for all six backend services are checked in at `lilishop/deploy-api.yml` (namespace `lilishop-service`, NodePorts 30885–30890).
+Yes. The `docker` repo (see [Project Repositories](#project-repositories)) provides the All-In-One image and installer scripts. The Kubernetes manifest in `lilishop/deploy-api.yml` exposes only the unified `lilishop-all` backend service.
 
 ### Does it support WeChat Mini Program and native mobile apps?
 

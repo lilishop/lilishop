@@ -14,6 +14,8 @@
 
 想快速体验完整商城，不需要分别部署后端、PC、商家端、运营端、IM、H5、MySQL 和 Redis。安装 Docker Desktop 后，直接执行下面脚本，按提示输入 IP/域名、端口、密码和数据目录即可启动单镜像单容器环境。
 
+数据库口径：常规部署和项目技术栈仍以 MySQL 为准；All-In-One 镜像内置 MariaDB 只是单容器本地体验中的 MySQL 协议兼容实现，不代表生产部署或常规部署已经切换为 MariaDB。
+
 macOS / Linux:
 
 ```bash
@@ -30,7 +32,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\install-lilishop.ps1
 ```
 
-默认镜像：`ccr.ccs.tencentyun.com/lilishop/lilishop-all-in-one:lite`。启动后可访问买家 PC、商家端、运营端、IM Web、uniapp H5 和后端 API。更多说明见 [docker/all-in-one 文档](https://gitee.com/beijing_hongye_huicheng/docker/tree/allinone-lite-mysql-redis/all-in-one)。
+默认镜像：`ccr.ccs.tencentyun.com/lilishop/lilishop-all-in-one:lite`。启动后可访问买家 PC、商家端、运营端、IM Web、uniapp H5，统一后端由 All-In-One 的同域 `/api/` 入口代理。更多说明见 [docker/all-in-one 文档](https://gitee.com/beijing_hongye_huicheng/docker/tree/allinone-lite-mysql-redis/all-in-one)。
 
 ## 核心特性
 
@@ -87,7 +89,7 @@ Lilishop 由 4 个独立仓库组成，均同步托管于 GitHub 与 Gitee：
 
 -   **全端覆盖**: 一套代码库支持PC、H5、小程序、APP，降低开发和维护成本。
 -   **商家入驻**: 支持多商家入驻，构建平台化电商生态。
--   **分布式架构**: 后端API服务化，支持独立部署和弹性伸缩。
+-   **All-In-One 后端**: 当前分支推荐使用 `lilishop-all` 统一后端入口，降低本地体验和私有化部署门槛。
 -   **前后端分离**: 清晰的职责划分，便于团队协作和独立开发。
 -   **容器化支持**: 提供Docker镜像和docker-compose配置，实现一键部署。
 -   **功能完善**: 涵盖客户、订单、商品、促销、店铺、运营、统计等完整电商业务模块。
@@ -173,12 +175,12 @@ lili:
       compatibility-version: 7
 ```
 
-在 manager-api 模块执行搜索集成测试（需 Redis、MySQL、ES 均可访问，且已有商品索引）：
+在 `lilishop-all` 模块执行搜索集成测试（需 Redis、MySQL、ES 均可访问，且已有商品索引）：
 
 ```powershell
 $env:JAVA_HOME="C:\Program Files\Java\jdk-21.0.3"
 $env:LILISHOP_ES_REGRESSION="true"
-mvn test -pl manager-api "-Drevision=4.3" "-DskipTests=false" "-Dtest=EsSearchCompatibilityTest" "-Dsurefire.failIfNoSpecifiedTests=false"
+mvn test -pl lilishop-all "-Drevision=4.3" "-DskipTests=false" "-Dtest=EsSearchCompatibilityTest" "-Dsurefire.failIfNoSpecifiedTests=false"
 ```
 
 覆盖场景：集群连通、商品分页搜索、筛选聚合、按 ID 查询。

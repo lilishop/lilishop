@@ -28,23 +28,13 @@ public class RocketmqCustomProperties {
 
     private String orderGroup;
 
-    private String msgExtTopic;
-
-    private String msgExtGroup;
-
     private String goodsTopic;
 
     private String goodsGroup;
 
-    private String topicUser;
-
     private String memberTopic;
 
     private String memberGroup;
-
-    private String otherTopic;
-
-    private String otherGroup;
 
     private String noticeTopic;
 
@@ -61,9 +51,5 @@ public class RocketmqCustomProperties {
     private String afterSaleTopic;
 
     private String afterSaleGroup;
-
-    private String broadcastTopic;
-
-    private String broadcastGroup;
 
 }

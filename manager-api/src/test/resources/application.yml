@@ -206,16 +206,12 @@ lili:
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
-      msg-ext-topic: lili_msg_topic
-      msg-ext-group: lili_msg_group
       goods-topic: lili_goods_topic
       goods-group: lili_goods_group
       order-topic: lili_order_topic
       order-group: lili_order_group
       member-topic: lili_member_topic
       member-group: lili_member_group
-      other-topic: lili_other_topic
-      other-group: lili_other_group
       notice-topic: lili_notice_topic
       notice-group: lili_notice_group
       notice-send-topic: lili_send_notice_topic

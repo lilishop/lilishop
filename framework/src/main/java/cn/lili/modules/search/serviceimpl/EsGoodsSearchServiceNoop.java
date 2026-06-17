@@ -2,6 +2,7 @@ package cn.lili.modules.search.serviceimpl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.GoodsParamsItemDTO;
@@ -10,6 +11,8 @@ import cn.lili.modules.goods.entity.dto.GoodsSkuDTO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.promotion.service.PromotionGoodsService;
+import cn.lili.modules.promotion.service.PromotionService;
 import cn.lili.modules.search.entity.dos.EsGoodsAttribute;
 import cn.lili.modules.search.entity.dos.EsGoodsIndex;
 import cn.lili.modules.search.entity.dos.EsGoodsRelatedInfo;
@@ -23,13 +26,16 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.SearchPage;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -49,6 +55,14 @@ public class EsGoodsSearchServiceNoop implements EsGoodsSearchService {
     private static final long MYSQL_SEARCH_LIMIT = 5000L;
 
     private final GoodsSkuService goodsSkuService;
+
+    @Autowired
+    @Lazy
+    private PromotionService promotionService;
+
+    @Autowired
+    @Lazy
+    private PromotionGoodsService promotionGoodsService;
 
     public EsGoodsSearchServiceNoop(GoodsSkuService goodsSkuService) {
         this.goodsSkuService = goodsSkuService;
@@ -94,7 +108,7 @@ public class EsGoodsSearchServiceNoop implements EsGoodsSearchService {
         }
         GoodsSearchParams params = new GoodsSearchParams();
         params.setSkuIds(skuIds);
-        return goodsSkuService.getGoodsSkuByList(params).stream().map(EsGoodsIndex::new).toList();
+        return goodsSkuService.getGoodsSkuByList(params).stream().map(this::buildGoodsIndex).toList();
     }
 
     @Override
@@ -120,9 +134,46 @@ public class EsGoodsSearchServiceNoop implements EsGoodsSearchService {
                 .filter(sku -> matchBrand(sku, searchDTO))
                 .filter(sku -> matchExcludedGoodsType(sku, searchDTO))
                 .filter(sku -> matchExcludedSalesModel(sku, searchDTO))
-                .map(sku -> new EsGoodsIndex(sku, parseIndexParams(sku.getParams())))
+                .map(sku -> buildGoodsIndex(sku, parseIndexParams(sku.getParams())))
                 .filter(index -> matchProps(index, searchDTO))
                 .toList();
+    }
+
+    private EsGoodsIndex buildGoodsIndex(GoodsSku sku) {
+        return fillPromotionInfo(new EsGoodsIndex(sku));
+    }
+
+    private EsGoodsIndex buildGoodsIndex(GoodsSkuDTO sku, List<GoodsParamsItemDTO> params) {
+        return fillPromotionInfo(new EsGoodsIndex(sku, params));
+    }
+
+    private EsGoodsIndex fillPromotionInfo(EsGoodsIndex index) {
+        if (index == null) {
+            return null;
+        }
+        Map<String, Object> promotionMap = buildPromotionMap(index);
+        index.setPromotionMapJson(JSON.toJSONString(promotionMap));
+        fillPromotionPrice(index);
+        return index;
+    }
+
+    private Map<String, Object> buildPromotionMap(EsGoodsIndex index) {
+        if (promotionService == null || index == null) {
+            return Collections.emptyMap();
+        }
+        Map<String, Object> promotionMap = promotionService.getGoodsSkuPromotionMap(index.getStoreId(), index.getId());
+        return promotionMap == null ? Collections.emptyMap() : promotionMap;
+    }
+
+    private void fillPromotionPrice(EsGoodsIndex index) {
+        if (promotionGoodsService == null || index == null) {
+            return;
+        }
+        Double promotionPrice = promotionGoodsService.getValidPromotionsGoodsPrice(index.getId(),
+                Arrays.asList(PromotionTypeEnum.SECKILL.name(), PromotionTypeEnum.PINTUAN.name()));
+        if (promotionPrice != null) {
+            index.setPromotionPrice(promotionPrice);
+        }
     }
 
     private List<GoodsSkuDTO> queryMysqlSkuDTOList(EsGoodsSearchDTO searchDTO) {

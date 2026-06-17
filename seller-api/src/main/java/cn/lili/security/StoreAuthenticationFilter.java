@@ -82,6 +82,8 @@ public class StoreAuthenticationFilter extends BasicAuthenticationFilter {
         if (authentication != null) {
             customAuthentication(request, response, authentication);
             SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else if (StrUtil.isNotBlank(jwt)) {
+            return;
         }
         chain.doFilter(request, response);
     }
@@ -117,14 +119,21 @@ public class StoreAuthenticationFilter extends BasicAuthenticationFilter {
                 authentication.setDetails(authUser);
                 return authentication;
             }
-            ResponseUtil.output(response, 403, ResponseUtil.resultMap(false, 403, "登录已失效，请重新登录"));
+            outputInvalidToken(response);
             return null;
         } catch (ExpiredJwtException e) {
             log.debug("user analysis exception:", e);
         } catch (Exception e) {
             log.error("user analysis exception:", e);
         }
+        outputInvalidToken(response);
         return null;
+    }
+
+    private void outputInvalidToken(HttpServletResponse response) {
+        if (!response.isCommitted()) {
+            ResponseUtil.output(response, 403, ResponseUtil.resultMap(false, 403, "登录已失效，请重新登录"));
+        }
     }
 
 
@@ -192,4 +201,3 @@ public class StoreAuthenticationFilter extends BasicAuthenticationFilter {
     }
 
 }
-
