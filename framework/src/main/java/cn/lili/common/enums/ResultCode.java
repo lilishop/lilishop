@@ -523,7 +523,21 @@ public enum ResultCode {
      * IM
      */
     IM_MESSAGE_ADD_ERROR(80400,"IM消息发送错误"),
-    IM_MESSAGE_EDIT_ERROR(80400,"IM消息更新错误"),
+    IM_MESSAGE_EDIT_ERROR(80401,"IM消息更新错误"),
+
+    /**
+     * 直播相关
+     */
+    LIVE_GOODS_NOT_EXIST(80500, "直播商品不存在！"),
+    LIVE_ROOM_NOT_EXIST(80501, "直播不存在！"),
+    LIVE_ROOM_NOT_LIVING(80502, "直播状态错误，不可开播！"),
+    LIVE_ROOM_NOT_ENDED(80503, "直播状态错误，不可结束！"),
+    LIVE_ROOM_CREATE_ERROR(80504, "直播创建失败！"),
+    LIVE_ROOM_EDIT_ERROR(80505, "直播修改失败！"),
+    LIVE_ROOM_DELETE_ERROR(80506, "直播删除失败！"),
+    LIVE_USER_NOT_EXIST(80507, "直播用户不存在！"),
+    LIVE_USER_MUTE_EXIST(80508, "直播用户已被禁言！"),
+    LIVE_MESSAGE_REMOVE_EXIST(80509, "直播消息删除失败！"),
 
     /**
      * 其他

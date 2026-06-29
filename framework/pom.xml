@@ -368,6 +368,23 @@
             <groupId>com.huaweicloud</groupId>
             <artifactId>esdk-obs-java</artifactId>
             <version>${huaweicloud-obs.version}</version>
+            <exclusions>
+                <!-- 去除旧版本的 okio -->
+                <exclusion>
+                    <groupId>com.squareup.okio</groupId>
+                    <artifactId>okio</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio-jvm</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+            <version>3.4.0</version>
         </dependency>
         <dependency>
             <groupId>com.qcloud</groupId>
@@ -410,6 +427,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <!-- MQTT -->
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>1.2.5</version>
         </dependency>
     </dependencies>
 

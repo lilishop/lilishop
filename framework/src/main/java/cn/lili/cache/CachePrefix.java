@@ -524,7 +524,45 @@ public enum CachePrefix {
      * @return
      */
     QR_CODE_LOGIN_SESSION,
-    WX_CHANNELS_THIRD_CATEGORY;
+    WX_CHANNELS_THIRD_CATEGORY,
+
+    //直播相关内容
+    /**
+     * 直播用户详情
+     */
+    LIVE_USER_DETAIL,
+    /**
+     * 直播商品列表
+     */
+    LIVE_GOODS_LIST,
+    /**
+     * 直播商品热度
+     */
+    LIVE_GOODS_POPULARITY,
+    /**
+     * 直播详情
+     */
+    LIVE_DETAIL,
+
+    /**
+     * 直播评论数
+     */
+    LIVE_ACTIVITY_COMMENT,
+
+    /**
+     * 直播评论用户
+     */
+    LIVE_ACTIVITY_COMMENT_USER,
+
+    /**
+     * 直播查看人数
+     */
+    LIVE_ACTIVITY_VIEW,
+
+    /**
+     * 直播优惠券列表
+     */
+    LIVE_COUPON_LIST;
 
 
     public static String removePrefix(String str) {
