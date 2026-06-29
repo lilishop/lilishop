@@ -9,6 +9,7 @@ import cn.lili.modules.logistics.entity.enums.LogisticsEnum;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
+import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.store.entity.dos.StoreLogistics;
 import cn.lili.modules.store.entity.dto.StoreDeliverGoodsAddressDTO;
 import cn.lili.modules.system.entity.dos.Logistics;
@@ -39,6 +40,9 @@ public class KdniaoPlugin implements LogisticsPlugin {
 
     @Autowired
     private LogisticsSetting logisticsSetting;
+
+    @Autowired
+    private OrderService orderService;
 
     public KdniaoPlugin(LogisticsSetting logisticsSetting) {
         this.logisticsSetting = logisticsSetting;
@@ -222,6 +226,9 @@ public class KdniaoPlugin implements LogisticsPlugin {
 
             JSONObject orderJson = JSON.parseObject(obj.getString("Order"));
             resultMap.put("printTemplate", obj.getString("PrintTemplate"));
+
+            //进行发货
+            orderService.delivery(order.getSn(), orderJson.getString("LogisticCode"), logistics.getId());
             return resultMap;
         } catch (Exception e) {
             e.printStackTrace();
