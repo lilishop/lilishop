@@ -232,8 +232,8 @@ public class KdniaoPlugin implements LogisticsPlugin {
             return resultMap;
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     @Override
