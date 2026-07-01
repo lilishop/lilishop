@@ -56,8 +56,9 @@
         <spotify>1.2.2</spotify>
 
         <owasp-java-html-sanitizer>20211018.2</owasp-java-html-sanitizer>
-        <minio.version>8.0.3</minio.version>
-        <huaweicloud-obs.version>3.20.6.2</huaweicloud-obs.version>
+        <minio.version>8.5.17</minio.version>
+        <huaweicloud-obs.version>3.25.5</huaweicloud-obs.version>
+        <okio.version>3.16.1</okio.version>
         <cos.version>5.6.97</cos.version>
         <tencentcloud.version>3.1.693</tencentcloud.version>
         <kuaidi100-api.version>1.0.11</kuaidi100-api.version>
@@ -74,6 +75,21 @@
         <module>im-api</module>
 
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>${okio.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okio</groupId>
+                <artifactId>okio-jvm</artifactId>
+                <version>${okio.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <repositories>
         <repository>
