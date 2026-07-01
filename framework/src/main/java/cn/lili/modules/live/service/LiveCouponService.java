@@ -60,4 +60,13 @@ public interface LiveCouponService extends IService<LiveCoupon> {
      * @return
      */
     boolean removeLiveCoupon(List<String> ids);
+
+    /**
+     * 根据直播间ID和优惠券ID查询直播优惠券
+     *
+     * @param liveRoomId 直播间ID
+     * @param couponId   优惠券ID
+     * @return 直播优惠券
+     */
+    LiveCoupon getByLiveRoomIdAndCouponId(String liveRoomId, String couponId);
 }

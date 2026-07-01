@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -47,10 +48,42 @@ public class LiveUserServiceImpl extends ServiceImpl<LiveUserMapper, LiveUser> i
     public LiveUser queryLiveUserDetail(String liveRoomId, String userId) {
         LiveUser liveUser = (LiveUser) cache.get(CachePrefix.LIVE_USER_DETAIL.getPrefix() + liveRoomId + "_" + userId);
         if (liveUser == null) {
-            liveUser = this.getOne(new LambdaQueryWrapper<LiveUser>().eq(LiveUser::getLiveRoomId, liveRoomId).eq(LiveUser::getUserId, userId));
+            liveUser = findFromDb(liveRoomId, userId);
             setLiveUserCache(liveUser);
         }
         return liveUser;
+    }
+
+    @Override
+    public LiveUser getOrCreate(LiveUser liveUser) {
+        LiveUser existing = findFromDb(liveUser.getLiveRoomId(), liveUser.getUserId());
+        if (existing != null) {
+            setLiveUserCache(existing);
+            return existing;
+        }
+        try {
+            this.save(liveUser);
+            setLiveUserCache(liveUser);
+            return liveUser;
+        } catch (DataIntegrityViolationException e) {
+            existing = findFromDb(liveUser.getLiveRoomId(), liveUser.getUserId());
+            if (existing != null) {
+                setLiveUserCache(existing);
+                return existing;
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * 直接从数据库查询，避免缓存与并发创建导致的重复读
+     */
+    private LiveUser findFromDb(String liveRoomId, String userId) {
+        return this.getOne(new LambdaQueryWrapper<LiveUser>()
+                .eq(LiveUser::getLiveRoomId, liveRoomId)
+                .eq(LiveUser::getUserId, userId)
+                .orderByAsc(LiveUser::getCreateTime)
+                .last("LIMIT 1"), false);
     }
 
     @Override

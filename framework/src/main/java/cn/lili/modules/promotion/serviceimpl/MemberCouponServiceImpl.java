@@ -7,6 +7,11 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.live.entity.dos.LiveCoupon;
+import cn.lili.modules.live.entity.dos.LiveRoom;
+import cn.lili.modules.live.entity.enums.LiveStautsEnum;
+import cn.lili.modules.live.service.LiveCouponService;
+import cn.lili.modules.live.service.LiveRoomService;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
@@ -60,6 +65,14 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     @Autowired
     private Cache cache;
 
+    @Autowired
+    @Lazy
+    private LiveCouponService liveCouponService;
+
+    @Autowired
+    @Lazy
+    private LiveRoomService liveRoomService;
+
     @Override
     public void checkCouponLimit(String couponId, String memberId) {
         Coupon coupon = couponService.getById(couponId);
@@ -93,9 +106,36 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         if (coupon != null && !CouponGetEnum.FREE.name().equals(coupon.getGetType())) {
             throw new ServiceException(ResultCode.COUPON_DO_NOT_RECEIVER);
         } else if (coupon != null) {
-            this.receiverCoupon(couponId, memberId, memberName, coupon);
+            this.receiverCoupon(couponId, memberId, memberName, coupon, null, null);
         }
 
+    }
+
+    @Override
+    @CacheEvict(key = "#memberId")
+    @Transactional(rollbackFor = Exception.class)
+    public MemberCoupon receiveLiveBuyerCoupon(String couponId, String liveRoomId, String memberId, String memberName) {
+        LiveRoom liveRoom = liveRoomService.getById(liveRoomId);
+        if (liveRoom == null) {
+            throw new ServiceException(ResultCode.LIVE_ROOM_NOT_EXIST);
+        }
+        if (!LiveStautsEnum.LIVING.name().equals(liveRoom.getLiveStatus())) {
+            throw new ServiceException(ResultCode.LIVE_COUPON_RECEIVE_ERROR);
+        }
+        LiveCoupon liveCoupon = liveCouponService.getByLiveRoomIdAndCouponId(liveRoomId, couponId);
+        if (liveCoupon == null) {
+            throw new ServiceException(ResultCode.LIVE_COUPON_NOT_EXIST);
+        }
+        Coupon coupon = couponService.getById(couponId);
+        if (coupon == null) {
+            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
+        }
+        if (!CouponGetEnum.FREE.name().equals(coupon.getGetType())) {
+            throw new ServiceException(ResultCode.COUPON_DO_NOT_RECEIVER);
+        }
+        String liveRoomName = CharSequenceUtil.isNotEmpty(liveCoupon.getLiveRoomName())
+                ? liveCoupon.getLiveRoomName() : liveRoom.getTitle();
+        return this.receiverCoupon(couponId, memberId, memberName, coupon, liveRoomId, liveRoomName);
     }
 
     @Override
@@ -104,7 +144,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     public void receiveCoupon(String couponId, String memberId, String memberName) {
         Coupon coupon = couponService.getById(couponId);
         if (coupon != null) {
-            this.receiverCoupon(couponId, memberId, memberName, coupon);
+            this.receiverCoupon(couponId, memberId, memberName, coupon, null, null);
         } else {
             throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
         }
@@ -361,14 +401,18 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         return this.update(updateWrapper);
     }
 
-    private void receiverCoupon(String couponId, String memberId, String memberName, Coupon coupon) {
+    private MemberCoupon receiverCoupon(String couponId, String memberId, String memberName, Coupon coupon,
+                                          String liveRoomId, String liveRoomName) {
         this.checkCouponLimit(couponId, memberId);
         MemberCoupon memberCoupon = new MemberCoupon(coupon);
         memberCoupon.setMemberId(memberId);
         memberCoupon.setMemberName(memberName);
         memberCoupon.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
         memberCoupon.setPlatformFlag((PromotionTools.PLATFORM_ID).equals(coupon.getStoreId()));
+        memberCoupon.setLiveRoomId(liveRoomId);
+        memberCoupon.setLiveRoomName(liveRoomName);
         this.save(memberCoupon);
         couponService.receiveCoupon(couponId, 1);
+        return memberCoupon;
     }
 }

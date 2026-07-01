@@ -61,6 +61,7 @@ CREATE TABLE `li_live_user` (
   `user_sig` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '用户腾讯云Sig',
   `amount` decimal(12,2) DEFAULT NULL COMMENT '消费金额',
   PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_li_live_user_room_user` (`live_room_id`, `user_id`) USING BTREE,
   KEY `idx_li_live_user_live_room_id` (`live_room_id`) USING BTREE,
   KEY `idx_li_live_user_user_id` (`user_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin ROW_FORMAT=DYNAMIC COMMENT='直播间用户';
@@ -175,4 +176,19 @@ CREATE TABLE `li_live_block` (
 SET FOREIGN_KEY_CHECKS = 1;
 
 
-ALTER TABLE li_order ADD live_room_id varchar (200)
+ALTER TABLE li_order ADD live_room_id varchar (200);
+
+-- 客户优惠券记录直播领取来源
+ALTER TABLE `li_member_coupon`
+    ADD COLUMN `live_room_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '领取来源直播间ID' AFTER `member_coupon_status`,
+    ADD COLUMN `live_room_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '领取来源直播间名称' AFTER `live_room_id`,
+    ADD KEY `idx_li_member_coupon_live_room_id` (`live_room_id`) USING BTREE;
+
+-- 清理直播间用户重复数据并添加唯一约束（同一用户在同一直播间仅保留一条记录）
+DELETE u1 FROM `li_live_user` u1
+    INNER JOIN `li_live_user` u2
+        ON u1.`live_room_id` = u2.`live_room_id`
+        AND u1.`user_id` = u2.`user_id`
+        AND u1.`id` > u2.`id`;
+ALTER TABLE `li_live_user`
+    ADD UNIQUE KEY `uk_li_live_user_room_user` (`live_room_id`, `user_id`) USING BTREE;

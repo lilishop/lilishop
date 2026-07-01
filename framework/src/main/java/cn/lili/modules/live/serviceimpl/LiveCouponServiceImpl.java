@@ -92,6 +92,13 @@ public class LiveCouponServiceImpl extends ServiceImpl<LiveCouponMapper, LiveCou
         return this.removeByIds(ids);
     }
 
+    @Override
+    public LiveCoupon getByLiveRoomIdAndCouponId(String liveRoomId, String couponId) {
+        return this.getOne(new LambdaQueryWrapper<LiveCoupon>()
+                .eq(LiveCoupon::getLiveRoomId, liveRoomId)
+                .eq(LiveCoupon::getCouponId, couponId));
+    }
+
     private boolean updateAndSendMqtt(LiveCoupon liveCoupon) {
         boolean update = this.updateById(liveCoupon);
         sendLiveCouponMessage(liveCoupon.getLiveRoomId(), null);

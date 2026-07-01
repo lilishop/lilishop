@@ -1,10 +1,14 @@
 package cn.lili.controller.live;
 
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.AuthUser;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.live.entity.vos.LivePollingDataVO;
 import cn.lili.modules.live.service.LivePollingDataCacheService;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
+import cn.lili.modules.promotion.service.MemberCouponService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +38,9 @@ public class LivePollingBuyerController {
     @Autowired
     private LivePollingDataCacheService livePollingDataCacheService;
 
+    @Autowired
+    private MemberCouponService memberCouponService;
+
 
     @Operation(summary = "获取直播轮询聚合数据")
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
@@ -45,6 +52,13 @@ public class LivePollingBuyerController {
         }
 
         List<MemberCoupon> liveCouponReceives = Collections.emptyList();
+        AuthUser currentUser = UserContext.getCurrentUser();
+        if (currentUser != null) {
+            MemberCouponSearchParams param = new MemberCouponSearchParams();
+            param.setMemberId(currentUser.getId());
+            param.setLiveRoomId(id);
+            liveCouponReceives = memberCouponService.getMemberCoupons(param);
+        }
 
         // 构造响应副本，避免把用户维度数据写回缓存对象。
         LivePollingDataVO response = LivePollingDataVO.builder()

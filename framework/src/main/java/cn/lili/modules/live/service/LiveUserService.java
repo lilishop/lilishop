@@ -68,4 +68,12 @@ public interface LiveUserService extends IService<LiveUser> {
      */
     void setUserWatchTime(String liveId, String userId, String watchTime);
 
+    /**
+     * 获取或创建直播间用户（并发安全，依赖 live_room_id + user_id 唯一约束）
+     *
+     * @param liveUser 待创建的直播间用户
+     * @return 已存在或新创建的用户
+     */
+    LiveUser getOrCreate(LiveUser liveUser);
+
 }

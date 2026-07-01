@@ -538,6 +538,8 @@ public enum ResultCode {
     LIVE_USER_NOT_EXIST(80507, "直播用户不存在！"),
     LIVE_USER_MUTE_EXIST(80508, "直播用户已被禁言！"),
     LIVE_MESSAGE_REMOVE_EXIST(80509, "直播消息删除失败！"),
+    LIVE_COUPON_NOT_EXIST(80510, "直播优惠券不存在！"),
+    LIVE_COUPON_RECEIVE_ERROR(80511, "当前直播未开始或已结束，无法领取优惠券"),
 
     /**
      * 其他

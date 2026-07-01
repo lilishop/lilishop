@@ -63,6 +63,8 @@ public class BuyerSecurityConfig {
         http
             // 配置授权规则
             .authorizeHttpRequests(authz -> authz
+                // 直播轮询接口允许匿名访问（高并发场景，登录用户可携带 token 获取个人数据）
+                .requestMatchers("/buyer/live/room/polling/**").permitAll()
                 // 配置的url不需要授权
                 .requestMatchers(ignoredUrls).permitAll()
                 // 任何其他请求都需要身份认证
@@ -90,7 +92,7 @@ public class BuyerSecurityConfig {
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable())
             // 添加JWT认证过滤器
-            .addFilter(new BuyerAuthenticationFilter(authenticationManager(authenticationConfiguration()), cache));
+            .addFilter(new BuyerAuthenticationFilter(authenticationManager(authenticationConfiguration()), cache, ignoredUrlsProperties));
 
         return http.build();
     }

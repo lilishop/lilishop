@@ -28,7 +28,6 @@ import cn.lili.modules.system.service.SettingService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -85,31 +84,18 @@ public class LiveOperateServiceImpl extends ServiceImpl<LiveRoomMapper, LiveRoom
 //            throw new CrmebException(LiveActivityResultCode.USER_BLACKLIST_EXIST);
 //        }
         LiveUser liveUser = liveUserService.queryLiveUserDetail(liveRoomId, currentUser.getId());
-
-        try {
-            if (liveUser == null) {
-                //计入缓存
-                this.increaseViewing(liveRoomId, currentUser.getId());
-                liveUser = new LiveUser();
-                liveUser.setLiveRoomId(liveRoomId);
-                liveUser.setUserId(currentUser.getId());
-                liveUser.setUserName(currentUser.getNickName());
-                liveUser.setUserFace(currentUser.getFace());
-                liveUser.setUserSig(generateUserSig(currentUser.getId()));
-                liveUser.setAmount(0D);
-                liveUser.setWatchTime("00:00");
-                liveUser.setMuteFlag(false);
-                liveUserService.save(liveUser);
-            }
-        }catch (DataIntegrityViolationException e) {
-            // 捕获唯一键冲突异常
-            // 这意味着在我们查询和保存的间隙，另一个线程已经成功插入了数据
-            // 所以我们再次查询一次，这次一定能查到
-            liveUser = liveUserService.queryLiveUserDetail(liveRoomId, currentUser.getId());
-            if (liveUser == null) {
-                // 正常不应该出现此情况，如果出现则向上抛出未知异常
-                throw new RuntimeException("创建用户失败，请联系管理员", e);
-            }
+        if (liveUser == null) {
+            this.increaseViewing(liveRoomId, currentUser.getId());
+            LiveUser newLiveUser = new LiveUser();
+            newLiveUser.setLiveRoomId(liveRoomId);
+            newLiveUser.setUserId(currentUser.getId());
+            newLiveUser.setUserName(currentUser.getNickName());
+            newLiveUser.setUserFace(currentUser.getFace());
+            newLiveUser.setUserSig(generateUserSig(currentUser.getId()));
+            newLiveUser.setAmount(0D);
+            newLiveUser.setWatchTime("00:00");
+            newLiveUser.setMuteFlag(false);
+            liveUser = liveUserService.getOrCreate(newLiveUser);
         }
         return liveUser;
     }
@@ -134,9 +120,9 @@ public class LiveOperateServiceImpl extends ServiceImpl<LiveRoomMapper, LiveRoom
             throw new ServiceException(ResultCode.LIVE_USER_MUTE_EXIST);
         }
         //校验直播房间是否为直播中
-        if (!liveRoom.getLiveStatus().equals(LiveStautsEnum.LIVING.name())) {
-            throw new ServiceException(ResultCode.LIVE_ROOM_NOT_LIVING);
-        }
+//        if (!liveRoom.getLiveStatus().equals(LiveStautsEnum.LIVING.name())) {
+//            throw new ServiceException(ResultCode.LIVE_ROOM_NOT_LIVING);
+//        }
         liveMessage.setUserId(liveUser.getUserId());
         liveMessage.setUserName(liveUser.getUserName());
         liveMessage.setUserFace(liveUser.getUserFace());

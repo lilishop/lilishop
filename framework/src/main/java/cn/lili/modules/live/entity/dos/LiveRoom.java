@@ -92,4 +92,11 @@ public class LiveRoom extends BaseEntity {
 
     @Schema(title = "直播编号")
     private String sn;
+
+    public Boolean getAuthFlag(){
+        if(authFlag == null){
+            return false;
+        }
+        return authFlag;
+    }
 }
