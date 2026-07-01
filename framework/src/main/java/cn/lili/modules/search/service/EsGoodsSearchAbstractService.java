@@ -492,14 +492,16 @@ public class EsGoodsSearchAbstractService extends BaseElasticsearchService {
     }
 
     public Query buildFunctionSearch(String keyword) {
+        // missing(1d)：部分文档缺少 skuSource 字段值时，用默认值兜底，
+        // 避免 ES field_value_factor 抛出 "Missing value for field [skuSource]" 导致整个查询 500。
         if (CharSequenceUtil.isNotEmpty(keyword)) {
             return QueryBuilders.functionScore(f -> f.query(fu -> fu.match(ff -> ff.field(GOODS_NAME).query(keyword)))
                     .functions(
-                            fu -> fu.fieldValueFactor(ff -> ff.field(SKU_SOURCE).modifier(FieldValueFactorModifier.Log1p))
+                            fu -> fu.fieldValueFactor(ff -> ff.field(SKU_SOURCE).modifier(FieldValueFactorModifier.Log1p).missing(1d))
                                     .weight(4d)));
         } else {
             return QueryBuilders.functionScore(f -> f.functions(
-                    fu -> fu.fieldValueFactor(ff -> ff.field(SKU_SOURCE).modifier(FieldValueFactorModifier.Log1p))
+                    fu -> fu.fieldValueFactor(ff -> ff.field(SKU_SOURCE).modifier(FieldValueFactorModifier.Log1p).missing(1d))
                             .weight(4d)));
         }
     }
