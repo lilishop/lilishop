@@ -66,6 +66,12 @@ public class PromotionServiceImpl implements PromotionService {
     @Autowired
     private KanjiaActivityGoodsService kanjiaActivityGoodsService;
 
+    @Autowired
+    private FlashDiscountService flashDiscountService;
+
+    @Autowired
+    private NthItemDiscountService nthItemDiscountService;
+
 
     /**
      * 获取当前进行的所有促销活动信息
@@ -124,6 +130,14 @@ public class PromotionServiceImpl implements PromotionService {
                 case POINTS_GOODS:
                     PointsGoods pointsGoods = pointsGoodsService.getById(promotionGoods.getPromotionId());
                     promotionMap.put(esPromotionKey, pointsGoods);
+                    break;
+                case FLASH_DISCOUNT:
+                    FlashDiscount flashDiscount = flashDiscountService.getById(promotionGoods.getPromotionId());
+                    promotionMap.put(esPromotionKey, flashDiscount);
+                    break;
+                case NTH_ITEM_DISCOUNT:
+                    NthItemDiscount nthItemDiscount = nthItemDiscountService.getById(promotionGoods.getPromotionId());
+                    promotionMap.put(esPromotionKey, nthItemDiscount);
                     break;
                 default:
                     break;
