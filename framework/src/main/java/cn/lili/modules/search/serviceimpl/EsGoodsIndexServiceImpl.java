@@ -330,35 +330,40 @@ public class EsGoodsIndexServiceImpl extends ElasticsearchIndexAbstractService i
                     }
 
                     for (GoodsSkuDTO goodsSku : skuIPage.getRecords()) {
-                        int skuSource = 100;
-                        EsGoodsIndex esGoodsIndex = wrapperEsGoodsIndex(goodsSku, brandList, categoryList, storeCategoryList);
-                        long count = esGoodsIndices.stream().filter(j -> j.getGoodsId().equals(esGoodsIndex.getGoodsId())).count();
-                        if (count >= 1) {
-                            skuSource -= count;
-                        }
-                        if (skuSource <= 0) {
-                            skuSource = 1;
-                        }
-                        esGoodsIndex.setSkuSource(skuSource);
+                        try {
+                            int skuSource = 100;
+                            EsGoodsIndex esGoodsIndex = wrapperEsGoodsIndex(goodsSku, brandList, categoryList, storeCategoryList);
+                            long count = esGoodsIndices.stream().filter(j -> j.getGoodsId().equals(esGoodsIndex.getGoodsId())).count();
+                            if (count >= 1) {
+                                skuSource -= count;
+                            }
+                            if (skuSource <= 0) {
+                                skuSource = 1;
+                            }
+                            esGoodsIndex.setSkuSource(skuSource);
 
 
-                        //设置促销信息
-                        List<PromotionGoods> promotionGoods = skuValidPromotions.stream()
-                                .filter(j ->
-                                        (CharSequenceUtil.isNotEmpty(j.getSkuId()) && j.getSkuId().equals(goodsSku.getId())) ||
-                                                (j.getScopeType().equals(PromotionsScopeTypeEnum.ALL.name()) && "0".equals(j.getStoreId())) ||
-                                                (j.getScopeType().equals(PromotionsScopeTypeEnum.ALL.name()) && j.getStoreId().equals(esGoodsIndex.getStoreId())) ||
-                                                (j.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name()) && "0".equals(j.getStoreId()) && j.getScopeId().contains(goodsSku.getCategoryPath())) ||
-                                                (j.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name()) && j.getStoreId().equals(goodsSku.getStoreId()) && j.getScopeId().contains(goodsSku.getCategoryPath()))
-                                )
-                                .collect(Collectors.toList());
-                        if (CollUtil.isNotEmpty(promotionGoods)) {
-                            esGoodsIndex.setPromotionMapJson(JSON.toJSONString(promotionService.wrapperPromotionMapList(promotionGoods)));
-                        }
+                            //设置促销信息
+                            List<PromotionGoods> promotionGoods = skuValidPromotions.stream()
+                                    .filter(j ->
+                                            (CharSequenceUtil.isNotEmpty(j.getSkuId()) && j.getSkuId().equals(goodsSku.getId())) ||
+                                                    (j.getScopeType().equals(PromotionsScopeTypeEnum.ALL.name()) && "0".equals(j.getStoreId())) ||
+                                                    (j.getScopeType().equals(PromotionsScopeTypeEnum.ALL.name()) && j.getStoreId().equals(esGoodsIndex.getStoreId())) ||
+                                                    (j.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name()) && "0".equals(j.getStoreId()) && CharSequenceUtil.isNotEmpty(j.getScopeId()) && CharSequenceUtil.isNotEmpty(goodsSku.getCategoryPath()) && j.getScopeId().contains(goodsSku.getCategoryPath())) ||
+                                                    (j.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name()) && j.getStoreId().equals(goodsSku.getStoreId()) && CharSequenceUtil.isNotEmpty(j.getScopeId()) && CharSequenceUtil.isNotEmpty(goodsSku.getCategoryPath()) && j.getScopeId().contains(goodsSku.getCategoryPath()))
+                                    )
+                                    .collect(Collectors.toList());
+                            if (CollUtil.isNotEmpty(promotionGoods)) {
+                                esGoodsIndex.setPromotionMapJson(JSON.toJSONString(promotionService.wrapperPromotionMapList(promotionGoods)));
+                            }
 
-                        esGoodsIndices.add(esGoodsIndex);
-                        //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
-                        cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
+                            esGoodsIndices.add(esGoodsIndex);
+                            //库存锁是在redis做的，所以生成索引，同时更新一下redis中的库存数量
+                            cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
+                        } catch (Exception e) {
+                            log.error("商品SKU[{}]生成索引数据异常，已跳过：", goodsSku.getId(), e);
+                            skipInitIndexRecord();
+                        }
                     }
 
                     //批量插入索引，如果为第一次则删除原索引并创建新索引
@@ -551,6 +556,19 @@ public class EsGoodsIndexServiceImpl extends ElasticsearchIndexAbstractService i
     @Override
     public void deleteIndexByIds(List<String> ids) {
         deleteIndexByIds(ids, EsGoodsIndex.class);
+    }
+
+    /**
+     * 初始化索引时单条记录失败：计入失败数并更新进度，不中断整批任务
+     */
+    private void skipInitIndexRecord() {
+        Map<String, Long> progress = (Map<String, Long>) cache.get(CachePrefix.INIT_INDEX_PROCESS.getPrefix());
+        if (progress == null) {
+            return;
+        }
+        progress.put(KEY_FAIL, progress.getOrDefault(KEY_FAIL, 0L) + 1);
+        progress.put(KEY_PROCESSED, progress.getOrDefault(KEY_PROCESSED, 0L) + 1);
+        cache.put(CachePrefix.INIT_INDEX_PROCESS.getPrefix(), progress);
     }
 
     @Override
@@ -899,7 +917,7 @@ public class EsGoodsIndexServiceImpl extends ElasticsearchIndexAbstractService i
                     .filter(j -> CharSequenceUtil.isNotEmpty(j.getSkuId()) && j.getSkuId().equals(goodsSku.getId())
                             || j.getScopeType().equals(PromotionsScopeTypeEnum.ALL.name()) && j.getStoreId().equals("0")
                             || j.getScopeType().equals(PromotionsScopeTypeEnum.ALL.name()) && j.getStoreId().equals(goodsSku.getStoreId())
-                            || j.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name()) && j.getScopeId().contains(goodsSku.getCategoryPath()))
+                            || j.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS_CATEGORY.name()) && CharSequenceUtil.isNotEmpty(j.getScopeId()) && CharSequenceUtil.isNotEmpty(goodsSku.getCategoryPath()) && j.getScopeId().contains(goodsSku.getCategoryPath()))
                     .toList();
             setIndexPromotionsInfo(promotionGoods, index);
         } catch (Exception e) {
