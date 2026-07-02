@@ -6,6 +6,8 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
+import cn.lili.common.enums.PromotionTypeEnum;
+import cn.lili.modules.order.order.entity.dto.DiscountPriceItem;
 import cn.lili.modules.order.order.entity.dto.PriceDetailDTO;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
@@ -101,6 +103,12 @@ public class StoreFlow extends BaseIdEntity {
 
     @Schema(description = "砍价活动商品结算价格")
     private Double kanjiaSettlementPrice;
+
+    @Schema(description = "限时直降补贴")
+    private Double flashDiscountSubsidy;
+
+    @Schema(description = "第N件优惠补贴")
+    private Double nthItemSubsidy;
 
     @Schema(description = "平台优惠券 使用金额")
     private Double siteCouponPrice;
@@ -213,11 +221,12 @@ public class StoreFlow extends BaseIdEntity {
             if (promotionType.equals(OrderPromotionTypeEnum.KANJIA.name())) {
                 this.setKanjiaSettlementPrice(item.getPriceDetailDTO().getSettlementPrice());
             }
-            //如果为砍价活动，填写砍价结算价
+            //如果为积分活动，填写积分结算价
             else if (promotionType.equals(OrderPromotionTypeEnum.POINTS.name())) {
                 this.setPointSettlementPrice(item.getPriceDetailDTO().getSettlementPrice());
             }
         }
+        applyMarketingSubsidy(item.getPriceDetailDTO());
         //添加支付方式
         this.setPaymentName(order.getPaymentMethod());
         //添加第三方支付流水号
@@ -227,5 +236,25 @@ public class StoreFlow extends BaseIdEntity {
             this.billTime = DateUtil.offsetDay(new Date(), 180);
             this.fullRefund = false;
         }
+    }
+
+    private void applyMarketingSubsidy(PriceDetailDTO priceDetailDTO) {
+        if (priceDetailDTO == null || priceDetailDTO.getDiscountPriceDetail() == null) {
+            return;
+        }
+        double flash = 0D;
+        double nth = 0D;
+        for (DiscountPriceItem item : priceDetailDTO.getDiscountPriceDetail()) {
+            if (item.getPromotionTypeEnum() == null || item.getDiscountPrice() == null) {
+                continue;
+            }
+            switch (item.getPromotionTypeEnum()) {
+                case FLASH_DISCOUNT -> flash = CurrencyUtil.add(flash, item.getDiscountPrice());
+                case NTH_ITEM_DISCOUNT -> nth = CurrencyUtil.add(nth, item.getDiscountPrice());
+                default -> { }
+            }
+        }
+        this.setFlashDiscountSubsidy(flash);
+        this.setNthItemSubsidy(nth);
     }
 }

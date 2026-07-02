@@ -64,4 +64,10 @@ public class StoreFlowPayDownloadVO {
 
     @Schema(description = "最终结算金额")
     private Double billPrice;
+
+    @Schema(description = "支付方式")
+    private String paymentName;
+
+    @Schema(description = "第三方交易流水号")
+    private String transactionId;
 }

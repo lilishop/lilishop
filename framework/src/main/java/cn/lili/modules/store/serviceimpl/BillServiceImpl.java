@@ -2,16 +2,13 @@ package cn.lili.modules.store.serviceimpl;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.poi.excel.ExcelUtil;
-import cn.hutool.poi.excel.ExcelWriter;
 import cn.lili.common.enums.ResultCode;
+import cn.lili.modules.finance.service.FinanceExportService;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
-import cn.lili.modules.order.order.entity.dto.StoreFlowQueryDTO;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
 import cn.lili.modules.order.order.service.StoreFlowService;
 import cn.lili.modules.store.entity.dos.Bill;
@@ -19,8 +16,6 @@ import cn.lili.modules.store.entity.dto.BillSearchParams;
 import cn.lili.modules.store.entity.enums.BillStatusEnum;
 import cn.lili.modules.store.entity.vos.BillListVO;
 import cn.lili.modules.store.entity.vos.StoreDetailVO;
-import cn.lili.modules.store.entity.vos.StoreFlowPayDownloadVO;
-import cn.lili.modules.store.entity.vos.StoreFlowRefundDownloadVO;
 import cn.lili.modules.store.mapper.BillMapper;
 import cn.lili.modules.store.service.BillService;
 import cn.lili.modules.store.service.StoreDetailService;
@@ -36,13 +31,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
-import java.net.URLEncoder;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 结算单业务层实现
@@ -64,6 +54,9 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     @Autowired
     @Lazy
     private StoreFlowService storeFlowService;
+
+    @Autowired
+    private FinanceExportService financeExportService;
 
     @Override
     public void createBill(String storeId, Date startTime, DateTime endTime) {
@@ -237,132 +230,13 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
         return this.update(lambdaUpdateWrapper);
     }
 
+    /**
+     * 下载结算单 Excel，委托 {@link FinanceExportService} 统一导出（xlsx，含礼品卡等完整字段）。
+     * 保持原有 URL 兼容，管理端与商家端 BillController 均调用此方法。
+     */
     @Override
     public void download(HttpServletResponse response, String id) {
-
-
-        Bill bill = this.getById(id);
-        //创建Excel工作薄对象
-        ExcelWriter writer = ExcelUtil.getWriterWithSheet("店铺结算单");
-        writer.setSheet("店铺结算单");
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("创建时间", DateUtil.format(bill.getCreateTime(), "yyyy-MM-dd"));
-        writer.setColumnWidth(0, 15);
-        map.put("账单号", bill.getSn());
-        writer.setColumnWidth(1, 30);
-        map.put("结算开始时间", DateUtil.format(bill.getStartTime(), "yyyy-MM-dd"));
-        writer.setColumnWidth(2, 15);
-        map.put("结算结束时间", DateUtil.format(bill.getEndTime(), "yyyy-MM-dd"));
-        writer.setColumnWidth(3, 15);
-        map.put("账单状态", BillStatusEnum.valueOf(bill.getBillStatus()).description());
-        map.put("店铺名称", bill.getStoreName());
-        writer.setColumnWidth(5, 15);
-        map.put("平台付款时间", DateUtil.format(bill.getPayTime(), "yyyy-MM-dd"));
-        writer.setColumnWidth(6, 15);
-        map.put("银行开户名", bill.getBankAccountName());
-        writer.setColumnWidth(7, 15);
-        map.put("银行账号", bill.getBankAccountNumber());
-        writer.setColumnWidth(8, 15);
-        map.put("开户行", bill.getBankName());
-        writer.setColumnWidth(9, 15);
-        map.put("联行号", bill.getBankCode());
-        map.put("订单金额", bill.getOrderPrice());
-        map.put("退单金额", bill.getRefundPrice());
-        map.put("平台收取服务费", bill.getCommissionPrice());
-        writer.setColumnWidth(13, 15);
-        map.put("退单退回平台服务费", bill.getRefundCommissionPrice());
-        writer.setColumnWidth(14, 25);
-        map.put("分销佣金", bill.getDistributionCommission());
-        map.put("退单退还分销佣金", bill.getDistributionRefundCommission());
-        writer.setColumnWidth(16, 20);
-        map.put("平台优惠券补贴", bill.getSiteCouponCommission());
-        writer.setColumnWidth(17, 15);
-        map.put("退单退回平台优惠券补贴", bill.getSiteCouponRefundCommission());
-        writer.setColumnWidth(18, 25);
-        map.put("积分商品补贴", bill.getSiteCouponCommission());
-        writer.setColumnWidth(19, 15);
-        map.put("积分商品补贴", bill.getPointSettlementPrice());
-        writer.setColumnWidth(20, 15);
-        map.put("退单退回积分商品补贴", bill.getPointRefundSettlementPrice());
-        writer.setColumnWidth(21, 25);
-        map.put("砍价商品补贴", bill.getKanjiaSettlementPrice());
-        writer.setColumnWidth(22, 15);
-        map.put("退单退回砍价补贴", bill.getKanjiaRefundSettlementPrice());
-        writer.setColumnWidth(23, 25);
-        map.put("最终结算金额", bill.getBillPrice());
-        writer.setColumnWidth(24, 15);
-        writer.writeRow(map, true);
-
-
-        writer.setSheet("入账订单");
-        writer.addHeaderAlias("createTime", "入账时间");
-        writer.setColumnWidth(0, 20);
-        writer.addHeaderAlias("orderSn", "订单编号");
-        writer.setColumnWidth(1, 35);
-        writer.addHeaderAlias("storeName", "店铺名称");
-        writer.setColumnWidth(2, 20);
-        writer.addHeaderAlias("goodsName", "商品名称");
-        writer.setColumnWidth(3, 70);
-        writer.addHeaderAlias("num", "销售量");
-        writer.addHeaderAlias("finalPrice", "订单金额");
-        writer.addHeaderAlias("commissionPrice", "平台分佣");
-        writer.addHeaderAlias("siteCouponPrice", "平台优惠券");
-        writer.setColumnWidth(7, 12);
-        writer.addHeaderAlias("distributionRebate", "分销金额");
-        writer.addHeaderAlias("pointSettlementPrice", "积分结算金额");
-        writer.setColumnWidth(9, 12);
-        writer.addHeaderAlias("kanjiaSettlementPrice", "砍价结算金额");
-        writer.setColumnWidth(10, 12);
-        writer.addHeaderAlias("billPrice", "应结金额");
-        writer.setColumnWidth(11, 20);
-
-        List<StoreFlowPayDownloadVO> storeFlowList = storeFlowService.getStoreFlowPayDownloadVO(StoreFlowQueryDTO.builder().type(FlowTypeEnum.PAY.name()).bill(bill).build());
-        writer.write(storeFlowList, true);
-
-        writer.setSheet("退款订单");
-        writer.addHeaderAlias("createTime", "入账时间");
-        writer.setColumnWidth(0, 20);
-        writer.addHeaderAlias("orderSn", "订单编号");
-        writer.setColumnWidth(1, 35);
-        writer.addHeaderAlias("refundSn", "售后单号");
-        writer.setColumnWidth(2, 35);
-        writer.addHeaderAlias("storeName", "店铺名称");
-        writer.setColumnWidth(3, 20);
-        writer.addHeaderAlias("goodsName", "商品名称");
-        writer.setColumnWidth(4, 70);
-        writer.addHeaderAlias("num", "退款量");
-        writer.addHeaderAlias("finalPrice", "退款金额");
-        writer.addHeaderAlias("commissionPrice", "平台分佣");
-        writer.addHeaderAlias("siteCouponPrice", "平台优惠券");
-        writer.setColumnWidth(8, 12);
-        writer.addHeaderAlias("distributionRebate", "分销金额");
-        writer.addHeaderAlias("pointSettlementPrice", "积分结算金额");
-        writer.setColumnWidth(10, 12);
-        writer.addHeaderAlias("kanjiaSettlementPrice", "砍价结算金额");
-        writer.setColumnWidth(11, 12);
-        writer.addHeaderAlias("billPrice", "结算金额");
-        writer.setColumnWidth(12, 20);
-
-        List<StoreFlowRefundDownloadVO> storeFlowRefundDownloadVOList = storeFlowService.getStoreFlowRefundDownloadVO(StoreFlowQueryDTO.builder().type(FlowTypeEnum.REFUND.name()).bill(bill).build());
-        writer.write(storeFlowRefundDownloadVOList, true);
-
-        ServletOutputStream out = null;
-        try {
-            writer.setOnlyAlias(true);
-
-            //设置公共属性，列表名称
-            response.setContentType("application/vnd.ms-excel;charset=utf-8");
-            response.setHeader("Content-Disposition", URLEncoder.encode("店铺结算单详情", "UTF8") + ".xls");
-            out = response.getOutputStream();
-            writer.flush(out, true);
-        } catch (Exception e) {
-            log.error("下载列表错误", e);
-        } finally {
-            writer.close();
-            IoUtil.close(out);
-        }
-
-
+        financeExportService.exportBill(response, id);
     }
 
 }

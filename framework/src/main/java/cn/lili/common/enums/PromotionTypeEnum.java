@@ -23,12 +23,21 @@ public enum PromotionTypeEnum {
     FULL_DISCOUNT("满减"),
     POINTS_GOODS("积分商品"),
     KANJIA("砍价"),
-    COUPON_ACTIVITY("优惠券活动");
+    COUPON_ACTIVITY("优惠券活动"),
+    FLASH_DISCOUNT("限时直降"),
+    NTH_ITEM_DISCOUNT("第N件优惠");
 
     /**
      * 有促销库存的活动类型
      */
-    public static final PromotionTypeEnum[] haveStockPromotion = new PromotionTypeEnum[]{PINTUAN, SECKILL, KANJIA, POINTS_GOODS};
+    public static final PromotionTypeEnum[] haveStockPromotion = new PromotionTypeEnum[]{PINTUAN, SECKILL, KANJIA, POINTS_GOODS, FLASH_DISCOUNT};
+
+    /**
+     * 同 SKU 互斥的单品促销类型（不可时间重叠）
+     */
+    public static final PromotionTypeEnum[] exclusiveSkuPromotion = new PromotionTypeEnum[]{
+            SECKILL, PINTUAN, KANJIA, FLASH_DISCOUNT
+    };
 
     /**
      * 有独立促销库存的活动类型

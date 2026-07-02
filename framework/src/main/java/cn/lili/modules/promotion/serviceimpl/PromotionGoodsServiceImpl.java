@@ -336,10 +336,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
             goodsIndex = goodsIndexService.getResetEsGoodsIndex(dataSku);
         }
         if (goodsIndex.getPromotionMap() != null && !goodsIndex.getPromotionMap().isEmpty()) {
-            if (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.SECKILL.name())) || (goodsIndex.getPromotionMap().keySet().stream().anyMatch(i -> i.contains(PromotionTypeEnum.PINTUAN.name())) && CartTypeEnum.PINTUAN.name().equals(cartType))) {
-                Optional<Map.Entry<String, Object>> containsPromotion = goodsIndex.getPromotionMap().entrySet().stream().filter(i -> i.getKey().contains(PromotionTypeEnum.SECKILL.name()) || i.getKey().contains(PromotionTypeEnum.PINTUAN.name())).findFirst();
-                containsPromotion.ifPresent(stringObjectEntry -> this.setGoodsPromotionInfo(dataSku, stringObjectEntry));
-            }
+            applyBestSkuPromotionPrice(dataSku, goodsIndex.getPromotionMap(), cartType);
             promotionMap = goodsIndex.getPromotionMap();
         } else {
             promotionMap = null;
@@ -347,6 +344,45 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
             dataSku.setPromotionPrice(null);
         }
         return promotionMap;
+    }
+
+    /**
+     * 从 ES 促销映射中选取最优 SKU 活动价（秒杀/直降/拼团）
+     */
+    private void applyBestSkuPromotionPrice(GoodsSku dataSku, Map<String, Object> promotionMap, String cartType) {
+        Double bestPrice = null;
+        for (Map.Entry<String, Object> entry : promotionMap.entrySet()) {
+            String key = entry.getKey();
+            if (!isSkuPricePromotionKey(key, cartType)) {
+                continue;
+            }
+            PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
+            searchParams.setSkuId(dataSku.getId());
+            JSONObject promotionsObj = JSON.parseObject(JSON.toJSONString(entry.getValue()));
+            searchParams.setPromotionId(promotionsObj.getString("id"));
+            PromotionGoods promotionsGoods = this.getPromotionsGoods(searchParams);
+            if (promotionsGoods == null || promotionsGoods.getPrice() == null) {
+                continue;
+            }
+            if (bestPrice == null || promotionsGoods.getPrice() < bestPrice) {
+                bestPrice = promotionsGoods.getPrice();
+            }
+        }
+        if (bestPrice != null) {
+            dataSku.setPromotionFlag(true);
+            dataSku.setPromotionPrice(bestPrice);
+        } else {
+            dataSku.setPromotionFlag(false);
+            dataSku.setPromotionPrice(null);
+        }
+    }
+
+    private boolean isSkuPricePromotionKey(String key, String cartType) {
+        if (key.contains(PromotionTypeEnum.SECKILL.name())
+                || key.contains(PromotionTypeEnum.FLASH_DISCOUNT.name())) {
+            return true;
+        }
+        return key.contains(PromotionTypeEnum.PINTUAN.name()) && CartTypeEnum.PINTUAN.name().equals(cartType);
     }
 
     private void setGoodsPromotionInfo(GoodsSku dataSku, Map.Entry<String, Object> promotionInfo) {

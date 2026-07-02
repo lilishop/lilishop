@@ -268,6 +268,7 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
                 }
                 //查询是否在同一时间段参与了拼团活动
                 Integer count = promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.SECKILL.name(), promotionGood.getSkuId(), pintuan.getStartTime(), pintuan.getEndTime(), pintuan.getId());
+                count += promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.FLASH_DISCOUNT.name(), promotionGood.getSkuId(), pintuan.getStartTime(), pintuan.getEndTime(), pintuan.getId());
                 //查询是否在同一时间段参与了限时抢购活动
                 count += promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.PINTUAN.name(), promotionGood.getSkuId(), pintuan.getStartTime(), pintuan.getEndTime(), pintuan.getId());
                 if (count > 0) {
