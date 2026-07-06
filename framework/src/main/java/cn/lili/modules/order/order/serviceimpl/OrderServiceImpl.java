@@ -23,6 +23,7 @@ import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
+import cn.lili.modules.live.entity.vos.LiveRoomVO;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
@@ -1000,6 +1001,33 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setSellerRemark(sellerRemark);
         this.updateById(order);
         return order;
+    }
+
+    @Override
+    public void countLiveOrderData(LiveRoomVO liveRoomVO) {
+        if (liveRoomVO == null || CharSequenceUtil.isEmpty(liveRoomVO.getId())) {
+            return;
+        }
+        //获取已付款未退款订单
+        List<Order> orderList = this.list(new LambdaQueryWrapper<Order>()
+                .select(Order::getMemberId)
+                .eq(Order::getLiveRoomId, liveRoomVO.getId())
+                .eq(Order::getPayStatus, PayStatusEnum.PAID.name())
+                .in(Order::getOrderStatus, OrderStatusEnum.PAID.name(),OrderStatusEnum.TAKE.name(),OrderStatusEnum.STAY_PICKED_UP.name(),
+                        OrderStatusEnum.UNDELIVERED.name(),OrderStatusEnum.PARTS_DELIVERED.name(),OrderStatusEnum.DELIVERED.name(),OrderStatusEnum.COMPLETED.name()));
+
+        if (orderList == null || orderList.isEmpty()) {
+            liveRoomVO.setOrderCount(0);
+            liveRoomVO.setOrderUserCount(0);
+            return;
+        }
+        liveRoomVO.setOrderCount(orderList.size());
+        int orderUserCount = (int) orderList.stream()
+                .map(Order::getMemberId)
+                .filter(CharSequenceUtil::isNotEmpty)
+                .distinct()
+                .count();
+        liveRoomVO.setOrderUserCount(orderUserCount);
     }
 
     /**

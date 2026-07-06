@@ -1,5 +1,6 @@
 package cn.lili.modules.order.order.service;
 
+import cn.lili.modules.live.entity.vos.LiveRoomVO;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
@@ -16,6 +17,7 @@ import cn.lili.modules.system.entity.vo.Traces;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -348,4 +350,10 @@ public interface OrderService extends IService<Order> {
      * @return 订单
      */
     Order updateSellerRemark(String orderSn, String sellerRemark);
+
+    /**
+     * 直播订单统计
+     * @param liveRoomVO 直播房间VO
+     */
+    void countLiveOrderData(@RequestBody LiveRoomVO liveRoomVO);
 }

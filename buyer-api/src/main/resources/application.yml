@@ -65,6 +65,7 @@ ignored:
     - /buyer/payment/cashier/**
     - /buyer/payment/cashierRefund/**
     - /buyer/other/pageData/**
+    - /buyer/live/room/polling/**
     - /buyer/other/article/**
     - /buyer/other/wechat/h5/callback
     - /buyer/goods/**
@@ -86,6 +87,7 @@ ignored:
     - /swagger-ui/**
     - /v3/api-docs
     - /v3/api-docs/**
+
 
 
 # Mybatis-plus

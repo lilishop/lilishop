@@ -36,6 +36,17 @@ public interface MemberCouponService extends IService<MemberCoupon> {
     void receiveBuyerCoupon(String couponId, String memberId, String memberName);
 
     /**
+     * 领取直播优惠券
+     *
+     * @param couponId   优惠券编号
+     * @param liveRoomId 直播间ID
+     * @param memberId   客户
+     * @param memberName 客户名称
+     * @return 客户优惠券
+     */
+    MemberCoupon receiveLiveBuyerCoupon(String couponId, String liveRoomId, String memberId, String memberName);
+
+    /**
      * 领取优惠券
      *
      * @param couponId   优惠券编号

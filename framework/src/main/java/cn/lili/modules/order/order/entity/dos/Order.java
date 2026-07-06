@@ -224,6 +224,9 @@ public class Order extends BaseEntity {
     @Schema(description = "自提点地址经纬度")
     private String storeAddressCenter;
 
+    @Schema(description = "直播间Id")
+    private String liveRoomId;
+
     /**
      * 构建订单
      *

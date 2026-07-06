@@ -124,6 +124,21 @@ public class CouponBuyerController {
         return ResultUtil.success();
     }
 
+    @Operation(summary = "客户领取直播优惠券")
+    @Parameters({
+            @Parameter(name = "liveRoomId", description = "直播间ID", required = true),
+            @Parameter(name = "couponId", description = "优惠券ID", required = true)
+    })
+    @GetMapping("/receive/live/{liveRoomId}/{couponId}")
+    public ResultMessage<MemberCoupon> receiveLiveCoupon(
+            @NotNull(message = "直播间ID不能为空") @PathVariable("liveRoomId") String liveRoomId,
+            @NotNull(message = "优惠券ID不能为空") @PathVariable("couponId") String couponId) {
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        MemberCoupon memberCoupon = memberCouponService.receiveLiveBuyerCoupon(
+                couponId, liveRoomId, currentUser.getId(), currentUser.getNickName());
+        return ResultUtil.data(memberCoupon);
+    }
+
     @Operation(summary = "通过id获取")
     @Parameters({
             @Parameter(name = "id", description = "优惠券ID", required = true)
