@@ -72,6 +72,7 @@ ignored:
     - /common/common/slider/**
     - /common/common/sms/**
     - /common/common/site
+    - /common/common/site/theme
     - /buyer/payment/cashier/**
     - /buyer/other/pageData/**
     - /buyer/live/room/polling/**

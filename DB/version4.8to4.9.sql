@@ -17,3 +17,11 @@ WHERE (`file_category` IS NULL OR `file_category` = '')
 UPDATE `li_file`
 SET `file_category` = 'FILE'
 WHERE `file_category` IS NULL OR `file_category` = '';
+
+/**
+ * 主题色配置
+ */
+INSERT INTO `li_setting` (`id`, `create_by`, `create_time`, `delete_flag`, `update_by`, `update_time`, `setting_value`)
+VALUES ('THEME_SETTING', 'admin', NOW(), b'0', 'admin', NOW(),
+        '{"themeColor":"#ff3c2a","lightColor":"#ff6b35","aiderLightColor":"#ff9f28"}')
+ON DUPLICATE KEY UPDATE `setting_value` = VALUES(`setting_value`);

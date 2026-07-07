@@ -55,5 +55,7 @@ public enum SettingEnum {
     HOT_WORDS,
     WX_CHANNELS,
     //直播设置
-    LIVE_SETTING
+    LIVE_SETTING,
+    //主题色设置
+    THEME_SETTING
 }

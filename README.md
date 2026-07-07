@@ -149,9 +149,7 @@ mvn test -pl manager-api "-Drevision=4.3" "-DskipTests=false" "-Dtest=EsSearchCo
 
 [功能清单](https://bdwx2tfwwt.feishu.cn/sheets/FFQKscQKDhUx60to1k9cbMngnYb?from=from_copylink)
 
-
-
-
+---
 
 ### 7. 开源与授权
 
@@ -171,3 +169,28 @@ mvn test -pl manager-api "-Drevision=4.3" "-DskipTests=false" "-Dtest=EsSearchCo
 -   **微信交流1群（已满）**
 -   **微信交流2群**:
     ![微信群](https://lilishop-wechat.oss-cn-beijing.aliyuncs.com/wechat.jpg)
+
+---
+
+### 9. 升级计划
+
+以下功能将陆续在后续版本中发布：✅ 已完成 · 🔜 规划中
+
+- ✅ 商品定时上下架
+- ✅ 商品分组
+- ✅ 会员分组
+- ✅ 商品虚拟销量
+- ✅ 专用发票（发票上传）
+- ✅ 置顶评论
+- ✅ 客户等级
+- ✅ 购物卡
+- ✅ 腾讯云-云直播
+- 🔜 主题色管理
+- 🔜 平台经营报表
+- 🔜 店铺结算汇总
+- 🔜 支付方式汇总
+- 🔜 结算台账
+- 🔜 钱包流水
+- 🔜 财务汇总
+- 🔜 微信小店对接
+- 🔜 抖店对接
