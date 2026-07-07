@@ -30,7 +30,7 @@ public class FileManagerController {
     private FileService fileService;
 
 
-    @Operation(summary = "管理端管理所有图片")
+    @Operation(summary = "管理端管理所有文件")
     @GetMapping
     public ResultMessage<IPage<File>> adminFiles(
             @Parameter(description = "名称模糊匹配") FileOwnerDTO fileOwnerDTO) {
