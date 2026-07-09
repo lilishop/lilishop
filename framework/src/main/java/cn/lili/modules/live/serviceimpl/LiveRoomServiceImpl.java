@@ -13,6 +13,7 @@ import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.live.entity.dos.LiveRoom;
 import cn.lili.modules.live.entity.dto.LiveRoomSearchDTO;
 import cn.lili.modules.live.entity.enums.LiveStautsEnum;
+import cn.lili.modules.live.entity.vos.LiveRoomDetailVO;
 import cn.lili.modules.live.entity.vos.LiveRoomVO;
 import cn.lili.modules.live.mapper.LiveRoomMapper;
 import cn.lili.modules.live.service.LiveRoomService;
@@ -20,6 +21,11 @@ import cn.lili.modules.live.service.LiveUserService;
 import cn.lili.modules.live.util.MqttUtil;
 import cn.lili.modules.live.util.TencentLiveUtil;
 import cn.lili.modules.order.order.service.OrderService;
+import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.ImSetting;
+import cn.lili.modules.system.entity.dto.LiveSetting;
+import cn.lili.modules.system.entity.enums.SettingEnum;
+import cn.lili.modules.system.service.SettingService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -50,6 +56,8 @@ public class LiveRoomServiceImpl extends ServiceImpl<LiveRoomMapper, LiveRoom> i
     private final String LIVE_ROOM = "room/";
 
     private final MqttUtil mqttUtil;
+
+    private final SettingService settingService;
 
     @Override
     public IPage<LiveRoom> queryPage(LiveRoomSearchDTO liveRoomSearchDTO) {
@@ -202,6 +210,22 @@ public class LiveRoomServiceImpl extends ServiceImpl<LiveRoomMapper, LiveRoom> i
         //从缓存获取查看人数
         String viewKey = CachePrefix.LIVE_ACTIVITY_VIEW + liveRoomId;
         return cache.counter(viewKey);
+    }
+
+    @Override
+    public LiveRoomDetailVO queryDetail(String liveRoomId) {
+        LiveRoom liveRoom = this.queryDetailByCache(liveRoomId);
+        if(liveRoom == null){
+            return null;
+        }
+        LiveRoomDetailVO detailVO = new LiveRoomDetailVO();
+        BeanUtil.copyProperties(liveRoom, detailVO);
+
+        Setting setting = settingService.get(SettingEnum.LIVE_SETTING.name());
+        LiveSetting liveSetting = JSONUtil.toBean(setting.getSettingValue(), LiveSetting.class);
+        detailVO.setImSdkAppid(liveSetting.getImSdkAppid());
+        detailVO.setSecretId(liveSetting.getSecretId());
+        return detailVO;
     }
 
     private void removeLiveRoomCache(LiveRoom liveRoom) {
