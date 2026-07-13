@@ -287,13 +287,6 @@
             <artifactId>poi-ooxml</artifactId>
             <version>${poi-ooxml-version}</version>
         </dependency>
-        <!--集成logstash-->
-        <dependency>
-            <groupId>net.logstash.logback</groupId>
-            <artifactId>logstash-logback-encoder</artifactId>
-            <version>${logstash-logback-encoder}</version>
-        </dependency>
-
         <!-- 开源多维码生成工具 -->
         <dependency>
             <groupId>com.google.zxing</groupId>

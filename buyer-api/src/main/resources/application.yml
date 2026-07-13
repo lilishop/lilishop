@@ -155,8 +155,6 @@ lili:
     maxPoolSize: 50
     queueCapacity: 50
   data:
-    logstash:
-      server: 192.168.0.116:4560
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group

@@ -7,7 +7,6 @@
     <springProperty scope="context" name="APP_NAME" source="spring.application.name"/>
     <!--日志文件保存路径-->
     <springProperty scope="context" name="LOG_FILE_PATH" source="logging.file.path"/>
-    <springProperty scope="context" name="LOGSTASH_SERVER" source="lili.data.logstash.server"/>
     <contextName>${APP_NAME}</contextName>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -34,33 +33,9 @@
     <logger name="RocketmqClient" additivity="false" level="INFO">
         <appender-ref ref="RocketmqClientAppender"/>
     </logger>
-    <springProfile name="prod">
-        <!--输出到elk的LOGSTASH-->
-        <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-            <destination>${LOGSTASH_SERVER}</destination>
-            <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">
-                <providers>
-                    <timestamp>
-                        <timeZone>UTC</timeZone>
-                    </timestamp>
-                </providers>
-                <customFields>{"appName":"${APP_NAME}"}</customFields>
-            </encoder>
-        </appender>
-    </springProfile>
 
-    <springProfile name="prod">
-        <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE"/>
-            <appender-ref ref="LOGSTASH"/>
-        </root>
-    </springProfile>
-
-    <springProfile name="!prod">
-        <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE"/>
-        </root>
-    </springProfile>
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
 </configuration>
