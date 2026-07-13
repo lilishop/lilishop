@@ -87,9 +87,7 @@ Built with:
 - Java 21
 - Spring Boot 4
 - Spring Cloud
-- Redis
-- RocketMQ
-- Elasticsearch
+- Redis (cache + async message queue)
 - Docker
 
 Supports distributed deployment and high concurrency ecommerce scenarios.
@@ -119,9 +117,7 @@ Supports distributed deployment and high concurrency ecommerce scenarios.
 - Spring Cloud
 - MyBatis Plus
 - MySQL
-- Redis
-- RocketMQ
-- Elasticsearch
+- Redis (cache + async message queue)
 - JWT
 - Docker
 
@@ -169,12 +165,12 @@ The fastest path on this branch is the All-In-One image, which exposes one HTTP 
 git clone https://github.com/lilishop/docker.git && cd docker
 ./install/install-lilishop.sh
 
-# 2. Build the unified backend if you are developing from source.
+# 2. Build standalone API modules from source.
 git clone https://github.com/lilishop/lilishop.git && cd lilishop
-mvn -pl lilishop-all -am -DskipTests package
+mvn -pl buyer-api,manager-api,im-api -am -DskipTests package
 ```
 
-Supported deployment mode on this branch is **All-In-One**. The mobile client is built with HBuilderX or the `uni` CLI from the `lilishop-uniapp` repository (see the [Project Repositories](#project-repositories) table).
+Supported deployment on this branch is **standalone microservices** (`buyer-api` :8888, `manager-api` :8887 with embedded message consumer + scheduled tasks, `im-api` :8885). Async messages use a **Redis List queue** (no RocketMQ). Scheduled tasks use Spring `@Scheduled` (no XXL-Job Admin). The historical `lilishop-all` module has been removed.
 
 ---
 
@@ -186,11 +182,11 @@ Yes. Full source for the backend, all four web frontends, the mobile client, and
 
 ### Does it support a true microservice architecture?
 
-The current branch focuses on `lilishop-all` as the unified backend entrypoint. Historical split modules still exist in source for code organization, but deployment and documentation should expose the All-In-One entrypoint instead of separate API ports.
+Yes. Each backend deployable module (`buyer-api`, `manager-api`, `im-api`) runs as its own Spring Boot process. Message consumption and scheduled jobs run inside `manager-api`. See `README.md` (Chinese) for `java -jar` commands.
 
 ### Can I deploy it with Docker and Kubernetes?
 
-Yes. The `docker` repo (see [Project Repositories](#project-repositories)) provides the All-In-One image and installer scripts. The Kubernetes manifest in `lilishop/deploy-api.yml` exposes only the unified `lilishop-all` backend service.
+Yes. The `docker` repo provides installer scripts. [`deploy-api.yml`](./deploy-api.yml) defines three backend Deployments/Services (ports 8888/8887/8885). Run **one replica** of `manager-api` for message consumption and scheduled tasks.
 
 ### Does it support WeChat Mini Program and native mobile apps?
 
@@ -198,7 +194,7 @@ Yes. The buyer-facing client lives in the `lilishop-uniapp` repo (see [Project R
 
 ### What's the tech stack at a glance?
 
-Java 21, Spring Boot 3.5.6, MyBatis-Plus 3.5.8, MySQL 8, Redis, Elasticsearch 7, RocketMQ 4.9, ShardingSphere 4, Spring Security + JWT, XXL-Job, Docker. Frontend: Vue 2.6 + iView for admin / seller / buyer / IM consoles; uni-app + uViewUI for mobile.
+Java 21, Spring Boot, MyBatis-Plus, MySQL, Redis, Spring Security + JWT, Docker. Product search uses MySQL (Elasticsearch removed). Async messaging uses Redis queues. Scheduled tasks use Spring `@Scheduled`. Frontend: Vue for admin / seller / buyer / IM; uni-app for mobile.
 
 ---
 

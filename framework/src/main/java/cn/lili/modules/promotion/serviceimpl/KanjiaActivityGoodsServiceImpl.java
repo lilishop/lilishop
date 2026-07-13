@@ -98,7 +98,7 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
             boolean saveBatch = this.promotionGoodsService.saveBatch(promotionGoodsList);
             if (saveBatch) {
                 for (KanjiaActivityGoods kanjiaActivityGoods : kanjiaActivityGoodsList) {
-                    this.updateEsGoodsIndex(kanjiaActivityGoods);
+                    this.updateGoodsIndex(kanjiaActivityGoods);
                 }
             }
         }
@@ -276,7 +276,7 @@ public class KanjiaActivityGoodsServiceImpl extends AbstractPromotionsServiceImp
         this.promotionGoodsService.deletePromotionGoods(Collections.singletonList(kanJiaActivityGoodsDTO.getId()));
         PromotionGoods promotionGoods = new PromotionGoods(kanJiaActivityGoodsDTO);
         this.promotionGoodsService.save(promotionGoods);
-        this.updateEsGoodsIndex(kanJiaActivityGoodsDTO);
+        this.updateGoodsIndex(kanJiaActivityGoodsDTO);
         //修改数据库
         return this.updateById(kanJiaActivityGoodsDTO);
     }

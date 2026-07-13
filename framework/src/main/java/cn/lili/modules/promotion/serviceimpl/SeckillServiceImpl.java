@@ -25,7 +25,6 @@ import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.SeckillSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -33,7 +32,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -75,7 +74,7 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
      * rocketMq
      */
     @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    private LiliMessageTemplate liliMessageTemplate;
 
 
     @Override
@@ -98,7 +97,7 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
         for (Seckill seckill : seckillList) {
             seckill.setStartTime(null);
             seckill.setEndTime(null);
-            this.updateEsGoodsIndex(seckill);
+            this.updateGoodsIndex(seckill);
         }
         this.remove(new QueryWrapper<>());
 
@@ -143,7 +142,7 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
      * 2. checkPromotions 检查促销参数
      * 3. saveOrUpdate 保存促销信息
      * 4. updatePromotionGoods 更新促销商品信息
-     * 5. updateEsGoodsIndex 更新商品索引促销信息
+     * 5. updateGoodsIndex 促销变更后处理
      *
      * @param promotions 促销信息
      * @return 是否更新成功
@@ -164,13 +163,13 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
 
 
     /**
-     * 更新商品索引限时抢购信息
+     * 同步秒杀活动商品范围
      *
      * @param seckill 限时抢购信息
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateEsGoodsSeckill(Seckill seckill, List<SeckillApply> seckillApplies) {
+    public void syncSeckillScope(Seckill seckill, List<SeckillApply> seckillApplies) {
         if (seckillApplies != null && !seckillApplies.isEmpty()) {
             // 更新促销范围
             seckill.setScopeId(ArrayUtil.join(seckillApplies.stream().map(SeckillApply::getSkuId).toArray(), ","));
@@ -185,24 +184,20 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
                 }
             }
             if (!seckillApplies.isEmpty()) {
-                this.updateEsGoodsIndex(seckill);
+                this.updateGoodsIndex(seckill);
             }
         }
     }
 
     /**
-     * 删除商品索引限时抢购信息
+     * 移除秒杀活动中的 SKU（Elasticsearch 已移除，保留接口兼容）
      *
      * @param seckill 限时抢购信息
      * @param skuIds  商品skuId列表
      */
     @Override
-    public void deleteEsGoodsSeckill(Seckill seckill, List<String> skuIds) {
-        Map<Object, Object> build = MapBuilder.create().put("promotionKey", this.getPromotionType() + "-" + seckill.getId()).put("scopeId", ArrayUtil.join(skuIds.toArray(), ",")).build();
-        //删除商品促销消息
-        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.DELETE_GOODS_INDEX_PROMOTIONS.name();
-        //发送mq消息
-        rocketMQTemplate.asyncSend(destination, JSON.toJSONString(build), RocketmqSendCallbackBuilder.commonCallback());
+    public void removeSeckillSku(Seckill seckill, List<String> skuIds) {
+        // Elasticsearch 已移除
     }
 
     @Override

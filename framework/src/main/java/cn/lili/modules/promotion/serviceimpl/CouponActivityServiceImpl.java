@@ -206,7 +206,7 @@ public class CouponActivityServiceImpl extends AbstractPromotionsServiceImpl<Cou
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateEsGoodsIndex(CouponActivity couponActivity) {
+    public void updateGoodsIndex(CouponActivity couponActivity) {
 
 
         switch (CouponActivityTypeEnum.valueOf(couponActivity.getCouponActivityType())) {

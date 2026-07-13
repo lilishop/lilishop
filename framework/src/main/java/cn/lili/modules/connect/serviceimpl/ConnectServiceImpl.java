@@ -30,14 +30,14 @@ import cn.lili.modules.system.entity.dto.connect.WechatConnectSetting;
 import cn.lili.modules.system.entity.dto.connect.dto.WechatConnectSettingItem;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.message.MessageSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import cn.lili.message.LiliMessageTemplate;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -73,7 +73,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
      * RocketMQ
      */
     @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    private LiliMessageTemplate liliMessageTemplate;
     /**
      * RocketMQ配置
      */
@@ -315,8 +315,8 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             String destination =
                     rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_CONNECT_LOGIN.name();
             //发送用户第三方登录消息
-            rocketMQTemplate.asyncSend(destination, JSON.toJSONString(memberConnectLoginMessage),
-                    RocketmqSendCallbackBuilder.commonCallback());
+            liliMessageTemplate.asyncSend(destination, JSON.toJSONString(memberConnectLoginMessage),
+                    MessageSendCallbackBuilder.commonCallback());
 
             return memberTokenGenerate.createToken(member, longTerm);
         } catch (Exception e) {

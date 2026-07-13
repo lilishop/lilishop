@@ -1,4 +1,4 @@
-server:
+﻿server:
   servlet:
     context-path: /
 
@@ -8,7 +8,7 @@ server:
       min-spare: 50
       max: 1000
 
-# 与Spring Boot 2一样，默认情况下，大多数端点都不通过http公开，我们公开了所有端点。对于生产，您应该仔细选择要公开的端点�?
+# 与Spring Boot 2一样，默认情况下，大多数端点都不通过http公开，我们公开了所有端点。对于生产，您应该仔细选择要公开的端点�?
 management:
   #  health:
   endpoints:
@@ -34,9 +34,9 @@ spring:
           max-active: 200
           # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
           max-wait: 20s
-          # 连接池中的最大空闲连�?默认 8
+          # 连接池中的最大空闲连�?默认 8
           max-idle: 10
-          # 连接池中的最小空闲连�?默认 8
+          # 连接池中的最小空闲连�?默认 8
           min-idle: 8
   # 文件大小上传配置
   servlet:
@@ -46,7 +46,7 @@ spring:
   jackson:
     time-zone: GMT+8
     serialization:
-      #关闭jackson 对json做解�?
+      #关闭jackson 对json做解�?
       fail-on-empty-beans: false
 
       datasource:
@@ -99,7 +99,7 @@ swagger:
 mybatis-plus:
   mapper-locations: classpath*:mapper/*.xml
   configuration:
-    #缓存开�?
+    #缓存开�?
     cache-enabled: true
     #日志
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -114,9 +114,9 @@ logging:
   file:
     # 指定路径
     path: lili-logs
-    # 最大保存天�?
+    # 最大保存天�?
     max-history: 7
-    # 每个文件最大大�?
+    # 每个文件最大大�?
     max-size: 5MB
 #加密参数
 jasypt:
@@ -127,9 +127,9 @@ lili:
   system:
     isDemoSite: true
   statistics:
-    # 在线人数统计 X 小时。这里设�?8，即统计过去48小时每小时在线人�?
+    # 在线人数统计 X 小时。这里设�?8，即统计过去48小时每小时在线人�?
     onlineMember: 48
-    # 当前在线人数刷新时间间隔，单位秒，设置为600，则�?0分钟刷新一�?
+    # 当前在线人数刷新时间间隔，单位秒，设置为600，则�?0分钟刷新一�?
     currentOnlineUpdate: 600
   #qq lbs 申请
   lbs:
@@ -155,9 +155,9 @@ lili:
 
   # 使用Spring @Cacheable注解失效时间
   cache:
-    # 过期时间 单位�?永久不过期设�?1
+    # 过期时间 单位�?永久不过期设�?1
     timeout: 1500
-  #多线程配�?
+  #多线程配�?
   thread:
     corePoolSize: 5
     maxPoolSize: 50
@@ -178,20 +178,3 @@ lili:
       notice-group: lili_notice_group
       notice-send-topic: lili_send_notice_topic
       notice-send-group: lili_send_notice_group
-rocketmq:
-  name-server: 192.168.0.116:9876
-  producer:
-    group: lili_group
-    send-message-timeout: 30000
-
-xxl:
-  job:
-    admin:
-      addresses: http://192.168.0.116:9001/xxl-job-admin
-    executor:
-      appname: xxl-job-executor-lilishop
-      address:
-      ip:
-      port: 8891
-      logpath: ./xxl-job/executor
-      logretentiondays: 7

@@ -7,10 +7,10 @@ import cn.lili.modules.sms.entity.dos.SmsReach;
 import cn.lili.modules.sms.entity.dto.SmsReachDTO;
 import cn.lili.modules.sms.mapper.SmsReachMapper;
 import cn.lili.modules.sms.service.SmsReachService;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.message.MessageSendCallbackBuilder;
 import cn.lili.rocketmq.tags.OtherTagsEnum;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +26,7 @@ import java.util.List;
 @Service
 public class SmsReachServiceImpl extends ServiceImpl<SmsReachMapper, SmsReach> implements SmsReachService {
     @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    private LiliMessageTemplate liliMessageTemplate;
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
 
@@ -40,7 +40,7 @@ public class SmsReachServiceImpl extends ServiceImpl<SmsReachMapper, SmsReach> i
         smsReachDTO.setMobile(mobile);
         this.save(smsReach);
         //发送短信批量发送mq消息
-        rocketMQTemplate.asyncSend(destination, JSONUtil.toJsonStr(smsReachDTO), RocketmqSendCallbackBuilder.commonCallback());
+        liliMessageTemplate.asyncSend(destination, JSONUtil.toJsonStr(smsReachDTO), MessageSendCallbackBuilder.commonCallback());
 
     }
 }

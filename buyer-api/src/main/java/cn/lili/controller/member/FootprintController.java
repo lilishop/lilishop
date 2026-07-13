@@ -5,7 +5,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dto.FootPrintQueryParams;
 import cn.lili.modules.member.service.FootprintService;
-import cn.lili.modules.search.entity.dos.EsGoodsIndex;
+import cn.lili.modules.search.entity.dos.GoodsIndex;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,7 +36,7 @@ public class FootprintController {
 
     @Operation(summary = "分页获取")
     @GetMapping
-    public ResultMessage<IPage<EsGoodsIndex>> getByPage(FootPrintQueryParams params) {
+    public ResultMessage<IPage<GoodsIndex>> getByPage(FootPrintQueryParams params) {
         params.setMemberId(UserContext.getCurrentUser().getId());
         return ResultUtil.data(footprintService.footPrintPage(params));
     }
@@ -66,7 +66,7 @@ public class FootprintController {
 
     @GetMapping("/history")
     @Operation(summary = "获取客户的历史足迹")
-    public ResultMessage<IPage<EsGoodsIndex>> getMemberHistory(FootPrintQueryParams params) {
+    public ResultMessage<IPage<GoodsIndex>> getMemberHistory(FootPrintQueryParams params) {
         return ResultUtil.data(footprintService.footPrintPage(params));
     }
 }

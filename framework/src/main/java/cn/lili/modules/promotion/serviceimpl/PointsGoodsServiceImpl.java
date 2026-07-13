@@ -19,7 +19,7 @@ import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.tools.PromotionTools;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,7 +58,7 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
      * rocketMq
      */
     @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    private LiliMessageTemplate liliMessageTemplate;
 
 
     @Override
@@ -91,7 +91,7 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
             boolean saveOrUpdateBatch = this.promotionGoodsService.saveOrUpdateBatch(promotionGoodsList);
             if (saveOrUpdateBatch) {
                 for (PointsGoods pointsGoods : promotionsList) {
-                    this.updateEsGoodsIndex(pointsGoods);
+                    this.updateGoodsIndex(pointsGoods);
                 }
             }
 
@@ -114,7 +114,7 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
         if (this.checkSkuDuplicate(promotions.getSkuId(), promotions.getId()) == null) {
             result = this.updateById(promotions);
             if (this.updatePromotionsGoods(promotions)) {
-                this.updateEsGoodsIndex(promotions);
+                this.updateGoodsIndex(promotions);
             }
         }
         return result;
@@ -219,8 +219,8 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
      * @param promotions 促销实体
      */
     @Override
-    public void updateEsGoodsIndex(PointsGoods promotions) {
-        super.updateEsGoodsIndex(promotions);
+    public void updateGoodsIndex(PointsGoods promotions) {
+        super.updateGoodsIndex(promotions);
     }
 
 

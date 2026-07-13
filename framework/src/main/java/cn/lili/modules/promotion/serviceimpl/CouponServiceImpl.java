@@ -297,18 +297,8 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateEsGoodsIndex(Coupon promotions) {
-        Coupon coupon = JSON.parseObject(JSON.toJSONString(promotions), Coupon.class);
-        if (!CouponRangeDayEnum.DYNAMICTIME.name().equals(coupon.getRangeDayType()) && promotions.getStartTime() == null && promotions.getEndTime() == null) {
-            Map<Object, Object> build = MapBuilder.create().put("promotionKey", this.getPromotionType() + "-" + promotions.getId()).build();
-            if(promotions.getScopeType().equals(PromotionsScopeTypeEnum.PORTION_GOODS.name())){
-                build.put("scopeId", promotions.getScopeId());
-            }
-            //删除商品促销消息
-            applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("删除商品促销事件", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.DELETE_GOODS_INDEX_PROMOTIONS.name(), JSON.toJSONString(build)));
-        } else {
-            super.sendUpdateEsGoodsMsg(promotions);
-        }
+    public void updateGoodsIndex(Coupon promotions) {
+        // Elasticsearch 已移除，促销信息在搜索时实时组装
     }
 
     @Override

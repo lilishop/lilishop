@@ -18,8 +18,8 @@ import cn.lili.modules.promotion.mapper.PromotionGoodsMapper;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.service.SeckillApplyService;
 import cn.lili.modules.promotion.tools.PromotionTools;
-import cn.lili.modules.search.entity.dos.EsGoodsIndex;
-import cn.lili.modules.search.service.EsGoodsIndexService;
+import cn.lili.modules.search.entity.dos.GoodsIndex;
+import cn.lili.modules.search.service.GoodsIndexService;
 import cn.lili.modules.system.aspect.annotation.SystemLogPoint;
 import cn.lili.mybatis.util.PageUtil;
 import com.alibaba.fastjson2.JSON;
@@ -65,7 +65,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     private GoodsService goodsService;
 
     @Autowired
-    private EsGoodsIndexService goodsIndexService;
+    private GoodsIndexService goodsIndexService;
 
     @Autowired
     private Cache cache;
@@ -331,9 +331,9 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     @Override
     public Map<String, Object> getCurrentGoodsPromotion(GoodsSku dataSku, String cartType) {
         Map<String, Object> promotionMap;
-        EsGoodsIndex goodsIndex = goodsIndexService.findById(dataSku.getId());
+        GoodsIndex goodsIndex = goodsIndexService.findById(dataSku.getId());
         if (goodsIndex == null) {
-            goodsIndex = goodsIndexService.getResetEsGoodsIndex(dataSku);
+            goodsIndex = goodsIndexService.buildGoodsIndex(dataSku);
         }
         if (goodsIndex.getPromotionMap() != null && !goodsIndex.getPromotionMap().isEmpty()) {
             applyBestSkuPromotionPrice(dataSku, goodsIndex.getPromotionMap(), cartType);

@@ -4,54 +4,140 @@ metadata:
   name: lilishop-service
 
 ---
+# 买家端 API — 8888
 apiVersion: v1
 kind: Service
 metadata:
-  name: lilishop-all-service
+  name: buyer-api-service
   namespace: lilishop-service
-  labels:
-    app.kubernetes.io/name: lilishop-all-service
-    app.kubernetes.io/instance: lilishop-all
-    app.kubernetes.io/component: all-in-one-api
-    app.kubernetes.io/part-of: lilishop
 spec:
   type: ClusterIP
   ports:
     - name: http
-      port: 8080
+      port: 8888
       targetPort: http
   selector:
-    lilishop.service: lilishop-all
+    lilishop.service: buyer-api
 
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: buyer-api
+  namespace: lilishop-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: buyer-api
+  template:
+    metadata:
+      labels:
+        lilishop.service: buyer-api
+    spec:
+      containers:
+        - image: buyer-api:latest
+          name: buyer-api
+          ports:
+            - name: http
+              containerPort: 8888
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+
+---
+# 平台 + 商家 API — 8887
+apiVersion: v1
+kind: Service
+metadata:
+  name: manager-api-service
+  namespace: lilishop-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8887
+      targetPort: http
+  selector:
+    lilishop.service: manager-api
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: manager-api
+  namespace: lilishop-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: manager-api
+  template:
+    metadata:
+      labels:
+        lilishop.service: manager-api
+    spec:
+      containers:
+        - image: manager-api:latest
+          name: manager-api
+          ports:
+            - name: http
+              containerPort: 8887
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+
+---
+# IM / 客服 — 8885
+apiVersion: v1
+kind: Service
+metadata:
+  name: im-api-service
+  namespace: lilishop-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8885
+      targetPort: http
+  selector:
+    lilishop.service: im-api
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: im-api
+  namespace: lilishop-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      lilishop.service: im-api
+  template:
+    metadata:
+      labels:
+        lilishop.service: im-api
+    spec:
+      containers:
+        - image: im-api:latest
+          name: im-api
+          ports:
+            - name: http
+              containerPort: 8885
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+
+---
+# 共享配置片段（各服务通过 ConfigMap 挂载或 spring.config.import 引用）
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: lilishop-all-config
+  name: lilishop-shared-config
   namespace: lilishop-service
-  labels:
-    app.kubernetes.io/name: lilishop-all-config
-    app.kubernetes.io/instance: lilishop-all
-    app.kubernetes.io/component: all-in-one-api
-    app.kubernetes.io/part-of: lilishop
 data:
-  application.yml: |
-    server:
-      port: 8080
-      servlet:
-        context-path: /
-      tomcat:
-        uri-encoding: UTF-8
-        threads:
-          min-spare: 50
-          max: 1000
-
-    management:
-      endpoints:
-        web:
-          exposure:
-            include: '*'
-
+  middleware.yml: |
     spring:
       data:
         redis:
@@ -63,16 +149,8 @@ data:
         username: root
         password: lilishop
         driver-class-name: com.mysql.cj.jdbc.Driver
-
     lili:
-      system:
-        isDemoSite: false
-      local-file:
-        path: data/uploads
-        url-prefix: /files
       data:
-        logstash:
-          server: logstash-service.lilishop-middleware:4560
         rocketmq:
           promotion-topic: lili_promotion_topic
           promotion-group: lili_promotion_group
@@ -90,63 +168,19 @@ data:
           notice-send-group: lili_send_notice_group
           after-sale-topic: lili_after_sale_topic
           after-sale-group: lili_after_sale_group
-
-    rocketmq:
-      name-server: rocketmq.lilishop-middleware:9876
-      producer:
-        group: lili_group
-        send-message-timeout: 30000
-
-    xxl:
-      job:
-        admin:
-          addresses: http://xxl-job-service.lilishop-middleware:9001/xxl-job-admin
-        executor:
-          appname: xxl-job-executor-lilishop
-          logpath: ./xxl-job/executor
-          logretentiondays: 7
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: lilishop-all
-  namespace: lilishop-service
-  labels:
-    app.kubernetes.io/name: lilishop-all-service
-    app.kubernetes.io/instance: lilishop-all
-    app.kubernetes.io/component: all-in-one-api
-    app.kubernetes.io/part-of: lilishop
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      lilishop.service: lilishop-all
-  template:
-    metadata:
-      labels:
-        lilishop.service: lilishop-all
-    spec:
-      containers:
-        - image: lilishop-all:latest
-          name: lilishop-all
-          args:
-            - --spring.profiles.active=dev
-            - --spring.config.additional-location=file:/application.yml
-          env:
-            - name: TZ
-              value: Asia/Shanghai
-            - name: JAVA_OPTS
-              value: -Xms512m -Xmx1024m
-          ports:
-            - name: http
-              containerPort: 8080
-          volumeMounts:
-            - mountPath: /application.yml
-              name: application-yml
-              subPath: application.yml
-      restartPolicy: Always
-      volumes:
-        - configMap:
-            name: lilishop-all-config
-          name: application-yml
+      schedule:
+        every-minute-cron: "0 * * * * ?"
+        every-hour-cron: "0 0 * * * ?"
+        every-day-cron: "0 0 0 * * ?"
+      message:
+        consumer:
+          enabled: true
+  buyer-security-reference.yml: |
+    # 若线上 buyer-api 出现 /buyer/common/* 403，请确认 ignored.urls 包含以下路径后重启服务
+    ignored:
+      urls:
+        - /buyer/common/slider/**
+        - /buyer/common/sms/**
+        - /buyer/common/site/**
+        - /buyer/common/region/**
+        - /buyer/common/IM

@@ -11,22 +11,24 @@ alwaysApply: false
 - Mybatis-Plus - ORM framework
 - Spring Security - Security framework
 - JWT - Authentication
-- RocketMQ - Message queue
-- Redis & MongoDB - Caching
-- Elasticsearch - Search engine
+- Redis List - Async messaging (replaces RocketMQ broker)
+- Redis - Caching
 - MySQL - Primary database
-- Sharding - Database sharding
-- XXL-Job - Distributed scheduling
+- Spring `@Scheduled` - Task scheduling (in manager-api)
+
+## Search
+- MySQL candidate set + in-memory filter (`GoodsSearchServiceImpl`)
+- No Elasticsearch dependency
 
 ## Frontend Stack
-### Admin & Seller Portals ([admin/](mdc:admin))
+### Admin & Seller Portals (lilishop-ui)
 - Vue.js - Frontend framework
-- iView - UI components
+- iView / Element - UI components
 - Vuex - State management
 - Vue Router - Routing
 - Axios - HTTP client
 
-### Mobile Applications
+### Mobile Applications (lilishop-uniapp)
 - Uni-app - Cross-platform framework
 - uViewui - UI components
 - SCSS - Styling

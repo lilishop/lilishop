@@ -1,4 +1,4 @@
-server:
+﻿server:
   port: 8885
 
   servlet:
@@ -182,20 +182,3 @@ lili:
       notice-send-group: lili_send_notice_group
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
-rocketmq:
-  name-server: 127.0.0.1:9876
-  producer:
-    group: lili_group
-    send-message-timeout: 30000
-
-xxl:
-  job:
-    admin:
-      addresses: http://127.0.0.1:9001/xxl-job-admin
-    executor:
-      appname: xxl-job-executor-lilishop
-      address:
-      ip:
-      port: 8891
-      logpath: ./xxl-job/executor
-      logretentiondays: 7

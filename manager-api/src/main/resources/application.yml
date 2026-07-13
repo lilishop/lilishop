@@ -10,7 +10,7 @@ server:
       min-spare: 50
       max: 1000
 
-# 与Spring Boot 2一样，默认情况下，大多数端点都不通过http公开，我们公开了所有端点。对于生产，您应该仔细选择要公开的端点�?
+# 与 Spring Boot 2 一样，默认情况下大多数端点都不通过 http 公开；我们公开了所有端点。生产环境请仔细选择要公开的端点。
 management:
   health:
   endpoints:
@@ -19,7 +19,7 @@ management:
         include: '*'
 spring:
   application:
-    name: manager-api
+    name: admin-api
 
   cache:
     type: redis
@@ -31,13 +31,13 @@ spring:
       password: lilishop
       lettuce:
         pool:
-          # 连接池最大连接数（使用负值表示没有限制） 默认 8
+          # 连接池最大连接数（使用负值表示没有限制）默认 8
           max-active: 200
-          # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
+          # 连接池最大阻塞等待时间（使用负值表示没有限制）默认 -1
           max-wait: 20
-          # 连接池中的最大空闲连�?默认 8
+          # 连接池中的最大空闲连接，默认 8
           max-idle: 10
-          # 连接池中的最小空闲连�?默认 8
+          # 连接池中的最小空闲连接，默认 8
           min-idle: 8
   # 文件大小上传配置
   servlet:
@@ -47,10 +47,10 @@ spring:
   jackson:
     time-zone: GMT+8
     serialization:
-      #关闭jackson 对json做解�?
+      # 关闭 jackson 对 json 做解析
       fail-on-empty-beans: false
 
-  # 数据源配�?
+  # 数据源配置
   datasource:
     url: jdbc:mysql://192.168.31.100:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     username: root
@@ -58,7 +58,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
 
-# 忽略鉴权url
+# 忽略鉴权 url
 ignored:
   urls:
     - /editor-app/**
@@ -67,10 +67,23 @@ ignored:
     - /manager/passport/user/login
     - /manager/passport/user/refresh/**
     - /manager/other/customWords
+    - /manager/common/slider/**
+    - /manager/common/site/**
+    - /manager/common/region/**
+    - /store/passport/login/**
+    - /store/passport/login/refresh/**
+    - /store/common/slider/**
+    - /store/common/sms/**
+    - /store/common/site/**
+    - /store/common/region/**
+    - /store/common/IM
     - /druid/**
     - /v3/api-docs
     - /v3/api-docs/**
     - /swagger-ui/**
+    - /swagger-ui.html
+    - /swagger-ui
+    - /swagger-ui/
     - /favicon.ico
     - /static/**
     - /public/**
@@ -81,9 +94,9 @@ ignored:
 mybatis-plus:
   mapper-locations: classpath*:mapper/*.xml
   configuration:
-    #缓存开�?
+    # 缓存开启
     cache-enabled: true
-    #日志
+    # 日志
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # 日志
@@ -104,47 +117,67 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui/index.html
-  packages-to-scan: cn.lili.controller
-  paths-to-match: /manager/**
+  packages-to-scan: cn.lili.controller.manager,cn.lili.controller.seller
+  paths-to-match:
+    - /manager/**
+    - /store/**
   override-with-generic-response: false
   logback:
     rollingpolicy:
-      # 最大保存天�?
+      # 最大保存天数
       max-history: 7
-      # 每个文件最大大�?
+      # 每个文件最大大小
       max-file-size: 5MB
-#加密参数
+# 加密参数
 jasypt:
   encryptor:
     password: lili
 
 lili:
+  runtime:
+    mode: microservice
+  local-file:
+    path: data/uploads
+    url-prefix: /files
+  verification-code:
+    effectiveTime: 300
+    watermark: LILI-SHOP
+    interfereNum: 0
+    faultTolerant: 3
+    loginBypassEnabled: false
   system:
     isDemoSite: true
-    #     脱敏级别�?
-    #     0：不做脱敏处�?
-    #     1：管理端用户手机号等信息脱敏
-    #     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
+    # 脱敏级别：
+    # 0：不做脱敏处理
+    # 1：管理端用户手机号等信息脱敏
+    # 2：商家端信息脱敏（为 2 时，表示管理端、商家端同时脱敏）
     sensitiveLevel: 1
   statistics:
-    # 在线人数统计 X 小时。这里设�?8，即统计过去48小时每小时在线人�?
+    # 在线人数统计 X 小时。这里设为 48，即统计过去 48 小时每小时在线人数
     onlineMember: 48
-    # 当前在线人数刷新时间间隔，单位秒，设置为600，则�?0分钟刷新一�?
+    # 当前在线人数刷新时间间隔，单位秒，设置为 600，则每 10 分钟刷新一次
     currentOnlineUpdate: 600
   # jwt 细节设定
   jwt-setting:
-    # token过期时间（分钟）
+    # token 过期时间（分钟）
     tokenExpireTime: 86400
 
-  # 使用Spring @Cacheable注解失效时间
+  # 使用 Spring @Cacheable 注解失效时间
   cache:
-    # 过期时间 单位�?永久不过期设�?1
+    # 过期时间，单位秒；永久不过期设为 -1
     timeout: 1500
-  #多线程配�?
+  # 多线程配置
   thread:
     corePoolSize: 5
     maxPoolSize: 50
     queueCapacity: 50
+  schedule:
+    every-minute-cron: "0 * * * * ?"
+    every-hour-cron: "0 0 * * * ?"
+    every-day-cron: "0 0 0 * * ?"
+  message:
+    consumer:
+      enabled: true
   data:
     logstash:
       server: 127.0.0.1:4560
@@ -165,10 +198,3 @@ lili:
       notice-send-group: lili_send_notice_group
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
-rocketmq:
-  name-server: 192.168.31.100:9876
-  producer:
-    group: lili_group
-    send-message-timeout: 30000
-  consumer:
-    group: lili_consumer_group

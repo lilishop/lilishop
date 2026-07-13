@@ -7,7 +7,7 @@ import cn.lili.modules.member.entity.dos.FootPrint;
 import cn.lili.modules.member.entity.dto.FootPrintQueryParams;
 import cn.lili.modules.member.mapper.FootprintMapper;
 import cn.lili.modules.member.service.FootprintService;
-import cn.lili.modules.search.entity.dos.EsGoodsIndex;
+import cn.lili.modules.search.entity.dos.GoodsIndex;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -73,36 +73,36 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
     }
 
     @Override
-    public IPage<EsGoodsIndex> footPrintPage(FootPrintQueryParams params) {
+    public IPage<GoodsIndex> footPrintPage(FootPrintQueryParams params) {
         params.setSort("createTime");
         Page<FootPrint> footPrintPages = this.page(PageUtil.initPage(params), params.queryWrapper());
         //定义结果
-        Page<EsGoodsIndex> esGoodsIndexIPage = new Page<>();
+        Page<GoodsIndex> goodsIndexIPage = new Page<>();
 
         if (footPrintPages.getRecords() != null && !footPrintPages.getRecords().isEmpty()) {
             List<String> skuIds = footPrintPages.getRecords().stream().map(FootPrint::getSkuId).collect(Collectors.toList());
             List<GoodsSku> goodsSkuByIdFromCache = goodsSkuService.getGoodsSkuByIdFromCache(skuIds);
-            List<EsGoodsIndex> collect = IntStream.range(0, goodsSkuByIdFromCache.size())
+            List<GoodsIndex> collect = IntStream.range(0, goodsSkuByIdFromCache.size())
                     .mapToObj(i -> {
                         if (goodsSkuByIdFromCache.get(i) == null) {
                             return null;
                         }
                         Optional<FootPrint> first =
                                 footPrintPages.getRecords().stream().filter(j -> j.getSkuId().equals(goodsSkuByIdFromCache.get(i).getId())).findFirst();
-                        return first.map(footPrint -> new EsGoodsIndex(goodsSkuByIdFromCache.get(i), footPrint.getCreateTime())).orElseGet(() -> new EsGoodsIndex(goodsSkuByIdFromCache.get(i)));
+                        return first.map(footPrint -> new GoodsIndex(goodsSkuByIdFromCache.get(i), footPrint.getCreateTime())).orElseGet(() -> new GoodsIndex(goodsSkuByIdFromCache.get(i)));
                     })
                     .collect(Collectors.toList());
 
             collect.removeIf(Objects::isNull);
 
-            esGoodsIndexIPage.setPages(footPrintPages.getPages());
-            esGoodsIndexIPage.setRecords(collect);
-            esGoodsIndexIPage.setTotal(footPrintPages.getTotal());
-            esGoodsIndexIPage.setSize(footPrintPages.getSize());
-            esGoodsIndexIPage.setCurrent(footPrintPages.getCurrent());
-            return esGoodsIndexIPage;
+            goodsIndexIPage.setPages(footPrintPages.getPages());
+            goodsIndexIPage.setRecords(collect);
+            goodsIndexIPage.setTotal(footPrintPages.getTotal());
+            goodsIndexIPage.setSize(footPrintPages.getSize());
+            goodsIndexIPage.setCurrent(footPrintPages.getCurrent());
+            return goodsIndexIPage;
         }
-        return esGoodsIndexIPage;
+        return goodsIndexIPage;
     }
 
     @Override

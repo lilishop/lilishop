@@ -1,4 +1,4 @@
-spring:
+﻿spring:
   data:
     redis:
       host: 127.0.0.1
@@ -14,7 +14,3 @@ lili:
       server: 127.0.0.1:4560
 rocketmq:
   name-server: 127.0.0.1:9876
-xxl:
-  job:
-    admin:
-      addresses: http://127.0.0.1:9001/xxl-job-admin

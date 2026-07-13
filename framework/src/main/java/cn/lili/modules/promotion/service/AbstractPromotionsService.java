@@ -26,7 +26,7 @@ public interface AbstractPromotionsService<T extends BasePromotions> extends ISe
      * 2. checkPromotions 检查促销参数
      * 3. save 保存促销信息
      * 4. updatePromotionGoods 更新促销商品信息
-     * 5。 updateEsGoodsIndex 更新商品索引促销信息
+     * 5. updateGoodsIndex 促销变更后处理（子类可覆盖）
      *
      * @param promotions 促销信息
      * @return 是否保存成功
@@ -40,7 +40,7 @@ public interface AbstractPromotionsService<T extends BasePromotions> extends ISe
      * 2. checkPromotions 检查促销参数
      * 3. saveOrUpdate 保存促销信息
      * 4. updatePromotionGoods 更新促销商品信息
-     * 5. updateEsGoodsIndex 更新商品索引促销信息
+     * 5. updateGoodsIndex 促销变更后处理（子类可覆盖）
      *
      * @param promotions 促销信息
      * @return 是否更新成功
@@ -115,18 +115,9 @@ public interface AbstractPromotionsService<T extends BasePromotions> extends ISe
     boolean updatePromotionsGoods(T promotions);
 
     /**
-     * 更新促销信息到商品索引
-     *
-     * @param promotions 促销实体
+     * 促销变更后处理，子类可覆盖实现额外逻辑
      */
-    void updateEsGoodsIndex(T promotions);
-
-    /**
-     * 发送更新商品索引消息
-     *
-     * @param promotions 促销实体
-     */
-    void sendUpdateEsGoodsMsg(T promotions);
+    void updateGoodsIndex(T promotions);
 
     /**
      * 当前促销类型

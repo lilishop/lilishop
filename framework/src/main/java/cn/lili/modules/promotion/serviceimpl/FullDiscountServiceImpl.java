@@ -130,9 +130,9 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
      * @param promotions 促销实体
      */
     @Override
-    public void updateEsGoodsIndex(FullDiscount promotions) {
+    public void updateGoodsIndex(FullDiscount promotions) {
         FullDiscount fullDiscount = promotions;
-        super.updateEsGoodsIndex(fullDiscount);
+        super.updateGoodsIndex(fullDiscount);
     }
 
     /**

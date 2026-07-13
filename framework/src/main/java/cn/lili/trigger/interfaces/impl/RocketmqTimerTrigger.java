@@ -2,7 +2,7 @@ package cn.lili.trigger.interfaces.impl;
 
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.message.MessageSendCallbackBuilder;
 import cn.lili.trigger.delay.queue.PromotionDelayQueue;
 import cn.lili.trigger.interfaces.TimeTrigger;
 import cn.lili.trigger.model.TimeTriggerMsg;
@@ -10,7 +10,7 @@ import cn.lili.trigger.util.DelayQueueTools;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RocketmqTimerTrigger implements TimeTrigger {
     @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    private LiliMessageTemplate liliMessageTemplate;
     @Autowired
     private Cache<Integer> cache;
     @Autowired
@@ -81,7 +81,7 @@ public class RocketmqTimerTrigger implements TimeTrigger {
         TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(executorName, triggerTime, param, uniqueKey, topic);
         Message<TimeTriggerMsg> message = MessageBuilder.withPayload(timeTriggerMsg).build();
         log.info("延时任务发送信息：{}", message);
-        this.rocketMQTemplate.asyncSend(topic, message, RocketmqSendCallbackBuilder.commonCallback());
+        this.liliMessageTemplate.asyncSend(topic, message, MessageSendCallbackBuilder.commonCallback());
     }
 
     @Override

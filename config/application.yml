@@ -8,7 +8,7 @@ server:
       min-spare: 50
       max: 1000
 
-# 与Spring Boot 2一样，默认情况下，大多数端点都不通过http公开，我们公开了所有端点。对于生产，您应该仔细选择要公开的端点�?
+# 与Spring Boot 2一样，默认情况下，大多数端点都不通过http公开，我们公开了所有端点。对于生产，您应该仔细选择要公开的端点。
 spring:
   #  health:
   endpoints:
@@ -34,9 +34,9 @@ spring:
           max-active: 200
           # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
           max-wait: 20s
-          # 连接池中的最大空闲连�?默认 8
+          # 连接池中的最大空闲连接，默认 8
           max-idle: 10
-          # 连接池中的最小空闲连�?默认 8
+          # 连接池中的最小空闲连接，默认 8
           min-idle: 8
   # 文件大小上传配置
   servlet:
@@ -46,7 +46,7 @@ spring:
   jackson:
     time-zone: GMT+8
     serialization:
-      #关闭jackson 对json做解�?
+      #关闭jackson 对json做解析
       fail-on-empty-beans: false
 
   datasource:
@@ -63,12 +63,11 @@ ignored:
     - /MP_verify_qSyvBPhDsPdxvOhC.txt
     - /weixin/**
     - /source/**
-    - /store/passport/login/**
-    - /store/passport/login/refresh/**
-    - /common/common/slider/**
-    - /common/common/sms/**
-    - /common/common/site
-    - /common/common/site/theme
+    - /buyer/common/slider/**
+    - /buyer/common/site/**
+    - /buyer/common/sms/**
+    - /buyer/common/region/**
+    - /buyer/common/IM
     - /buyer/payment/cashier/**
     - /buyer/other/pageData/**
     - /buyer/live/room/polling/**
@@ -87,6 +86,15 @@ ignored:
     - /buyer/member/evaluation/*/evaluationNumber
     - /buyer/other/appVersion/**
     - /buyer/broadcast/studio/**
+    - /store/passport/login/**
+    - /store/passport/login/refresh/**
+    - /store/common/slider/**
+    - /store/common/sms/**
+    - /store/common/site/**
+    - /store/common/region/**
+    - /manager/common/slider/**
+    - /manager/common/site/**
+    - /manager/common/region/**
     - /manager/passport/user/login
     - /manager/passport/user/refresh/**
     - /manager/other/customWords
@@ -125,7 +133,7 @@ springdoc:
 mybatis-plus:
   mapper-locations: classpath*:mapper/*.xml
   configuration:
-    #缓存开�?
+    #缓存开启
     cache-enabled: true
     #日志
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -142,9 +150,9 @@ logging:
     path: logs
   logback:
     rollingpolicy:
-      # 最大保存天�?
+      # 最大保存天数
       max-history: 7
-      # 每个文件最大大�?
+      # 每个文件最大大小
       max-file-size: 5MB
 #加密参数
 jasypt:
@@ -153,22 +161,22 @@ jasypt:
 
 
 lili:
-  #验证码设�?
+  #验证码设置
   verification-code:
-    #图形验证码有效时�?�?包含滑块验证码有效时间， 以及验证通过之后，缓存中存储的验证结果有效时�?
+    #图形验证码有效时间，包含滑块验证码有效时间，以及验证通过之后，缓存中存储的验证结果有效时间
     effectiveTime: 300
     #水印
     watermark: LILI-SHOP
-    #干扰项数�?最�? 默认0
+    #干扰项数量 最多2 默认0
     interfereNum: 1
     #允许误差像素
     faultTolerant: 3
-    #登录验证码放行，普通部署默认关�?
+    #登录验证码放行，普通部署默认关闭
     loginBypassEnabled: false
   system:
     isDemoSite: false
-    #     脱敏级别�?
-    #     0：不做脱敏处�?
+    #     脱敏级别：
+    #     0：不做脱敏处理
     #     1：管理端用户手机号等信息脱敏
     #     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
     sensitiveLevel: 1
@@ -177,9 +185,9 @@ lili:
     url-prefix: /files
 
   statistics:
-    # 在线人数统计 X 小时。这里设�?8，即统计过去48小时每小时在线人�?
+    # 在线人数统计 X 小时。这里设为48，即统计过去48小时每小时在线人数
     onlineMember: 48
-    # 当前在线人数刷新时间间隔，单位秒，设置为600，则�?0分钟刷新一�?
+    # 当前在线人数刷新时间间隔，单位秒，设置为600，则每10分钟刷新一次
     currentOnlineUpdate: 600
   #qq lbs 申请
   lbs:
@@ -205,9 +213,9 @@ lili:
 
   # 使用Spring @Cacheable注解失效时间
   cache:
-    # 过期时间 单位�?永久不过期设�?1
+    # 过期时间 单位秒 永久不过期设为-1
     timeout: 1500
-  #多线程配�?
+  #多线程配置
   thread:
     corePoolSize: 5
     maxPoolSize: 50
@@ -232,21 +240,3 @@ lili:
       notice-send-group: lili_send_notice_group
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
-rocketmq:
-  name-server: 192.168.31.100:9876
-  isVIPChannel: false
-  producer:
-    group: lili_group
-    send-message-timeout: 30000
-
-xxl:
-  job:
-    admin:
-      addresses: http://192.168.31.100:9001/xxl-job-admin
-    executor:
-      appname: xxl-job-executor-lilishop
-      address:
-      ip:
-      port: 8891
-      logpath: ./xxl-job/executor
-      logretentiondays: 7

@@ -45,7 +45,7 @@ import cn.lili.modules.system.entity.dto.GoodsSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.mybatis.util.PageUtil;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.message.MessageSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -54,7 +54,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -112,7 +112,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
      * rocketMq
      */
     @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    private LiliMessageTemplate liliMessageTemplate;
     /**
      * rocketMq配置
      */
@@ -218,7 +218,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (goodsOperationDTO.getGoodsGalleryList() != null && !goodsOperationDTO.getGoodsGalleryList().isEmpty()) {
             this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
         }
-        this.generateEs(goods);
     }
 
 
@@ -262,10 +261,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
         }
         if (GoodsAuthEnum.TOBEAUDITED.name().equals(goods.getAuthFlag())) {
-            this.deleteEsGoods(Collections.singletonList(goodsId));
+            this.notifyGoodsDelete(Collections.singletonList(goodsId));
         }
         cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
-        this.generateEs(goods);
     }
 
 
@@ -389,7 +387,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             //商品审核消息
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_AUDIT.name();
             //发送mq消息
-            rocketMQTemplate.asyncSend(destination, JSON.toJSONString(goods), RocketmqSendCallbackBuilder.commonCallback());
+            liliMessageTemplate.asyncSend(destination, JSON.toJSONString(goods), MessageSendCallbackBuilder.commonCallback());
         }
         cache.multiDel(goodsCacheKeys);
         return result;
@@ -517,7 +515,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         }
         //删除缓存
         cache.multiDel(goodsCacheKeys);
-        this.deleteEsGoods(goodsIds);
+        this.notifyGoodsDelete(goodsIds);
         return true;
     }
 
@@ -694,11 +692,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         cache.multiDel(goodsCacheKeys);
 
         if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {
-            this.deleteEsGoods(goodsIds);
-        } else {
-            this.updateEsGoods(goodsIds);
+            this.notifyGoodsDelete(goodsIds);
         }
-
 
         //下架商品发送消息
         if (goodsStatusEnum.equals(GoodsStatusEnum.DOWN)) {
@@ -708,22 +703,10 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     /**
-     * 发送生成ES商品索引
-     *
-     * @param goods 商品信息
+     * 发送商品删除消息，用于清理关联促销信息
      */
     @Transactional
-    public void generateEs(Goods goods) {
-        // Elasticsearch 已移除
-    }
-
-    @Transactional
-    public void updateEsGoods(List<String> goodsIds) {
-        // Elasticsearch 已移除
-    }
-
-    @Transactional
-    public void deleteEsGoods(List<String> goodsIds) {
+    public void notifyGoodsDelete(List<String> goodsIds) {
         applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("删除商品促销信息", rocketmqCustomProperties.getGoodsTopic(),
                 GoodsTagsEnum.GOODS_DELETE.name(), JSON.toJSONString(goodsIds)));
     }

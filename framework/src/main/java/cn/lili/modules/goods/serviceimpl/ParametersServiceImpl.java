@@ -18,7 +18,7 @@ import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -46,7 +46,7 @@ public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Paramet
     private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    private LiliMessageTemplate liliMessageTemplate;
 
     @Autowired
     private CategoryParameterService categoryParameterService;
@@ -108,7 +108,7 @@ public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Paramet
 //
 //            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX.name();
 //            //发送mq消息
-//            rocketMQTemplate.asyncSend(destination, JSON.toJSONString(goodsIds), RocketmqSendCallbackBuilder.commonCallback());
+//            liliMessageTemplate.asyncSend(destination, JSON.toJSONString(goodsIds), MessageSendCallbackBuilder.commonCallback());
 //        }
 
         Boolean isUpdate = this.updateById(goodsParamsDTO);
