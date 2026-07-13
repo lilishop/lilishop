@@ -12,7 +12,6 @@ import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.goods.service.GoodsService;
-import cn.lili.modules.search.utils.EsIndexUtil;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dos.StoreDetail;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
@@ -112,15 +111,7 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
 
     @Override
     public void updateStoreGoodsInfo(Store store) {
-
         goodsService.updateStoreDetail(store);
-
-        Map<String, Object> updateIndexFieldsMap = EsIndexUtil.getUpdateIndexFieldsMap(
-                MapUtil.builder(new HashMap<String, Object>()).put("storeId", store.getId()).build(),
-                MapUtil.builder(new HashMap<String, Object>()).put("storeName", store.getStoreName()).put("selfOperated", store.getSelfOperated()).build());
-        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX_FIELD.name();
-        //发送mq消息
-        rocketMQTemplate.asyncSend(destination, JSON.toJSONString(updateIndexFieldsMap), RocketmqSendCallbackBuilder.commonCallback());
     }
 
     @Override

@@ -2,19 +2,12 @@ package cn.lili.modules.search.entity.dos;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
-import org.springframework.data.elasticsearch.annotations.InnerField;
-import org.springframework.data.elasticsearch.annotations.MultiField;
 
 import java.io.Serializable;
 
 /**
- * 商品属性索引
- *
- * @author paulG
- * @since 2020/10/14
- **/
+ * 商品属性
+ */
 @Data
 @NoArgsConstructor
 public class EsGoodsAttribute implements Serializable {
@@ -24,37 +17,16 @@ public class EsGoodsAttribute implements Serializable {
     /**
      * 属性参数：0->规格；1->参数
      */
-    @Field(type = FieldType.Integer)
     private Integer type;
 
-    /**
-     * 属性名称
-     */
     private String nameId;
 
-    /**
-     * 属性名称
-     */
-    @MultiField(mainField = @Field(type = FieldType.Text, fielddata = true), otherFields = @InnerField(suffix = "keyword", type = FieldType.Keyword))
     private String name;
 
-    /**
-     * 属性值
-     */
-    @Field(type = FieldType.Text)
     private String valueId;
 
-    /**
-     * 属性值
-     */
-    @MultiField(mainField = @Field(type = FieldType.Text, fielddata = true), otherFields = @InnerField(suffix = "keyword", type = FieldType.Keyword))
     private String value;
 
-
-    /**
-     * 排序
-     */
-    @Field(type = FieldType.Integer)
     private Integer sort;
 
     public EsGoodsAttribute(Integer type, String nameId, String name, String valueId, String value, Integer sort) {

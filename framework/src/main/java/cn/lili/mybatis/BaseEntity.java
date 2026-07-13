@@ -9,28 +9,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
 
-
 /**
  * 数据库基础实体类
- *
- * @author Chopper
- * @version v1.0
- * @since 2020/8/20 14:34
  */
 @Data
-@JsonIgnoreProperties(value = { "handler", "fieldHandler"})
+@JsonIgnoreProperties(value = {"handler", "fieldHandler"})
 @AllArgsConstructor
 @NoArgsConstructor
 public abstract class BaseEntity implements Serializable {
@@ -41,30 +29,24 @@ public abstract class BaseEntity implements Serializable {
     @Schema(description = "唯一标识", hidden = true)
     private String id;
 
-    @CreatedBy
     @TableField(fill = FieldFill.INSERT)
     @Schema(description = "创建者", hidden = true)
     private String createBy;
 
-    @CreatedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT)
     @Schema(description = "创建时间", hidden = true)
-    @Field(type = FieldType.Date, format = DateFormat.date_optional_time, pattern = "yyyy-MM-dd HH:mm:ss || yyyy-MM-dd || yyyy/MM/dd HH:mm:ss|| yyyy/MM/dd ||epoch_millis")
     private Date createTime;
 
-    @LastModifiedBy
     @TableField(fill = FieldFill.UPDATE)
     @Schema(description = "更新者", hidden = true)
     private String updateBy;
 
-    @LastModifiedDate
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField(fill = FieldFill.INSERT_UPDATE)
     @Schema(description = "更新时间", hidden = true)
-    @Field(type = FieldType.Date, format = DateFormat.date_optional_time, pattern = "yyyy-MM-dd HH:mm:ss || yyyy-MM-dd || yyyy/MM/dd HH:mm:ss|| yyyy/MM/dd ||epoch_millis")
     private Date updateTime;
 
     @TableField(fill = FieldFill.INSERT)

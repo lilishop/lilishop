@@ -91,7 +91,7 @@ public class UnifiedSecurityConfig {
                         cn.lili.common.utils.ResponseUtil.resultMap(false, 403, "未登录或token失效"))))
             .formLogin(f -> f.disable())
             .httpBasic(b -> b.disable())
-            .addFilter(new BuyerAuthenticationFilter(authManager, cache));
+            .addFilter(new BuyerAuthenticationFilter(authManager, cache, ignoredUrlsProperties));
         return http.build();
     }
 

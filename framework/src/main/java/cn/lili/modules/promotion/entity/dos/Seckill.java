@@ -13,8 +13,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.util.Date;
 
@@ -37,7 +35,6 @@ public class Seckill extends BasePromotions {
     @NotNull(message = "请填写报名截止时间")
     @Schema(description = "报名截至时间", required = true)
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @Field(type = FieldType.Date, pattern = "yyyy-MM-dd HH:mm:ss || yyyy-MM-dd || yyyy/MM/dd HH:mm:ss|| yyyy/MM/dd ||epoch_millis")
     private Date applyEndTime;
 
     @Schema(description = "申请规则")

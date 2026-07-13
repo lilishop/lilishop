@@ -192,10 +192,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 GoodsSku sku = GoodsSkuBuilder.build(goods, map);
                 renderGoodsSku(sku, goodsOperationDTO);
                 skuList.add(sku);
-                //如果商品状态值不对，则es索引移除
-                if (goods.getAuthFlag().equals(GoodsAuthEnum.PASS.name()) && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())) {
-                    goodsIndexService.deleteIndexById(sku.getId());
-                }
                 this.clearCache(sku.getId());
             }
         }
@@ -738,17 +734,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             cache.put(GoodsSkuService.getStockCacheKey(skuId), quantity);
 
             this.promotionGoodsService.updatePromotionGoodsStock(goodsSku.getId(), quantity);
-            //商品库存为0是删除商品索引
-            if (quantity <= 0) {
-                goodsIndexService.deleteIndexById(goodsSku.getId());
-            }
-            //库存从<=0恢复到>0并且商品状态为上架时重建商品索引
-            if (isFlag && quantity > 0 && CharSequenceUtil.equals(goodsSku.getMarketEnable(), GoodsStatusEnum.UPPER.name())) {
-                List<String> goodsIds = new ArrayList<>();
-                goodsIds.add(goodsSku.getGoodsId());
-                applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品", rocketmqCustomProperties.getGoodsTopic(),
-                        GoodsTagsEnum.UPDATE_GOODS_INDEX.name(), goodsIds));
-            }
         }
     }
 
@@ -776,17 +761,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             cache.put(GoodsSkuService.getStockCacheKey(skuId), quantity);
 
             this.promotionGoodsService.updatePromotionGoodsStock(goodsSku.getId(), quantity);
-            //商品库存为0是删除商品索引
-            if (quantity <= 0) {
-                goodsIndexService.deleteIndexById(goodsSku.getId());
-            }
-            //库存从<=0恢复到>0并且商品状态为上架时重建商品索引
-            if (isFlag && quantity > 0 && CharSequenceUtil.equals(goodsSku.getMarketEnable(), GoodsStatusEnum.UPPER.name())) {
-                List<String> goodsIds = new ArrayList<>();
-                goodsIds.add(goodsSku.getGoodsId());
-                applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品", rocketmqCustomProperties.getGoodsTopic(),
-                        GoodsTagsEnum.UPDATE_GOODS_INDEX.name(), goodsIds));
-            }
         }
     }
 

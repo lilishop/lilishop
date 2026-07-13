@@ -71,10 +71,6 @@ data:
         path: data/uploads
         url-prefix: /files
       data:
-        elasticsearch:
-          enabled: true
-          cluster-nodes: elasticsearch.lilishop-middleware:9200
-          schema: http
         logstash:
           server: logstash-service.lilishop-middleware:4560
         rocketmq:

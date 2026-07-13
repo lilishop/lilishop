@@ -1,9 +1,6 @@
 # 开发环境覆盖：替换 192.168.31.100 为你本地中间件地址
 spring:
   data:
-    elasticsearch:
-      repositories:
-        enabled: false
     redis:
       host: 127.0.0.1
       port: 6379
@@ -15,9 +12,6 @@ spring:
 
 lili:
   data:
-    elasticsearch:
-      enabled: false
-
 xxl:
   job:
     enabled: false

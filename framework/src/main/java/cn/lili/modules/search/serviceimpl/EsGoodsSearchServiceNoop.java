@@ -19,19 +19,15 @@ import cn.lili.modules.search.entity.dos.EsGoodsRelatedInfo;
 import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
 import cn.lili.modules.search.entity.dto.ParamOptions;
 import cn.lili.modules.search.entity.dto.SelectorOptions;
+import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import cn.lili.modules.search.service.EsGoodsSearchService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
-import org.springframework.data.elasticsearch.core.SearchPage;
-import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -46,10 +42,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * all-in-one 精简模式不启用 Elasticsearch，商品搜索降级为 MySQL 候选集 + 内存筛选。
+ * 商品搜索：MySQL 候选集 + 内存筛选
  */
 @Service
-@ConditionalOnProperty(value = "lili.data.elasticsearch.enabled", havingValue = "false")
 public class EsGoodsSearchServiceNoop implements EsGoodsSearchService {
 
     private static final long MYSQL_SEARCH_LIMIT = 5000L;
@@ -66,16 +61,6 @@ public class EsGoodsSearchServiceNoop implements EsGoodsSearchService {
 
     public EsGoodsSearchServiceNoop(GoodsSkuService goodsSkuService) {
         this.goodsSkuService = goodsSkuService;
-    }
-
-    @Override
-    public SearchPage<EsGoodsIndex> searchGoods(EsGoodsSearchDTO searchDTO, PageVO pageVo) {
-        return null;
-    }
-
-    @Override
-    public <T> SearchPage<T> searchGoods(Query searchQuery, Class<T> clazz) {
-        return null;
     }
 
     @Override
@@ -118,11 +103,6 @@ public class EsGoodsSearchServiceNoop implements EsGoodsSearchService {
         }
         List<EsGoodsIndex> indexes = getEsGoodsBySkuIds(List.of(id), null);
         return indexes.isEmpty() ? null : indexes.get(0);
-    }
-
-    @Override
-    public NativeQueryBuilder createSearchQueryBuilder(EsGoodsSearchDTO searchDTO, PageVO pageVo) {
-        return new NativeQueryBuilder();
     }
 
     private List<EsGoodsIndex> searchMysqlIndexes(EsGoodsSearchDTO searchDTO) {
@@ -302,7 +282,6 @@ public class EsGoodsSearchServiceNoop implements EsGoodsSearchService {
             }
             selectedProps.computeIfAbsent(pair[0], key -> new ArrayList<>()).add(pair[1]);
         }
-        // 与 ES 查询保持一致：已选参数名不再在参数聚合中重复展示。
         searchDTO.getNotShowCol().put("name", new ArrayList<>(selectedProps.keySet()));
         searchDTO.getNotShowCol().put("value", selectedProps.values().stream().flatMap(List::stream).toList());
         return selectedProps;

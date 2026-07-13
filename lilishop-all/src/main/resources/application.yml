@@ -9,9 +9,6 @@ server:
       max: 1000
 
 management:
-  health:
-    elasticsearch:
-      enabled: false
   endpoints:
     web:
       exposure:
@@ -22,12 +19,6 @@ spring:
     name: lilishop-all
   autoconfigure:
     exclude:
-      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
-      - org.springframework.boot.autoconfigure.elasticsearch.ReactiveElasticsearchClientAutoConfiguration
-      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchClientAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.elasticsearch.ReactiveElasticsearchRepositoriesAutoConfiguration
       - org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration
   servlet:
     multipart:
@@ -41,9 +32,6 @@ spring:
       fail-on-empty-beans: false
 
   data:
-    elasticsearch:
-      repositories:
-        enabled: false
     redis:
       host: 192.168.31.100
       port: 30379
@@ -62,7 +50,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
 
-# 合并后的 ignored.urls 白名单（来自 6 个模块）
+# ???? ignored.urls ?????? 6 ????
 ignored:
   urls:
     - /editor-app/**
@@ -82,7 +70,7 @@ ignored:
     - /swagger-ui/**
     - /v3/api-docs
     - /v3/api-docs/**
-    # buyer 公开接口
+    # buyer ????
     - /buyer/payment/cashier/**
     - /buyer/payment/cashierRefund/**
     - /buyer/other/pageData/**
@@ -102,15 +90,14 @@ ignored:
     - /buyer/member/evaluation/*/evaluationNumber
     - /buyer/other/appVersion/**
     - /buyer/broadcast/studio/**
-    # store 公开接口
+    # store ????
     - /store/passport/login/**
     - /store/passport/login/refresh/**
-    # manager 公开接口
+    # manager ????
     - /manager/passport/user/login
     - /manager/passport/user/refresh/**
-    - /manager/other/elasticsearch
     - /manager/other/customWords
-    # common 公开接口
+    # common ????
     - /common/common/slider/**
     - /common/common/sms/**
     - /common/common/logo
@@ -142,7 +129,7 @@ springdoc:
   swagger-ui:
     path: /swagger-ui/index.html
   packages-to-scan: cn.lili.controller
-  # 合并后扫描所有模块路径
+  # ????????????
   paths-to-match:
     - /buyer/**
     - /store/**
@@ -169,8 +156,6 @@ lili:
     maxPoolSize: 50
     queueCapacity: 50
   data:
-    elasticsearch:
-      enabled: false
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
@@ -189,7 +174,7 @@ lili:
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
 
-# XXL-Job（来自原 consumer 模块）
+# XXL-Job???? consumer ????
 xxl:
   job:
     enabled: false

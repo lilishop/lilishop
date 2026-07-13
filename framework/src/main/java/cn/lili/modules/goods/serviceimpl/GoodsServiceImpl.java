@@ -34,7 +34,6 @@ import cn.lili.modules.goods.service.*;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
-import cn.lili.modules.search.utils.EsIndexUtil;
 import cn.lili.modules.store.entity.dos.FreightTemplate;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.vos.StoreVO;
@@ -590,9 +589,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
         // 修改商品sku评价数量
         this.goodsSkuService.updateGoodsSkuGrade(goodsId, grade, goods.getCommentNum());
-
-        Map<String, Object> updateIndexFieldsMap = EsIndexUtil.getUpdateIndexFieldsMap(MapUtil.builder(new HashMap<String, Object>()).put("goodsId", goodsId).build(), MapUtil.builder(new HashMap<String, Object>()).put("commentNum", goods.getCommentNum()).put("highPraiseNum", highPraiseNum).put("grade", grade).build());
-        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品索引信息", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.UPDATE_GOODS_INDEX_FIELD.name(), JSON.toJSONString(updateIndexFieldsMap)));
     }
 
     /**
@@ -718,33 +714,17 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
      */
     @Transactional
     public void generateEs(Goods goods) {
-        // 不生成没有审核通过且没有上架的商品
-        if (!GoodsStatusEnum.UPPER.name().equals(goods.getMarketEnable()) || !GoodsAuthEnum.PASS.name().equals(goods.getAuthFlag())) {
-            return;
-        }
-        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("生成商品", rocketmqCustomProperties.getGoodsTopic(),
-                GoodsTagsEnum.GENERATOR_GOODS_INDEX.name(), goods.getId()));
+        // Elasticsearch 已移除
     }
 
-    /**
-     * 发送生成ES商品索引
-     *
-     * @param goodsIds 商品id
-     */
     @Transactional
     public void updateEsGoods(List<String> goodsIds) {
-        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品", rocketmqCustomProperties.getGoodsTopic(),
-                GoodsTagsEnum.UPDATE_GOODS_INDEX.name(), goodsIds));
+        // Elasticsearch 已移除
     }
 
-    /**
-     * 发送删除es索引的信息
-     *
-     * @param goodsIds 商品id
-     */
     @Transactional
     public void deleteEsGoods(List<String> goodsIds) {
-        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("删除商品", rocketmqCustomProperties.getGoodsTopic(),
+        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("删除商品促销信息", rocketmqCustomProperties.getGoodsTopic(),
                 GoodsTagsEnum.GOODS_DELETE.name(), JSON.toJSONString(goodsIds)));
     }
 

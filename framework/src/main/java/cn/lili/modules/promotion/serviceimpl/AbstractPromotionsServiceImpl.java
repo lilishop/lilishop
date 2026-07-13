@@ -257,28 +257,13 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public void updateEsGoodsIndex(T promotions) {
-        if (promotions.getStartTime() == null && promotions.getEndTime() == null) {
-            Map<Object, Object> build = MapBuilder.create().put("promotionKey", this.getPromotionType() + "-" + promotions.getId()).put("scopeId", promotions.getScopeId()).build();
-            //删除商品促销消息
-            applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("删除商品促销事件", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.DELETE_GOODS_INDEX_PROMOTIONS.name(), JSONUtil.toJsonStr(build)));
-        } else {
-            this.sendUpdateEsGoodsMsg(promotions);
-        }
+        // Elasticsearch 已移除，促销信息在搜索时实时组装
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void sendUpdateEsGoodsMsg(T promotions) {
-
-        String esPromotionKey = this.getPromotionType().name() + "-" + promotions.getId();
-        Map<String, Object> map = new HashMap<>();
-        // es促销key
-        map.put("esPromotionKey", esPromotionKey);
-        // 促销类型全路径名
-        map.put("promotionsType", promotions.getClass().getName());
-        // 促销实体
-        map.put("promotions", promotions);
-        applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品索引促销事件", rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.UPDATE_GOODS_INDEX_PROMOTIONS.name(), JSONUtil.toJsonStr(map)));
+        // Elasticsearch 已移除
     }
 
     @Override

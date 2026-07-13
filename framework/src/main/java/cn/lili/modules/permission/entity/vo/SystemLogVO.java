@@ -1,101 +1,84 @@
 package cn.lili.modules.permission.entity.vo;
 
 import cn.lili.common.utils.ObjectUtil;
-import cn.lili.elasticsearch.EsSuffix;
+import cn.lili.modules.permission.entity.dos.SystemLog;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
-
 /**
- * 日志
- *
- * @author Chopper
- * @since 2020/12/2 17:50
+ * 系统日志 VO
  */
 @Data
-@Document(indexName = "#{@elasticsearchProperties.indexPrefix}_" + EsSuffix.LOGS_INDEX_NAME)
 @ToString
 @NoArgsConstructor
 @Accessors(chain = true)
 public class SystemLogVO implements Serializable {
 
-
     private static final long serialVersionUID = -8995552592401630086L;
 
-    @Id
     @Schema(description = "id")
     private String id;
 
-
     @Schema(description = "日志记录时间")
-    @Field(type = FieldType.Long)
     private Long createTime = new Date().getTime();
 
     @Schema(description = "请求用户")
-    @Field(type = FieldType.Text)
     private String username;
 
     @Schema(description = "请求路径")
-    @Field(type = FieldType.Text)
     private String requestUrl;
 
     @Schema(description = "请求参数")
-    @Field(type = FieldType.Text)
     private String requestParam;
 
     @Schema(description = "响应参数")
-    @Field(type = FieldType.Text)
     private String responseBody;
 
     @Schema(description = "ip")
-    @Field(type = FieldType.Keyword)
     private String ip;
 
     @Schema(description = "方法操作名称")
-    @Field(type = FieldType.Keyword)
     private String name;
 
-
     @Schema(description = "请求类型")
-    @Field(type = FieldType.Keyword)
     private String requestType;
 
-
     @Schema(description = "自定义日志内容")
-    @Field(type = FieldType.Text)
     private String customerLog;
 
-
     @Schema(description = "ip信息")
-    @Field(type = FieldType.Text)
     private String ipInfo;
 
     @Schema(description = "花费时间")
-    @Field(type = FieldType.Integer)
     private Integer costTime;
 
     @Schema(description = "商家")
-    @Field(type = FieldType.Long)
     private Long storeId = -1L;
 
-    /**
-     * 转换请求参数为Json
-     *
-     * @param paramMap
-     */
     public void setMapToParams(Map<String, String[]> paramMap) {
-
         this.requestParam = ObjectUtil.mapToString(paramMap);
+    }
+
+    public static SystemLogVO fromEntity(SystemLog entity) {
+        if (entity == null) {
+            return null;
+        }
+        SystemLogVO vo = new SystemLogVO();
+        BeanUtils.copyProperties(entity, vo);
+        return vo;
+    }
+
+    public SystemLog toEntity() {
+        SystemLog entity = new SystemLog();
+        BeanUtils.copyProperties(this, entity);
+        return entity;
     }
 }

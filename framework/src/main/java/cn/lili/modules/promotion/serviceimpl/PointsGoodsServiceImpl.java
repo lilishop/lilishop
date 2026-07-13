@@ -17,9 +17,6 @@ import cn.lili.modules.promotion.mapper.PointsGoodsMapper;
 import cn.lili.modules.promotion.service.PointsGoodsService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
 import cn.lili.modules.promotion.tools.PromotionTools;
-import cn.lili.modules.search.utils.EsIndexUtil;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
-import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -224,12 +221,6 @@ public class PointsGoodsServiceImpl extends AbstractPromotionsServiceImpl<Points
     @Override
     public void updateEsGoodsIndex(PointsGoods promotions) {
         super.updateEsGoodsIndex(promotions);
-        Map<String, Object> query = MapUtil.builder(new HashMap<String, Object>()).put("id", promotions.getSkuId()).build();
-        Map<String, Object> update = MapUtil.builder(new HashMap<String, Object>()).put("points", promotions.getPoints()).build();
-        //修改规格索引,发送mq消息
-        Map<String, Object> updateIndexFieldsMap = EsIndexUtil.getUpdateIndexFieldsMap(query, update);
-        String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.UPDATE_GOODS_INDEX_FIELD.name();
-        rocketMQTemplate.asyncSend(destination, JSON.toJSONString(updateIndexFieldsMap), RocketmqSendCallbackBuilder.commonCallback());
     }
 
 

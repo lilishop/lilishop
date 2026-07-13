@@ -107,7 +107,7 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 [**部署文档 -> 环境准备**](https://docs.pickmall.cn/deply/deply.html)
 
 #### 数据库初始化
--   **推荐方式**: 使用项目提供的 `docker-compose` 配置，可自动完成数据库（MySQL, Redis, Elasticsearch等）的部署与初始化。
+-   **推荐方式**: 使用项目提供的 `docker-compose` 配置，可自动完成数据库（MySQL、Redis、RocketMQ、XXL-Job 等）的部署与初始化。
 -   **手动方式**: 如果您选择手动部署，SQL脚本位于以下地址。请确保获取与您代码版本一致的SQL文件。
     [**数据库脚本 (Gitee)**](https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql)
 
@@ -124,28 +124,7 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 - H5 / 小程序 / APP：`lilishop-uniapp`
 - 部署、SQL、镜像与启动脚本：`docker`
 
-All-In-One 仅用于本地体验、演示或验证，不代表生产高可用部署架构。生产部署应按实际访问量、稳定性、监控、备份和扩缩容要求拆分数据库、缓存、搜索、消息、任务调度、前端静态资源和后端服务。
-
-#### Elasticsearch 搜索回归（Spring Boot 4 升级后）
-
-集群为 **Elasticsearch 7.x** 时，请配置 REST API 兼容版本（默认 `7`）：
-
-```yaml
-lili:
-  data:
-    elasticsearch:
-      compatibility-version: 7
-```
-
-在 manager-api 模块执行搜索集成测试（需 Redis、MySQL、ES 均可访问，且已有商品索引）：
-
-```powershell
-$env:JAVA_HOME="C:\Program Files\Java\jdk-21.0.3"
-$env:LILISHOP_ES_REGRESSION="true"
-mvn test -pl manager-api "-Drevision=4.3" "-DskipTests=false" "-Dtest=EsSearchCompatibilityTest" "-Dsurefire.failIfNoSpecifiedTests=false"
-```
-
-覆盖场景：集群连通、商品分页搜索、筛选聚合、按 ID 查询。
+All-In-One 仅用于本地体验、演示或验证，不代表生产高可用部署架构。生产部署应按实际访问量、稳定性、监控、备份和扩缩容要求拆分数据库、缓存、消息、任务调度、前端静态资源和后端服务。商品搜索已改为 MySQL 实现，不再依赖 Elasticsearch。
 
 ---
 
