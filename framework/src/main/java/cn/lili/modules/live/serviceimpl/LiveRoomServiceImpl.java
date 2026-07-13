@@ -202,6 +202,12 @@ public class LiveRoomServiceImpl extends ServiceImpl<LiveRoomMapper, LiveRoom> i
         liveRoomVO.setInteractionRate(rate);
 
         orderService.countLiveOrderData(liveRoomVO);
+
+
+        Setting setting = settingService.get(SettingEnum.LIVE_SETTING.name());
+        LiveSetting liveSetting = JSONUtil.toBean(setting.getSettingValue(), LiveSetting.class);
+        liveRoomVO.setImSdkAppid(liveSetting.getImSdkAppid());
+        liveRoomVO.setSecretId(liveSetting.getSecretId());
         return liveRoomVO;
     }
 

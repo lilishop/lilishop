@@ -37,6 +37,13 @@ public class LiveRoomVO extends LiveRoom {
     @Schema(title = "转化率")
     private BigDecimal conversionRate;
 
-    @Schema(title = "腾讯云IMid")
-    private String imGroupId;
+    /**
+     * 密钥Id
+     */
+    private String secretId;
+
+    /**
+     * 直播IM SDK APPID
+     */
+    private String imSdkAppid;
 }

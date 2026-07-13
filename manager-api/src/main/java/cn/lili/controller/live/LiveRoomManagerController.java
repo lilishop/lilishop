@@ -5,6 +5,7 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.live.entity.dos.LiveRoom;
 import cn.lili.modules.live.entity.dto.LiveRoomSearchDTO;
+import cn.lili.modules.live.entity.vos.LiveRoomVO;
 import cn.lili.modules.live.service.LivePollingDataCacheService;
 import cn.lili.modules.live.service.LiveRoomService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -50,8 +51,8 @@ public class LiveRoomManagerController {
 
     @Operation(summary = "通过id获取直播间")
     @GetMapping("/{id}")
-    public ResultMessage<LiveRoom> getById(@NotNull(message = "直播流ID不能为空") @PathVariable String id) {
-        return ResultUtil.data(liveRoomService.getById(id));
+    public ResultMessage<LiveRoomVO> getById(@NotNull(message = "直播流ID不能为空") @PathVariable String id) {
+        return ResultUtil.data(liveRoomService.getLiveRoomDetailVO(id));
     }
 
     @Operation(summary = "新增直播间")
