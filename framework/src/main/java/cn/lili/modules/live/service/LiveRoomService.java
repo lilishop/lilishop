@@ -2,6 +2,7 @@ package cn.lili.modules.live.service;
 
 import cn.lili.modules.live.entity.dos.LiveRoom;
 import cn.lili.modules.live.entity.dto.LiveRoomSearchDTO;
+import cn.lili.modules.live.entity.vos.LiveRoomDetailVO;
 import cn.lili.modules.live.entity.vos.LiveRoomVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -90,5 +91,12 @@ public interface LiveRoomService extends IService<LiveRoom> {
      * @return
      */
      Long getViewCount(String liveRoomId);
+
+    /**
+     * 获取直播间详情
+     * @param liveRoomId
+     * @return
+     */
+    LiveRoomDetailVO queryDetail(String liveRoomId);
 
 }

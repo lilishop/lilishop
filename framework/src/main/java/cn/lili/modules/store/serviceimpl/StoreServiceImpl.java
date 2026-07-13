@@ -249,6 +249,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
             boolean update = this.update(storeLambdaUpdateWrapper);
             //下架所有此店铺商品
             if (update) {
+                cache.remove(CachePrefix.STORE.getPrefix() + id);
                 goodsService.underStoreGoods(id);
             }
 
@@ -269,7 +270,11 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         Store store = this.getById(id);
         if (store != null) {
             store.setStoreDisable(StoreStatusEnum.OPEN.value());
-            return this.updateById(store);
+            boolean update = this.updateById(store);
+            if (update) {
+                cache.remove(CachePrefix.STORE.getPrefix() + id);
+            }
+            return update;
         }
         throw new ServiceException(ResultCode.STORE_NOT_EXIST);
     }
