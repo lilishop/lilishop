@@ -200,6 +200,14 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new WxChannelsSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), WxChannelsSetting.class));
+            case LIVE_SETTING:
+                return setting == null ?
+                        ResultUtil.data(new LiveSetting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), LiveSetting.class));
+            case THEME_SETTING:
+                return setting == null ?
+                        ResultUtil.data(new ThemeSetting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), ThemeSetting.class));
             default:
                 throw new ServiceException(ResultCode.SETTING_NOT_TO_SET);
         }

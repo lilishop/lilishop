@@ -42,6 +42,9 @@ public class FileOwnerDTO extends PageVO {
     @Schema(description = "文件类型")
     private String fileType;
 
+    @Schema(description = "文件分类：IMAGE/VIDEO/FILE")
+    private String fileCategory;
+
     @Schema(description = "文件夹ID")
     private String fileDirectoryId;
 

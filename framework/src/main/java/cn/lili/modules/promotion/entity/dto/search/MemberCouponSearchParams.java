@@ -68,6 +68,9 @@ public class MemberCouponSearchParams extends BasePromotionsSearchParams impleme
     @Schema(description = "消费门槛")
     private Double consumeThreshold;
 
+    @Schema(description = "领取来源直播间ID")
+    private String liveRoomId;
+
 
     @Override
     public <T> QueryWrapper<T> queryWrapper() {
@@ -92,6 +95,9 @@ public class MemberCouponSearchParams extends BasePromotionsSearchParams impleme
         }
         if (CharSequenceUtil.isNotEmpty(memberCouponStatus)) {
             queryWrapper.eq("member_coupon_status", MemberCouponStatusEnum.valueOf(memberCouponStatus).name());
+        }
+        if (CharSequenceUtil.isNotEmpty(liveRoomId)) {
+            queryWrapper.eq("live_room_id", liveRoomId);
         }
         if (CharSequenceUtil.isNotEmpty(price)) {
             String[] s = price.split("_");

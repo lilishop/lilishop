@@ -80,6 +80,7 @@ ignored:
     - /common/common/sms/**
     - /common/common/logo
     - /common/common/site
+    - /common/common/site/theme
     - /druid/**
     - /swagger-ui.html
     - /files/**

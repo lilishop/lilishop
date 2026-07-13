@@ -15,6 +15,7 @@ import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 订单查询参数
@@ -111,6 +112,12 @@ public class OrderSearchParams extends PageVO {
      */
     @Schema(description = "订单促销类型")
     private String orderPromotionType;
+
+    @Schema(description = "直播间Id")
+    private String liveRoomId;
+
+    @Schema(description = "订单状态列表")
+    private List<String> orderStatusList;
 
     public <T> QueryWrapper<T> queryWrapper() {
         AuthUser currentUser = UserContext.getCurrentUser();
@@ -209,6 +216,12 @@ public class OrderSearchParams extends PageVO {
         wrapper.eq(CharSequenceUtil.isNotEmpty(promotionId), "o.promotion_id", promotionId);
 
         wrapper.eq(CharSequenceUtil.isNotEmpty(orderPromotionType), "o.order_promotion_type", orderPromotionType);
+
+        wrapper.eq(CharSequenceUtil.isNotEmpty(liveRoomId), "o.live_room_id", liveRoomId);
+
+        if(orderStatusList != null){
+            wrapper.eq("o.order_status", orderStatusList);
+        }
 
         if (CharSequenceUtil.isNotEmpty(flowPrice)) {
             String[] s = flowPrice.split("_");

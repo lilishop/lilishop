@@ -6,6 +6,7 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.modules.file.entity.File;
 import cn.lili.modules.file.entity.dto.FileOwnerDTO;
+import cn.lili.modules.file.entity.enums.FileCategoryEnum;
 import cn.lili.modules.file.mapper.FileMapper;
 import cn.lili.modules.file.plugin.FilePluginFactory;
 import cn.lili.modules.file.service.FileService;
@@ -100,9 +101,9 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
                 fileOwnerDTO.getUserEnums())
             .eq(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getFileDirectoryId()), File::getFileDirectoryId,
                 fileOwnerDTO.getFileDirectoryId())
-            .like(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getFileKey()), File::getFileKey, fileOwnerDTO.getFileKey())
-            .like(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getFileType()), File::getFileType,
-                fileOwnerDTO.getFileType()).between(
+            .like(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getFileKey()), File::getFileKey, fileOwnerDTO.getFileKey());
+        applyCategoryFilter(queryWrapper, fileOwnerDTO);
+        queryWrapper.between(
                 CharSequenceUtil.isNotEmpty(fileOwnerDTO.getStartDate()) && CharSequenceUtil.isNotEmpty(
                     fileOwnerDTO.getEndDate()), File::getCreateTime, fileOwnerDTO.getStartDate(),
                 fileOwnerDTO.getEndDate());
@@ -117,14 +118,29 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
             .eq(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getFileDirectoryId()), File::getFileDirectoryId,
                 fileOwnerDTO.getFileDirectoryId())
             .like(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getName()), File::getName, fileOwnerDTO.getName())
-            .like(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getOwnerName()), File::getOwnerName,
-                fileOwnerDTO.getOwnerName())
-            .like(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getFileKey()), File::getFileKey, fileOwnerDTO.getFileKey())
-            .like(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getFileType()), File::getFileType,
-                fileOwnerDTO.getFileType()).between(
+            .like(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getFileKey()), File::getFileKey, fileOwnerDTO.getFileKey());
+        applyCategoryFilter(queryWrapper, fileOwnerDTO);
+        queryWrapper.between(
                 CharSequenceUtil.isNotEmpty(fileOwnerDTO.getStartDate()) && CharSequenceUtil.isNotEmpty(
                     fileOwnerDTO.getEndDate()), File::getCreateTime, fileOwnerDTO.getStartDate(),
                 fileOwnerDTO.getEndDate());
         return this.page(PageUtil.initPage(fileOwnerDTO), queryWrapper);
+    }
+
+    /**
+     * 按文件分类筛选，兼容旧版 fileType=image/video 参数
+     */
+    private void applyCategoryFilter(LambdaQueryWrapper<File> queryWrapper, FileOwnerDTO fileOwnerDTO) {
+        if (CharSequenceUtil.isNotEmpty(fileOwnerDTO.getFileCategory())) {
+            queryWrapper.eq(File::getFileCategory, fileOwnerDTO.getFileCategory());
+            return;
+        }
+        FileCategoryEnum legacyCategory = FileCategoryEnum.fromLegacyFileType(fileOwnerDTO.getFileType());
+        if (legacyCategory != null) {
+            queryWrapper.eq(File::getFileCategory, legacyCategory.name());
+            return;
+        }
+        queryWrapper.like(CharSequenceUtil.isNotEmpty(fileOwnerDTO.getFileType()), File::getFileType,
+            fileOwnerDTO.getFileType());
     }
 }

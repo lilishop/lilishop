@@ -13,6 +13,7 @@ import cn.lili.common.utils.Base64DecodeMultipartFile;
 import cn.lili.common.utils.CommonUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.file.entity.File;
+import cn.lili.modules.file.entity.enums.FileCategoryEnum;
 import cn.lili.modules.file.plugin.FilePluginFactory;
 import cn.lili.modules.file.service.FileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -87,6 +88,7 @@ public class UploadController {
             newFile.setName(file.getOriginalFilename());
             newFile.setFileSize(file.getSize());
             newFile.setFileType(file.getContentType());
+            newFile.setFileCategory(FileCategoryEnum.fromContentType(file.getContentType()).name());
             newFile.setFileKey(fileKey);
             newFile.setUrl(result);
             newFile.setCreateBy(authUser.getUsername());

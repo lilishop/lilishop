@@ -222,11 +222,12 @@ public class KdniaoPlugin implements LogisticsPlugin {
 
             JSONObject orderJson = JSON.parseObject(obj.getString("Order"));
             resultMap.put("printTemplate", obj.getString("PrintTemplate"));
+            resultMap.put("logisticCode", orderJson.getString("LogisticCode"));
             return resultMap;
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     @Override

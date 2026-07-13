@@ -12,9 +12,7 @@
 
 ## All-In-One 一键启动
 
-想快速体验完整商城，不需要分别部署后端、PC、商家端、运营端、IM、H5、MySQL 和 Redis。安装 Docker Desktop 后，直接执行下面脚本，按提示输入 IP/域名、端口、密码和数据目录即可启动单镜像单容器环境。
-
-数据库口径：常规部署和项目技术栈仍以 MySQL 为准；All-In-One 镜像内置 MariaDB 只是单容器本地体验中的 MySQL 协议兼容实现，不代表生产部署或常规部署已经切换为 MariaDB。
+如果只是想快速体验完整商城，不需要分别部署后端、PC、商家端、运营端、IM Web、H5、MySQL 和 Redis。安装 Docker Desktop 后，可以直接下载 `docker` 仓库 `allinone-lite-mysql-redis` 分支的一键安装脚本，按提示输入 IP/域名、端口、密码和数据目录，即可启动单镜像单容器体验环境。
 
 macOS / Linux:
 
@@ -32,7 +30,11 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\install-lilishop.ps1
 ```
 
-默认镜像：`ccr.ccs.tencentyun.com/lilishop/lilishop-all-in-one:lite`。启动后可访问买家 PC、商家端、运营端、IM Web、uniapp H5，统一后端由 All-In-One 的同域 `/api/` 入口代理。更多说明见 [docker/all-in-one 文档](https://gitee.com/beijing_hongye_huicheng/docker/tree/allinone-lite-mysql-redis/all-in-one)。
+默认镜像：`ccr.ccs.tencentyun.com/lilishop/lilishop-all-in-one:lite`。启动后可访问买家 PC、商家端、运营端、IM Web 会话/消息页、uniapp H5 和后端 API。更多说明见 [docker/all-in-one 文档](https://gitee.com/beijing_hongye_huicheng/docker/tree/allinone-lite-mysql-redis/all-in-one)。
+
+All-In-One `lite` 是本地体验和演示形态：一个容器内包含应用、前端资源、H5、MariaDB、Redis 和本地文件存储。它不是生产高可用架构，也不内置 Elasticsearch、RocketMQ、XXL-Job、Kibana、Logstash 或 RocketMQ Dashboard；搜索、消息和定时任务逻辑在 lite 环境中使用 MySQL / Redis / 本地调度兼容实现。
+
+LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开源商城系统，支持 B2B2C 多商户商城、小程序商城、微服务商城、直播电商、分销返佣、秒杀活动、Docker 私有化部署。
 
 ## 核心特性
 
@@ -55,11 +57,6 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 - Java商城系统二次开发
 - 开源商城源码学习
 - 多商户电商平台
-
-LILISHOP（PickMall）是一套基于 **Spring Boot 3** 与 **Vue / uni-app** 构建的 **Java 开源商城系统**，定位为可商用、可二次开发的 **B2B2C 多商户电商平台**。代码采用前后端分离架构，后端模块化、支持分布式部署，前端覆盖 PC、H5、微信小程序与 Android / iOS APP。系统内置直播电商、分销返佣、秒杀拼团、优惠券、积分会员、可视化装修等完整电商业务模块，并提供 Docker 镜像与 docker-compose 配置，便于私有化部署到企业服务器或 Kubernetes 集群。
-
-> **本仓库**: Lilishop 后端服务（Spring Boot 3 / Java 21 多模块工程）。前端、移动端、基础设施分别位于 `lilishop-ui`、`lilishop-uniapp`、`docker` 仓库——GitHub 与 Gitee 完整地址见下方 [项目仓库](#项目仓库) 表。
-
 ---
 
 ### 1. 项目简介
@@ -70,17 +67,8 @@ LILISHOP（PickMall）是一套基于 **Spring Boot 3** 与 **Vue / uni-app** �
 
 -   **官方网站**: <https://pickmall.cn>
 -   **官方文档**: <https://docs.pickmall.cn>
-
-#### 项目仓库
-
-Lilishop 由 4 个独立仓库组成，均同步托管于 GitHub 与 Gitee：
-
-| 仓库 | 说明 | GitHub | Gitee |
-| :--- | :--- | :--- | :--- |
-| **lilishop** | 后端服务（Spring Boot / Java 21） | [github.com/lilishop/lilishop](https://github.com/lilishop/lilishop) | [gitee.com/beijing_hongye_huicheng/lilishop](https://gitee.com/beijing_hongye_huicheng/lilishop) |
-| **lilishop-ui** | PC 端 Web 前端（管理端 / 商家端 / 买家端 / IM） | [github.com/lilishop/lilishop-ui](https://github.com/lilishop/lilishop-ui) | [gitee.com/beijing_hongye_huicheng/lilishop-ui](https://gitee.com/beijing_hongye_huicheng/lilishop-ui) |
-| **lilishop-uniapp** | 买家端移动应用（H5 / 小程序 / APP） | [github.com/lilishop/lilishop-uniapp](https://github.com/lilishop/lilishop-uniapp) | [gitee.com/beijing_hongye_huicheng/lilishop-uniapp](https://gitee.com/beijing_hongye_huicheng/lilishop-uniapp) |
-| **docker** | 基础设施 docker-compose 配置 | [github.com/lilishop/docker](https://github.com/lilishop/docker) | [gitee.com/beijing_hongye_huicheng/docker](https://gitee.com/beijing_hongye_huicheng/docker) |
+-   **Gitee 仓库**: <https://gitee.com/beijing_hongye_huicheng/lilishop>
+-   **GitHub 仓库**: <https://github.com/lilishop/lilishop>
 
 
 ---
@@ -89,7 +77,7 @@ Lilishop 由 4 个独立仓库组成，均同步托管于 GitHub 与 Gitee：
 
 -   **全端覆盖**: 一套代码库支持PC、H5、小程序、APP，降低开发和维护成本。
 -   **商家入驻**: 支持多商家入驻，构建平台化电商生态。
--   **All-In-One 后端**: 当前分支推荐使用 `lilishop-all` 统一后端入口，降低本地体验和私有化部署门槛。
+-   **分布式架构**: 后端API服务化，支持独立部署和弹性伸缩。
 -   **前后端分离**: 清晰的职责划分，便于团队协作和独立开发。
 -   **容器化支持**: 提供Docker镜像和docker-compose配置，实现一键部署。
 -   **功能完善**: 涵盖客户、订单、商品、促销、店铺、运营、统计等完整电商业务模块。
@@ -108,7 +96,7 @@ Lilishop 由 4 个独立仓库组成，均同步托管于 GitHub 与 Gitee：
     -   密码: `111111`
 -   **商城PC端**: <https://pc-b2b2c.pickmall.cn>
 -   **微信小程序**:
-    ![Lilishop 买家端微信小程序体验二维码](https://static.pickmall.cn/images/h5-qrcode.png)
+    ![移动端体验二维码](https://static.pickmall.cn/images/h5-qrcode.png)
 
 ---
 
@@ -125,46 +113,20 @@ Lilishop 由 4 个独立仓库组成，均同步托管于 GitHub 与 Gitee：
 
 ---
 
-### 5. 技术架构
+### 5. 架构文档边界
 
-#### 5.1 架构图
-![Lilishop B2B2C 商城系统架构图：Spring Boot 微服务 + Vue 前端 + RocketMQ 消息队列 + Elasticsearch 搜索引擎](https://lili-system.oss-cn-beijing.aliyuncs.com/docs/%E6%9E%B6%E6%9E%84.png)
+本仓库首页不再维护不完整的系统架构图和技术栈表，避免与实际源码、部署形态和分支差异产生偏差。当前仓库主要说明后端源码定位、在线演示、部署入口和验证补充。
 
-#### 5.2 后端技术栈
+完整架构请以官方文档及四个源码仓库为准：
 
-| 技术            | 选型            | 版本   | 备注/用途  |
-| :-------------- | :-------------- | :----- | :--------- |
-| 核心框架        | Spring Boot     | 4.0.5  | 简化应用开发（需 JDK 21） |
-| ORM框架         | MyBatis-Plus    | 3.5.15 | 数据持久化  |
-| 数据库          | MySQL (LTS)     | 8.3.0  | 关系型数据存储 |
-| 消息队列        | RocketMQ        | 2.3.4  | 异步任务与解耦 |
-| 缓存            | Redis           | -  | 数据缓存    |
-| 搜索引擎        | Elasticsearch   | 7.x  | 商品搜索（客户端 elasticsearch-java 9.x） |
-| 安全框架        | Spring Security | -  | 认证与授权  |
-| 定时任务        | XXL-Job         | 2.3.0  | 分布式任务调度 |
-| 认证方案        | JWT             | -      | Token 方案 |
+- 后端源码：`lilishop`
+- PC / 商家端 / 运营端 / IM Web：`lilishop-ui`
+- H5 / 小程序 / APP：`lilishop-uniapp`
+- 部署、SQL、镜像与启动脚本：`docker`
 
-#### 5.3 前端技术栈
+All-In-One 仅用于本地体验、演示或验证，不代表生产高可用部署架构。生产部署应按实际访问量、稳定性、监控、备份和扩缩容要求拆分数据库、缓存、搜索、消息、任务调度、前端静态资源和后端服务。
 
-**管理端 (平台/商家)**
-
-| 技术       | 选型       | 备注/用途  |
-| :--------- | :--------- | :--------- |
-| JS框架     | Vue.js     | 核心框架   |
-| UI库       | iView      | 界面组件   |
-| 状态管理   | Vuex       | 全局状态管理 |
-| 路由       | Vue Router | 页面路由   |
-| HTTP客户端 | axios      | API请求    |
-
-**移动端 (H5/小程序/APP)**
-
-| 技术      | 选型    | 备注/用途      |
- | :-------- | :------ | :------------- |
-| 核心框架  | uni-app | 跨平台开发框架 |
-| UI库      | uViewUI | 丰富的组件库   |
-| CSS预处理 | SCSS    | 样式开发       |
-
-#### 5.4 Elasticsearch 搜索回归（Spring Boot 4 升级后）
+#### Elasticsearch 搜索回归（Spring Boot 4 升级后）
 
 集群为 **Elasticsearch 7.x** 时，请配置 REST API 兼容版本（默认 `7`）：
 
@@ -175,25 +137,23 @@ lili:
       compatibility-version: 7
 ```
 
-在 `lilishop-all` 模块执行搜索集成测试（需 Redis、MySQL、ES 均可访问，且已有商品索引）：
+在 manager-api 模块执行搜索集成测试（需 Redis、MySQL、ES 均可访问，且已有商品索引）：
 
 ```powershell
 $env:JAVA_HOME="C:\Program Files\Java\jdk-21.0.3"
 $env:LILISHOP_ES_REGRESSION="true"
-mvn test -pl lilishop-all "-Drevision=4.3" "-DskipTests=false" "-Dtest=EsSearchCompatibilityTest" "-Dsurefire.failIfNoSpecifiedTests=false"
+mvn test -pl manager-api "-Drevision=4.3" "-DskipTests=false" "-Dtest=EsSearchCompatibilityTest" "-Dsurefire.failIfNoSpecifiedTests=false"
 ```
 
 覆盖场景：集群连通、商品分页搜索、筛选聚合、按 ID 查询。
 
 ---
 
-### 6.功能列表
+### 6. 功能列表
 
 [功能清单](https://bdwx2tfwwt.feishu.cn/sheets/FFQKscQKDhUx60to1k9cbMngnYb?from=from_copylink)
 
-
-
-
+---
 
 ### 7. 开源与授权
 
@@ -212,4 +172,29 @@ mvn test -pl lilishop-all "-Drevision=4.3" "-DskipTests=false" "-Dtest=EsSearchC
 -   **[在线客服](https://work.weixin.qq.com/kfid/kfc4d8dc24a73c15f44)**
 -   **微信交流1群（已满）**
 -   **微信交流2群**:
-    ![Lilishop 开源商城系统微信交流群二维码](https://lilishop-wechat.oss-cn-beijing.aliyuncs.com/wechat.jpg)
+    ![微信群](https://lilishop-wechat.oss-cn-beijing.aliyuncs.com/wechat.jpg)
+
+---
+
+### 9. 升级计划
+
+以下功能将陆续在后续版本中发布：✅ 已完成 · 🔜 规划中
+
+- ✅ 商品定时上下架
+- ✅ 商品分组
+- ✅ 会员分组
+- ✅ 商品虚拟销量
+- ✅ 专用发票（发票上传）
+- ✅ 置顶评论
+- ✅ 客户等级
+- ✅ 购物卡
+- ✅ 腾讯云-云直播
+- 🔜 主题色管理
+- 🔜 平台经营报表
+- 🔜 店铺结算汇总
+- 🔜 支付方式汇总
+- 🔜 结算台账
+- 🔜 钱包流水
+- 🔜 财务汇总
+- 🔜 微信小店对接
+- 🔜 抖店对接

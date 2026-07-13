@@ -34,4 +34,10 @@ public class SiteController {
     public ResultMessage<Object> baseSetting() {
         return ResultUtil.data(settingService.get(SettingEnum.BASE_SETTING.name()));
     }
+
+    @Operation(summary = "获取主题色配置")
+    @GetMapping("/theme")
+    public ResultMessage<Object> themeSetting() {
+        return ResultUtil.data(settingService.get(SettingEnum.THEME_SETTING.name()));
+    }
 }

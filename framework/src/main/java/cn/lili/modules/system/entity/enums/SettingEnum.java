@@ -53,5 +53,9 @@ public enum SettingEnum {
     UNIONPAY_PAYMENT,
     //热词设置
     HOT_WORDS,
-    WX_CHANNELS
+    WX_CHANNELS,
+    //直播设置
+    LIVE_SETTING,
+    //主题色设置
+    THEME_SETTING
 }

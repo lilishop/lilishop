@@ -1,6 +1,7 @@
 package cn.lili.modules.file.entity;
 
 import cn.lili.mybatis.BaseEntity;
+import cn.lili.modules.file.entity.enums.FileCategoryEnum;
 import com.baomidou.mybatisplus.annotation.TableName;
 import tools.jackson.databind.annotation.JsonSerialize;
 import tools.jackson.databind.ser.std.ToStringSerializer;
@@ -35,6 +36,12 @@ public class File extends BaseEntity {
 
     @Schema(description = "文件类型")
     private String fileType;
+
+    @Schema(description = "文件分类")
+    /**
+     * @see FileCategoryEnum
+     */
+    private String fileCategory;
 
     @Schema(description = "路径")
     private String url;

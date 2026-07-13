@@ -28,6 +28,7 @@ import com.alibaba.fastjson2.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -216,17 +217,20 @@ public class SkuPromotionRender implements CartRenderStep {
 
                             cartSkuVO.getPriceDetailDTO().getJoinPromotion().add(promotionSkuVO);
 
-                            //如果是秒杀活动
-                            if (promotionSkuVO.getPromotionType().equals(PromotionTypeEnum.SECKILL.name())) {
-                                //需记录秒杀活动详情
-                                cartSkuVO.getPriceDetailDTO().setDiscountPriceItem(
-                                        DiscountPriceItem.builder()
-                                                .discountPrice(CurrencyUtil.sub(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getPurchasePrice()))
-                                                .promotionId(promotionSkuVO.getActivityId())
-                                                .promotionTypeEnum(PromotionTypeEnum.SECKILL)
-                                                .skuId(cartSkuVO.getGoodsSku().getId())
-                                                .goodsId(cartSkuVO.getGoodsSku().getGoodsId())
-                                                .build());
+                            if (isSkuPricePromotion(promotionSkuVO.getPromotionType())) {
+                                PromotionTypeEnum type = PromotionTypeEnum.valueOf(promotionSkuVO.getPromotionType());
+                                if (cartSkuVO.getPriceDetailDTO().getDiscountPriceDetail() == null) {
+                                    cartSkuVO.getPriceDetailDTO().setDiscountPriceDetail(new ArrayList<>());
+                                }
+                                DiscountPriceItem item = DiscountPriceItem.builder()
+                                        .discountPrice(CurrencyUtil.sub(cartSkuVO.getGoodsSku().getPrice(), cartSkuVO.getPurchasePrice()))
+                                        .promotionId(promotionSkuVO.getActivityId())
+                                        .promotionTypeEnum(type)
+                                        .skuId(cartSkuVO.getGoodsSku().getId())
+                                        .goodsId(cartSkuVO.getGoodsSku().getGoodsId())
+                                        .build();
+                                cartSkuVO.getPriceDetailDTO().getDiscountPriceDetail().add(item);
+                                cartSkuVO.getPriceDetailDTO().setDiscountPriceItem(item);
                             }
 
 
@@ -270,6 +274,7 @@ public class SkuPromotionRender implements CartRenderStep {
                     break;
                 case SECKILL:
                 case PINTUAN:
+                case FLASH_DISCOUNT:
                     quantity = promotionGoodsService.getPromotionGoodsStock(PromotionTypeEnum.valueOf(promotionSkuVO.getPromotionType()), promotionSkuVO.getActivityId(), cartSkuVO.getGoodsSku().getId());
                     break;
                 default:
@@ -283,6 +288,11 @@ public class SkuPromotionRender implements CartRenderStep {
             //设置失效消息
             cartSkuVO.setErrorMessage("促销商品库存不足,现有库存数量[" + quantity + "]");
         }
+    }
+
+    private boolean isSkuPricePromotion(String promotionType) {
+        return PromotionTypeEnum.SECKILL.name().equals(promotionType)
+                || PromotionTypeEnum.FLASH_DISCOUNT.name().equals(promotionType);
     }
 
     /**

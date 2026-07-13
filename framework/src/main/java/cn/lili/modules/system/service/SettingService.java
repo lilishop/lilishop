@@ -21,7 +21,7 @@ public interface SettingService extends IService<Setting> {
      * @param key
      * @return
      */
-    @Cacheable(key = "#key")
+//    @Cacheable(key = "#key")
     Setting get(String key);
 
     /**
@@ -30,6 +30,6 @@ public interface SettingService extends IService<Setting> {
      * @param setting
      * @return
      */
-    @CacheEvict(key = "#setting.id")
+//    @CacheEvict(key = "#setting.id")
     boolean saveUpdate(Setting setting);
 }

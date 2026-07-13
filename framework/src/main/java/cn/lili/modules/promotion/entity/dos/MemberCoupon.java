@@ -105,6 +105,12 @@ public class MemberCoupon extends BaseEntity {
     @Schema(description = "客户优惠券状态")
     private String memberCouponStatus;
 
+    @Schema(description = "领取来源直播间ID")
+    private String liveRoomId;
+
+    @Schema(description = "领取来源直播间名称")
+    private String liveRoomName;
+
     public MemberCoupon() {
     }
 

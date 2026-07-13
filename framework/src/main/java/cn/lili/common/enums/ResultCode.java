@@ -374,6 +374,14 @@ public enum ResultCode {
     FULL_RATE_NUM_ERROR(43010, "请填写打折数值"),
 
     /**
+     * 营销促销扩展
+     */
+    FLASH_DISCOUNT_NOT_EXIST_ERROR(43101, "限时直降活动不存在"),
+    NTH_ITEM_DISCOUNT_NOT_EXIST_ERROR(43104, "第N件优惠活动不存在"),
+    PROMOTION_SKU_CONFLICT(43106, "商品已在重叠时间段参与其他互斥促销活动"),
+    PROMOTION_PRICE_ERROR(43107, "活动价格不能大于商品原价"),
+
+    /**
      * 直播
      */
     STODIO_GOODS_EXIST_ERROR(44001, "直播商品已存在"),
@@ -523,7 +531,23 @@ public enum ResultCode {
      * IM
      */
     IM_MESSAGE_ADD_ERROR(80400,"IM消息发送错误"),
-    IM_MESSAGE_EDIT_ERROR(80400,"IM消息更新错误"),
+    IM_MESSAGE_EDIT_ERROR(80401,"IM消息更新错误"),
+
+    /**
+     * 直播相关
+     */
+    LIVE_GOODS_NOT_EXIST(80500, "直播商品不存在！"),
+    LIVE_ROOM_NOT_EXIST(80501, "直播不存在！"),
+    LIVE_ROOM_NOT_LIVING(80502, "直播状态错误，不可开播！"),
+    LIVE_ROOM_NOT_ENDED(80503, "直播状态错误，不可结束！"),
+    LIVE_ROOM_CREATE_ERROR(80504, "直播创建失败！"),
+    LIVE_ROOM_EDIT_ERROR(80505, "直播修改失败！"),
+    LIVE_ROOM_DELETE_ERROR(80506, "直播删除失败！"),
+    LIVE_USER_NOT_EXIST(80507, "直播用户不存在！"),
+    LIVE_USER_MUTE_EXIST(80508, "直播用户已被禁言！"),
+    LIVE_MESSAGE_REMOVE_EXIST(80509, "直播消息删除失败！"),
+    LIVE_COUPON_NOT_EXIST(80510, "直播优惠券不存在！"),
+    LIVE_COUPON_RECEIVE_ERROR(80511, "当前直播未开始或已结束，无法领取优惠券"),
 
     /**
      * 其他

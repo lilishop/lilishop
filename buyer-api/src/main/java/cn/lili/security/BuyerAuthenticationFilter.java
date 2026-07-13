@@ -3,6 +3,7 @@ package cn.lili.security;
 import cn.hutool.core.util.StrUtil;
 import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
+import cn.lili.common.properties.IgnoredUrlsProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.enums.SecurityEnum;
 import cn.lili.common.security.enums.UserEnums;
@@ -13,13 +14,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.util.PatternMatchUtils;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -41,52 +42,68 @@ import java.util.List;
 @Slf4j
 public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
 
+    private final Cache cache;
 
-    /**
-     * 缓存
-     */
-    @Autowired
-    private Cache cache;
+    private final IgnoredUrlsProperties ignoredUrlsProperties;
 
     /**
      * 自定义构造器
      *
-     * @param authenticationManager
-     * @param cache
+     * @param authenticationManager  认证管理器
+     * @param cache                  缓存
+     * @param ignoredUrlsProperties  忽略鉴权配置
      */
     public BuyerAuthenticationFilter(AuthenticationManager authenticationManager,
-                                     Cache cache) {
+                                     Cache cache,
+                                     IgnoredUrlsProperties ignoredUrlsProperties) {
         super(authenticationManager);
         this.cache = cache;
+        this.ignoredUrlsProperties = ignoredUrlsProperties;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        //从header中获取jwt
-        String jwt = request.getHeader(SecurityEnum.HEADER_TOKEN.getValue());
-        try {
-            //如果没有token 则return
-            if (StrUtil.isBlank(jwt)) {
+        // 忽略无需鉴权的路径，直接放行（与管理端保持一致）
+        String requestUri = request.getRequestURI();
+        for (String url : ignoredUrlsProperties.getUrls()) {
+            if (PatternMatchUtils.simpleMatch(url, requestUri)) {
                 chain.doFilter(request, response);
                 return;
             }
-            //获取用户信息，存入context
+        }
+
+        //从header中获取jwt
+        String jwt = request.getHeader(SecurityEnum.HEADER_TOKEN.getValue());
+        //如果没有token 则return
+        if (StrUtil.isBlank(jwt)) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        try {
             UsernamePasswordAuthenticationToken authentication = getAuthentication(jwt, response);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (authentication != null) {
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                chain.doFilter(request, response);
+            } else if (!response.isCommitted()) {
+                ResponseUtil.output(response, 403, ResponseUtil.resultMap(false, 403, "登录已失效，请重新登录"));
+            }
         } catch (Exception e) {
             log.error("BuyerAuthenticationFilter-> member authentication exception:", e);
+            if (!response.isCommitted()) {
+                chain.doFilter(request, response);
+            }
         }
-        chain.doFilter(request, response);
     }
 
     /**
      * 解析用户
      *
-     * @param jwt
-     * @param response
-     * @return
+     * @param jwt      token
+     * @param response 响应
+     * @return 认证信息
      */
     private UsernamePasswordAuthenticationToken getAuthentication(String jwt, HttpServletResponse response) {
 
@@ -110,8 +127,6 @@ public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
                 authentication.setDetails(authUser);
                 return authentication;
             }
-            ResponseUtil.output(response, 403, ResponseUtil.resultMap(false, 403, "登录已失效，请重新登录"));
-            return null;
         } catch (ExpiredJwtException e) {
             log.debug("user analysis exception:", e);
         } catch (Exception e) {
@@ -121,4 +136,3 @@ public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
     }
 
 }
-

@@ -427,6 +427,10 @@ public class PriceDetailDTO implements Serializable {
         if (couponPrice == null || discountPrice == null) {
             return;
         }
+        // goodsPrice 未就绪时跳过（如 JSON 反序列化时 couponPrice 先于 goodsPrice 赋值）
+        if (goodsPrice == null || goodsPrice <= 0) {
+            return;
+        }
         //如果订单优惠总额>商品金额，则处理一下数据，使得两数相加<=商品金额
         if (CurrencyUtil.add(couponPrice, discountPrice) > goodsPrice) {
             couponPrice = CurrencyUtil.sub(goodsPrice, discountPrice);

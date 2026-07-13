@@ -123,7 +123,11 @@ public class LogisticsServiceImpl extends ServiceImpl<LogisticsMapper, Logistics
             labelOrderDTO.setStoreLogistics(storeLogistics);
             labelOrderDTO.setStoreDeliverGoodsAddressDTO(storeDeliverGoodsAddressDTO);
             //触发电子面单
-            return logisticsPluginFactory.filePlugin().labelOrder(labelOrderDTO);
+            Map result = logisticsPluginFactory.filePlugin().labelOrder(labelOrderDTO);
+            if (result != null && result.get("logisticCode") != null && orderService != null) {
+                orderService.delivery(orderSn, result.get("logisticCode").toString(), logistics.getId());
+            }
+            return result;
         } else {
             throw new ServiceException(ResultCode.ORDER_LABEL_ORDER_ERROR);
         }
