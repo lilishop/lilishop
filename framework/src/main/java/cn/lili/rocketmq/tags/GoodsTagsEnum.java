@@ -6,6 +6,7 @@ package cn.lili.rocketmq.tags;
  **/
 public enum GoodsTagsEnum {
 
+    // 以下标签为 Elasticsearch 移除前的遗留消息，仅用于消费端兼容旧队列
     /**
      * "生成商品索引"
      */

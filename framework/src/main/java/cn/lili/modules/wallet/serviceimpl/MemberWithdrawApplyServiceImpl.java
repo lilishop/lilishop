@@ -23,7 +23,7 @@ import cn.lili.modules.wallet.service.MemberWalletService;
 import cn.lili.modules.wallet.service.MemberWithdrawApplyService;
 import cn.lili.mybatis.BaseEntity;
 import cn.lili.mybatis.util.PageUtil;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.message.MessageSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -31,7 +31,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -50,7 +50,7 @@ import java.util.Date;
 public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawApplyMapper, MemberWithdrawApply> implements MemberWithdrawApplyService {
 
     @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    private LiliMessageTemplate liliMessageTemplate;
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
     @Autowired
@@ -95,7 +95,7 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
             memberWithdrawalMessage.setPrice(memberWithdrawApply.getApplyMoney());
 
             String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_WITHDRAWAL.name();
-            rocketMQTemplate.asyncSend(destination, memberWithdrawalMessage, RocketmqSendCallbackBuilder.commonCallback());
+            liliMessageTemplate.asyncSend(destination, memberWithdrawalMessage, MessageSendCallbackBuilder.commonCallback());
             return true;
         }
         throw new ServiceException(ResultCode.WALLET_APPLY_ERROR);
@@ -163,6 +163,6 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
         memberWithdrawalMessage.setMemberId(memberWithdrawApply.getMemberId());
         memberWithdrawalMessage.setPrice(memberWithdrawApply.getApplyMoney());
         String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_WITHDRAWAL.name();
-        rocketMQTemplate.asyncSend(destination, memberWithdrawalMessage, RocketmqSendCallbackBuilder.commonCallback());
+        liliMessageTemplate.asyncSend(destination, memberWithdrawalMessage, MessageSendCallbackBuilder.commonCallback());
     }
 }

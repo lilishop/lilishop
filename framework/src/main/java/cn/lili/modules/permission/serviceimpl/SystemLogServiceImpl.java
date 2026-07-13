@@ -1,115 +1,98 @@
 package cn.lili.modules.permission.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
+import cn.lili.modules.permission.entity.dos.SystemLog;
 import cn.lili.modules.permission.entity.vo.SystemLogVO;
-import cn.lili.modules.permission.repository.SystemLogRepository;
+import cn.lili.modules.permission.mapper.SystemLogMapper;
 import cn.lili.modules.permission.service.SystemLogService;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
-import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
-import co.elastic.clients.json.JsonData;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
-import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 系统日志
- *
- * @author Chopper
- * @since 2020/11/17 3:45 下午
+ * 系统日志（MySQL）
  */
 @Service
 public class SystemLogServiceImpl implements SystemLogService {
 
     @Autowired
-    private SystemLogRepository systemLogRepository;
-
-    /**
-     * ES
-     */
-    @Autowired
-    private ElasticsearchOperations restTemplate;
+    private SystemLogMapper systemLogMapper;
 
     @Override
     public void saveLog(SystemLogVO systemLogVO) {
-        systemLogRepository.save(systemLogVO);
+        if (systemLogVO == null) {
+            return;
+        }
+        SystemLog entity = systemLogVO.toEntity();
+        if (CharSequenceUtil.isEmpty(entity.getId())) {
+            entity.setId(IdUtil.getSnowflakeNextIdStr());
+        }
+        if (entity.getCreateTime() == null) {
+            entity.setCreateTime(System.currentTimeMillis());
+        }
+        systemLogMapper.insert(entity);
     }
 
     @Override
     public void deleteLog(List<String> id) {
-        for (String s : id) {
-            systemLogRepository.deleteById(s);
+        if (id == null || id.isEmpty()) {
+            return;
         }
+        systemLogMapper.deleteByIds(id);
     }
 
     @Override
     public void flushAll() {
-        systemLogRepository.deleteAll();
+        systemLogMapper.delete(Wrappers.emptyWrapper());
     }
 
     @Override
     public IPage<SystemLogVO> queryLog(String storeId, String operatorName, String key, SearchVO searchVo, PageVO pageVO) {
         pageVO.setNotConvert(true);
-        IPage<SystemLogVO> iPage = new Page<>();
-        NativeQueryBuilder filterBuilder = createFilterBuilder(storeId, operatorName, key, searchVo);
-
-        filterBuilder.withPageable(PageRequest.of(pageVO.getPageNumber() - 1, pageVO.getPageSize()));
-
-        if (CharSequenceUtil.isNotEmpty(pageVO.getOrder()) && CharSequenceUtil.isNotEmpty(pageVO.getSort())) {
-            filterBuilder.withSort(Sort.by(Sort.Direction.valueOf(pageVO.getOrder().toUpperCase()), pageVO.getSort()));
-        } else {
-            filterBuilder.withSort(Sort.by(Sort.Direction.DESC, "createTime"));
-        }
-
-        SearchHits<SystemLogVO> searchResult = restTemplate.search(filterBuilder.build(), SystemLogVO.class);
-        iPage.setTotal(searchResult.getTotalHits());
-        iPage.setRecords(searchResult.getSearchHits().stream().map(SearchHit::getContent).toList());
-        return iPage;
-    }
-
-
-    private NativeQueryBuilder createFilterBuilder(String storeId, String operatorName, String key, SearchVO searchVo) {
-        NativeQueryBuilder builder = NativeQuery.builder();
-        List<Query> queries = new ArrayList<>();
-
+        LambdaQueryWrapper<SystemLog> wrapper = Wrappers.lambdaQuery();
         if (CharSequenceUtil.isNotEmpty(storeId)) {
-            queries.add(QueryBuilders.match(m -> m.field("storeId").query(storeId)));
+            wrapper.eq(SystemLog::getStoreId, Long.parseLong(storeId));
         }
-
         if (CharSequenceUtil.isNotEmpty(operatorName)) {
-            queries.add(QueryBuilders.match(m -> m.field("username").query(operatorName)));
+            wrapper.like(SystemLog::getUsername, operatorName);
         }
-
         if (CharSequenceUtil.isNotEmpty(key)) {
-            queries.add(QueryBuilders.multiMatch(m -> m.fields("requestUrl", "requestParam", "responseBody", "name", "customerLog", "ipInfo").query(key).fuzziness("AUTO").tieBreaker(0.3d).type(TextQueryType.BestFields)));
+            wrapper.and(w -> w.like(SystemLog::getRequestUrl, key)
+                    .or().like(SystemLog::getRequestParam, key)
+                    .or().like(SystemLog::getResponseBody, key)
+                    .or().like(SystemLog::getName, key)
+                    .or().like(SystemLog::getCustomerLog, key)
+                    .or().like(SystemLog::getIpInfo, key));
         }
-
-        if (searchVo.getConvertStartDate() != null && searchVo.getConvertEndDate() != null) {
-            queries.add(co.elastic.clients.elasticsearch._types.query_dsl.RangeQueryBuilders.date(d -> d.field("createTime")
-                .gte(java.time.Instant.ofEpochMilli(searchVo.getConvertStartDate().getTime()).toString())
-                .lte(java.time.Instant.ofEpochMilli(searchVo.getConvertEndDate().getTime()).toString()))._toQuery());
+        if (searchVo != null && searchVo.getConvertStartDate() != null && searchVo.getConvertEndDate() != null) {
+            wrapper.between(SystemLog::getCreateTime,
+                    searchVo.getConvertStartDate().getTime(),
+                    searchVo.getConvertEndDate().getTime());
         }
-
-        if (!queries.isEmpty()) {
-            builder.withQuery(QueryBuilders.bool(b -> b.must(queries)));
+        if (CharSequenceUtil.isNotEmpty(pageVO.getSort()) && CharSequenceUtil.isNotEmpty(pageVO.getOrder())) {
+            boolean asc = "asc".equalsIgnoreCase(pageVO.getOrder());
+            switch (pageVO.getSort()) {
+                case "createTime" -> wrapper.orderBy(true, asc, SystemLog::getCreateTime);
+                case "costTime" -> wrapper.orderBy(true, asc, SystemLog::getCostTime);
+                case "username" -> wrapper.orderBy(true, asc, SystemLog::getUsername);
+                default -> wrapper.orderByDesc(SystemLog::getCreateTime);
+            }
         } else {
-            builder.withQuery(q -> q.matchAll(a -> a));
+            wrapper.orderByDesc(SystemLog::getCreateTime);
         }
-        return builder;
-    }
 
+        Page<SystemLog> page = new Page<>(pageVO.getPageNumber(), pageVO.getPageSize());
+        IPage<SystemLog> result = systemLogMapper.selectPage(page, wrapper);
+        Page<SystemLogVO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
+        voPage.setRecords(result.getRecords().stream().map(SystemLogVO::fromEntity).toList());
+        return voPage;
+    }
 }

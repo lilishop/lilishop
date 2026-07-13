@@ -43,11 +43,11 @@ import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
 import cn.lili.modules.promotion.service.PromotionGoodsService;
-import cn.lili.modules.search.entity.dos.EsGoodsIndex;
-import cn.lili.modules.search.service.EsGoodsIndexService;
+import cn.lili.modules.search.entity.dos.GoodsIndex;
+import cn.lili.modules.search.service.GoodsIndexService;
 import cn.lili.mybatis.BaseEntity;
 import cn.lili.mybatis.util.PageUtil;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.message.MessageSendCallbackBuilder;
 import cn.lili.rocketmq.tags.GoodsTagsEnum;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
@@ -64,7 +64,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
@@ -79,7 +79,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 商品sku业务层实现
+ * ??sku?????
  *
  * @author pikachu
  * @since 2020-02-23 15:18:56
@@ -88,18 +88,18 @@ import java.util.stream.Collectors;
 public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> implements GoodsSkuService {
 
     /**
-     * 缓存
+     * ??
      */
     @Autowired
     private Cache cache;
     /**
-     * 分类
+     * ??
      */
     @Autowired
     @Lazy
     private MemberCouponService memberCouponService;
     /**
-     * 商品相册
+     * ????
      */
     @Autowired
     private GoodsGalleryService goodsGalleryService;
@@ -107,24 +107,24 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
      * rocketMq
      */
     @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    private LiliMessageTemplate liliMessageTemplate;
     /**
-     * rocketMq配置
+     * rocketMq??
      */
     @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
     /**
-     * 商品
+     * ??
      */
     @Autowired
     @Lazy
     private GoodsService goodsService;
     /**
-     * 商品索引
+     * ????
      */
     @Autowired
     @Lazy
-    private EsGoodsIndexService goodsIndexService;
+    private GoodsIndexService goodsIndexService;
 
     @Autowired
     @Lazy
@@ -146,11 +146,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void add(Goods goods, GoodsOperationDTO goodsOperationDTO) {
-        // 是否存在规格
+        // ??????
         if (goodsOperationDTO.getSkuList() == null || goodsOperationDTO.getSkuList().isEmpty()) {
             throw new ServiceException(ResultCode.MUST_HAVE_GOODS_SKU);
         }
-        // 检查是否需要生成索引
+        // ??????????
         List<GoodsSku> goodsSkus = GoodsSkuBuilder.buildBatch(goods, goodsOperationDTO.getSkuList());
         renderGoodsSkuList(goodsSkus, goodsOperationDTO);
 
@@ -163,27 +163,27 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(Goods goods, GoodsOperationDTO goodsOperationDTO) {
-        // 是否存在规格
+        // ??????
         if (goodsOperationDTO.getSkuList() == null || goodsOperationDTO.getSkuList().isEmpty()) {
             throw new ServiceException(ResultCode.MUST_HAVE_GOODS_SKU);
         }
         List<GoodsSku> skuList;
-        //删除旧的sku信息
+        //????sku??
         if (Boolean.TRUE.equals(goodsOperationDTO.getRegeneratorSkuFlag())) {
             skuList = GoodsSkuBuilder.buildBatch(goods, goodsOperationDTO.getSkuList());
             renderGoodsSkuList(skuList, goodsOperationDTO);
             List<GoodsSkuVO> goodsListByGoodsId = getGoodsListByGoodsId(goods.getId());
             List<String> oldSkuIds = new ArrayList<>();
-            //删除旧索引
+            //?????
             for (GoodsSkuVO goodsSkuVO : goodsListByGoodsId) {
                 oldSkuIds.add(goodsSkuVO.getId());
                 cache.remove(GoodsSkuService.getCacheKeys(goodsSkuVO.getId()));
             }
 
-            //删除sku相册
+            //??sku??
             goodsGalleryService.removeByGoodsId(goods.getId());
 
-            //发送mq消息
+            //??mq??
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.SKU_DELETE.name();
             asyncSendIfPresent(destination, JSON.toJSONString(oldSkuIds));
         } else {
@@ -192,10 +192,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 GoodsSku sku = GoodsSkuBuilder.build(goods, map);
                 renderGoodsSku(sku, goodsOperationDTO);
                 skuList.add(sku);
-                //如果商品状态值不对，则es索引移除
-                if (goods.getAuthFlag().equals(GoodsAuthEnum.PASS.name()) && goods.getMarketEnable().equals(GoodsStatusEnum.UPPER.name())) {
-                    goodsIndexService.deleteIndexById(sku.getId());
-                }
                 this.clearCache(sku.getId());
             }
         }
@@ -211,9 +207,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     /**
-     * 更新商品sku
+     * ????sku
      *
-     * @param goodsSku sku信息
+     * @param goodsSku sku??
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -225,7 +221,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
 
     /**
-     * 清除sku缓存
+     * ??sku??
      *
      * @param skuId skuID
      */
@@ -236,9 +232,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     @Override
     public GoodsSku getGoodsSkuByIdFromCache(String id) {
-        //获取缓存中的sku
+        //??????sku
         GoodsSku goodsSku = (GoodsSku) cache.get(GoodsSkuService.getCacheKeys(id));
-        //如果缓存中没有信息，则查询数据库，然后写入缓存
+        //???????????????????????
         if (goodsSku == null) {
             goodsSku = this.getById(id);
             if (goodsSku == null) {
@@ -247,12 +243,12 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             cache.put(GoodsSkuService.getCacheKeys(id), goodsSku,72 * 60 * 60L);
         }
 
-        //获取商品库存
+        //??????
         Integer integer = (Integer) cache.get(GoodsSkuService.getStockCacheKey(id));
 
-        //库存不为空,库存与缓存中不一致
+        //?????,?????????
         if (integer != null && !goodsSku.getQuantity().equals(integer)) {
-            //写入最新的库存信息
+            //?????????
             goodsSku.setQuantity(integer);
             cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
         }
@@ -271,41 +267,41 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     public Map<String, Object> getGoodsSkuDetail(String goodsId, String skuId) {
         Map<String, Object> map = new HashMap<>(16);
-        //获取商品VO
+        //????VO
         GoodsVO goodsVO = goodsService.getGoodsVO(goodsId);
-        //如果skuid为空，则使用商品VO中sku信息获取
+        //??skuid????????VO?sku????
         if (CharSequenceUtil.isEmpty(skuId) || "undefined".equals(skuId)) {
             skuId = goodsVO.getSkuList().get(0).getId();
         }
-        //从缓存拿商品Sku
+        //??????Sku
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
-        //如果使用商品ID无法查询SKU则返回错误
+        //??????ID????SKU?????
         if (goodsVO == null || goodsSku == null) {
-            //发送mq消息
+            //??mq??
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_DELETE.name();
             asyncSendIfPresent(destination, JSON.toJSONString(Collections.singletonList(goodsId)));
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
 
-        //商品下架||商品未审核通过||商品删除，则提示：商品已下架
+        //????||???????||??????????????
         if (GoodsStatusEnum.DOWN.name().equals(goodsVO.getMarketEnable()) || !GoodsAuthEnum.PASS.name().equals(goodsVO.getAuthFlag()) || Boolean.TRUE.equals(goodsVO.getDeleteFlag())) {
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_DELETE.name();
             asyncSendIfPresent(destination, JSON.toJSONString(Collections.singletonList(goodsId)));
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
 
-        //获取当前商品的索引信息
-        EsGoodsIndex goodsIndex = goodsIndexService.findById(skuId);
+        //???????????
+        GoodsIndex goodsIndex = goodsIndexService.findById(skuId);
         if (goodsIndex == null) {
-            goodsIndex = goodsIndexService.getResetEsGoodsIndex(goodsSku);
+            goodsIndex = goodsIndexService.buildGoodsIndex(goodsSku);
         }
 
-        //商品规格
+        //????
         GoodsSkuVO goodsSkuDetail = this.getGoodsSkuVO(goodsSku);
 
-        Map<String, Object> promotionMap = goodsIndex.getPromotionMap();
+        Map<String, Object> promotionMap = goodsIndex == null ? Collections.emptyMap() : goodsIndex.getPromotionMap();
         AuthUser currentUser = UserContext.getCurrentUser();
-        //设置当前商品的促销价格
+        //???????????
         if (promotionMap != null && !promotionMap.isEmpty()) {
             promotionMap = promotionMap.entrySet().stream().parallel().filter(i -> {
                 JSONObject jsonObject = JSON.parseObject(String.valueOf(i.getValue()));
@@ -322,7 +318,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                         }
                     }
                 }
-                // 过滤活动赠送优惠券和无效时间的活动
+                // ?????????????????
                 return (jsonObject.get("getType") == null || CouponGetEnum.FREE.name().equals(jsonObject.getString("getType"))) && (jsonObject.get("startTime") != null && jsonObject.getObject("startTime", Date.class).getTime() <= System.currentTimeMillis()) && (jsonObject.get("endTime") == null || jsonObject.getObject("endTime", Date.class).getTime() >= System.currentTimeMillis());
             }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -351,22 +347,22 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
         map.put("data", goodsSkuDetail);
 
-        //获取分类
+        //????
         map.put("wholesaleList", GoodsSalesModeEnum.WHOLESALE.name().equals(goodsVO.getSalesModel()) ?
                 wholesaleService.findByGoodsId(goodsSkuDetail.getGoodsId()) : Collections.emptyList());
         map.put("categoryName", CharSequenceUtil.isNotEmpty(goodsIndex.getCategoryNamePath()) ?
                 goodsIndex.getCategoryNamePath().split(",") : null);
 
-        //获取规格信息
+        //??????
         map.put("specs", this.groupBySkuAndSpec(goodsVO.getSkuList()));
         map.put("promotionMap", promotionMap);
 
-        //获取参数信息
+        //??????
         if (goodsVO.getGoodsParamsDTOList() != null && !goodsVO.getGoodsParamsDTOList().isEmpty()) {
             map.put("goodsParamsDTOList", goodsVO.getGoodsParamsDTOList());
         }
 
-        //记录用户足迹
+        //??????
         if (currentUser != null) {
             FootPrint footPrint = new FootPrint(currentUser.getId(), goodsIndex.getStoreId(), goodsId, skuId);
             String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.VIEW_GOODS.name();
@@ -376,9 +372,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     /**
-     * 更新商品sku状态
+     * ????sku??
      *
-     * @param goods 商品信息(Id,MarketEnable/AuthFlag)
+     * @param goods ????(Id,MarketEnable/AuthFlag)
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -402,11 +398,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     /**
-     * 更新商品sku状态根据店铺id
+     * ????id????sku??
      *
-     * @param storeId      店铺id
-     * @param marketEnable 市场启用状态
-     * @param authFlag     审核状态
+     * @param storeId      ??id
+     * @param marketEnable ????
+     * @param authFlag     ????
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -416,16 +412,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         updateWrapper.set(CharSequenceUtil.isNotEmpty(marketEnable), GoodsSku::getMarketEnable, marketEnable);
         updateWrapper.set(CharSequenceUtil.isNotEmpty(authFlag), GoodsSku::getAuthFlag, authFlag);
         boolean update = this.update(updateWrapper);
-        if (Boolean.TRUE.equals(update)) {
-            if (GoodsStatusEnum.UPPER.name().equals(marketEnable)) {
-                applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("生成店铺商品",
-                        rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.GENERATOR_STORE_GOODS_INDEX.name(),
-                        storeId));
-            } else if (GoodsStatusEnum.DOWN.name().equals(marketEnable)) {
-                cache.vagueDel(CachePrefix.GOODS_SKU.getPrefix());
-                applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("删除店铺商品",
-                        rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.STORE_GOODS_DELETE.name(), storeId));
-            }
+        if (Boolean.TRUE.equals(update) && GoodsStatusEnum.DOWN.name().equals(marketEnable)) {
+            cache.vagueDel(CachePrefix.GOODS_SKU.getPrefix());
         }
     }
 
@@ -454,10 +442,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     /**
-     * 获取goodsId下所有的goodsSku
+     * ??goodsId????goodsSku
      *
-     * @param goodsId 商品id
-     * @return goodsSku列表
+     * @param goodsId ??id
+     * @return goodsSku??
      */
     @Override
     public List<GoodsSku> getGoodsSkuListByGoodsId(String goodsId) {
@@ -490,15 +478,15 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     @Override
     public GoodsSkuVO getGoodsSkuVO(GoodsSku goodsSku) {
-        //初始化商品
+        //?????
         GoodsSkuVO goodsSkuVO = new GoodsSkuVO(goodsSku);
-        //获取sku信息
+        //??sku??
         JSONObject jsonObject = JSON.parseObject(goodsSku.getSpecs());
-        //用于接受sku信息
+        //????sku??
         List<SpecValueVO> specValueVOS = new ArrayList<>();
-        //用于接受sku相册
+        //????sku??
         List<String> goodsGalleryList = new ArrayList<>();
-        //循环提交的sku表单
+        //?????sku??
         for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
             SpecValueVO specValueVO = new SpecValueVO();
             if ("images".equals(entry.getKey())) {
@@ -529,8 +517,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         List<GoodsSkuStockDTO> goodsSkuStockDTOList = this.baseMapper.queryStocks(searchParams.queryWrapper());
         XSSFWorkbook workbook = initStockExportData(goodsSkuStockDTOList);
         try {
-            // 设置响应头
-            String fileName = URLEncoder.encode("商品库存", "UTF-8");
+            // ?????
+            String fileName = URLEncoder.encode("????", "UTF-8");
             response.setContentType("application/vnd.ms-excel;charset=UTF-8");
             response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
 
@@ -551,23 +539,23 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     public void importStock(String storeId, MultipartFile file) {
         List<GoodsSkuStockDTO> goodsSkuStockDTOList = new ArrayList<>();
         try (InputStream inputStream = file.getInputStream()) {
-            // 使用 WorkbookFactory.create 方法读取 Excel 文件
+            // ?? WorkbookFactory.create ???? Excel ??
             Workbook workbook = WorkbookFactory.create(inputStream);
-            // 我们只读取第一个sheet
+            // ????????sheet
             Sheet sheet = workbook.getSheetAt(0);
 
-            // 检查第一个sheet的行数是否超过10002行
+            // ?????sheet???????10002?
             if (sheet.getPhysicalNumberOfRows() > 10002) {
-                throw new ServiceException(ResultCode.GOODS_STOCK_IMPORT_ERROR, "Excel行数超过10002行");
+                throw new ServiceException(ResultCode.GOODS_STOCK_IMPORT_ERROR, "Excel????10002?");
             }
-            // 遍历行和单元格
+            // ???????
             Iterator<Row> rowIterator = sheet.rowIterator();
             int rowIndex = 0;
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
                 rowIndex++;
 
-                // 跳过表头
+                // ????
                 if (rowIndex < 3) {
                     continue;
                 }
@@ -578,16 +566,16 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 }
                 log.error(getCellValue(row.getCell(2)));
                 log.error(getCellValue(row.getCell(3)));
-                // 判断数据格式
-                if (!"增".equals(getCellValue(row.getCell(2))) && !"减".equals(getCellValue(row.getCell(2)))) {
-                    throw new ServiceException(ResultCode.GOODS_STOCK_IMPORT_ERROR, "库存修改方向列数据必须是“增”或“减”");
+                // ??????
+                if (!"?".equals(getCellValue(row.getCell(2))) && !"?".equals(getCellValue(row.getCell(2)))) {
+                    throw new ServiceException(ResultCode.GOODS_STOCK_IMPORT_ERROR, "???????????????????");
                 } else if (!NumberUtil.isInteger(getCellValue(row.getCell(3))) || Integer.parseInt(getCellValue(row.getCell(3))) < 0) {
-                    throw new ServiceException(ResultCode.GOODS_STOCK_IMPORT_ERROR, "库存必须是正整数");
+                    throw new ServiceException(ResultCode.GOODS_STOCK_IMPORT_ERROR, "????????");
                 } else if (this.count(new LambdaQueryWrapper<GoodsSku>()
                         .eq(GoodsSku::getGoodsId, getCellValue(row.getCell(0)))
                         .eq(GoodsSku::getId, getCellValue(row.getCell(1)))
                         .eq(GoodsSku::getStoreId, storeId)) == 0) {
-                    throw new ServiceException(ResultCode.GOODS_STOCK_IMPORT_ERROR, "第" + rowIndex + "行商品不存在");
+                    throw new ServiceException(ResultCode.GOODS_STOCK_IMPORT_ERROR, "?" + rowIndex + "??????");
                 }
                 GoodsSkuStockDTO goodsSkuStockDTO = new GoodsSkuStockDTO();
                 goodsSkuStockDTO.setGoodsId(getCellValue(row.getCell(0)));
@@ -601,7 +589,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             throw new ServiceException(ResultCode.GOODS_STOCK_IMPORT_ERROR, e.getMessage());
         }
 
-        // 批量修改商品库存
+        // ????????
         this.updateStocksByType(goodsSkuStockDTOList);
     }
 
@@ -616,7 +604,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 if (DateUtil.isCellDateFormatted(cell)) {
                     return cell.getDateCellValue().toString();
                 } else {
-                    // 将数值转换为整数以去掉小数点
+                    // ??????????????
                     double numericValue = cell.getNumericCellValue();
                     if (numericValue == (long) numericValue) {
                         return String.valueOf((long) numericValue);
@@ -640,10 +628,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     /**
-     * 列表查询商品sku信息
+     * ??????sku??
      *
-     * @param searchParams 查询参数
-     * @return 商品sku信息
+     * @param searchParams ????
+     * @return ??sku??
      */
     @Override
     public List<GoodsSku> getGoodsSkuByList(GoodsSearchParams searchParams) {
@@ -657,15 +645,15 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         List<GoodsSkuStockDTO> goodsSkuStockList = this.baseMapper.queryStocks(GoodsSearchParams.builder().ids(skuIds).build().queryWrapper());
         Map<String, List<GoodsSkuStockDTO>> groupByGoodsIds = goodsSkuStockList.stream().collect(Collectors.groupingBy(GoodsSkuStockDTO::getGoodsId));
 
-        //统计每个商品的库存
+        //?????????
         for (Map.Entry<String, List<GoodsSkuStockDTO>> entry : groupByGoodsIds.entrySet()) {
-            //库存
+            //??
             for (GoodsSkuStockDTO goodsSku : entry.getValue()) {
                 goodsSkuStockDTOS.stream().filter(i -> i.getSkuId().equals(goodsSku.getSkuId())).findFirst().ifPresent(i -> goodsSku.setQuantity(i.getQuantity()));
 
                 this.updateStock(goodsSku.getSkuId(), goodsSku.getQuantity());
             }
-            //保存商品库存结果
+            //????????
             goodsService.updateStock(entry.getKey());
         }
     }
@@ -674,17 +662,17 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Transactional(rollbackFor = Exception.class)
     public void updateStocksByType(List<GoodsSkuStockDTO> goodsSkuStockDTOS) {
 
-        // 获取所有的goodsID，并去除相同的goodsID
+        // ?????goodsID???????goodsID
         List<String> goodsIds = goodsSkuStockDTOS.stream()
                 .map(GoodsSkuStockDTO::getGoodsId)
                 .distinct()
                 .collect(Collectors.toList());
 
-        //更新SKU库存
+        //??SKU??
         for (GoodsSkuStockDTO goodsSkuStockDTO : goodsSkuStockDTOS) {
             this.updateStock(goodsSkuStockDTO.getSkuId(), goodsSkuStockDTO.getQuantity(), goodsSkuStockDTO.getType());
         }
-        //更新SPU库存
+        //??SPU??
         for (String goodsId : goodsIds) {
             goodsService.updateStock(goodsId);
         }
@@ -695,7 +683,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     public void updateAlertQuantity(GoodsSkuStockDTO goodsSkuStockDTO) {
         GoodsSku goodsSku = this.getById(goodsSkuStockDTO.getSkuId());
         goodsSku.setAlertQuantity(goodsSkuStockDTO.getAlertQuantity());
-        //清除缓存，防止修改预警后直接修改商品导致预警数值错误
+        //??????????????????????????
         cache.remove(CachePrefix.GOODS.getPrefix() + goodsSku.getGoodsId());
         this.update(goodsSku);
     }
@@ -707,12 +695,12 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         List<GoodsSkuStockDTO> goodsSkuStockList = this.baseMapper.queryStocks(GoodsSearchParams.builder().ids(skuIds).build().queryWrapper());
         List<String> goodsIdList = goodsSkuStockList.stream().map(GoodsSkuStockDTO::getGoodsId).collect(Collectors.toList());
         HashSet<String> uniqueSet = new HashSet<>(goodsIdList);
-        // 将去重后的元素转回列表
+        // ???????????
         List<String> uniqueGoodsIdList = new ArrayList<>(uniqueSet);
         for (String goodsId : uniqueGoodsIdList) {
             cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
         }
-        //修改预警库存
+        //??????
         for (GoodsSkuStockDTO goodsSkuStockDTO : goodsSkuStockDTOS) {
             GoodsSku goodsSku = this.getById(goodsSkuStockDTO.getSkuId());
             goodsSku.setAlertQuantity(goodsSkuStockDTO.getAlertQuantity());
@@ -726,7 +714,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     public void updateStock(String skuId, Integer quantity) {
         GoodsSku goodsSku = getGoodsSkuByIdFromCache(skuId);
         if (goodsSku != null) {
-            //判断商品sku是否已经下架(修改商品库存为0时  会自动下架商品),再次更新商品库存时 需更新商品索引
+            //????sku??????(???????0?  ???????),????????? ???????
             boolean isFlag = goodsSku.getQuantity() <= 0;
 
             goodsSku.setQuantity(quantity);
@@ -738,17 +726,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             cache.put(GoodsSkuService.getStockCacheKey(skuId), quantity);
 
             this.promotionGoodsService.updatePromotionGoodsStock(goodsSku.getId(), quantity);
-            //商品库存为0是删除商品索引
-            if (quantity <= 0) {
-                goodsIndexService.deleteIndexById(goodsSku.getId());
-            }
-            //库存从<=0恢复到>0并且商品状态为上架时重建商品索引
-            if (isFlag && quantity > 0 && CharSequenceUtil.equals(goodsSku.getMarketEnable(), GoodsStatusEnum.UPPER.name())) {
-                List<String> goodsIds = new ArrayList<>();
-                goodsIds.add(goodsSku.getGoodsId());
-                applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品", rocketmqCustomProperties.getGoodsTopic(),
-                        GoodsTagsEnum.UPDATE_GOODS_INDEX.name(), goodsIds));
-            }
         }
     }
 
@@ -757,10 +734,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     public void updateStock(String skuId, Integer quantity, String type) {
         GoodsSku goodsSku = getGoodsSkuByIdFromCache(skuId);
         if (goodsSku != null) {
-            //判断商品sku是否已经下架(修改商品库存为0时  会自动下架商品),再次更新商品库存时 需更新商品索引
+            //????sku??????(???????0?  ???????),????????? ???????
             boolean isFlag = goodsSku.getQuantity() <= 0;
 
-            //计算修改库存
+            //??????
             if (type.equals(GoodsStockTypeEnum.ADD.name())) {
                 quantity = Convert.toInt(NumberUtil.add(goodsSku.getQuantity(), quantity));
             } else {
@@ -776,17 +753,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             cache.put(GoodsSkuService.getStockCacheKey(skuId), quantity);
 
             this.promotionGoodsService.updatePromotionGoodsStock(goodsSku.getId(), quantity);
-            //商品库存为0是删除商品索引
-            if (quantity <= 0) {
-                goodsIndexService.deleteIndexById(goodsSku.getId());
-            }
-            //库存从<=0恢复到>0并且商品状态为上架时重建商品索引
-            if (isFlag && quantity > 0 && CharSequenceUtil.equals(goodsSku.getMarketEnable(), GoodsStatusEnum.UPPER.name())) {
-                List<String> goodsIds = new ArrayList<>();
-                goodsIds.add(goodsSku.getGoodsId());
-                applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("更新商品", rocketmqCustomProperties.getGoodsTopic(),
-                        GoodsTagsEnum.UPDATE_GOODS_INDEX.name(), goodsIds));
-            }
         }
     }
 
@@ -808,9 +774,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     public void updateGoodsStock(List<GoodsSku> goodsSkus) {
         Map<String, List<GoodsSku>> groupByGoodsIds = goodsSkus.stream().collect(Collectors.groupingBy(GoodsSku::getGoodsId));
 
-        //统计每个商品的库存
+        //?????????
         for (String goodsId : groupByGoodsIds.keySet()) {
-            //库存
+            //??
             Integer quantity = 0;
             for (GoodsSku goodsSku : goodsSkus) {
                 if (goodsId.equals(goodsSku.getGoodsId())) {
@@ -818,7 +784,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
                 }
                 this.updateStock(goodsSku.getId(), goodsSku.getQuantity());
             }
-            //保存商品库存结果
+            //????????
             goodsService.updateStock(goodsId);
         }
 
@@ -826,10 +792,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     /**
-     * 根据商品id获取全部skuId的集合
+     * ????id????skuId???
      *
      * @param goodsId goodsId
-     * @return 全部skuId的集合
+     * @return ??skuId???
      */
     @Override
     public List<String> getSkuIdsByGoodsId(String goodsId) {
@@ -860,14 +826,14 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
 
     /**
-     * 批量渲染商品sku
+     * ??????sku
      *
-     * @param goodsSkuList      sku集合
-     * @param goodsOperationDTO 商品操作DTO
+     * @param goodsSkuList      sku??
+     * @param goodsOperationDTO ????DTO
      */
     @Override
     public void renderGoodsSkuList(List<GoodsSku> goodsSkuList, GoodsOperationDTO goodsOperationDTO) {
-        // 商品销售模式渲染器
+        // ?????????
         salesModelRenders.stream().filter(i -> i.getSalesMode().equals(goodsOperationDTO.getSalesModel())).findFirst().ifPresent(i -> i.renderBatch(goodsSkuList, goodsOperationDTO));
         for (GoodsSku goodsSku : goodsSkuList) {
             extendOldSkuValue(goodsSku);
@@ -895,7 +861,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         this.update(updateWrapper);
         sku.setVirtualSales(virtualSales);
         this.clearCache(skuId);
-        goodsIndexService.getResetEsGoodsIndex(sku);
+        goodsIndexService.buildGoodsIndex(sku);
     }
 
     @Override
@@ -944,22 +910,22 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     /**
-     * 渲染商品sku
+     * ????sku
      *
      * @param goodsSku          sku
-     * @param goodsOperationDTO 商品操作DTO
+     * @param goodsOperationDTO ????DTO
      */
     void renderGoodsSku(GoodsSku goodsSku, GoodsOperationDTO goodsOperationDTO) {
         extendOldSkuValue(goodsSku);
-        // 商品销售模式渲染器
+        // ?????????
         salesModelRenders.stream().filter(i -> i.getSalesMode().equals(goodsOperationDTO.getSalesModel())).findFirst().ifPresent(i -> i.renderSingle(goodsSku, goodsOperationDTO));
         this.renderImages(goodsSku, goodsOperationDTO.getGoodsGalleryList());
     }
 
     /**
-     * 将原sku的一些不会直接传递的值放到新的sku中
+     * ??sku???????????????sku?
      *
-     * @param goodsSku 商品sku
+     * @param goodsSku ??sku
      */
     private void extendOldSkuValue(GoodsSku goodsSku) {
         if (CharSequenceUtil.isNotEmpty(goodsSku.getGoodsId())) {
@@ -975,7 +941,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     /**
-     * 渲染sku图片
+     * ??sku??
      *
      * @param goodsSku sku
      */
@@ -999,10 +965,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     /**
-     * 根据商品分组商品sku及其规格信息
+     * ????????sku??????
      *
-     * @param goodsSkuVOList 商品VO列表
-     * @return 分组后的商品sku及其规格信息
+     * @param goodsSkuVOList ??VO??
+     * @return ??????sku??????
      */
     private List<GoodsSkuSpecVO> groupBySkuAndSpec(List<GoodsSkuVO> goodsSkuVOList) {
 
@@ -1018,53 +984,53 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     /**
-     * 初始化填充商品库存导出数据
+     * ?????????????
      *
-     * @param goodsSkuStockDTOList 导出的库存数据
-     * @return 商品库存导出列表
+     * @param goodsSkuStockDTOList ???????
+     * @return ????????
      */
     private XSSFWorkbook initStockExportData(List<GoodsSkuStockDTO> goodsSkuStockDTOList) {
 
         XSSFWorkbook workbook = new XSSFWorkbook();
-        // 创建模板
+        // ????
         this.createTemplate(workbook);
-        // 创建sku库存列表
+        // ??sku????
         this.skuStockList(workbook, goodsSkuStockDTOList);
-        // 创建sku库存列表
+        // ??sku????
         this.skuList(workbook, goodsSkuStockDTOList);
         return workbook;
     }
 
     /**
-     * 创建模板
+     * ????
      *
      * @param workbook
      */
     private void createTemplate(XSSFWorkbook workbook) {
-        Sheet templateSheet = workbook.createSheet("商品库存编辑模板");
+        Sheet templateSheet = workbook.createSheet("????????");
 
-        // 创建表头
+        // ????
         Row description = templateSheet.createRow(0);
         description.setHeightInPoints(90);
         Cell descriptionCell = description.createCell(0);
-        descriptionCell.setCellValue("填写说明（请勿删除本说明）：\n" +
-                "1.可批量设置多个商品的库存，一次最多10000行\n" +
-                "2.库存修改方向：选择库存方向后，会在原先库存基础上进行增加或者减少\n" +
-                "3.库存变更数量：需要为整数，不能填写0和负数");
-        // 合并描述行的单元格
+        descriptionCell.setCellValue("??????????????\n" +
+                "1.?????????????????10000?\n" +
+                "2.????????????????????????????????\n" +
+                "3.?????????????????0???");
+        // ?????????
         templateSheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 3));
 
-        // 设置描述行单元格样式（例如，自动换行）
+        // ???????????????????
         CellStyle descriptionStyle = workbook.createCellStyle();
         descriptionStyle.setWrapText(true);
         descriptionStyle.setAlignment(HorizontalAlignment.LEFT);
         descriptionStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         descriptionCell.setCellStyle(descriptionStyle);
 
-        // 创建表头
+        // ????
         Row header = templateSheet.createRow(1);
 
-        String[] headers = {"商品ID（必填）", "skuID（必填）", "库存修改方向（必填，填 增 或者 减）", "库存变更数量（必填）"};
+        String[] headers = {"??ID????", "skuID????", "??????????? ? ?? ??", "??????????"};
 
         CellStyle headerStyle = workbook.createCellStyle();
         Font headerFont = workbook.createFont();
@@ -1075,16 +1041,16 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             cell.setCellValue(headers[i]);
             cell.setCellStyle(headerStyle);
         }
-        //修改列宽
+        //????
         templateSheet.setColumnWidth(0, 30 * 256);
         templateSheet.setColumnWidth(1, 30 * 256);
         templateSheet.setColumnWidth(2, 40 * 256);
         templateSheet.setColumnWidth(3, 25 * 256);
 
-        // 设置下拉列表数据验证
+        // ??????????
         DataValidationHelper validationHelper = templateSheet.getDataValidationHelper();
-        DataValidationConstraint constraint = validationHelper.createExplicitListConstraint(new String[]{"增", "减"});
-        // 从第3行到第10002行，第3列
+        DataValidationConstraint constraint = validationHelper.createExplicitListConstraint(new String[]{"?", "?"});
+        // ??3???10002???3?
         CellRangeAddressList addressList = new CellRangeAddressList(2, 10001, 2, 2);
         DataValidation validation = validationHelper.createValidation(constraint, addressList);
         validation.setSuppressDropDownArrow(true);
@@ -1093,17 +1059,17 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     /**
-     * 创建sku库存列表
+     * ??sku????
      *
      * @param workbook
      */
     private void skuStockList(XSSFWorkbook workbook, List<GoodsSkuStockDTO> goodsSkuStockDTOList) {
-        Sheet skuListSheet = workbook.createSheet("商品库存信息");
+        Sheet skuListSheet = workbook.createSheet("??????");
 
-        // 创建表头
+        // ????
         Row header = skuListSheet.createRow(0);
 
-        String[] headers = {"商品ID", "商品名称", "规格ID(SKUID)", "规格名称", "货号", "当前库存数量"};
+        String[] headers = {"??ID", "????", "??ID(SKUID)", "????", "??", "??????"};
 
         for (int i = 0; i < headers.length; i++) {
             Cell cell = header.createCell(i);
@@ -1111,7 +1077,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
 
 
-        // 填充数据
+        // ????
         for (int i = 0; i < goodsSkuStockDTOList.size(); i++) {
             GoodsSkuStockDTO dto = goodsSkuStockDTOList.get(i);
             Row row = skuListSheet.createRow(i + 1);
@@ -1123,7 +1089,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             row.createCell(5).setCellValue(dto.getQuantity());
         }
 
-        //修改列宽
+        //????
         skuListSheet.setColumnWidth(0, 30 * 256);
         skuListSheet.setColumnWidth(1, 30 * 256);
         skuListSheet.setColumnWidth(2, 30 * 256);
@@ -1133,19 +1099,19 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     private void skuList(XSSFWorkbook workbook, List<GoodsSkuStockDTO> goodsSkuStockDTOList) {
-        Sheet skuListSheet = workbook.createSheet("商品规格");
+        Sheet skuListSheet = workbook.createSheet("????");
 
-        // 创建表头
+        // ????
         Row header = skuListSheet.createRow(0);
 
-        String[] headers = {"商品ID", "商品名称", "规格ID(SKUID)", "规格名称", "货号"};
+        String[] headers = {"??ID", "????", "??ID(SKUID)", "????", "??"};
 
         for (int i = 0; i < headers.length; i++) {
             Cell cell = header.createCell(i);
             cell.setCellValue(headers[i]);
         }
 
-        // 填充数据
+        // ????
         for (int i = 0; i < goodsSkuStockDTOList.size(); i++) {
             GoodsSkuStockDTO dto = goodsSkuStockDTOList.get(i);
             Row row = skuListSheet.createRow(i + 1);
@@ -1156,7 +1122,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             row.createCell(4).setCellValue(dto.getSn());
         }
 
-        //修改列宽
+        //????
         skuListSheet.setColumnWidth(0, 30 * 256);
         skuListSheet.setColumnWidth(1, 30 * 256);
         skuListSheet.setColumnWidth(2, 30 * 256);
@@ -1165,8 +1131,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     private void asyncSendIfPresent(String destination, Object payload) {
-        if (rocketMQTemplate != null) {
-            rocketMQTemplate.asyncSend(destination, payload, RocketmqSendCallbackBuilder.commonCallback());
+        if (liliMessageTemplate != null) {
+            liliMessageTemplate.asyncSend(destination, payload, MessageSendCallbackBuilder.commonCallback());
         }
     }
 

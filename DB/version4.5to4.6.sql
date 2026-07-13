@@ -459,6 +459,32 @@ CREATE TABLE `li_gift_card_cash_credential` (
   KEY `idx_li_gift_card_cash_cred_issue` (`issue_batch_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin ROW_FORMAT=DYNAMIC COMMENT='现金礼品卡卡密凭证';
 
+CREATE TABLE `li_order_gift_card_record` (
+  `id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `create_time` datetime(6) DEFAULT NULL,
+  `delete_flag` bit(1) DEFAULT b'0',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `update_time` datetime(6) DEFAULT NULL,
+  `order_sn` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '订单号',
+  `trade_sn` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '交易号',
+  `member_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '会员ID',
+  `credential_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '礼品卡凭证ID',
+  `card_no` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '礼品卡卡号',
+  `deduct_amount` decimal(12,2) DEFAULT 0.00 COMMENT '本次抵扣金额',
+  `change_amount` decimal(12,2) DEFAULT 0.00 COMMENT '变动金额',
+  `balance_after` decimal(12,2) DEFAULT 0.00 COMMENT '变动后余额',
+  `flow_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '流水方向：INCREASE/DECREASE',
+  `biz_type` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '业务类型',
+  `biz_sn` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '业务单号',
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_li_order_gift_card_order` (`order_sn`),
+  KEY `idx_li_order_gift_card_trade` (`trade_sn`),
+  KEY `idx_li_order_gift_card_member` (`member_id`),
+  KEY `idx_li_order_gift_card_credential` (`credential_id`),
+  KEY `idx_li_order_gift_card_biz` (`biz_type`,`biz_sn`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin ROW_FORMAT=DYNAMIC COMMENT='订单礼品卡使用流水';
+
 
 
 ALTER TABLE `li_order`

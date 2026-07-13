@@ -191,9 +191,9 @@ public class PintuanServiceImpl extends AbstractPromotionsServiceImpl<PintuanMap
      * @param promotions 促销实体
      */
     @Override
-    public void updateEsGoodsIndex(Pintuan promotions) {
+    public void updateGoodsIndex(Pintuan promotions) {
         Pintuan pintuan = promotions;
-        super.updateEsGoodsIndex(pintuan);
+        super.updateGoodsIndex(pintuan);
     }
 
     /**

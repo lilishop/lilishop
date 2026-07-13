@@ -37,7 +37,6 @@
         <aliyun-version>4.6.0</aliyun-version>
         <aliyun-sdk-oss-version>3.14.0</aliyun-sdk-oss-version>
         <aliyun-sdk-dysms-version>2.0.9</aliyun-sdk-dysms-version>
-        <rocketmq-version>2.3.4</rocketmq-version>
         <jwt-version>0.13.0</jwt-version>
         <druid-version>1.2.16</druid-version>
         <simple-http-version>1.0.3</simple-http-version>
@@ -52,7 +51,6 @@
         <xk-time>3.2.3</xk-time>
         <commons-text>1.14.0</commons-text>
         <enjoy.version>4.3</enjoy.version>
-        <xxl-job>2.3.0</xxl-job>
         <spotify>1.2.2</spotify>
 
         <owasp-java-html-sanitizer>20211018.2</owasp-java-html-sanitizer>
@@ -68,11 +66,8 @@
 
     <modules>
         <module>framework</module>
-        <module>common-api</module>
         <module>manager-api</module>
-        <module>seller-api</module>
         <module>buyer-api</module>
-        <module>consumer</module>
         <module>im-api</module>
 
     </modules>
@@ -103,4 +98,24 @@
             <url>file:///${project.basedir}/maven-repository</url>
         </repository>
     </repositories>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>1.18.34</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

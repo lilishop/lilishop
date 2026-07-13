@@ -1,4 +1,4 @@
-server:
+﻿server:
   port: 8888
 
   servlet:
@@ -6,8 +6,6 @@ server:
 
 management:
   health:
-    elasticsearch:
-      enabled: false
   endpoints:
     web:
       exposure:
@@ -23,11 +21,11 @@ spring:
       max-request-size: 20MB
   cache:
     type: redis
-  #jackson json解析
+  # jackson json 配置
   jackson:
     time-zone: GMT+8
     serialization:
-      #关闭jackson 对json做解析
+      # 关闭 jackson 对 json 做解析
       fail-on-empty-beans: false
 
   # Redis
@@ -38,15 +36,15 @@ spring:
       password: lilishop
       lettuce:
         pool:
-          # 连接池最大连接数（使用负值表示没有限制） 默认 8
+          # 连接池最大连接数（使用负值表示没有限制）默认 8
           max-active: 200
-          # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
+          # 连接池最大阻塞等待时间（使用负值表示没有限制）默认 -1
           max-wait: 20s
-          # 连接池中的最大空闲连接 默认 8
+          # 连接池中的最大空闲连接，默认 8
           max-idle: 10
-          # 连接池中的最小空闲连接 默认 8
+          # 连接池中的最小空闲连接，默认 8
           min-idle: 8
-  
+
   # 数据源配置
   datasource:
     url: jdbc:mysql://192.168.31.100:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
@@ -55,7 +53,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
 
-# 忽略TOKEN 鉴权 的url
+# 忽略 TOKEN 鉴权的 url
 ignored:
   urls:
     - /editor-app/**
@@ -82,21 +80,24 @@ ignored:
     - /buyer/member/evaluation/*/evaluationNumber
     - /buyer/other/appVersion/**
     - /buyer/broadcast/studio/**
+    - /buyer/common/slider/**
+    - /buyer/common/sms/**
+    - /buyer/common/site/**
+    - /buyer/common/region/**
+    - /buyer/common/IM
     - /druid/**
     - /swagger-ui.html
     - /swagger-ui/**
     - /v3/api-docs
     - /v3/api-docs/**
 
-
-
 # Mybatis-plus
 mybatis-plus:
   mapper-locations: classpath*:mapper/*.xml
   configuration:
-    #缓存开启
+    # 缓存开启
     cache-enabled: true
-    #日志
+    # 日志
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # 日志
@@ -120,47 +121,45 @@ springdoc:
   paths-to-match: /buyer/**
 
 lili:
+  runtime:
+    mode: microservice
+  local-file:
+    path: data/uploads
+    url-prefix: /files
+  verification-code:
+    effectiveTime: 300
+    watermark: LILI-SHOP
+    interfereNum: 0
+    faultTolerant: 3
+    loginBypassEnabled: false
   system:
     isDemoSite: true
   statistics:
-    # 在线人数统计 X 小时。这里设置48，即统计过去48小时每小时在线人数
+    # 在线人数统计 X 小时。这里设为 48，即统计过去 48 小时每小时在线人数
     onlineMember: 48
-    # 当前在线人数刷新时间间隔，单位秒，设置为600，则每10分钟刷新一次
+    # 当前在线人数刷新时间间隔，单位秒，设置为 600，则每 10 分钟刷新一次
     currentOnlineUpdate: 600
 
   # jwt 细节设定
   jwt-setting:
-    # token过期时间（分钟）
+    # token 过期时间（分钟）
     tokenExpireTime: 259200
 
-  # 使用Spring @Cacheable注解失效时间
+  # 使用 Spring @Cacheable 注解失效时间
   cache:
-    # 过期时间 单位秒 永久不过期设为-1
+    # 过期时间，单位秒；永久不过期设为 -1
     timeout: 1500
-  #多线程配置
+  # 多线程配置
   thread:
     corePoolSize: 5
     maxPoolSize: 50
     queueCapacity: 50
   data:
-    elasticsearch:
-      cluster-name: elasticsearch
-      cluster-nodes: 192.168.31.100:9200
-      index:
-        number-of-replicas: 0
-        number-of-shards: 3
-      index-prefix: lili
-      schema: http
-    #      account:
-    #        username: elastic
-    #        password: LiLiShopES
     logstash:
       server: 192.168.0.116:4560
     rocketmq:
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
-      msg-ext-topic: lili_msg_topic
-      msg-ext-group: lili_msg_group
       goods-topic: lili_goods_topic
       goods-group: lili_goods_group
       order-topic: lili_order_topic
@@ -169,16 +168,10 @@ lili:
       member-group: lili_member_group
       store-topic: lili_store_topic
       store-group: lili_store_group
-      other-topic: lili_other_topic
-      other-group: lili_other_group
       notice-topic: lili_notice_topic
       notice-group: lili_notice_group
       notice-send-topic: lili_send_notice_topic
       notice-send-group: lili_send_notice_group
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
-rocketmq:
-  name-server: 192.168.31.100:9876
-  producer:
-    group: lili_group
     send-message-timeout: 30000

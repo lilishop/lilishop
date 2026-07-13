@@ -10,26 +10,27 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
- * 买家API
- *
- * @author Chopper
- * @since 2020/11/16 10:03 下午
+ * 买家端 API 独立启动入口。
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "cn.lili")
 @EnableCaching
 @EnableAsync
 public class BuyerApiApplication {
 
-
     @Primary
     @Bean
     public TaskExecutor primaryTaskExecutor() {
-        return new ThreadPoolTaskExecutor();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(50);
+        executor.setQueueCapacity(50);
+        executor.setThreadNamePrefix("lili-buyer-async-");
+        executor.initialize();
+        return executor;
     }
 
     public static void main(String[] args) {
         System.setProperty("es.set.netty.runtime.available.processors", "false");
-        System.setProperty("rocketmq.client.logUseSlf4j","true");
         SpringApplication.run(BuyerApiApplication.class, args);
     }
 }

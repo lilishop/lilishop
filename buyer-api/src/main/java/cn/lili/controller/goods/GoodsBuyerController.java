@@ -11,10 +11,10 @@ import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
-import cn.lili.modules.search.entity.dos.EsGoodsIndex;
-import cn.lili.modules.search.entity.dos.EsGoodsRelatedInfo;
-import cn.lili.modules.search.entity.dto.EsGoodsSearchDTO;
-import cn.lili.modules.search.service.EsGoodsSearchService;
+import cn.lili.modules.search.entity.dos.GoodsIndex;
+import cn.lili.modules.search.entity.dos.GoodsRelatedInfo;
+import cn.lili.modules.search.entity.dto.GoodsSearchDTO;
+import cn.lili.modules.search.service.GoodsSearchService;
 import cn.lili.modules.search.service.HotWordsService;
 import cn.lili.modules.statistics.aop.PageViewPoint;
 import cn.lili.modules.statistics.aop.enums.PageViewEnum;
@@ -58,10 +58,10 @@ public class GoodsBuyerController {
     @Autowired
     private GoodsSkuService goodsSkuService;
     /**
-     * ES商品搜索
+     * 商品搜索
      */
     @Autowired
-    private EsGoodsSearchService goodsSearchService;
+    private GoodsSearchService goodsSearchService;
 
     @Autowired
     private HotWordsService hotWordsService;
@@ -108,18 +108,18 @@ public class GoodsBuyerController {
         return ResultUtil.data(goodsSkuService.getGoodsSkuByList(goodsSearchParams));
     }
 
-    @Operation(summary = "从ES中获取商品信息")
-    @GetMapping("/es")
-    public ResultMessage<Page<EsGoodsIndex>> getGoodsByPageFromEs(EsGoodsSearchDTO goodsSearchParams, PageVO pageVO) {
+    @Operation(summary = "商品搜索分页")
+    @GetMapping("/search")
+    public ResultMessage<Page<GoodsIndex>> searchGoods(GoodsSearchDTO goodsSearchParams, PageVO pageVO) {
         pageVO.setNotConvert(true);
         return ResultUtil.data(goodsSearchService.searchGoodsByPage(goodsSearchParams, pageVO));
     }
 
-    @Operation(summary = "从ES中获取相关商品品牌名称，分类名称及属性")
-    @GetMapping("/es/related")
-    public ResultMessage<EsGoodsRelatedInfo> getGoodsRelatedByPageFromEs(EsGoodsSearchDTO goodsSearchParams, PageVO pageVO) {
+    @Operation(summary = "商品搜索筛选器")
+    @GetMapping("/search/related")
+    public ResultMessage<GoodsRelatedInfo> searchGoodsRelated(GoodsSearchDTO goodsSearchParams, PageVO pageVO) {
         pageVO.setNotConvert(true);
-        EsGoodsRelatedInfo selector = goodsSearchService.getSelector(goodsSearchParams, pageVO);
+        GoodsRelatedInfo selector = goodsSearchService.getSelector(goodsSearchParams, pageVO);
         return ResultUtil.data(selector);
     }
 

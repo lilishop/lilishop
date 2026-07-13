@@ -34,10 +34,6 @@
     <logger name="RocketmqClient" additivity="false" level="INFO">
         <appender-ref ref="RocketmqClientAppender"/>
     </logger>
-    <!-- ES 未开启 xpack.security 时，集群会返回 HTTP 299 Warning，客户端会打 WARN，开发环境忽略 -->
-    <springProfile name="!prod">
-        <logger name="co.elastic.clients.transport.rest5_client.low_level.Rest5Client" level="ERROR"/>
-    </springProfile>
 
     <springProfile name="prod">
         <!--输出到elk的LOGSTASH-->

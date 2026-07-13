@@ -20,13 +20,13 @@ import cn.lili.modules.system.entity.dto.PointSetting;
 import cn.lili.modules.system.entity.dto.PointSettingItem;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.message.MessageSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +47,7 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
      * RocketMQ
      */
     @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    private LiliMessageTemplate liliMessageTemplate;
     /**
      * RocketMQ 配置
      */
@@ -101,7 +101,7 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
                 this.baseMapper.insert(memberSign);
                 //签到成功后发送消息赠送积分
                 String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_SING.name();
-                rocketMQTemplate.asyncSend(destination, memberSign, RocketmqSendCallbackBuilder.commonCallback());
+                liliMessageTemplate.asyncSend(destination, memberSign, MessageSendCallbackBuilder.commonCallback());
                 return true;
             } catch (Exception e) {
                 throw new ServiceException(ResultCode.MEMBER_SIGN_REPEAT);

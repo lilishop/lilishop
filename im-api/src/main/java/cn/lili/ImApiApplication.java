@@ -2,30 +2,41 @@ package cn.lili;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
-
 /**
- * @author liushuai
+ * IM / 客服 WebSocket 独立启动入口。
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "cn.lili")
+@EnableCaching
+@EnableAsync
 public class ImApiApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(ImApiApplication.class, args);
+    @Primary
+    @Bean
+    public TaskExecutor primaryTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(50);
+        executor.setQueueCapacity(50);
+        executor.setThreadNamePrefix("lili-im-async-");
+        executor.initialize();
+        return executor;
     }
 
-    /**
-     * 如果使用独立的servlet容器，
-     * 而不是直接使用springboot的内置容器，
-     * 就不要注入ServerEndpointExporter，
-     * 因为它将由容器自己提供和管理
-     *
-     * @return
-     */
     @Bean
     public ServerEndpointExporter serverEndpointExporter() {
         return new ServerEndpointExporter();
+    }
+
+    public static void main(String[] args) {
+        System.setProperty("es.set.netty.runtime.available.processors", "false");
+        SpringApplication.run(ImApiApplication.class, args);
     }
 }

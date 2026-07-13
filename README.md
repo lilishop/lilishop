@@ -1,34 +1,15 @@
 # Lilishop(PickMall) 开源商城系统
 
-[![GitHub Stars](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=github)](https://github.com/hongyehuicheng/lilishop)
+[![GitHub Stars](https://img.shields.io/github/stars/lilishop/lilishop.svg?style=social&logo=github)](https://github.com/lilishop/lilishop)
 [![Gitee Stars](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](./LICENSE)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
+
 <p align="right">
   简体中文 | <a href="./README.en.md">English</a>
 </p>
 
-## All-In-One 一键启动
-
-如果只是想快速体验完整商城，不需要分别部署后端、PC、商家端、运营端、IM Web、H5、MySQL 和 Redis。安装 Docker Desktop 后，可以直接下载 `docker` 仓库 `allinone-lite-mysql-redis` 分支的一键安装脚本，按提示输入 IP/域名、端口、密码和数据目录，即可启动单镜像单容器体验环境。
-
-macOS / Linux:
-
-```bash
-curl -fsSL https://gitee.com/beijing_hongye_huicheng/docker/raw/allinone-lite-mysql-redis/install/install-lilishop.sh -o install-lilishop.sh
-chmod +x install-lilishop.sh
-./install-lilishop.sh
-```
-
-Windows PowerShell:
-
-```powershell
-Invoke-WebRequest -Uri "https://gitee.com/beijing_hongye_huicheng/docker/raw/allinone-lite-mysql-redis/install/install-lilishop.ps1" -OutFile "install-lilishop.ps1"
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\install-lilishop.ps1
-```
-
-默认镜像：`ccr.ccs.tencentyun.com/lilishop/lilishop-all-in-one:lite`。启动后可访问买家 PC、商家端、运营端、IM Web 会话/消息页、uniapp H5 和后端 API。更多说明见 [docker/all-in-one 文档](https://gitee.com/beijing_hongye_huicheng/docker/tree/allinone-lite-mysql-redis/all-in-one)。
-
-All-In-One `lite` 是本地体验和演示形态：一个容器内包含应用、前端资源、H5、MariaDB、Redis 和本地文件存储。它不是生产高可用架构，也不内置 Elasticsearch、RocketMQ、XXL-Job、Kibana、Logstash 或 RocketMQ Dashboard；搜索、消息和定时任务逻辑在 lite 环境中使用 MySQL / Redis / 本地调度兼容实现。
 
 LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开源商城系统，支持 B2B2C 多商户商城、小程序商城、微服务商城、直播电商、分销返佣、秒杀活动、Docker 私有化部署。
 
@@ -103,7 +84,7 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 [**部署文档 -> 环境准备**](https://docs.pickmall.cn/deply/deply.html)
 
 #### 数据库初始化
--   **推荐方式**: 使用项目提供的 `docker-compose` 配置，可自动完成数据库（MySQL, Redis, Elasticsearch等）的部署与初始化。
+-   **推荐方式**: 使用项目提供的 `docker-compose` 配置，可自动完成数据库（MySQL、Redis 等）的部署与初始化。
 -   **手动方式**: 如果您选择手动部署，SQL脚本位于以下地址。请确保获取与您代码版本一致的SQL文件。
     [**数据库脚本 (Gitee)**](https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql)
 
@@ -119,29 +100,6 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 - PC / 商家端 / 运营端 / IM Web：`lilishop-ui`
 - H5 / 小程序 / APP：`lilishop-uniapp`
 - 部署、SQL、镜像与启动脚本：`docker`
-
-All-In-One 仅用于本地体验、演示或验证，不代表生产高可用部署架构。生产部署应按实际访问量、稳定性、监控、备份和扩缩容要求拆分数据库、缓存、搜索、消息、任务调度、前端静态资源和后端服务。
-
-#### Elasticsearch 搜索回归（Spring Boot 4 升级后）
-
-集群为 **Elasticsearch 7.x** 时，请配置 REST API 兼容版本（默认 `7`）：
-
-```yaml
-lili:
-  data:
-    elasticsearch:
-      compatibility-version: 7
-```
-
-在 manager-api 模块执行搜索集成测试（需 Redis、MySQL、ES 均可访问，且已有商品索引）：
-
-```powershell
-$env:JAVA_HOME="C:\Program Files\Java\jdk-21.0.3"
-$env:LILISHOP_ES_REGRESSION="true"
-mvn test -pl manager-api "-Drevision=4.3" "-DskipTests=false" "-Dtest=EsSearchCompatibilityTest" "-Dsurefire.failIfNoSpecifiedTests=false"
-```
-
-覆盖场景：集群连通、商品分页搜索、筛选聚合、按 ID 查询。
 
 ---
 
@@ -166,8 +124,7 @@ mvn test -pl manager-api "-Drevision=4.3" "-DskipTests=false" "-Dtest=EsSearchCo
 我们欢迎任何形式的交流与贡献。在提问前，请先查阅 [官方文档](https://docs.pickmall.cn/) ，并参考 [《提问的智慧》](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md) 以便高效沟通。
 
 -   **[在线客服](https://work.weixin.qq.com/kfid/kfc4d8dc24a73c15f44)**
--   **微信交流1群（已满）**
--   **微信交流2群**:
+-   **微信交流群**:
     ![微信群](https://lilishop-wechat.oss-cn-beijing.aliyuncs.com/wechat.jpg)
 
 ---

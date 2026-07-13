@@ -1,4 +1,4 @@
-spring:
+﻿spring:
   data:
     redis:
       host: 127.0.0.1
@@ -10,10 +10,5 @@ spring:
     password: lilishop
 lili:
   data:
-    elasticsearch:
-      cluster-nodes: 127.0.0.1:9200
-      schema: http
     logstash:
       server: 127.0.0.1:4560
-rocketmq:
-  name-server: 127.0.0.1:9876

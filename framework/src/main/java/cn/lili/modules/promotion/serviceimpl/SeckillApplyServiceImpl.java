@@ -210,7 +210,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         seckillService.updateSeckillGoodsNum(seckillId);
         cache.vagueDel(CachePrefix.STORE_ID_SECKILL);
         if (result) {
-            this.seckillService.updateEsGoodsSeckill(seckill, originList);
+            this.seckillService.syncSeckillScope(seckill, originList);
         }
     }
 
@@ -239,7 +239,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
                 .eq(SeckillApply::getSeckillId, seckillId)
                 .in(SeckillApply::getId, id));
 
-        this.seckillService.deleteEsGoodsSeckill(seckill, Collections.singletonList(seckillApply.getSkuId()));
+        this.seckillService.removeSeckillSku(seckill, Collections.singletonList(seckillApply.getSkuId()));
         //删除促销商品
         this.promotionGoodsService.deletePromotionGoods(seckillId, Collections.singletonList(seckillApply.getSkuId()));
     }
@@ -291,7 +291,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
             //初始化促销商品
             List<PromotionGoods> promotionGoods = PromotionTools.promotionGoodsInit(promotionGoodsList, seckill, PromotionTypeEnum.SECKILL);
             result = promotionGoodsService.saveBatch(promotionGoods);
-            this.seckillService.updateEsGoodsSeckill(seckill, list);
+            this.seckillService.syncSeckillScope(seckill, list);
 
             LambdaQueryWrapper<SeckillApply> deleteWrapper = new LambdaQueryWrapper<>();
             deleteWrapper.eq(SeckillApply::getSeckillId, seckill.getId());

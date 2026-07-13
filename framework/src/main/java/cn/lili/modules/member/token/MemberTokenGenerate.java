@@ -9,9 +9,9 @@ import cn.lili.common.security.token.Token;
 import cn.lili.common.security.token.TokenUtil;
 import cn.lili.common.security.token.base.AbstractTokenGenerate;
 import cn.lili.modules.member.entity.dos.Member;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.message.MessageSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +32,7 @@ public class MemberTokenGenerate extends AbstractTokenGenerate<Member> {
     private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    private LiliMessageTemplate liliMessageTemplate;
 
     @Override
     public Token createToken(Member member, Boolean longTerm) {
@@ -54,9 +54,9 @@ public class MemberTokenGenerate extends AbstractTokenGenerate<Member> {
         //记录最后登录时间，客户端类型
         member.setLastLoginDate(new Date());
         member.setClientEnum(clientTypeEnum.name());
-        if (rocketMQTemplate != null) {
+        if (liliMessageTemplate != null) {
             String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_LOGIN.name();
-            rocketMQTemplate.asyncSend(destination, member, RocketmqSendCallbackBuilder.commonCallback());
+            liliMessageTemplate.asyncSend(destination, member, MessageSendCallbackBuilder.commonCallback());
         }
 
         AuthUser authUser = AuthUser.builder()

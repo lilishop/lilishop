@@ -5,7 +5,7 @@
 微信小程序配置需额外配置：前往微信平台，登陆自己的小程序
 https://mp.weixin.qq.com/ 
 
-配置内容：  开发  ->  开发设置  ->  服务器域名  ->  socket合法域名  ->  添加 https://im-api.pickmall.cn(参考)
+配置内容：开发 -> 开发设置 -> 服务器域名 -> socket 合法域名，添加 All-In-One 对外统一域名，例如 `https://shop.example.com`。
 
 ##### https NGINX配置参考
 
@@ -19,7 +19,7 @@ ssl_session_timeout  10m;
 ssl_ciphers HIGH:!aNULL:!MD5;
 ssl_prefer_server_ciphers on;
 include /etc/nginx/default.d/*.conf;
-server_name  im-api.pickmall.cn;
+server_name  shop.example.com;
 
 location / {
            proxy_http_version 1.1;
@@ -27,7 +27,7 @@ location / {
            proxy_set_header Connection "Upgrade";
            proxy_set_header X-real-ip $remote_addr;
            proxy_set_header X-Forwarded-For $remote_addr;
-           proxy_pass http://127.0.0.1:8885;
+           proxy_pass http://127.0.0.1:8080/lili/webSocket;
      }
 }
 ```
@@ -42,7 +42,7 @@ ssl_session_timeout  10m;
 ssl_ciphers HIGH:!aNULL:!MD5;
 ssl_prefer_server_ciphers on;
 include /etc/nginx/default.d/*.conf;
-server_name  im-api.pickmall.cn;
+server_name  shop.example.com;
 
 location / {
            proxy_http_version 1.1;
@@ -50,7 +50,7 @@ location / {
            proxy_set_header Connection "Upgrade";
            proxy_set_header X-real-ip $remote_addr;
            proxy_set_header X-Forwarded-For $remote_addr;
-           proxy_pass http://127.0.0.1:8885;
+           proxy_pass http://127.0.0.1:8080/lili/webSocket;
      }
 }
 ```

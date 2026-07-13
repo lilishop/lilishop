@@ -40,7 +40,7 @@ import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.enums.StoreStatusEnum;
 import cn.lili.modules.store.service.StoreService;
 import cn.lili.mybatis.util.PageUtil;
-import cn.lili.rocketmq.RocketmqSendCallbackBuilder;
+import cn.lili.message.MessageSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -49,7 +49,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import cn.lili.message.LiliMessageTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
@@ -102,7 +102,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Autowired
-    private RocketMQTemplate rocketMQTemplate;
+    private LiliMessageTemplate liliMessageTemplate;
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
@@ -339,7 +339,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         this.updateById(member);
         String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_INFO_EDIT.name();
         //发送订单变更mq消息
-        rocketMQTemplate.asyncSend(destination, member, RocketmqSendCallbackBuilder.commonCallback());
+        liliMessageTemplate.asyncSend(destination, member, MessageSendCallbackBuilder.commonCallback());
         return member;
     }
 

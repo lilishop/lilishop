@@ -14,6 +14,7 @@ logs/
 *.factorypath
 lili-shop/src/main/java/cn/lili/generator/CodeGenerator.java
 lili-logs
+/data/
 
 
 ### STS ###
@@ -39,3 +40,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Cursor ###
+.cursor/
+
+### Local / generated ###
+META-INF/
+deploy-api.yml
+docker-image.sh

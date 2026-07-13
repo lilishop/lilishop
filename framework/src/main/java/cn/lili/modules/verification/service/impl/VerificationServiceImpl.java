@@ -174,6 +174,11 @@ public class VerificationServiceImpl implements VerificationService {
      */
     @Override
     public boolean check(String uuid, VerificationEnums verificationEnums) {
+        // 本地 all-in-one 验收环境可通过配置跳过登录滑块，普通部署默认关闭。
+        if (VerificationEnums.LOGIN.equals(verificationEnums)
+                && Boolean.TRUE.equals(verificationCodeProperties.getLoginBypassEnabled())) {
+            return true;
+        }
         //如果有校验标记，则返回校验结果
         if (Boolean.TRUE.equals(cache.remove(cacheResult(verificationEnums, uuid)))) {
             return true;
@@ -246,4 +251,3 @@ public class VerificationServiceImpl implements VerificationService {
     }
 
 }
-

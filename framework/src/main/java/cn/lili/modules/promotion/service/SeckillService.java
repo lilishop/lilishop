@@ -52,7 +52,7 @@ public interface SeckillService extends AbstractPromotionsService<Seckill> {
      * @param seckill        限时抢购信息
      * @param seckillApplies 限时抢购商品列表
      */
-    void updateEsGoodsSeckill(Seckill seckill, List<SeckillApply> seckillApplies);
+    void syncSeckillScope(Seckill seckill, List<SeckillApply> seckillApplies);
 
     /**
      * 删除商品索引限时抢购信息
@@ -60,7 +60,7 @@ public interface SeckillService extends AbstractPromotionsService<Seckill> {
      * @param seckill 限时抢购信息
      * @param skuIds  商品skuId列表
      */
-    void deleteEsGoodsSeckill(Seckill seckill, List<String> skuIds);
+    void removeSeckillSku(Seckill seckill, List<String> skuIds);
 
     /**
      * 设置秒杀活动的每个参与活动商品的详细时间

@@ -1,0 +1,29 @@
+package cn.lili.listener;
+
+import cn.hutool.json.JSONUtil;
+import cn.lili.message.QueueMessage;
+import cn.lili.modules.message.entity.dto.NoticeMessageDTO;
+import cn.lili.modules.message.service.NoticeMessageService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ * 站内信通知
+ *
+ * @author paulG
+ * @since 2020/12/9
+ */
+@Component
+public class NoticeMessageListener {
+
+    /**
+     * 站内信
+     */
+    @Autowired
+    private NoticeMessageService noticeMessageService;
+
+    public void onMessage(QueueMessage messageExt) {
+        NoticeMessageDTO noticeMessageDTO = JSONUtil.toBean(new String(messageExt.getBody()), NoticeMessageDTO.class);
+        noticeMessageService.noticeMessage(noticeMessageDTO);
+    }
+}
