@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
- * 概览数据
+ * 营业概况数据（含环比）
  *
  * @author Bulbasaur
  * @since 2025/08/25 7:07 下午
@@ -12,19 +12,25 @@ import lombok.Data;
 @Data
 public class OverViewDataVO {
 
+    @Schema(description = "营业收入=营业收入不含充值+新增充值金额")
+    private OverViewMetricVO income;
 
-    @Schema(description = "营业额")
-    private Double turnover;
+    @Schema(description = "营业额=营业收入不含充值+优惠金额")
+    private OverViewMetricVO turnover;
+
     @Schema(description = "优惠金额")
-    private Double discount;
-    @Schema(description = "营业收入不含数值储值金额")
-    private Double incomeNoStoreValue;
-    @Schema(description = "支付订单数")
-    private Long payOrderNum;
-    @Schema(description = "新增充值金额")
-    private Double recharge;
-    @Schema(description = "使用充值金额")
-    private Long rechargeUse;
+    private OverViewMetricVO discount;
 
+    @Schema(description = "营业收入不含充值金额")
+    private OverViewMetricVO incomeNoStoreValue;
+
+    @Schema(description = "支付订单数")
+    private OverViewMetricVO payOrderNum;
+
+    @Schema(description = "新增充值金额")
+    private OverViewMetricVO recharge;
+
+    @Schema(description = "使用储值本金")
+    private OverViewMetricVO rechargeUse;
 
 }

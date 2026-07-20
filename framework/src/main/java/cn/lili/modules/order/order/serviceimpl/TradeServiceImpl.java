@@ -208,7 +208,8 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
             }
             boolean result = memberService.updateMemberPoint(tradeDTO.getPriceDetailDTO().getPayPoint(), PointTypeEnum.REDUCE.name(),
                     tradeDTO.getMemberId(),
-                    "订单【" + orderSns + "】创建，积分扣减");
+                    "订单【" + orderSns + "】创建，积分扣减",
+                    cn.lili.modules.member.entity.enums.PointSourceEnum.ORDER_PAY.name());
             if (!result) {
                 throw new ServiceException(ResultCode.PAY_POINT_ENOUGH);
             }

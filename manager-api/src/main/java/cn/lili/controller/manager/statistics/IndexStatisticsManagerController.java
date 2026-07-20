@@ -6,6 +6,7 @@ import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.statistics.entity.dto.GoodsStatisticsQueryParam;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.enums.StatisticsQuery;
+import cn.lili.modules.statistics.entity.vo.DataTrendVO;
 import cn.lili.modules.statistics.entity.vo.GoodsStatisticsDataVO;
 import cn.lili.modules.statistics.entity.vo.IndexNoticeVO;
 import cn.lili.modules.statistics.entity.vo.IndexStatisticsVO;
@@ -76,5 +77,12 @@ public class IndexStatisticsManagerController {
     @GetMapping("/notice")
     public ResultMessage<IndexNoticeVO> notice() {
         return ResultUtil.data(indexStatisticsService.indexNotice());
+    }
+
+    @Operation(summary = "数据概况按日趋势")
+    @Parameter(name = "statisticsQueryParam", description = "统计查询参数", required = true)
+    @GetMapping("/trend")
+    public ResultMessage<List<DataTrendVO>> trend(StatisticsQueryParam statisticsQueryParam) {
+        return ResultUtil.data(indexStatisticsService.dataTrend(statisticsQueryParam));
     }
 }

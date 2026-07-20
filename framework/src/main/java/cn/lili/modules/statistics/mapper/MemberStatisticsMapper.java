@@ -34,4 +34,7 @@ public interface MemberStatisticsMapper extends BaseMapper<MemberStatisticsData>
      */
     @Select("select client_enum,count(0) as num from li_member group by client_enum")
     List<MemberDistributionVO> distribution();
+
+    @Select("SELECT DATE_FORMAT(create_time,'%Y-%m-%d') AS day, COUNT(0) AS num FROM li_member ${ew.customSqlSegment}")
+    List<java.util.Map<String, Object>> groupNewMemberByDay(@Param(Constants.WRAPPER) Wrapper queryWrapper);
 }

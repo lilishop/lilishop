@@ -7,6 +7,7 @@ import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.BusinessCompositionDataVO;
 import cn.lili.modules.statistics.entity.vo.OrderOverviewVO;
 import cn.lili.modules.statistics.entity.vo.OverViewDataVO;
+import cn.lili.modules.statistics.entity.vo.OverViewMetricVO;
 import cn.lili.modules.statistics.entity.vo.SourceDataVO;
 import cn.lili.modules.statistics.service.OrderStatisticsService;
 import cn.lili.modules.statistics.service.OverViewStatisticsService;
@@ -22,7 +23,6 @@ import java.util.List;
 /**
  * @author Bulbasaur
  * @since 2025/08/25 7:07 下午
- *
  */
 @Service
 public class OverViewStatisticsServiceImpl implements OverViewStatisticsService {
@@ -31,62 +31,97 @@ public class OverViewStatisticsServiceImpl implements OverViewStatisticsService 
     private RechargeService rechargeService;
     @Autowired
     private OrderStatisticsService orderStatisticsService;
+
     @Override
     public OverViewDataVO getOverViewDataVO(StatisticsQueryParam statisticsQueryParam) {
         Date[] dates = StatisticsDateUtil.getDateArray(statisticsQueryParam);
+        Date[] previousDates = StatisticsDateUtil.getPreviousDateArray(dates);
+
+        PeriodMetrics current = calcPeriodMetrics(dates);
+        PeriodMetrics previous = calcPeriodMetrics(previousDates);
 
         OverViewDataVO overViewDataVO = new OverViewDataVO();
-        //营业收入不含数值储值金额.订单扣除退款折扣后金额（不含储值充值）
-        overViewDataVO.setIncomeNoStoreValue(orderStatisticsService.getPayOrderPrice(dates,null,null));
-        //优惠金额.订单的优惠金额（扣除退款，不含储值充值）
-        overViewDataVO.setDiscount(orderStatisticsService.getDiscountPrice( dates));
-        //营业额.营业额=营业收入+优惠金额，订单扣除退款折扣前金额（不含储值充值）
-        overViewDataVO.setTurnover(CurrencyUtil.add(overViewDataVO.getIncomeNoStoreValue(), overViewDataVO.getDiscount()));
-        //支付订单数.按客户支付完成时间统计的成功付款的订单数（不含退款、储值充值）
-        overViewDataVO.setPayOrderNum(orderStatisticsService.getPayOrderNum(dates));
-        //新增充值金额.按客户支付完成时间统计的客户储值充值本金金额
-        overViewDataVO.setRecharge(rechargeService.getRecharge(dates,null));
-        //使用充值金额.使用储值支付本金金额：统计时间范围内，支付和退款成功的订单中，使用储值支付且扣除退款的金额
-        overViewDataVO.setRechargeUse(orderStatisticsService.orderNum(PaymentMethodEnum.WALLET.name(), dates));
-
+        overViewDataVO.setIncome(OverViewMetricVO.of(current.income, previous.income));
+        overViewDataVO.setTurnover(OverViewMetricVO.of(current.turnover, previous.turnover));
+        overViewDataVO.setDiscount(OverViewMetricVO.of(current.discount, previous.discount));
+        overViewDataVO.setIncomeNoStoreValue(OverViewMetricVO.of(current.incomeNoStoreValue, previous.incomeNoStoreValue));
+        overViewDataVO.setPayOrderNum(OverViewMetricVO.of(current.payOrderNum, previous.payOrderNum));
+        overViewDataVO.setRecharge(OverViewMetricVO.of(current.recharge, previous.recharge));
+        overViewDataVO.setRechargeUse(OverViewMetricVO.of(current.rechargeUse, previous.rechargeUse));
         return overViewDataVO;
+    }
+
+    /**
+     * 计算单个周期的营业概况指标
+     */
+    private PeriodMetrics calcPeriodMetrics(Date[] dates) {
+        PeriodMetrics metrics = new PeriodMetrics();
+        //营业收入不含充值：订单扣除退款折扣后金额（不含储值充值）
+        metrics.incomeNoStoreValue = nullToZero(orderStatisticsService.getPayOrderPrice(dates, null, null));
+        //优惠金额
+        metrics.discount = nullToZero(orderStatisticsService.getDiscountPrice(dates));
+        //营业额 = 营业收入不含充值 + 优惠金额
+        metrics.turnover = CurrencyUtil.add(metrics.incomeNoStoreValue, metrics.discount);
+        //支付订单数
+        metrics.payOrderNum = orderStatisticsService.getPayOrderNum(dates);
+        //新增充值金额
+        metrics.recharge = nullToZero(rechargeService.getRecharge(dates, null));
+        //营业收入 = 营业收入不含充值 + 新增充值
+        metrics.income = CurrencyUtil.add(metrics.incomeNoStoreValue, metrics.recharge);
+        //使用储值本金：余额支付且扣除退款
+        metrics.rechargeUse = nullToZero(orderStatisticsService.getPayOrderPrice(dates, PaymentMethodEnum.WALLET, null));
+        return metrics;
+    }
+
+    private Double nullToZero(Double value) {
+        return value == null ? 0D : value;
+    }
+
+    private static class PeriodMetrics {
+        Double income;
+        Double turnover;
+        Double discount;
+        Double incomeNoStoreValue;
+        Long payOrderNum;
+        Double recharge;
+        Double rechargeUse;
     }
 
     @Override
     public List<SourceDataVO> getSourceDataVOList(StatisticsQueryParam statisticsQueryParam) {
         Date[] dates = StatisticsDateUtil.getDateArray(statisticsQueryParam);
-        List<SourceDataVO> sourceDataVOList=new ArrayList<>();
+        List<SourceDataVO> sourceDataVOList = new ArrayList<>();
         //微信
-        SourceDataVO sourceDataVO=new SourceDataVO();
+        SourceDataVO sourceDataVO = new SourceDataVO();
         sourceDataVO.setPayType(PaymentMethodEnum.WECHAT.paymentName());
 
-        sourceDataVO.setIncome(orderStatisticsService.getPayOrderPrice(dates,PaymentMethodEnum.WECHAT,null));
-        sourceDataVO.setRecharge(rechargeService.getRecharge(dates,PaymentMethodEnum.WECHAT));
-        sourceDataVO.setTotal(CurrencyUtil.add(sourceDataVO.getIncome(),sourceDataVO.getRecharge()));
+        sourceDataVO.setIncome(orderStatisticsService.getPayOrderPrice(dates, PaymentMethodEnum.WECHAT, null));
+        sourceDataVO.setRecharge(rechargeService.getRecharge(dates, PaymentMethodEnum.WECHAT));
+        sourceDataVO.setTotal(CurrencyUtil.add(sourceDataVO.getIncome(), sourceDataVO.getRecharge()));
         sourceDataVOList.add(sourceDataVO);
 
         //支付宝
-        SourceDataVO zhifubao=new SourceDataVO();
+        SourceDataVO zhifubao = new SourceDataVO();
         zhifubao.setPayType(PaymentMethodEnum.ALIPAY.paymentName());
-        zhifubao.setIncome(orderStatisticsService.getPayOrderPrice(dates,PaymentMethodEnum.ALIPAY,null));
-        zhifubao.setRecharge(rechargeService.getRecharge(dates,PaymentMethodEnum.ALIPAY));
-        zhifubao.setTotal(CurrencyUtil.add(zhifubao.getIncome(),zhifubao.getRecharge()));
+        zhifubao.setIncome(orderStatisticsService.getPayOrderPrice(dates, PaymentMethodEnum.ALIPAY, null));
+        zhifubao.setRecharge(rechargeService.getRecharge(dates, PaymentMethodEnum.ALIPAY));
+        zhifubao.setTotal(CurrencyUtil.add(zhifubao.getIncome(), zhifubao.getRecharge()));
         sourceDataVOList.add(zhifubao);
 
         //线下支付
-        SourceDataVO bankTransfer=new SourceDataVO();
+        SourceDataVO bankTransfer = new SourceDataVO();
         bankTransfer.setPayType(PaymentMethodEnum.BANK_TRANSFER.paymentName());
-        bankTransfer.setIncome(orderStatisticsService.getPayOrderPrice(dates,PaymentMethodEnum.BANK_TRANSFER,null));
-        bankTransfer.setRecharge(rechargeService.getRecharge(dates,PaymentMethodEnum.BANK_TRANSFER));
-        bankTransfer.setTotal(CurrencyUtil.add(bankTransfer.getIncome(),bankTransfer.getRecharge()));
+        bankTransfer.setIncome(orderStatisticsService.getPayOrderPrice(dates, PaymentMethodEnum.BANK_TRANSFER, null));
+        bankTransfer.setRecharge(rechargeService.getRecharge(dates, PaymentMethodEnum.BANK_TRANSFER));
+        bankTransfer.setTotal(CurrencyUtil.add(bankTransfer.getIncome(), bankTransfer.getRecharge()));
         sourceDataVOList.add(bankTransfer);
 
         //余额
-        SourceDataVO wallet=new SourceDataVO();
+        SourceDataVO wallet = new SourceDataVO();
         wallet.setPayType(PaymentMethodEnum.WALLET.paymentName());
-        wallet.setIncome(orderStatisticsService.getPayOrderPrice(dates,PaymentMethodEnum.WALLET,null));
-        wallet.setRecharge(rechargeService.getRecharge(dates,PaymentMethodEnum.WALLET));
-        wallet.setTotal(CurrencyUtil.add(wallet.getIncome(),wallet.getRecharge()));
+        wallet.setIncome(orderStatisticsService.getPayOrderPrice(dates, PaymentMethodEnum.WALLET, null));
+        wallet.setRecharge(rechargeService.getRecharge(dates, PaymentMethodEnum.WALLET));
+        wallet.setTotal(CurrencyUtil.add(wallet.getIncome(), wallet.getRecharge()));
         sourceDataVOList.add(wallet);
         return sourceDataVOList;
     }
@@ -94,12 +129,12 @@ public class OverViewStatisticsServiceImpl implements OverViewStatisticsService 
     @Override
     public BusinessCompositionDataVO businessCompositionDataVO(StatisticsQueryParam statisticsQueryParam) {
         Date[] dates = StatisticsDateUtil.getDateArray(statisticsQueryParam);
-        BusinessCompositionDataVO businessCompositionDataVO=new BusinessCompositionDataVO();
+        BusinessCompositionDataVO businessCompositionDataVO = new BusinessCompositionDataVO();
         //-----订单分类构成-----
 
-        businessCompositionDataVO.setStoreSelf(orderStatisticsService.getPayOrderPrice(dates,null, DeliveryMethodEnum.SELF_PICK_UP));
-        businessCompositionDataVO.setExpress(orderStatisticsService.getPayOrderPrice(dates,null, DeliveryMethodEnum.LOGISTICS));
-        businessCompositionDataVO.setOnline(orderStatisticsService.getPayOrderPrice(dates,null, DeliveryMethodEnum.VIRTUAL));
+        businessCompositionDataVO.setStoreSelf(orderStatisticsService.getPayOrderPrice(dates, null, DeliveryMethodEnum.SELF_PICK_UP));
+        businessCompositionDataVO.setExpress(orderStatisticsService.getPayOrderPrice(dates, null, DeliveryMethodEnum.LOGISTICS));
+        businessCompositionDataVO.setOnline(orderStatisticsService.getPayOrderPrice(dates, null, DeliveryMethodEnum.VIRTUAL));
 
         //-----营业收入-----
         //商品销售
@@ -111,7 +146,7 @@ public class OverViewStatisticsServiceImpl implements OverViewStatisticsService 
         //商品销售+费用构成
         businessCompositionDataVO.setIncomeComposition(
                 CurrencyUtil.sub(CurrencyUtil.add(businessCompositionDataVO.getIncome(), businessCompositionDataVO.getFreight()),
-                businessCompositionDataVO.getIncomeBack()));
+                        businessCompositionDataVO.getIncomeBack()));
 
         //-----退款统计-----
         //退款订单笔数
@@ -123,14 +158,14 @@ public class OverViewStatisticsServiceImpl implements OverViewStatisticsService 
 
         //-----消费指标-----
         //支付金额
-        OrderOverviewVO overview=orderStatisticsService.overview(statisticsQueryParam);
+        OrderOverviewVO overview = orderStatisticsService.overview(statisticsQueryParam);
         businessCompositionDataVO.setPay(overview.getPaymentAmount());
         //折后笔单价
-        businessCompositionDataVO.setPrice(CurrencyUtil.div(overview.getPaymentAmount(),overview.getPaymentOrderNum()));
+        businessCompositionDataVO.setPrice(CurrencyUtil.div(overview.getPaymentAmount(), overview.getPaymentOrderNum()));
         //支付人数
         businessCompositionDataVO.setPayNum(overview.getPaymentsNum());
         //折后客单价
-        businessCompositionDataVO.setPriceNum(CurrencyUtil.div(overview.getPaymentAmount(),overview.getPaymentsNum()));
+        businessCompositionDataVO.setPriceNum(CurrencyUtil.div(overview.getPaymentAmount(), overview.getPaymentsNum()));
 
         return businessCompositionDataVO;
     }

@@ -20,6 +20,7 @@ import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.OrderOverviewVO;
 import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
+import cn.lili.modules.statistics.entity.vo.TradeTrendVO;
 import cn.lili.modules.statistics.mapper.OrderStatisticsMapper;
 import cn.lili.modules.statistics.service.OrderStatisticsService;
 import cn.lili.modules.statistics.service.PlatformViewService;
@@ -377,6 +378,88 @@ public class OrderStatisticsServiceImpl extends ServiceImpl<OrderStatisticsMappe
         queryWrapper.eq("flow_type", FlowTypeEnum.PAY.name());
 
         return queryWrapper;
+    }
+
+    @Override
+    public List<TradeTrendVO> tradeTrend(StatisticsQueryParam statisticsQueryParam) {
+        Date[] dates = StatisticsDateUtil.getDateArray(statisticsQueryParam);
+
+        QueryWrapper orderQw = Wrappers.query();
+        orderQw.between("create_time", dates[0], dates[1]);
+        orderQw.eq(StringUtils.isNotEmpty(statisticsQueryParam.getStoreId()), "store_id", statisticsQueryParam.getStoreId());
+        orderQw.groupBy("DATE_FORMAT(create_time,'%Y-%m-%d')");
+        List<Map<String, Object>> orderGroup = this.baseMapper.groupOrderByDay(orderQw);
+
+        QueryWrapper payQw = Wrappers.query();
+        payQw.between("payment_time", dates[0], dates[1]);
+        payQw.eq("pay_status", PayStatusEnum.PAID.name());
+        payQw.eq(StringUtils.isNotEmpty(statisticsQueryParam.getStoreId()), "store_id", statisticsQueryParam.getStoreId());
+        payQw.groupBy("DATE_FORMAT(payment_time,'%Y-%m-%d')");
+        List<Map<String, Object>> payGroup = this.baseMapper.groupPaymentByDay(payQw);
+
+        QueryWrapper refundQw = Wrappers.query();
+        refundQw.eq("service_status", "COMPLETE");
+        refundQw.apply("IFNULL(refund_time, update_time) BETWEEN {0} AND {1}", dates[0], dates[1]);
+        refundQw.eq(StringUtils.isNotEmpty(statisticsQueryParam.getStoreId()), "store_id", statisticsQueryParam.getStoreId());
+        refundQw.groupBy("DATE_FORMAT(IFNULL(refund_time, update_time),'%Y-%m-%d')");
+        List<Map<String, Object>> refundGroup = this.baseMapper.groupRefundByDay(refundQw);
+
+        Map<String, TradeTrendVO> dayMap = new LinkedHashMap<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(dates[0]);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        while (!calendar.getTime().after(dates[1])) {
+            String key = cn.hutool.core.date.DateUtil.formatDate(calendar.getTime());
+            TradeTrendVO vo = new TradeTrendVO();
+            vo.setDate(calendar.getTime());
+            dayMap.put(key, vo);
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        fillTradeTrend(dayMap, orderGroup, true, false);
+        fillTradeTrend(dayMap, payGroup, false, true);
+        fillTradeRefund(dayMap, refundGroup);
+        return new ArrayList<>(dayMap.values());
+    }
+
+    private void fillTradeTrend(Map<String, TradeTrendVO> dayMap, List<Map<String, Object>> rows, boolean order, boolean pay) {
+        if (rows == null) {
+            return;
+        }
+        for (Map<String, Object> row : rows) {
+            String day = String.valueOf(row.get("create_time"));
+            TradeTrendVO vo = dayMap.get(day);
+            if (vo == null) {
+                continue;
+            }
+            Long num = row.get("order_num") == null ? 0L : Long.valueOf(row.get("order_num").toString());
+            Double price = row.get("price") == null ? 0D : Double.valueOf(row.get("price").toString());
+            if (order) {
+                vo.setOrderNum(num);
+                vo.setOrderAmount(price);
+            }
+            if (pay) {
+                vo.setPaymentOrderNum(num);
+                vo.setPaymentAmount(price);
+            }
+        }
+    }
+
+    private void fillTradeRefund(Map<String, TradeTrendVO> dayMap, List<Map<String, Object>> rows) {
+        if (rows == null) {
+            return;
+        }
+        for (Map<String, Object> row : rows) {
+            String day = String.valueOf(row.get("create_time"));
+            TradeTrendVO vo = dayMap.get(day);
+            if (vo == null) {
+                continue;
+            }
+            vo.setRefundOrderNum(row.get("order_num") == null ? 0L : Long.valueOf(row.get("order_num").toString()));
+            vo.setRefundOrderPrice(row.get("price") == null ? 0D : Double.valueOf(row.get("price").toString()));
+        }
     }
 
 }

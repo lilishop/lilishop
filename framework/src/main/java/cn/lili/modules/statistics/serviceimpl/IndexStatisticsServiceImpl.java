@@ -14,6 +14,7 @@ import cn.lili.modules.statistics.entity.dto.GoodsStatisticsQueryParam;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.enums.SearchTypeEnum;
 import cn.lili.modules.statistics.entity.vo.*;
+import cn.lili.modules.statistics.mapper.MemberStatisticsMapper;
 import cn.lili.modules.statistics.service.*;
 import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import cn.lili.modules.store.entity.enums.BillStatusEnum;
@@ -47,6 +48,11 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
      */
     @Autowired
     private MemberStatisticsService memberStatisticsService;
+    /**
+     * 客户统计 Mapper
+     */
+    @Autowired
+    private MemberStatisticsMapper memberStatisticsMapper;
     /**
      * 商品统计
      */
@@ -249,6 +255,39 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         Page page = new Page<StoreStatisticsDataVO>(1, 10);
 
         return storeFlowStatisticsService.getStoreStatisticsData(page, queryWrapper);
+    }
+
+    @Override
+    public List<DataTrendVO> dataTrend(StatisticsQueryParam statisticsQueryParam) {
+        List<TradeTrendVO> tradeTrends = orderStatisticsService.tradeTrend(statisticsQueryParam);
+        Date[] dates = StatisticsDateUtil.getDateArray(statisticsQueryParam);
+        QueryWrapper memberQw = Wrappers.query();
+        memberQw.between("create_time", dates[0], dates[1]);
+        memberQw.eq("disabled", true);
+        memberQw.groupBy("DATE_FORMAT(create_time,'%Y-%m-%d')");
+        List<Map<String, Object>> memberGroup = memberStatisticsMapper.groupNewMemberByDay(memberQw);
+        Map<String, Long> memberMap = new java.util.HashMap<>();
+        if (memberGroup != null) {
+            for (Map<String, Object> row : memberGroup) {
+                if (row.get("day") != null) {
+                    memberMap.put(row.get("day").toString(),
+                            row.get("num") == null ? 0L : Long.parseLong(row.get("num").toString()));
+                }
+            }
+        }
+        List<DataTrendVO> result = new java.util.ArrayList<>();
+        if (tradeTrends != null) {
+            for (TradeTrendVO trade : tradeTrends) {
+                DataTrendVO vo = new DataTrendVO();
+                vo.setDate(trade.getDate());
+                vo.setTurnover(trade.getPaymentAmount());
+                vo.setOrderNum(trade.getPaymentOrderNum());
+                String key = cn.hutool.core.date.DateUtil.formatDate(trade.getDate());
+                vo.setMemberNum(memberMap.getOrDefault(key, 0L));
+                result.add(vo);
+            }
+        }
+        return result;
     }
 
 

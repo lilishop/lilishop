@@ -145,7 +145,8 @@ public class MemberSignServiceImpl extends ServiceImpl<MemberSignMapper, MemberS
                     content = "客户签到第" + day + "天，赠送积分" + point + "分";
                 }
                 //赠送客户积分
-                memberService.updateMemberPoint(point, PointTypeEnum.INCREASE.name(), memberId, content);
+                memberService.updateMemberPoint(point, PointTypeEnum.INCREASE.name(), memberId, content,
+                        cn.lili.modules.member.entity.enums.PointSourceEnum.SIGN.name());
             }
             String signBizId = DateUtil.toString(new Date(), DateUtil.STANDARD_DATE_NO_UNDERLINE_FORMAT);
             memberExperienceService.grantExperience(memberId, ExperienceRuleEnum.SIGN_IN, signBizId, "客户签到赠送经验值");

@@ -542,9 +542,15 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @Override
-    @PointLogPoint
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateMemberPoint(Long point, String type, String memberId, String content) {
+        return updateMemberPoint(point, type, memberId, content, cn.lili.modules.member.entity.enums.PointSourceEnum.UNKNOWN.name());
+    }
+
+    @Override
+    @PointLogPoint
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateMemberPoint(Long point, String type, String memberId, String content, String pointSource) {
         //获取当前客户信息
         Member member = this.getById(memberId);
         if (member != null) {

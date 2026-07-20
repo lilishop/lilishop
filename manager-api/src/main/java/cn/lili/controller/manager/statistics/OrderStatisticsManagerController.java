@@ -8,6 +8,7 @@ import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.OrderOverviewVO;
 import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
+import cn.lili.modules.statistics.entity.vo.TradeTrendVO;
 import cn.lili.modules.statistics.service.AfterSaleStatisticsService;
 import cn.lili.modules.statistics.service.OrderStatisticsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -83,5 +84,12 @@ public class OrderStatisticsManagerController {
     @GetMapping("/refund")
     public ResultMessage<IPage<AfterSale>> refund(StatisticsQueryParam statisticsQueryParam, PageVO pageVO) {
         return ResultUtil.data(afterSaleStatisticsService.getStatistics(statisticsQueryParam, pageVO));
+    }
+
+    @Operation(summary = "交易趋势按日")
+    @Parameter(name = "statisticsQueryParam", description = "统计查询参数", required = true)
+    @GetMapping("/tradeTrend")
+    public ResultMessage<List<TradeTrendVO>> tradeTrend(StatisticsQueryParam statisticsQueryParam) {
+        return ResultUtil.data(orderStatisticsService.tradeTrend(statisticsQueryParam));
     }
 }

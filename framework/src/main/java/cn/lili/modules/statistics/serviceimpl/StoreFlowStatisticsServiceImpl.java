@@ -4,6 +4,8 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.StringUtils;
+import cn.lili.modules.goods.entity.dos.Category;
+import cn.lili.modules.goods.service.CategoryService;
 import cn.lili.modules.order.order.entity.dos.StoreFlow;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
 import cn.lili.modules.statistics.entity.dto.GoodsStatisticsQueryParam;
@@ -26,8 +28,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 商品统计业务层实现
@@ -42,6 +47,8 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
     @Lazy
     @Autowired
     private OrderStatisticsService orderStatisticsService;
+    @Autowired
+    private CategoryService categoryService;
 
     @Override
     public List<GoodsStatisticsDataVO> getGoodsStatisticsData(GoodsStatisticsQueryParam goodsStatisticsQueryParam, Integer num) {
@@ -63,7 +70,37 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
         QueryWrapper queryWrapper = getQueryWrapper(goodsStatisticsQueryParam);
         //根据分类分组
         queryWrapper.groupBy("category_id");
-        return this.baseMapper.getCateGoryStatisticsData(queryWrapper);
+        queryWrapper.eq(StringUtils.isNotEmpty(goodsStatisticsQueryParam.getStoreId()), "store_id", goodsStatisticsQueryParam.getStoreId());
+        List<CategoryStatisticsDataVO> list = this.baseMapper.getCateGoryStatisticsData(queryWrapper);
+        fillCategoryName(list);
+        return list;
+    }
+
+    private void fillCategoryName(List<CategoryStatisticsDataVO> list) {
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        List<String> ids = list.stream()
+                .map(CategoryStatisticsDataVO::getCategoryId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        if (ids.isEmpty()) {
+            return;
+        }
+        Map<String, String> nameMap = new HashMap<>();
+        List<Category> categories = categoryService.listByIds(ids);
+        if (categories != null) {
+            for (Category category : categories) {
+                nameMap.put(String.valueOf(category.getId()), category.getName());
+            }
+        }
+        for (CategoryStatisticsDataVO vo : list) {
+            if (vo.getCategoryId() == null) {
+                continue;
+            }
+            vo.setCategoryName(nameMap.getOrDefault(vo.getCategoryId(), vo.getCategoryId()));
+        }
     }
 
     @Override
@@ -208,7 +245,7 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
         queryWrapper.between("create_time", date[0], date[1]);
 
         //判断是按照数量统计还是按照金额统计
-        if (goodsStatisticsQueryParam.getType().equals(StatisticsQuery.PRICE.name())) {
+        if (StatisticsQuery.PRICE.name().equals(goodsStatisticsQueryParam.getType())) {
             queryWrapper.orderByDesc("price");
         } else {
             queryWrapper.orderByDesc("num");

@@ -108,7 +108,8 @@ public class MemberManagerController {
         }else{
             content="运营后台手动减少积分:"+point;
         }
-        if(memberService.updateMemberPoint(point, type, memberId, content)){
+        if(memberService.updateMemberPoint(point, type, memberId, content,
+                cn.lili.modules.member.entity.enums.PointSourceEnum.ADMIN.name())){
             return ResultUtil.success();
         }
         return ResultUtil.error();

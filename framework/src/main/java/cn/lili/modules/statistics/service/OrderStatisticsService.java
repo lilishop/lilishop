@@ -8,6 +8,7 @@ import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.vo.OrderOverviewVO;
 import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
+import cn.lili.modules.statistics.entity.vo.TradeTrendVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -130,4 +131,12 @@ public interface OrderStatisticsService extends IService<Order> {
      * @return
      */
     Double getRefundRate(Date[] dates);
+
+    /**
+     * 交易趋势按日
+     *
+     * @param statisticsQueryParam 查询参数
+     * @return 按日趋势
+     */
+    List<TradeTrendVO> tradeTrend(StatisticsQueryParam statisticsQueryParam);
 }

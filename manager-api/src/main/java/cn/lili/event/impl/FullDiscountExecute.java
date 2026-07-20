@@ -122,7 +122,8 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
         try {
             if (cartVO.getGiftPoint() != null && cartVO.getGiftPoint() > 0) {
                 memberService.updateMemberPoint(cartVO.getGiftPoint().longValue(), PointTypeEnum.INCREASE.name(),
-                        order.getMemberId(), "订单满优惠赠送积分" + cartVO.getGiftPoint());
+                        order.getMemberId(), "订单满优惠赠送积分" + cartVO.getGiftPoint(),
+                        cn.lili.modules.member.entity.enums.PointSourceEnum.FULL_DISCOUNT.name());
             }
         } catch (Exception e) {
             log.error("订单赠送积分异常", e);

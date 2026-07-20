@@ -3,6 +3,7 @@ package cn.lili.modules.statistics.mapper;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
+import cn.lili.modules.statistics.entity.vo.GoodsRankVO;
 import cn.lili.modules.statistics.entity.vo.OrderStatisticsDataVO;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -12,6 +13,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 订单统计数据处理层
@@ -81,4 +83,36 @@ public interface OrderStatisticsMapper extends BaseMapper<Order> {
     
     @Select("SELECT COALESCE(SUM( oi.refund_price ), 0) FROM li_order_item oi INNER JOIN li_order o ON o.sn=oi.order_sn ${ew.customSqlSegment} ")
     Double getRefundPrice(@Param(Constants.WRAPPER) Wrapper<OrderItem> queryWrapper);
+
+    @Select("SELECT DATE_FORMAT(create_time,'%Y-%m-%d') AS create_time, COUNT(0) AS order_num, COALESCE(SUM(flow_price),0) AS price " +
+            "FROM li_order ${ew.customSqlSegment}")
+    List<Map<String, Object>> groupOrderByDay(@Param(Constants.WRAPPER) Wrapper queryWrapper);
+
+    @Select("SELECT DATE_FORMAT(payment_time,'%Y-%m-%d') AS create_time, COUNT(0) AS order_num, COALESCE(SUM(flow_price),0) AS price " +
+            "FROM li_order ${ew.customSqlSegment}")
+    List<Map<String, Object>> groupPaymentByDay(@Param(Constants.WRAPPER) Wrapper queryWrapper);
+
+    @Select("SELECT DATE_FORMAT(IFNULL(refund_time, update_time),'%Y-%m-%d') AS create_time, COUNT(0) AS order_num, COALESCE(SUM(actual_refund_price),0) AS price " +
+            "FROM li_after_sale ${ew.customSqlSegment}")
+    List<Map<String, Object>> groupRefundByDay(@Param(Constants.WRAPPER) Wrapper queryWrapper);
+
+    @Select("SELECT COALESCE(SUM(oi.flow_price),0) FROM li_order_item oi INNER JOIN li_order o ON o.sn=oi.order_sn ${ew.customSqlSegment}")
+    Double sumGoodsSalesAmount(@Param(Constants.WRAPPER) Wrapper queryWrapper);
+
+    @Select("SELECT COALESCE(SUM(oi.num),0) FROM li_order_item oi INNER JOIN li_order o ON o.sn=oi.order_sn ${ew.customSqlSegment}")
+    Long sumGoodsSalesNum(@Param(Constants.WRAPPER) Wrapper queryWrapper);
+
+    @Select("SELECT COALESCE(SUM(actual_refund_price),0) FROM li_after_sale ${ew.customSqlSegment}")
+    Double sumGoodsRefundAmount(@Param(Constants.WRAPPER) Wrapper queryWrapper);
+
+    @Select("SELECT COALESCE(SUM(num),0) FROM li_after_sale ${ew.customSqlSegment}")
+    Long sumGoodsRefundNum(@Param(Constants.WRAPPER) Wrapper queryWrapper);
+
+    @Select("SELECT oi.sku_id AS skuId, MAX(oi.goods_name) AS skuName, COALESCE(SUM(oi.flow_price),0) AS amount " +
+            "FROM li_order_item oi INNER JOIN li_order o ON o.sn=oi.order_sn ${ew.customSqlSegment}")
+    List<GoodsRankVO> rankSalesBySku(@Param(Constants.WRAPPER) Wrapper queryWrapper);
+
+    @Select("SELECT sku_id AS skuId, MAX(goods_name) AS skuName, COALESCE(SUM(actual_refund_price),0) AS amount " +
+            "FROM li_after_sale ${ew.customSqlSegment}")
+    List<GoodsRankVO> rankRefundBySku(@Param(Constants.WRAPPER) Wrapper queryWrapper);
 }

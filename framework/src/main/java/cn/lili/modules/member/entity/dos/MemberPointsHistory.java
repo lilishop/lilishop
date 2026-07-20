@@ -69,4 +69,10 @@ public class MemberPointsHistory extends BaseIdEntity {
     @Schema(description = "积分类型")
     private String pointType;
 
+    /**
+     * @see cn.lili.modules.member.entity.enums.PointSourceEnum
+     */
+    @Schema(description = "积分来源")
+    private String pointSource;
+
 }

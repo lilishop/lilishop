@@ -243,6 +243,18 @@ public interface MemberService extends IService<Member> {
      */
     Boolean updateMemberPoint(Long point, String type, String memberId, String content);
 
+    /**
+     * 客户积分变动（带来源）
+     *
+     * @param point       变动积分
+     * @param type        是否增加积分 INCREASE 增加  REDUCE 扣减
+     * @param memberId    客户id
+     * @param content     变动日志
+     * @param pointSource 积分来源 {@link cn.lili.modules.member.entity.enums.PointSourceEnum}
+     * @return 操作结果
+     */
+    Boolean updateMemberPoint(Long point, String type, String memberId, String content, String pointSource);
+
 
     /**
      * 修改客户状态

@@ -293,7 +293,8 @@ public class MemberBenefitServiceImpl extends ServiceImpl<MemberBenefitMapper, M
             Integer gp = this.parseGiftPointFromConfig(benefit.getBenefitConfig());
             if (gp != null && gp > 0) {
                 this.memberService.updateMemberPoint(gp.longValue(), PointTypeEnum.INCREASE.name(), member.getId(),
-                        "等级权益「" + benefit.getBenefitName() + "」赠送积分");
+                        "等级权益「" + benefit.getBenefitName() + "」赠送积分",
+                        cn.lili.modules.member.entity.enums.PointSourceEnum.BENEFIT.name());
             }
             return;
         }

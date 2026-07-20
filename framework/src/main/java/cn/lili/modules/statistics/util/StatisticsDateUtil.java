@@ -10,7 +10,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * 统计缓存后缀工具
+ * 统计日期工具
  *
  * @author Chopper
  * @since 2021-01-15 15:30
@@ -71,7 +71,7 @@ public class StatisticsDateUtil {
 
                 calendar.set(Calendar.HOUR_OF_DAY, +24 * 30);
                 calendar.set(Calendar.MILLISECOND, -1);
-                //获取过去七天
+                //获取过去三十天
                 dateArray[1] = calendar.getTime();
                 break;
             default:
@@ -108,12 +108,17 @@ public class StatisticsDateUtil {
 
     /**
      * 根据搜索参数获取搜索开始结束时间
+     * 优先级：自定义时间区间 > 快捷搜索 > 年月 > 默认最近七日
      *
      * @param statisticsQueryParam
      * @return
      */
     public static Date[] getDateArray(StatisticsQueryParam statisticsQueryParam) {
-        //如果快捷搜搜哦
+        //自定义时间区间
+        if (statisticsQueryParam.getStartTime() != null && statisticsQueryParam.getEndTime() != null) {
+            return new Date[]{statisticsQueryParam.getStartTime(), statisticsQueryParam.getEndTime()};
+        }
+        //如果快捷搜索
         if (StringUtils.isNotEmpty(statisticsQueryParam.getSearchType())) {
             return getDateArray(SearchTypeEnum.valueOf(statisticsQueryParam.getSearchType()));
         }
@@ -121,11 +126,27 @@ public class StatisticsDateUtil {
         else if (statisticsQueryParam.getMonth() != null && statisticsQueryParam.getYear() != null) {
             return getDateArray(statisticsQueryParam.getYear(), statisticsQueryParam.getMonth());
         }
-        //默认查询当前月份
+        //默认最近七日
         else {
-            Calendar calendar = Calendar.getInstance();
-            return getDateArray(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
+            return getDateArray(SearchTypeEnum.LAST_SEVEN);
         }
+    }
+
+    /**
+     * 根据本期区间回推上一等长周期
+     *
+     * @param currentDates 本期 [start, end]
+     * @return 上期 [start, end]
+     */
+    public static Date[] getPreviousDateArray(Date[] currentDates) {
+        if (currentDates == null || currentDates.length < 2 || currentDates[0] == null || currentDates[1] == null) {
+            throw new ServiceException(ResultCode.ERROR);
+        }
+        long duration = currentDates[1].getTime() - currentDates[0].getTime();
+        Date[] previous = new Date[2];
+        previous[1] = new Date(currentDates[0].getTime() - 1);
+        previous[0] = new Date(previous[1].getTime() - duration);
+        return previous;
     }
 
 

@@ -2,6 +2,7 @@ package cn.lili.modules.member.aop.interceptor;
 
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberPointsHistory;
+import cn.lili.modules.member.entity.enums.PointSourceEnum;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.service.MemberPointsHistoryService;
 import cn.lili.modules.member.service.MemberService;
@@ -71,6 +72,12 @@ public class PointLogInterceptor {
 
                 memberPointsHistory.setPoint(member.getPoint());
                 memberPointsHistory.setContent(obj[3] == null ? "" : obj[3].toString());
+                // 积分来源：第5个参数（可选），缺省 UNKNOWN
+                String pointSource = PointSourceEnum.UNKNOWN.name();
+                if (obj.length > 4 && obj[4] != null) {
+                    pointSource = obj[4].toString();
+                }
+                memberPointsHistory.setPointSource(pointSource);
                 memberPointsHistory.setCreateBy("系统");
                 memberPointsHistoryService.save(memberPointsHistory);
             }

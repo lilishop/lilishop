@@ -51,5 +51,12 @@ public interface IndexStatisticsService {
      */
     List<StoreStatisticsDataVO> storeStatistics(StatisticsQueryParam statisticsQueryParam);
 
+    /**
+     * 数据概况按日趋势（营业额/订单数/新增客户数）
+     *
+     * @param statisticsQueryParam 查询参数
+     * @return 按日趋势
+     */
+    List<DataTrendVO> dataTrend(StatisticsQueryParam statisticsQueryParam);
 
 }
