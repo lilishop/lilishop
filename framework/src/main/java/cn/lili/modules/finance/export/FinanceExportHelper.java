@@ -73,11 +73,23 @@ public final class FinanceExportHelper {
     }
 
     /**
+     * 切换到指定 Sheet。单 Sheet 导出时重命名默认 sheet1，避免留下空白页。
+     */
+    public static void useSheet(ExcelWriter writer, String sheetName) {
+        if (writer.getWorkbook().getNumberOfSheets() == 1) {
+            writer.renameSheet(0, sheetName);
+            writer.setSheet(0);
+        } else {
+            writer.setSheet(sheetName);
+        }
+    }
+
+    /**
      * 向指定 Sheet 写入表头与数据行。
      */
     public static void writeSheet(ExcelWriter writer, String sheetName,
                                   List<String> headers, List<List<Object>> rows) {
-        writer.setSheet(sheetName);
+        useSheet(writer, sheetName);
         writer.writeHeadRow(headers);
         if (rows != null && !rows.isEmpty()) {
             writer.write(rows, false);

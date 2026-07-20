@@ -137,6 +137,8 @@ public class StatisticsDateUtil {
      *
      * @param currentDates 本期 [start, end]
      * @return 上期 [start, end]
+     * @author Bulbasaur
+     * @since 2026/07/20
      */
     public static Date[] getPreviousDateArray(Date[] currentDates) {
         if (currentDates == null || currentDates.length < 2 || currentDates[0] == null || currentDates[1] == null) {
@@ -147,6 +149,27 @@ public class StatisticsDateUtil {
         previous[1] = new Date(currentDates[0].getTime() - 1);
         previous[0] = new Date(previous[1].getTime() - duration);
         return previous;
+    }
+
+    /**
+     * 本期区间整体回退一年,用于同比
+     *
+     * @param currentDates 本期 [start, end]
+     * @return 去年同期 [start, end]
+     * @author Bulbasaur
+     * @since 2026/07/20
+     */
+    public static Date[] getYearOnYearDateArray(Date[] currentDates) {
+        if (currentDates == null || currentDates.length < 2 || currentDates[0] == null || currentDates[1] == null) {
+            throw new ServiceException(ResultCode.ERROR);
+        }
+        Calendar start = Calendar.getInstance();
+        start.setTime(currentDates[0]);
+        start.add(Calendar.YEAR, -1);
+        Calendar end = Calendar.getInstance();
+        end.setTime(currentDates[1]);
+        end.add(Calendar.YEAR, -1);
+        return new Date[]{start.getTime(), end.getTime()};
     }
 
 
