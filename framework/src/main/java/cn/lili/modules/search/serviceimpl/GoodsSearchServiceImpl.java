@@ -83,7 +83,7 @@ public class GoodsSearchServiceImpl implements GoodsSearchService {
         List<GoodsIndex> indexes = searchMysqlIndexes(goodsSearch, false);
         GoodsRelatedInfo relatedInfo = new GoodsRelatedInfo();
         relatedInfo.setCategories(buildSelector(indexes, GoodsIndex::getCategoryPath, GoodsIndex::getCategoryNamePath));
-        relatedInfo.setBrands(buildSelector(indexes, GoodsIndex::getBrandId, GoodsIndex::getBrandName));
+        relatedInfo.setBrands(buildBrandSelector(indexes));
         relatedInfo.setParamOptions(buildParamOptions(indexes, goodsSearch));
         return relatedInfo;
     }
@@ -119,6 +119,10 @@ public class GoodsSearchServiceImpl implements GoodsSearchService {
                 .map(sku -> {
                     List<GoodsParamsItemDTO> params = parseIndexParams(sku.getParams());
                     GoodsIndex index = new GoodsIndex(sku, params);
+                    if (!"0".equals(sku.getBrandId())) {
+                        index.setBrandName(sku.getBrandName());
+                        index.setBrandUrl(sku.getBrandLogo());
+                    }
                     return withPromotion ? fillPromotionInfo(index) : index;
                 })
                 .filter(index -> matchProps(index, searchDTO))
@@ -344,6 +348,33 @@ public class GoodsSearchServiceImpl implements GoodsSearchService {
         }
         int toIndex = Math.min(fromIndex + pageSize, indexes.size());
         return new ArrayList<>(indexes.subList(fromIndex, toIndex));
+    }
+
+    private List<SelectorOptions> buildBrandSelector(List<GoodsIndex> indexes) {
+        if (CollUtil.isEmpty(indexes)) {
+            return Collections.emptyList();
+        }
+        Map<String, SelectorOptions> options = new LinkedHashMap<>();
+        for (GoodsIndex index : indexes) {
+            String brandId = index.getBrandId();
+            if (CharSequenceUtil.isEmpty(brandId) || "0".equals(brandId)) {
+                continue;
+            }
+            SelectorOptions option = options.computeIfAbsent(brandId, key -> {
+                SelectorOptions selectorOptions = new SelectorOptions();
+                selectorOptions.setValue(key);
+                selectorOptions.setName(CharSequenceUtil.isNotEmpty(index.getBrandName()) ? index.getBrandName() : key);
+                selectorOptions.setUrl(index.getBrandUrl());
+                return selectorOptions;
+            });
+            if (CharSequenceUtil.isEmpty(option.getName()) && CharSequenceUtil.isNotEmpty(index.getBrandName())) {
+                option.setName(index.getBrandName());
+            }
+            if (CharSequenceUtil.isEmpty(option.getUrl()) && CharSequenceUtil.isNotEmpty(index.getBrandUrl())) {
+                option.setUrl(index.getBrandUrl());
+            }
+        }
+        return new ArrayList<>(options.values());
     }
 
     private List<SelectorOptions> buildSelector(List<GoodsIndex> indexes,

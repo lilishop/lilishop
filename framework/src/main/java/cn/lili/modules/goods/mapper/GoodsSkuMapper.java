@@ -114,7 +114,13 @@ public interface GoodsSkuMapper extends BaseMapper<GoodsSku> {
      * @param queryWrapper 查询条件
      * @return 售后VO分页
      */
-    @Select("SELECT *,g.params as params FROM li_goods_sku gs inner join li_goods g on gs.goods_id = g.id ${ew.customSqlSegment}")
+      @Select("SELECT gs.*, g.params as params, " +
+            "CASE WHEN gs.brand_id = '0' THEN NULL ELSE b.name END as brand_name, " +
+            "CASE WHEN gs.brand_id = '0' THEN NULL ELSE b.logo END as brand_logo " +
+            "FROM li_goods_sku gs " +
+            "inner join li_goods g on gs.goods_id = g.id " +
+            "left join li_brand b on gs.brand_id = b.id and gs.brand_id != '0' and b.delete_flag = 0 " +
+            "${ew.customSqlSegment}")
     IPage<GoodsSkuDTO> queryByParams(IPage<GoodsSkuDTO> page, @Param(Constants.WRAPPER) Wrapper<GoodsSkuDTO> queryWrapper);
 
     @Select("SELECT id as sku_id, quantity, goods_id,simple_specs,sn,goods_name FROM li_goods_sku ${ew.customSqlSegment}")

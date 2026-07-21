@@ -34,7 +34,9 @@ public interface StoreMapper extends BaseMapper<Store> {
      * @param queryWrapper 查询条件
      * @return 店铺VO分页列表
      */
-    @Select("select s.* from li_store as s ${ew.customSqlSegment}")
+    @Select("select s.*, " +
+            "(select count(*) from li_order o where o.store_id = s.id and o.delete_flag = 0) as order_num " +
+            "from li_store as s ${ew.customSqlSegment}")
     IPage<StoreVO> getStoreList(IPage<StoreVO> page, @Param(Constants.WRAPPER) Wrapper<StoreVO> queryWrapper);
 
 
