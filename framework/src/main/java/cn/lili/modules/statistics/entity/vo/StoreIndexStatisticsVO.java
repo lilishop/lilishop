@@ -27,6 +27,8 @@ public class StoreIndexStatisticsVO {
     private Long unDeliveredOrder;
     @Schema(description = "待收货订单数量")
     private Long deliveredOrder;
+    @Schema(description = "待核验订单数量")
+    private Long waitCheckOrder;
 
     @Schema(description = "待处理退货数量")
     private Long returnGoods;

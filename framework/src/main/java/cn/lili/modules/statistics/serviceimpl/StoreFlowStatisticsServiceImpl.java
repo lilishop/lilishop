@@ -248,7 +248,7 @@ public class StoreFlowStatisticsServiceImpl extends ServiceImpl<StoreFlowStatist
         if (StatisticsQuery.PRICE.name().equals(goodsStatisticsQueryParam.getType())) {
             queryWrapper.orderByDesc("price");
         } else {
-            queryWrapper.orderByDesc("num");
+            queryWrapper.orderByDesc("orderNum");
         }
         //设置为付款查询
         queryWrapper.eq("flow_type", FlowTypeEnum.PAY.name());

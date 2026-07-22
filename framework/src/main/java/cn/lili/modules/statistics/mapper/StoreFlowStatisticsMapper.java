@@ -29,7 +29,7 @@ public interface StoreFlowStatisticsMapper extends BaseMapper<StoreFlow> {
      * @param queryWrapper 查询条件
      * @return 商品统计列表
      */
-    @Select("SELECT goods_id,goods_name,SUM(final_price) AS price,SUM(num) AS num FROM li_store_flow ${ew.customSqlSegment}")
+    @Select("SELECT goods_id,goods_name,COUNT(DISTINCT order_sn) AS orderNum,SUM(final_price) AS price,SUM(num) AS num FROM li_store_flow ${ew.customSqlSegment}")
     List<GoodsStatisticsDataVO> getGoodsStatisticsData(IPage<GoodsStatisticsDataVO> page, @Param(Constants.WRAPPER) Wrapper<GoodsStatisticsDataVO> queryWrapper);
 
     /**

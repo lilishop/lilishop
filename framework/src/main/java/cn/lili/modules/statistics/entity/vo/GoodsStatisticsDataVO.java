@@ -18,6 +18,9 @@ public class GoodsStatisticsDataVO {
     @Schema(description = "商品名称")
     private String goodsName;
 
+    @Schema(description = "下单笔数")
+    private Long orderNum;
+
     @Schema(description = "销售数量")
     private String num;
 

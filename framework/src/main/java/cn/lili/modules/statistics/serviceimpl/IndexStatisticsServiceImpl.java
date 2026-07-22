@@ -206,6 +206,8 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         storeIndexStatisticsVO.setUnDeliveredOrder(orderStatisticsService.orderNum(OrderStatusEnum.UNDELIVERED.name()));
         //待收货订单数量
         storeIndexStatisticsVO.setDeliveredOrder(orderStatisticsService.orderNum(OrderStatusEnum.DELIVERED.name()));
+        //待核验订单数量
+        storeIndexStatisticsVO.setWaitCheckOrder(orderStatisticsService.orderNum(OrderStatusEnum.TAKE.name()));
         //待自提数量
         storeIndexStatisticsVO.setSelfPickNum(orderStatisticsService.orderNum(OrderStatusEnum.STAY_PICKED_UP.name()));
         //待处理退货数量
