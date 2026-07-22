@@ -777,9 +777,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         int currentQuantity = goodsSku.getQuantity() == null ? 0 : goodsSku.getQuantity();
 
         if (type.equals(GoodsStockTypeEnum.ADD.name())) {
-            quantity = Convert.toInt(NumberUtil.add(currentQuantity, quantity));
+            quantity = currentQuantity + quantity;
         } else {
-            quantity = Convert.toInt(NumberUtil.sub(currentQuantity, quantity));
+            quantity = currentQuantity - quantity;
         }
         goodsSku.setQuantity(quantity);
 
