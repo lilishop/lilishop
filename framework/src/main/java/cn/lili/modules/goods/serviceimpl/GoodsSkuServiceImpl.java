@@ -624,7 +624,18 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
 
     @Override
     public IPage<GoodsSkuDTO> getGoodsSkuDTOByPage(Page<GoodsSkuDTO> page, Wrapper<GoodsSkuDTO> queryWrapper) {
-        return this.baseMapper.queryByParams(page, queryWrapper);
+        IPage<GoodsSkuDTO> result = this.baseMapper.queryByParams(page, queryWrapper);
+        if (result != null && result.getRecords() != null) {
+            result.getRecords().forEach(this::clearBrandInfoWhenNoBrand);
+        }
+        return result;
+    }
+
+    private void clearBrandInfoWhenNoBrand(GoodsSkuDTO sku) {
+        if (sku != null && "0".equals(sku.getBrandId())) {
+            sku.setBrandName(null);
+            sku.setBrandLogo(null);
+        }
     }
 
     /**
