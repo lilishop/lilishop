@@ -8,6 +8,8 @@ import cn.lili.modules.procurement.entity.vos.ProcurementOrderVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.Map;
+
 /**
  * 采购单业务接口
  * 定义采购单的生命周期操作与查询
@@ -52,4 +54,11 @@ public interface ProcurementOrderService extends IService<ProcurementOrder> {
      * @return 采购单分页数据
      */
     IPage<ProcurementOrder> page(ProcurementOrderSearchParams params);
+
+    /**
+     * 按状态统计采购单数量（不含状态筛选条件）
+     * @param params 查询参数
+     * @return 状态 -> 数量
+     */
+    Map<String, Long> statusCount(ProcurementOrderSearchParams params);
 }

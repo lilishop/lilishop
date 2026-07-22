@@ -17,6 +17,9 @@ public class ProcurementOrderCreateDTO {
     @Schema(description = "备注")
     private String remark;
 
+    @Schema(description = "出入库原因ID")
+    private String stockReasonId;
+
     @Schema(description = "商品明细")
     private List<Item> items;
 

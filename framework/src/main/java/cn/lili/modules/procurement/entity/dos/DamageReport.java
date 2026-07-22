@@ -48,4 +48,20 @@ public class DamageReport extends BaseEntity {
 
     @Schema(description = "报损总金额")
     private Double totalAmount;
+
+    @Schema(description = "制单人ID")
+    private String makerId;
+
+    @Schema(description = "制单人")
+    private String makerName;
+
+    @Schema(description = "审核时间")
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date auditTime;
+
+    @Schema(description = "审核人ID")
+    private String auditorId;
+
+    @Schema(description = "审核人")
+    private String auditorName;
 }

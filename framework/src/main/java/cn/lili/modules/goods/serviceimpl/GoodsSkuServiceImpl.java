@@ -215,8 +215,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Transactional(rollbackFor = Exception.class)
     public void update(GoodsSku goodsSku) {
         this.updateById(goodsSku);
-        cache.remove(GoodsSkuService.getCacheKeys(goodsSku.getId()));
+        clearCache(goodsSku.getId());
         cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
+        if (goodsSku.getQuantity() != null) {
+            cache.put(GoodsSkuService.getStockCacheKey(goodsSku.getId()), goodsSku.getQuantity());
+        }
     }
 
 
@@ -228,6 +231,17 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     public void clearCache(String skuId) {
         cache.remove(GoodsSkuService.getCacheKeys(skuId));
+        cache.remove(GoodsSkuService.getStockCacheKey(skuId));
+    }
+
+    /**
+     * 清除 SKU 库存相关缓存（SKU 详情、库存数量、所属商品）
+     */
+    private void clearStockRelatedCache(String skuId, String goodsId) {
+        clearCache(skuId);
+        if (CharSequenceUtil.isNotEmpty(goodsId)) {
+            cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
+        }
     }
 
     @Override
@@ -247,7 +261,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         Integer integer = (Integer) cache.get(GoodsSkuService.getStockCacheKey(id));
 
         //?????,?????????
-        if (integer != null && !goodsSku.getQuantity().equals(integer)) {
+        if (integer != null && (goodsSku.getQuantity() == null || !goodsSku.getQuantity().equals(integer))) {
             //?????????
             goodsSku.setQuantity(integer);
             cache.put(GoodsSkuService.getCacheKeys(goodsSku.getId()), goodsSku);
@@ -672,10 +686,14 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateStocksByType(List<GoodsSkuStockDTO> goodsSkuStockDTOS) {
+        if (goodsSkuStockDTOS == null || goodsSkuStockDTOS.isEmpty()) {
+            return;
+        }
 
         // ?????goodsID???????goodsID
         List<String> goodsIds = goodsSkuStockDTOS.stream()
                 .map(GoodsSkuStockDTO::getGoodsId)
+                .filter(CharSequenceUtil::isNotEmpty)
                 .distinct()
                 .collect(Collectors.toList());
 
@@ -723,19 +741,22 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateStock(String skuId, Integer quantity) {
+        if (CharSequenceUtil.isEmpty(skuId) || quantity == null || quantity < 0) {
+            throw new ServiceException(ResultCode.PARAMS_ERROR);
+        }
         GoodsSku goodsSku = getGoodsSkuByIdFromCache(skuId);
-        if (goodsSku != null) {
-            //????sku??????(???????0?  ???????),????????? ???????
-            boolean isFlag = goodsSku.getQuantity() <= 0;
-
-            goodsSku.setQuantity(quantity);
-            boolean update = this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
-            if (update) {
-                cache.remove(CachePrefix.GOODS.getPrefix() + goodsSku.getGoodsId());
-            }
+        if (goodsSku == null) {
+            goodsSku = this.getById(skuId);
+        }
+        if (goodsSku == null) {
+            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+        }
+        goodsSku.setQuantity(quantity);
+        boolean update = this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
+        if (update) {
+            clearStockRelatedCache(skuId, goodsSku.getGoodsId());
             cache.put(GoodsSkuService.getCacheKeys(skuId), goodsSku);
             cache.put(GoodsSkuService.getStockCacheKey(skuId), quantity);
-
             this.promotionGoodsService.updatePromotionGoodsStock(goodsSku.getId(), quantity);
         }
     }
@@ -743,26 +764,30 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateStock(String skuId, Integer quantity, String type) {
+        if (CharSequenceUtil.isEmpty(skuId) || quantity == null || quantity < 0) {
+            throw new ServiceException(ResultCode.PARAMS_ERROR);
+        }
         GoodsSku goodsSku = getGoodsSkuByIdFromCache(skuId);
-        if (goodsSku != null) {
-            //????sku??????(???????0?  ???????),????????? ???????
-            boolean isFlag = goodsSku.getQuantity() <= 0;
+        if (goodsSku == null) {
+            goodsSku = this.getById(skuId);
+        }
+        if (goodsSku == null) {
+            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+        }
+        int currentQuantity = goodsSku.getQuantity() == null ? 0 : goodsSku.getQuantity();
 
-            //??????
-            if (type.equals(GoodsStockTypeEnum.ADD.name())) {
-                quantity = Convert.toInt(NumberUtil.add(goodsSku.getQuantity(), quantity));
-            } else {
-                quantity = Convert.toInt(NumberUtil.sub(goodsSku.getQuantity(), quantity));
-            }
-            goodsSku.setQuantity(quantity);
+        if (type.equals(GoodsStockTypeEnum.ADD.name())) {
+            quantity = Convert.toInt(NumberUtil.add(currentQuantity, quantity));
+        } else {
+            quantity = Convert.toInt(NumberUtil.sub(currentQuantity, quantity));
+        }
+        goodsSku.setQuantity(quantity);
 
-            boolean update = this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
-            if (update) {
-                cache.remove(CachePrefix.GOODS.getPrefix() + goodsSku.getGoodsId());
-            }
+        boolean update = this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
+        if (update) {
+            clearStockRelatedCache(skuId, goodsSku.getGoodsId());
             cache.put(GoodsSkuService.getCacheKeys(skuId), goodsSku);
             cache.put(GoodsSkuService.getStockCacheKey(skuId), quantity);
-
             this.promotionGoodsService.updatePromotionGoodsStock(goodsSku.getId(), quantity);
         }
     }

@@ -45,8 +45,17 @@ public class ProcurementOrder extends BaseEntity {
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date auditTime;
 
+    @Schema(description = "审核人ID")
+    private String auditorId;
+
+    @Schema(description = "审核人")
+    private String auditorName;
+
     @Schema(description = "备注")
     private String remark;
+
+    @Schema(description = "出入库原因ID")
+    private String stockReasonId;
 
     @Schema(description = "状态")
     private String status;

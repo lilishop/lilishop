@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * 报损单业务接口
@@ -64,4 +65,9 @@ public interface DamageReportService extends IService<DamageReport> {
      * @return 报损单分页数据
      */
     IPage<DamageReport> pageByCondition(PageVO pageVO, String storeId, String status, Date startDate, Date endDate);
+
+    /**
+     * 按状态统计报损单数量（不含状态筛选条件）
+     */
+    Map<String, Long> statusCount(String storeId, Date startDate, Date endDate);
 }

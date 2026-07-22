@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * 店铺端采购单接口
  * 支持创建、提交、审核、关闭、详情与分页查询
@@ -54,6 +56,12 @@ public class ProcurementOrderStoreController {
     @PutMapping("/close/{id}")
     public ResultMessage<Boolean> close(@PathVariable String id) {
         return ResultUtil.data(procurementOrderService.close(id));
+    }
+
+    @Operation(summary = "采购单各状态数量")
+    @GetMapping("/status-count")
+    public ResultMessage<Map<String, Long>> statusCount(ProcurementOrderSearchParams params) {
+        return ResultUtil.data(procurementOrderService.statusCount(params));
     }
 
     @Operation(summary = "采购单详情")

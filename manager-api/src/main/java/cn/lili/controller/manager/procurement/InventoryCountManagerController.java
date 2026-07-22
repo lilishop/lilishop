@@ -2,6 +2,7 @@ package cn.lili.controller.manager.procurement;
 
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.OperationalJudgment;
+import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.procurement.entity.dos.InventoryCount;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -54,10 +56,13 @@ public class InventoryCountManagerController {
     @Operation(summary = "分页查看盘点单明细")
     @Parameter(name = "id", description = "盘点单ID", required = true)
     @GetMapping("/{id}/items/page")
-    public ResultMessage<IPage<InventoryCountItem>> itemsPage(@PathVariable String id, PageVO pageVO) {
+    public ResultMessage<IPage<InventoryCountItem>> itemsPage(
+            @PathVariable String id,
+            PageVO pageVO,
+            @RequestParam(required = false) String goodsName) {
         InventoryCount count = OperationalJudgment.judgment(inventoryCountService.getById(id));
         Page<InventoryCountItem> page = new Page<>(pageVO.getPageNumber(), pageVO.getPageSize());
-        return ResultUtil.data(inventoryCountItemService.pageByCountId(count.getId(), page));
+        return ResultUtil.data(inventoryCountItemService.pageByCountId(count.getId(), page, goodsName));
     }
 
     @Operation(summary = "下载盘点单明细")
@@ -66,5 +71,13 @@ public class InventoryCountManagerController {
     public ResultMessage<List<InventoryCountItem>> download(@PathVariable String id) {
         InventoryCount count = OperationalJudgment.judgment(inventoryCountService.getById(id));
         return ResultUtil.data(inventoryCountItemService.listByCountId(count.getId()));
+    }
+
+    @Operation(summary = "导出盘点单明细 Excel")
+    @Parameter(name = "id", description = "盘点单ID", required = true)
+    @GetMapping("/{id}/export")
+    public void export(@PathVariable String id) {
+        InventoryCount count = OperationalJudgment.judgment(inventoryCountService.getById(id));
+        inventoryCountItemService.exportExcel(count.getId(), count.getSn(), ThreadContextHolder.getHttpResponse());
     }
 }

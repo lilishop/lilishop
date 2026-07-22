@@ -9,6 +9,7 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.goods.entity.dto.GoodsSkuStockDTO;
 import cn.lili.modules.goods.entity.enums.GoodsStockTypeEnum;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.procurement.entity.dos.ProcurementInbound;
 import cn.lili.modules.procurement.entity.dos.ProcurementInboundItem;
@@ -113,11 +114,26 @@ public class ProcurementInboundServiceImpl extends ServiceImpl<ProcurementInboun
             totalRetail = CurrencyUtil.add(totalRetail, CurrencyUtil.mul(matched.getRetailPrice(), i.getInboundQuantity()));
 
             GoodsSkuStockDTO stockDTO = new GoodsSkuStockDTO();
-            stockDTO.setGoodsId(matched.getGoodsId());
-            stockDTO.setSkuId(matched.getSkuId());
+            String goodsId = CharSequenceUtil.isNotEmpty(matched.getGoodsId()) ? matched.getGoodsId() : i.getGoodsId();
+            String skuId = CharSequenceUtil.isNotEmpty(matched.getSkuId()) ? matched.getSkuId() : i.getSkuId();
+            if (CharSequenceUtil.isEmpty(skuId)) {
+                throw new ServiceException(ResultCode.PARAMS_ERROR);
+            }
+            GoodsSku goodsSku = goodsSkuService.getById(skuId);
+            if (goodsSku == null) {
+                throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+            }
+            if (CharSequenceUtil.isEmpty(goodsId)) {
+                goodsId = goodsSku.getGoodsId();
+            }
+            stockDTO.setGoodsId(goodsId);
+            stockDTO.setSkuId(skuId);
             stockDTO.setQuantity(i.getInboundQuantity());
             stockDTO.setType(GoodsStockTypeEnum.ADD.name());
             stockDTOS.add(stockDTO);
+        }
+        if (stockDTOS.isEmpty()) {
+            throw new ServiceException(ResultCode.PARAMS_ERROR);
         }
         this.save(inbound);
         inboundItems.forEach(item -> item.setInboundId(inbound.getId()));

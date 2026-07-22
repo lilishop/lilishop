@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -103,5 +104,14 @@ public class DamageReportStoreController {
                                                    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") @RequestParam(required = false) Date endDate) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         return ResultUtil.data(damageReportService.pageByCondition(page, storeId, status, startDate, endDate));
+    }
+
+    @Operation(summary = "报损单各状态数量")
+    @GetMapping("/status-count")
+    public ResultMessage<Map<String, Long>> statusCount(
+            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") @RequestParam(required = false) Date startDate,
+            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") @RequestParam(required = false) Date endDate) {
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        return ResultUtil.data(damageReportService.statusCount(storeId, startDate, endDate));
     }
 }

@@ -25,6 +25,9 @@ public class DamageReportItem extends BaseEntity {
     @Schema(description = "SKU ID")
     private String skuId;
 
+    @Schema(description = "商品名称")
+    private String goodsName;
+
     @Schema(description = "报损数量")
     private Integer quantity;
 

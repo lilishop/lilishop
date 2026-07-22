@@ -20,6 +20,7 @@ import cn.lili.modules.procurement.service.ProcurementOrderItemService;
 import cn.lili.modules.procurement.service.ProcurementOrderService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -29,7 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -51,6 +54,9 @@ public class ProcurementOrderServiceImpl extends ServiceImpl<ProcurementOrderMap
         if (user == null || user.getStoreId() == null) {
             throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
+        if (CharSequenceUtil.isEmpty(dto.getStockReasonId())) {
+            throw new ServiceException(ResultCode.PARAMS_ERROR);
+        }
         ProcurementOrder order = new ProcurementOrder();
         order.setOrderSn(SnowFlake.createStr("PO"));
         order.setStoreId(user.getStoreId());
@@ -58,6 +64,7 @@ public class ProcurementOrderServiceImpl extends ServiceImpl<ProcurementOrderMap
         order.setMakerId(user.getClerkId());
         order.setMakerName(user.getUsername());
         order.setRemark(dto.getRemark());
+        order.setStockReasonId(dto.getStockReasonId());
         order.setStatus(ProcurementStatusEnum.DRAFT.name());
 
         List<ProcurementOrderItem> items = new ArrayList<>();
@@ -117,13 +124,18 @@ public class ProcurementOrderServiceImpl extends ServiceImpl<ProcurementOrderMap
             throw new ServiceException(ResultCode.PARAMS_ERROR);
         }
         AuthUser user = UserContext.getCurrentUser();
-        if (user == null || user.getStoreId() == null || !Boolean.TRUE.equals(user.getIsSuper())) {
+        if (user == null || user.getStoreId() == null) {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        }
+        if (!user.getStoreId().equals(order.getStoreId())) {
             throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
         if (!ProcurementStatusEnum.SUBMITTED.name().equals(order.getStatus())) {
             throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
         order.setAuditTime(new Date());
+        order.setAuditorId(user.getClerkId());
+        order.setAuditorName(user.getUsername());
         if (Boolean.TRUE.equals(action.getPass())) {
             order.setStatus(ProcurementStatusEnum.PENDING_INBOUND.name());
         } else {
@@ -161,40 +173,62 @@ public class ProcurementOrderServiceImpl extends ServiceImpl<ProcurementOrderMap
 
     @Override
     public IPage<ProcurementOrder> page(ProcurementOrderSearchParams params) {
-        LambdaQueryWrapper<ProcurementOrder> wrapper = Wrappers.lambdaQuery();
+        QueryWrapper<ProcurementOrder> wrapper = buildQueryWrapper(params, true);
+        wrapper.orderByDesc("create_time");
+        return this.page(PageUtil.initPage(params), wrapper);
+    }
+
+    @Override
+    public Map<String, Long> statusCount(ProcurementOrderSearchParams params) {
+        QueryWrapper<ProcurementOrder> wrapper = buildQueryWrapper(params, false);
+        wrapper.select("status", "COUNT(1) AS cnt");
+        wrapper.groupBy("status");
+        List<Map<String, Object>> rows = this.listMaps(wrapper);
+        Map<String, Long> result = new HashMap<>();
+        for (Map<String, Object> row : rows) {
+            Object status = row.get("status");
+            Object cnt = row.get("cnt");
+            if (status != null && cnt != null) {
+                result.put(status.toString(), ((Number) cnt).longValue());
+            }
+        }
+        return result;
+    }
+
+    private QueryWrapper<ProcurementOrder> buildQueryWrapper(ProcurementOrderSearchParams params, boolean includeStatus) {
+        QueryWrapper<ProcurementOrder> wrapper = Wrappers.query();
         AuthUser user = UserContext.getCurrentUser();
         if (user != null && user.getStoreId() != null) {
-            wrapper.eq(ProcurementOrder::getStoreId, user.getStoreId());
+            wrapper.eq("store_id", user.getStoreId());
         }
         if (CharSequenceUtil.isNotEmpty(params.getOrderSn())) {
-            wrapper.eq(ProcurementOrder::getOrderSn, params.getOrderSn());
+            wrapper.eq("order_sn", params.getOrderSn());
         }
-        if (CharSequenceUtil.isNotEmpty(params.getStatus())) {
-            wrapper.eq(ProcurementOrder::getStatus, params.getStatus());
+        if (includeStatus && CharSequenceUtil.isNotEmpty(params.getStatus())) {
+            wrapper.eq("status", params.getStatus());
         }
         if (params.getStartCreateTime() != null) {
-            wrapper.ge(ProcurementOrder::getCreateTime, params.getStartCreateTime());
+            wrapper.ge("create_time", params.getStartCreateTime());
         }
         if (params.getEndCreateTime() != null) {
-            wrapper.le(ProcurementOrder::getCreateTime, params.getEndCreateTime());
+            wrapper.le("create_time", params.getEndCreateTime());
         }
         if (params.getStartAuditTime() != null) {
-            wrapper.ge(ProcurementOrder::getAuditTime, params.getStartAuditTime());
+            wrapper.ge("audit_time", params.getStartAuditTime());
         }
         if (params.getEndAuditTime() != null) {
-            wrapper.le(ProcurementOrder::getAuditTime, params.getEndAuditTime());
+            wrapper.le("audit_time", params.getEndAuditTime());
         }
         if (CharSequenceUtil.isNotEmpty(params.getGoodsName())) {
             List<String> orderIds = orderItemService.list(Wrappers.<ProcurementOrderItem>lambdaQuery()
                     .like(ProcurementOrderItem::getGoodsName, params.getGoodsName()))
                     .stream().map(ProcurementOrderItem::getProcurementOrderId).distinct().collect(Collectors.toList());
             if (!orderIds.isEmpty()) {
-                wrapper.in(ProcurementOrder::getId, orderIds);
+                wrapper.in("id", orderIds);
             } else {
-                wrapper.eq(ProcurementOrder::getId, "0");
+                wrapper.eq("id", "0");
             }
         }
-        wrapper.orderByDesc(ProcurementOrder::getCreateTime);
-        return this.page(PageUtil.initPage(params), wrapper);
+        return wrapper;
     }
 }
