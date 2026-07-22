@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -136,6 +137,9 @@ public class ParametersServiceImpl extends ServiceImpl<ParametersMapper, Paramet
         List<String> parametersId = new ArrayList<>();
         for (CategoryParameter categoryParameter : categoryParameterList) {
             parametersId.add(categoryParameter.getParameterId());
+        }
+        if (parametersId.isEmpty()) {
+            return Collections.emptyList();
         }
         return this.list(new LambdaQueryWrapper<Parameters>().in(Parameters::getId, parametersId));
     }
