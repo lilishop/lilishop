@@ -2,7 +2,9 @@ package cn.lili.controller.manager.common;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.file.entity.FileDirectory;
 import cn.lili.modules.file.entity.dto.FileDirectoryDTO;
@@ -17,7 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 文件目录管理接口
+ * 平台端文件目录（素材分组）管理接口。
+ * <p>
+ * 分组按管理员维度隔离：ownerId 为当前管理员 ID，directoryType 为 MANAGER。
  *
  * @author Chopper
  * @since 2020/11/26 15:41
@@ -34,14 +38,17 @@ public class FileDirectoryManagerController {
     @Operation(summary = "获取文件目录列表")
     @GetMapping
     public ResultMessage<List<FileDirectoryDTO>> getSceneFileList() {
-        return ResultUtil.data(fileDirectoryService.getFileDirectoryList(UserContext.getCurrentUser().getId()));
+        AuthUser authUser = UserContext.getCurrentUser();
+        return ResultUtil.data(fileDirectoryService.getFileDirectoryList(
+                authUser.getId(), UserEnums.MANAGER.name()));
     }
 
     @Operation(summary = "添加文件目录")
     @PostMapping
     public ResultMessage<FileDirectory> addSceneFileList(@RequestBody @Valid FileDirectory fileDirectory) {
-        fileDirectory.setDirectoryType(UserContext.getCurrentUser().getRole().name());
-        fileDirectory.setOwnerId(UserContext.getCurrentUser().getId());
+        AuthUser authUser = UserContext.getCurrentUser();
+        fileDirectory.setDirectoryType(UserEnums.MANAGER.name());
+        fileDirectory.setOwnerId(authUser.getId());
         fileDirectoryService.save(fileDirectory);
         return ResultUtil.data(fileDirectory);
     }
@@ -49,8 +56,11 @@ public class FileDirectoryManagerController {
     @Operation(summary = "修改文件目录")
     @PutMapping
     public ResultMessage<FileDirectory> editSceneFileList(@RequestBody @Valid FileDirectory fileDirectory) {
-        fileDirectory.setDirectoryType(UserContext.getCurrentUser().getRole().name());
-        fileDirectory.setOwnerId(UserContext.getCurrentUser().getId());
+        AuthUser authUser = UserContext.getCurrentUser();
+        // 仅允许修改本人创建的管理员分组
+        fileDirectoryService.assertDirectoryOwned(fileDirectory.getId(), authUser.getId(), UserEnums.MANAGER.name());
+        fileDirectory.setDirectoryType(UserEnums.MANAGER.name());
+        fileDirectory.setOwnerId(authUser.getId());
         fileDirectoryService.updateById(fileDirectory);
         return ResultUtil.data(fileDirectory);
     }
@@ -58,6 +68,9 @@ public class FileDirectoryManagerController {
     @Operation(summary = "删除文件目录")
     @DeleteMapping("/{id}")
     public ResultMessage<Object> deleteSceneFileList(@PathVariable String id) {
+        AuthUser authUser = UserContext.getCurrentUser();
+        // 仅允许删除本人创建的管理员分组
+        fileDirectoryService.assertDirectoryOwned(id, authUser.getId(), UserEnums.MANAGER.name());
         if (fileService.countByDirectory(id)) {
             return ResultUtil.error(ResultCode.FILE_DIRECTORY_NOT_EMPTY);
         }

@@ -15,6 +15,7 @@ import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.file.entity.File;
 import cn.lili.modules.file.entity.enums.FileCategoryEnum;
 import cn.lili.modules.file.plugin.FilePluginFactory;
+import cn.lili.modules.file.service.FileDirectoryService;
 import cn.lili.modules.file.service.FileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,6 +42,8 @@ public class UploadStoreController {
     @Autowired
     private FileService fileService;
     @Autowired
+    private FileDirectoryService fileDirectoryService;
+    @Autowired
     private FilePluginFactory filePluginFactory;
     @Autowired
     private Cache cache;
@@ -57,6 +60,8 @@ public class UploadStoreController {
         if (authUser == null) {
             throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
+        // 上传前校验目标分组属于当前店铺，防止跨店绑定 fileDirectoryId
+        validateDirectoryPath(authUser, directoryPath);
         if (file == null) {
             throw new ServiceException(ResultCode.FILE_NOT_EXIST_ERROR);
         }
@@ -121,6 +126,9 @@ public class UploadStoreController {
         return scene;
     }
 
+    /**
+     * 规范化上传分组路径：空值、undefined、null 统一归入 default 默认分组。
+     */
     private String normalizeDirectoryPath(String directoryPath) {
         directoryPath = StrUtil.trimToEmpty(directoryPath);
         if (StrUtil.isBlank(directoryPath)
@@ -129,5 +137,22 @@ public class UploadStoreController {
             return "default";
         }
         return directoryPath;
+    }
+
+    /**
+     * 校验上传所选分组归属。
+     * default 为系统默认目录，无需校验；商家上传时分组 ownerId 必须与 storeId 一致。
+     */
+    private void validateDirectoryPath(AuthUser authUser, String directoryPath) {
+        if ("default".equals(directoryPath)) {
+            return;
+        }
+        String directoryId = directoryPath;
+        if (directoryPath.indexOf("/") > 0) {
+            directoryId = directoryPath.substring(directoryPath.lastIndexOf("/") + 1);
+        }
+        if (UserEnums.STORE.equals(authUser.getRole())) {
+            fileDirectoryService.assertDirectoryOwned(directoryId, authUser.getStoreId(), UserEnums.STORE.name());
+        }
     }
 }
