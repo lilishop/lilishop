@@ -106,11 +106,10 @@ public class StoreMenuServiceImpl extends ServiceImpl<StoreMenuMapper, StoreMenu
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean saveOrUpdateMenu(StoreMenu storeMenu) {
-        if (CharSequenceUtil.isNotEmpty(storeMenu.getId())) {
-            cache.vagueDel(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE));
-            cache.vagueDel(CachePrefix.STORE_USER_MENU.getPrefix());
-        }
-        return this.saveOrUpdate(storeMenu);
+        boolean saved = this.saveOrUpdate(storeMenu);
+        cache.vagueDel(CachePrefix.PERMISSION_LIST.getPrefix(UserEnums.STORE));
+        cache.vagueDel(CachePrefix.STORE_USER_MENU.getPrefix());
+        return saved;
     }
 
     @Override

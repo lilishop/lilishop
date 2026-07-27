@@ -1,7 +1,9 @@
 package cn.lili.modules.file.serviceimpl;
 
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.modules.distribution.entity.dos.DistributionOrder;
 import cn.lili.modules.file.entity.FileDirectory;
 import cn.lili.modules.file.entity.dto.FileDirectoryDTO;
 import cn.lili.modules.file.mapper.FileDirectoryMapper;
@@ -35,8 +37,19 @@ public class FileDirectoryServiceImpl extends ServiceImpl<FileDirectoryMapper, F
     }
 
     @Override
-    public List<FileDirectoryDTO> getFileDirectoryList(String scene) {
-        List<FileDirectory> fileDirectoryList = this.list(new LambdaQueryWrapper<FileDirectory>().eq(FileDirectory::getOwnerId, scene));
+    public List<FileDirectoryDTO> getFileDirectoryList(String ownerId) {
+        return getFileDirectoryList(ownerId, null);
+    }
+
+    @Override
+    public List<FileDirectoryDTO> getFileDirectoryList(String ownerId, String directoryType) {
+        LambdaQueryWrapper<FileDirectory> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(FileDirectory::getOwnerId, ownerId);
+        // 按 directoryType 过滤，避免商家与平台分组混用
+        if (CharSequenceUtil.isNotEmpty(directoryType)) {
+            queryWrapper.eq(FileDirectory::getDirectoryType, directoryType);
+        }
+        List<FileDirectory> fileDirectoryList = this.list(queryWrapper);
         List<FileDirectoryDTO> fileDirectoryDTOList = new ArrayList<>();
 
         fileDirectoryList.forEach(item -> {
@@ -48,6 +61,22 @@ public class FileDirectoryServiceImpl extends ServiceImpl<FileDirectoryMapper, F
         });
 
         return fileDirectoryDTOList;
+    }
+
+    @Override
+    public void assertDirectoryOwned(String directoryId, String ownerId, String directoryType) {
+        if (CharSequenceUtil.isBlank(directoryId)) {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        }
+        FileDirectory directory = this.getById(directoryId);
+        if (directory == null) {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        }
+        // 同时校验 ownerId 与 directoryType，防止跨店铺或跨角色操作
+        if (!CharSequenceUtil.equals(ownerId, directory.getOwnerId())
+                || !CharSequenceUtil.equals(directoryType, directory.getDirectoryType())) {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        }
     }
 
 

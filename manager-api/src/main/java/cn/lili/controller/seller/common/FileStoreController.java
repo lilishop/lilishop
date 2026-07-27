@@ -65,6 +65,10 @@ public class FileStoreController {
 
         AuthUser authUser = UserContext.getAuthUser(cache, accessToken);
         File file = fileService.getById(id);
+        if (file == null) {
+            // 文件不存在时直接返回，避免后续 NPE
+            throw new ServiceException(ResultCode.FILE_NOT_EXIST_ERROR);
+        }
         file.setName(newName);
         switch (authUser.getRole()) {
             case MEMBER:
