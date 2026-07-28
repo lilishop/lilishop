@@ -535,7 +535,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         }
         //按照客户分组查询
         if (CharSequenceUtil.isNotBlank(memberSearchVO.getGroupId())) {
-            queryWrapper.inSql("m.id", "SELECT member_id FROM li_member_group_user WHERE group_id = '" + memberSearchVO.getGroupId() + "' AND delete_flag = false");
+            queryWrapper.apply("m.id IN (SELECT member_id FROM li_member_group_user WHERE group_id = {0} AND delete_flag = false)",
+                    memberSearchVO.getGroupId());
         }
         queryWrapper.orderByDesc("m.create_time");
         return this.baseMapper.pageByMemberVO(PageUtil.initPage(page), queryWrapper);

@@ -120,7 +120,7 @@ public class StatisticsDateUtil {
         }
         //如果快捷搜索
         if (StringUtils.isNotEmpty(statisticsQueryParam.getSearchType())) {
-            return getDateArray(SearchTypeEnum.valueOf(statisticsQueryParam.getSearchType()));
+            return getDateArray(SearchTypeEnum.parse(statisticsQueryParam.getSearchType()));
         }
         //按照年月查询
         else if (statisticsQueryParam.getMonth() != null && statisticsQueryParam.getYear() != null) {

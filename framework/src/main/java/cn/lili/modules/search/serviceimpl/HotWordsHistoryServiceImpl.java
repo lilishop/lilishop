@@ -27,18 +27,33 @@ public class HotWordsHistoryServiceImpl extends ServiceImpl<HotWordsHistoryMappe
     @Autowired
     private HotWordsService hotWordsService;
 
+    /**
+     * 热词数量上限，避免前端传入超大值造成全表扫描
+     */
+    private static final int MAX_TOP = 500;
+
+    private static final int DEFAULT_TOP = 50;
+
     @Override
     public List<HotWordsHistory> statistics(HotWordsSearchParams hotWordsSearchParams) {
-        if (hotWordsSearchParams.getSearchType().equals(SearchTypeEnum.TODAY.name())) {
-            return hotWordsService.getHotWordsVO(hotWordsSearchParams.getTop());
+        int top = limitTop(hotWordsSearchParams.getTop());
+        if (SearchTypeEnum.TODAY.name().equals(hotWordsSearchParams.getSearchType())) {
+            return hotWordsService.getHotWordsVO(top);
         }
         QueryWrapper queryWrapper = hotWordsSearchParams.queryWrapper();
 
         queryWrapper.groupBy("keywords");
         queryWrapper.orderByDesc("score");
-        queryWrapper.last("limit " + hotWordsSearchParams.getTop());
+        queryWrapper.last("limit " + top);
         List<HotWordsHistory> list = baseMapper.statistics(queryWrapper);
         return list;
+    }
+
+    private int limitTop(Integer top) {
+        if (top == null || top <= 0) {
+            return DEFAULT_TOP;
+        }
+        return Math.min(top, MAX_TOP);
     }
 
     @Override

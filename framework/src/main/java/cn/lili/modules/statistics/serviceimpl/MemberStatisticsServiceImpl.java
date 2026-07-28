@@ -70,7 +70,7 @@ public class MemberStatisticsServiceImpl extends ServiceImpl<MemberStatisticsMap
         Date endTime = dates[1];
 
         //如果统计今天，则自行构造数据
-        if (statisticsQueryParam.getSearchType().equals(SearchTypeEnum.TODAY.name())) {
+        if (SearchTypeEnum.TODAY.name().equals(statisticsQueryParam.getSearchType())) {
             //构建数据，然后返回集合，提供给前端展示
             MemberStatisticsData memberStatisticsData = new MemberStatisticsData();
             memberStatisticsData.setMemberCount(this.memberCount(endTime));
