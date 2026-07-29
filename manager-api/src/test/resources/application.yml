@@ -8,13 +8,11 @@
       min-spare: 50
       max: 1000
 
-# 与Spring Boot 2一样，默认情况下，大多数端点都不通过http公开，我们公开了所有端点。对于生产，您应该仔细选择要公开的端点�?
 management:
-  #  health:
   endpoints:
     web:
       exposure:
-        include: '*'
+        include: health
 spring:
 
   cache:
@@ -61,7 +59,6 @@ ignored:
     - /manager/passport/user/login
     - /manager/passport/user/refresh/**
     - /manager/other/customWords
-    - /druid/**
     - /v3/api-docs/**
     - /swagger-ui/**
     - /favicon.ico
