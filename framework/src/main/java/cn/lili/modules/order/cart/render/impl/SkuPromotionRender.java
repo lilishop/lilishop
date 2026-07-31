@@ -6,6 +6,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
+import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -64,6 +65,9 @@ public class SkuPromotionRender implements CartRenderStep {
     @Autowired
     private Cache cache;
 
+    @Autowired
+    private CardKeyService cardKeyService;
+
     @Override
     public RenderStepEnums step() {
         return RenderStepEnums.SKU_PROMOTION;
@@ -74,6 +78,10 @@ public class SkuPromotionRender implements CartRenderStep {
 
         //基础价格渲染
         renderBasePrice(tradeDTO);
+        // E_COUPON 仅 renderBasePrice，不参与单品促销/秒杀等（AC-19 / O-12a）
+        if (cardKeyService.isECouponOnlyTrade(tradeDTO)) {
+            return;
+        }
         //渲染单品促销
         renderSkuPromotion(tradeDTO);
         //检查促销库存

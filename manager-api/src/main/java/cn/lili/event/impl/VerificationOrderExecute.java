@@ -8,6 +8,7 @@ import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.enums.OrderComplaintStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderItemAfterSaleStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
+import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -34,6 +35,10 @@ public class VerificationOrderExecute implements OrderStatusChangeEvent {
         if (orderMessage.getNewStatus().equals(OrderStatusEnum.TAKE) || orderMessage.getNewStatus().equals(OrderStatusEnum.STAY_PICKED_UP)) {
             //获取订单信息
             Order order = orderService.getBySn(orderMessage.getOrderSn());
+            // E_COUPON 支付后直接 COMPLETED，不生成核销码、不进入 TAKE（EC-24）
+            if (order == null || OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
+                return;
+            }
             //获取随机数，判定是否存在
             String code = getCode(order.getStoreId());
             //设置订单验证码

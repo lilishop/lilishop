@@ -26,6 +26,7 @@ import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.entity.vos.GoodsNumVO;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
@@ -108,6 +109,10 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Autowired
     @Lazy
     private MemberEvaluationService memberEvaluationService;
+
+    @Autowired
+    @Lazy
+    private CardKeyService cardKeyService;
     /**
      * rocketMq
      */
@@ -512,6 +517,13 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             //修改SKU状态
             goodsSkuService.updateGoodsSkuStatus(goods);
             goodsCacheKeys.add(CachePrefix.GOODS.getPrefix() + goods.getId());
+            // S-06：删除 E_COUPON 商品时软删未售/作废卡池，已售 ALLOCATED 保留
+            if (GoodsTypeEnum.E_COUPON.name().equals(goods.getGoodsType())) {
+                List<GoodsSku> skus = goodsSkuService.getGoodsSkuListByGoodsId(goods.getId());
+                for (GoodsSku sku : skus) {
+                    cardKeyService.softDeletePoolOnSkuRemove(sku.getId());
+                }
+            }
         }
         //删除缓存
         cache.multiDel(goodsCacheKeys);
@@ -743,6 +755,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
                 }
                 break;
             case "VIRTUAL_GOODS":
+                if (!"0".equals(goods.getTemplateId())) {
+                    goods.setTemplateId("0");
+                }
+                break;
+            case "E_COUPON":
+                // 电子卡券无需运费模板，强制 templateId=0（FR-S-01）
                 if (!"0".equals(goods.getTemplateId())) {
                     goods.setTemplateId("0");
                 }

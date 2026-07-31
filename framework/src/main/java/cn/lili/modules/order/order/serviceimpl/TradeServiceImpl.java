@@ -8,6 +8,7 @@ import cn.lili.common.event.TransactionCommitSendMQEvent;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
+import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.service.MemberService;
@@ -85,6 +86,9 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
     @Autowired
     private KanjiaActivityService kanjiaActivityService;
 
+    @Autowired
+    private CardKeyService cardKeyService;
+
     /**
      * RocketMQ 配置
      */
@@ -119,11 +123,12 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
     }
 
     /**
-     * 创建订单最后一步校验
+     * 创建订单最后一步校验；首行校验 E_COUPON 购买规则（混单/促销/poolStock/0 元等）。
      *
      * @param tradeDTO 购物车视图
      */
     private void createTradeCheck(TradeDTO tradeDTO) {
+        cardKeyService.validateTradeForECoupon(tradeDTO);
         // 购物车选择状态判断
         if (tradeDTO.getCartList().stream().noneMatch(CartVO::getChecked)) {
             throw new ServiceException(ResultCode.ORDER_NOT_EXIST_VALID);
@@ -131,7 +136,10 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
         if (!tradeDTO.getCartTypeEnum().equals(CartTypeEnum.VIRTUAL) && tradeDTO.getStoreAddress() == null) {
             //创建订单如果没有收获地址，
             MemberAddress memberAddress = tradeDTO.getMemberAddress();
-            if (memberAddress == null && !GoodsTypeEnum.VIRTUAL_GOODS.name().equals(tradeDTO.getCheckedSkuList().get(0).getGoodsSku().getGoodsType())) {
+            String goodsType = tradeDTO.getCheckedSkuList().get(0).getGoodsSku().getGoodsType();
+            if (memberAddress == null
+                    && !GoodsTypeEnum.VIRTUAL_GOODS.name().equals(goodsType)
+                    && !GoodsTypeEnum.E_COUPON.name().equals(goodsType)) {
                 throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
             }
             //订单配送区域校验

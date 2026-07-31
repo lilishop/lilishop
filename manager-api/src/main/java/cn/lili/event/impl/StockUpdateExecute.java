@@ -5,10 +5,14 @@ import cn.lili.cache.Cache;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
+import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
+import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.promotion.entity.dos.KanjiaActivity;
@@ -27,6 +31,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,6 +51,11 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
      * 出库失败消息
      */
     static String outOfStockMessage = "库存不足，出库失败";
+    /**
+     * PAID 消息处理锁 TTL（秒）
+     */
+    private static final long PAID_HANDLE_LOCK_SECONDS = 120L;
+    private static final String PAID_HANDLE_LOCK_PREFIX = "order:paid:handle:";
     /**
      * Redis
      */
@@ -81,47 +91,43 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
     @Autowired
     private PointsGoodsService pointsGoodsService;
 
+    @Autowired
+    private CardKeyService cardKeyService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void orderChange(OrderMessage orderMessage) {
 
         switch (orderMessage.getNewStatus()) {
             case PAID: {
-                //获取订单详情
-                OrderDetailVO order = orderService.queryDetail(orderMessage.getOrderSn());
-                //库存key 和 扣减数量
-                List<String> keys = new ArrayList<>();
-                List<String> values = new ArrayList<>();
-                for (OrderItem orderItem : order.getOrderItems()) {
-                    keys.add(GoodsSkuService.getStockCacheKey(orderItem.getSkuId()));
-                    int i = -orderItem.getNum();
-                    values.add(Integer.toString(i));
-                    setPromotionStock(keys, values, orderItem, true);
+                String orderSn = orderMessage.getOrderSn();
+                String lockKey = PAID_HANDLE_LOCK_PREFIX + orderSn;
+                // O-12d：PAID 并发锁，避免多消费者重复履约或与旧版 virtualOrderConfirm 竞态
+                String lockToken = orderSn + ":" + System.nanoTime();
+                Boolean locked = stringRedisTemplate.opsForValue()
+                        .setIfAbsent(lockKey, lockToken, Duration.ofSeconds(PAID_HANDLE_LOCK_SECONDS));
+                if (!Boolean.TRUE.equals(locked)) {
+                    log.info("PAID 消息跳过，其他消费者处理中，orderSn={}", orderSn);
+                    break;
                 }
-
-                List<Integer> stocks = cache.multiGet(keys);
-                //如果缓存中不存在存在等量的库存值，则重新写入缓存，防止缓存击穿导致无法下单
-                checkStocks(stocks, order);
-
-                //库存扣除结果
-                Boolean skuResult = stringRedisTemplate.execute(quantityScript, keys, values.toArray());
-                //如果库存扣减都成功，则记录成交订单
-                if (Boolean.TRUE.equals(skuResult)) {
-                    log.info("库存扣减成功,参数为{};{}", keys, values);
-                    //库存确认之后对结构处理
-                    orderService.afterOrderConfirm(orderMessage.getOrderSn());
-                    //成功之后，同步库存
-                    synchroDB(order);
-                } else {
-                    log.info("库存扣件失败，变更缓存key{} 变更缓存value{}", keys, values);
-                    //失败之后取消订单
-                    this.errorOrder(orderMessage.getOrderSn());
+                try {
+                    handlePaidOrder(orderMessage);
+                } finally {
+                    String current = stringRedisTemplate.opsForValue().get(lockKey);
+                    if (lockToken.equals(current)) {
+                        stringRedisTemplate.delete(lockKey);
+                    }
                 }
                 break;
             }
             case CANCELLED: {
                 //获取订单详情
                 OrderDetailVO order = orderService.queryDetail(orderMessage.getOrderSn());
+                // E_COUPON 库存由卡池管理，取消时不走 Redis 库存回滚
+                if (order.getOrder() != null
+                        && OrderTypeEnum.E_COUPON.name().equals(order.getOrder().getOrderType())) {
+                    break;
+                }
                 //判定是否已支付 并且 非库存不足导致库存回滚 则需要考虑订单库存返还业务
                 if (order.getOrder().getPayStatus().equals(PayStatusEnum.PAID.name())
                         && !order.getOrder().getCancelReason().equals(outOfStockMessage)) {
@@ -149,6 +155,49 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
             }
             default:
                 break;
+        }
+    }
+
+    /**
+     * PAID 消息处理：E_COUPON 跳过 Redis Lua，直接走卡池履约（O-10 / EC-25）。
+     * 已 COMPLETED 幂等跳过；其他类型仍 Redis 扣减后 afterOrderConfirm。
+     */
+    private void handlePaidOrder(OrderMessage orderMessage) {
+        OrderDetailVO order = orderService.queryDetail(orderMessage.getOrderSn());
+        Order orderHeader = order.getOrder();
+        if (orderHeader != null && OrderTypeEnum.E_COUPON.name().equals(orderHeader.getOrderType())) {
+            if (OrderStatusEnum.COMPLETED.name().equals(orderHeader.getOrderStatus())) {
+                log.info("E_COUPON PAID 跳过，订单已完成，orderSn={}", orderMessage.getOrderSn());
+                return;
+            }
+            cardKeyService.fulfillAfterPayment(orderMessage.getOrderSn());
+            return;
+        }
+        //库存key 和 扣减数量
+        List<String> keys = new ArrayList<>();
+        List<String> values = new ArrayList<>();
+        for (OrderItem orderItem : order.getOrderItems()) {
+            keys.add(GoodsSkuService.getStockCacheKey(orderItem.getSkuId()));
+            int i = -orderItem.getNum();
+            values.add(Integer.toString(i));
+            setPromotionStock(keys, values, orderItem, true);
+        }
+
+        List<Integer> stocks = cache.multiGet(keys);
+        //如果缓存中不存在存在等量的库存值，则重新写入缓存，防止缓存击穿导致无法下单
+        checkStocks(stocks, order);
+
+        //库存扣除结果
+        Boolean skuResult = stringRedisTemplate.execute(quantityScript, keys, values.toArray());
+        //如果库存扣减都成功，则记录成交订单
+        if (Boolean.TRUE.equals(skuResult)) {
+            log.info("库存扣减成功,参数为{};{}", keys, values);
+            orderService.afterOrderConfirm(orderMessage.getOrderSn());
+            synchroDB(order);
+        } else {
+            log.info("库存扣件失败，变更缓存key{} 变更缓存value{}", keys, values);
+            //失败之后取消订单
+            this.errorOrder(orderMessage.getOrderSn());
         }
     }
 

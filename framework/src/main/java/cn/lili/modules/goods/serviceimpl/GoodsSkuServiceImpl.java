@@ -24,6 +24,7 @@ import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStockTypeEnum;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.entity.vos.GoodsSkuSpecVO;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
@@ -517,6 +518,10 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
         goodsSkuVO.setGoodsGalleryList(goodsGalleryList);
         goodsSkuVO.setSpecList(specValueVOS);
+        // 买家/商家 SKU 详情：poolStock 与卡池 UNUSED 同步，前端库存只读展示
+        if (GoodsTypeEnum.E_COUPON.name().equals(goodsSku.getGoodsType())) {
+            goodsSkuVO.setPoolStock(goodsSku.getQuantity() == null ? 0 : goodsSku.getQuantity());
+        }
         return goodsSkuVO;
 
     }
@@ -956,6 +961,11 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         // ?????????
         salesModelRenders.stream().filter(i -> i.getSalesMode().equals(goodsOperationDTO.getSalesModel())).findFirst().ifPresent(i -> i.renderSingle(goodsSku, goodsOperationDTO));
         this.renderImages(goodsSku, goodsOperationDTO.getGoodsGalleryList());
+        // 保存 E_COUPON SKU 时忽略商家手填库存，以卡池 syncSkuStock 为准
+        if (GoodsTypeEnum.E_COUPON.name().equals(goodsSku.getGoodsType())) {
+            GoodsSku existing = CharSequenceUtil.isNotEmpty(goodsSku.getId()) ? this.getById(goodsSku.getId()) : null;
+            goodsSku.setQuantity(existing != null && existing.getQuantity() != null ? existing.getQuantity() : 0);
+        }
     }
 
     /**

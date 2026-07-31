@@ -15,6 +15,7 @@ import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
+import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.member.entity.dos.Member;
@@ -131,6 +132,9 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private StoreAddressService storeAddressService;
 
+    @Autowired
+    private CardKeyService cardKeyService;
+
     @Override
     public void add(String skuId, Integer num, String cartType, Boolean cover) {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
@@ -139,6 +143,8 @@ public class CartServiceImpl implements CartService {
         }
         CartTypeEnum cartTypeEnum = getCartType(cartType);
         GoodsSku dataSku = checkGoods(skuId);
+        // E_COUPON：禁止 CART 加购，校验 poolStock 上限（FR-B-01）
+        cardKeyService.validateAddToCart(skuId, num, cartTypeEnum.name());
         Map<String, Object> promotionMap = promotionGoodsService.getCurrentGoodsPromotion(dataSku, cartTypeEnum.name());
 
         try {
@@ -239,8 +245,12 @@ public class CartServiceImpl implements CartService {
             tradeDTO.setMemberId(currentUser.getId());
             tradeDTO.setMemberName(currentUser.getUsername());
         }
-        if (tradeDTO.getMemberAddress() == null) {
+        // E_COUPON 免默认收货地址；读取时即归一化虚拟发货与促销选择
+        if (tradeDTO.getMemberAddress() == null && !cardKeyService.isECouponOnlyTrade(tradeDTO)) {
             tradeDTO.setMemberAddress(this.memberAddressService.getDefaultMemberAddress());
+        }
+        if (cardKeyService.isECouponOnlyTrade(tradeDTO)) {
+            cardKeyService.normalizeECouponTrade(tradeDTO);
         }
         return tradeDTO;
     }
@@ -413,14 +423,16 @@ public class CartServiceImpl implements CartService {
     }
 
     /**
-     * 检查并设置购物车商品数量
-     *
-     * @param cartSkuVO 购物车商品对象
-     * @param skuId     商品id
-     * @param num       购买数量
+     * 检查并设置购物车商品数量；E_COUPON 库存以卡池 UNUSED 数为准，非 Redis SKU 库存。
      */
     private void checkSetGoodsQuantity(CartSkuVO cartSkuVO, String skuId, Integer num) {
-        Integer enableStock = goodsSkuService.getStock(skuId);
+        int enableStock;
+        if (cartSkuVO.getGoodsSku() != null
+                && GoodsTypeEnum.E_COUPON.name().equals(cartSkuVO.getGoodsSku().getGoodsType())) {
+            enableStock = cardKeyService.countUnusedPoolStock(skuId);
+        } else {
+            enableStock = goodsSkuService.getStock(skuId);
+        }
 
         //如果sku的可用库存小于等于0或者小于用户购买的数量，则不允许购买
         if (enableStock <= 0 || enableStock < num) {
@@ -605,8 +617,12 @@ public class CartServiceImpl implements CartService {
         tradeDTO.setStoreRemark(tradeParams.getRemark());
         tradeDTO.setParentOrderSn(tradeParams.getParentOrderSn());
         //订单无收货地址校验
-        if (tradeDTO.getStoreAddress() == null && tradeDTO.getMemberAddress() == null && !GoodsTypeEnum.VIRTUAL_GOODS.name().equals(tradeDTO.getCheckedSkuList().get(0).getGoodsSku().getGoodsType())) {
-            throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
+        if (tradeDTO.getStoreAddress() == null && tradeDTO.getMemberAddress() == null) {
+            String goodsType = tradeDTO.getCheckedSkuList().get(0).getGoodsSku().getGoodsType();
+            if (!GoodsTypeEnum.VIRTUAL_GOODS.name().equals(goodsType)
+                    && !GoodsTypeEnum.E_COUPON.name().equals(goodsType)) {
+                throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
+            }
         }
         //构建交易
         Trade trade = tradeBuilder.createTrade(tradeDTO);
@@ -616,9 +632,13 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public List<String> shippingMethodList(String way) {
+        TradeDTO tradeDTO = this.getCheckedTradeDTO(CartTypeEnum.valueOf(way));
+        // E_COUPON 仅虚拟发货，结算页不展示物流/自提选项
+        if (cardKeyService.isECouponOnlyTrade(tradeDTO)) {
+            return List.of(DeliveryMethodEnum.VIRTUAL.name());
+        }
         List<String> list = new ArrayList<String>();
         list.add(DeliveryMethodEnum.LOGISTICS.name());
-        TradeDTO tradeDTO = this.getCheckedTradeDTO(CartTypeEnum.valueOf(way));
         if (tradeDTO.getCartList().size() == 1) {
             for (CartVO cartVO : tradeDTO.getCartList()) {
                 Store store = storeService.getById(cartVO.getStoreId());

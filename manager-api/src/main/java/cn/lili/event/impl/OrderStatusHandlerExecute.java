@@ -3,6 +3,7 @@ package cn.lili.event.impl;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.event.AfterSaleStatusChangeEvent;
 import cn.lili.event.TradeEvent;
+import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.aftersale.entity.vo.AfterSaleSearchParams;
 import cn.lili.modules.order.aftersale.service.AfterSaleService;
@@ -15,6 +16,7 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.TradeService;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,7 @@ import java.util.List;
  * @since 2020-07-03 11:20
  **/
 @Service
+@Slf4j
 public class OrderStatusHandlerExecute implements TradeEvent, AfterSaleStatusChangeEvent {
 
 
@@ -38,11 +41,18 @@ public class OrderStatusHandlerExecute implements TradeEvent, AfterSaleStatusCha
     private OrderService orderService;
     @Autowired
     private AfterSaleService afterSaleService;
+    @Autowired
+    private CardKeyService cardKeyService;
 
     @Override
     public void orderCreate(TradeDTO tradeDTO) {
         // 应付现金为 0 时自动推进为已支付（优惠券/积分/礼品卡等抵扣后无需走收银台）
+        // E_COUPON 禁止 0 元自动支付，须走正常收银且 flowPrice>0（O-12b / EC-27）
         if (tradeDTO.getPriceDetailDTO().getFlowPrice() <= 0) {
+            if (cardKeyService.isECouponOnlyTrade(tradeDTO)) {
+                log.error("电子卡券订单金额为 0，拒绝自动支付，tradeSn={}", tradeDTO.getSn());
+                return;
+            }
             String paymentMethod = PaymentMethodEnum.BANK_TRANSFER.name();
             Double giftCardPrice = tradeDTO.getPriceDetailDTO().getGiftCardPrice();
             if (giftCardPrice != null && giftCardPrice > 0) {

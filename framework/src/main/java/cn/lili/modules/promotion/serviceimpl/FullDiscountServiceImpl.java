@@ -4,6 +4,9 @@ import com.alibaba.fastjson2.JSON;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
+import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.order.cart.entity.vo.FullDiscountVO;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.FullDiscount;
@@ -46,6 +49,12 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
      */
     @Autowired
     private PromotionGoodsService promotionGoodsService;
+    /**
+     * 商品 SKU
+     */
+    @Lazy
+    @Autowired
+    private GoodsSkuService goodsSkuService;
 
     @Override
     public List<FullDiscountVO> currentPromotion(List<String> storeId) {
@@ -180,6 +189,7 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
             if (noGiftSelected) {
                 throw new ServiceException(ResultCode.FULL_DISCOUNT_GIFT_ERROR);
             }
+            this.checkGiftSku(fullDiscount.getGiftId());
         } else {
             fullDiscount.setGiftId(null);
         }
@@ -195,6 +205,21 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
             fullDiscount.setTitle("满" + fullDiscount.getFullMoney() + " 打" + fullDiscount.getFullRate() + "折");
         }
 
+    }
+
+    /**
+     * 检查赠品 SKU（卡密商品不可作为满额活动赠品）
+     *
+     * @param giftSkuId 赠品 SKU 编号
+     */
+    private void checkGiftSku(String giftSkuId) {
+        GoodsSku giftSku = this.goodsSkuService.getGoodsSkuByIdFromCache(giftSkuId);
+        if (giftSku == null) {
+            throw new ServiceException(ResultCode.FULL_DISCOUNT_GIFT_ERROR);
+        }
+        if (GoodsTypeEnum.E_COUPON.name().equals(giftSku.getGoodsType())) {
+            throw new ServiceException(ResultCode.FULL_DISCOUNT_GIFT_E_COUPON_ERROR);
+        }
     }
 
     /**

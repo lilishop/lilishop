@@ -183,6 +183,8 @@ lili:
   local-file:
     path: data/uploads
     url-prefix: /files
+  card-key:
+    secret: lilishop-card-key-default-secret
 
   statistics:
     # 在线人数统计 X 小时。这里设为48，即统计过去48小时每小时在线人数

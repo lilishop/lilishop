@@ -172,14 +172,14 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         //获取订单货物判断是否可申请售后
         OrderItem orderItem = orderItemService.getBySn(sn);
 
+        Order order = OperationalJudgment.judgment(orderService.getBySn(orderItem.getOrderSn()));
+        rejectECouponAfterSale(order);
+
         //未申请售后订单货物或部分售后才能进行申请
         if (!orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name())
                 && !orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.PART_AFTER_SALE.name())) {
             throw new ServiceException(ResultCode.AFTER_SALES_BAN);
         }
-
-        //获取售后类型
-        Order order = OperationalJudgment.judgment(orderService.getBySn(orderItem.getOrderSn()));
 
         //订单未支付，不能申请申请售后
         if (!order.getPayStatus().equals(PayStatusEnum.PAID.name())) {
@@ -551,6 +551,9 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         //获取订单货物判断是否可申请售后
         OrderItem orderItem = orderItemService.getBySn(afterSaleDTO.getOrderItemSn());
 
+        Order order = orderService.getBySn(orderItem.getOrderSn());
+        rejectECouponAfterSale(order);
+
         //未申请售后或部分售后订单货物才能进行申请
         if (!orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name()) && !orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.PART_AFTER_SALE.name())) {
             throw new ServiceException(ResultCode.AFTER_SALES_BAN);
@@ -560,10 +563,6 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         if (afterSaleDTO.getNum() > (orderItem.getNum() - orderItem.getReturnGoodsNumber())) {
             throw new ServiceException(ResultCode.AFTER_GOODS_NUMBER_ERROR);
         }
-
-
-        //获取售后类型
-        Order order = orderService.getBySn(orderItem.getOrderSn());
         AfterSaleTypeEnum afterSaleTypeEnum = AfterSaleTypeEnum.valueOf(afterSaleDTO.getServiceType());
         switch (afterSaleTypeEnum) {
             case RETURN_MONEY:
@@ -585,6 +584,15 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
                 break;
         }
 
+    }
+
+    /**
+     * 电子卡券订单不支持买家售后（FR-B-04 / AC-10）。
+     */
+    private void rejectECouponAfterSale(Order order) {
+        if (order != null && OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
+            throw new ServiceException(ResultCode.CARD_KEY_E_COUPON_NO_AFTER_SALE);
+        }
     }
 
     /**
