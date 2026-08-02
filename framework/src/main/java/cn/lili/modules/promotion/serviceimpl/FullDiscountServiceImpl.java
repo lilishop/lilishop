@@ -208,7 +208,7 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
     }
 
     /**
-     * 检查赠品 SKU（卡密商品不可作为满额活动赠品）
+     * 检查赠品 SKU（E_COUPON 可作为满赠赠品，支付后由卡池自动发卡）
      *
      * @param giftSkuId 赠品 SKU 编号
      */
@@ -216,9 +216,6 @@ public class FullDiscountServiceImpl extends AbstractPromotionsServiceImpl<FullD
         GoodsSku giftSku = this.goodsSkuService.getGoodsSkuByIdFromCache(giftSkuId);
         if (giftSku == null) {
             throw new ServiceException(ResultCode.FULL_DISCOUNT_GIFT_ERROR);
-        }
-        if (GoodsTypeEnum.E_COUPON.name().equals(giftSku.getGoodsType())) {
-            throw new ServiceException(ResultCode.FULL_DISCOUNT_GIFT_E_COUPON_ERROR);
         }
     }
 

@@ -1,7 +1,3 @@
-/**
- * 作者：Mike
- * 日期：2026-07-31
- */
 package cn.lili.modules.goods.entity.dto.search;
 
 import cn.lili.common.vo.PageVO;

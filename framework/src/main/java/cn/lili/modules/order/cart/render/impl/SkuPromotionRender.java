@@ -78,10 +78,6 @@ public class SkuPromotionRender implements CartRenderStep {
 
         //基础价格渲染
         renderBasePrice(tradeDTO);
-        // E_COUPON 仅 renderBasePrice，不参与单品促销/秒杀等（AC-19 / O-12a）
-        if (cardKeyService.isECouponOnlyTrade(tradeDTO)) {
-            return;
-        }
         //渲染单品促销
         renderSkuPromotion(tradeDTO);
         //检查促销库存

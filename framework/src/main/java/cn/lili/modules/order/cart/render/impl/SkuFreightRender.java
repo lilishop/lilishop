@@ -45,7 +45,7 @@ public class SkuFreightRender implements CartRenderStep {
 
     @Override
     public void render(TradeDTO tradeDTO) {
-        // E_COUPON 免运费、免地址，跳过运费模板计算（O-11 / EC-26）
+        // E_COUPON 免运费、免地址，跳过运费模板计算
         if (cardKeyService.isECouponOnlyTrade(tradeDTO)) {
             return;
         }

@@ -1,7 +1,3 @@
-/**
- * 作者：Mike
- * 日期：2026-07-31
- */
 package cn.lili.modules.goods.serviceimpl;
 
 import cn.hutool.core.collection.CollUtil;
@@ -22,7 +18,12 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.dto.CardKeyAddDTO;
 import cn.lili.modules.goods.entity.dto.CardKeyImportDTO;
 import cn.lili.modules.goods.entity.dto.search.CardKeySearchParams;
+import cn.lili.common.security.enums.UserEnums;
+import cn.lili.modules.goods.entity.enums.CardKeyFulfillStatusEnum;
 import cn.lili.modules.goods.entity.enums.CardKeyStatusEnum;
+import cn.lili.modules.order.order.entity.vo.GiftECouponOrderSummaryVO;
+import cn.lili.modules.order.trade.entity.dos.OrderLog;
+import cn.lili.modules.order.trade.service.OrderLogService;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.entity.vo.CardKeyImportResultVO;
@@ -31,6 +32,7 @@ import cn.lili.modules.goods.entity.vo.CardKeyStatsVO;
 import cn.lili.modules.goods.entity.vo.CardKeyVO;
 import cn.lili.modules.goods.mapper.CardKeyMapper;
 import cn.lili.modules.goods.service.CardKeyService;
+import cn.lili.modules.goods.service.GiftFulfillmentAlertPublisher;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.goods.util.CardKeySecretUtil;
@@ -80,7 +82,7 @@ import java.util.stream.Collectors;
 /**
  * 电子卡券卡密服务实现。
  * <p>
- * 卡密库内 AES 加密存储；商家授权接口返回明文。支付履约由 {@link #fulfillAfterPayment} 统一入口，
+ * 卡密库内明文存储。支付履约由 {@link #fulfillAfterPayment} 统一入口，
  * 勿与 VIRTUAL 核销链（TAKE）混用。
  *
  * @author Mike
@@ -94,6 +96,7 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
     private static final int EXPORT_MAX_ROWS = 10000;
     private static final int MAX_BUY_QUANTITY = 999;
     private static final String FULFILL_FAIL_CANCEL_REASON = "库存不足，出库失败";
+    private static final String GIFT_FULFILL_FAIL_CANCEL_REASON = "满赠电子卡券发放失败";
 
     @Autowired
     private GoodsSkuService goodsSkuService;
@@ -116,9 +119,14 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private GiftFulfillmentAlertPublisher giftFulfillmentAlertPublisher;
+
+    @Autowired
+    private OrderLogService orderLogService;
+
     /**
      * {@inheritDoc}
-     * <p>幂等：已 COMPLETED 直接跳过。失败路径触发系统 auto 退款，非买家售后。
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -136,26 +144,76 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
             log.info("电子卡券支付后履约跳过，订单已完成，orderSn={}", orderSn);
             return;
         }
-        log.info("电子卡券支付后履约开始，orderSn={}，orderStatus={}", orderSn, order.getOrderStatus());
-        if (isPurchaseTypeOrder(order)) {
-            try {
-                allocateByOrder(orderSn);
-                orderService.systemComplete(orderSn);
-                log.info("电子卡券支付后履约完成，orderSn={}", orderSn);
-            } catch (Exception e) {
-                log.error("电子卡券支付后履约失败，orderSn={}", orderSn, e);
-                voidOnSystemFailure(orderSn);
-                orderItemService.getByOrderSn(orderSn)
-                        .forEach(item -> syncSkuStock(item.getSkuId()));
-                orderService.systemCancel(orderSn, FULFILL_FAIL_CANCEL_REASON, true);
-            }
+        log.info("电子卡券支付后履约开始，orderSn={}，orderStatus={}，promotionType={}",
+                orderSn, order.getOrderStatus(), order.getOrderPromotionType());
+        if (isGiftECouponOrder(order)) {
+            fulfillGiftECouponOrder(order);
+        } else if (isPintuanECouponOrder(order)) {
+            // 拼团预占由 afterOrderConfirm 触发 reserveByOrder
+            log.info("电子卡券拼团订单等待成团，orderSn={}", orderSn);
+        } else if (isPurchaseTypeOrder(order)) {
+            fulfillPurchaseECouponOrder(order);
         } else {
             orderService.systemComplete(orderSn);
-            log.info("电子卡券非购买型订单直接完成，orderSn={}", orderSn);
+            log.info("电子卡券非卡池订单直接完成，orderSn={}", orderSn);
         }
     }
 
-    /** {@inheritDoc} 前置校验：店铺权限、SKU 类型、审核/关店状态（S-06/S-07）。 */
+    private void fulfillPurchaseECouponOrder(Order order) {
+        String orderSn = order.getSn();
+        try {
+            allocateByOrder(orderSn);
+            orderService.systemComplete(orderSn);
+            log.info("电子卡券支付后履约完成，orderSn={}", orderSn);
+        } catch (Exception e) {
+            log.error("电子卡券支付后履约失败，orderSn={}", orderSn, e);
+            voidOnSystemFailure(orderSn);
+            orderItemService.getByOrderSn(orderSn)
+                    .forEach(item -> syncSkuStock(item.getSkuId()));
+            orderService.systemCancel(orderSn, FULFILL_FAIL_CANCEL_REASON, true);
+        }
+    }
+
+    private void fulfillGiftECouponOrder(Order giftOrder) {
+        String orderSn = giftOrder.getSn();
+        Order parentOrder = CharSequenceUtil.isBlank(giftOrder.getParentOrderSn()) ? null
+                : orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, giftOrder.getParentOrderSn()));
+        try {
+            allocateGiftByOrder(orderSn);
+            orderService.systemComplete(orderSn);
+            log.info("满赠电子卡券子单履约完成，orderSn={}", orderSn);
+        } catch (Exception e) {
+            log.error("满赠电子卡券子单履约失败，orderSn={}", orderSn, e);
+            voidOnSystemFailure(orderSn);
+            orderItemService.getByOrderSn(orderSn)
+                    .forEach(item -> syncSkuStock(item.getSkuId()));
+            orderService.systemCancel(orderSn, GIFT_FULFILL_FAIL_CANCEL_REASON, false);
+            giftFulfillmentAlertPublisher.onGiftFulfillmentFailure(giftOrder, parentOrder, e.getMessage());
+            writeGiftFulfillmentFailureLogs(giftOrder, parentOrder, e.getMessage());
+        }
+    }
+
+    private void writeGiftFulfillmentFailureLogs(Order giftOrder, Order parentOrder, String reason) {
+        String detail = CharSequenceUtil.blankToDefault(reason, "卡池库存不足");
+        OrderLog giftLog = new OrderLog(
+                giftOrder.getSn(),
+                "-1",
+                UserEnums.SYSTEM.name(),
+                UserEnums.SYSTEM.getRole(),
+                "满赠电子卡券发卡失败，赠品子单已取消。原因：" + detail);
+        orderLogService.save(giftLog);
+        if (parentOrder != null) {
+            OrderLog parentLog = new OrderLog(
+                    parentOrder.getSn(),
+                    "-1",
+                    UserEnums.SYSTEM.name(),
+                    UserEnums.SYSTEM.getRole(),
+                    "满赠赠品（子单 " + giftOrder.getSn() + "）卡密发放失败，主订单不受影响");
+            orderLogService.save(parentLog);
+        }
+    }
+
+    /** {@inheritDoc} 前置校验：店铺权限、SKU 类型、审核/关店状态。 */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public CardKeyImportResultVO importExcel(String skuId, MultipartFile file) {
@@ -225,6 +283,7 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
         CardKeyStatsVO vo = new CardKeyStatsVO();
         vo.setSkuId(skuId);
         vo.setUnusedCount(countByStatus(skuId, CardKeyStatusEnum.UNUSED));
+        vo.setReservedCount(countByStatus(skuId, CardKeyStatusEnum.RESERVED));
         vo.setAllocatedCount(countByStatus(skuId, CardKeyStatusEnum.ALLOCATED));
         vo.setVoidedCount(countByStatus(skuId, CardKeyStatusEnum.VOIDED));
         return vo;
@@ -344,8 +403,8 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
         if (goodsSku == null) {
             return;
         }
-        int poolStock = countUnusedPoolStock(skuId);
-        goodsSkuService.updateStock(skuId, poolStock);
+        int availableStock = countUnusedPoolStock(skuId);
+        goodsSkuService.updateStockFromCardKeySync(skuId, availableStock);
         // 商家商品列表读 li_goods.quantity，须同步 SPU 级库存
         goodsService.updateStock(goodsSku.getGoodsId());
     }
@@ -360,7 +419,6 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
 
     /**
      * {@inheritDoc}
-     * <p>任一步取卡不足则 voidOnSystemFailure 并抛异常，触发上层系统退款（EC-16）。
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -369,11 +427,92 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
         if (order == null || !isPurchaseTypeOrder(order)) {
             return;
         }
-        if (alreadyAllocated(orderSn)) {
+        if (alreadyBound(orderSn, CardKeyStatusEnum.ALLOCATED)) {
+            return;
+        }
+        bindCardsForOrder(orderSn, CardKeyStatusEnum.ALLOCATED);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void reserveByOrder(String orderSn) {
+        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
+        if (order == null || !isPintuanECouponOrder(order)) {
+            return;
+        }
+        if (alreadyBound(orderSn, CardKeyStatusEnum.RESERVED)
+                || alreadyBound(orderSn, CardKeyStatusEnum.ALLOCATED)) {
+            return;
+        }
+        bindCardsForOrder(orderSn, CardKeyStatusEnum.RESERVED);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void confirmReservationAndComplete(String orderSn) {
+        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
+        if (order == null || !isPintuanECouponOrder(order)) {
+            return;
+        }
+        List<CardKey> reserved = baseMapper.selectReservedByOrder(orderSn);
+        if (reserved.isEmpty()) {
+            if (alreadyBound(orderSn, CardKeyStatusEnum.ALLOCATED)) {
+                orderService.systemComplete(orderSn);
+            }
+            return;
+        }
+        Date now = new Date();
+        Set<String> skuIds = new HashSet<>();
+        for (CardKey card : reserved) {
+            card.setStatus(CardKeyStatusEnum.ALLOCATED.name());
+            card.setAllocatedTime(now);
+            this.updateById(card);
+            skuIds.add(card.getSkuId());
+        }
+        skuIds.forEach(this::syncSkuStock);
+        orderService.systemComplete(orderSn);
+        log.info("拼团电子卡券预占确认完成，orderSn={}", orderSn);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void releaseReservation(String orderSn) {
+        List<CardKey> reserved = baseMapper.selectReservedByOrder(orderSn);
+        if (reserved.isEmpty()) {
+            return;
+        }
+        Set<String> skuIds = new HashSet<>();
+        for (CardKey cardKey : reserved) {
+            this.update(new LambdaUpdateWrapper<CardKey>()
+                    .eq(CardKey::getId, cardKey.getId())
+                    .set(CardKey::getStatus, CardKeyStatusEnum.UNUSED.name())
+                    .set(CardKey::getOrderSn, null)
+                    .set(CardKey::getOrderItemSn, null)
+                    .set(CardKey::getMemberId, null)
+                    .set(CardKey::getAllocatedTime, null));
+            skuIds.add(cardKey.getSkuId());
+        }
+        skuIds.forEach(this::syncSkuStock);
+        log.info("拼团电子卡券预占已释放，orderSn={}", orderSn);
+    }
+
+    private void allocateGiftByOrder(String orderSn) {
+        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
+        if (order == null || !isGiftECouponOrder(order)) {
+            return;
+        }
+        if (alreadyBound(orderSn, CardKeyStatusEnum.ALLOCATED)) {
+            return;
+        }
+        bindCardsForOrder(orderSn, CardKeyStatusEnum.ALLOCATED);
+    }
+
+    private void bindCardsForOrder(String orderSn, CardKeyStatusEnum targetStatus) {
+        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
+        if (order == null) {
             return;
         }
         List<OrderItem> orderItems = orderItemService.getByOrderSn(orderSn);
-        List<CardKey> allocated = new ArrayList<>();
         try {
             for (OrderItem orderItem : orderItems) {
                 GoodsSku sku = goodsSkuService.getById(orderItem.getSkuId());
@@ -386,18 +525,21 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
                 }
                 Date now = new Date();
                 for (CardKey card : cards) {
-                    card.setStatus(CardKeyStatusEnum.ALLOCATED.name());
+                    card.setStatus(targetStatus.name());
                     card.setOrderSn(orderSn);
                     card.setOrderItemSn(orderItem.getSn());
                     card.setMemberId(order.getMemberId());
-                    card.setAllocatedTime(now);
+                    if (CardKeyStatusEnum.ALLOCATED.equals(targetStatus)) {
+                        card.setAllocatedTime(now);
+                    }
                     this.updateById(card);
-                    allocated.add(card);
                 }
                 syncSkuStock(orderItem.getSkuId());
             }
         } catch (RuntimeException ex) {
-            voidOnSystemFailure(orderSn);
+            if (CardKeyStatusEnum.ALLOCATED.equals(targetStatus) && isPurchaseTypeOrder(order)) {
+                voidOnSystemFailure(orderSn);
+            }
             throw ex;
         }
     }
@@ -438,15 +580,17 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void softDeletePoolOnStoreClose(String storeId) {
-        List<GoodsSku> skus = goodsSkuService.list(new LambdaQueryWrapper<GoodsSku>()
-                .eq(GoodsSku::getStoreId, storeId)
-                .eq(GoodsSku::getGoodsType, GoodsTypeEnum.E_COUPON.name())
-                .eq(GoodsSku::getDeleteFlag, false));
-        for (GoodsSku sku : skus) {
-            softDeletePoolOnSkuRemove(sku.getId());
-        }
+    public boolean isGiftECouponOrder(Order order) {
+        return order != null
+                && OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())
+                && OrderPromotionTypeEnum.GIFT.name().equals(order.getOrderPromotionType());
+    }
+
+    @Override
+    public boolean isPintuanECouponOrder(Order order) {
+        return order != null
+                && OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())
+                && OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType());
     }
 
     @Override
@@ -480,15 +624,9 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
         }
         tradeDTO.setMemberAddress(null);
         tradeDTO.setStoreAddress(null);
-        tradeDTO.setPlatformCoupon(null);
-        tradeDTO.setStoreCoupons(new java.util.HashMap<>());
-        tradeDTO.setSelectedGiftCardIds(new ArrayList<>());
-        tradeDTO.setSkuPromotionDetail(new java.util.HashMap<>());
         if (tradeDTO.getCartList() != null) {
             for (CartVO cart : tradeDTO.getCartList()) {
                 cart.setDeliveryMethod(DeliveryMethodEnum.VIRTUAL.name());
-                cart.setFullDiscount(null);
-                cart.setGiftPoint(null);
                 if (cart.getSkuList() != null) {
                     for (CartSkuVO sku : cart.getSkuList()) {
                         sku.setDeliveryMethod(DeliveryMethodEnum.VIRTUAL.name());
@@ -524,23 +662,18 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
         if (hasNonECoupon) {
             throw new ServiceException(ResultCode.CARD_KEY_MIXED_CHECKOUT);
         }
-        if (!CartTypeEnum.BUY_NOW.equals(tradeDTO.getCartTypeEnum())) {
+        if (CartTypeEnum.CART.equals(tradeDTO.getCartTypeEnum())) {
             throw new ServiceException(ResultCode.CARD_KEY_E_COUPON_CART_FORBIDDEN);
         }
         if (checked.size() > 1) {
             throw new ServiceException(ResultCode.CARD_KEY_MULTI_E_COUPON_SKU);
         }
         CartSkuVO eCouponSku = checked.get(0);
-        validatePromotionForbidden(tradeDTO);
         validateStoreOpenForSell(eCouponSku.getStoreId());
         int num = eCouponSku.getNum() == null ? 0 : eCouponSku.getNum();
         int maxAllowed = Math.min(countUnusedPoolStock(eCouponSku.getGoodsSku().getId()), MAX_BUY_QUANTITY);
         if (num <= 0 || num > maxAllowed) {
             throw new ServiceException(ResultCode.CARD_KEY_POOL_INSUFFICIENT);
-        }
-        Double flowPrice = tradeDTO.getPriceDetailDTO() == null ? null : tradeDTO.getPriceDetailDTO().getFlowPrice();
-        if (flowPrice == null || flowPrice <= 0) {
-            throw new ServiceException(ResultCode.CARD_KEY_ZERO_PRICE);
         }
     }
 
@@ -569,25 +702,115 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
 
     @Override
     public void enrichOrderDetail(OrderDetailVO orderDetailVO) {
-        if (orderDetailVO == null || orderDetailVO.getOrder() == null || CollUtil.isEmpty(orderDetailVO.getOrderItems())) {
+        if (orderDetailVO == null || orderDetailVO.getOrder() == null) {
             return;
         }
         Order order = orderDetailVO.getOrder();
-        if (!OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
-            return;
-        }
-        boolean delivered = OrderStatusEnum.COMPLETED.name().equals(order.getOrderStatus())
-                && PayStatusEnum.PAID.name().equals(order.getPayStatus());
-        for (OrderItem orderItem : orderDetailVO.getOrderItems()) {
-            if (delivered) {
-                List<CardKeyVO> cardKeys = listCardKeyVOByOrderItemSn(orderItem.getSn(), true);
-                orderItem.setCardKeys(cardKeys);
-                orderItem.setCardKeyDelivered(!cardKeys.isEmpty());
-            } else {
-                orderItem.setCardKeys(new ArrayList<>());
-                orderItem.setCardKeyDelivered(false);
+        if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())
+                && CollUtil.isNotEmpty(orderDetailVO.getOrderItems())) {
+            for (OrderItem orderItem : orderDetailVO.getOrderItems()) {
+                applyCardKeyFulfillToOrderItem(order, orderItem);
             }
         }
+        if (!isGiftECouponOrder(order) && CharSequenceUtil.isBlank(order.getParentOrderSn())) {
+            orderDetailVO.setGiftECouponOrders(loadGiftECouponSummaries(order.getSn()));
+        }
+    }
+
+    private void applyCardKeyFulfillToOrderItem(Order order, OrderItem orderItem) {
+        CardKeyFulfillStatusEnum status = resolveCardKeyFulfillStatus(order);
+        String message = resolveCardKeyFulfillMessage(order, status);
+        List<CardKeyVO> cardKeys = CardKeyFulfillStatusEnum.DELIVERED.equals(status)
+                ? listCardKeyVOByOrderItemSn(orderItem.getSn(), true)
+                : new ArrayList<>();
+        if (CardKeyFulfillStatusEnum.DELIVERED.equals(status) && cardKeys.isEmpty()) {
+            status = CardKeyFulfillStatusEnum.FAILED;
+            message = CharSequenceUtil.blankToDefault(order.getCancelReason(), "订单已完成但未找到已分配卡密");
+        }
+        orderItem.setCardKeyFulfillStatus(status.name());
+        orderItem.setCardKeyFulfillMessage(message);
+        orderItem.setCardKeys(cardKeys);
+        orderItem.setCardKeyDelivered(CardKeyFulfillStatusEnum.DELIVERED.equals(status) && !cardKeys.isEmpty());
+    }
+
+    private CardKeyFulfillStatusEnum resolveCardKeyFulfillStatus(Order order) {
+        if (OrderStatusEnum.CANCELLED.name().equals(order.getOrderStatus())) {
+            return CardKeyFulfillStatusEnum.FAILED;
+        }
+        if (OrderStatusEnum.COMPLETED.name().equals(order.getOrderStatus())
+                && PayStatusEnum.PAID.name().equals(order.getPayStatus())) {
+            return CardKeyFulfillStatusEnum.DELIVERED;
+        }
+        if (isPintuanECouponOrder(order)) {
+            return CardKeyFulfillStatusEnum.PENDING;
+        }
+        if (PayStatusEnum.PAID.name().equals(order.getPayStatus())
+                || OrderStatusEnum.PAID.name().equals(order.getOrderStatus())) {
+            return CardKeyFulfillStatusEnum.PENDING;
+        }
+        return CardKeyFulfillStatusEnum.PENDING;
+    }
+
+    private String resolveCardKeyFulfillMessage(Order order, CardKeyFulfillStatusEnum status) {
+        if (CardKeyFulfillStatusEnum.FAILED.equals(status)) {
+            if (GIFT_FULFILL_FAIL_CANCEL_REASON.equals(order.getCancelReason())) {
+                return isGiftECouponOrder(order)
+                        ? "满赠电子卡券发放失败，赠品子单已取消，主订单不受影响"
+                        : order.getCancelReason();
+            }
+            return CharSequenceUtil.blankToDefault(order.getCancelReason(), "卡密发放失败");
+        }
+        if (CardKeyFulfillStatusEnum.DELIVERED.equals(status)) {
+            return null;
+        }
+        if (isPintuanECouponOrder(order)) {
+            return "拼团成功后发放卡密";
+        }
+        if (isGiftECouponOrder(order)) {
+            return "满赠卡密发放中，请稍后刷新";
+        }
+        return "卡密发放中，请稍后刷新";
+    }
+
+    private List<GiftECouponOrderSummaryVO> loadGiftECouponSummaries(String parentOrderSn) {
+        List<Order> giftOrders = orderMapper.selectList(new LambdaQueryWrapper<Order>()
+                .eq(Order::getParentOrderSn, parentOrderSn)
+                .eq(Order::getOrderPromotionType, OrderPromotionTypeEnum.GIFT.name())
+                .eq(Order::getOrderType, OrderTypeEnum.E_COUPON.name()));
+        if (CollUtil.isEmpty(giftOrders)) {
+            return new ArrayList<>();
+        }
+        List<GiftECouponOrderSummaryVO> summaries = new ArrayList<>();
+        for (Order giftOrder : giftOrders) {
+            GiftECouponOrderSummaryVO summary = new GiftECouponOrderSummaryVO();
+            summary.setOrderSn(giftOrder.getSn());
+            summary.setParentOrderSn(giftOrder.getParentOrderSn());
+            summary.setOrderStatus(giftOrder.getOrderStatus());
+            CardKeyFulfillStatusEnum status = resolveCardKeyFulfillStatus(giftOrder);
+            summary.setCardKeyFulfillStatus(status.name());
+            summary.setCardKeyFulfillMessage(resolveCardKeyFulfillMessage(giftOrder, status));
+            List<OrderItem> giftItems = orderItemService.getByOrderSn(giftOrder.getSn());
+            if (CollUtil.isNotEmpty(giftItems)) {
+                OrderItem first = giftItems.get(0);
+                summary.setGoodsName(first.getGoodsName());
+                summary.setSkuId(first.getSkuId());
+            }
+            List<CardKeyVO> cardKeys = new ArrayList<>();
+            if (CardKeyFulfillStatusEnum.DELIVERED.equals(status)) {
+                for (OrderItem giftItem : giftItems) {
+                    cardKeys.addAll(listCardKeyVOByOrderItemSn(giftItem.getSn(), true));
+                }
+                if (cardKeys.isEmpty()) {
+                    summary.setCardKeyFulfillStatus(CardKeyFulfillStatusEnum.FAILED.name());
+                    summary.setCardKeyFulfillMessage(
+                            CharSequenceUtil.blankToDefault(giftOrder.getCancelReason(), "订单已完成但未找到已分配卡密"));
+                }
+            }
+            summary.setCardKeys(cardKeys);
+            summary.setCardKeyDelivered(!cardKeys.isEmpty());
+            summaries.add(summary);
+        }
+        return summaries;
     }
 
     @Override
@@ -612,7 +835,7 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
     }
 
     /**
-     * 卡池管理前置校验（API-S-01~S-07）：跨店、非 E_COUPON、关店、审核拒绝、SKU/SPU 已删。
+     * 卡池管理前置校验：跨店、非 E_COUPON、关店、审核拒绝、SKU/SPU 已删。
      */
     private GoodsSku validateSkuForManage(String skuId, String storeId) {
         GoodsSku sku = goodsSkuService.getById(skuId);
@@ -646,65 +869,11 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
         }
     }
 
-    /**
-     * 拦截 E_COUPON 参与的一切促销：满减、优惠券、积分、拼团、礼品卡等（M-01 / EC-20）。
-     */
-    private void validatePromotionForbidden(TradeDTO tradeDTO) {
-        CartTypeEnum cartType = tradeDTO.getCartTypeEnum();
-        if (cartType != null && (CartTypeEnum.POINTS.equals(cartType)
-                || CartTypeEnum.PINTUAN.equals(cartType)
-                || CartTypeEnum.KANJIA.equals(cartType)
-                || CartTypeEnum.VIRTUAL.equals(cartType))) {
-            throw new ServiceException(ResultCode.CARD_KEY_PROMOTION_FORBIDDEN);
-        }
-        if (tradeDTO.getPlatformCoupon() != null) {
-            throw new ServiceException(ResultCode.CARD_KEY_PROMOTION_FORBIDDEN);
-        }
-        if (tradeDTO.getStoreCoupons() != null && !tradeDTO.getStoreCoupons().isEmpty()) {
-            throw new ServiceException(ResultCode.CARD_KEY_PROMOTION_FORBIDDEN);
-        }
-        if (CollUtil.isNotEmpty(tradeDTO.getSelectedGiftCardIds())) {
-            throw new ServiceException(ResultCode.CARD_KEY_PROMOTION_FORBIDDEN);
-        }
-        if (tradeDTO.getSkuPromotionDetail() != null && !tradeDTO.getSkuPromotionDetail().isEmpty()) {
-            throw new ServiceException(ResultCode.CARD_KEY_PROMOTION_FORBIDDEN);
-        }
-        if (cartType != null && !CartTypeEnum.BUY_NOW.equals(cartType) && !CartTypeEnum.CART.equals(cartType)) {
-            throw new ServiceException(ResultCode.CARD_KEY_PROMOTION_FORBIDDEN);
-        }
-        PriceDetailDTO priceDetail = tradeDTO.getPriceDetailDTO();
-        if (priceDetail != null) {
-            if (priceDetail.getPayPoint() != null && priceDetail.getPayPoint() > 0) {
-                throw new ServiceException(ResultCode.CARD_KEY_PROMOTION_FORBIDDEN);
-            }
-            if (priceDetail.getDiscountPrice() != null && priceDetail.getDiscountPrice() > 0) {
-                throw new ServiceException(ResultCode.CARD_KEY_PROMOTION_FORBIDDEN);
-            }
-            if (priceDetail.getCouponPrice() != null && priceDetail.getCouponPrice() > 0) {
-                throw new ServiceException(ResultCode.CARD_KEY_PROMOTION_FORBIDDEN);
-            }
-            if (priceDetail.getGiftCardPrice() != null && priceDetail.getGiftCardPrice() > 0) {
-                throw new ServiceException(ResultCode.CARD_KEY_PROMOTION_FORBIDDEN);
-            }
-            if (CollUtil.isNotEmpty(priceDetail.getJoinPromotion())) {
-                throw new ServiceException(ResultCode.CARD_KEY_PROMOTION_FORBIDDEN);
-            }
-        }
-        if (CollUtil.isNotEmpty(tradeDTO.getCartList())) {
-            for (CartVO cart : tradeDTO.getCartList()) {
-                if (cart.getFullDiscount() != null) {
-                    throw new ServiceException(ResultCode.CARD_KEY_PROMOTION_FORBIDDEN);
-                }
-                if (cart.getGiftPoint() != null && cart.getGiftPoint() > 0) {
-                    throw new ServiceException(ResultCode.CARD_KEY_PROMOTION_FORBIDDEN);
-                }
-            }
-        }
-        for (CartSkuVO cartSkuVO : tradeDTO.getCheckedSkuList()) {
-            if (cartSkuVO.getPromotionMap() != null && !cartSkuVO.getPromotionMap().isEmpty()) {
-                throw new ServiceException(ResultCode.CARD_KEY_PROMOTION_FORBIDDEN);
-            }
-        }
+    private boolean alreadyBound(String orderSn, CardKeyStatusEnum status) {
+        return this.count(new LambdaQueryWrapper<CardKey>()
+                .eq(CardKey::getOrderSn, orderSn)
+                .eq(CardKey::getStatus, status.name())
+                .eq(CardKey::getDeleteFlag, false)) > 0;
     }
 
     private LambdaQueryWrapper<CardKey> buildListWrapper(CardKeySearchParams params) {
@@ -773,10 +942,7 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
     }
 
     private boolean alreadyAllocated(String orderSn) {
-        return this.count(new LambdaQueryWrapper<CardKey>()
-                .eq(CardKey::getOrderSn, orderSn)
-                .eq(CardKey::getStatus, CardKeyStatusEnum.ALLOCATED.name())
-                .eq(CardKey::getDeleteFlag, false)) > 0;
+        return alreadyBound(orderSn, CardKeyStatusEnum.ALLOCATED);
     }
 
     private void addFailRow(CardKeyImportResultVO result, Integer row, String cardNo, String reason) {

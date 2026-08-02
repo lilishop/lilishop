@@ -150,13 +150,6 @@ public class CheckDataRender implements CartRenderStep {
                 cartSkuVO.setChecked(false);
                 //设置失效消息
                 cartSkuVO.setErrorMessage("商品库存不足,现有库存数量[" + dataSku.getQuantity() + "]");
-            }
-            // O-12a：E_COUPON 始终用 SKU 原价刷新单价，避免 promotion 链路清空后 flowPrice=0
-            if (dataSku != null && GoodsTypeEnum.E_COUPON.name().equals(dataSku.getGoodsType())) {
-                Double goodsPrice = dataSku.getPrice();
-                cartSkuVO.setPurchasePrice(goodsPrice);
-                cartSkuVO.setUtilPrice(goodsPrice);
-                cartSkuVO.setSubTotal(CurrencyUtil.mul(goodsPrice, cartSkuVO.getNum()));
             } else if (!cartSkuVO.getCartType().equals(CartTypeEnum.POINTS) && (CollUtil.isNotEmpty(cartSkuVO.getNotFilterPromotionMap()) || Boolean.TRUE.equals(cartSkuVO.getGoodsSku().getPromotionFlag()))) {
                 //如果存在商品促销活动，则判定商品促销状态
                 //获取当前最新的促销信息

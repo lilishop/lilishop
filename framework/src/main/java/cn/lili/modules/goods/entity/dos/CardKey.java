@@ -1,7 +1,3 @@
-/**
- * 作者：Mike
- * 日期：2026-07-31
- */
 package cn.lili.modules.goods.entity.dos;
 
 import cn.lili.modules.goods.entity.enums.CardKeyStatusEnum;
@@ -19,7 +15,7 @@ import java.util.Date;
 /**
  * 电子卡券卡密池实体，对应表 {@code li_card_key}。
  * <p>
- * 可售库存 = 同 SKU 下 status=UNUSED 且 delete_flag=0 的行数；card_secret 库内 AES 密文。
+ * 可售库存 = 同 SKU 下 status=UNUSED 且 delete_flag=0 的行数；card_secret 库内明文存储。
  *
  * @author Mike
  * @date 2026-07-31
@@ -45,7 +41,7 @@ public class CardKey extends BaseEntity {
     @Schema(description = "卡号")
     private String cardNo;
 
-    @Schema(description = "卡密(AES密文)")
+    @Schema(description = "卡密(明文)")
     private String cardSecret;
 
     /**

@@ -102,7 +102,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
             case PAID: {
                 String orderSn = orderMessage.getOrderSn();
                 String lockKey = PAID_HANDLE_LOCK_PREFIX + orderSn;
-                // O-12d：PAID 并发锁，避免多消费者重复履约或与旧版 virtualOrderConfirm 竞态
+                // PAID 并发锁，避免多消费者重复履约或与旧版 virtualOrderConfirm 竞态
                 String lockToken = orderSn + ":" + System.nanoTime();
                 Boolean locked = stringRedisTemplate.opsForValue()
                         .setIfAbsent(lockKey, lockToken, Duration.ofSeconds(PAID_HANDLE_LOCK_SECONDS));
@@ -123,9 +123,9 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
             case CANCELLED: {
                 //获取订单详情
                 OrderDetailVO order = orderService.queryDetail(orderMessage.getOrderSn());
-                // E_COUPON 库存由卡池管理，取消时不走 Redis 库存回滚
                 if (order.getOrder() != null
                         && OrderTypeEnum.E_COUPON.name().equals(order.getOrder().getOrderType())) {
+                    handleECouponCancelled(order);
                     break;
                 }
                 //判定是否已支付 并且 非库存不足导致库存回滚 则需要考虑订单库存返还业务
@@ -159,8 +159,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
     }
 
     /**
-     * PAID 消息处理：E_COUPON 跳过 Redis Lua，直接走卡池履约（O-10 / EC-25）。
-     * 已 COMPLETED 幂等跳过；其他类型仍 Redis 扣减后 afterOrderConfirm。
+     * PAID 消息处理：E_COUPON 仅扣促销 Redis 库存，卡池由 afterOrderConfirm 履约。
      */
     private void handlePaidOrder(OrderMessage orderMessage) {
         OrderDetailVO order = orderService.queryDetail(orderMessage.getOrderSn());
@@ -170,7 +169,11 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                 log.info("E_COUPON PAID 跳过，订单已完成，orderSn={}", orderMessage.getOrderSn());
                 return;
             }
-            cardKeyService.fulfillAfterPayment(orderMessage.getOrderSn());
+            if (!deductPromotionStockOnly(order)) {
+                errorOrder(orderMessage.getOrderSn());
+                return;
+            }
+            orderService.afterOrderConfirm(orderMessage.getOrderSn());
             return;
         }
         //库存key 和 扣减数量
@@ -271,6 +274,111 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         });
     }
 
+
+    /**
+     * E_COUPON 取消：回滚促销库存，释放拼团预占或作废已分配卡密。
+     */
+    private void handleECouponCancelled(OrderDetailVO order) {
+        if (order.getOrder().getPayStatus().equals(PayStatusEnum.PAID.name())
+                && !order.getOrder().getCancelReason().equals(outOfStockMessage)) {
+            List<String> keys = new ArrayList<>();
+            List<String> values = new ArrayList<>();
+            for (OrderItem orderItem : order.getOrderItems()) {
+                setPromotionStock(keys, values, orderItem, false);
+            }
+            if (!keys.isEmpty()) {
+                Boolean promoResult = stringRedisTemplate.execute(quantityScript, keys, values.toArray());
+                if (Boolean.FALSE.equals(promoResult)) {
+                    log.error("E_COUPON 促销库存回退异常，keys：{}, 回复库存值为: {}", keys, values);
+                }
+                synchroPromotionOnly(order);
+            }
+        }
+        cardKeyService.releaseReservation(order.getOrder().getSn());
+        cardKeyService.voidOnSystemFailure(order.getOrder().getSn());
+    }
+
+    /**
+     * E_COUPON 仅扣减促销 Redis 库存（不扣 SKU 镜像库存）。
+     */
+    private boolean deductPromotionStockOnly(OrderDetailVO order) {
+        List<String> keys = new ArrayList<>();
+        List<String> values = new ArrayList<>();
+        for (OrderItem orderItem : order.getOrderItems()) {
+            setPromotionStock(keys, values, orderItem, true);
+        }
+        if (keys.isEmpty()) {
+            return true;
+        }
+        initPromotionCache(order.getOrderItems());
+        Boolean promoResult = stringRedisTemplate.execute(quantityScript, keys, values.toArray());
+        if (Boolean.TRUE.equals(promoResult)) {
+            log.info("E_COUPON 促销库存扣减成功,参数为{};{}", keys, values);
+            synchroPromotionOnly(order);
+            return true;
+        }
+        log.info("E_COUPON 促销库存扣减失败，变更缓存key{} 变更缓存value{}", keys, values);
+        return false;
+    }
+
+    /**
+     * 同步促销库存至 DB（E_COUPON 不更新 SKU Redis 镜像库存）。
+     */
+    private void synchroPromotionOnly(OrderDetailVO order) {
+        List<PromotionGoods> promotionGoods = new ArrayList<>();
+        List<String> promotionKey = new ArrayList<>();
+        for (OrderItem orderItem : order.getOrderItems()) {
+            if (null != orderItem.getPromotionType() && null != orderItem.getPromotionId()) {
+                String[] skuPromotions = orderItem.getPromotionType().split(",");
+                for (int i = 0; i < skuPromotions.length; i++) {
+                    int currentIndex = i;
+                    Arrays.stream(PromotionTypeEnum.haveStockPromotion)
+                            .filter(promotionTypeEnum -> promotionTypeEnum.name().equals(skuPromotions[currentIndex]))
+                            .findFirst()
+                            .ifPresent(promotionTypeEnum -> {
+                                String promotionId = orderItem.getPromotionId().split(",")[currentIndex];
+                                if (promotionTypeEnum.equals(PromotionTypeEnum.KANJIA)) {
+                                    KanjiaActivity kanjiaActivity = kanjiaActivityService.getById(promotionId);
+                                    KanjiaActivityGoodsDTO kanjiaActivityGoodsDTO =
+                                            kanjiaActivityGoodsService.getKanjiaGoodsDetail(kanjiaActivity.getKanjiaActivityGoodsId());
+                                    Integer stock = Integer.parseInt(cache.get(
+                                            PromotionGoodsService.getPromotionGoodsStockCacheKey(
+                                                    promotionTypeEnum, promotionId, orderItem.getSkuId())).toString());
+                                    kanjiaActivityGoodsDTO.setStock(stock);
+                                    kanjiaActivityGoodsService.updateById(kanjiaActivityGoodsDTO);
+                                } else if (promotionTypeEnum.equals(PromotionTypeEnum.POINTS_GOODS)) {
+                                    PointsGoodsVO pointsGoodsVO = pointsGoodsService.getPointsGoodsDetail(promotionId);
+                                    Integer stock = Integer.parseInt(cache.get(
+                                            PromotionGoodsService.getPromotionGoodsStockCacheKey(
+                                                    promotionTypeEnum, promotionId, orderItem.getSkuId())).toString());
+                                    pointsGoodsVO.setActiveStock(stock);
+                                    pointsGoodsService.updateById(pointsGoodsVO);
+                                } else {
+                                    PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
+                                    searchParams.setPromotionType(promotionTypeEnum.name());
+                                    searchParams.setPromotionId(promotionId);
+                                    searchParams.setSkuId(orderItem.getSkuId());
+                                    PromotionGoods pGoods = promotionGoodsService.getPromotionsGoods(searchParams);
+                                    promotionKey.add(PromotionGoodsService.getPromotionGoodsStockCacheKey(
+                                            promotionTypeEnum, promotionId, orderItem.getSkuId()));
+                                    if (pGoods != null) {
+                                        promotionGoods.add(pGoods);
+                                    }
+                                }
+                            });
+                }
+            }
+        }
+        if (!promotionKey.isEmpty()) {
+            List promotionStocks = cache.multiGet(promotionKey);
+            for (int i = 0; i < promotionKey.size(); i++) {
+                promotionGoods.get(i).setQuantity(Convert.toInt(promotionStocks.get(i).toString()));
+                Integer num = promotionGoods.get(i).getNum();
+                promotionGoods.get(i).setNum((num != null ? num : 0) + order.getOrder().getGoodsNum());
+            }
+            promotionGoodsService.updatePromotionGoodsStock(promotionGoods);
+        }
+    }
 
     /**
      * 订单出库失败

@@ -1,7 +1,3 @@
-/**
- * 作者：Mike
- * 日期：2026-07-31
- */
 package cn.lili.controller.seller.goods;
 
 import cn.lili.common.enums.ResultUtil;
@@ -30,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * 店铺端卡密管理 HTTP 接口（API-S-01a ~ S-07）。
+ * 店铺端卡密管理 HTTP 接口。
  * <p>
  * Base Path: {@code /store/goods/card-key}。卡密明文仅在本端授权上下文返回，禁止写入日志。
  *
@@ -46,7 +42,7 @@ public class CardKeyStoreController {
     private CardKeyService cardKeyService;
 
     /**
-     * API-S-01a：动态生成 Excel 模板，仅表头「卡号」「卡密」。
+     * 动态生成 Excel 模板，仅表头「卡号」「卡密」。
      */
     @Operation(summary = "下载卡密导入模板")
     @GetMapping("/import/template")
@@ -55,7 +51,7 @@ public class CardKeyStoreController {
     }
 
     /**
-     * API-S-01：multipart 上传，单次最多 10,000 行；部分失败返回 failRows。
+     * multipart 上传，单次最多 10,000 行；部分失败返回 failRows。
      */
     @Operation(summary = "批量导入卡密")
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -90,7 +86,7 @@ public class CardKeyStoreController {
     }
 
     /**
-     * API-S-07：按 list 相同筛选条件同步导出，含明文 cardSecret。
+     * 按 list 相同筛选条件同步导出，含明文 cardSecret。
      */
     @Operation(summary = "卡池导出")
     @GetMapping("/export")

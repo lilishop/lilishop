@@ -30,10 +30,6 @@ public class GoodsSkuVO extends GoodsSku {
     @Schema(description = "商品图片")
     private List<String> goodsGalleryList;
 
-    /** 卡池可售数（UNUSED 且未删），E_COUPON SKU 详情/列表展示，与 quantity 镜像同步 */
-    @Schema(description = "卡池可售数（E_COUPON）")
-    private Integer poolStock;
-
     public GoodsSkuVO(GoodsSku goodsSku) {
         BeanUtil.copyProperties(goodsSku, this);
     }

@@ -133,15 +133,37 @@ public class OrderItem extends BaseEntity {
     @Schema(description = "已发货数量")
     private Integer deliverNumber;
 
-    /** COMPLETED 且有关联 ALLOCATED 卡密时为 true，供前端「卡密尚未发放」占位 */
+    /**
+     * 订单详情扩展（不落库）：是否已发卡。
+     * 仅 {@link cn.lili.modules.goods.service.CardKeyService#enrichOrderDetail} 对 E_COUPON 子单填充；
+     * 非 E_COUPON 或未 enrich 时为 null；PENDING/FAILED 为 false；与
+     * {@link #cardKeyFulfillStatus}=DELIVERED 且 {@link #cardKeys} 非空一致。
+     */
     @TableField(exist = false)
     @Schema(description = "是否已发卡")
     private Boolean cardKeyDelivered;
 
-    /** 订单详情扩展：明文卡号/卡密（API-B-01 / 商家订单 §6.2） */
+    /**
+     * 订单详情扩展（不落库）：明文卡号/卡密。
+     * DELIVERED 时为非空列表；PENDING/FAILED 为空列表；非 E_COUPON 或未 enrich 时为 null。
+     */
     @TableField(exist = false)
     @Schema(description = "卡密列表")
     private List<CardKeyVO> cardKeys;
+
+    /**
+     * 订单详情扩展（不落库）：卡密履约状态。
+     *
+     * @see cn.lili.modules.goods.entity.enums.CardKeyFulfillStatusEnum
+     */
+    @TableField(exist = false)
+    @Schema(description = "卡密履约状态 PENDING/DELIVERED/FAILED/NOT_APPLICABLE")
+    private String cardKeyFulfillStatus;
+
+    /** 订单详情扩展（不落库）：卡密履约说明；DELIVERED 时通常为 null */
+    @TableField(exist = false)
+    @Schema(description = "卡密履约说明")
+    private String cardKeyFulfillMessage;
 
     public Integer getDeliverNumber() {
         if(deliverNumber == null){

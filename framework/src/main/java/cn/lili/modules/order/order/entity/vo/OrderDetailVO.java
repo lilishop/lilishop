@@ -74,6 +74,13 @@ public class OrderDetailVO implements Serializable {
      * 获取订单日志
      */
     private List<OrderLog> orderLogs;
+
+    /**
+     * 满赠电子卡券赠品子单摘要（主单详情聚合，不含购买型 E_COUPON 主单自身卡密）
+     */
+    @Schema(description = "满赠电子卡券赠品子单")
+    private List<GiftECouponOrderSummaryVO> giftECouponOrders;
+
     @Schema(description = "价格详情")
     private String priceDetail;
 

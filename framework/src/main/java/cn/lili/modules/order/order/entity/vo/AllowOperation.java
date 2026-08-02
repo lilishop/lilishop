@@ -55,7 +55,7 @@ public class AllowOperation implements Serializable {
      */
     public AllowOperation(Order order) {
 
-        // E_COUPON：仅 UNPAID 可取消/支付；无物流/核销/改价；无售后操作项（FR-B-04）
+        // E_COUPON：仅 UNPAID 可取消/支付；无物流/核销/改价；无售后操作项
         if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
             String status = order.getOrderStatus();
             String payStatus = order.getPayStatus();

@@ -247,21 +247,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         queryWrapper.groupBy("o.id");
         queryWrapper.orderByDesc("o.id");
         return this.baseMapper.queryByParams(PageUtil.initPage(orderSearchParams), queryWrapper);
-//        IPage<OrderSimpleVO> page = this.baseMapper.queryByParams(PageUtil.initPage(orderSearchParams), queryWrapper);
-//        page.getRecords().forEach(vo -> {
-//            if (!OrderTypeEnum.E_COUPON.name().equals(vo.getOrderType())
-//                    || !OrderStatusEnum.TAKE.name().equals(vo.getOrderStatus())
-//                    || !PayStatusEnum.PAID.name().equals(vo.getPayStatus())) {
-//                return;
-//            }
-//            if (repairStuckECouponOrderIfNeeded(vo.getSn())) {
-//                Order order = this.getBySn(vo.getSn());
-//                if (order != null) {
-//                    vo.setOrderStatus(order.getOrderStatus());
-//                }
-//            }
-//        });
-//        return page;
     }
 
     @Override
@@ -360,7 +345,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public OrderDetailVO queryDetail(String orderSn) {
-//        repairStuckECouponOrderIfNeeded(orderSn);
         Order order = this.getBySn(orderSn);
         if (order == null) {
             throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
@@ -373,7 +357,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Receipt receipt = receiptService.getByOrderSn(orderSn);
         //查询订单和自订单，然后写入vo返回
         OrderDetailVO detailVO = new OrderDetailVO(order, orderItems, orderLogs, receipt);
-        // E_COUPON 订单填充 orderItems[].cardKeys（买卖家订单详情唯一查卡入口，S-09）
+        // E_COUPON 订单填充 orderItems[].cardKeys（买卖家订单详情唯一查卡入口）
         cardKeyService.enrichOrderDetail(detailVO);
         return detailVO;
     }
@@ -499,7 +483,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             log.error("订单[ {} ]检测到重复付款，请处理", orderSn);
             throw new ServiceException(ResultCode.PAY_DOUBLE_ERROR);
         }
-        // 关店后 E_COUPON 禁止继续支付（S-07）
+        // 关店后 E_COUPON 禁止继续支付
         cardKeyService.validatePayOrder(order);
 
         //修改订单状态
@@ -529,7 +513,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     /**
      * 支付后库存确认路由（L2 兜底）。
-     * E_COUPON → fulfillAfterPayment；VIRTUAL 仅 PAID 可进 virtualOrderConfirm（O-12e）。
+     * E_COUPON → fulfillAfterPayment；VIRTUAL 仅 PAID 可进 virtualOrderConfirm。
      */
     @Override
     @OrderLogPoint(description = "'库存确认'", orderSn = "#orderSn")
@@ -548,10 +532,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //判断是否为拼团订单，进行特殊处理
         //判断订单类型进行不同的订单确认操作
         if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())) {
+            if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
+                cardKeyService.reserveByOrder(orderSn);
+            }
             String parentOrderSn = CharSequenceUtil.isEmpty(order.getParentOrderSn()) ? orderSn : order.getParentOrderSn();
             this.checkPintuanOrder(order.getPromotionId(), parentOrderSn);
         } else if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
-            // L2 兜底：E_COUPON 转发卡池履约，不得走 normal/virtual 分支（O-10）
+            // L2 兜底：E_COUPON 转发卡池履约，不得走 normal/virtual 分支
             cardKeyService.fulfillAfterPayment(orderSn);
         } else if (order.getOrderType().equals(OrderTypeEnum.NORMAL.name())) {
             normalOrderConfirm(orderSn);
@@ -1239,7 +1226,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Transactional(rollbackFor = Exception.class)
     public void pintuanOrderSuccess(List<Order> orderList) {
         for (Order order : orderList) {
-            if (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
+            if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
+                cardKeyService.confirmReservationAndComplete(order.getSn());
+            } else if (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
                 this.virtualOrderConfirm(order.getSn());
             } else if (order.getOrderType().equals(OrderTypeEnum.NORMAL.name())) {
                 this.normalOrderConfirm(order.getSn());
@@ -1256,6 +1245,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         List<Order> list = this.list(new LambdaQueryWrapper<Order>().eq(Order::getParentOrderSn, parentOrderSn).or().eq(Order::getSn, parentOrderSn));
         for (Order order : list) {
             try {
+                if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
+                    cardKeyService.releaseReservation(order.getSn());
+                }
                 this.systemCancel(order.getSn(), "拼团人数不足，拼团失败！", true);
             } catch (Exception e) {
                 log.error("拼团订单取消失败", e);
@@ -1307,36 +1299,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         this.sendUpdateStatusMessage(orderMessage);
     }
 
-//    /**
-//     * 修复支付后误入「待核验」的电子卡券订单（发卡并完成）。
-//     * 仅处理 TAKE，不处理 PAID，避免在 StockUpdateExecute 扣减 Redis 库存前抢先完成订单。
-//     *
-//     * @return 是否执行了修复
-//     */
-//    private boolean repairStuckECouponOrderIfNeeded(String orderSn) {
-//        Order order = this.getBySn(orderSn);
-//        if (order == null || !cardKeyService.isPurchaseTypeOrder(order)) {
-//            return false;
-//        }
-//        if (!PayStatusEnum.PAID.name().equals(order.getPayStatus())) {
-//            return false;
-//        }
-//        if (!OrderStatusEnum.TAKE.name().equals(order.getOrderStatus())) {
-//            return false;
-//        }
-//        log.warn("电子卡券订单{}误入待核验，自动修复为发卡完成", orderSn);
-//        try {
-//            self.afterOrderConfirm(orderSn);
-//            return true;
-//        } catch (Exception e) {
-//            log.error("电子卡券订单{}自动修复失败", orderSn, e);
-//            return false;
-//        }
-//    }
-
     /**
      * 虚拟商品订单确认：VIRTUAL+PAID → TAKE。
-     * E_COUPON 误入时转发 {@link CardKeyService#fulfillAfterPayment}，禁止写 TAKE（O-12c / EC-24）。
+     * E_COUPON 误入时转发 {@link CardKeyService#fulfillAfterPayment}，禁止写 TAKE。
      */
     @Transactional(rollbackFor = Exception.class)
     public void virtualOrderConfirm(String orderSn) {

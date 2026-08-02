@@ -1,7 +1,3 @@
-/**
- * 作者：Mike
- * 日期：2026-07-31
- */
 package cn.lili.modules.order.order.serviceimpl;
 
 import cn.lili.modules.goods.service.CardKeyService;
@@ -22,7 +18,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 /**
- * O-12c：virtualOrderConfirm 对 E_COUPON 转发 fulfillAfterPayment，VIRTUAL+PAID 才写 TAKE。
+ * virtualOrderConfirm 对 E_COUPON 转发 fulfillAfterPayment，VIRTUAL+PAID 才写 TAKE。
  *
  * @author Mike
  * @date 2026-07-31

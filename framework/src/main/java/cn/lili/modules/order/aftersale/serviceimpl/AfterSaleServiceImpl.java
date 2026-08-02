@@ -587,7 +587,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     }
 
     /**
-     * 电子卡券订单不支持买家售后（FR-B-04 / AC-10）。
+     * 电子卡券订单不支持买家售后。
      */
     private void rejectECouponAfterSale(Order order) {
         if (order != null && OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {

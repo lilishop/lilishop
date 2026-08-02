@@ -105,7 +105,7 @@ public class RenderStepStatement {
     };
 
     /**
-     * 电子卡券结算页渲染步骤（O-11 / O-12a）：含 SKU_PROMOTION 写 basePrice，跳过满减/券/礼品卡/运费。
+     * 电子卡券结算页渲染步骤：含 SKU_PROMOTION 写 basePrice，跳过满减/券/礼品卡/运费。
      */
     public static RenderStepEnums[] eCouponCheckedRender = {
             RenderStepEnums.CHECKED_FILTER,

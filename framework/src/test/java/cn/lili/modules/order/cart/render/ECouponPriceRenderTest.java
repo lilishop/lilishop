@@ -1,7 +1,3 @@
-/**
- * 作者：Mike
- * 日期：2026-07-31
- */
 package cn.lili.modules.order.cart.render;
 
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -24,7 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * O-12a / AC-26：E_COUPON 专用渲染链须回填 basePrice，避免 flowPrice=0。
+ * E_COUPON 专用渲染链须回填 basePrice，避免 flowPrice=0。
  *
  * @author Mike
  * @date 2026-07-31

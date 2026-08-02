@@ -143,7 +143,7 @@ public class CartServiceImpl implements CartService {
         }
         CartTypeEnum cartTypeEnum = getCartType(cartType);
         GoodsSku dataSku = checkGoods(skuId);
-        // E_COUPON：禁止 CART 加购，校验 poolStock 上限（FR-B-01）
+        // E_COUPON：禁止 CART 加购，实时校验卡池库存上限
         cardKeyService.validateAddToCart(skuId, num, cartTypeEnum.name());
         Map<String, Object> promotionMap = promotionGoodsService.getCurrentGoodsPromotion(dataSku, cartTypeEnum.name());
 
@@ -616,11 +616,11 @@ public class CartServiceImpl implements CartService {
         tradeDTO.setClientType(tradeParams.getClient());
         tradeDTO.setStoreRemark(tradeParams.getRemark());
         tradeDTO.setParentOrderSn(tradeParams.getParentOrderSn());
-        //订单无收货地址校验
-        if (tradeDTO.getStoreAddress() == null && tradeDTO.getMemberAddress() == null) {
+        // 提交前校验收货地址（TradeBuilder 渲染前）；E_COUPON 免地址，核销型虚拟商品免地址
+        if (tradeDTO.getStoreAddress() == null && tradeDTO.getMemberAddress() == null
+                && !cardKeyService.isECouponOnlyTrade(tradeDTO)) {
             String goodsType = tradeDTO.getCheckedSkuList().get(0).getGoodsSku().getGoodsType();
-            if (!GoodsTypeEnum.VIRTUAL_GOODS.name().equals(goodsType)
-                    && !GoodsTypeEnum.E_COUPON.name().equals(goodsType)) {
+            if (!GoodsTypeEnum.VIRTUAL_GOODS.name().equals(goodsType)) {
                 throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
             }
         }

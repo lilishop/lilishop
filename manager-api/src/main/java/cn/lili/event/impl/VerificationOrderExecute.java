@@ -35,7 +35,7 @@ public class VerificationOrderExecute implements OrderStatusChangeEvent {
         if (orderMessage.getNewStatus().equals(OrderStatusEnum.TAKE) || orderMessage.getNewStatus().equals(OrderStatusEnum.STAY_PICKED_UP)) {
             //获取订单信息
             Order order = orderService.getBySn(orderMessage.getOrderSn());
-            // E_COUPON 支付后直接 COMPLETED，不生成核销码、不进入 TAKE（EC-24）
+            // E_COUPON 支付后直接 COMPLETED，不生成核销码、不进入 TAKE
             if (order == null || OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
                 return;
             }

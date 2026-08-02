@@ -517,7 +517,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             //修改SKU状态
             goodsSkuService.updateGoodsSkuStatus(goods);
             goodsCacheKeys.add(CachePrefix.GOODS.getPrefix() + goods.getId());
-            // S-06：删除 E_COUPON 商品时软删未售/作废卡池，已售 ALLOCATED 保留
+            // 电子卡券：商品删除时按 SKU 软删卡池（UNUSED/VOIDED），已分配 ALLOCATED 保留供订单查卡
             if (GoodsTypeEnum.E_COUPON.name().equals(goods.getGoodsType())) {
                 List<GoodsSku> skus = goodsSkuService.getGoodsSkuListByGoodsId(goods.getId());
                 for (GoodsSku sku : skus) {
@@ -760,7 +760,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
                 }
                 break;
             case "E_COUPON":
-                // 电子卡券无需运费模板，强制 templateId=0（FR-S-01）
+                // 电子卡券无需运费模板，强制 templateId=0
                 if (!"0".equals(goods.getTemplateId())) {
                     goods.setTemplateId("0");
                 }

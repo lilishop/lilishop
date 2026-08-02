@@ -518,10 +518,6 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
         goodsSkuVO.setGoodsGalleryList(goodsGalleryList);
         goodsSkuVO.setSpecList(specValueVOS);
-        // 买家/商家 SKU 详情：poolStock 与卡池 UNUSED 同步，前端库存只读展示
-        if (GoodsTypeEnum.E_COUPON.name().equals(goodsSku.getGoodsType())) {
-            goodsSkuVO.setPoolStock(goodsSku.getQuantity() == null ? 0 : goodsSku.getQuantity());
-        }
         return goodsSkuVO;
 
     }
@@ -749,21 +745,19 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         if (CharSequenceUtil.isEmpty(skuId) || quantity == null || quantity < 0) {
             throw new ServiceException(ResultCode.PARAMS_ERROR);
         }
-        GoodsSku goodsSku = getGoodsSkuByIdFromCache(skuId);
-        if (goodsSku == null) {
-            goodsSku = this.getById(skuId);
+        GoodsSku goodsSku = loadGoodsSkuForStockUpdate(skuId);
+        assertManualStockUpdateAllowed(goodsSku);
+        applyStockQuantityUpdate(goodsSku, skuId, quantity);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateStockFromCardKeySync(String skuId, Integer quantity) {
+        if (CharSequenceUtil.isEmpty(skuId) || quantity == null || quantity < 0) {
+            throw new ServiceException(ResultCode.PARAMS_ERROR);
         }
-        if (goodsSku == null) {
-            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
-        }
-        goodsSku.setQuantity(quantity);
-        boolean update = this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
-        if (update) {
-            clearStockRelatedCache(skuId, goodsSku.getGoodsId());
-            cache.put(GoodsSkuService.getCacheKeys(skuId), goodsSku);
-            cache.put(GoodsSkuService.getStockCacheKey(skuId), quantity);
-            this.promotionGoodsService.updatePromotionGoodsStock(goodsSku.getId(), quantity);
-        }
+        GoodsSku goodsSku = loadGoodsSkuForStockUpdate(skuId);
+        applyStockQuantityUpdate(goodsSku, skuId, quantity);
     }
 
     @Override
@@ -772,13 +766,8 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         if (CharSequenceUtil.isEmpty(skuId) || quantity == null || quantity < 0) {
             throw new ServiceException(ResultCode.PARAMS_ERROR);
         }
-        GoodsSku goodsSku = getGoodsSkuByIdFromCache(skuId);
-        if (goodsSku == null) {
-            goodsSku = this.getById(skuId);
-        }
-        if (goodsSku == null) {
-            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
-        }
+        GoodsSku goodsSku = loadGoodsSkuForStockUpdate(skuId);
+        assertManualStockUpdateAllowed(goodsSku);
         int currentQuantity = goodsSku.getQuantity() == null ? 0 : goodsSku.getQuantity();
 
         if (type.equals(GoodsStockTypeEnum.ADD.name())) {
@@ -788,6 +777,34 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
         goodsSku.setQuantity(quantity);
 
+        boolean update = this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
+        if (update) {
+            clearStockRelatedCache(skuId, goodsSku.getGoodsId());
+            cache.put(GoodsSkuService.getCacheKeys(skuId), goodsSku);
+            cache.put(GoodsSkuService.getStockCacheKey(skuId), quantity);
+            this.promotionGoodsService.updatePromotionGoodsStock(goodsSku.getId(), quantity);
+        }
+    }
+
+    private GoodsSku loadGoodsSkuForStockUpdate(String skuId) {
+        GoodsSku goodsSku = getGoodsSkuByIdFromCache(skuId);
+        if (goodsSku == null) {
+            goodsSku = this.getById(skuId);
+        }
+        if (goodsSku == null) {
+            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+        }
+        return goodsSku;
+    }
+
+    private void assertManualStockUpdateAllowed(GoodsSku goodsSku) {
+        if (GoodsTypeEnum.E_COUPON.name().equals(goodsSku.getGoodsType())) {
+            throw new ServiceException(ResultCode.CARD_KEY_STOCK_MANUAL_FORBIDDEN);
+        }
+    }
+
+    private void applyStockQuantityUpdate(GoodsSku goodsSku, String skuId, Integer quantity) {
+        goodsSku.setQuantity(quantity);
         boolean update = this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
         if (update) {
             clearStockRelatedCache(skuId, goodsSku.getGoodsId());
@@ -813,23 +830,19 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateGoodsStock(List<GoodsSku> goodsSkus) {
-        Map<String, List<GoodsSku>> groupByGoodsIds = goodsSkus.stream().collect(Collectors.groupingBy(GoodsSku::getGoodsId));
-
-        //?????????
-        for (String goodsId : groupByGoodsIds.keySet()) {
-            //??
-            Integer quantity = 0;
-            for (GoodsSku goodsSku : goodsSkus) {
-                if (goodsId.equals(goodsSku.getGoodsId())) {
-                    quantity += goodsSku.getQuantity();
+        Map<String, List<GoodsSku>> groupByGoodsIds = goodsSkus.stream()
+                .collect(Collectors.groupingBy(GoodsSku::getGoodsId));
+        for (Map.Entry<String, List<GoodsSku>> entry : groupByGoodsIds.entrySet()) {
+            for (GoodsSku goodsSku : entry.getValue()) {
+                int quantity = goodsSku.getQuantity() == null ? 0 : goodsSku.getQuantity();
+                if (GoodsTypeEnum.E_COUPON.name().equals(goodsSku.getGoodsType())) {
+                    this.updateStockFromCardKeySync(goodsSku.getId(), quantity);
+                } else {
+                    this.updateStock(goodsSku.getId(), quantity);
                 }
-                this.updateStock(goodsSku.getId(), goodsSku.getQuantity());
             }
-            //????????
-            goodsService.updateStock(goodsId);
+            goodsService.updateStock(entry.getKey());
         }
-
-
     }
 
     /**

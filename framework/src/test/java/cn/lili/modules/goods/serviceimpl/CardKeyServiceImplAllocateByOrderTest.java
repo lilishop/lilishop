@@ -1,7 +1,3 @@
-/**
- * 作者：Mike
- * 日期：2026-07-31
- */
 package cn.lili.modules.goods.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
@@ -46,7 +42,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * AC-15 / EC-16：部分取卡失败时整单失败，触发 voidOnSystemFailure，无部分交付。
+ * 部分取卡失败时整单失败，触发 voidOnSystemFailure，无部分交付。
  *
  * @author Mike
  * @date 2026-07-31

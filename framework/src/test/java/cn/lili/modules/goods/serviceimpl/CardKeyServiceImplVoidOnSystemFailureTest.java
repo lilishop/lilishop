@@ -1,7 +1,3 @@
-/**
- * 作者：Mike
- * 日期：2026-07-31
- */
 package cn.lili.modules.goods.serviceimpl;
 
 import cn.lili.modules.goods.entity.dos.CardKey;
@@ -30,7 +26,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * AC-20 / SVC-03：发卡失败系统退款后，已写 ALLOCATED 的卡须 VOIDED（不回收到 UNUSED）。
+ * 发卡失败系统退款后，已写 ALLOCATED 的卡须 VOIDED（不回收到 UNUSED）。
  *
  * @author Mike
  * @date 2026-07-31

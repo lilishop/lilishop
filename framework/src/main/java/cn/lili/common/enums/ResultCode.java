@@ -94,7 +94,6 @@ public enum ResultCode {
 
     /**
      * 电子卡券（卡密商品）业务错误码，11030~11051。
-     * 详见 docs/requirements/card-key-goods-api.md §3。
      */
     CARD_KEY_SKU_NOT_FOUND(11030, "SKU不存在"),
     CARD_KEY_SKU_NOT_E_COUPON(11031, "仅电子卡券SKU可管理卡密"),
@@ -118,6 +117,7 @@ public enum ResultCode {
     CARD_KEY_STORE_CLOSED(11049, "店铺已关闭，无法管理卡密"),
     CARD_KEY_STORE_SELL_FORBIDDEN(11050, "店铺已关闭，无法购买"),
     CARD_KEY_ZERO_PRICE(11051, "电子卡券订单金额异常"),
+    CARD_KEY_STOCK_MANUAL_FORBIDDEN(11052, "电子卡券库存由卡池同步，不可手动调整"),
 
     /**
      * 参数

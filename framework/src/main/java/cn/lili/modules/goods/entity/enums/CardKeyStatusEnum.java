@@ -1,7 +1,3 @@
-/**
- * 作者：Mike
- * 日期：2026-07-31
- */
 package cn.lili.modules.goods.entity.enums;
 
 /**
@@ -14,6 +10,9 @@ public enum CardKeyStatusEnum {
 
     /** 在库可售 */
     UNUSED("在库可售"),
+
+    /** 拼团等场景预占，未成团前不可售 */
+    RESERVED("预占"),
 
     /** 已售且已交付 */
     ALLOCATED("已售"),

@@ -1,7 +1,3 @@
-/**
- * 作者：Mike
- * 日期：2026-07-31
- */
 package cn.lili.modules.goods.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
@@ -28,7 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * AC-21 / TS-30、TS-31：审核拒绝禁管卡池；待审核可备货。
+ * 审核拒绝禁管卡池；待审核可备货。
  *
  * @author Mike
  * @date 2026-07-31
