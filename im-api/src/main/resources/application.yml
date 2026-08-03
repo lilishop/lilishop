@@ -205,6 +205,8 @@ lili:
 
   # jwt 细节设定
   jwt-setting:
+    # Base64-encoded JWT signing key, injected per deployment.
+    secret: ${LILI_JWT_SECRET:}
     # token过期时间（分钟）
     tokenExpireTime: 60
 
