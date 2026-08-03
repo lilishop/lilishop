@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>商品发布 Step1 - 含电子卡券（原型预览）</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #f0f2f5; color: #333; }
+    .page { max-width: 1200px; margin: 24px auto; padding: 0 16px 80px; }
+    .steps { display: flex; justify-content: center; gap: 8px; background: #fff; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
+    .step { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #999; }
+    .step.active { color: #409eff; font-weight: 600; }
+    .step-num { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #c0c4cc; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+    .step.active .step-num { border-color: #409eff; background: #409eff; color: #fff; }
+    .step-line { width: 80px; height: 2px; background: #e4e7ed; }
+    .card { background: #fff; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,.08); padding: 16px; }
+    .category-wrap { background: #ededed; border-radius: 8px; padding: 10px; min-height: 420px; display: flex; gap: 15px; flex-wrap: wrap; }
+    .category-col { width: 280px; background: #fff; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,.08); list-style: none; padding: 8px 0; max-height: 400px; overflow: auto; }
+    .category-col li { padding: 10px 12px; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; border: 1px solid transparent; margin: 2px 6px; border-radius: 4px; }
+    .category-col li:hover { background: #f5f7fa; }
+    .category-col li.active { background: rgba(64,158,255,.15); border-color: rgba(64,158,255,.6); color: #409eff; }
+    .tip-bar { margin-top: 12px; padding: 10px 14px; background: #fcf8e3; border: 1px solid #fbeed5; color: #c09853; font-size: 13px; border-radius: 4px; }
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #ebeef5; padding: 16px; display: flex; justify-content: center; gap: 12px; }
+    .btn { padding: 10px 24px; border-radius: 4px; font-size: 14px; cursor: pointer; border: 1px solid #dcdfe6; background: #fff; }
+    .btn-primary { background: #409eff; color: #fff; border-color: #409eff; }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; }
+    .overlay.show { display: flex; }
+    .modal { width: 550px; background: #fff; border-radius: 8px; overflow: hidden; }
+    .type-list { max-height: 480px; overflow-y: auto; }
+    .type-item { display: flex; align-items: center; justify-content: center; padding: 20px; cursor: pointer; transition: .2s; gap: 20px; }
+    .type-item:hover { background: #ededed; }
+    .type-item.active { background: #e8e8e8; }
+    .type-icon { width: 80px; height: 80px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 36px; flex-shrink: 0; }
+    .type-icon.physical { background: #e8f4ff; }
+    .type-icon.virtual { background: #f0f9eb; }
+    .type-icon.ecoupon { background: #fff7e6; }
+    .type-item h2 { font-size: 20px; margin-bottom: 8px; }
+    .type-item p { color: #999; font-size: 14px; }
+    .type-item .tag { display: inline-block; margin-top: 6px; font-size: 12px; color: #e6a23c; background: #fdf6ec; padding: 2px 8px; border-radius: 4px; }
+    .modal-footer { padding: 12px 20px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #ebeef5; }
+    .toast { display: none; position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: #fef0f0; color: #f56c6c; border: 1px solid #fde2e2; padding: 10px 20px; border-radius: 4px; z-index: 200; font-size: 14px; }
+    .toast.show { display: block; }
+    .badge { display: inline-block; margin-left: 8px; font-size: 12px; color: #409eff; background: #ecf5ff; padding: 2px 8px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="steps">
+      <div class="step active"><span class="step-num">1</span>选择商品品类</div>
+      <div class="step-line"></div>
+      <div class="step"><span class="step-num">2</span>填写商品详情</div>
+      <div class="step-line"></div>
+      <div class="step"><span class="step-num">3</span>商品发布成功</div>
+    </div>
+
+    <div class="card">
+      <div class="category-wrap">
+        <ul class="category-col" id="col1"></ul>
+        <ul class="category-col" id="col2"></ul>
+        <ul class="category-col" id="col3"></ul>
+      </div>
+      <div class="tip-bar" id="tipBar">您当前选择的商品类别是：<span id="tipText">请选择分类</span></div>
+      <div style="margin-top:12px;font-size:13px;color:#666;">
+        当前商品类型：<strong id="currentType">未选择</strong>
+        <span class="badge" id="typeBadge" style="display:none">E_COUPON</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="btn btn-primary" onclick="openModal()">商品类型</button>
+    <button class="btn btn-primary" onclick="nextStep()">下一步</button>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="type-list" id="typeList"></div>
+      <div class="modal-footer">
+        <button class="btn" onclick="cancelModal()">取消</button>
+        <button class="btn btn-primary" onclick="confirmModal()">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const types = [
+      { title: '实物商品', desc: '零售批发，物流配送', type: 'PHYSICAL_GOODS', icon: '📦', cls: 'physical' },
+      { title: '虚拟商品', desc: '虚拟核验，无需物流', type: 'VIRTUAL_GOODS', icon: '🛒', cls: 'virtual' },
+      { title: '电子卡券', desc: '卡密自动发卡，无需物流', type: 'E_COUPON', icon: '🎫', cls: 'ecoupon', tag: '库存来自卡池可用数' },
+    ];
+    const categories = {
+      '生活服务': { '游戏充值': ['Steam 卡密', '点卡充值'], '软件会员': ['视频会员', '音乐会员'] },
+      '数码电器': { '电脑办公': ['笔记本', '台式机'], '手机通讯': ['智能手机', '配件'] },
+    };
+    let goodsType = '';
+    let pendingType = '';
+    let sel = ['', '', ''];
+
+    function renderTypes() {
+      document.getElementById('typeList').innerHTML = types.map(t => `
+        <div class="type-item ${pendingType === t.type ? 'active' : ''}" data-type="${t.type}" onclick="pickType('${t.type}')">
+          <div class="type-icon ${t.cls}">${t.icon}</div>
+          <div>
+            <h2>${t.title}</h2>
+            <p>${t.desc}</p>
+            ${t.tag ? `<span class="tag">${t.tag}</span>` : ''}
+          </div>
+        </div>`).join('');
+    }
+
+    function renderCat() {
+      const c1 = Object.keys(categories);
+      document.getElementById('col1').innerHTML = c1.map(n => `<li class="${sel[0]===n?'active':''}" onclick="pickCat(0,'${n}')">${n} &gt;</li>`).join('');
+      const c2 = sel[0] ? Object.keys(categories[sel[0]]||{}) : [];
+      document.getElementById('col2').innerHTML = c2.map(n => `<li class="${sel[1]===n?'active':''}" onclick="pickCat(1,'${n}')">${n} &gt;</li>`).join('');
+      const c3 = (sel[0]&&sel[1]) ? (categories[sel[0]][sel[1]]||[]) : [];
+      document.getElementById('col3').innerHTML = c3.map(n => `<li class="${sel[2]===n?'active':''}" onclick="pickCat(2,'${n}')">${n}</li>`).join('');
+      const parts = sel.filter(Boolean);
+      document.getElementById('tipText').textContent = parts.length ? parts.join(' > ') : '请选择分类';
+    }
+
+    function pickCat(level, name) {
+      sel[level] = name;
+      if (level === 0) { sel[1] = ''; sel[2] = ''; }
+      if (level === 1) sel[2] = '';
+      renderCat();
+    }
+
+    function openModal() { pendingType = goodsType; renderTypes(); document.getElementById('overlay').classList.add('show'); }
+    function pickType(t) { pendingType = t; renderTypes(); }
+    function cancelModal() { document.getElementById('overlay').classList.remove('show'); }
+    function confirmModal() {
+      if (!pendingType) return showToast('请选择商品类型');
+      goodsType = pendingType;
+      const label = types.find(t => t.type === goodsType)?.title || goodsType;
+      document.getElementById('currentType').textContent = label;
+      document.getElementById('typeBadge').style.display = goodsType === 'E_COUPON' ? 'inline-block' : 'none';
+      cancelModal();
+    }
+    function nextStep() {
+      if (!goodsType) return showToast('请选择商品类型');
+      if (!sel[2]) return showToast('必须选择到三级分类');
+      alert('进入 Step2\n\ngoodsType: ' + goodsType + '\ncategory: ' + sel.join(' > '));
+    }
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg; el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2000);
+    }
+    renderCat();
+  </script>
+</body>
+</html>

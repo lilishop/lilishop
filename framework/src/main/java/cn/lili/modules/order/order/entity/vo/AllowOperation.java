@@ -55,6 +55,21 @@ public class AllowOperation implements Serializable {
      */
     public AllowOperation(Order order) {
 
+        // E_COUPON：仅 UNPAID 可取消/支付；无物流/核销/改价；无售后操作项
+        if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
+            String status = order.getOrderStatus();
+            String payStatus = order.getPayStatus();
+            this.cancel = OrderStatusEnum.UNPAID.name().equals(status) && PayStatusEnum.UNPAID.name().equals(payStatus);
+            this.pay = this.cancel;
+            this.ship = false;
+            this.rog = false;
+            this.showLogistics = false;
+            this.editConsignee = false;
+            this.editPrice = false;
+            this.take = false;
+            return;
+        }
+
         //获取订单类型
         String status = order.getOrderStatus();
         String payStatus = order.getPayStatus();
@@ -97,6 +112,21 @@ public class AllowOperation implements Serializable {
      * @param order
      */
     public AllowOperation(OrderSimpleVO order) {
+
+        // E_COUPON 列表页操作权限，规则同 {@link #AllowOperation(Order)}
+        if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
+            String status = order.getOrderStatus();
+            String payStatus = order.getPayStatus();
+            this.cancel = OrderStatusEnum.UNPAID.name().equals(status) && PayStatusEnum.UNPAID.name().equals(payStatus);
+            this.pay = this.cancel;
+            this.ship = false;
+            this.rog = false;
+            this.showLogistics = false;
+            this.editConsignee = false;
+            this.editPrice = false;
+            this.take = false;
+            return;
+        }
 
         //获取订单类型
         String status = order.getOrderStatus();

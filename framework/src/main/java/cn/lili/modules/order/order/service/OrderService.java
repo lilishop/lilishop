@@ -244,6 +244,24 @@ public interface OrderService extends IService<Order> {
     void systemComplete(String orderSn);
 
     /**
+     * E_COUPON 专用完成 CAS：仅允许 E_COUPON + payStatus=PAID + orderStatus=PAID → COMPLETED。
+     *
+     * @param orderSn 订单编号
+     * @return 是否完成（含幂等已成功）
+     */
+    boolean systemCompleteECoupon(String orderSn);
+
+    /**
+     * E_COUPON 专用取消 CAS：仅允许 E_COUPON + orderStatus=PAID → CANCELLED。
+     *
+     * @param orderSn      订单编号
+     * @param reason       取消原因
+     * @param refundMoney  是否退款
+     * @return 是否取消成功（含幂等已取消）
+     */
+    boolean systemCancelECoupon(String orderSn, String reason, Boolean refundMoney);
+
+    /**
      * 通过trade 获取订单列表
      *
      * @param tradeSn 交易编号

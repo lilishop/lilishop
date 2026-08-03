@@ -14,12 +14,12 @@ public enum OrderTypeEnum {
     NORMAL,
 
     /**
-     * 虚拟订单
+     * 虚拟商品订单（{@link cn.lili.modules.order.cart.entity.enums.CartTypeEnum#VIRTUAL} 等原有核销/提货码链路）
      */
     VIRTUAL,
 
     /**
-     * 虚拟订单
+     * 电子卡券订单（{@link cn.lili.modules.goods.entity.enums.GoodsTypeEnum#E_COUPON} 卡密商品，走卡池履约）
      */
     E_COUPON,
 }

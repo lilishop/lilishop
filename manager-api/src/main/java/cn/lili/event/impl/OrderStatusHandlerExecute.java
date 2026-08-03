@@ -15,6 +15,7 @@ import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.TradeService;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ import java.util.List;
  * @since 2020-07-03 11:20
  **/
 @Service
+@Slf4j
 public class OrderStatusHandlerExecute implements TradeEvent, AfterSaleStatusChangeEvent {
 
 

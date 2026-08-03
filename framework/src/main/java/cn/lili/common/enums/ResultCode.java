@@ -93,6 +93,33 @@ public enum ResultCode {
     GOODS_STOCK_IMPORT_ERROR(11018, "导入商品库存失败，请检查表格数据"),
 
     /**
+     * 电子卡券（卡密商品）业务错误码，11030~11051。
+     */
+    CARD_KEY_SKU_NOT_FOUND(11030, "SKU不存在"),
+    CARD_KEY_SKU_NOT_E_COUPON(11031, "仅电子卡券SKU可管理卡密"),
+    CARD_KEY_STORE_ACCESS_DENIED(11032, "无权操作该店铺卡密"),
+    CARD_KEY_DUPLICATE_CARD_NO(11033, "卡号已存在"),
+    CARD_KEY_CARD_NO_REQUIRED(11034, "卡号不能为空"),
+    CARD_KEY_CARD_SECRET_REQUIRED(11035, "卡密不能为空"),
+    CARD_KEY_NOT_FOUND(11036, "卡密不存在"),
+    CARD_KEY_CANNOT_VOID(11037, "仅未售卡密可作废"),
+    CARD_KEY_IMPORT_LIMIT(11038, "单次导入不能超过10000行"),
+    CARD_KEY_EXPORT_LIMIT(11039, "单次导出不能超过10000行"),
+    CARD_KEY_E_COUPON_CART_FORBIDDEN(11040, "电子卡券请使用立即购买"),
+    CARD_KEY_POOL_INSUFFICIENT(11041, "卡密库存不足"),
+    CARD_KEY_MIXED_CHECKOUT(11042, "电子卡券请单独购买"),
+    CARD_KEY_MULTI_E_COUPON_SKU(11043, "每次仅可购买一种电子卡券"),
+    CARD_KEY_PROMOTION_FORBIDDEN(11044, "电子卡券不参与促销活动"),
+    CARD_KEY_E_COUPON_NO_AFTER_SALE(11045, "电子卡券订单不支持售后"),
+    CARD_KEY_ORDER_ACCESS_DENIED(11046, "无权查看该订单卡密"),
+    CARD_KEY_GOODS_AUTH_REFUSE(11047, "商品审核未通过，无法管理卡密"),
+    CARD_KEY_SKU_DELETED(11048, "商品或SKU已删除，无法管理卡密"),
+    CARD_KEY_STORE_CLOSED(11049, "店铺已关闭，无法管理卡密"),
+    CARD_KEY_STORE_SELL_FORBIDDEN(11050, "店铺已关闭，无法购买"),
+    CARD_KEY_ZERO_PRICE(11051, "电子卡券订单金额异常"),
+    CARD_KEY_STOCK_MANUAL_FORBIDDEN(11052, "电子卡券库存由卡池同步，不可手动调整"),
+
+    /**
      * 参数
      */
     PARAMETER_SAVE_ERROR(12001, "参数添加失败"),
@@ -371,6 +398,7 @@ public enum ResultCode {
     FULL_DISCOUNT_COUPON_TIME_ERROR(43007, "赠送的优惠券有效时间必须在活动时间之内"),
     FULL_DISCOUNT_MONEY_ERROR(43008, "请填写满减金额"),
     FULL_DISCOUNT_MONEY_GREATER_THAN_MINUS(43009, "满减金额不能大于优惠门槛"),
+    FULL_DISCOUNT_GIFT_E_COUPON_ERROR(43010, "电子卡券不可作为满额活动赠品"),
     FULL_RATE_NUM_ERROR(43010, "请填写打折数值"),
 
     /**

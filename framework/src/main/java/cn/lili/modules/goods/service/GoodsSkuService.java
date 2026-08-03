@@ -244,6 +244,11 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     void updateStock(String skuId, Integer quantity,String type);
 
     /**
+     * 卡密池同步专用：更新 E_COUPON SKU 的 quantity（绕过普通库存手工修改限制）。
+     */
+    void updateStockFromCardKeySync(String skuId, Integer quantity);
+
+    /**
      * 获取商品sku库存
      *
      * @param skuId 商品skuId

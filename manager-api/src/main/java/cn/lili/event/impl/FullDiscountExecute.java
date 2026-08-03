@@ -11,6 +11,7 @@ import cn.lili.event.OrderStatusChangeEvent;
 import cn.lili.event.TradeEvent;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
+import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.service.MemberService;
@@ -71,6 +72,9 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
     private GoodsSkuService goodsSkuService;
 
     @Autowired
+    private CardKeyService cardKeyService;
+
+    @Autowired
     private RocketmqCustomProperties rocketmqCustomProperties;
 
     @Autowired
@@ -104,7 +108,10 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
             searchParams.setOrderPromotionType(OrderPromotionTypeEnum.GIFT.name());
             List<Order> orders = orderService.queryListByParams(searchParams);
             if (orders != null && !orders.isEmpty()) {
-                orderService.systemCancel(orders.get(0).getSn(),"主订单取消，赠送订单字段自动取消",true);
+                for (Order giftOrder : orders) {
+                    cardKeyService.voidOnSystemFailure(giftOrder.getSn());
+                    orderService.systemCancel(giftOrder.getSn(), "主订单取消，赠送订单自动取消", false);
+                }
             }
         }
     }
@@ -190,6 +197,15 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
      * @param orderTypeEnum 订单类型
      */
     private void giftOrderHandler(List<GoodsSku> skuList, Order originOrder, OrderTypeEnum orderTypeEnum) {
+        OrderSearchParams searchParams = new OrderSearchParams();
+        searchParams.setParentOrderSn(originOrder.getSn());
+        searchParams.setOrderPromotionType(OrderPromotionTypeEnum.GIFT.name());
+        searchParams.setOrderType(orderTypeEnum.name());
+        List<Order> existingGiftOrders = orderService.queryListByParams(searchParams);
+        if (existingGiftOrders != null && !existingGiftOrders.isEmpty()) {
+            log.info("满赠子单已存在，跳过重复创建，parentSn={} orderType={}", originOrder.getSn(), orderTypeEnum);
+            return;
+        }
         //初始化订单对象/订单日志/自订单
         Order order = new Order();
         List<OrderItem> orderItems = new ArrayList<>();
@@ -203,12 +219,16 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
         order.setSn(SnowFlake.createStr("G"));
         order.setParentOrderSn(originOrder.getSn());
         order.setOrderPromotionType(OrderPromotionTypeEnum.GIFT.name());
-        order.setOrderStatus(OrderStatusEnum.UNPAID.name());
+        // 满赠子单随主单已支付，须 PAID 才能通过 E_COUPON 履约门禁
+        order.setOrderStatus(OrderStatusEnum.PAID.name());
         order.setPayStatus(PayStatusEnum.PAID.name());
         order.setOrderType(orderTypeEnum.name());
         order.setNeedReceipt(false);
+        order.setFlowPrice(0D);
+        order.setGoodsPrice(0D);
         order.setPriceDetailDTO(priceDetailDTO);
         order.setClientType(originOrder.getClientType());
+        order.applyECouponPersistNormalization();
         //订单日志
         String message = "赠品订单[" + order.getSn() + "]创建";
         orderLogs.add(new OrderLog(order.getSn(), originOrder.getMemberId(), UserEnums.MEMBER.name(), originOrder.getMemberName(), message));

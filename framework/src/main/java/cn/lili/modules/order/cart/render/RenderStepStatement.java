@@ -103,4 +103,27 @@ public class RenderStepStatement {
             RenderStepEnums.DISTRIBUTION,
             RenderStepEnums.PLATFORM_COMMISSION,
     };
+
+    /**
+     * 电子卡券结算页渲染步骤：含 SKU_PROMOTION 写 basePrice，跳过满减/券/礼品卡/运费。
+     */
+    public static RenderStepEnums[] eCouponCheckedRender = {
+            RenderStepEnums.CHECKED_FILTER,
+            RenderStepEnums.CHECK_DATA,
+            RenderStepEnums.SKU_PROMOTION,
+            RenderStepEnums.CART_PRICE,
+    };
+
+    /**
+     * 电子卡券建单前渲染步骤：在 checked 基础上增加 SN、分销、平台佣金等落库所需步骤。
+     */
+    public static RenderStepEnums[] eCouponTradeRender = {
+            RenderStepEnums.CHECKED_FILTER,
+            RenderStepEnums.CHECK_DATA,
+            RenderStepEnums.SKU_PROMOTION,
+            RenderStepEnums.CART_PRICE,
+            RenderStepEnums.CART_SN,
+            RenderStepEnums.DISTRIBUTION,
+            RenderStepEnums.PLATFORM_COMMISSION,
+    };
 }
