@@ -146,6 +146,16 @@ Please read the deployment documentation:
 
 https://docs.pickmall.cn
 
+### JWT secret configuration
+
+The JWT signing secret must be injected by the deployment environment and must not be committed to the repository. It must be a Base64-encoded key containing at least 32 bytes of key material, for example:
+
+```bash
+export LILI_JWT_SECRET="$(openssl rand -base64 32)"
+```
+
+All API services must use the same `LILI_JWT_SECRET`. The service fails during startup when this variable is not configured.
+
 Supports:
 
 - Docker deployment

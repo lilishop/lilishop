@@ -83,6 +83,15 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 -   **手动方式**: 如果您选择手动部署，SQL脚本位于以下地址。请确保获取与您代码版本一致的SQL文件。
     [**数据库脚本 (Gitee)**](https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql)
 
+#### JWT密钥配置
+JWT签名密钥必须由部署环境注入，不要提交到代码仓库。密钥需要是至少 32 字节密钥材料的 Base64 编码，例如：
+
+```bash
+export LILI_JWT_SECRET="$(openssl rand -base64 32)"
+```
+
+所有 API 服务必须使用同一个 `LILI_JWT_SECRET`。未配置该变量时，服务会在启动时失败。
+
 ---
 
 ### 5. 技术架构
