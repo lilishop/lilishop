@@ -169,6 +169,12 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                 log.info("E_COUPON PAID 跳过，订单已完成，orderSn={}", orderMessage.getOrderSn());
                 return;
             }
+            // 非 PAID+PAID 态（如满赠子单尚未就绪）跳过，避免误入 afterOrderConfirm
+            if (!cardKeyService.isECouponFulfillmentEligible(orderHeader)) {
+                log.info("E_COUPON PAID 跳过，状态不满足履约门禁，orderSn={}，orderStatus={}，payStatus={}",
+                        orderMessage.getOrderSn(), orderHeader.getOrderStatus(), orderHeader.getPayStatus());
+                return;
+            }
             if (!deductPromotionStockOnly(order)) {
                 errorOrder(orderMessage.getOrderSn());
                 return;

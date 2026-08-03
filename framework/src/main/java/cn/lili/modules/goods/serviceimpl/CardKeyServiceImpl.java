@@ -131,7 +131,7 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void fulfillAfterPayment(String orderSn) {
-        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
+        Order order = orderMapper.selectForUpdateBySn(orderSn);
         if (order == null) {
             log.warn("电子卡券支付后履约跳过，订单不存在，orderSn={}", orderSn);
             return;
@@ -144,50 +144,66 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
             log.info("电子卡券支付后履约跳过，订单已完成，orderSn={}", orderSn);
             return;
         }
+        if (!isECouponFulfillmentEligible(order)) {
+            log.warn("电子卡券支付后履约拒绝，状态不满足门禁，orderSn={}，payStatus={}，orderStatus={}",
+                    orderSn, order.getPayStatus(), order.getOrderStatus());
+            return;
+        }
         log.info("电子卡券支付后履约开始，orderSn={}，orderStatus={}，promotionType={}",
                 orderSn, order.getOrderStatus(), order.getOrderPromotionType());
         if (isGiftECouponOrder(order)) {
             fulfillGiftECouponOrder(order);
         } else if (isPintuanECouponOrder(order)) {
-            // 拼团预占由 afterOrderConfirm 触发 reserveByOrder
             log.info("电子卡券拼团订单等待成团，orderSn={}", orderSn);
         } else if (isPurchaseTypeOrder(order)) {
             fulfillPurchaseECouponOrder(order);
         } else {
-            orderService.systemComplete(orderSn);
-            log.info("电子卡券非卡池订单直接完成，orderSn={}", orderSn);
+            log.error("电子卡券支付后履约拒绝，未知促销类型，orderSn={}，promotionType={}",
+                    orderSn, order.getOrderPromotionType());
         }
     }
 
+    /**
+     * 购买型 E_COUPON：分配卡密后通过 {@link OrderService#systemCompleteECoupon} 完成订单；失败则作废并取消。
+     */
     private void fulfillPurchaseECouponOrder(Order order) {
         String orderSn = order.getSn();
         try {
             allocateByOrder(orderSn);
-            orderService.systemComplete(orderSn);
+            if (!orderService.systemCompleteECoupon(orderSn)) {
+                log.warn("电子卡券支付后履约完成 CAS 未生效，orderSn={}", orderSn);
+                return;
+            }
             log.info("电子卡券支付后履约完成，orderSn={}", orderSn);
         } catch (Exception e) {
             log.error("电子卡券支付后履约失败，orderSn={}", orderSn, e);
             voidOnSystemFailure(orderSn);
             orderItemService.getByOrderSn(orderSn)
                     .forEach(item -> syncSkuStock(item.getSkuId()));
-            orderService.systemCancel(orderSn, FULFILL_FAIL_CANCEL_REASON, true);
+            orderService.systemCancelECoupon(orderSn, FULFILL_FAIL_CANCEL_REASON, true);
         }
     }
 
+    /**
+     * 满赠 E_COUPON 子单：分配卡密后完成子单；失败则作废、取消子单并告警主单。
+     */
     private void fulfillGiftECouponOrder(Order giftOrder) {
         String orderSn = giftOrder.getSn();
         Order parentOrder = CharSequenceUtil.isBlank(giftOrder.getParentOrderSn()) ? null
                 : orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, giftOrder.getParentOrderSn()));
         try {
             allocateGiftByOrder(orderSn);
-            orderService.systemComplete(orderSn);
+            if (!orderService.systemCompleteECoupon(orderSn)) {
+                log.warn("满赠电子卡券子单履约完成 CAS 未生效，orderSn={}", orderSn);
+                return;
+            }
             log.info("满赠电子卡券子单履约完成，orderSn={}", orderSn);
         } catch (Exception e) {
             log.error("满赠电子卡券子单履约失败，orderSn={}", orderSn, e);
             voidOnSystemFailure(orderSn);
             orderItemService.getByOrderSn(orderSn)
                     .forEach(item -> syncSkuStock(item.getSkuId()));
-            orderService.systemCancel(orderSn, GIFT_FULFILL_FAIL_CANCEL_REASON, false);
+            orderService.systemCancelECoupon(orderSn, GIFT_FULFILL_FAIL_CANCEL_REASON, false);
             giftFulfillmentAlertPublisher.onGiftFulfillmentFailure(giftOrder, parentOrder, e.getMessage());
             writeGiftFulfillmentFailureLogs(giftOrder, parentOrder, e.getMessage());
         }
@@ -423,41 +439,52 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void allocateByOrder(String orderSn) {
-        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
+        Order order = orderMapper.selectForUpdateBySn(orderSn);
         if (order == null || !isPurchaseTypeOrder(order)) {
             return;
         }
         if (alreadyBound(orderSn, CardKeyStatusEnum.ALLOCATED)) {
             return;
         }
-        bindCardsForOrder(orderSn, CardKeyStatusEnum.ALLOCATED);
+        bindCardsForOrder(order, orderSn, CardKeyStatusEnum.ALLOCATED);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void reserveByOrder(String orderSn) {
-        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
+        Order order = orderMapper.selectForUpdateBySn(orderSn);
         if (order == null || !isPintuanECouponOrder(order)) {
+            return;
+        }
+        if (!isECouponFulfillmentEligible(order)) {
+            log.warn("电子卡券拼团预占拒绝，状态不满足门禁，orderSn={}，payStatus={}，orderStatus={}",
+                    orderSn, order.getPayStatus(), order.getOrderStatus());
             return;
         }
         if (alreadyBound(orderSn, CardKeyStatusEnum.RESERVED)
                 || alreadyBound(orderSn, CardKeyStatusEnum.ALLOCATED)) {
             return;
         }
-        bindCardsForOrder(orderSn, CardKeyStatusEnum.RESERVED);
+        bindCardsForOrder(order, orderSn, CardKeyStatusEnum.RESERVED);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void confirmReservationAndComplete(String orderSn) {
-        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
+        Order order = orderMapper.selectForUpdateBySn(orderSn);
         if (order == null || !isPintuanECouponOrder(order)) {
             return;
         }
         List<CardKey> reserved = baseMapper.selectReservedByOrder(orderSn);
         if (reserved.isEmpty()) {
             if (alreadyBound(orderSn, CardKeyStatusEnum.ALLOCATED)) {
-                orderService.systemComplete(orderSn);
+                orderService.systemCompleteECoupon(orderSn);
             }
             return;
         }
@@ -470,13 +497,19 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
             skuIds.add(card.getSkuId());
         }
         skuIds.forEach(this::syncSkuStock);
-        orderService.systemComplete(orderSn);
+        orderService.systemCompleteECoupon(orderSn);
         log.info("拼团电子卡券预占确认完成，orderSn={}", orderSn);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * 先对订单行加锁，再释放 RESERVED，避免与成团/取消并发冲突。
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void releaseReservation(String orderSn) {
+        orderMapper.selectForUpdateBySn(orderSn);
         List<CardKey> reserved = baseMapper.selectReservedByOrder(orderSn);
         if (reserved.isEmpty()) {
             return;
@@ -496,19 +529,28 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
         log.info("拼团电子卡券预占已释放，orderSn={}", orderSn);
     }
 
+    /**
+     * 满赠子单分配卡密（调用方已持有订单行锁）。
+     */
     private void allocateGiftByOrder(String orderSn) {
-        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
+        Order order = orderMapper.selectForUpdateBySn(orderSn);
         if (order == null || !isGiftECouponOrder(order)) {
             return;
         }
         if (alreadyBound(orderSn, CardKeyStatusEnum.ALLOCATED)) {
             return;
         }
-        bindCardsForOrder(orderSn, CardKeyStatusEnum.ALLOCATED);
+        bindCardsForOrder(order, orderSn, CardKeyStatusEnum.ALLOCATED);
     }
 
-    private void bindCardsForOrder(String orderSn, CardKeyStatusEnum targetStatus) {
-        Order order = orderMapper.selectOne(new LambdaQueryWrapper<Order>().eq(Order::getSn, orderSn));
+    /**
+     * 按订单明细从卡池绑定卡密；购买型 ALLOCATED 失败时触发 {@link #voidOnSystemFailure}。
+     *
+     * @param order        已加锁的订单（可为 null）
+     * @param orderSn      订单号
+     * @param targetStatus ALLOCATED 或 RESERVED
+     */
+    private void bindCardsForOrder(Order order, String orderSn, CardKeyStatusEnum targetStatus) {
         if (order == null) {
             return;
         }
@@ -568,6 +610,9 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
         skuIds.forEach(this::syncSkuStock);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void softDeletePoolOnSkuRemove(String skuId) {
@@ -593,12 +638,35 @@ public class CardKeyServiceImpl extends ServiceImpl<CardKeyMapper, CardKey> impl
                 && OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isPurchaseTypeOrder(Order order) {
-        return order != null
-                && OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())
-                && !OrderPromotionTypeEnum.GIFT.name().equals(order.getOrderPromotionType())
-                && CharSequenceUtil.isBlank(order.getParentOrderSn());
+        if (order == null || !OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
+            return false;
+        }
+        if (CharSequenceUtil.isNotBlank(order.getParentOrderSn())) {
+            return false;
+        }
+        String promotionType = order.getOrderPromotionType();
+        return OrderPromotionTypeEnum.NORMAL.name().equals(promotionType)
+                || OrderPromotionTypeEnum.POINTS.name().equals(promotionType)
+                || OrderPromotionTypeEnum.KANJIA.name().equals(promotionType);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isECouponFulfillmentEligible(Order order) {
+        if (order == null || !OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
+            return false;
+        }
+        if (!PayStatusEnum.PAID.name().equals(order.getPayStatus())) {
+            return false;
+        }
+        return OrderStatusEnum.PAID.name().equals(order.getOrderStatus());
     }
 
     @Override

@@ -219,7 +219,8 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
         order.setSn(SnowFlake.createStr("G"));
         order.setParentOrderSn(originOrder.getSn());
         order.setOrderPromotionType(OrderPromotionTypeEnum.GIFT.name());
-        order.setOrderStatus(OrderStatusEnum.UNPAID.name());
+        // 满赠子单随主单已支付，须 PAID 才能通过 E_COUPON 履约门禁
+        order.setOrderStatus(OrderStatusEnum.PAID.name());
         order.setPayStatus(PayStatusEnum.PAID.name());
         order.setOrderType(orderTypeEnum.name());
         order.setNeedReceipt(false);

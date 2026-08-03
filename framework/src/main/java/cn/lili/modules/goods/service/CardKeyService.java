@@ -114,7 +114,7 @@ public interface CardKeyService {
     void softDeletePoolOnSkuRemove(String skuId);
 
     /**
-     * 是否为可走卡池的购买型 E_COUPON 订单。
+     * 是否为可走卡池的购买型 E_COUPON 订单（NORMAL / POINTS / KANJIA，且无 parentOrderSn）。
      */
     boolean isPurchaseTypeOrder(Order order);
 
@@ -127,6 +127,11 @@ public interface CardKeyService {
      * 是否为拼团 E_COUPON 订单。
      */
     boolean isPintuanECouponOrder(Order order);
+
+    /**
+     * E_COUPON 支付后履约门禁：orderType=E_COUPON、payStatus=PAID、orderStatus=PAID。
+     */
+    boolean isECouponFulfillmentEligible(Order order);
 
     /**
      * 当前交易是否全部为 E_COUPON SKU，用于选择专用渲染链路与免地址逻辑。

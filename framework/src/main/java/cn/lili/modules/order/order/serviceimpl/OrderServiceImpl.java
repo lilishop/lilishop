@@ -513,7 +513,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     /**
      * 支付后库存确认路由（L2 兜底）。
-     * E_COUPON → fulfillAfterPayment；VIRTUAL 仅 PAID 可进 virtualOrderConfirm。
+     * E_COUPON 进入专用履约入口；VIRTUAL 仅 PAID 可进 virtualOrderConfirm。
      */
     @Override
     @OrderLogPoint(description = "'库存确认'", orderSn = "#orderSn")
@@ -529,18 +529,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             return;
         }
         log.info("库存确认开始，orderSn={}，orderType={}，orderStatus={}", orderSn, order.getOrderType(), order.getOrderStatus());
-        //判断是否为拼团订单，进行特殊处理
-        //判断订单类型进行不同的订单确认操作
-        if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())) {
-            if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
-                cardKeyService.reserveByOrder(orderSn);
-            }
+        if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
+            eCouponOrderConfirm(order);
+        } else if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())) {
             String parentOrderSn = CharSequenceUtil.isEmpty(order.getParentOrderSn()) ? orderSn : order.getParentOrderSn();
             this.checkPintuanOrder(order.getPromotionId(), parentOrderSn);
-        } else if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
-            // L2 兜底：E_COUPON 转发卡池履约，不得走 normal/virtual 分支
-            cardKeyService.fulfillAfterPayment(orderSn);
-        } else if (order.getOrderType().equals(OrderTypeEnum.NORMAL.name())) {
+        } else if (OrderTypeEnum.NORMAL.name().equals(order.getOrderType())) {
             normalOrderConfirm(orderSn);
         } else if (OrderTypeEnum.VIRTUAL.name().equals(order.getOrderType())) {
             if (!OrderStatusEnum.PAID.name().equals(order.getOrderStatus())) {
@@ -549,7 +543,31 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             }
             virtualOrderConfirm(orderSn);
         } else {
-            virtualOrderConfirm(orderSn);
+            log.error("库存确认拒绝，未知订单类型，orderSn={}，orderType={}，orderStatus={}",
+                    orderSn, order.getOrderType(), order.getOrderStatus());
+        }
+    }
+
+    /**
+     * E_COUPON 专用支付后履约入口：集中校验、活动分流与卡密履约，不进入 NORMAL/VIRTUAL 分支。
+     */
+    private void eCouponOrderConfirm(Order order) {
+        if (!cardKeyService.isECouponFulfillmentEligible(order)) {
+            if (OrderStatusEnum.COMPLETED.name().equals(order.getOrderStatus())) {
+                log.info("E_COUPON 履约跳过，订单已完成，orderSn={}", order.getSn());
+                return;
+            }
+            log.warn("E_COUPON 履约拒绝，状态不满足门禁，orderSn={}，payStatus={}，orderStatus={}",
+                    order.getSn(), order.getPayStatus(), order.getOrderStatus());
+            return;
+        }
+        String orderSn = order.getSn();
+        if (OrderPromotionTypeEnum.PINTUAN.name().equals(order.getOrderPromotionType())) {
+            cardKeyService.reserveByOrder(orderSn);
+            String parentOrderSn = CharSequenceUtil.isEmpty(order.getParentOrderSn()) ? orderSn : order.getParentOrderSn();
+            this.checkPintuanOrder(order.getPromotionId(), parentOrderSn);
+        } else {
+            cardKeyService.fulfillAfterPayment(orderSn);
         }
     }
 
@@ -700,14 +718,110 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    @OrderLogPoint(description = "'订单['+#orderSn+']完成'", orderSn = "#orderSn")
+    @Transactional(rollbackFor = Exception.class)
+    public boolean systemCompleteECoupon(String orderSn) {
+        Order order = this.getBySn(orderSn);
+        if (order == null) {
+            log.warn("E_COUPON 完成 CAS 跳过，订单不存在，orderSn={}", orderSn);
+            return false;
+        }
+        if (OrderStatusEnum.COMPLETED.name().equals(order.getOrderStatus())) {
+            return true;
+        }
+        if (!OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())
+                || !PayStatusEnum.PAID.name().equals(order.getPayStatus())
+                || !OrderStatusEnum.PAID.name().equals(order.getOrderStatus())) {
+            log.warn("E_COUPON 完成 CAS 拒绝，orderSn={}，orderType={}，payStatus={}，orderStatus={}",
+                    orderSn, order.getOrderType(), order.getPayStatus(), order.getOrderStatus());
+            return false;
+        }
+        boolean updated = this.update(new LambdaUpdateWrapper<Order>()
+                .eq(Order::getSn, orderSn)
+                .eq(Order::getOrderType, OrderTypeEnum.E_COUPON.name())
+                .eq(Order::getPayStatus, PayStatusEnum.PAID.name())
+                .eq(Order::getOrderStatus, OrderStatusEnum.PAID.name())
+                .set(Order::getOrderStatus, OrderStatusEnum.COMPLETED.name())
+                .set(Order::getCompleteTime, new Date()));
+        if (!updated) {
+            order = this.getBySn(orderSn);
+            if (order != null && OrderStatusEnum.COMPLETED.name().equals(order.getOrderStatus())) {
+                return true;
+            }
+            log.warn("E_COUPON 完成 CAS 失败，orderSn={}，orderStatus={}",
+                    orderSn, order == null ? null : order.getOrderStatus());
+            return false;
+        }
+        order.setOrderStatus(OrderStatusEnum.COMPLETED.name());
+        applyOrderCompleteSideEffects(order, orderSn);
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @OrderLogPoint(description = "'订单['+#orderSn+']系统取消，原因为：'+#reason", orderSn = "#orderSn")
+    @Transactional(rollbackFor = Exception.class)
+    public boolean systemCancelECoupon(String orderSn, String reason, Boolean refundMoney) {
+        Order order = this.getBySn(orderSn);
+        if (order == null) {
+            log.warn("E_COUPON 取消 CAS 跳过，订单不存在，orderSn={}", orderSn);
+            return false;
+        }
+        if (OrderStatusEnum.CANCELLED.name().equals(order.getOrderStatus())) {
+            return true;
+        }
+        if (OrderStatusEnum.COMPLETED.name().equals(order.getOrderStatus())) {
+            log.warn("E_COUPON 取消 CAS 拒绝，订单已完成，orderSn={}", orderSn);
+            return false;
+        }
+        boolean updated = this.update(new LambdaUpdateWrapper<Order>()
+                .eq(Order::getSn, orderSn)
+                .eq(Order::getOrderType, OrderTypeEnum.E_COUPON.name())
+                .eq(Order::getOrderStatus, OrderStatusEnum.PAID.name())
+                .set(Order::getOrderStatus, OrderStatusEnum.CANCELLED.name())
+                .set(Order::getCancelReason, reason));
+        if (!updated) {
+            order = this.getBySn(orderSn);
+            if (order != null && OrderStatusEnum.CANCELLED.name().equals(order.getOrderStatus())) {
+                return true;
+            }
+            log.warn("E_COUPON 取消 CAS 失败，orderSn={}，orderStatus={}",
+                    orderSn, order == null ? null : order.getOrderStatus());
+            return false;
+        }
+        order.setOrderStatus(OrderStatusEnum.CANCELLED.name());
+        order.setCancelReason(reason);
+        orderItemService.update(new LambdaUpdateWrapper<OrderItem>().eq(OrderItem::getOrderSn, orderSn)
+                .set(OrderItem::getIsRefund, RefundStatusEnum.ALL_REFUND.name()));
+        if (Boolean.TRUE.equals(refundMoney)) {
+            refundCanceledOrderBySplit(order, reason);
+            storeFlowService.orderCancel(orderSn);
+            orderStatusMessage(order);
+        }
+        return true;
+    }
+
+    /**
      * 完成订单方法封装
      *
      * @param order   订单
      * @param orderSn 订单编号
      */
     @Transactional(rollbackFor = Exception.class)
-    public void complete(Order order, String orderSn) {//修改订单状态为完成
+    public void complete(Order order, String orderSn) {
         this.updateStatus(orderSn, OrderStatusEnum.COMPLETED);
+        applyOrderCompleteSideEffects(order, orderSn);
+    }
+
+    /**
+     * 订单 COMPLETED 后的公共副作用：评价状态、完成时间、投诉状态与 MQ 通知。
+     */
+    private void applyOrderCompleteSideEffects(Order order, String orderSn) {
         //修改订单货物可以进行评价
         orderItemService.update(new UpdateWrapper<OrderItem>().eq(ORDER_SN_COLUMN, orderSn)
                 .set("comment_status", CommentStatusEnum.UNFINISHED));
@@ -1247,8 +1361,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             try {
                 if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
                     cardKeyService.releaseReservation(order.getSn());
+                    this.systemCancelECoupon(order.getSn(), "拼团人数不足，拼团失败！", true);
+                } else {
+                    this.systemCancel(order.getSn(), "拼团人数不足，拼团失败！", true);
                 }
-                this.systemCancel(order.getSn(), "拼团人数不足，拼团失败！", true);
             } catch (Exception e) {
                 log.error("拼团订单取消失败", e);
             }
@@ -1301,14 +1417,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     /**
      * 虚拟商品订单确认：VIRTUAL+PAID → TAKE。
-     * E_COUPON 误入时转发 {@link CardKeyService#fulfillAfterPayment}，禁止写 TAKE。
+     * E_COUPON 误入时记录非法路由并退出，禁止写 TAKE 或转发卡密履约。
      */
     @Transactional(rollbackFor = Exception.class)
     public void virtualOrderConfirm(String orderSn) {
         Order order = this.getBySn(orderSn);
         if (order != null && OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
-            log.warn("E_COUPON 误入 virtualOrderConfirm，转发卡密履约，orderSn={}", orderSn);
-            cardKeyService.fulfillAfterPayment(orderSn);
+            log.error("E_COUPON 非法路由进入 virtualOrderConfirm，orderSn={}", orderSn);
             return;
         }
         boolean updated = this.update(new LambdaUpdateWrapper<Order>()

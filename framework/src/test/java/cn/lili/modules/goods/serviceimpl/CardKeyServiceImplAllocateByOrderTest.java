@@ -76,6 +76,29 @@ class CardKeyServiceImplAllocateByOrderTest {
     }
 
     @Test
+    void allocateByOrderBindsThreeCardsForQuantityThree() {
+        stubPurchaseOrderContext(3, List.of(unusedCard("ck-1"), unusedCard("ck-2"), unusedCard("ck-3")));
+        doReturn(0L).when(cardKeyService).count(any(Wrapper.class));
+        doReturn(true).when(cardKeyService).updateById(any(CardKey.class));
+        doNothing().when(cardKeyService).syncSkuStock(anyString());
+
+        cardKeyService.allocateByOrder("O001");
+
+        verify(cardKeyService, times(3)).updateById(any(CardKey.class));
+        verify(cardKeyService).syncSkuStock("sku-1");
+    }
+
+    @Test
+    void allocateByOrderSkipsWhenAlreadyAllocated() {
+        when(orderMapper.selectForUpdateBySn("O001")).thenReturn(purchaseOrder());
+        doReturn(1L).when(cardKeyService).count(any(Wrapper.class));
+
+        cardKeyService.allocateByOrder("O001");
+
+        verify(cardKeyMapper, never()).selectForAllocate(anyString(), any(Integer.class));
+    }
+
+    @Test
     void allocateByOrderRejectsInsufficientPoolAndInvokesVoidOnSystemFailure() {
         stubPurchaseOrderContext(2, List.of(unusedCard("ck-1")));
         doReturn(0L).when(cardKeyService).count(any(Wrapper.class));
@@ -107,7 +130,7 @@ class CardKeyServiceImplAllocateByOrderTest {
     }
 
     private void stubPurchaseOrderContext(int num, List<CardKey> poolCards) {
-        when(orderMapper.selectOne(any())).thenReturn(purchaseOrder());
+        when(orderMapper.selectForUpdateBySn("O001")).thenReturn(purchaseOrder());
         when(orderItemService.getByOrderSn("O001")).thenReturn(List.of(eCouponOrderItem(num)));
         when(goodsSkuService.getById("sku-1")).thenReturn(eCouponSku());
         when(cardKeyMapper.selectForAllocate(eq("sku-1"), eq(num))).thenReturn(poolCards);

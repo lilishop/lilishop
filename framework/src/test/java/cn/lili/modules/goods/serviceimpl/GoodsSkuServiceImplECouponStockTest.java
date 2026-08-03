@@ -3,6 +3,7 @@ package cn.lili.modules.goods.serviceimpl;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.service.GoodsService;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,6 +49,21 @@ class GoodsSkuServiceImplECouponStockTest {
     void setUp() {
         serviceSpy = spy(goodsSkuService);
         ReflectionTestUtils.setField(serviceSpy, "goodsService", goodsService);
+    }
+
+    @Test
+    void renderGoodsSkuListIgnoresManualQuantityForNewECouponSku() {
+        GoodsSku sku = buildECouponSku("", 999);
+        sku.setId(null);
+        GoodsOperationDTO dto = GoodsOperationDTO.builder()
+                .salesModel("RETAIL")
+                .goodsGalleryList(new ArrayList<>())
+                .build();
+        ReflectionTestUtils.setField(goodsSkuService, "salesModelRenders", List.of());
+
+        goodsSkuService.renderGoodsSkuList(List.of(sku), dto);
+
+        assertThat(sku.getQuantity()).isZero();
     }
 
     @Test

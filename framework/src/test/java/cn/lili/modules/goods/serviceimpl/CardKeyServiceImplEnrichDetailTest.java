@@ -15,6 +15,7 @@ import cn.lili.modules.order.order.mapper.OrderMapper;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.trade.entity.dos.OrderLog;
 import cn.lili.modules.order.trade.service.OrderLogService;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -24,7 +25,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,12 +45,35 @@ class CardKeyServiceImplEnrichDetailTest {
 
     @BeforeEach
     void setUp() {
-        cardKeyService = new CardKeyServiceImpl();
+        cardKeyService = spy(new CardKeyServiceImpl());
         orderMapper = mock(OrderMapper.class);
         orderItemService = mock(OrderItemService.class);
         ReflectionTestUtils.setField(cardKeyService, "orderMapper", orderMapper);
         ReflectionTestUtils.setField(cardKeyService, "orderItemService", orderItemService);
         ReflectionTestUtils.setField(cardKeyService, "cardKeySecretUtil", new cn.lili.modules.goods.util.CardKeySecretUtil());
+    }
+
+    @Test
+    void enrichOrderDetailReturnsDeliveredCardKeys() {
+        Order order = purchaseECouponOrder(OrderStatusEnum.COMPLETED.name());
+        order.setSn("O200");
+        OrderItem item = orderItem("O200", "item-2");
+        OrderDetailVO vo = new OrderDetailVO(order, List.of(item), List.of(), null);
+
+        CardKey cardKey = new CardKey();
+        cardKey.setCardNo("NO-001");
+        cardKey.setCardSecret("secret-1");
+        cardKey.setStatus(CardKeyStatusEnum.ALLOCATED.name());
+        cardKey.setOrderItemSn("item-2");
+        doReturn(List.of(cardKey)).when(cardKeyService).list(any(Wrapper.class));
+
+        cardKeyService.enrichOrderDetail(vo);
+
+        OrderItem enriched = vo.getOrderItems().get(0);
+        assertThat(enriched.getCardKeyFulfillStatus()).isEqualTo(CardKeyFulfillStatusEnum.DELIVERED.name());
+        assertThat(enriched.getCardKeyDelivered()).isTrue();
+        assertThat(enriched.getCardKeys()).hasSize(1);
+        assertThat(enriched.getCardKeys().get(0).getCardNo()).isEqualTo("NO-001");
     }
 
     @Test
@@ -70,6 +96,7 @@ class CardKeyServiceImplEnrichDetailTest {
     void enrichOrderDetailAggregatesGiftSubOrderOnParentOrder() {
         Order parent = normalOrder("P001");
         Order gift = giftOrder(OrderStatusEnum.CANCELLED.name(), "满赠电子卡券发放失败");
+        gift.setSn("G002");
         OrderItem parentItem = orderItem("P001", "pi-1");
         OrderItem giftItem = orderItem("G002", "gi-1");
         giftItem.setGoodsName("赠品卡密");
