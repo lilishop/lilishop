@@ -4,12 +4,12 @@
   servlet:
     context-path: /
 
+# actuator 仅暴露健康检查端点。
 management:
-  health:
   endpoints:
     web:
       exposure:
-        include: '*'
+        include: health
 spring:
   application:
     name: buyer-api
@@ -85,7 +85,6 @@ ignored:
     - /buyer/common/site/**
     - /buyer/common/region/**
     - /buyer/common/IM
-    - /druid/**
     - /swagger-ui.html
     - /swagger-ui/**
     - /v3/api-docs

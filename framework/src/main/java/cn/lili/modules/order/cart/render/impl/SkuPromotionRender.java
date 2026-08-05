@@ -6,6 +6,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.CurrencyUtil;
+import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
@@ -63,6 +64,9 @@ public class SkuPromotionRender implements CartRenderStep {
 
     @Autowired
     private Cache cache;
+
+    @Autowired
+    private CardKeyService cardKeyService;
 
     @Override
     public RenderStepEnums step() {

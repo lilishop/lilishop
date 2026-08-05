@@ -13,6 +13,7 @@ import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.Clerk;

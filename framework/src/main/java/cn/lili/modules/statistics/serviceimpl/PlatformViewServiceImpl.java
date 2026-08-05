@@ -153,7 +153,7 @@ public class PlatformViewServiceImpl extends ServiceImpl<PlatformViewMapper, Pla
 
         //搜索类型判定，如果不为空，则按照搜索类型进行查询
         if (StringUtils.isNotEmpty(queryParam.getSearchType())) {
-            SearchTypeEnum searchTypeEnum = SearchTypeEnum.valueOf(queryParam.getSearchType());
+            SearchTypeEnum searchTypeEnum = SearchTypeEnum.parse(queryParam.getSearchType());
             switch (searchTypeEnum) {
                 case TODAY:
                     PlatformViewVO today = new PlatformViewVO();

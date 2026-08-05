@@ -119,5 +119,10 @@ public interface OrderMapper extends BaseMapper<Order> {
             " FROM li_order o INNER JOIN li_order_item AS oi on o.sn = oi.order_sn ${ew.customSqlSegment} ")
     List<Order> queryListByParams(@Param(Constants.WRAPPER) Wrapper<Order> queryWrapper);
 
+    /**
+     * 卡密履约串行化：按订单号加行锁
+     */
+    @Select("SELECT * FROM li_order WHERE sn = #{orderSn} AND delete_flag = 0 FOR UPDATE")
+    Order selectForUpdateBySn(@Param("orderSn") String orderSn);
 
 }

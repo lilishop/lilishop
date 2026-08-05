@@ -10,13 +10,12 @@ server:
       min-spare: 50
       max: 1000
 
-# 与 Spring Boot 2 一样，默认情况下大多数端点都不通过 http 公开；我们公开了所有端点。生产环境请仔细选择要公开的端点。
+# actuator 仅暴露健康检查端点。
 management:
-  health:
   endpoints:
     web:
       exposure:
-        include: '*'
+        include: health
 spring:
   application:
     name: admin-api
@@ -77,7 +76,6 @@ ignored:
     - /store/common/site/**
     - /store/common/region/**
     - /store/common/IM
-    - /druid/**
     - /v3/api-docs
     - /v3/api-docs/**
     - /swagger-ui/**

@@ -249,8 +249,11 @@ public class Order extends BaseEntity {
         this.setTradeSn(tradeDTO.getSn());
         this.setRemark(cartVO.getRemark());
         this.setFreightPrice(cartVO.getPriceDetailDTO().getFreightPrice());
+        this.applyECouponPersistNormalization();
         //客户收件信息
-        if (tradeDTO.getMemberAddress() != null && DeliveryMethodEnum.LOGISTICS.name().equals(cartVO.getDeliveryMethod())) {
+        if (!OrderTypeEnum.E_COUPON.name().equals(this.getOrderType())
+                && tradeDTO.getMemberAddress() != null
+                && DeliveryMethodEnum.LOGISTICS.name().equals(cartVO.getDeliveryMethod())) {
             this.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());
             this.setConsigneeAddressPath(tradeDTO.getMemberAddress().getConsigneeAddressPath());
             this.setConsigneeDetail(tradeDTO.getMemberAddress().getDetail());
@@ -280,6 +283,29 @@ public class Order extends BaseEntity {
 
 
     /**
+     * E_COUPON 订单落库归一化：虚拟发货、运费 0、清除收件/自提/物流快照。
+     * 供 {@link #Order(CartVO, TradeDTO)} 与满赠 G 子单等 bypass 构造器的创建路径共用。
+     */
+    public void applyECouponPersistNormalization() {
+        if (!OrderTypeEnum.E_COUPON.name().equals(this.getOrderType())) {
+            return;
+        }
+        this.setDeliveryMethod(DeliveryMethodEnum.VIRTUAL.name());
+        this.setFreightPrice(0D);
+        this.setConsigneeName(null);
+        this.setConsigneeMobile(null);
+        this.setConsigneeAddressPath(null);
+        this.setConsigneeAddressIdPath(null);
+        this.setConsigneeDetail(null);
+        this.setStoreAddressPath(null);
+        this.setStoreAddressMobile(null);
+        this.setStoreAddressCenter(null);
+        this.setLogisticsNo(null);
+        this.setLogisticsCode(null);
+        this.setLogisticsName(null);
+    }
+
+    /**
      * 填写交易（订单）类型
      * 1.判断是普通、促销订单
      * 2.普通订单进行区分：实物订单、虚拟订单
@@ -293,15 +319,23 @@ public class Order extends BaseEntity {
 
         //判断是否为普通订单、促销订单
         if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.CART) || tradeDTO.getCartTypeEnum().equals(CartTypeEnum.BUY_NOW)) {
-            this.setOrderType(OrderTypeEnum.NORMAL.name());
+            String goodsType = cartVO.getCheckedSkuList().get(0).getGoodsSku().getGoodsType();
+            // 立即购买/购物车链路：E_COUPON 与 NORMAL 区分 orderType（非 VIRTUAL 核销）
+            if (GoodsTypeEnum.E_COUPON.name().equals(goodsType)) {
+                this.setOrderType(OrderTypeEnum.E_COUPON.name());
+            } else {
+                this.setOrderType(OrderTypeEnum.NORMAL.name());
+            }
             this.setOrderPromotionType(OrderPromotionTypeEnum.NORMAL.name());
         } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.VIRTUAL)) {
             this.setOrderType(OrderTypeEnum.VIRTUAL.name());
             this.setOrderPromotionType(OrderPromotionTypeEnum.NORMAL.name());
         } else {
-            //促销订单（拼团、积分）-判断购买的是虚拟商品还是实物商品
+            //促销订单（拼团、积分、砍价）
             String goodsType = cartVO.getCheckedSkuList().get(0).getGoodsSku().getGoodsType();
-            if (CharSequenceUtil.isEmpty(goodsType) || goodsType.equals(GoodsTypeEnum.PHYSICAL_GOODS.name())) {
+            if (GoodsTypeEnum.E_COUPON.name().equals(goodsType)) {
+                this.setOrderType(OrderTypeEnum.E_COUPON.name());
+            } else if (CharSequenceUtil.isEmpty(goodsType) || goodsType.equals(GoodsTypeEnum.PHYSICAL_GOODS.name())) {
                 this.setOrderType(OrderTypeEnum.NORMAL.name());
             } else {
                 this.setOrderType(OrderTypeEnum.VIRTUAL.name());

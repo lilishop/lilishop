@@ -1,6 +1,7 @@
 package cn.lili.modules.order.cart.render;
 
 import cn.lili.common.exception.ServiceException;
+import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.RenderStepEnums;
@@ -41,6 +42,9 @@ public class TradeBuilder {
     @Autowired
     private CartService cartService;
 
+    @Autowired
+    private CardKeyService cardKeyService;
+
 
     /**
      * 构造购物车
@@ -65,12 +69,14 @@ public class TradeBuilder {
     }
 
     /**
-     * 构造结算页面
+     * 构造结算页面；纯 E_COUPON 仍归一化免地址/虚拟发货，渲染链按 cartType 复用标准步骤。
      */
     public TradeDTO buildChecked(CartTypeEnum checkedWay) {
         //读取对应购物车的商品信息
         TradeDTO tradeDTO = cartService.readDTO(checkedWay);
-        //需要对购物车渲染
+        if (cardKeyService.isECouponOnlyTrade(tradeDTO)) {
+            cardKeyService.normalizeECouponTrade(tradeDTO);
+        }
         if (isSingle(checkedWay)) {
             renderCartBySteps(tradeDTO, RenderStepStatement.checkedSingleRender);
         } else if (checkedWay.equals(CartTypeEnum.PINTUAN)) {
@@ -86,13 +92,16 @@ public class TradeBuilder {
      * 创建一笔交易
      * 1.构造交易
      * 2.创建交易
+     * <p>E_COUPON 按 cartType 复用标准 tradeRender / pintuanTradeRender / singleTradeRender。
      *
      * @param tradeDTO 交易模型
      * @return 交易信息
      */
     public Trade createTrade(TradeDTO tradeDTO) {
 
-        //需要对购物车渲染
+        if (cardKeyService.isECouponOnlyTrade(tradeDTO)) {
+            cardKeyService.normalizeECouponTrade(tradeDTO);
+        }
         if (isSingle(tradeDTO.getCartTypeEnum())) {
             renderCartBySteps(tradeDTO, RenderStepStatement.singleTradeRender);
         } else if (tradeDTO.getCartTypeEnum().equals(CartTypeEnum.PINTUAN)) {

@@ -7,8 +7,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.event.TransactionCommitSendMQEvent;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
-import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
-import cn.lili.modules.member.entity.dos.MemberAddress;
+import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.order.cart.entity.dto.MemberCouponDTO;
@@ -85,6 +84,9 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
     @Autowired
     private KanjiaActivityService kanjiaActivityService;
 
+    @Autowired
+    private CardKeyService cardKeyService;
+
     /**
      * RocketMQ 配置
      */
@@ -119,22 +121,24 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
     }
 
     /**
-     * 创建订单最后一步校验
+     * 创建交易入库前校验。
+     * <ul>
+     *   <li>E_COUPON：{@link CardKeyService#validateTradeForECoupon}（混单/促销/卡池/金额等）</li>
+     *   <li>收货地址：由 {@link cn.lili.modules.order.cart.service.CartServiceImpl#createTrade} 在渲染前校验</li>
+     *   <li>本方法：勾选状态、E_COUPON 跳过后续物流校验、实物配送区域与自提门店</li>
+     * </ul>
      *
      * @param tradeDTO 购物车视图
      */
     private void createTradeCheck(TradeDTO tradeDTO) {
-        // 购物车选择状态判断
+        cardKeyService.validateTradeForECoupon(tradeDTO);
         if (tradeDTO.getCartList().stream().noneMatch(CartVO::getChecked)) {
             throw new ServiceException(ResultCode.ORDER_NOT_EXIST_VALID);
         }
+        if (cardKeyService.isECouponOnlyTrade(tradeDTO)) {
+            return;
+        }
         if (!tradeDTO.getCartTypeEnum().equals(CartTypeEnum.VIRTUAL) && tradeDTO.getStoreAddress() == null) {
-            //创建订单如果没有收获地址，
-            MemberAddress memberAddress = tradeDTO.getMemberAddress();
-            if (memberAddress == null && !GoodsTypeEnum.VIRTUAL_GOODS.name().equals(tradeDTO.getCheckedSkuList().get(0).getGoodsSku().getGoodsType())) {
-                throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
-            }
-            //订单配送区域校验
             if (tradeDTO.getNotSupportFreight() != null && !tradeDTO.getNotSupportFreight().isEmpty()) {
                 StringBuilder stringBuilder = new StringBuilder("包含商品有-");
                 tradeDTO.getNotSupportFreight().forEach(sku -> stringBuilder.append(sku.getGoodsSku().getGoodsName()));

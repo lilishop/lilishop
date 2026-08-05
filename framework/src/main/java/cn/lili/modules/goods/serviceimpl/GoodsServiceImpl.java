@@ -26,6 +26,7 @@ import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.goods.entity.vos.GoodsNumVO;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
@@ -108,6 +109,10 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Autowired
     @Lazy
     private MemberEvaluationService memberEvaluationService;
+
+    @Autowired
+    @Lazy
+    private CardKeyService cardKeyService;
     /**
      * rocketMq
      */
@@ -298,14 +303,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             goodsVO.setSkuList(goodsListByGoodsId);
         }
         //商品分类名称赋值
-        List<String> categoryName = new ArrayList<>();
-        String categoryPath = goods.getCategoryPath();
-        String[] strArray = categoryPath.split(",");
-        List<Category> categories = categoryService.listByIds(Arrays.asList(strArray));
-        for (Category category : categories) {
-            categoryName.add(category.getName());
-        }
-        goodsVO.setCategoryName(categoryName);
+        goodsVO.setCategoryName(categoryService.getCategoryNamesByPath(goods.getCategoryPath()));
 
         //参数非空则填写参数
         if (CharSequenceUtil.isNotEmpty(goods.getParams())) {
@@ -512,6 +510,13 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             //修改SKU状态
             goodsSkuService.updateGoodsSkuStatus(goods);
             goodsCacheKeys.add(CachePrefix.GOODS.getPrefix() + goods.getId());
+            // 电子卡券：商品删除时按 SKU 软删卡池（UNUSED/VOIDED），已分配 ALLOCATED 保留供订单查卡
+            if (GoodsTypeEnum.E_COUPON.name().equals(goods.getGoodsType())) {
+                List<GoodsSku> skus = goodsSkuService.getGoodsSkuListByGoodsId(goods.getId());
+                for (GoodsSku sku : skus) {
+                    cardKeyService.softDeletePoolOnSkuRemove(sku.getId());
+                }
+            }
         }
         //删除缓存
         cache.multiDel(goodsCacheKeys);
@@ -743,6 +748,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
                 }
                 break;
             case "VIRTUAL_GOODS":
+                if (!"0".equals(goods.getTemplateId())) {
+                    goods.setTemplateId("0");
+                }
+                break;
+            case "E_COUPON":
+                // 电子卡券无需运费模板，强制 templateId=0
                 if (!"0".equals(goods.getTemplateId())) {
                     goods.setTemplateId("0");
                 }

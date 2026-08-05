@@ -1,6 +1,7 @@
 package cn.lili.modules.order.cart.render.impl;
 
 import cn.lili.common.utils.CurrencyUtil;
+import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.order.cart.entity.dto.TradeDTO;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
@@ -34,6 +35,9 @@ public class SkuFreightRender implements CartRenderStep {
     @Autowired
     private FreightTemplateService freightTemplateService;
 
+    @Autowired
+    private CardKeyService cardKeyService;
+
     @Override
     public RenderStepEnums step() {
         return RenderStepEnums.SKU_FREIGHT;
@@ -41,6 +45,10 @@ public class SkuFreightRender implements CartRenderStep {
 
     @Override
     public void render(TradeDTO tradeDTO) {
+        // E_COUPON 免运费、免地址，跳过运费模板计算
+        if (cardKeyService.isECouponOnlyTrade(tradeDTO)) {
+            return;
+        }
         List<CartSkuVO> cartSkuVOS = tradeDTO.getCheckedSkuList();
         if (tradeDTO.getCartList() == null || tradeDTO.getCartList().isEmpty()
                 || cartSkuVOS == null || cartSkuVOS.isEmpty()) {

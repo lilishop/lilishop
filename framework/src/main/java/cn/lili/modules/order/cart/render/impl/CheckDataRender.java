@@ -12,6 +12,8 @@ import cn.lili.modules.goods.entity.dos.Wholesale;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
+import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.goods.service.WholesaleService;
 import cn.lili.modules.member.entity.dos.Member;
@@ -54,6 +56,9 @@ public class CheckDataRender implements CartRenderStep {
 
     @Autowired
     private GoodsSkuService goodsSkuService;
+
+    @Autowired
+    private CardKeyService cardKeyService;
 
     @Autowired
     private OrderService orderService;
@@ -145,9 +150,8 @@ public class CheckDataRender implements CartRenderStep {
                 cartSkuVO.setChecked(false);
                 //设置失效消息
                 cartSkuVO.setErrorMessage("商品库存不足,现有库存数量[" + dataSku.getQuantity() + "]");
-            }
-            //如果存在商品促销活动，则判定商品促销状态
-            if (!cartSkuVO.getCartType().equals(CartTypeEnum.POINTS) && (CollUtil.isNotEmpty(cartSkuVO.getNotFilterPromotionMap()) || Boolean.TRUE.equals(cartSkuVO.getGoodsSku().getPromotionFlag()))) {
+            } else if (!cartSkuVO.getCartType().equals(CartTypeEnum.POINTS) && (CollUtil.isNotEmpty(cartSkuVO.getNotFilterPromotionMap()) || Boolean.TRUE.equals(cartSkuVO.getGoodsSku().getPromotionFlag()))) {
+                //如果存在商品促销活动，则判定商品促销状态
                 //获取当前最新的促销信息
                 cartSkuVO.setPromotionMap(this.promotionGoodsService.getCurrentGoodsPromotion(cartSkuVO.getGoodsSku(), tradeDTO.getCartTypeEnum().name()));
                 //设定商品价格
@@ -175,7 +179,13 @@ public class CheckDataRender implements CartRenderStep {
                 if (!storeCart.getValue().isEmpty()) {
                     CartVO cartVO = new CartVO(storeCart.getValue().get(0));
                     if (CharSequenceUtil.isEmpty(cartVO.getDeliveryMethod())) {
-                        cartVO.setDeliveryMethod(DeliveryMethodEnum.LOGISTICS.name());
+                        // 店铺购物车含 E_COUPON 时默认虚拟发货，无需物流地址
+                        boolean eCouponStore = storeCart.getValue().stream()
+                                .anyMatch(s -> s.getGoodsSku() != null
+                                        && GoodsTypeEnum.E_COUPON.name().equals(s.getGoodsSku().getGoodsType()));
+                        cartVO.setDeliveryMethod(eCouponStore
+                                ? DeliveryMethodEnum.VIRTUAL.name()
+                                : DeliveryMethodEnum.LOGISTICS.name());
                     }
                     cartVO.setSkuList(storeCart.getValue());
                     try {

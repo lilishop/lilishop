@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -92,6 +93,19 @@ public class GlobalControllerExceptionHandler {
 
         return ResultUtil.error(001, e.getMessage());
     }*/
+
+    /**
+     * 请求参数类型转换失败
+     * 例如 Integer 参数收到非数字内容，属于入参问题，返回参数异常
+     * 只记录参数名与简要原因，避免打印完整堆栈刷满日志
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ResultMessage<Object> argumentTypeMismatchExceptionHandler(HttpServletRequest request, final MethodArgumentTypeMismatchException e, HttpServletResponse response) {
+        log.warn("请求参数类型不匹配，path:{}, param:{}", request.getRequestURI(), e.getName());
+        return ResultUtil.error(ResultCode.PARAMS_ERROR);
+    }
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)

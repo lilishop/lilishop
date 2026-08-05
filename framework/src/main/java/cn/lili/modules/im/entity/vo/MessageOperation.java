@@ -6,6 +6,7 @@ import cn.lili.modules.im.entity.enums.OperationType;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * @author liushuai
@@ -45,6 +46,7 @@ public class MessageOperation {
     /**
      * 消息内容
      */
+    @JsonDeserialize(using = FlexibleJsonStringDeserializer.class)
     private String context;
 
     public void setOperationType(String operationType) {
