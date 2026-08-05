@@ -217,6 +217,23 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     }
 
     @Override
+    public List<String> getCategoryNamesByPath(String categoryPath) {
+        if (CharSequenceUtil.isBlank(categoryPath)) {
+            return Collections.emptyList();
+        }
+        List<String> ids = Arrays.stream(categoryPath.split(","))
+                .map(String::trim)
+                .filter(CharSequenceUtil::isNotEmpty)
+                .collect(Collectors.toList());
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return listByIdsOrderByLevel(ids).stream()
+                .map(Category::getName)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Category> findByAllBySortOrder(Category category) {
         QueryWrapper<Category> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq(category.getLevel() != null, "level", category.getLevel())

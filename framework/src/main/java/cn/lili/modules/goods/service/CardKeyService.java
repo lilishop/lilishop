@@ -159,7 +159,7 @@ public interface CardKeyService {
     void validatePayOrder(Order order);
 
     /**
-     * 填充买卖家订单详情：orderItems 卡密/履约状态；主单聚合满赠 E_COUPON 子单 {@link OrderDetailVO#getGiftECouponOrders()}。
+     * 填充买卖家订单详情：orderItems 卡密/履约状态；非赠品主单可附带 {@link OrderDetailVO#getGiftECouponOrders()} 摘要（前端主单卡密区不合并，赠品在子单详情查看）。
      */
     void enrichOrderDetail(OrderDetailVO orderDetailVO);
 

@@ -8,6 +8,7 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.order.entity.dos.Order;
+import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.enums.OrderPromotionTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderTypeEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
@@ -38,12 +39,13 @@ class FullDiscountExecuteGiftOrderTest {
 
     private FullDiscountExecute execute;
     private OrderService orderService;
+    private OrderItemService orderItemService;
 
     @BeforeEach
     void setUp() {
         execute = new FullDiscountExecute();
         orderService = mock(OrderService.class);
-        OrderItemService orderItemService = mock(OrderItemService.class);
+        orderItemService = mock(OrderItemService.class);
         OrderLogService orderLogService = mock(OrderLogService.class);
         LiliMessageTemplate messageTemplate = mock(LiliMessageTemplate.class);
         RocketmqCustomProperties rocketmqCustomProperties = mock(RocketmqCustomProperties.class);
@@ -77,6 +79,27 @@ class FullDiscountExecuteGiftOrderTest {
         assertThat(saved.getFreightPrice()).isZero();
         assertThat(saved.getConsigneeName()).isNull();
         assertThat(saved.getConsigneeDetail()).isNull();
+
+        ArgumentCaptor<List<OrderItem>> itemCaptor = ArgumentCaptor.forClass(List.class);
+        verify(orderItemService).saveBatch(itemCaptor.capture());
+        OrderItem savedItem = itemCaptor.getValue().get(0);
+        assertThat(savedItem.getSn()).startsWith("OI");
+        assertThat(savedItem.getSn()).isNotEqualTo("004");
+    }
+
+    @Test
+    void giftOrderItemSnNotGoodsSkuCode() {
+        Order origin = originOrder();
+        GoodsSku giftSku = giftSku();
+        giftSku.setSn("004");
+
+        ReflectionTestUtils.invokeMethod(execute, "giftOrderHandler",
+                List.of(giftSku), origin, OrderTypeEnum.E_COUPON);
+
+        ArgumentCaptor<List<OrderItem>> itemCaptor = ArgumentCaptor.forClass(List.class);
+        verify(orderItemService).saveBatch(itemCaptor.capture());
+        assertThat(itemCaptor.getValue().get(0).getSn()).startsWith("OI");
+        assertThat(itemCaptor.getValue().get(0).getSn()).isNotEqualTo("004");
     }
 
     @Test

@@ -84,6 +84,14 @@ public interface CategoryService extends IService<Category> {
     List<String> getCategoryNameByIds(List<String> ids);
 
     /**
+     * 按 categoryPath（逗号分隔 ID）解析分类名称，顺序与 level 一致。
+     *
+     * @param categoryPath 如 {@code id1,id2,id3}
+     * @return 分类名称列表，path 为空或未命中时返回空列表
+     */
+    List<String> getCategoryNamesByPath(String categoryPath);
+
+    /**
      * 获取商品分类list
      *
      * @param category 分类
