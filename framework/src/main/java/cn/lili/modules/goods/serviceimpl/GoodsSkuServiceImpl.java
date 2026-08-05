@@ -3,7 +3,7 @@ package cn.lili.modules.goods.serviceimpl;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
-import cn.lili.cache.Cache;
+import cn.lili.cache .Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.PromotionTypeEnum;
 import cn.lili.common.enums.ResultCode;
@@ -290,18 +290,13 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
         // 从缓存拿商品Sku
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
-        // 如果使用商品ID无法查询SKU则返回错误
+        // 如果使用商品ID无法查询SKU则返回错误（读接口不触发促销清理，见 GoodsServiceImpl.notifyGoodsDelete）
         if (goodsVO == null || goodsSku == null) {
-            // 发送mq消息
-            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_DELETE.name();
-            asyncSendIfPresent(destination, JSON.toJSONString(Collections.singletonList(goodsId)));
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
 
         // 商品下架||商品未审核通过||商品删除，则提示：商品已下架
         if (GoodsStatusEnum.DOWN.name().equals(goodsVO.getMarketEnable()) || !GoodsAuthEnum.PASS.name().equals(goodsVO.getAuthFlag()) || Boolean.TRUE.equals(goodsVO.getDeleteFlag())) {
-            String destination = rocketmqCustomProperties.getGoodsTopic() + ":" + GoodsTagsEnum.GOODS_DELETE.name();
-            asyncSendIfPresent(destination, JSON.toJSONString(Collections.singletonList(goodsId)));
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
 
@@ -365,8 +360,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         // 获取分类
         map.put("wholesaleList", GoodsSalesModeEnum.WHOLESALE.name().equals(goodsVO.getSalesModel()) ?
                 wholesaleService.findByGoodsId(goodsSkuDetail.getGoodsId()) : Collections.emptyList());
-        map.put("categoryName", CharSequenceUtil.isNotEmpty(goodsIndex.getCategoryNamePath()) ?
-                goodsIndex.getCategoryNamePath().split(",") : null);
+        map.put("categoryName", resolveCategoryNames(goodsVO, goodsIndex));
 
         // 获取规格信息
         map.put("specs", this.groupBySkuAndSpec(goodsVO.getSkuList()));
@@ -384,6 +378,20 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             asyncSendIfPresent(destination, footPrint);
         }
         return map;
+    }
+
+    /**
+     * 商品详情分类名：优先 GoodsVO（与 SPU 一致），fallback 至索引 categoryNamePath。
+     */
+    private String[] resolveCategoryNames(GoodsVO goodsVO, GoodsIndex goodsIndex) {
+        List<String> names = goodsVO != null ? goodsVO.getCategoryName() : null;
+        if (names != null && !names.isEmpty()) {
+            return names.toArray(new String[0]);
+        }
+        if (goodsIndex != null && CharSequenceUtil.isNotEmpty(goodsIndex.getCategoryNamePath())) {
+            return goodsIndex.getCategoryNamePath().split(",");
+        }
+        return null;
     }
 
     /**

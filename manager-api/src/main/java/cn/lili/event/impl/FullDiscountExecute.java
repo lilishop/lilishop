@@ -236,8 +236,9 @@ public class FullDiscountExecute implements TradeEvent, OrderStatusChangeEvent {
         //生成子订单
         for (GoodsSku goodsSku : skuList) {
             OrderItem orderItem = new OrderItem();
-            BeanUtil.copyProperties(goodsSku, orderItem, "id");
+            BeanUtil.copyProperties(goodsSku, orderItem, "id", "sn");
             BeanUtil.copyProperties(priceDetailDTO, orderItem, "id");
+            orderItem.setSn(SnowFlake.createStr("OI"));
             orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.NEW.name());
             orderItem.setCommentStatus(CommentStatusEnum.NEW.name());
             orderItem.setComplainStatus(OrderComplaintStatusEnum.NEW.name());

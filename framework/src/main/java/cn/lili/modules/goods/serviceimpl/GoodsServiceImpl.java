@@ -303,14 +303,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             goodsVO.setSkuList(goodsListByGoodsId);
         }
         //商品分类名称赋值
-        List<String> categoryName = new ArrayList<>();
-        String categoryPath = goods.getCategoryPath();
-        String[] strArray = categoryPath.split(",");
-        List<Category> categories = categoryService.listByIds(Arrays.asList(strArray));
-        for (Category category : categories) {
-            categoryName.add(category.getName());
-        }
-        goodsVO.setCategoryName(categoryName);
+        goodsVO.setCategoryName(categoryService.getCategoryNamesByPath(goods.getCategoryPath()));
 
         //参数非空则填写参数
         if (CharSequenceUtil.isNotEmpty(goods.getParams())) {
