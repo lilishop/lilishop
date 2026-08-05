@@ -6,8 +6,12 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dos.DistributionCash;
+import cn.lili.modules.distribution.entity.dos.DistributionWalletLog;
 import cn.lili.modules.distribution.service.DistributionCashService;
+import cn.lili.modules.distribution.service.DistributionService;
+import cn.lili.modules.distribution.service.DistributionWalletLogService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -48,6 +52,12 @@ public class DistributionCashBuyerController {
     @Autowired
     private DistributionCashService distributorCashService;
 
+    @Autowired
+    private DistributionService distributionService;
+
+    @Autowired
+    private DistributionWalletLogService walletLogService;
+
 
     @PreventDuplicateSubmissions
     @Operation(summary = "分销员提现")
@@ -70,5 +80,14 @@ public class DistributionCashBuyerController {
         return ResultUtil.data(distributorCashService.getDistributionCash(page));
     }
 
+    @Operation(summary = "分销钱包流水分页")
+    @GetMapping("/walletLog")
+    public ResultMessage<IPage<DistributionWalletLog>> walletLog(PageVO page) {
+        Distribution distribution = distributionService.getDistribution();
+        if (distribution == null || distributionService.isRetreated(distribution.getMemberId())) {
+            return ResultUtil.data(null);
+        }
+        return ResultUtil.data(walletLogService.pageByDistribution(distribution.getId(), null, null, page));
+    }
 
 }

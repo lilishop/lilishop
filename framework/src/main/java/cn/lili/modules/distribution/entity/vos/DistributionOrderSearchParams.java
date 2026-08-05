@@ -14,7 +14,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 /**
- * 分销员对象
+ * 分销订单查询参数
  *
  * @author pikachu
  * @since 2020-03-14 23:04:56
@@ -63,6 +63,24 @@ public class DistributionOrderSearchParams extends PageVO {
             endTime = DateUtil.endOfDate(endTime);
             queryWrapper.between("create_time", startTime, endTime);
         }
+        return queryWrapper;
+    }
+
+    /**
+     * 分页查询条件（列名带 do. 表别名，供自定义 JOIN 分页 SQL 使用）。
+     */
+    public <T> QueryWrapper<T> pageQueryWrapper() {
+        QueryWrapper<T> queryWrapper = Wrappers.query();
+        queryWrapper.like(StringUtils.isNotBlank(distributionName), "do.distribution_name", distributionName);
+        queryWrapper.eq(StringUtils.isNotBlank(distributionOrderStatus), "do.distribution_order_status", distributionOrderStatus);
+        queryWrapper.eq(StringUtils.isNotBlank(orderSn), "do.order_sn", orderSn);
+        queryWrapper.eq(StringUtils.isNotBlank(distributionId), "do.distribution_id", distributionId);
+        queryWrapper.eq(StringUtils.isNotBlank(storeId), "do.store_id", storeId);
+        if (endTime != null && startTime != null) {
+            endTime = DateUtil.endOfDate(endTime);
+            queryWrapper.between("do.create_time", startTime, endTime);
+        }
+        queryWrapper.orderByDesc("do.create_time");
         return queryWrapper;
     }
 

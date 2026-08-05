@@ -13,6 +13,18 @@ public enum SettingEnum {
     WITHDRAWAL_SETTING,
     //分销设置
     DISTRIBUTION_SETTING,
+    //分销客户关系设置
+    DISTRIBUTION_CUSTOMER_SETTING,
+    //分销结算方案设置
+    DISTRIBUTION_SETTLEMENT_SETTING,
+    //分销商品设置
+    DISTRIBUTION_FEATURED_GOODS_SETTING,
+    //分销平台海报设置
+    DISTRIBUTION_PROMOTION_POSTER_SETTING,
+    //分销邀请卡设置
+    DISTRIBUTION_INVITE_CARD_SETTING,
+    //分销招募设置
+    DISTRIBUTION_RECRUIT_SETTING,
     //邮箱配置
     EMAIL_SETTING,
     //商品设置

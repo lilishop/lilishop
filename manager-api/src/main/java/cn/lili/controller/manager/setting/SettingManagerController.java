@@ -7,6 +7,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.distribution.support.DistributionSettingSupport;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.*;
 import cn.lili.modules.system.entity.dto.connect.ConnectSetting;
@@ -45,6 +46,9 @@ public class SettingManagerController {
      */
     @Autowired
     private Cache<String> cache;
+
+    @Autowired
+    private DistributionSettingSupport distributionSettingSupport;
 
 
     @DemoSite
@@ -95,6 +99,11 @@ public class SettingManagerController {
             }
             configValue = JSONUtil.toJsonStr(pointSetting);
         }
+        if (settingEnum.equals(SettingEnum.DISTRIBUTION_SETTING)) {
+            DistributionSetting distributionSetting = JSONUtil.toBean(configValue, DistributionSetting.class);
+            distributionSettingSupport.normalize(distributionSetting);
+            configValue = JSONUtil.toJsonStr(distributionSetting);
+        }
         return configValue;
     }
 
@@ -121,9 +130,7 @@ public class SettingManagerController {
                         ResultUtil.data(new WithdrawalSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), WithdrawalSetting.class));
             case DISTRIBUTION_SETTING:
-                return setting == null ?
-                        ResultUtil.data(new DistributionSetting()) :
-                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), DistributionSetting.class));
+                return ResultUtil.data(distributionSettingSupport.getSetting());
             case EMAIL_SETTING:
                 return setting == null ?
                         ResultUtil.data(new EmailSetting()) :

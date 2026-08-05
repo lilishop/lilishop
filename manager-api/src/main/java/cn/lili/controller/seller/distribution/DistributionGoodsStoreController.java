@@ -5,10 +5,10 @@ import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
+import cn.lili.modules.distribution.entity.dto.DistributionGoodsBatchCheckDTO;
 import cn.lili.modules.distribution.entity.dto.DistributionGoodsSearchParams;
 import cn.lili.modules.distribution.entity.vos.DistributionGoodsVO;
 import cn.lili.modules.distribution.service.DistributionGoodsService;
-import cn.lili.modules.distribution.service.DistributionSelectedGoodsService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,7 +16,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -36,13 +38,7 @@ public class DistributionGoodsStoreController {
     @Autowired
     private DistributionGoodsService distributionGoodsService;
 
-    /**
-     * 已选择分销商品
-     */
-    @Autowired
-    private DistributionSelectedGoodsService distributionSelectedGoodsService;
-
-    @Operation(description = "获取分销商商品列表")
+    @Operation(description = "获取分销员商品列表")
     @GetMapping
     public ResultMessage<IPage<DistributionGoodsVO>> distributionGoods(DistributionGoodsSearchParams distributionGoodsSearchParams) {
 
@@ -59,14 +55,28 @@ public class DistributionGoodsStoreController {
         return ResultUtil.data(distributionGoodsService.checked(skuId, commission, storeId));
     }
 
+    @Operation(description = "批量选择商品参与分销")
+    @PostMapping("/checked/batch")
+    public ResultMessage<List<DistributionGoods>> distributionBatchCheckGoods(
+            @Valid @RequestBody DistributionGoodsBatchCheckDTO batchDTO) {
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        return ResultUtil.data(distributionGoodsService.batchChecked(batchDTO, storeId));
+    }
+
+    @Operation(description = "修改分销商品佣金")
+    @Parameter(name = "id", description = "分销商品ID", required = true)
+    @PutMapping("/{id}/commission")
+    public ResultMessage<DistributionGoods> updateCommission(@NotNull @PathVariable String id,
+                                                             @NotNull(message = "佣金金额不能为空") @RequestParam Double commission) {
+        DistributionGoods distributionGoods = OperationalJudgment.judgment(distributionGoodsService.getById(id));
+        return ResultUtil.data(distributionGoodsService.updateCommission(distributionGoods, commission));
+    }
+
     @Operation(description = "取消分销商品")
-    @Parameter(name = "id", description = "分销商商品ID", required = true)
+    @Parameter(name = "id", description = "分销员商品ID", required = true)
     @DeleteMapping("/cancel/{id}")
     public ResultMessage<Object> cancel(@NotNull @PathVariable String id) {
         OperationalJudgment.judgment(distributionGoodsService.getById(id));
-        //清除分销商已选择分销商品
-        distributionSelectedGoodsService.deleteByDistributionGoodsId(id);
-        //清除分销商品
         distributionGoodsService.removeById(id);
         return ResultUtil.success();
     }

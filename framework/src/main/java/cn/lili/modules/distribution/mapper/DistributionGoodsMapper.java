@@ -18,35 +18,20 @@ import org.apache.ibatis.annotations.Select;
 public interface DistributionGoodsMapper extends BaseMapper<DistributionGoods> {
 
     /**
-     * 获取分销员未选择商品VO分页
+     * 分页查询分销商品 VO（库存取自 SKU 实时库存）。
      *
-     * @param page           分页
-     * @param queryWrapper   查询条件
-     * @param distributionId 分销员ID
-     * @return 分销员未选择商品VO分页
-     */
-    @Select("SELECT dg.* FROM li_distribution_goods dg WHERE dg.id NOT IN(SELECT distribution_goods_id FROM li_distribution_selected_goods WHERE distribution_id=${distributionId}) ${ew.customSqlSegment}")
-    IPage<DistributionGoodsVO> notSelectGoods(IPage<DistributionGoodsVO> page, @Param(Constants.WRAPPER) Wrapper<DistributionGoodsVO> queryWrapper, String distributionId);
-
-    /**
-     * 获取分销员已选择分销商品VO分页
-     *
-     * @param page           分页
-     * @param queryWrapper   查询条件
-     * @param distributionId 分销员ID
-     * @return 分销员已选择分销商品VO分页
-     */
-    @Select("SELECT dg.* FROM li_distribution_goods dg WHERE dg.id IN(SELECT distribution_goods_id FROM li_distribution_selected_goods WHERE distribution_id=${distributionId}) ${ew.customSqlSegment}")
-    IPage<DistributionGoodsVO> selectGoods(IPage<DistributionGoodsVO> page, @Param(Constants.WRAPPER) Wrapper<DistributionGoodsVO> queryWrapper, String distributionId);
-
-    /**
-     * 获取分销商品VO分页
-     *
-     * @param page         分页
+     * @param page         分页参数
      * @param queryWrapper 查询条件
-     * @return 分销商品VO分页
+     * @return 分销商品 VO 分页
      */
-    @Select("SELECT dg.* FROM li_distribution_goods dg ${ew.customSqlSegment}")
-    IPage<DistributionGoodsVO> getDistributionGoodsVO(IPage<DistributionGoodsVO> page, @Param(Constants.WRAPPER) Wrapper<DistributionGoodsVO> queryWrapper);
-
+    @Select("SELECT dg.id, dg.create_by, dg.create_time, dg.goods_id, dg.goods_name, dg.sku_id, dg.specs, "
+            + "dg.store_id, dg.store_name, dg.commission, dg.price, dg.thumbnail, dg.auth_status, dg.auth_remark, "
+            + "gs.quantity AS quantity, gs.goods_type AS goodsType, gs.category_path AS categoryPath, "
+            + "b.name AS brandName "
+            + "FROM li_distribution_goods dg "
+            + "LEFT JOIN li_goods_sku gs ON dg.sku_id = gs.id AND gs.delete_flag = 0 "
+            + "LEFT JOIN li_brand b ON gs.brand_id = b.id AND b.delete_flag = 0 "
+            + "${ew.customSqlSegment}")
+    IPage<DistributionGoodsVO> getDistributionGoodsVO(IPage<DistributionGoodsVO> page,
+                                                      @Param(Constants.WRAPPER) Wrapper<DistributionGoodsVO> queryWrapper);
 }

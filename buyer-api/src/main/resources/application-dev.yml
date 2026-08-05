@@ -8,3 +8,8 @@
     url: jdbc:mysql://192.168.31.100:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     username: root
     password: lilishop
+
+lili:
+  wechat:
+    mp:
+      url-link-env-version: auto

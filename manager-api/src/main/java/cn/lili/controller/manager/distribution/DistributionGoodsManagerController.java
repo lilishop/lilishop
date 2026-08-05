@@ -1,7 +1,9 @@
 package cn.lili.controller.manager.distribution;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.distribution.entity.dto.DistributionGoodsAuditDTO;
 import cn.lili.modules.distribution.entity.dto.DistributionGoodsSearchParams;
 import cn.lili.modules.distribution.entity.vos.DistributionGoodsVO;
 import cn.lili.modules.distribution.service.DistributionGoodsService;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 /**
@@ -39,6 +42,14 @@ public class DistributionGoodsManagerController {
     public ResultMessage<Object> delAllByIds(@PathVariable List ids) {
 
         distributionGoodsService.removeByIds(ids);
+        return ResultUtil.success();
+    }
+
+    @PreventDuplicateSubmissions
+    @PutMapping("/audit")
+    @Operation(description = "审核分销商品")
+    public ResultMessage<Object> audit(@Valid @RequestBody DistributionGoodsAuditDTO auditDTO) {
+        distributionGoodsService.auditDistributionGoods(auditDTO);
         return ResultUtil.success();
     }
 }

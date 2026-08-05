@@ -1,14 +1,32 @@
 package cn.lili.controller.distribution;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.modules.distribution.entity.dos.Distribution;
-import cn.lili.modules.distribution.entity.dos.DistributionOrder;
-import cn.lili.modules.distribution.entity.dto.DistributionApplyDTO;
-import cn.lili.modules.distribution.entity.vos.DistributionOrderSearchParams;
-import cn.lili.modules.distribution.service.DistributionOrderService;
+import cn.lili.modules.distribution.entity.dos.DistributionGrade;
+import cn.lili.modules.distribution.entity.dos.DistributionRecruitApplication;
+import cn.lili.modules.distribution.entity.dto.DistributionRecruitApplyDTO;
+import cn.lili.modules.distribution.entity.vos.DistributionParentInfoVO;
+import cn.lili.modules.distribution.entity.vos.DistributionInviteCardVO;
+import cn.lili.modules.distribution.entity.dto.DistributionBuyerCustomerQueryDTO;
+import cn.lili.modules.distribution.entity.dto.DistributionBuyerPerformanceQueryDTO;
+import cn.lili.modules.distribution.entity.dto.DistributionInviteeQueryDTO;
+import cn.lili.modules.distribution.entity.vos.DistributionBuyerCustomerDetailVO;
+import cn.lili.modules.distribution.entity.vos.DistributionBuyerCustomerPageVO;
+import cn.lili.modules.distribution.entity.vos.DistributionBuyerPerformanceVO;
+import cn.lili.modules.distribution.entity.vos.DistributionInvitePageVO;
+import cn.lili.modules.distribution.entity.vos.DistributionPromotionPosterVO;
+import cn.lili.modules.distribution.entity.vos.DistributionRecruitConditionProgressVO;
+import cn.lili.modules.distribution.entity.vos.DistributionRecruitPageVO;
+import cn.lili.modules.distribution.service.DistributionBuyerPerformanceService;
+import cn.lili.modules.distribution.service.DistributionCustomerRelationService;
+import cn.lili.modules.distribution.service.DistributionGoodsService;
+import cn.lili.modules.distribution.service.DistributionGradeService;
+import cn.lili.modules.distribution.service.DistributionRecruitService;
 import cn.lili.modules.distribution.service.DistributionService;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,37 +45,105 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/buyer/distribution/distribution")
 public class DistributionBuyerController {
 
-    /**
-     * 分销员
-     */
     @Autowired
     private DistributionService distributionService;
-    /**
-     * 分销员订单
-     */
+
     @Autowired
-    private DistributionOrderService distributionOrderService;
+    private DistributionRecruitService recruitService;
 
-    @Operation(summary = "申请分销员")
-    @PostMapping
-    public ResultMessage<Object> applyDistribution(DistributionApplyDTO distributionApplyDTO) {
-        return ResultUtil.data(distributionService.applyDistribution(distributionApplyDTO));
-    }
+    @Autowired
+    private DistributionBuyerPerformanceService buyerPerformanceService;
 
-    @Operation(summary = "获取分销员分页订单列表")
-    @GetMapping("/distributionOrder")
-    public ResultMessage<IPage<DistributionOrder>> distributionOrderPage(DistributionOrderSearchParams distributionOrderSearchParams) {
-        distributionOrderSearchParams.setDistributionId(distributionService.getDistribution().getId());
-        return ResultUtil.data(distributionOrderService.getDistributionOrderPage(distributionOrderSearchParams));
-    }
+    @Autowired
+    private DistributionCustomerRelationService customerRelationService;
+
+    @Autowired
+    private DistributionGradeService gradeService;
+
+    @Autowired
+    private DistributionGoodsService distributionGoodsService;
 
     @Operation(summary = "获取当前客户的分销员信息", description = "可根据分销员信息查询待提现金额以及冻结金额等信息")
     @GetMapping
     public ResultMessage<Distribution> getDistribution() {
-        //检查分销开关
         distributionService.checkDistributionSetting();
+        Distribution distribution = distributionService.getDistribution();
+        if (distribution == null) {
+            return ResultUtil.data(null);
+        }
+        if (distributionService.isRetreated(distribution.getMemberId())) {
+            return ResultUtil.data(null);
+        }
+        return ResultUtil.data(distribution);
+    }
 
-        return ResultUtil.data(distributionService.getDistribution());
+    @Operation(summary = "推广海报上下文（邀请好友锁客）")
+    @GetMapping("/promotion-poster")
+    public ResultMessage<DistributionPromotionPosterVO> promotionPoster() {
+        return ResultUtil.data(distributionService.getPromotionPoster());
+    }
+
+    @Operation(summary = "邀请卡上下文（招募下级分销员）")
+    @GetMapping("/invite-card")
+    public ResultMessage<DistributionInviteCardVO> inviteCard() {
+        return ResultUtil.data(distributionService.getInviteCard());
+    }
+
+    @Operation(summary = "业绩统计")
+    @GetMapping("/performance")
+    public ResultMessage<DistributionBuyerPerformanceVO> performance(DistributionBuyerPerformanceQueryDTO query) {
+        distributionService.checkDistributionSetting();
+        Distribution distribution = distributionService.getDistribution();
+        if (distribution == null || distributionService.isRetreated(distribution.getMemberId())) {
+            return ResultUtil.data(new DistributionBuyerPerformanceVO());
+        }
+        return ResultUtil.data(buyerPerformanceService.getPerformance(distribution.getId(), query));
+    }
+
+    @Operation(summary = "我邀请的下级分销员列表")
+    @GetMapping("/invite/invitees")
+    public ResultMessage<DistributionInvitePageVO> invitees(DistributionInviteeQueryDTO query) {
+        distributionService.checkDistributionSetting();
+        Distribution distribution = distributionService.getDistribution();
+        if (distribution == null || distributionService.isRetreated(distribution.getMemberId())) {
+            return ResultUtil.data(new DistributionInvitePageVO());
+        }
+        return ResultUtil.data(distributionService.pageInvitees(distribution.getId(), query));
+    }
+
+    @Operation(summary = "我的客户列表")
+    @GetMapping("/customers")
+    public ResultMessage<DistributionBuyerCustomerPageVO> customers(DistributionBuyerCustomerQueryDTO query) {
+        distributionService.checkDistributionSetting();
+        Distribution distribution = distributionService.getDistribution();
+        if (distribution == null || distributionService.isRetreated(distribution.getMemberId())) {
+            return ResultUtil.data(new DistributionBuyerCustomerPageVO());
+        }
+        return ResultUtil.data(customerRelationService.pageBuyerCustomers(distribution.getId(), query));
+    }
+
+    @Operation(summary = "客户详情")
+    @GetMapping("/customers/{id}")
+    public ResultMessage<DistributionBuyerCustomerDetailVO> customerDetail(@PathVariable String id) {
+        distributionService.checkDistributionSetting();
+        Distribution distribution = distributionService.getDistribution();
+        if (distribution == null || distributionService.isRetreated(distribution.getMemberId())) {
+            return ResultUtil.error(ResultCode.ERROR);
+        }
+        return ResultUtil.data(customerRelationService.getBuyerCustomerDetail(distribution.getId(), id));
+    }
+
+    @Operation(summary = "设置/取消客户星标")
+    @PutMapping("/customers/{id}/starred")
+    public ResultMessage<Object> updateCustomerStarred(@PathVariable String id,
+                                                       @RequestParam Boolean starred) {
+        distributionService.checkDistributionSetting();
+        Distribution distribution = distributionService.getDistribution();
+        if (distribution == null || distributionService.isRetreated(distribution.getMemberId())) {
+            return ResultUtil.error(ResultCode.ERROR);
+        }
+        customerRelationService.updateBuyerCustomerStarred(distribution.getId(), id, starred);
+        return ResultUtil.success();
     }
 
     @Operation(summary = "绑定分销员")
@@ -66,5 +152,66 @@ public class DistributionBuyerController {
     public ResultMessage<Object> bindingDistribution(@PathVariable String distributionId) {
         distributionService.bindingDistribution(distributionId);
         return ResultUtil.success();
+    }
+
+    @Operation(summary = "分享商品访问（记录访问并绑定客户关系）")
+    @GetMapping("/share-visit")
+    public ResultMessage<Object> shareVisit(
+            @RequestParam String skuId,
+            @RequestParam String goodsId,
+            @RequestParam String distributionId,
+            @RequestParam(required = false) String shareId) {
+        distributionGoodsService.recordShareVisit(skuId, goodsId, distributionId, shareId);
+        if (UserContext.getCurrentUser() != null) {
+            try {
+                distributionService.bindingDistribution(distributionId);
+            } catch (Exception ignored) {
+                // 访问记录优先，绑定失败不影响页面访问
+            }
+        }
+        return ResultUtil.success();
+    }
+
+    @Operation(summary = "招募页信息")
+    @GetMapping("/recruit/page")
+    public ResultMessage<DistributionRecruitPageVO> recruitPage() {
+        return ResultUtil.data(recruitService.getRecruitPage());
+    }
+
+    @Operation(summary = "提交招募申请")
+    @PostMapping("/recruit/apply")
+    public ResultMessage<DistributionRecruitApplication> recruitApply(@RequestBody DistributionRecruitApplyDTO applyDTO) {
+        return ResultUtil.data(recruitService.submitApplication(applyDTO));
+    }
+
+    @Operation(summary = "招募条件进度")
+    @GetMapping("/recruit/progress")
+    public ResultMessage<DistributionRecruitConditionProgressVO> recruitProgress() {
+        String memberId = UserContext.getCurrentUser() == null ? null : UserContext.getCurrentUser().getId();
+        return ResultUtil.data(recruitService.getConditionProgress(memberId));
+    }
+
+    @Operation(summary = "上级分销员信息")
+    @GetMapping("/parent")
+    public ResultMessage<DistributionParentInfoVO> parentInfo() {
+        Distribution distribution = distributionService.getDistribution();
+        DistributionParentInfoVO vo = new DistributionParentInfoVO();
+        if (distribution == null) {
+            return ResultUtil.data(vo);
+        }
+        if (StringUtils.isNotEmpty(distribution.getParentDistributionId())) {
+            vo.setParentDistributionId(distribution.getParentDistributionId());
+            Distribution parent = distributionService.getById(distribution.getParentDistributionId());
+            if (parent != null) {
+                vo.setParentNickname(parent.getMemberName());
+            }
+        }
+        return ResultUtil.data(vo);
+    }
+
+    @Operation(summary = "等级列表(可见时)")
+    @GetMapping("/grades")
+    public ResultMessage<java.util.List<DistributionGrade>> gradeList() {
+        return ResultUtil.data(gradeService.listBuyerGrades());
     }
 }

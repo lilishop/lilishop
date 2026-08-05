@@ -24,6 +24,7 @@ import cn.lili.modules.connect.entity.dto.ConnectAuthUser;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.member.aop.annotation.PointLogPoint;
 import cn.lili.modules.member.entity.dos.Member;
+import cn.lili.modules.member.entity.dos.MemberGrade;
 import cn.lili.modules.member.entity.dto.*;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.entity.enums.QRCodeLoginSessionStatusEnum;
@@ -32,6 +33,7 @@ import cn.lili.modules.member.entity.vo.MemberVO;
 import cn.lili.modules.member.entity.vo.QRCodeLoginSessionVo;
 import cn.lili.modules.member.entity.vo.QRLoginResultVo;
 import cn.lili.modules.member.mapper.MemberMapper;
+import cn.lili.modules.member.service.MemberGradeService;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.member.service.MemberShareRegisterService;
 import cn.lili.modules.member.token.MemberTokenGenerate;
@@ -74,6 +76,13 @@ import java.util.concurrent.TimeUnit;
 public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> implements MemberService {
 
     /**
+     * 微信授权默认返回的昵称，无法区分用户，需要拼接 openid 后缀
+     */
+    private static final String WECHAT_DEFAULT_NICKNAME = "微信用户";
+
+    private static final int NICKNAME_SUFFIX_LENGTH = 4;
+
+    /**
      * 客户token
      */
     @Autowired
@@ -114,6 +123,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Autowired
     @Lazy
     private MemberShareRegisterService memberShareRegisterService;
+
+    @Autowired
+    @Lazy
+    private MemberGradeService memberGradeService;
 
     @Override
     public Member findByUsername(String userName) {
@@ -225,36 +238,14 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         return checkMemberStore(member);
     }
 
-    private Token checkMemberStore(Member member) {
-        if (Boolean.TRUE.equals(member.getHaveStore())) {
-            Store store = storeService.getById(member.getStoreId());
-            if (!store.getStoreDisable().equals(StoreStatusEnum.OPEN.name())) {
-                throw new ServiceException(ResultCode.STORE_CLOSE_ERROR);
-            }
-        } else {
-            throw new ServiceException(ResultCode.USER_NOT_EXIST);
-        }
-        return storeTokenGenerate.createToken(member, false);
-    }
-
-    /**
-     * 传递手机号或者用户名
-     *
-     * @param userName 手机号或者用户名
-     * @return 客户信息
-     */
-    private Member findMember(String userName) {
-        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", userName).or().eq("mobile", userName);
-        return this.getOne(queryWrapper, false);
-    }
-
     @Override
     @Transactional
     public Member autoRegister(ConnectAuthUser authUser) {
 
         if (CharSequenceUtil.isEmpty(authUser.getNickname())) {
             authUser.setNickname(CommonUtil.getSpecialStr("用户"));
+        } else if (WECHAT_DEFAULT_NICKNAME.equals(authUser.getNickname().trim())) {
+            authUser.setNickname(WECHAT_DEFAULT_NICKNAME + openIdSuffix(authUser.getUuid()));
         }
         if (CharSequenceUtil.isEmpty(authUser.getAvatar())) {
             authUser.setAvatar("https://i.loli.net/2020/11/19/LyN6JF7zZRskdIe.png");
@@ -321,12 +312,26 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Transactional
     public void registerHandler(Member member) {
         member.setId(SnowFlake.getIdStr());
+        // 新客户默认写入客户等级（按经验值匹配，无匹配则取默认等级）
+        assignDefaultMemberGradeIfAbsent(member);
         //保存客户
         this.save(member);
         UserContext.settingInviter(member.getId(), cache);
         // 发送客户注册信息
         applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("new member register", rocketmqCustomProperties.getMemberTopic(),
                 MemberTagsEnum.MEMBER_REGISTER.name(), member));
+    }
+
+    @Override
+    public void assignDefaultMemberGradeIfAbsent(Member member) {
+        if (member == null || CharSequenceUtil.isNotBlank(member.getGradeId())) {
+            return;
+        }
+        MemberGrade grade = memberGradeService.getCurrentGradeByExperience(
+                member.getExperience() == null ? 0L : member.getExperience());
+        if (grade != null) {
+            member.setGradeId(grade.getId());
+        }
     }
 
     @Override
@@ -404,19 +409,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         connectService.deleteByMemberId(member.getId());
         //混淆用户信息
         this.confusionMember(member);
-    }
-
-    /**
-     * 混淆之前的客户信息
-     *
-     * @param member
-     */
-    private void confusionMember(Member member) {
-        member.setUsername(UuidUtils.getUUID());
-        member.setMobile(UuidUtils.getUUID() + member.getMobile());
-        member.setNickName("用户已注销");
-        member.setDisabled(false);
-        this.updateById(member);
     }
 
     @Override
@@ -599,72 +591,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         }
         return this.update(updateWrapper);
     }
-
-    /**
-     * 根据手机号获取客户
-     *
-     * @param mobilePhone 手机号
-     * @return 客户
-     */
-    private Long findMember(String mobilePhone, String userName) {
-        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("mobile", mobilePhone)
-                .or().eq("username", userName);
-        return this.baseMapper.selectCount(queryWrapper);
-    }
-
-    /**
-     * 获取cookie中的联合登录对象
-     *
-     * @param uuid uuid
-     * @param type 状态
-     * @return cookie中的联合登录对象
-     */
-    private ConnectAuthUser getConnectAuthUser(String uuid, String type) {
-        Object context = cache.get(ConnectService.cacheKey(type, uuid));
-        if (context != null) {
-            return (ConnectAuthUser) context;
-        }
-        return null;
-    }
-
-    /**
-     * 成功登录，则检测cookie中的信息，进行客户绑定
-     *
-     * @param member 客户
-     */
-    private void loginBindUser(Member member) {
-        //获取cookie存储的信息
-        String uuid = CookieUtil.getCookie(ConnectService.CONNECT_COOKIE, ThreadContextHolder.getHttpRequest());
-        String connectType = CookieUtil.getCookie(ConnectService.CONNECT_TYPE, ThreadContextHolder.getHttpRequest());
-        //如果联合登陆存储了信息
-        if (CharSequenceUtil.isNotEmpty(uuid) && CharSequenceUtil.isNotEmpty(connectType)) {
-            try {
-                //获取信息
-                ConnectAuthUser connectAuthUser = getConnectAuthUser(uuid, connectType);
-                if (connectAuthUser == null) {
-                    return;
-                }
-                Connect connect = connectService.queryConnect(
-                        ConnectQueryDTO.builder().unionId(connectAuthUser.getUuid()).unionType(connectType).build()
-                );
-                if (connect == null) {
-                    connect = new Connect(member.getId(), connectAuthUser.getUuid(), connectType);
-                    connectService.save(connect);
-                }
-            } catch (ServiceException e) {
-                throw e;
-            } catch (Exception e) {
-                log.error("绑定第三方联合登陆失败：", e);
-            } finally {
-                //联合登陆成功与否，都清除掉cookie中的信息
-                CookieUtil.delCookie(ConnectService.CONNECT_COOKIE, ThreadContextHolder.getHttpResponse());
-                CookieUtil.delCookie(ConnectService.CONNECT_TYPE, ThreadContextHolder.getHttpResponse());
-            }
-        }
-
-    }
-
 
 //    /**
 //     * 检测是否可以绑定第三方联合登陆
@@ -873,6 +799,123 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
         }
         return result;
+    }
+
+    private Token checkMemberStore(Member member) {
+        if (Boolean.TRUE.equals(member.getHaveStore())) {
+            Store store = storeService.getById(member.getStoreId());
+            if (!store.getStoreDisable().equals(StoreStatusEnum.OPEN.name())) {
+                throw new ServiceException(ResultCode.STORE_CLOSE_ERROR);
+            }
+        } else {
+            throw new ServiceException(ResultCode.USER_NOT_EXIST);
+        }
+        return storeTokenGenerate.createToken(member, false);
+    }
+
+    /**
+     * 传递手机号或者用户名
+     *
+     * @param userName 手机号或者用户名
+     * @return 客户信息
+     */
+    private Member findMember(String userName) {
+        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", userName).or().eq("mobile", userName);
+        return this.getOne(queryWrapper, false);
+    }
+
+    /**
+     * 根据手机号获取客户
+     *
+     * @param mobilePhone 手机号
+     * @return 客户
+     */
+    private Long findMember(String mobilePhone, String userName) {
+        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("mobile", mobilePhone)
+                .or().eq("username", userName);
+        return this.baseMapper.selectCount(queryWrapper);
+    }
+
+    /**
+     * 取 openid 后四位作为昵称后缀，openid 缺失时使用随机数兜底
+     *
+     * @param openId 微信openid
+     * @return 昵称后缀
+     */
+    private String openIdSuffix(String openId) {
+        if (CharSequenceUtil.isEmpty(openId)) {
+            return CommonUtil.getRandomNum();
+        }
+        return openId.length() > NICKNAME_SUFFIX_LENGTH
+                ? openId.substring(openId.length() - NICKNAME_SUFFIX_LENGTH)
+                : openId;
+    }
+
+    /**
+     * 混淆之前的客户信息
+     *
+     * @param member
+     */
+    private void confusionMember(Member member) {
+        member.setUsername(UuidUtils.getUUID());
+        member.setMobile(UuidUtils.getUUID() + member.getMobile());
+        member.setNickName("用户已注销");
+        member.setDisabled(false);
+        this.updateById(member);
+    }
+
+    /**
+     * 获取cookie中的联合登录对象
+     *
+     * @param uuid uuid
+     * @param type 状态
+     * @return cookie中的联合登录对象
+     */
+    private ConnectAuthUser getConnectAuthUser(String uuid, String type) {
+        Object context = cache.get(ConnectService.cacheKey(type, uuid));
+        if (context != null) {
+            return (ConnectAuthUser) context;
+        }
+        return null;
+    }
+
+    /**
+     * 成功登录，则检测cookie中的信息，进行客户绑定
+     *
+     * @param member 客户
+     */
+    private void loginBindUser(Member member) {
+        //获取cookie存储的信息
+        String uuid = CookieUtil.getCookie(ConnectService.CONNECT_COOKIE, ThreadContextHolder.getHttpRequest());
+        String connectType = CookieUtil.getCookie(ConnectService.CONNECT_TYPE, ThreadContextHolder.getHttpRequest());
+        //如果联合登陆存储了信息
+        if (CharSequenceUtil.isNotEmpty(uuid) && CharSequenceUtil.isNotEmpty(connectType)) {
+            try {
+                //获取信息
+                ConnectAuthUser connectAuthUser = getConnectAuthUser(uuid, connectType);
+                if (connectAuthUser == null) {
+                    return;
+                }
+                Connect connect = connectService.queryConnect(
+                        ConnectQueryDTO.builder().unionId(connectAuthUser.getUuid()).unionType(connectType).build()
+                );
+                if (connect == null) {
+                    connect = new Connect(member.getId(), connectAuthUser.getUuid(), connectType);
+                    connectService.save(connect);
+                }
+            } catch (ServiceException e) {
+                throw e;
+            } catch (Exception e) {
+                log.error("绑定第三方联合登陆失败：", e);
+            } finally {
+                //联合登陆成功与否，都清除掉cookie中的信息
+                CookieUtil.delCookie(ConnectService.CONNECT_COOKIE, ThreadContextHolder.getHttpResponse());
+                CookieUtil.delCookie(ConnectService.CONNECT_TYPE, ThreadContextHolder.getHttpResponse());
+            }
+        }
+
     }
 
     /**

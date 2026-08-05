@@ -2,11 +2,15 @@ package cn.lili.modules.distribution.mapper;
 
 import cn.hutool.core.date.DateTime;
 import cn.lili.modules.distribution.entity.dos.DistributionOrder;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import java.util.Date;
-import java.util.List;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+
+import java.util.Date;
 
 /**
  * 分销订单数据处理层
@@ -17,25 +21,52 @@ import org.apache.ibatis.annotations.Update;
 public interface DistributionOrderMapper extends BaseMapper<DistributionOrder> {
 
     /**
-     * 修改分销员提现金额
+     * 分页查询分销订单。
      *
-     * @param distributionOrderStatus 分销订单状态
-     * @param settleCycle             时间
+     * @param page         分页参数
+     * @param queryWrapper 查询条件（列名需带 do. 表别名）
+     * @return 分销订单分页
      */
-    @Update("UPDATE li_distribution AS d " +
-            "SET d.can_rebate =(ifnull(d.can_rebate,0) +(SELECT SUM( dorder.rebate ) FROM li_distribution_order AS dorder WHERE dorder.distribution_order_status = #{distributionOrderStatus} AND dorder.settle_cycle< #{settleCycle} AND dorder.distribution_id = d.id ))" +
-            ",d.commission_frozen =(ifnull(d.commission_frozen,0) -(SELECT SUM( dorder.rebate ) FROM li_distribution_order AS dorder WHERE dorder.distribution_order_status = #{distributionOrderStatus} AND dorder.settle_cycle< #{settleCycle} AND dorder.distribution_id = d.id ) )")
+    @Select("""
+            SELECT do.*
+            FROM li_distribution_order do
+            ${ew.customSqlSegment}
+            """)
+    IPage<DistributionOrder> selectDistributionOrderPage(IPage<DistributionOrder> page,
+                                                         @Param(Constants.WRAPPER) Wrapper<DistributionOrder> queryWrapper);
+
+    /**
+     * 批量解冻到期分销订单佣金到分销员可提现余额。
+     *
+     * @param distributionOrderStatus 待解冻的订单状态
+     * @param settleCycle             解冻截止时间
+     */
+    @Update("UPDATE li_distribution AS d "
+            + "SET d.can_rebate = (IFNULL(d.can_rebate, 0) + ("
+            + "  SELECT SUM(dorder.rebate) FROM li_distribution_order AS dorder "
+            + "  WHERE dorder.distribution_order_status = #{distributionOrderStatus} "
+            + "    AND dorder.settle_cycle < #{settleCycle} "
+            + "    AND dorder.distribution_id = d.id"
+            + ")), "
+            + "d.commission_frozen = (IFNULL(d.commission_frozen, 0) - ("
+            + "  SELECT SUM(dorder.rebate) FROM li_distribution_order AS dorder "
+            + "  WHERE dorder.distribution_order_status = #{distributionOrderStatus} "
+            + "    AND dorder.settle_cycle < #{settleCycle} "
+            + "    AND dorder.distribution_id = d.id"
+            + "))")
     void rebate(String distributionOrderStatus, DateTime settleCycle);
 
     /**
-     * 查询待结算的分销订单
-     * @return 待结算的分销订单
+     * 将已过售后期且未结算的分销订单标记为待结算，并写入解冻周期。
+     *
+     * @param settleCycle 解冻周期时间
+     * @return 影响行数
      */
-    @Select("UPDATE li_distribution_order distribution_order"
-        + " INNER JOIN li_order_item oi ON oi.sn = distribution_order.order_item_sn"
-        + " SET distribution_order.distribution_order_status = 'WAIT_BILL',"
-        + "    distribution_order.settle_cycle = #{settleCycle} "
-        + " WHERE distribution_order.distribution_order_status = 'NO_COMPLETED'"
-        + "  AND oi.after_sale_status = 'EXPIRED';")
-    List<DistributionOrder> distributionSettlementOrder(Date settleCycle);
+    @Update("UPDATE li_distribution_order distribution_order "
+            + "INNER JOIN li_order_item oi ON oi.sn = distribution_order.order_item_sn "
+            + "SET distribution_order.distribution_order_status = 'WAIT_BILL', "
+            + "distribution_order.settle_cycle = #{settleCycle} "
+            + "WHERE distribution_order.distribution_order_status = 'NO_COMPLETED' "
+            + "AND oi.after_sale_status = 'EXPIRED'")
+    int distributionSettlementOrder(Date settleCycle);
 }

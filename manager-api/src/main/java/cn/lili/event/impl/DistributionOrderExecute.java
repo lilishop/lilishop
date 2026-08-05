@@ -1,21 +1,12 @@
 package cn.lili.event.impl;
 
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.json.JSONUtil;
 import cn.lili.event.AfterSaleStatusChangeEvent;
 import cn.lili.event.OrderStatusChangeEvent;
-import cn.lili.modules.distribution.entity.enums.DistributionOrderStatusEnum;
 import cn.lili.modules.distribution.service.DistributionOrderService;
+import cn.lili.modules.distribution.service.DistributionRewardService;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleStatusEnum;
-import cn.lili.modules.system.entity.dos.Setting;
-import cn.lili.modules.system.entity.dto.DistributionSetting;
-import cn.lili.modules.system.entity.enums.SettingEnum;
-import cn.lili.modules.system.service.SettingService;
-import cn.lili.timetask.handler.EveryDayExecute;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +16,6 @@ import org.springframework.stereotype.Service;
  * @author Chopper
  * @since 2020-07-03 11:20
  */
-@Slf4j
 @Service
 public class DistributionOrderExecute implements OrderStatusChangeEvent, AfterSaleStatusChangeEvent {
 
@@ -35,20 +25,28 @@ public class DistributionOrderExecute implements OrderStatusChangeEvent, AfterSa
     @Autowired
     private DistributionOrderService distributionOrderService;
 
+    @Autowired
+    private DistributionRewardService distributionRewardService;
+
+    /**
+     * 订单状态变更时处理分销入账、补偿与取消。
+     *
+     * @param orderMessage 订单状态消息
+     */
     @Override
     public void orderChange(OrderMessage orderMessage) {
-
+        String orderSn = orderMessage.getOrderSn();
         switch (orderMessage.getNewStatus()) {
-            //订单带校验/订单代发货/待自提，则记录分销信息
+            case PAID:
             case TAKE:
             case STAY_PICKED_UP:
             case UNDELIVERED: {
-                //记录分销订单
-                distributionOrderService.calculationDistribution(orderMessage.getOrderSn());
+                if (!hasRewardRecords(orderSn)) {
+                    distributionOrderService.handlePaymentRewards(orderSn);
+                }
                 break;
             }
             case CANCELLED: {
-                //修改分销订单状态
                 distributionOrderService.cancelOrder(orderMessage.getOrderSn());
                 break;
             }
@@ -58,6 +56,21 @@ public class DistributionOrderExecute implements OrderStatusChangeEvent, AfterSa
         }
     }
 
+    /**
+     * 判断订单是否已生成 V2 奖励记录。
+     *
+     * @param orderSn 订单编号
+     * @return 是否已有奖励记录
+     */
+    private boolean hasRewardRecords(String orderSn) {
+        return distributionRewardService.hasRewardsByOrderSn(orderSn);
+    }
+
+    /**
+     * 售后完成时触发分销退款冲回。
+     *
+     * @param afterSale 售后单
+     */
     @Override
     public void afterSaleStatusChange(AfterSale afterSale) {
         if (afterSale.getServiceStatus().equals(AfterSaleStatusEnum.COMPLETE.name())) {

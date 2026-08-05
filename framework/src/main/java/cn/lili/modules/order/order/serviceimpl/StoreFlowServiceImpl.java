@@ -74,7 +74,6 @@ public class StoreFlowServiceImpl extends ServiceImpl<StoreFlowMapper, StoreFlow
     private BillService billService;
 
     @Autowired
-    @Lazy
     private DistributionOrderService distributionOrderService;
 
     /**

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,6 +29,14 @@ public class DistributionOrderManagerController {
 
     @Autowired
     private DistributionOrderService distributionOrderService;
+
+    @Operation(summary = "补偿处理订单分销奖励（支付后未入账时手动触发）")
+    @PostMapping("/reprocess/{orderSn}")
+    public ResultMessage<Object> reprocessRewards(
+            @Parameter(description = "订单编号", required = true) @PathVariable String orderSn) {
+        distributionOrderService.handlePaymentRewards(orderSn);
+        return ResultUtil.success();
+    }
 
     @Operation(summary = "通过id获取分销订单")
     @GetMapping("/get/{id}")

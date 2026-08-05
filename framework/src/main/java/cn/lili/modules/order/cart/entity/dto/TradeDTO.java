@@ -135,7 +135,7 @@ public class TradeDTO implements Serializable {
     private String memberId;
 
     /**
-     * 分销商id
+     * 分销员id
      */
     private String distributionId;
 

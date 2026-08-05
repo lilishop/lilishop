@@ -184,6 +184,13 @@ public interface MemberService extends IService<Member> {
     Member addMember(MemberAddDTO memberAddDTO);
 
     /**
+     * 若客户尚未绑定等级，按当前经验写入对应/默认客户等级。
+     *
+     * @param member 客户
+     */
+    void assignDefaultMemberGradeIfAbsent(Member member);
+
+    /**
      * 后台-修改客户
      *
      * @param managerMemberEditDTO 后台修改客户参数

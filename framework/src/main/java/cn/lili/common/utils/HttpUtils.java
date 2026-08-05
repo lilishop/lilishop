@@ -154,57 +154,47 @@ public class HttpUtils {
      * @return
      */
     public static String doPostWithJson(String reqUrl, Map<String, String> jsonParameters) {
-        HttpURLConnection urlConn = null;
-        try {
-            urlConn = sendPost(reqUrl, null, "utf-8", HTTP_CONN_TIMEOUT, HTTP_SOCKET_TIMEOUT);
-            urlConn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-            urlConn.setRequestProperty("Accept", "application/json");
-            urlConn.setDoOutput(true);
-            urlConn.setDoInput(true);
-            PrintWriter out = new PrintWriter(urlConn.getOutputStream());
-            out.append(JSON.toJSONString(jsonParameters));
-            out.flush();
-            out.close();
-            return getContent(urlConn, "utf-8");
-        } catch (Exception e) {
-            log.error("请求异常", e);
-            try {
-                int responseCode = urlConn.getResponseCode();
-                if (responseCode != HttpURLConnection.HTTP_OK) {
-                    return getContent(urlConn, "utf-8");
-                }
-            } catch (Exception ex) {
-                log.error("请求异常", ex);
-            }
-        }
-        return null;
+        return doPostWithJson(reqUrl, (Object) jsonParameters);
     }
 
     public static String doPostWithJson(String reqUrl, Object object) {
         HttpURLConnection urlConn = null;
         try {
-            urlConn = sendPost(reqUrl, null, "utf-8", HTTP_CONN_TIMEOUT, HTTP_SOCKET_TIMEOUT);
-            urlConn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-            urlConn.setRequestProperty("Accept", "application/json");
-            urlConn.setDoOutput(true);
-            urlConn.setDoInput(true);
-            PrintWriter out = new PrintWriter(urlConn.getOutputStream());
-            out.append(JSON.toJSONString(object));
-            out.flush();
-            out.close();
-            return getContent(urlConn, "utf-8");
+            urlConn = createJsonPostConnection(reqUrl);
+            byte[] body = JSON.toJSONString(object).getBytes(StandardCharsets.UTF_8);
+            try (OutputStream out = urlConn.getOutputStream()) {
+                out.write(body);
+                out.flush();
+            }
+            return getContent(urlConn, StandardCharsets.UTF_8.name()).trim();
         } catch (Exception e) {
             log.error("请求异常", e);
             try {
-                int responseCode = urlConn.getResponseCode();
-                if (responseCode != HttpURLConnection.HTTP_OK) {
-                    return getContent(urlConn, "utf-8");
+                if (urlConn != null && urlConn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    return getContent(urlConn, StandardCharsets.UTF_8.name());
                 }
             } catch (Exception ex) {
                 log.error("请求异常", ex);
             }
+        } finally {
+            if (urlConn != null) {
+                urlConn.disconnect();
+            }
         }
         return null;
+    }
+
+    private static HttpURLConnection createJsonPostConnection(String reqUrl) throws IOException {
+        URL url = new URL(reqUrl);
+        HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
+        urlConn.setRequestMethod("POST");
+        urlConn.setConnectTimeout(HTTP_CONN_TIMEOUT);
+        urlConn.setReadTimeout(HTTP_SOCKET_TIMEOUT);
+        urlConn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+        urlConn.setRequestProperty("Accept", "application/json");
+        urlConn.setDoOutput(true);
+        urlConn.setDoInput(true);
+        return urlConn;
     }
 
     /**

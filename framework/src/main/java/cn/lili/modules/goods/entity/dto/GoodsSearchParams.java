@@ -113,6 +113,15 @@ public class GoodsSearchParams extends PageVO {
     @Schema(description = "预警库存")
     private Boolean alertQuantity;
 
+    @Schema(description = "品牌ID")
+    private String brandId;
+
+    @Schema(description = "销量下限")
+    private Integer geBuyCount;
+
+    @Schema(description = "销量上限")
+    private Integer leBuyCount;
+
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
 
@@ -186,7 +195,16 @@ public class GoodsSearchParams extends PageVO {
             queryWrapper.le("quantity", leQuantity);
         }
         if (Objects.nonNull(geQuantity)) {
-            queryWrapper.gt("quantity", geQuantity);
+            queryWrapper.ge("quantity", geQuantity);
+        }
+        if (Objects.nonNull(leBuyCount)) {
+            queryWrapper.le("buy_count", leBuyCount);
+        }
+        if (Objects.nonNull(geBuyCount)) {
+            queryWrapper.ge("buy_count", geBuyCount);
+        }
+        if (CharSequenceUtil.isNotEmpty(brandId)) {
+            queryWrapper.eq("brand_id", brandId);
         }
         if (Objects.nonNull(recommend)) {
             queryWrapper.le("recommend", recommend);

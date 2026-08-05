@@ -70,11 +70,5 @@ public class DistributionCash extends BaseEntity {
         this.price = price;
         this.distributionCashStatus = WithdrawStatusEnum.APPLY.name();
         this.distributionName = distribution.getMemberName();
-
-        this.name = distribution.getName();
-        this.idNumber = distribution.getIdNumber();
-        this.settlementBankAccountName = distribution.getSettlementBankAccountName();
-        this.settlementBankAccountNum = distribution.getSettlementBankAccountNum();
-        this.settlementBankBranchName = distribution.getSettlementBankBranchName();
     }
 }

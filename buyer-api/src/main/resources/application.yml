@@ -123,6 +123,10 @@ springdoc:
 lili:
   runtime:
     mode: microservice
+  wechat:
+    mp:
+      # URL Link 打开版本：release / trial / develop / auto（依次尝试，适合开发环境）
+      url-link-env-version: auto
   local-file:
     path: data/uploads
     url-prefix: /files

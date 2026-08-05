@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 分销佣金查询信息
+ * 分销提现查询参数
  *
  * @author pikachu
  * @since 2020-03-26 09:04:53
@@ -17,21 +17,13 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class DistributionCashSearchParams extends PageVO {
 
-    /**
-     * 编号
-     */
-    @Schema(description = "编号")
+    @Schema(description = "提现单编号")
     private String sn;
-    /**
-     * 客户名称
-     */
-    @Schema(description = "客户名称")
+
+    @Schema(description = "分销员名称")
     private String memberName;
 
-    /**
-     * 分销员提现状态
-     */
-    @Schema(description = "分销员提现状态", allowableValues = "APPLY,PASS,REFUSE")
+    @Schema(description = "提现状态", allowableValues = "APPLY,PASS,REFUSE")
     private String distributionCashStatus;
 
     public <T> QueryWrapper<T> queryWrapper() {

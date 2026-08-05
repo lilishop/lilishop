@@ -1,6 +1,7 @@
 package cn.lili.modules.distribution.entity.dos;
 
 
+import cn.lili.modules.distribution.entity.enums.DistributionGoodsAuthEnum;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.mybatis.BaseIdEntity;
 import com.alibaba.fastjson2.JSON;
@@ -51,14 +52,14 @@ public class DistributionGoods extends BaseIdEntity {
     private Date createTime;
 
     @NotNull(message = "商品ID不能为空")
-    @Schema(description = "商品ID", required = true)
+    @Schema(description = "商品ID", requiredMode = Schema.RequiredMode.REQUIRED)
     private String goodsId;
 
     @Schema(description = "商品名称")
     private String goodsName;
 
     @NotNull(message = "规格ID不能为空")
-    @Schema(description = "规格ID", required = true)
+    @Schema(description = "规格ID", requiredMode = Schema.RequiredMode.REQUIRED)
     private String skuId;
 
     @Schema(description = "规格信息json", hidden = true)
@@ -74,7 +75,7 @@ public class DistributionGoods extends BaseIdEntity {
     private String storeName;
 
     @NotNull(message = "佣金金额")
-    @Schema(description = "佣金金额", required = true)
+    @Schema(description = "佣金金额", requiredMode = Schema.RequiredMode.REQUIRED)
     private Double commission = 0D;
 
     @Max(value = 99999999, message = "价格不能超过99999999")
@@ -84,9 +85,16 @@ public class DistributionGoods extends BaseIdEntity {
     @Schema(description = "缩略图路径")
     private String thumbnail;
 
-    @Max(value = 99999999, message = "库存不能超过99999999")
-    @Schema(description = "库存")
-    private Integer quantity;
+    /**
+     * @see cn.lili.modules.distribution.entity.enums.DistributionGoodsAuthEnum
+     */
+    @Schema(description = "审核状态")
+    @TableField("auth_status")
+    private String authStatus;
+
+    @Schema(description = "审核备注")
+    @TableField("auth_remark")
+    private String authRemark;
 
     public DistributionGoods(GoodsSku goodsSku, Double commission) {
         this.goodsId = goodsSku.getGoodsId();
@@ -104,8 +112,8 @@ public class DistributionGoods extends BaseIdEntity {
         this.storeName = goodsSku.getStoreName();
         this.price = goodsSku.getPrice();
         this.thumbnail = goodsSku.getThumbnail();
-        this.quantity = goodsSku.getQuantity();
         this.commission = commission;
+        this.authStatus = DistributionGoodsAuthEnum.TOBEAUDITED.name();
     }
 
 }

@@ -7,10 +7,13 @@ package cn.lili.modules.distribution.entity.enums;
  */
 public enum DistributionOrderStatusEnum {
 
+    /** 未完成 */
     NO_COMPLETED("未完成"),
-    //完成
+
+    /** 已完成 */
     COMPLETE("完成"),
-    //订单取消
+
+    /** 已退款 */
     REFUND("退款");
 
     private final String description;

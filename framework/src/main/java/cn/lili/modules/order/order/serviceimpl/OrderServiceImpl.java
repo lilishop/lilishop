@@ -22,6 +22,7 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
+import cn.lili.modules.distribution.service.DistributionOrderService;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.live.entity.vos.LiveRoomVO;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
@@ -157,6 +158,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     @Lazy
     private TradeService tradeService;
+
+    @Lazy
+    @Autowired
+    private DistributionOrderService distributionOrderService;
 
 
     @Autowired
@@ -490,6 +495,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderMessage.setPaymentMethod(paymentMethod);
         orderMessage.setNewStatus(OrderStatusEnum.PAID);
         this.sendUpdateStatusMessage(orderMessage);
+
+        try {
+            distributionOrderService.handlePaymentRewards(orderSn);
+        } catch (Exception e) {
+            log.error("订单[{}]分销奖励同步入账失败", orderSn, e);
+        }
 
         String message = "订单付款，付款方式[" + PaymentMethodEnum.valueOf(paymentMethod).paymentName() + "]";
         OrderLog orderLog = new OrderLog(orderSn, "-1", UserEnums.SYSTEM.getRole(), "系统操作", message);

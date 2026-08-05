@@ -9,6 +9,11 @@
     username: root
     password: lilishop
 
+lili:
+  wechat:
+    mp:
+      url-link-env-version: release
+
 springdoc:
   api-docs:
     enabled: false
