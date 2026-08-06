@@ -114,7 +114,6 @@ public class GoodsManagerController {
     @Parameter(name = "goodsId", description = "商品ID", required = true)
     @Parameter(name = "reason", description = "下架理由", required = true)
 
-    @DemoSite
     @PutMapping("/under")
     public ResultMessage<Object> underGoods(@RequestParam List<String> goodsId, @NotEmpty(message = "下架原因不能为空") @RequestParam String reason) {
 
