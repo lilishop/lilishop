@@ -147,7 +147,6 @@ public class GoodsStoreController {
         return ResultUtil.success();
     }
 
-    @DemoSite
     @Operation(summary = "下架商品", description = "下架商品时使用")
     @Parameter(name = "goodsId", description = "商品ID", required = true)
     @PutMapping("/under")
