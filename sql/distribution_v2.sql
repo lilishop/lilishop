@@ -452,6 +452,27 @@ CREATE TABLE IF NOT EXISTS li_distribution_recruit_application_answer (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='招募申请动态填写内容';
 
 
+CREATE TABLE IF NOT EXISTS `li_distribution_bank_card`
+(
+    `id`              VARCHAR(64)  NOT NULL COMMENT '主键（雪花ID）',
+    `distribution_id` VARCHAR(64)  NOT NULL COMMENT '分销员ID',
+    `holder_name`     VARCHAR(64)  NOT NULL COMMENT '收款人姓名',
+    `bank_name`       VARCHAR(128) NOT NULL COMMENT '银行名称',
+    `card_no`         VARCHAR(64)  NOT NULL COMMENT '银行卡号',
+    `is_default`      TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '是否默认卡 1=是 0=否',
+    `create_by`       VARCHAR(64)           DEFAULT NULL COMMENT '创建者',
+    `create_time`     DATETIME              DEFAULT NULL COMMENT '创建时间',
+    `update_by`       VARCHAR(64)           DEFAULT NULL COMMENT '更新者',
+    `update_time`     DATETIME              DEFAULT NULL COMMENT '更新时间',
+    `delete_flag`     TINYINT(1)            DEFAULT 0 COMMENT '逻辑删除标志',
+    PRIMARY KEY (`id`),
+    KEY `idx_bank_card_distribution` (`distribution_id`),
+    UNIQUE KEY `uk_distribution_card_no` (`distribution_id`, `card_no`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COMMENT = '分销员银行卡';
+
+
 -- ============================================================
 -- 第 18 步：新建 li_distribution_stats_daily_distributor（分销员日聚合，可选）
 -- 用于行为数据/概览的离线快照，由日结任务幂等写入
