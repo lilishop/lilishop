@@ -185,6 +185,31 @@ public class DistributionCustomerRelationServiceImpl
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void bindSelfOnPaid(String memberId, String distributionId, String orderSn) {
+        DistributionCustomerRelation relation = getOne(new LambdaQueryWrapper<DistributionCustomerRelation>()
+                .eq(DistributionCustomerRelation::getMemberId, memberId));
+        String beforeDistributionId = relation == null ? null : relation.getDistributionId();
+        String beforeStatus = relation == null ? null : relation.getRelationStatus();
+        Date beforeExpireAt = relation == null ? null : relation.getExpireAt();
+        if (relation == null) {
+            relation = new DistributionCustomerRelation();
+            relation.setMemberId(memberId);
+        }
+        relation.setDistributionId(distributionId);
+        relation.setBindSource("SELF_PURCHASE");
+        relation.setRelationStatus(DistributionRelationStatusEnum.SELF_BIND.name());
+        relation.setBindTime(new Date());
+        relation.setExpireAt(null);
+        relation.setTriggerOrderSn(orderSn);
+        saveOrUpdate(relation);
+        writeLog(relation, DistributionCustomerRelationChangeTypeEnum.CREATE.getCode(),
+                beforeDistributionId, beforeStatus, beforeExpireAt, "SELF_PURCHASE", null);
+        syncValidCustomerCount(beforeDistributionId);
+        syncValidCustomerCount(distributionId);
+    }
+
+    @Override
     public DistributionCustomerRelation getActiveRelation(String memberId) {
         DistributionCustomerRelation relation = getOne(new LambdaQueryWrapper<DistributionCustomerRelation>()
                 .eq(DistributionCustomerRelation::getMemberId, memberId));

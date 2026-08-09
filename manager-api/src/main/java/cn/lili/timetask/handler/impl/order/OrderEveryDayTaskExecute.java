@@ -139,6 +139,48 @@ public class OrderEveryDayTaskExecute implements EveryDayExecute {
 
     }
 
+    /** 手动触发：自动确认收货 */
+    public void executeAutoComplete() {
+        completedOrder(getOrderSetting());
+    }
+
+    /** 手动触发：自动好评 */
+    public void executeAutoEvaluate() {
+        memberEvaluation(getOrderSetting());
+    }
+
+    /** 手动触发：关闭售后申请 */
+    public void executeCloseAfterSale() {
+        closeAfterSale(getOrderSetting());
+    }
+
+    /** 手动触发：关闭交易投诉 */
+    public void executeCloseComplaint() {
+        closeComplaint(getOrderSetting());
+    }
+
+    /** 手动触发：更新分账状态 */
+    public void executeProfitSharing() {
+        storeFlowService.updateProfitSharingStatus();
+    }
+
+    /** 手动触发：生成店铺结算单 */
+    public void executeCreateBill() {
+        createBill();
+    }
+
+    /**
+     * 读取订单系统配置，配置缺失时抛出异常。
+     */
+    private OrderSetting getOrderSetting() {
+        Setting setting = settingService.get(SettingEnum.ORDER_SETTING.name());
+        OrderSetting orderSetting = JSONUtil.toBean(setting.getSettingValue(), OrderSetting.class);
+        if (orderSetting == null) {
+            throw new ServiceException(ResultCode.ORDER_SETTING_ERROR);
+        }
+        return orderSetting;
+    }
+
     /**
      * 自动确认收获，订单完成
      *

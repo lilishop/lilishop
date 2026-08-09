@@ -19,6 +19,24 @@
 -- SHOW CREATE TABLE li_distribution;
 -- SHOW CREATE TABLE li_distribution_order;
 -- SHOW CREATE TABLE li_distribution_cash;
+INSERT INTO li_menu (
+    id, title, name, path, level,
+    front_route, parent_id, sort_order,
+    permission, create_time, update_time, delete_flag
+) VALUES (
+             '1348810750596767745',
+             '定时任务管理',
+             'timed-task',
+             'timed-task',
+             2,
+             'sys/timed-task/index',
+             '1349237129847005184',
+             999,
+             '/manager/setting/timed-task*',
+             NOW(),
+             NOW(),
+             0
+         );
 
 SELECT COLUMN_NAME, COLUMN_TYPE, COLUMN_COMMENT
 FROM information_schema.COLUMNS
