@@ -33,7 +33,7 @@ public class Seckill extends BasePromotions {
     private static final long serialVersionUID = -9116425737163730836L;
 
     @NotNull(message = "请填写报名截止时间")
-    @Schema(description = "报名截至时间", required = true)
+    @Schema(description = "报名截至时间", requiredMode = Schema.RequiredMode.REQUIRED)
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date applyEndTime;
 

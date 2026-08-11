@@ -1,4 +1,4 @@
-﻿server:
+server:
   port: 8888
 
   servlet:
@@ -80,11 +80,14 @@ ignored:
     - /buyer/member/evaluation/*/evaluationNumber
     - /buyer/other/appVersion/**
     - /buyer/broadcast/studio/**
+    - /buyer/distribution/distribution/recruit/page
+    - /buyer/distribution/distribution/recruit/inviter
     - /buyer/common/slider/**
     - /buyer/common/sms/**
     - /buyer/common/site/**
     - /buyer/common/region/**
     - /buyer/common/IM
+    - /druid/**
     - /swagger-ui.html
     - /swagger-ui/**
     - /v3/api-docs

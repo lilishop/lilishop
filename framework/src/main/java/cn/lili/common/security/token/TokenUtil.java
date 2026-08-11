@@ -128,9 +128,9 @@ public class TokenUtil {
                 //jwt 私有声明
                 .claim(SecurityEnum.USER_CONTEXT.getValue(), new Gson().toJson(authUser))
                 //JWT的主体
-                .setSubject(authUser.getUsername())
+                .subject(authUser.getUsername())
                 //失效时间 当前时间+过期分钟
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime * 60 * 1000))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime * 60 * 1000))
                 //签名算法和密钥
                 .signWith(SecretKeyUtil.generalKey())
                 .compact();

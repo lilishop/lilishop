@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-
 /**
  * 管理端,分销钱包流水接口
  *
@@ -36,8 +34,6 @@ public class DistributionWalletLogManagerController {
                                                             @RequestParam(required = false) String logType,
                                                             @RequestParam(required = false) String bizSn,
                                                             PageVO page) {
-        return ResultUtil.data(walletLogService.pageByDistribution(distributionId,
-                logType != null ? Collections.singletonList(logType) : null,
-                bizSn, page));
+        return ResultUtil.data(walletLogService.pageByDistribution(distributionId, logType, bizSn, page));
     }
 }

@@ -30,14 +30,14 @@ public class BasePromotions extends BaseEntity {
     private String storeId;
 
     @NotEmpty(message = "活动名称不能为空")
-    @Schema(description = "活动名称", required = true)
+    @Schema(description = "活动名称", requiredMode = Schema.RequiredMode.REQUIRED)
     private String promotionName;
 
-    @Schema(description = "活动开始时间", required = true)
+    @Schema(description = "活动开始时间", requiredMode = Schema.RequiredMode.REQUIRED)
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date startTime;
 
-    @Schema(description = "活动结束时间", required = true)
+    @Schema(description = "活动结束时间", requiredMode = Schema.RequiredMode.REQUIRED)
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endTime;
 

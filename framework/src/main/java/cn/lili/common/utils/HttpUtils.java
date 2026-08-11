@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -185,7 +186,7 @@ public class HttpUtils {
     }
 
     private static HttpURLConnection createJsonPostConnection(String reqUrl) throws IOException {
-        URL url = new URL(reqUrl);
+        URL url = URI.create(reqUrl).toURL();
         HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
         urlConn.setRequestMethod("POST");
         urlConn.setConnectTimeout(HTTP_CONN_TIMEOUT);
@@ -212,7 +213,7 @@ public class HttpUtils {
         HttpURLConnection urlConn = null;
         try {
             String params = generatorParamString(parameters, encoding);
-            URL url = new URL(reqUrl);
+            URL url = URI.create(reqUrl).toURL();
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setRequestMethod("POST");
             //（单位：毫秒）jdk
@@ -270,7 +271,7 @@ public class HttpUtils {
     public static String doGet(String link, String encoding, int connectTimeout, int readTimeout) {
         HttpURLConnection conn = null;
         try {
-            URL url = new URL(link);
+            URL url = URI.create(link).toURL();
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(connectTimeout);

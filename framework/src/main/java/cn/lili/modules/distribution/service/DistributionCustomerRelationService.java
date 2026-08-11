@@ -52,15 +52,6 @@ public interface DistributionCustomerRelationService extends IService<Distributi
     void bindPermanentOnPaid(String memberId, String orderSn);
 
     /**
-     * 分销员自购且佣金归属配置为 SELF 时，将客户关系绑定为自己。
-     *
-     * @param memberId       会员 ID
-     * @param distributionId 该会员对应的分销员 ID
-     * @param orderSn        触发的订单号
-     */
-    void bindSelfOnPaid(String memberId, String distributionId, String orderSn);
-
-    /**
      * 查询会员当前有效的分销客户关系。
      *
      * @param memberId 会员 ID

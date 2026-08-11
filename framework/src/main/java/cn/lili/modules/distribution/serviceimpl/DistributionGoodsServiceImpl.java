@@ -101,13 +101,6 @@ public class DistributionGoodsServiceImpl extends ServiceImpl<DistributionGoodsM
     private static final String SHARE_BUTTON_GENERATE_POSTER = "GENERATE_POSTER";
 
     @Override
-    public long countPending(DistributionGoodsSearchParams searchParams) {
-        QueryWrapper<DistributionGoodsVO> wrapper = searchParams.distributionQueryWrapper();
-        wrapper.eq("dg.auth_status", DistributionGoodsAuthEnum.TOBEAUDITED.name());
-        return this.baseMapper.countByCondition(wrapper);
-    }
-
-    @Override
     public IPage<DistributionGoodsVO> goodsPage(DistributionGoodsSearchParams searchParams) {
         IPage<DistributionGoodsVO> page;
         //获取商家的分销商品列表
@@ -477,6 +470,12 @@ public class DistributionGoodsServiceImpl extends ServiceImpl<DistributionGoodsM
         return new ShareAccessContext(distribution, distributionGoods);
     }
 
+    /**
+     * 商品分享访问校验上下文。
+     *
+     * @param distribution      分销员
+     * @param distributionGoods 分销商品
+     */
     private record ShareAccessContext(Distribution distribution, DistributionGoods distributionGoods) {
     }
 

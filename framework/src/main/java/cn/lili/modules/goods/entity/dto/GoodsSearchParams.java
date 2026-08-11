@@ -104,7 +104,7 @@ public class GoodsSearchParams extends PageVO {
     /**
      * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
      */
-    @Schema(description = "销售模式", required = true)
+    @Schema(description = "销售模式", requiredMode = Schema.RequiredMode.REQUIRED)
     private String salesModel;
 
     @Schema(description = "商品分组ID")

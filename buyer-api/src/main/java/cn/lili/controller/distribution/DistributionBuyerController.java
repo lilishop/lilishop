@@ -20,6 +20,7 @@ import cn.lili.modules.distribution.entity.vos.DistributionBuyerPerformanceVO;
 import cn.lili.modules.distribution.entity.vos.DistributionInvitePageVO;
 import cn.lili.modules.distribution.entity.vos.DistributionPromotionPosterVO;
 import cn.lili.modules.distribution.entity.vos.DistributionRecruitConditionProgressVO;
+import cn.lili.modules.distribution.entity.vos.DistributionRecruitInviterVO;
 import cn.lili.modules.distribution.entity.vos.DistributionRecruitPageVO;
 import cn.lili.modules.distribution.service.DistributionBuyerPerformanceService;
 import cn.lili.modules.distribution.service.DistributionCustomerRelationService;
@@ -176,6 +177,12 @@ public class DistributionBuyerController {
     @GetMapping("/recruit/page")
     public ResultMessage<DistributionRecruitPageVO> recruitPage() {
         return ResultUtil.data(recruitService.getRecruitPage());
+    }
+
+    @Operation(summary = "招募页邀请人信息（无需登录）")
+    @GetMapping("/recruit/inviter")
+    public ResultMessage<DistributionRecruitInviterVO> recruitInviter(@RequestParam String distributionId) {
+        return ResultUtil.data(recruitService.getRecruitInviter(distributionId));
     }
 
     @Operation(summary = "提交招募申请")

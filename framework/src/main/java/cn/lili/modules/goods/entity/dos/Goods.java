@@ -46,7 +46,7 @@ public class Goods extends BaseEntity {
     @Length(max = 100, message = "商品名称太长，不能超过100个字符")
     private String goodsName;
 
-    @Schema(description = "商品价格", required = true)
+    @Schema(description = "商品价格", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "商品价格不能为空")
     @Min(value = 0, message = "商品价格不能为负数")
     @Max(value = 99999999, message = "商品价格不能超过99999999")
@@ -143,20 +143,20 @@ public class Goods extends BaseEntity {
     private String goodsVideo;
 
 
-    @Schema(description = "是否为推荐商品", required = true)
+    @Schema(description = "是否为推荐商品", requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean recommend;
 
     /**
      * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
      */
-    @Schema(description = "销售模式", required = true)
+    @Schema(description = "销售模式", requiredMode = Schema.RequiredMode.REQUIRED)
     private String salesModel;
 
 
     /**
      * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
      */
-    @Schema(description = "商品类型", required = true)
+    @Schema(description = "商品类型", requiredMode = Schema.RequiredMode.REQUIRED)
     private String goodsType;
 
     @Schema(description = "商品参数json", hidden = true)

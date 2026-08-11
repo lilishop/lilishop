@@ -177,7 +177,6 @@ public class PageUtil {
         IPage<T> resultPage = new Page<>();
         if (originPage != null) {
             resultPage.setCurrent(originPage.getCurrent());
-            resultPage.setPages(originPage.getPages());
             resultPage.setTotal(originPage.getTotal());
             resultPage.setSize(originPage.getSize());
             resultPage.setRecords(records);

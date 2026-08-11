@@ -141,36 +141,55 @@ public interface DistributionService extends IService<Distribution> {
 
     /**
      * 管理端查询分销员详情。
+     *
+     * @param id 分销员 ID
+     * @return 分销员详情
      */
     DistributionMemberDetailVO getMemberDetail(String id);
 
     /**
      * 管理端编辑分销员基础信息。
+     *
+     * @param id        分销员 ID
+     * @param updateDTO 编辑参数
+     * @return 更新后的分销员信息
      */
     DistributionMemberVO updateMember(String id, DistributionMemberUpdateDTO updateDTO);
 
     /**
      * 管理端新增分销员（同步创建或关联 C 端客户）。
+     *
+     * @param createDTO 新增参数
+     * @return 新建的分销员信息
      */
     DistributionMemberVO createMember(DistributionMemberCreateDTO createDTO);
 
     /**
      * 管理端批量设置分销等级。
+     *
+     * @param batchGradeDTO 批量等级参数
      */
     void batchUpdateGrade(DistributionMemberBatchGradeDTO batchGradeDTO);
 
     /**
      * 管理端按筛选条件导出分销员列表。
+     *
+     * @param response                 HTTP 响应
+     * @param distributionSearchParams 搜索条件
      */
     void exportMembers(HttpServletResponse response, DistributionSearchParams distributionSearchParams);
 
     /**
      * 获取推广海报上下文（邀请好友锁客，非招募下级）。
+     *
+     * @return 推广海报上下文
      */
     DistributionPromotionPosterVO getPromotionPoster();
 
     /**
      * 获取邀请卡上下文（招募下级分销员）。
+     *
+     * @return 邀请卡上下文
      */
     DistributionInviteCardVO getInviteCard();
 

@@ -28,7 +28,7 @@ public interface DistributionOrderMapper extends BaseMapper<DistributionOrder> {
      * @return 分销订单分页
      */
     @Select("""
-            SELECT do.*, do.rebate AS directCommission
+            SELECT do.*
             FROM li_distribution_order do
             ${ew.customSqlSegment}
             """)

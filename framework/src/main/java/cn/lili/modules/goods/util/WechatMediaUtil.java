@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 
 /**
@@ -47,7 +48,7 @@ public class WechatMediaUtil {
         URL mediaUrl;
         try {
             String boundary = "----WebKitFormBoundaryOYXo8heIv9pgpGjT";
-            URL url = new URL(mediaStr);
+            URL url = URI.create(mediaStr).toURL();
             HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
             //让输入输出流开启
             urlConn.setDoInput(true);
@@ -61,7 +62,7 @@ public class WechatMediaUtil {
             OutputStream out = urlConn.getOutputStream();
 
             //读取文件的数据,构建一个GET请求，然后读取指定地址中的数据
-            mediaUrl = new URL(mediaFileUrl);
+            mediaUrl = URI.create(mediaFileUrl).toURL();
             HttpURLConnection mediaConn = (HttpURLConnection) mediaUrl.openConnection();
             //设置请求方式
             mediaConn.setRequestMethod("GET");

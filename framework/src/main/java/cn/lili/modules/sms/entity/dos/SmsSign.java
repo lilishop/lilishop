@@ -19,19 +19,19 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class SmsSign extends BaseIdEntity {
 
-    @Schema(description = "签名名称", required = true)
+    @Schema(description = "签名名称", requiredMode = Schema.RequiredMode.REQUIRED)
     private String signName;
 
-    @Schema(description = "签名来源", required = true)
+    @Schema(description = "签名来源", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer signSource;
 
-    @Schema(description = "短信签名申请说明", required = true)
+    @Schema(description = "短信签名申请说明", requiredMode = Schema.RequiredMode.REQUIRED)
     private String remark;
 
-    @Schema(description = "营业执照", required = true)
+    @Schema(description = "营业执照", requiredMode = Schema.RequiredMode.REQUIRED)
     private String businessLicense;
 
-    @Schema(description = "授权委托书", required = true)
+    @Schema(description = "授权委托书", requiredMode = Schema.RequiredMode.REQUIRED)
     private String license;
 
     /**

@@ -1,5 +1,6 @@
 package cn.lili.modules.wechat.util;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
@@ -24,8 +25,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HTTP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,11 +57,11 @@ public class WechatUtil {
 
     public String h5QrCodeBase64(String scene, Integer expireSeconds) {
         String accessToken = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.H5);
-        if (StringUtils.isEmpty(accessToken)) {
+        if (CharSequenceUtil.isBlank(accessToken)) {
             throw new ServiceException(ResultCode.WECHAT_CONNECT_NOT_EXIST);
         }
 
-        String sceneStr = StringUtils.isEmpty(scene) ? "lilishop" : scene;
+        String sceneStr = CharSequenceUtil.isBlank(scene) ? "lilishop" : scene;
         int expire = expireSeconds == null ? 2592000 : Math.min(expireSeconds, 2592000);
 
         Map<String, Object> params = new HashMap<>(4);
@@ -92,7 +91,7 @@ public class WechatUtil {
                 throw new ServiceException(ResultCode.WECHAT_QRCODE_ERROR);
             }
             String ticket = jsonObject.getString("ticket");
-            if (StringUtils.isEmpty(ticket)) {
+            if (CharSequenceUtil.isBlank(ticket)) {
                 log.error("微信公众号二维码创建返回缺少ticket:{}", content);
                 throw new ServiceException(ResultCode.WECHAT_QRCODE_ERROR);
             }
@@ -111,7 +110,7 @@ public class WechatUtil {
     }
 
     public void handleH5Callback(String xml) {
-        if (StringUtils.isEmpty(xml)) {
+        if (CharSequenceUtil.isBlank(xml)) {
             return;
         }
         XmlHelper xmlHelper = XmlHelper.of(xml);
@@ -129,7 +128,7 @@ public class WechatUtil {
         if (!"subscribe".equalsIgnoreCase(event) && !"SCAN".equalsIgnoreCase(event)) {
             return;
         }
-        if (StringUtils.isEmpty(fromUser) || StringUtils.isEmpty(eventKey)) {
+        if (CharSequenceUtil.isBlank(fromUser) || CharSequenceUtil.isBlank(eventKey)) {
             return;
         }
 
@@ -137,12 +136,12 @@ public class WechatUtil {
         if (scene.startsWith("qrscene_")) {
             scene = scene.substring("qrscene_".length());
         }
-        if (StringUtils.isEmpty(scene)) {
+        if (CharSequenceUtil.isBlank(scene)) {
             return;
         }
 
         String memberId = resolveMemberId(scene);
-        if (StringUtils.isEmpty(memberId)) {
+        if (CharSequenceUtil.isBlank(memberId)) {
             return;
         }
 
@@ -155,7 +154,7 @@ public class WechatUtil {
             cn.lili.modules.connect.entity.Connect existedOpenId = connectService.queryConnect(
                     ConnectQueryDTO.builder().unionType(openIdUnionType).unionId(fromUser).build()
             );
-            cn.lili.modules.connect.entity.Connect existedUnionId = StringUtils.isEmpty(unionId) ? null : connectService.queryConnect(
+            cn.lili.modules.connect.entity.Connect existedUnionId = CharSequenceUtil.isBlank(unionId) ? null : connectService.queryConnect(
                     ConnectQueryDTO.builder().unionType(unionIdUnionType).unionId(unionId).build()
             );
             cn.lili.modules.connect.entity.Connect existedMemberOpenId = connectService.queryConnect(
@@ -179,7 +178,7 @@ public class WechatUtil {
             if (existedOpenId == null) {
                 connectService.loginBindUser(memberId, fromUser, openIdUnionType);
             }
-            if (!StringUtils.isEmpty(unionId) && existedUnionId == null) {
+            if (CharSequenceUtil.isNotBlank(unionId) && existedUnionId == null) {
                 connectService.loginBindUser(memberId, unionId, unionIdUnionType);
             }
 
@@ -206,7 +205,7 @@ public class WechatUtil {
     private String getWechatUnionId(String openId) {
         try {
             String accessToken = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.H5);
-            if (StringUtils.isEmpty(accessToken)) {
+            if (CharSequenceUtil.isBlank(accessToken)) {
                 return null;
             }
             String url = USER_INFO_API + accessToken +

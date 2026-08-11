@@ -149,18 +149,18 @@ public class GoodsSku extends BaseEntity {
     @Schema(description = "商品视频")
     private String goodsVideo;
 
-    @Schema(description = "是否为推荐商品", required = true)
+    @Schema(description = "是否为推荐商品", requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean recommend;
 
     /**
      * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
      */
-    @Schema(description = "销售模式", required = true)
+    @Schema(description = "销售模式", requiredMode = Schema.RequiredMode.REQUIRED)
     private String salesModel;
     /**
      * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
      */
-    @Schema(description = "商品类型", required = true)
+    @Schema(description = "商品类型", requiredMode = Schema.RequiredMode.REQUIRED)
     private String goodsType;
 
     @Schema(description = "预警数量")

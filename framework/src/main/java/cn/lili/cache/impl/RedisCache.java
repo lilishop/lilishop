@@ -156,7 +156,7 @@ public class RedisCache implements Cache {
     private void scan(String pattern, Consumer<byte[]> consumer) {
         this.redisTemplate.execute((RedisConnection connection) -> {
             try (Cursor<byte[]> cursor =
-                         connection.scan(ScanOptions.scanOptions()
+                         connection.keyCommands().scan(ScanOptions.scanOptions()
                                  .count(Long.MAX_VALUE)
                                  .match(pattern).build())) {
                 cursor.forEachRemaining(consumer);

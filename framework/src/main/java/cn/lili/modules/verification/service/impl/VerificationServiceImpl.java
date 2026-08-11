@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +134,7 @@ public class VerificationServiceImpl implements VerificationService {
             }
         }
         if (StringUtils.isNotEmpty(originalResource)) {
-            URL url = new URL(originalResource);
+            URL url = URI.create(originalResource).toURL();
             InputStream inputStream = url.openStream();
             SerializableStream serializableStream = new SerializableStream(inputStream);
             cache.put(CachePrefix.VERIFICATION_IMAGE.getPrefix() + originalResource, serializableStream);

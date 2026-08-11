@@ -14,6 +14,7 @@ import cn.lili.modules.distribution.entity.enums.RecruitApplyModeEnum;
 import cn.lili.modules.distribution.entity.enums.RecruitAuditModeEnum;
 import cn.lili.modules.distribution.entity.enums.RecruitJoinConditionTypeEnum;
 import cn.lili.modules.distribution.entity.vos.DistributionRecruitConditionProgressVO;
+import cn.lili.modules.distribution.entity.vos.DistributionRecruitInviterVO;
 import cn.lili.modules.distribution.entity.vos.DistributionRecruitPageVO;
 import cn.lili.modules.distribution.entity.vos.DistributionRecruitPlanGoodsItemVO;
 import cn.lili.modules.distribution.mapper.DistributionRecruitApplicationMapper;
@@ -125,6 +126,29 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
             pageVO.setCurrentApplication(application);
         }
         return pageVO;
+    }
+
+    @Override
+    public DistributionRecruitInviterVO getRecruitInviter(String distributionId) {
+        DistributionRecruitInviterVO vo = new DistributionRecruitInviterVO();
+        if (distributionId == null || distributionId.isBlank()) {
+            return vo;
+        }
+        Distribution distribution = distributionMemberSupport.getById(distributionId.trim());
+        if (distribution == null
+                || !DistributionStatusEnum.PASS.name().equals(distribution.getDistributionStatus())) {
+            return vo;
+        }
+        vo.setDistributionId(distribution.getId());
+        vo.setMemberName(distribution.getMemberName());
+        Member member = memberService.getById(distribution.getMemberId());
+        if (member != null) {
+            if (member.getNickName() != null && !member.getNickName().isBlank()) {
+                vo.setMemberName(member.getNickName());
+            }
+            vo.setMemberAvatar(member.getFace());
+        }
+        return vo;
     }
 
     @Override

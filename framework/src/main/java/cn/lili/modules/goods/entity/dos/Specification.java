@@ -28,7 +28,7 @@ public class Specification extends BaseIdEntity {
      */
     @NotEmpty(message = "规格名称不能为空")
     @Size(max = 20, message = "规格名称不能超过20个字符")
-    @Schema(description = "规格名称", required = true)
+    @Schema(description = "规格名称", requiredMode = Schema.RequiredMode.REQUIRED)
     private String specName;
 
     /**

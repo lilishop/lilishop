@@ -11,8 +11,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 /**
  * 分销钱包流水服务实现
  *
@@ -33,10 +31,10 @@ public class DistributionWalletLogServiceImpl extends ServiceImpl<DistributionWa
      * @return 流水分页
      */
     @Override
-    public IPage<DistributionWalletLog> pageByDistribution(String distributionId, List<String> logTypes, String bizSn, PageVO page) {
+    public IPage<DistributionWalletLog> pageByDistribution(String distributionId, String logType, String bizSn, PageVO page) {
         LambdaQueryWrapper<DistributionWalletLog> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(CharSequenceUtil.isNotEmpty(distributionId), DistributionWalletLog::getDistributionId, distributionId);
-        wrapper.in(logTypes != null && !logTypes.isEmpty(), DistributionWalletLog::getLogType, logTypes);
+        wrapper.eq(CharSequenceUtil.isNotEmpty(logType), DistributionWalletLog::getLogType, logType);
         wrapper.eq(CharSequenceUtil.isNotEmpty(bizSn), DistributionWalletLog::getBizSn, bizSn);
         wrapper.orderByDesc(DistributionWalletLog::getCreateTime);
         return this.page(PageUtil.initPage(page), wrapper);

@@ -19,16 +19,16 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class SmsTemplate extends BaseIdEntity {
 
-    @Schema(description = "模板名称", required = true)
+    @Schema(description = "模板名称", requiredMode = Schema.RequiredMode.REQUIRED)
     private String templateName;
 
-    @Schema(description = "短信类型", required = true)
+    @Schema(description = "短信类型", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer templateType;
 
-    @Schema(description = "短信模板申请说明", required = true)
+    @Schema(description = "短信模板申请说明", requiredMode = Schema.RequiredMode.REQUIRED)
     private String remark;
 
-    @Schema(description = "模板内容", required = true)
+    @Schema(description = "模板内容", requiredMode = Schema.RequiredMode.REQUIRED)
     private String templateContent;
 
     /**

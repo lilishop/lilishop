@@ -33,7 +33,7 @@ public class GoodsOperationDTO implements Serializable {
     @Schema(description = "商品id", hidden = true)
     private String goodsId;
 
-    @Schema(description = "商品价格", required = true)
+    @Schema(description = "商品价格", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "商品价格不能为空")
     @Min(value = 0, message = "商品价格不能为负数")
     @Max(value = 99999999, message = "商品价格不能超过99999999")
@@ -42,7 +42,7 @@ public class GoodsOperationDTO implements Serializable {
     @Schema(description = "分类path")
     private String categoryPath;
 
-    @Schema(description = "店铺分类id", required = true)
+    @Schema(description = "店铺分类id", requiredMode = Schema.RequiredMode.REQUIRED)
     @Size(max = 200, message = "选择了太多店铺分类")
     private String storeCategoryPath;
 
@@ -50,7 +50,7 @@ public class GoodsOperationDTO implements Serializable {
     @Min(value = 0, message = "品牌值不正确")
     private String brandId;
 
-    @Schema(description = "商品名称", required = true)
+    @Schema(description = "商品名称", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "商品名称不能为空")
     @Length(max = 50, message = "商品名称不能超过50个字符")
     private String goodsName;
@@ -78,7 +78,7 @@ public class GoodsOperationDTO implements Serializable {
     @Schema(description = "商品图片")
     private List<String> goodsGalleryList;
 
-    @Schema(description = "运费模板id,不需要运费模板时值是0", required = true)
+    @Schema(description = "运费模板id,不需要运费模板时值是0", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "运费模板不能为空，没有运费模板时，传值0")
     @Min(value = 0, message = "运费模板值不正确")
     private String templateId;
@@ -89,13 +89,13 @@ public class GoodsOperationDTO implements Serializable {
     /**
      * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
      */
-    @Schema(description = "销售模式", required = true)
+    @Schema(description = "销售模式", requiredMode = Schema.RequiredMode.REQUIRED)
     private String salesModel;
 
     @Schema(description = "是否有规格", hidden = true)
     private String haveSpec;
 
-    @Schema(description = "商品单位", required = true)
+    @Schema(description = "商品单位", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "商品单位不能为空")
     private String goodsUnit;
 

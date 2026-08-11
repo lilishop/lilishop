@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
 
 
 /**
@@ -88,9 +87,7 @@ public class DistributionCashBuyerController {
         if (distribution == null || distributionService.isRetreated(distribution.getMemberId())) {
             return ResultUtil.data(null);
         }
-        // 买家端收支明细只展示：已结算佣金、提现申请（扣款）、提现驳回
-        List<String> visibleTypes = List.of("COMMISSION_SETTLE", "WITHDRAW_APPLY", "WITHDRAW_REJECT");
-        return ResultUtil.data(walletLogService.pageByDistribution(distribution.getId(), visibleTypes, null, page));
+        return ResultUtil.data(walletLogService.pageByDistribution(distribution.getId(), null, null, page));
     }
 
 }

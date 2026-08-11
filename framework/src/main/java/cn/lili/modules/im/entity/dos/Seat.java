@@ -41,7 +41,7 @@ public class Seat extends BaseTenantEntity {
     private Boolean disabled;
 
     @NotEmpty(message = "手机号码不能为空")
-    @Schema(description = "手机号码", required = true)
+    @Schema(description = "手机号码", requiredMode = Schema.RequiredMode.REQUIRED)
     private String mobile;
 
 }

@@ -1,7 +1,6 @@
 package cn.lili.modules.distribution.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
@@ -21,7 +20,6 @@ import cn.lili.modules.distribution.entity.dto.DistributionInviteeQueryDTO;
 import cn.lili.modules.distribution.entity.dto.DistributionMemberBatchGradeDTO;
 import cn.lili.modules.distribution.entity.dto.DistributionMemberCreateDTO;
 import cn.lili.modules.distribution.entity.dto.DistributionMemberUpdateDTO;
-import cn.lili.modules.distribution.entity.dto.DistributionRecruitApplyFormItemSnapshot;
 import cn.lili.modules.distribution.entity.dto.DistributionSearchParams;
 import cn.lili.modules.distribution.entity.enums.DistributionRewardTypeEnum;
 import cn.lili.modules.distribution.entity.enums.DistributionStatusEnum;
@@ -33,7 +31,6 @@ import cn.lili.modules.distribution.entity.vos.DistributionPromotionPosterVO;
 import cn.lili.modules.distribution.mapper.DistributionCustomerRelationMapper;
 import cn.lili.modules.distribution.mapper.DistributionInviteMapper;
 import cn.lili.modules.distribution.mapper.DistributionMapper;
-import cn.lili.modules.distribution.mapper.DistributionRecruitApplicationMapper;
 import cn.lili.modules.distribution.service.DistributionCustomerRelationService;
 import cn.lili.modules.distribution.service.DistributionGradeService;
 import cn.lili.modules.distribution.service.DistributionRecruitService;
@@ -121,9 +118,6 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
 
     @Autowired
     private ConnectService connectService;
-
-    @Autowired
-    private DistributionRecruitApplicationMapper distributionRecruitApplicationMapper;
 
     @Override
     public IPage<Distribution> distributionPage(DistributionSearchParams distributionSearchParams, PageVO page) {
@@ -320,22 +314,6 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
             DistributionGrade grade = gradeService.resolveGrade(distribution.getGradeId());
             if (grade != null) {
                 detail.setGradeName(grade.getGradeName());
-            }
-        }
-        // 查询招募申请记录，填充申请时间和表单内容
-        DistributionRecruitApplication application = distributionRecruitApplicationMapper.selectOne(
-                new LambdaQueryWrapper<DistributionRecruitApplication>()
-                        .eq(DistributionRecruitApplication::getDistributionId, distribution.getId())
-                        .orderByDesc(DistributionRecruitApplication::getCreateTime)
-                        .last("LIMIT 1")
-        );
-        if (application != null) {
-            detail.setApplyTime(application.getCreateTime());
-            if (CharSequenceUtil.isNotBlank(application.getApplyFormSnapshot())) {
-                try {
-                    detail.setApplyFormItems(JSONUtil.toList(application.getApplyFormSnapshot(), DistributionRecruitApplyFormItemSnapshot.class));
-                } catch (Exception ignore) {
-                }
             }
         }
         return detail;

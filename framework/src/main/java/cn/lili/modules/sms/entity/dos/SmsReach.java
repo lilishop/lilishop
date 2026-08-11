@@ -28,7 +28,7 @@ public class SmsReach extends BaseIdEntity {
 
     private static final long serialVersionUID = -8106666482841131277L;
 
-    @Schema(description = "签名名称", required = true)
+    @Schema(description = "签名名称", requiredMode = Schema.RequiredMode.REQUIRED)
     private String signName;
 
     @Schema(description = "模板名称")

@@ -86,6 +86,8 @@ ignored:
     - /buyer/member/evaluation/*/evaluationNumber
     - /buyer/other/appVersion/**
     - /buyer/broadcast/studio/**
+    - /buyer/distribution/distribution/recruit/page
+    - /buyer/distribution/distribution/recruit/inviter
     - /store/passport/login/**
     - /store/passport/login/refresh/**
     - /store/common/slider/**

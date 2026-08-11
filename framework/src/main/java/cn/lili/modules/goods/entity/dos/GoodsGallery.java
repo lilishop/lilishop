@@ -48,7 +48,7 @@ public class GoodsGallery extends BaseIdEntity {
     /**
      * 原图路径
      */
-    @Schema(description = "原图路径", required = true)
+    @Schema(description = "原图路径", requiredMode = Schema.RequiredMode.REQUIRED)
     private String original;
 
     /**
@@ -60,7 +60,7 @@ public class GoodsGallery extends BaseIdEntity {
     /**
      * 排序
      */
-    @Schema(description = "排序", required = true)
+    @Schema(description = "排序", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer sort;
 
 }

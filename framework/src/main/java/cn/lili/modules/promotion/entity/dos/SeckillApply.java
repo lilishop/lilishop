@@ -24,7 +24,7 @@ public class SeckillApply extends BaseEntity {
 
     private static final long serialVersionUID = 5440164641970820989L;
 
-    @Schema(description = "活动id", required = true)
+    @Schema(description = "活动id", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "活动id参数不能为空")
     @Min(value = 0, message = "活动id参数异常")
     private String seckillId;

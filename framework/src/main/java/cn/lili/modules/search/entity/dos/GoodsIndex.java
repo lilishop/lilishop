@@ -124,10 +124,10 @@ public class GoodsIndex implements Serializable {
     @Schema(description = "商品发布时间")
     private Date releaseTime;
 
-    @Schema(description = "商品类型", required = true)
+    @Schema(description = "商品类型", requiredMode = Schema.RequiredMode.REQUIRED)
     private String goodsType;
 
-    @Schema(description = "商品sku基础分数", required = true)
+    @Schema(description = "商品sku基础分数", requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer skuSource;
 
     private List<GoodsSearchAttribute> attrList;

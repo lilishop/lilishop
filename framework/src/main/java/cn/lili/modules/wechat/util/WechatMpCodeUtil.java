@@ -53,7 +53,7 @@ public class WechatMpCodeUtil {
     @Autowired
     private ShortLinkService shortLinkService;
     @Autowired
-    private Cache cache;
+    private Cache<String> cache;
 
     /**
      * 小程序 URL Link 打开版本：release / trial / develop / auto（依次尝试）
@@ -168,9 +168,9 @@ public class WechatMpCodeUtil {
         String normalizedQuery = CharSequenceUtil.blankToDefault(query, "");
         String cacheKey = MP_URL_LINK_CACHE_PREFIX + normalizedPath + "?" + normalizedQuery;
         try {
-            Object cached = cache.get(cacheKey);
-            if (cached != null && CharSequenceUtil.isNotBlank(cached.toString())) {
-                return cached.toString();
+            String cached = cache.getString(cacheKey);
+            if (CharSequenceUtil.isNotBlank(cached)) {
+                return cached;
             }
         } catch (Exception e) {
             log.warn("读取小程序 URL Link 缓存失败", e);

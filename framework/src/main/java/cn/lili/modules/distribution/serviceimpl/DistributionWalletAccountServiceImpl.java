@@ -173,12 +173,23 @@ public class DistributionWalletAccountServiceImpl implements DistributionWalletA
         return value == null ? BigDecimal.ZERO : value;
     }
 
+    /**
+     * 钱包余额快照，用于记录资金变动前后的余额。
+     */
     private static final class WalletSnapshot {
         private final BigDecimal canRebate;
         private final BigDecimal commissionFrozen;
         private final BigDecimal withdrawalFrozen;
         private final BigDecimal withdrawnTotal;
 
+        /**
+         * 构造钱包余额快照。
+         *
+         * @param canRebate        可提现余额
+         * @param commissionFrozen 佣金冻结金额
+         * @param withdrawalFrozen 提现冻结金额
+         * @param withdrawnTotal   累计已提现金额
+         */
         private WalletSnapshot(BigDecimal canRebate, BigDecimal commissionFrozen, BigDecimal withdrawalFrozen, BigDecimal withdrawnTotal) {
             this.canRebate = canRebate;
             this.commissionFrozen = commissionFrozen;

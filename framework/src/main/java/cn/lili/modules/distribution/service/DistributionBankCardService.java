@@ -15,7 +15,9 @@ import java.util.List;
 public interface DistributionBankCardService extends IService<DistributionBankCard> {
 
     /**
-     * 查询当前分销员的银行卡列表
+     * 查询当前分销员的银行卡列表。
+     *
+     * @return 银行卡列表
      */
     List<DistributionBankCard> listMyCards();
 

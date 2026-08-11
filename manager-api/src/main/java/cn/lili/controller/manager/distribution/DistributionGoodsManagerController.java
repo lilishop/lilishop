@@ -36,12 +36,6 @@ public class DistributionGoodsManagerController {
         return ResultUtil.data(distributionGoodsService.goodsPage(distributionGoodsSearchParams));
     }
 
-    @GetMapping("/pendingCount")
-    @Operation(description = "获取待审核分销商品数量")
-    public ResultMessage<Long> pendingCount(DistributionGoodsSearchParams distributionGoodsSearchParams) {
-        return ResultUtil.data(distributionGoodsService.countPending(distributionGoodsSearchParams));
-    }
-
 
     @DeleteMapping("/delByIds/{ids}")
     @Operation(description = "批量删除")

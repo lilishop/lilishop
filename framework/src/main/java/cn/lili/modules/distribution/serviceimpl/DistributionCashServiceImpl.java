@@ -9,12 +9,9 @@ import cn.lili.modules.distribution.entity.dos.DistributionCash;
 import cn.lili.modules.distribution.entity.enums.DistributionStatusEnum;
 import cn.lili.modules.distribution.entity.vos.DistributionCashSearchParams;
 import cn.lili.modules.distribution.mapper.DistributionCashMapper;
-import cn.lili.modules.distribution.entity.dos.DistributionBankCard;
-import cn.lili.modules.distribution.service.DistributionBankCardService;
 import cn.lili.modules.distribution.service.DistributionCashService;
 import cn.lili.modules.distribution.service.DistributionService;
 import cn.lili.modules.distribution.service.DistributionWalletAccountService;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import cn.lili.modules.wallet.entity.enums.WithdrawStatusEnum;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -50,9 +47,6 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
     @Autowired
     private DistributionWalletAccountService walletAccountService;
 
-    @Autowired
-    private DistributionBankCardService bankCardService;
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean cash(Double applyMoney) {
@@ -69,17 +63,6 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
             walletAccountService.applyWithdraw(distribution.getId(), amount, sn,
                     "withdraw:apply:" + sn, "分销提现申请");
             DistributionCash distributionCash = new DistributionCash(sn, applyMoney, distribution);
-            // 快照默认银行卡信息
-            DistributionBankCard defaultCard = bankCardService.getOne(
-                new LambdaQueryWrapper<DistributionBankCard>()
-                    .eq(DistributionBankCard::getDistributionId, distribution.getId())
-                    .eq(DistributionBankCard::getIsDefault, true)
-                    .last("LIMIT 1"));
-            if (defaultCard != null) {
-                distributionCash.setName(defaultCard.getHolderName());
-                distributionCash.setSettlementBankAccountName(defaultCard.getBankName());
-                distributionCash.setSettlementBankAccountNum(defaultCard.getCardNo());
-            }
             return this.save(distributionCash);
         }
         throw new ServiceException(ResultCode.DISTRIBUTION_NOT_EXIST);

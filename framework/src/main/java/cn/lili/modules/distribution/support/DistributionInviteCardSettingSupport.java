@@ -39,7 +39,8 @@ public class DistributionInviteCardSettingSupport {
                 return value;
             }
         }
-        return defaultSetting(); // 无配置时返回带默认文案的对象
+        // 无配置时返回带默认文案的对象
+        return defaultSetting();
     }
 
     /**

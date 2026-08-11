@@ -103,16 +103,6 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
                 .eq(Distribution::getDistributionStatus, DistributionStatusEnum.PASS.name()));
         boolean selfPurchase = buyerDistribution != null;
 
-        // 自购且佣金归属为 SELF 时，将客户关系绑定为分销员自己
-        if (selfPurchase) {
-            String spMode = settlementSetting.getSelfPurchaseCommissionMode() == null
-                    ? DistributionSelfPurchaseModeEnum.SELF.name()
-                    : settlementSetting.getSelfPurchaseCommissionMode();
-            if (DistributionSelfPurchaseModeEnum.SELF.name().equals(spMode)) {
-                customerRelationService.bindSelfOnPaid(order.getMemberId(), buyerDistribution.getId(), orderSn);
-            }
-        }
-
         // 预加载分销商品、已有分销订单及受益人缓存，避免循环内重复查库
         Map<String, DistributionGoods> goodsBySkuId = loadDistributionGoodsMap(orderItems);
         Set<String> existingDistributionOrderItems = loadExistingDistributionOrderItemSns(orderSn);
@@ -454,9 +444,11 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
                 directBeneficiaryId = relation == null ? null : relation.getDistributionId();
             }
         } else {
-            // 推广单：仅凭有效客户关系确定受益人，无有效关系则不产生佣金
+            // 推广单：优先取客户绑定关系，其次取订单快照中的分销员
             if (relation != null && relation.getDistributionId() != null) {
                 directBeneficiaryId = relation.getDistributionId();
+            } else if (order.getDistributionId() != null) {
+                directBeneficiaryId = order.getDistributionId();
             }
         }
 
@@ -747,6 +739,9 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
         return value == null ? BigDecimal.ZERO : value;
     }
 
+    /**
+     * 佣金分配上下文，缓存直推/邀请受益人及业绩归属分销员。
+     */
     private static final class CommissionContext {
         private Distribution directDistribution;
         private DistributionGrade directGrade;

@@ -51,7 +51,8 @@ public class LiveOrderServiceImpl implements LiveOrderService {
                 OrderStatusEnum.UNDELIVERED.name(),
                 OrderStatusEnum.DELIVERED.name(),
                 OrderStatusEnum.STAY_PICKED_UP.name(),
-                OrderStatusEnum.PARTS_DELIVERED.name(), // 注意这里你原来漏了.name()
+                // 注意这里你原来漏了.name()
+                OrderStatusEnum.PARTS_DELIVERED.name(),
                 OrderStatusEnum.TAKE.name()
         );
         orderSearchParams.setOrderStatusList(statusList);
@@ -61,13 +62,18 @@ public class LiveOrderServiceImpl implements LiveOrderService {
         if (orderList != null && !orderList.isEmpty()) {
 
             long salesVolume = orderList.stream()
-                    .map(Order::getMemberId) // 提取 buyerId
-                    .distinct()             // 去重
-                    .count();               // 统计数量
+                    // 提取 buyerId
+                    .map(Order::getMemberId)
+                    // 去重
+                    .distinct()
+                    // 统计数量
+                    .count();
 
             double totalAmount = orderList.stream()
-                    .mapToDouble(Order::getFlowPrice) // 转换为 DoubleStream，避免拆装箱
-                    .sum(); // 求和
+                    // 转换为 DoubleStream，避免拆装箱
+                    .mapToDouble(Order::getFlowPrice)
+                    // 求和
+                    .sum();
 
             orderStatisticsVO.setTotalAmount(totalAmount);
             orderStatisticsVO.setSalesVolume(orderList.size());

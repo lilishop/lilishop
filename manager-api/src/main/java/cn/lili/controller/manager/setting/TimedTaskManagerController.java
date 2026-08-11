@@ -84,7 +84,9 @@ public class TimedTaskManagerController {
 
         // 其余 EveryDayExecute 实现（跳过 OrderEveryDayTaskExecute，已拆分列出）
         for (EveryDayExecute t : everyDayExecutes) {
-            if (t instanceof OrderEveryDayTaskExecute) continue;
+            if (t instanceof OrderEveryDayTaskExecute) {
+                continue;
+            }
             String id = AopUtils.getTargetClass(t).getSimpleName();
             tasks.add(row(id, NAMES.getOrDefault(id, id), "每日任务", "0 0 0 * * ?"));
         }
@@ -109,13 +111,22 @@ public class TimedTaskManagerController {
 
             // 在三个列表中按类名查找并执行
             for (EveryMinuteExecute t : everyMinuteExecutes) {
-                if (AopUtils.getTargetClass(t).getSimpleName().equals(taskId)) { t.execute(); return ok(); }
+                if (AopUtils.getTargetClass(t).getSimpleName().equals(taskId)) {
+                    t.execute();
+                    return ok();
+                }
             }
             for (EveryHourExecute t : everyHourExecutes) {
-                if (AopUtils.getTargetClass(t).getSimpleName().equals(taskId)) { t.execute(); return ok(); }
+                if (AopUtils.getTargetClass(t).getSimpleName().equals(taskId)) {
+                    t.execute();
+                    return ok();
+                }
             }
             for (EveryDayExecute t : everyDayExecutes) {
-                if (AopUtils.getTargetClass(t).getSimpleName().equals(taskId)) { t.execute(); return ok(); }
+                if (AopUtils.getTargetClass(t).getSimpleName().equals(taskId)) {
+                    t.execute();
+                    return ok();
+                }
             }
 
             return ResultUtil.error(ResultCode.ERROR.code(), "未知任务ID: " + taskId);

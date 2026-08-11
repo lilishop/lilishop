@@ -24,14 +24,6 @@ import java.util.List;
 public interface DistributionGoodsService extends IService<DistributionGoods> {
 
     /**
-     * 统计符合筛选条件的待审核分销商品数量。
-     *
-     * @param searchParams 查询条件（authStatus 字段会被忽略，固定统计 TOBEAUDITED）
-     * @return 待审核数量
-     */
-    long countPending(DistributionGoodsSearchParams searchParams);
-
-    /**
      * 管理端分页查询分销商品（含 SKU、品牌、类目等扩展信息）。
      *
      * @param distributionGoodsSearchParams 查询条件

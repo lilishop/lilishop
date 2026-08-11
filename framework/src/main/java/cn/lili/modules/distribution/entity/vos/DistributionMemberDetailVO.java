@@ -5,11 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import cn.lili.modules.distribution.entity.dto.DistributionRecruitApplyFormItemSnapshot;
-
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 分销员详情 VO
@@ -72,12 +69,4 @@ public class DistributionMemberDetailVO {
 
     @Schema(description = "自购金额")
     private BigDecimal selfPurchaseAmount;
-
-    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @Schema(description = "申请时间")
-    private Date applyTime;
-
-    @Schema(description = "申请表单内容")
-    private List<DistributionRecruitApplyFormItemSnapshot> applyFormItems;
 }

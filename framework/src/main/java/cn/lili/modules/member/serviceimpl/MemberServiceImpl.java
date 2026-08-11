@@ -196,7 +196,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public void updateHaveShop(Boolean haveStore, String storeId, List<String> memberIds) {
-        List<Member> members = this.baseMapper.selectBatchIds(memberIds);
+        List<Member> members = this.listByIds(memberIds);
         if (members.size() > 0) {
             members.forEach(member -> {
                 member.setHaveStore(haveStore);
@@ -527,8 +527,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         }
         //按照客户分组查询
         if (CharSequenceUtil.isNotBlank(memberSearchVO.getGroupId())) {
-            queryWrapper.apply("m.id IN (SELECT member_id FROM li_member_group_user WHERE group_id = {0} AND delete_flag = false)",
-                    memberSearchVO.getGroupId());
+            queryWrapper.inSql("m.id", "SELECT member_id FROM li_member_group_user WHERE group_id = '" + memberSearchVO.getGroupId() + "' AND delete_flag = false");
         }
         queryWrapper.orderByDesc("m.create_time");
         return this.baseMapper.pageByMemberVO(PageUtil.initPage(page), queryWrapper);

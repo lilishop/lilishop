@@ -34,16 +34,4 @@ public interface DistributionGoodsMapper extends BaseMapper<DistributionGoods> {
             + "${ew.customSqlSegment}")
     IPage<DistributionGoodsVO> getDistributionGoodsVO(IPage<DistributionGoodsVO> page,
                                                       @Param(Constants.WRAPPER) Wrapper<DistributionGoodsVO> queryWrapper);
-
-    /**
-     * 统计符合筛选条件的待审核分销商品数量。
-     *
-     * @param queryWrapper 查询条件（调用方负责设置 auth_status = TOBEAUDITED）
-     * @return 数量
-     */
-    @Select("SELECT COUNT(*) "
-            + "FROM li_distribution_goods dg "
-            + "LEFT JOIN li_goods_sku gs ON dg.sku_id = gs.id AND gs.delete_flag = 0 "
-            + "${ew.customSqlSegment}")
-    long countByCondition(@Param(Constants.WRAPPER) Wrapper<DistributionGoodsVO> queryWrapper);
 }

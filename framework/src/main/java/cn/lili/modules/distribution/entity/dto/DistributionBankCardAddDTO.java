@@ -18,15 +18,15 @@ import lombok.NoArgsConstructor;
 @Schema(description = "分销员银行卡添加DTO")
 public class DistributionBankCardAddDTO {
 
-    @Schema(description = "收款人姓名", required = true)
+    @Schema(description = "收款人姓名", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "请输入收款人姓名")
     private String holderName;
 
-    @Schema(description = "银行名称", required = true)
+    @Schema(description = "银行名称", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "请输入银行名称")
     private String bankName;
 
-    @Schema(description = "银行卡号", required = true)
+    @Schema(description = "银行卡号", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "请输入银行卡号")
     private String cardNo;
 }

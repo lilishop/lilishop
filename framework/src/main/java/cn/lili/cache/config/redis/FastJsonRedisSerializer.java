@@ -46,13 +46,13 @@ public class FastJsonRedisSerializer<T> implements RedisSerializer<T> {
         String str = new String(bytes, StandardCharsets.UTF_8);
         try {
 
-            return JSON.parseObject(str, clazz, autoTypeFilter, JSONReader.Feature.SupportAutoType);
+            return JSON.parseObject(str, clazz, autoTypeFilter);
         } catch (Throwable ex) {
             // 出现解析异常时，尝试对 JSON 文本进行非法字符清洗后再次解析
             String cleaned = sanitizeRedisJson(str);
             if (!cleaned.equals(str)) {
                 try {
-                    return JSON.parseObject(cleaned, clazz, autoTypeFilter, JSONReader.Feature.SupportAutoType);
+                    return JSON.parseObject(cleaned, clazz, autoTypeFilter);
                 } catch (Throwable ex2) {
                     throw ex2;
                 }
@@ -78,7 +78,9 @@ public class FastJsonRedisSerializer<T> implements RedisSerializer<T> {
             int from = 0;
             while (true) {
                 int keyIdx = cleaned.indexOf(prefix, from);
-                if (keyIdx == -1) break;
+                if (keyIdx == -1) {
+                    break;
+                }
                 int valueStart = keyIdx + prefix.length();
 
                 int endQuote = findEndQuoteForSpecs(cleaned, valueStart);

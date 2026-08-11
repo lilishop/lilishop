@@ -24,7 +24,7 @@ public class FullDiscount extends BasePromotions {
 
     @NotNull(message = "请填写优惠门槛")
     @DecimalMax(value = "99999999.00", message = "优惠券门槛金额超出限制")
-    @Schema(description = "优惠门槛金额", required = true)
+    @Schema(description = "优惠门槛金额", requiredMode = Schema.RequiredMode.REQUIRED)
     private Double fullMoney;
 
     @Schema(description = "活动是否减现金")
@@ -61,7 +61,7 @@ public class FullDiscount extends BasePromotions {
     private String couponId;
 
     @NotEmpty(message = "请填写活动标题")
-    @Schema(description = "活动标题", required = true)
+    @Schema(description = "活动标题", requiredMode = Schema.RequiredMode.REQUIRED)
     private String title;
 
     @Schema(description = "活动说明")

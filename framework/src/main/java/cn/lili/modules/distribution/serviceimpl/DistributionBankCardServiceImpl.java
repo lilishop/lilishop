@@ -93,7 +93,8 @@ public class DistributionBankCardServiceImpl
     @Transactional(rollbackFor = Exception.class)
     public void setDefault(String id) {
         Distribution distribution = getCheckedDistribution();
-        getOwnCard(id, distribution.getId()); // 权限校验
+        // 权限校验
+        getOwnCard(id, distribution.getId());
 
         // 先清除该分销员所有默认标记
         this.update(new LambdaUpdateWrapper<DistributionBankCard>()
@@ -106,8 +107,11 @@ public class DistributionBankCardServiceImpl
                 .set(DistributionBankCard::getIsDefault, true));
     }
 
-    // ── helpers ─────────────────────────────────────────────
-
+    /**
+     * 获取当前登录且已通过审核的分销员。
+     *
+     * @return 分销员实体
+     */
     private Distribution getCheckedDistribution() {
         Distribution distribution = distributionService.getDistribution();
         if (distribution == null) {
@@ -116,6 +120,13 @@ public class DistributionBankCardServiceImpl
         return distribution;
     }
 
+    /**
+     * 校验银行卡归属当前分销员。
+     *
+     * @param id             银行卡 ID
+     * @param distributionId 分销员 ID
+     * @return 银行卡实体
+     */
     private DistributionBankCard getOwnCard(String id, String distributionId) {
         DistributionBankCard card = this.getById(id);
         if (card == null || !distributionId.equals(card.getDistributionId())) {

@@ -48,7 +48,8 @@ public class DistributionRecruitSettingSupport {
         if (value == null) {
             return DistributionRecruitSetting.defaultSetting();
         }
-        normalize(value); // 补全默认值与字段排序
+        // 补全默认值与字段排序
+        normalize(value);
         return value;
     }
 
@@ -85,7 +86,8 @@ public class DistributionRecruitSettingSupport {
             throw new ServiceException(ResultCode.PARAMS_ERROR);
         }
         if (!RecruitJoinConditionTypeEnum.CONDITIONAL.name().equals(setting.getJoinConditionType())) {
-            return; // 无条件加入时跳过后续门槛校验
+            // 无条件加入时跳过后续门槛校验
+            return;
         }
         boolean requirePurchaseGoods = Boolean.TRUE.equals(setting.getRequirePurchaseGoods());
         boolean requireSelfPurchaseAmount = Boolean.TRUE.equals(setting.getRequireSelfPurchaseAmount());
@@ -169,7 +171,8 @@ public class DistributionRecruitSettingSupport {
             setting.setRecruitGoods(Collections.emptyList());
         }
         if (CharSequenceUtil.isNotBlank(setting.getPosterBackground())) {
-            setting.setPosterEnabled(true); // 上传背景图即视为启用招募海报
+            // 上传背景图即视为启用招募海报
+            setting.setPosterEnabled(true);
         }
     }
 

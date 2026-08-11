@@ -126,13 +126,17 @@ public class WxChannelOverviewServiceImpl implements WxChannelOverviewService {
     }
 
     private Double sum(List<WxChannelOrder> src, String scene) {
-        if (src == null || src.isEmpty()) return 0d;
+        if (src == null || src.isEmpty()) {
+            return 0d;
+        }
         return src.stream().filter(o -> CharSequenceUtil.isEmpty(scene) || CharSequenceUtil.equals(scene, o.getScene()))
                 .map(WxChannelOrder::getAmount).filter(Objects::nonNull).mapToDouble(Double::doubleValue).sum();
     }
 
     private Double sumRefund(List<WxChannelRefund> src, String scene) {
-        if (src == null || src.isEmpty()) return 0d;
+        if (src == null || src.isEmpty()) {
+            return 0d;
+        }
         return src.stream().filter(o -> CharSequenceUtil.isEmpty(scene) || CharSequenceUtil.equals(scene, o.getScene()))
                 .map(WxChannelRefund::getAmount).filter(Objects::nonNull).mapToDouble(Double::doubleValue).sum();
     }

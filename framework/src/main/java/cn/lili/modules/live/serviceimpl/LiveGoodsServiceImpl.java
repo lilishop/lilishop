@@ -102,7 +102,9 @@ public class LiveGoodsServiceImpl extends ServiceImpl<LiveGoodsMapper, LiveGoods
 
     @Override
     public boolean batchUpdateShowStatus(List<String> ids, boolean show) {
-        if (ids == null || ids.isEmpty()) return false;
+        if (ids == null || ids.isEmpty()) {
+            return false;
+        }
 
         LambdaUpdateWrapper<LiveGoods> wrapper = new LambdaUpdateWrapper<>();
         wrapper.in(LiveGoods::getId, ids).set(LiveGoods::getHideFlag, show);
@@ -236,7 +238,7 @@ public class LiveGoodsServiceImpl extends ServiceImpl<LiveGoodsMapper, LiveGoods
     public Long getPopularity(String id, String liveId) {
         String key = CachePrefix.LIVE_GOODS_POPULARITY.getPrefix() + id + "_" + liveId;
         Object object = cache.get(key);
-        if(object != null){
+        if (object != null) {
             Long popularity = Long.parseLong(cache.get(key).toString());
             return popularity == null ? 0L : popularity;
         }
@@ -246,7 +248,8 @@ public class LiveGoodsServiceImpl extends ServiceImpl<LiveGoodsMapper, LiveGoods
     @Override
     public List<LiveGoods> getLiveGoodsById(List<String> ids) {
         if (ids == null) {
-            return null; // 如果ID为null，直接返回null
+            // 如果ID为null，直接返回null
+            return null;
         }
         return this.list(new LambdaQueryWrapper<LiveGoods>().in(LiveGoods::getSkuId, ids));
     }

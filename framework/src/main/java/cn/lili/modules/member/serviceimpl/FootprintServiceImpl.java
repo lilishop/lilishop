@@ -95,7 +95,6 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
 
             collect.removeIf(Objects::isNull);
 
-            goodsIndexIPage.setPages(footPrintPages.getPages());
             goodsIndexIPage.setRecords(collect);
             goodsIndexIPage.setTotal(footPrintPages.getTotal());
             goodsIndexIPage.setSize(footPrintPages.getSize());

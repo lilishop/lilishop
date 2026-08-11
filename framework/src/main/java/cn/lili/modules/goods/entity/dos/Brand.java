@@ -25,12 +25,12 @@ public class Brand extends BaseEntity {
 
     @NotEmpty(message = "品牌名称不能为空")
     @Length(max = 20, message = "品牌名称应该小于20长度字符")
-    @Schema(description = "品牌名称", required = true)
+    @Schema(description = "品牌名称", requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotEmpty(message = "品牌图标不能为空")
     @Length(max = 255, message = "品牌图标地址长度超过255字符")
-    @Schema(description = "品牌图标", required = true)
+    @Schema(description = "品牌图标", requiredMode = Schema.RequiredMode.REQUIRED)
     private String logo;
 
 }

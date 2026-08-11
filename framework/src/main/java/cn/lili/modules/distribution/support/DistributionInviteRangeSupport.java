@@ -59,7 +59,8 @@ public final class DistributionInviteRangeSupport {
             case RANGE_CUSTOM -> between(
                     toLocalDateTime(startTime),
                     toLocalDateTime(endTime));
-            default -> DateRange.empty(); // ALL 或未识别类型：不限时间
+            // ALL 或未识别类型：不限时间
+            default -> DateRange.empty();
         };
     }
 

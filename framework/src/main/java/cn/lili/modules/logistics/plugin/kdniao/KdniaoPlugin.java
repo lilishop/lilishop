@@ -21,8 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HashMap;
@@ -271,8 +273,8 @@ public class KdniaoPlugin implements LogisticsPlugin {
     }
 
     @SuppressWarnings("unused")
-    private String urlEncoder(String str, String charset) throws UnsupportedEncodingException {
-        return URLEncoder.encode(str, charset);
+    private String urlEncoder(String str, String charset) {
+        return URLEncoder.encode(str, Charset.forName(charset));
     }
 
     /**
@@ -305,7 +307,7 @@ public class KdniaoPlugin implements LogisticsPlugin {
         BufferedReader in = null;
         StringBuilder result = new StringBuilder();
         try {
-            URL realUrl = new URL(url);
+            URL realUrl = URI.create(url).toURL();
             HttpURLConnection conn = (HttpURLConnection) realUrl.openConnection();
             //发送POST请求必须设置如下两行
             conn.setDoOutput(true);

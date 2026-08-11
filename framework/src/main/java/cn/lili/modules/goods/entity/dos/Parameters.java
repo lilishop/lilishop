@@ -26,7 +26,7 @@ public class Parameters extends BaseEntity {
 
     private static final long serialVersionUID = -566510714456317006L;
 
-    @Schema(description = "参数名称", required = true)
+    @Schema(description = "参数名称", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "参数名称必填")
     @Length(max = 5, message = "参数名称不能超过5字")
     private String paramName;
@@ -37,13 +37,13 @@ public class Parameters extends BaseEntity {
     @Length(max = 255, message = "参数选项过长，请简略")
     private String options;
 
-    @Schema(description = "是否可索引，0 不显示 1 显示", required = true)
+    @Schema(description = "是否可索引，0 不显示 1 显示", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "是否可索引必选")
     @Min(value = 0, message = "是否可索引传值不正确")
     @Max(value = 1, message = "是否可索引传值不正确")
     private Integer isIndex;
 
-    @Schema(description = "是否必填是  1    否   0", required = true)
+    @Schema(description = "是否必填是  1    否   0", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "是否必填必选")
     @Min(value = 0, message = "是否必填传值不正确")
     @Max(value = 1, message = "是否必填传值不正确")

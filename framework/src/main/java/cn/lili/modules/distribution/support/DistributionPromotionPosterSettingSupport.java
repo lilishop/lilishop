@@ -119,7 +119,8 @@ public class DistributionPromotionPosterSettingSupport {
                 legacy.setSlogan(json.getStr("promotionPosterSlogan"));
             }
         }
-        normalize(legacy); // 补全默认推荐语与文字颜色
+        // 补全默认推荐语与文字颜色
+        normalize(legacy);
         return legacy;
     }
 

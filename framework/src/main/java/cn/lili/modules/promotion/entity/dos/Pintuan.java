@@ -35,7 +35,7 @@ public class Pintuan extends BasePromotions {
     @Schema(description = "限购数量")
     private Integer limitNum;
 
-    @Schema(description = "虚拟成团", required = true)
+    @Schema(description = "虚拟成团", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "虚拟成团必填")
     private Boolean fictitious;
 

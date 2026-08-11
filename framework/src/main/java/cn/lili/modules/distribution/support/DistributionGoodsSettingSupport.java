@@ -92,7 +92,8 @@ public class DistributionGoodsSettingSupport {
         }
         if ("SALES".equals(sortField)) {
             queryWrapper.orderBy(true, asc, "IFNULL(gs.buy_count, 0)");
-            queryWrapper.orderByDesc("dg.commission"); // 销量相同时按佣金二次排序
+            // 销量相同时按佣金二次排序
+            queryWrapper.orderByDesc("dg.commission");
             return;
         }
         if ("LATEST".equals(sortField)) {

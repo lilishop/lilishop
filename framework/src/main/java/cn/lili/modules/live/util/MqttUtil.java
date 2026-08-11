@@ -47,7 +47,8 @@ public class MqttUtil {
             // ================== 1. 配置和连接发布者客户端 ==================
             // 注意：将初始化和连接逻辑放在一起
             publisherClient = new MqttClient(MqttConfig.BROKER_URL, MqttConfig.CLIENT_ID_PUBLISHER, new MemoryPersistence());
-            MqttConnectOptions connOptsPub = createConnectOptions(true); // 自动重连
+            // 自动重连
+            MqttConnectOptions connOptsPub = createConnectOptions(true);
 
             publisherClient.setCallback(new MqttCallback() {
                 @Override
@@ -70,7 +71,8 @@ public class MqttUtil {
 
             // ================== 2. 配置和连接订阅者客户端 ==================
             subscriberClient = new MqttClient(MqttConfig.BROKER_URL, MqttConfig.CLIENT_ID_SUBSCRIBER, new MemoryPersistence());
-            MqttConnectOptions connOptsSub = createConnectOptions(true); // 自动重连
+            // 自动重连
+            MqttConnectOptions connOptsSub = createConnectOptions(true);
 
             subscriberClient.setCallback(new MqttCallbackExtended() {
                 @Override
@@ -114,9 +116,12 @@ public class MqttUtil {
     private MqttConnectOptions createConnectOptions(boolean autoReconnect) {
         MqttConnectOptions options = new MqttConnectOptions();
         options.setAutomaticReconnect(autoReconnect);
-        options.setCleanSession(false); // 持久化会话，非常重要
-        options.setConnectionTimeout(10); // 连接超时
-        options.setKeepAliveInterval(60); // 心跳
+        // 持久化会话，非常重要
+        options.setCleanSession(false);
+        // 连接超时
+        options.setConnectionTimeout(10);
+        // 心跳
+        options.setKeepAliveInterval(60);
         // 如果需要用户名密码认证
         // options.setUserName("your_username");
         // options.setPassword("your_password".toCharArray());

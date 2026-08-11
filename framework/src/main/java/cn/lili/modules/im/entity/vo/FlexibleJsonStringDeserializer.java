@@ -19,8 +19,8 @@ public class FlexibleJsonStringDeserializer extends ValueDeserializer<String> {
         if (node == null || node.isNull()) {
             return null;
         }
-        if (node.isTextual()) {
-            return node.asText();
+        if (node.isString()) {
+            return node.asString();
         }
         return node.toString();
     }

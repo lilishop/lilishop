@@ -10,8 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.net.ssl.*;
 import java.io.*;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -164,7 +166,7 @@ public class HuaweiSmsPlugin implements SmsPlugin {
         trustAllHttpsCertificates();
 
         try {
-            URL realUrl = new URL(url);
+            URL realUrl = URI.create(url).toURL();
             connection = (HttpsURLConnection) realUrl.openConnection();
 
             connection.setHostnameVerifier(hv);
@@ -192,7 +194,7 @@ public class HuaweiSmsPlugin implements SmsPlugin {
             } else { //400/401
                 is = connection.getErrorStream();
             }
-            in = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String line = "";
             while ((line = in.readLine()) != null) {
                 result.append(line);
@@ -256,11 +258,7 @@ public class HuaweiSmsPlugin implements SmsPlugin {
         String temp = "";
 
         for (String s : map.keySet()) {
-            try {
-                temp = URLEncoder.encode(map.get(s), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            temp = URLEncoder.encode(map.get(s), StandardCharsets.UTF_8);
             sb.append(s).append("=").append(temp).append("&");
         }
 

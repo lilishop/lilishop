@@ -13,6 +13,6 @@ import lombok.Data;
 @Data
 public class GoodsParamsSearchDTO extends PageVO {
 
-    @Schema(description = "参数名称", required = true)
+    @Schema(description = "参数名称", requiredMode = Schema.RequiredMode.REQUIRED)
     private String paramName;
 }

@@ -181,7 +181,8 @@ public class WechatMPServiceImpl implements WechatMPService {
         WechatPaymentSetting wechatPaymentSetting = JSON.parseObject(systemSetting.getSettingValue(), WechatPaymentSetting.class);
         map.put("merchant_id", wechatPaymentSetting.getMchId());
         //快递签收时间，时间戳形式
-        map.put("received_time", System.currentTimeMillis() / 1000); // 微信要求的是秒级时间戳
+        // 微信要求的是秒级时间戳
+        map.put("received_time", System.currentTimeMillis() / 1000);
         this.doPostWithJson(confirmReceiveUrl, map);
     }
 
