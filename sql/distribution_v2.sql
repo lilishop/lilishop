@@ -1,11 +1,12 @@
 -- ============================================================
--- 分销系统 v2 数据库升级脚本
+-- 分销系统 v2 数据库升级脚本（唯一入口，勿再拆分其他 patch 文件）
 -- 说明：
 -- 1. 以运行库现有 li_distribution* 表为基础增量升级，不包含历史数据回填与回滚脚本
 -- 2. 金额字段统一 DECIMAL(20,2)，比例字段 DECIMAL(10,4)，Java 侧使用 BigDecimal
 -- 3. JSON 快照字段使用 TEXT 存储 JSON 文本，便于兼容低版本 MySQL
 -- 4. id 为雪花 ID 字符串，与现有 BaseEntity 保持一致
 -- 5. 执行前请备份数据库；ALTER 语句仅首次执行有效，重复执行需自行跳过已存在列
+-- 6. 新环境：按顺序执行全文；存量环境：已存在列/表可跳过，重点关注文末「存量迁移」注释块
 --
 -- @author Bulbasaur
 -- @since 2026/07/23
@@ -61,12 +62,17 @@ ALTER TABLE li_distribution
 -- ============================================================
 
 ALTER TABLE li_distribution_order
-    ADD COLUMN performance_distributor_id VARCHAR(64) DEFAULT NULL COMMENT '业绩归属分销员ID（统计口径唯一归属）' AFTER distribution_name,
+    ADD COLUMN invite_distribution_id VARCHAR(64) DEFAULT NULL COMMENT '二级分销员ID（邀请奖励受益人）' AFTER distribution_name,
+    ADD COLUMN invite_distribution_name VARCHAR(255) DEFAULT NULL COMMENT '二级分销员名称' AFTER invite_distribution_id,
+    ADD COLUMN performance_distributor_id VARCHAR(64) DEFAULT NULL COMMENT '业绩归属分销员ID（统计口径唯一归属）' AFTER invite_distribution_name,
     ADD COLUMN self_purchase TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否分销员自购：0否 1是' AFTER performance_distributor_id,
     ADD COLUMN payment_time DATETIME DEFAULT NULL COMMENT '支付成功时间' AFTER self_purchase,
     ADD COLUMN commission_pool DECIMAL(20, 2) DEFAULT NULL COMMENT '本明细佣金池金额（固定佣金×数量）' AFTER payment_time,
     ADD COLUMN relation_snapshot TEXT COMMENT '支付时客户关系快照（JSON）' AFTER commission_pool,
-    ADD COLUMN pay_snapshot TEXT COMMENT '支付时商品佣金/等级/结算配置快照（JSON）' AFTER relation_snapshot;
+    ADD COLUMN pay_snapshot TEXT COMMENT '支付时商品佣金/等级/结算配置快照（JSON）' AFTER relation_snapshot,
+    ADD COLUMN invite_commission DOUBLE DEFAULT NULL COMMENT '二级邀请佣金' AFTER rebate,
+    ADD COLUMN invite_sell_back_rebate DOUBLE DEFAULT 0 COMMENT '二级邀请佣金退款冲回金额' AFTER sell_back_rebate,
+    ADD COLUMN settle_time DATETIME DEFAULT NULL COMMENT '佣金结算时间' AFTER settle_cycle;
 
 ALTER TABLE li_distribution_order
     ADD KEY idx_do_performance_distributor (performance_distributor_id),
@@ -108,10 +114,8 @@ CREATE TABLE IF NOT EXISTS li_distribution_grade (
     sales_enabled       TINYINT(1)      NOT NULL DEFAULT 1 COMMENT '是否启用销售额升级条件',
     commission_enabled  TINYINT(1)      NOT NULL DEFAULT 1 COMMENT '是否启用收益额升级条件',
     invite_enabled      TINYINT(1)      NOT NULL DEFAULT 1 COMMENT '是否启用邀请人数升级条件',
-    condition_match_mode VARCHAR(16)    NOT NULL DEFAULT 'ALL' COMMENT '条件组合：ALL全部满足 ANY任一满足',
     product_commission_rate DECIMAL(10, 4) NOT NULL DEFAULT 0.0000 COMMENT '直属商品佣金比例（占佣金池）',
     invite_commission_rate  DECIMAL(10, 4) NOT NULL DEFAULT 0.0000 COMMENT '邀请奖励比例（占佣金池）',
-    grade_state         VARCHAR(16)     NOT NULL DEFAULT 'OPEN' COMMENT '等级状态：OPEN启用 CLOSE停用',
     is_default          TINYINT(1)      NOT NULL DEFAULT 0 COMMENT '是否默认等级',
     create_by           VARCHAR(64)     DEFAULT NULL COMMENT '创建者',
     create_time         DATETIME        DEFAULT NULL COMMENT '创建时间',
@@ -120,8 +124,7 @@ CREATE TABLE IF NOT EXISTS li_distribution_grade (
     delete_flag         TINYINT(1)      NOT NULL DEFAULT 0 COMMENT '删除标志 0未删除 1已删除',
     PRIMARY KEY (id),
     UNIQUE KEY uk_grade_name (grade_name, delete_flag),
-    KEY idx_grade_sort (grade_sort),
-    KEY idx_grade_state (grade_state, delete_flag)
+    KEY idx_grade_sort (grade_sort)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分销等级配置';
 
 
@@ -222,13 +225,13 @@ CREATE TABLE IF NOT EXISTS li_distribution_customer_relation_log (
 -- ============================================================
 -- 第 8 步：（已废弃）li_distribution_invite_relation
 -- 邀请上下级关系已合并至 li_distribution.parent_distribution_id
--- 存量环境请执行 distribution_v2_patch_distribution_parent.sql
+-- 存量迁移见文末「第 29 步」注释块
 -- ============================================================
 
 -- ============================================================
 -- 第 9 步：（已废弃）li_distribution_reward_order
 -- 佣金已合并至 li_distribution_order（rebate / invite_commission）
--- 存量环境请执行 distribution_v2_patch_drop_reward_order.sql
+-- 存量迁移见文末「第 29 步」注释块
 -- ============================================================
 
 
@@ -324,87 +327,18 @@ CREATE TABLE IF NOT EXISTS li_distribution_visit_event (
 
 
 -- ============================================================
--- 第 13 步：新建 li_distribution_recruit_plan（分销招募设置）
--- ============================================================
-
-CREATE TABLE IF NOT EXISTS li_distribution_recruit_plan (
-    id                      VARCHAR(64)     NOT NULL COMMENT '主键',
-    version_no              INT             NOT NULL COMMENT '版本号（递增）',
-    plan_status             VARCHAR(16)     NOT NULL DEFAULT 'DRAFT' COMMENT '状态：DRAFT草稿 PUBLISHED已发布 ARCHIVED已归档',
-    join_condition_type     VARCHAR(16)     NOT NULL DEFAULT 'NONE' COMMENT '加入条件：NONE无条件 CONDITIONAL有条件',
-    join_conditions         TEXT            COMMENT '条件配置（JSON：指定商品/自购金额/消费笔数）',
-    apply_mode              VARCHAR(16)     NOT NULL DEFAULT 'MANUAL' COMMENT '申请方式：MANUAL手动 AUTO自动',
-    audit_mode              VARCHAR(16)     NOT NULL DEFAULT 'MANUAL' COMMENT '审核方式：MANUAL人工 AUTO_PASS免审',
-    need_apply_form         TINYINT(1)      NOT NULL DEFAULT 0 COMMENT '手动申请是否需填写动态字段',
-    online_entry_visible    TINYINT(1)      NOT NULL DEFAULT 1 COMMENT '线上招募入口是否展示',
-    poster_config           TEXT            COMMENT '招募海报配置（JSON）',
-    agreement_content       TEXT            COMMENT '分销推广服务协议（富文本）',
-    published_at            DATETIME        DEFAULT NULL COMMENT '发布时间',
-    create_by               VARCHAR(64)     DEFAULT NULL COMMENT '创建者',
-    create_time             DATETIME        DEFAULT NULL COMMENT '创建时间',
-    update_by               VARCHAR(64)     DEFAULT NULL COMMENT '更新者',
-    update_time             DATETIME        DEFAULT NULL COMMENT '更新时间',
-    delete_flag             TINYINT(1)      NOT NULL DEFAULT 0 COMMENT '删除标志',
-    PRIMARY KEY (id),
-    UNIQUE KEY uk_drp_version (version_no),
-    KEY idx_drp_status_published (plan_status, published_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分销招募设置';
-
-
--- ============================================================
--- 第 14 步：新建 li_distribution_recruit_plan_goods（招募指定商品）
--- ============================================================
-
-CREATE TABLE IF NOT EXISTS li_distribution_recruit_plan_goods (
-    id              VARCHAR(64)     NOT NULL COMMENT '主键',
-    plan_id         VARCHAR(64)     NOT NULL COMMENT '分销招募设置ID',
-    goods_id        VARCHAR(64)     NOT NULL COMMENT '商品ID',
-    sku_id          VARCHAR(64)     DEFAULT NULL COMMENT 'SKU ID（可选，空表示整商品）',
-    create_by       VARCHAR(64)     DEFAULT NULL COMMENT '创建者',
-    create_time     DATETIME        DEFAULT NULL COMMENT '创建时间',
-    update_by       VARCHAR(64)     DEFAULT NULL COMMENT '更新者',
-    update_time     DATETIME        DEFAULT NULL COMMENT '更新时间',
-    delete_flag     TINYINT(1)      NOT NULL DEFAULT 0 COMMENT '删除标志',
-    PRIMARY KEY (id),
-    UNIQUE KEY uk_drpg_plan_goods_sku (plan_id, goods_id, sku_id),
-    KEY idx_drpg_goods (goods_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分销招募设置指定商品';
-
-
--- ============================================================
--- 第 15 步：新建 li_distribution_recruit_field（招募动态申请字段）
--- ============================================================
-
-CREATE TABLE IF NOT EXISTS li_distribution_recruit_field (
-    id              VARCHAR(64)     NOT NULL COMMENT '主键',
-    plan_id         VARCHAR(64)     NOT NULL COMMENT '分销招募设置ID',
-    field_type      VARCHAR(16)     NOT NULL COMMENT '字段类型：NAME MOBILE IMAGE',
-    field_name      VARCHAR(64)     NOT NULL COMMENT '字段名称',
-    required_flag   TINYINT(1)      NOT NULL DEFAULT 1 COMMENT '是否必填',
-    sort_order      INT             NOT NULL DEFAULT 0 COMMENT '排序',
-    placeholder     VARCHAR(200)    DEFAULT NULL COMMENT '提示文案',
-    create_by       VARCHAR(64)     DEFAULT NULL COMMENT '创建者',
-    create_time     DATETIME        DEFAULT NULL COMMENT '创建时间',
-    update_by       VARCHAR(64)     DEFAULT NULL COMMENT '更新者',
-    update_time     DATETIME        DEFAULT NULL COMMENT '更新时间',
-    delete_flag     TINYINT(1)      NOT NULL DEFAULT 0 COMMENT '删除标志',
-    PRIMARY KEY (id),
-    KEY idx_drf_plan_sort (plan_id, sort_order)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分销招募设置动态申请字段（最多5个）';
-
-
--- ============================================================
--- 第 16 步：新建 li_distribution_recruit_application（招募申请记录）
+-- 第 13 步：新建 li_distribution_recruit_application（招募申请记录）
+-- 说明：招募计划/动态字段已迁至 li_setting（DISTRIBUTION_RECRUIT_SETTING），不再建 plan 子表
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS li_distribution_recruit_application (
     id                      VARCHAR(64)     NOT NULL COMMENT '主键',
     member_id               VARCHAR(64)     NOT NULL COMMENT '申请人会员ID',
-    plan_id                 VARCHAR(64)     NOT NULL COMMENT '分销招募设置ID',
+    plan_id                 VARCHAR(64)     NOT NULL COMMENT '分销招募设置ID（li_setting）',
     plan_version_no         INT             NOT NULL COMMENT '申请时设置版本号',
     apply_source            VARCHAR(32)     NOT NULL COMMENT '申请来源：MANUAL_ENTRY AUTO_ENTRY ADMIN',
     condition_snapshot      TEXT            COMMENT '条件快照（JSON）',
-    condition_evidence      TEXT            COMMENT '条件完成证据（JSON：订单号列表等）',
+    apply_form_snapshot     TEXT            COMMENT '动态填写内容快照（JSON）',
     recruit_token           VARCHAR(64)     DEFAULT NULL COMMENT '招募邀请令牌',
     recruit_inviter_id      VARCHAR(64)     DEFAULT NULL COMMENT '招募邀请方分销员ID',
     bound_distributor_id    VARCHAR(64)     DEFAULT NULL COMMENT '申请时客户绑定分销员ID',
@@ -431,29 +365,7 @@ CREATE TABLE IF NOT EXISTS li_distribution_recruit_application (
 
 
 -- ============================================================
--- 第 17 步：新建 li_distribution_recruit_application_answer（申请动态填写内容）
--- ============================================================
-
-CREATE TABLE IF NOT EXISTS li_distribution_recruit_application_answer (
-    id                  VARCHAR(64)     NOT NULL COMMENT '主键',
-    application_id      VARCHAR(64)     NOT NULL COMMENT '申请记录ID',
-    field_id            VARCHAR(64)     DEFAULT NULL COMMENT '字段配置ID',
-    field_type          VARCHAR(16)     NOT NULL COMMENT '字段类型：NAME MOBILE IMAGE',
-    field_name          VARCHAR(64)     NOT NULL COMMENT '字段名称快照',
-    answer_value        TEXT            COMMENT '填写内容（图片为URL，多张逗号分隔）',
-    create_by           VARCHAR(64)     DEFAULT NULL COMMENT '创建者',
-    create_time         DATETIME        DEFAULT NULL COMMENT '创建时间',
-    update_by           VARCHAR(64)     DEFAULT NULL COMMENT '更新者',
-    update_time         DATETIME        DEFAULT NULL COMMENT '更新时间',
-    delete_flag         TINYINT(1)      NOT NULL DEFAULT 0 COMMENT '删除标志',
-    PRIMARY KEY (id),
-    KEY idx_draa_application (application_id),
-    KEY idx_draa_field (field_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='招募申请动态填写内容';
-
-
--- ============================================================
--- 第 18 步：新建 li_distribution_stats_daily_distributor（分销员日聚合，可选）
+-- 第 14 步：新建 li_distribution_stats_daily_distributor（分销员日聚合，可选）
 -- 用于行为数据/概览的离线快照，由日结任务幂等写入
 -- ============================================================
 
@@ -486,14 +398,86 @@ CREATE TABLE IF NOT EXISTS li_distribution_stats_daily_distributor (
 
 
 -- ============================================================
+-- 第 15 步：新建 li_distribution_import_batch / li_distribution_import_item（分销员批量导入）
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS li_distribution_import_batch (
+    id              VARCHAR(64)     NOT NULL COMMENT '主键',
+    file_name       VARCHAR(255)    DEFAULT NULL COMMENT '导入文件名',
+    total_count     INT             DEFAULT NULL COMMENT '总行数',
+    success_count   INT             DEFAULT NULL COMMENT '成功行数',
+    fail_count      INT             DEFAULT NULL COMMENT '失败行数',
+    status          VARCHAR(32)     DEFAULT NULL COMMENT '状态：PROCESSING/DONE/FAILED',
+    operator_id     VARCHAR(64)     DEFAULT NULL COMMENT '操作人ID',
+    operator_name   VARCHAR(128)    DEFAULT NULL COMMENT '操作人名称',
+    remark          VARCHAR(500)    DEFAULT NULL COMMENT '备注',
+    create_by       VARCHAR(64)     DEFAULT NULL COMMENT '创建者',
+    create_time     DATETIME        DEFAULT NULL COMMENT '创建时间',
+    update_by       VARCHAR(64)     DEFAULT NULL COMMENT '更新者',
+    update_time     DATETIME        DEFAULT NULL COMMENT '更新时间',
+    delete_flag     TINYINT(1)      NOT NULL DEFAULT 0 COMMENT '删除标志',
+    PRIMARY KEY (id),
+    KEY idx_dib_status_time (status, create_time),
+    KEY idx_dib_operator_time (operator_id, create_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分销员批量导入批次';
+
+
+CREATE TABLE IF NOT EXISTS li_distribution_import_item (
+    id                  VARCHAR(64)     NOT NULL COMMENT '主键',
+    batch_id            VARCHAR(64)     NOT NULL COMMENT '批次ID',
+    row_num             INT             DEFAULT NULL COMMENT 'Excel行号',
+    mobile              VARCHAR(32)     DEFAULT NULL COMMENT '手机号',
+    open_id             VARCHAR(128)    DEFAULT NULL COMMENT '分销员openid',
+    nickname            VARCHAR(128)    DEFAULT NULL COMMENT '昵称',
+    inviter_mobile      VARCHAR(32)     DEFAULT NULL COMMENT '邀请人手机号',
+    inviter_open_id     VARCHAR(128)    DEFAULT NULL COMMENT '邀请人openid',
+    grade_sort          INT             DEFAULT NULL COMMENT '等级序号',
+    distribution_id     VARCHAR(64)     DEFAULT NULL COMMENT '成功后的分销员ID',
+    status              VARCHAR(32)     DEFAULT NULL COMMENT '状态：SUCCESS/FAIL',
+    fail_reason         VARCHAR(500)    DEFAULT NULL COMMENT '失败原因',
+    create_by           VARCHAR(64)     DEFAULT NULL COMMENT '创建者',
+    create_time         DATETIME        DEFAULT NULL COMMENT '创建时间',
+    update_by           VARCHAR(64)     DEFAULT NULL COMMENT '更新者',
+    update_time         DATETIME        DEFAULT NULL COMMENT '更新时间',
+    delete_flag         TINYINT(1)      NOT NULL DEFAULT 0 COMMENT '删除标志',
+    PRIMARY KEY (id),
+    KEY idx_dii_batch_row (batch_id, row_num),
+    KEY idx_dii_batch_status (batch_id, status),
+    KEY idx_dii_distribution (distribution_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分销员批量导入明细';
+
+
+-- ============================================================
+-- 第 16 步：新建 li_distribution_bank_card（分销员银行卡）
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS li_distribution_bank_card (
+    id                  VARCHAR(64)     NOT NULL COMMENT '主键',
+    distribution_id     VARCHAR(64)     NOT NULL COMMENT '分销员ID',
+    holder_name         VARCHAR(64)     NOT NULL COMMENT '收款人姓名',
+    bank_name           VARCHAR(128)    NOT NULL COMMENT '银行名称',
+    card_no             VARCHAR(32)     NOT NULL COMMENT '银行卡号',
+    is_default          TINYINT(1)      NOT NULL DEFAULT 0 COMMENT '是否默认卡：0否 1是',
+    create_by           VARCHAR(64)     DEFAULT NULL COMMENT '创建者',
+    create_time         DATETIME        DEFAULT NULL COMMENT '创建时间',
+    update_by           VARCHAR(64)     DEFAULT NULL COMMENT '更新者',
+    update_time         DATETIME        DEFAULT NULL COMMENT '更新时间',
+    delete_flag         TINYINT(1)      NOT NULL DEFAULT 0 COMMENT '删除标志',
+    PRIMARY KEY (id),
+    KEY idx_dbc_distribution (distribution_id),
+    KEY idx_dbc_distribution_default (distribution_id, is_default)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分销员银行卡';
+
+
+-- ============================================================
 -- 第 20 步：初始化默认分销等级（可按业务调整）
 -- ============================================================
 
 INSERT INTO li_distribution_grade (
     id, grade_name, grade_sort, sales_threshold, commission_threshold, invite_threshold,
     sales_enabled, commission_enabled, invite_enabled,
-    condition_match_mode, product_commission_rate, invite_commission_rate,
-    grade_state, is_default, create_by, create_time, update_by, update_time, delete_flag
+    product_commission_rate, invite_commission_rate,
+    is_default, create_by, create_time, update_by, update_time, delete_flag
 )
 SELECT
     '1000000000000000001',
@@ -505,10 +489,8 @@ SELECT
     0,
     0,
     0,
-    'ALL',
     1.0000,
     0.0000,
-    'OPEN',
     1,
     'system',
     NOW(),
@@ -712,7 +694,7 @@ ALTER TABLE li_distribution_goods
 
 -- ============================================================
 -- 第 24 步：（已废弃）邀请关系表字段对齐
--- 请执行 distribution_v2_patch_distribution_parent.sql
+-- 存量迁移见文末「第 29 步」注释块
 -- ============================================================
 
 
@@ -756,10 +738,11 @@ WHERE version IS NULL;
 
 
 -- ============================================================
--- 第 29 步：V2 精简 — 删除废弃字段/表
+-- 第 29 步：V2 精简 — 存量库迁移与删除废弃字段/表
+-- 新环境若已按上文最终结构建表，本步多数语句可跳过或仅执行 DROP 清理
 -- ============================================================
 
--- 【存量库】若仍存在 li_distribution_invite_relation，请先执行上级回填后再删表：
+-- ---------- 29.0 存量库：邀请关系回填至 parent_distribution_id ----------
 -- UPDATE li_distribution d
 --     INNER JOIN li_distribution_invite_relation ir
 --         ON ir.child_distribution_id = d.id AND IFNULL(ir.delete_flag, 0) = 0
@@ -767,7 +750,7 @@ WHERE version IS NULL;
 -- WHERE d.parent_distribution_id IS NULL
 --   AND ir.parent_distribution_id IS NOT NULL;
 
--- ---------- 29.1 li_distribution_order 邀请佣金字段（合并 reward_order）----------
+-- ---------- 29.1 存量库：li_distribution_order 邀请佣金字段（若第 2 步未执行）----------
 ALTER TABLE li_distribution_order
     ADD COLUMN IF NOT EXISTS invite_distribution_id VARCHAR(64) DEFAULT NULL COMMENT '二级分销员ID（邀请奖励受益人）' AFTER distribution_name,
     ADD COLUMN IF NOT EXISTS invite_distribution_name VARCHAR(255) DEFAULT NULL COMMENT '二级分销员名称' AFTER invite_distribution_id,
@@ -775,7 +758,7 @@ ALTER TABLE li_distribution_order
     ADD COLUMN IF NOT EXISTS invite_sell_back_rebate DOUBLE DEFAULT 0 COMMENT '二级邀请佣金退款冲回金额' AFTER sell_back_rebate,
     ADD COLUMN IF NOT EXISTS settle_time DATETIME DEFAULT NULL COMMENT '佣金结算时间' AFTER settle_cycle;
 
--- 【存量库】若仍存在 li_distribution_reward_order，可取消注释回填邀请佣金：
+-- ---------- 29.2 存量库：reward_order 回填邀请佣金 ----------
 -- UPDATE li_distribution_order do
 --     INNER JOIN li_distribution_reward_order r
 --         ON r.order_item_sn = do.order_item_sn
@@ -786,7 +769,7 @@ ALTER TABLE li_distribution_order
 --     do.settle_time = COALESCE(do.settle_time, r.settle_time)
 -- WHERE IFNULL(do.invite_commission, 0) = 0 OR do.invite_distribution_id IS NULL;
 
--- ---------- 29.2 删除 li_distribution 已废弃字段 ----------
+-- ---------- 29.3 删除 li_distribution 已废弃字段 ----------
 ALTER TABLE li_distribution
     DROP COLUMN IF EXISTS name,
     DROP COLUMN IF EXISTS id_number,
@@ -794,33 +777,33 @@ ALTER TABLE li_distribution
     DROP COLUMN IF EXISTS settlement_bank_account_num,
     DROP COLUMN IF EXISTS settlement_bank_branch_name;
 
--- ---------- 29.3 删除 li_distribution_grade 已废弃字段 ----------
+-- ---------- 29.4 删除 li_distribution_grade 已废弃字段 ----------
 ALTER TABLE li_distribution_grade
     DROP COLUMN IF EXISTS condition_match_mode,
     DROP COLUMN IF EXISTS grade_state;
 
--- ---------- 29.4 删除已废弃表 ----------
+-- ---------- 29.5 删除已废弃表 ----------
 DROP TABLE IF EXISTS li_distribution_invite_relation;
 DROP TABLE IF EXISTS li_distribution_reward_order;
 DROP TABLE IF EXISTS li_distribution_selected_goods;
 
--- ---------- 29.5 删除 li_distribution_goods 冗余库存（实时读 SKU 库存）----------
+-- ---------- 29.6 删除 li_distribution_goods 冗余库存（实时读 SKU 库存）----------
 ALTER TABLE li_distribution_goods
     DROP COLUMN IF EXISTS quantity;
 
--- ---------- 29.6 招募设置迁至 li_setting，删除计划/字段子表 ----------
+-- ---------- 29.7 招募设置迁至 li_setting，删除计划/字段子表（存量库）----------
 -- 【存量库】若 li_distribution_recruit_plan 有数据，请先在管理端重新保存一次招募设置，或自行将配置写入 li_setting（id=DISTRIBUTION_RECRUIT_SETTING）。
 DROP TABLE IF EXISTS li_distribution_recruit_field;
 DROP TABLE IF EXISTS li_distribution_recruit_plan_goods;
 DROP TABLE IF EXISTS li_distribution_recruit_plan;
 
--- ---------- 29.7 招募申请动态填写内容合并至申请主表 ----------
+-- ---------- 29.8 招募申请动态填写内容合并至申请主表（存量库）----------
 ALTER TABLE li_distribution_recruit_application
     ADD COLUMN IF NOT EXISTS apply_form_snapshot TEXT COMMENT '动态填写内容快照（JSON）' AFTER condition_snapshot;
 
 DROP TABLE IF EXISTS li_distribution_recruit_application_answer;
 
--- ---------- 29.8 分销模式设置已合并至 DISTRIBUTION_SETTING，删除旧 li_setting 记录 ----------
+-- ---------- 29.9 分销模式设置已合并至 DISTRIBUTION_SETTING，删除旧 li_setting 记录 ----------
 DELETE FROM li_setting WHERE id = 'DISTRIBUTION_MODE_SETTING';
 
 

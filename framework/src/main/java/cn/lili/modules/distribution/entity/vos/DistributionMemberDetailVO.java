@@ -1,5 +1,6 @@
 package cn.lili.modules.distribution.entity.vos;
 
+import cn.lili.modules.distribution.entity.dto.DistributionRecruitApplyFormItemSnapshot;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -7,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 分销员详情 VO
@@ -29,6 +31,20 @@ public class DistributionMemberDetailVO {
     @Schema(description = "昵称")
     private String nickname;
 
+    @Schema(description = "用户名")
+    private String username;
+
+    @Schema(description = "头像")
+    private String face;
+
+    @Schema(description = "性别：0保密 1男 2女")
+    private Integer sex;
+
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(description = "客户注册时间")
+    private Date memberCreateTime;
+
     @Schema(description = "等级名称")
     private String gradeName;
 
@@ -39,6 +55,20 @@ public class DistributionMemberDetailVO {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "加入时间")
     private Date joinTime;
+
+    @Schema(description = "待审核申请ID")
+    private String pendingApplicationId;
+
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(description = "申请提交时间")
+    private Date applyTime;
+
+    @Schema(description = "申请来源：MANUAL_ENTRY AUTO_ENTRY ADMIN")
+    private String applySource;
+
+    @Schema(description = "申请时填写的动态表单快照")
+    private List<DistributionRecruitApplyFormItemSnapshot> applyFormItems;
 
     @Schema(description = "累计销售额")
     private BigDecimal validSalesAmount;

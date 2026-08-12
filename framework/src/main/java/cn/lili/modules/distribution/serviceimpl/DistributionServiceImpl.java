@@ -1,6 +1,7 @@
 package cn.lili.modules.distribution.serviceimpl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.context.UserContext;
@@ -20,6 +21,7 @@ import cn.lili.modules.distribution.entity.dto.DistributionInviteeQueryDTO;
 import cn.lili.modules.distribution.entity.dto.DistributionMemberBatchGradeDTO;
 import cn.lili.modules.distribution.entity.dto.DistributionMemberCreateDTO;
 import cn.lili.modules.distribution.entity.dto.DistributionMemberUpdateDTO;
+import cn.lili.modules.distribution.entity.dto.DistributionRecruitApplyFormItemSnapshot;
 import cn.lili.modules.distribution.entity.dto.DistributionSearchParams;
 import cn.lili.modules.distribution.entity.enums.DistributionRewardTypeEnum;
 import cn.lili.modules.distribution.entity.enums.DistributionStatusEnum;
@@ -309,6 +311,10 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
         if (member != null) {
             detail.setMobile(member.getMobile());
             detail.setNickname(member.getNickName());
+            detail.setUsername(member.getUsername());
+            detail.setFace(member.getFace());
+            detail.setSex(member.getSex());
+            detail.setMemberCreateTime(member.getCreateTime());
         }
         if (distribution.getGradeId() != null) {
             DistributionGrade grade = gradeService.resolveGrade(distribution.getGradeId());
@@ -316,7 +322,37 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
                 detail.setGradeName(grade.getGradeName());
             }
         }
+        // 待审核时附带招募申请填写信息，供管理端审核弹窗展示
+        if (DistributionStatusEnum.APPLY.name().equals(distribution.getDistributionStatus())) {
+            DistributionRecruitApplication pendingApplication =
+                    recruitService.getPendingApplicationByMemberId(distribution.getMemberId());
+            if (pendingApplication != null) {
+                detail.setPendingApplicationId(pendingApplication.getId());
+                detail.setApplyTime(pendingApplication.getCreateTime());
+                detail.setApplySource(pendingApplication.getApplySource());
+                detail.setApplyFormItems(parseApplyFormItems(pendingApplication.getApplyFormSnapshot()));
+            }
+        }
         return detail;
+    }
+
+    /**
+     * 解析申请表单快照 JSON。
+     *
+     * @param applyFormSnapshot 快照 JSON
+     * @return 表单项列表；空或非法时返回空列表
+     */
+    private List<DistributionRecruitApplyFormItemSnapshot> parseApplyFormItems(String applyFormSnapshot) {
+        if (CharSequenceUtil.isBlank(applyFormSnapshot)) {
+            return Collections.emptyList();
+        }
+        try {
+            List<DistributionRecruitApplyFormItemSnapshot> items =
+                    JSONUtil.toList(applyFormSnapshot, DistributionRecruitApplyFormItemSnapshot.class);
+            return items == null ? Collections.emptyList() : items;
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
     @Override
