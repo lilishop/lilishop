@@ -87,7 +87,7 @@ class GoodsServiceImplDelistECouponTest {
                 List.of(GOODS_ID), GoodsStatusEnum.DOWN, "商家下架"));
 
         verify(cardKeyService, never()).softDeletePoolOnSkuRemove(any());
-        verify(goodsSkuService).updateGoodsSkuStatus(goods);
+        verify(goodsSkuService).updateGoodsSkuStatusByGoodsIds(List.of(GOODS_ID), GoodsStatusEnum.DOWN.name());
     }
 
     /** 重新上架（UPPER）不触发 softDeletePoolOnSkuRemove。 */
@@ -100,7 +100,7 @@ class GoodsServiceImplDelistECouponTest {
                 List.of(GOODS_ID), GoodsStatusEnum.UPPER, ""));
 
         verify(cardKeyService, never()).softDeletePoolOnSkuRemove(any());
-        verify(goodsSkuService).updateGoodsSkuStatus(goods);
+        verify(goodsSkuService).updateGoodsSkuStatusByGoodsIds(List.of(GOODS_ID), GoodsStatusEnum.UPPER.name());
     }
 
     /** 删除 E_COUPON 商品时软删该 SKU 卡池。 */
@@ -140,10 +140,7 @@ class GoodsServiceImplDelistECouponTest {
 
     private void stubMarketAbleUpdate(List<Goods> goodsList) {
         doReturn(true).when(goodsService).update(any());
-        doReturn(goodsList).when(goodsService).list(any(Wrapper.class));
-        for (Goods goods : goodsList) {
-            doNothing().when(goodsSkuService).updateGoodsSkuStatus(goods);
-        }
+        doNothing().when(goodsSkuService).updateGoodsSkuStatusByGoodsIds(any(), any());
     }
 
     private Goods eCouponGoods() {

@@ -415,11 +415,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         updateWrapper.in(Goods::getId, goodsIds);
         result = this.update(updateWrapper);
 
-        //修改规格商品
-        LambdaQueryWrapper<Goods> queryWrapper = this.getQueryWrapperByStoreAuthority();
-        queryWrapper.in(Goods::getId, goodsIds);
-        List<Goods> goodsList = this.list(queryWrapper);
-        this.updateGoodsStatus(goodsIds, goodsStatusEnum, goodsList);
+        this.updateGoodsStatus(goodsIds, goodsStatusEnum);
         return result;
     }
 
@@ -482,11 +478,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         updateWrapper.in(Goods::getId, goodsIds);
         result = this.update(updateWrapper);
 
-        //修改规格商品
-        LambdaQueryWrapper<Goods> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(Goods::getId, goodsIds);
-        List<Goods> goodsList = this.list(queryWrapper);
-        this.updateGoodsStatus(goodsIds, goodsStatusEnum, goodsList);
+        this.updateGoodsStatus(goodsIds, goodsStatusEnum);
         return result;
     }
 
@@ -686,14 +678,13 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
      *
      * @param goodsIds        商品ID
      * @param goodsStatusEnum 商品状态
-     * @param goodsList       商品列表
      */
-    private void updateGoodsStatus(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum, List<Goods> goodsList) {
-        List<String> goodsCacheKeys = new ArrayList<>();
-        for (Goods goods : goodsList) {
-            goodsCacheKeys.add(CachePrefix.GOODS.getPrefix() + goods.getId());
-            goodsSkuService.updateGoodsSkuStatus(goods);
-        }
+    private void updateGoodsStatus(List<String> goodsIds, GoodsStatusEnum goodsStatusEnum) {
+        goodsSkuService.updateGoodsSkuStatusByGoodsIds(goodsIds, goodsStatusEnum.name());
+
+        List<String> goodsCacheKeys = goodsIds.stream()
+                .map(id -> CachePrefix.GOODS.getPrefix() + id)
+                .toList();
         cache.multiDel(goodsCacheKeys);
 
         if (GoodsStatusEnum.DOWN.equals(goodsStatusEnum)) {

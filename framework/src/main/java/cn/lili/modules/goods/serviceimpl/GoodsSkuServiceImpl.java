@@ -441,6 +441,30 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateGoodsSkuStatusByGoodsIds(List<String> goodsIds, String marketEnable) {
+        if (goodsIds == null || goodsIds.isEmpty()) {
+            return;
+        }
+        LambdaUpdateWrapper<GoodsSku> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.in(GoodsSku::getGoodsId, goodsIds);
+        updateWrapper.set(GoodsSku::getMarketEnable, marketEnable);
+        if (!Boolean.TRUE.equals(this.update(updateWrapper))) {
+            return;
+        }
+        List<GoodsSku> skus = this.list(new LambdaQueryWrapper<GoodsSku>()
+                .in(GoodsSku::getGoodsId, goodsIds)
+                .select(GoodsSku::getId));
+        if (skus.isEmpty()) {
+            return;
+        }
+        List<String> cacheKeys = skus.stream()
+                .map(sku -> GoodsSkuService.getCacheKeys(sku.getId()))
+                .toList();
+        cache.multiDel(cacheKeys);
+    }
+
+    @Override
     public List<GoodsSku> getGoodsSkuByIdFromCache(List<String> ids) {
         List<String> keys = new ArrayList<>();
         for (String id : ids) {

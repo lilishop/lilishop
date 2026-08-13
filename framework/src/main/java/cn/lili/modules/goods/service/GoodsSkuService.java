@@ -215,6 +215,14 @@ public interface GoodsSkuService extends IService<GoodsSku> {
     void updateGoodsSkuStatusByStoreId(String storeId, String marketEnable, String authFlag);
 
     /**
+     * 按商品 ID 列表批量更新 SKU 上下架状态
+     *
+     * @param goodsIds     商品 id 列表
+     * @param marketEnable 上下架状态
+     */
+    void updateGoodsSkuStatusByGoodsIds(List<String> goodsIds, String marketEnable);
+
+    /**
      * 更新SKU库存
      *
      * @param goodsSkuStockDTOS sku库存修改实体
