@@ -22,7 +22,7 @@ ALTER TABLE `li_order_package`
     COMMENT '本批次发货时间' AFTER `delivery_remark`;
 
 ALTER TABLE `li_order_package`
-  MODIFY COLUMN `logistics_no` varchar(128) DEFAULT NULL;
+  MODIFY COLUMN `logistics_no` varchar(255) DEFAULT NULL;
 
 ALTER TABLE `li_order_package`
   MODIFY COLUMN `logistics_code` varchar(64) DEFAULT NULL;
