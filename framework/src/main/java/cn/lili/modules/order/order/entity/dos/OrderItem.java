@@ -172,6 +172,17 @@ public class OrderItem extends BaseEntity {
         return deliverNumber;
     }
 
+    @TableField(exist = false)
+    @Schema(description = "剩余待发数量")
+    private Integer remainDeliverNumber;
+
+    public Integer getRemainDeliverNumber() {
+        if (num == null) {
+            return 0;
+        }
+        return num - getDeliverNumber();
+    }
+
     public OrderItem(CartSkuVO cartSkuVO, CartVO cartVO, TradeDTO tradeDTO) {
         String oldId = this.getId();
         BeanUtil.copyProperties(cartSkuVO.getGoodsSku(), this);

@@ -8,6 +8,7 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderPackage;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
@@ -49,6 +50,9 @@ public class OrderBuyerController {
     @Autowired
     private OrderPackageService orderPackageService;
 
+    @Autowired
+    private CardKeyService cardKeyService;
+
     @Operation(summary = "查询客户订单列表")
     @GetMapping
     public ResultMessage<IPage<OrderSimpleVO>> queryMineOrder(OrderSearchParams orderSearchParams) {
@@ -65,6 +69,7 @@ public class OrderBuyerController {
     public ResultMessage<OrderDetailVO> detail(@NotNull(message = "订单编号不能为空") @PathVariable("orderSn") String orderSn) {
         OrderDetailVO orderDetailVO = orderService.queryDetail(orderSn);
         OperationalJudgment.judgment(orderDetailVO.getOrder());
+        cardKeyService.enrichOrderDetail(orderDetailVO);
         return ResultUtil.data(orderDetailVO);
     }
 

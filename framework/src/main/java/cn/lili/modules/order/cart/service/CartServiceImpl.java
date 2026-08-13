@@ -51,10 +51,12 @@ import cn.lili.modules.store.entity.dos.StoreAddress;
 import cn.lili.modules.store.service.StoreAddressService;
 import cn.lili.modules.store.service.StoreService;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -238,7 +240,20 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public TradeDTO readDTO(CartTypeEnum checkedWay) {
-        TradeDTO tradeDTO = (TradeDTO) cache.get(this.getOriginKey(checkedWay));
+        String cacheKey = this.getOriginKey(checkedWay);
+        TradeDTO tradeDTO = null;
+        try {
+            tradeDTO = (TradeDTO) cache.get(cacheKey);
+        } catch (RuntimeException ex) {
+            if (!isCacheSerializationFailure(ex)) {
+                throw ex;
+            }
+            log.error("购物车缓存反序列化失败，保留原缓存等待修复, key={}", cacheKey, ex);
+            String message = checkedWay == CartTypeEnum.CART
+                    ? "购物车数据读取失败，请刷新重试"
+                    : "结算信息已失效，请重新购买";
+            throw new ServiceException(ResultCode.CART_ERROR, message);
+        }
         if (tradeDTO == null) {
             tradeDTO = new TradeDTO(checkedWay);
             AuthUser currentUser = UserContext.getCurrentUser();
@@ -253,6 +268,17 @@ public class CartServiceImpl implements CartService {
             cardKeyService.normalizeECouponTrade(tradeDTO);
         }
         return tradeDTO;
+    }
+
+    private boolean isCacheSerializationFailure(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof JSONException || current instanceof SerializationException) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     @Override

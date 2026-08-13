@@ -45,20 +45,43 @@ public class FastJsonRedisSerializer<T> implements RedisSerializer<T> {
         }
         String str = new String(bytes, StandardCharsets.UTF_8);
         try {
-
-            return JSON.parseObject(str, clazz, autoTypeFilter);
+            return parseRedisJson(str);
         } catch (Throwable ex) {
             // 出现解析异常时，尝试对 JSON 文本进行非法字符清洗后再次解析
             String cleaned = sanitizeRedisJson(str);
             if (!cleaned.equals(str)) {
                 try {
-                    return JSON.parseObject(cleaned, clazz, autoTypeFilter);
+                    return parseRedisJson(cleaned);
                 } catch (Throwable ex2) {
                     throw ex2;
                 }
             }
             throw ex;
         }
+    }
+
+    private T parseRedisJson(String str) {
+        return JSON.parseObject(
+                prepareRedisJson(str),
+                clazz,
+                autoTypeFilter,
+                JSONReader.Feature.SupportAutoType
+        );
+    }
+
+    /**
+     * 规范化 fastjson2 WriteClassName 产生的空 HashMap，避免泛型 Map 反序列化失败。
+     */
+    static String prepareRedisJson(String str) {
+        return normalizeEmptyTypedMaps(str);
+    }
+
+    private static String normalizeEmptyTypedMaps(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        // 仅匹配不含其它键的空 Map，避免误伤带数据的 HashMap
+        return str.replaceAll("\\{\"@type\":\"java\\.util\\.HashMap\"\\}", "{}");
     }
 
     /**

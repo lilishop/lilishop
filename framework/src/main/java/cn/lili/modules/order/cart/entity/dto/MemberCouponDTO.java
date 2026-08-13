@@ -1,7 +1,9 @@
 package cn.lili.modules.order.cart.entity.dto;
 
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -13,6 +15,8 @@ import java.util.Map;
  * @since 2020-03-25 2:30 下午
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class MemberCouponDTO implements Serializable {
 
 
@@ -28,8 +32,4 @@ public class MemberCouponDTO implements Serializable {
      */
     private MemberCoupon memberCoupon;
 
-    public MemberCouponDTO(Map<String, Double> skuDetail, MemberCoupon memberCoupon) {
-        this.skuDetail = skuDetail;
-        this.memberCoupon = memberCoupon;
-    }
 }

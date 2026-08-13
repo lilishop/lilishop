@@ -9,10 +9,11 @@ import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.member.service.StoreLogisticsService;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
-import cn.lili.modules.order.order.entity.dto.PartDeliveryParamsDTO;
+import cn.lili.modules.order.order.entity.dto.OrderFulfillParamsDTO;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderNumVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
@@ -74,6 +75,9 @@ public class OrderStoreController {
     @Autowired
     private OrderPackageService orderPackageService;
 
+    @Autowired
+    private CardKeyService cardKeyService;
+
 
     @Operation(description = "查询订单列表")
     @GetMapping
@@ -92,7 +96,9 @@ public class OrderStoreController {
     @GetMapping("/{orderSn}")
     public ResultMessage<OrderDetailVO> detail(@NotNull @PathVariable String orderSn) {
         OperationalJudgment.judgment(orderService.getBySn(orderSn));
-        return ResultUtil.data(orderService.queryDetail(orderSn));
+        OrderDetailVO orderDetailVO = orderService.queryDetail(orderSn);
+        cardKeyService.enrichOrderDetail(orderDetailVO);
+        return ResultUtil.data(orderDetailVO);
     }
 
     @PreventDuplicateSubmissions
@@ -119,15 +125,12 @@ public class OrderStoreController {
     }
 
     @PreventDuplicateSubmissions
-    @Operation(description = "订单发货")
-    @Parameter(name = "orderSn", description = "订单sn", required = true)
-    @Parameter(name = "logisticsNo", description = "发货单号", required = true)
-    @Parameter(name = "logisticsId", description = "物流公司", required = true)
-    @PostMapping("/{orderSn}/delivery")
-    public ResultMessage<Object> delivery(@NotNull(message = "参数非法") @PathVariable String orderSn,
-                                          @NotNull(message = "发货单号不能为空") String logisticsNo,
-                                          @NotNull(message = "请选择物流公司") String logisticsId) {
-        return ResultUtil.data(orderService.delivery(orderSn, logisticsNo, logisticsId));
+    @Operation(description = "订单发货（整单 / 拆单 / 无需配送）")
+    @PostMapping("/{orderSn}/fulfill")
+    public ResultMessage<Object> fulfill(@NotNull(message = "参数非法") @PathVariable String orderSn,
+                                         @Valid @RequestBody OrderFulfillParamsDTO params) {
+        params.setOrderSn(orderSn);
+        return ResultUtil.data(orderService.fulfillOrder(params));
     }
 
     @PreventDuplicateSubmissions
@@ -224,15 +227,6 @@ public class OrderStoreController {
     @GetMapping("/getTracesList/{orderSn}")
     public ResultMessage<Object> getTracesList(@NotBlank(message = "订单编号不能为空") @PathVariable String orderSn) {
         return ResultUtil.data(orderPackageService.getOrderPackageVOList(orderSn));
-    }
-
-    @Operation(description = "订单包裹发货")
-    @Parameter(name = "orderSn", description = "订单sn", required = true)
-    @Parameter(name = "logisticsNo", description = "发货单号", required = true)
-    @Parameter(name = "logisticsId", description = "物流公司", required = true)
-    @PostMapping("/{orderSn}/partDelivery")
-    public ResultMessage<Object> delivery(@RequestBody PartDeliveryParamsDTO partDeliveryParamsDTO) {
-        return ResultUtil.data(orderService.partDelivery(partDeliveryParamsDTO));
     }
 
     @Operation(description = "卖家订单备注")

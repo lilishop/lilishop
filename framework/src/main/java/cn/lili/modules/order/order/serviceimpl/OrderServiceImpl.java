@@ -107,6 +107,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     private static final String ORDER_SN_COLUMN = "order_sn";
 
+    private static final int MAX_DELIVERY_REMARK_LENGTH = 500;
+
     /**
      * 延时任务
      */
@@ -567,37 +569,113 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @OrderLogPoint(description = "'订单['+#orderSn+']发货，发货单号['+#logisticsNo+']'", orderSn = "#orderSn")
     @Transactional(rollbackFor = Exception.class)
     public Order delivery(String orderSn, String logisticsNo, String logisticsId) {
-        Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
-        //如果订单未发货，并且订单状态值等于待发货
-        if ((order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name()) || order.getDeliverStatus().equals(DeliverStatusEnum.PARTS_DELIVERED.name())) &&
-                (order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name()) || order.getOrderStatus().equals(OrderStatusEnum.PARTS_DELIVERED.name()))) {
-            //获取对应物流
-            if (logisticsService != null) {
-                Logistics logistics = logisticsService.getById(logisticsId);
-                if (logistics == null) {
-                    throw new ServiceException(ResultCode.ORDER_LOGISTICS_ERROR);
-                }
-                //写入物流信息
-                order.setLogisticsCode(logistics.getId());
-                order.setLogisticsName(logistics.getName());
-            }
-            order.setLogisticsNo(logisticsNo);
-            order.setLogisticsTime(new Date());
-            order.setDeliverStatus(DeliverStatusEnum.DELIVERED.name());
-            this.updateById(order);
-            //修改订单状态为已发送
-            this.updateStatus(orderSn, OrderStatusEnum.DELIVERED);
-            //修改订单货物可以进行售后、投诉
-            orderItemService.update(new UpdateWrapper<OrderItem>().eq(ORDER_SN_COLUMN, orderSn)
-                    .set("after_sale_status", OrderItemAfterSaleStatusEnum.NOT_APPLIED)
-                    .set("complain_status", OrderComplaintStatusEnum.NO_APPLY));
-            //发送订单状态改变消息
-            OrderMessage orderMessage = new OrderMessage();
-            orderMessage.setNewStatus(OrderStatusEnum.DELIVERED);
-            orderMessage.setOrderSn(order.getSn());
-            this.sendUpdateStatusMessage(orderMessage);
-        } else {
+        OrderFulfillParamsDTO params = new OrderFulfillParamsDTO();
+        params.setOrderSn(orderSn);
+        params.setFulfillmentMode(FulfillmentModeEnum.WHOLE.name());
+        params.setLogisticsId(logisticsId);
+        params.setLogisticsNo(logisticsNo);
+        return fulfillOrder(params);
+    }
+
+    @Override
+    @OrderLogPoint(description = "'订单['+#params.orderSn+']统一发货'", orderSn = "#params.orderSn")
+    @Transactional(rollbackFor = Exception.class)
+    public Order fulfillOrder(OrderFulfillParamsDTO params) {
+        if (params == null || CharSequenceUtil.isBlank(params.getOrderSn())) {
             throw new ServiceException(ResultCode.ORDER_DELIVER_ERROR);
+        }
+        FulfillmentModeEnum mode = FulfillmentModeEnum.of(params.getFulfillmentMode());
+        if (mode == null) {
+            throw new ServiceException(ResultCode.ORDER_DELIVER_ERROR);
+        }
+
+        String orderSn = params.getOrderSn();
+        Order order = this.baseMapper.selectForUpdateBySn(orderSn);
+        if (order == null) {
+            throw new ServiceException(ResultCode.ORDER_NOT_EXIST);
+        }
+        OperationalJudgment.judgment(order);
+        validateDeliverableOrder(order, mode);
+
+        List<OrderItem> orderItems = orderItemService.getByOrderSn(orderSn);
+        Map<String, OrderItem> itemMap = orderItems.stream()
+                .collect(Collectors.toMap(OrderItem::getId, item -> item, (a, b) -> a));
+        Map<String, Integer> deliveryLines = resolveDeliveryLines(mode, orderItems, params.getItems());
+        if (deliveryLines.isEmpty()) {
+            throw new ServiceException(ResultCode.ORDER_DELIVER_NUM_ERROR);
+        }
+
+        Logistics logistics = null;
+        if (mode == FulfillmentModeEnum.WHOLE || mode == FulfillmentModeEnum.SPLIT) {
+            if (CharSequenceUtil.isBlank(params.getLogisticsId()) || CharSequenceUtil.isBlank(params.getLogisticsNo())) {
+                throw new ServiceException(ResultCode.ORDER_LOGISTICS_ERROR);
+            }
+            logistics = logisticsService.getById(params.getLogisticsId());
+            if (logistics == null) {
+                throw new ServiceException(ResultCode.ORDER_LOGISTICS_ERROR);
+            }
+        } else if (CharSequenceUtil.isNotBlank(params.getLogisticsId()) || CharSequenceUtil.isNotBlank(params.getLogisticsNo())) {
+            throw new ServiceException(ResultCode.ORDER_DELIVER_ERROR);
+        }
+
+        String deliveryRemark = normalizeDeliveryRemark(params.getDeliveryRemark());
+        Date now = new Date();
+
+        OrderPackage orderPackage = new OrderPackage();
+        orderPackage.setPackageNo(SnowFlake.createStr("OP"));
+        orderPackage.setOrderSn(orderSn);
+        orderPackage.setFulfillmentMode(mode.name());
+        orderPackage.setDeliveryRemark(deliveryRemark);
+        orderPackage.setLogisticsTime(now);
+        orderPackage.setStatus("1");
+        orderPackage.setConsigneeMobile(order.getConsigneeMobile());
+        if (logistics != null) {
+            orderPackage.setLogisticsNo(params.getLogisticsNo());
+            orderPackage.setLogisticsCode(logistics.getId());
+            orderPackage.setLogisticsName(logistics.getName());
+        }
+        orderPackageService.save(orderPackage);
+
+        List<OrderLog> orderLogList = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : deliveryLines.entrySet()) {
+            OrderItem orderItem = itemMap.get(entry.getKey());
+            if (orderItem == null) {
+                throw new ServiceException(ResultCode.ORDER_DELIVER_NUM_ERROR);
+            }
+            int deliveryNum = entry.getValue();
+            int remain = orderItem.getNum() - orderItem.getDeliverNumber();
+            if (deliveryNum <= 0 || deliveryNum > remain) {
+                throw new ServiceException(ResultCode.ORDER_DELIVER_NUM_ERROR);
+            }
+            orderItem.setDeliverNumber(orderItem.getDeliverNumber() + deliveryNum);
+
+            OrderPackageItem orderPackageItem = new OrderPackageItem();
+            orderPackageItem.setOrderSn(orderSn);
+            orderPackageItem.setPackageNo(orderPackage.getPackageNo());
+            orderPackageItem.setOrderItemSn(orderItem.getSn());
+            orderPackageItem.setDeliverNumber(deliveryNum);
+            orderPackageItem.setLogisticsTime(now);
+            orderPackageItem.setGoodsName(orderItem.getGoodsName());
+            orderPackageItem.setThumbnail(orderItem.getImage());
+            orderPackageItemService.save(orderPackageItem);
+
+            String logMessage = buildDeliveryLogMessage(orderSn, orderItem.getGoodsName(), deliveryNum, mode, orderPackage);
+            orderLogList.add(new OrderLog(orderSn, UserContext.getCurrentUser().getId(),
+                    UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), logMessage));
+        }
+        orderItemService.updateBatchById(orderItems);
+        if (!orderLogList.isEmpty()) {
+            orderLogService.saveBatch(orderLogList);
+        }
+
+        boolean allDelivered = orderItems.stream().allMatch(item -> item.getDeliverNumber() >= item.getNum());
+        if (allDelivered) {
+            finalizeOrderDelivered(order, orderPackage, mode);
+        } else if (OrderStatusEnum.UNDELIVERED.name().equals(order.getOrderStatus())
+                || DeliverStatusEnum.UNDELIVERED.name().equals(order.getDeliverStatus())) {
+            order.setDeliverStatus(DeliverStatusEnum.PARTS_DELIVERED.name());
+            order.setOrderStatus(OrderStatusEnum.PARTS_DELIVERED.name());
+            this.updateById(order);
         }
         return order;
     }
@@ -1045,76 +1123,135 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Order partDelivery(PartDeliveryParamsDTO partDeliveryParamsDTO) {
-        String logisticsId = partDeliveryParamsDTO.getLogisticsId();
-        String orderSn = partDeliveryParamsDTO.getOrderSn();
-        String invoiceNumber = partDeliveryParamsDTO.getLogisticsNo();
-
-        //获取对应物流
-        Logistics logistics = logisticsService.getById(logisticsId);
-        if (logistics == null) {
-            throw new ServiceException(ResultCode.ORDER_LOGISTICS_ERROR);
+        if (partDeliveryParamsDTO == null || CharSequenceUtil.isBlank(partDeliveryParamsDTO.getOrderSn())) {
+            throw new ServiceException(ResultCode.ORDER_DELIVER_ERROR);
         }
-        Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
-        List<OrderItem> orderItemList = orderItemService.getByOrderSn(orderSn);
+        OrderFulfillParamsDTO params = new OrderFulfillParamsDTO();
+        params.setOrderSn(partDeliveryParamsDTO.getOrderSn());
+        params.setFulfillmentMode(FulfillmentModeEnum.SPLIT.name());
+        params.setLogisticsId(partDeliveryParamsDTO.getLogisticsId());
+        params.setLogisticsNo(partDeliveryParamsDTO.getLogisticsNo());
+        if (partDeliveryParamsDTO.getPartDeliveryDTOList() != null) {
+            List<OrderFulfillItemDTO> items = new ArrayList<>();
+            for (PartDeliveryDTO partDeliveryDTO : partDeliveryParamsDTO.getPartDeliveryDTOList()) {
+                OrderFulfillItemDTO item = new OrderFulfillItemDTO();
+                item.setOrderItemId(partDeliveryDTO.getOrderItemId());
+                item.setDeliveryNum(partDeliveryDTO.getDeliveryNum());
+                items.add(item);
+            }
+            params.setItems(items);
+        }
+        return fulfillOrder(params);
+    }
 
-        OrderPackage orderPackage = new OrderPackage();
-        orderPackage.setPackageNo(SnowFlake.createStr("OP"));
-        orderPackage.setOrderSn(orderSn);
-        orderPackage.setLogisticsNo(invoiceNumber);
-        orderPackage.setLogisticsCode(logistics.getId());
-        orderPackage.setLogisticsName(logistics.getName());
-        orderPackage.setStatus("1");
-        orderPackage.setConsigneeMobile(order.getConsigneeMobile());
-        orderPackageService.save(orderPackage);
-        List<OrderLog> orderLogList = new ArrayList<>();
-        for (PartDeliveryDTO partDeliveryDTO : partDeliveryParamsDTO.getPartDeliveryDTOList()) {
-            for (OrderItem orderItem : orderItemList) {
-                //寻找订单货物进行判断
-                if (partDeliveryDTO.getOrderItemId().equals(orderItem.getId())) {
-                    if ((partDeliveryDTO.getDeliveryNum() + orderItem.getDeliverNumber()) > orderItem.getNum()) {
-                        throw new ServiceException("发货数量不正确!");
-                    }
-                    orderItem.setDeliverNumber((partDeliveryDTO.getDeliveryNum() + orderItem.getDeliverNumber()));
-                    // 记录分包裹中每个item子单的具体发货信息
-                    OrderPackageItem orderPackageItem = new OrderPackageItem();
-                    orderPackageItem.setOrderSn(orderSn);
-                    orderPackageItem.setPackageNo(orderPackage.getPackageNo());
-                    orderPackageItem.setOrderItemSn(orderItem.getSn());
-                    orderPackageItem.setDeliverNumber(partDeliveryDTO.getDeliveryNum());
-                    orderPackageItem.setLogisticsTime(new Date());
-                    orderPackageItem.setGoodsName(orderItem.getGoodsName());
-                    orderPackageItem.setThumbnail(orderItem.getImage());
-                    orderPackageItemService.save(orderPackageItem);
-                    OrderLog orderLog = new OrderLog(orderSn, UserContext.getCurrentUser().getId(),
-                            UserContext.getCurrentUser().getRole().getRole(), UserContext.getCurrentUser().getUsername(), "订单 [ " + orderSn + " ]商品" +
-                            " [ " + orderItem.getGoodsName() + " ]发货，发货数量: [ " + partDeliveryDTO.getDeliveryNum() + " ]，发货单号[ " + invoiceNumber + " ]");
-                    orderLogList.add(orderLog);
+    private void validateDeliverableOrder(Order order, FulfillmentModeEnum mode) {
+        if (!OrderTypeEnum.NORMAL.name().equals(order.getOrderType())) {
+            throw new ServiceException(ResultCode.ORDER_DELIVER_ERROR);
+        }
+        if (DeliveryMethodEnum.SELF_PICK_UP.name().equals(order.getDeliveryMethod())) {
+            throw new ServiceException(ResultCode.ORDER_DELIVER_ERROR);
+        }
+        boolean deliverableStatus = (DeliverStatusEnum.UNDELIVERED.name().equals(order.getDeliverStatus())
+                || DeliverStatusEnum.PARTS_DELIVERED.name().equals(order.getDeliverStatus()))
+                && (OrderStatusEnum.UNDELIVERED.name().equals(order.getOrderStatus())
+                || OrderStatusEnum.PARTS_DELIVERED.name().equals(order.getOrderStatus()));
+        if (!deliverableStatus) {
+            throw new ServiceException(ResultCode.ORDER_DELIVER_ERROR);
+        }
+        if (OrderStatusEnum.PARTS_DELIVERED.name().equals(order.getOrderStatus())
+                || DeliverStatusEnum.PARTS_DELIVERED.name().equals(order.getDeliverStatus())) {
+            if (mode != FulfillmentModeEnum.SPLIT) {
+                throw new ServiceException(ResultCode.ORDER_DELIVER_ERROR);
+            }
+        }
+        if ((mode == FulfillmentModeEnum.WHOLE || mode == FulfillmentModeEnum.NO_DELIVERY)
+                && !OrderStatusEnum.UNDELIVERED.name().equals(order.getOrderStatus())) {
+            throw new ServiceException(ResultCode.ORDER_DELIVER_ERROR);
+        }
+    }
+
+    private Map<String, Integer> resolveDeliveryLines(FulfillmentModeEnum mode, List<OrderItem> orderItems,
+                                                       List<OrderFulfillItemDTO> requestItems) {
+        Map<String, Integer> lines = new LinkedHashMap<>();
+        if (mode == FulfillmentModeEnum.WHOLE || mode == FulfillmentModeEnum.NO_DELIVERY) {
+            for (OrderItem orderItem : orderItems) {
+                int remain = orderItem.getNum() - orderItem.getDeliverNumber();
+                if (remain > 0) {
+                    lines.put(orderItem.getId(), remain);
                 }
             }
+            return lines;
         }
-        //修改订单货物
-        orderItemService.updateBatchById(orderItemList);
-
-
-        orderLogService.saveBatch(orderLogList);
-        //判断订单货物是否全部发货完毕
-        Boolean delivery = true;
-        for (OrderItem orderItem : orderItemList) {
-            if (orderItem.getDeliverNumber() < orderItem.getNum()) {
-                delivery = false;
-                break;
+        if (requestItems == null || requestItems.isEmpty()) {
+            return lines;
+        }
+        for (OrderFulfillItemDTO requestItem : requestItems) {
+            if (requestItem == null || CharSequenceUtil.isBlank(requestItem.getOrderItemId())) {
+                continue;
+            }
+            OrderItem matched = orderItems.stream()
+                    .filter(item -> requestItem.getOrderItemId().equals(item.getId()))
+                    .findFirst()
+                    .orElse(null);
+            if (matched == null) {
+                throw new ServiceException(ResultCode.ORDER_DELIVER_NUM_ERROR);
+            }
+            int remain = matched.getNum() - matched.getDeliverNumber();
+            int deliveryNum = requestItem.getDeliveryNum() == null ? remain : requestItem.getDeliveryNum();
+            if (deliveryNum <= 0 || deliveryNum > remain) {
+                throw new ServiceException(ResultCode.ORDER_DELIVER_NUM_ERROR);
+            }
+            lines.merge(requestItem.getOrderItemId(), deliveryNum, Integer::sum);
+            if (lines.get(requestItem.getOrderItemId()) > remain) {
+                throw new ServiceException(ResultCode.ORDER_DELIVER_NUM_ERROR);
             }
         }
-        //是否全部发货
-        if (delivery) {
-            return delivery(orderSn, invoiceNumber, logisticsId);
-        }else if(order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name()) || order.getOrderStatus().equals(OrderStatusEnum.UNDELIVERED.name())){
-            //更改订单状态为部分发货
-            order.setDeliverStatus(DeliverStatusEnum.PARTS_DELIVERED.name());
-            order.setOrderStatus(OrderStatusEnum.PARTS_DELIVERED.name());
-            this.updateById(order);
+        return lines;
+    }
+
+    private String normalizeDeliveryRemark(String deliveryRemark) {
+        if (CharSequenceUtil.isBlank(deliveryRemark)) {
+            return null;
         }
-        return order;
+        String trimmed = deliveryRemark.trim();
+        if (trimmed.length() > MAX_DELIVERY_REMARK_LENGTH) {
+            throw new ServiceException(ResultCode.ORDER_DELIVER_ERROR);
+        }
+        return trimmed;
+    }
+
+    private String buildDeliveryLogMessage(String orderSn, String goodsName, int deliveryNum,
+                                           FulfillmentModeEnum mode, OrderPackage orderPackage) {
+        if (mode == FulfillmentModeEnum.NO_DELIVERY) {
+            return "订单 [ " + orderSn + " ] 商品 [ " + goodsName + " ] 无需配送发货，数量 [ " + deliveryNum + " ]"
+                    + (CharSequenceUtil.isNotBlank(orderPackage.getDeliveryRemark())
+                    ? "，说明 [ " + orderPackage.getDeliveryRemark() + " ]" : "");
+        }
+        return "订单 [ " + orderSn + " ] 商品 [ " + goodsName + " ] 发货，数量 [ " + deliveryNum + " ]，发货单号 [ "
+                + orderPackage.getLogisticsNo() + " ]";
+    }
+
+    private void finalizeOrderDelivered(Order order, OrderPackage orderPackage, FulfillmentModeEnum mode) {
+        if (mode == FulfillmentModeEnum.NO_DELIVERY) {
+            order.setLogisticsCode(null);
+            order.setLogisticsName(null);
+            order.setLogisticsNo(null);
+        } else {
+            order.setLogisticsCode(orderPackage.getLogisticsCode());
+            order.setLogisticsName(orderPackage.getLogisticsName());
+            order.setLogisticsNo(orderPackage.getLogisticsNo());
+        }
+        order.setLogisticsTime(orderPackage.getLogisticsTime());
+        order.setDeliverStatus(DeliverStatusEnum.DELIVERED.name());
+        this.updateById(order);
+        this.updateStatus(order.getSn(), OrderStatusEnum.DELIVERED);
+        orderItemService.update(new UpdateWrapper<OrderItem>().eq(ORDER_SN_COLUMN, order.getSn())
+                .set("after_sale_status", OrderItemAfterSaleStatusEnum.NOT_APPLIED)
+                .set("complain_status", OrderComplaintStatusEnum.NO_APPLY));
+        OrderMessage orderMessage = new OrderMessage();
+        orderMessage.setNewStatus(OrderStatusEnum.DELIVERED);
+        orderMessage.setOrderSn(order.getSn());
+        this.sendUpdateStatusMessage(orderMessage);
     }
 
     @Override

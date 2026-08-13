@@ -47,11 +47,19 @@ public class AllowOperation implements Serializable {
     @Schema(description = "是否可以进行核销")
     private Boolean take = false;
 
+    @Schema(description = "是否允许整单发货")
+    private Boolean fulfillWhole = false;
+
+    @Schema(description = "是否允许拆单发货")
+    private Boolean fulfillSplit = false;
+
+    @Schema(description = "是否允许无需配送发货")
+    private Boolean fulfillNoDelivery = false;
 
     /**
      * 根据各种状态构建对象
      *
-     * @param order
+     * @param order 订单
      */
     public AllowOperation(Order order) {
 
@@ -95,21 +103,25 @@ public class AllowOperation implements Serializable {
         //是否允许被发货
         this.ship = editConsignee && (status.equals(OrderStatusEnum.UNDELIVERED.name()) || order.getDeliverStatus().equals(DeliverStatusEnum.PARTS_DELIVERED.name()));
 
+        applyFulfillmentModes(order, status);
+
         //是否允许被收货
         this.rog = status.equals(OrderStatusEnum.DELIVERED.name());
 
-        //是否允许查看物流信息
-        this.showLogistics = (order.getDeliverStatus().equals(DeliverStatusEnum.DELIVERED.name()) || order.getDeliverStatus().equals(DeliverStatusEnum.PARTS_DELIVERED.name())) && (status.equals(OrderStatusEnum.DELIVERED.name()) || status.equals(OrderStatusEnum.PARTS_DELIVERED.name()));
+        //是否允许查看物流信息（含无需配送配送说明页）
+        this.showLogistics = (order.getDeliverStatus().equals(DeliverStatusEnum.DELIVERED.name()) || order.getDeliverStatus().equals(DeliverStatusEnum.PARTS_DELIVERED.name()))
+                && (status.equals(OrderStatusEnum.DELIVERED.name()) || status.equals(OrderStatusEnum.PARTS_DELIVERED.name()));
 
         //虚拟订单 或 自提订单可以核销
         this.take =
-                (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name()) && order.getOrderStatus().equals(OrderStatusEnum.TAKE.name())) || (order.getDeliveryMethod().equals(DeliveryMethodEnum.SELF_PICK_UP.name()) && order.getOrderStatus().equals(OrderStatusEnum.STAY_PICKED_UP.name()));
+                (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name()) && order.getOrderStatus().equals(OrderStatusEnum.TAKE.name()))
+                        || (order.getDeliveryMethod().equals(DeliveryMethodEnum.SELF_PICK_UP.name()) && order.getOrderStatus().equals(OrderStatusEnum.STAY_PICKED_UP.name()));
     }
 
     /**
      * 根据各种状态构建对象
      *
-     * @param order
+     * @param order 列表订单
      */
     public AllowOperation(OrderSimpleVO order) {
 
@@ -137,26 +149,57 @@ public class AllowOperation implements Serializable {
         }
 
         //取消判定
-        if (CharSequenceUtil.equalsAny(status, OrderStatusEnum.UNPAID.name(), OrderStatusEnum.PAID.name(), OrderStatusEnum.UNDELIVERED.name())) {
+        if (CharSequenceUtil.equalsAny(status, OrderStatusEnum.UNPAID.name(), OrderStatusEnum.PAID.name(), OrderStatusEnum.UNDELIVERED.name(),
+                OrderStatusEnum.PARTS_DELIVERED.name())) {
             this.cancel = true;
         }
         //新订单，允许支付
         this.pay = status.equals(OrderStatusEnum.UNPAID.name());
 
-        //订单未发货，就可以编辑收货人信息
-        this.editConsignee = order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name());
+        //订单未发货或部分发货，就可以编辑收货人信息
+        this.editConsignee = order.getOrderType().equals(OrderTypeEnum.NORMAL.name())
+                && (order.getDeliverStatus().equals(DeliverStatusEnum.UNDELIVERED.name()) || order.getDeliverStatus().equals(DeliverStatusEnum.PARTS_DELIVERED.name()));
 
         //是否允许被发货
-        this.ship = editConsignee && status.equals(OrderStatusEnum.UNDELIVERED.name());
+        this.ship = editConsignee && (status.equals(OrderStatusEnum.UNDELIVERED.name()) || status.equals(OrderStatusEnum.PARTS_DELIVERED.name()));
+
+        applyFulfillmentModesForList(order, status);
 
         //是否允许被收货
         this.rog = status.equals(OrderStatusEnum.DELIVERED.name());
 
         //是否允许查看物流信息
-        this.showLogistics = order.getDeliverStatus().equals(DeliverStatusEnum.DELIVERED.name()) && status.equals(OrderStatusEnum.DELIVERED.name());
+        this.showLogistics = (order.getDeliverStatus().equals(DeliverStatusEnum.DELIVERED.name()) || order.getDeliverStatus().equals(DeliverStatusEnum.PARTS_DELIVERED.name()))
+                && (status.equals(OrderStatusEnum.DELIVERED.name()) || status.equals(OrderStatusEnum.PARTS_DELIVERED.name()));
 
         this.take = order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name()) && order.getOrderStatus().equals(OrderStatusEnum.TAKE.name());
     }
 
+    private void applyFulfillmentModes(Order order, String status) {
+        if (!Boolean.TRUE.equals(this.ship)) {
+            return;
+        }
+        if (OrderStatusEnum.UNDELIVERED.name().equals(status)) {
+            this.fulfillWhole = true;
+            this.fulfillSplit = true;
+            this.fulfillNoDelivery = true;
+        } else if (OrderStatusEnum.PARTS_DELIVERED.name().equals(status)
+                || DeliverStatusEnum.PARTS_DELIVERED.name().equals(order.getDeliverStatus())) {
+            this.fulfillSplit = true;
+        }
+    }
 
+    private void applyFulfillmentModesForList(OrderSimpleVO order, String status) {
+        if (!Boolean.TRUE.equals(this.ship)) {
+            return;
+        }
+        if (OrderStatusEnum.UNDELIVERED.name().equals(status)) {
+            this.fulfillWhole = true;
+            this.fulfillSplit = true;
+            this.fulfillNoDelivery = true;
+        } else if (OrderStatusEnum.PARTS_DELIVERED.name().equals(status)
+                || DeliverStatusEnum.PARTS_DELIVERED.name().equals(order.getDeliverStatus())) {
+            this.fulfillSplit = true;
+        }
+    }
 }

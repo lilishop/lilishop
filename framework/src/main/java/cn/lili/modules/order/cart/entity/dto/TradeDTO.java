@@ -13,6 +13,7 @@ import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.vos.GiftCardCashMemberCardVO;
 import cn.lili.modules.promotion.entity.vos.MemberCouponVO;
 import cn.lili.modules.store.entity.dos.StoreAddress;
+import com.alibaba.fastjson2.annotation.JSONField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -183,6 +184,7 @@ public class TradeDTO implements Serializable {
      *
      * @return
      */
+    @JSONField(serialize = false)
     public List<CartSkuVO> getCheckedSkuList() {
         if (skuList != null && !skuList.isEmpty()) {
             return skuList.stream().filter(CartSkuVO::getChecked).collect(Collectors.toList());

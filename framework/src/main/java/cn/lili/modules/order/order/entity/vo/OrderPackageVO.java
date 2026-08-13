@@ -1,8 +1,10 @@
 package cn.lili.modules.order.order.entity.vo;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.order.order.entity.dos.OrderPackage;
 import cn.lili.modules.order.order.entity.dos.OrderPackageItem;
+import cn.lili.modules.order.order.entity.enums.FulfillmentModeEnum;
 import cn.lili.modules.system.entity.vo.Traces;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -58,8 +60,31 @@ public class OrderPackageVO implements Serializable {
     @Schema(description = "物流信息")
     private Traces traces;
 
+    /**
+     * @see cn.lili.modules.order.order.entity.enums.FulfillmentModeEnum
+     */
+    @Schema(description = "履约模式 WHOLE/SPLIT/NO_DELIVERY")
+    private String fulfillmentMode;
+
+    @Schema(description = "无需配送说明")
+    private String deliveryRemark;
+
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(description = "本批次发货时间")
+    private Date logisticsTime;
+
+    @Schema(description = "是否需要查询快递轨迹")
+    private Boolean logisticsRequired;
+
     public OrderPackageVO(OrderPackage orderPackage) {
         BeanUtil.copyProperties(orderPackage, this);
+        if (this.logisticsTime == null) {
+            this.logisticsTime = orderPackage.getLogisticsTime();
+        }
+        this.logisticsRequired = !FulfillmentModeEnum.NO_DELIVERY.name()
+                .equals(CharSequenceUtil.blankToDefault(orderPackage.getFulfillmentMode(), FulfillmentModeEnum.SPLIT.name()))
+                && CharSequenceUtil.isNotBlank(orderPackage.getLogisticsNo());
     }
 
 }

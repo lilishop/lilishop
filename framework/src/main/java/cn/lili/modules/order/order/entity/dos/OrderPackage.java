@@ -37,4 +37,16 @@ public class OrderPackage extends BaseEntity {
     @Schema(description = "状态")
     private String status;
 
+    /**
+     * @see cn.lili.modules.order.order.entity.enums.FulfillmentModeEnum
+     */
+    @Schema(description = "履约模式 WHOLE/SPLIT/NO_DELIVERY")
+    private String fulfillmentMode;
+
+    @Schema(description = "无需配送说明")
+    private String deliveryRemark;
+
+    @Schema(description = "本批次发货时间")
+    private java.util.Date logisticsTime;
+
 }

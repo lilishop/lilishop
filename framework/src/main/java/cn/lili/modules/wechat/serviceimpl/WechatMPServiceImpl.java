@@ -1,5 +1,6 @@
 package cn.lili.modules.wechat.serviceimpl;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.HttpUtils;
@@ -9,8 +10,11 @@ import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.member.entity.dto.ConnectQueryDTO;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
+import cn.lili.modules.order.order.entity.dos.OrderPackage;
+import cn.lili.modules.order.order.entity.enums.FulfillmentModeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
+import cn.lili.modules.order.order.service.OrderPackageService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -48,6 +52,8 @@ public class WechatMPServiceImpl implements WechatMPService {
     private OrderService orderService;
     @Autowired
     private OrderItemService orderItemService;
+    @Autowired
+    private OrderPackageService orderPackageService;
     @Autowired
     private ConnectService connectService;
     @Autowired
@@ -110,25 +116,66 @@ public class WechatMPServiceImpl implements WechatMPService {
 
         } else if (order.getOrderStatus().equals(OrderStatusEnum.DELIVERED.name())) {
 
-            //物流模式，发货方式枚举值：1、实体物流配送采用快递公司进行实体物流配送形式 2、同城配送 3、虚拟商品，虚拟商品，例如话费充值，点卡等，无实体配送形式 4、用户自提
-            map.put("logistics_type", 1);
-            //发货模式，发货模式枚举值：1、UNIFIED_DELIVERY（统一发货）2、SPLIT_DELIVERY（分拆发货） 示例值: UNIFIED_DELIVERY
-            map.put("delivery_mode", 1);
+            List<OrderPackage> packages = orderPackageService.orderPackageList(order.getSn());
+            boolean noDeliveryOnly = !packages.isEmpty() && packages.stream()
+                    .allMatch(pkg -> FulfillmentModeEnum.NO_DELIVERY.name().equals(pkg.getFulfillmentMode()));
+            List<OrderPackage> expressPackages = packages.stream()
+                    .filter(pkg -> !FulfillmentModeEnum.NO_DELIVERY.name().equals(pkg.getFulfillmentMode())
+                            && CharSequenceUtil.isNotBlank(pkg.getLogisticsNo()))
+                    .toList();
 
-            //物流信息列表，发货物流单列表，支持统一发货（单个物流单）和分拆发货（多个物流单）两种模式，多重性: [1, 10]
-            List<Shipping> shippingList = new ArrayList<>();
-            Shipping shipping = new Shipping();
-            shipping.setTracking_no(order.getLogisticsNo());
-            shipping.setExpress_company(getDeliveryList(order));
-            //商品信息，例如：微信红包抱枕*1个，限120个字以内
-            List<OrderItem> orderItemList = orderItemService.getByOrderSn(order.getSn());
-            shipping.setItem_desc(orderItemList.get(0).getGoodsName());
-            //联系方式，当发货的物流公司为顺丰时，联系方式为必填，收件人或寄件人联系方式二选一
-            Contact contact = new Contact();
-            contact.setReceiver_contact(order.getConsigneeMobile());
-            shipping.setContact(contact);
-            shippingList.add(shipping);
-            map.put("shipping_list", shippingList);
+            if (noDeliveryOnly) {
+                map.put("logistics_type", 2);
+                map.put("delivery_mode", 1);
+                OrderPackage firstPackage = packages.get(0);
+                List<Shipping> shippingList = new ArrayList<>();
+                Shipping shipping = new Shipping();
+                List<OrderItem> orderItemList = orderItemService.getByOrderSn(order.getSn());
+                String itemDesc = CharSequenceUtil.isNotBlank(firstPackage.getDeliveryRemark())
+                        ? firstPackage.getDeliveryRemark()
+                        : orderItemList.get(0).getGoodsName();
+                shipping.setItem_desc(itemDesc);
+                Contact contact = new Contact();
+                contact.setReceiver_contact(order.getConsigneeMobile());
+                shipping.setContact(contact);
+                shippingList.add(shipping);
+                map.put("shipping_list", shippingList);
+            } else if (expressPackages.size() > 1) {
+                map.put("logistics_type", 1);
+                map.put("delivery_mode", 2);
+                List<Shipping> shippingList = new ArrayList<>();
+                for (OrderPackage orderPackage : expressPackages) {
+                    Shipping shipping = new Shipping();
+                    shipping.setTracking_no(orderPackage.getLogisticsNo());
+                    shipping.setExpress_company(getDeliveryList(orderPackage.getLogisticsName()));
+                    List<OrderItem> orderItemList = orderItemService.getByOrderSn(order.getSn());
+                    shipping.setItem_desc(orderItemList.get(0).getGoodsName());
+                    Contact contact = new Contact();
+                    contact.setReceiver_contact(order.getConsigneeMobile());
+                    shipping.setContact(contact);
+                    shippingList.add(shipping);
+                }
+                map.put("shipping_list", shippingList);
+            } else {
+                map.put("logistics_type", 1);
+                map.put("delivery_mode", 1);
+                List<Shipping> shippingList = new ArrayList<>();
+                Shipping shipping = new Shipping();
+                if (!expressPackages.isEmpty()) {
+                    shipping.setTracking_no(expressPackages.get(0).getLogisticsNo());
+                    shipping.setExpress_company(getDeliveryList(expressPackages.get(0).getLogisticsName()));
+                } else {
+                    shipping.setTracking_no(order.getLogisticsNo());
+                    shipping.setExpress_company(getDeliveryList(order));
+                }
+                List<OrderItem> orderItemList = orderItemService.getByOrderSn(order.getSn());
+                shipping.setItem_desc(orderItemList.get(0).getGoodsName());
+                Contact contact = new Contact();
+                contact.setReceiver_contact(order.getConsigneeMobile());
+                shipping.setContact(contact);
+                shippingList.add(shipping);
+                map.put("shipping_list", shippingList);
+            }
 
 
         } else if (order.getOrderStatus().equals(OrderStatusEnum.STAY_PICKED_UP.name())) {
@@ -206,14 +253,15 @@ public class WechatMPServiceImpl implements WechatMPService {
      * https://developers.weixin.qq.com/miniprogram/dev/platform-capabilities/industry/express/business/express_search.html#%E8%8E%B7%E5%8F%96%E8%BF%90%E5%8A%9Bid%E5%88%97%E8%A1%A8get-delivery-list
      */
     private String getDeliveryList(Order order) {
-        //发送url
+        return getDeliveryList(order.getLogisticsName());
+    }
 
+    private String getDeliveryList(String logisticsName) {
         Map<String, Object> map = new HashMap<>(2);
         JSONObject jsonObject = this.doPostWithJson(DeliveryUrl, map);
-        Map<String, String> roomMap = new HashMap<>(2);
         List<Delivery> deliveryList = JSON.parseArray(jsonObject.getString("delivery_list"), Delivery.class);
         for (Delivery delivery : deliveryList) {
-            if (order.getLogisticsName().equals(delivery.getDelivery_name())) {
+            if (logisticsName != null && logisticsName.equals(delivery.getDelivery_name())) {
                 return delivery.getDelivery_id();
             }
         }

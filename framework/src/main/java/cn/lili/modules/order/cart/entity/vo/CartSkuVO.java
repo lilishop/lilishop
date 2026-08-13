@@ -6,6 +6,7 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.promotion.tools.PromotionTools;
+import com.alibaba.fastjson2.annotation.JSONField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -144,6 +145,7 @@ public class CartSkuVO extends CartBase implements Serializable {
         return PromotionTools.filterInvalidPromotionsMap(this.promotionMap);
     }
 
+    @JSONField(serialize = false)
     public Map<String, Object> getNotFilterPromotionMap() {
         return this.promotionMap;
     }

@@ -1,9 +1,9 @@
 package cn.lili.modules.order.order.serviceimpl;
 
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.modules.order.order.entity.dos.OrderPackage;
 import cn.lili.modules.order.order.entity.dos.OrderPackageItem;
+import cn.lili.modules.order.order.entity.enums.FulfillmentModeEnum;
 import cn.lili.modules.order.order.entity.vo.OrderPackageVO;
 import cn.lili.modules.order.order.mapper.OrderPackageMapper;
 import cn.lili.modules.order.order.service.OrderPackageItemService;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -43,19 +44,23 @@ public class OrderPackageServiceImpl extends ServiceImpl<OrderPackageMapper, Ord
     @Override
     public List<OrderPackageVO> getOrderPackageVOList(String orderSn) {
         List<OrderPackage> orderPackages = this.orderPackageList(orderSn);
-        if (orderPackages == null){
-            throw new ServiceException(ResultCode.ORDER_PACKAGE_NOT_EXIST);
+        if (orderPackages == null || orderPackages.isEmpty()) {
+            return Collections.emptyList();
         }
         List<OrderPackageVO> orderPackageVOS = new ArrayList<>();
         orderPackages.forEach(orderPackage -> {
             OrderPackageVO orderPackageVO = new OrderPackageVO(orderPackage);
-            // 获取子订单包裹详情
             List<OrderPackageItem> orderPackageItemList = orderpackageItemService.getOrderPackageItemListByPno(orderPackage.getPackageNo());
             orderPackageVO.setOrderPackageItemList(orderPackageItemList);
-            String str = orderPackage.getConsigneeMobile();
-            str = str.substring(str.length() - 4);
-            Traces traces = logisticsService.getLogisticTrack(orderPackage.getLogisticsCode(), orderPackage.getLogisticsNo(), str);
-            orderPackageVO.setTraces(traces);
+            if (Boolean.TRUE.equals(orderPackageVO.getLogisticsRequired())
+                    && CharSequenceUtil.isNotBlank(orderPackage.getLogisticsCode())
+                    && CharSequenceUtil.isNotBlank(orderPackage.getLogisticsNo())
+                    && CharSequenceUtil.isNotBlank(orderPackage.getConsigneeMobile())) {
+                String mobile = orderPackage.getConsigneeMobile();
+                String suffix = mobile.length() >= 4 ? mobile.substring(mobile.length() - 4) : mobile;
+                Traces traces = logisticsService.getLogisticTrack(orderPackage.getLogisticsCode(), orderPackage.getLogisticsNo(), suffix);
+                orderPackageVO.setTraces(traces);
+            }
             orderPackageVOS.add(orderPackageVO);
         });
 
