@@ -147,6 +147,7 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 - ✅ 卡密商品
 - ✅ 二级分销
 - ✅ 定时任务管理
+- ✅ 商家发货改造（整单发货/拆单发货/无需配送）
 - 🔜 主题色管理
 - 🔜 店铺结算汇总
 - 🔜 支付方式汇总
