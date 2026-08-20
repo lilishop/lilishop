@@ -175,7 +175,7 @@ lili:
     #登录验证码放行，普通部署默认关闭
     loginBypassEnabled: false
   system:
-    isDemoSite: false
+    isDemoSite: true
     #     脱敏级别：
     #     0：不做脱敏处理
     #     1：管理端用户手机号等信息脱敏
