@@ -137,17 +137,17 @@ public class DistributionWalletAccountServiceImpl implements DistributionWalletA
                          WalletSnapshot before, WalletSnapshot after, String idempotentKey, String remark) {
         DistributionWalletLog walletLog = new DistributionWalletLog();
         walletLog.setDistributionId(distributionId);
-        walletLog.setLogType(logType.name());
+        walletLog.setBizType(logType.name());
         walletLog.setBizSn(bizSn);
         walletLog.setChangeAmount(changeAmount);
-        walletLog.setCanRebateBefore(before.canRebate);
-        walletLog.setCanRebateAfter(after.canRebate);
-        walletLog.setCommissionFrozenBefore(before.commissionFrozen);
-        walletLog.setCommissionFrozenAfter(after.commissionFrozen);
-        walletLog.setWithdrawalFrozenBefore(before.withdrawalFrozen);
-        walletLog.setWithdrawalFrozenAfter(after.withdrawalFrozen);
-        walletLog.setWithdrawnTotalBefore(before.withdrawnTotal);
-        walletLog.setWithdrawnTotalAfter(after.withdrawnTotal);
+        walletLog.setBeforeCanRebate(before.canRebate);
+        walletLog.setAfterCanRebate(after.canRebate);
+        walletLog.setBeforeCommissionFrozen(before.commissionFrozen);
+        walletLog.setAfterCommissionFrozen(after.commissionFrozen);
+        walletLog.setBeforeWithdrawalFrozen(before.withdrawalFrozen);
+        walletLog.setAfterWithdrawalFrozen(after.withdrawalFrozen);
+        walletLog.setBeforeWithdrawnTotal(before.withdrawnTotal);
+        walletLog.setAfterWithdrawnTotal(after.withdrawnTotal);
         walletLog.setIdempotentKey(idempotentKey);
         walletLog.setRemark(remark);
         distributionWalletLogMapper.insert(walletLog);

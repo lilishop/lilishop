@@ -31,9 +31,9 @@ public class DistributionWalletLogManagerController {
     @Operation(summary = "钱包流水分页")
     @GetMapping
     public ResultMessage<IPage<DistributionWalletLog>> page(@RequestParam(required = false) String distributionId,
-                                                            @RequestParam(required = false) String logType,
+                                                            @RequestParam(required = false) String bizType,
                                                             @RequestParam(required = false) String bizSn,
                                                             PageVO page) {
-        return ResultUtil.data(walletLogService.pageByDistribution(distributionId, logType, bizSn, page));
+        return ResultUtil.data(walletLogService.pageByDistribution(distributionId, bizType, bizSn, page));
     }
 }

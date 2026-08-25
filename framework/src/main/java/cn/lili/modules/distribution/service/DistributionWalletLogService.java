@@ -20,10 +20,10 @@ public interface DistributionWalletLogService extends IService<DistributionWalle
      * 分页查询指定分销员的钱包流水。
      *
      * @param distributionId 分销员 ID
-     * @param logType        流水类型（可选）
+     * @param bizType        业务类型（可选）
      * @param bizSn          业务单号（可选）
      * @param page           分页参数
      * @return 钱包流水分页
      */
-    IPage<DistributionWalletLog> pageByDistribution(String distributionId, String logType, String bizSn, PageVO page);
+    IPage<DistributionWalletLog> pageByDistribution(String distributionId, String bizType, String bizSn, PageVO page);
 }

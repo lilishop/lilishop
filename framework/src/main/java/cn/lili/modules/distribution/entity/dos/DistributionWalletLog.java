@@ -29,8 +29,8 @@ public class DistributionWalletLog extends BaseEntity {
     /**
      * @see cn.lili.modules.distribution.entity.enums.DistributionWalletLogTypeEnum
      */
-    @Schema(description = "流水类型")
-    private String logType;
+    @Schema(description = "业务类型")
+    private String bizType;
 
     @Schema(description = "业务单号")
     private String bizSn;
@@ -39,28 +39,28 @@ public class DistributionWalletLog extends BaseEntity {
     private BigDecimal changeAmount;
 
     @Schema(description = "变动前可提现余额")
-    private BigDecimal canRebateBefore;
+    private BigDecimal beforeCanRebate;
 
     @Schema(description = "变动后可提现余额")
-    private BigDecimal canRebateAfter;
+    private BigDecimal afterCanRebate;
 
     @Schema(description = "变动前佣金冻结余额")
-    private BigDecimal commissionFrozenBefore;
+    private BigDecimal beforeCommissionFrozen;
 
     @Schema(description = "变动后佣金冻结余额")
-    private BigDecimal commissionFrozenAfter;
+    private BigDecimal afterCommissionFrozen;
 
     @Schema(description = "变动前提现冻结余额")
-    private BigDecimal withdrawalFrozenBefore;
+    private BigDecimal beforeWithdrawalFrozen;
 
     @Schema(description = "变动后提现冻结余额")
-    private BigDecimal withdrawalFrozenAfter;
+    private BigDecimal afterWithdrawalFrozen;
 
     @Schema(description = "变动前累计已提现金额")
-    private BigDecimal withdrawnTotalBefore;
+    private BigDecimal beforeWithdrawnTotal;
 
     @Schema(description = "变动后累计已提现金额")
-    private BigDecimal withdrawnTotalAfter;
+    private BigDecimal afterWithdrawnTotal;
 
     @Schema(description = "操作者ID")
     private String operatorId;

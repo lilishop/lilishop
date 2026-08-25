@@ -25,16 +25,16 @@ public class DistributionWalletLogServiceImpl extends ServiceImpl<DistributionWa
      * 分页查询分销员钱包流水。
      *
      * @param distributionId 分销员ID
-     * @param logType        流水类型
+     * @param bizType        业务类型
      * @param bizSn          业务单号
      * @param page           分页参数
      * @return 流水分页
      */
     @Override
-    public IPage<DistributionWalletLog> pageByDistribution(String distributionId, String logType, String bizSn, PageVO page) {
+    public IPage<DistributionWalletLog> pageByDistribution(String distributionId, String bizType, String bizSn, PageVO page) {
         LambdaQueryWrapper<DistributionWalletLog> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(CharSequenceUtil.isNotEmpty(distributionId), DistributionWalletLog::getDistributionId, distributionId);
-        wrapper.eq(CharSequenceUtil.isNotEmpty(logType), DistributionWalletLog::getLogType, logType);
+        wrapper.eq(CharSequenceUtil.isNotEmpty(bizType), DistributionWalletLog::getBizType, bizType);
         wrapper.eq(CharSequenceUtil.isNotEmpty(bizSn), DistributionWalletLog::getBizSn, bizSn);
         wrapper.orderByDesc(DistributionWalletLog::getCreateTime);
         return this.page(PageUtil.initPage(page), wrapper);
