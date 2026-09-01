@@ -87,7 +87,10 @@ public class GoodsBuyerController {
             Map<String, Object> map = goodsSkuService.getGoodsSkuDetail(goodsId, skuId);
             return ResultUtil.data(map);
         } catch (ServiceException se) {
-            log.info(se.getMsg(), se);
+            log.info("商品详情不可用 goodsId={}, skuId={}, code={}, msg={}",
+                    goodsId, skuId,
+                    se.getResultCode() != null ? se.getResultCode() : ResultCode.ERROR,
+                    se.getMsg());
             throw se;
         } catch (Exception e) {
             log.error(ResultCode.GOODS_ERROR.message(), e);

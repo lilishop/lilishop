@@ -67,8 +67,7 @@ public class GoodsSearchServiceImpl implements GoodsSearchService {
     public Page<GoodsIndex> searchGoodsByPage(GoodsSearchDTO searchDTO, PageVO pageVo) {
         int pageNumber = getPageNumber(pageVo);
         int pageSize = getPageSize(pageVo);
-        List<GoodsIndex> indexes = searchMysqlIndexes(searchDTO, false);
-        sort(indexes, pageVo);
+        List<GoodsIndex> indexes = sort(searchMysqlIndexes(searchDTO, false), pageVo);
 
         Page<GoodsIndex> page = new Page<>(pageNumber, pageSize);
         page.setTotal(indexes.size());
@@ -322,9 +321,9 @@ public class GoodsSearchServiceImpl implements GoodsSearchService {
         }).toList();
     }
 
-    private void sort(List<GoodsIndex> indexes, PageVO pageVo) {
+    private List<GoodsIndex> sort(List<GoodsIndex> indexes, PageVO pageVo) {
         if (CollUtil.isEmpty(indexes) || pageVo == null || CharSequenceUtil.isEmpty(pageVo.getSort())) {
-            return;
+            return indexes;
         }
         Comparator<GoodsIndex> comparator = switch (pageVo.getSort()) {
             case "price" -> Comparator.comparing(GoodsIndex::getPrice, Comparator.nullsLast(Double::compareTo));
@@ -333,12 +332,14 @@ public class GoodsSearchServiceImpl implements GoodsSearchService {
             default -> null;
         };
         if (comparator == null) {
-            return;
+            return indexes;
         }
         if ("desc".equalsIgnoreCase(pageVo.getOrder())) {
             comparator = comparator.reversed();
         }
-        indexes.sort(comparator);
+        List<GoodsIndex> sorted = new ArrayList<>(indexes);
+        sorted.sort(comparator);
+        return sorted;
     }
 
     private List<GoodsIndex> slice(List<GoodsIndex> indexes, int pageNumber, int pageSize) {

@@ -177,6 +177,61 @@ class GoodsSearchServiceImplTest {
         verify(promotionService, never()).getGoodsSkuPromotionMap("store-1", "sku-3");
     }
 
+    @Test
+    void searchGoodsByPageSortsImmutableMysqlResultByPriceDesc() {
+        GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
+        Page<GoodsSkuDTO> skuPage = new Page<>();
+        GoodsSkuDTO cheap = skuDto("sku-cheap", "goods-cheap", "低价商品", "内存", "8G");
+        cheap.setPrice(10D);
+        cheap.setBuyCount(3);
+        GoodsSkuDTO mid = skuDto("sku-mid", "goods-mid", "中价商品", "内存", "8G");
+        mid.setPrice(20D);
+        mid.setBuyCount(1);
+        GoodsSkuDTO expensive = skuDto("sku-expensive", "goods-expensive", "高价商品", "内存", "8G");
+        expensive.setPrice(30D);
+        expensive.setBuyCount(2);
+        skuPage.setRecords(List.of(cheap, mid, expensive));
+        when(goodsSkuService.getGoodsSkuDTOByPage(any(Page.class), any())).thenReturn(skuPage);
+
+        GoodsSearchServiceImpl service = new GoodsSearchServiceImpl(goodsSkuService);
+        PageVO pageVO = new PageVO();
+        pageVO.setNotConvert(true);
+        pageVO.setSort("price");
+        pageVO.setOrder("desc");
+        pageVO.setPageNumber(1);
+        pageVO.setPageSize(10);
+
+        Page<GoodsIndex> result = service.searchGoodsByPage(new GoodsSearchDTO(), pageVO);
+
+        Assertions.assertEquals(List.of("sku-expensive", "sku-mid", "sku-cheap"),
+                result.getRecords().stream().map(GoodsIndex::getId).toList());
+    }
+
+    @Test
+    void searchGoodsByPageSortsImmutableMysqlResultByBuyCountAsc() {
+        GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
+        Page<GoodsSkuDTO> skuPage = new Page<>();
+        GoodsSkuDTO lowSales = skuDto("sku-low", "goods-low", "低销量", "内存", "8G");
+        lowSales.setBuyCount(1);
+        GoodsSkuDTO highSales = skuDto("sku-high", "goods-high", "高销量", "内存", "8G");
+        highSales.setBuyCount(9);
+        skuPage.setRecords(List.of(highSales, lowSales));
+        when(goodsSkuService.getGoodsSkuDTOByPage(any(Page.class), any())).thenReturn(skuPage);
+
+        GoodsSearchServiceImpl service = new GoodsSearchServiceImpl(goodsSkuService);
+        PageVO pageVO = new PageVO();
+        pageVO.setNotConvert(true);
+        pageVO.setSort("buyCount");
+        pageVO.setOrder("asc");
+        pageVO.setPageNumber(1);
+        pageVO.setPageSize(10);
+
+        Page<GoodsIndex> result = service.searchGoodsByPage(new GoodsSearchDTO(), pageVO);
+
+        Assertions.assertEquals(List.of("sku-low", "sku-high"),
+                result.getRecords().stream().map(GoodsIndex::getId).toList());
+    }
+
     private GoodsSku sku(String skuId, String goodsId, String goodsName) {
         GoodsSku sku = new GoodsSku();
         sku.setId(skuId);
