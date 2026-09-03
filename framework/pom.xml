@@ -216,6 +216,17 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- 搜索 IT：cn.lili.it.search（testCompile 需要，即使 skipTests=true） -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-mysql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-mariadb</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- 解决版本提示问题 -->
         <dependency>
