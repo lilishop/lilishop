@@ -31,19 +31,14 @@ public class PageUtil {
     static final Integer orderByLengthLimit = 20;
 
     /**
-     * Mybatis-Plus分页封装
-     *
-     * @param page 分页VO
-     * @param <T>  范型
-     * @return 分页响应
+     * 只夹紧页码与页长，不挂 {@link OrderItem}。
+     * 调用方自行拼 ORDER BY（例如搜索白名单）时使用，避免与 {@link #initPage} 的排序叠加。
+     * 夹紧规则与 {@link #initPage} 相同：pageNumber &lt; 1 → 1，pageSize &lt; 1 → 10，pageSize &gt; 100 → 100。
+     * 不处理 page 为 null（与 {@link #initPage} 一致，由调用方保证）。
      */
-    public static <T> Page<T> initPage(PageVO page) {
-
+    public static <T> Page<T> initPageWithoutOrder(PageVO page) {
         int pageNumber = page.getPageNumber();
         int pageSize = page.getPageSize();
-        String sort = page.getSort();
-        String order = page.getOrder();
-
         if (pageNumber < 1) {
             pageNumber = 1;
         }
@@ -53,8 +48,21 @@ public class PageUtil {
         if (pageSize > 100) {
             pageSize = 100;
         }
+        return new Page<>(pageNumber, pageSize);
+    }
 
-        Page<T> p = new Page<>(pageNumber, pageSize);
+    /**
+     * Mybatis-Plus分页封装
+     *
+     * @param page 分页VO
+     * @param <T>  范型
+     * @return 分页响应
+     */
+    public static <T> Page<T> initPage(PageVO page) {
+
+        Page<T> p = initPageWithoutOrder(page);
+        String sort = page.getSort();
+        String order = page.getOrder();
 
         if (CharSequenceUtil.isNotBlank(sort)) {
 

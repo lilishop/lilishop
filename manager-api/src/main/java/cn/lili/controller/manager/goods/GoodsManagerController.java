@@ -16,6 +16,8 @@ import cn.lili.modules.goods.entity.vos.GoodsNumVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.service.GoodsService;
 import cn.lili.modules.goods.service.GoodsSkuService;
+import cn.lili.modules.goods.service.GoodsSearchParamService;
+import cn.lili.modules.goods.entity.dto.RebuildStatus;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -52,6 +54,11 @@ public class GoodsManagerController {
      */
     @Autowired
     private GoodsSkuService goodsSkuService;
+    /**
+     * 商品参数倒排
+     */
+    @Autowired
+    private GoodsSearchParamService goodsSearchParamService;
 
     @Operation(summary = "分页获取")
     @Parameter(name = "goodsSearchParams", description = "商品查询参数")
@@ -152,6 +159,37 @@ public class GoodsManagerController {
     public ResultMessage<Object> batchUpdateVirtualSales(@Valid @RequestBody GoodsVirtualSalesDTO goodsVirtualSalesDTO) {
         goodsSkuService.batchUpdateGoodsSkuVirtualSales(goodsVirtualSalesDTO.getSkuIds(), goodsVirtualSalesDTO.getVirtualSales());
         return ResultUtil.success();
+    }
+
+    /**
+     * 异步全量重建：按 li_goods.params 刷 li_goods_search_param，上线切读前 / 数据修复用。
+     */
+    @DemoSite
+    @Operation(summary = "提交商品参数倒排全量重建")
+    @PostMapping("/search-param/rebuild")
+    public ResultMessage<RebuildStatus> submitSearchParamRebuild() {
+        return ResultUtil.data(goodsSearchParamService.submitRebuildAll());
+    }
+
+    /**
+     * 同步重建单个 SPU 的倒排行；返回写入行数。
+     */
+    @DemoSite
+    @Operation(summary = "重建单个商品的参数倒排")
+    @Parameter(name = "goodsId", description = "商品ID", required = true)
+    @PostMapping("/search-param/rebuild/{goodsId}")
+    public ResultMessage<Integer> rebuildSearchParamByGoodsId(@PathVariable String goodsId) {
+        return ResultUtil.data(goodsSearchParamService.rebuildByGoodsId(goodsId));
+    }
+
+    /**
+     * 查询全量重建进度（已扫描 / 已重建 / 失败 goodsId 等）。
+     */
+    @DemoSite
+    @Operation(summary = "查询商品参数倒排全量重建进度")
+    @GetMapping("/search-param/rebuild/status")
+    public ResultMessage<RebuildStatus> getSearchParamRebuildStatus() {
+        return ResultUtil.data(goodsSearchParamService.getRebuildStatus());
     }
 
 }

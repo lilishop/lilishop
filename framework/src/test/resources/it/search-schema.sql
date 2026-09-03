@@ -1,0 +1,76 @@
+-- 搜索 IT 最小表结构：列类型对齐 docker/init/mysql/lilishop.sql，仅保留本轮查询用到的列。
+-- 作者：Mike
+-- 创建：2026-09-03
+CREATE TABLE IF NOT EXISTS `li_brand` (
+  `id` bigint NOT NULL COMMENT 'ID',
+  `delete_flag` bit(1) NULL DEFAULT NULL,
+  `logo` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB CHARACTER SET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+CREATE TABLE IF NOT EXISTS `li_goods` (
+  `id` bigint NOT NULL COMMENT 'ID',
+  `create_by` varchar(255) NULL DEFAULT NULL,
+  `create_time` datetime(6) NULL DEFAULT NULL,
+  `delete_flag` bit(1) NULL DEFAULT NULL,
+  `update_by` varchar(255) NULL DEFAULT NULL,
+  `update_time` datetime(6) NULL DEFAULT NULL,
+  `auth_message` varchar(255) NULL DEFAULT NULL,
+  `brand_id` varchar(255) NULL DEFAULT NULL,
+  `buy_count` int NULL DEFAULT 0,
+  `category_path` varchar(255) NULL DEFAULT NULL,
+  `comment_num` int NULL DEFAULT NULL,
+  `goods_name` varchar(255) NULL DEFAULT NULL,
+  `goods_unit` varchar(255) NULL DEFAULT NULL,
+  `goods_video` varchar(255) NULL DEFAULT NULL,
+  `grade` decimal(10, 2) NULL DEFAULT NULL,
+  `intro` text NULL,
+  `auth_flag` varchar(255) NULL DEFAULT NULL,
+  `market_enable` varchar(255) NULL DEFAULT NULL,
+  `mobile_intro` text NULL,
+  `original` varchar(255) NULL DEFAULT NULL,
+  `price` decimal(10, 2) NULL DEFAULT NULL,
+  `quantity` int NULL DEFAULT 0,
+  `recommend` bit(1) NULL DEFAULT NULL,
+  `sales_model` varchar(255) NULL DEFAULT NULL,
+  `self_operated` bit(1) NULL DEFAULT NULL,
+  `store_id` varchar(255) NULL DEFAULT NULL,
+  `store_name` varchar(255) NULL DEFAULT NULL,
+  `selling_point` varchar(255) NULL DEFAULT NULL,
+  `small` varchar(255) NULL DEFAULT NULL,
+  `sn` varchar(30) NULL DEFAULT NULL,
+  `template_id` varchar(255) NULL DEFAULT NULL,
+  `thumbnail` varchar(255) NULL DEFAULT NULL,
+  `under_message` varchar(255) NULL DEFAULT NULL,
+  `store_category_path` varchar(255) NULL DEFAULT NULL,
+  `params` text NULL,
+  `goods_type` varchar(255) NULL DEFAULT NULL,
+  `scheduled_upper_time` datetime NULL DEFAULT NULL,
+  `scheduled_upper_reason` varchar(255) NULL DEFAULT NULL,
+  `scheduled_down_time` datetime NULL DEFAULT NULL,
+  `scheduled_down_reason` varchar(255) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB CHARACTER SET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+CREATE TABLE IF NOT EXISTS `li_goods_sku` (
+  `id` bigint NOT NULL COMMENT 'ID',
+  `create_time` datetime(6) NULL DEFAULT NULL,
+  `delete_flag` bit(1) NULL DEFAULT NULL,
+  `brand_id` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
+  `buy_count` int NULL DEFAULT NULL,
+  `virtual_sales` int NULL DEFAULT 0,
+  `category_path` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
+  `comment_num` int NULL DEFAULT NULL,
+  `goods_id` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
+  `goods_name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
+  `auth_flag` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
+  `market_enable` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
+  `price` decimal(10, 2) NULL DEFAULT NULL,
+  `recommend` bit(1) NOT NULL DEFAULT b'0',
+  `sales_model` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
+  `store_id` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
+  `store_category_path` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
+  `goods_type` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB CHARACTER SET=utf8mb3 COLLATE=utf8mb3_general_ci;

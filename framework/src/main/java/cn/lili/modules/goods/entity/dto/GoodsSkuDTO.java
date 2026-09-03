@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.BeanUtils;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,6 +36,10 @@ public class GoodsSkuDTO extends GoodsSku {
     @Schema(description = "品牌logo")
     @TableField(exist = false)
     private String brandLogo;
+
+    @Schema(description = "商品SPU建档时间")
+    @TableField(exist = false)
+    private Date goodsCreateTime;
 
 
     public GoodsSkuDTO(GoodsSku goodsSku, List<GoodsParamsDTO> goodsParamDTOS) {

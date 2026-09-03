@@ -111,17 +111,22 @@ public class GoodsBuyerController {
         return ResultUtil.data(goodsSkuService.getGoodsSkuByList(goodsSearchParams));
     }
 
-    @Operation(summary = "商品搜索分页")
+    @Operation(summary = "商品搜索分页",
+            description = "pageSize 上限 100，超出被静默压到 100。"
+                    + "promotionType、promotionsId、currentGoodsId、nameIds 当前 MySQL 搜索未实现。")
     @GetMapping("/search")
     public ResultMessage<Page<GoodsIndex>> searchGoods(GoodsSearchDTO goodsSearchParams, PageVO pageVO) {
+        // 保持前端传入的驼峰 sort（price/buyCount 等），交由服务端白名单归一
         pageVO.setNotConvert(true);
         return ResultUtil.data(goodsSearchService.searchGoodsByPage(goodsSearchParams, pageVO));
     }
 
-    @Operation(summary = "商品搜索筛选器")
+    @Operation(summary = "商品搜索筛选器",
+            description = "promotionType、promotionsId、currentGoodsId、nameIds 当前 MySQL 搜索未实现。")
     @GetMapping("/search/related")
     public ResultMessage<GoodsRelatedInfo> searchGoodsRelated(GoodsSearchDTO goodsSearchParams, PageVO pageVO) {
         pageVO.setNotConvert(true);
+        // 品牌 / 分类 / 参数选项，与列表共用 WHERE
         GoodsRelatedInfo selector = goodsSearchService.getSelector(goodsSearchParams, pageVO);
         return ResultUtil.data(selector);
     }

@@ -159,7 +159,11 @@ public class Goods extends BaseEntity {
     @Schema(description = "商品类型", requiredMode = Schema.RequiredMode.REQUIRED)
     private String goodsType;
 
-    @Schema(description = "商品参数json", hidden = true)
+    /**
+     * 商品参数 JSON。与倒排表 {@code li_goods_search_param} 同源：实体上的最终值才是写倒排的输入。
+     * {@code null} 表示本次不更新该列（edit 走 updateById 时该列不进 UPDATE）。
+     */
+    @Schema(description = "商品参数json。null 表示本次不更新该列，空数组 [] 表示清空参数", hidden = true)
     private String params;
 
 
@@ -180,7 +184,7 @@ public class Goods extends BaseEntity {
         this.mobileIntro = goodsOperationDTO.getMobileIntro();
         this.goodsVideo = goodsOperationDTO.getGoodsVideo();
         this.price = goodsOperationDTO.getPrice();
-        if (goodsOperationDTO.getGoodsParamsDTOList() != null && goodsOperationDTO.getGoodsParamsDTOList().isEmpty()) {
+        if (goodsOperationDTO.getGoodsParamsDTOList() != null) {
             this.params = JSON.toJSONString(goodsOperationDTO.getGoodsParamsDTOList());
         }
         //如果立即上架则

@@ -10,6 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 商品搜索入参。
+ * <p>
+ * 当前 MySQL 搜索未实现：nameIds、currentGoodsId、promotionType、promotionsId。
+ * pageSize 上限为 100，超出被静默压到 100。
+ *
  * @author paulG
  * @since 2020/10/15
  **/
@@ -37,7 +42,7 @@ public class GoodsSearchDTO {
     @Schema(description = "属性:参数名_参数值@参数名_参数值", example = "屏幕类型_LED@屏幕尺寸_15英寸")
     private String prop;
 
-    @Schema(description = "规格项列表")
+    @Schema(description = "规格项列表。当前 MySQL 搜索未实现，传入无效")
     private List<String> nameIds;
 
     @Schema(description = "卖家id，搜索店铺商品的时候使用")
@@ -49,16 +54,16 @@ public class GoodsSearchDTO {
     @Schema(hidden = true)
     private Map<String, List<String>> notShowCol = new HashMap<>();
 
-    @Schema(description = "当前商品skuId,根据当前浏览的商品信息来给用户推荐可能喜欢的商品")
+    @Schema(description = "当前商品skuId,根据当前浏览的商品信息来给用户推荐可能喜欢的商品。当前 MySQL 搜索未实现，传入无效")
     private String currentGoodsId;
 
     /**
      * @see cn.lili.common.enums.PromotionTypeEnum
      */
-    @Schema(description = "促销活动类型")
+    @Schema(description = "促销活动类型。当前 MySQL 搜索未实现，传入无效")
     private String promotionType;
 
-    @Schema(description = "促销活动id")
+    @Schema(description = "促销活动id。当前 MySQL 搜索未实现，传入无效")
     private String promotionsId;
 
     /**

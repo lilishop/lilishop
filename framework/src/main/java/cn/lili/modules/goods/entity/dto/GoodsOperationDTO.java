@@ -72,7 +72,15 @@ public class GoodsOperationDTO implements Serializable {
     @Schema(description = "是否是推荐商品")
     private Boolean recommend;
 
-    @Schema(description = "商品参数")
+    /**
+     * 商品参数三态：
+     * <ul>
+     *   <li>非空数组：写入该 JSON，并按解析结果重建倒排表</li>
+     *   <li>空数组 {@code []}：写入 {@code "[]"}，并清空该商品的倒排行</li>
+     *   <li>缺字段 / {@code null}：不更新 {@code li_goods.params}，倒排表保持原样（不是清空）</li>
+     * </ul>
+     */
+    @Schema(description = "商品参数。非空数组写入 JSON 并重建倒排；空数组 [] 写入 \"[]\" 并清空倒排；缺字段/null 表示本次不更新参数")
     private List<GoodsParamsItemDTO> goodsParamsDTOList;
 
     @Schema(description = "商品图片")

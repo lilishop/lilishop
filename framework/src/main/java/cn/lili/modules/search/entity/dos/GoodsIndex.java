@@ -163,7 +163,6 @@ public class GoodsIndex implements Serializable {
             this.grade = sku.getGrade();
             this.recommend = sku.getRecommend();
             this.goodsType = sku.getGoodsType();
-            this.releaseTime = new Date();
         }
     }
 
@@ -188,36 +187,6 @@ public class GoodsIndex implements Serializable {
     public GoodsIndex(GoodsSku sku, Date createDate) {
         this(sku);
         this.releaseTime = createDate;
-    }
-
-    public void setGoodsSku(GoodsSku sku) {
-        if (sku != null) {
-            this.id = sku.getId();
-            this.goodsId = sku.getGoodsId();
-            this.goodsName = sku.getGoodsName();
-            this.price = sku.getPrice();
-            this.storeName = sku.getStoreName();
-            this.storeId = sku.getStoreId();
-            this.thumbnail = sku.getThumbnail();
-            this.categoryPath = sku.getCategoryPath();
-            this.goodsVideo = sku.getGoodsVideo();
-            this.mobileIntro = sku.getMobileIntro();
-            this.buyCount = (sku.getBuyCount() != null ? sku.getBuyCount() : 0)
-                    + (sku.getVirtualSales() != null ? sku.getVirtualSales() : 0);
-            this.commentNum = sku.getCommentNum();
-            this.small = sku.getSmall();
-            this.brandId = sku.getBrandId();
-            this.sn = sku.getSn();
-            this.storeCategoryPath = sku.getStoreCategoryPath();
-            this.sellingPoint = sku.getSellingPoint();
-            this.selfOperated = sku.getSelfOperated();
-            this.salesModel = sku.getSalesModel();
-            this.marketEnable = sku.getMarketEnable();
-            this.authFlag = sku.getAuthFlag();
-            this.intro = sku.getIntro();
-            this.grade = sku.getGrade();
-            this.releaseTime = new Date();
-        }
     }
 
     public Map<String, Object> getOriginPromotionMap() {

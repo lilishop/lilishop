@@ -57,11 +57,12 @@ public interface PromotionGoodsMapper extends BaseMapper<PromotionGoods> {
                                                     @Param("promotionId") String promotionId);
 
     /**
-     * 查询参加活动促销商品价格
+     * 查询当前有效促销中的最低价。
+     * 同一 SKU 可能同时命中秒杀、拼团或多条重叠活动，必须聚合为单值，避免 selectOne 因多行失败。
      *
      * @param queryWrapper 查询条件
-     * @return 共参加了几种活动
+     * @return 促销商品价格
      */
-    @Select("select price from li_promotion_goods ${ew.customSqlSegment} ")
+    @Select("select MIN(price) from li_promotion_goods ${ew.customSqlSegment}")
     Double selectPromotionsGoodsPrice(@Param(Constants.WRAPPER) Wrapper<PromotionGoods> queryWrapper);
 }

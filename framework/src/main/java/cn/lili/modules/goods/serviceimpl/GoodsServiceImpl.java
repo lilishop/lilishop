@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
-import cn.lili.modules.goods.entity.dto.GoodsParamsItemDTO;
 import cn.lili.trigger.enums.DelayTypeEnums;
 import cn.lili.trigger.message.GoodsMarketMessage;
 import cn.lili.trigger.model.TimeExecuteConstant;
@@ -22,7 +21,6 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.modules.goods.entity.dos.*;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
-import cn.lili.modules.goods.entity.dto.GoodsParamsDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
@@ -32,6 +30,7 @@ import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.mapper.GoodsMapper;
 import cn.lili.modules.goods.service.*;
+import cn.lili.modules.goods.support.GoodsSearchParamParser;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
 import cn.lili.modules.member.entity.enums.EvaluationGradeEnum;
 import cn.lili.modules.member.service.MemberEvaluationService;
@@ -139,6 +138,9 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Autowired
     private Cache<GoodsVO> cache;
 
+    @Autowired
+    private GoodsSearchParamService goodsSearchParamService;
+
     @Override
     public List<Goods> getByBrandIds(List<String> brandIds) {
         LambdaQueryWrapper<Goods> lambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -157,21 +159,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         applicationEventPublisher.publishEvent(new TransactionCommitSendMQEvent("下架商品",
                 rocketmqCustomProperties.getGoodsTopic(), GoodsTagsEnum.DOWN.name(), JSON.toJSONString(list)));
 
-    }
-
-    /**
-     * 更新商品参数
-     *
-     * @param goodsId 商品id
-     * @param params  商品参数
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void updateGoodsParams(String goodsId, String params) {
-        LambdaUpdateWrapper<Goods> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Goods::getId, goodsId);
-        updateWrapper.set(Goods::getParams, params);
-        this.update(updateWrapper);
     }
 
     @Override
@@ -193,11 +180,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (goodsOperationDTO.getGoodsGalleryList().size() > 0) {
             this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
         }
-        //添加商品参数
-        if (goodsOperationDTO.getGoodsParamsDTOList() != null && !goodsOperationDTO.getGoodsParamsDTOList().isEmpty()) {
-            //给商品参数填充值
-            goods.setParams(JSON.toJSONString(goodsOperationDTO.getGoodsParamsDTOList()));
-        }
         
         // 检查库存，如果总库存为0则设置为下架状态
         int totalStock = 0;
@@ -217,6 +199,10 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         
         //添加商品
         this.save(goods);
+        // params 非 null 时同事务重建倒排（null=不更新参数；[]=清空倒排）；输入取实体最终 JSON
+        if (goods.getParams() != null) {
+            goodsSearchParamService.syncByGoodsId(goods.getId(), goods.getParams());
+        }
         //添加商品sku信息
         this.goodsSkuService.add(goods, goodsOperationDTO);
         //添加相册
@@ -236,10 +222,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         this.checkGoods(goods);
         //向goods加入图片
         this.setGoodsGalleryParam(goodsOperationDTO.getGoodsGalleryList().get(0), goods);
-        //添加商品参数
-        if (goodsOperationDTO.getGoodsParamsDTOList() != null && !goodsOperationDTO.getGoodsParamsDTOList().isEmpty()) {
-            goods.setParams(JSON.toJSONString(goodsOperationDTO.getGoodsParamsDTOList()));
-        }
         
         // 检查库存，如果总库存为0则设置为下架状态
         int totalStock = 0;
@@ -259,6 +241,10 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         
         //修改商品
         this.updateById(goods);
+        // 与 addGoods 相同：仅当本次写入了 params 才同步倒排，保证 JSON 与搜索表同事务一致
+        if (goods.getParams() != null) {
+            goodsSearchParamService.syncByGoodsId(goods.getId(), goods.getParams());
+        }
         //修改商品sku信息
         this.goodsSkuService.update(goods, goodsOperationDTO);
         //添加相册
@@ -307,7 +293,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
 
         //参数非空则填写参数
         if (CharSequenceUtil.isNotEmpty(goods.getParams())) {
-            goodsVO.setGoodsParamsDTOList(JSON.parseArray(goods.getParams(), GoodsParamsItemDTO.class));
+            goodsVO.setGoodsParamsDTOList(GoodsSearchParamParser.parseAll(goods.getParams()));
         }
 
         List<Wholesale> wholesaleList = wholesaleService.findByGoodsId(goodsId);

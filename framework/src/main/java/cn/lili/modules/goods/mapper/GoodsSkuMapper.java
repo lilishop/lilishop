@@ -114,7 +114,10 @@ public interface GoodsSkuMapper extends BaseMapper<GoodsSku> {
      * @param queryWrapper 查询条件
      * @return 售后VO分页
      */
-      @Select("SELECT gs.*, g.params as params, " +
+    /**
+     * 搜索列表分页：gs.* + SPU params/create_time + 品牌名 logo；WHERE/ORDER BY 来自 ew.customSqlSegment。
+     */
+      @Select("SELECT gs.*, g.params as params, g.create_time AS goods_create_time, " +
             "CASE WHEN gs.brand_id = '0' THEN NULL ELSE b.name END as brand_name, " +
             "CASE WHEN gs.brand_id = '0' THEN NULL ELSE b.logo END as brand_logo " +
             "FROM li_goods_sku gs " +
@@ -125,5 +128,22 @@ public interface GoodsSkuMapper extends BaseMapper<GoodsSku> {
 
     @Select("SELECT id as sku_id, quantity, goods_id,simple_specs,sn,goods_name FROM li_goods_sku ${ew.customSqlSegment}")
     List<GoodsSkuStockDTO> queryStocks(@Param(Constants.WRAPPER) Wrapper<GoodsSku> queryWrapper);
+
+    /**
+     * 品牌 selector：候选集与列表共用 WHERE，额外排除 brand_id = '0'。
+     */
+    @Select("SELECT DISTINCT gs.brand_id, b.name AS brand_name, b.logo AS brand_logo FROM li_goods_sku gs "
+            + "INNER JOIN li_goods g ON gs.goods_id = g.id "
+            + "LEFT JOIN li_brand b ON gs.brand_id = b.id AND gs.brand_id <> '0' AND b.delete_flag = 0 "
+            + "${ew.customSqlSegment}")
+    List<GoodsSkuDTO> selectSelectorBrands(@Param(Constants.WRAPPER) Wrapper<GoodsSkuDTO> queryWrapper);
+
+    /**
+     * 分类 selector：只取 distinct category_path，名称由调用方批量解析。
+     */
+    @Select("SELECT DISTINCT gs.category_path FROM li_goods_sku gs "
+            + "INNER JOIN li_goods g ON gs.goods_id = g.id "
+            + "${ew.customSqlSegment}")
+    List<String> selectSelectorCategoryPaths(@Param(Constants.WRAPPER) Wrapper<GoodsSkuDTO> queryWrapper);
 
 }

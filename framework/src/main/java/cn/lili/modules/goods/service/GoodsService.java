@@ -37,14 +37,6 @@ public interface GoodsService extends IService<Goods> {
     void underStoreGoods(String storeId);
 
     /**
-     * 更新商品参数
-     *
-     * @param goodsId 商品id
-     * @param params 商品参数
-     */
-    void updateGoodsParams(String goodsId, String params);
-
-    /**
      * 获取某分类下的商品数量
      *
      * @param categoryId 分类ID
@@ -53,16 +45,22 @@ public interface GoodsService extends IService<Goods> {
     long getGoodsCountByCategory(String categoryId);
 
     /**
-     * 添加商品
+     * 添加商品。
+     * <p>
+     * {@code goodsParamsDTOList} 三态：非空数组写入该 JSON 并重建倒排；空数组 {@code []} 写入 {@code "[]"} 并清空倒排；
+     * {@code null} 不写 params、不碰倒排。
      *
-     * @param goodsOperationDTO 商品查询条件
+     * @param goodsOperationDTO 商品操作参数
      */
     void addGoods(GoodsOperationDTO goodsOperationDTO);
 
     /**
-     * 修改商品
+     * 修改商品。
+     * <p>
+     * {@code goodsParamsDTOList} 三态：非空数组写入该 JSON 并重建倒排；空数组 {@code []} 写入 {@code "[]"} 并清空倒排；
+     * {@code null} 表示本次不更新参数（{@code li_goods.params} 与倒排表均保持原值）。
      *
-     * @param goodsOperationDTO 商品查询条件
+     * @param goodsOperationDTO 商品操作参数
      * @param goodsId           商品ID
      */
     void editGoods(GoodsOperationDTO goodsOperationDTO, String goodsId);

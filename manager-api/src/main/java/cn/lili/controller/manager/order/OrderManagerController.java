@@ -38,7 +38,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/manager/order/order")
 @Tag(name = "管理端,订单API")
-public class OrderManagerController {
+public class  OrderManagerController {
 
     /**
      * 订单
