@@ -118,10 +118,13 @@ public interface DistributionMapper extends BaseMapper<Distribution> {
 
     /**
      * 按邀请关系重算累计邀请下级分销员数。
+     * 内层派生表避免 MySQL 同表 UPDATE + SELECT 报错。
      */
     @Update("UPDATE li_distribution SET invite_count = ("
-            + "SELECT COUNT(1) FROM li_distribution child "
+            + "SELECT cnt FROM ("
+            + "SELECT COUNT(1) AS cnt FROM li_distribution child "
             + "WHERE child.parent_distribution_id = #{distributionId} AND IFNULL(child.delete_flag, 0) = 0"
+            + ") AS invite_cnt"
             + ") WHERE id = #{distributionId}")
     void syncInviteCount(@Param("distributionId") String distributionId);
 

@@ -9,6 +9,9 @@ import cn.lili.modules.system.entity.dto.DistributionSetting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * 分销员上级归属绑定辅助，避免 RecruitService 与 DistributionService 循环依赖。
  *
@@ -50,12 +53,38 @@ public class DistributionParentBindSupport {
         } else {
             parentDistributionId = recruitInviterId;
         }
-        if (StringUtils.isEmpty(parentDistributionId)) {
+        if (StringUtils.isEmpty(parentDistributionId) || isInviteCycle(childDistributionId, parentDistributionId)) {
             return;
         }
         child.setParentDistributionId(parentDistributionId);
         distributionMapper.updateById(child);
         syncInviteCountAndGrade(parentDistributionId);
+    }
+
+    /**
+     * 判断挂上级是否会形成自邀或邀请环。成环时跳过绑定，不阻断审核。
+     *
+     * @param childDistributionId  下级分销员 ID
+     * @param parentDistributionId 拟绑定的上级分销员 ID
+     * @return 是否成环
+     */
+    private boolean isInviteCycle(String childDistributionId, String parentDistributionId) {
+        if (childDistributionId.equals(parentDistributionId)) {
+            return true;
+        }
+        String current = parentDistributionId;
+        Set<String> visited = new HashSet<>();
+        while (StringUtils.isNotEmpty(current)) {
+            if (childDistributionId.equals(current)) {
+                return true;
+            }
+            if (!visited.add(current)) {
+                break;
+            }
+            Distribution parent = distributionMapper.selectById(current);
+            current = parent == null ? null : parent.getParentDistributionId();
+        }
+        return false;
     }
 
     /**

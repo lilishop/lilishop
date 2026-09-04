@@ -175,6 +175,7 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
                 ? "AUTO_ENTRY" : "MANUAL_ENTRY");
         application.setAuditMode(setting.getAuditMode());
         application.setRecruitToken(applyDTO.getRecruitToken());
+        application.setRecruitInviterId(resolveRecruitInviterId(applyDTO.getRecruitToken(), memberId));
         if (setting.getAgreementContent() != null && !setting.getAgreementContent().isBlank()) {
             if (!Boolean.TRUE.equals(applyDTO.getAgreementAccepted())) {
                 throw new ServiceException(ResultCode.PARAMS_ERROR, "请先同意分销推广服务协议");
@@ -235,6 +236,12 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
             return;
         }
         application.setApplicationStatus("APPROVED");
+        // 历史待审申请可能只有 token、没有邀请人 ID，审核时再解析一次
+        String recruitInviterId = application.getRecruitInviterId();
+        if (recruitInviterId == null || recruitInviterId.isBlank()) {
+            recruitInviterId = resolveRecruitInviterId(application.getRecruitToken(), application.getMemberId());
+            application.setRecruitInviterId(recruitInviterId);
+        }
         applicationMapper.updateById(application);
         // 激活分销员身份（自动审核场景下可能新建记录）
         Member member = memberService.getById(application.getMemberId());
@@ -245,7 +252,7 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
             applicationMapper.updateById(application);
         }
         distributionParentBindSupport.bindParentOnAuditPass(distribution.getId(),
-                application.getRecruitInviterId(), application.getBoundDistributorId());
+                recruitInviterId, application.getBoundDistributorId());
     }
 
     @Override
@@ -464,6 +471,47 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
             }
         }
         return false;
+    }
+
+    /**
+     * 将邀请卡 token 解析为已通过审核的邀请人分销员 ID。
+     * <p>token 实际为邀请人分销员 ID，兼容 {@code recruit_{id}} 前缀。无效或不存在时返回 null，不阻断申请。</p>
+     *
+     * @param recruitToken      招募邀请令牌
+     * @param applicantMemberId 申请人会员 ID
+     * @return 邀请人分销员 ID；无法解析时返回 null
+     */
+    private String resolveRecruitInviterId(String recruitToken, String applicantMemberId) {
+        String distributionId = normalizeRecruitToken(recruitToken);
+        if (distributionId == null) {
+            return null;
+        }
+        Distribution inviter = distributionMemberSupport.getById(distributionId);
+        if (inviter == null
+                || !DistributionStatusEnum.PASS.name().equals(inviter.getDistributionStatus())) {
+            return null;
+        }
+        if (applicantMemberId != null && applicantMemberId.equals(inviter.getMemberId())) {
+            return null;
+        }
+        return inviter.getId();
+    }
+
+    /**
+     * 规范化招募邀请令牌为分销员 ID。
+     *
+     * @param recruitToken 邀请卡 token 或 scene
+     * @return 分销员 ID；空值时返回 null
+     */
+    static String normalizeRecruitToken(String recruitToken) {
+        if (recruitToken == null || recruitToken.isBlank()) {
+            return null;
+        }
+        String token = recruitToken.trim();
+        if (token.startsWith("recruit_")) {
+            token = token.substring("recruit_".length()).trim();
+        }
+        return token.isEmpty() ? null : token;
     }
 
     /**
