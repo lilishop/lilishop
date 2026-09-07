@@ -55,10 +55,10 @@ public class DistributionGrade extends BaseEntity {
     @TableField("invite_enabled")
     private Boolean enableInviteCondition;
 
-    @Schema(description = "商品佣金比例")
+    @Schema(description = "商品佣金比例（0～1，0.1 表示 10%）")
     @TableField("product_commission_rate")
     private BigDecimal goodsCommissionRate;
 
-    @Schema(description = "邀请佣金比例")
+    @Schema(description = "邀请佣金比例（0～1，0.1 表示 10%）")
     private BigDecimal inviteCommissionRate;
 }

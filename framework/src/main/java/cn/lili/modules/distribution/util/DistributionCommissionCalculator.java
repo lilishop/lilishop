@@ -62,8 +62,8 @@ public final class DistributionCommissionCalculator {
      * 按等级比例拆分佣金池为一级（商品）与二级（邀请）佣金。
      *
      * @param pool        佣金池
-     * @param directRate  一级商品佣金比例
-     * @param inviteRate  二级邀请佣金比例
+     * @param directRate  一级商品佣金比例（0～1 小数，0.1 表示 10%）
+     * @param inviteRate  二级邀请佣金比例（0～1 小数，0.1 表示 10%）
      * @return [一级佣金, 二级佣金]
      */
     public static BigDecimal[] splitPool(BigDecimal pool, BigDecimal directRate, BigDecimal inviteRate) {
@@ -78,16 +78,21 @@ public final class DistributionCommissionCalculator {
     }
 
     /**
-     * 计算直属分销员商品佣金（佣金池 × 等级商品佣金比例）
+     * 计算直属分销员商品佣金（佣金池 × 等级商品佣金比例）。
+     * 比例为 0～1 小数，0.1 表示 10%。
      */
     public static BigDecimal calculateDirectCommission(BigDecimal pool, BigDecimal directRate) {
         return splitPool(pool, directRate, BigDecimal.ZERO)[0];
     }
 
+    /**
+     * 将等级比例转为结算用小数。入参是 0～1 小数，0.1 表示 10%。
+     * null / 负数按 0 处理；大于 1 的脏数据不截断、不按百分数换算，保持原值相乘。
+     */
     private static BigDecimal rateFraction(BigDecimal rate) {
         BigDecimal normalizedRate = toRate(rate);
-        if (normalizedRate.compareTo(BigDecimal.ONE) > 0) {
-            return normalizedRate.divide(BigDecimal.valueOf(100), RATE_SCALE + 2, ROUNDING);
+        if (normalizedRate.compareTo(BigDecimal.ZERO) < 0) {
+            return BigDecimal.ZERO.setScale(RATE_SCALE, ROUNDING);
         }
         return normalizedRate;
     }

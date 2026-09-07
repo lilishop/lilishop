@@ -49,7 +49,7 @@ public class DistributionGradeReferenceSupport {
         grade.setEnableSalesCondition(false);
         grade.setEnableCommissionCondition(false);
         grade.setEnableInviteCondition(false);
-        grade.setGoodsCommissionRate(BigDecimal.ZERO);
+        grade.setGoodsCommissionRate(new BigDecimal("0.1000"));
         grade.setInviteCommissionRate(BigDecimal.ZERO);
         distributionGradeMapper.insert(grade);
     }

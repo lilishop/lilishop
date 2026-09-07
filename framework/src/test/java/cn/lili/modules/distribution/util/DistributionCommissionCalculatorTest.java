@@ -1,7 +1,9 @@
 package cn.lili.modules.distribution.util;
 
 import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -13,19 +15,57 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class DistributionCommissionCalculatorTest {
 
     /**
-     * 一级商品佣金 = 佣金池 × 等级商品佣金比例（比例 &gt; 1 时按百分数处理）。
+     * 一级商品佣金 = 佣金池 × 等级商品佣金比例（0～1 小数）。
      */
     @Test
     void calculateDirectCommission_appliesGradeRateToPool() {
-        // 佣金池 1 元、等级比例 10% → 0.10 元
+        // 佣金池 1 元、等级比例 0.10（10%）→ 0.10 元
         BigDecimal commission = DistributionCommissionCalculator.calculateDirectCommission(
-                BigDecimal.valueOf(1), BigDecimal.valueOf(10));
+                BigDecimal.valueOf(1), new BigDecimal("0.10"));
         assertEquals(new BigDecimal("0.10"), commission);
 
-        // 佣金池 100 元、等级比例 10% → 10.00 元（主推商品展示场景）
+        // 佣金池 100 元、等级比例 0.10（10%）→ 10.00 元（主推商品展示场景）
         BigDecimal featured = DistributionCommissionCalculator.calculateDirectCommission(
-                BigDecimal.valueOf(100), BigDecimal.valueOf(10));
+                BigDecimal.valueOf(100), new BigDecimal("0.10"));
         assertEquals(new BigDecimal("10.00"), featured);
+    }
+
+    /**
+     * 1% 与 100% 均为合法小数：0.01 拿池的 1%，1 拿整池。
+     */
+    @Test
+    void calculateDirectCommission_supportsOnePercentAndFullPool() {
+        BigDecimal onePercent = DistributionCommissionCalculator.calculateDirectCommission(
+                BigDecimal.valueOf(100), new BigDecimal("0.01"));
+        assertEquals(new BigDecimal("1.00"), onePercent);
+
+        BigDecimal fullPool = DistributionCommissionCalculator.calculateDirectCommission(
+                BigDecimal.valueOf(100), BigDecimal.ONE);
+        assertEquals(new BigDecimal("100.00"), fullPool);
+    }
+
+    /**
+     * 未迁数的百分数（如 10）不再 ÷100，也不截成 1。
+     */
+    @Test
+    void calculateDirectCommission_doesNotTreatTenAsTenPercent() {
+        BigDecimal dirty = DistributionCommissionCalculator.calculateDirectCommission(
+                BigDecimal.valueOf(100), BigDecimal.valueOf(10));
+        assertEquals(new BigDecimal("1000.00"), dirty);
+    }
+
+    /**
+     * null、负数按 0 处理，不参与结算。
+     */
+    @Test
+    void calculateDirectCommission_treatsNullAndNegativeAsZero() {
+        BigDecimal fromNull = DistributionCommissionCalculator.calculateDirectCommission(
+                BigDecimal.valueOf(100), null);
+        assertEquals(new BigDecimal("0.00"), fromNull);
+
+        BigDecimal fromNegative = DistributionCommissionCalculator.calculateDirectCommission(
+                BigDecimal.valueOf(100), new BigDecimal("-0.10"));
+        assertEquals(new BigDecimal("0.00"), fromNegative);
     }
 
     /**
@@ -34,7 +74,7 @@ class DistributionCommissionCalculatorTest {
     @Test
     void splitPool_splitsDirectAndInviteIndependently() {
         BigDecimal[] split = DistributionCommissionCalculator.splitPool(
-                BigDecimal.valueOf(1), BigDecimal.valueOf(10), BigDecimal.valueOf(20));
+                BigDecimal.valueOf(1), new BigDecimal("0.10"), new BigDecimal("0.20"));
 
         assertEquals(new BigDecimal("0.10"), split[0]); // 一级 10%
         assertEquals(new BigDecimal("0.20"), split[1]); // 二级 20%
@@ -46,7 +86,7 @@ class DistributionCommissionCalculatorTest {
     @Test
     void splitPool_directOnlyLeavesInviteZero() {
         BigDecimal[] split = DistributionCommissionCalculator.splitPool(
-                BigDecimal.valueOf(1), BigDecimal.valueOf(20), BigDecimal.ZERO);
+                BigDecimal.valueOf(1), new BigDecimal("0.20"), BigDecimal.ZERO);
 
         assertEquals(new BigDecimal("0.20"), split[0]);
         assertEquals(new BigDecimal("0.00"), split[1]);
@@ -59,7 +99,7 @@ class DistributionCommissionCalculatorTest {
     void splitPool_scalesWithQuantity() {
         // 佣金池 2 元（等价于单品佣金 × 数量 2）
         BigDecimal[] split = DistributionCommissionCalculator.splitPool(
-                BigDecimal.valueOf(2), BigDecimal.valueOf(10), BigDecimal.valueOf(20));
+                BigDecimal.valueOf(2), new BigDecimal("0.10"), new BigDecimal("0.20"));
 
         assertEquals(new BigDecimal("0.20"), split[0]);
         assertEquals(new BigDecimal("0.40"), split[1]);

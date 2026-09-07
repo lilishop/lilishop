@@ -114,8 +114,8 @@ CREATE TABLE IF NOT EXISTS li_distribution_grade (
     sales_enabled       TINYINT(1)      NOT NULL DEFAULT 1 COMMENT '是否启用销售额升级条件',
     commission_enabled  TINYINT(1)      NOT NULL DEFAULT 1 COMMENT '是否启用收益额升级条件',
     invite_enabled      TINYINT(1)      NOT NULL DEFAULT 1 COMMENT '是否启用邀请人数升级条件',
-    product_commission_rate DECIMAL(10, 4) NOT NULL DEFAULT 0.0000 COMMENT '直属商品佣金比例（占佣金池）',
-    invite_commission_rate  DECIMAL(10, 4) NOT NULL DEFAULT 0.0000 COMMENT '邀请奖励比例（占佣金池）',
+    product_commission_rate DECIMAL(10, 4) NOT NULL DEFAULT 0.0000 COMMENT '直属商品佣金比例（占佣金池，0.1 表示 10%）',
+    invite_commission_rate  DECIMAL(10, 4) NOT NULL DEFAULT 0.0000 COMMENT '邀请奖励比例（占佣金池，0.1 表示 10%）',
     is_default          TINYINT(1)      NOT NULL DEFAULT 0 COMMENT '是否默认等级',
     create_by           VARCHAR(64)     DEFAULT NULL COMMENT '创建者',
     create_time         DATETIME        DEFAULT NULL COMMENT '创建时间',
@@ -489,7 +489,7 @@ SELECT
     0,
     0,
     0,
-    1.0000,
+    0.1000,
     0.0000,
     1,
     'system',
@@ -816,3 +816,60 @@ FROM information_schema.TABLES
 WHERE TABLE_SCHEMA = DATABASE()
   AND TABLE_NAME LIKE 'li_distribution%'
 ORDER BY TABLE_NAME;
+
+
+-- ============================================================
+-- 第 31 步：分销等级比例统一为 0～1 小数（0.1 = 10%）
+-- 先查再迁。1.5 这类值按「>1 则 ÷100」会变成 0.015，若本意是 1.5% 需人工改。
+-- ============================================================
+
+SELECT id, grade_name, product_commission_rate, invite_commission_rate
+FROM li_distribution_grade WHERE delete_flag = 0;
+
+-- 历史表先看一眼：运行时 Java 实体列为 goods_commission_rate / invite_commission_rate。
+-- 本脚本建表为 JSON 快照结构，无这两列时下面 UPDATE 会跳过，勿对 JSON 快照做 ÷100。
+SELECT COLUMN_NAME, COLUMN_TYPE
+FROM information_schema.COLUMNS
+WHERE TABLE_SCHEMA = DATABASE()
+  AND TABLE_NAME = 'li_distribution_grade_history'
+  AND COLUMN_NAME IN ('goods_commission_rate', 'invite_commission_rate');
+
+-- 明显按百分数存的值（>1）转为小数
+UPDATE li_distribution_grade
+SET product_commission_rate = product_commission_rate / 100
+WHERE product_commission_rate > 1;
+
+UPDATE li_distribution_grade
+SET invite_commission_rate = invite_commission_rate / 100
+WHERE invite_commission_rate > 1;
+
+-- 旧种子 1.0000 是「看起来像 1%、结算当整池」，改为默认 10%
+UPDATE li_distribution_grade
+SET product_commission_rate = 0.1000
+WHERE id = '1000000000000000001'
+  AND product_commission_rate = 1.0000;
+
+-- 历史表：有比例列才迁（与等级表同样 >1 ÷100）
+SET @db = DATABASE();
+
+SET @exist = (
+    SELECT COUNT(*) FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'li_distribution_grade_history' AND COLUMN_NAME = 'goods_commission_rate'
+);
+SET @sql = IF(@exist > 0,
+    'UPDATE li_distribution_grade_history SET goods_commission_rate = goods_commission_rate / 100 WHERE goods_commission_rate > 1',
+    'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @exist = (
+    SELECT COUNT(*) FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = @db AND TABLE_NAME = 'li_distribution_grade_history' AND COLUMN_NAME = 'invite_commission_rate'
+);
+SET @sql = IF(@exist > 0,
+    'UPDATE li_distribution_grade_history SET invite_commission_rate = invite_commission_rate / 100 WHERE invite_commission_rate > 1',
+    'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+ALTER TABLE li_distribution_grade
+    MODIFY COLUMN product_commission_rate DECIMAL(10, 4) NOT NULL DEFAULT 0.0000 COMMENT '直属商品佣金比例（占佣金池，0.1 表示 10%）',
+    MODIFY COLUMN invite_commission_rate DECIMAL(10, 4) NOT NULL DEFAULT 0.0000 COMMENT '邀请奖励比例（占佣金池，0.1 表示 10%）';

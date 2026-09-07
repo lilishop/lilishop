@@ -156,8 +156,8 @@ public class DistributionGradeServiceImpl extends ServiceImpl<DistributionGradeM
                 maxInvite = grade.getInviteCommissionRate();
             }
         }
-        if (maxGoods.add(maxInvite).compareTo(BigDecimal.valueOf(100)) > 0) {
-            throw new ServiceException(ResultCode.PARAMS_ERROR, "商品佣金比例与邀请佣金比例之和不能超过100");
+        if (maxGoods.add(maxInvite).compareTo(BigDecimal.ONE) > 0) {
+            throw new ServiceException(ResultCode.PARAMS_ERROR, "商品佣金比例与邀请佣金比例之和不能超过100%");
         }
     }
 
@@ -218,9 +218,11 @@ public class DistributionGradeServiceImpl extends ServiceImpl<DistributionGradeM
                 || gradeValue > DistributionGradeReferenceSupport.MAX_GRADE_VALUE) {
             throw new ServiceException(ResultCode.PARAMS_ERROR, "等级值必须为1-5");
         }
-        if (grade.getGoodsCommissionRate() != null && grade.getInviteCommissionRate() != null
-                && grade.getGoodsCommissionRate().add(grade.getInviteCommissionRate()).compareTo(BigDecimal.valueOf(100)) > 0) {
-            throw new ServiceException(ResultCode.PARAMS_ERROR, "单等级商品佣金比例与邀请佣金比例之和不能超过100");
+        validateRateRange(grade.getGoodsCommissionRate(), "商品佣金比例");
+        validateRateRange(grade.getInviteCommissionRate(), "邀请佣金比例");
+        if (defaultDecimal(grade.getGoodsCommissionRate()).add(defaultDecimal(grade.getInviteCommissionRate()))
+                .compareTo(BigDecimal.ONE) > 0) {
+            throw new ServiceException(ResultCode.PARAMS_ERROR, "单等级商品佣金比例与邀请佣金比例之和不能超过100%");
         }
         if (!isConditionEnabled(grade.getEnableSalesCondition())
                 && !isConditionEnabled(grade.getEnableCommissionCondition())
@@ -231,6 +233,21 @@ public class DistributionGradeServiceImpl extends ServiceImpl<DistributionGradeM
             }
         } else {
             validateEnabledThresholds(grade);
+        }
+    }
+
+    /**
+     * 校验单个比例为 0～1 小数（页面 100% 对应入库 1）。
+     *
+     * @param rate      比例
+     * @param fieldName 字段名称（用于对外文案）
+     */
+    private void validateRateRange(BigDecimal rate, String fieldName) {
+        if (rate == null) {
+            return;
+        }
+        if (rate.compareTo(BigDecimal.ZERO) < 0 || rate.compareTo(BigDecimal.ONE) > 0) {
+            throw new ServiceException(ResultCode.PARAMS_ERROR, fieldName + "不能超过100%");
         }
     }
 
