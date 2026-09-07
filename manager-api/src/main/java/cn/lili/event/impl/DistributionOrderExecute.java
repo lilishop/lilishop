@@ -25,6 +25,9 @@ public class DistributionOrderExecute implements OrderStatusChangeEvent, AfterSa
     @Autowired
     private DistributionOrderService distributionOrderService;
 
+    /**
+     * 分销奖励（判断 afterCommit 是否已入账）。
+     */
     @Autowired
     private DistributionRewardService distributionRewardService;
 
@@ -41,7 +44,9 @@ public class DistributionOrderExecute implements OrderStatusChangeEvent, AfterSa
             case TAKE:
             case STAY_PICKED_UP:
             case UNDELIVERED: {
+                // 已有分销单则跳过，避免与 afterCommit 双写
                 if (!hasRewardRecords(orderSn)) {
+                    // afterCommit 未写入时由 MQ 补偿入账
                     distributionOrderService.handlePaymentRewards(orderSn);
                 }
                 break;

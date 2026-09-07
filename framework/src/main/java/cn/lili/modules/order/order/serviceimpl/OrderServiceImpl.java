@@ -22,7 +22,7 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
-import cn.lili.modules.distribution.service.DistributionOrderService;
+import cn.lili.modules.distribution.event.DistributionPaymentRewardsEvent;
 import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.live.entity.vos.LiveRoomVO;
@@ -161,11 +161,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     @Lazy
     private TradeService tradeService;
-
-    @Lazy
-    @Autowired
-    private DistributionOrderService distributionOrderService;
-
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
@@ -473,6 +468,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
 
+    /**
+     * 订单付款：更新支付信息、记流水、发状态变更 MQ。
+     * 分销入账改为提交后事件，避免写库失败把本事务标成 rollback-only。
+     *
+     * @param orderSn       订单编号
+     * @param paymentMethod 支付方法
+     * @param receivableNo  第三方流水
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void payOrder(String orderSn, String paymentMethod, String receivableNo) {
@@ -503,11 +506,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderMessage.setNewStatus(OrderStatusEnum.PAID);
         this.sendUpdateStatusMessage(orderMessage);
 
-        try {
-            distributionOrderService.handlePaymentRewards(orderSn);
-        } catch (Exception e) {
-            log.error("订单[{}]分销奖励同步入账失败", orderSn, e);
-        }
+        // 支付提交后再入账，避免分销写库失败把本事务标成 rollback-only
+        applicationEventPublisher.publishEvent(new DistributionPaymentRewardsEvent(this, orderSn));
 
         String message = "订单付款，付款方式[" + PaymentMethodEnum.valueOf(paymentMethod).paymentName() + "]";
         OrderLog orderLog = new OrderLog(orderSn, "-1", UserEnums.SYSTEM.getRole(), "系统操作", message);

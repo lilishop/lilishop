@@ -28,6 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderMapper, DistributionOrder>
         implements DistributionOrderService {
 
+    /**
+     * 分销奖励服务（支付入账、结算、冲回均委托于此）。
+     */
     @Autowired
     private DistributionRewardService distributionRewardService;
 
@@ -104,6 +107,7 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void handlePaymentRewards(String orderSn) {
+        // 委托 V2 奖励服务（写单、冻结、流水均在其内幂等完成）
         distributionRewardService.handlePaymentRewards(orderSn);
     }
 }

@@ -649,7 +649,7 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
             distributionOrderByItem.put(orderItemSn, distributionOrder);
             return distributionOrder;
         } catch (DuplicateKeyException ex) {
-            // 并发重复写入时以已存在记录为准
+            // uk_do_order_item_sn：afterCommit 与 MQ 补偿并发时以已存在记录为准
             log.warn("分销订单已存在，跳过重复写入 orderItemSn={}", orderItemSn);
             existingDistributionOrderItems.add(orderItemSn);
             return getDistributionOrderByItemSn(orderItemSn);

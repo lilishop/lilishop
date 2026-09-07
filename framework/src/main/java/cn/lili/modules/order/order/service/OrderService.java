@@ -136,6 +136,7 @@ public interface OrderService extends IService<Order> {
      * 订单付款
      * 修改订单付款信息
      * 记录订单流水
+     * 支付事务提交后发布分销入账事件（本事务内不写分销）
      *
      * @param orderSn       订单编号
      * @param paymentMethod 支付方法

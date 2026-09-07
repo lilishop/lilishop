@@ -30,10 +30,17 @@ public class DistributionOrderManagerController {
     @Autowired
     private DistributionOrderService distributionOrderService;
 
+    /**
+     * 支付后未入账时人工补触发（MQ 不可用或 afterCommit 失败时使用）。
+     *
+     * @param orderSn 订单编号
+     * @return 操作结果
+     */
     @Operation(summary = "补偿处理订单分销奖励（支付后未入账时手动触发）")
     @PostMapping("/reprocess/{orderSn}")
     public ResultMessage<Object> reprocessRewards(
             @Parameter(description = "订单编号", required = true) @PathVariable String orderSn) {
+        // 支付后未入账时人工补触发
         distributionOrderService.handlePaymentRewards(orderSn);
         return ResultUtil.success();
     }
