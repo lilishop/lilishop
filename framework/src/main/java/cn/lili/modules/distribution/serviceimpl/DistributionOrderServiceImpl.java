@@ -1,5 +1,6 @@
 package cn.lili.modules.distribution.serviceimpl;
 
+import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.distribution.entity.dos.DistributionOrder;
 import cn.lili.modules.distribution.entity.enums.DistributionOrderStatusEnum;
 import cn.lili.modules.distribution.entity.vos.DistributionOrderSearchParams;
@@ -35,7 +36,7 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
     private DistributionRewardService distributionRewardService;
 
     /**
-     * 分页查询分销订单（SQL 关联奖励明细，填充一级/二级佣金展示字段）。
+     * 分页查询分销订单。走 MP {@code page}，以 {@code rebate} 正确映射到 {@code directCommission}。
      *
      * @param distributionOrderSearchParams 查询参数
      * @return 分销订单分页
@@ -43,9 +44,11 @@ public class DistributionOrderServiceImpl extends ServiceImpl<DistributionOrderM
     @Override
     public IPage<DistributionOrder> getDistributionOrderPage(
             DistributionOrderSearchParams distributionOrderSearchParams) {
-        return this.baseMapper.selectDistributionOrderPage(
-                PageUtil.initPage(distributionOrderSearchParams),
-                distributionOrderSearchParams.pageQueryWrapper());
+        if (StringUtils.isBlank(distributionOrderSearchParams.getSort())) {
+            distributionOrderSearchParams.setSort("create_time");
+        }
+        return this.page(PageUtil.initPage(distributionOrderSearchParams),
+                distributionOrderSearchParams.queryWrapper());
     }
 
     /**

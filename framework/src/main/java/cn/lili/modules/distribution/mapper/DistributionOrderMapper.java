@@ -2,12 +2,7 @@ package cn.lili.modules.distribution.mapper;
 
 import cn.hutool.core.date.DateTime;
 import cn.lili.modules.distribution.entity.dos.DistributionOrder;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import java.util.Date;
@@ -19,21 +14,6 @@ import java.util.Date;
  * @since 2020-03-15 10:45:56
  */
 public interface DistributionOrderMapper extends BaseMapper<DistributionOrder> {
-
-    /**
-     * 分页查询分销订单。
-     *
-     * @param page         分页参数
-     * @param queryWrapper 查询条件（列名需带 do. 表别名）
-     * @return 分销订单分页
-     */
-    @Select("""
-            SELECT do.*
-            FROM li_distribution_order do
-            ${ew.customSqlSegment}
-            """)
-    IPage<DistributionOrder> selectDistributionOrderPage(IPage<DistributionOrder> page,
-                                                         @Param(Constants.WRAPPER) Wrapper<DistributionOrder> queryWrapper);
 
     /**
      * 批量解冻到期分销订单佣金到分销员可提现余额。
