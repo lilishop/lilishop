@@ -136,25 +136,20 @@ CREATE TABLE IF NOT EXISTS li_distribution_grade (
 CREATE TABLE IF NOT EXISTS li_distribution_grade_history (
     id                      VARCHAR(64)     NOT NULL COMMENT '主键',
     distribution_id         VARCHAR(64)     NOT NULL COMMENT '分销员ID',
-    member_id               VARCHAR(64)     DEFAULT NULL COMMENT '会员ID（冗余）',
-    before_grade_id         VARCHAR(64)     DEFAULT NULL COMMENT '变更前等级ID',
-    after_grade_id          VARCHAR(64)     NOT NULL COMMENT '变更后等级ID',
-    before_grade_snapshot   TEXT            COMMENT '变更前等级配置快照（JSON）',
-    after_grade_snapshot    TEXT            COMMENT '变更后等级配置快照（JSON）',
-    metric_snapshot         TEXT            COMMENT '变更时指标快照（JSON：销售额/收益/邀请数/客户数）',
-    change_type             VARCHAR(32)     NOT NULL DEFAULT 'UPGRADE' COMMENT '变更类型：UPGRADE升级 INIT初始化 MANUAL_ADJUST人工调整',
-    change_time             DATETIME        NOT NULL COMMENT '变更时间',
-    operator_id             VARCHAR(64)     DEFAULT NULL COMMENT '操作者ID（系统为空）',
-    remark                  VARCHAR(500)    DEFAULT NULL COMMENT '备注',
+    previous_grade_id       VARCHAR(64)     DEFAULT NULL COMMENT '变更前等级值（1-5）',
+    grade_id                VARCHAR(64)     NOT NULL COMMENT '变更后等级值（1-5）',
+    grade_name              VARCHAR(64)     DEFAULT NULL COMMENT '等级名称快照',
+    goods_commission_rate   DECIMAL(10, 4)  DEFAULT NULL COMMENT '商品佣金比例快照',
+    invite_commission_rate  DECIMAL(10, 4)  DEFAULT NULL COMMENT '邀请佣金比例快照',
+    upgrade_time            DATETIME        NOT NULL COMMENT '升级时间（自动升级写入，非通用变更时间）',
     create_by               VARCHAR(64)     DEFAULT NULL COMMENT '创建者',
     create_time             DATETIME        DEFAULT NULL COMMENT '创建时间',
     update_by               VARCHAR(64)     DEFAULT NULL COMMENT '更新者',
     update_time             DATETIME        DEFAULT NULL COMMENT '更新时间',
     delete_flag             TINYINT(1)      NOT NULL DEFAULT 0 COMMENT '删除标志',
     PRIMARY KEY (id),
-    KEY idx_dgh_distribution_time (distribution_id, change_time),
-    KEY idx_dgh_member_time (member_id, change_time),
-    KEY idx_dgh_after_grade (after_grade_id)
+    KEY idx_dgh_distribution_time (distribution_id, upgrade_time),
+    KEY idx_dgh_grade (grade_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='分销员等级变更历史';
 
 
@@ -828,7 +823,7 @@ SELECT id, grade_name, product_commission_rate, invite_commission_rate
 FROM li_distribution_grade WHERE delete_flag = 0;
 
 -- 历史表先看一眼：运行时 Java 实体列为 goods_commission_rate / invite_commission_rate。
--- 本脚本建表为 JSON 快照结构，无这两列时下面 UPDATE 会跳过，勿对 JSON 快照做 ÷100。
+-- 仓库建表已是扁平列；运行库若仍无这两列（尚未打 008），下面 UPDATE 会跳过，勿对 JSON 快照做 ÷100。
 SELECT COLUMN_NAME, COLUMN_TYPE
 FROM information_schema.COLUMNS
 WHERE TABLE_SCHEMA = DATABASE()
