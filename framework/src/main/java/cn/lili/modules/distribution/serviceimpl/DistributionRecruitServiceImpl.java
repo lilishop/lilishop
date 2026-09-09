@@ -159,8 +159,11 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
             throw new ServiceException(ResultCode.PARAMS_ERROR, "暂无分销招募设置");
         }
         String memberId = UserContext.getCurrentUser().getId();
-        // 已是分销员或存在阻塞性申请状态时拒绝重复提交
         Distribution existing = distributionMemberSupport.getByMemberId(memberId);
+        // 清退为停用，不可再申请；独立错误码，勿复用「已申请无需重复提交」
+        if (existing != null && DistributionStatusEnum.RETREAT.name().equals(existing.getDistributionStatus())) {
+            throw new ServiceException(ResultCode.DISTRIBUTION_RETREATED);
+        }
         if (distributionMemberSupport.isBlockingRecruitApply(existing)) {
             throw new ServiceException(ResultCode.DISTRIBUTION_IS_APPLY);
         }

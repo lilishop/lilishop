@@ -71,10 +71,9 @@ public class DistributionMemberSupport {
      * @return true 表示不可再次申请
      */
     public boolean isBlockingRecruitApply(Distribution distribution) {
-        // 仅「已拒绝」「已清退」可再次申请，其余状态视为占用中
+        // 仅「已拒绝」与无记录可申请；清退为停用，不可再申请
         return distribution != null
-                && !DistributionStatusEnum.REFUSE.name().equals(distribution.getDistributionStatus())
-                && !DistributionStatusEnum.RETREAT.name().equals(distribution.getDistributionStatus());
+                && !DistributionStatusEnum.REFUSE.name().equals(distribution.getDistributionStatus());
     }
 
     /**

@@ -28,6 +28,7 @@ import cn.lili.modules.distribution.service.DistributionGoodsService;
 import cn.lili.modules.distribution.service.DistributionGradeService;
 import cn.lili.modules.distribution.service.DistributionRecruitService;
 import cn.lili.modules.distribution.service.DistributionService;
+import cn.lili.modules.distribution.support.DistributionBuyerViewSupport;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -68,14 +69,8 @@ public class DistributionBuyerController {
     @GetMapping
     public ResultMessage<Distribution> getDistribution() {
         distributionService.checkDistributionSetting();
-        Distribution distribution = distributionService.getDistribution();
-        if (distribution == null) {
-            return ResultUtil.data(null);
-        }
-        if (distributionService.isRetreated(distribution.getMemberId())) {
-            return ResultUtil.data(null);
-        }
-        return ResultUtil.data(distribution);
+        // 清退必须回对象供入口按状态路由；金额脱敏在拷贝上完成，不写库
+        return ResultUtil.data(DistributionBuyerViewSupport.forBuyerResponse(distributionService.getDistribution()));
     }
 
     @Operation(summary = "推广海报上下文（邀请好友锁客）")
