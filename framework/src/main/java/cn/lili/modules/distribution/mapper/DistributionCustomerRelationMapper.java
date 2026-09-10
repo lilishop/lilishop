@@ -83,7 +83,7 @@ public interface DistributionCustomerRelationMapper extends BaseMapper<Distribut
             + "FROM li_distribution_order do "
             + "LEFT JOIN li_store_flow sf ON sf.order_item_sn = do.order_item_sn AND sf.flow_type = 'PAY' "
             + "WHERE do.distribution_id = #{distributionId} AND do.member_id = #{memberId} "
-            + "AND do.distribution_order_status &lt;&gt; 'REFUND'")
+            + "AND do.distribution_order_status != 'REFUND'")
     DistributionBuyerCustomerTradeStatsVO selectBuyerCustomerTradeStats(@Param("distributionId") String distributionId,
                                                                       @Param("memberId") String memberId);
 }
