@@ -52,6 +52,7 @@ import cn.lili.modules.system.entity.dto.DistributionPromotionPosterSetting;
 import cn.lili.modules.system.entity.dto.DistributionSetting;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -388,6 +389,7 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
             if (StringUtils.isEmpty(inviterMobile)) {
                 String oldParentId = distribution.getParentDistributionId();
                 updateParentByAdmin(id, null);
+                distribution.setParentDistributionId(null);
                 if (member != null && StringUtils.isNotEmpty(oldParentId)) {
                     DistributionCustomerRelation customerRelation = customerRelationService.getActiveRelation(member.getId());
                     if (customerRelation != null && oldParentId.equals(customerRelation.getDistributionId())) {
@@ -401,6 +403,7 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
                 String parentDistributionId = resolveDistributionIdByMobile(inviterMobile);
                 validateInviteCycle(id, parentDistributionId);
                 updateParentByAdmin(id, parentDistributionId);
+                distribution.setParentDistributionId(parentDistributionId);
                 if (member != null) {
                     customerRelationService.adminRebind(member.getId(), parentDistributionId, "后台编辑分销员", operatorId);
                 }
@@ -683,8 +686,9 @@ public class DistributionServiceImpl extends ServiceImpl<DistributionMapper, Dis
             if (StringUtils.isEmpty(oldParentId)) {
                 return;
             }
-            child.setParentDistributionId(null);
-            updateById(child);
+            this.update(new LambdaUpdateWrapper<Distribution>()
+                    .eq(Distribution::getId, childDistributionId)
+                    .set(Distribution::getParentDistributionId, null));
             syncInviteCountAndGrade(oldParentId);
             return;
         }
