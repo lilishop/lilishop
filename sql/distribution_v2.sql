@@ -300,7 +300,7 @@ CREATE TABLE IF NOT EXISTS li_distribution_share_event (
 
 CREATE TABLE IF NOT EXISTS li_distribution_visit_event (
     id                  VARCHAR(64)     NOT NULL COMMENT '主键',
-    event_id            VARCHAR(64)     NOT NULL COMMENT '客户端事件ID（幂等）',
+    event_id            VARCHAR(255)    NOT NULL COMMENT '服务端幂等键：visitorId:distributionId:goodsId:yyyy-MM-dd',
     share_id            VARCHAR(64)     NOT NULL COMMENT '分享标识',
     distribution_id     VARCHAR(64)     NOT NULL COMMENT '分享分销员ID',
     goods_id            VARCHAR(64)     DEFAULT NULL COMMENT '商品ID',
