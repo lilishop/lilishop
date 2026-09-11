@@ -198,11 +198,13 @@ public class DistributionBuyerController {
         return ResultUtil.data(recruitService.getConditionProgress(memberId));
     }
 
-    @Operation(summary = "上级分销员信息")
+    @Operation(summary = "上级分销员信息（附带是否展示上级）")
     @GetMapping("/parent")
     public ResultMessage<DistributionParentInfoVO> parentInfo() {
-        Distribution distribution = distributionService.getDistribution();
         DistributionParentInfoVO vo = new DistributionParentInfoVO();
+        DistributionSetting setting = distributionSettingSupport.getSetting();
+        vo.setParentDistributorVisible(setting.getParentDistributorVisible());
+        Distribution distribution = distributionService.getDistribution();
         if (distribution == null) {
             return ResultUtil.data(vo);
         }
