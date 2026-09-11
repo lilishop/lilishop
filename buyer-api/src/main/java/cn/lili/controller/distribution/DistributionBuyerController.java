@@ -6,9 +6,9 @@ import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.modules.distribution.entity.dos.Distribution;
-import cn.lili.modules.distribution.entity.dos.DistributionGrade;
 import cn.lili.modules.distribution.entity.dos.DistributionRecruitApplication;
 import cn.lili.modules.distribution.entity.dto.DistributionRecruitApplyDTO;
+import cn.lili.modules.distribution.entity.vos.DistributionBuyerGradeListVO;
 import cn.lili.modules.distribution.entity.vos.DistributionParentInfoVO;
 import cn.lili.modules.distribution.entity.vos.DistributionInviteCardVO;
 import cn.lili.modules.distribution.entity.dto.DistributionBuyerCustomerQueryDTO;
@@ -29,6 +29,8 @@ import cn.lili.modules.distribution.service.DistributionGradeService;
 import cn.lili.modules.distribution.service.DistributionRecruitService;
 import cn.lili.modules.distribution.service.DistributionService;
 import cn.lili.modules.distribution.support.DistributionBuyerViewSupport;
+import cn.lili.modules.distribution.support.DistributionSettingSupport;
+import cn.lili.modules.system.entity.dto.DistributionSetting;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -64,6 +66,9 @@ public class DistributionBuyerController {
 
     @Autowired
     private DistributionGoodsService distributionGoodsService;
+
+    @Autowired
+    private DistributionSettingSupport distributionSettingSupport;
 
     @Operation(summary = "获取当前客户的分销员信息", description = "可根据分销员信息查询待提现金额以及冻结金额等信息")
     @GetMapping
@@ -211,9 +216,13 @@ public class DistributionBuyerController {
         return ResultUtil.data(vo);
     }
 
-    @Operation(summary = "等级列表(可见时)")
+    @Operation(summary = "等级列表（附带是否展示各等级规则与权益）")
     @GetMapping("/grades")
-    public ResultMessage<java.util.List<DistributionGrade>> gradeList() {
-        return ResultUtil.data(gradeService.listBuyerGrades());
+    public ResultMessage<DistributionBuyerGradeListVO> gradeList() {
+        DistributionSetting setting = distributionSettingSupport.getSetting();
+        DistributionBuyerGradeListVO vo = new DistributionBuyerGradeListVO();
+        vo.setUpgradeConditionVisible(setting.getUpgradeConditionVisible());
+        vo.setGrades(gradeService.listGrades());
+        return ResultUtil.data(vo);
     }
 }

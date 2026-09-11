@@ -68,7 +68,7 @@ class DistributionGradeServiceImplRefreshGradeTest {
 
         DistributionGrade current = grade(1, "普通分销员", false, BigDecimal.ZERO);
         DistributionGrade target = grade(2, "银牌分销员", true, new BigDecimal("500.00"));
-        doReturn(List.of(current, target)).when(service).listBuyerGrades();
+        doReturn(List.of(current, target)).when(service).listGrades();
         doReturn(current).when(service).resolveGrade("1");
 
         // 销售额 1000 达到银牌门槛 500
@@ -100,7 +100,7 @@ class DistributionGradeServiceImplRefreshGradeTest {
 
         DistributionGrade current = grade(1, "普通分销员", false, BigDecimal.ZERO);
         DistributionGrade target = grade(2, "银牌分销员", true, new BigDecimal("500.00"));
-        doReturn(List.of(current, target)).when(service).listBuyerGrades();
+        doReturn(List.of(current, target)).when(service).listGrades();
         doReturn(current).when(service).resolveGrade("1");
 
         // 销售额 10 未达门槛

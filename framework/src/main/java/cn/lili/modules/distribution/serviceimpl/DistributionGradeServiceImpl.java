@@ -80,7 +80,7 @@ public class DistributionGradeServiceImpl extends ServiceImpl<DistributionGradeM
                 return grade;
             }
         }
-        List<DistributionGrade> grades = listBuyerGrades();
+        List<DistributionGrade> grades = listGrades();
         if (!grades.isEmpty()) {
             return grades.get(0);
         }
@@ -174,7 +174,7 @@ public class DistributionGradeServiceImpl extends ServiceImpl<DistributionGradeM
         if (!Objects.equals(previousGradeId, distribution.getGradeId())) {
             distributionMapper.updateById(distribution);
         }
-        List<DistributionGrade> grades = listBuyerGrades();
+        List<DistributionGrade> grades = listGrades();
         if (grades.isEmpty()) {
             return;
         }
