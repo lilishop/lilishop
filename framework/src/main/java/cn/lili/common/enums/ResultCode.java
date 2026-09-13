@@ -205,6 +205,8 @@ public enum ResultCode {
     DISTRIBUTION_GOODS_DOUBLE(22006, "不能重复添加分销商品"),
     DISTRIBUTION_EDIT_ERROR(22007, "修改分销员失败"),
     DISTRIBUTION_RETREATED(22008, "您的分销资格已被清退。请联系管理员！"),
+    DISTRIBUTION_ONLINE_ENTRY_CLOSED(22009, "暂未开放线上招募"),
+    DISTRIBUTION_RECRUIT_INVITE_INVALID(22010, "邀请无效或已失效"),
 
     /**
      * 购物车
