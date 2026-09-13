@@ -1,12 +1,16 @@
 package cn.lili.modules.distribution.serviceimpl;
 
+import cn.hutool.json.JSONUtil;
 import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dos.DistributionCustomerRelation;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
 import cn.lili.modules.distribution.entity.dos.DistributionGrade;
 import cn.lili.modules.distribution.entity.dos.DistributionOrder;
 import cn.lili.modules.distribution.entity.dos.DistributionWalletLog;
+import cn.lili.modules.distribution.entity.dto.DistributionOrderPaySnapshot;
+import cn.lili.modules.distribution.entity.dto.DistributionOrderRelationSnapshot;
 import cn.lili.modules.distribution.entity.enums.DistributionGoodsAuthEnum;
+import cn.lili.modules.distribution.entity.enums.DistributionSelfPurchaseModeEnum;
 import cn.lili.modules.distribution.entity.enums.DistributionStatusEnum;
 import cn.lili.modules.distribution.entity.enums.DistributionWalletLogTypeEnum;
 import cn.lili.modules.distribution.mapper.DistributionWalletLogMapper;
@@ -21,8 +25,8 @@ import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.modules.system.service.SettingService;
-import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.service.SettingService;import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
@@ -34,6 +38,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,6 +64,9 @@ class DistributionRewardServiceImplPaymentRewardsTest {
     private static final String ORDER_ITEM_SN = "OI1";
     private static final String DIRECT_ID = "D1";
     private static final String INVITE_ID = "D2";
+    private static final String BUYER_DIST_ID = "B1";
+    private static final Date PAYMENT_TIME = new Date(1_700_000_000_000L);
+    private static final Date CREATE_TIME = new Date(1_699_000_000_000L);
 
     private DistributionRewardServiceImpl rewardService;
     private OrderService orderService;
@@ -83,6 +91,7 @@ class DistributionRewardServiceImplPaymentRewardsTest {
         TableInfoHelper.initTableInfo(assistant, DistributionOrder.class);
         TableInfoHelper.initTableInfo(assistant, DistributionWalletLog.class);
         TableInfoHelper.initTableInfo(assistant, DistributionGoods.class);
+        TableInfoHelper.initTableInfo(assistant, DistributionCustomerRelation.class);
         TableInfoHelper.initTableInfo(assistant, Order.class);
         TableInfoHelper.initTableInfo(assistant, OrderItem.class);
     }
@@ -145,8 +154,21 @@ class DistributionRewardServiceImplPaymentRewardsTest {
         rewardService.handlePaymentRewards(ORDER_SN);
 
         assertThat(storedOrders).hasSize(1);
-        assertThat(storedOrders.get(0).getDirectCommission()).isEqualTo(2.0D);
-        assertThat(storedOrders.get(0).getInviteCommission()).isEqualTo(4.0D);
+        DistributionOrder stored = storedOrders.get(0);
+        assertThat(stored.getDirectCommission()).isEqualTo(2.0D);
+        assertThat(stored.getInviteCommission()).isEqualTo(4.0D);
+        assertThat(stored.getSelfPurchase()).isFalse();
+        assertThat(stored.getPerformanceDistributorId()).isEqualTo(DIRECT_ID);
+        assertThat(stored.getPaymentTime()).isEqualTo(PAYMENT_TIME);
+        assertThat(stored.getCommissionPool()).isEqualByComparingTo("20.00");
+        DistributionOrderPaySnapshot paySnapshot = parsePaySnapshot(stored);
+        assertThat(paySnapshot.getSelfPurchase()).isFalse();
+        assertThat(paySnapshot.getCommissionPool()).isEqualByComparingTo("20.00");
+        assertThat(paySnapshot.getDirectDistributionId()).isEqualTo(DIRECT_ID);
+        assertThat(paySnapshot.getSelfPurchaseCommissionMode()).isEqualTo(DistributionSelfPurchaseModeEnum.SELF.name());
+        DistributionOrderRelationSnapshot relationSnapshot = parseRelationSnapshot(stored);
+        assertThat(relationSnapshot.getDistributionId()).isEqualTo(DIRECT_ID);
+        assertThat(relationSnapshot.getRelationStatus()).isEqualTo("PENDING");
         assertThat(BigDecimal.valueOf(direct.getCommissionFrozen())).isEqualByComparingTo("2.00");
         assertThat(BigDecimal.valueOf(invite.getCommissionFrozen())).isEqualByComparingTo("4.00");
 
@@ -164,9 +186,56 @@ class DistributionRewardServiceImplPaymentRewardsTest {
     }
 
     /**
-     * 双路径重复入账幂等，不重复写单、不重复加冻结。
+     * 分销员自购且模式为 SELF：行上自购为 true，受益人是买家本人。
      */
     @Test
+    void handlePaymentRewardsMarksSelfPurchaseWhenBuyerIsDirectBeneficiary() {
+        stubPaidDistributionOrder();
+        when(distributionService.getOne(org.mockito.ArgumentMatchers.<Wrapper<Distribution>>any())).thenReturn(direct);
+
+        rewardService.handlePaymentRewards(ORDER_SN);
+
+        assertThat(storedOrders).hasSize(1);
+        DistributionOrder stored = storedOrders.get(0);
+        assertThat(stored.getDistributionId()).isEqualTo(DIRECT_ID);
+        assertThat(stored.getPerformanceDistributorId()).isEqualTo(DIRECT_ID);
+        assertThat(stored.getSelfPurchase()).isTrue();
+        DistributionOrderPaySnapshot paySnapshot = parsePaySnapshot(stored);
+        assertThat(paySnapshot.getSelfPurchase()).isTrue();
+        assertThat(paySnapshot.getSelfPurchaseCommissionMode()).isEqualTo(DistributionSelfPurchaseModeEnum.SELF.name());
+        assertThat(stored.getDirectCommission()).isEqualTo(2.0D);
+        assertThat(stored.getInviteCommission()).isEqualTo(4.0D);
+    }
+
+    /**
+     * 分销员自购且模式为 BOUND_DISTRIBUTOR：佣金归绑定方，行上自购为 false。
+     */
+    @Test
+    void handlePaymentRewardsKeepsBoundOrderAsPromotionNotSelfPurchase() {
+        stubPaidDistributionOrder();
+        Distribution buyer = distributor(BUYER_DIST_ID, "买家分销员", null);
+        when(distributionService.getOne(org.mockito.ArgumentMatchers.<Wrapper<Distribution>>any())).thenReturn(buyer);
+        Setting setting = new Setting();
+        setting.setSettingValue("{\"selfPurchaseCommissionMode\":\"BOUND_DISTRIBUTOR\"}");
+        when(settingService.get(anyString())).thenReturn(setting);
+
+        rewardService.handlePaymentRewards(ORDER_SN);
+
+        assertThat(storedOrders).hasSize(1);
+        DistributionOrder stored = storedOrders.get(0);
+        assertThat(stored.getDistributionId()).isEqualTo(DIRECT_ID);
+        assertThat(stored.getSelfPurchase()).isFalse();
+        DistributionOrderPaySnapshot paySnapshot = parsePaySnapshot(stored);
+        assertThat(paySnapshot.getSelfPurchase()).isFalse();
+        assertThat(paySnapshot.getSelfPurchaseCommissionMode())
+                .isEqualTo(DistributionSelfPurchaseModeEnum.BOUND_DISTRIBUTOR.name());
+        assertThat(stored.getDirectCommission()).isEqualTo(2.0D);
+        assertThat(stored.getInviteCommission()).isEqualTo(4.0D);
+    }
+
+    /**
+     * 双路径重复入账幂等，不重复写单、不重复加冻结。
+     */    @Test
     void handlePaymentRewardsIsIdempotentAcrossDualPath() {
         stubPaidDistributionOrder();
 
@@ -231,7 +300,11 @@ class DistributionRewardServiceImplPaymentRewardsTest {
         DistributionCustomerRelation relation = new DistributionCustomerRelation();
         relation.setMemberId("M1");
         relation.setDistributionId(DIRECT_ID);
+        relation.setRelationStatus("PENDING");
+        relation.setBindTime(CREATE_TIME);
         when(customerRelationService.getActiveRelation("M1")).thenReturn(relation);
+        when(customerRelationService.getOne(org.mockito.ArgumentMatchers.<Wrapper<DistributionCustomerRelation>>any(),
+                anyBoolean())).thenReturn(relation);
         when(distributionService.getOne(org.mockito.ArgumentMatchers.<Wrapper<Distribution>>any())).thenReturn(null);
 
         direct = distributor(DIRECT_ID, "直推", INVITE_ID);
@@ -273,7 +346,30 @@ class DistributionRewardServiceImplPaymentRewardsTest {
         order.setMemberName("buyer");
         order.setStoreId("S1");
         order.setStoreName("store");
+        order.setPaymentTime(PAYMENT_TIME);
+        order.setCreateTime(CREATE_TIME);
         return order;
+    }
+
+    /**
+     * 解析支付分佣快照。
+     */
+    private static DistributionOrderPaySnapshot parsePaySnapshot(DistributionOrder order) {
+        assertThat(order.getPaySnapshot()).isNotBlank();
+        return JSONUtil.toBean(order.getPaySnapshot(), DistributionOrderPaySnapshot.class);
+    }
+
+    /**
+     * 解析关系快照。
+     */
+    private static DistributionOrderRelationSnapshot parseRelationSnapshot(DistributionOrder order) {
+        assertThat(order.getRelationSnapshot()).isNotBlank();
+        DistributionOrderRelationSnapshot snapshot =
+                JSONUtil.toBean(order.getRelationSnapshot(), DistributionOrderRelationSnapshot.class);
+        if (snapshot.getBindTime() != null) {
+            assertThat(snapshot.getBindTime()).matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}");
+        }
+        return snapshot;
     }
 
     /**

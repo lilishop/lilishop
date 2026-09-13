@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -61,6 +62,26 @@ public class DistributionOrder extends BaseIdEntity {
 
     @Schema(description = "二级分销员名称")
     private String inviteDistributionName;
+
+    @Schema(description = "业绩归属分销员ID")
+    private String performanceDistributorId;
+
+    @Schema(description = "是否本行分销员自购")
+    private Boolean selfPurchase;
+
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(description = "支付成功时间")
+    private Date paymentTime;
+
+    @Schema(description = "本明细佣金池金额")
+    private BigDecimal commissionPool;
+
+    @Schema(description = "支付时客户关系快照")
+    private String relationSnapshot;
+
+    @Schema(description = "支付时商品佣金/等级/结算配置快照")
+    private String paySnapshot;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
