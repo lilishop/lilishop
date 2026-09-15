@@ -44,8 +44,6 @@ import java.util.stream.Collectors;
 @Service
 public class DistributionFeaturedGoodsServiceImpl implements DistributionFeaturedGoodsService {
 
-    private static final int CUSTOM_GOODS_MANAGER_LIMIT = 10;
-
     @Autowired
     private SettingService settingService;
 
@@ -63,7 +61,7 @@ public class DistributionFeaturedGoodsServiceImpl implements DistributionFeature
         DistributionFeaturedGoodsSetting setting = readSetting();
         DistributionFeaturedGoodsSettingVO vo = new DistributionFeaturedGoodsSettingVO();
         BeanUtil.copyProperties(setting, vo);
-        vo.setCustomGoods(listCustomGoods(setting, CUSTOM_GOODS_MANAGER_LIMIT));
+        vo.setCustomGoods(listAllCustomGoods(setting));
         return vo;
     }
 
@@ -106,13 +104,23 @@ public class DistributionFeaturedGoodsServiceImpl implements DistributionFeature
     }
 
     /**
+     * 管理端回显全部可解析的自定义主推商品（不截断）。
+     *
+     * @param setting 主推商品设置
+     * @return 自定义主推商品列表
+     */
+    private List<DistributionFeaturedGoodsItemVO> listAllCustomGoods(DistributionFeaturedGoodsSetting setting) {
+        return listCustomGoods(setting, null);
+    }
+
+    /**
      * 按配置中的 SKU 列表查询自定义主推商品，并保持配置顺序。
      *
      * @param setting 主推商品设置
-     * @param limit   最大返回条数
+     * @param limit   最大返回条数，null 表示不截断
      * @return 自定义主推商品列表
      */
-    private List<DistributionFeaturedGoodsItemVO> listCustomGoods(DistributionFeaturedGoodsSetting setting, int limit) {
+    private List<DistributionFeaturedGoodsItemVO> listCustomGoods(DistributionFeaturedGoodsSetting setting, Integer limit) {
         if (CollUtil.isEmpty(setting.getSkuIds())) {
             return Collections.emptyList();
         }
@@ -120,8 +128,13 @@ public class DistributionFeaturedGoodsServiceImpl implements DistributionFeature
                 .filter(Objects::nonNull)
                 .map(String::trim)
                 .filter(id -> !id.isEmpty())
-                .limit(limit)
                 .collect(Collectors.toList());
+        if (limit != null) {
+            skuIds = skuIds.stream().limit(limit).collect(Collectors.toList());
+        }
+        if (CollUtil.isEmpty(skuIds)) {
+            return Collections.emptyList();
+        }
         return orderBySkuIds(distributionFeaturedGoodsMapper.listBySkuIds(skuIds), skuIds);
     }
 
@@ -169,7 +182,7 @@ public class DistributionFeaturedGoodsServiceImpl implements DistributionFeature
     }
 
     /**
-     * 校验并过滤出已审核通过的分销商品 SKU，最多保留管理端上限条数。
+     * 校验并过滤出已审核通过的分销商品 SKU。
      *
      * @param skuIds 待校验的 SKU 列表
      * @return 有效的 SKU 列表
@@ -188,14 +201,10 @@ public class DistributionFeaturedGoodsServiceImpl implements DistributionFeature
         Map<String, DistributionGoods> goodsBySkuId = goodsList.stream()
                 .filter(goods -> goods.getSkuId() != null)
                 .collect(Collectors.toMap(DistributionGoods::getSkuId, Function.identity(), (a, b) -> a, LinkedHashMap::new));
-        // 按用户选择顺序保留有效 SKU，最多取管理端上限条数
         List<String> validSkuIds = new ArrayList<>();
         for (String skuId : distinctSkuIds) {
             if (goodsBySkuId.containsKey(skuId)) {
                 validSkuIds.add(skuId);
-            }
-            if (validSkuIds.size() >= CUSTOM_GOODS_MANAGER_LIMIT) {
-                break;
             }
         }
         if (CollUtil.isEmpty(validSkuIds)) {
@@ -373,6 +382,21 @@ public class DistributionFeaturedGoodsServiceImpl implements DistributionFeature
         if (CollUtil.isEmpty(dto.getSkuIds())) {
             throw new ServiceException(ResultCode.PARAMS_ERROR, "请至少选择一个自定义主推商品");
         }
+        int displayCount = normalizeDisplayCount(dto.getDisplayCount());
+        int skuCount = normalizeSkuIds(dto.getSkuIds()).size();
+        if (skuCount > displayCount) {
+            throw new ServiceException(ResultCode.PARAMS_ERROR, customGoodsLimitMessage(displayCount));
+        }
+    }
+
+    /**
+     * 自定义主推商品超过主推条数时的提示文案。
+     *
+     * @param displayCount 主推条数
+     * @return 提示文案
+     */
+    private String customGoodsLimitMessage(int displayCount) {
+        return "主推商品数量为" + displayCount + "时，最多选择" + displayCount + "个自定义商品";
     }
 
     /**
