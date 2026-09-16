@@ -23,6 +23,7 @@ import cn.lili.modules.distribution.service.DistributionRecruitService;
 import cn.lili.modules.distribution.support.DistributionMemberSupport;
 import cn.lili.modules.distribution.support.DistributionParentBindSupport;
 import cn.lili.modules.distribution.support.DistributionRecruitSettingSupport;
+import cn.lili.modules.distribution.support.DistributionSettingSupport;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsService;
@@ -36,6 +37,7 @@ import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.system.entity.dto.DistributionRecruitFieldSetting;
 import cn.lili.modules.system.entity.dto.DistributionRecruitSetting;
+import cn.lili.modules.system.entity.dto.DistributionSetting;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,6 +60,9 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
 
     @Autowired
     private DistributionRecruitSettingSupport recruitSettingSupport;
+
+    @Autowired
+    private DistributionSettingSupport distributionSettingSupport;
 
     @Autowired
     private DistributionRecruitApplicationMapper applicationMapper;
@@ -104,6 +109,7 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
 
     @Override
     public DistributionRecruitPageVO getRecruitPage() {
+        assertDistributionOpen();
         DistributionRecruitSetting setting = getSetting();
         DistributionRecruitPageVO pageVO = new DistributionRecruitPageVO();
         // planVersion > 0 表示已配置招募方案
@@ -154,6 +160,7 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public DistributionRecruitApplication submitApplication(DistributionRecruitApplyDTO applyDTO) {
+        assertDistributionOpen();
         DistributionRecruitSetting setting = getSetting();
         if (setting.getPlanVersion() == null || setting.getPlanVersion() <= 0) {
             throw new ServiceException(ResultCode.PARAMS_ERROR, "暂无分销招募设置");
@@ -170,6 +177,7 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
         if (getPendingApplicationByMemberId(memberId) != null) {
             throw new ServiceException(ResultCode.DISTRIBUTION_IS_APPLY);
         }
+        String recruitInviterId = assertOnlineRecruitChannelAllowed(setting, applyDTO.getRecruitToken(), memberId);
         DistributionRecruitApplication application = new DistributionRecruitApplication();
         application.setMemberId(memberId);
         application.setPlanId(DistributionRecruitSettingSupport.SETTING_KEY);
@@ -178,7 +186,7 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
                 ? "AUTO_ENTRY" : "MANUAL_ENTRY");
         application.setAuditMode(setting.getAuditMode());
         application.setRecruitToken(applyDTO.getRecruitToken());
-        application.setRecruitInviterId(resolveRecruitInviterId(applyDTO.getRecruitToken(), memberId));
+        application.setRecruitInviterId(recruitInviterId);
         if (setting.getAgreementContent() != null && !setting.getAgreementContent().isBlank()) {
             if (!Boolean.TRUE.equals(applyDTO.getAgreementAccepted())) {
                 throw new ServiceException(ResultCode.PARAMS_ERROR, "请先同意分销推广服务协议");
@@ -275,6 +283,7 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
 
     @Override
     public DistributionRecruitConditionProgressVO getConditionProgress(String memberId) {
+        assertDistributionOpen();
         DistributionRecruitSetting setting = recruitSettingSupport.readSetting();
         DistributionRecruitConditionProgressVO progress = new DistributionRecruitConditionProgressVO();
         // 未配置招募方案时不设门槛
@@ -474,6 +483,39 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
             }
         }
         return false;
+    }
+
+    /**
+     * 分销总闸：未开启时抛 {@link ResultCode#DISTRIBUTION_CLOSE}。
+     * 只读 {@link DistributionSettingSupport}，不调用 DistributionService。
+     */
+    private void assertDistributionOpen() {
+        DistributionSetting setting = distributionSettingSupport.getSetting();
+        if (Boolean.FALSE.equals(setting.getIsOpen())) {
+            throw new ServiceException(ResultCode.DISTRIBUTION_CLOSE);
+        }
+    }
+
+    /**
+     * 线上招募通道校验。入口关闭时仅有效邀请人可放行。
+     *
+     * @param setting      招募设置
+     * @param recruitToken 邀请卡 token；自助通道为空
+     * @param memberId     申请人会员 ID
+     * @return 解析出的邀请人分销员 ID，可为 null
+     */
+    String assertOnlineRecruitChannelAllowed(DistributionRecruitSetting setting, String recruitToken, String memberId) {
+        String inviterId = resolveRecruitInviterId(recruitToken, memberId);
+        if (Boolean.TRUE.equals(setting.getOnlineEntryVisible())) {
+            return inviterId;
+        }
+        if (inviterId != null && !inviterId.isBlank()) {
+            return inviterId;
+        }
+        if (recruitToken == null || recruitToken.isBlank()) {
+            throw new ServiceException(ResultCode.DISTRIBUTION_ONLINE_ENTRY_CLOSED);
+        }
+        throw new ServiceException(ResultCode.DISTRIBUTION_RECRUIT_INVITE_INVALID);
     }
 
     /**

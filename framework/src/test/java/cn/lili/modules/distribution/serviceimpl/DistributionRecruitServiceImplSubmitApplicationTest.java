@@ -8,7 +8,9 @@ import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dto.DistributionRecruitApplyDTO;
 import cn.lili.modules.distribution.entity.enums.DistributionStatusEnum;
 import cn.lili.modules.distribution.support.DistributionMemberSupport;
+import cn.lili.modules.distribution.support.DistributionSettingSupport;
 import cn.lili.modules.system.entity.dto.DistributionRecruitSetting;
+import cn.lili.modules.system.entity.dto.DistributionSetting;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -34,6 +36,7 @@ class DistributionRecruitServiceImplSubmitApplicationTest {
         DistributionRecruitServiceImpl service = spy(new DistributionRecruitServiceImpl());
         DistributionMemberSupport memberSupport = mock(DistributionMemberSupport.class);
         ReflectionTestUtils.setField(service, "distributionMemberSupport", memberSupport);
+        injectOpenDistribution(service);
 
         DistributionRecruitSetting setting = new DistributionRecruitSetting();
         setting.setPlanVersion(1);
@@ -67,6 +70,7 @@ class DistributionRecruitServiceImplSubmitApplicationTest {
         DistributionRecruitServiceImpl service = spy(new DistributionRecruitServiceImpl());
         DistributionMemberSupport memberSupport = mock(DistributionMemberSupport.class);
         ReflectionTestUtils.setField(service, "distributionMemberSupport", memberSupport);
+        injectOpenDistribution(service);
 
         DistributionRecruitSetting setting = new DistributionRecruitSetting();
         setting.setPlanVersion(1);
@@ -90,5 +94,47 @@ class DistributionRecruitServiceImplSubmitApplicationTest {
                         assertThat(serviceException.getResultCode()).isEqualTo(ResultCode.DISTRIBUTION_IS_APPLY);
                     });
         }
+    }
+
+    @Test
+    void submitApplication_stillThrowsRetreatedWhenOnlineEntryClosed() {
+        DistributionRecruitServiceImpl service = spy(new DistributionRecruitServiceImpl());
+        DistributionMemberSupport memberSupport = mock(DistributionMemberSupport.class);
+        ReflectionTestUtils.setField(service, "distributionMemberSupport", memberSupport);
+        injectOpenDistribution(service);
+
+        DistributionRecruitSetting setting = new DistributionRecruitSetting();
+        setting.setPlanVersion(1);
+        setting.setOnlineEntryVisible(false);
+        doReturn(setting).when(service).getSetting();
+
+        Distribution retreated = new Distribution();
+        retreated.setMemberId("M1");
+        retreated.setDistributionStatus(DistributionStatusEnum.RETREAT.name());
+        when(memberSupport.getByMemberId("M1")).thenReturn(retreated);
+        when(memberSupport.isBlockingRecruitApply(retreated)).thenReturn(true);
+
+        AuthUser user = new AuthUser();
+        user.setId("M1");
+        try (MockedStatic<UserContext> userContext = mockStatic(UserContext.class)) {
+            userContext.when(UserContext::getCurrentUser).thenReturn(user);
+
+            assertThatThrownBy(() -> service.submitApplication(new DistributionRecruitApplyDTO()))
+                    .isInstanceOf(ServiceException.class)
+                    .satisfies(ex -> {
+                        ServiceException serviceException = (ServiceException) ex;
+                        assertThat(serviceException.getResultCode()).isEqualTo(ResultCode.DISTRIBUTION_RETREATED);
+                        assertThat(serviceException.getResultCode())
+                                .isNotEqualTo(ResultCode.DISTRIBUTION_ONLINE_ENTRY_CLOSED);
+                    });
+        }
+    }
+
+    private static void injectOpenDistribution(DistributionRecruitServiceImpl service) {
+        DistributionSettingSupport settingSupport = mock(DistributionSettingSupport.class);
+        DistributionSetting setting = new DistributionSetting();
+        setting.setIsOpen(true);
+        when(settingSupport.getSetting()).thenReturn(setting);
+        ReflectionTestUtils.setField(service, "distributionSettingSupport", settingSupport);
     }
 }
