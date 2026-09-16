@@ -1,15 +1,12 @@
 package cn.lili.modules.distribution.serviceimpl;
 
 import cn.hutool.json.JSONUtil;
-import cn.lili.common.utils.DateUtil;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.distribution.entity.dos.Distribution;
 import cn.lili.modules.distribution.entity.dos.DistributionCustomerRelation;
 import cn.lili.modules.distribution.entity.dos.DistributionGoods;
 import cn.lili.modules.distribution.entity.dos.DistributionGrade;
 import cn.lili.modules.distribution.entity.dos.DistributionOrder;
-import cn.lili.modules.distribution.entity.dto.DistributionOrderPaySnapshot;
-import cn.lili.modules.distribution.entity.dto.DistributionOrderRelationSnapshot;
 import cn.lili.modules.distribution.entity.enums.DistributionOrderStatusEnum;
 import cn.lili.modules.distribution.entity.enums.DistributionSelfPurchaseModeEnum;
 import cn.lili.modules.distribution.entity.enums.DistributionStatusEnum;
@@ -93,12 +90,6 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
         if (order == null || !PayStatusEnum.PAID.name().equals(order.getPayStatus())) {
             return;
         }
-        // 转永久前先读库中关系，供 relation_snapshot 保留支付触发前状态
-        DistributionCustomerRelation relationBeforePermanent = customerRelationService.getOne(
-                new LambdaQueryWrapper<DistributionCustomerRelation>()
-                        .eq(DistributionCustomerRelation::getMemberId, order.getMemberId())
-                        .last("LIMIT 1"),
-                false);
         // 支付成功后将客户与分销员绑定为永久关系
         customerRelationService.bindPermanentOnPaid(order.getMemberId(), orderSn);
         List<OrderItem> orderItems = orderItemService.getByOrderSn(orderSn);
@@ -122,12 +113,7 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
         // 按自购/推广模式解析直推与邀请受益人
         CommissionContext commissionContext = resolveCommissionContext(
                 order, settlementSetting, buyerDistribution, buyerIsDistributor, distributionCache, gradeCache);
-        commissionContext.buyerIsDistributor = buyerIsDistributor;
         commissionContext.buyerDistributionId = buyerDistribution == null ? null : buyerDistribution.getId();
-        commissionContext.selfPurchaseCommissionMode = settlementSetting.getSelfPurchaseCommissionMode() == null
-                ? DistributionSelfPurchaseModeEnum.SELF.name()
-                : settlementSetting.getSelfPurchaseCommissionMode();
-        commissionContext.relationBeforePermanent = relationBeforePermanent;
 
         Map<String, BigDecimal> performanceSalesDelta = new HashMap<>();
         Set<String> performanceDistributionIds = new HashSet<>();
@@ -174,11 +160,6 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
             payload.directCommission = directRebate;
             payload.inviteCommission = inviteRebate;
             payload.commissionPool = pool;
-            payload.distributionGoods = distributionGoods;
-            payload.directRate = directRate;
-            payload.inviteRate = inviteRate;
-            payload.num = orderItem.getNum();
-            payload.goodsId = orderItem.getGoodsId();
 
             DistributionOrder distributionOrder = ensureDistributionOrder(
                     order, orderItem, commissionContext, payload,
@@ -657,8 +638,6 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
         distributionOrder.setSelfPurchase(rowSelfPurchase);
         distributionOrder.setPaymentTime(paymentTime);
         distributionOrder.setCommissionPool(payload.commissionPool);
-        distributionOrder.setRelationSnapshot(JSONUtil.toJsonStr(buildRelationSnapshot(ctx)));
-        distributionOrder.setPaySnapshot(JSONUtil.toJsonStr(buildPaySnapshot(ctx, payload, rowSelfPurchase)));
         distributionOrder.setDirectCommission(
                 payload.directCommission == null ? 0D : payload.directCommission.doubleValue());
         distributionOrder.setInviteCommission(
@@ -688,80 +667,6 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
             existingDistributionOrderItems.add(orderItemSn);
             return getDistributionOrderByItemSn(orderItemSn);
         }
-    }
-
-    /**
-     * 构建转永久前的客户关系快照。无关系时仍返回空对象。
-     *
-     * @param ctx 佣金上下文
-     * @return 关系快照
-     */
-    private DistributionOrderRelationSnapshot buildRelationSnapshot(CommissionContext ctx) {
-        DistributionOrderRelationSnapshot snapshot = new DistributionOrderRelationSnapshot();
-        DistributionCustomerRelation relation = ctx == null ? null : ctx.relationBeforePermanent;
-        if (relation == null) {
-            return snapshot;
-        }
-        snapshot.setMemberId(relation.getMemberId());
-        snapshot.setDistributionId(relation.getDistributionId());
-        snapshot.setBindSource(relation.getBindSource());
-        snapshot.setBindMode(relation.getBindMode());
-        snapshot.setPermanentBindMode(relation.getPermanentBindMode());
-        snapshot.setRelationStatus(relation.getRelationStatus());
-        snapshot.setBindTime(formatSnapshotTime(relation.getBindTime()));
-        snapshot.setExpireAt(formatSnapshotTime(relation.getExpireAt()));
-        snapshot.setPermanentAt(formatSnapshotTime(relation.getPermanentAt()));
-        snapshot.setTriggerOrderSn(relation.getTriggerOrderSn());
-        return snapshot;
-    }
-
-    /**
-     * 构建支付当下分佣依据快照。
-     *
-     * @param ctx             佣金上下文
-     * @param payload         明细写入载荷
-     * @param rowSelfPurchase 行上自购标志
-     * @return 分佣快照
-     */
-    private DistributionOrderPaySnapshot buildPaySnapshot(CommissionContext ctx,
-                                                          WritePayload payload,
-                                                          boolean rowSelfPurchase) {
-        DistributionOrderPaySnapshot snapshot = new DistributionOrderPaySnapshot();
-        snapshot.setSelfPurchase(rowSelfPurchase);
-        snapshot.setSelfPurchaseCommissionMode(ctx == null ? null : ctx.selfPurchaseCommissionMode);
-        snapshot.setSkuId(payload.distributionGoods == null ? null : payload.distributionGoods.getSkuId());
-        snapshot.setGoodsId(payload.goodsId != null
-                ? payload.goodsId
-                : payload.distributionGoods == null ? null : payload.distributionGoods.getGoodsId());
-        snapshot.setUnitCommission(payload.distributionGoods == null || payload.distributionGoods.getCommission() == null
-                ? null : BigDecimal.valueOf(payload.distributionGoods.getCommission()));
-        snapshot.setNum(payload.num);
-        snapshot.setCommissionPool(payload.commissionPool);
-        snapshot.setDirectRate(payload.directRate);
-        snapshot.setInviteRate(payload.inviteRate);
-        snapshot.setDirectCommission(payload.directCommission);
-        snapshot.setInviteCommission(payload.inviteCommission);
-        snapshot.setDirectDistributionId(ctx == null || ctx.directDistribution == null
-                ? null : ctx.directDistribution.getId());
-        snapshot.setDirectGradeId(ctx == null || ctx.directGrade == null ? null : ctx.directGrade.getId());
-        snapshot.setInviteDistributionId(payload.inviteDistributionId);
-        snapshot.setInviteGradeId(ctx == null || ctx.inviteGrade == null ? null : ctx.inviteGrade.getId());
-        snapshot.setPerformanceDistributorId(payload.distributionId);
-        return snapshot;
-    }
-
-    /**
-     * 将时间格式化为快照用字符串。
-     *
-     * @param date 原始时间
-     * @return yyyy-MM-dd HH:mm:ss，空则为 null
-     */
-    private String formatSnapshotTime(Date date) {
-        if (date == null) {
-            return null;
-        }
-        String formatted = DateUtil.toString(date);
-        return formatted == null || formatted.isBlank() ? null : formatted;
     }
 
     /**
@@ -849,14 +754,10 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
 
     /**
      * 佣金分配上下文，缓存直推/邀请受益人及业绩归属分销员。
-     * buyerIsDistributor 只给分佣分支；行上自购用 buyerDistributionId 与本行 distributionId 比较。
+     * 行上自购用 buyerDistributionId 与本行 distributionId 比较，不要和分佣分支的 buyerIsDistributor 混用。
      */
     private static final class CommissionContext {
-        @SuppressWarnings("unused")
-        private boolean buyerIsDistributor;
         private String buyerDistributionId;
-        private String selfPurchaseCommissionMode;
-        private DistributionCustomerRelation relationBeforePermanent;
         private Distribution directDistribution;
         private DistributionGrade directGrade;
         private Distribution inviteDistribution;
@@ -892,10 +793,5 @@ public class DistributionRewardServiceImpl implements DistributionRewardService 
         private BigDecimal directCommission;
         private BigDecimal inviteCommission;
         private BigDecimal commissionPool;
-        private DistributionGoods distributionGoods;
-        private BigDecimal directRate;
-        private BigDecimal inviteRate;
-        private Integer num;
-        private String goodsId;
     }
 }

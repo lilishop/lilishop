@@ -77,12 +77,6 @@ public class DistributionOrder extends BaseIdEntity {
     @Schema(description = "本明细佣金池金额")
     private BigDecimal commissionPool;
 
-    @Schema(description = "支付时客户关系快照")
-    private String relationSnapshot;
-
-    @Schema(description = "支付时商品佣金/等级/结算配置快照")
-    private String paySnapshot;
-
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "解冻日期")
