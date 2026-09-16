@@ -27,19 +27,23 @@ public class ServiceException extends RuntimeException {
     private ResultCode resultCode;
 
     public ServiceException(String msg) {
+        super(msg);
         this.resultCode = ResultCode.ERROR;
         this.msg = msg;
     }
 
     public ServiceException() {
-        super();
+        this(ResultCode.ERROR);
     }
 
     public ServiceException(ResultCode resultCode) {
+        super(resultCode.message());
         this.resultCode = resultCode;
+        this.msg = resultCode.message();
     }
 
     public ServiceException(ResultCode resultCode, String message) {
+        super(message);
         this.resultCode = resultCode;
         this.msg = message;
     }
