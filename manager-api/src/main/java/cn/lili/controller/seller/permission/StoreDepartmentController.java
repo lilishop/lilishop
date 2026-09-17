@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,7 +50,7 @@ public class StoreDepartmentController {
     @PostMapping
     @Operation(description = "新增部门")
     @Parameter(name = "storeDepartment", description = "部门信息", required = true)
-    public ResultMessage<StoreDepartment> save(@RequestBody StoreDepartment storeDepartment) {
+    public ResultMessage<StoreDepartment> save(@Validated StoreDepartment storeDepartment) {
         storeDepartment.setStoreId(UserContext.getCurrentUser().getStoreId());
         storeDepartmentService.save(storeDepartment);
         return ResultUtil.data(storeDepartment);
