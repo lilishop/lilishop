@@ -6,6 +6,7 @@ import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.distribution.entity.enums.DistributionRecruitFieldTypeEnum;
+import cn.lili.modules.distribution.entity.enums.RecruitApplyModeEnum;
 import cn.lili.modules.distribution.entity.enums.RecruitJoinConditionTypeEnum;
 import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.dto.DistributionRecruitFieldSetting;
@@ -85,6 +86,10 @@ public class DistributionRecruitSettingSupport {
         if (setting == null) {
             throw new ServiceException(ResultCode.PARAMS_ERROR);
         }
+        // AUTO 模式不收集申请表单，与运营后台 UI 一致
+        if (RecruitApplyModeEnum.AUTO.name().equals(setting.getApplyMode())) {
+            setting.setRequireApplyInfo(false);
+        }
         if (!RecruitJoinConditionTypeEnum.CONDITIONAL.name().equals(setting.getJoinConditionType())) {
             // 无条件加入时跳过后续门槛校验
             return;
@@ -138,6 +143,9 @@ public class DistributionRecruitSettingSupport {
         }
         if (setting.getOnlineEntryVisible() == null) {
             setting.setOnlineEntryVisible(true);
+        }
+        if (RecruitApplyModeEnum.AUTO.name().equals(setting.getApplyMode())) {
+            setting.setRequireApplyInfo(false);
         }
         if (setting.getRequireApplyInfo() == null) {
             setting.setRequireApplyInfo(false);

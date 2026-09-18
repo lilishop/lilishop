@@ -562,7 +562,11 @@ public enum CachePrefix {
     /**
      * 直播优惠券列表
      */
-    LIVE_COUPON_LIST;
+    LIVE_COUPON_LIST,
+    /**
+     * 招募邀请 pending token（关闭线上入口时自动申请用）
+     */
+    RECRUIT_PENDING_TOKEN;
 
 
     public static String removePrefix(String str) {

@@ -36,6 +36,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -48,6 +50,8 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "买家端,分销员接口")
 @RequestMapping("/buyer/distribution/distribution")
 public class DistributionBuyerController {
+
+    private static final Logger log = LoggerFactory.getLogger(DistributionBuyerController.class);
 
     @Autowired
     private DistributionService distributionService;
@@ -176,6 +180,7 @@ public class DistributionBuyerController {
     @Operation(summary = "招募页信息")
     @GetMapping("/recruit/page")
     public ResultMessage<DistributionRecruitPageVO> recruitPage() {
+        tryAutoApplyQuietly();
         return ResultUtil.data(recruitService.getRecruitPage());
     }
 
@@ -191,11 +196,34 @@ public class DistributionBuyerController {
         return ResultUtil.data(recruitService.submitApplication(applyDTO));
     }
 
+    @Operation(summary = "上报招募邀请 token（登录后供自动申请使用）")
+    @PutMapping("/recruit/pending-token")
+    public ResultMessage<Object> savePendingRecruitToken(@RequestParam String recruitToken) {
+        String memberId = UserContext.getCurrentUser().getId();
+        recruitService.savePendingRecruitToken(memberId, recruitToken);
+        return ResultUtil.success();
+    }
+
     @Operation(summary = "招募条件进度")
     @GetMapping("/recruit/progress")
     public ResultMessage<DistributionRecruitConditionProgressVO> recruitProgress() {
+        tryAutoApplyQuietly();
         String memberId = UserContext.getCurrentUser() == null ? null : UserContext.getCurrentUser().getId();
         return ResultUtil.data(recruitService.getConditionProgress(memberId));
+    }
+
+    /**
+     * 已登录时尝试自动申请；失败不影响招募页读取。
+     */
+    private void tryAutoApplyQuietly() {
+        if (UserContext.getCurrentUser() == null) {
+            return;
+        }
+        try {
+            recruitService.tryAutoApply(UserContext.getCurrentUser().getId());
+        } catch (Exception e) {
+            log.error("招募页自动申请失败", e);
+        }
     }
 
     @Operation(summary = "上级分销员信息（附带是否展示上级）")

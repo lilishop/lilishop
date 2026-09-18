@@ -78,10 +78,21 @@ public interface DistributionRecruitService {
 
     /**
      * 满足自动申请条件时尝试代会员提交申请。
+     * <p>
+     * 预期业务拒绝（已申请、入口关闭、token 无效等）以 {@link cn.lili.common.exception.ServiceException} 抛出；
+     * 调用方（支付监听器、招募页接口）应捕获，避免影响主流程。
      *
      * @param memberId 会员 ID
      */
     void tryAutoApply(String memberId);
+
+    /**
+     * 登录会员上报招募邀请 token，供关闭线上入口时自动申请使用。
+     *
+     * @param memberId     当前会员 ID
+     * @param recruitToken 邀请卡 token
+     */
+    void savePendingRecruitToken(String memberId, String recruitToken);
 
     /**
      * 查询会员招募准入条件完成进度。
