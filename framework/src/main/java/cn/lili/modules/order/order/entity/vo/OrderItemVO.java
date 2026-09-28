@@ -35,6 +35,9 @@ public class OrderItemVO {
     @Schema(description = "商品名称")
     private String name;
 
+    @Schema(description = "规格")
+    private String specs;
+
     @Schema(description = "商品名称")
     private Double goodsPrice;
 

@@ -19,7 +19,12 @@ public enum GoodsTypeEnum {
     /**
      * "电子卡券"
      */
-    E_COUPON("电子卡券");
+    E_COUPON("电子卡券"),
+
+    /**
+     * "预约服务商品"
+     */
+    APPOINTMENT_GOODS("预约服务商品");
 
 
     private final String description;

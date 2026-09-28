@@ -43,7 +43,7 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 前端覆盖PC、H5、小程序和APP，基于 **Vue** 和 **uni-app** 开发。
 
 -   **官方网站**: <https://pickmall.cn>
--   **官方文档**: <https://docs.pickmall.cn>
+-   **官方文档**: <https://bdwx2tfwwt.feishu.cn/wiki/space/7675179368632617952?ccm_open_type=lark_wiki_spaceLink&open_tab_from=wiki_home>
 -   **Gitee 仓库**: <https://gitee.com/beijing_hongye_huicheng/lilishop>
 -   **GitHub 仓库**: <https://github.com/lilishop/lilishop>
 
@@ -148,6 +148,7 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 - ✅ 二级分销
 - ✅ 定时任务管理
 - ✅ 商家发货改造（整单发货/拆单发货/无需配送）
+- ✅ 预约服务商品
 - 🔜 主题色管理
 - 🔜 店铺结算汇总
 - 🔜 支付方式汇总

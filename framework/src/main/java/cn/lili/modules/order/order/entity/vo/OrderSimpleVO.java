@@ -1,6 +1,9 @@
 package cn.lili.modules.order.order.entity.vo;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.security.sensitive.Sensitive;
 import cn.lili.common.security.sensitive.enums.SensitiveStrategy;
@@ -15,6 +18,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 订单简略信息
@@ -63,6 +67,12 @@ public class OrderSimpleVO {
     @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String memberName;
 
+    @Schema(description = "收货人姓名")
+    private String consigneeName;
+
+    @Schema(description = "收货人手机")
+    private String consigneeMobile;
+
     @Schema(description = "店铺名称")
     private String storeName;
 
@@ -99,6 +109,10 @@ public class OrderSimpleVO {
     @Schema(hidden = true, description = "item 名字")
     @Setter
     private String groupName;
+
+    @Schema(hidden = true, description = "item 规格json")
+    @Setter
+    private String groupSpecs;
 
     @Schema(hidden = true, description = "item 编号")
     @Setter
@@ -184,6 +198,12 @@ public class OrderSimpleVO {
         if (CharSequenceUtil.isNotEmpty(groupName)) {
             orderItemVO.setName(groupName.split(",")[i]);
         }
+        if (CharSequenceUtil.isNotEmpty(groupSpecs)) {
+            String[] specs = groupSpecs.split("\u001e", -1);
+            if (specs.length == groupGoodsId.split(",").length) {
+                orderItemVO.setSpecs(formatSpecs(specs[i]));
+            }
+        }
         if (CharSequenceUtil.isNotEmpty(groupNum) && groupNum.split(",").length == groupGoodsId.split(",").length) {
             orderItemVO.setNum(groupNum.split(",")[i]);
         }
@@ -213,6 +233,43 @@ public class OrderSimpleVO {
             orderItemVO.setRefundPrice(groupRefundPrice.split(",")[i]);
         }
         return orderItemVO;
+    }
+
+    /**
+     * 规格 JSON 转成列表展示文案，跳过相册等非文字字段。
+     */
+    private String formatSpecs(String specs) {
+        if (CharSequenceUtil.isBlank(specs)) {
+            return "";
+        }
+        String trimmed = specs.trim();
+        if (!trimmed.startsWith("{")) {
+            return trimmed;
+        }
+        try {
+            JSONObject obj = JSONUtil.parseObj(trimmed);
+            StringBuilder text = new StringBuilder();
+            for (Map.Entry<String, Object> entry : obj.entrySet()) {
+                if ("images".equals(entry.getKey()) || entry.getValue() == null) {
+                    continue;
+                }
+                Object value = entry.getValue();
+                if (value instanceof JSONObject || value instanceof JSONArray) {
+                    continue;
+                }
+                String specValue = String.valueOf(value).trim();
+                if (specValue.isEmpty()) {
+                    continue;
+                }
+                if (text.length() > 0) {
+                    text.append(' ');
+                }
+                text.append(entry.getKey()).append('：').append(specValue);
+            }
+            return text.toString();
+        } catch (Exception ignored) {
+            return trimmed;
+        }
     }
 
     /**

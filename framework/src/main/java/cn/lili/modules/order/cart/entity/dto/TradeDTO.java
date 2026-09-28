@@ -1,5 +1,6 @@
 package cn.lili.modules.order.cart.entity.dto;
 
+import cn.lili.modules.appointment.entity.dto.AppointmentCheckoutDTO;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.enums.SuperpositionPromotionEnum;
@@ -59,6 +60,9 @@ public class TradeDTO implements Serializable {
 
     @Schema(description = "是否需要发票")
     private Boolean needReceipt;
+
+    @Schema(description = "预约结算信息（时段 + 补充信息答案），创单时写入订单扩展")
+    private AppointmentCheckoutDTO appointmentCheckout;
 
 
     @Schema(description = "不支持配送方式")

@@ -250,8 +250,10 @@ public class Order extends BaseEntity {
         this.setRemark(cartVO.getRemark());
         this.setFreightPrice(cartVO.getPriceDetailDTO().getFreightPrice());
         this.applyECouponPersistNormalization();
+        this.applyAppointmentPersistNormalization();
         //客户收件信息
         if (!OrderTypeEnum.E_COUPON.name().equals(this.getOrderType())
+                && !OrderTypeEnum.APPOINTMENT.name().equals(this.getOrderType())
                 && tradeDTO.getMemberAddress() != null
                 && DeliveryMethodEnum.LOGISTICS.name().equals(cartVO.getDeliveryMethod())) {
             this.setConsigneeAddressIdPath(tradeDTO.getMemberAddress().getConsigneeAddressIdPath());
@@ -306,6 +308,23 @@ public class Order extends BaseEntity {
     }
 
     /**
+     * APPOINTMENT 订单落库归一化：虚拟发货、运费 0。
+     */
+    public void applyAppointmentPersistNormalization() {
+        if (!OrderTypeEnum.APPOINTMENT.name().equals(this.getOrderType())) {
+            return;
+        }
+        this.setDeliveryMethod(DeliveryMethodEnum.VIRTUAL.name());
+        this.setFreightPrice(0D);
+        this.setStoreAddressPath(null);
+        this.setStoreAddressMobile(null);
+        this.setStoreAddressCenter(null);
+        this.setLogisticsNo(null);
+        this.setLogisticsCode(null);
+        this.setLogisticsName(null);
+    }
+
+    /**
      * 填写交易（订单）类型
      * 1.判断是普通、促销订单
      * 2.普通订单进行区分：实物订单、虚拟订单
@@ -323,6 +342,8 @@ public class Order extends BaseEntity {
             // 立即购买/购物车链路：E_COUPON 与 NORMAL 区分 orderType（非 VIRTUAL 核销）
             if (GoodsTypeEnum.E_COUPON.name().equals(goodsType)) {
                 this.setOrderType(OrderTypeEnum.E_COUPON.name());
+            } else if (GoodsTypeEnum.APPOINTMENT_GOODS.name().equals(goodsType)) {
+                this.setOrderType(OrderTypeEnum.APPOINTMENT.name());
             } else {
                 this.setOrderType(OrderTypeEnum.NORMAL.name());
             }
@@ -335,6 +356,8 @@ public class Order extends BaseEntity {
             String goodsType = cartVO.getCheckedSkuList().get(0).getGoodsSku().getGoodsType();
             if (GoodsTypeEnum.E_COUPON.name().equals(goodsType)) {
                 this.setOrderType(OrderTypeEnum.E_COUPON.name());
+            } else if (GoodsTypeEnum.APPOINTMENT_GOODS.name().equals(goodsType)) {
+                this.setOrderType(OrderTypeEnum.APPOINTMENT.name());
             } else if (CharSequenceUtil.isEmpty(goodsType) || goodsType.equals(GoodsTypeEnum.PHYSICAL_GOODS.name())) {
                 this.setOrderType(OrderTypeEnum.NORMAL.name());
             } else {

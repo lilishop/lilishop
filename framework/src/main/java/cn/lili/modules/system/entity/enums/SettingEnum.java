@@ -33,6 +33,8 @@ public enum SettingEnum {
     LOGISTICS_SETTING,
     //订单配置
     ORDER_SETTING,
+    //预约订单配置
+    APPOINTMENT_ORDER_SETTING,
     //阿里OSS配置
     OSS_SETTING,
     //阿里短信配置

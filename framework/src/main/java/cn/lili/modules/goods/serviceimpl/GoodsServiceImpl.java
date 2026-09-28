@@ -19,6 +19,7 @@ import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
+import cn.lili.modules.appointment.service.AppointmentService;
 import cn.lili.modules.goods.entity.dos.*;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
@@ -112,6 +113,13 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Autowired
     @Lazy
     private CardKeyService cardKeyService;
+
+    /**
+     * 预约服务
+     */
+    @Autowired
+    @Lazy
+    private AppointmentService appointmentService;
     /**
      * rocketMq
      */
@@ -209,6 +217,10 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (goodsOperationDTO.getGoodsGalleryList() != null && !goodsOperationDTO.getGoodsGalleryList().isEmpty()) {
             this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
         }
+        //预约商品同步发品设置与时段模板
+        if (GoodsTypeEnum.APPOINTMENT_GOODS.name().equals(goods.getGoodsType())) {
+            appointmentService.syncGoodsExtFromPublish(goods.getId(), goodsOperationDTO);
+        }
     }
 
 
@@ -251,8 +263,13 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (goodsOperationDTO.getGoodsGalleryList() != null && !goodsOperationDTO.getGoodsGalleryList().isEmpty()) {
             this.goodsGalleryService.add(goodsOperationDTO.getGoodsGalleryList(), goods.getId());
         }
+        //待审核商品删除索引
         if (GoodsAuthEnum.TOBEAUDITED.name().equals(goods.getAuthFlag())) {
             this.notifyGoodsDelete(Collections.singletonList(goodsId));
+        }
+        //预约商品同步发品设置与时段模板
+        if (GoodsTypeEnum.APPOINTMENT_GOODS.name().equals(goods.getGoodsType())) {
+            appointmentService.syncGoodsExtFromPublish(goodsId, goodsOperationDTO);
         }
         cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
     }
@@ -296,9 +313,15 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             goodsVO.setGoodsParamsDTOList(GoodsSearchParamParser.parseAll(goods.getParams()));
         }
 
+        //批发商品消费规则
         List<Wholesale> wholesaleList = wholesaleService.findByGoodsId(goodsId);
         if (CollUtil.isNotEmpty(wholesaleList)) {
             goodsVO.setWholesaleList(wholesaleList);
+        }
+
+        //预约商品回显发品设置与时段可约数量
+        if (GoodsTypeEnum.APPOINTMENT_GOODS.name().equals(goods.getGoodsType())) {
+            appointmentService.enrichGoodsVoForSeller(goodsVO);
         }
 
         cache.put(CachePrefix.GOODS.getPrefix() + goodsId, goodsVO,7200L);
@@ -706,16 +729,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         goods.setThumbnail(goodsGallery.getThumbnail());
     }
 
-    /**
-     * 检查商品信息
-     * 如果商品是虚拟商品则无需配置配送模板
-     * 如果商品是实物商品需要配置配送模板
-     * 判断商品是否存在
-     * 判断商品是否需要审核
-     * 判断当前用户是否为店铺
-     *
-     * @param goods 商品
-     */
     private void checkGoods(Goods goods) {
         //判断商品类型
         switch (goods.getGoodsType()) {
@@ -731,6 +744,11 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
                 break;
             case "E_COUPON":
                 // 电子卡券无需运费模板，强制 templateId=0
+                if (!"0".equals(goods.getTemplateId())) {
+                    goods.setTemplateId("0");
+                }
+                break;
+            case "APPOINTMENT_GOODS":
                 if (!"0".equals(goods.getTemplateId())) {
                     goods.setTemplateId("0");
                 }

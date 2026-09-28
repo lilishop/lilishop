@@ -11,6 +11,8 @@ import cn.lili.modules.order.order.entity.dto.PartDeliveryParamsDTO;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderNumVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
+import cn.lili.modules.order.order.entity.vo.OrderVerificationPreviewVO;
+import cn.lili.modules.order.order.entity.vo.OrderVerificationRecordVO;
 import cn.lili.modules.order.order.entity.vo.PaymentLog;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
@@ -52,12 +54,20 @@ public interface OrderService extends IService<Order> {
 
 
     /**
-     * 订单查询
+     * 买家订单列表
      *
      * @param orderSearchParams 查询参数
-     * @return 简短订单分页
+     * @return 买家订单分页
      */
-    IPage<OrderSimpleVO> queryByParams(OrderSearchParams orderSearchParams);
+    IPage<OrderSimpleVO> queryBuyerByParams(OrderSearchParams orderSearchParams);
+
+    /**
+     * 商家、平台订单列表
+     *
+     * @param orderSearchParams 查询参数
+     * @return 管理端订单分页
+     */
+    IPage<OrderSimpleVO> queryManageByParams(OrderSearchParams orderSearchParams);
 
     /**
      * 获取订单数量
@@ -222,6 +232,30 @@ public interface OrderService extends IService<Order> {
      * @return 订单
      */
     Order take(String verificationCode);
+
+    /**
+     * 按核销码核销。预约码走预约核销，虚拟商品和自提走订单核销。
+     *
+     * @param code 核销码
+     * @return 结果说明
+     */
+    String confirmVerification(String code);
+
+    /**
+     * 按核销码预览待核销货物，不改变核销状态。
+     *
+     * @param code 核销码
+     * @return 待核销货物
+     */
+    OrderVerificationPreviewVO previewVerification(String code);
+
+    /**
+     * 本店核销记录
+     *
+     * @param page 分页
+     * @return 核销记录
+     */
+    IPage<OrderVerificationRecordVO> verificationRecordPage(PageVO page);
 
     /**
      * 根据核验码获取订单信息

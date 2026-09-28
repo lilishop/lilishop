@@ -22,4 +22,9 @@ public enum OrderTypeEnum {
      * 电子卡券订单（{@link cn.lili.modules.goods.entity.enums.GoodsTypeEnum#E_COUPON} 卡密商品，走卡池履约）
      */
     E_COUPON,
+
+    /**
+     * 预约服务订单（{@link cn.lili.modules.goods.entity.enums.GoodsTypeEnum#APPOINTMENT_GOODS}）
+     */
+    APPOINTMENT,
 }

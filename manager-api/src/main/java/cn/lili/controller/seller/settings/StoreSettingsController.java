@@ -1,7 +1,12 @@
 package cn.lili.controller.seller.settings;
 
 
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.AuthUser;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.store.entity.dto.StoreAfterSaleAddressDTO;
 import cn.lili.modules.store.entity.dto.StoreDeliverGoodsAddressDTO;
@@ -9,6 +14,7 @@ import cn.lili.modules.store.entity.dto.StoreSettingDTO;
 import cn.lili.modules.store.entity.vos.StoreVO;
 import cn.lili.modules.store.service.StoreDetailService;
 import cn.lili.modules.store.service.StoreService;
+import cn.lili.modules.wechat.util.WechatMpCodeUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,6 +47,27 @@ public class StoreSettingsController {
      */
     @Autowired
     private StoreDetailService storeDetailService;
+
+    @Autowired
+    private WechatMpCodeUtil wechatMpCodeUtil;
+
+    @Operation(summary = "当前店铺首页小程序葵花码")
+    @GetMapping("/mp-qrcode")
+    public ResultMessage<String> mpQrcode() {
+        AuthUser user = UserContext.getCurrentUser();
+        if (user == null || CharSequenceUtil.isBlank(user.getStoreId())) {
+            throw new ServiceException(ResultCode.USER_NOT_LOGIN);
+        }
+        String storeId = user.getStoreId();
+        try {
+            // unlimited 的 scene 走短链，扫码后店铺页用 scene 换回 id
+            return ResultUtil.data(wechatMpCodeUtil.createCode(
+                    "pages/product/shopPage", "id=" + storeId));
+        } catch (Exception e) {
+            return ResultUtil.data(wechatMpCodeUtil.createQrCode(
+                    "pages/product/shopPage?id=" + storeId));
+        }
+    }
 
     @Operation(description = "获取商家设置")
     @GetMapping

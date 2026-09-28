@@ -1,7 +1,9 @@
 package cn.lili.modules.goods.entity.dto;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
@@ -46,6 +48,12 @@ public class GoodsSearchParams extends PageVO {
 
     @Schema(description = "规格简短信息")
     private String simpleSpecs;
+
+    @Schema(description = "SKU名称")
+    private String skuName;
+
+    @Schema(description = "SKU货号")
+    private String skuSn;
 
     @Schema(description = "商品编号")
     private String id;
@@ -122,6 +130,12 @@ public class GoodsSearchParams extends PageVO {
     @Schema(description = "销量上限")
     private Integer leBuyCount;
 
+    @Schema(description = "创建开始时间")
+    private String startDate;
+
+    @Schema(description = "创建结束时间")
+    private String endDate;
+
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
 
@@ -143,6 +157,18 @@ public class GoodsSearchParams extends PageVO {
         }
         if (CharSequenceUtil.isNotEmpty(simpleSpecs)) {
             queryWrapper.like("simple_specs", simpleSpecs);
+        }
+        if (CharSequenceUtil.isNotEmpty(skuName)) {
+            queryWrapper.apply(
+                    "EXISTS (SELECT 1 FROM li_goods_sku gs WHERE gs.goods_id = li_goods.id AND gs.delete_flag = 0 AND gs.goods_name LIKE CONCAT('%', {0}, '%'))",
+                    skuName
+            );
+        }
+        if (CharSequenceUtil.isNotEmpty(skuSn)) {
+            queryWrapper.apply(
+                    "EXISTS (SELECT 1 FROM li_goods_sku gs WHERE gs.goods_id = li_goods.id AND gs.delete_flag = 0 AND gs.sn LIKE CONCAT('%', {0}, '%'))",
+                    skuSn
+            );
         }
         if (CharSequenceUtil.isNotEmpty(id)) {
             queryWrapper.in("id", Arrays.asList(id.split(",")));
@@ -230,6 +256,12 @@ public class GoodsSearchParams extends PageVO {
 
         queryWrapper.in(CollUtil.isNotEmpty(ids), "id", ids);
         queryWrapper.eq("delete_flag", false);
+        if (StringUtils.isNotEmpty(startDate)) {
+            queryWrapper.ge("create_time", DateUtil.parse(startDate));
+        }
+        if (StringUtils.isNotEmpty(endDate)) {
+            queryWrapper.le("create_time", DateUtil.parse(endDate));
+        }
         this.betweenWrapper(queryWrapper);
         return queryWrapper;
     }

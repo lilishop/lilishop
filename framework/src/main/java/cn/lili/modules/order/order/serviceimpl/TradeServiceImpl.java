@@ -7,6 +7,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.event.TransactionCommitSendMQEvent;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.modules.appointment.service.AppointmentService;
 import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.service.MemberService;
@@ -87,6 +88,9 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
     @Autowired
     private CardKeyService cardKeyService;
 
+    @Autowired
+    private AppointmentService appointmentService;
+
     /**
      * RocketMQ 配置
      */
@@ -132,10 +136,11 @@ public class TradeServiceImpl extends ServiceImpl<TradeMapper, Trade> implements
      */
     private void createTradeCheck(TradeDTO tradeDTO) {
         cardKeyService.validateTradeForECoupon(tradeDTO);
+        appointmentService.validateTrade(tradeDTO);
         if (tradeDTO.getCartList().stream().noneMatch(CartVO::getChecked)) {
             throw new ServiceException(ResultCode.ORDER_NOT_EXIST_VALID);
         }
-        if (cardKeyService.isECouponOnlyTrade(tradeDTO)) {
+        if (cardKeyService.isECouponOnlyTrade(tradeDTO) || appointmentService.isAppointmentOnlyTrade(tradeDTO)) {
             return;
         }
         if (!tradeDTO.getCartTypeEnum().equals(CartTypeEnum.VIRTUAL) && tradeDTO.getStoreAddress() == null) {

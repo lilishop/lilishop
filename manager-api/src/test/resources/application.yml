@@ -150,18 +150,6 @@ lili:
   lbs:
     key: 4BYBZ-7MT6S-PUAOA-6BNWL-FJUD7-UUFXT
     sk: zhNKVrJK6UPOhqIjn8AQvG37b9sz6
-  #域名
-  domain:
-    pc: http://192.168.0.116:8888
-    wap: http://192.168.0.116:8888
-    seller: http://192.168.0.116:8888
-    admin: http://192.168.0.116:8888
-  #api地址
-  api:
-    buyer: https://z171l91606.51mypc.cn
-    base: http://192.168.0.116:8888
-    manager: http://192.168.0.116:8888
-    seller: http://192.168.0.116:8888
 
   # jwt 细节设定
   jwt-setting:

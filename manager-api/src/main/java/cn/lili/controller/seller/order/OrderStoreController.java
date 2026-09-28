@@ -14,9 +14,13 @@ import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.member.service.StoreLogisticsService;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.dto.OrderFulfillParamsDTO;
+import cn.lili.common.vo.PageVO;
+import cn.lili.modules.order.order.entity.dto.OrderVerificationConfirmDTO;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderNumVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
+import cn.lili.modules.order.order.entity.vo.OrderVerificationPreviewVO;
+import cn.lili.modules.order.order.entity.vo.OrderVerificationRecordVO;
 import cn.lili.modules.order.order.service.OrderPackageService;
 import cn.lili.modules.order.order.service.OrderPriceService;
 import cn.lili.modules.order.order.service.OrderService;
@@ -82,7 +86,7 @@ public class OrderStoreController {
     @Operation(description = "查询订单列表")
     @GetMapping
     public ResultMessage<IPage<OrderSimpleVO>> queryMineOrder(OrderSearchParams orderSearchParams) {
-        return ResultUtil.data(orderService.queryByParams(orderSearchParams));
+        return ResultUtil.data(orderService.queryManageByParams(orderSearchParams));
     }
 
     @Operation(description = "获取订单数量")
@@ -165,6 +169,26 @@ public class OrderStoreController {
     @PutMapping("/take/{orderSn}/{verificationCode}")
     public ResultMessage<Object> take(@PathVariable String orderSn, @PathVariable String verificationCode) {
         return ResultUtil.data(orderService.take(orderSn, verificationCode));
+    }
+
+    @Operation(summary = "核销码预览")
+    @GetMapping("/verification/preview")
+    public ResultMessage<OrderVerificationPreviewVO> previewVerification(
+            @NotBlank(message = "核销码不能为空") @RequestParam String code) {
+        return ResultUtil.data(orderService.previewVerification(code));
+    }
+
+    @PreventDuplicateSubmissions
+    @Operation(summary = "按核销码核销")
+    @PostMapping("/verification/confirm")
+    public ResultMessage<String> confirmVerification(@Valid @RequestBody OrderVerificationConfirmDTO dto) {
+        return ResultUtil.data(orderService.confirmVerification(dto.getCode()));
+    }
+
+    @Operation(summary = "核销记录")
+    @GetMapping("/verification/records")
+    public ResultMessage<IPage<OrderVerificationRecordVO>> verificationRecords(PageVO page) {
+        return ResultUtil.data(orderService.verificationRecordPage(page));
     }
 
     @Operation(description = "查询物流踪迹")

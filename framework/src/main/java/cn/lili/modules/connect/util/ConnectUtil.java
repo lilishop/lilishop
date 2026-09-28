@@ -7,8 +7,6 @@ import cn.lili.common.enums.ClientTypeEnum;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.properties.ApiProperties;
-import cn.lili.common.properties.DomainProperties;
 import cn.lili.common.security.token.Token;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.connect.config.AuthConfig;
@@ -57,11 +55,6 @@ public class ConnectUtil {
     private ConnectService connectService;
     @Autowired
     private SettingService settingService;
-    @Autowired
-    private ApiProperties apiProperties;
-    @Autowired
-    private DomainProperties domainProperties;
-
 
     static String prefix = "/buyer/passport/connect/connect/callback/";
 

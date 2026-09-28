@@ -36,7 +36,7 @@ public class LiveOrderServiceImpl implements LiveOrderService {
 
     @Override
     public IPage<OrderSimpleVO> queryOrderPage(OrderSearchParams orderSearchParams) {
-        return orderService.queryByParams(orderSearchParams);
+        return orderService.queryManageByParams(orderSearchParams);
     }
 
     @Override

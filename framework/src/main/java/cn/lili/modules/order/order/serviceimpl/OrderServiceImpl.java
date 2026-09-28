@@ -22,6 +22,10 @@ import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
+import cn.lili.modules.appointment.entity.dos.AppointmentVerificationCode;
+import cn.lili.modules.appointment.entity.enums.AppointmentVerificationCodeStatusEnum;
+import cn.lili.modules.appointment.entity.vo.AppointmentVerificationResultVO;
+import cn.lili.modules.appointment.service.AppointmentService;
 import cn.lili.modules.distribution.event.DistributionPaymentRewardsEvent;
 import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
@@ -189,6 +193,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Autowired
     private CardKeyService cardKeyService;
 
+    /**
+     * 预约服务
+     */
+    @Lazy
+    @Autowired
+    private AppointmentService appointmentService;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -237,14 +248,25 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         orderItemService.saveBatch(orderItems);
         //批量记录订单操作日志
         orderLogService.saveBatch(orderLogs);
+        // 预约单：创单写入订单扩展（时段 + 补充信息），支付成功再扣时段
+        appointmentService.stashCheckoutForPayment(tradeDTO);
     }
 
     @Override
-    public IPage<OrderSimpleVO> queryByParams(OrderSearchParams orderSearchParams) {
+    public IPage<OrderSimpleVO> queryBuyerByParams(OrderSearchParams orderSearchParams) {
+        return this.baseMapper.queryBuyerByParams(PageUtil.initPage(orderSearchParams), orderListWrapper(orderSearchParams));
+    }
+
+    @Override
+    public IPage<OrderSimpleVO> queryManageByParams(OrderSearchParams orderSearchParams) {
+        return this.baseMapper.queryManageByParams(PageUtil.initPage(orderSearchParams), orderListWrapper(orderSearchParams));
+    }
+
+    private QueryWrapper orderListWrapper(OrderSearchParams orderSearchParams) {
         QueryWrapper queryWrapper = orderSearchParams.queryWrapper();
         queryWrapper.groupBy("o.id");
         queryWrapper.orderByDesc("o.id");
-        return this.baseMapper.queryByParams(PageUtil.initPage(orderSearchParams), queryWrapper);
+        return queryWrapper;
     }
 
     @Override
@@ -519,6 +541,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @OrderLogPoint(description = "'库存确认'", orderSn = "#orderSn")
     @Transactional(rollbackFor = Exception.class)
     public void afterOrderConfirm(String orderSn) {
+        // 支付成功后的履约确认：按促销/订单类型分流，互斥 return，避免走错发货或核验链路
         Order order = this.getBySn(orderSn);
         if (order == null) {
             return;
@@ -533,15 +556,23 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             this.checkPintuanOrder(order.getPromotionId(), parentOrderSn);
             return;
         }
+        // 电子卡券：支付后发卡密并完结，不进入待发货/待核验
         if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
             if (cardKeyService.isECouponFulfillmentEligible(order)) {
                 cardKeyService.fulfillAfterPayment(orderSn);
             }
             return;
         }
+        // 预约商品：支付后扣时段、建工单并发 N 码，进入待核验
+        if (OrderTypeEnum.APPOINTMENT.name().equals(order.getOrderType())) {
+            appointmentService.fulfillAfterPayment(orderSn);
+            return;
+        }
+        // 普通实物：按物流/自提进入待发货或待自提
         if (order.getOrderType().equals(OrderTypeEnum.NORMAL.name())) {
             normalOrderConfirm(orderSn);
         } else if (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
+            // 核销型虚拟：进入待核验
             virtualOrderConfirm(orderSn);
         }
     }
@@ -736,6 +767,107 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         //订单完成
         this.complete(order.getSn());
         return order;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String confirmVerification(String code) {
+        if (CharSequenceUtil.isBlank(code)) {
+            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+        }
+        String verificationCode = code.trim();
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        String userId = UserContext.getCurrentUser().getId();
+        if (appointmentService.hasVerificationCode(storeId, verificationCode)) {
+            AppointmentVerificationResultVO result = appointmentService.verifyCodeByOperator(storeId, userId, verificationCode);
+            if (Boolean.TRUE.equals(result.getAllVerified())) {
+                return Boolean.TRUE.equals(result.getOrderCompleted())
+                        ? "全部核销完成，订单已完成"
+                        : "全部核销完成，请在工单中结束服务";
+            }
+            return "核销成功（" + result.getVerifiedCount() + "/" + result.getTotalCount() + "）";
+        }
+        Order order = this.getOne(new LambdaQueryWrapper<Order>()
+                .eq(Order::getStoreId, storeId)
+                .eq(Order::getVerificationCode, verificationCode)
+                .eq(Order::getDeleteFlag, false));
+        if (order == null) {
+            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+        }
+        if (!OrderStatusEnum.TAKE.name().equals(order.getOrderStatus())
+                && !OrderStatusEnum.STAY_PICKED_UP.name().equals(order.getOrderStatus())) {
+            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+        }
+        ((OrderService) SpringContextUtil.getBean(OrderService.class)).take(order.getSn(), verificationCode);
+        return "订单核销成功";
+    }
+
+    @Override
+    public OrderVerificationPreviewVO previewVerification(String code) {
+        if (CharSequenceUtil.isBlank(code)) {
+            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+        }
+        String verificationCode = code.trim();
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        AppointmentVerificationCode appointmentCode = appointmentService.findVerificationCode(storeId, verificationCode);
+        if (appointmentCode != null) {
+            if (!AppointmentVerificationCodeStatusEnum.UNUSED.name().equals(appointmentCode.getStatus())) {
+                throw new ServiceException(ResultCode.APPOINTMENT_CODE_ALREADY_USED);
+            }
+            OrderItem item = orderItemService.getBySn(appointmentCode.getOrderItemSn());
+            OrderVerificationGoodsVO goods = toVerificationGoods(item, 1);
+            if (CharSequenceUtil.isBlank(goods.getOrderItemSn())) {
+                goods.setOrderItemSn(appointmentCode.getOrderItemSn());
+            }
+            OrderVerificationPreviewVO preview = new OrderVerificationPreviewVO();
+            preview.setCode(appointmentCode.getCode());
+            preview.setOrderSn(appointmentCode.getOrderSn());
+            preview.setGoods(Collections.singletonList(goods));
+            return preview;
+        }
+        Order order = this.getOne(new LambdaQueryWrapper<Order>()
+                .eq(Order::getStoreId, storeId)
+                .eq(Order::getVerificationCode, verificationCode)
+                .eq(Order::getDeleteFlag, false));
+        if (order == null
+                || (!OrderStatusEnum.TAKE.name().equals(order.getOrderStatus())
+                && !OrderStatusEnum.STAY_PICKED_UP.name().equals(order.getOrderStatus()))) {
+            throw new ServiceException(ResultCode.ORDER_TAKE_ERROR);
+        }
+        List<OrderItem> items = orderItemService.getByOrderSn(order.getSn());
+        OrderVerificationPreviewVO preview = new OrderVerificationPreviewVO();
+        preview.setCode(order.getVerificationCode());
+        preview.setOrderSn(order.getSn());
+        preview.setGoods(items.stream()
+                .map(item -> toVerificationGoods(item, item.getNum()))
+                .collect(Collectors.toList()));
+        return preview;
+    }
+
+    /**
+     * 组装待核销货物。订单项缺失时只返回本次核销数量。
+     *
+     * @param item 订单货物，可为空
+     * @param num  本次核销数量
+     * @return 待核销货物
+     */
+    private OrderVerificationGoodsVO toVerificationGoods(OrderItem item, Integer num) {
+        OrderVerificationGoodsVO goods = new OrderVerificationGoodsVO();
+        goods.setNum(num);
+        if (item == null) {
+            return goods;
+        }
+        goods.setOrderItemSn(item.getSn());
+        goods.setGoodsName(item.getGoodsName());
+        goods.setImage(item.getImage());
+        goods.setSpecs(item.getSpecs());
+        return goods;
+    }
+
+    @Override
+    public IPage<OrderVerificationRecordVO> verificationRecordPage(PageVO page) {
+        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
+        return this.baseMapper.pageVerificationRecords(PageUtil.initPage(page), storeId);
     }
 
     @Override

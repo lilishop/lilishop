@@ -182,6 +182,14 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
             orderService.afterOrderConfirm(orderMessage.getOrderSn());
             return;
         }
+        if (orderHeader != null && OrderTypeEnum.APPOINTMENT.name().equals(orderHeader.getOrderType())) {
+            if (!PayStatusEnum.PAID.name().equals(orderHeader.getPayStatus())) {
+                log.info("APPOINTMENT PAID 跳过，支付状态不满足，orderSn={}", orderMessage.getOrderSn());
+                return;
+            }
+            orderService.afterOrderConfirm(orderMessage.getOrderSn());
+            return;
+        }
         //库存key 和 扣减数量
         List<String> keys = new ArrayList<>();
         List<String> values = new ArrayList<>();

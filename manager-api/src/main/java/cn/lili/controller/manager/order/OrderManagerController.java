@@ -55,7 +55,7 @@ public class  OrderManagerController {
     @Operation(summary = "查询订单列表分页")
     @GetMapping
     public ResultMessage<IPage<OrderSimpleVO>> queryMineOrder(OrderSearchParams orderSearchParams) {
-        return ResultUtil.data(orderService.queryByParams(orderSearchParams));
+        return ResultUtil.data(orderService.queryManageByParams(orderSearchParams));
     }
 
     @Operation(summary = "获取订单数量")

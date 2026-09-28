@@ -30,6 +30,11 @@ public enum OrderTagEnum {
     WAIT_ROG("待收货"),
 
     /**
+     * 待收货/使用：已发货待收货，以及虚拟订单待核验、自提订单待核销。
+     */
+    WAIT_USE("待收货/使用"),
+
+    /**
      * 已完成
      */
     COMPLETE("已完成"),

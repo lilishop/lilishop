@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 商品VO
@@ -36,4 +37,10 @@ public class GoodsVO extends Goods {
 
     @Schema(description = "批发商品消费规则列表")
     private List<Wholesale> wholesaleList;
+
+    @Schema(description = "预约商品设置（编辑回显）")
+    private Map<String, Object> appointmentSettings;
+
+    @Schema(description = "预约时段模板（编辑回显）")
+    private Map<String, Object> appointmentSlotTemplate;
 }

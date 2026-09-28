@@ -115,17 +115,16 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui/index.html
-  packages-to-scan: cn.lili.controller.manager,cn.lili.controller.seller
-  paths-to-match:
-    - /manager/**
-    - /store/**
+  group-configs:
+    - group: manager
+      display-name: 管理端 API
+      packages-to-scan: cn.lili.controller.manager
+      paths-to-match: /manager/**
+    - group: store
+      display-name: 店铺端 API
+      packages-to-scan: cn.lili.controller.seller
+      paths-to-match: /store/**
   override-with-generic-response: false
-  logback:
-    rollingpolicy:
-      # 最大保存天数
-      max-history: 7
-      # 每个文件最大大小
-      max-file-size: 5MB
 # 加密参数
 jasypt:
   encryptor:

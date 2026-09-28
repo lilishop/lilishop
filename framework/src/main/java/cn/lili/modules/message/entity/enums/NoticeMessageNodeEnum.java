@@ -54,7 +54,14 @@ public enum NoticeMessageNodeEnum {
     WALLET_WITHDRAWAL_SUCCESS("余额提现成功通知"),
     WALLET_WITHDRAWAL_ERROR("余额提现申请失败通知"),
     WALLET_WITHDRAWAL_AUDIT_ERROR("余额提现申请驳回通知"),
-    WALLET_WITHDRAWAL_AUDIT_SUCCESS("余额提现申请通过通知");
+    WALLET_WITHDRAWAL_AUDIT_SUCCESS("余额提现申请通过通知"),
+
+    /**
+     * 预约服务
+     */
+    APPOINTMENT_BOOKING_SUCCESS_MEMBER("预约成功通知"),
+    APPOINTMENT_SERVICE_REFUNDED_MEMBER("预约服务退款通知"),
+    APPOINTMENT_SERVICE_START_REMIND_MEMBER("预约服务即将开始提醒");
 
 
     private final String description;

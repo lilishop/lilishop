@@ -144,8 +144,9 @@ public class CheckDataRender implements CartRenderStep {
 
             }
 
-            //商品库存判定
-            if (dataSku.getQuantity() < cartSkuVO.getNum()) {
+            //商品库存判定。预约商品 SKU quantity 固定为 0，可售性在结算页按时段校验
+            boolean appointmentGoods = GoodsTypeEnum.APPOINTMENT_GOODS.name().equals(dataSku.getGoodsType());
+            if (!appointmentGoods && dataSku.getQuantity() < cartSkuVO.getNum()) {
                 //设置购物车未选中
                 cartSkuVO.setChecked(false);
                 //设置失效消息

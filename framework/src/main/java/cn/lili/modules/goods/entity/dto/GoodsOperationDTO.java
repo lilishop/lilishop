@@ -118,7 +118,7 @@ public class GoodsOperationDTO implements Serializable {
      * @see cn.lili.modules.goods.entity.enums.GoodsTypeEnum
      */
     @Schema(description = "商品类型")
-    @EnumValue(strValues = {"PHYSICAL_GOODS", "VIRTUAL_GOODS", "E_COUPON"}, message = "商品类型参数值错误")
+    @EnumValue(strValues = {"PHYSICAL_GOODS", "VIRTUAL_GOODS", "E_COUPON", "APPOINTMENT_GOODS"}, message = "商品类型参数值错误")
     private String goodsType;
 
     /**
@@ -150,6 +150,12 @@ public class GoodsOperationDTO implements Serializable {
 
     @Schema(description = "浏览权限")
     private String browsePermissions;
+
+    @Schema(description = "预约商品设置（发品）")
+    private Map<String, Object> appointmentSettings;
+
+    @Schema(description = "预约时段模板（发品）")
+    private Map<String, Object> appointmentSlotTemplate;
 
     public String getGoodsName() {
         //对商品对名称做一个极限处理。这里没有用xss过滤是因为xss过滤为全局过滤，影响很大。

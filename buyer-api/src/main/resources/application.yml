@@ -44,7 +44,6 @@ spring:
           max-idle: 10
           # 连接池中的最小空闲连接，默认 8
           min-idle: 8
-
   # 数据源配置
   datasource:
     url: jdbc:mysql://192.168.31.100:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai

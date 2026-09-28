@@ -1,6 +1,5 @@
 package cn.lili.modules.goods.sku;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Assert;
 import cn.lili.modules.goods.entity.dos.Goods;
@@ -20,6 +19,14 @@ public class GoodsSkuBuilder {
 
 
     private static final String IMAGES_KEY = "images";
+
+    /**
+     * 发品/编辑时随 SKU 一并提交、但不属于规格维度的字段。
+     */
+    private static final Set<String> IGNORE_SKU_META_KEYS = Set.of(
+            "id", "sn", "cost", "price", "quantity", "weight", "alertQuantity",
+            "specList", "slotCapacities", "goodsGalleryList"
+    );
 
 
     /**
@@ -64,19 +71,18 @@ public class GoodsSkuBuilder {
         //规格值
         Map<String, Object> specMap = new LinkedHashMap<>();
 
-        // 原始规格项
-        String[] ignoreOriginKeys = {"id", "sn", "cost", "price", "quantity", "weight", "alertQuantity"};
         //获取规格信息
         for (Map.Entry<String, Object> spec : skuInfo.entrySet()) {
-            //保存新增规格信息
-            if (!CollUtil.contains(Arrays.asList(ignoreOriginKeys), spec.getKey()) && spec.getValue() != null) {
-                specMap.put(spec.getKey(), spec.getValue());
-                if (!spec.getKey().equals(IMAGES_KEY)) {
-                    //设置商品名称
-                    goodsName.append(" ").append(spec.getValue());
-                    //规格简短信息
-                    simpleSpecs.append(" ").append(spec.getValue());
-                }
+            if (IGNORE_SKU_META_KEYS.contains(spec.getKey()) || spec.getValue() == null) {
+                continue;
+            }
+            // 保存新增规格信息
+            specMap.put(spec.getKey(), spec.getValue());
+            if (!IMAGES_KEY.equals(spec.getKey()) && isScalarSpecValue(spec.getValue())) {
+                //设置商品名称
+                goodsName.append(" ").append(spec.getValue());
+                //规格简短信息
+                simpleSpecs.append(" ").append(spec.getValue());
             }
         }
         //设置规格信息
@@ -95,5 +101,11 @@ public class GoodsSkuBuilder {
         goodsSku.setAlertQuantity(Convert.toInt(skuInfo.get("alertQuantity"), 0));
     }
 
+    private static boolean isScalarSpecValue(Object value) {
+        return value instanceof CharSequence
+                || value instanceof Number
+                || value instanceof Boolean
+                || value instanceof Character;
+    }
 
 }

@@ -5,7 +5,6 @@ import cn.lili.common.context.ThreadContextHolder;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
-import cn.lili.common.properties.DomainProperties;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
@@ -20,6 +19,7 @@ import cn.lili.modules.payment.kit.params.dto.CashierParam;
 import cn.lili.modules.payment.service.PaymentService;
 import cn.lili.modules.payment.service.RefundLogService;
 import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.connect.ConnectSetting;
 import cn.lili.modules.system.entity.dto.payment.AlipayPaymentSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
@@ -69,12 +69,6 @@ public class AliPayPlugin implements Payment {
      */
     @Autowired
     private SettingService settingService;
-    /**
-     * 域名配置
-     */
-    @Autowired
-    private DomainProperties domainProperties;
-
     @Override
     public ResultMessage<Object> h5pay(HttpServletRequest request, HttpServletResponse response, PayParam payParam) {
 
@@ -286,7 +280,9 @@ public class AliPayPlugin implements Payment {
                 log.info("支付回调通知：支付失败-参数：{}", map);
             }
 
-            ThreadContextHolder.getHttpResponse().sendRedirect(domainProperties.getWap() + "/pages/order/myOrder?status=0");
+            ConnectSetting connectSetting = JSONUtil.toBean(
+                    settingService.get(SettingEnum.CONNECT_SETTING.name()).getSettingValue(), ConnectSetting.class);
+            ThreadContextHolder.getHttpResponse().sendRedirect(connectSetting.getWap() + "/pages/order/myOrder?status=0");
         } catch (Exception e) {
             log.error("支付回调同步通知异常", e);
         }

@@ -13,6 +13,7 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
+import cn.lili.modules.appointment.service.AppointmentService;
 import cn.lili.modules.order.aftersale.aop.AfterSaleLogPoint;
 import cn.lili.modules.order.aftersale.entity.dos.AfterSale;
 import cn.lili.modules.order.aftersale.entity.dto.AfterSaleDTO;
@@ -98,6 +99,11 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     private RocketmqCustomProperties rocketmqCustomProperties;
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
+    /**
+     * 预约服务
+     */
+    @Autowired
+    private AppointmentService appointmentService;
 
 
     @Override
@@ -173,8 +179,16 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         OrderItem orderItem = orderItemService.getBySn(sn);
 
         Order order = OperationalJudgment.judgment(orderService.getBySn(orderItem.getOrderSn()));
+        //电子卡券订单不支持买家售后
         rejectECouponAfterSale(order);
+        //预约订单仅已支付且未服务完结可申请售后
+        validateAppointmentAfterSale(order);
 
+        //预约订单已支付后即可退款，下单时售后状态为 NEW
+        if (appointmentService.isAppointmentOrder(order)
+                && OrderItemAfterSaleStatusEnum.NEW.name().equals(orderItem.getAfterSaleStatus())) {
+            orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name());
+        }
         //未申请售后订单货物或部分售后才能进行申请
         if (!orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name())
                 && !orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.PART_AFTER_SALE.name())) {
@@ -195,16 +209,23 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         if (order.getOrderType().equals(OrderTypeEnum.VIRTUAL.name())) {
             afterSaleApplyVO.setReturnMoney(true);
             afterSaleApplyVO.setReturnGoods(false);
+        } else if (OrderTypeEnum.APPOINTMENT.name().equals(order.getOrderType())) {
+            afterSaleApplyVO.setReturnMoney(true);
+            afterSaleApplyVO.setReturnGoods(false);
         } else {
             afterSaleApplyVO.setReturnMoney(true);
             afterSaleApplyVO.setReturnGoods(true);
         }
 
         afterSaleApplyVO.setAccountType(order.getPaymentMethod());
-        afterSaleApplyVO.setApplyRefundPrice(CurrencyUtil.div(
-                CurrencyUtil.add(orderItem.getFlowPrice(),
-                        orderItem.getPriceDetailDTO().getGiftCardPrice()),
-                orderItem.getNum()));
+        if (OrderTypeEnum.APPOINTMENT.name().equals(order.getOrderType())) {
+            afterSaleApplyVO.setApplyRefundPrice(appointmentService.getRemainingRefundableAmount(order.getSn()));
+        } else {
+            afterSaleApplyVO.setApplyRefundPrice(CurrencyUtil.div(
+                    CurrencyUtil.add(orderItem.getFlowPrice(),
+                            orderItem.getPriceDetailDTO().getGiftCardPrice()),
+                    orderItem.getNum()));
+        }
         //如果已经退货或者退款过，则返回最大售后数量重新设置
         if (orderItem.getReturnGoodsNumber() != null) {
             afterSaleApplyVO.setNum(orderItem.getNum() - orderItem.getReturnGoodsNumber());
@@ -280,6 +301,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         this.updateOrderItemAfterSaleStatus(afterSale);
         //发送售后消息
         this.sendAfterSaleMessage(afterSale);
+        notifyAppointmentRefundIfNeeded(afterSale);
 
         return afterSale;
     }
@@ -363,6 +385,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         this.updateOrderItemAfterSaleStatus(afterSale);
         //发送售后消息
         this.sendAfterSaleMessage(afterSale);
+        notifyAppointmentRefundIfNeeded(afterSale);
         return afterSale;
     }
 
@@ -380,6 +403,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         refundSupport.refund(afterSale);
         //发送退款消息
         this.sendAfterSaleMessage(afterSale);
+        notifyAppointmentRefundIfNeeded(afterSale);
         return afterSale;
     }
 
@@ -475,7 +499,9 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
             afterSale.setAfterSaleImage(afterSaleDTO.getImages());
         }
 
-        if (afterSale.getNum().equals(orderItem.getNum())) {
+        if (OrderTypeEnum.APPOINTMENT.name().equals(order.getOrderType()) && afterSaleDTO.getApplyRefundPrice() != null) {
+            afterSale.setApplyRefundPrice(afterSaleDTO.getApplyRefundPrice());
+        } else if (afterSale.getNum().equals(orderItem.getNum())) {
             //计算退回金额
             afterSale.setApplyRefundPrice(flowPrice);
         } else {
@@ -552,8 +578,16 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         OrderItem orderItem = orderItemService.getBySn(afterSaleDTO.getOrderItemSn());
 
         Order order = orderService.getBySn(orderItem.getOrderSn());
+        //电子卡券订单不支持买家售后
         rejectECouponAfterSale(order);
+        //预约订单仅已支付且未服务完结可申请售后
+        validateAppointmentAfterSale(order);
 
+        //预约订单已支付后即可退款，下单时售后状态为 NEW
+        if (appointmentService.isAppointmentOrder(order)
+                && OrderItemAfterSaleStatusEnum.NEW.name().equals(orderItem.getAfterSaleStatus())) {
+            orderItem.setAfterSaleStatus(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name());
+        }
         //未申请售后或部分售后订单货物才能进行申请
         if (!orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.NOT_APPLIED.name()) && !orderItem.getAfterSaleStatus().equals(OrderItemAfterSaleStatusEnum.PART_AFTER_SALE.name())) {
             throw new ServiceException(ResultCode.AFTER_SALES_BAN);
@@ -563,6 +597,15 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         if (afterSaleDTO.getNum() > (orderItem.getNum() - orderItem.getReturnGoodsNumber())) {
             throw new ServiceException(ResultCode.AFTER_GOODS_NUMBER_ERROR);
         }
+        // 预约无退货，仅退款；金额按剩余可退校验（支持部分退）
+        if (OrderTypeEnum.APPOINTMENT.name().equals(order.getOrderType())) {
+            if (!AfterSaleTypeEnum.RETURN_MONEY.name().equals(afterSaleDTO.getServiceType())) {
+                throw new ServiceException(ResultCode.AFTER_SALES_BAN);
+            }
+            double applyAmount = afterSaleDTO.getApplyRefundPrice() == null ? 0D : afterSaleDTO.getApplyRefundPrice();
+            appointmentService.validateBuyerAfterSaleAmount(order.getSn(), applyAmount);
+        }
+
         AfterSaleTypeEnum afterSaleTypeEnum = AfterSaleTypeEnum.valueOf(afterSaleDTO.getServiceType());
         switch (afterSaleTypeEnum) {
             case RETURN_MONEY:
@@ -587,12 +630,49 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     }
 
     /**
-     * 电子卡券订单不支持买家售后。
+     * 电子卡券订单不支持买家售后
+     *
+     * @param order 订单
      */
     private void rejectECouponAfterSale(Order order) {
         if (order != null && OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
             throw new ServiceException(ResultCode.CARD_KEY_E_COUPON_NO_AFTER_SALE);
         }
+    }
+
+    /**
+     * 预约订单售后校验：仅已支付、未服务完结可申请
+     *
+     * @param order 订单
+     */
+    private void validateAppointmentAfterSale(Order order) {
+        if (!appointmentService.isAppointmentOrder(order)) {
+            return;
+        }
+        if (!PayStatusEnum.PAID.name().equals(order.getPayStatus())) {
+            throw new ServiceException(ResultCode.APPOINTMENT_AFTER_SALE_UNPAID);
+        }
+        if (!appointmentService.canApplyBuyerAfterSale(order.getSn())) {
+            throw new ServiceException(ResultCode.APPOINTMENT_AFTER_SALE_SERVICE_COMPLETE);
+        }
+    }
+
+    /**
+     * 预约订单售后完成时通知履约：部分退不关单，退尽关单并回补时段
+     *
+     * @param afterSale 售后单
+     */
+    private void notifyAppointmentRefundIfNeeded(AfterSale afterSale) {
+        if (!AfterSaleStatusEnum.COMPLETE.name().equals(afterSale.getServiceStatus())) {
+            return;
+        }
+        Order order = orderService.getBySn(afterSale.getOrderSn());
+        if (!appointmentService.isAppointmentOrder(order)) {
+            return;
+        }
+        double amount = afterSale.getActualRefundPrice() == null
+                ? afterSale.getApplyRefundPrice() : afterSale.getActualRefundPrice();
+        appointmentService.onRefundSuccess(afterSale.getOrderSn(), amount);
     }
 
     /**
@@ -695,6 +775,7 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
         switch (afterSaleTypeEnum) {
             //售后状态为：未申请 部分售后 已申请
             case NOT_APPLIED:
+            case NEW:
             case PART_AFTER_SALE:
             case ALREADY_APPLIED: {
                 //通过正在售后商品总数修改订单售后状态

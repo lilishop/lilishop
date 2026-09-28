@@ -6,6 +6,8 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
+import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
 import cn.lili.modules.order.order.entity.enums.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -14,6 +16,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +34,12 @@ public class OrderSearchParams extends PageVO {
 
     @Schema(description = "商品名称")
     private String goodsName;
+
+    /**
+     * @see GoodsTypeEnum
+     */
+    @Schema(description = "商品类型", allowableValues = "PHYSICAL_GOODS,VIRTUAL_GOODS,E_COUPON,APPOINTMENT_GOODS")
+    private String goodsType;
 
     @Schema(description = "订单编号")
     private String orderSn;
@@ -165,6 +174,15 @@ public class OrderSearchParams extends PageVO {
         //按商品名称查询
         wrapper.like(CharSequenceUtil.isNotEmpty(goodsName), "oi.goods_name", goodsName);
 
+        //按商品类型查询。订单类型无法区分实物/虚拟（购物车下单都会记成 NORMAL），以商品表为准。
+        if (CharSequenceUtil.isNotEmpty(goodsType)
+                && Arrays.stream(GoodsTypeEnum.values()).anyMatch(item -> item.name().equals(goodsType))) {
+            wrapper.apply(
+                    "EXISTS (SELECT 1 FROM li_order_item oi_gt INNER JOIN li_goods g ON g.id = oi_gt.goods_id "
+                            + "WHERE oi_gt.order_sn = o.sn AND oi_gt.delete_flag = 0 AND g.goods_type = {0})",
+                    goodsType);
+        }
+
         //按支付方式
         wrapper.eq(CharSequenceUtil.isNotEmpty(paymentMethod), "o.payment_method", paymentMethod);
 
@@ -196,6 +214,19 @@ public class OrderSearchParams extends PageVO {
                 //待收货
                 case WAIT_ROG:
                     wrapper.eq(orderStatusColumn, OrderStatusEnum.DELIVERED.name());
+                    break;
+                //待收货/使用：物流已发货，以及虚拟待核验、自提待核销
+                case WAIT_USE:
+                    wrapper.and(use -> use.in(orderStatusColumn, Arrays.asList(
+                                    OrderStatusEnum.DELIVERED.name(),
+                                    OrderStatusEnum.TAKE.name(),
+                                    OrderStatusEnum.STAY_PICKED_UP.name()))
+                            .or(paid -> paid.eq(orderStatusColumn, OrderStatusEnum.PAID.name())
+                                    .and(kind -> kind.eq("o.order_type", OrderTypeEnum.VIRTUAL.name())
+                                            .or()
+                                            .eq("o.order_type", OrderTypeEnum.APPOINTMENT.name())
+                                            .or()
+                                            .eq("o.delivery_method", DeliveryMethodEnum.SELF_PICK_UP.name()))));
                     break;
                 //已取消
                 case CANCELLED:

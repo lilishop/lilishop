@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 商品规格VO
@@ -29,6 +30,9 @@ public class GoodsSkuVO extends GoodsSku {
 
     @Schema(description = "商品图片")
     private List<String> goodsGalleryList;
+
+    @Schema(description = "预约时段可约数量（发品回显）")
+    private List<Map<String, Object>> slotCapacities;
 
     public GoodsSkuVO(GoodsSku goodsSku) {
         BeanUtil.copyProperties(goodsSku, this);

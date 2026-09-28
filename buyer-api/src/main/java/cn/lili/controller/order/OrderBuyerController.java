@@ -58,7 +58,7 @@ public class OrderBuyerController {
     public ResultMessage<IPage<OrderSimpleVO>> queryMineOrder(OrderSearchParams orderSearchParams) {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         orderSearchParams.setMemberId(currentUser.getId());
-        return ResultUtil.data(orderService.queryByParams(orderSearchParams));
+        return ResultUtil.data(orderService.queryBuyerByParams(orderSearchParams));
     }
 
     @Operation(summary = "订单明细")

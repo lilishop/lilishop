@@ -63,6 +63,23 @@ public class AllowOperation implements Serializable {
      */
     public AllowOperation(Order order) {
 
+        // APPOINTMENT：未支付可取消/支付；已支付不可取消（走售后）；无物流/核销
+        if (OrderTypeEnum.APPOINTMENT.name().equals(order.getOrderType())) {
+            String status = order.getOrderStatus();
+            String payStatus = order.getPayStatus();
+            boolean unpaid = PayStatusEnum.UNPAID.name().equals(payStatus)
+                    && OrderStatusEnum.UNPAID.name().equals(status);
+            this.cancel = unpaid;
+            this.pay = unpaid;
+            this.ship = false;
+            this.rog = false;
+            this.showLogistics = false;
+            this.editConsignee = false;
+            this.editPrice = false;
+            this.take = false;
+            return;
+        }
+
         // E_COUPON：仅 UNPAID 可取消/支付；无物流/核销/改价；无售后操作项
         if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
             String status = order.getOrderStatus();
@@ -124,6 +141,23 @@ public class AllowOperation implements Serializable {
      * @param order 列表订单
      */
     public AllowOperation(OrderSimpleVO order) {
+
+        // APPOINTMENT 列表页操作权限，规则同 {@link #AllowOperation(Order)}
+        if (OrderTypeEnum.APPOINTMENT.name().equals(order.getOrderType())) {
+            String status = order.getOrderStatus();
+            String payStatus = order.getPayStatus();
+            boolean unpaid = PayStatusEnum.UNPAID.name().equals(payStatus)
+                    && OrderStatusEnum.UNPAID.name().equals(status);
+            this.cancel = unpaid;
+            this.pay = unpaid;
+            this.ship = false;
+            this.rog = false;
+            this.showLogistics = false;
+            this.editConsignee = false;
+            this.editPrice = false;
+            this.take = false;
+            return;
+        }
 
         // E_COUPON 列表页操作权限，规则同 {@link #AllowOperation(Order)}
         if (OrderTypeEnum.E_COUPON.name().equals(order.getOrderType())) {
