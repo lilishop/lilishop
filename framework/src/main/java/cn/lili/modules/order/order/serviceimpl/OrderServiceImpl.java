@@ -27,6 +27,7 @@ import cn.lili.modules.appointment.entity.enums.AppointmentVerificationCodeStatu
 import cn.lili.modules.appointment.entity.vo.AppointmentVerificationResultVO;
 import cn.lili.modules.appointment.service.AppointmentService;
 import cn.lili.modules.distribution.event.DistributionPaymentRewardsEvent;
+import cn.lili.modules.distribution.event.DistributionRecruitAutoApplyEvent;
 import cn.lili.modules.goods.service.CardKeyService;
 import cn.lili.modules.goods.entity.dto.GoodsCompleteMessage;
 import cn.lili.modules.live.entity.vos.LiveRoomVO;
@@ -530,6 +531,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
         // 支付提交后再入账，避免分销写库失败把本事务标成 rollback-only
         applicationEventPublisher.publishEvent(new DistributionPaymentRewardsEvent(this, orderSn));
+        if (CharSequenceUtil.isNotBlank(order.getMemberId())) {
+            applicationEventPublisher.publishEvent(new DistributionRecruitAutoApplyEvent(this, order.getMemberId()));
+        }
 
         String message = "订单付款，付款方式[" + PaymentMethodEnum.valueOf(paymentMethod).paymentName() + "]";
         OrderLog orderLog = new OrderLog(orderSn, "-1", UserEnums.SYSTEM.getRole(), "系统操作", message);

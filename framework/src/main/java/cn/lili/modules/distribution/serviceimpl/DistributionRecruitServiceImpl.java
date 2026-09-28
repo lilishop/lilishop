@@ -22,6 +22,7 @@ import cn.lili.modules.distribution.service.DistributionCustomerRelationService;
 import cn.lili.modules.distribution.service.DistributionRecruitService;
 import cn.lili.modules.distribution.support.DistributionMemberSupport;
 import cn.lili.modules.distribution.support.DistributionParentBindSupport;
+import cn.lili.modules.distribution.support.DistributionRecruitPendingTokenSupport;
 import cn.lili.modules.distribution.support.DistributionRecruitSettingSupport;
 import cn.lili.modules.distribution.support.DistributionSettingSupport;
 import cn.lili.modules.goods.entity.dos.Goods;
@@ -39,6 +40,7 @@ import cn.lili.modules.system.entity.dto.DistributionRecruitFieldSetting;
 import cn.lili.modules.system.entity.dto.DistributionRecruitSetting;
 import cn.lili.modules.system.entity.dto.DistributionSetting;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +57,7 @@ import java.util.stream.Collectors;
  *
  * @author pikachu
  */
+@Slf4j
 @Service
 public class DistributionRecruitServiceImpl implements DistributionRecruitService {
 
@@ -75,6 +78,9 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
 
     @Autowired
     private DistributionParentBindSupport distributionParentBindSupport;
+
+    @Autowired
+    private DistributionRecruitPendingTokenSupport pendingTokenSupport;
 
     @Autowired
     private MemberService memberService;
@@ -160,12 +166,25 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public DistributionRecruitApplication submitApplication(DistributionRecruitApplyDTO applyDTO) {
+        String memberId = UserContext.getCurrentUser().getId();
+        return submitApplicationForMember(memberId, applyDTO);
+    }
+
+    /**
+     * 按会员 ID 提交招募申请，不依赖 HTTP {@link UserContext}。
+     *
+     * @param memberId 申请人会员 ID
+     * @param applyDTO 申请参数
+     * @return 新建后的招募申请
+     */
+    @Transactional(rollbackFor = Exception.class)
+    DistributionRecruitApplication submitApplicationForMember(String memberId, DistributionRecruitApplyDTO applyDTO) {
         assertDistributionOpen();
         DistributionRecruitSetting setting = getSetting();
         if (setting.getPlanVersion() == null || setting.getPlanVersion() <= 0) {
             throw new ServiceException(ResultCode.PARAMS_ERROR, "暂无分销招募设置");
         }
-        String memberId = UserContext.getCurrentUser().getId();
+        DistributionRecruitApplyDTO dto = applyDTO == null ? new DistributionRecruitApplyDTO() : applyDTO;
         Distribution existing = distributionMemberSupport.getByMemberId(memberId);
         // 清退为停用，不可再申请；独立错误码，勿复用「已申请无需重复提交」
         if (existing != null && DistributionStatusEnum.RETREAT.name().equals(existing.getDistributionStatus())) {
@@ -177,7 +196,7 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
         if (getPendingApplicationByMemberId(memberId) != null) {
             throw new ServiceException(ResultCode.DISTRIBUTION_IS_APPLY);
         }
-        String recruitInviterId = assertOnlineRecruitChannelAllowed(setting, applyDTO.getRecruitToken(), memberId);
+        String recruitInviterId = assertOnlineRecruitChannelAllowed(setting, dto.getRecruitToken(), memberId);
         DistributionRecruitApplication application = new DistributionRecruitApplication();
         application.setMemberId(memberId);
         application.setPlanId(DistributionRecruitSettingSupport.SETTING_KEY);
@@ -185,10 +204,10 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
         application.setApplySource(RecruitApplyModeEnum.AUTO.name().equals(setting.getApplyMode())
                 ? "AUTO_ENTRY" : "MANUAL_ENTRY");
         application.setAuditMode(setting.getAuditMode());
-        application.setRecruitToken(applyDTO.getRecruitToken());
+        application.setRecruitToken(dto.getRecruitToken());
         application.setRecruitInviterId(recruitInviterId);
         if (setting.getAgreementContent() != null && !setting.getAgreementContent().isBlank()) {
-            if (!Boolean.TRUE.equals(applyDTO.getAgreementAccepted())) {
+            if (!Boolean.TRUE.equals(dto.getAgreementAccepted())) {
                 throw new ServiceException(ResultCode.PARAMS_ERROR, "请先同意分销推广服务协议");
             }
             application.setAgreementContent(setting.getAgreementContent());
@@ -200,7 +219,7 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
             throw new ServiceException(ResultCode.PARAMS_ERROR, "尚未满足加入条件");
         }
         application.setConditionSnapshot(JSONUtil.toJsonStr(conditionProgress));
-        application.setApplyFormSnapshot(buildApplyFormSnapshot(setting, applyDTO.getFormItems()));
+        application.setApplyFormSnapshot(buildApplyFormSnapshot(setting, dto.getFormItems()));
         // 记录当前绑定的推广分销员，审核通过时用于确定上级归属
         DistributionCustomerRelation relation = customerRelationService.getActiveRelation(memberId);
         application.setBoundDistributorId(relation == null ? null : relation.getDistributionId());
@@ -217,6 +236,9 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
         if (RecruitAuditModeEnum.AUTO_PASS.name().equals(setting.getAuditMode())) {
             auditApplication(application.getId(), true, "自动审核通过", "system");
             application = applicationMapper.selectById(application.getId());
+        }
+        if (pendingTokenSupport != null) {
+            pendingTokenSupport.clear(memberId);
         }
         return application;
     }
@@ -269,16 +291,54 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void tryAutoApply(String memberId) {
-        DistributionRecruitSetting setting = getSetting();
+        if (memberId == null || memberId.isBlank()) {
+            return;
+        }
+        DistributionSetting distributionSetting = distributionSettingSupport.getSetting();
+        if (Boolean.FALSE.equals(distributionSetting.getIsOpen())) {
+            return;
+        }
+        DistributionRecruitSetting setting = recruitSettingSupport.readSetting();
         if (!RecruitApplyModeEnum.AUTO.name().equals(setting.getApplyMode())) {
             return;
         }
-        // 仅当加入条件已满足时才触发自动申请
-        DistributionRecruitConditionProgressVO progress = getConditionProgress(memberId);
-        if (!Boolean.TRUE.equals(progress.getSatisfied())) {
+        if (setting.getPlanVersion() == null || setting.getPlanVersion() <= 0) {
             return;
         }
-        submitApplication(new DistributionRecruitApplyDTO());
+        Distribution existing = distributionMemberSupport.getByMemberId(memberId);
+        if (existing != null && DistributionStatusEnum.RETREAT.name().equals(existing.getDistributionStatus())) {
+            return;
+        }
+        if (distributionMemberSupport.isBlockingRecruitApply(existing)) {
+            return;
+        }
+        if (getPendingApplicationByMemberId(memberId) != null) {
+            return;
+        }
+        try {
+            DistributionRecruitConditionProgressVO progress = getConditionProgress(memberId);
+            if (!Boolean.TRUE.equals(progress.getSatisfied())) {
+                return;
+            }
+            DistributionRecruitApplyDTO dto = new DistributionRecruitApplyDTO();
+            if (pendingTokenSupport != null) {
+                dto.setRecruitToken(pendingTokenSupport.get(memberId));
+            }
+            if (setting.getAgreementContent() != null && !setting.getAgreementContent().isBlank()) {
+                dto.setAgreementAccepted(true);
+            }
+            submitApplicationForMember(memberId, dto);
+        } catch (ServiceException e) {
+            log.debug("分销招募自动申请跳过 memberId={} code={}", memberId, e.getResultCode());
+        }
+    }
+
+    @Override
+    public void savePendingRecruitToken(String memberId, String recruitToken) {
+        if (pendingTokenSupport == null) {
+            return;
+        }
+        pendingTokenSupport.save(memberId, recruitToken);
     }
 
     @Override
@@ -286,9 +346,9 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
         assertDistributionOpen();
         DistributionRecruitSetting setting = recruitSettingSupport.readSetting();
         DistributionRecruitConditionProgressVO progress = new DistributionRecruitConditionProgressVO();
-        // 未配置招募方案时不设门槛
+        // 未配置招募方案时不能视为已达标，避免加入页显示「已满足」却无法申请
         if (setting.getPlanVersion() == null || setting.getPlanVersion() <= 0) {
-            progress.setSatisfied(true);
+            progress.setSatisfied(false);
             return progress;
         }
         progress.setJoinConditionType(setting.getJoinConditionType());
@@ -548,7 +608,7 @@ public class DistributionRecruitServiceImpl implements DistributionRecruitServic
      * @param recruitToken 邀请卡 token 或 scene
      * @return 分销员 ID；空值时返回 null
      */
-    static String normalizeRecruitToken(String recruitToken) {
+    public static String normalizeRecruitToken(String recruitToken) {
         if (recruitToken == null || recruitToken.isBlank()) {
             return null;
         }
