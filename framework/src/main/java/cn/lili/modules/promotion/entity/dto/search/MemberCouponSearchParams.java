@@ -11,7 +11,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * 客户优惠券查询通用类
@@ -106,12 +105,6 @@ public class MemberCouponSearchParams extends BasePromotionsSearchParams impleme
             } else {
                 queryWrapper.ge(PRICE_COLUMN, s[0]);
             }
-        }
-        if (this.getStartTime() != null) {
-            queryWrapper.ge("start_time", new Date(this.getEndTime()));
-        }
-        if (this.getEndTime() != null) {
-            queryWrapper.le("end_time", new Date(this.getEndTime()));
         }
         queryWrapper.eq("delete_flag", false);
         queryWrapper.orderByDesc("create_time");

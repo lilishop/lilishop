@@ -8,7 +8,6 @@ import cn.lili.modules.member.entity.dto.FootPrintQueryParams;
 import cn.lili.modules.member.mapper.FootprintMapper;
 import cn.lili.modules.member.service.FootprintService;
 import cn.lili.modules.search.entity.dos.GoodsIndex;
-import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -17,12 +16,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * 客户浏览历史业务层实现
@@ -74,34 +73,61 @@ public class FootprintServiceImpl extends ServiceImpl<FootprintMapper, FootPrint
 
     @Override
     public IPage<GoodsIndex> footPrintPage(FootPrintQueryParams params) {
-        params.setSort("createTime");
-        Page<FootPrint> footPrintPages = this.page(PageUtil.initPage(params), params.queryWrapper());
-        //定义结果
-        Page<GoodsIndex> goodsIndexIPage = new Page<>();
+        int pageNumber = params.getPageNumber() == null || params.getPageNumber() < 1 ? 1 : params.getPageNumber();
+        int pageSize = params.getPageSize() == null || params.getPageSize() < 1 ? 20 : params.getPageSize();
+        List<FootPrint> footprints = this.list(params.queryWrapper());
+        List<GoodsIndex> goodsList = toVisibleGoods(footprints);
 
-        if (footPrintPages.getRecords() != null && !footPrintPages.getRecords().isEmpty()) {
-            List<String> skuIds = footPrintPages.getRecords().stream().map(FootPrint::getSkuId).collect(Collectors.toList());
-            List<GoodsSku> goodsSkuByIdFromCache = goodsSkuService.getGoodsSkuByIdFromCache(skuIds);
-            List<GoodsIndex> collect = IntStream.range(0, goodsSkuByIdFromCache.size())
-                    .mapToObj(i -> {
-                        if (goodsSkuByIdFromCache.get(i) == null) {
-                            return null;
-                        }
-                        Optional<FootPrint> first =
-                                footPrintPages.getRecords().stream().filter(j -> j.getSkuId().equals(goodsSkuByIdFromCache.get(i).getId())).findFirst();
-                        return first.map(footPrint -> new GoodsIndex(goodsSkuByIdFromCache.get(i), footPrint.getCreateTime())).orElseGet(() -> new GoodsIndex(goodsSkuByIdFromCache.get(i)));
-                    })
-                    .collect(Collectors.toList());
+        int from = (pageNumber - 1) * pageSize;
+        List<GoodsIndex> pageRecords = from >= goodsList.size()
+                ? new ArrayList<>()
+                : new ArrayList<>(goodsList.subList(from, Math.min(goodsList.size(), from + pageSize)));
 
-            collect.removeIf(Objects::isNull);
-
-            goodsIndexIPage.setRecords(collect);
-            goodsIndexIPage.setTotal(footPrintPages.getTotal());
-            goodsIndexIPage.setSize(footPrintPages.getSize());
-            goodsIndexIPage.setCurrent(footPrintPages.getCurrent());
-            return goodsIndexIPage;
-        }
+        Page<GoodsIndex> goodsIndexIPage = new Page<>(pageNumber, pageSize, goodsList.size());
+        goodsIndexIPage.setRecords(pageRecords);
         return goodsIndexIPage;
+    }
+
+    /**
+     * 只保留还能查到商品的足迹。商品已删除或缓存缺记录时不再占分页名额。
+     */
+    private List<GoodsIndex> toVisibleGoods(List<FootPrint> footprints) {
+        List<GoodsIndex> goodsList = new ArrayList<>();
+        if (footprints == null || footprints.isEmpty()) {
+            return goodsList;
+        }
+        List<String> skuIds = new ArrayList<>();
+        for (FootPrint footPrint : footprints) {
+            if (footPrint.getSkuId() != null) {
+                skuIds.add(footPrint.getSkuId());
+            }
+        }
+        Map<String, GoodsSku> skuMap = new HashMap<>();
+        List<GoodsSku> cachedSkus = goodsSkuService.getGoodsSkuByIdFromCache(skuIds);
+        if (cachedSkus != null) {
+            for (GoodsSku sku : cachedSkus) {
+                if (sku != null && sku.getId() != null) {
+                    skuMap.put(sku.getId(), sku);
+                }
+            }
+        }
+        for (String skuId : skuIds) {
+            if (skuMap.containsKey(skuId)) {
+                continue;
+            }
+            GoodsSku sku = goodsSkuService.getGoodsSkuByIdFromCache(skuId);
+            if (sku != null && sku.getId() != null) {
+                skuMap.put(sku.getId(), sku);
+            }
+        }
+        for (FootPrint footPrint : footprints) {
+            GoodsSku sku = skuMap.get(footPrint.getSkuId());
+            if (sku == null) {
+                continue;
+            }
+            goodsList.add(new GoodsIndex(sku, footPrint.getCreateTime()));
+        }
+        return goodsList;
     }
 
     @Override

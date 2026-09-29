@@ -154,11 +154,9 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     public IPage<MemberCoupon> getMemberCoupons(MemberCouponSearchParams param, PageVO pageVo) {
         QueryWrapper<MemberCoupon> queryWrapper = param.queryWrapper();
         Page<MemberCoupon> page = this.page(PageUtil.initPage(pageVo), queryWrapper);
-        if (page.getRecords() != null && page.getRecords().size() > 0) {
-            if (page.getRecords().stream().anyMatch(i -> i.getEndTime().before(new Date()))) {
-                this.expireInvalidMemberCoupon(param.getMemberId());
-                return this.page(PageUtil.initPage(pageVo), queryWrapper);
-            }
+        if (containsExpiredCoupon(page.getRecords())) {
+            this.expireInvalidMemberCoupon(param.getMemberId());
+            return this.page(PageUtil.initPage(pageVo), queryWrapper);
         }
         return page;
     }
@@ -172,7 +170,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     @Override
     public List<MemberCoupon> getMemberCoupons(MemberCouponSearchParams param) {
         List<MemberCoupon> list = this.list(param.queryWrapper());
-        if (list.stream().anyMatch(i -> i.getEndTime().before(new Date()))) {
+        if (containsExpiredCoupon(list)) {
             this.expireInvalidMemberCoupon(param.getMemberId());
             return this.list(param.queryWrapper());
         }
@@ -399,6 +397,14 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
                 .le(MemberCoupon::getEndTime, new Date())
                 .set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.EXPIRE.name());
         return this.update(updateWrapper);
+    }
+
+    private boolean containsExpiredCoupon(List<MemberCoupon> coupons) {
+        if (coupons == null || coupons.isEmpty()) {
+            return false;
+        }
+        Date now = new Date();
+        return coupons.stream().anyMatch(coupon -> coupon.getEndTime() != null && coupon.getEndTime().before(now));
     }
 
     private MemberCoupon receiverCoupon(String couponId, String memberId, String memberName, Coupon coupon,
