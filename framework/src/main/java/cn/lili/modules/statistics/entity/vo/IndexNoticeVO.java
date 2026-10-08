@@ -30,4 +30,10 @@ public class IndexNoticeVO {
     @Schema(description = "待处理商家结算")
     private Long waitPayBill;
 
+    @Schema(description = "未完成预约工单")
+    private Long appointmentWorkOrder;
+
+    @Schema(description = "待审核采购单")
+    private Long procurementAudit;
+
 }

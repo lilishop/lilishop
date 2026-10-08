@@ -14,8 +14,8 @@ import cn.lili.modules.member.entity.dto.MemberAddressDTO;
 import cn.lili.modules.member.service.StoreLogisticsService;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
 import cn.lili.modules.order.order.entity.dto.OrderFulfillParamsDTO;
-import cn.lili.common.vo.PageVO;
 import cn.lili.modules.order.order.entity.dto.OrderVerificationConfirmDTO;
+import cn.lili.modules.order.order.entity.dto.OrderVerificationRecordSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderNumVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
@@ -187,8 +187,8 @@ public class OrderStoreController {
 
     @Operation(summary = "核销记录")
     @GetMapping("/verification/records")
-    public ResultMessage<IPage<OrderVerificationRecordVO>> verificationRecords(PageVO page) {
-        return ResultUtil.data(orderService.verificationRecordPage(page));
+    public ResultMessage<IPage<OrderVerificationRecordVO>> verificationRecords(OrderVerificationRecordSearchParams params) {
+        return ResultUtil.data(orderService.verificationRecordPage(params));
     }
 
     @Operation(description = "查询物流踪迹")

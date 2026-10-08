@@ -150,6 +150,12 @@ public class OrderSimpleVO {
     private String orderType;
 
     /**
+     * @see cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum
+     */
+    @Schema(description = "配送方式")
+    private String deliveryMethod;
+
+    /**
      * @see cn.lili.modules.order.order.entity.enums.DeliverStatusEnum
      */
     @Schema(description = "货运状态")

@@ -2,6 +2,7 @@ package cn.lili.modules.order.order.mapper;
 
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderExportDTO;
+import cn.lili.modules.order.order.entity.dto.OrderVerificationRecordSearchParams;
 import cn.lili.modules.order.order.entity.vo.OrderNumVO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.entity.vo.OrderVerificationRecordVO;
@@ -82,7 +83,7 @@ public interface OrderMapper extends BaseMapper<Order> {
      * @param queryWrapper 查询条件
      * @return 买家订单分页
      */
-    @Select("select o.sn,o.flow_price,o.create_time,o.order_status,o.pay_status,o.store_name as store_name,o.store_id as store_id," +
+    @Select("select o.sn,o.flow_price,o.create_time,o.order_status,o.pay_status,o.payment_method,o.store_name as store_name,o.store_id as store_id," +
             "o.order_type,o.deliver_status,o.order_promotion_type" +
             ",GROUP_CONCAT(oi.goods_id) as group_goods_id," +
             " GROUP_CONCAT(oi.sku_id) as group_sku_id," +
@@ -107,7 +108,7 @@ public interface OrderMapper extends BaseMapper<Order> {
      * @return 管理端订单分页
      */
     @Select("select o.sn,o.flow_price,o.create_time,o.order_status,o.pay_status,o.payment_method,o.payment_time,o.member_name,o.member_id,o.consignee_name,o.consignee_mobile,o.store_name as " +
-            "store_name,o.store_id as store_id,o.client_type,o.order_type,o.deliver_status,o.order_promotion_type,o.seller_remark " +
+            "store_name,o.store_id as store_id,o.client_type,o.order_type,o.delivery_method,o.deliver_status,o.order_promotion_type,o.seller_remark " +
             ",GROUP_CONCAT(oi.goods_id) as group_goods_id," +
             " GROUP_CONCAT(oi.sku_id) as group_sku_id," +
             " GROUP_CONCAT(oi.num) as group_num" +
@@ -153,12 +154,15 @@ public interface OrderMapper extends BaseMapper<Order> {
 
     /**
      * 本店核销记录：预约核销码，以及虚拟/自提订单核销。
+     * 商品名称、核销员、核销时间在外层过滤，避免 UNION 两侧各写一遍条件。
      *
      * @param page    分页
      * @param storeId 店铺ID
+     * @param params  筛选条件，空字段不参与过滤
      * @return 核销记录
      */
-    @Select("SELECT * FROM (" +
+    @Select("<script>" +
+            "SELECT * FROM (" +
             "SELECT c.code AS code, c.order_sn AS order_sn, c.order_item_sn AS order_item_sn, " +
             "oi.goods_name AS goods_name, oi.image AS image, oi.specs AS specs, " +
             "c.verified_time AS verified_time, " +
@@ -178,10 +182,20 @@ public interface OrderMapper extends BaseMapper<Order> {
             "FROM li_order o " +
             "INNER JOIN li_order_item oi ON oi.order_sn = o.sn AND oi.delete_flag = 0 " +
             "WHERE o.store_id = #{storeId} AND o.delete_flag = 0 " +
-            "AND o.verification_code IS NOT NULL AND o.verification_code <> '' " +
-            "AND o.order_status = 'COMPLETED' AND o.order_type <> 'APPOINTMENT' " +
+            "AND o.verification_code IS NOT NULL AND o.verification_code &lt;&gt; '' " +
+            "AND o.order_status = 'COMPLETED' AND o.order_type &lt;&gt; 'APPOINTMENT' " +
             "AND (o.order_type = 'VIRTUAL' OR o.delivery_method = 'SELF_PICK_UP')" +
-            ") verification_record ORDER BY verified_time DESC")
-    IPage<OrderVerificationRecordVO> pageVerificationRecords(IPage<OrderVerificationRecordVO> page, @Param("storeId") String storeId);
+            ") verification_record " +
+            "<where>" +
+            "<if test='params.goodsName != null and params.goodsName != \"\"'> AND goods_name LIKE CONCAT('%', #{params.goodsName}, '%') </if>" +
+            "<if test='params.verifierName != null and params.verifierName != \"\"'> AND verifier_name LIKE CONCAT('%', #{params.verifierName}, '%') </if>" +
+            "<if test='params.startTime != null'> AND verified_time &gt;= #{params.startTime} </if>" +
+            "<if test='params.endTime != null'> AND verified_time &lt;= #{params.endTime} </if>" +
+            "</where>" +
+            " ORDER BY verified_time DESC" +
+            "</script>")
+    IPage<OrderVerificationRecordVO> pageVerificationRecords(IPage<OrderVerificationRecordVO> page,
+                                                             @Param("storeId") String storeId,
+                                                             @Param("params") OrderVerificationRecordSearchParams params);
 
 }

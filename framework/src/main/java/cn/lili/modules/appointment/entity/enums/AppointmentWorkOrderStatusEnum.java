@@ -1,5 +1,8 @@
 package cn.lili.modules.appointment.entity.enums;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * 预约工单状态
  *
@@ -35,5 +38,17 @@ public enum AppointmentWorkOrderStatusEnum {
     /**
      * 逾期未到店
      */
-    NO_SHOW
+    NO_SHOW;
+
+    /**
+     * 首页待办使用的未完成状态。服务结束和已退款不再计入。
+     */
+    public static List<String> unfinishedNames() {
+        return Arrays.asList(
+                PENDING_CLAIM.name(),
+                CLAIMED.name(),
+                WAIT_VERIFY.name(),
+                IN_SERVICE.name(),
+                NO_SHOW.name());
+    }
 }

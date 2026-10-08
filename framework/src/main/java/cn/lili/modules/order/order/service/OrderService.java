@@ -7,6 +7,7 @@ import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dto.OrderMessage;
 import cn.lili.modules.order.order.entity.dto.OrderFulfillParamsDTO;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
+import cn.lili.modules.order.order.entity.dto.OrderVerificationRecordSearchParams;
 import cn.lili.modules.order.order.entity.dto.PartDeliveryParamsDTO;
 import cn.lili.modules.order.order.entity.vo.OrderDetailVO;
 import cn.lili.modules.order.order.entity.vo.OrderNumVO;
@@ -252,10 +253,10 @@ public interface OrderService extends IService<Order> {
     /**
      * 本店核销记录
      *
-     * @param page 分页
+     * @param params 分页与筛选
      * @return 核销记录
      */
-    IPage<OrderVerificationRecordVO> verificationRecordPage(PageVO page);
+    IPage<OrderVerificationRecordVO> verificationRecordPage(OrderVerificationRecordSearchParams params);
 
     /**
      * 根据核验码获取订单信息

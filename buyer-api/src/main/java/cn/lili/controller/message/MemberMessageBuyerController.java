@@ -1,5 +1,6 @@
 package cn.lili.controller.message;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
@@ -37,6 +38,18 @@ public class MemberMessageBuyerController {
     public ResultMessage<IPage<MemberMessage>> page(MemberMessageQueryVO memberMessageQueryVO, PageVO page) {
         memberMessageQueryVO.setMemberId(UserContext.getCurrentUser().getId());
         return ResultUtil.data(memberMessageService.getPage(memberMessageQueryVO, page));
+    }
+
+    @Operation(summary = "查看客户站内消息")
+    @Parameter(name = "messageId", description = "客户消息id", required = true)
+    @GetMapping("/{message_id}")
+    public ResultMessage<MemberMessage> get(@PathVariable("message_id") String messageId) {
+        MemberMessage memberMessage = memberMessageService.getById(messageId);
+        String memberId = UserContext.getCurrentUser().getId();
+        if (memberMessage == null || !memberId.equals(memberMessage.getMemberId())) {
+            return ResultUtil.error(ResultCode.ERROR);
+        }
+        return ResultUtil.data(memberMessage);
     }
 
     @Operation(summary = "消息已读")

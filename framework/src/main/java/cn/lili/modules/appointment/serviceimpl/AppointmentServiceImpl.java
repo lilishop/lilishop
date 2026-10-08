@@ -670,7 +670,9 @@ public class AppointmentServiceImpl extends ServiceImpl<AppointmentGoodsExtMappe
         if (!managerScope && CharSequenceUtil.isNotBlank(params.getStoreId())) {
             wrapper.eq(AppointmentWorkOrder::getStoreId, params.getStoreId());
         }
-        if (CharSequenceUtil.isNotBlank(params.getServiceStatus())) {
+        if ("OPEN".equals(params.getServiceStatus())) {
+            wrapper.in(AppointmentWorkOrder::getServiceStatus, AppointmentWorkOrderStatusEnum.unfinishedNames());
+        } else if (CharSequenceUtil.isNotBlank(params.getServiceStatus())) {
             wrapper.eq(AppointmentWorkOrder::getServiceStatus, params.getServiceStatus());
         }
         if (CharSequenceUtil.isNotBlank(params.getWorkOrderSn())) {

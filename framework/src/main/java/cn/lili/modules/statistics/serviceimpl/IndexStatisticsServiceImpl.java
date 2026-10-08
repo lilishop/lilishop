@@ -5,11 +5,17 @@ import cn.hutool.core.date.DateTime;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.utils.BeanUtil;
+import cn.lili.modules.appointment.entity.dos.AppointmentWorkOrder;
+import cn.lili.modules.appointment.entity.enums.AppointmentWorkOrderStatusEnum;
+import cn.lili.modules.appointment.mapper.AppointmentWorkOrderMapper;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleTypeEnum;
+import cn.lili.modules.procurement.entity.dos.ProcurementOrder;
+import cn.lili.modules.procurement.entity.enums.ProcurementStatusEnum;
+import cn.lili.modules.procurement.mapper.ProcurementOrderMapper;
 import cn.lili.modules.statistics.entity.dto.GoodsStatisticsQueryParam;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.enums.SearchTypeEnum;
@@ -103,6 +109,16 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
      */
     @Autowired
     private SeckillStatisticsService seckillStatisticsService;
+    /**
+     * 预约工单
+     */
+    @Autowired
+    private AppointmentWorkOrderMapper appointmentWorkOrderMapper;
+    /**
+     * 采购单
+     */
+    @Autowired
+    private ProcurementOrderMapper procurementOrderMapper;
 
     @Override
     public IndexNoticeVO indexNotice() {
@@ -120,6 +136,14 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         indexNoticeVO.setDistributionCash(distributionCashStatisticsService.newDistributionCash());
         //待处理商家结算
         indexNoticeVO.setWaitPayBill(billStatisticsService.billNum(BillStatusEnum.CHECK));
+        //未完成预约工单
+        indexNoticeVO.setAppointmentWorkOrder(appointmentWorkOrderMapper.selectCount(Wrappers.<AppointmentWorkOrder>lambdaQuery()
+                .eq(AppointmentWorkOrder::getDeleteFlag, false)
+                .in(AppointmentWorkOrder::getServiceStatus, AppointmentWorkOrderStatusEnum.unfinishedNames())));
+        //已提交、待店铺审核的采购单
+        indexNoticeVO.setProcurementAudit(procurementOrderMapper.selectCount(Wrappers.<ProcurementOrder>lambdaQuery()
+                .eq(ProcurementOrder::getDeleteFlag, false)
+                .eq(ProcurementOrder::getStatus, ProcurementStatusEnum.SUBMITTED.name())));
         return indexNoticeVO;
     }
 

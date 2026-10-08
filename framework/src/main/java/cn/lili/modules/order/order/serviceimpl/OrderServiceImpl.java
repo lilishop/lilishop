@@ -869,9 +869,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    public IPage<OrderVerificationRecordVO> verificationRecordPage(PageVO page) {
+    public IPage<OrderVerificationRecordVO> verificationRecordPage(OrderVerificationRecordSearchParams params) {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
-        return this.baseMapper.pageVerificationRecords(PageUtil.initPage(page), storeId);
+        if (params == null) {
+            params = new OrderVerificationRecordSearchParams();
+        }
+        params.setGoodsName(CharSequenceUtil.trimToNull(params.getGoodsName()));
+        params.setVerifierName(CharSequenceUtil.trimToNull(params.getVerifierName()));
+        return this.baseMapper.pageVerificationRecords(PageUtil.initPageWithoutOrder(params), storeId, params);
     }
 
     @Override

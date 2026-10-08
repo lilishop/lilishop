@@ -61,6 +61,12 @@ public class OrderSearchParams extends PageVO {
     @Schema(description = "收货人")
     private String shipName;
 
+    @Schema(description = "收货人手机")
+    private String consigneeMobile;
+
+    @Schema(description = "店铺名称")
+    private String storeName;
+
     @Schema(description = "买家昵称")
     private String buyerName;
 
@@ -132,13 +138,14 @@ public class OrderSearchParams extends PageVO {
         AuthUser currentUser = UserContext.getCurrentUser();
         QueryWrapper<T> wrapper = new QueryWrapper<>();
 
-        //关键字查询
+        //关键字查询。商品名称走 EXISTS，数量统计只查 li_order，不能引用 oi 别名。
         if (CharSequenceUtil.isNotEmpty(keywords)) {
+            String keywordLike = likePattern(keywords);
             wrapper.and(keyWrapper -> keyWrapper.like("o.sn", keywords).or()
-                    .like("oi.goods_name", keywords).or()
                     .like("o.consignee_name", keywords).or()
                     .like("o.consignee_mobile", keywords).or()
-                    .like("o.store_name", keywords));
+                    .like("o.store_name", keywords).or()
+                    .apply(orderItemGoodsNameExists("oi_kw"), keywordLike));
         }
         if (currentUser != null) {
             //按卖家查询
@@ -170,9 +177,13 @@ public class OrderSearchParams extends PageVO {
 
         //物流查询
         wrapper.like(CharSequenceUtil.isNotEmpty(shipName), "o.consignee_name", shipName);
+        wrapper.like(CharSequenceUtil.isNotEmpty(consigneeMobile), "o.consignee_mobile", consigneeMobile);
+        wrapper.like(CharSequenceUtil.isNotEmpty(storeName), "o.store_name", storeName);
 
-        //按商品名称查询
-        wrapper.like(CharSequenceUtil.isNotEmpty(goodsName), "oi.goods_name", goodsName);
+        //按商品名称查询。用 EXISTS，列表和 orderNum 都能带上同一条件。
+        if (CharSequenceUtil.isNotEmpty(goodsName)) {
+            wrapper.apply(orderItemGoodsNameExists("oi_gn"), likePattern(goodsName));
+        }
 
         //按商品类型查询。订单类型无法区分实物/虚拟（购物车下单都会记成 NORMAL），以商品表为准。
         if (CharSequenceUtil.isNotEmpty(goodsType)
@@ -264,6 +275,16 @@ public class OrderSearchParams extends PageVO {
         }
         wrapper.eq("o.delete_flag", false);
         return wrapper;
+    }
+
+    private static String orderItemGoodsNameExists(String alias) {
+        return "EXISTS (SELECT 1 FROM li_order_item " + alias
+                + " WHERE " + alias + ".order_sn = o.sn AND " + alias + ".delete_flag = 0 AND "
+                + alias + ".goods_name LIKE {0})";
+    }
+
+    private static String likePattern(String value) {
+        return "%" + value + "%";
     }
 
 }
