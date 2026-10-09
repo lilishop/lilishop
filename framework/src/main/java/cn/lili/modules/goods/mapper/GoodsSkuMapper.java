@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.core.toolkit.Constants;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -128,6 +129,18 @@ public interface GoodsSkuMapper extends BaseMapper<GoodsSku> {
 
     @Select("SELECT id as sku_id, quantity, goods_id,simple_specs,sn,goods_name FROM li_goods_sku ${ew.customSqlSegment}")
     List<GoodsSkuStockDTO> queryStocks(@Param(Constants.WRAPPER) Wrapper<GoodsSku> queryWrapper);
+
+    /**
+     * 库存原子增加
+     */
+    @Update("UPDATE li_goods_sku SET quantity = quantity + #{quantity} WHERE id = #{skuId}")
+    int increaseStock(@Param("skuId") String skuId, @Param("quantity") Integer quantity);
+
+    /**
+     * 库存原子扣减，库存不足时影响行数为 0
+     */
+    @Update("UPDATE li_goods_sku SET quantity = quantity - #{quantity} WHERE id = #{skuId} AND quantity >= #{quantity}")
+    int reduceStock(@Param("skuId") String skuId, @Param("quantity") Integer quantity);
 
     /**
      * 品牌 selector：候选集与列表共用 WHERE，额外排除 brand_id = '0'。

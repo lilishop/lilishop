@@ -6,7 +6,6 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
-import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.member.entity.dos.Member;
@@ -36,6 +35,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import cn.lili.message.LiliMessageTemplate;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -51,6 +51,7 @@ import java.util.Date;
  * @author pikachu
  * @since 2020-02-25 14:10:16
  */
+@Slf4j
 @Service
 public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, MemberWallet> implements MemberWalletService {
 
@@ -105,10 +106,11 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
     public Boolean increaseWithdrawal(MemberWalletUpdateDTO memberWalletUpdateDTO) {
         //检测客户预存款信息是否存在，如果不存在则新建
         MemberWallet memberWallet = this.checkMemberWallet(memberWalletUpdateDTO.getMemberId());
-        //余额变动
-        memberWallet.setMemberWallet(CurrencyUtil.add(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney()));
-        memberWallet.setMemberFrozenWallet(CurrencyUtil.sub(memberWallet.getMemberFrozenWallet(), memberWalletUpdateDTO.getMoney()));
-        this.updateById(memberWallet);
+        //冻结金额原子退回余额，冻结不足时影响行数为 0
+        int rows = this.baseMapper.releaseFrozenToWallet(memberWalletUpdateDTO.getMemberId(), memberWalletUpdateDTO.getMoney());
+        if (rows == 0) {
+            throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_FROZEN_AMOUNT_INSUFFICIENT);
+        }
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO);
         walletLogService.save(walletLog);
@@ -120,9 +122,8 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
     public Boolean increase(MemberWalletUpdateDTO memberWalletUpdateDTO) {
         //检测客户预存款信息是否存在，如果不存在则新建
         MemberWallet memberWallet = this.checkMemberWallet(memberWalletUpdateDTO.getMemberId());
-        //新增预存款
-        memberWallet.setMemberWallet(CurrencyUtil.add(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney()));
-        this.baseMapper.updateById(memberWallet);
+        //余额原子增加
+        this.baseMapper.increaseWallet(memberWalletUpdateDTO.getMemberId(), memberWalletUpdateDTO.getMoney());
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO);
         walletLogService.save(walletLog);
@@ -135,13 +136,11 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
     public Boolean reduce(MemberWalletUpdateDTO memberWalletUpdateDTO) {
         //检测客户预存款信息是否存在，如果不存在则新建
         MemberWallet memberWallet = this.checkMemberWallet(memberWalletUpdateDTO.getMemberId());
-        //减少预存款，需要校验 如果不够扣减预存款
-        if (0 > CurrencyUtil.sub(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney())) {
+        //余额原子扣减，影响行数为 0 说明余额不足
+        int rows = this.baseMapper.reduceWallet(memberWalletUpdateDTO.getMemberId(), memberWalletUpdateDTO.getMoney());
+        if (rows == 0) {
             return false;
         }
-        memberWallet.setMemberWallet(CurrencyUtil.sub(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney()));
-        //保存记录
-        this.updateById(memberWallet);
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO, true);
         walletLogService.save(walletLog);
@@ -154,14 +153,11 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
     public Boolean reduceWithdrawal(MemberWalletUpdateDTO memberWalletUpdateDTO) {
         //检测客户预存款信息是否存在，如果不存在则新建
         MemberWallet memberWallet = this.checkMemberWallet(memberWalletUpdateDTO.getMemberId());
-        //减少预存款，需要校验 如果不够扣减预存款
-        if (0 > CurrencyUtil.sub(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney())) {
+        //余额原子转入冻结，影响行数为 0 说明余额不足
+        int rows = this.baseMapper.moveWalletToFrozen(memberWalletUpdateDTO.getMemberId(), memberWalletUpdateDTO.getMoney());
+        if (rows == 0) {
             throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_INSUFFICIENT);
         }
-        memberWallet.setMemberWallet(CurrencyUtil.sub(memberWallet.getMemberWallet(), memberWalletUpdateDTO.getMoney()));
-        memberWallet.setMemberFrozenWallet(CurrencyUtil.add(memberWallet.getMemberFrozenWallet(), memberWalletUpdateDTO.getMoney()));
-        //修改余额
-        this.updateById(memberWallet);
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO, true);
         walletLogService.save(walletLog);
@@ -174,12 +170,11 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
     public Boolean reduceFrozen(MemberWalletUpdateDTO memberWalletUpdateDTO) {
         //检测客户预存款信息是否存在，如果不存在则新建
         MemberWallet memberWallet = this.checkMemberWallet(memberWalletUpdateDTO.getMemberId());
-        //校验此金额是否超过冻结金额
-        if (0 > CurrencyUtil.sub(memberWallet.getMemberFrozenWallet(), memberWalletUpdateDTO.getMoney())) {
+        //冻结金额原子扣减，影响行数为 0 说明冻结金额不足
+        int rows = this.baseMapper.reduceFrozenWallet(memberWalletUpdateDTO.getMemberId(), memberWalletUpdateDTO.getMoney());
+        if (rows == 0) {
             throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_FROZEN_AMOUNT_INSUFFICIENT);
         }
-        memberWallet.setMemberFrozenWallet(CurrencyUtil.sub(memberWallet.getMemberFrozenWallet(), memberWalletUpdateDTO.getMoney()));
-        this.updateById(memberWallet);
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO, true);
         walletLogService.save(walletLog);
@@ -326,6 +321,12 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
     @Override
     public void withdrawal(String withdrawApplyId) {
         MemberWithdrawApply memberWithdrawApply = memberWithdrawApplyService.getById(withdrawApplyId);
+        //状态闸门：只有审核通过待打款的申请才能执行，防止 MQ 重投/并发导致重复打款
+        if (memberWithdrawApply == null
+                || !WithdrawStatusEnum.VIA_AUDITING.name().equals(memberWithdrawApply.getApplyStatus())) {
+            log.warn("提现申请状态非法，跳过打款，withdrawApplyId={}", withdrawApplyId);
+            return;
+        }
         memberWithdrawApply.setInspectTime(new Date());
         //获取提现设置
         Setting setting = settingService.get(SettingEnum.WITHDRAWAL_SETTING.name());

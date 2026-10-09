@@ -66,39 +66,42 @@ public class MemberWithdrawApplyServiceImpl extends ServiceImpl<MemberWithdrawAp
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean audit(String applyId, Boolean result, String remark) {
-        MemberWithdrawalMessage memberWithdrawalMessage = new MemberWithdrawalMessage();
         //查询申请记录
         MemberWithdrawApply memberWithdrawApply = this.getById(applyId);
-        memberWithdrawApply.setInspectRemark(remark);
-        memberWithdrawApply.setInspectTime(new Date());
-        if (memberWithdrawApply != null) {
-            //获取账户余额
-            MemberWalletVO memberWalletVO = memberWalletService.getMemberWallet(memberWithdrawApply.getMemberId());
-            //校验金额是否满足提现，因为是从冻结金额扣减，所以校验的是冻结金额
-            if (memberWalletVO.getMemberFrozenWallet() < memberWithdrawApply.getApplyMoney()) {
-                throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_FROZEN_AMOUNT_INSUFFICIENT);
-            }
-            //如果审核通过 则微信直接提现，反之则记录审核状态
-            if (Boolean.TRUE.equals(result)) {
-                memberWithdrawApply.setApplyStatus(WithdrawStatusEnum.VIA_AUDITING.name());
-
-            } else {
-                memberWithdrawApply.setApplyStatus(WithdrawStatusEnum.FAIL_AUDITING.name());
-                //保存修改审核记录
-                this.updateById(memberWithdrawApply);
-
-            }
-            //发送审核消息
-            memberWithdrawalMessage.setStatus(memberWithdrawApply.getApplyStatus());
-            memberWithdrawalMessage.setMemberWithdrawApplyId(memberWithdrawApply.getId());
-            memberWithdrawalMessage.setMemberId(memberWithdrawApply.getMemberId());
-            memberWithdrawalMessage.setPrice(memberWithdrawApply.getApplyMoney());
-
-            String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_WITHDRAWAL.name();
-            liliMessageTemplate.asyncSend(destination, memberWithdrawalMessage, MessageSendCallbackBuilder.commonCallback());
-            return true;
+        if (memberWithdrawApply == null) {
+            throw new ServiceException(ResultCode.WALLET_APPLY_ERROR);
         }
-        throw new ServiceException(ResultCode.WALLET_APPLY_ERROR);
+        //获取账户余额
+        MemberWalletVO memberWalletVO = memberWalletService.getMemberWallet(memberWithdrawApply.getMemberId());
+        //校验金额是否满足提现，因为是从冻结金额扣减，所以校验的是冻结金额
+        if (memberWalletVO.getMemberFrozenWallet() < memberWithdrawApply.getApplyMoney()) {
+            throw new ServiceException(ResultCode.WALLET_WITHDRAWAL_FROZEN_AMOUNT_INSUFFICIENT);
+        }
+        //如果审核通过 则微信直接提现，反之则记录审核状态
+        String targetStatus = Boolean.TRUE.equals(result)
+                ? WithdrawStatusEnum.VIA_AUDITING.name()
+                : WithdrawStatusEnum.FAIL_AUDITING.name();
+        //状态闸门：只有待审核(APPLY)的申请才能审核，条件更新防止重复审核/并发审核
+        boolean updated = this.update(new LambdaUpdateWrapper<MemberWithdrawApply>()
+                .eq(MemberWithdrawApply::getId, applyId)
+                .eq(MemberWithdrawApply::getApplyStatus, WithdrawStatusEnum.APPLY.name())
+                .set(MemberWithdrawApply::getApplyStatus, targetStatus)
+                .set(MemberWithdrawApply::getInspectRemark, remark)
+                .set(MemberWithdrawApply::getInspectTime, new Date()));
+        if (!updated) {
+            throw new ServiceException(ResultCode.WALLET_APPLY_ERROR);
+        }
+        memberWithdrawApply.setApplyStatus(targetStatus);
+        //发送审核消息
+        MemberWithdrawalMessage memberWithdrawalMessage = new MemberWithdrawalMessage();
+        memberWithdrawalMessage.setStatus(memberWithdrawApply.getApplyStatus());
+        memberWithdrawalMessage.setMemberWithdrawApplyId(memberWithdrawApply.getId());
+        memberWithdrawalMessage.setMemberId(memberWithdrawApply.getMemberId());
+        memberWithdrawalMessage.setPrice(memberWithdrawApply.getApplyMoney());
+
+        String destination = rocketmqCustomProperties.getMemberTopic() + ":" + MemberTagsEnum.MEMBER_WITHDRAWAL.name();
+        liliMessageTemplate.asyncSend(destination, memberWithdrawalMessage, MessageSendCallbackBuilder.commonCallback());
+        return true;
     }
 
 

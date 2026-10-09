@@ -52,6 +52,12 @@ public class MemberWalletExecute implements MemberWithdrawalEvent {
                     this.retryWithdrawalLater(memberWithdrawalMessage);
                     break;
                 }
+                //状态闸门：防止 MQ 重投导致重复打款
+                if (!WithdrawStatusEnum.VIA_AUDITING.name().equals(memberWithdrawApply.getApplyStatus())) {
+                    log.info("提现申请已处理，跳过重复打款，withdrawApplyId={}, status={}",
+                            memberWithdrawApply.getId(), memberWithdrawApply.getApplyStatus());
+                    break;
+                }
                 memberWalletService.withdrawal(memberWithdrawalMessage.getMemberWithdrawApplyId());
                 break;
             case SUCCESS:

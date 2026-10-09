@@ -791,22 +791,19 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         }
         GoodsSku goodsSku = loadGoodsSkuForStockUpdate(skuId);
         assertManualStockUpdateAllowed(goodsSku);
-        int currentQuantity = goodsSku.getQuantity() == null ? 0 : goodsSku.getQuantity();
 
-        if (type.equals(GoodsStockTypeEnum.ADD.name())) {
-            quantity = currentQuantity + quantity;
-        } else {
-            quantity = currentQuantity - quantity;
+        // 原子增减库存，扣减时带库存下限保护，避免读-改-写并发覆盖
+        int rows = GoodsStockTypeEnum.ADD.name().equals(type)
+                ? this.baseMapper.increaseStock(skuId, quantity)
+                : this.baseMapper.reduceStock(skuId, quantity);
+        if (rows == 0) {
+            throw new ServiceException(ResultCode.GOODS_STOCK_INSUFFICIENT);
         }
-        goodsSku.setQuantity(quantity);
 
-        boolean update = this.update(new LambdaUpdateWrapper<GoodsSku>().eq(GoodsSku::getId, skuId).set(GoodsSku::getQuantity, quantity));
-        if (update) {
-            clearStockRelatedCache(skuId, goodsSku.getGoodsId());
-            cache.put(GoodsSkuService.getCacheKeys(skuId), goodsSku);
-            cache.put(GoodsSkuService.getStockCacheKey(skuId), quantity);
-            this.promotionGoodsService.updatePromotionGoodsStock(goodsSku.getId(), quantity);
-        }
+        // 读取更新后的真实库存，缓存只删不写，避免缓存/DB 双写不一致
+        Integer newQuantity = this.getById(skuId).getQuantity();
+        clearStockRelatedCache(skuId, goodsSku.getGoodsId());
+        this.promotionGoodsService.updatePromotionGoodsStock(goodsSku.getId(), newQuantity);
     }
 
     private GoodsSku loadGoodsSkuForStockUpdate(String skuId) {
