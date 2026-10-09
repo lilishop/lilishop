@@ -34,6 +34,15 @@ public interface ClerkService extends IService<Clerk> {
     IPage<ClerkVO> clerkForPage(PageVO page, ClerkQueryDTO clerkQueryDTO);
 
     /**
+     * 管理端按店铺id查询店员分页
+     *
+     * @param page
+     * @param clerkQueryDTO 查询参数，storeId 必填
+     * @return
+     */
+    IPage<ClerkVO> clerkForPageByStore(PageVO page, ClerkQueryDTO clerkQueryDTO);
+
+    /**
      * 查询店员详细
      *
      * @param id 店员id

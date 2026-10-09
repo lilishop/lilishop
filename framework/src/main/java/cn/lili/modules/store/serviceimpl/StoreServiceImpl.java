@@ -346,8 +346,6 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
         BeanUtil.copyProperties(storeOtherInfoDTO, storeDetail);
         //设置店铺经营范围
         storeDetail.setGoodsManagementCategory(storeOtherInfoDTO.getGoodsManagementCategory());
-        //最后一步申请，给予店铺设置库存预警默认值
-        storeDetail.setStockWarning(10);
         //修改店铺详细信息
         storeDetailService.updateById(storeDetail);
         //设置店铺名称,修改店铺信息

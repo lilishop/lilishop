@@ -60,6 +60,17 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
     private Cache cache;
 
     @Override
+    public IPage<ClerkVO> clerkForPageByStore(PageVO page, ClerkQueryDTO clerkQueryDTO) {
+        QueryWrapper<ClerkVO> clerkVOQueryWrapper = new QueryWrapper<>();
+        clerkVOQueryWrapper.eq("li_clerk.store_id", clerkQueryDTO.getStoreId());
+        clerkVOQueryWrapper.eq(StringUtils.isNotEmpty(clerkQueryDTO.getDepartmentId()), "li_clerk.department_id", clerkQueryDTO.getDepartmentId());
+        clerkVOQueryWrapper.like(StringUtils.isNotEmpty(clerkQueryDTO.getClerkName()), "li_clerk.clerk_name", clerkQueryDTO.getClerkName());
+        clerkVOQueryWrapper.like(StringUtils.isNotEmpty(clerkQueryDTO.getMobile()), "m.mobile", clerkQueryDTO.getMobile());
+
+        return this.baseMapper.selectClerkPage(PageUtil.initPage(page), clerkVOQueryWrapper);
+    }
+
+    @Override
     public IPage<ClerkVO> clerkForPage(PageVO page, ClerkQueryDTO clerkQueryDTO) {
 
         QueryWrapper<ClerkVO> clerkVOQueryWrapper = new QueryWrapper<>();
@@ -72,10 +83,8 @@ public class ClerkServiceImpl extends ServiceImpl<ClerkMapper, Clerk> implements
 
 
         /*Page<Clerk> clerkPage = page(initPage, initWrapper);
-
         if (clerkPage.getRecords().size() > 0) {
-            List<StoreRole> roles = storeRoleService.list(new QueryWrapper<StoreRole>()
-                    .eq("store_id", UserContext.getCurrentUser().getStoreId()));
+            List<StoreRole> roles = storeRoleService.list(new QueryWrapper<StoreRole>()                    .eq("store_id", UserContext.getCurrentUser().getStoreId()));
 
             List<StoreDepartment> departments = storeDepartmentService.list(new QueryWrapper<StoreDepartment>()
                     .eq("store_id", UserContext.getCurrentUser().getStoreId()));

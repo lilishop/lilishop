@@ -138,7 +138,7 @@ public class StoreDetail extends BaseIdEntity {
     @Schema(description = "店铺经营类目")
     private String goodsManagementCategory;
 
-    @Schema(description = "结算周期")
+    @Schema(description = "结算日")
     private String settlementCycle;
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
@@ -146,9 +146,6 @@ public class StoreDetail extends BaseIdEntity {
     @Schema(description = "结算日", hidden = true)
     private Date settlementDay;
 
-
-    @Schema(description = "库存预警数量")
-    private Integer stockWarning;
 
     /**
      * 同城配送达达店铺编码
@@ -196,6 +193,5 @@ public class StoreDetail extends BaseIdEntity {
         //设置店铺公司信息、设置店铺银行信息、设置店铺其他信息
         BeanUtil.copyProperties(adminStoreApplyDTO, this);
         this.settlementDay = DateUtil.date();
-        this.stockWarning = 10;
     }
 }

@@ -94,15 +94,6 @@ public class StoreSettingsController {
         return ResultUtil.data(result);
     }
 
-    @Operation(description = "修改店铺库存预警数量")
-    @Parameter(name = "stockWarning", description = "库存预警数量", required = true)
-    @PutMapping("/updateStockWarning")
-    public ResultMessage<Object> updateStockWarning(Integer stockWarning) {
-        //修改商家设置
-        boolean result = storeDetailService.updateStockWarning(stockWarning);
-        return ResultUtil.data(result);
-    }
-
     @Operation(description = "获取商家退货收件地址")
     @GetMapping("/storeAfterSaleAddress")
     public ResultMessage<StoreAfterSaleAddressDTO> getStoreAfterSaleAddress() {

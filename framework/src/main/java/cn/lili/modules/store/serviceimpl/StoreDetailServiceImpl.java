@@ -215,16 +215,6 @@ public class StoreDetailServiceImpl extends ServiceImpl<StoreDetailMapper, Store
 
 
     @Override
-    public boolean updateStockWarning(Integer stockWarning) {
-        String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
-        LambdaUpdateWrapper<StoreDetail> lambdaUpdateWrapper = Wrappers.lambdaUpdate();
-        lambdaUpdateWrapper.set(StoreDetail::getStockWarning, stockWarning);
-        lambdaUpdateWrapper.eq(StoreDetail::getStoreId, storeId);
-        this.removeCache(storeId);
-        return this.update(lambdaUpdateWrapper);
-    }
-
-    @Override
     public List<StoreManagementCategoryVO> goodsManagementCategory(String storeId) {
 
         //获取顶部分类列表

@@ -121,12 +121,9 @@ public class StoreEditDTO {
     @Schema(description = "店铺经营类目")
     private String goodsManagementCategory;
 
-    @Schema(description = "结算周期")
+    @Schema(description = "结算日")
     private String settlementCycle;
 
-
-    @Schema(description = "库存预警数量")
-    private Integer stockWarning;
 
     @Schema(description = "同城配送达达店铺编码")
     @TableField(value = "dd_code")

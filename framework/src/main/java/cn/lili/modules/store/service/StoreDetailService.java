@@ -83,16 +83,6 @@ public interface StoreDetailService extends IService<StoreDetail> {
      */
     boolean editStoreAfterSaleAddressDTO(StoreAfterSaleAddressDTO storeAfterSaleAddressDTO);
 
-
-
-    /**
-     * 修改店铺库存预警数量
-     *
-     * @param stockWarning 库存预警数量
-     * @return 操作状态
-     */
-    boolean updateStockWarning(Integer stockWarning);
-
     /**
      * 获取店铺经营范围
      *

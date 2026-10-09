@@ -4,6 +4,9 @@ import cn.lili.common.aop.annotation.DemoSite;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.member.entity.dto.ClerkQueryDTO;
+import cn.lili.modules.member.entity.vo.ClerkVO;
+import cn.lili.modules.member.service.ClerkService;
 import cn.lili.modules.store.entity.dos.Store;
 import cn.lili.modules.store.entity.dto.AdminStoreApplyDTO;
 import cn.lili.modules.store.entity.dto.StoreEditDTO;
@@ -44,6 +47,11 @@ public class StoreManagerController {
      */
     @Autowired
     private StoreDetailService storeDetailService;
+    /**
+     * 店员
+     */
+    @Autowired
+    private ClerkService clerkService;
 
     @Operation(summary = "获取店铺分页列表")
     @GetMapping("/all")
@@ -122,6 +130,14 @@ public class StoreManagerController {
     @GetMapping("/{memberId}/member")
     public ResultMessage<Store> getByMemberId(@Valid @PathVariable String memberId) {
         return ResultUtil.data(storeService.getStoreByMemberId(memberId));
+    }
+
+    @Operation(summary = "获取店铺店员分页列表")
+    @Parameter(name = "storeId", description = "店铺ID", required = true)
+    @GetMapping("/clerk/{storeId}")
+    public ResultMessage<IPage<ClerkVO>> clerkPage(@PathVariable String storeId, ClerkQueryDTO clerkQueryDTO, PageVO page) {
+        clerkQueryDTO.setStoreId(storeId);
+        return ResultUtil.data(clerkService.clerkForPageByStore(page, clerkQueryDTO));
     }
 
     @Operation(summary = "将所有店铺导入店员表")

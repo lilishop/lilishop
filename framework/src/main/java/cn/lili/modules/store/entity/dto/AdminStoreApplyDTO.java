@@ -164,8 +164,8 @@ public class AdminStoreApplyDTO {
     @Schema(description = "同城配送达达店铺编码")
     private String ddCode;
 
-    /****结算周期***/
-    @Schema(description = "结算周期")
+    /****结算日***/
+    @Schema(description = "结算日")
     private String settlementCycle;
 
 }

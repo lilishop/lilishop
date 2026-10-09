@@ -15,9 +15,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class StoreVO extends Store {
 
-    @Schema(description = "库存预警数量")
-    private Integer stockWarning;
-
     @Schema(description = "登录用户的昵称")
     private String nickName;
 
