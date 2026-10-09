@@ -7,6 +7,7 @@ import cn.lili.common.utils.CommonUtil;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
@@ -35,6 +36,8 @@ public class Member extends BaseEntity {
     @Schema(description = "客户用户名")
     private String username;
 
+    // 密码散列只允许反序列化写入（注册/改密），任何接口都不序列化返回
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Schema(description = "客户密码")
     private String password;
 

@@ -10,6 +10,7 @@ import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dto.MemberEditDTO;
 import cn.lili.modules.member.entity.enums.QRCodeLoginSessionStatusEnum;
+import cn.lili.modules.member.entity.vo.ImUserDetailVO;
 import cn.lili.modules.member.entity.vo.QRLoginResultVo;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.member.service.MemberShareRegisterService;
@@ -316,10 +317,14 @@ public class MemberBuyerController {
     }
 
     @GetMapping("/getImUserDetail/{memberId}")
-    @Parameter(name = "memberId", description = "店铺Id", required = true)
-    @Operation(summary = "获取用户信息")
-    public ResultMessage<Member> getImUserDetail(@PathVariable String memberId) {
-        return ResultUtil.data(memberService.getById(memberId));
+    @Parameter(name = "memberId", description = "会员Id", required = true)
+    @Operation(summary = "获取IM用户信息（仅昵称/头像等公开字段）")
+    public ResultMessage<ImUserDetailVO> getImUserDetail(@PathVariable String memberId) {
+        Member member = memberService.getById(memberId);
+        if (member == null) {
+            throw new ServiceException(ResultCode.USER_NOT_EXIST);
+        }
+        return ResultUtil.data(new ImUserDetailVO(member));
     }
 
     @Operation(summary = "分享商城页面赠送经验值")

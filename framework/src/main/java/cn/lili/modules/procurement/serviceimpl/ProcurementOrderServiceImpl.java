@@ -109,6 +109,7 @@ public class ProcurementOrderServiceImpl extends ServiceImpl<ProcurementOrderMap
         if (order == null) {
             throw new ServiceException(ResultCode.PARAMS_ERROR);
         }
+        checkStoreOwner(order);
         if (!ProcurementStatusEnum.DRAFT.name().equals(order.getStatus())) {
             throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
@@ -123,13 +124,7 @@ public class ProcurementOrderServiceImpl extends ServiceImpl<ProcurementOrderMap
         if (order == null) {
             throw new ServiceException(ResultCode.PARAMS_ERROR);
         }
-        AuthUser user = UserContext.getCurrentUser();
-        if (user == null || user.getStoreId() == null) {
-            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
-        }
-        if (!user.getStoreId().equals(order.getStoreId())) {
-            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
-        }
+        AuthUser user = checkStoreOwner(order);
         if (!ProcurementStatusEnum.SUBMITTED.name().equals(order.getStatus())) {
             throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
         }
@@ -154,6 +149,11 @@ public class ProcurementOrderServiceImpl extends ServiceImpl<ProcurementOrderMap
         if (order == null) {
             throw new ServiceException(ResultCode.PARAMS_ERROR);
         }
+        checkStoreOwner(order);
+        if (ProcurementStatusEnum.COMPLETED.name().equals(order.getStatus())
+                || ProcurementStatusEnum.CLOSED.name().equals(order.getStatus())) {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        }
         order.setStatus(ProcurementStatusEnum.CLOSED.name());
         return this.updateById(order);
     }
@@ -164,11 +164,26 @@ public class ProcurementOrderServiceImpl extends ServiceImpl<ProcurementOrderMap
         if (order == null) {
             throw new ServiceException(ResultCode.PARAMS_ERROR);
         }
+        checkStoreOwner(order);
         ProcurementOrderVO vo = new ProcurementOrderVO();
         BeanUtil.copyProperties(order, vo);
         List<ProcurementOrderItem> items = orderItemService.list(new LambdaQueryWrapper<ProcurementOrderItem>().eq(ProcurementOrderItem::getProcurementOrderId, id));
         vo.setItems(items);
         return vo;
+    }
+
+    /**
+     * 校验当前登录店员对采购单的门店归属，防止跨门店越权操作
+     */
+    private AuthUser checkStoreOwner(ProcurementOrder order) {
+        AuthUser user = UserContext.getCurrentUser();
+        if (user == null || user.getStoreId() == null) {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        }
+        if (!user.getStoreId().equals(order.getStoreId())) {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        }
+        return user;
     }
 
     @Override

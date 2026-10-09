@@ -69,8 +69,19 @@ ignored:
     - /buyer/store/**
     - /buyer/passport/connect/**
     - /buyer/members/**
-    - /buyer/passport/member/**
+    # passport/member 只放行登录/注册/找回密码/扫码登录所需的匿名端点，其余（用户信息、改密、注销等）必须登录
+    - /buyer/passport/member/userLogin
+    - /buyer/passport/member/smsLogin
+    - /buyer/passport/member/register
+    - /buyer/passport/member/resetByMobile
+    - /buyer/passport/member/resetPassword
     - /buyer/passport/member/refresh/**
+    - /buyer/passport/member/pc_session
+    - /buyer/passport/member/session_login/**
+    - /buyer/passport/member/app_scanner
+    - /buyer/passport/member/app_confirm
+    - /buyer/passport/member/bindMobile
+    - /buyer/passport/member/logout
     - /buyer/promotion/pintuan/**
     - /buyer/promotion/seckill/**
     - /buyer/promotion/pointsGoods/**

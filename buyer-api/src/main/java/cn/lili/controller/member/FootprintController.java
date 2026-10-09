@@ -67,6 +67,8 @@ public class FootprintController {
     @GetMapping("/history")
     @Operation(summary = "获取客户的历史足迹")
     public ResultMessage<IPage<GoodsIndex>> getMemberHistory(FootPrintQueryParams params) {
+        // 强制使用当前登录用户ID，防止查看他人足迹；不传 memberId 时也不会泄露全平台数据
+        params.setMemberId(UserContext.getCurrentUser().getId());
         return ResultUtil.data(footprintService.footPrintPage(params));
     }
 }
