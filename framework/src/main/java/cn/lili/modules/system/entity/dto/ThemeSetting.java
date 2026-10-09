@@ -13,6 +13,9 @@ public class ThemeSetting implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @Schema(description = "模式：system 系统预设 / custom 自定义")
+    private String mode;
+
     @Schema(description = "主题色")
     private String themeColor;
 
