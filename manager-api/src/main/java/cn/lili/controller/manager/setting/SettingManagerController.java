@@ -1,5 +1,6 @@
 package cn.lili.controller.manager.setting;
 
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.lili.cache.Cache;
 import cn.lili.common.aop.annotation.DemoSite;
@@ -104,7 +105,66 @@ public class SettingManagerController {
             distributionSettingSupport.normalize(distributionSetting);
             configValue = JSONUtil.toJsonStr(distributionSetting);
         }
+        if (settingEnum.equals(SettingEnum.WITHDRAWAL_SETTING)) {
+            configValue = normalizeWithdrawalSetting(configValue);
+        }
         return configValue;
+    }
+
+    /**
+     * 提现配置按字段类型入库，避免页面把空值保存成字符串 "null"、把金额保存成字符串。
+     */
+    private String normalizeWithdrawalSetting(String configValue) {
+        JSONObject json = JSONUtil.parseObj(configValue);
+        setOrRemove(json, "minPrice", toDoubleOrNull(json.get("minPrice")));
+        setOrRemove(json, "fee", toDoubleOrNull(json.get("fee")));
+        setOrRemove(json, "wechatAppId", toTextOrNull(json.get("wechatAppId")));
+        setOrRemove(json, "wechatAppIdSource", toTextOrNull(json.get("wechatAppIdSource")));
+        setOrRemove(json, "apply", toBooleanOrNull(json.get("apply")));
+        setOrRemove(json, "type", toTextOrNull(json.get("type")));
+        WithdrawalSetting withdrawalSetting = json.toBean(WithdrawalSetting.class);
+        return JSONUtil.toJsonStr(withdrawalSetting);
+    }
+
+    private Double toDoubleOrNull(Object value) {
+        if (isBlankToken(value)) {
+            return null;
+        }
+        try {
+            return Double.valueOf(String.valueOf(value).trim());
+        } catch (NumberFormatException e) {
+            throw new ServiceException("提现金额或手续费必须是数字");
+        }
+    }
+
+    private Boolean toBooleanOrNull(Object value) {
+        if (isBlankToken(value)) {
+            return null;
+        }
+        return Boolean.parseBoolean(String.valueOf(value).trim());
+    }
+
+    private String toTextOrNull(Object value) {
+        if (isBlankToken(value)) {
+            return null;
+        }
+        return String.valueOf(value).trim();
+    }
+
+    private void setOrRemove(JSONObject json, String key, Object value) {
+        if (value == null) {
+            json.remove(key);
+        } else {
+            json.set(key, value);
+        }
+    }
+
+    private boolean isBlankToken(Object value) {
+        if (value == null) {
+            return true;
+        }
+        String text = String.valueOf(value).trim();
+        return text.isEmpty() || "null".equals(text);
     }
 
     /**
@@ -128,7 +188,7 @@ public class SettingManagerController {
             case WITHDRAWAL_SETTING:
                 return setting == null ?
                         ResultUtil.data(new WithdrawalSetting()) :
-                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), WithdrawalSetting.class));
+                        ResultUtil.data(JSONUtil.toBean(normalizeWithdrawalSetting(setting.getSettingValue()), WithdrawalSetting.class));
             case DISTRIBUTION_SETTING:
                 return ResultUtil.data(distributionSettingSupport.getSetting());
             case EMAIL_SETTING:
