@@ -158,6 +158,16 @@ https://pc-b2b2c.pickmall.cn
 
 The fastest path on this branch is the All-In-One image, which exposes one HTTP entrypoint and proxies backend traffic through `/api/`. Full deployment guide: [docs.pickmall.cn/deply/deply.html](https://docs.pickmall.cn/deply/deply.html).
 
+### JWT signing key
+
+Before starting the backend API services, configure the same deployment-specific key for every service that signs or verifies Lilishop JWTs. Use Base64-encoded random key material of at least 32 bytes:
+
+```bash
+export LILI_JWT_SECRET="$(openssl rand -base64 32)"
+```
+
+The services fail to start when the key is missing or invalid. Rotating it invalidates existing JWTs, so users must sign in again.
+
 > The clone URLs below use GitHub; substitute the Gitee mirror (`gitee.com/beijing_hongye_huicheng/<repo>.git`) if it's closer to you — see the [Project Repositories](#project-repositories) table for full URLs.
 
 ```bash

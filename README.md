@@ -83,6 +83,15 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 详细的本地部署指南，请参考官方文档：
 [**部署文档 -> 环境准备**](https://docs.pickmall.cn/deply/deply.html)
 
+#### JWT 密钥配置
+启动后端 API 服务前，必须为所有 API 实例配置同一个部署专用密钥。使用至少 32 字节随机密钥材料的 Base64 编码，例如：
+
+```bash
+export LILI_JWT_SECRET="$(openssl rand -base64 32)"
+```
+
+未配置有效密钥时，服务会拒绝启动。轮换密钥会使旧 JWT 失效，用户需要重新登录。
+
 #### 数据库初始化
 -   **推荐方式**: 使用项目提供的 `docker-compose` 配置，可自动完成数据库（MySQL、Redis 等）的部署与初始化。
 -   **手动方式**: 如果您选择手动部署，SQL脚本位于以下地址。请确保获取与您代码版本一致的SQL文件。

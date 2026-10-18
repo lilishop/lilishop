@@ -134,6 +134,8 @@ lili:
 
   # jwt 细节设定
   jwt-setting:
+    # Test-only key; never use this value in a deployed environment.
+    secret: dGVzdC1vbmx5LWtleS1mb3ItdGVzdC1vbmx5LTIwMjY=
     # token过期时间（分钟）
     tokenExpireTime: 60
 
