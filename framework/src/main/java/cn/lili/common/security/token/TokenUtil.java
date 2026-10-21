@@ -5,6 +5,13 @@ import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.JWTTokenProperties;
+import cn.lili.common.utils.SpringContextUtil;
+import cn.lili.modules.system.entity.dos.Setting;
+import cn.lili.modules.system.entity.dto.SecuritySetting;
+import cn.lili.modules.system.entity.enums.SettingEnum;
+import cn.lili.modules.system.service.SettingService;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.enums.SecurityEnum;
 import cn.lili.common.security.enums.UserEnums;
@@ -31,6 +38,31 @@ public class TokenUtil {
     @Autowired
     private Cache cache;
 
+    private Long getAccessTokenExpireTime(AuthUser authUser) {
+        if (authUser != null) {
+            try {
+                SettingService settingService = SpringContextUtil.getBean(SettingService.class);
+                if (settingService != null) {
+                    Setting setting = settingService.get(SettingEnum.SECURITY_SETTING.name());
+                    if (setting != null && CharSequenceUtil.isNotBlank(setting.getSettingValue())) {
+                        SecuritySetting securitySetting = JSONUtil.toBean(setting.getSettingValue(), SecuritySetting.class);
+                        if (UserEnums.MEMBER.equals(authUser.getRole())) {
+                            if (securitySetting.getBuyerTokenExpireTime() != null) {
+                                return securitySetting.getBuyerTokenExpireTime();
+                            }
+                        } else {
+                            if (securitySetting.getManagerTokenExpireTime() != null) {
+                                return securitySetting.getManagerTokenExpireTime();
+                            }
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return tokenProperties != null ? tokenProperties.getTokenExpireTime() : 60L;
+    }
+
     /**
      * 构建token
      *
@@ -39,13 +71,14 @@ public class TokenUtil {
      */
     public Token createToken(AuthUser authUser) {
         Token token = new Token();
+        Long tokenExpireTime = getAccessTokenExpireTime(authUser);
         //访问token
-        String accessToken = createToken(authUser, tokenProperties.getTokenExpireTime());
+        String accessToken = createToken(authUser, tokenExpireTime);
 
         cache.put(CachePrefix.ACCESS_TOKEN.getPrefix(authUser.getRole(), authUser.getId()) + accessToken, 1,
-                tokenProperties.getTokenExpireTime(), TimeUnit.MINUTES);
+                tokenExpireTime, TimeUnit.MINUTES);
         //刷新token生成策略：如果是长时间有效的token（用于app），则默认15天有效期刷新token。如果是普通用户登录，则刷新token为普通token2倍数
-        Long expireTime = authUser.getLongTerm() ? 15 * 24 * 60L : tokenProperties.getTokenExpireTime() * 2;
+        Long expireTime = authUser.getLongTerm() ? 15 * 24 * 60L : tokenExpireTime * 2;
         String refreshToken = createToken(authUser, expireTime);
 
         cache.put(CachePrefix.REFRESH_TOKEN.getPrefix(authUser.getRole(), authUser.getId()) + refreshToken, 1, expireTime, TimeUnit.MINUTES);
@@ -89,13 +122,14 @@ public class TokenUtil {
         //如果缓存中有刷新token &&
         if (cache.hasKey(CachePrefix.REFRESH_TOKEN.getPrefix(userEnums, authUser.getId()) + oldRefreshToken)) {
             Token token = new Token();
+            Long tokenExpireTime = getAccessTokenExpireTime(authUser);
             //访问token
-            String accessToken = createToken(authUser, tokenProperties.getTokenExpireTime());
-            cache.put(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums, authUser.getId()) + accessToken, 1, tokenProperties.getTokenExpireTime(),
+            String accessToken = createToken(authUser, tokenExpireTime);
+            cache.put(CachePrefix.ACCESS_TOKEN.getPrefix(userEnums, authUser.getId()) + accessToken, 1, tokenExpireTime,
                     TimeUnit.MINUTES);
 
             //如果是信任登录设备，则刷新token长度继续延长
-            Long expirationTime = tokenProperties.getTokenExpireTime() * 2;
+            Long expirationTime = tokenExpireTime * 2;
             if (longTerm) {
                 expirationTime = 60 * 24 * 15L;
                 authUser.setLongTerm(true);

@@ -1,9 +1,18 @@
+# ===================================================================
+# 买家端服务 (buyer-api) - 线上生产环境配置 (Profile: prod)
+# 作用说明：
+# 适用于生产环境高可用部署，微信小程序指向正式版本，关闭 Swagger 文档
+# ===================================================================
+
 spring:
+  # Redis 缓存与分布式锁配置（生产环境）
   data:
     redis:
       host: 127.0.0.1
       port: 6379
       password: lilishop
+
+  # 主业务数据库连接配置（生产环境）
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     username: root
@@ -12,8 +21,10 @@ spring:
 lili:
   wechat:
     mp:
+      # 生产环境：小程序 URL Link 固定打开 release 正式版
       url-link-env-version: release
 
+# 生产环境安全加固：关闭对外 Swagger API 文档
 springdoc:
   api-docs:
     enabled: false

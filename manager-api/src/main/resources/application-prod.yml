@@ -1,14 +1,24 @@
-﻿spring:
+# ===================================================================
+# 管理端服务 (manager-api) - 线上生产环境配置 (Profile: prod)
+# 作用说明：
+# 适用于生产环境高可用部署，默认关闭外网 Swagger 接口文档暴露
+# ===================================================================
+
+spring:
+  # Redis 缓存与分布式锁配置（生产环境）
   data:
     redis:
       host: 127.0.0.1
       port: 6379
       password: lilishop
+
+  # 主业务数据库连接配置（生产环境）
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     username: root
     password: lilishop
 
+# 生产环境安全加固：关闭对外 Swagger API 文档
 springdoc:
   api-docs:
     enabled: false

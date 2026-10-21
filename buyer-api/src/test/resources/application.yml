@@ -1,4 +1,10 @@
-﻿server:
+# ===================================================================
+# 买家端测试专用配置文件 (buyer-api/src/test/resources/application.yml)
+# 作用说明：
+# 供 buyer-api 单元测试与集成测试环境加载执行
+# ===================================================================
+
+server:
   servlet:
     context-path: /
 
@@ -17,9 +23,6 @@ spring:
 
   cache:
     type: redis
-  #amqp
-  #  rabbitmq:
-  #    host: 192.168.0.116
   # Redis
   data:
     redis:
@@ -28,13 +31,9 @@ spring:
       password: lilishop
       lettuce:
         pool:
-          # 连接池最大连接数（使用负值表示没有限制） 默认 8
           max-active: 200
-          # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
           max-wait: 20s
-          # 连接池中的最大空闲连接，默认 8
           max-idle: 10
-          # 连接池中的最小空闲连接，默认 8
           min-idle: 8
   # 文件大小上传配置
   servlet:
@@ -97,24 +96,17 @@ mybatis-plus:
   configuration:
     # 缓存开启
     cache-enabled: true
-    #日志
-#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # 日志
 logging:
-  # 输出级别
   level:
     cn.lili: info
-  #    org.hibernate: debug
-  #    org.springframework: debug
   file:
-    # 指定路径
     path: lili-logs
-    # 最大保存天数
     max-history: 7
-    # 每个文件最大大小
     max-size: 5MB
-#加密参数
+
+# 加密参数
 jasypt:
   encryptor:
     password: lili
@@ -127,10 +119,6 @@ lili:
     onlineMember: 48
     # 当前在线人数刷新时间间隔，单位秒，设置为 600，则每 10 分钟刷新一次
     currentOnlineUpdate: 600
-  #qq lbs 申请
-  lbs:
-    key: 4BYBZ-7MT6S-PUAOA-6BNWL-FJUD7-UUFXT
-    sk: zhNKVrJK6UPOhqIjn8AQvG37b9sz6
 
   # jwt 细节设定
   jwt-setting:

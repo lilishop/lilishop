@@ -1,9 +1,18 @@
-﻿spring:
+# ===================================================================
+# 客服服务 (im-api) - 本地开发环境配置 (Profile: dev)
+# 作用说明：
+# 覆盖基础配置，配置本地开发联调时的 MySQL 数据源与 Redis 服务
+# ===================================================================
+
+spring:
+  # Redis 缓存与分布式会话配置（开发环境）
   data:
     redis:
       host: 192.168.31.100
       port: 30379
       password: lilishop
+
+  # 主业务数据库连接配置（开发环境）
   datasource:
     url: jdbc:mysql://192.168.31.100:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     username: root

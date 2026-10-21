@@ -1,9 +1,18 @@
-﻿spring:
+# ===================================================================
+# 管理端服务 (manager-api) - 测试环境配置 (Profile: test)
+# 作用说明：
+# 适用于自动化测试、CI/CD 流水线或独立测试服务器部署
+# ===================================================================
+
+spring:
+  # Redis 缓存与分布式锁配置（测试环境）
   data:
     redis:
       host: 127.0.0.1
       port: 6379
       password: lilishop
+
+  # 主业务数据库连接配置（测试环境）
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     username: root

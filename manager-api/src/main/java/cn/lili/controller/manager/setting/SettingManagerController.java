@@ -211,6 +211,14 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new LiveSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), LiveSetting.class));
+            case VERIFICATION_SETTING:
+                return setting == null ?
+                        ResultUtil.data(new VerificationSetting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), VerificationSetting.class));
+            case SECURITY_SETTING:
+                return setting == null ?
+                        ResultUtil.data(new SecuritySetting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), SecuritySetting.class));
             case THEME_SETTING:
                 return setting == null ?
                         ResultUtil.data(new ThemeSetting()) :
