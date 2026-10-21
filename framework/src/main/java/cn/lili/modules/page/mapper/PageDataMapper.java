@@ -43,7 +43,7 @@ public interface PageDataMapper extends BaseMapper<PageData> {
      * @param queryWrapper 查询条件
      * @return 页面数据分页
      */
-    @Select("SELECT id,name,page_show,create_time FROM li_page_data ${ew.customSqlSegment}")
+    @Select("SELECT id,name,page_show,create_time,update_time FROM li_page_data ${ew.customSqlSegment}")
     IPage<PageDataListVO> getPageDataList(IPage<PageDataListVO> page, @Param(Constants.WRAPPER) Wrapper<PageDataListVO> queryWrapper);
 
 }

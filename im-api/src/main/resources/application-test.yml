@@ -1,9 +1,18 @@
-﻿spring:
+# ===================================================================
+# 客服服务 (im-api) - 测试环境配置 (Profile: test)
+# 作用说明：
+# 适用于即时通讯客服系统在测试环境的部署与测试
+# ===================================================================
+
+spring:
+  # Redis 缓存与分布式会话配置（测试环境）
   data:
     redis:
       host: 127.0.0.1
       port: 6379
       password: lilishop
+
+  # 主业务数据库连接配置（测试环境）
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     username: root

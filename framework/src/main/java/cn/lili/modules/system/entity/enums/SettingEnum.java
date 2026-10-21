@@ -71,5 +71,9 @@ public enum SettingEnum {
     //直播设置
     LIVE_SETTING,
     //主题色设置
-    THEME_SETTING
+    THEME_SETTING,
+    //验证码设置
+    VERIFICATION_SETTING,
+    //安全设置
+    SECURITY_SETTING
 }

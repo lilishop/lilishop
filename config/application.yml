@@ -1,62 +1,102 @@
+# ===================================================================
+# Lilishop 全局通用集中配置模板 (config/application.yml)
+# 作用说明：
+# 1. 集中定义平台全部微服务通用的基础配置模板（供配置中心 Nacos/Config 或外部化加载参考）
+# 2. 覆盖公共数据库连接、Redis 缓存、白名单路由等公用项
+# ===================================================================
+
+# -------------------------------------------------------------------
+# Web 容器与网络服务通用配置
+# -------------------------------------------------------------------
 server:
   servlet:
+    # 根上下文访问路径
     context-path: /
 
   tomcat:
+    # 请求 URI 字符编码
     uri-encoding: UTF-8
     threads:
+      # Tomcat 工作线程池：最小空闲预留线程数
       min-spare: 50
+      # Tomcat 工作线程池：最大并发工作线程数
       max: 1000
 
-# actuator 仅暴露健康检查端点。
+# -------------------------------------------------------------------
+# Spring Boot Actuator 服务监控配置
+# -------------------------------------------------------------------
+# actuator 仅暴露健康检查端点，保障生产环境安全性
 management:
   endpoints:
     web:
       exposure:
+        # 仅公开健康检查健康端点 (/actuator/health)
         include: health
 
+# -------------------------------------------------------------------
+# Spring 基础组件与中间件通用配置
+# -------------------------------------------------------------------
 spring:
   cache:
+    # 默认缓存实现类型：Redis
     type: redis
-  # Redis
+
+  # Redis 缓存与分布式锁连接配置
   data:
     redis:
+      # Redis 服务器地址
       host: 192.168.31.100
+      # Redis 端口
       port: 30379
+      # Redis 认证密码
       password: lilishop
-      # SpringBoot3兼容性：添加超时配置
+      # 读取超时时间
       timeout: 10s
-      # SpringBoot3兼容性：添加连接超时配置
+      # 建立连接超时时间
       connect-timeout: 10s
       lettuce:
         pool:
-          # 连接池最大连接数（使用负值表示没有限制） 默认 8
+          # 连接池最大连接数（使用负值表示没有限制，默认 8）
           max-active: 200
-          # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
+          # 连接池最大阻塞等待时间（默认 20s）
           max-wait: 20s
           # 连接池中的最大空闲连接，默认 8
           max-idle: 10
           # 连接池中的最小空闲连接，默认 8
           min-idle: 8
-  # 文件大小上传配置
+
+  # HTTP 文件上传大小限制
   servlet:
     multipart:
+      # 允许上传的单文件最大大小
       max-file-size: 20MB
+      # 单次请求允许上传的总数据大小
       max-request-size: 20MB
+
+  # Jackson JSON 序列化配置
   jackson:
+    # 日期序列化时区（东八区）
     time-zone: GMT+8
     serialization:
-      #关闭jackson 对json做解析
+      # 允许空对象序列化
       fail-on-empty-beans: false
 
+  # 主数据库连接池配置（阿里巴巴 Druid 连接池）
   datasource:
+    # MySQL 数据库 JDBC 连接串
     url: jdbc:mysql://192.168.31.100:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    # 数据库登录用户名
     username: root
+    # 数据库登录密码
     password: lilishop
+    # MySQL 驱动类
     driver-class-name: com.mysql.cj.jdbc.Driver
+    # 连接池类型
     type: com.alibaba.druid.pool.DruidDataSource
 
-# 忽略鉴权url
+# -------------------------------------------------------------------
+# 安全认证：全局白名单 URL 汇总（忽略鉴权，无需携带 Token 即可访问）
+# -------------------------------------------------------------------
 ignored:
   urls:
     - /editor-app/**
@@ -105,8 +145,6 @@ ignored:
     - /swagger-ui/
     - /swagger-ui/**
     - /v3/api-docs/**
-    - /v3/api-docs/**
-    - /manager/promotion/seckill/init
     - /favicon.ico
     - /files/**
     - /static/**
@@ -114,7 +152,9 @@ ignored:
     - /resources/**
     - /META-INF/resources/**
 
-# Swagger界面内容配置
+# -------------------------------------------------------------------
+# Swagger 接口文档基本信息配置
+# -------------------------------------------------------------------
 swagger:
   title: lilishop API接口文档
   description: lilishop Api Documentation
@@ -125,105 +165,125 @@ swagger:
     url: https://pickmall.cn
     email: admin@pickmall.com
 
+# -------------------------------------------------------------------
+# SpringDoc 接口文档通用配置
+# -------------------------------------------------------------------
 springdoc:
   swagger-ui:
+    # 是否开启 Swagger UI 界面
     enabled: true
+    # 文档访问入口
     path: /swagger-ui.html
 
-# Mybatis-plus
+# -------------------------------------------------------------------
+# MyBatis-Plus ORM 框架配置
+# -------------------------------------------------------------------
 mybatis-plus:
+  # XML 映射文件加载路径
   mapper-locations: classpath*:mapper/*.xml
   configuration:
-    #缓存开启
+    # 是否开启二级缓存
     cache-enabled: true
-    #日志
+    # 日志输出（按需放开）
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-# 日志
+# -------------------------------------------------------------------
+# 系统日志配置（基于 Logback）
+# -------------------------------------------------------------------
 logging:
-  # 输出级别
   level:
+    # 核心包日志输出级别
     cn.lili: info
-  #    org.hibernate: debug
-  #    org.springframework: debug
   file:
-    # 指定路径
+    # 日志输出根目录
     path: logs
   logback:
     rollingpolicy:
-      # 最大保存天数
+      # 日志最大保存天数
       max-history: 7
-      # 每个文件最大大小
+      # 单个日志文件最大大小
       max-file-size: 5MB
-#加密参数
+
+# -------------------------------------------------------------------
+# Jasypt 敏感属性加密密钥配置
+# -------------------------------------------------------------------
 jasypt:
   encryptor:
+    # 加密/解密私钥
     password: lili
 
-
+# -------------------------------------------------------------------
+# Lilishop 商城平台通用业务配置
+# -------------------------------------------------------------------
 lili:
-  #验证码设置
-  verification-code:
-    #图形验证码有效时间，包含滑块验证码有效时间，以及验证通过之后，缓存中存储的验证结果有效时间
-    effectiveTime: 300
-    #水印
-    watermark: LILI-SHOP
-    #干扰项数量 最多2 默认0
-    interfereNum: 1
-    #允许误差像素
-    faultTolerant: 3
-    #登录验证码放行，普通部署默认关闭
-    loginBypassEnabled: false
+  # 演示站及脱敏规则配置
   system:
+    # 是否演示站点
     isDemoSite: false
-    #     脱敏级别：
-    #     0：不做脱敏处理
-    #     1：管理端用户手机号等信息脱敏
-    #     2：商家端信息脱敏（为2时，表示管理端，商家端同时脱敏）
+    # 数据脱敏级别：
+    # 0：不做脱敏处理
+    # 1：管理端用户手机号等敏感信息脱敏
+    # 2：商家端信息脱敏（为 2 时，表示管理端、商家端同时脱敏）
     sensitiveLevel: 1
+
+  # 本地文件存储配置
   local-file:
+    # 本地上传文件保存目录
     path: data/uploads
+    # 静态文件访问的 URL 前缀
     url-prefix: /files
 
+  # 在线会员人数统计设置
   statistics:
-    # 在线人数统计 X 小时。这里设为48，即统计过去48小时每小时在线人数
+    # 在线人数统计 X 小时：这里设为 48，即统计过去 48 小时每小时在线人数
     onlineMember: 48
-    # 当前在线人数刷新时间间隔，单位秒，设置为600，则每10分钟刷新一次
+    # 当前在线人数刷新时间间隔（单位：秒）：设置为 600，则每 10 分钟刷新一次
     currentOnlineUpdate: 600
-  #qq lbs 申请
-  lbs:
-    key: 4BYBZ-7MT6S-PUAOA-6BNWL-FJUD7-UUFXT
-    sk: zhNKVrJK6UPOhqIjn8AQvG37b9sz6
 
-  # jwt 细节设定
+
+  # JWT 身份鉴权令牌配置
   jwt-setting:
-    # token过期时间（分钟）
+    # 令牌过期时间（分钟）
     tokenExpireTime: 10000
 
-  # 使用Spring @Cacheable注解失效时间
+  # Spring Cache 默认缓存过期配置
   cache:
-    # 过期时间 单位秒 永久不过期设为-1
+    # 缓存过期时间（单位：秒）；永久不过期设为 -1
     timeout: 1500
-  #多线程配置
+
+  # 异步多线程执行线程池配置
   thread:
+    # 核心线程数
     corePoolSize: 5
+    # 最大线程数
     maxPoolSize: 50
+    # 等待队列容量
     queueCapacity: 50
+
+  # RocketMQ 分布式消息队列主题 (Topic) 与消费组 (Group) 配置
   data:
     rocketmq:
+      # 促销活动相关主题与消费组
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
+      # 商品变动相关主题与消费组
       goods-topic: lili_goods_topic
       goods-group: lili_goods_group
+      # 订单交易相关主题与消费组
       order-topic: lili_order_topic
       order-group: lili_order_group
+      # 会员用户相关主题与消费组
       member-topic: lili_member_topic
       member-group: lili_member_group
+      # 店铺/商家相关主题与消费组
       store-topic: lili_store_topic
       store-group: lili_store_group
+      # 站内公告通知相关主题与消费组
       notice-topic: lili_notice_topic
       notice-group: lili_notice_group
+      # 消息发送相关主题与消费组
       notice-send-topic: lili_send_notice_topic
       notice-send-group: lili_send_notice_group
+      # 售后/退款退货相关主题与消费组
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group

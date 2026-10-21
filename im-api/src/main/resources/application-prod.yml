@@ -1,9 +1,18 @@
-﻿spring:
+# ===================================================================
+# 客服服务 (im-api) - 线上生产环境配置 (Profile: prod)
+# 作用说明：
+# 适用于生产环境高可用部署
+# ===================================================================
+
+spring:
+  # Redis 缓存与分布式会话配置（生产环境）
   data:
     redis:
       host: 127.0.0.1
       port: 6379
       password: lilishop
+
+  # 主业务数据库连接配置（生产环境）
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     username: root

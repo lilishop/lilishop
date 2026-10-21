@@ -1,191 +1,267 @@
+# ===================================================================
+# Lilishop 买家端 API 服务主配置文件 (buyer-api)
+# 作用说明：
+# 1. 面向 C 端消费者提供全渠道商城服务接口 (/buyer/**)
+# 2. 支持 PC Web、H5 移动商城、微信小程序、App 端的接口请求
+# 3. 包含商品检索浏览、购物车、下单支付结算、会员中心等核心流程
+# ===================================================================
+
+# -------------------------------------------------------------------
+# Web 容器与网络服务配置
+# -------------------------------------------------------------------
 server:
+  # HTTP 服务监听端口
   port: 8888
 
   servlet:
+    # 根上下文访问路径
     context-path: /
 
-# actuator 仅暴露健康检查端点。
+# -------------------------------------------------------------------
+# Spring Boot Actuator 服务监控配置
+# -------------------------------------------------------------------
+# actuator 仅暴露健康检查端点，保障生产环境安全性
 management:
   endpoints:
     web:
       exposure:
+        # 仅公开健康检查健康端点 (/actuator/health)
         include: health
+
+# -------------------------------------------------------------------
+# Spring 基础组件与中间件配置
+# -------------------------------------------------------------------
 spring:
   application:
+    # 应用程序名称
     name: buyer-api
 
-  # 文件大小上传配置
+  # HTTP 文件上传大小限制
   servlet:
     multipart:
+      # 允许上传的单文件最大大小
       max-file-size: 20MB
+      # 单次请求允许上传的总数据大小
       max-request-size: 20MB
+
   cache:
+    # 默认缓存实现类型：Redis
     type: redis
-  # jackson json 配置
+
+  # Jackson JSON 序列化与反序列化配置
   jackson:
+    # 日期序列化时区（东八区）
     time-zone: GMT+8
     serialization:
-      # 关闭 jackson 对 json 做解析
+      # 允许空对象（Java Bean 没有属性时）序列化，避免抛出异常
       fail-on-empty-beans: false
 
-  # Redis
+  # Redis 缓存与分布式锁连接配置
   data:
     redis:
+      # Redis 服务器地址
       host: 192.168.31.100
+      # Redis 端口
       port: 30379
+      # Redis 认证密码
       password: lilishop
       lettuce:
         pool:
-          # 连接池最大连接数（使用负值表示没有限制）默认 8
+          # 连接池最大连接数（使用负值表示没有限制，默认 8）
           max-active: 200
-          # 连接池最大阻塞等待时间（使用负值表示没有限制）默认 -1
+          # 连接池最大阻塞等待时间（默认 20s）
           max-wait: 20s
           # 连接池中的最大空闲连接，默认 8
           max-idle: 10
           # 连接池中的最小空闲连接，默认 8
           min-idle: 8
-  # 数据源配置
+
+  # 主数据库连接池配置（阿里巴巴 Druid 连接池）
   datasource:
+    # MySQL 数据库 JDBC 连接串
     url: jdbc:mysql://192.168.31.100:3306/lilishop?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    # 数据库登录用户名
     username: root
+    # 数据库登录密码
     password: lilishop
+    # MySQL 驱动类
     driver-class-name: com.mysql.cj.jdbc.Driver
+    # 连接池类型
     type: com.alibaba.druid.pool.DruidDataSource
 
-# 忽略 TOKEN 鉴权的 url
+# -------------------------------------------------------------------
+# 安全认证：白名单 URL 配置（忽略 TOKEN 鉴权，公开匿名访问）
+# -------------------------------------------------------------------
 ignored:
   urls:
     - /editor-app/**
-    - /MP_verify_qSyvBPhDsPdxvOhC.txt
-    - /weixin/**
-    - /source/**
-    - /buyer/payment/cashier/**
-    - /buyer/payment/cashierRefund/**
-    - /buyer/other/pageData/**
-    - /buyer/live/room/polling/**
-    - /buyer/other/article/**
-    - /buyer/other/wechat/h5/callback
-    - /buyer/goods/**
-    - /buyer/store/**
-    - /buyer/passport/connect/**
-    - /buyer/members/**
-    # passport/member 只放行登录/注册/找回密码/扫码登录所需的匿名端点，其余（用户信息、改密、注销等）必须登录
-    - /buyer/passport/member/userLogin
-    - /buyer/passport/member/smsLogin
-    - /buyer/passport/member/register
-    - /buyer/passport/member/resetByMobile
-    - /buyer/passport/member/resetPassword
-    - /buyer/passport/member/refresh/**
-    - /buyer/passport/member/pc_session
-    - /buyer/passport/member/session_login/**
-    - /buyer/passport/member/app_scanner
-    - /buyer/passport/member/app_confirm
-    - /buyer/passport/member/bindMobile
-    - /buyer/passport/member/logout
-    - /buyer/promotion/pintuan/**
-    - /buyer/promotion/seckill/**
-    - /buyer/promotion/pointsGoods/**
-    - /buyer/promotion/coupon
-    - /buyer/member/evaluation/*/goodsEvaluation
-    - /buyer/member/evaluation/*/evaluationNumber
-    - /buyer/other/appVersion/**
-    - /buyer/broadcast/studio/**
-    - /buyer/distribution/distribution/recruit/page
-    - /buyer/distribution/distribution/recruit/inviter
-    - /buyer/common/slider/**
-    - /buyer/common/sms/**
-    - /buyer/common/site/**
-    - /buyer/common/region/**
-    - /buyer/common/IM
-    - /druid/**
-    - /swagger-ui.html
+    - /MP_verify_qSyvBPhDsPdxvOhC.txt           # 微信公众号域名所有权验证文件
+    - /weixin/**                                # 微信通知回调接口
+    - /source/**                                # 静态图片资源
+    - /buyer/payment/cashier/**                 # 收银台支付页面数据
+    - /buyer/payment/cashierRefund/**           # 退款查询接口
+    - /buyer/other/pageData/**                  # 商城楼层装修模板数据
+    - /buyer/live/room/polling/**               # 直播间轮询数据
+    - /buyer/other/article/**                   # 帮助中心文章与协议
+    - /buyer/other/wechat/h5/callback           # 微信 H5 授权登录回调
+    - /buyer/goods/**                           # 商品检索、详情与分类浏览
+    - /buyer/store/**                           # 店铺主页与店铺信息展示
+    - /buyer/passport/connect/**                # 联合登录（微信/QQ等第三方授权）
+    - /buyer/members/**                         # 会员公开信息
+    # passport/member 只放行登录/注册/找回密码/扫码登录所需的匿名端点，其余必须登录
+    - /buyer/passport/member/userLogin          # 账号密码登录
+    - /buyer/passport/member/smsLogin           # 短信验证码登录
+    - /buyer/passport/member/register           # 会员注册
+    - /buyer/passport/member/resetByMobile      # 手机号找回密码
+    - /buyer/passport/member/resetPassword      # 重置密码
+    - /buyer/passport/member/refresh/**         # 刷新买家端 Token
+    - /buyer/passport/member/pc_session         # PC 端登录 session 会话
+    - /buyer/passport/member/session_login/**   # 会话登录状态校验
+    - /buyer/passport/member/app_scanner        # App 扫码登录扫描确认
+    - /buyer/passport/member/app_confirm        # App 扫码确认登录
+    - /buyer/passport/member/bindMobile         # 绑定手机号
+    - /buyer/passport/member/logout             # 登出退出登录
+    - /buyer/promotion/pintuan/**               # 拼团营销活动浏览
+    - /buyer/promotion/seckill/**               # 秒杀营销活动浏览
+    - /buyer/promotion/pointsGoods/**           # 积分商城商品浏览
+    - /buyer/promotion/coupon                   # 领券中心公开优惠券列表
+    - /buyer/member/evaluation/*/goodsEvaluation# 商品评价列表公开查看
+    - /buyer/member/evaluation/*/evaluationNumber# 商品评价数量统计
+    - /buyer/other/appVersion/**                # App 版本检测与热更新检查
+    - /buyer/broadcast/studio/**                # 小程序直播组件数据
+    - /buyer/distribution/distribution/recruit/page    # 分销招募宣传页
+    - /buyer/distribution/distribution/recruit/inviter # 分销邀请人信息
+    - /buyer/common/slider/**                   # 滑块验证码获取
+    - /buyer/common/sms/**                      # 短信验证码发送
+    - /buyer/common/site/**                     # 站点基础信息公开接口
+    - /buyer/common/region/**                   # 行政省市区地址级联
+    - /buyer/common/IM                          # 在线客服配置
+    - /druid/**                                 # Druid 监控（内网访问）
+    - /swagger-ui.html                          # Swagger 接口文档
     - /swagger-ui/**
     - /v3/api-docs
     - /v3/api-docs/**
 
-# Mybatis-plus
+# -------------------------------------------------------------------
+# MyBatis-Plus ORM 框架配置
+# -------------------------------------------------------------------
 mybatis-plus:
+  # XML 映射文件加载路径
   mapper-locations: classpath*:mapper/*.xml
   configuration:
-    # 缓存开启
+    # 是否开启二级缓存
     cache-enabled: true
-    # 日志
+    # 日志输出（按需放开）
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-# 日志
+# -------------------------------------------------------------------
+# 系统日志配置（基于 Logback）
+# -------------------------------------------------------------------
 logging:
+  # 外部 Logback 配置文件路径
   config: classpath:logback-spring.xml
-  # 输出级别
   level:
+    # 根日志输出级别
     root: info
-#    org.springframework: debug
   file:
-    # 指定路径
+    # 日志输出根目录
     path: lili-logs
 
+# -------------------------------------------------------------------
+# SpringDoc (OpenAPI 3 / Swagger) 接口文档配置
+# -------------------------------------------------------------------
 springdoc:
   api-docs:
+    # 是否开启 API 元数据导出
     enabled: true
   swagger-ui:
+    # 是否开启 Swagger UI 界面
     enabled: true
+    # 文档访问路径
     path: /swagger-ui/index.html
+  # 控制器扫描包路径
   packages-to-scan: cn.lili.controller
+  # 匹配路径规则
   paths-to-match: /buyer/**
 
+# -------------------------------------------------------------------
+# Lilishop 商城平台买家端核心业务配置
+# -------------------------------------------------------------------
 lili:
+  # 运行架构模式：microservice（微服务模式）/ all-in-one（单体模式）
   runtime:
     mode: microservice
+
+  # 微信生态特有配置
   wechat:
     mp:
-      # URL Link 打开版本：release / trial / develop / auto（依次尝试，适合开发环境）
+      # 微信小程序 URL Link 打开版本：release（正式版）/ trial（体验版）/ develop（开发版）/ auto（依次尝试，适合开发环境）
       url-link-env-version: auto
+
+  # 本地文件存储配置
   local-file:
+    # 本地上传文件保存目录
     path: data/uploads
+    # 静态文件访问的 URL 前缀
     url-prefix: /files
-  verification-code:
-    effectiveTime: 300
-    watermark: LILI-SHOP
-    interfereNum: 0
-    faultTolerant: 3
-    loginBypassEnabled: false
+
+  # 演示站及脱敏规则配置
   system:
+    # 是否演示站点
     isDemoSite: true
+
+  # 在线会员人数统计设置
   statistics:
-    # 在线人数统计 X 小时。这里设为 48，即统计过去 48 小时每小时在线人数
+    # 在线人数统计 X 小时：这里设为 48，即统计过去 48 小时每小时在线人数
     onlineMember: 48
-    # 当前在线人数刷新时间间隔，单位秒，设置为 600，则每 10 分钟刷新一次
+    # 当前在线人数刷新时间间隔（单位：秒）：设置为 600，则每 10 分钟刷新一次
     currentOnlineUpdate: 600
 
-  # jwt 细节设定
+  # JWT 身份鉴权令牌配置
   jwt-setting:
-    # token 过期时间（分钟）
+    # 买家端 Token 访问令牌有效时间（单位：分钟），259200 分钟 = 180 天（买家免密登录时长更长）
     tokenExpireTime: 259200
 
-  # 使用 Spring @Cacheable 注解失效时间
+  # Spring Cache 默认缓存过期配置
   cache:
-    # 过期时间，单位秒；永久不过期设为 -1
+    # 缓存过期时间（单位：秒）；永久不过期设为 -1
     timeout: 1500
-  # 多线程配置
+
+  # 异步多线程执行线程池配置
   thread:
+    # 核心线程数
     corePoolSize: 5
+    # 最大线程数
     maxPoolSize: 50
+    # 等待队列容量
     queueCapacity: 50
+
+  # RocketMQ 分布式消息队列主题 (Topic) 与消费组 (Group) 配置
   data:
     rocketmq:
+      # 促销活动相关主题与消费组
       promotion-topic: lili_promotion_topic
       promotion-group: lili_promotion_group
+      # 商品变动相关主题与消费组
       goods-topic: lili_goods_topic
       goods-group: lili_goods_group
+      # 订单交易相关主题与消费组
       order-topic: lili_order_topic
       order-group: lili_order_group
+      # 会员用户相关主题与消费组
       member-topic: lili_member_topic
       member-group: lili_member_group
+      # 店铺/商家相关主题与消费组
       store-topic: lili_store_topic
       store-group: lili_store_group
+      # 站内公告通知相关主题与消费组
       notice-topic: lili_notice_topic
       notice-group: lili_notice_group
+      # 消息发送相关主题与消费组
       notice-send-topic: lili_send_notice_topic
       notice-send-group: lili_send_notice_group
+      # 售后/退款退货相关主题与消费组
       after-sale-topic: lili_after_sale_topic
       after-sale-group: lili_after_sale_group
+    # 消息发送超时时间（毫秒）
     send-message-timeout: 30000
