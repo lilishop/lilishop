@@ -75,17 +75,30 @@ final class SearchFixtures {
 
     static void insertVisibleSku(String skuId, String goodsId, String brandId, BigDecimal price,
                                  Integer buyCount, Integer commentNum, String categoryPath) {
-        insertSku(skuId, goodsId, brandId, price, buyCount, commentNum, categoryPath,
+        insertSku(skuId, goodsId, brandId, price, null, buyCount, commentNum, categoryPath,
+                "UPPER", "PASS", false);
+    }
+
+    static void insertVisibleSkuWithCost(String skuId, String goodsId, String brandId, BigDecimal price,
+                                         BigDecimal cost, Integer buyCount, Integer commentNum, String categoryPath) {
+        insertSku(skuId, goodsId, brandId, price, cost, buyCount, commentNum, categoryPath,
                 "UPPER", "PASS", false);
     }
 
     static void insertSku(String skuId, String goodsId, String brandId, BigDecimal price,
                           Integer buyCount, Integer commentNum, String categoryPath,
                           String marketEnable, String authFlag, boolean deleted) {
+        insertSku(skuId, goodsId, brandId, price, null, buyCount, commentNum, categoryPath,
+                marketEnable, authFlag, deleted);
+    }
+
+    static void insertSku(String skuId, String goodsId, String brandId, BigDecimal price, BigDecimal cost,
+                          Integer buyCount, Integer commentNum, String categoryPath,
+                          String marketEnable, String authFlag, boolean deleted) {
         String sql = "INSERT INTO li_goods_sku ("
                 + "id, create_time, delete_flag, brand_id, buy_count, virtual_sales, category_path, comment_num, "
-                + "goods_id, goods_name, auth_flag, market_enable, price, recommend, sales_model, store_id, goods_type"
-                + ") VALUES (?, NOW(6), ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, 0, 'RETAIL', 'store-1', 'PHYSICAL_GOODS')";
+                + "goods_id, goods_name, auth_flag, market_enable, price, cost, recommend, sales_model, store_id, goods_type"
+                + ") VALUES (?, NOW(6), ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'RETAIL', 'store-1', 'PHYSICAL_GOODS')";
         try (Connection connection = MysqlITSupport.open();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, Long.parseLong(skuId));
@@ -110,6 +123,11 @@ final class SearchFixtures {
                 statement.setNull(11, Types.DECIMAL);
             } else {
                 statement.setBigDecimal(11, price);
+            }
+            if (cost == null) {
+                statement.setNull(12, Types.DECIMAL);
+            } else {
+                statement.setBigDecimal(12, cost);
             }
             statement.executeUpdate();
         } catch (SQLException e) {

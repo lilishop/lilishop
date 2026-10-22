@@ -79,6 +79,9 @@ public class GoodsIndex implements Serializable {
     @Schema(description = "商品价格")
     private Double price;
 
+    @Schema(description = "划线价(市场价,取SKU成本价字段)")
+    private Double marketPrice;
+
     @Schema(description = "促销价")
     private Double promotionPrice;
 
@@ -141,6 +144,7 @@ public class GoodsIndex implements Serializable {
             this.goodsId = sku.getGoodsId();
             this.goodsName = sku.getGoodsName();
             this.price = sku.getPrice();
+            this.marketPrice = sku.getCost();
             this.storeName = sku.getStoreName();
             this.storeId = sku.getStoreId();
             this.thumbnail = sku.getThumbnail();

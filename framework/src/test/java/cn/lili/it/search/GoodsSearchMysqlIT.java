@@ -229,6 +229,18 @@ class GoodsSearchMysqlIT {
     }
 
     @Test
+    void goodsIndexExposesSkuCostAsMarketPrice() {
+        SearchFixtures.insertGoods("1001", "[]", false, LocalDateTime.of(2021, 6, 1, 0, 0));
+        SearchFixtures.insertVisibleSkuWithCost("10011", "1001", "0",
+                new BigDecimal("99.00"), new BigDecimal("129.00"), 1, 0, "c1");
+
+        Page<GoodsIndex> page = goodsSearchService.searchGoodsByPage(new GoodsSearchDTO(), page(1, 10, null, null));
+
+        assertThat(page.getRecords()).hasSize(1);
+        assertThat(page.getRecords().get(0).getMarketPrice()).isEqualTo(129.00);
+    }
+
+    @Test
     void selectorParamSqlHidesSelectedDimension() {
         String json = SearchFixtures.indexedJsonTwo("内存", "8G", 1, "颜色", "黑色", 2);
         seedVisibleGoods("901", json, "1");
