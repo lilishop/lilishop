@@ -124,9 +124,9 @@ public class AfterSaleBuyerController {
     @Parameter(name = "sn", description = "售后编号", required = true)
     @GetMapping("/get/getAfterSaleLog/{sn}")
     public ResultMessage<List<AfterSaleLog>> getAfterSaleLog(@PathVariable String sn) {
+        // 安全校验：核验当前售后单归属权，防止买家通过遍历 sn 水平越权窃取他人售后流转日志
+        OperationalJudgment.judgment(afterSaleService.getAfterSale(sn));
         return ResultUtil.data(afterSaleLogService.getAfterSaleLog(sn));
     }
-
-   
 
 }

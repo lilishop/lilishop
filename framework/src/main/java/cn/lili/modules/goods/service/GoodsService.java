@@ -51,8 +51,9 @@ public interface GoodsService extends IService<Goods> {
      * {@code null} 不写 params、不碰倒排。
      *
      * @param goodsOperationDTO 商品操作参数
+     * @return 新商品ID
      */
-    void addGoods(GoodsOperationDTO goodsOperationDTO);
+    String addGoods(GoodsOperationDTO goodsOperationDTO);
 
     /**
      * 修改商品。

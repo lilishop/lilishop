@@ -62,13 +62,14 @@ public class OrderComplaintStoreController {
     }
 
 
-
     @Operation(summary = "添加交易投诉对话")
     @Parameter(name = "complainId", description = "投诉单ID", required = true)
     @Parameter(name = "content", description = "内容", required = true)
     @PostMapping("/communication")
     public ResultMessage<OrderComplaintCommunicationVO> addCommunication(@RequestParam String complainId, @RequestParam String content) {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        // 安全校验：校验投诉单是否存在且属于当前商户店铺，严防跨店铺越权回复他人投诉
+        OperationalJudgment.judgment(orderComplaintService.getOrderComplainById(complainId));
         OrderComplaintCommunicationVO communicationVO = new OrderComplaintCommunicationVO(complainId, content, CommunicationOwnerEnum.STORE.name(), currentUser.getUsername(), currentUser.getStoreId());
         orderComplaintCommunicationService.addCommunication(communicationVO);
         return ResultUtil.success();

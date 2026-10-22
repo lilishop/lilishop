@@ -3,6 +3,7 @@ package cn.lili.modules.member.serviceimpl;
 
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.dos.Member;
@@ -51,7 +52,6 @@ public class MemberReceiptServiceImpl extends ServiceImpl<MemberReceiptMapper, M
         if (!receipts.isEmpty()) {
             throw new ServiceException(ResultCode.USER_RECEIPT_REPEAT_ERROR);
         }
-        //参数封装
         MemberReceipt memberReceipt = new MemberReceipt();
         BeanUtil.copyProperties(memberReceiptAddVO, memberReceipt);
         //根据客户信息查询客户
@@ -113,6 +113,8 @@ public class MemberReceiptServiceImpl extends ServiceImpl<MemberReceiptMapper, M
         //根据客户id查询发票信息
         MemberReceipt memberReceiptDb = this.baseMapper.selectById(id);
         if (memberReceiptDb != null) {
+            // 安全防护：校验待删除发票是否归属于当前登录用户，防止水平越权删除他人发票
+            OperationalJudgment.judgment(memberReceiptDb);
             //如果客户发票信息不为空 则逻辑删除此发票信息
             memberReceiptDb.setDeleteFlag(false);
             this.baseMapper.updateById(memberReceiptDb);

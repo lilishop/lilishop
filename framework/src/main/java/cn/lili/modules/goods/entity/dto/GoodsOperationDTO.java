@@ -55,6 +55,9 @@ public class GoodsOperationDTO implements Serializable {
     @Length(max = 50, message = "商品名称不能超过50个字符")
     private String goodsName;
 
+    @Schema(description = "SPU编码，前端进入发布页时生成并随表单提交，为空时后端兜底生成")
+    private String spuSn;
+
     @Schema(description = "详情")
     private String intro;
 
@@ -98,7 +101,7 @@ public class GoodsOperationDTO implements Serializable {
      * @see cn.lili.modules.goods.entity.enums.GoodsSalesModeEnum
      */
     @Schema(description = "销售模式", requiredMode = Schema.RequiredMode.REQUIRED)
-    private String salesModel;
+    private String salesModel = GoodsSalesModeEnum.RETAIL.name();
 
     @Schema(description = "是否有规格", hidden = true)
     private String haveSpec;

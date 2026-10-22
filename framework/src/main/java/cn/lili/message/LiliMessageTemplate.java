@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -85,21 +87,40 @@ public class LiliMessageTemplate {
     }
 
     private void publish(String destination, Object payload, Long delaySeconds) {
-        Destination parsed = Destination.parse(destination);
-        QueueMessage queueMessage = new QueueMessage(
-                parsed.topic(),
-                parsed.tag(),
-                toBody(payload)
-        );
-        String json = JSON.toJSONString(queueMessage);
-        if (delaySeconds != null && delaySeconds > 0) {
-            double score = Instant.now().getEpochSecond() + delaySeconds;
-            stringRedisTemplate.opsForZSet().add(DELAY_KEY, json, score);
-            log.debug("queued delayed message topic={}, tag={}, delaySeconds={}", parsed.topic(), parsed.tag(), delaySeconds);
+        // 若当前处于 Spring 本地事务中，注册事务同步器，确保事务提交后再发送到 Redis，防止时序竞态或回滚导致脏消息
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    doPublish(destination, payload, delaySeconds);
+                }
+            });
+            log.debug("transaction active, registered message to publish after commit: destination={}", destination);
             return;
         }
-        stringRedisTemplate.opsForList().leftPush(QUEUE_PREFIX + parsed.topic(), json);
-        log.debug("queued message topic={}, tag={}", parsed.topic(), parsed.tag());
+        doPublish(destination, payload, delaySeconds);
+    }
+
+    private void doPublish(String destination, Object payload, Long delaySeconds) {
+        try {
+            Destination parsed = Destination.parse(destination);
+            QueueMessage queueMessage = new QueueMessage(
+                    parsed.topic(),
+                    parsed.tag(),
+                    toBody(payload)
+            );
+            String json = JSON.toJSONString(queueMessage);
+            if (delaySeconds != null && delaySeconds > 0) {
+                double score = Instant.now().getEpochSecond() + delaySeconds;
+                stringRedisTemplate.opsForZSet().add(DELAY_KEY, json, score);
+                log.debug("queued delayed message topic={}, tag={}, delaySeconds={}", parsed.topic(), parsed.tag(), delaySeconds);
+                return;
+            }
+            stringRedisTemplate.opsForList().leftPush(QUEUE_PREFIX + parsed.topic(), json);
+            log.debug("queued message topic={}, tag={}", parsed.topic(), parsed.tag());
+        } catch (Exception e) {
+            log.error("doPublish message to redis failed, destination={}", destination, e);
+        }
     }
 
     private byte[] toBody(Object payload) {

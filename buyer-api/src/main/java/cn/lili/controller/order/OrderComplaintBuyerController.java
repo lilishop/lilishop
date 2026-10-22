@@ -79,6 +79,8 @@ public class OrderComplaintBuyerController {
     @PostMapping("/communication")
     public ResultMessage<OrderComplaintCommunicationVO> addCommunication(@RequestParam String complainId, @RequestParam String content) {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        // 安全校验：校验投诉单是否存在且属于当前买家，严防跨用户越权注入伪造投诉沟通信息
+        OperationalJudgment.judgment(orderComplaintService.getOrderComplainById(complainId));
         OrderComplaintCommunicationVO communicationVO = new OrderComplaintCommunicationVO(complainId, content, CommunicationOwnerEnum.BUYER.name(), currentUser.getNickName(), currentUser.getId());
         orderComplaintCommunicationService.addCommunication(communicationVO);
         return ResultUtil.data(communicationVO);

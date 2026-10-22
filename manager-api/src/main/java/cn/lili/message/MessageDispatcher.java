@@ -98,6 +98,7 @@ public class MessageDispatcher {
             }
         } catch (Exception e) {
             log.error("dispatch message failed, topic={}, tag={}", message.getTopic(), message.getTag(), e);
+            throw e;
         }
     }
 

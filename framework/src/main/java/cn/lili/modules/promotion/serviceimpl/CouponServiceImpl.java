@@ -98,8 +98,14 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
         if (coupon == null) {
             throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
         }
-        this.update(new LambdaUpdateWrapper<Coupon>().eq(Coupon::getId, coupon.getId()).set(Coupon::getReceivedNum,
-                coupon.getReceivedNum() + receiveNum));
+        if (receiveNum == null || receiveNum <= 0) {
+            throw new ServiceException(ResultCode.PARAMS_ERROR);
+        }
+        // 原子递增已领数量，并在 SQL 层面防止超过 publish_num（防超发）
+        int rows = this.baseMapper.increaseReceivedNum(couponId, receiveNum);
+        if (rows == 0) {
+            throw new ServiceException(ResultCode.COUPON_NUM_INSUFFICIENT_ERROR);
+        }
     }
 
     @Override

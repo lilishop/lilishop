@@ -30,6 +30,7 @@ import cn.lili.modules.goods.entity.vos.GoodsNumVO;
 import cn.lili.modules.goods.entity.vos.GoodsSkuVO;
 import cn.lili.modules.goods.entity.vos.GoodsVO;
 import cn.lili.modules.goods.mapper.GoodsMapper;
+import cn.lili.modules.goods.util.GoodsCodeGenerator;
 import cn.lili.modules.goods.service.*;
 import cn.lili.modules.goods.support.GoodsSearchParamParser;
 import cn.lili.modules.member.entity.dto.EvaluationQueryParams;
@@ -180,8 +181,12 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Override
     @Transactional(rollbackFor = Exception.class)
     @SystemLogPoint(description = "添加商品", customerLog = "'新增商品名称:['+#goodsOperationDTO.goodsName+']'")
-    public void addGoods(GoodsOperationDTO goodsOperationDTO) {
+    public String addGoods(GoodsOperationDTO goodsOperationDTO) {
         Goods goods = new Goods(goodsOperationDTO);
+        //SPU编码：优先使用前端进入发布页时生成并提交的值，为空则后端兜底生成
+        if (CharSequenceUtil.isBlank(goods.getSpuSn())) {
+            goods.setSpuSn(GoodsCodeGenerator.spuCode());
+        }
         //检查商品
         this.checkGoods(goods);
         //向goods加入图片
@@ -221,6 +226,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (GoodsTypeEnum.APPOINTMENT_GOODS.name().equals(goods.getGoodsType())) {
             appointmentService.syncGoodsExtFromPublish(goods.getId(), goodsOperationDTO);
         }
+        return goods.getId();
     }
 
 
@@ -253,6 +259,14 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         
         //修改商品
         this.updateById(goods);
+        //编辑视为重新确定上下架方式：清除历史定时上下架计划（若选择定时上架，前端会在编辑完成后重新设置）
+        LambdaUpdateWrapper<Goods> scheduleClearWrapper = new LambdaUpdateWrapper<>();
+        scheduleClearWrapper.eq(Goods::getId, goodsId)
+                .set(Goods::getScheduledUpperTime, null)
+                .set(Goods::getScheduledUpperReason, null)
+                .set(Goods::getScheduledDownTime, null)
+                .set(Goods::getScheduledDownReason, null);
+        this.update(scheduleClearWrapper);
         // 与 addGoods 相同：仅当本次写入了 params 才同步倒排，保证 JSON 与搜索表同事务一致
         if (goods.getParams() != null) {
             goodsSearchParamService.syncByGoodsId(goods.getId(), goods.getParams());
@@ -632,9 +646,14 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         if (goodsIds == null || goodsIds.isEmpty() || triggerTime == null) {
             return;
         }
+        if (triggerTime.getTime() <= System.currentTimeMillis()) {
+            throw new ServiceException("定时时间必须晚于当前时间");
+        }
         String executor = GoodsStatusEnum.UPPER.equals(status)
                 ? TimeExecuteConstant.GOODS_UPPER_EXECUTOR
                 : TimeExecuteConstant.GOODS_DOWN_EXECUTOR;
+        //记录旧计划时间，用于删除旧延时任务，避免旧任务残留提前/重复触发
+        List<Goods> oldGoodsList = this.listByIds(goodsIds);
         LambdaUpdateWrapper<Goods> uw = new LambdaUpdateWrapper<>();
         uw.in(Goods::getId, goodsIds);
         long normalizedMs = (triggerTime.getTime() / 1000L) * 1000L;
@@ -648,8 +667,18 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         }
         this.update(uw);
         for (String goodsId : goodsIds) {
-            GoodsMarketMessage payload = new GoodsMarketMessage(Collections.singletonList(goodsId), reason);
             String uniqueKey = DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.GOODS, goodsId);
+            java.util.Date oldTime = oldGoodsList.stream()
+                    .filter(g -> g.getId().equals(goodsId))
+                    .map(g -> GoodsStatusEnum.UPPER.equals(status) ? g.getScheduledUpperTime() : g.getScheduledDownTime())
+                    .filter(java.util.Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
+            if (oldTime != null) {
+                timeTrigger.delete(executor, (oldTime.getTime() / 1000L) * 1000L, uniqueKey,
+                        rocketmqCustomProperties.getPromotionTopic());
+            }
+            GoodsMarketMessage payload = new GoodsMarketMessage(Collections.singletonList(goodsId), reason, normalizedMs);
             TimeTriggerMsg timeTriggerMsg = new TimeTriggerMsg(executor, normalizedMs, payload, uniqueKey,
                     rocketmqCustomProperties.getPromotionTopic());
             timeTrigger.addDelay(timeTriggerMsg);

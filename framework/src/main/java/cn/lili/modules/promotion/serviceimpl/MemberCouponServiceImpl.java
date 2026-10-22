@@ -103,12 +103,13 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     @Transactional(rollbackFor = Exception.class)
     public void receiveBuyerCoupon(String couponId, String memberId, String memberName) {
         Coupon coupon = couponService.getById(couponId);
-        if (coupon != null && !CouponGetEnum.FREE.name().equals(coupon.getGetType())) {
-            throw new ServiceException(ResultCode.COUPON_DO_NOT_RECEIVER);
-        } else if (coupon != null) {
-            this.receiverCoupon(couponId, memberId, memberName, coupon, null, null);
+        if (coupon == null) {
+            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
         }
-
+        if (!CouponGetEnum.FREE.name().equals(coupon.getGetType())) {
+            throw new ServiceException(ResultCode.COUPON_DO_NOT_RECEIVER);
+        }
+        this.receiverCoupon(couponId, memberId, memberName, coupon, null, null);
     }
 
     @Override
@@ -410,6 +411,8 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
     private MemberCoupon receiverCoupon(String couponId, String memberId, String memberName, Coupon coupon,
                                           String liveRoomId, String liveRoomName) {
         this.checkCouponLimit(couponId, memberId);
+        // 先行原子扣减优惠券发行量库存，不足时直接抛出异常中断并回滚，避免无效写入
+        couponService.receiveCoupon(couponId, 1);
         MemberCoupon memberCoupon = new MemberCoupon(coupon);
         memberCoupon.setMemberId(memberId);
         memberCoupon.setMemberName(memberName);
@@ -418,7 +421,6 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         memberCoupon.setLiveRoomId(liveRoomId);
         memberCoupon.setLiveRoomName(liveRoomName);
         this.save(memberCoupon);
-        couponService.receiveCoupon(couponId, 1);
         return memberCoupon;
     }
 }

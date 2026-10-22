@@ -18,6 +18,18 @@ public class QueueMessage {
 
     private byte[] body;
 
+    /**
+     * 消费重试次数计数
+     */
+    private Integer retryCount = 0;
+
+    public QueueMessage(String topic, String tag, byte[] body) {
+        this.topic = topic;
+        this.tag = tag;
+        this.body = body;
+        this.retryCount = 0;
+    }
+
     public String getTags() {
         return tag;
     }

@@ -32,7 +32,7 @@ public abstract class AbstractDelayQueueListen implements ApplicationRunner {
         log.info("延时队列机器{}开始运作", setDelayQueueName());
 
         //监听redis队列
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
                 //获取当前时间的时间戳
                 long now = System.currentTimeMillis() / 1000;
@@ -48,7 +48,7 @@ public abstract class AbstractDelayQueueListen implements ApplicationRunner {
                         //移除缓存，如果移除成功则表示当前线程处理了延时任务，则执行延时任务
                         Long num = cache.zRemove(setDelayQueueName(), jobId);
                         //如果移除成功, 则执行
-                        if (num > 0) {
+                        if (num != null && num > 0) {
                             ThreadPoolUtil.execute(() -> invoke(jobId));
                         }
                     }
@@ -57,11 +57,13 @@ public abstract class AbstractDelayQueueListen implements ApplicationRunner {
             } catch (Exception e) {
                 log.error("处理延时任务发生异常,异常原因为{}", e.getMessage(), e);
             } finally {
-                //间隔一秒钟搞一次
+                //间隔5秒钟轮询一次
                 try {
                     TimeUnit.SECONDS.sleep(5L);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    log.warn("延时队列机器{}轮询被中断", setDelayQueueName());
+                    Thread.currentThread().interrupt();
+                    break;
                 }
 
             }
@@ -85,10 +87,12 @@ public abstract class AbstractDelayQueueListen implements ApplicationRunner {
 
 
     /**
-     * 监听队列
+     * 监听队列（启动独立守护线程轮询，避免常驻死循环永久占用通用业务线程池核心工作线程）
      */
     public void init() {
-        ThreadPoolUtil.getPool().execute(this::startDelayQueueMachine);
+        Thread thread = new Thread(this::startDelayQueueMachine, "lili-delay-queue-" + setDelayQueueName().toLowerCase());
+        thread.setDaemon(true);
+        thread.start();
     }
 
 }

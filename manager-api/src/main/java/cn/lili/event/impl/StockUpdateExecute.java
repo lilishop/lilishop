@@ -35,6 +35,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -63,6 +64,13 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private DefaultRedisScript<Boolean> quantityScript;
+    /**
+     * 分布式锁释放 Lua 脚本（比对 token 一致才删除，保证原子性）
+     */
+    private static final DefaultRedisScript<Long> UNLOCK_SCRIPT = new DefaultRedisScript<>(
+            "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end",
+            Long.class
+    );
     /**
      * 订单
      */
@@ -113,10 +121,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
                 try {
                     handlePaidOrder(orderMessage);
                 } finally {
-                    String current = stringRedisTemplate.opsForValue().get(lockKey);
-                    if (lockToken.equals(current)) {
-                        stringRedisTemplate.delete(lockKey);
-                    }
+                    stringRedisTemplate.execute(UNLOCK_SCRIPT, Collections.singletonList(lockKey), lockToken);
                 }
                 break;
             }
@@ -202,7 +207,7 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
 
         List<Integer> stocks = cache.multiGet(keys);
         //如果缓存中不存在存在等量的库存值，则重新写入缓存，防止缓存击穿导致无法下单
-        checkStocks(stocks, order);
+        checkStocks(keys, stocks, order);
 
         //库存扣除结果
         Boolean skuResult = stringRedisTemplate.execute(quantityScript, keys, values.toArray());
@@ -220,12 +225,17 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
 
 
     /**
-     * 校验库存是否有效
+     * 校验库存缓存是否完整
+     * <p>
+     * 关键修复：必须保证 keys 中每一个 SKU 对应的缓存均存在（allMatch(Objects::nonNull)）。
+     * 若仅部分存在，原有 anyMatch 会误判为已命中，导致 Lua 脚本因获取到 nil 返回库存不足而错误取消已付款订单。
      *
-     * @param stocks
+     * @param keys   待扣减的缓存 key 集合
+     * @param stocks Redis 中批量查出的库存值列表
+     * @param order  订单详情
      */
-    private void checkStocks(List<Integer> stocks, OrderDetailVO order) {
-        if (!stocks.isEmpty() && order.getOrderItems().size() == stocks.size() && stocks.stream().anyMatch(Objects::nonNull)) {
+    private void checkStocks(List<String> keys, List<Integer> stocks, OrderDetailVO order) {
+        if (stocks != null && stocks.size() == keys.size() && !stocks.isEmpty() && stocks.stream().allMatch(Objects::nonNull)) {
             return;
         }
         initSkuCache(order.getOrderItems());
@@ -511,17 +521,27 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         //批量获取商品库存
         List skuStocks = cache.multiGet(skuKeys);
         //循环写入商品库存
-        for (int i = 0; i < skuStocks.size(); i++) {
-            goodsSkus.get(i).setQuantity(Convert.toInt(skuStocks.get(i).toString()));
+        if (skuStocks != null) {
+            for (int i = 0; i < skuStocks.size(); i++) {
+                Object stockObj = skuStocks.get(i);
+                if (stockObj != null) {
+                    goodsSkus.get(i).setQuantity(Convert.toInt(stockObj));
+                }
+            }
         }
 
         //促销库存处理
         if (!promotionKey.isEmpty()) {
             List promotionStocks = cache.multiGet(promotionKey);
-            for (int i = 0; i < promotionKey.size(); i++) {
-                promotionGoods.get(i).setQuantity(Convert.toInt(promotionStocks.get(i).toString()));
-                Integer num = promotionGoods.get(i).getNum();
-                promotionGoods.get(i).setNum((num != null ? num : 0) + order.getOrder().getGoodsNum());
+            if (promotionStocks != null) {
+                for (int i = 0; i < promotionKey.size() && i < promotionStocks.size(); i++) {
+                    Object pStockObj = promotionStocks.get(i);
+                    if (pStockObj != null) {
+                        promotionGoods.get(i).setQuantity(Convert.toInt(pStockObj));
+                    }
+                    Integer num = promotionGoods.get(i).getNum();
+                    promotionGoods.get(i).setNum((num != null ? num : 0) + order.getOrder().getGoodsNum());
+                }
             }
             promotionGoodsService.updatePromotionGoodsStock(promotionGoods);
         }
@@ -623,10 +643,15 @@ public class StockUpdateExecute implements OrderStatusChangeEvent {
         //促销库存处理
         if (!promotionKey.isEmpty()) {
             List promotionStocks = cache.multiGet(promotionKey);
-            for (int i = 0; i < promotionKey.size(); i++) {
-                promotionGoods.get(i).setQuantity(Convert.toInt(promotionStocks.get(i).toString()));
-                Integer num = promotionGoods.get(i).getNum();
-                promotionGoods.get(i).setNum((num != null ? num : 0) + order.getOrder().getGoodsNum());
+            if (promotionStocks != null) {
+                for (int i = 0; i < promotionKey.size() && i < promotionStocks.size(); i++) {
+                    Object pStockObj = promotionStocks.get(i);
+                    if (pStockObj != null) {
+                        promotionGoods.get(i).setQuantity(Convert.toInt(pStockObj));
+                    }
+                    Integer num = promotionGoods.get(i).getNum();
+                    promotionGoods.get(i).setNum((num != null ? num : 0) + order.getOrder().getGoodsNum());
+                }
             }
             promotionGoodsService.updatePromotionGoodsStock(promotionGoods);
         }

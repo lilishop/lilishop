@@ -2,8 +2,10 @@ package cn.lili.modules.goods.sku;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.modules.goods.entity.dos.Goods;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.util.GoodsCodeGenerator;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -91,7 +93,9 @@ public class GoodsSkuBuilder {
 
         //规格信息
         goodsSku.setId(Convert.toStr(skuInfo.get("id"), ""));
-        goodsSku.setSn(Convert.toStr(skuInfo.get("sn")));
+        //SKU编码：已有值保留（编辑场景），为空则自动生成
+        String sn = Convert.toStr(skuInfo.get("sn"));
+        goodsSku.setSn(CharSequenceUtil.isBlank(sn) ? GoodsCodeGenerator.skuCode() : sn);
         goodsSku.setWeight(Convert.toDouble(skuInfo.get("weight"), 0D));
         goodsSku.setPrice(Convert.toDouble(skuInfo.get("price"), 0D));
         goodsSku.setCost(Convert.toDouble(skuInfo.get("cost"), 0D));

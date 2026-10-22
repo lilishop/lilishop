@@ -25,9 +25,9 @@ public class ThreadProperties {
     private Integer maxPoolSize = 50;
 
     /**
-     * 队列最大长度
+     * 队列最大长度（默认有界 1024，规避无界队列导致 OOM）
      */
-    private Integer queueCapacity = Integer.MAX_VALUE;
+    private Integer queueCapacity = 1024;
 
     /**
      * 允许超时关闭

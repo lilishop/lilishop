@@ -20,5 +20,13 @@ public class GoodsMarketMessage {
 
     @Schema(description = "原因")
     private String reason;
+
+    @Schema(description = "触发时间（毫秒时间戳，到秒），用于执行时校验是否为最新计划")
+    private Long triggerTime;
+
+    public GoodsMarketMessage(List<String> goodsIds, String reason) {
+        this.goodsIds = goodsIds;
+        this.reason = reason;
+    }
 }
 

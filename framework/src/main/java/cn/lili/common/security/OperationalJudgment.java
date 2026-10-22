@@ -37,6 +37,10 @@ public class OperationalJudgment {
      * @return 返回判定本身，防止多次查询对象
      */
     public static <T> T judgment(T object, String buyerIdField, String storeIdField) {
+        // 防御性校验：目标实体对象为空时直接拒绝访问，避免后续反射触发隐式空指针异常
+        if (object == null) {
+            throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        }
         AuthUser tokenUser = Objects.requireNonNull(UserContext.getCurrentUser());
         switch (tokenUser.getRole()) {
             case MANAGER:

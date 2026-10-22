@@ -1,5 +1,6 @@
 package cn.lili.controller.promotion;
 
+import cn.lili.common.aop.annotation.PreventDuplicateSubmissions;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.OperationalJudgment;
@@ -113,6 +114,8 @@ public class CouponBuyerController {
         return ResultUtil.data(memberCouponService.getMemberCouponsNum());
     }
 
+    // 防重保证：防止买家端连击或并发请求突破优惠券限领数量
+    @PreventDuplicateSubmissions
     @Operation(summary = "客户领取优惠券")
     @Parameters({
             @Parameter(name = "couponId", description = "优惠券ID", required = true)
@@ -124,6 +127,8 @@ public class CouponBuyerController {
         return ResultUtil.success();
     }
 
+    // 防重保证：防止直播间高并发领券产生超领超发
+    @PreventDuplicateSubmissions
     @Operation(summary = "客户领取直播优惠券")
     @Parameters({
             @Parameter(name = "liveRoomId", description = "直播间ID", required = true),

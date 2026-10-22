@@ -29,6 +29,8 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -50,6 +52,8 @@ class StockUpdateExecuteRoutingTest {
     private ValueOperations<String, String> valueOperations;
 
     private PromotionGoodsService promotionGoodsService;
+    private GoodsSkuService goodsSkuService;
+    private DefaultRedisScript<Boolean> quantityScript;
 
     @BeforeEach
     void setUp() {
@@ -60,14 +64,15 @@ class StockUpdateExecuteRoutingTest {
         stringRedisTemplate = mock(StringRedisTemplate.class);
         valueOperations = mock(ValueOperations.class);
         promotionGoodsService = mock(PromotionGoodsService.class);
-        DefaultRedisScript<Boolean> quantityScript = mock(DefaultRedisScript.class);
+        quantityScript = mock(DefaultRedisScript.class);
 
         ReflectionTestUtils.setField(stockUpdateExecute, "orderService", orderService);
         ReflectionTestUtils.setField(stockUpdateExecute, "cardKeyService", cardKeyService);
         ReflectionTestUtils.setField(stockUpdateExecute, "cache", cache);
         ReflectionTestUtils.setField(stockUpdateExecute, "stringRedisTemplate", stringRedisTemplate);
+        goodsSkuService = mock(GoodsSkuService.class);
         ReflectionTestUtils.setField(stockUpdateExecute, "quantityScript", quantityScript);
-        ReflectionTestUtils.setField(stockUpdateExecute, "goodsSkuService", mock(GoodsSkuService.class));
+        ReflectionTestUtils.setField(stockUpdateExecute, "goodsSkuService", goodsSkuService);
         ReflectionTestUtils.setField(stockUpdateExecute, "promotionGoodsService", promotionGoodsService);
         ReflectionTestUtils.setField(stockUpdateExecute, "kanjiaActivityService", mock(KanjiaActivityService.class));
         ReflectionTestUtils.setField(stockUpdateExecute, "kanjiaActivityGoodsService", mock(KanjiaActivityGoodsService.class));
@@ -112,7 +117,7 @@ class StockUpdateExecuteRoutingTest {
 
         verify(orderService).afterOrderConfirm(orderSn);
         verify(cardKeyService, never()).fulfillAfterPayment(orderSn);
-        verify(stringRedisTemplate, never()).execute(any(DefaultRedisScript.class), anyList(), any());
+        verify(stringRedisTemplate, never()).execute(eq(quantityScript), anyList(), any());
     }
 
     @Test
@@ -138,7 +143,7 @@ class StockUpdateExecuteRoutingTest {
 
         verify(cardKeyService).releaseReservation(orderSn);
         verify(cardKeyService).voidOnSystemFailure(orderSn);
-        verify(stringRedisTemplate, never()).execute(any(DefaultRedisScript.class), anyList(), any());
+        verify(stringRedisTemplate, never()).execute(eq(quantityScript), anyList(), any());
     }
 
     @Test
@@ -202,7 +207,7 @@ class StockUpdateExecuteRoutingTest {
         when(cache.get(anyString())).thenReturn("10");
         when(cache.multiGet(anyList())).thenReturn(List.of(10));
         when(promotionGoodsService.getPromotionsGoods(any())).thenReturn(new PromotionGoods());
-        when(stringRedisTemplate.execute(any(DefaultRedisScript.class), anyList(), any())).thenReturn(true);
+        when(stringRedisTemplate.execute(eq(quantityScript), anyList(), any())).thenReturn(true);
         when(cardKeyService.isECouponFulfillmentEligible(order)).thenReturn(true);
 
         OrderMessage message = new OrderMessage();
@@ -211,7 +216,7 @@ class StockUpdateExecuteRoutingTest {
 
         stockUpdateExecute.orderChange(message);
 
-        verify(stringRedisTemplate).execute(any(DefaultRedisScript.class), anyList(), any());
+        verify(stringRedisTemplate).execute(eq(quantityScript), anyList(), any());
         verify(orderService).afterOrderConfirm(orderSn);
     }
 
@@ -238,7 +243,7 @@ class StockUpdateExecuteRoutingTest {
         stockUpdateExecute.orderChange(message);
 
         verify(orderService, never()).afterOrderConfirm(orderSn);
-        verify(stringRedisTemplate, never()).execute(any(DefaultRedisScript.class), anyList(), any());
+        verify(stringRedisTemplate, never()).execute(eq(quantityScript), anyList(), any());
     }
 
     @Test
@@ -285,7 +290,7 @@ class StockUpdateExecuteRoutingTest {
         when(orderService.queryDetail(orderSn)).thenReturn(detail);
         when(orderService.getBySn(orderSn)).thenReturn(order);
         when(cache.multiGet(anyList())).thenReturn(List.of(10));
-        when(stringRedisTemplate.execute(any(DefaultRedisScript.class), anyList(), any())).thenReturn(true);
+        when(stringRedisTemplate.execute(eq(quantityScript), anyList(), any())).thenReturn(true);
 
         OrderMessage message = new OrderMessage();
         message.setOrderSn(orderSn);
@@ -296,5 +301,77 @@ class StockUpdateExecuteRoutingTest {
         verify(orderService).afterOrderConfirm(orderSn);
         verify(cardKeyService, never()).fulfillAfterPayment(any());
     }
-}
 
+    @Test
+    void paidMessageInitializesCacheWhenAnySkuCacheIsMissing() {
+        mockPaidLockAcquired();
+        String orderSn = "O-MULTI-SKU-001";
+        Order order = new Order();
+        order.setSn(orderSn);
+        order.setOrderType(OrderTypeEnum.NORMAL.name());
+
+        OrderItem item1 = new OrderItem();
+        item1.setSkuId("sku-A");
+        item1.setNum(1);
+
+        OrderItem item2 = new OrderItem();
+        item2.setSkuId("sku-B");
+        item2.setNum(2);
+
+        OrderDetailVO detail = new OrderDetailVO();
+        detail.setOrder(order);
+        detail.setOrderItems(List.of(item1, item2));
+
+        when(orderService.queryDetail(orderSn)).thenReturn(detail);
+        when(orderService.getBySn(orderSn)).thenReturn(order);
+        // sku-A 缓存命中 10，sku-B 缓存失效为 null
+        java.util.List<Integer> mockStocks = new java.util.ArrayList<>();
+        mockStocks.add(10);
+        mockStocks.add(null);
+        when(cache.multiGet(anyList())).thenReturn(mockStocks);
+        when(cache.hasKey(GoodsSkuService.getStockCacheKey("sku-A"))).thenReturn(true);
+        when(cache.hasKey(GoodsSkuService.getStockCacheKey("sku-B"))).thenReturn(false);
+        when(stringRedisTemplate.execute(eq(quantityScript), anyList(), any(), any())).thenReturn(true);
+
+        OrderMessage message = new OrderMessage();
+        message.setOrderSn(orderSn);
+        message.setNewStatus(OrderStatusEnum.PAID);
+
+        stockUpdateExecute.orderChange(message);
+
+        // 验证 sku-B 缺失时，必须触发 goodsSkuService.getStock 回填缓存
+        verify(goodsSkuService).getStock("sku-B");
+        verify(orderService).afterOrderConfirm(orderSn);
+    }
+
+    @Test
+    void paidMessageReleasesLockWithUnlockScript() {
+        mockPaidLockAcquired();
+        String orderSn = "O-UNLOCK-001";
+        Order order = new Order();
+        order.setSn(orderSn);
+        order.setOrderType(OrderTypeEnum.NORMAL.name());
+
+        OrderItem item = new OrderItem();
+        item.setSkuId("sku-1");
+        item.setNum(1);
+
+        OrderDetailVO detail = new OrderDetailVO();
+        detail.setOrder(order);
+        detail.setOrderItems(List.of(item));
+
+        when(orderService.queryDetail(orderSn)).thenReturn(detail);
+        when(orderService.getBySn(orderSn)).thenReturn(order);
+        when(cache.multiGet(anyList())).thenReturn(List.of(10));
+        when(stringRedisTemplate.execute(eq(quantityScript), anyList(), any())).thenReturn(true);
+
+        OrderMessage message = new OrderMessage();
+        message.setOrderSn(orderSn);
+        message.setNewStatus(OrderStatusEnum.PAID);
+
+        stockUpdateExecute.orderChange(message);
+
+        // 验证不再使用非原子的 delete(lockKey)，保证锁安全
+        verify(stringRedisTemplate, never()).delete(anyString());
+    }
+}

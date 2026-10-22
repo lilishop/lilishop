@@ -14,6 +14,7 @@ import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.entity.enums.GoodsTypeEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.xkcoding.http.util.StringUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
@@ -45,6 +46,9 @@ public class Goods extends BaseEntity {
     @NotEmpty(message = "商品名称不能为空")
     @Length(max = 100, message = "商品名称太长，不能超过100个字符")
     private String goodsName;
+
+    @Schema(description = "SPU编码")
+    private String spuSn;
 
     @Schema(description = "商品价格", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "商品价格不能为空")
@@ -122,12 +126,14 @@ public class Goods extends BaseEntity {
     private String underMessage;
 
     @Schema(description = "计划上架时间（到秒，yyyy-MM-dd HH:mm:ss）")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date scheduledUpperTime;
 
     @Schema(description = "计划上架原因")
     private String scheduledUpperReason;
 
     @Schema(description = "计划下架时间（到秒，yyyy-MM-dd HH:mm:ss）")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date scheduledDownTime;
 
     @Schema(description = "计划下架原因")
@@ -172,13 +178,14 @@ public class Goods extends BaseEntity {
 
     public Goods(GoodsOperationDTO goodsOperationDTO) {
         this.goodsName = goodsOperationDTO.getGoodsName();
+        this.spuSn = goodsOperationDTO.getSpuSn();
         this.categoryPath = goodsOperationDTO.getCategoryPath();
         this.storeCategoryPath = goodsOperationDTO.getStoreCategoryPath();
         this.brandId = goodsOperationDTO.getBrandId();
         this.templateId = goodsOperationDTO.getTemplateId();
         this.recommend = goodsOperationDTO.getRecommend();
         this.sellingPoint = goodsOperationDTO.getSellingPoint();
-        this.salesModel = goodsOperationDTO.getSalesModel();
+        this.salesModel = CharSequenceUtil.isNotEmpty(goodsOperationDTO.getSalesModel()) ? goodsOperationDTO.getSalesModel() : GoodsSalesModeEnum.RETAIL.name();
         this.goodsUnit = goodsOperationDTO.getGoodsUnit();
         this.intro = goodsOperationDTO.getIntro();
         this.mobileIntro = goodsOperationDTO.getMobileIntro();
@@ -194,14 +201,11 @@ public class Goods extends BaseEntity {
 
         //循环sku，判定sku是否有效
         for (Map<String, Object> sku : goodsOperationDTO.getSkuList()) {
-            //判定参数不能为空
-            if (!sku.containsKey("sn") || sku.get("sn") == null) {
-                throw new ServiceException(ResultCode.GOODS_SKU_SN_ERROR);
-            }
-            if ((!sku.containsKey("price") || StringUtil.isEmpty(sku.get("price").toString()) || Convert.toDouble(sku.get("price")) <= 0) && !goodsOperationDTO.getSalesModel().equals(GoodsSalesModeEnum.WHOLESALE.name())) {
+            //SKU编码(sn)由后端自动生成，不再要求前端必传
+            if ((!sku.containsKey("price") || StringUtil.isEmpty(sku.get("price").toString()) || Convert.toDouble(sku.get("price")) <= 0) && !GoodsSalesModeEnum.WHOLESALE.name().equals(goodsOperationDTO.getSalesModel())) {
                 throw new ServiceException(ResultCode.GOODS_SKU_PRICE_ERROR);
             }
-            if ((!sku.containsKey("cost") || StringUtil.isEmpty(sku.get("cost").toString()) || Convert.toDouble(sku.get("cost")) <= 0) && !goodsOperationDTO.getSalesModel().equals(GoodsSalesModeEnum.WHOLESALE.name())) {
+            if ((!sku.containsKey("cost") || StringUtil.isEmpty(sku.get("cost").toString()) || Convert.toDouble(sku.get("cost")) <= 0) && !GoodsSalesModeEnum.WHOLESALE.name().equals(goodsOperationDTO.getSalesModel())) {
                 throw new ServiceException(ResultCode.GOODS_SKU_COST_ERROR);
             }
             //虚拟商品没有重量字段
@@ -211,8 +215,12 @@ public class Goods extends BaseEntity {
             if (!sku.containsKey("quantity") || StringUtil.isEmpty(sku.get("quantity").toString()) || Convert.toInt(sku.get("quantity").toString()) < 0) {
                 throw new ServiceException(ResultCode.GOODS_SKU_QUANTITY_ERROR);
             }
-            sku.values().forEach(i -> {
-                if (CharSequenceUtil.isBlank(i.toString())) {
+            sku.forEach((key, value) -> {
+                //SKU编码(sn)允许为空，空值由后端生成
+                if ("sn".equals(key)) {
+                    return;
+                }
+                if (CharSequenceUtil.isBlank(value.toString())) {
                     throw new ServiceException(ResultCode.MUST_HAVE_GOODS_SKU_VALUE);
                 }
             });
