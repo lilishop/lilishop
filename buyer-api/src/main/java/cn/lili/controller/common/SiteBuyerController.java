@@ -39,4 +39,10 @@ public class SiteBuyerController {
     public ResultMessage<Object> themeSetting() {
         return ResultUtil.data(settingService.get(SettingEnum.THEME_SETTING.name()));
     }
+
+    @Operation(summary = "获取分类页配置")
+    @GetMapping("/category-page")
+    public ResultMessage<Object> categoryPageSetting() {
+        return ResultUtil.data(settingService.get(SettingEnum.CATEGORY_PAGE_SETTING.name()));
+    }
 }

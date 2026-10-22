@@ -75,5 +75,7 @@ public enum SettingEnum {
     //验证码设置
     VERIFICATION_SETTING,
     //安全设置
-    SECURITY_SETTING
+    SECURITY_SETTING,
+    //分类页设置
+    CATEGORY_PAGE_SETTING
 }

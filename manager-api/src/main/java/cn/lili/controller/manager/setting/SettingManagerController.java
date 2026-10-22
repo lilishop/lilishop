@@ -283,6 +283,10 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new ThemeSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), ThemeSetting.class));
+            case CATEGORY_PAGE_SETTING:
+                return setting == null ?
+                        ResultUtil.data(new CategoryPageSetting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), CategoryPageSetting.class));
             default:
                 throw new ServiceException(ResultCode.SETTING_NOT_TO_SET);
         }
