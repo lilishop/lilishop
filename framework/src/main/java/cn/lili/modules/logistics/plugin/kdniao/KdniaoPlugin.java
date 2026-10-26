@@ -74,7 +74,7 @@ public class KdniaoPlugin implements LogisticsPlugin {
             Map map = JSON.parseObject(result, Map.class);
             return new Traces(logistics.getName(), expNo, (List<Map>) map.get("Traces"));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("快递鸟物流轨迹查询异常", e);
         }
         return null;
     }
@@ -108,7 +108,7 @@ public class KdniaoPlugin implements LogisticsPlugin {
             String result = sendPost(reqURL, params);
             log.error(result);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("快递鸟地图轨迹查询异常", e);
         }
         return null;
     }
@@ -227,7 +227,7 @@ public class KdniaoPlugin implements LogisticsPlugin {
             resultMap.put("logisticCode", orderJson.getString("LogisticCode"));
             return resultMap;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("快递鸟电子面单下单异常", e);
             return null;
         }
     }
@@ -358,7 +358,7 @@ public class KdniaoPlugin implements LogisticsPlugin {
                     in.close();
                 }
             } catch (IOException ex) {
-                ex.printStackTrace();
+                log.error("快递鸟请求关闭资源异常", ex);
             }
         }
         return result.toString();

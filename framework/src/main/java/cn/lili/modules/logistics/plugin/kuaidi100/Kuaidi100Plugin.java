@@ -90,7 +90,7 @@ public class Kuaidi100Plugin implements LogisticsPlugin {
             }
             return new Traces(logistics.getName(), expNo, traces);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("快递100物流轨迹查询异常", e);
         }
         return null;
     }
@@ -116,9 +116,9 @@ public class Kuaidi100Plugin implements LogisticsPlugin {
             HttpResult result = baseClient.execute(queryTrackReq);
 
             QueryTrackMapResp queryTrackMapResp = new Gson().fromJson(result.getBody(), QueryTrackMapResp.class);
-            System.out.println(queryTrackMapResp);
+            log.info("快递100地图轨迹响应：{}", queryTrackMapResp);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("快递100地图轨迹查询异常", e);
         }
         return null;
     }
@@ -223,17 +223,17 @@ public class Kuaidi100Plugin implements LogisticsPlugin {
 
             IBaseClient baseClient = new LabelV2();
             HttpResult result = baseClient.execute(printReq);
-            System.out.println(result.getBody());
+            log.info("快递100电子面单下单响应：{}", result.getBody());
 
 
 
             OrderResult orderResult = new Gson().fromJson(result.getBody(), OrderResult.class);
             log.info("电子面单响应：{}", orderResult);
-            System.out.println("快递单号："+orderResult.getKdComOrderNum());
-            System.out.println("面单短链："+orderResult.getLabel());
+            log.info("快递单号：{}", orderResult.getKdComOrderNum());
+            log.info("面单短链：{}", orderResult.getLabel());
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("快递100电子面单下单异常", e);
         }
         return null;
     }

@@ -2,6 +2,7 @@ package cn.lili.modules.live.util;
 
 import cn.hutool.core.util.ObjectUtil;
 import jodd.util.Base64;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,6 +32,7 @@ import java.util.zip.Deflater;
  *
  * Reference: https://intl.cloud.tencent.com/document/product/1047/34385
  */
+@Slf4j
 public class GenerateUserSig {
 
     /**
@@ -96,7 +98,7 @@ public class GenerateUserSig {
             sigDoc.put("TLS.expire", expire);
             sigDoc.put("TLS.time", currTime);
         } catch (JSONException e) {
-            e.printStackTrace();
+            log.error("生成UserSig写入TLS基础字段失败", e);
         }
 
         String base64UserBuf = null;
@@ -105,7 +107,7 @@ public class GenerateUserSig {
             try {
                 sigDoc.put("TLS.userbuf", base64UserBuf);
             } catch (JSONException e) {
-                e.printStackTrace();
+                log.error("生成UserSig写入userbuf失败", e);
             }
         }
         String sig = hmacsha256(sdkappid, userId, currTime, expire, priKeyContent, base64UserBuf);
@@ -115,7 +117,7 @@ public class GenerateUserSig {
         try {
             sigDoc.put("TLS.sig", sig);
         } catch (JSONException e) {
-            e.printStackTrace();
+            log.error("生成UserSig写入签名失败", e);
         }
         Deflater compressor = new Deflater();
         compressor.setInput(sigDoc.toString().getBytes(Charset.forName("UTF-8")));

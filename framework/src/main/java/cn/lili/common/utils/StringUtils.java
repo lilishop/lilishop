@@ -1,6 +1,7 @@
 package cn.lili.common.utils;
 
 import cn.hutool.core.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -19,6 +20,7 @@ import java.util.regex.Pattern;
  *
  * @author pikachu
  */
+@Slf4j
 public class StringUtils extends StrUtil {
 
     /**
@@ -32,7 +34,7 @@ public class StringUtils extends StrUtil {
         try {
             messageDigest = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException ex) {
-            ex.printStackTrace();
+            log.error("MD5加密错误", ex);
             return null;
         }
         byte[] resultByte = messageDigest.digest(str.getBytes());

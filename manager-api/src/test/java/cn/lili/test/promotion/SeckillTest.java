@@ -11,6 +11,7 @@ import cn.lili.modules.system.entity.dto.SeckillSetting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,7 @@ import java.util.List;
  * @author paulG
  * @since 2020/10/29
  **/
+@Slf4j
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 class SeckillTest {
@@ -47,9 +49,9 @@ class SeckillTest {
     @Test
     void add() {
         Setting setting = settingService.get(SettingEnum.SECKILL_SETTING.name());
-        System.out.println(setting);
+        log.info("{}", setting);
         SeckillSetting seckillSetting = new Gson().fromJson(setting.getSettingValue(), SeckillSetting.class);
-        System.out.println(seckillSetting);
+        log.info("{}", seckillSetting);
         boolean result = true;
         for (int i = 1; i <= SeckillService.PRE_CREATION; i++) {
             Seckill seckill = new Seckill(i, seckillSetting.getHours(), seckillSetting.getSeckillRule());

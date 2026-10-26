@@ -79,14 +79,14 @@ public class HuaweiFilePlugin implements FilePlugin {
             putObjectRequest.setMetadata(objectMetadata);
             obsClient.putObject(putObjectRequest);
         } catch (ObsException obsException) {
-            obsException.printStackTrace();
+            log.error("华为OBS上传文件异常", obsException);
             throw new ServiceException(ResultCode.OSS_EXCEPTION_ERROR);
         } finally {
             try {
                 // 关闭OBS连接
                 obsClient.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("华为OBS关闭连接异常", e);
                 log.error("OBS关闭连接报错！" + e.getMessage());
                 throw new ServiceException(ResultCode.OSS_EXCEPTION_ERROR);
             }

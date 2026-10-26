@@ -25,6 +25,7 @@ import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.member.aop.annotation.PointLogPoint;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.entity.dos.MemberGrade;
+import cn.lili.modules.member.entity.dos.MemberGroupUser;
 import cn.lili.modules.member.entity.dto.*;
 import cn.lili.modules.member.entity.enums.PointTypeEnum;
 import cn.lili.modules.member.entity.enums.QRCodeLoginSessionStatusEnum;
@@ -34,6 +35,7 @@ import cn.lili.modules.member.entity.vo.QRCodeLoginSessionVo;
 import cn.lili.modules.member.entity.vo.QRLoginResultVo;
 import cn.lili.modules.member.mapper.MemberMapper;
 import cn.lili.modules.member.service.MemberGradeService;
+import cn.lili.modules.member.service.MemberGroupUserService;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.member.service.MemberShareRegisterService;
 import cn.lili.modules.member.token.MemberTokenGenerate;
@@ -44,6 +46,7 @@ import cn.lili.modules.store.service.StoreService;
 import cn.lili.mybatis.util.PageUtil;
 import cn.lili.message.MessageSendCallbackBuilder;
 import cn.lili.rocketmq.tags.MemberTagsEnum;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -127,6 +130,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     @Autowired
     @Lazy
     private MemberGradeService memberGradeService;
+
+    @Autowired
+    @Lazy
+    private MemberGroupUserService memberGroupUserService;
 
     @Override
     public Member findByUsername(String userName) {
@@ -527,7 +534,18 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         }
         //按照客户分组查询
         if (CharSequenceUtil.isNotBlank(memberSearchVO.getGroupId())) {
-            queryWrapper.inSql("m.id", "SELECT member_id FROM li_member_group_user WHERE group_id = '" + memberSearchVO.getGroupId() + "' AND delete_flag = false");
+            //先查询分组下的客户ID列表，避免拼接SQL导致注入
+            List<String> groupMemberIds = memberGroupUserService.listObjs(
+                    new LambdaQueryWrapper<MemberGroupUser>()
+                            .eq(MemberGroupUser::getGroupId, memberSearchVO.getGroupId())
+                            .eq(MemberGroupUser::getDeleteFlag, false),
+                    String::valueOf);
+            if (groupMemberIds.isEmpty()) {
+                //分组下没有客户，构造一个永不命中的条件
+                queryWrapper.eq("m.id", -1);
+            } else {
+                queryWrapper.in("m.id", groupMemberIds);
+            }
         }
         queryWrapper.orderByDesc("m.create_time");
         return this.baseMapper.pageByMemberVO(PageUtil.initPage(page), queryWrapper);

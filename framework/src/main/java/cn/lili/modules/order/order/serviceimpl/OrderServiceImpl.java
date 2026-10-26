@@ -354,12 +354,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             ServletOutputStream out = response.getOutputStream();
             workbook.write(out);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("导出订单列表错误", e);
         } finally {
             try {
                 workbook.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("导出订单列表关闭workbook错误", e);
             }
         }
     }
@@ -1397,7 +1397,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public Order updateSellerRemark(String orderSn, String sellerRemark) {
-        Order order = this.getBySn(orderSn);
+        Order order = OperationalJudgment.judgment(this.getBySn(orderSn));
         order.setSellerRemark(sellerRemark);
         this.updateById(order);
         return order;

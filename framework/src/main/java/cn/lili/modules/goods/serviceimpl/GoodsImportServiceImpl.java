@@ -151,7 +151,7 @@ public class GoodsImportServiceImpl implements GoodsImportService {
             try {
                 out.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("下载商品导入模板关闭输出流错误", e);
             }
         }
     }

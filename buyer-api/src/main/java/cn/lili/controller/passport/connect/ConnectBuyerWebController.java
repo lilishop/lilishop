@@ -77,7 +77,6 @@ public class ConnectBuyerWebController {
         try {
             return ResultUtil.data(connectService.unionLoginCallback(authUser, uuid));
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("unionID登录错误", e);
         }
         return null;

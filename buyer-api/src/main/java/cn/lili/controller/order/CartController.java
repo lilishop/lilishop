@@ -218,7 +218,7 @@ public class CartController {
             return ResultUtil.data(cartService.shippingMethodList(way));
         }
         catch (Exception e) {
-            e.printStackTrace();
+            log.error("获取用户可选择的物流方式错误", e);
             return ResultUtil.error(ResultCode.ERROR);
         }
     }

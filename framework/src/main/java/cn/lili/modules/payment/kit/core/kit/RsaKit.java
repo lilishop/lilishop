@@ -57,8 +57,8 @@ public class RsaKit {
         map.put("publicKey", publicKeyStr);
         map.put("privateKey", privateKeyStr);
 
-        System.out.println("公钥\r\n" + publicKeyStr);
-        System.out.println("私钥\r\n" + privateKeyStr);
+        log.debug("公钥\r\n{}", publicKeyStr);
+        log.debug("私钥\r\n{}", privateKeyStr);
         return map;
     }
 
@@ -323,7 +323,7 @@ public class RsaKit {
         } catch (NoSuchAlgorithmException e) {
             throw new Exception("无此算法");
         } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
+            log.error("加载RSA私钥失败", e);
             throw new Exception("私钥非法");
         } catch (NullPointerException e) {
             throw new Exception("私钥数据为空");
@@ -345,20 +345,20 @@ public class RsaKit {
         String content = "我是,I am ";
         String encrypt = encryptByPublicKey(content, publicKey);
         String decrypt = decryptByPrivateKey(encrypt, privateKey);
-        System.out.println("加密之后：" + encrypt);
-        System.out.println("解密之后：" + decrypt);
+        log.debug("加密之后：{}", encrypt);
+        log.debug("解密之后：{}", decrypt);
 
-        System.out.println("======华丽的分割线=========");
+        log.debug("======华丽的分割线=========");
 
         content = "我是,I am ";
         encrypt = encryptByPublicKeyByWx(content, publicKey);
         decrypt = decryptByPrivateKeyByWx(encrypt, privateKey);
-        System.out.println("加密之后：" + encrypt);
-        System.out.println("解密之后：" + decrypt);
+        log.debug("加密之后：{}", encrypt);
+        log.debug("解密之后：{}", decrypt);
 
         //OPPO
         String sign = encryptByPrivateKey(content, privateKey);
-        System.out.println("加密之后：" + sign);
-        System.out.println(checkByPublicKey(content, sign, publicKey));
+        log.debug("加密之后：{}", sign);
+        log.debug("验签结果：{}", checkByPublicKey(content, sign, publicKey));
     }
 }

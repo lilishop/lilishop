@@ -19,6 +19,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -39,6 +40,7 @@ import java.util.List;
  * @since 2020-03-126 18:04:56
  */
 @Service
+@Slf4j
 public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMapper, DistributionCash> implements DistributionCashService {
 
     @Autowired
@@ -91,12 +93,12 @@ public class DistributionCashServiceImpl extends ServiceImpl<DistributionCashMap
             ServletOutputStream out = response.getOutputStream();
             workbook.write(out);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("导出分销提现列表错误", e);
         } finally {
             try {
                 workbook.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("导出分销提现列表关闭workbook错误", e);
             }
         }
     }

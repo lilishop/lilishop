@@ -8,6 +8,7 @@ import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.vo.TradeParams;
 import cn.lili.modules.order.cart.service.CartService;
 import cn.lili.modules.payment.service.PaymentService;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,7 @@ import java.util.List;
  * @author paulG
  * @since 2020/11/14
  **/
+@Slf4j
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 class CartTest {
@@ -39,7 +41,7 @@ class CartTest {
     void getAll() {
         TradeDTO allTradeDTO = cartService.getAllTradeDTO();
         Assertions.assertNotNull(allTradeDTO);
-        System.out.println(JSONUtil.toJsonStr(allTradeDTO));
+        log.info("{}", JSONUtil.toJsonStr(allTradeDTO));
     }
 
     @Test
@@ -60,7 +62,7 @@ class CartTest {
     void getAllCategory() {
         List<CategoryVO> allCategory = categoryService.categoryTree();
         for (CategoryVO categoryVO : allCategory) {
-            System.out.println(categoryVO);
+            log.info("{}", categoryVO);
         }
         Assertions.assertTrue(true);
     }

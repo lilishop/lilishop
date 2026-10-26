@@ -91,7 +91,7 @@ public class TencentSmsPlugin implements SmsPlugin {
             SendSmsResponse res = getClient().SendSms(req);
 
             // 输出json格式的字符串回包
-            System.out.println(SendSmsResponse.toJsonString(res));
+            log.info("腾讯云短信发送响应：{}", SendSmsResponse.toJsonString(res));
 
             // 也可以取出单个值，你可以通过官网接口文档或跳转到response对象的定义处查看返回字段的定义
             // System.out.println(res.getRequestId());
@@ -104,7 +104,7 @@ public class TencentSmsPlugin implements SmsPlugin {
              * 更多错误，可咨询[腾讯云助手](https://tccc.qcloud.com/web/im/index.html#/chat?webAppId=8fa15978f85cb41f7e2ea36920cb3ae1&title=Sms)
              */
         } catch (TencentCloudSDKException tencentCloudSDKException) {
-            tencentCloudSDKException.printStackTrace();
+            log.error("腾讯云短信发送失败", tencentCloudSDKException);
         }
 
     }
@@ -161,7 +161,7 @@ public class TencentSmsPlugin implements SmsPlugin {
             SendSmsResponse res = getClient().SendSms(req);
 
             // 输出json格式的字符串回包
-            System.out.println(SendSmsResponse.toJsonString(res));
+            log.info("腾讯云短信发送响应：{}", SendSmsResponse.toJsonString(res));
 
             // 也可以取出单个值，你可以通过官网接口文档或跳转到response对象的定义处查看返回字段的定义
             // System.out.println(res.getRequestId());
@@ -174,7 +174,7 @@ public class TencentSmsPlugin implements SmsPlugin {
              * 更多错误，可咨询[腾讯云助手](https://tccc.qcloud.com/web/im/index.html#/chat?webAppId=8fa15978f85cb41f7e2ea36920cb3ae1&title=Sms)
              */
         } catch (TencentCloudSDKException tencentCloudSDKException) {
-            tencentCloudSDKException.printStackTrace();
+            log.error("腾讯云短信发送失败", tencentCloudSDKException);
         }
     }
 

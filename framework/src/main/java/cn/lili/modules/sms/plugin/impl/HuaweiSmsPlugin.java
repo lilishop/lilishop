@@ -52,7 +52,7 @@ public class HuaweiSmsPlugin implements SmsPlugin {
         try {
             this.sendSms(signName, mobile, param.values() + "", templateCode);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("华为短信发送失败", e);
         }
 
     }
@@ -62,7 +62,7 @@ public class HuaweiSmsPlugin implements SmsPlugin {
         try {
             this.sendSms(signName, StringUtils.join(mobile, ","), null, templateCode);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("华为短信批量发送失败", e);
         }
     }
 
@@ -138,14 +138,14 @@ public class HuaweiSmsPlugin implements SmsPlugin {
         //请求Body,不携带签名名称时,signature请填null
         String body = buildRequestBody(sender, receiver, templateId, templateParas, statusCallBack, signature);
         if (null == body || body.isEmpty()) {
-            System.out.println("body is null.");
+            log.error("华为短信请求Body为空");
             return;
         }
 
         //请求Headers中的X-WSSE参数值
         String wsseHeader = buildWsseHeader(appKey, appSecret);
         if (null == wsseHeader || wsseHeader.isEmpty()) {
-            System.out.println("wsse header is null.");
+            log.error("华为短信WSSE Header为空");
             return;
         }
 
@@ -201,9 +201,9 @@ public class HuaweiSmsPlugin implements SmsPlugin {
             }
 
             // 打印响应消息实体
-            System.out.println(result.toString());
+            log.info("华为短信响应：{}", result.toString());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("华为短信发送请求异常", e);
         } finally {
             try {
                 if (null != out) {
@@ -216,7 +216,7 @@ public class HuaweiSmsPlugin implements SmsPlugin {
                     in.close();
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("华为短信发送关闭资源异常", e);
             }
         }
     }
@@ -236,7 +236,7 @@ public class HuaweiSmsPlugin implements SmsPlugin {
                                    String statusCallBack, String signature) {
         if (null == sender || null == receiver || null == templateId || sender.isEmpty() || receiver.isEmpty()
                 || templateId.isEmpty()) {
-            System.out.println("buildRequestBody(): sender, receiver or templateId is null.");
+            log.error("华为短信构造请求Body失败：sender、receiver或templateId为空");
             return null;
         }
         Map<String, String> map = new HashMap<String, String>();
@@ -274,7 +274,7 @@ public class HuaweiSmsPlugin implements SmsPlugin {
      */
     static String buildWsseHeader(String appKey, String appSecret) {
         if (null == appKey || null == appSecret || appKey.isEmpty() || appSecret.isEmpty()) {
-            System.out.println("buildWsseHeader(): appKey or appSecret is null.");
+            log.error("华为短信构造WSSE Header失败：appKey或appSecret为空");
             return null;
         }
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -293,7 +293,7 @@ public class HuaweiSmsPlugin implements SmsPlugin {
             md.update((nonce + time + appSecret).getBytes());
             passwordDigest = md.digest();
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            log.error("华为短信密码摘要生成失败", e);
         }
 
         // PasswordDigest

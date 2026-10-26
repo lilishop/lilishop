@@ -1,5 +1,6 @@
 package cn.lili.common.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
 import java.lang.reflect.Field;
@@ -10,6 +11,7 @@ import java.lang.reflect.Method;
  *
  * @author Chopper
  */
+@Slf4j
 public class BeanUtil {
 
     /**
@@ -129,7 +131,7 @@ public class BeanUtil {
 
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("键值对转换为对象错误", e);
         }
         return t;
     }

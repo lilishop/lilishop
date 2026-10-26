@@ -1,5 +1,6 @@
 package cn.lili.common.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
 
@@ -8,6 +9,7 @@ import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
  * 加密解密
  * @author Chopper
  */
+@Slf4j
 public class JasyptUtil {
 
     /**
@@ -55,8 +57,8 @@ public class JasyptUtil {
     public static void main(String[] args){
 
         //加密 若修改了第一个参数加密password记得在配置文件同步修改
-        System.out.println(encryptPwd("jasypt.encryptor.password","123456"));
+        log.debug("{}", encryptPwd("jasypt.encryptor.password","123456"));
         //解密
-        System.out.println(decryptPwd("jasypt.encryptor.password","PYVnAYh+j5C3jkMV1d+myj6JzDaUk7pcfTWUaYsvQdEVkuvIVf7Y0mOU9XkffxT8"));
+        log.debug("{}", decryptPwd("jasypt.encryptor.password","PYVnAYh+j5C3jkMV1d+myj6JzDaUk7pcfTWUaYsvQdEVkuvIVf7Y0mOU9XkffxT8"));
     }
 }

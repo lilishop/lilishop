@@ -10,6 +10,7 @@ import cn.lili.modules.payment.kit.core.enums.RequestMethodEnums;
 import cn.lili.modules.payment.kit.core.enums.SignType;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
@@ -27,6 +28,7 @@ import java.util.Map;
  *
  * @author
  */
+@Slf4j
 public class WxPayKit {
     private static final String FIELD_SIGN = "sign";
     private static final String FIELD_SIGN_TYPE = "sign_type";
@@ -657,7 +659,7 @@ public class WxPayKit {
         //获取平台证书序列号
         X509Certificate certificate = PayKit.getCertificate(inputStream);
         String serialNumber = certificate.getSerialNumber().toString(16).toUpperCase();
-        System.out.println(serialNumber);
+        log.debug("微信平台证书序列号：{}", serialNumber);
         //验证证书序列号
         if (serialNumber.equals(serialNo)) {
             boolean verifySignature = WxPayKit.verifySignature(signature, body, nonce, timestamp, certificate.getPublicKey());

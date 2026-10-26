@@ -12,6 +12,7 @@ import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.modules.promotion.entity.vos.CouponVO;
 import cn.lili.modules.promotion.service.CouponService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,7 @@ import java.util.List;
  * @author paulG
  * @since 2020/10/29
  **/
+@Slf4j
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 class CouponTest {
@@ -161,15 +163,15 @@ class CouponTest {
         pageVo.setPageSize(10);
         IPage<Coupon> couponsByPage = couponService.pageFindAll(queryParam, pageVo);
         Assertions.assertNotNull(couponsByPage);
-        couponsByPage.getRecords().forEach(System.out::println);
+        couponsByPage.getRecords().forEach(coupon -> log.info("{}", coupon));
     }
 
     @Test
     void delete() {
 //       Assertions.assertTrue(couponService.deleteCoupon("1326001296591577088"));
         GoodsStatusEnum goodsStatusEnum = GoodsStatusEnum.DOWN;
-        System.out.println("name::  " + goodsStatusEnum.name());
-        System.out.println("description::  " + goodsStatusEnum.description());
+        log.info("name::  {}", goodsStatusEnum.name());
+        log.info("description::  {}", goodsStatusEnum.description());
         Assertions.assertTrue(true);
     }
 

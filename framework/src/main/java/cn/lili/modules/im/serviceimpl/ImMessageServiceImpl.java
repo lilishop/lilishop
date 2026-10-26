@@ -15,6 +15,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import java.util.Objects;
  *
  * @author Chopper
  */
+@Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -115,7 +117,7 @@ public class ImMessageServiceImpl extends ServiceImpl<ImMessageMapper, ImMessage
                         return 1;
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("IM消息按时间排序异常", e);
                 }
                 return 0;
             }

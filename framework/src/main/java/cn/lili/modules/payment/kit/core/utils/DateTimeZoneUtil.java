@@ -3,6 +3,7 @@ package cn.lili.modules.payment.kit.core.utils;
 import cn.hutool.core.util.StrUtil;
 import com.xkzhangsan.time.converter.DateTimeConverterUtil;
 import com.xkzhangsan.time.formatter.DateTimeFormatterUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -15,6 +16,7 @@ import java.util.Date;
  *
  * @author YunGouOS
  */
+@Slf4j
 public class DateTimeZoneUtil implements Serializable {
 
     private static final long serialVersionUID = -1331008203306650395L;
@@ -77,8 +79,8 @@ public class DateTimeZoneUtil implements Serializable {
     public static void main(String[] args) throws Exception {
         String timeZone = dateToTimeZone(System.currentTimeMillis() + 1000 * 60 * 3);
         String timeZone2 = dateToTimeZone(new Date());
-        System.out.println(timeZone + " " + timeZone2);
+        log.debug("{} {}", timeZone, timeZone2);
         String date = timeZoneDateToStr(timeZone);
-        System.out.println(date);
+        log.debug("{}", date);
     }
 }

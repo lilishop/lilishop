@@ -49,6 +49,6 @@ public class SnowflakeInitiator {
     public static void main(String[] args) {
         SnowFlake.initialize(0, 8);
 
-        System.out.println(SnowFlake.getId());
+        log.debug("雪花ID：{}", SnowFlake.getId());
     }
 }

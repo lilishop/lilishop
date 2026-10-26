@@ -85,7 +85,7 @@ public class UnionPayPlugin implements Payment {
             log.info(result.toString());
             return null;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("银联扫码支付异常", e);
             return null;
         }
     }
@@ -113,7 +113,7 @@ public class UnionPayPlugin implements Payment {
                     .build()
                     .createSign(unionPaymentSetting.getUnionPayKey(), SignType.MD5);
 
-            System.out.println(params);
+            log.info("银联APP支付请求参数：{}", params);
 
             String xmlResult = UnionPayApi.execution(unionPaymentSetting.getUnionPayServerUrl(), params);
             log.info("xmlResult:" + xmlResult);
@@ -131,7 +131,7 @@ public class UnionPayPlugin implements Payment {
             return null;
         } catch (Exception e) {
             log.error(e.getMessage());
-            e.printStackTrace();
+            log.error("银联APP支付异常", e);
             return null;
         }
     }
@@ -171,7 +171,7 @@ public class UnionPayPlugin implements Payment {
                     .build()
                     .createSign(unionPaymentSetting.getUnionPayKey(), SignType.MD5);
 
-            System.out.println(params);
+            log.info("银联JS支付请求参数：{}", params);
 
             String xmlResult = UnionPayApi.execution(unionPaymentSetting.getUnionPayServerUrl(), params);
             log.info("xmlResult:" + xmlResult);
@@ -179,7 +179,7 @@ public class UnionPayPlugin implements Payment {
             log.info(result.toString());
             return null;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("银联JS支付异常", e);
             return null;
         }
     }

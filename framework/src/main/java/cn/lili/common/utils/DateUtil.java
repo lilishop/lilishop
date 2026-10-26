@@ -1,5 +1,7 @@
 package cn.lili.common.utils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
@@ -9,6 +11,7 @@ import java.util.*;
  *
  * @author Chopper
  */
+@Slf4j
 public class DateUtil {
 
     public static final String STANDARD_FORMAT = "yyyy-MM-dd HH:mm:ss";
@@ -156,7 +159,7 @@ public class DateUtil {
             newDate = sdf.parse(date);
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("字符串转换日期错误", ex);
         }
         return newDate;
     }
@@ -249,7 +252,7 @@ public class DateUtil {
         try {
             dateString = sdf.format(date);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("日期转换字符串错误", ex);
         }
         return dateString;
     }

@@ -1,5 +1,7 @@
 package cn.lili.common.utils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -8,6 +10,7 @@ import java.util.regex.Pattern;
  *
  * @author Chopper
  */
+@Slf4j
 public class RegularUtil {
 
 
@@ -101,7 +104,7 @@ public class RegularUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println(replace("selectSELECTINORNOTIN123阿松大asdfa!@#$%^&&*()_+{}[]！？>?").trim());
+        log.debug("{}", replace("selectSELECTINORNOTIN123阿松大asdfa!@#$%^&&*()_+{}[]！？>?").trim());
     }
 
 

@@ -193,7 +193,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             connectAuthUser.setToken(authToken);
             return this.unionLoginCallback(connectAuthUser, true);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("手机号绑定自动登录异常", e);
         }
         return null;
     }

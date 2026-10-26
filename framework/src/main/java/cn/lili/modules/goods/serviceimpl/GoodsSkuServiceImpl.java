@@ -61,6 +61,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
@@ -86,6 +87,7 @@ import java.util.stream.Collectors;
  * @since 2020-02-23 15:18:56
  */
 @Service
+@Slf4j
 public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> implements GoodsSkuService {
 
     /**
@@ -572,12 +574,12 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
             ServletOutputStream out = response.getOutputStream();
             workbook.write(out);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("导出商品库存错误", e);
         } finally {
             try {
                 workbook.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("导出商品库存关闭workbook错误", e);
             }
         }
     }
