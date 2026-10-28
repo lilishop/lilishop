@@ -2,6 +2,7 @@ package cn.lili.modules.promotion.entity.dos;
 
 import cn.lili.modules.promotion.entity.enums.PromotionsApplyStatusEnum;
 import cn.lili.mybatis.BaseEntity;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
@@ -72,6 +73,18 @@ public class SeckillApply extends BaseEntity {
 
     @Schema(description = "商品原始价格")
     private Double originalPrice;
+
+    @Schema(description = "SKU编码")
+    @TableField(exist = false)
+    private String sn;
+
+    @Schema(description = "规格")
+    @TableField(exist = false)
+    private String simpleSpecs;
+
+    @Schema(description = "缩略图")
+    @TableField(exist = false)
+    private String thumbnail;
 
 
 }

@@ -5,6 +5,8 @@ import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.entity.dos.Seckill;
 import cn.lili.modules.promotion.entity.dos.SeckillApply;
 import cn.lili.modules.promotion.entity.dto.search.SeckillSearchParams;
@@ -19,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 店铺端,秒杀活动接口
@@ -35,6 +39,8 @@ public class SeckillStoreController {
     private SeckillService seckillService;
     @Autowired
     private SeckillApplyService seckillApplyService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
 
     @GetMapping
     @Operation(description = "获取秒杀活动列表")
@@ -49,6 +55,19 @@ public class SeckillStoreController {
         String storeId = Objects.requireNonNull(UserContext.getCurrentUser()).getStoreId();
         queryParam.setStoreId(storeId);
         IPage<SeckillApply> seckillPage = seckillApplyService.getSeckillApplyPage(queryParam, pageVo);
+        List<String> skuIds = seckillPage.getRecords().stream().map(SeckillApply::getSkuId).filter(Objects::nonNull).collect(Collectors.toList());
+        if (!skuIds.isEmpty()) {
+            Map<String, GoodsSku> skuMap = goodsSkuService.getGoodsSkuByIdFromCache(skuIds).stream()
+                    .collect(Collectors.toMap(GoodsSku::getId, sku -> sku, (a, b) -> a));
+            seckillPage.getRecords().forEach(item -> {
+                GoodsSku sku = skuMap.get(item.getSkuId());
+                if (sku != null) {
+                    item.setSn(sku.getSn());
+                    item.setSimpleSpecs(sku.getSimpleSpecs());
+                    item.setThumbnail(sku.getThumbnail());
+                }
+            });
+        }
         return ResultUtil.data(seckillPage);
     }
 

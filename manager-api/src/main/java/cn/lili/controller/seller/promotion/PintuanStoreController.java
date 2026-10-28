@@ -10,6 +10,8 @@ import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.goods.entity.dos.GoodsSku;
+import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.entity.dos.Pintuan;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.search.PintuanSearchParams;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -45,6 +48,8 @@ public class PintuanStoreController {
     private PintuanService pintuanService;
     @Autowired
     private PromotionGoodsService promotionGoodsService;
+    @Autowired
+    private GoodsSkuService goodsSkuService;
 
 
     @GetMapping
@@ -75,7 +80,20 @@ public class PintuanStoreController {
         searchParams.setStoreId(currentUser.getStoreId());
         searchParams.setPromotionId(pintuanId);
         searchParams.setPromotionType(PromotionTypeEnum.PINTUAN.name());
-        return ResultUtil.data(promotionGoodsService.pageFindAll(searchParams, pageVo));
+        IPage<PromotionGoods> page = promotionGoodsService.pageFindAll(searchParams, pageVo);
+        List<String> skuIds = page.getRecords().stream().map(PromotionGoods::getSkuId).filter(Objects::nonNull).collect(Collectors.toList());
+        if (!skuIds.isEmpty()) {
+            Map<String, GoodsSku> skuMap = goodsSkuService.getGoodsSkuByIdFromCache(skuIds).stream()
+                    .collect(Collectors.toMap(GoodsSku::getId, sku -> sku, (a, b) -> a));
+            page.getRecords().forEach(item -> {
+                GoodsSku sku = skuMap.get(item.getSkuId());
+                if (sku != null) {
+                    item.setSn(sku.getSn());
+                    item.setSimpleSpecs(sku.getSimpleSpecs());
+                }
+            });
+        }
+        return ResultUtil.data(page);
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json")

@@ -6,6 +6,7 @@ import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.mybatis.BaseEntity;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -104,6 +105,14 @@ public class PromotionGoods extends BaseEntity {
 
     @Schema(description = "范围关联的id")
     private String scopeId;
+
+    @Schema(description = "SKU编码")
+    @TableField(exist = false)
+    private String sn;
+
+    @Schema(description = "规格")
+    @TableField(exist = false)
+    private String simpleSpecs;
 
     public PromotionGoods(GoodsSku sku) {
         if (sku != null) {
