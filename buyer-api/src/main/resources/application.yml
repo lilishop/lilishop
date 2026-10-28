@@ -125,8 +125,8 @@ ignored:
     - /buyer/promotion/seckill/**               # 秒杀营销活动浏览
     - /buyer/promotion/pointsGoods/**           # 积分商城商品浏览
     - /buyer/promotion/coupon                   # 领券中心公开优惠券列表
-    - /buyer/member/evaluation/*/goodsEvaluation# 商品评价列表公开查看
-    - /buyer/member/evaluation/*/evaluationNumber# 商品评价数量统计
+    - /buyer/member/evaluation/*/goodsEvaluation # 商品评价列表公开查看
+    - /buyer/member/evaluation/*/evaluationNumber # 商品评价数量统计
     - /buyer/other/appVersion/**                # App 版本检测与热更新检查
     - /buyer/broadcast/studio/**                # 小程序直播组件数据
     - /buyer/distribution/distribution/recruit/page    # 分销招募宣传页
