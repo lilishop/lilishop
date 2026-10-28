@@ -45,4 +45,13 @@ public class BaseSetting implements Serializable {
 
     @Schema(description = "wap站点地址")
     private String staticPageWapAddress;
+
+    @Schema(description = "公司名称")
+    private String companyName;
+
+    @Schema(description = "公司链接")
+    private String companyUrl;
+
+    @Schema(description = "官网地址")
+    private String website;
 }

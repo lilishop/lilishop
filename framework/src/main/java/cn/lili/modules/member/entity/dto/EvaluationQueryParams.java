@@ -51,6 +51,9 @@ public class EvaluationQueryParams extends PageVO {
     @Schema(description = "是否有图")
     private String haveImage;
 
+    @Schema(description = "回复状态")
+    private Boolean replyStatus;
+
     @Schema(description = "评论日期--开始时间")
     private String startTime;
 
@@ -94,6 +97,9 @@ public class EvaluationQueryParams extends PageVO {
         }
         if (CharSequenceUtil.isNotEmpty(haveImage)) {
             queryWrapper.eq("have_image", haveImage);
+        }
+        if (replyStatus != null) {
+            queryWrapper.eq("reply_status", replyStatus);
         }
         if (CharSequenceUtil.isNotEmpty(status)) {
             queryWrapper.eq("status", status);

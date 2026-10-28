@@ -22,8 +22,17 @@ public class MemberEvaluationListVO {
     @Schema(description = "客户名称")
     private String memberName;
 
+    @Schema(description = "客户头像")
+    private String memberProfile;
+
     @Schema(description = "商品名称")
     private String goodsName;
+
+    @Schema(description = "商品图片")
+    private String goodsImage;
+
+    @Schema(description = "订单号")
+    private String orderNo;
 
     @Schema(description = "商品ID")
     private String goodsId;
