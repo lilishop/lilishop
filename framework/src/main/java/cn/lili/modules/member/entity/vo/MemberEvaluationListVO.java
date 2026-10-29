@@ -19,6 +19,18 @@ public class MemberEvaluationListVO {
     @Schema(description = "评论ID")
     private String id;
 
+    @Schema(description = "客户ID")
+    private String memberId;
+
+    @Schema(description = "店铺ID")
+    private String storeId;
+
+    @Schema(description = "店铺名称")
+    private String storeName;
+
+    @Schema(description = "评价图片")
+    private String images;
+
     @Schema(description = "客户名称")
     private String memberName;
 
