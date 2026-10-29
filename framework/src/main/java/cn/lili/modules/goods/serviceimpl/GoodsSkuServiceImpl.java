@@ -286,6 +286,9 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         Map<String, Object> map = new HashMap<>(16);
         // 获取商品VO
         GoodsVO goodsVO = goodsService.getGoodsVO(goodsId);
+        if (goodsVO == null) {
+            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+        }
         // 如果skuid为空，则使用商品VO中sku信息获取
         if (CharSequenceUtil.isEmpty(skuId) || "undefined".equals(skuId)) {
             skuId = goodsVO.getSkuList().get(0).getId();
@@ -293,7 +296,7 @@ public class GoodsSkuServiceImpl extends ServiceImpl<GoodsSkuMapper, GoodsSku> i
         // 从缓存拿商品Sku
         GoodsSku goodsSku = this.getGoodsSkuByIdFromCache(skuId);
         // 如果使用商品ID无法查询SKU则返回错误（读接口不触发促销清理，见 GoodsServiceImpl.notifyGoodsDelete）
-        if (goodsVO == null || goodsSku == null) {
+        if (goodsSku == null) {
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
 

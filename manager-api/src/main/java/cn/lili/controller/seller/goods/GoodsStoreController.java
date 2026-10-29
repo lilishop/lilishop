@@ -129,8 +129,12 @@ public class GoodsStoreController {
     @Operation(summary = "通过id获取")
     @GetMapping("/get/{id}")
     public ResultMessage<GoodsVO> get(@PathVariable String id) {
-        GoodsVO goods = OperationalJudgment.judgment(goodsService.getGoodsVO(id));
-        return ResultUtil.data(goods);
+        GoodsVO goods = goodsService.getGoodsVO(id);
+        if (goods == null) {
+            log.warn("商品不存在 goodsId={}", id);
+            return ResultUtil.error(ResultCode.GOODS_NOT_EXIST);
+        }
+        return ResultUtil.data(OperationalJudgment.judgment(goods));
     }
 
     @Operation(summary = "新增商品")

@@ -136,6 +136,9 @@ public class GoodsManagerController {
     @GetMapping("/get/{id}")
     public ResultMessage<GoodsVO> get(@PathVariable String id) {
         GoodsVO goods = goodsService.getGoodsVO(id);
+        if (goods == null) {
+            return ResultUtil.error(ResultCode.GOODS_NOT_EXIST);
+        }
         return ResultUtil.data(goods);
     }
 

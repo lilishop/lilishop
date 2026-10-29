@@ -70,7 +70,7 @@ public interface GoodsService extends IService<Goods> {
      * 查询商品VO
      *
      * @param goodsId 商品id
-     * @return 商品VO
+     * @return 商品VO，商品不存在时返回null，由调用方决定如何处理
      */
     GoodsVO getGoodsVO(String goodsId);
 

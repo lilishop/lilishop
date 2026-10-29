@@ -70,7 +70,12 @@ public class GoodsBuyerController {
     @Parameter(name = "goodsId", description = "商品ID", required = true)
     @GetMapping("/get/{goodsId}")
     public ResultMessage<GoodsVO> get(@NotNull(message = "商品ID不能为空") @PathVariable("goodsId") String id) {
-        return ResultUtil.data(goodsService.getGoodsVO(id));
+        GoodsVO goodsVO = goodsService.getGoodsVO(id);
+        if (goodsVO == null) {
+            log.warn("商品不存在 goodsId={}", id);
+            return ResultUtil.error(ResultCode.GOODS_NOT_EXIST);
+        }
+        return ResultUtil.data(goodsVO);
     }
 
     @Operation(summary = "通过id获取商品信息")
@@ -87,11 +92,10 @@ public class GoodsBuyerController {
             Map<String, Object> map = goodsSkuService.getGoodsSkuDetail(goodsId, skuId);
             return ResultUtil.data(map);
         } catch (ServiceException se) {
-            log.info("商品详情不可用 goodsId={}, skuId={}, code={}, msg={}",
-                    goodsId, skuId,
-                    se.getResultCode() != null ? se.getResultCode() : ResultCode.ERROR,
-                    se.getMsg());
-            throw se;
+            //商品下架/不存在等预期业务异常：记录一行日志后直接返回错误结果，不再向上抛出堆栈
+            ResultCode resultCode = se.getResultCode() != null ? se.getResultCode() : ResultCode.ERROR;
+            log.warn("商品详情不可用 goodsId={}, skuId={}, code={}, msg={}", goodsId, skuId, resultCode, se.getMsg());
+            return ResultUtil.error(resultCode);
         } catch (Exception e) {
             log.error(ResultCode.GOODS_ERROR.message(), e);
             return ResultUtil.error(ResultCode.GOODS_ERROR);

@@ -299,8 +299,7 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         //查询商品信息
         Goods goods = this.getById(goodsId);
         if (goods == null) {
-            log.error("商品ID为" + goodsId + "的商品不存在");
-            throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
+            return null;
         }
         goodsVO = new GoodsVO();
         //赋值
@@ -827,7 +826,6 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     private Goods checkExist(String goodsId) {
         Goods goods = getById(goodsId);
         if (goods == null) {
-            log.error("商品ID为" + goodsId + "的商品不存在");
             throw new ServiceException(ResultCode.GOODS_NOT_EXIST);
         }
         return goods;
