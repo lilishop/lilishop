@@ -82,6 +82,7 @@ public class MemberWalletBuyerController {
         withdrawalSettingVO.setMinPrice(withdrawalSetting.getMinPrice());
         withdrawalSettingVO.setFee(withdrawalSetting.getFee());
         withdrawalSettingVO.setType(withdrawalSetting.getType());
+        withdrawalSettingVO.setWithdrawRule(withdrawalSetting.getWithdrawRule());
         return ResultUtil.data(withdrawalSettingVO);
     }
 

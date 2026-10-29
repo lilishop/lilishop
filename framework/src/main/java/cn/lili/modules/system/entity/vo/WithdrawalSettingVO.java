@@ -28,4 +28,10 @@ public class WithdrawalSettingVO {
     @Schema(description = "提现类型 WECHAT、ALI")
     private String type;
 
+    /**
+     * 提现规则说明
+     */
+    @Schema(description = "提现规则说明")
+    private String withdrawRule;
+
 }

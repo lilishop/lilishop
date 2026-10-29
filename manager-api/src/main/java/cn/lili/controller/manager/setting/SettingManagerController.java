@@ -122,6 +122,7 @@ public class SettingManagerController {
         setOrRemove(json, "wechatAppIdSource", toTextOrNull(json.get("wechatAppIdSource")));
         setOrRemove(json, "apply", toBooleanOrNull(json.get("apply")));
         setOrRemove(json, "type", toTextOrNull(json.get("type")));
+        setOrRemove(json, "withdrawRule", toTextOrNull(json.get("withdrawRule")));
         WithdrawalSetting withdrawalSetting = json.toBean(WithdrawalSetting.class);
         return JSONUtil.toJsonStr(withdrawalSetting);
     }

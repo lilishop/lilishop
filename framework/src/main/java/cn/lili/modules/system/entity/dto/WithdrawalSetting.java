@@ -39,4 +39,9 @@ public class WithdrawalSetting implements Serializable {
      * 微信APPID渠道
      */
     private String wechatAppIdSource;
+
+    /**
+     * 提现规则说明
+     */
+    private String withdrawRule;
 }
