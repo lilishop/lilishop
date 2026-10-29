@@ -4,6 +4,8 @@ import cn.lili.modules.order.aftersale.entity.dos.AfterSaleReason;
 import cn.lili.modules.order.aftersale.mapper.AfterSaleReasonMapper;
 import cn.lili.modules.order.aftersale.service.AfterSaleReasonService;
 import cn.lili.mybatis.util.PageUtil;
+import cn.lili.common.sensitive.SensitiveFilterScene;
+import cn.lili.common.sensitive.SensitiveWordsHelper;
 import cn.lili.common.vo.PageVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -25,6 +27,13 @@ public class AfterSaleReasonServiceImpl extends ServiceImpl<AfterSaleReasonMappe
 
 
     @Override
+    public boolean save(AfterSaleReason entity) {
+        //过滤售后原因敏感词
+        entity.setReason(SensitiveWordsHelper.filter(SensitiveFilterScene.REASON, entity.getReason()));
+        return super.save(entity);
+    }
+
+    @Override
     public List<AfterSaleReason> afterSaleReasonList(String serviceType) {
         LambdaQueryWrapper<AfterSaleReason> lambdaQueryWrapper = Wrappers.lambdaQuery();
         lambdaQueryWrapper.eq(AfterSaleReason::getServiceType, serviceType);
@@ -40,6 +49,8 @@ public class AfterSaleReasonServiceImpl extends ServiceImpl<AfterSaleReasonMappe
 
     @Override
     public AfterSaleReason editAfterSaleReason(AfterSaleReason afterSaleReason) {
+        //过滤售后原因敏感词
+        afterSaleReason.setReason(SensitiveWordsHelper.filter(SensitiveFilterScene.REASON, afterSaleReason.getReason()));
         LambdaUpdateWrapper<AfterSaleReason> lambdaQueryWrapper = Wrappers.lambdaUpdate();
         lambdaQueryWrapper.eq(AfterSaleReason::getId, afterSaleReason.getId());
         lambdaQueryWrapper.set(AfterSaleReason::getReason, afterSaleReason.getReason());

@@ -7,6 +7,8 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.event.TransactionCommitSendMQEvent;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.common.sensitive.SensitiveFilterScene;
+import cn.lili.common.sensitive.SensitiveWordsHelper;
 import cn.lili.modules.goods.entity.dos.Category;
 import cn.lili.modules.goods.entity.dto.CategorySearchParams;
 import cn.lili.modules.goods.entity.vos.CategoryVO;
@@ -248,6 +250,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean saveCategory(Category category) {
+        //过滤分类名称敏感词
+        category.setName(SensitiveWordsHelper.filter(SensitiveFilterScene.GOODS, category.getName()));
         //判断分类佣金是否正确
         if (category.getCommissionRate() < 0) {
             throw new ServiceException(ResultCode.CATEGORY_COMMISSION_RATE_ERROR);
@@ -266,6 +270,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @CacheEvict(key = "#category.id")
     @Transactional(rollbackFor = Exception.class)
     public void updateCategory(Category category) {
+        //过滤分类名称敏感词
+        category.setName(SensitiveWordsHelper.filter(SensitiveFilterScene.GOODS, category.getName()));
         //判断分类佣金是否正确
         if (category.getCommissionRate() < 0) {
             throw new ServiceException(ResultCode.CATEGORY_COMMISSION_RATE_ERROR);

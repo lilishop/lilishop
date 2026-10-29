@@ -10,6 +10,8 @@ import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.OperationalJudgment;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.sensitive.SensitiveFilterScene;
+import cn.lili.common.sensitive.SensitiveWordsHelper;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
@@ -246,6 +248,8 @@ public class AfterSaleServiceImpl extends ServiceImpl<AfterSaleMapper, AfterSale
     @Transactional(rollbackFor = Exception.class)
     public AfterSale saveAfterSale(AfterSaleDTO afterSaleDTO) {
 
+        //过滤售后原因敏感词
+        afterSaleDTO.setReason(SensitiveWordsHelper.filter(SensitiveFilterScene.REASON, afterSaleDTO.getReason()));
         //检查当前订单是否可申请售后
         this.checkAfterSaleType(afterSaleDTO);
 

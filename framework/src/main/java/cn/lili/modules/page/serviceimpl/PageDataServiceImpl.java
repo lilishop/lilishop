@@ -9,6 +9,8 @@ import cn.lili.common.properties.SystemSettingProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
+import cn.lili.common.sensitive.SensitiveFilterScene;
+import cn.lili.common.sensitive.SensitiveWordsHelper;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.page.entity.dos.PageData;
 import cn.lili.modules.page.entity.dto.PageDataDTO;
@@ -66,6 +68,9 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public PageData addPageData(PageData pageData) {
+        //过滤楼层装修敏感词
+        pageData.setName(SensitiveWordsHelper.filter(SensitiveFilterScene.DECORATION, pageData.getName()));
+        pageData.setPageData(SensitiveWordsHelper.filterJson(SensitiveFilterScene.DECORATION, pageData.getPageData()));
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         //演示站点判定
         if (Boolean.TRUE.equals(systemSettingProperties.getDemoSite()) && (pageData.getPageShow().equals(SwitchEnum.OPEN.name()) && pageData.getPageType().equals(PageEnum.INDEX.name()))) {
@@ -92,6 +97,9 @@ public class PageDataServiceImpl extends ServiceImpl<PageDataMapper, PageData> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public PageData updatePageData(PageData pageData) {
+        //过滤楼层装修敏感词
+        pageData.setName(SensitiveWordsHelper.filter(SensitiveFilterScene.DECORATION, pageData.getName()));
+        pageData.setPageData(SensitiveWordsHelper.filterJson(SensitiveFilterScene.DECORATION, pageData.getPageData()));
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         //如果页面为发布，则关闭其他页面，开启此页面
         if (pageData.getPageShow() != null && pageData.getPageShow().equals(SwitchEnum.OPEN.name())) {

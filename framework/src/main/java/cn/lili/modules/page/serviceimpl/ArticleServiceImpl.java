@@ -4,6 +4,8 @@ package cn.lili.modules.page.serviceimpl;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.sensitive.SensitiveFilterScene;
+import cn.lili.common.sensitive.SensitiveWordsHelper;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.modules.page.entity.dos.Article;
 import cn.lili.modules.page.entity.dto.ArticleSearchParams;
@@ -32,6 +34,14 @@ import java.util.List;
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
 
     @Override
+    public boolean save(Article entity) {
+        //过滤文章敏感词
+        entity.setTitle(SensitiveWordsHelper.filter(SensitiveFilterScene.ARTICLE, entity.getTitle()));
+        entity.setContent(SensitiveWordsHelper.filter(SensitiveFilterScene.ARTICLE, entity.getContent()));
+        return super.save(entity);
+    }
+
+    @Override
     public IPage<ArticleVO> managerArticlePage(ArticleSearchParams articleSearchParams) {
         articleSearchParams.setSort("a.sort");
         return this.baseMapper.getArticleList(PageUtil.initPage(articleSearchParams), articleSearchParams.queryWrapper());
@@ -56,6 +66,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Override
     public Article updateArticle(Article article) {
+        //过滤文章敏感词
+        article.setTitle(SensitiveWordsHelper.filter(SensitiveFilterScene.ARTICLE, article.getTitle()));
+        article.setContent(SensitiveWordsHelper.filter(SensitiveFilterScene.ARTICLE, article.getContent()));
         Article oldArticle = this.getById(article.getId());
         BeanUtil.copyProperties(article, oldArticle);
         this.updateById(oldArticle);

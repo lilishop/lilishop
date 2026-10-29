@@ -10,6 +10,8 @@ import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
+import cn.lili.common.sensitive.SensitiveFilterScene;
+import cn.lili.common.sensitive.SensitiveWordsHelper;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
@@ -282,6 +284,11 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
 
     @Override
     public boolean applyFirstStep(StoreCompanyDTO storeCompanyDTO) {
+        //过滤店铺公司信息敏感词
+        storeCompanyDTO.setCompanyName(SensitiveWordsHelper.filter(SensitiveFilterScene.STORE, storeCompanyDTO.getCompanyName()));
+        storeCompanyDTO.setCompanyAddress(SensitiveWordsHelper.filter(SensitiveFilterScene.STORE, storeCompanyDTO.getCompanyAddress()));
+        storeCompanyDTO.setScope(SensitiveWordsHelper.filter(SensitiveFilterScene.STORE, storeCompanyDTO.getScope()));
+        storeCompanyDTO.setLegalName(SensitiveWordsHelper.filter(SensitiveFilterScene.STORE, storeCompanyDTO.getLegalName()));
         //获取当前操作的店铺
         Store store = getStoreByMember();
 
@@ -322,6 +329,10 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
     @Override
     public boolean applySecondStep(StoreBankDTO storeBankDTO) {
 
+        //过滤店铺银行信息敏感词
+        storeBankDTO.setSettlementBankAccountName(SensitiveWordsHelper.filter(SensitiveFilterScene.STORE, storeBankDTO.getSettlementBankAccountName()));
+        storeBankDTO.setSettlementBankBranchName(SensitiveWordsHelper.filter(SensitiveFilterScene.STORE, storeBankDTO.getSettlementBankBranchName()));
+        storeBankDTO.setSettlementBankJointName(SensitiveWordsHelper.filter(SensitiveFilterScene.STORE, storeBankDTO.getSettlementBankJointName()));
         //获取当前操作的店铺
         Store store = getStoreByMember();
         //校验店铺状态
@@ -334,6 +345,8 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store> implements
 
     @Override
     public boolean applyThirdStep(StoreOtherInfoDTO storeOtherInfoDTO) {
+        //过滤店铺名称敏感词
+        storeOtherInfoDTO.setStoreName(SensitiveWordsHelper.filter(SensitiveFilterScene.STORE, storeOtherInfoDTO.getStoreName()));
         //获取当前操作的店铺
         Store store = getStoreByMember();
 

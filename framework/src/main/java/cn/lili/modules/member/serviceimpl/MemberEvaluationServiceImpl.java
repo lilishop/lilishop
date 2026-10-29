@@ -11,7 +11,8 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
-import cn.lili.common.sensitive.SensitiveWordsFilter;
+import cn.lili.common.sensitive.SensitiveFilterScene;
+import cn.lili.common.sensitive.SensitiveWordsHelper;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.Member;
@@ -142,7 +143,7 @@ public class MemberEvaluationServiceImpl extends ServiceImpl<MemberEvaluationMap
         //新增用户评价
         MemberEvaluation memberEvaluation = new MemberEvaluation(memberEvaluationDTO, goodsSku, member, order);
         //过滤商品咨询敏感词
-        memberEvaluation.setContent(SensitiveWordsFilter.filter(memberEvaluation.getContent()));
+        memberEvaluation.setContent(SensitiveWordsHelper.filter(SensitiveFilterScene.EVALUATION, memberEvaluation.getContent()));
         //添加评价
         this.save(memberEvaluation);
 

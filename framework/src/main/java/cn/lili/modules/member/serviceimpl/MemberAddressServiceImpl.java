@@ -3,6 +3,8 @@ package cn.lili.modules.member.serviceimpl;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
+import cn.lili.common.sensitive.SensitiveFilterScene;
+import cn.lili.common.sensitive.SensitiveWordsHelper;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.member.entity.enums.ExperienceRuleEnum;
 import cn.lili.modules.member.entity.dos.MemberAddress;
@@ -70,6 +72,10 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
     @Override
     @Transactional(rollbackFor = Exception.class)
     public MemberAddress saveMemberAddress(MemberAddress memberAddress) {
+        //过滤收货地址敏感词
+        memberAddress.setName(SensitiveWordsHelper.filter(SensitiveFilterScene.MEMBER, memberAddress.getName()));
+        memberAddress.setDetail(SensitiveWordsHelper.filter(SensitiveFilterScene.MEMBER, memberAddress.getDetail()));
+        memberAddress.setAlias(SensitiveWordsHelper.filter(SensitiveFilterScene.MEMBER, memberAddress.getAlias()));
         //判断当前地址是否为默认地址，如果为默认需要将其他的地址修改为非默认
         removeDefaultAddress(memberAddress);
         //添加客户地址
@@ -82,6 +88,10 @@ public class MemberAddressServiceImpl extends ServiceImpl<MemberAddressMapper, M
     @Override
     @Transactional(rollbackFor = Exception.class)
     public MemberAddress updateMemberAddress(MemberAddress memberAddress) {
+        //过滤收货地址敏感词
+        memberAddress.setName(SensitiveWordsHelper.filter(SensitiveFilterScene.MEMBER, memberAddress.getName()));
+        memberAddress.setDetail(SensitiveWordsHelper.filter(SensitiveFilterScene.MEMBER, memberAddress.getDetail()));
+        memberAddress.setAlias(SensitiveWordsHelper.filter(SensitiveFilterScene.MEMBER, memberAddress.getAlias()));
         MemberAddress originalMemberAddress = this.getMemberAddress(memberAddress.getId());
         if (originalMemberAddress != null) {
             if (memberAddress.getIsDefault() == null) {

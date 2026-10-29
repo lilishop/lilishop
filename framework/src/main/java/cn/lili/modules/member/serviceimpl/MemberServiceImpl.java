@@ -16,7 +16,8 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
 import cn.lili.common.security.token.Token;
-import cn.lili.common.sensitive.SensitiveWordsFilter;
+import cn.lili.common.sensitive.SensitiveFilterScene;
+import cn.lili.common.sensitive.SensitiveWordsHelper;
 import cn.lili.common.utils.*;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.connect.entity.Connect;
@@ -343,6 +344,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Override
     public Member editOwn(MemberEditDTO memberEditDTO) {
+        //过滤客户昵称敏感词
+        if (CharSequenceUtil.isNotBlank(memberEditDTO.getNickName())) {
+            memberEditDTO.setNickName(SensitiveWordsHelper.filter(SensitiveFilterScene.MEMBER, memberEditDTO.getNickName()));
+        }
         //查询客户信息
         Member member = this.findByUsername(Objects.requireNonNull(UserContext.getCurrentUser()).getUsername());
         //传递修改客户信息
@@ -498,7 +503,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public Member updateMember(ManagerMemberEditDTO managerMemberEditDTO) {
         //过滤客户昵称敏感词
         if (CharSequenceUtil.isNotBlank(managerMemberEditDTO.getNickName())) {
-            managerMemberEditDTO.setNickName(SensitiveWordsFilter.filter(managerMemberEditDTO.getNickName()));
+            managerMemberEditDTO.setNickName(SensitiveWordsHelper.filter(SensitiveFilterScene.MEMBER, managerMemberEditDTO.getNickName()));
         }
         //如果密码不为空则加密密码
         if (CharSequenceUtil.isNotBlank(managerMemberEditDTO.getPassword())) {

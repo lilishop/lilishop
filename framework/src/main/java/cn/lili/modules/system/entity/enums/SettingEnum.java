@@ -77,5 +77,7 @@ public enum SettingEnum {
     //安全设置
     SECURITY_SETTING,
     //分类页设置
-    CATEGORY_PAGE_SETTING
+    CATEGORY_PAGE_SETTING,
+    //敏感词过滤设置
+    SENSITIVE_WORDS_SETTING,
 }

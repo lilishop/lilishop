@@ -8,8 +8,11 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.event.TransactionCommitSendMQEvent;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.common.sensitive.SensitiveFilterScene;
+import cn.lili.common.sensitive.SensitiveWordsHelper;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.BasePromotions;
+import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import cn.lili.modules.promotion.entity.dto.search.BasePromotionsSearchParams;
 import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
@@ -71,6 +74,8 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public boolean savePromotions(T promotions) {
+        //过滤促销名称敏感词
+        filterPromotionsSensitiveWords(promotions);
         this.initPromotion(promotions);
         this.checkPromotions(promotions);
         boolean save = this.save(promotions);
@@ -95,6 +100,8 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public boolean updatePromotions(T promotions) {
+        //过滤促销名称敏感词
+        filterPromotionsSensitiveWords(promotions);
         this.checkStatus(promotions);
         this.checkPromotions(promotions);
         boolean save = this.saveOrUpdate(promotions);
@@ -102,6 +109,20 @@ public abstract class AbstractPromotionsServiceImpl<M extends BaseMapper<T>, T e
             this.updateGoodsIndex(promotions);
         }
         return save;
+    }
+
+    /**
+     * 过滤促销名称敏感词
+     * 优惠券额外过滤优惠券名称
+     *
+     * @param promotions 促销信息
+     */
+    protected void filterPromotionsSensitiveWords(BasePromotions promotions) {
+        promotions.setPromotionName(SensitiveWordsHelper.filter(SensitiveFilterScene.PROMOTION, promotions.getPromotionName()));
+        if (promotions instanceof Coupon) {
+            Coupon coupon = (Coupon) promotions;
+            coupon.setCouponName(SensitiveWordsHelper.filter(SensitiveFilterScene.PROMOTION, coupon.getCouponName()));
+        }
     }
 
     /**

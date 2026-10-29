@@ -4,6 +4,8 @@ import cn.lili.cache.Cache;
 import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.sensitive.SensitiveFilterScene;
+import cn.lili.common.sensitive.SensitiveWordsHelper;
 import cn.lili.modules.page.entity.dos.Article;
 import cn.lili.modules.page.entity.dos.ArticleCategory;
 import cn.lili.modules.page.entity.enums.ArticleCategoryEnum;
@@ -53,6 +55,8 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ArticleCategory saveArticleCategory(ArticleCategory articleCategory) {
+        //过滤文章分类名称敏感词
+        articleCategory.setArticleCategoryName(SensitiveWordsHelper.filter(SensitiveFilterScene.ARTICLE, articleCategory.getArticleCategoryName()));
         //非顶级分类
         if (articleCategory.getParentId() != null && !parentId.equals(articleCategory.getParentId())) {
             ArticleCategory parent = this.getById(articleCategory.getParentId());
@@ -73,6 +77,8 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
 
     @Override
     public ArticleCategory updateArticleCategory(ArticleCategory articleCategory) {
+        //过滤文章分类名称敏感词
+        articleCategory.setArticleCategoryName(SensitiveWordsHelper.filter(SensitiveFilterScene.ARTICLE, articleCategory.getArticleCategoryName()));
         //非顶级分类校验是否存在
         if (!parentId.equals(articleCategory.getParentId())) {
             ArticleCategory parent = this.getById(articleCategory.getParentId());

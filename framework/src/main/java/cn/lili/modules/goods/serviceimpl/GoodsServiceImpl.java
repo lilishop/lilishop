@@ -19,9 +19,12 @@ import cn.lili.common.properties.RocketmqCustomProperties;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.security.enums.UserEnums;
+import cn.lili.common.sensitive.SensitiveFilterScene;
+import cn.lili.common.sensitive.SensitiveWordsHelper;
 import cn.lili.modules.appointment.service.AppointmentService;
 import cn.lili.modules.goods.entity.dos.*;
 import cn.lili.modules.goods.entity.dto.GoodsOperationDTO;
+import cn.lili.modules.goods.entity.dto.GoodsParamsItemDTO;
 import cn.lili.modules.goods.entity.dto.GoodsSearchParams;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
 import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
@@ -182,6 +185,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Transactional(rollbackFor = Exception.class)
     @SystemLogPoint(description = "添加商品", customerLog = "'新增商品名称:['+#goodsOperationDTO.goodsName+']'")
     public String addGoods(GoodsOperationDTO goodsOperationDTO) {
+        //过滤商品敏感词
+        filterGoodsSensitiveWords(goodsOperationDTO);
         Goods goods = new Goods(goodsOperationDTO);
         //SPU编码：优先使用前端进入发布页时生成并提交的值，为空则后端兜底生成
         if (CharSequenceUtil.isBlank(goods.getSpuSn())) {
@@ -234,6 +239,8 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Transactional(rollbackFor = Exception.class)
     @SystemLogPoint(description = "修改商品", customerLog = "'操作的商品ID:['+#goodsId+']'")
     public void editGoods(GoodsOperationDTO goodsOperationDTO, String goodsId) {
+        //过滤商品敏感词
+        filterGoodsSensitiveWords(goodsOperationDTO);
         Goods goods = new Goods(goodsOperationDTO);
         goods.setId(goodsId);
         //检查商品信息
@@ -286,6 +293,24 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
             appointmentService.syncGoodsExtFromPublish(goodsId, goodsOperationDTO);
         }
         cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
+    }
+
+    /**
+     * 过滤商品敏感词
+     *
+     * @param goodsOperationDTO 商品操作DTO
+     */
+    private void filterGoodsSensitiveWords(GoodsOperationDTO goodsOperationDTO) {
+        goodsOperationDTO.setGoodsName(SensitiveWordsHelper.filter(SensitiveFilterScene.GOODS, goodsOperationDTO.getGoodsName()));
+        goodsOperationDTO.setSellingPoint(SensitiveWordsHelper.filter(SensitiveFilterScene.GOODS, goodsOperationDTO.getSellingPoint()));
+        goodsOperationDTO.setIntro(SensitiveWordsHelper.filter(SensitiveFilterScene.GOODS, goodsOperationDTO.getIntro()));
+        goodsOperationDTO.setMobileIntro(SensitiveWordsHelper.filter(SensitiveFilterScene.GOODS, goodsOperationDTO.getMobileIntro()));
+        if (CollUtil.isNotEmpty(goodsOperationDTO.getGoodsParamsDTOList())) {
+            for (GoodsParamsItemDTO goodsParamsItemDTO : goodsOperationDTO.getGoodsParamsDTOList()) {
+                goodsParamsItemDTO.setParamName(SensitiveWordsHelper.filter(SensitiveFilterScene.GOODS, goodsParamsItemDTO.getParamName()));
+                goodsParamsItemDTO.setParamValue(SensitiveWordsHelper.filter(SensitiveFilterScene.GOODS, goodsParamsItemDTO.getParamValue()));
+            }
+        }
     }
 
 
