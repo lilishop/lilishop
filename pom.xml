@@ -18,7 +18,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <revision>4.3</revision>
+        <revision>5.0.2</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <skipTests>true</skipTests>
