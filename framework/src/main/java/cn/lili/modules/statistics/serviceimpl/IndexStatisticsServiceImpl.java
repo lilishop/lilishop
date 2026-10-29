@@ -13,9 +13,6 @@ import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.order.order.entity.enums.FlowTypeEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import cn.lili.modules.order.trade.entity.enums.AfterSaleTypeEnum;
-import cn.lili.modules.procurement.entity.dos.ProcurementOrder;
-import cn.lili.modules.procurement.entity.enums.ProcurementStatusEnum;
-import cn.lili.modules.procurement.mapper.ProcurementOrderMapper;
 import cn.lili.modules.statistics.entity.dto.GoodsStatisticsQueryParam;
 import cn.lili.modules.statistics.entity.dto.StatisticsQueryParam;
 import cn.lili.modules.statistics.entity.enums.SearchTypeEnum;
@@ -24,6 +21,10 @@ import cn.lili.modules.statistics.mapper.MemberStatisticsMapper;
 import cn.lili.modules.statistics.service.*;
 import cn.lili.modules.statistics.util.StatisticsDateUtil;
 import cn.lili.modules.store.entity.enums.BillStatusEnum;
+import cn.lili.modules.wallet.entity.dos.MemberWithdrawApply;
+import cn.lili.modules.wallet.entity.enums.WithdrawStatusEnum;
+import cn.lili.modules.wallet.mapper.MemberWithdrawApplyMapper;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -115,10 +116,11 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
     @Autowired
     private AppointmentWorkOrderMapper appointmentWorkOrderMapper;
     /**
-     * 采购单
+     * 会员提现申请
      */
     @Autowired
-    private ProcurementOrderMapper procurementOrderMapper;
+    private MemberWithdrawApplyMapper memberWithdrawApplyMapper;
+
 
     @Override
     public IndexNoticeVO indexNotice() {
@@ -140,10 +142,9 @@ public class IndexStatisticsServiceImpl implements IndexStatisticsService {
         indexNoticeVO.setAppointmentWorkOrder(appointmentWorkOrderMapper.selectCount(Wrappers.<AppointmentWorkOrder>lambdaQuery()
                 .eq(AppointmentWorkOrder::getDeleteFlag, false)
                 .in(AppointmentWorkOrder::getServiceStatus, AppointmentWorkOrderStatusEnum.unfinishedNames())));
-        //已提交、待店铺审核的采购单
-        indexNoticeVO.setProcurementAudit(procurementOrderMapper.selectCount(Wrappers.<ProcurementOrder>lambdaQuery()
-                .eq(ProcurementOrder::getDeleteFlag, false)
-                .eq(ProcurementOrder::getStatus, ProcurementStatusEnum.SUBMITTED.name())));
+        //待审核会员提现申请
+        indexNoticeVO.setBalanceCash(memberWithdrawApplyMapper.selectCount(Wrappers.<MemberWithdrawApply>lambdaQuery()
+                .eq(MemberWithdrawApply::getApplyStatus, WithdrawStatusEnum.APPLY.name())));
         return indexNoticeVO;
     }
 

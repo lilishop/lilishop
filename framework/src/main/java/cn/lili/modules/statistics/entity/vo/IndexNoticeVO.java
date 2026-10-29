@@ -33,7 +33,7 @@ public class IndexNoticeVO {
     @Schema(description = "未完成预约工单")
     private Long appointmentWorkOrder;
 
-    @Schema(description = "待审核采购单")
-    private Long procurementAudit;
+    @Schema(description = "待审核会员提现申请")
+    private Long balanceCash;
 
 }
