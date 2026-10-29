@@ -1,15 +1,18 @@
 package cn.lili.timetask.config;
 
 import cn.lili.timetask.TimedTaskJobHandler;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
- * Spring 内置定时调度，替代 XXL-Job。
+ * 原 Spring 内置批量轮询定时调度（已由 DynamicTaskManager 动态可配置调度替代）
+ * 默认不启用；若需要兼容旧版轮询模式，可在配置文件中设置 lili.schedule.legacy.enabled=true
  */
 @Configuration
 @EnableScheduling
+@ConditionalOnProperty(name = "lili.schedule.legacy.enabled", havingValue = "true")
 public class TimedTaskScheduler {
 
     private static final String LOCAL_PARAM = "local-schedule";
