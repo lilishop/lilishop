@@ -50,10 +50,7 @@ public class MemberGroupUserServiceImpl extends ServiceImpl<MemberGroupUserMappe
     public boolean updateUserGroups(String memberId, List<String> groupIds) {
         QueryWrapper<MemberGroupUser> wrapper = new QueryWrapper<>();
         wrapper.eq("member_id", memberId);
-        boolean removed = this.remove(wrapper);
-        if (!removed) {
-            return false;
-        }
+        this.remove(wrapper);
         if (groupIds == null || groupIds.isEmpty()) {
             return true;
         }
