@@ -40,6 +40,9 @@ public class StoreSearchParams extends PageVO implements Serializable {
     @Schema(description = "结束时间")
     private String endDate;
 
+    @Schema(description = "是否自营，为空不限")
+    private Boolean selfOperated;
+
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
         if (StringUtils.isNotEmpty(storeName)) {
@@ -59,6 +62,9 @@ public class StoreSearchParams extends PageVO implements Serializable {
         }
         if (StringUtils.isNotEmpty(endDate)) {
             queryWrapper.le("create_time", DateUtil.parse(endDate));
+        }
+        if (selfOperated != null) {
+            queryWrapper.eq("self_operated", selfOperated);
         }
         return queryWrapper;
     }

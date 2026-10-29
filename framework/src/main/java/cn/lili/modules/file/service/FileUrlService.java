@@ -84,8 +84,8 @@ public class FileUrlService {
     }
 
     public String toImageUrl(String url, Integer width, Integer height, OssSetting setting) {
-        if (CharSequenceUtil.isBlank(url)) {
-            return url;
+        if (CharSequenceUtil.isBlank(url) || "null".equalsIgnoreCase(url.trim()) || "undefined".equalsIgnoreCase(url.trim())) {
+            return "";
         }
         String imageUrl = url;
         if (width != null && height != null && width > 0 && height > 0) {
