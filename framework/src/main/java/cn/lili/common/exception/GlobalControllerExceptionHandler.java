@@ -67,6 +67,11 @@ public class GlobalControllerExceptionHandler {
                 log.debug("403 :{}", serviceException.getResultCode().message(), e);
                 return ResultUtil.error(code, message);
             }
+            if (serviceException.getResultCode().equals(ResultCode.USER_PASSWORD_ERROR)
+                    || serviceException.getResultCode().equals(ResultCode.VERIFICATION_ERROR)) {
+                log.debug("[{}]:{}", serviceException.getResultCode().name(), serviceException.getResultCode().message());
+                return ResultUtil.error(code, message);
+            }
 
 
             log.error("全局异常[ServiceException]:{}-{}", serviceException.getResultCode().code(), serviceException.getResultCode().message(), e);

@@ -146,7 +146,14 @@ public class MemberBuyerController {
                                            @NotNull(message = "密码不能为空") @RequestParam String password,
                                            @RequestHeader String uuid) {
         verificationService.check(uuid, VerificationEnums.LOGIN);
-        return ResultUtil.data(this.memberService.usernameLogin(username, password));
+        try {
+            return ResultUtil.data(this.memberService.usernameLogin(username, password));
+        } catch (ServiceException e) {
+            if (ResultCode.USER_PASSWORD_ERROR.equals(e.getResultCode())) {
+                return ResultUtil.error(ResultCode.USER_PASSWORD_ERROR);
+            }
+            throw e;
+        }
     }
 
     @Operation(summary = "注销接口")

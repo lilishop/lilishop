@@ -54,9 +54,16 @@ public class StorePassportController {
     public ResultMessage<Object> userLogin(@NotNull(message = "用户名不能为空") @RequestParam String username,
                                            @NotNull(message = "密码不能为空") @RequestParam String password, @RequestHeader String uuid) {
         if (verificationService.check(uuid, VerificationEnums.LOGIN)) {
-            return ResultUtil.data(this.memberService.usernameStoreLogin(username, password));
+            try {
+                return ResultUtil.data(this.memberService.usernameStoreLogin(username, password));
+            } catch (ServiceException e) {
+                if (ResultCode.USER_PASSWORD_ERROR.equals(e.getResultCode())) {
+                    return ResultUtil.error(ResultCode.USER_PASSWORD_ERROR);
+                }
+                throw e;
+            }
         } else {
-            throw new ServiceException(ResultCode.VERIFICATION_ERROR);
+            return ResultUtil.error(ResultCode.VERIFICATION_ERROR);
         }
     }
 
