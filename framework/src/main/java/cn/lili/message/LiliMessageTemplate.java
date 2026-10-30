@@ -88,7 +88,8 @@ public class LiliMessageTemplate {
 
     private void publish(String destination, Object payload, Long delaySeconds) {
         // 若当前处于 Spring 本地事务中，注册事务同步器，确保事务提交后再发送到 Redis，防止时序竞态或回滚导致脏消息
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()
+                && TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
