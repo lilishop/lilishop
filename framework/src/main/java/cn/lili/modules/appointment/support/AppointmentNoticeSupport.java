@@ -1,9 +1,10 @@
 package cn.lili.modules.appointment.support;
 
+import cn.lili.common.properties.RocketmqCustomProperties;
+import cn.lili.message.LiliMessageTemplate;
 import cn.lili.modules.message.entity.dto.NoticeMessageDTO;
 import cn.lili.modules.message.entity.enums.NoticeMessageNodeEnum;
 import cn.lili.modules.message.entity.enums.NoticeMessageParameterEnum;
-import cn.lili.modules.message.service.NoticeMessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 预约订单站内信通知
+ * 预约订单消息通知（投递队列，由编排器异步分发）
  *
  * @author Bulbasaur
  * @since 2026-09-18
@@ -22,10 +23,12 @@ import java.util.Map;
 public class AppointmentNoticeSupport {
 
     @Autowired
-    private NoticeMessageService noticeMessageService;
+    private LiliMessageTemplate liliMessageTemplate;
+    @Autowired
+    private RocketmqCustomProperties rocketmqCustomProperties;
 
     /**
-     * 按节点发送预约站内信
+     * 按节点发送预约消息
      *
      * @param memberId  会员ID
      * @param node      消息节点
@@ -48,7 +51,7 @@ public class AppointmentNoticeSupport {
     }
 
     /**
-     * 发送预约站内信
+     * 投递预约场景消息到通知队列
      *
      * @param memberId  会员ID
      * @param node      消息节点
@@ -67,9 +70,9 @@ public class AppointmentNoticeSupport {
             params.put(NoticeMessageParameterEnum.GOODS.getType(), goodsName == null ? "" : goodsName);
             params.put("orderSn", orderSn == null ? "" : orderSn);
             dto.setParameter(params);
-            noticeMessageService.noticeMessage(dto);
+            liliMessageTemplate.asyncSend(rocketmqCustomProperties.getNoticeTopic(), dto, null);
         } catch (Exception e) {
-            log.warn("预约站内信发送失败 node={}, orderSn={}", node, orderSn, e);
+            log.warn("预约消息投递失败 node={}, orderSn={}", node, orderSn, e);
         }
     }
 }

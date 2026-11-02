@@ -8,8 +8,11 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
+import cn.lili.common.utils.DateUtil;
 import cn.lili.modules.member.entity.dos.Member;
 import cn.lili.modules.member.service.MemberService;
+import cn.lili.modules.message.entity.dto.NoticeMessageDTO;
+import cn.lili.modules.message.entity.enums.NoticeMessageNodeEnum;
 import cn.lili.modules.payment.entity.enums.PaymentMethodEnum;
 import cn.lili.modules.payment.kit.CashierSupport;
 import cn.lili.modules.system.entity.dos.Setting;
@@ -43,6 +46,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -114,6 +119,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO);
         walletLogService.save(walletLog);
+        this.notifyWalletChange(memberWalletUpdateDTO.getMemberId(), memberWalletUpdateDTO.getMoney(), false);
         return true;
     }
 
@@ -127,6 +133,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO);
         walletLogService.save(walletLog);
+        this.notifyWalletChange(memberWalletUpdateDTO.getMemberId(), memberWalletUpdateDTO.getMoney(), false);
         return true;
     }
 
@@ -144,6 +151,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO, true);
         walletLogService.save(walletLog);
+        this.notifyWalletChange(memberWalletUpdateDTO.getMemberId(), memberWalletUpdateDTO.getMoney(), true);
         return true;
     }
 
@@ -161,6 +169,7 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         //新增预存款日志
         WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO, true);
         walletLogService.save(walletLog);
+        this.notifyWalletChange(memberWalletUpdateDTO.getMemberId(), memberWalletUpdateDTO.getMoney(), true);
         return true;
 
     }
@@ -179,6 +188,42 @@ public class MemberWalletServiceImpl extends ServiceImpl<MemberWalletMapper, Mem
         WalletLog walletLog = new WalletLog(memberWallet.getMemberName(), memberWalletUpdateDTO, true);
         walletLogService.save(walletLog);
         return true;
+    }
+
+    /**
+     * 发送余额变动消息（投递队列，由编排器异步分发站内信/短信/微信渠道）
+     */
+    private void notifyWalletChange(String memberId, Double money, boolean isReduce) {
+        if (StringUtils.isEmpty(memberId) || money == null) {
+            return;
+        }
+        try {
+            NoticeMessageDTO noticeMessageDTO = new NoticeMessageDTO();
+            noticeMessageDTO.setMemberId(memberId);
+            noticeMessageDTO.setNoticeMessageNodeEnum(NoticeMessageNodeEnum.WALLET_CHANGE);
+            Map<String, String> params = new HashMap<>(8);
+            String amountStr = String.format("%.2f", Math.abs(money));
+            params.put("income", isReduce ? "0.00" : amountStr);
+            params.put("expenditure", isReduce ? amountStr : "0.00");
+            params.put("change_amount", (isReduce ? "-" : "+") + amountStr);
+            params.put("wallet_balance", currentBalanceStr(memberId));
+            params.put("wallet_time", DateUtil.toString(new Date(), DateUtil.STANDARD_FORMAT));
+            params.put("change_reason", "账户余额已变动，请进入我的钱包查看");
+            noticeMessageDTO.setParameter(params);
+            noticeMessageDTO.setPage("pages/mine/deposit/index");
+            liliMessageTemplate.asyncSend(rocketmqCustomProperties.getNoticeTopic(), noticeMessageDTO, null);
+        } catch (Exception e) {
+            log.error("余额变动消息投递异常", e);
+        }
+    }
+
+    /**
+     * 查询会员当前余额文案（供通知参数使用）
+     */
+    public String currentBalanceStr(String memberId) {
+        MemberWallet latest = this.getOne(new QueryWrapper<MemberWallet>().eq("member_id", memberId), false);
+        return latest != null && latest.getMemberWallet() != null
+                ? String.format("%.2f", latest.getMemberWallet()) : "0.00";
     }
 
     /**
