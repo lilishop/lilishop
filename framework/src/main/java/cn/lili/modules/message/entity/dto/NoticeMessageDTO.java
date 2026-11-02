@@ -23,4 +23,7 @@ public class NoticeMessageDTO {
 
     @Schema(description = "消息参数")
     private Map<String, String> parameter;
+
+    @Schema(description = "微信小程序订阅消息跳转路径")
+    private String page;
 }
