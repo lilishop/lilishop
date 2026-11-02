@@ -11,14 +11,19 @@ import cn.lili.modules.system.entity.dos.Setting;
 import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import cn.lili.modules.wechat.util.WechatSceneMessageSender;
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.ArgumentCaptor;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -188,5 +193,20 @@ class MemberMessageOrchestratorTest {
         doThrow(new RuntimeException("x")).when(wechatSceneMessageSender).sendMpMessage(anyString(), anyString(), any(), any());
 
         assertThatCode(() -> orchestrator.orchestrate(dto())).doesNotThrowAnyException();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void templateLookupFiltersMemberType() {
+        // LambdaQueryWrapper 解析列名需要 TableInfo，单测无 MyBatis 上下文，手动初始化
+        TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""), NoticeMessage.class);
+        when(noticeMessageService.getOne(any(LambdaQueryWrapper.class), anyBoolean())).thenReturn(null);
+
+        orchestrator.orchestrate(dto());
+
+        ArgumentCaptor<LambdaQueryWrapper<NoticeMessage>> captor = ArgumentCaptor.forClass(LambdaQueryWrapper.class);
+        verify(noticeMessageService).getOne(captor.capture(), anyBoolean());
+        // 必须带 type=MEMBER 过滤，避免命中同 sceneCode/文案的商户或平台模板
+        assertThat(captor.getValue().getSqlSegment()).contains("type");
     }
 }

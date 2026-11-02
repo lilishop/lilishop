@@ -55,9 +55,10 @@ public class MemberMessageOrchestrator {
         try {
             NoticeMessage template = noticeMessageService.getOne(
                     new LambdaQueryWrapper<NoticeMessage>()
-                            .eq(NoticeMessage::getSceneCode, sceneCode)
-                            .or()
-                            .eq(NoticeMessage::getNoticeNode, dto.getNoticeMessageNodeEnum().getDescription().trim())
+                            .eq(NoticeMessage::getType, "MEMBER")
+                            .and(w -> w.eq(NoticeMessage::getSceneCode, sceneCode)
+                                    .or()
+                                    .eq(NoticeMessage::getNoticeNode, dto.getNoticeMessageNodeEnum().getDescription().trim()))
                             .last("LIMIT 1"), false);
             if (template == null) {
                 log.info("消息模板不存在，跳过分发，scene={}", sceneCode);

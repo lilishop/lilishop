@@ -68,7 +68,10 @@ public class AppointmentNoticeSupport {
             dto.setNoticeMessageNodeEnum(node);
             Map<String, String> params = new HashMap<>(4);
             params.put(NoticeMessageParameterEnum.GOODS.getType(), goodsName == null ? "" : goodsName);
-            params.put("orderSn", orderSn == null ? "" : orderSn);
+            String sn = orderSn == null ? "" : orderSn;
+            params.put("orderSn", sn);
+            // 短信/微信模板变量统一使用 snake_case
+            params.put("order_sn", sn);
             dto.setParameter(params);
             liliMessageTemplate.asyncSend(rocketmqCustomProperties.getNoticeTopic(), dto, null);
         } catch (Exception e) {

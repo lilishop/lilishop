@@ -86,6 +86,7 @@ public class WechatSceneMessageSender {
             map.put("data", wechatMessageData.createData());
             String content = postJson("https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=" + token, JSON.toJSONString(map));
             log.info("微信公众号模板消息发送结果：scene={}, memberId={}, result={}", sceneCode, memberId, content);
+            checkResult("微信公众号模板消息", sceneCode, memberId, content);
         } catch (Exception e) {
             log.error("微信公众号模板消息发送异常，scene=" + sceneCode + ", memberId=" + memberId, e);
         }
@@ -142,6 +143,7 @@ public class WechatSceneMessageSender {
             }
             String content = postJson("https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=" + token, JSON.toJSONString(map));
             log.info("小程序订阅消息发送结果：scene={}, memberId={}, result={}", sceneCode, memberId, content);
+            checkResult("小程序订阅消息", sceneCode, memberId, content);
         } catch (Exception e) {
             log.error("小程序订阅消息发送异常，scene=" + sceneCode + ", memberId=" + memberId, e);
         }
@@ -152,5 +154,19 @@ public class WechatSceneMessageSender {
      */
     protected String postJson(String url, String body) {
         return HttpUtil.post(url, body);
+    }
+
+    /**
+     * 解析微信接口返回，errcode 非 0 时记错误日志（HTTP 200 也可能业务失败）
+     */
+    protected void checkResult(String channel, String sceneCode, String memberId, String content) {
+        try {
+            Integer errcode = JSON.parseObject(content).getInteger("errcode");
+            if (errcode != null && errcode != 0) {
+                log.error("{}发送失败：scene={}, memberId={}, result={}", channel, sceneCode, memberId, content);
+            }
+        } catch (Exception e) {
+            log.warn("{}发送结果无法解析：scene={}, memberId={}, result={}", channel, sceneCode, memberId, content);
+        }
     }
 }
