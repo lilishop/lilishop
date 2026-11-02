@@ -94,6 +94,9 @@ public class TradeCashier implements CashierExecute {
             cashierParam.setDetail(subject);
 
             cashierParam.setCreateTime(trade.getCreateTime());
+            if (!orders.isEmpty()) {
+                cashierParam.setOrderPromotionType(orders.get(0).getOrderPromotionType());
+            }
             return cashierParam;
         }
 

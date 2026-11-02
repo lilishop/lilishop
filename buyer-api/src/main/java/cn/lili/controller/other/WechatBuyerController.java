@@ -33,14 +33,19 @@ public class WechatBuyerController {
 
     @GetMapping(value = "/h5/callback", produces = "text/plain;charset=UTF-8")
     @Operation(summary = "微信公众号回调校验")
-    public String h5CallbackCheck(@RequestParam(required = false) String echostr) {
-        return echostr;
+    public String h5CallbackCheck(@RequestParam(required = false) String signature,
+                                  @RequestParam(required = false) String timestamp,
+                                  @RequestParam(required = false) String nonce,
+                                  @RequestParam(required = false) String echostr) {
+        if (wechatUtil.checkSignature(signature, timestamp, nonce)) {
+            return echostr;
+        }
+        return "invalid signature";
     }
 
-    @PostMapping(value = "/h5/callback", produces = "text/plain;charset=UTF-8")
+    @PostMapping(value = "/h5/callback", produces = "application/xml;charset=UTF-8")
     @Operation(summary = "微信公众号回调接收")
     public String h5Callback(@RequestBody(required = false) String xml) {
-        wechatUtil.handleH5Callback(xml);
-        return "success";
+        return wechatUtil.handleH5Callback(xml);
     }
 }

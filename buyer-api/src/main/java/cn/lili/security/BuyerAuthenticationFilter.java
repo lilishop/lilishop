@@ -12,6 +12,7 @@ import cn.lili.common.utils.ResponseUtil;
 import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -128,7 +129,9 @@ public class BuyerAuthenticationFilter extends BasicAuthenticationFilter {
                 return authentication;
             }
         } catch (ExpiredJwtException e) {
-            log.debug("user analysis exception:", e);
+            log.debug("user token expired: {}", e.getMessage());
+        } catch (JwtException e) {
+            log.warn("user token invalid: {}", e.getMessage());
         } catch (Exception e) {
             log.error("user analysis exception:", e);
         }

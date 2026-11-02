@@ -50,7 +50,9 @@ public class MiniProgramBuyerController {
     @GetMapping("/subscribeMessage")
     @Operation(summary = "消息订阅")
     public ResultMessage<List<WechatMPMessage>> autoLogin() {
-        return ResultUtil.data(wechatMPMessageService.list());
+        return ResultUtil.data(wechatMPMessageService.list(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<WechatMPMessage>()
+                        .eq(WechatMPMessage::getEnable, true)));
     }
 
     @GetMapping("/mp/unlimited")

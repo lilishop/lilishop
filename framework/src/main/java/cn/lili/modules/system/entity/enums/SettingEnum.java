@@ -52,6 +52,8 @@ public enum SettingEnum {
     CONNECT_SUPPORT,
     //微信 联合登陆设置
     WECHAT_CONNECT,
+    //公众号通知设置（关注引导文章、回调校验参数、关注自动回复）
+    WECHAT_OFFICIAL_ACCOUNT_SETTING,
     //QQ 浏览器 联合登录设置
     QQ_CONNECT,
     //登录设置
@@ -63,8 +65,6 @@ public enum SettingEnum {
     ALIPAY_PAYMENT,
     //微信支付设置
     WECHAT_PAYMENT,
-    //银联支付设置
-    UNIONPAY_PAYMENT,
     //热词设置
     HOT_WORDS,
     WX_CHANNELS,

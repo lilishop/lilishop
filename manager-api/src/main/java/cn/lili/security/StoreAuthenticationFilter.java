@@ -17,6 +17,7 @@ import cn.lili.modules.member.token.StoreTokenGenerate;
 import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -122,7 +123,9 @@ public class StoreAuthenticationFilter extends BasicAuthenticationFilter {
             outputInvalidToken(response);
             return null;
         } catch (ExpiredJwtException e) {
-            log.debug("user analysis exception:", e);
+            log.debug("user token expired: {}", e.getMessage());
+        } catch (JwtException e) {
+            log.warn("user token invalid: {}", e.getMessage());
         } catch (Exception e) {
             log.error("user analysis exception:", e);
         }

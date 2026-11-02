@@ -2,9 +2,8 @@ package cn.lili.modules.wechat.serviceimpl;
 
 import cn.hutool.http.HttpUtil;
 import cn.lili.common.enums.ClientTypeEnum;
-import cn.lili.common.enums.ResultCode;
-import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.HttpUtils;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.SearchVO;
 import cn.lili.modules.message.entity.enums.NoticeMessageNodeEnum;
@@ -17,8 +16,8 @@ import cn.lili.modules.wechat.util.WechatAccessTokenUtil;
 import cn.lili.modules.wechat.util.WechatMessageUtil;
 import cn.lili.mybatis.util.PageUtil;
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.AllArgsConstructor;
@@ -28,10 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 微信小程序消息订阅 业务实现
@@ -53,7 +49,7 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
      */
     private final String keywords = "https://api.weixin.qq.com/wxaapi/newtmpl/getpubtemplatekeywords?access_token=";
     /**
-     * post 删除模版 添加模版 获取模版id
+     * post 删除模版
      */
     private final String delMsgTpl = "https://api.weixin.qq.com/wxaapi/newtmpl/deltemplate?access_token=";
     /**
@@ -64,92 +60,108 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
     @Override
     public void init() {
         this.baseMapper.deleteAll();
+        List<WechatMPMessageData> tmpList = initData();
+
+        // 1. 尝试从微信线上获取已有模板或自动在微信后台创建模板
+        Map<String, String> remoteTitleToPriTmplId = new HashMap<>(16);
+        String accessToken = null;
         try {
-            String accessToken = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
-            //获取已有模版，删除
-            String context = HttpUtil.get(allMsgTpl + accessToken);
-
-            log.info("获取全部模版：{}", context);
-            JSONObject jsonObject = JSON.parseObject(context);
-            WechatMessageUtil.wechatHandler(jsonObject);
-
-            List<String> oldList = new ArrayList<>();
-            if (jsonObject.containsKey("data")) {
-                jsonObject.getJSONArray("data").forEach(item -> {
-                    if (item instanceof JSONObject) {
-                        oldList.add(((JSONObject) item).getString("priTmplId"));
-                    } else {
-                        oldList.add(JSON.parseObject(JSON.toJSONString(item)).getString("priTmplId"));
+            accessToken = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.WECHAT_MP);
+            if (StringUtils.isNotEmpty(accessToken)) {
+                String context = HttpUtil.get(allMsgTpl + accessToken);
+                log.info("获取微信线上全部订阅模版：{}", context);
+                JSONObject jsonObject = JSON.parseObject(context);
+                if (jsonObject != null && jsonObject.getIntValue("errcode") == 0 && jsonObject.containsKey("data")) {
+                    List<String> validTitles = new ArrayList<>();
+                    List<String> validCodes = new ArrayList<>();
+                    for (WechatMPMessageData d : tmpList) {
+                        validTitles.add(d.getTitle());
+                        validCodes.add(d.getDefaultCode());
                     }
-                });
-            }
-            if (oldList.size() != 0) {
-                oldList.forEach(templateId -> {
-                    Map<String, Object> params = new HashMap<>(1);
-                    params.put("priTmplId", templateId);
-                    String message = WechatMessageUtil.wechatHandler(HttpUtil.post(delMsgTpl + accessToken, params));
-                    log.info("删除模版请求:{},删除模版响应：{}", params, message);
-                });
-            }
-
-            //加入数据
-            List<WechatMPMessageData> tmpList = initData();
-            tmpList.forEach(tplData -> {
-                WechatMPMessage wechatMPMessage = new WechatMPMessage();
-
-                Map params = new HashMap<>(16);
-                params.put("tid", tplData.getTid());
-                //获取微信消息订阅keys
-                String keywordsItems = WechatMessageUtil.wechatHandler(HttpUtil.get(keywords + accessToken, params));
-                JSONArray jsonArray = JSON.parseObject(keywordsItems).getJSONArray("data");
-                List<WechatMessageKeyword> keywordArray = JSON.parseArray(JSON.toJSONString(jsonArray), WechatMessageKeyword.class);
-
-                log.info("keywords:" + keywordArray);
-                //存放约定好的kids
-                List<String> kids = new ArrayList<>(tplData.keyWord.size());
-                List<String> kidTexts = new ArrayList<>(tplData.keyWord.size());
-                keywordArray:
-                for (WechatMessageItemEnums enums : tplData.getKeyWord()) {
-
-                    for (String tplKey : enums.getText()) {
-                        for (WechatMessageKeyword wechatMessageKeyword : keywordArray) {
-                            if (wechatMessageKeyword.getName().equals(tplKey)) {
-                                kids.add(wechatMessageKeyword.getKid());
-                                kidTexts.add(wechatMessageKeyword.getRule() + wechatMessageKeyword.getKid());
-                                continue keywordArray;
+                    JSONArray dataArr = jsonObject.getJSONArray("data");
+                    for (int i = 0; i < dataArr.size(); i++) {
+                        JSONObject item = dataArr.getJSONObject(i);
+                        if (item != null && StringUtils.isNotEmpty(item.getString("title")) && StringUtils.isNotEmpty(item.getString("priTmplId"))) {
+                            String rTitle = item.getString("title").trim();
+                            String rPriTmplId = item.getString("priTmplId").trim();
+                            if (validTitles.contains(rTitle) || validCodes.contains(rPriTmplId)) {
+                                remoteTitleToPriTmplId.put(rTitle, rPriTmplId);
+                            } else {
+                                Map<String, String> delParams = new HashMap<>(2);
+                                delParams.put("priTmplId", rPriTmplId);
+                                String delMsg = HttpUtils.doPostWithJson(delMsgTpl + accessToken, delParams);
+                                log.info("清理微信线上多余旧订阅模版 [{}]: {}", rTitle, delMsg);
                             }
                         }
                     }
                 }
-                params = new HashMap<>(4);
-                params.put("tid", tplData.getTid());
-                params.put("kidList", kids);
-                params.put("sceneDesc", tplData.getSceneDesc());
-                String content = HttpUtils.doPostWithJson(addTpl + accessToken, params);
-                log.info("添加模版参数:{},添加模版响应:{}", params, content);
-                JSONObject tplContent = JSON.parseObject(content);
-                WechatMessageUtil.wechatHandler(tplContent);
-
-                //如果包含模版id则进行操作，否则抛出异常
-                if (tplContent.containsKey("priTmplId")) {
-                    wechatMPMessage.setCode(tplContent.getString("priTmplId"));
-                } else {
-                    throw new ServiceException(ResultCode.WECHAT_MP_MESSAGE_TMPL_ERROR);
-                }
-
-                wechatMPMessage.setName(tplData.getSceneDesc());
-                wechatMPMessage.setTemplateId(tplData.getTid());
-                wechatMPMessage.setKeywords(JSON.toJSONString(tplData.getKeyWord()));
-                wechatMPMessage.setKeywordsText(JSON.toJSONString(kidTexts));
-                wechatMPMessage.setEnable(true);
-                wechatMPMessage.setOrderStatus(tplData.getOrderStatus().name());
-                wechatMPMessage.setSceneCode(tplData.getSceneCode());
-                this.save(wechatMPMessage);
-            });
+            }
         } catch (Exception e) {
-            log.error("初始化微信消息异常", e);
+            log.warn("连接微信获取已有订阅消息模板异常，将使用预置标准配置初始化", e);
         }
 
+        // 2. 遍历 7 条全量会员小程序订阅消息模板并写入数据库
+        for (WechatMPMessageData tplData : tmpList) {
+            WechatMPMessage wechatMPMessage = new WechatMPMessage();
+            String finalCode = tplData.getDefaultCode();
+            List<String> finalKidTexts = tplData.getDefaultKidTexts();
+
+            // 如果微信线上已有同名模板，优先采用线上真实的 priTmplId
+            if (remoteTitleToPriTmplId.containsKey(tplData.getTitle())) {
+                finalCode = remoteTitleToPriTmplId.get(tplData.getTitle());
+            } else if (StringUtils.isNotEmpty(accessToken) && StringUtils.isNotEmpty(tplData.getTid())) {
+                // 如果微信线上还没有该模板，自动调微信接口在小程序后台添加该模板
+                try {
+                    Map<String, Object> params = new HashMap<>(4);
+                    params.put("tid", tplData.getTid());
+                    String keywordsItems = HttpUtil.get(keywords + accessToken, params);
+                    JSONObject kwJson = JSON.parseObject(keywordsItems);
+                    if (kwJson != null && kwJson.getIntValue("errcode") == 0 && kwJson.containsKey("data")) {
+                        JSONArray jsonArray = kwJson.getJSONArray("data");
+                        List<WechatMessageKeyword> keywordArray = JSON.parseArray(JSON.toJSONString(jsonArray), WechatMessageKeyword.class);
+                        List<String> kids = new ArrayList<>(tplData.getKeyWord().size());
+                        List<String> kidTexts = new ArrayList<>(tplData.getKeyWord().size());
+                        keywordLoop:
+                        for (WechatMessageItemEnums enums : tplData.getKeyWord()) {
+                            for (String tplKey : enums.getText()) {
+                                for (WechatMessageKeyword wechatMessageKeyword : keywordArray) {
+                                    if (wechatMessageKeyword.getName().equals(tplKey)) {
+                                        kids.add(wechatMessageKeyword.getKid());
+                                        kidTexts.add(wechatMessageKeyword.getRule() + wechatMessageKeyword.getKid());
+                                        continue keywordLoop;
+                                    }
+                                }
+                            }
+                        }
+                        if (!kids.isEmpty()) {
+                            Map<String, Object> addParams = new HashMap<>(4);
+                            addParams.put("tid", tplData.getTid());
+                            addParams.put("kidList", kids);
+                            addParams.put("sceneDesc", tplData.getSceneDesc());
+                            String content = HttpUtils.doPostWithJson(addTpl + accessToken, addParams);
+                            log.info("自动向微信添加订阅模版参数:{}, 响应:{}", addParams, content);
+                            JSONObject tplContent = JSON.parseObject(content);
+                            if (tplContent != null && tplContent.containsKey("priTmplId")) {
+                                finalCode = tplContent.getString("priTmplId");
+                                finalKidTexts = kidTexts;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("自动在微信创建模板 [{}] 失败，使用预置模板ID", tplData.getTitle(), e);
+                }
+            }
+
+            wechatMPMessage.setName(tplData.getTitle());
+            wechatMPMessage.setTemplateId(tplData.getTid());
+            wechatMPMessage.setCode(finalCode);
+            wechatMPMessage.setKeywords(JSON.toJSONString(tplData.getKeyWord()));
+            wechatMPMessage.setKeywordsText(JSON.toJSONString(finalKidTexts));
+            wechatMPMessage.setEnable(true);
+            wechatMPMessage.setOrderStatus(tplData.getOrderStatus());
+            wechatMPMessage.setSceneCode(tplData.getSceneCode());
+            this.save(wechatMPMessage);
+        }
     }
 
     @Override
@@ -157,49 +169,94 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
         return this.page(PageUtil.initPage(pageVO), PageUtil.initWrapper(entity, searchVO));
     }
 
-
     public List<WechatMPMessageData> initData() {
-
         List<WechatMPMessageData> msg = new ArrayList<>();
-        //支付提醒
-        List<WechatMessageItemEnums> PAIDkeyWord = new ArrayList<>();
-        PAIDkeyWord.add(WechatMessageItemEnums.ORDER_SN);
-        PAIDkeyWord.add(WechatMessageItemEnums.MEMBER_NAME);
-        PAIDkeyWord.add(WechatMessageItemEnums.PRICE);
-        PAIDkeyWord.add(WechatMessageItemEnums.GOODS_INFO);
+
+        // 1. 订单发货通知 (374)
         msg.add(new WechatMPMessageData(
-                "订单支付成功,准备发货",
-                "487", PAIDkeyWord,
-                OrderStatusEnum.UNDELIVERED,
-                NoticeMessageNodeEnum.ORDER_PAY_SUCCESS.name()));
-        //发货提醒
+                "订单发货提醒",
+                "订单发货通知",
+                "374",
+                "8UqLGc3kBUDN3md_czOLAcLi_gPBXysS49cVuaSrPMk",
+                Arrays.asList(WechatMessageItemEnums.GOODS_INFO, WechatMessageItemEnums.ORDER_SN, WechatMessageItemEnums.LOGISTICS_TIME, WechatMessageItemEnums.REMARK),
+                Arrays.asList("thing1", "character_string15", "date4", "thing12"),
+                OrderStatusEnum.DELIVERED.name(),
+                NoticeMessageNodeEnum.ORDER_DELIVER.name()
+        ));
 
-        List<WechatMessageItemEnums> deliverdKeyWord = new ArrayList<>();
-        deliverdKeyWord.add(WechatMessageItemEnums.ORDER_SN);
-        deliverdKeyWord.add(WechatMessageItemEnums.GOODS_INFO);
-        deliverdKeyWord.add(WechatMessageItemEnums.LOGISTICS_NAME);
-        deliverdKeyWord.add(WechatMessageItemEnums.LOGISTICS_NO);
+        // 2. 订单完成通知 (3606)
         msg.add(new WechatMPMessageData(
-                "订单发货成功",
-                "374", deliverdKeyWord,
-                OrderStatusEnum.DELIVERED,
-                NoticeMessageNodeEnum.ORDER_DELIVER.name()));
+                "订单已完成提醒",
+                "订单完成通知",
+                "3606",
+                "knckkHDSRC7eYuX_4sOJaS_zpHvG3Z13Fzqh78hxBsQ",
+                Arrays.asList(WechatMessageItemEnums.GOODS_INFO, WechatMessageItemEnums.ORDER_SN, WechatMessageItemEnums.COMPLETE_TIME, WechatMessageItemEnums.REMARK),
+                Arrays.asList("thing3", "character_string5", "time9", "thing4"),
+                OrderStatusEnum.COMPLETED.name(),
+                NoticeMessageNodeEnum.ORDER_COMPLETE.name()
+        ));
 
-
-        //已完成
-
-        List<WechatMessageItemEnums> completeKeyWord = new ArrayList<>();
-        completeKeyWord.add(WechatMessageItemEnums.SHOP_NAME);
-        completeKeyWord.add(WechatMessageItemEnums.GOODS_INFO);
+        // 3. 拼团成功通知 (766)
         msg.add(new WechatMPMessageData(
-                "订单完成",
-                "3606", completeKeyWord,
-                OrderStatusEnum.COMPLETED,
-                NoticeMessageNodeEnum.ORDER_COMPLETE.name()));
+                "拼团成功通知",
+                "拼团成功通知",
+                "766",
+                "gdEG644QpBsT_LBnjeCbwlueZx8-5RgCeEVs7y9Ei78",
+                Arrays.asList(WechatMessageItemEnums.GOODS_INFO, WechatMessageItemEnums.ORDER_SN, WechatMessageItemEnums.PINTUAN_TIME, WechatMessageItemEnums.REMARK),
+                Arrays.asList("thing1", "character_string13", "date7", "thing5"),
+                OrderStatusEnum.UNDELIVERED.name(),
+                NoticeMessageNodeEnum.PINTUAN_SUCCESS.name()
+        ));
+
+        // 4. 售后审核通知 (2927)
+        msg.add(new WechatMPMessageData(
+                "售后申请审核通知",
+                "售后审核通知",
+                "2927",
+                "j5-2nnrKZOZNpodLJUS2cLjftPUlKJok7m4JZf5-LcM",
+                Arrays.asList(WechatMessageItemEnums.GOODS_INFO, WechatMessageItemEnums.AFTER_SALE_SN, WechatMessageItemEnums.AUDIT_RESULT, WechatMessageItemEnums.REMARK),
+                Arrays.asList("thing4", "character_string13", "phrase2", "thing3"),
+                "AFTER_SALE_AUDIT",
+                NoticeMessageNodeEnum.AFTER_SALE_AUDIT.name()
+        ));
+
+        // 5. 积分变更通知 (3595)
+        msg.add(new WechatMPMessageData(
+                "积分变更提醒",
+                "积分变更通知",
+                "3595",
+                "iq4eRz5juxFsFwiRmbu5GPXfBY0w9Kkskf6Kt_m4NnE",
+                Arrays.asList(WechatMessageItemEnums.CHANGE_POINT, WechatMessageItemEnums.CURRENT_POINT, WechatMessageItemEnums.POINT_TIME, WechatMessageItemEnums.REMARK),
+                Arrays.asList("number2", "thing11", "time12", "thing4"),
+                "POINT_CHANGE",
+                NoticeMessageNodeEnum.POINT_CHANGE.name()
+        ));
+
+        // 6. 余额账户变更通知 (15259)
+        msg.add(new WechatMPMessageData(
+                "账户余额变动通知",
+                "余额账户变更通知",
+                "15259",
+                "hhuKGE5VzE4TVPJ3ZMmWNs0RRM-HdxmcRdS5ZdOSCZY",
+                Arrays.asList(WechatMessageItemEnums.CHANGE_AMOUNT, WechatMessageItemEnums.WALLET_BALANCE, WechatMessageItemEnums.WALLET_TIME, WechatMessageItemEnums.CHANGE_REASON),
+                Arrays.asList("character_string1", "amount2", "time3", "thing4"),
+                "WALLET_CHANGE",
+                NoticeMessageNodeEnum.WALLET_CHANGE.name()
+        ));
+
+        // 7. 提现申请审核通知 (20020)
+        msg.add(new WechatMPMessageData(
+                "提现结果通知",
+                "提现申请审核通知",
+                "20020",
+                "jmXHzErl2ELJ3u3vexC-jJ2eDr3CAzkYi74v39WYkiA",
+                Arrays.asList(WechatMessageItemEnums.WITHDRAW_AMOUNT, WechatMessageItemEnums.WITHDRAW_RESULT, WechatMessageItemEnums.APPLY_TIME, WechatMessageItemEnums.WARM_REMIND),
+                Arrays.asList("amount1", "phrase2", "date3", "thing4"),
+                "WALLET_WITHDRAWAL_AUDIT_ERROR",
+                NoticeMessageNodeEnum.WALLET_WITHDRAWAL_AUDIT_ERROR.name()
+        ));
 
         return msg;
-
-
     }
 }
 
@@ -209,24 +266,39 @@ public class WechatMPMessageServiceImpl extends ServiceImpl<WechatMPMessageMappe
 class WechatMPMessageData {
 
     /**
-     * 场景描述 // 等于本服务器模版名称
+     * 微信公共模板标题 (如 订单发货提醒)
+     */
+    String title;
+
+    /**
+     * 场景描述 (如 订单发货通知)
      */
     String sceneDesc;
 
     /**
-     * 模版id
+     * 微信公共模版编号 tid
      */
     String tid;
 
     /**
-     * 自身服务器 消息字段
+     * 默认预置的微信 priTmplId
+     */
+    String defaultCode;
+
+    /**
+     * 自身服务器消息字段枚举
      */
     List<WechatMessageItemEnums> keyWord;
 
     /**
-     * 处于什么状态发送
+     * 默认预置的微信变量名列表 (如 thing1, character_string15...)
      */
-    OrderStatusEnum orderStatus;
+    List<String> defaultKidTexts;
+
+    /**
+     * 状态标识
+     */
+    String orderStatus;
 
     /**
      * 与站内信场景一致，对应 {@link cn.lili.modules.message.entity.enums.NoticeMessageNodeEnum#name()}

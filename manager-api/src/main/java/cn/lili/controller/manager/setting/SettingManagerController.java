@@ -16,7 +16,6 @@ import cn.lili.modules.system.entity.dto.connect.QQConnectSetting;
 import cn.lili.modules.system.entity.dto.connect.WechatConnectSetting;
 import cn.lili.modules.system.entity.dto.payment.AlipayPaymentSetting;
 import cn.lili.modules.system.entity.dto.payment.PaymentSupportSetting;
-import cn.lili.modules.system.entity.dto.payment.UnionPaymentSetting;
 import cn.lili.modules.system.entity.dto.payment.WechatPaymentSetting;
 import cn.lili.modules.system.entity.dto.payment.dto.PaymentSupportForm;
 import cn.lili.modules.system.entity.enums.SettingEnum;
@@ -108,6 +107,9 @@ public class SettingManagerController {
         if (settingEnum.equals(SettingEnum.WITHDRAWAL_SETTING)) {
             configValue = normalizeWithdrawalSetting(configValue);
         }
+        if (settingEnum.equals(SettingEnum.WECHAT_OFFICIAL_ACCOUNT_SETTING)) {
+            configValue = normalizeWechatOfficialAccountSetting(configValue);
+        }
         return configValue;
     }
 
@@ -125,6 +127,31 @@ public class SettingManagerController {
         setOrRemove(json, "withdrawRule", toTextOrNull(json.get("withdrawRule")));
         WithdrawalSetting withdrawalSetting = json.toBean(WithdrawalSetting.class);
         return JSONUtil.toJsonStr(withdrawalSetting);
+    }
+
+    /**
+     * 公众号通知设置：去除首尾空格、空值不入库；开启时必须配置合法的公众号文章链接。
+     */
+    private String normalizeWechatOfficialAccountSetting(String configValue) {
+        JSONObject json = JSONUtil.parseObj(configValue);
+        setOrRemove(json, "enabled", toBooleanOrNull(json.get("enabled")));
+        setOrRemove(json, "accountName", toTextOrNull(json.get("accountName")));
+        setOrRemove(json, "articleUrl", toTextOrNull(json.get("articleUrl")));
+        setOrRemove(json, "serverToken", toTextOrNull(json.get("serverToken")));
+        setOrRemove(json, "encodingAesKey", toTextOrNull(json.get("encodingAesKey")));
+        setOrRemove(json, "subscribeReply", toTextOrNull(json.get("subscribeReply")));
+        WechatOfficialAccountSetting oaSetting = json.toBean(WechatOfficialAccountSetting.class);
+        String articleUrl = oaSetting.getArticleUrl();
+        if (Boolean.TRUE.equals(oaSetting.getEnabled()) && articleUrl == null) {
+            throw new ServiceException("开启公众号通知时必须配置引导关注文章链接");
+        }
+        if (articleUrl != null && !articleUrl.startsWith("https://mp.weixin.qq.com/")) {
+            throw new ServiceException("引导关注文章链接必须是 https://mp.weixin.qq.com/ 开头的公众号文章地址");
+        }
+        if (oaSetting.getEncodingAesKey() != null && oaSetting.getEncodingAesKey().length() != 43) {
+            throw new ServiceException("EncodingAESKey 长度必须为 43 位");
+        }
+        return JSONUtil.toJsonStr(oaSetting);
     }
 
     private Double toDoubleOrNull(Object value) {
@@ -236,14 +263,14 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new AlipayPaymentSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), AlipayPaymentSetting.class));
-            case UNIONPAY_PAYMENT:
-                return setting == null ?
-                        ResultUtil.data(new UnionPaymentSetting()) :
-                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), UnionPaymentSetting.class));
             case WECHAT_CONNECT:
                 return setting == null ?
                         ResultUtil.data(new WechatConnectSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), WechatConnectSetting.class));
+            case WECHAT_OFFICIAL_ACCOUNT_SETTING:
+                return setting == null ?
+                        ResultUtil.data(new WechatOfficialAccountSetting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), WechatOfficialAccountSetting.class));
             case WECHAT_PAYMENT:
                 return setting == null ?
                         ResultUtil.data(new WechatPaymentSetting()) :
@@ -288,6 +315,10 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new CategoryPageSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), CategoryPageSetting.class));
+            case  SENSITIVE_WORDS_SETTING:
+                return setting == null ?
+                        ResultUtil.data(new SensitiveWordsSetting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), SensitiveWordsSetting.class));
             default:
                 throw new ServiceException(ResultCode.SETTING_NOT_TO_SET);
         }

@@ -15,6 +15,7 @@ import cn.lili.modules.system.token.ManagerTokenGenerate;
 import com.google.gson.Gson;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -189,6 +190,10 @@ public class ManagerAuthenticationFilter extends BasicAuthenticationFilter {
             ResponseUtil.output(response, 403, ResponseUtil.resultMap(false, 403, "登录已失效，请重新登录"));
             return null;
         } catch (ExpiredJwtException e) {
+            log.debug("user token expired: {}", e.getMessage());
+            ResponseUtil.output(response, 403, ResponseUtil.resultMap(false, 403, "登录已失效，请重新登录"));
+        } catch (JwtException e) {
+            log.warn("user token invalid: {}", e.getMessage());
             ResponseUtil.output(response, 403, ResponseUtil.resultMap(false, 403, "登录已失效，请重新登录"));
         } catch (Exception e) {
             log.error("other exception:", e);

@@ -18,10 +18,6 @@ public enum PaymentMethodEnum {
     ALIPAY("aliPayPlugin", "支付宝"),
 
     /**
-     * 银联-云闪付
-     */
-    UNIONPAY("unionPayPlugin", "银联-云闪付"),
-    /**
      * 余额支付
      */
     WALLET("walletPlugin", "余额支付"),

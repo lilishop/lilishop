@@ -54,6 +54,23 @@ public class NoticeMessage extends BaseEntity {
     @Length(max = 64, message = "场景编码过长")
     private String sceneCode;
 
+    @Schema(description = "模板受众分类: MEMBER(会员) / STORE(商户) / PLATFORM(平台)")
+    private String type;
+
+    /**
+     * @see cn.lili.common.enums.SwitchEnum
+     */
+    @Schema(description = "短信渠道是否开启")
+    private String smsStatus;
+
+    @Schema(description = "短信服务商模板CODE")
+    @Length(max = 64, message = "短信模板CODE过长")
+    private String smsTemplateCode;
+
+    @Schema(description = "短信模板正文预览(只读参考)")
+    @Length(max = 500, message = "短信模板内容过长")
+    private String smsContent;
+
     /**
      * @see cn.lili.common.enums.SwitchEnum
      */

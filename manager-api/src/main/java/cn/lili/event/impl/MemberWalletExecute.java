@@ -61,20 +61,20 @@ public class MemberWalletExecute implements MemberWithdrawalEvent {
                 memberWalletService.withdrawal(memberWithdrawalMessage.getMemberWithdrawApplyId());
                 break;
             case SUCCESS:
-                //??????????
+                //提现成功扣减冻结金额
                 memberWalletService.reduceFrozen(
-                        new MemberWalletUpdateDTO(memberWithdrawalMessage.getPrice(), memberWithdrawalMessage.getMemberId(), "?????????",
+                        new MemberWalletUpdateDTO(memberWithdrawalMessage.getPrice(), memberWithdrawalMessage.getMemberId(), "余额提现成功",
                                 DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
                 break;
             case ERROR:
-                //????????????
+                //提现失败解冻余额至可用余额
                 memberWalletService.increaseWithdrawal(new MemberWalletUpdateDTO(memberWithdrawalMessage.getPrice(),
-                        memberWithdrawalMessage.getMemberId(), "?????????????????", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
+                        memberWithdrawalMessage.getMemberId(), "微信转账失败，提现金额已退回", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
                 break;
             case FAIL_AUDITING:
-                //????????????
+                //审核拒绝解冻余额至可用余额
                 memberWalletService.increaseWithdrawal(new MemberWalletUpdateDTO(memberWithdrawalMessage.getPrice(),
-                        memberWithdrawalMessage.getMemberId(), "??????????????", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
+                        memberWithdrawalMessage.getMemberId(), "提现审核未通过，冻结金额已退回", DepositServiceTypeEnum.WALLET_WITHDRAWAL.name()));
                 break;
             default:
                 break;

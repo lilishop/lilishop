@@ -84,6 +84,7 @@ public class OrderCashier implements CashierExecute {
 
             cashierParam.setOrderSns(payParam.getSn());
             cashierParam.setCreateTime(order.getOrder().getCreateTime());
+            cashierParam.setOrderPromotionType(order.getOrder().getOrderPromotionType());
             return cashierParam;
         }
 

@@ -99,54 +99,106 @@ spring:
 # -------------------------------------------------------------------
 ignored:
   urls:
+    # 流程设计器（bpmn-js 等）静态资源
     - /editor-app/**
+    # 微信公众号服务器域名验证文件
     - /MP_verify_qSyvBPhDsPdxvOhC.txt
+    # 微信相关回调与对接接口（登录、支付回调等）
     - /weixin/**
+    # 源码/静态资源开放路径
     - /source/**
+    # ========== 买家端（buyer-api）开放接口 ==========
+    # 首页轮播图
     - /buyer/common/slider/**
+    # 站点基础设置信息（LOGO、名称等）
     - /buyer/common/site/**
+    # 短信验证码发送
     - /buyer/common/sms/**
+    # 省市区行政区划数据
     - /buyer/common/region/**
+    # IM 客服连接接口
     - /buyer/common/IM
+    # 收银台支付接口
     - /buyer/payment/cashier/**
+    # 退款查询接口
+    - /buyer/payment/cashierRefund/**
+    # 楼层装修页面数据
     - /buyer/other/pageData/**
+    # 直播间轮询
     - /buyer/live/room/polling/**
+    # 帮助中心/文章
     - /buyer/other/article/**
+    # 商品列表与商品详情
     - /buyer/goods/**
+    # 店铺信息
     - /buyer/store/**
+    # 联合登录（微信、QQ 等第三方登录）
     - /buyer/passport/connect/**
+    # 会员注册相关
     - /buyer/members/**
+    # 会员登录、注册、短信登录
     - /buyer/passport/member/**
+    # 会员 Token 刷新
     - /buyer/passport/member/refresh/**
+    # 拼团活动
     - /buyer/promotion/pintuan/**
+    # 秒杀活动
     - /buyer/promotion/seckill/**
+    # 积分商品
     - /buyer/promotion/pointsGoods/**
+    # 优惠券列表
     - /buyer/promotion/coupon
+    # 商品评价列表
     - /buyer/member/evaluation/*/goodsEvaluation
+    # 商品评价数量统计
     - /buyer/member/evaluation/*/evaluationNumber
+    # APP 版本更新检查
     - /buyer/other/appVersion/**
+    # 直播回放/录播
     - /buyer/broadcast/studio/**
+    # 分销员招募说明页
     - /buyer/distribution/distribution/recruit/page
+    # 分销员邀请人查询
     - /buyer/distribution/distribution/recruit/inviter
+    # ========== 商家端（store-api）开放接口 ==========
+    # 商家登录
     - /store/passport/login/**
+    # 商家 Token 刷新
     - /store/passport/login/refresh/**
+    # 商家端轮播图
     - /store/common/slider/**
+    # 商家端短信验证码
     - /store/common/sms/**
+    # 商家端站点设置
     - /store/common/site/**
+    # 商家端行政区划数据
     - /store/common/region/**
+    # ========== 管理端（manager-api）开放接口 ==========
+    # 管理端轮播图
     - /manager/common/slider/**
+    # 管理端站点设置
     - /manager/common/site/**
+    # 管理端行政区划数据
     - /manager/common/region/**
+    # 管理员登录
     - /manager/passport/user/login
+    # 管理员 Token 刷新
     - /manager/passport/user/refresh/**
+    # 自定义热词
     - /manager/other/customWords
+    # ========== 接口文档与静态资源 ==========
+    # Swagger UI 页面及资源
     - /swagger-ui.html
     - /swagger-ui
     - /swagger-ui/
     - /swagger-ui/**
+    # OpenAPI 文档数据
     - /v3/api-docs/**
+    # 浏览器图标
     - /favicon.ico
+    # 上传文件静态访问
     - /files/**
+    # 各类静态资源目录
     - /static/**
     - /public/**
     - /resources/**
@@ -156,13 +208,21 @@ ignored:
 # Swagger 接口文档基本信息配置
 # -------------------------------------------------------------------
 swagger:
+  # 接口文档标题
   title: lilishop API接口文档
+  # 接口文档描述
   description: lilishop Api Documentation
+  # 接口文档版本号
   version: 4.2.2
+  # 服务条款链接
   termsOfServiceUrl: https://pickmall.cn
+  # 联系人信息
   contact:
+    # 联系人名称
     name: lili
+    # 联系人主页
     url: https://pickmall.cn
+    # 联系邮箱
     email: admin@pickmall.com
 
 # -------------------------------------------------------------------

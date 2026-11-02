@@ -46,6 +46,9 @@ public class CashierParam {
     @Schema(description = "剩余余额")
     private Double walletValue;
 
+    @Schema(description = "订单促销类型(NORMAL/PINTUAN等)")
+    private String orderPromotionType;
+
     public String getDetail() {
         if (CharSequenceUtil.isEmpty(detail)) {
             return "清单详细";
