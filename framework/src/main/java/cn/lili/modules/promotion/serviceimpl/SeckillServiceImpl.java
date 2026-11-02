@@ -213,7 +213,7 @@ public class SeckillServiceImpl extends AbstractPromotionsServiceImpl<SeckillMap
             parseEndTime = DateUtil.parse((format + " " + nextHour + ":59:59"), DatePattern.NORM_DATETIME_PATTERN);
         }
         seckill.setStartTime(parseStartTime);
-        //当时商品的秒杀活动活动结束时间为下个时间段的开始
+        //当时商品的秒杀活动结束时间为下个时间段的开始
         seckill.setEndTime(parseEndTime);
     }
 

@@ -22,7 +22,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("li_goods_sku")
-@Schema(description = "商品sku对象")
+@Schema(description = "商品SKU")
 @NoArgsConstructor
 public class GoodsSku extends BaseEntity {
 

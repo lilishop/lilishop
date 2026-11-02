@@ -86,7 +86,7 @@ public class ConnectAuthUser implements Serializable {
     private JSONObject rawUserInfo;
 
     /**
-     * 联合登陆类型
+     * 联合登录类型
      */
     private ConnectAuthEnum connectEnum;
 

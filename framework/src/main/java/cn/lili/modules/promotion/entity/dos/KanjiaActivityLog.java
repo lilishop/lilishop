@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @TableName("li_kanjia_activity_log")
-@Schema(description = "砍价活动日志对象")
+@Schema(description = "砍价活动日志")
 @EqualsAndHashCode(callSuper = false)
 public class KanjiaActivityLog extends BaseEntity {
 

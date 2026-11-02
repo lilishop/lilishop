@@ -84,7 +84,7 @@ public interface SeckillApplyService extends IService<SeckillApply> {
     /**
      * 批量删除秒杀活动商品
      *
-     * @param seckillId 秒杀活动活动id
+     * @param seckillId 秒杀活动id
      * @param id        秒杀活动商品
      */
     void removeSeckillApply(String seckillId, String id);

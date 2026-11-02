@@ -16,7 +16,7 @@ public class WechatConnectSetting {
 
 
     /**
-     * 微信联合登陆配置
+     * 微信联合登录配置
      */
     List<WechatConnectSettingItem> wechatConnectSettingItems;
 

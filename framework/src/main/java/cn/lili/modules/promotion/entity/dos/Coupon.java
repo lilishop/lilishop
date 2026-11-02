@@ -21,7 +21,7 @@ import org.springframework.beans.BeanUtils;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("li_coupon")
-@Schema(description = "优惠券实体类")
+@Schema(description = "优惠券")
 @ToString(callSuper = true)
 @NoArgsConstructor
 public class Coupon extends BasePromotions {

@@ -120,12 +120,12 @@ public class WechatPlugin implements Payment {
     @Autowired
     private SettingService settingService;
     /**
-     * 联合登陆
+     * 联合登录
      */
     @Autowired
     private ConnectService connectService;
     /**
-     * 联合登陆
+     * 联合登录
      */
     @Autowired
     private OrderService orderService;
@@ -402,7 +402,7 @@ public class WechatPlugin implements Payment {
             //过期时间
             String timeExpire = DateTimeZoneUtil.dateToTimeZone(System.currentTimeMillis() + 1000 * 60 * 3);
 
-            //微信小程序，appid 需要单独获取，这里读取了联合登陆配置的appid ，实际场景小程序自动登录，所以这个appid是最为保险的做法
+            //微信小程序，appid 需要单独获取，这里读取了联合登录配置的appid ，实际场景小程序自动登录，所以这个appid是最为保险的做法
             //如果有2开需求，这里需要调整，修改这个appid的获取途径即可
             String appid = wechatPaymentSetting().getMpAppId();
             if (StringUtils.isEmpty(appid)) {

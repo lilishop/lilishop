@@ -1,7 +1,7 @@
 package cn.lili.modules.connect.entity.enums;
 
 /**
- * 联合登陆枚举
+ * 联合登录枚举
  *
  * @author Chopper
  * @version v4.0
@@ -9,7 +9,7 @@ package cn.lili.modules.connect.entity.enums;
  */
 public enum ConnectEnum {
     /**
-     * 联合登陆枚举各个类型
+     * 联合登录枚举各个类型
      */
     QQ("QQ登录"),
     WEIBO("微博联合登录"),

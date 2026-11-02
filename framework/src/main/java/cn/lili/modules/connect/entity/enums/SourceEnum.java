@@ -3,7 +3,7 @@ package cn.lili.modules.connect.entity.enums;
 import cn.lili.common.enums.ClientTypeEnum;
 
 /**
- * 联合登陆-渠道枚举
+ * 联合登录-渠道枚举
  *
  * @author Chopper
  * @version v4.0

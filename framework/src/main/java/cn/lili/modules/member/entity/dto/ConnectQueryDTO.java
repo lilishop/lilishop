@@ -25,7 +25,7 @@ public class ConnectQueryDTO {
     private String unionId;
 
     /**
-     * 联合登陆类型
+     * 联合登录类型
      */
     private String unionType;
 

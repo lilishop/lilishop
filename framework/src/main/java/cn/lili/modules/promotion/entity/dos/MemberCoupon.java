@@ -16,7 +16,7 @@ import lombok.EqualsAndHashCode;
 import java.util.Date;
 
 /**
- * 客户优惠券实体类
+ * 客户优惠券
  *
  * @author Chopper
  * @since 2020-03-19 10:44 上午

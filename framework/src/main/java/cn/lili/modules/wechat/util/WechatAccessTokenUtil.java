@@ -52,7 +52,7 @@ public class WechatAccessTokenUtil {
             //获取微信配置
             Setting setting = settingService.get(SettingEnum.WECHAT_CONNECT.name());
             if (setting == null) {
-                log.error("获取token客户端异常" + clientTypeEnum.name() + ",客户端未配置微信参数，请前往后台=》联合登陆，进行对应微信配置");
+                log.error("获取token客户端异常" + clientTypeEnum.name() + ",客户端未配置微信参数，请前往后台=》联合登录，进行对应微信配置");
                 return null;
             }
             //获取配置，获取对应的配置

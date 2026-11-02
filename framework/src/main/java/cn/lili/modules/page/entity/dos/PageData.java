@@ -14,14 +14,14 @@ import lombok.NoArgsConstructor;
 
 
 /**
- * 页面数据DO
+ * 页面数据
  *
  * @author Bulbasaur
  * @since 2020/12/10 17:42
  */
 @Data
 @TableName("li_page_data")
-@Schema(description = "页面数据DO")
+@Schema(description = "页面数据")
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class PageData extends BaseEntity {

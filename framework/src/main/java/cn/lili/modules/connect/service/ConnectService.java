@@ -12,7 +12,7 @@ import javax.naming.NoPermissionException;
 import java.util.List;
 
 /**
- * 联合登陆接口
+ * 联合登录接口
  *
  * @author Chopper
  */
@@ -20,16 +20,16 @@ public interface ConnectService extends IService<Connect> {
 
 
     /**
-     * 联合登陆cookie 常量
+     * 联合登录cookie 常量
      */
     String CONNECT_COOKIE = "CONNECT_COOKIE";
     /**
-     * 联合登陆cookie 常量
+     * 联合登录cookie 常量
      */
     String CONNECT_TYPE = "CONNECT_TYPE";
 
     /**
-     * 联合登陆对象直接登录
+     * 联合登录对象直接登录
      *
      * @param authUser 第三方登录返回封装类
      * @param uuid     用户uuid
@@ -65,8 +65,8 @@ public interface ConnectService extends IService<Connect> {
      * 联合登录缓存key生成
      * 这个方法返回的key从缓存中可以获取到redis中记录到客户信息，有效时间30分钟
      *
-     * @param type 联合登陆类型
-     * @param uuid 联合登陆uuid
+     * @param type 联合登录类型
+     * @param uuid 联合登录uuid
      * @return 返回KEY
      */
     static String cacheKey(String type, String uuid) {

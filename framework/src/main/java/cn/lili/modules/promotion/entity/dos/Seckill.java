@@ -25,7 +25,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("li_seckill")
-@Schema(description = "秒杀活动活动")
+@Schema(description = "秒杀活动")
 @NoArgsConstructor
 @ToString(callSuper = true)
 public class Seckill extends BasePromotions {

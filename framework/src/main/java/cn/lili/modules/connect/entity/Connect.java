@@ -16,11 +16,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 /**
+ * 联合登录
+ *
  * @author Chopper
  */
 @Data
 @TableName("li_connect")
-@Schema(description = "联合登陆")
+@Schema(description = "联合登录")
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class Connect extends BaseIdEntity {

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
- * 联合登陆授权token
+ * 联合登录授权token
  *
  * @author Chopper
  * @version v4.0

@@ -54,7 +54,7 @@ import java.security.Security;
 import java.util.*;
 
 /**
- * 联合登陆接口实现
+ * 联合登录接口实现
  *
  * @author Chopper
  */
@@ -123,7 +123,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
     public Token miniProgramAutoLogin(WechatMPLoginParams params) {
 
         Map<String, String> map = new HashMap<>(3);
-        //得到微信小程序联合登陆信息
+        //得到微信小程序联合登录信息
         JSONObject json = this.getConnect(params.getCode());
         //存储session key 后续登录用得到
         String sessionKey = json.getString("session_key");
@@ -133,7 +133,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
         map.put("unionId", unionId);
         map.put("openId", openId);
 
-        //微信联合登陆参数
+        //微信联合登录参数
         return phoneMpBindAndLogin(map.get("sessionKey"), params, map.get("openId"), map.get("unionId"));
     }
 
@@ -170,7 +170,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
             String encryptedData = params.getEncryptedData();
             String iv = params.getIv();
             JSONObject userInfo = this.getUserInfo(encryptedData, sessionKey, iv);
-            log.info("联合登陆返回：{}", userInfo.toString());
+            log.info("联合登录返回：{}", userInfo.toString());
 
 
             ConnectAuthUser connectAuthUser = new ConnectAuthUser();
@@ -258,7 +258,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
 
 
     /**
-     * 第三方联合登陆
+     * 第三方联合登录
      * 1.判断是否使用开放平台
      * 1.1如果使用开放平台则使用UnionId进行登录
      * 1.2如果不适用开放平台则使用OpenId进行登录
@@ -320,7 +320,7 @@ public class ConnectServiceImpl extends ServiceImpl<ConnectMapper, Connect> impl
 
             return memberTokenGenerate.createToken(member, longTerm);
         } catch (Exception e) {
-            log.error("联合登陆失败：", e);
+            log.error("联合登录失败：", e);
             throw e;
         }
     }

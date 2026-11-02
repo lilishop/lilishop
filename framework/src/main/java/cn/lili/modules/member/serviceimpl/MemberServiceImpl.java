@@ -616,20 +616,20 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
 //    /**
-//     * 检测是否可以绑定第三方联合登陆
+//     * 检测是否可以绑定第三方联合登录
 //     * 返回null原因
-//     * 包含原因1：redis中已经没有联合登陆信息  2：已绑定其他账号
+//     * 包含原因1：redis中已经没有联合登录信息  2：已绑定其他账号
 //     *
-//     * @return 返回对象则代表可以进行绑定第三方客户，返回null则表示联合登陆无法继续
+//     * @return 返回对象则代表可以进行绑定第三方客户，返回null则表示联合登录无法继续
 //     */
 //    private ConnectAuthUser checkConnectUser() {
 //        //获取cookie存储的信息
 //        String uuid = CookieUtil.getCookie(ConnectService.CONNECT_COOKIE, ThreadContextHolder.getHttpRequest());
 //        String connectType = CookieUtil.getCookie(ConnectService.CONNECT_TYPE, ThreadContextHolder.getHttpRequest());
 //
-//        //如果联合登陆存储了信息
+//        //如果联合登录存储了信息
 //        if (CharSequenceUtil.isNotEmpty(uuid) && CharSequenceUtil.isNotEmpty(connectType)) {
-//            //枚举 联合登陆类型获取
+//            //枚举 联合登录类型获取
 //            ConnectAuthEnum authInterface = ConnectAuthEnum.valueOf(connectType);
 //
 //            ConnectAuthUser connectAuthUser = getConnectAuthUser(uuid, connectType);
@@ -913,7 +913,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         //获取cookie存储的信息
         String uuid = CookieUtil.getCookie(ConnectService.CONNECT_COOKIE, ThreadContextHolder.getHttpRequest());
         String connectType = CookieUtil.getCookie(ConnectService.CONNECT_TYPE, ThreadContextHolder.getHttpRequest());
-        //如果联合登陆存储了信息
+        //如果联合登录存储了信息
         if (CharSequenceUtil.isNotEmpty(uuid) && CharSequenceUtil.isNotEmpty(connectType)) {
             try {
                 //获取信息
@@ -931,9 +931,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             } catch (ServiceException e) {
                 throw e;
             } catch (Exception e) {
-                log.error("绑定第三方联合登陆失败：", e);
+                log.error("绑定第三方联合登录失败：", e);
             } finally {
-                //联合登陆成功与否，都清除掉cookie中的信息
+                //联合登录成功与否，都清除掉cookie中的信息
                 CookieUtil.delCookie(ConnectService.CONNECT_COOKIE, ThreadContextHolder.getHttpResponse());
                 CookieUtil.delCookie(ConnectService.CONNECT_TYPE, ThreadContextHolder.getHttpResponse());
             }

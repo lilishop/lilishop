@@ -48,7 +48,7 @@ public enum CachePrefix {
      */
     CONNECT_RESULT,
     /**
-     * 微信联合登陆 session key
+     * 微信联合登录 session key
      */
     SESSION_KEY,
     /**
@@ -227,7 +227,7 @@ public enum CachePrefix {
     STORE_ID_FULL_DISCOUNT,
 
     /**
-     * 秒杀活动活动缓存key前缀
+     * 秒杀活动缓存key前缀
      */
     STORE_ID_SECKILL,
 

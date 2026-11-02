@@ -15,7 +15,7 @@ import java.util.List;
 public class QQConnectSetting {
 
     /**
-     * qq联合登陆配置
+     * qq联合登录配置
      */
     List<QQConnectSettingItem> qqConnectSettingItemList;
 

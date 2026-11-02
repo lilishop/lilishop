@@ -168,7 +168,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         }
         //检查秒杀活动申请是否合法
         checkSeckillApplyList(seckill.getHours(), seckillApplyList);
-        //获取已参与活动的秒杀活动活动申请列表
+        //获取已参与活动的秒杀活动申请列表
         List<String> skuIds = seckillApplyList.stream().map(SeckillApply::getSkuId).collect(Collectors.toList());
         List<SeckillApply> originList = new ArrayList<>();
         List<PromotionGoods> promotionGoodsList = new ArrayList<>();
@@ -218,7 +218,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     /**
      * 批量删除秒杀活动申请
      *
-     * @param seckillId 秒杀活动活动id
+     * @param seckillId 秒杀活动id
      * @param id        id
      */
     @Override
@@ -340,7 +340,7 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
     private List<SeckillTimelineVO> getSeckillTimelineInfo() {
         List<SeckillTimelineVO> timelineList = new ArrayList<>();
         LambdaQueryWrapper<Seckill> queryWrapper = new LambdaQueryWrapper<>();
-        //查询当天时间段内的秒杀活动活动
+        //查询当天时间段内的秒杀活动
         Date now = new Date();
         queryWrapper.between(BasePromotions::getStartTime, DateUtil.beginOfDay(now), DateUtil.endOfDay(now));
         queryWrapper.ge(BasePromotions::getEndTime, DateUtil.endOfDay(now));
@@ -420,9 +420,9 @@ public class SeckillApplyServiceImpl extends ServiceImpl<SeckillApplyMapper, Sec
         if (promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.PINTUAN.name(), goodsSku.getId(), startTime, seckill.getEndTime(), seckill.getId()) > 0) {
             throw new ServiceException("商品[" + goodsSku.getGoodsName() + "]已经在重叠的时间段参加了拼团活动，不能参加秒杀活动");
         }
-        //查询是否在同一时间段参与了秒杀活动活动
+        //查询是否在同一时间段参与了秒杀活动
         if (promotionGoodsService.findInnerOverlapPromotionGoods(PromotionTypeEnum.SECKILL.name(), goodsSku.getId(), startTime, seckill.getEndTime(), seckill.getId()) > 0) {
-            throw new ServiceException("商品[" + goodsSku.getGoodsName() + "]已经在重叠的时间段参加了秒杀活动，不能参加秒杀活动活动");
+            throw new ServiceException("商品[" + goodsSku.getGoodsName() + "]已经在重叠的时间段参加了秒杀活动，不能参加秒杀活动");
         }
     }
 

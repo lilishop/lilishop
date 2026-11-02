@@ -22,7 +22,7 @@ public class SeckillSearchParams extends BasePromotionsSearchParams implements S
 
     private static final long serialVersionUID = -4052716630253333681L;
 
-    @Schema(description = "秒杀活动活动编号")
+    @Schema(description = "秒杀活动编号")
     private String seckillId;
 
     @Schema(description = "活动名称")

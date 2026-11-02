@@ -206,8 +206,8 @@ public enum ResultCode {
     USER_NOT_BINDING(20020, "未绑定用户"),
     USER_AUTO_REGISTER_ERROR(20021, "自动注册失败,请稍后重试"),
     USER_OVERDUE_CONNECT_ERROR(20022, "授权信息已过期，请重新授权/登录"),
-    USER_CONNECT_BANDING_ERROR(20023, "当前联合登陆方式，已绑定其他账号，需进行解绑操作"),
-    USER_CONNECT_NOT_EXIST_ERROR(20024, "暂无联合登陆信息，无法实现一键注册功能，请点击第三方登录进行授权"),
+    USER_CONNECT_BANDING_ERROR(20023, "当前联合登录方式，已绑定其他账号，需进行解绑操作"),
+    USER_CONNECT_NOT_EXIST_ERROR(20024, "暂无联合登录信息，无法实现一键注册功能，请点击第三方登录进行授权"),
     USER_POINTS_ERROR(20024, "用户积分不足"),
     CLERK_SUPPER(20025, "店主无法操作"),
     CLERK_SAVE_ERROR(20026, "店员保存失败"),
@@ -463,12 +463,12 @@ public enum ResultCode {
     SECKILL_NOT_START_ERROR(45000, "今日没有限时抢购活动，请明天再来看看吧。"),
     SECKILL_NOT_EXIST_ERROR(45001, "当前参与的秒杀活动不存在！"),
     SECKILL_APPLY_NOT_EXIST_ERROR(45010, "当前参与的秒杀活动不存在！"),
-    SECKILL_UPDATE_ERROR(45002, "当前秒杀活动活动已经开始，无法修改！"),
+    SECKILL_UPDATE_ERROR(45002, "当前秒杀活动已经开始，无法修改！"),
     SECKILL_PRICE_ERROR(45003, "活动价格不能大于商品原价"),
     SECKILL_TIME_ERROR(45004, "时刻参数异常"),
-    SECKILL_DELETE_ERROR(45005, "该秒杀活动活动的状态不能删除"),
-    SECKILL_OPEN_ERROR(45010, "该秒杀活动活动的状态不能删除"),
-    SECKILL_CLOSE_ERROR(45006, "该秒杀活动活动的状态不能关闭"),
+    SECKILL_DELETE_ERROR(45005, "该秒杀活动的状态不能删除"),
+    SECKILL_OPEN_ERROR(45010, "该秒杀活动的状态不能删除"),
+    SECKILL_CLOSE_ERROR(45006, "该秒杀活动的状态不能关闭"),
 
 
     /**
@@ -584,7 +584,7 @@ public enum ResultCode {
     /**
      * 微信相关异常
      */
-    WECHAT_CONNECT_NOT_SETTING(80300, "微信联合登陆信息未配置"),
+    WECHAT_CONNECT_NOT_SETTING(80300, "微信联合登录信息未配置"),
     WECHAT_PAYMENT_NOT_SETTING(80301, "微信支付信息未配置"),
     WECHAT_QRCODE_ERROR(80302, "微信二维码生成异常"),
     WECHAT_MP_MESSAGE_ERROR(80303, "微信小程序小消息订阅异常"),

@@ -50,7 +50,7 @@ public enum SettingEnum {
 
     //登录设置
     CONNECT_SUPPORT,
-    //微信 联合登陆设置
+    //微信 联合登录设置
     WECHAT_CONNECT,
     //公众号通知设置（关注引导文章、回调校验参数、关注自动回复）
     WECHAT_OFFICIAL_ACCOUNT_SETTING,

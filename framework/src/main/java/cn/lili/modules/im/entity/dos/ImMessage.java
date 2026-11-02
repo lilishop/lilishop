@@ -14,12 +14,14 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
+ * IM消息
+ *
  * @author Chopper
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TableName("li_im_message")
-@Schema(description = "Im消息")
+@Schema(description = "IM消息")
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImMessage extends BaseEntity {

@@ -39,7 +39,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 联合登陆工具类
+ * 联合登录工具类
  *
  * @author Chopper
  * @version v1.0
@@ -83,7 +83,7 @@ public class ConnectUtil {
         AuthRequest authRequest = this.getAuthRequest(type);
         AuthResponse<ConnectAuthUser> response = authRequest.login(callback);
         ResultMessage<Object> resultMessage;
-        //联合登陆处理，如果响应正常，则录入响应结果到redis
+        //联合登录处理，如果响应正常，则录入响应结果到redis
         if (response.ok()) {
             ConnectAuthUser authUser = response.getData();
             try {
