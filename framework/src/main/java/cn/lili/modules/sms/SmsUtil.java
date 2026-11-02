@@ -3,6 +3,7 @@ package cn.lili.modules.sms;
 import cn.lili.modules.verification.entity.enums.VerificationEnums;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 短信接口
@@ -43,6 +44,16 @@ public interface SmsUtil {
      * @param templateCode 模版code
      */
     void sendBatchSms(String signName, List<String> mobile, String templateCode);
+
+    /**
+     * 通知类短信发送（单条，带模板参数）
+     *
+     * @param signName     签名
+     * @param mobile       接收手机号
+     * @param templateCode 模版code
+     * @param param        模板参数（变量名需与短信服务商模板变量一致）
+     */
+    void sendNoticeSms(String signName, String mobile, String templateCode, Map<String, String> param);
 
 
 }

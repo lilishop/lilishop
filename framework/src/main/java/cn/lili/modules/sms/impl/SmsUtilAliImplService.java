@@ -138,6 +138,11 @@ public class SmsUtilAliImplService implements SmsUtil {
         smsPluginFactory.smsPlugin().sendBatchSms(signName, mobile, templateCode);
     }
 
+    @Override
+    public void sendNoticeSms(String signName, String mobile, String templateCode, Map<String, String> param) {
+        smsPluginFactory.smsPlugin().sendSmsCode(signName, mobile, param, templateCode);
+    }
+
 
     /**
      * 生成缓存key
