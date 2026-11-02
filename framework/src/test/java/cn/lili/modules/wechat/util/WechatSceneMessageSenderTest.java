@@ -3,7 +3,9 @@ package cn.lili.modules.wechat.util;
 import cn.lili.modules.connect.entity.Connect;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.wechat.entity.dos.WechatMPMessage;
+import cn.lili.modules.wechat.entity.dos.WechatMessage;
 import cn.lili.modules.wechat.service.WechatMPMessageService;
+import cn.lili.modules.wechat.service.WechatMessageService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,7 @@ class WechatSceneMessageSenderTest {
 
     private WechatSceneMessageSender sender;
     private WechatMPMessageService wechatMPMessageService;
+    private WechatMessageService wechatMessageService;
     private ConnectService connectService;
     private WechatAccessTokenUtil wechatAccessTokenUtil;
 
@@ -37,9 +40,11 @@ class WechatSceneMessageSenderTest {
     void setUp() {
         sender = spy(new WechatSceneMessageSender());
         wechatMPMessageService = mock(WechatMPMessageService.class);
+        wechatMessageService = mock(WechatMessageService.class);
         connectService = mock(ConnectService.class);
         wechatAccessTokenUtil = mock(WechatAccessTokenUtil.class);
         ReflectionTestUtils.setField(sender, "wechatMPMessageService", wechatMPMessageService);
+        ReflectionTestUtils.setField(sender, "wechatMessageService", wechatMessageService);
         ReflectionTestUtils.setField(sender, "connectService", connectService);
         ReflectionTestUtils.setField(sender, "wechatAccessTokenUtil", wechatAccessTokenUtil);
         doReturn("{\"errcode\":0,\"errmsg\":\"ok\"}").when(sender).postJson(anyString(), anyString());
@@ -119,5 +124,71 @@ class WechatSceneMessageSenderTest {
         ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
         verify(sender).postJson(anyString(), bodyCaptor.capture());
         assertThat(bodyCaptor.getValue()).contains("商品名称\":{\"value\":\"-\"}");
+    }
+
+    private WechatMessage enabledOaTemplate() {
+        WechatMessage template = new WechatMessage();
+        template.setSceneCode("ORDER_DELIVER");
+        template.setCode("OA_TEMPLATE_ID");
+        template.setEnable(true);
+        template.setFirst("您好");
+        template.setRemark("谢谢");
+        template.setKeywords("ORDER_SN,MEMBER_NAME");
+        return template;
+    }
+
+    private Connect oaConnect() {
+        Connect connect = new Connect();
+        connect.setUnionId("oa_open_id_1");
+        return connect;
+    }
+
+    @Test
+    void oaSkipsWhenDisabledOrCodeBlank() {
+        WechatMessage disabled = enabledOaTemplate();
+        disabled.setEnable(false);
+        when(wechatMessageService.getOne(any(LambdaQueryWrapper.class), any(Boolean.class))).thenReturn(disabled);
+        sender.sendOaMessage("ORDER_DELIVER", "m1", Map.of("order_sn", "SN123"));
+
+        WechatMessage noCode = enabledOaTemplate();
+        noCode.setCode(null);
+        when(wechatMessageService.getOne(any(LambdaQueryWrapper.class), any(Boolean.class))).thenReturn(noCode);
+        sender.sendOaMessage("ORDER_DELIVER", "m1", Map.of("order_sn", "SN123"));
+
+        verify(sender, never()).postJson(anyString(), anyString());
+    }
+
+    @Test
+    void oaSendsFirstKeywordRemark() {
+        when(wechatMessageService.getOne(any(LambdaQueryWrapper.class), any(Boolean.class))).thenReturn(enabledOaTemplate());
+        when(connectService.queryConnect(any())).thenReturn(oaConnect());
+        when(wechatAccessTokenUtil.cgiAccessToken(any())).thenReturn("token");
+
+        Map<String, String> params = new HashMap<>();
+        params.put("order_sn", "SN123");
+        params.put("member_name", "张三");
+        sender.sendOaMessage("ORDER_DELIVER", "m1", params);
+
+        ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
+        verify(sender).postJson(anyString(), bodyCaptor.capture());
+        String body = bodyCaptor.getValue();
+        assertThat(body).contains("OA_TEMPLATE_ID").contains("oa_open_id_1")
+                .contains("first\":{\"value\":\"您好\"}")
+                .contains("keyword1\":{\"value\":\"SN123\"}")
+                .contains("keyword2\":{\"value\":\"张三\"}")
+                .contains("remark\":{\"value\":\"谢谢\"}");
+    }
+
+    @Test
+    void oaRendersMissingKeywordAsDash() {
+        when(wechatMessageService.getOne(any(LambdaQueryWrapper.class), any(Boolean.class))).thenReturn(enabledOaTemplate());
+        when(connectService.queryConnect(any())).thenReturn(oaConnect());
+        when(wechatAccessTokenUtil.cgiAccessToken(any())).thenReturn("token");
+
+        sender.sendOaMessage("ORDER_DELIVER", "m1", Map.of("order_sn", "SN123"));
+
+        ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
+        verify(sender).postJson(anyString(), bodyCaptor.capture());
+        assertThat(bodyCaptor.getValue()).contains("keyword2\":{\"value\":\"-\"}");
     }
 }

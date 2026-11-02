@@ -9,13 +9,16 @@ import cn.lili.modules.connect.entity.enums.SourceEnum;
 import cn.lili.modules.connect.service.ConnectService;
 import cn.lili.modules.member.entity.dto.ConnectQueryDTO;
 import cn.lili.modules.wechat.entity.dos.WechatMPMessage;
+import cn.lili.modules.wechat.entity.dos.WechatMessage;
 import cn.lili.modules.wechat.service.WechatMPMessageService;
+import cn.lili.modules.wechat.service.WechatMessageService;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,9 +38,58 @@ public class WechatSceneMessageSender {
     @Autowired
     private WechatMPMessageService wechatMPMessageService;
     @Autowired
+    private WechatMessageService wechatMessageService;
+    @Autowired
     private ConnectService connectService;
     @Autowired
     private WechatAccessTokenUtil wechatAccessTokenUtil;
+
+    /**
+     * 发送微信公众号模板消息
+     *
+     * @param sceneCode 业务场景编码（对应 li_wechat_message.scene_code）
+     * @param memberId  会员ID
+     * @param params    场景参数（key 为关键字枚举名小写）
+     */
+    public void sendOaMessage(String sceneCode, String memberId, Map<String, String> params) {
+        try {
+            if (CharSequenceUtil.isBlank(sceneCode) || CharSequenceUtil.isBlank(memberId)) {
+                return;
+            }
+            WechatMessage template = wechatMessageService.getOne(
+                    new LambdaQueryWrapper<WechatMessage>().eq(WechatMessage::getSceneCode, sceneCode).last("LIMIT 1"), false);
+            if (template == null || Boolean.FALSE.equals(template.getEnable()) || CharSequenceUtil.isBlank(template.getCode())) {
+                log.info("微信公众号模板消息未配置或未开启，scene={}", sceneCode);
+                return;
+            }
+            Connect connect = connectService.queryConnect(
+                    ConnectQueryDTO.builder().userId(memberId).unionType(SourceEnum.WECHAT_OFFIACCOUNT_OPEN_ID.name()).build());
+            if (connect == null) {
+                log.info("会员未绑定微信公众号，跳过模板消息，scene={}, memberId={}", sceneCode, memberId);
+                return;
+            }
+            String token = wechatAccessTokenUtil.cgiAccessToken(ClientTypeEnum.H5);
+
+            List<String> values = new ArrayList<>();
+            for (String keyword : template.getKeywords().split(",")) {
+                String val = params != null ? params.get(keyword.trim().toLowerCase()) : null;
+                values.add(CharSequenceUtil.isBlank(val) ? "-" : val);
+            }
+            WechatMessageData wechatMessageData = new WechatMessageData();
+            wechatMessageData.setFirst(template.getFirst());
+            wechatMessageData.setRemark(template.getRemark());
+            wechatMessageData.setMessageData(values);
+
+            Map<String, Object> map = new HashMap<>(4);
+            map.put("touser", connect.getUnionId());
+            map.put("template_id", template.getCode());
+            map.put("data", wechatMessageData.createData());
+            String content = postJson("https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=" + token, JSON.toJSONString(map));
+            log.info("微信公众号模板消息发送结果：scene={}, memberId={}, result={}", sceneCode, memberId, content);
+        } catch (Exception e) {
+            log.error("微信公众号模板消息发送异常，scene=" + sceneCode + ", memberId=" + memberId, e);
+        }
+    }
 
     /**
      * 发送微信小程序订阅消息
