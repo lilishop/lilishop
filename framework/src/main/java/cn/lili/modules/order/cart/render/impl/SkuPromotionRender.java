@@ -278,7 +278,6 @@ public class SkuPromotionRender implements CartRenderStep {
                     break;
                 case SECKILL:
                 case PINTUAN:
-                case FLASH_DISCOUNT:
                     quantity = promotionGoodsService.getPromotionGoodsStock(PromotionTypeEnum.valueOf(promotionSkuVO.getPromotionType()), promotionSkuVO.getActivityId(), cartSkuVO.getGoodsSku().getId());
                     break;
                 default:
@@ -295,8 +294,7 @@ public class SkuPromotionRender implements CartRenderStep {
     }
 
     private boolean isSkuPricePromotion(String promotionType) {
-        return PromotionTypeEnum.SECKILL.name().equals(promotionType)
-                || PromotionTypeEnum.FLASH_DISCOUNT.name().equals(promotionType);
+        return PromotionTypeEnum.SECKILL.name().equals(promotionType);
     }
 
     /**
@@ -305,7 +303,8 @@ public class SkuPromotionRender implements CartRenderStep {
     private boolean ignorePromotion(String promotionKey) {
 
         // 忽略积分活动活动 忽略砍价活动 忽略优惠券活动 忽略拼团活动
-        return promotionKey.contains(PromotionTypeEnum.POINTS_GOODS.name())
+        return PromotionTypeEnum.isRetired(promotionKey.split("-", 2)[0])
+                || promotionKey.contains(PromotionTypeEnum.POINTS_GOODS.name())
                 || promotionKey.contains(PromotionTypeEnum.KANJIA.name())
                 || promotionKey.contains(PromotionTypeEnum.COUPON.name())
                 || promotionKey.contains(PromotionTypeEnum.PINTUAN.name());

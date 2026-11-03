@@ -19,7 +19,6 @@ public class RenderStepStatement {
             RenderStepEnums.CHECK_DATA,
             RenderStepEnums.SKU_PROMOTION,
             RenderStepEnums.FULL_DISCOUNT,
-            RenderStepEnums.NTH_ITEM_DISCOUNT,
             RenderStepEnums.CART_PRICE};
 
     /**
@@ -32,7 +31,6 @@ public class RenderStepStatement {
             RenderStepEnums.CHECK_DATA,
             RenderStepEnums.SKU_PROMOTION,
             RenderStepEnums.FULL_DISCOUNT,
-            RenderStepEnums.NTH_ITEM_DISCOUNT,
             RenderStepEnums.COUPON,
             RenderStepEnums.SKU_FREIGHT,
             RenderStepEnums.GIFT_CARD,
@@ -94,7 +92,6 @@ public class RenderStepStatement {
             RenderStepEnums.CHECK_DATA,
             RenderStepEnums.SKU_PROMOTION,
             RenderStepEnums.FULL_DISCOUNT,
-            RenderStepEnums.NTH_ITEM_DISCOUNT,
             RenderStepEnums.COUPON,
             RenderStepEnums.SKU_FREIGHT,
             RenderStepEnums.GIFT_CARD,

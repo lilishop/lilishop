@@ -446,8 +446,6 @@ public enum ResultCode {
     /**
      * 营销促销扩展
      */
-    FLASH_DISCOUNT_NOT_EXIST_ERROR(43101, "限时直降活动不存在"),
-    NTH_ITEM_DISCOUNT_NOT_EXIST_ERROR(43104, "第N件优惠活动不存在"),
     PROMOTION_SKU_CONFLICT(43106, "商品已在重叠时间段参与其他互斥促销活动"),
     PROMOTION_PRICE_ERROR(43107, "活动价格不能大于商品原价"),
 

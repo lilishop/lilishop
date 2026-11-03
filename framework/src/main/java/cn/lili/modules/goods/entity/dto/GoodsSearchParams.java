@@ -130,6 +130,9 @@ public class GoodsSearchParams extends PageVO {
     @Schema(description = "销量上限")
     private Integer leBuyCount;
 
+    @Schema(description = "是否已设置虚拟销量：true 大于0，false 为0或空，不传查询全部")
+    private Boolean virtualSalesSet;
+
     @Schema(description = "创建开始时间")
     private String startDate;
 
@@ -192,7 +195,9 @@ public class GoodsSearchParams extends PageVO {
             queryWrapper.like("store_category_path", storeCategoryPath);
         }
         if (CharSequenceUtil.isNotEmpty(goodsStatus)) {
-            if (goodsStatus.equals(GoodsStatusEnum.UPPER.name())) {
+            if (goodsStatus.equals("SCHEDULED_UPPER")) {
+                queryWrapper.isNotNull("scheduled_upper_time");
+            } else if (goodsStatus.equals(GoodsStatusEnum.UPPER.name())) {
                 queryWrapper.eq("auth_flag", GoodsAuthEnum.PASS.name());
                 queryWrapper.eq("market_enable", GoodsStatusEnum.UPPER.name());
             } else if (goodsStatus.equals(GoodsStatusEnum.DOWN.name())) {
@@ -228,6 +233,11 @@ public class GoodsSearchParams extends PageVO {
         }
         if (Objects.nonNull(geBuyCount)) {
             queryWrapper.ge("buy_count", geBuyCount);
+        }
+        if (Boolean.TRUE.equals(virtualSalesSet)) {
+            queryWrapper.gt("virtual_sales", 0);
+        } else if (Boolean.FALSE.equals(virtualSalesSet)) {
+            queryWrapper.and(wrapper -> wrapper.eq("virtual_sales", 0).or().isNull("virtual_sales"));
         }
         if (CharSequenceUtil.isNotEmpty(brandId)) {
             queryWrapper.eq("brand_id", brandId);

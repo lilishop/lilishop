@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * 分页工具
@@ -29,6 +30,10 @@ public class PageUtil {
 
     //有order by 注入风险，限制长度
     static final Integer orderByLengthLimit = 20;
+
+    // 排序只接受单个字段或“表别名.字段”，不接受 SQL 表达式。
+    private static final Pattern ORDER_BY_COLUMN_PATTERN =
+            Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)?");
 
     /**
      * 只夹紧页码与页长，不挂 {@link OrderItem}。
@@ -66,8 +71,10 @@ public class PageUtil {
 
         if (CharSequenceUtil.isNotBlank(sort)) {
 
-            if (sort.length() > orderByLengthLimit || SqlFilter.hit(sort)) {
-                log.error("排序字段长度超过限制或包含sql关键字，请关注：{}", sort);
+            if (sort.length() > orderByLengthLimit
+                    || !ORDER_BY_COLUMN_PATTERN.matcher(sort).matches()
+                    || SqlFilter.hit(sort)) {
+                log.error("排序字段长度超过限制、格式非法或包含SQL关键字，请关注：{}", sort);
                 return p;
             }
 

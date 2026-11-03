@@ -336,8 +336,9 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
             goodsIndex = goodsIndexService.buildGoodsIndex(dataSku);
         }
         if (goodsIndex.getPromotionMap() != null && !goodsIndex.getPromotionMap().isEmpty()) {
-            applyBestSkuPromotionPrice(dataSku, goodsIndex.getPromotionMap(), cartType);
-            promotionMap = goodsIndex.getPromotionMap();
+            promotionMap = new HashMap<>(goodsIndex.getPromotionMap());
+            promotionMap.keySet().removeIf(key -> PromotionTypeEnum.isRetired(key.split("-", 2)[0]));
+            applyBestSkuPromotionPrice(dataSku, promotionMap, cartType);
         } else {
             promotionMap = null;
             dataSku.setPromotionFlag(false);
@@ -347,7 +348,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     }
 
     /**
-     * 从 ES 促销映射中选取最优 SKU 活动价（秒杀/直降/拼团）
+     * 从促销映射中选取最优 SKU 活动价（秒杀/拼团）
      */
     private void applyBestSkuPromotionPrice(GoodsSku dataSku, Map<String, Object> promotionMap, String cartType) {
         Double bestPrice = null;
@@ -378,8 +379,7 @@ public class PromotionGoodsServiceImpl extends ServiceImpl<PromotionGoodsMapper,
     }
 
     private boolean isSkuPricePromotionKey(String key, String cartType) {
-        if (key.contains(PromotionTypeEnum.SECKILL.name())
-                || key.contains(PromotionTypeEnum.FLASH_DISCOUNT.name())) {
+        if (key.contains(PromotionTypeEnum.SECKILL.name())) {
             return true;
         }
         return key.contains(PromotionTypeEnum.PINTUAN.name()) && CartTypeEnum.PINTUAN.name().equals(cartType);

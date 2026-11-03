@@ -66,12 +66,6 @@ public class PromotionServiceImpl implements PromotionService {
     @Autowired
     private KanjiaActivityGoodsService kanjiaActivityGoodsService;
 
-    @Autowired
-    private FlashDiscountService flashDiscountService;
-
-    @Autowired
-    private NthItemDiscountService nthItemDiscountService;
-
 
     /**
      * 获取当前进行的所有促销活动信息
@@ -83,7 +77,9 @@ public class PromotionServiceImpl implements PromotionService {
         PromotionGoodsSearchParams searchParams = new PromotionGoodsSearchParams();
         searchParams.setPromotionStatus(PromotionsStatusEnum.START.name());
         List<PromotionGoods> promotionGoods = promotionGoodsService.listFindAll(searchParams);
-        return promotionGoods.stream().collect(Collectors.groupingBy(PromotionGoods::getPromotionType));
+        return promotionGoods.stream()
+                .filter(goods -> !PromotionTypeEnum.isRetired(goods.getPromotionType()))
+                .collect(Collectors.groupingBy(PromotionGoods::getPromotionType));
     }
 
     /**
@@ -110,6 +106,9 @@ public class PromotionServiceImpl implements PromotionService {
     public Map<String, Object> wrapperPromotionMapList(List<PromotionGoods> promotionGoodsList) {
         Map<String, Object> promotionMap = new HashMap<>();
         for (PromotionGoods promotionGoods : promotionGoodsList) {
+            if (PromotionTypeEnum.isRetired(promotionGoods.getPromotionType())) {
+                continue;
+            }
             String esPromotionKey = promotionGoods.getPromotionType() + "-" + promotionGoods.getPromotionId();
             switch (PromotionTypeEnum.valueOf(promotionGoods.getPromotionType())) {
                 case COUPON:
@@ -130,14 +129,6 @@ public class PromotionServiceImpl implements PromotionService {
                 case POINTS_GOODS:
                     PointsGoods pointsGoods = pointsGoodsService.getById(promotionGoods.getPromotionId());
                     promotionMap.put(esPromotionKey, pointsGoods);
-                    break;
-                case FLASH_DISCOUNT:
-                    FlashDiscount flashDiscount = flashDiscountService.getById(promotionGoods.getPromotionId());
-                    promotionMap.put(esPromotionKey, flashDiscount);
-                    break;
-                case NTH_ITEM_DISCOUNT:
-                    NthItemDiscount nthItemDiscount = nthItemDiscountService.getById(promotionGoods.getPromotionId());
-                    promotionMap.put(esPromotionKey, nthItemDiscount);
                     break;
                 default:
                     break;

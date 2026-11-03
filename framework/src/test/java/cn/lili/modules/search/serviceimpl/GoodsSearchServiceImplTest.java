@@ -408,9 +408,9 @@ class GoodsSearchServiceImplTest {
     }
 
     @Test
-    void sqlFilterWouldFalsePositiveOnBuyCountAndReleaseTime() {
-        Assertions.assertTrue(SqlFilter.hit("buyCount"));
-        Assertions.assertTrue(SqlFilter.hit("releaseTime"));
+    void sqlFilterDoesNotRejectBuyCountAndReleaseTime() {
+        Assertions.assertFalse(SqlFilter.hit("buyCount"));
+        Assertions.assertFalse(SqlFilter.hit("releaseTime"));
     }
 
     @ParameterizedTest

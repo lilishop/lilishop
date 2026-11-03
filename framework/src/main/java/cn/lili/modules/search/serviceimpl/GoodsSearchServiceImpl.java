@@ -280,7 +280,7 @@ public class GoodsSearchServiceImpl implements GoodsSearchService {
 
     /**
      * 仅列表路径调用，把白名单 ORDER BY 挂到 wrapper 上。
-     * 排序输入只用于查表，永远不进 SQL 文本；不经过 SqlFilter.hit（buyCount 会误伤 COUNT）。
+     * 排序输入只用于查白名单，永远不进入 SQL 文本，无需依赖 SQL 关键字过滤。
      */
     private void applyOrderBy(QueryWrapper<GoodsSkuDTO> wrapper, PageVO pageVo) {
         String sortKey = pageVo == null || CharSequenceUtil.isEmpty(pageVo.getSort())

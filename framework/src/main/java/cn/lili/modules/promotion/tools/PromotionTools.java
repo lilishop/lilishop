@@ -203,7 +203,10 @@ public class PromotionTools {
         }
         try {
             //移除无效促销活动
-            return map.entrySet().stream().filter(Objects::nonNull).filter(i -> {
+            return map.entrySet().stream().filter(Objects::nonNull)
+                    .filter(entry -> entry.getKey() != null
+                            && !PromotionTypeEnum.isRetired(entry.getKey().split("-", 2)[0]))
+                    .filter(i -> {
                 try {
                     if (JSON.isValid(JSON.toJSONString(i.getValue()))) {
                         BasePromotions basePromotions = JSON.parseObject(JSON.toJSONString(i.getValue()), BasePromotions.class);

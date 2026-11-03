@@ -17,15 +17,13 @@ import java.util.regex.Pattern;
 public class SqlFilter {
 
 
-    // SQL注入过滤
+    // 按完整单词匹配，避免误伤 sort_order、buy_count 等字段中的关键字片段。
     static final String SQL_KEYWORDS_PATTERN =
-            "(?i)(SELECT|FROM|WHERE|CONCAT|AND|NOT|INSERT|UPDATE|DELETE" +
+            "(?i)\\b(SELECT|FROM|WHERE|CONCAT|AND|OR|NOT|CREATE|INSERT|UPDATE|DELETE" +
                     "|TABLE|INDEX|VIEW|DROP|ALTER|COLUMN|ADD|SET|GROUP|BY" +
                     "|HAVING|ORDER|ASC|DESC|LIKE|IN|BETWEEN|IS|NULL|TRUE|FALSE" +
                     "|JOIN|LEFT|RIGHT|INNER|OUTER|FULL|ON|AS|DISTINCT|COUNT" +
-                    "|MAX|MIN|SUM|AVG|IF|RAND|UPDATEXML|EXTRACTVALUE|LOAD_FILE|SLEEP|OFFSET)";
-    // OR 影响排序字段 sort，所以暂时不过滤
-    // CREATE 影响常用排序字段， CREATE_TIME，所以暂时不过滤
+                    "|MAX|MIN|SUM|AVG|IF|RAND|UPDATEXML|EXTRACTVALUE|LOAD_FILE|SLEEP|OFFSET)\\b";
     static final Pattern keywordPattern = Pattern.compile(SQL_KEYWORDS_PATTERN, Pattern.CASE_INSENSITIVE);
 
 
