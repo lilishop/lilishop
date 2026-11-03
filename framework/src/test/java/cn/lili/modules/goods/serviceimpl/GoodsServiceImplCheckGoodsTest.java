@@ -17,6 +17,8 @@ import cn.lili.modules.system.service.SettingService;
 import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockedStatic;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -108,6 +110,36 @@ class GoodsServiceImplCheckGoodsTest {
                     () -> ReflectionTestUtils.invokeMethod(goodsService, "checkGoods", goods));
             assertThat(ex.getResultCode()).isEqualTo(ResultCode.STORE_NOT_LOGIN_ERROR);
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "true,true,true,TOBEAUDITED", "true,true,false,PASS",
+            "true,false,true,TOBEAUDITED", "true,false,false,PASS",
+            "false,true,true,TOBEAUDITED", "false,true,false,TOBEAUDITED",
+            "false,false,true,PASS", "false,false,false,PASS",
+            "true,true,null,TOBEAUDITED", "true,false,null,PASS",
+            "null,true,false,TOBEAUDITED"
+    }, nullValues = "null")
+    void checkGoodsSelectsAuditRuleFromServerStoreType(Boolean selfOperated, boolean goodsCheck,
+                                                      Boolean selfOperatedGoodsCheck, String expected) {
+        GoodsSetting config = new GoodsSetting();
+        config.setGoodsCheck(goodsCheck);
+        config.setSelfOperatedGoodsCheck(selfOperatedGoodsCheck);
+        Setting setting = new Setting();
+        setting.setSettingValue(JSON.toJSONString(config));
+        when(settingService.get(SettingEnum.GOODS_SETTING.name())).thenReturn(setting);
+        StoreVO store = buildStoreDetail();
+        store.setSelfOperated(selfOperated);
+        when(storeService.getStoreDetail()).thenReturn(store);
+        Goods goods = newGoods(GoodsTypeEnum.E_COUPON.name(), "0");
+        // 请求里的店铺类型不能覆盖服务端店铺类型。
+        goods.setSelfOperated(!Boolean.TRUE.equals(selfOperated));
+
+        invokeCheckGoods(goods);
+
+        assertThat(goods.getAuthFlag()).isEqualTo(expected);
+        assertThat(goods.getSelfOperated()).isEqualTo(selfOperated);
     }
 
     private void invokeCheckGoods(Goods goods) {

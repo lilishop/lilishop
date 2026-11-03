@@ -79,36 +79,6 @@ public class FileUrlService {
         return url;
     }
 
-    public String toImageUrl(String url, Integer width, Integer height) {
-        return toImageUrl(url, width, height, getOssSetting());
-    }
-
-    public String toImageUrl(String url, Integer width, Integer height, OssSetting setting) {
-        if (CharSequenceUtil.isBlank(url) || "null".equalsIgnoreCase(url.trim()) || "undefined".equalsIgnoreCase(url.trim())) {
-            return "";
-        }
-        String imageUrl = url;
-        if (width != null && height != null && width > 0 && height > 0) {
-            OssEnum ossEnum = getOssEnum(setting);
-            switch (ossEnum) {
-                case ALI_OSS:
-                    imageUrl = appendQuery(url, "x-oss-process=style/" + width + "X" + height);
-                    break;
-                case HUAWEI_OBS:
-                    imageUrl = appendQuery(url, "image/resize,m_fixed,h_" + height + ",w_" + width);
-                    break;
-                case TENCENT_COS:
-                    imageUrl = appendQuery(url, "imageMogr2/thumbnail/" + width + "x" + height);
-                    break;
-                case MINIO:
-                case LOCAL:
-                default:
-                    break;
-            }
-        }
-        return toPublicUrl(imageUrl, setting);
-    }
-
     public String rewriteText(String text) {
         return rewriteText(text, getOssSetting());
     }
@@ -406,10 +376,6 @@ public class FileUrlService {
         } catch (Exception ignored) {
             // 非完整域名的本地前缀由路径规则处理。
         }
-    }
-
-    private String appendQuery(String url, String query) {
-        return url + (url.contains("?") ? "&" : "?") + query;
     }
 
     private boolean cdnEnabled(OssSetting setting) {

@@ -18,22 +18,7 @@ public class GoodsSetting implements Serializable {
     @Schema(description = "是否开启商品审核")
     private Boolean goodsCheck;
 
-    @Schema(description = "小图宽")
-    private Integer smallPictureWidth;
-
-    @Schema(description = "小图高")
-    private Integer smallPictureHeight;
-
-    @Schema(description = "缩略图宽")
-    private Integer abbreviationPictureWidth;
-
-    @Schema(description = "缩略图高")
-    private Integer abbreviationPictureHeight;
-
-    @Schema(description = "原图宽")
-    private Integer originalPictureWidth;
-
-    @Schema(description = "原图高")
-    private Integer originalPictureHeight;
+    @Schema(description = "自营店商品是否需要审核；未配置时沿用商品审核设置")
+    private Boolean selfOperatedGoodsCheck;
 
 }

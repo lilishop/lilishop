@@ -47,7 +47,7 @@ class FileUrlServiceTest {
     }
 
     @Test
-    void toImageUrlShouldAppendVendorStyleBeforeCdnRewrite() {
+    void toPublicUrlShouldRewriteCosOriginWithoutImageProcessing() {
         OssSetting setting = new OssSetting();
         setting.setType(OssEnum.TENCENT_COS.name());
         setting.setTencentCOSBucket("demo-123");
@@ -55,8 +55,8 @@ class FileUrlServiceTest {
         setting.setCdnEnabled(true);
         setting.setCdnUrlPrefix("https://cdn.example.com");
 
-        assertEquals("https://cdn.example.com/goods/a.png?imageMogr2/thumbnail/300x300",
-                fileUrlService.toImageUrl("https://demo-123.cos.ap-shanghai.myqcloud.com/goods/a.png", 300, 300, setting));
+        assertEquals("https://cdn.example.com/goods/a.png",
+                fileUrlService.toPublicUrl("https://demo-123.cos.ap-shanghai.myqcloud.com/goods/a.png", setting));
     }
 
     @Test

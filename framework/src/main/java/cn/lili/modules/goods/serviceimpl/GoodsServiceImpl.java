@@ -826,17 +826,20 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
         //获取商品系统配置决定是否审核
         Setting setting = settingService.get(SettingEnum.GOODS_SETTING.name());
         GoodsSetting goodsSetting = JSON.parseObject(setting.getSettingValue(), GoodsSetting.class);
-        //是否需要审核
-        goods.setAuthFlag(Boolean.TRUE.equals(goodsSetting.getGoodsCheck()) ? GoodsAuthEnum.TOBEAUDITED.name() : GoodsAuthEnum.PASS.name());
         //判断当前用户是否为店铺
         if (Objects.requireNonNull(UserContext.getCurrentUser()).getRole().equals(UserEnums.STORE)) {
             StoreVO storeDetail = this.storeService.getStoreDetail();
-            if (storeDetail.getSelfOperated() != null) {
-                goods.setSelfOperated(storeDetail.getSelfOperated());
-            }
             goods.setStoreId(storeDetail.getId());
             goods.setStoreName(storeDetail.getStoreName());
             goods.setSelfOperated(storeDetail.getSelfOperated());
+            // 使用服务端店铺类型选择审核开关，旧配置未设置自营开关时沿用原规则。
+            Boolean needsReview = goodsSetting.getGoodsCheck();
+            if (Boolean.TRUE.equals(storeDetail.getSelfOperated())
+                    && goodsSetting.getSelfOperatedGoodsCheck() != null) {
+                needsReview = goodsSetting.getSelfOperatedGoodsCheck();
+            }
+            goods.setAuthFlag(Boolean.TRUE.equals(needsReview)
+                    ? GoodsAuthEnum.TOBEAUDITED.name() : GoodsAuthEnum.PASS.name());
         } else {
             throw new ServiceException(ResultCode.STORE_NOT_LOGIN_ERROR);
         }

@@ -52,6 +52,9 @@ public class BaseSetting implements Serializable {
     @Schema(description = "公司链接")
     private String companyUrl;
 
+    @Schema(description = "版权归属")
+    private String copyrightOwner;
+
     @Schema(description = "官网地址")
     private String website;
 }

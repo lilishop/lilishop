@@ -5,13 +5,8 @@ import cn.lili.modules.file.service.FileUrlService;
 import cn.lili.modules.goods.entity.dos.GoodsGallery;
 import cn.lili.modules.goods.mapper.GoodsGalleryMapper;
 import cn.lili.modules.goods.service.GoodsGalleryService;
-import cn.lili.modules.system.entity.dos.Setting;
-import cn.lili.modules.system.entity.dto.GoodsSetting;
-import cn.lili.modules.system.entity.enums.SettingEnum;
-import cn.lili.modules.system.service.SettingService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.alibaba.fastjson2.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,12 +23,6 @@ import java.util.List;
  */
 @Service
 public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, GoodsGallery> implements GoodsGalleryService {
-    /**
-     * 设置
-     */
-    @Autowired
-    private SettingService settingService;
-
     @Autowired
     private FileUrlService fileUrlService;
 
@@ -46,7 +35,7 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
         //确定好图片选择器后进行处理
         int i = 0;
         for (String origin : goodsGalleryList) {
-            //获取带所有缩略的相册
+            //获取商品原图相册
             GoodsGallery galley = this.getGoodsGallery(origin);
             galley.setGoodsId(goodsId);
             //默认第一个为默认图片
@@ -59,17 +48,11 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
     @Override
     public GoodsGallery getGoodsGallery(String origin) {
         GoodsGallery goodsGallery = new GoodsGallery();
-        //获取商品系统配置决定是否审核
-        Setting setting = settingService.get(SettingEnum.GOODS_SETTING.name());
-        GoodsSetting goodsSetting = JSON.parseObject(setting.getSettingValue(), GoodsSetting.class);
-        //缩略图
-        String thumbnail = this.getUrl(origin, goodsSetting.getAbbreviationPictureWidth(), goodsSetting.getAbbreviationPictureHeight());
-        //小图
-        String small = this.getUrl(origin, goodsSetting.getSmallPictureWidth(), goodsSetting.getSmallPictureHeight());
-        //赋值
-        goodsGallery.setSmall(small);
-        goodsGallery.setThumbnail(thumbnail);
-        goodsGallery.setOriginal(origin);
+        // 各种展示尺寸统一使用原图，只转换公开访问地址。
+        String imageUrl = fileUrlService.toPublicUrl(origin);
+        goodsGallery.setSmall(imageUrl);
+        goodsGallery.setThumbnail(imageUrl);
+        goodsGallery.setOriginal(imageUrl);
         return goodsGallery;
     }
 
@@ -90,16 +73,5 @@ public class GoodsGalleryServiceImpl extends ServiceImpl<GoodsGalleryMapper, Goo
     }
 
 
-    /**
-     * 根据原图生成规定尺寸的图片
-     *
-     * @param url    连接
-     * @param width  宽
-     * @param height 高
-     * @return
-     */
-    private String getUrl(String url, Integer width, Integer height) {
-        return fileUrlService.toImageUrl(url, width, height);
-    }
 
 }
