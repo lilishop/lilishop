@@ -5,7 +5,7 @@
   <p>
     <a href="https://github.com/lilishop/lilishop"><img src="https://img.shields.io/github/stars/lilishop/lilishop.svg?style=social&logo=github" alt="GitHub Stars" /></a>
     <a href="https://gitee.com/beijing_hongye_huicheng/lilishop"><img src="https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark" alt="Gitee Stars" /></a>
-    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" /></a>
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License" /></a>
     <a href="https://openjdk.org/projects/jdk/21/"><img src="https://img.shields.io/badge/Java-21-orange.svg" alt="Java 21" /></a>
     <a href="https://spring.io/projects/spring-boot"><img src="https://img.shields.io/badge/Spring%20Boot-4.0.5-brightgreen.svg" alt="Spring Boot 4.0.5" /></a>
   </p>
@@ -27,7 +27,7 @@
 **LILISHOP** is an open-source e-commerce system built with Spring Boot, Vue 3, and uni-app. It supports B2B2C multi-vendor marketplaces, WeChat Mini Programs, H5, Android/iOS Apps, live-streaming e-commerce, affiliate distribution, and flash sales.
 
 ### ✨ Why Choose Lilishop
-- 🟢 **True MIT License**: Free for commercial use and private secondary development without licensing concerns.
+- 🟢 **True Apache-2.0 License**: Free for commercial use and private secondary development without licensing concerns.
 - 🚀 **Java 21 + Spring Boot 4 Stack**: Built on `Spring Boot 4.0.5 + Java 21 + MyBatis-Plus 3.5` on the backend and `Vue 3.5 + uni-app` on the frontend.
 - 🧩 **Full-Platform E-Commerce Suite**: Covers **Platform Admin, Seller Panel, PC Mall, H5, WeChat Mini Program, Android/iOS Apps, and IM Customer Service**, complete with B2B2C multi-vendor settlement, promotions, distribution, live streaming, and business reports.
 
@@ -142,4 +142,4 @@ lilishop
 
 ## 6. License
 
-Lilishop is licensed under the [MIT](./LICENSE) License. Copyright © 2020-2026 **Beijing Hongye Huicheng Technology Co., Ltd.**
+Lilishop is licensed under the [Apache-2.0](./LICENSE) License. Copyright © 2020-2026 **Beijing Hongye Huicheng Technology Co., Ltd.**

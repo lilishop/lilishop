@@ -5,7 +5,7 @@
   <p>
     <a href="https://github.com/lilishop/lilishop"><img src="https://img.shields.io/github/stars/lilishop/lilishop.svg?style=social&logo=github" alt="GitHub Stars" /></a>
     <a href="https://gitee.com/beijing_hongye_huicheng/lilishop"><img src="https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark" alt="Gitee Stars" /></a>
-    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" /></a>
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License" /></a>
     <a href="https://openjdk.org/projects/jdk/21/"><img src="https://img.shields.io/badge/Java-21-orange.svg" alt="Java 21" /></a>
     <a href="https://spring.io/projects/spring-boot"><img src="https://img.shields.io/badge/Spring%20Boot-4.0.5-brightgreen.svg" alt="Spring Boot 4.0.5" /></a>
   </p>
@@ -27,7 +27,7 @@
 **LILISHOP** 是基于 Spring Boot / Vue 3 / uni-app 开发的开源商城系统，支持 B2B2C 多商户商城、微信小程序商城、H5 商城、APP 商城、直播电商、分销返佣、秒杀活动。
 
 ### ✨ 为什么选择 Lilishop
-- 🟢 **真 MIT 协议**：支持免费商用与私有化闭源二开，无版权后顾之忧。
+- 🟢 **真 Apache-2.0 协议**：支持免费商用与私有化闭源二开，无版权后顾之忧。
 - 🚀 **Java 21 + Spring Boot 4 全新栈**：后端采用 `Spring Boot 4.0.5 + Java 21 + MyBatis-Plus 3.5`，前端采用 `Vue 3.5 + uni-app`，技术栈紧跟主流生态。
 - 🧩 **全端生产级完整闭环**：覆盖 **平台端、商家端、PC 端、H5、微信小程序、APP、IM 客服端**，内置商品、订单、售后、多商家结算、秒杀拼团、二级分销、直播、多维统计报表等完整电商业务。
 
@@ -147,7 +147,7 @@ lilishop
 
 ## 6. 开源与授权
 
-本项目遵循 [MIT](./LICENSE) 开源协议，版权归 **北京宏业汇成科技有限公司** 所有。允许个人及企业免费用于学习、研究、修改和商业用途（需保留原始版权和许可声明）。
+本项目遵循 [Apache-2.0](./LICENSE) 开源协议，版权归 **北京宏业汇成科技有限公司** 所有。允许个人及企业免费用于学习、研究、修改和商业用途（需保留原始版权和许可声明）。
 
 ---
 
