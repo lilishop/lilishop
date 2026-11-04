@@ -29,6 +29,9 @@ public class CouponActivityItemVO extends CouponActivityItem {
     @Schema(description = "优惠券类型")
     private String couponType;
 
+    @Schema(description = "消费门槛，0表示无门槛")
+    private Double consumeThreshold;
+
     @Schema(description = "折扣")
     private Double couponDiscount;
 }

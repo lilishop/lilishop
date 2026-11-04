@@ -149,13 +149,16 @@ public class CouponRender implements CartRenderStep {
         if (filterSku == null || filterSku.isEmpty()) {
             return Collections.emptyList();
         }
+        // 使用完整ID匹配适用范围，避免某个SKU ID是其他ID的子串时误用优惠券。
+        Set<String> scopeIds = new HashSet<>(Arrays.asList(
+                Optional.ofNullable(memberCoupon.getScopeId()).orElse("").split(",")));
         //优惠券类型判定
         switch (PromotionsScopeTypeEnum.valueOf(memberCoupon.getScopeType())) {
             case ALL:
                 return filterSku;
             case PORTION_GOODS:
                 //按照商品过滤
-                filterSku = filterSku.stream().filter(cartSkuVO -> memberCoupon.getScopeId().contains(cartSkuVO.getGoodsSku().getId())).collect(Collectors.toList());
+                filterSku = filterSku.stream().filter(cartSkuVO -> scopeIds.contains(cartSkuVO.getGoodsSku().getId())).collect(Collectors.toList());
                 break;
 
             case PORTION_SHOP_CATEGORY:
@@ -171,7 +174,7 @@ public class CouponRender implements CartRenderStep {
                     String[] categoryPath = cartSkuVO.getGoodsSku().getCategoryPath().split(",");
                     //平台三级分类
                     String categoryId = categoryPath[categoryPath.length - 1];
-                    return memberCoupon.getScopeId().contains(categoryId);
+                    return scopeIds.contains(categoryId);
                 }).collect(Collectors.toList());
                 break;
             default:
@@ -253,15 +256,9 @@ public class CouponRender implements CartRenderStep {
 
         //接收具体优惠券信息
         MemberCoupon coupon = memberCouponDTO.getMemberCoupon();
-        //处理一个极端情况，如果优惠券满减金额大于订单金额
-        if (coupon.getCouponType().equals(CouponTypeEnum.PRICE.name()) && coupon.getPrice() > countPrice) {
-            //将符合优惠券的金额写入，即最大扣减金额
-            coupon.setPrice(countPrice);
-        }
-
         if (coupon.getCouponType().equals(CouponTypeEnum.PRICE.name())) {
             //减免现金，则按照商品价格计算 需要通过工具类进行优惠金额的分发，分发给每个商品
-            this.renderCouponPrice(couponMap, tradeDTO, coupon, memberCouponDTO);
+            this.renderCouponPrice(couponMap, tradeDTO, coupon, memberCouponDTO, Math.min(coupon.getPrice(), countPrice));
         } else {
             //打折券 直接计算
             this.renderCouponDiscount(couponMap, tradeDTO, coupon);
@@ -275,10 +272,11 @@ public class CouponRender implements CartRenderStep {
      * @param tradeDTO        交易dto
      * @param coupon          优惠券信息
      * @param memberCouponDTO 用于计算优惠券结算详情
+     * @param discountPrice   本次实际抵扣金额，不改写优惠券面额
      */
-    private void renderCouponPrice(Map<String, Double> couponMap, TradeDTO tradeDTO, MemberCoupon coupon, MemberCouponDTO memberCouponDTO) {
+    private void renderCouponPrice(Map<String, Double> couponMap, TradeDTO tradeDTO, MemberCoupon coupon, MemberCouponDTO memberCouponDTO, double discountPrice) {
         //分发优惠券
-        PromotionPriceUtil.recountPrice(tradeDTO, memberCouponDTO.getSkuDetail(), memberCouponDTO.getMemberCoupon().getPrice(),
+        PromotionPriceUtil.recountPrice(tradeDTO, memberCouponDTO.getSkuDetail(), discountPrice,
                 Boolean.TRUE.equals(coupon.getPlatformFlag()) ?
                         PromotionTypeEnum.PLATFORM_COUPON : PromotionTypeEnum.COUPON, memberCouponDTO.getMemberCoupon().getCouponId());
         //如果是平台券 则需要计算商家承担比例

@@ -227,11 +227,29 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
         if (coupon.getPublishNum() != 0 && coupon.getCouponLimitNum() > coupon.getPublishNum()) {
             throw new ServiceException(ResultCode.COUPON_LIMIT_GREATER_THAN_PUBLISH);
         }
-        //打折优惠券大于10折
-        boolean discountCoupon = (coupon.getCouponType().equals(CouponTypeEnum.DISCOUNT.name())
-                && (coupon.getCouponDiscount() < 0 || coupon.getCouponDiscount() > 10));
-        if (discountCoupon) {
-            throw new ServiceException(ResultCode.COUPON_DISCOUNT_ERROR);
+        // PRICE + 零门槛表示立减券，沿用现金券领取和结算链路。
+        if (!CouponTypeEnum.PRICE.name().equals(coupon.getCouponType())
+                && !CouponTypeEnum.DISCOUNT.name().equals(coupon.getCouponType())) {
+            throw new ServiceException("优惠券类型不合法");
+        }
+        if (!validCouponAmount(coupon.getConsumeThreshold(), true)) {
+            throw new ServiceException("消费门槛必须为0至99999999之间的金额，最多两位小数");
+        }
+        if (CouponTypeEnum.PRICE.name().equals(coupon.getCouponType())) {
+            if (!validCouponAmount(coupon.getPrice(), false)) {
+                throw new ServiceException("减免金额必须大于0且不超过99999999，最多两位小数");
+            }
+            coupon.setCouponDiscount(null);
+        } else {
+            Double discount = coupon.getCouponDiscount();
+            if (discount == null || !Double.isFinite(discount) || discount < 0.1 || discount > 9.9
+                    || java.math.BigDecimal.valueOf(discount).stripTrailingZeros().scale() > 1) {
+                throw new ServiceException(ResultCode.COUPON_DISCOUNT_ERROR);
+            }
+            if (coupon.getConsumeThreshold() <= 0) {
+                throw new ServiceException("满折优惠券的消费门槛必须大于0");
+            }
+            coupon.setPrice(null);
         }
 
         //如果优惠券使用时间类型不合法，抛出异常，抛出异常
@@ -261,6 +279,12 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
 
 
         this.checkCouponScope((CouponVO) coupon);
+    }
+
+    private boolean validCouponAmount(Double amount, boolean allowZero) {
+        return amount != null && Double.isFinite(amount) && (allowZero ? amount >= 0 : amount > 0)
+                && amount <= 99999999
+                && java.math.BigDecimal.valueOf(amount).stripTrailingZeros().scale() <= 2;
     }
 
     @Override
