@@ -37,12 +37,18 @@ class StoreServiceImplDisableTest {
     private Cache cache;
     private ClerkService clerkService;
 
+    /**
+     * 初始化店铺实体的MyBatis-Plus元数据。
+     */
     @BeforeAll
     static void initStoreEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
         TableInfoHelper.initTableInfo(assistant, Store.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         storeService = spy(new StoreServiceImpl());
@@ -54,6 +60,9 @@ class StoreServiceImplDisableTest {
         ReflectionTestUtils.setField(storeService, "clerkService", clerkService);
     }
 
+    /**
+     * 验证禁用店铺时只触发本店商品下架。
+     */
     @Test
     void disableUnderStoreGoodsOnly() {
         Store store = new Store();

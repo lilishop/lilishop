@@ -15,6 +15,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class AllowOperationDeliveryTest {
 
+    /**
+     * 验证未发货普通订单允许整单、拆单及无需物流发货。
+     */
     @Test
     void undeliveredNormalOrderAllowsWholeSplitAndNoDelivery() {
         Order order = baseNormalOrder();
@@ -30,6 +33,9 @@ class AllowOperationDeliveryTest {
         assertThat(allowOperation.getShowLogistics()).isFalse();
     }
 
+    /**
+     * 验证部分发货订单在详情及列表中仅允许拆单发货。
+     */
     @Test
     void partsDeliveredOrderOnlyAllowsSplitOnDetailAndList() {
         Order order = baseNormalOrder();
@@ -57,6 +63,11 @@ class AllowOperationDeliveryTest {
         assertThat(listOperation.getShowLogistics()).isTrue();
     }
 
+    /**
+     * 构造使用物流配送的普通订单。
+     *
+     * @return 使用物流配送的普通订单
+     */
     private Order baseNormalOrder() {
         Order order = new Order();
         order.setOrderType(OrderTypeEnum.NORMAL.name());

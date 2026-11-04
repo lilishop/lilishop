@@ -23,6 +23,9 @@ class OrderStatusHandlerExecuteTest {
     private OrderStatusHandlerExecute handler;
     private TradeService tradeService;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         handler = new OrderStatusHandlerExecute();
@@ -30,6 +33,9 @@ class OrderStatusHandlerExecuteTest {
         ReflectionTestUtils.setField(handler, "tradeService", tradeService);
     }
 
+    /**
+     * 验证创建订单时零实付金额订单自动支付。
+     */
     @Test
     void orderCreateAutoPaysWhenFlowPriceIsZero() {
         TradeDTO tradeDTO = new TradeDTO(CartTypeEnum.BUY_NOW);

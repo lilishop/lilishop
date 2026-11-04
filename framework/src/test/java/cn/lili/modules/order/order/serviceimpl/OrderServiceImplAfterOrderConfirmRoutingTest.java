@@ -35,12 +35,18 @@ class OrderServiceImplAfterOrderConfirmRoutingTest {
     private OrderServiceImpl orderService;
     private CardKeyService cardKeyService;
 
+    /**
+     * 初始化订单实体的MyBatis-Plus元数据。
+     */
     @BeforeAll
     static void initOrderEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
         TableInfoHelper.initTableInfo(assistant, Order.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         orderService = spy(new OrderServiceImpl());
@@ -110,6 +116,13 @@ class OrderServiceImplAfterOrderConfirmRoutingTest {
         verify(cardKeyService, never()).fulfillAfterPayment(any());
     }
 
+    /**
+     * 构造卡密订单测试数据。
+     *
+     * @param sn            订单编号
+     * @param promotionType 促销活动类型
+     * @return 卡密订单测试数据
+     */
     private Order eCouponOrder(String sn, OrderPromotionTypeEnum promotionType) {
         Order order = new Order();
         order.setSn(sn);

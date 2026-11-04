@@ -10,6 +10,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class CategoryPageSettingTest {
 
+    /**
+     * 验证分类页默认使用模板一且所有展示字段开启。
+     */
     @Test
     void defaults_are_template1_and_all_fields_true() {
         CategoryPageSetting s = new CategoryPageSetting();
@@ -18,6 +21,9 @@ class CategoryPageSettingTest {
         assertThat(s.getShowFields().getLinePrice()).isTrue();
     }
 
+    /**
+     * 验证分类页配置缺少字段时使用默认值。
+     */
     @Test
     void missing_keys_fall_back_to_defaults() {
         CategoryPageSetting s = JSONUtil.toBean("{\"template\":2}", CategoryPageSetting.class);

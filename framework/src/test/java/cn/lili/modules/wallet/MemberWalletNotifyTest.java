@@ -29,6 +29,9 @@ class MemberWalletNotifyTest {
     private MemberWalletServiceImpl service;
     private LiliMessageTemplate liliMessageTemplate;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         service = spy(new MemberWalletServiceImpl());
@@ -40,6 +43,9 @@ class MemberWalletNotifyTest {
         doReturn("180.00").when(service).currentBalanceStr("m1");
     }
 
+    /**
+     * 验证钱包变动向通知主题发布消息。
+     */
     @Test
     void walletChangePublishesToNoticeTopic() {
         ReflectionTestUtils.invokeMethod(service, "notifyWalletChange", "m1", 100.0, false);
@@ -56,6 +62,9 @@ class MemberWalletNotifyTest {
         assertThat(dto.getPage()).isEqualTo("pages/mine/deposit/index");
     }
 
+    /**
+     * 验证钱包通知发布失败时不影响钱包变动流程。
+     */
     @Test
     void walletChangeDoesNotThrowWhenPublishFails() {
         doThrow(new RuntimeException("redis down")).when(liliMessageTemplate)

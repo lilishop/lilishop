@@ -57,6 +57,9 @@ class CardKeyServiceImplImportBatchTest {
     private GoodsService goodsService;
     private StoreService storeService;
 
+    /**
+     * 初始化当前测试使用的MyBatis-Plus实体元数据。
+     */
     @BeforeAll
     static void initEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
@@ -64,6 +67,9 @@ class CardKeyServiceImplImportBatchTest {
         ReflectionTestUtils.setField(SnowFlake.class, "snowflake", new Snowflake(1, 1));
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         cardKeyService = spy(new CardKeyServiceImpl());
@@ -80,6 +86,9 @@ class CardKeyServiceImplImportBatchTest {
         doNothing().when(cardKeyService).syncSkuStock(SKU_ID);
     }
 
+    /**
+     * 验证批量导入卡密累计成功数量。
+     */
     @Test
     void importBatchIncrementsSuccessCount() {
         try (MockedStatic<UserContext> userContext = mockStatic(UserContext.class)) {
@@ -96,6 +105,9 @@ class CardKeyServiceImplImportBatchTest {
         }
     }
 
+    /**
+     * 验证批量导入拒绝卡池中已存在的卡号。
+     */
     @Test
     void importBatchRejectsDuplicateCardNoInPool() {
         try (MockedStatic<UserContext> userContext = mockStatic(UserContext.class)) {
@@ -112,12 +124,20 @@ class CardKeyServiceImplImportBatchTest {
         }
     }
 
+    /**
+     * 配置卡密导入所需的商品、店铺及库存模拟依赖。
+     */
     private void whenMocks() {
         org.mockito.Mockito.when(goodsSkuService.getById(SKU_ID)).thenReturn(buildSku());
         org.mockito.Mockito.when(goodsService.getById("goods-1")).thenReturn(buildGoods());
         org.mockito.Mockito.when(storeService.getById(STORE_ID)).thenReturn(buildStore());
     }
 
+    /**
+     * 构造测试店铺的商家登录用户。
+     *
+     * @return 测试店铺的商家登录用户
+     */
     private AuthUser storeUser() {
         return AuthUser.builder()
                 .id("clerk-1")
@@ -127,6 +147,11 @@ class CardKeyServiceImplImportBatchTest {
                 .build();
     }
 
+    /**
+     * 构造SKU基础测试数据。
+     *
+     * @return SKU基础测试数据
+     */
     private GoodsSku buildSku() {
         GoodsSku sku = new GoodsSku();
         sku.setId(SKU_ID);
@@ -137,6 +162,11 @@ class CardKeyServiceImplImportBatchTest {
         return sku;
     }
 
+    /**
+     * 构造商品基础测试数据。
+     *
+     * @return 商品基础测试数据
+     */
     private Goods buildGoods() {
         Goods goods = new Goods();
         goods.setId("goods-1");
@@ -145,6 +175,11 @@ class CardKeyServiceImplImportBatchTest {
         return goods;
     }
 
+    /**
+     * 构造店铺基础测试数据。
+     *
+     * @return 店铺基础测试数据
+     */
     private Store buildStore() {
         Store store = new Store();
         store.setId(STORE_ID);

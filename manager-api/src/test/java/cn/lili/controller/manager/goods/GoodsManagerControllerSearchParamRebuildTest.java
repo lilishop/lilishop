@@ -41,6 +41,9 @@ class GoodsManagerControllerSearchParamRebuildTest {
     @Mock
     private GoodsSearchParamService goodsSearchParamService;
 
+    /**
+     * 验证提交商品参数重建接口返回服务提供的状态。
+     */
     @Test
     void submitRebuildReturnsServiceStatus() {
         RebuildStatus status = new RebuildStatus();
@@ -55,6 +58,9 @@ class GoodsManagerControllerSearchParamRebuildTest {
         verify(goodsSearchParamService).submitRebuildAll();
     }
 
+    /**
+     * 验证单商品参数重建接口返回写入行数。
+     */
     @Test
     void rebuildByGoodsIdReturnsWrittenRows() {
         when(goodsSearchParamService.rebuildByGoodsId("g1")).thenReturn(3);
@@ -65,6 +71,9 @@ class GoodsManagerControllerSearchParamRebuildTest {
         verify(goodsSearchParamService).rebuildByGoodsId("g1");
     }
 
+    /**
+     * 验证重建状态接口返回Redis中的进度。
+     */
     @Test
     void getStatusReturnsRedisProgress() {
         RebuildStatus status = new RebuildStatus();
@@ -78,6 +87,9 @@ class GoodsManagerControllerSearchParamRebuildTest {
         verify(goodsSearchParamService).getRebuildStatus();
     }
 
+    /**
+     * 验证参数重建写接口具有演示站点保护注解。
+     */
     @Test
     void rebuildEndpointsAreDemoSiteProtected() throws NoSuchMethodException {
         Method submit = GoodsManagerController.class.getMethod("submitSearchParamRebuild");

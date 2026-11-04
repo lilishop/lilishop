@@ -43,6 +43,9 @@ class GoodsServiceImplCheckGoodsTest {
     private SettingService settingService;
     private StoreService storeService;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         goodsService = new GoodsServiceImpl();
@@ -59,6 +62,9 @@ class GoodsServiceImplCheckGoodsTest {
         when(storeService.getStoreDetail()).thenReturn(buildStoreDetail());
     }
 
+    /**
+     * 验证卡密商品即使传入运费模板也强制使用零模板。
+     */
     @Test
     void checkGoodsForcesTemplateIdZeroForECouponWhenNonZeroProvided() {
         Goods goods = newGoods(GoodsTypeEnum.E_COUPON.name(), "123");
@@ -72,6 +78,9 @@ class GoodsServiceImplCheckGoodsTest {
         assertThat(goods.getQuantity()).isZero();
     }
 
+    /**
+     * 验证卡密商品保留零运费模板。
+     */
     @Test
     void checkGoodsKeepsTemplateIdZeroForECoupon() {
         Goods goods = newGoods(GoodsTypeEnum.E_COUPON.name(), "0");
@@ -81,6 +90,9 @@ class GoodsServiceImplCheckGoodsTest {
         assertThat(goods.getTemplateId()).isEqualTo("0");
     }
 
+    /**
+     * 验证虚拟商品强制使用零运费模板。
+     */
     @Test
     void checkGoodsForcesTemplateIdZeroForVirtualGoods() {
         Goods goods = newGoods(GoodsTypeEnum.VIRTUAL_GOODS.name(), "456");
@@ -90,6 +102,9 @@ class GoodsServiceImplCheckGoodsTest {
         assertThat(goods.getTemplateId()).isEqualTo("0");
     }
 
+    /**
+     * 验证实物商品未配置运费模板时拒绝保存。
+     */
     @Test
     void checkGoodsRejectsPhysicalGoodsWithoutFreightTemplate() {
         Goods goods = newGoods(GoodsTypeEnum.PHYSICAL_GOODS.name(), "0");
@@ -98,6 +113,9 @@ class GoodsServiceImplCheckGoodsTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.PHYSICAL_GOODS_NEED_TEMP);
     }
 
+    /**
+     * 验证非商家用户不能通过商品保存校验。
+     */
     @Test
     void checkGoodsRejectsNonStoreUser() {
         Goods goods = newGoods(GoodsTypeEnum.E_COUPON.name(), "0");
@@ -112,6 +130,14 @@ class GoodsServiceImplCheckGoodsTest {
         }
     }
 
+    /**
+     * 验证根据服务端店铺类型选择普通店或自营店审核配置。
+     *
+     * @param selfOperated           是否为自营店
+     * @param goodsCheck             普通店商品审核开关
+     * @param selfOperatedGoodsCheck 自营店商品审核开关
+     * @param expected               预期结果
+     */
     @ParameterizedTest
     @CsvSource(value = {
             "true,true,true,TOBEAUDITED", "true,true,false,PASS",
@@ -142,6 +168,11 @@ class GoodsServiceImplCheckGoodsTest {
         assertThat(goods.getSelfOperated()).isEqualTo(selfOperated);
     }
 
+    /**
+     * 在模拟商家上下文中调用商品内部校验方法。
+     *
+     * @param goods 商品测试数据
+     */
     private void invokeCheckGoods(Goods goods) {
         try (MockedStatic<UserContext> userContext = mockStatic(UserContext.class)) {
             userContext.when(UserContext::getCurrentUser).thenReturn(storeUser());
@@ -149,6 +180,13 @@ class GoodsServiceImplCheckGoodsTest {
         }
     }
 
+    /**
+     * 构造指定商品类型及运费模板的商品。
+     *
+     * @param goodsType  商品类型
+     * @param templateId 消息模板ID
+     * @return 指定商品类型及运费模板的商品
+     */
     private Goods newGoods(String goodsType, String templateId) {
         Goods goods = new Goods();
         goods.setGoodsType(goodsType);
@@ -157,6 +195,11 @@ class GoodsServiceImplCheckGoodsTest {
         return goods;
     }
 
+    /**
+     * 构造测试店铺的商家登录用户。
+     *
+     * @return 测试店铺的商家登录用户
+     */
     private AuthUser storeUser() {
         return AuthUser.builder()
                 .id("clerk-1")
@@ -166,6 +209,11 @@ class GoodsServiceImplCheckGoodsTest {
                 .build();
     }
 
+    /**
+     * 构造商品校验使用的店铺详情。
+     *
+     * @return 商品校验使用的店铺详情
+     */
     private StoreVO buildStoreDetail() {
         StoreVO store = new StoreVO();
         store.setId(STORE_ID);

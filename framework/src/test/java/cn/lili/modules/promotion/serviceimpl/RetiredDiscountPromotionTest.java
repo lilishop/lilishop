@@ -29,6 +29,11 @@ import static org.mockito.Mockito.*;
  * @since 2026-11-03
  */
 class RetiredDiscountPromotionTest {
+    /**
+     * 验证构建促销映射时忽略已退役活动类型。
+     *
+     * @param type 类型
+     */
     @ParameterizedTest
     @ValueSource(strings = {"FLASH_DISCOUNT", "NTH_ITEM_DISCOUNT"})
     void ignoresRetiredActivitiesWhenBuildingPromotionMap(String type) {
@@ -41,6 +46,9 @@ class RetiredDiscountPromotionTest {
         assertThat(PromotionTypeEnum.haveStock(type)).isFalse();
     }
 
+    /**
+     * 验证当前促销结果不再展示已退役活动类型。
+     */
     @Test
     void currentPromotionsDoNotAdvertiseRetiredActivities() {
         PromotionGoods retired = new PromotionGoods();
@@ -55,6 +63,11 @@ class RetiredDiscountPromotionTest {
         assertThat(service.getCurrentPromotion()).containsOnlyKeys("SECKILL");
     }
 
+    /**
+     * 验证清理已退役缓存活动时保留秒杀活动。
+     *
+     * @param type 类型
+     */
     @ParameterizedTest
     @ValueSource(strings = {"FLASH_DISCOUNT", "NTH_ITEM_DISCOUNT"})
     void dropsRetiredCachedActivityAndPreservesSeckill(String type) {
@@ -65,6 +78,11 @@ class RetiredDiscountPromotionTest {
         assertThat(source).hasSize(2);
     }
 
+    /**
+     * 验证失效活动不能覆盖SKU促销价格。
+     *
+     * @param type 类型
+     */
     @ParameterizedTest
     @ValueSource(strings = {"FLASH_DISCOUNT", "NTH_ITEM_DISCOUNT"})
     void staleActivityCannotSetSkuPromotionPrice(String type) {
@@ -86,6 +104,11 @@ class RetiredDiscountPromotionTest {
         assertThat(sku.getPrice()).isEqualTo(100D);
     }
 
+    /**
+     * 构造处于有效时间范围内的促销活动。
+     *
+     * @return 处于有效时间范围内的促销活动
+     */
     private BasePromotions currentActivity() {
         BasePromotions activity = new BasePromotions();
         activity.setId("activity");

@@ -32,6 +32,9 @@ class FileTest {
     @Autowired
     private BrandService brandService;
 
+    /**
+     * 迁移品牌Logo至文件存储服务并更新品牌记录。
+     */
     @Test
     void test() throws Exception {
         List<Brand> categoryList = brandService.list();

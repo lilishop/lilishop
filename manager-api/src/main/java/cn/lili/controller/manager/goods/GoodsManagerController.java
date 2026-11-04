@@ -67,6 +67,13 @@ public class GoodsManagerController {
         return ResultUtil.data(goodsService.queryByParams(goodsSearchParams));
     }
 
+    @Operation(summary = "取消商品定时上下架计划")
+    @DeleteMapping("/schedule/market/{goodsId}")
+    public ResultMessage<Object> cancelSchedule(@PathVariable String goodsId, @RequestParam GoodsStatusEnum status) {
+        goodsService.cancelGoodsMarketSchedule(goodsId, status);
+        return ResultUtil.success();
+    }
+
     @Operation(summary = "获取商品数量")
     @Parameter(name = "goodsSearchParams", description = "商品查询参数")
     @GetMapping("/goodsNumber")

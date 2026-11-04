@@ -62,6 +62,9 @@ class OrderServiceImplDeliveryTest {
     private AuthUser authUser;
     private MockedStatic<UserContext> userContextMock;
 
+    /**
+     * 初始化当前测试使用的MyBatis-Plus实体元数据。
+     */
     @BeforeAll
     static void initMybatisEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
@@ -70,6 +73,9 @@ class OrderServiceImplDeliveryTest {
         TableInfoHelper.initTableInfo(assistant, OrderPackage.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         orderService = spy(new OrderServiceImpl());
@@ -98,11 +104,17 @@ class OrderServiceImplDeliveryTest {
         userContextMock.when(UserContext::getCurrentUser).thenReturn(authUser);
     }
 
+    /**
+     * 释放当前用例创建的静态模拟资源。
+     */
     @AfterEach
     void tearDown() {
         userContextMock.close();
     }
 
+    /**
+     * 验证整单发货创建包裹并更新已发货数量。
+     */
     @Test
     void wholeDeliveryCreatesPackageAndUpdatesDeliverNumber() {
         Order order = deliverableOrder();
@@ -132,6 +144,9 @@ class OrderServiceImplDeliveryTest {
         assertThat(packageCaptor.getValue().getLogisticsNo()).isEqualTo("SF123");
     }
 
+    /**
+     * 验证拆单发货默认使用剩余未发数量。
+     */
     @Test
     void splitDeliveryDefaultsRemainingQuantity() {
         Order order = deliverableOrder();
@@ -160,6 +175,9 @@ class OrderServiceImplDeliveryTest {
         assertThat(order.getOrderStatus()).isEqualTo(OrderStatusEnum.PARTS_DELIVERED.name());
     }
 
+    /**
+     * 验证无需物流发货允许空备注并清除订单物流信息。
+     */
     @Test
     void noDeliveryAllowsBlankRemarkAndClearsOrderLogistics() {
         Order order = deliverableOrder();
@@ -184,6 +202,9 @@ class OrderServiceImplDeliveryTest {
         assertThat(packageCaptor.getValue().getDeliveryRemark()).isNull();
     }
 
+    /**
+     * 验证部分发货订单拒绝整单发货及无需物流发货。
+     */
     @Test
     void partsDeliveredRejectsWholeAndNoDelivery() {
         Order order = deliverableOrder();
@@ -212,6 +233,11 @@ class OrderServiceImplDeliveryTest {
                 .isEqualTo(ResultCode.ORDER_DELIVER_ERROR);
     }
 
+    /**
+     * 构造可执行发货流程的普通订单。
+     *
+     * @return 可执行发货流程的普通订单
+     */
     private Order deliverableOrder() {
         Order order = new Order();
         order.setSn("O001");
@@ -223,6 +249,14 @@ class OrderServiceImplDeliveryTest {
         return order;
     }
 
+    /**
+     * 构造订单项测试数据。
+     *
+     * @param id        测试数据ID
+     * @param num       增量或数量
+     * @param delivered 是否已发货
+     * @return 订单项测试数据
+     */
     private OrderItem orderItem(String id, int num, int delivered) {
         OrderItem item = new OrderItem();
         item.setId(id);
@@ -235,6 +269,13 @@ class OrderServiceImplDeliveryTest {
         return item;
     }
 
+    /**
+     * 构造指定ID及名称的物流公司数据。
+     *
+     * @param id   测试数据ID
+     * @param name 名称
+     * @return 指定ID及名称的物流公司数据
+     */
     private Logistics logistics(String id, String name) {
         Logistics logistics = new Logistics();
         logistics.setId(id);

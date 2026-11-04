@@ -23,6 +23,9 @@ class FilePluginFactoryTest {
     @TempDir
     Path tempDir;
 
+    /**
+     * 验证缺少对象存储配置时使用本地文件存储。
+     */
     @Test
     void filePluginShouldUseLocalStorageWhenOssSettingMissing() throws Exception {
         SettingService settingService = mock(SettingService.class);

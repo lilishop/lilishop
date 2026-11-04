@@ -37,6 +37,9 @@ class DistributionGradeServiceImplRefreshGradeTest {
     private DistributionGradeHistoryMapper gradeHistoryMapper;
     private DistributionGradeReferenceSupport gradeReferenceSupport;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         service = spy(new DistributionGradeServiceImpl());

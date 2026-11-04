@@ -45,12 +45,18 @@ class GoodsSkuServiceImplECouponStockTest {
 
     private GoodsSkuServiceImpl serviceSpy;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         serviceSpy = spy(goodsSkuService);
         ReflectionTestUtils.setField(serviceSpy, "goodsService", goodsService);
     }
 
+    /**
+     * 验证新建卡密SKU忽略手工库存数量。
+     */
     @Test
     void renderGoodsSkuListIgnoresManualQuantityForNewECouponSku() {
         GoodsSku sku = buildECouponSku("", 999);
@@ -66,6 +72,9 @@ class GoodsSkuServiceImplECouponStockTest {
         assertThat(sku.getQuantity()).isZero();
     }
 
+    /**
+     * 验证卡密SKU拒绝手动修改库存。
+     */
     @Test
     void updateStockRejectsECouponManualUpdate() {
         GoodsSku sku = buildECouponSku("sku-1", 10);
@@ -76,6 +85,9 @@ class GoodsSkuServiceImplECouponStockTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.CARD_KEY_STOCK_MANUAL_FORBIDDEN);
     }
 
+    /**
+     * 验证按类型更新库存时拒绝手工调整卡密库存。
+     */
     @Test
     void updateStockByTypeRejectsECouponManualUpdate() {
         GoodsSku sku = buildECouponSku("sku-1", 10);
@@ -86,6 +98,9 @@ class GoodsSkuServiceImplECouponStockTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.CARD_KEY_STOCK_MANUAL_FORBIDDEN);
     }
 
+    /**
+     * 验证更新卡密商品库存时使用卡池同步逻辑。
+     */
     @Test
     void updateGoodsStockUsesCardKeySyncForECoupon() {
         GoodsSku sku = buildECouponSku("sku-1", 5);
@@ -98,6 +113,13 @@ class GoodsSkuServiceImplECouponStockTest {
         verify(goodsService).updateStock("goods-1");
     }
 
+    /**
+     * 构造指定库存的卡密SKU测试数据。
+     *
+     * @param id       测试数据ID
+     * @param quantity 商品数量
+     * @return 指定库存的卡密SKU测试数据
+     */
     private GoodsSku buildECouponSku(String id, int quantity) {
         GoodsSku sku = new GoodsSku();
         sku.setId(id);

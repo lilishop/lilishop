@@ -35,6 +35,9 @@ public class BillTest {
     @Autowired
     private StoreDetailService storeDetailService;
 
+    /**
+     * 按店铺结算周期生成结算单并更新店铺结算时间。
+     */
     @Test
     void createBillTest() {
         //获取当前天数

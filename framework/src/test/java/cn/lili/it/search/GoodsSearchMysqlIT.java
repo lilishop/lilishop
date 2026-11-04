@@ -43,6 +43,13 @@ class GoodsSearchMysqlIT {
     private final GoodsSearchParamService goodsSearchParamService;
     private final Cache<RebuildStatus> cache;
 
+    /**
+     * 注入商品搜索集成测试所需服务及缓存。
+     *
+     * @param goodsSearchService      商品搜索服务
+     * @param goodsSearchParamService 商品参数服务
+     * @param cache                   测试缓存
+     */
     @Autowired
     GoodsSearchMysqlIT(GoodsSearchServiceImpl goodsSearchService,
                        GoodsSearchParamService goodsSearchParamService,
@@ -52,12 +59,18 @@ class GoodsSearchMysqlIT {
         this.cache = cache;
     }
 
+    /**
+     * 清空搜索相关测试表及重建进度缓存，隔离各测试用例。
+     */
     @BeforeEach
     void truncate() {
         MysqlITSupport.truncateSearchTables();
         cache.clear();
     }
 
+    /**
+     * 验证搜索SQL通过索引参数存在条件筛选商品。
+     */
     @Test
     void mapperSqlFiltersByIndexedParamExists() {
         seedVisibleGoods("101", SearchFixtures.indexedJson("内存", "8G", 1), "8");
@@ -69,6 +82,9 @@ class GoodsSearchMysqlIT {
         assertThat(page.getRecords()).extracting(GoodsIndex::getGoodsId).containsExactly("101");
     }
 
+    /**
+     * 验证分页总数与记录一致且同名参数多值按或匹配。
+     */
     @Test
     void countMatchesRecordTotalAndSameNameValuesAreOr() {
         for (int i = 1; i <= 12; i++) {
@@ -84,6 +100,9 @@ class GoodsSearchMysqlIT {
         assertThat(page.getRecords()).hasSize(5);
     }
 
+    /**
+     * 验证深分页结果无重复或遗漏。
+     */
     @Test
     void deepPaginationHasNoDuplicatesOrGaps() {
         for (int i = 1; i <= 25; i++) {
@@ -117,6 +136,9 @@ class GoodsSearchMysqlIT {
         assertThat(ordered).containsExactlyElementsOf(expectedDesc);
     }
 
+    /**
+     * 验证价格为空的商品在升序及降序中均排在末尾。
+     */
     @Test
     void nullPriceSortsLastInBothDirections() {
         SearchFixtures.insertGoods("401", "[]", false, LocalDateTime.of(2021, 1, 1, 0, 0));
@@ -137,6 +159,9 @@ class GoodsSearchMysqlIT {
                 .containsExactly("4011", "4033", "4022");
     }
 
+    /**
+     * 验证二进制排序规则下参数匹配区分大小写。
+     */
     @Test
     void utf8mb4BinParamMatchIsCaseSensitive() {
         seedVisibleGoods("501", SearchFixtures.indexedJson("Color", "Black", 1), "1");
@@ -150,6 +175,9 @@ class GoodsSearchMysqlIT {
         assertThat(page.getTotal()).isEqualTo(1);
     }
 
+    /**
+     * 验证同步后清空参数会删除倒排记录。
+     */
     @Test
     void syncThenClearRemovesInvertedRows() {
         seedVisibleGoods("601", SearchFixtures.indexedJson("内存", "8G", 1), "1");
@@ -161,6 +189,9 @@ class GoodsSearchMysqlIT {
         assertThat(SearchFixtures.countSearchParams("601")).isZero();
     }
 
+    /**
+     * 验证重复全量重建不会产生重复倒排记录。
+     */
     @Test
     void rebuildAllTwiceDoesNotDuplicateRows() throws InterruptedException {
         String json = SearchFixtures.indexedJsonTwo("内存", "8G", 1, "颜色", "黑色", 2);
@@ -179,6 +210,9 @@ class GoodsSearchMysqlIT {
         assertThat(SearchFixtures.searchParamExists("702", "颜色", "黑色")).isTrue();
     }
 
+    /**
+     * 验证并发编辑与重建后倒排数据与当前参数JSON一致。
+     */
     @Test
     void concurrentEditAndRebuildEndsWithCurrentJson() throws InterruptedException {
         String initial = SearchFixtures.indexedJson("内存", "8G", 1);
@@ -228,6 +262,9 @@ class GoodsSearchMysqlIT {
         }
     }
 
+    /**
+     * 验证商品索引使用SKU成本字段填充市场价。
+     */
     @Test
     void goodsIndexExposesSkuCostAsMarketPrice() {
         SearchFixtures.insertGoods("1001", "[]", false, LocalDateTime.of(2021, 6, 1, 0, 0));
@@ -240,6 +277,9 @@ class GoodsSearchMysqlIT {
         assertThat(page.getRecords().get(0).getMarketPrice()).isEqualTo(129.00);
     }
 
+    /**
+     * 验证参数筛选聚合查询排除已选维度的限制。
+     */
     @Test
     void selectorParamSqlHidesSelectedDimension() {
         String json = SearchFixtures.indexedJsonTwo("内存", "8G", 1, "颜色", "黑色", 2);
@@ -251,18 +291,40 @@ class GoodsSearchMysqlIT {
         assertThat(related.getParamOptions().get(0).getValues()).containsExactly("黑色");
     }
 
+    /**
+     * 插入带参数及可见SKU的商品测试数据。
+     *
+     * @param goodsId   商品ID
+     * @param params    商品参数JSON
+     * @param skuSuffix SKU编号后缀
+     */
     private static void seedVisibleGoods(String goodsId, String params, String skuSuffix) {
         SearchFixtures.insertGoods(goodsId, params, false, LocalDateTime.of(2021, 6, 1, 0, 0));
         SearchFixtures.insertVisibleSku(goodsId + skuSuffix, goodsId, "0",
                 new BigDecimal("99.00"), 1, 0, "c1,c2");
     }
 
+    /**
+     * 构造指定商品参数筛选条件的搜索请求。
+     *
+     * @param prop 商品参数筛选条件
+     * @return 指定商品参数筛选条件的搜索请求
+     */
     private static GoodsSearchDTO search(String prop) {
         GoodsSearchDTO searchDTO = new GoodsSearchDTO();
         searchDTO.setProp(prop);
         return searchDTO;
     }
 
+    /**
+     * 构造包含页码、页长及排序条件的分页参数。
+     *
+     * @param pageNumber 页码
+     * @param pageSize   每页条数
+     * @param sort       排序字段
+     * @param order      订单测试数据
+     * @return 包含页码、页长及排序条件的分页参数
+     */
     private static PageVO page(int pageNumber, int pageSize, String sort, String order) {
         PageVO pageVo = new PageVO();
         pageVo.setPageNumber(pageNumber);
@@ -273,6 +335,9 @@ class GoodsSearchMysqlIT {
         return pageVo;
     }
 
+    /**
+     * 轮询等待商品参数重建任务结束并校验最终进度。
+     */
     private void waitUntilIdle() throws InterruptedException {
         RebuildStatus status = null;
         for (int i = 0; i < 80; i++) {
@@ -286,6 +351,12 @@ class GoodsSearchMysqlIT {
         throw new AssertionError("rebuild did not finish: " + status);
     }
 
+    /**
+     * 读取数据库中商品当前保存的参数JSON。
+     *
+     * @param goodsId 商品ID
+     * @return 数据库中商品当前保存的参数JSON
+     */
     private static String currentParams(String goodsId) {
         try (var connection = MysqlITSupport.open();
              var statement = connection.prepareStatement("SELECT params FROM li_goods WHERE id = ?")) {

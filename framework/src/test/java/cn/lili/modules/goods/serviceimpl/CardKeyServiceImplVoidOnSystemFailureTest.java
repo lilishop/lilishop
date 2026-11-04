@@ -35,6 +35,9 @@ class CardKeyServiceImplVoidOnSystemFailureTest {
 
     private CardKeyServiceImpl cardKeyService;
 
+    /**
+     * 初始化当前测试使用的MyBatis-Plus实体元数据。
+     */
     @BeforeAll
     static void initMybatisPlusEntityCache() {
         TableInfoHelper.initTableInfo(
@@ -42,11 +45,17 @@ class CardKeyServiceImplVoidOnSystemFailureTest {
                 CardKey.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         cardKeyService = spy(new CardKeyServiceImpl());
     }
 
+    /**
+     * 验证系统失败时作废已分配卡密并清除订单绑定。
+     */
     @Test
     void voidOnSystemFailureVoidsAllocatedCardsAndClearsOrderBinding() {
         CardKey card1 = allocatedCard("ck-1", "sku-1", "O001", "OI001");
@@ -73,6 +82,9 @@ class CardKeyServiceImplVoidOnSystemFailureTest {
         }
     }
 
+    /**
+     * 验证系统失败清理后按不同SKU分别同步库存。
+     */
     @Test
     void voidOnSystemFailureSyncsStockForEachDistinctSku() {
         CardKey card1 = allocatedCard("ck-1", "sku-a", "O002", "OI001");
@@ -87,6 +99,9 @@ class CardKeyServiceImplVoidOnSystemFailureTest {
         verify(cardKeyService).syncSkuStock("sku-b");
     }
 
+    /**
+     * 验证没有已分配卡密时系统失败清理不执行更新。
+     */
     @Test
     void voidOnSystemFailureNoOpWhenNoAllocatedCards() {
         doReturn(List.of()).when(cardKeyService).list(any(Wrapper.class));
@@ -97,6 +112,9 @@ class CardKeyServiceImplVoidOnSystemFailureTest {
         verify(cardKeyService, never()).syncSkuStock(anyString());
     }
 
+    /**
+     * 验证系统失败清理不影响其他订单的卡密。
+     */
     @Test
     void voidOnSystemFailureDoesNotTouchUnrelatedOrders() {
         CardKey allocated = allocatedCard("ck-1", "sku-1", "O004", "OI001");
@@ -110,6 +128,15 @@ class CardKeyServiceImplVoidOnSystemFailureTest {
         verify(cardKeyService, never()).syncSkuStock("sku-other");
     }
 
+    /**
+     * 构造已分配并绑定订单的卡密记录。
+     *
+     * @param id          测试数据ID
+     * @param skuId       SKU ID
+     * @param orderSn     订单编号
+     * @param orderItemSn 订单项编号
+     * @return 已分配并绑定订单的卡密记录
+     */
     private CardKey allocatedCard(String id, String skuId, String orderSn, String orderItemSn) {
         CardKey cardKey = new CardKey();
         cardKey.setId(id);

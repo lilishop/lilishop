@@ -24,6 +24,9 @@ class DistributionRecruitPendingTokenSupportTest {
     private DistributionRecruitPendingTokenSupport support;
     private Cache<String> cache;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         support = new DistributionRecruitPendingTokenSupport();

@@ -26,6 +26,9 @@ class SiteBuyerControllerCategoryPageTest {
     @Mock
     private SettingService settingService;
 
+    /**
+     * 验证分类页接口返回已保存的配置。
+     */
     @Test
     void categoryPageSettingReturnsStoredSetting() {
         Setting setting = new Setting();
@@ -39,6 +42,9 @@ class SiteBuyerControllerCategoryPageTest {
         assertThat(message.getResult()).isEqualTo(setting);
     }
 
+    /**
+     * 验证分类页未配置时返回空结果。
+     */
     @Test
     void categoryPageSettingReturnsNullWhenNotConfigured() {
         when(settingService.get(SettingEnum.CATEGORY_PAGE_SETTING.name())).thenReturn(null);

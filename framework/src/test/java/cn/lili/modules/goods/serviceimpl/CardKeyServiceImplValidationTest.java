@@ -43,11 +43,17 @@ class CardKeyServiceImplValidationTest {
 
     private CardKeyServiceImpl cardKeyService;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         cardKeyService = new CardKeyServiceImpl();
     }
 
+    /**
+     * 验证立即购买卡密订单被识别为购买类型。
+     */
     @Test
     void isPurchaseTypeOrderReturnsTrueForBuyNowECoupon() {
         Order order = new Order();
@@ -94,6 +100,9 @@ class CardKeyServiceImplValidationTest {
         assertThat(cardKeyService.isECouponFulfillmentEligible(order)).isFalse();
     }
 
+    /**
+     * 验证卡密赠品子订单被识别为赠品订单。
+     */
     @Test
     void isGiftECouponOrderReturnsTrueForGiftSubOrder() {
         Order order = new Order();
@@ -104,6 +113,9 @@ class CardKeyServiceImplValidationTest {
         assertThat(cardKeyService.isPurchaseTypeOrder(order)).isFalse();
     }
 
+    /**
+     * 验证卡密拼团订单被正确识别。
+     */
     @Test
     void isPintuanECouponOrderReturnsTrueForPintuanOrder() {
         Order order = new Order();
@@ -114,6 +126,9 @@ class CardKeyServiceImplValidationTest {
         assertThat(cardKeyService.isPurchaseTypeOrder(order)).isFalse();
     }
 
+    /**
+     * 验证卡密商品与虚拟商品混合交易被拒绝。
+     */
     @Test
     void validateTradeRejectsMixedECouponAndVirtualGoods() {
         CardKeyServiceImpl service = buildServiceWithPoolStock(10);
@@ -123,6 +138,9 @@ class CardKeyServiceImplValidationTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.CARD_KEY_MIXED_CHECKOUT);
     }
 
+    /**
+     * 验证卡密商品不能通过普通购物车结算。
+     */
     @Test
     void validateTradeRejectsCartCheckoutForECoupon() {
         CardKeyServiceImpl service = buildServiceWithPoolStock(10);
@@ -132,6 +150,9 @@ class CardKeyServiceImplValidationTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.CARD_KEY_E_COUPON_CART_FORBIDDEN);
     }
 
+    /**
+     * 验证卡密池库存不足时拒绝交易。
+     */
     @Test
     void validateTradeRejectsInsufficientPoolStock() {
         CardKeyServiceImpl service = buildServiceWithPoolStock(0);
@@ -141,6 +162,9 @@ class CardKeyServiceImplValidationTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.CARD_KEY_POOL_INSUFFICIENT);
     }
 
+    /**
+     * 验证卡池充足时允许立即购买卡密商品。
+     */
     @Test
     void validateTradeAllowsBuyNowWhenStockAvailable() {
         CardKeyServiceImpl service = buildServiceWithPoolStock(5);
@@ -149,6 +173,9 @@ class CardKeyServiceImplValidationTest {
         assertDoesNotThrow(() -> service.validateTradeForECoupon(tradeDTO));
     }
 
+    /**
+     * 验证卡密交易支持积分结算类型。
+     */
     @Test
     void validateTradeAllowsPointsCartType() {
         CardKeyServiceImpl service = buildServiceWithPoolStock(10);
@@ -157,6 +184,9 @@ class CardKeyServiceImplValidationTest {
         assertDoesNotThrow(() -> service.validateTradeForECoupon(tradeDTO));
     }
 
+    /**
+     * 验证卡密交易支持拼团结算类型。
+     */
     @Test
     void validateTradeAllowsPintuanCartType() {
         CardKeyServiceImpl service = buildServiceWithPoolStock(10);
@@ -165,6 +195,9 @@ class CardKeyServiceImplValidationTest {
         assertDoesNotThrow(() -> service.validateTradeForECoupon(tradeDTO));
     }
 
+    /**
+     * 验证卡密商品与实物商品混合交易被拒绝。
+     */
     @Test
     void validateTradeRejectsMixedECouponAndPhysical() {
         CardKeyServiceImpl service = buildServiceWithPoolStock(10);
@@ -174,6 +207,9 @@ class CardKeyServiceImplValidationTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.CARD_KEY_MIXED_CHECKOUT);
     }
 
+    /**
+     * 验证同一交易包含多个卡密SKU时被拒绝。
+     */
     @Test
     void validateTradeRejectsMultipleECouponSkus() {
         CardKeyServiceImpl service = buildServiceWithPoolStock(10);
@@ -185,6 +221,9 @@ class CardKeyServiceImplValidationTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.CARD_KEY_MULTI_E_COUPON_SKU);
     }
 
+    /**
+     * 验证卡密交易允许促销及零实付金额。
+     */
     @Test
     void validateTradeAllowsPromotionsAndZeroFlowPrice() {
         CardKeyServiceImpl service = buildServiceWithPoolStock(10);
@@ -206,6 +245,9 @@ class CardKeyServiceImplValidationTest {
         assertDoesNotThrow(() -> service.validateTradeForECoupon(tradeDTO));
     }
 
+    /**
+     * 验证卡密交易规范化清除收货地址并保留优惠券信息。
+     */
     @Test
     void normalizeECouponTradeClearsAddressAndPreservesCoupons() {
         CardKeyServiceImpl service = new CardKeyServiceImpl();
@@ -225,6 +267,12 @@ class CardKeyServiceImplValidationTest {
                 .isEqualTo(cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum.VIRTUAL.name());
     }
 
+    /**
+     * 创建使用指定卡池库存的卡密服务。
+     *
+     * @param stock 库存数量
+     * @return 使用指定卡池库存的卡密服务
+     */
     private CardKeyServiceImpl buildServiceWithPoolStock(int stock) {
         CardKeyServiceImpl service = spy(new CardKeyServiceImpl());
         doReturn(stock).when(service).countUnusedPoolStock("sku-1");
@@ -236,6 +284,13 @@ class CardKeyServiceImplValidationTest {
         return service;
     }
 
+    /**
+     * 构造卡密交易测试数据。
+     *
+     * @param cartType 购物车类型
+     * @param num      增量或数量
+     * @return 卡密交易测试数据
+     */
     private TradeDTO buildECouponTrade(CartTypeEnum cartType, int num) {
         TradeDTO tradeDTO = new TradeDTO(cartType);
         tradeDTO.getSkuList().add(buildCartSkuLine("sku-1", GoodsTypeEnum.E_COUPON, num));
@@ -243,6 +298,13 @@ class CardKeyServiceImplValidationTest {
         return tradeDTO;
     }
 
+    /**
+     * 构造包含两种商品类型的混合交易。
+     *
+     * @param firstType  第一种商品类型
+     * @param secondType 第二种商品类型
+     * @return 包含两种商品类型的混合交易
+     */
     private TradeDTO buildMixedTrade(GoodsTypeEnum firstType, GoodsTypeEnum secondType) {
         TradeDTO tradeDTO = new TradeDTO(CartTypeEnum.BUY_NOW);
         tradeDTO.getSkuList().add(buildCartSkuLine("sku-ecoupon", firstType, 1));
@@ -250,6 +312,14 @@ class CardKeyServiceImplValidationTest {
         return tradeDTO;
     }
 
+    /**
+     * 构造指定商品类型及数量的购物车SKU行。
+     *
+     * @param skuId     SKU ID
+     * @param goodsType 商品类型
+     * @param num       增量或数量
+     * @return 指定商品类型及数量的购物车SKU行
+     */
     private CartSkuVO buildCartSkuLine(String skuId, GoodsTypeEnum goodsType, int num) {
         GoodsSku goodsSku = new GoodsSku();
         goodsSku.setId(skuId);

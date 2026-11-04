@@ -36,6 +36,9 @@ class FullDiscountTest {
     @Autowired
     private GoodsSkuService goodsSkuService;
 
+    /**
+     * 构造满额优惠配置并执行新增流程。
+     */
     @Test
     void addFullDiscount() {
         FullDiscountVO fullDiscountVO = new FullDiscountVO();
@@ -70,6 +73,9 @@ class FullDiscountTest {
         Assertions.assertTrue(fullDiscountService.savePromotions(fullDiscountVO));
     }
 
+    /**
+     * 分页查询满额优惠活动并检查返回结果。
+     */
     @Test
     void search() {
         PageVO pageVo = new PageVO();
@@ -84,6 +90,9 @@ class FullDiscountTest {
         Assertions.assertNotNull(fullDiscountByPage);
     }
 
+    /**
+     * 更新指定满额优惠活动。
+     */
     @Test
     void update() {
         FullDiscountVO fullDiscountVO = new FullDiscountVO();
@@ -119,6 +128,9 @@ class FullDiscountTest {
         Assertions.assertTrue(fullDiscountService.updatePromotions(fullDiscountVO));
     }
 
+    /**
+     * 验证删除指定满额优惠活动成功。
+     */
     @Test
     void delete() {
         Assertions.assertTrue(fullDiscountService.removePromotions(Collections.singletonList("1325995092947525632")));

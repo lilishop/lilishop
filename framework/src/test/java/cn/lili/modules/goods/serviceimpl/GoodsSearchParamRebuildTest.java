@@ -59,6 +59,9 @@ class GoodsSearchParamRebuildTest {
     private ThreadPoolTaskExecutor rebuildExecutor;
     private GoodsSearchParamService self;
 
+    /**
+     * 初始化商品参数重建所需的实体表元数据。
+     */
     @BeforeAll
     static void initTableInfo() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
@@ -66,6 +69,9 @@ class GoodsSearchParamRebuildTest {
         TableInfoHelper.initTableInfo(assistant, Goods.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         service = spy(new GoodsSearchParamServiceImpl());
@@ -85,6 +91,9 @@ class GoodsSearchParamRebuildTest {
         when(redissonClient.getLock(REBUILD_LOCK_KEY)).thenReturn(lock);
     }
 
+    /**
+     * 验证无重建进度缓存时返回空闲状态。
+     */
     @Test
     void getRebuildStatusReturnsIdleWhenCacheEmpty() {
         when(cache.get(REBUILD_STATUS_KEY)).thenReturn(null);
@@ -98,6 +107,9 @@ class GoodsSearchParamRebuildTest {
         assertThat(status.getMessage()).isEqualTo("未运行");
     }
 
+    /**
+     * 验证正在重建时不重复提交重建任务。
+     */
     @Test
     void submitRebuildAllDoesNotEnqueueWhenAlreadyRunning() {
         RebuildStatus running = new RebuildStatus();
@@ -117,6 +129,9 @@ class GoodsSearchParamRebuildTest {
         verify(cache, never()).put(eq(REBUILD_STATUS_KEY), any(), any());
     }
 
+    /**
+     * 验证提交重建只入队且由工作线程获取锁。
+     */
     @Test
     void submitRebuildAllEnqueuesWorkerAndLockIsTakenOnlyInsideWorker() throws InterruptedException {
         when(cache.get(REBUILD_STATUS_KEY)).thenReturn(null);
@@ -142,6 +157,9 @@ class GoodsSearchParamRebuildTest {
         verify(lock).unlock();
     }
 
+    /**
+     * 验证工作线程未获得锁时直接退出而不重建。
+     */
     @Test
     void workerExitsWithoutRebuildingWhenLockNotAcquired() throws InterruptedException {
         when(lock.tryLock(0, -1, TimeUnit.SECONDS)).thenReturn(false);
@@ -162,6 +180,9 @@ class GoodsSearchParamRebuildTest {
         assertThat(statusCaptor.getValue().getMessage()).isEqualTo("已有任务在运行");
     }
 
+    /**
+     * 验证重建按ID游标推进并记录非法JSON失败项。
+     */
     @Test
     void workerRebuildsByIdCursorAndRecordsIllegalJsonAsFailed() throws InterruptedException {
         when(lock.tryLock(0, -1, TimeUnit.SECONDS)).thenReturn(true);
@@ -208,6 +229,9 @@ class GoodsSearchParamRebuildTest {
         assertThat(finished.getMessage()).isEqualTo("完成");
     }
 
+    /**
+     * 验证单商品重建读取当前参数后先删除再插入倒排记录。
+     */
     @Test
     void rebuildByGoodsIdReadsCurrentParamsThenDeletesAndInserts() {
         Goods goods = new Goods();
@@ -233,6 +257,9 @@ class GoodsSearchParamRebuildTest {
         assertThat(captor.getValue().get(0).getParamValue()).isEqualTo("8G");
     }
 
+    /**
+     * 验证非法参数JSON清除旧倒排后抛出异常。
+     */
     @Test
     void rebuildByGoodsIdThrowsAfterClearingIllegalJson() {
         Goods goods = new Goods();
@@ -248,6 +275,9 @@ class GoodsSearchParamRebuildTest {
         verify(service, never()).saveBatch(anyCollection());
     }
 
+    /**
+     * 验证每次写入重建进度时刷新缓存有效期。
+     */
     @Test
     void eachProgressWriteResetsTtl() throws InterruptedException {
         when(lock.tryLock(0, -1, TimeUnit.SECONDS)).thenReturn(true);
@@ -261,6 +291,12 @@ class GoodsSearchParamRebuildTest {
         verify(cache, never()).put(eq(REBUILD_STATUS_KEY), any(RebuildStatus.class));
     }
 
+    /**
+     * 构造指定ID的商品测试数据。
+     *
+     * @param id 测试数据ID
+     * @return 指定ID的商品测试数据
+     */
     private static Goods goods(String id) {
         Goods goods = new Goods();
         goods.setId(id);

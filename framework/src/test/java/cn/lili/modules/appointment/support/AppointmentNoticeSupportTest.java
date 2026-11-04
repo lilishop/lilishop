@@ -26,6 +26,9 @@ class AppointmentNoticeSupportTest {
     private AppointmentNoticeSupport support;
     private LiliMessageTemplate liliMessageTemplate;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         support = new AppointmentNoticeSupport();
@@ -36,6 +39,9 @@ class AppointmentNoticeSupportTest {
         ReflectionTestUtils.setField(support, "rocketmqCustomProperties", properties);
     }
 
+    /**
+     * 验证预约通知以蛇形命名字段传递订单编号。
+     */
     @Test
     void notifyMemberDeliversOrderSnUnderSnakeCaseKey() {
         support.notifyMember("m1", NoticeMessageNodeEnum.APPOINTMENT_BOOKING_SUCCESS_MEMBER, "洗车服务", "SN123");

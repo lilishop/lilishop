@@ -216,4 +216,13 @@ public interface GoodsService extends IService<Goods> {
      * @param reason      原因
      */
     void scheduleGoodsMarket(List<String> goodsIds, GoodsStatusEnum status, java.util.Date triggerTime, String reason);
+
+    /**
+     * 取消商品定时上下架计划，不改变商品当前上下架状态
+     * 商家仅可取消本店商品的计划，管理员可取消所有店铺商品的计划。
+     *
+     * @param goodsId 商品ID
+     * @param status  计划类型：UPPER定时上架，DOWN定时下架
+     */
+    void cancelGoodsMarketSchedule(String goodsId, GoodsStatusEnum status);
 }

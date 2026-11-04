@@ -41,6 +41,9 @@ class DistributionPaymentRewardsListenerTest {
     private DistributionPaymentRewardsListener listener;
     private DistributionPaymentRewardsFacade facade;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         listener = new DistributionPaymentRewardsListener();

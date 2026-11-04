@@ -21,6 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class CardKeyImportTemplateTest {
 
+    /**
+     * 验证卡密导入模板从第二行开始读取数据。
+     */
     @Test
     void templateWithRow2DataParsesFromSecondRow() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -42,6 +45,9 @@ class CardKeyImportTemplateTest {
         }
     }
 
+    /**
+     * 验证只有表头的卡密模板不产生数据行。
+     */
     @Test
     void headerOnlyTemplateProducesNoDataRows() throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();

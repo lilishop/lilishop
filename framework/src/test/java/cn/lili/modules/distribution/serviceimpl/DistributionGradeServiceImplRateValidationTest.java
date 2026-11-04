@@ -23,11 +23,17 @@ class DistributionGradeServiceImplRateValidationTest {
 
     private DistributionGradeServiceImpl service;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         service = new DistributionGradeServiceImpl();
     }
 
+    /**
+     * 验证分销等级接受零到一范围内的佣金比例。
+     */
     @Test
     void validateGrade_acceptsDecimalWithinZeroToOne() {
         assertDoesNotThrow(() -> invokeValidateGrade(baseGrade("0.10", "0")));
@@ -35,6 +41,9 @@ class DistributionGradeServiceImplRateValidationTest {
         assertDoesNotThrow(() -> invokeValidateGrade(baseGrade("1", "0")));
     }
 
+    /**
+     * 验证未转换为小数的百分比数值被拒绝。
+     */
     @Test
     void validateGrade_rejectsUnmigratedPercentTen() {
         ServiceException ex = assertThrows(ServiceException.class,
@@ -42,6 +51,9 @@ class DistributionGradeServiceImplRateValidationTest {
         assertTrue(ex.getMsg().contains("不能超过100%"));
     }
 
+    /**
+     * 验证分销佣金比例不能为负数。
+     */
     @Test
     void validateGrade_rejectsNegative() {
         ServiceException ex = assertThrows(ServiceException.class,
@@ -49,6 +61,9 @@ class DistributionGradeServiceImplRateValidationTest {
         assertTrue(ex.getMsg().contains("不能超过100%"));
     }
 
+    /**
+     * 验证同一等级的佣金比例总和不能超过一。
+     */
     @Test
     void validateGrade_rejectsSingleGradeSumOverOne() {
         ServiceException ex = assertThrows(ServiceException.class,
@@ -56,6 +71,9 @@ class DistributionGradeServiceImplRateValidationTest {
         assertTrue(ex.getMsg().contains("不能超过100%"));
     }
 
+    /**
+     * 验证默认商品佣金与邀请奖励合计合法时允许配置。
+     */
     @Test
     void validateCrossRates_allowsDefaultTenPercentPlusInvite() {
         assertDoesNotThrow(() -> service.validateCrossRates(List.of(
@@ -63,6 +81,9 @@ class DistributionGradeServiceImplRateValidationTest {
                 higherGrade("0.15", "0.05"))));
     }
 
+    /**
+     * 验证最高商品佣金与最高邀请奖励合计超过一时拒绝配置。
+     */
     @Test
     void validateCrossRates_rejectsMaxGoodsPlusMaxInviteOverOne() {
         ServiceException ex = assertThrows(ServiceException.class,
@@ -72,10 +93,22 @@ class DistributionGradeServiceImplRateValidationTest {
         assertTrue(ex.getMsg().contains("不能超过100%"));
     }
 
+    /**
+     * 通过反射调用分销等级内部校验方法。
+     *
+     * @param grade 分销等级
+     */
     private void invokeValidateGrade(DistributionGrade grade) {
         ReflectionTestUtils.invokeMethod(service, "validateGrade", grade);
     }
 
+    /**
+     * 构造基础分销等级测试数据。
+     *
+     * @param goods  商品佣金比例
+     * @param invite 邀请奖励比例
+     * @return 基础分销等级测试数据
+     */
     private static DistributionGrade baseGrade(String goods, String invite) {
         DistributionGrade grade = new DistributionGrade();
         grade.setSortOrder(1);
@@ -85,6 +118,13 @@ class DistributionGradeServiceImplRateValidationTest {
         return grade;
     }
 
+    /**
+     * 构造更高等级的分销测试数据。
+     *
+     * @param goods  商品佣金比例
+     * @param invite 邀请奖励比例
+     * @return 更高等级的分销测试数据
+     */
     private static DistributionGrade higherGrade(String goods, String invite) {
         DistributionGrade grade = new DistributionGrade();
         grade.setSortOrder(2);

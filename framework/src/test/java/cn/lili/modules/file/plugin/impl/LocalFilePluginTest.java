@@ -21,6 +21,9 @@ class LocalFilePluginTest {
     @TempDir
     Path tempDir;
 
+    /**
+     * 验证流式上传保存文件并返回访问地址。
+     */
     @Test
     void inputStreamUploadShouldSaveFileAndReturnAccessUrl() throws Exception {
         OssSetting ossSetting = new OssSetting();
@@ -38,6 +41,9 @@ class LocalFilePluginTest {
         assertEquals("hello", Files.readString(tempDir.resolve("MANAGER/default/demo.txt")));
     }
 
+    /**
+     * 验证删除文件操作移除对应本地文件。
+     */
     @Test
     void deleteFileShouldRemoveLocalFile() throws Exception {
         OssSetting ossSetting = new OssSetting();
@@ -52,6 +58,9 @@ class LocalFilePluginTest {
         assertFalse(Files.exists(file));
     }
 
+    /**
+     * 验证流式上传拒绝包含路径穿越的文件名。
+     */
     @Test
     void inputStreamUploadShouldRejectPathTraversal() {
         OssSetting ossSetting = new OssSetting();

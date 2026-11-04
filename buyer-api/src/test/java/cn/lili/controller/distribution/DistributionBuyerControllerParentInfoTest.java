@@ -36,6 +36,9 @@ class DistributionBuyerControllerParentInfoTest {
     @Mock
     private DistributionSettingSupport distributionSettingSupport;
 
+    /**
+     * 验证开启展示时返回上级分销员信息。
+     */
     @Test
     void parentInfoWhenVisibleTrueReturnsParent() {
         when(distributionSettingSupport.getSetting()).thenReturn(visibleSetting(true));
@@ -50,6 +53,9 @@ class DistributionBuyerControllerParentInfoTest {
         assertThat(vo.getParentNickname()).isEqualTo("张三");
     }
 
+    /**
+     * 验证关闭展示开关时接口仍返回上级信息。
+     */
     @Test
     void parentInfoWhenVisibleFalseStillReturnsParent() {
         when(distributionSettingSupport.getSetting()).thenReturn(visibleSetting(false));
@@ -64,6 +70,9 @@ class DistributionBuyerControllerParentInfoTest {
         assertThat(vo.getParentNickname()).isEqualTo("张三");
     }
 
+    /**
+     * 验证没有上级时返回空的上级信息字段。
+     */
     @Test
     void parentInfoWhenVisibleTrueAndNoParentReturnsEmptyParentFields() {
         when(distributionSettingSupport.getSetting()).thenReturn(visibleSetting(true));
@@ -80,6 +89,9 @@ class DistributionBuyerControllerParentInfoTest {
         verify(distributionService, never()).getById(anyString());
     }
 
+    /**
+     * 验证非分销员会员仍获得展示开关信息。
+     */
     @Test
     void parentInfoWhenNotDistributorStillReturnsVisible() {
         when(distributionSettingSupport.getSetting()).thenReturn(visibleSetting(true));
@@ -95,6 +107,9 @@ class DistributionBuyerControllerParentInfoTest {
         verify(distributionService, never()).getById(anyString());
     }
 
+    /**
+     * 验证上级记录缺失时保留上级ID且不填昵称。
+     */
     @Test
     void parentInfoWhenParentRecordMissingKeepsIdWithoutNickname() {
         when(distributionSettingSupport.getSetting()).thenReturn(visibleSetting(true));
@@ -109,6 +124,9 @@ class DistributionBuyerControllerParentInfoTest {
         assertThat(vo.getParentNickname()).isNull();
     }
 
+    /**
+     * 验证未配置上级信息展示开关时使用默认开启值。
+     */
     @Test
     void parentInfoWhenSettingFieldMissingDefaultsTrue() {
         DistributionSetting setting = new DistributionSetting();
@@ -124,12 +142,24 @@ class DistributionBuyerControllerParentInfoTest {
         assertThat(message.getResult().getParentDistributionId()).isNull();
     }
 
+    /**
+     * 构造指定上级信息展示开关的分销配置。
+     *
+     * @param visible 是否展示上级信息
+     * @return 指定上级信息展示开关的分销配置
+     */
     private static DistributionSetting visibleSetting(boolean visible) {
         DistributionSetting setting = DistributionSetting.defaultSetting();
         setting.setParentDistributorVisible(visible);
         return setting;
     }
 
+    /**
+     * 构造绑定指定上级的下级分销员。
+     *
+     * @param parentId 上级ID
+     * @return 绑定指定上级的下级分销员
+     */
     private static Distribution childWithParent(String parentId) {
         Distribution child = new Distribution();
         child.setId("C1");
@@ -137,6 +167,12 @@ class DistributionBuyerControllerParentInfoTest {
         return child;
     }
 
+    /**
+     * 构造指定昵称的上级分销员。
+     *
+     * @param memberName 会员名称
+     * @return 指定昵称的上级分销员
+     */
     private static Distribution parentNamed(String memberName) {
         Distribution parent = new Distribution();
         parent.setId("P1");

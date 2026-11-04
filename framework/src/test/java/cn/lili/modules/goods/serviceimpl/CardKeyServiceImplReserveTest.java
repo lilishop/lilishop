@@ -45,6 +45,9 @@ class CardKeyServiceImplReserveTest {
     private GoodsSkuService goodsSkuService;
     private OrderService orderService;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         cardKeyService = spy(new CardKeyServiceImpl());
@@ -66,6 +69,9 @@ class CardKeyServiceImplReserveTest {
         doAnswer(invocation -> null).when(cardKeyService).syncSkuStock(any());
     }
 
+    /**
+     * 验证订单预占卡密后将卡密标记为已预占。
+     */
     @Test
     void reserveByOrderMarksCardsReserved() {
         Order order = pintuanOrder("PT-001");
@@ -85,6 +91,9 @@ class CardKeyServiceImplReserveTest {
         verify(cardKeyService).syncSkuStock("sku-1");
     }
 
+    /**
+     * 验证确认预占后分配卡密并完成订单。
+     */
     @Test
     void confirmReservationAndCompleteMarksAllocatedAndCompletesOrder() {
         Order order = pintuanOrder("PT-002");
@@ -99,6 +108,9 @@ class CardKeyServiceImplReserveTest {
         verify(orderService).systemCompleteECoupon("PT-002");
     }
 
+    /**
+     * 验证释放预占后卡密恢复未使用状态。
+     */
     @Test
     void releaseReservationReturnsCardsToUnused() {
         CardKey reserved = reservedCard("card-3", "sku-1", "PT-003");
@@ -112,6 +124,9 @@ class CardKeyServiceImplReserveTest {
         verify(orderService, never()).systemCompleteECoupon(any());
     }
 
+    /**
+     * 验证卡池数量不足时预占失败。
+     */
     @Test
     void reserveByOrderFailsWhenPoolInsufficient() {
         Order order = pintuanOrder("PT-004");
@@ -126,6 +141,12 @@ class CardKeyServiceImplReserveTest {
         assertThrows(ServiceException.class, () -> cardKeyService.reserveByOrder("PT-004"));
     }
 
+    /**
+     * 构造卡密拼团订单测试数据。
+     *
+     * @param sn 订单编号
+     * @return 卡密拼团订单测试数据
+     */
     private Order pintuanOrder(String sn) {
         Order order = new Order();
         order.setSn(sn);
@@ -137,6 +158,15 @@ class CardKeyServiceImplReserveTest {
         return order;
     }
 
+    /**
+     * 构造订单项测试数据。
+     *
+     * @param orderSn 订单编号
+     * @param itemSn  订单项编号
+     * @param skuId   SKU ID
+     * @param num     增量或数量
+     * @return 订单项测试数据
+     */
     private OrderItem orderItem(String orderSn, String itemSn, String skuId, int num) {
         OrderItem item = new OrderItem();
         item.setOrderSn(orderSn);
@@ -146,6 +176,12 @@ class CardKeyServiceImplReserveTest {
         return item;
     }
 
+    /**
+     * 构造卡密商品SKU测试数据。
+     *
+     * @param skuId SKU ID
+     * @return 卡密商品SKU测试数据
+     */
     private GoodsSku eCouponSku(String skuId) {
         GoodsSku sku = new GoodsSku();
         sku.setId(skuId);
@@ -153,6 +189,13 @@ class CardKeyServiceImplReserveTest {
         return sku;
     }
 
+    /**
+     * 构造未使用状态的卡密记录。
+     *
+     * @param id    测试数据ID
+     * @param skuId SKU ID
+     * @return 未使用状态的卡密记录
+     */
     private CardKey unusedCard(String id, String skuId) {
         CardKey cardKey = new CardKey();
         cardKey.setId(id);
@@ -161,6 +204,14 @@ class CardKeyServiceImplReserveTest {
         return cardKey;
     }
 
+    /**
+     * 构造已预占状态的卡密记录。
+     *
+     * @param id      测试数据ID
+     * @param skuId   SKU ID
+     * @param orderSn 订单编号
+     * @return 已预占状态的卡密记录
+     */
     private CardKey reservedCard(String id, String skuId, String orderSn) {
         CardKey cardKey = unusedCard(id, skuId);
         cardKey.setStatus(CardKeyStatusEnum.RESERVED.name());

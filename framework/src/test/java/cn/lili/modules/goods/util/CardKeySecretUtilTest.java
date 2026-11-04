@@ -12,6 +12,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class CardKeySecretUtilTest {
 
+    /**
+     * 验证卡密加密后解密能够还原原始明文。
+     */
     @Test
     void encryptAndDecryptReturnPlaintext() {
         CardKeySecretUtil util = new CardKeySecretUtil();

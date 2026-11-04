@@ -41,6 +41,9 @@ class FullDiscountExecuteGiftOrderTest {
     private OrderService orderService;
     private OrderItemService orderItemService;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         execute = new FullDiscountExecute();
@@ -60,6 +63,9 @@ class FullDiscountExecuteGiftOrderTest {
         ReflectionTestUtils.setField(SnowFlake.class, "snowflake", new Snowflake(1, 1));
     }
 
+    /**
+     * 验证满额赠卡密子订单按卡密规则规范化。
+     */
     @Test
     void giftOrderHandlerNormalizesECouponSubOrder() {
         Order origin = originOrder();
@@ -87,6 +93,9 @@ class FullDiscountExecuteGiftOrderTest {
         assertThat(savedItem.getSn()).isNotEqualTo("004");
     }
 
+    /**
+     * 验证赠品订单项编号不使用商品SKU编码。
+     */
     @Test
     void giftOrderItemSnNotGoodsSkuCode() {
         Order origin = originOrder();
@@ -102,6 +111,9 @@ class FullDiscountExecuteGiftOrderTest {
         assertThat(itemCaptor.getValue().get(0).getSn()).isNotEqualTo("004");
     }
 
+    /**
+     * 验证赠品子订单已存在时不重复创建。
+     */
     @Test
     void giftOrderHandlerSkipsWhenGiftSubOrderAlreadyExists() {
         Order origin = originOrder();
@@ -114,6 +126,11 @@ class FullDiscountExecuteGiftOrderTest {
         verify(orderService, never()).save(any());
     }
 
+    /**
+     * 构造生成赠品子订单所依赖的原订单。
+     *
+     * @return 生成赠品子订单所依赖的原订单
+     */
     private Order originOrder() {
         Order order = new Order();
         order.setSn("P100");
@@ -128,6 +145,11 @@ class FullDiscountExecuteGiftOrderTest {
         return order;
     }
 
+    /**
+     * 构造卡密赠品SKU测试数据。
+     *
+     * @return 卡密赠品SKU测试数据
+     */
     private GoodsSku giftSku() {
         GoodsSku sku = new GoodsSku();
         sku.setId("sku-gift");

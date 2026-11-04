@@ -32,6 +32,9 @@ class FinanceReportServiceImplTest {
     @InjectMocks
     private FinanceReportServiceImpl financeReportService;
 
+    /**
+     * 验证平台区间报表查询委托Mapper执行。
+     */
     @Test
     void platformPeriodReport_delegatesToMapper() {
         PlatformPeriodReportVO row = new PlatformPeriodReportVO();

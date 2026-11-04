@@ -42,6 +42,9 @@ class DistributionServiceImplUpdateParentByAdminTest {
     private DistributionCustomerRelationService customerRelationService;
     private DistributionGradeService gradeService;
 
+    /**
+     * 初始化分销实体的MyBatis-Plus元数据。
+     */
     @BeforeAll
     static void initDistributionEntityCache() {
         TableInfoHelper.initTableInfo(
@@ -49,6 +52,9 @@ class DistributionServiceImplUpdateParentByAdminTest {
                 Distribution.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         service = spy(new DistributionServiceImpl());
@@ -63,6 +69,9 @@ class DistributionServiceImplUpdateParentByAdminTest {
         doNothing().when(parentBindSupport).syncInviteCountAndGrade(anyString());
     }
 
+    /**
+     * 验证管理员解除已有上级时通过更新条件清空上级字段。
+     */
     @Test
     void updateParentByAdmin_clearsParentWithWrapperWhenOldParentExists() {
         Distribution child = child("D1", "P1");
@@ -79,6 +88,9 @@ class DistributionServiceImplUpdateParentByAdminTest {
         verify(service, never()).updateById(any(Distribution.class));
     }
 
+    /**
+     * 验证分销员已无上级时不重复更新。
+     */
     @Test
     void updateParentByAdmin_skipsUpdateWhenAlreadyNoParent() {
         Distribution child = child("D1", null);
@@ -91,6 +103,9 @@ class DistributionServiceImplUpdateParentByAdminTest {
         verify(parentBindSupport, never()).syncInviteCountAndGrade(anyString());
     }
 
+    /**
+     * 验证管理员重新绑定上级时按ID更新分销记录。
+     */
     @Test
     void updateParentByAdmin_rebindsParentByUpdateById() {
         Distribution child = child("D1", "P1");
@@ -107,6 +122,9 @@ class DistributionServiceImplUpdateParentByAdminTest {
         verify(parentBindSupport).syncInviteCountAndGrade("P2");
     }
 
+    /**
+     * 验证修改会员时先清空实体上级字段再执行最终更新。
+     */
     @Test
     void updateMember_clearsParentOnEntityBeforeFinalUpdateById() {
         Distribution child = child("D1", "P1");
@@ -132,6 +150,13 @@ class DistributionServiceImplUpdateParentByAdminTest {
         assertThat(captor.getValue().getParentDistributionId()).isNull();
     }
 
+    /**
+     * 构造下级分销员测试数据。
+     *
+     * @param id       测试数据ID
+     * @param parentId 上级ID
+     * @return 下级分销员测试数据
+     */
     private static Distribution child(String id, String parentId) {
         Distribution distribution = new Distribution();
         distribution.setId(id);

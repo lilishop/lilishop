@@ -53,12 +53,18 @@ class CardKeyServiceImplVoidCardTest {
     private GoodsService goodsService;
     private StoreService storeService;
 
+    /**
+     * 初始化当前测试使用的MyBatis-Plus实体元数据。
+     */
     @BeforeAll
     static void initEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
         TableInfoHelper.initTableInfo(assistant, CardKey.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         cardKeyService = spy(new CardKeyServiceImpl());
@@ -76,6 +82,9 @@ class CardKeyServiceImplVoidCardTest {
         doNothing().when(cardKeyService).syncSkuStock(SKU_ID);
     }
 
+    /**
+     * 验证未使用卡密作废后同步SKU库存。
+     */
     @Test
     void voidCardMarksUnusedAsVoidedAndSyncsStock() {
         CardKey cardKey = buildUnusedCard();
@@ -91,6 +100,9 @@ class CardKeyServiceImplVoidCardTest {
         }
     }
 
+    /**
+     * 验证非未使用状态的卡密不能手动作废。
+     */
     @Test
     void voidCardRejectsNonUnusedStatus() {
         CardKey cardKey = buildUnusedCard();
@@ -105,6 +117,11 @@ class CardKeyServiceImplVoidCardTest {
         }
     }
 
+    /**
+     * 构造测试店铺的商家登录用户。
+     *
+     * @return 测试店铺的商家登录用户
+     */
     private AuthUser storeUser() {
         return AuthUser.builder()
                 .id("clerk-1")
@@ -114,6 +131,11 @@ class CardKeyServiceImplVoidCardTest {
                 .build();
     }
 
+    /**
+     * 构造未使用状态的卡密测试记录。
+     *
+     * @return 未使用状态的卡密测试记录
+     */
     private CardKey buildUnusedCard() {
         CardKey cardKey = new CardKey();
         cardKey.setId(CARD_ID);
@@ -124,6 +146,11 @@ class CardKeyServiceImplVoidCardTest {
         return cardKey;
     }
 
+    /**
+     * 构造SKU基础测试数据。
+     *
+     * @return SKU基础测试数据
+     */
     private GoodsSku buildSku() {
         GoodsSku sku = new GoodsSku();
         sku.setId(SKU_ID);
@@ -134,6 +161,11 @@ class CardKeyServiceImplVoidCardTest {
         return sku;
     }
 
+    /**
+     * 构造商品基础测试数据。
+     *
+     * @return 商品基础测试数据
+     */
     private Goods buildGoods() {
         Goods goods = new Goods();
         goods.setId("goods-1");
@@ -142,6 +174,11 @@ class CardKeyServiceImplVoidCardTest {
         return goods;
     }
 
+    /**
+     * 构造店铺基础测试数据。
+     *
+     * @return 店铺基础测试数据
+     */
     private Store buildStore() {
         Store store = new Store();
         store.setId(STORE_ID);

@@ -15,6 +15,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class GoodsSearchParamRebuildConfigTest {
 
+    /**
+     * 验证搜索参数重建线程池使用单线程、单任务队列及丢弃策略。
+     */
     @Test
     void executorIsSingleThreadWithQueueOneAndDiscardPolicy() {
         GoodsSearchParamRebuildConfig config = new GoodsSearchParamRebuildConfig();

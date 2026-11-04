@@ -15,6 +15,9 @@ class MemberStatisticsTest {
     @Autowired
     private MemberStatisticsExecute memberStatisticsExecute;
 
+    /**
+     * 执行会员统计任务。
+     */
     @Test
     void customSetting() {
         memberStatisticsExecute.execute();

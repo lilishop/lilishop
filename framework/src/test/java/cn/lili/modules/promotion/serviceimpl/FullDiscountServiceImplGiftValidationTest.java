@@ -28,6 +28,9 @@ class FullDiscountServiceImplGiftValidationTest {
     private FullDiscountServiceImpl fullDiscountService;
     private GoodsSkuService goodsSkuService;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         fullDiscountService = spy(new FullDiscountServiceImpl());
@@ -36,6 +39,9 @@ class FullDiscountServiceImplGiftValidationTest {
         doReturn(true).when(fullDiscountService).allowExistSame();
     }
 
+    /**
+     * 验证满额赠活动允许使用卡密赠品SKU。
+     */
     @Test
     void checkPromotionsAllowsECouponGiftSku() {
         GoodsSku giftSku = buildGiftSku("SKU001", GoodsTypeEnum.E_COUPON);
@@ -44,6 +50,9 @@ class FullDiscountServiceImplGiftValidationTest {
         assertDoesNotThrow(() -> fullDiscountService.checkPromotions(buildGiftPromotion("SKU001")));
     }
 
+    /**
+     * 验证满额赠活动允许使用实物赠品SKU。
+     */
     @Test
     void checkPromotionsAllowsPhysicalGiftSku() {
         GoodsSku giftSku = buildGiftSku("SKU002", GoodsTypeEnum.PHYSICAL_GOODS);
@@ -52,6 +61,9 @@ class FullDiscountServiceImplGiftValidationTest {
         assertDoesNotThrow(() -> fullDiscountService.checkPromotions(buildGiftPromotion("SKU002")));
     }
 
+    /**
+     * 验证满额赠活动拒绝不存在的赠品SKU。
+     */
     @Test
     void checkPromotionsRejectsMissingGiftSku() {
         when(goodsSkuService.getGoodsSkuByIdFromCache("MISSING")).thenReturn(null);
@@ -61,6 +73,12 @@ class FullDiscountServiceImplGiftValidationTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.FULL_DISCOUNT_GIFT_ERROR);
     }
 
+    /**
+     * 构造关联指定赠品SKU的满额赠活动。
+     *
+     * @param giftSkuId 赠品SKU ID
+     * @return 关联指定赠品SKU的满额赠活动
+     */
     private FullDiscount buildGiftPromotion(String giftSkuId) {
         FullDiscount fullDiscount = new FullDiscount();
         fullDiscount.setGiftFlag(true);
@@ -72,6 +90,13 @@ class FullDiscountServiceImplGiftValidationTest {
         return fullDiscount;
     }
 
+    /**
+     * 构造指定商品类型的赠品SKU。
+     *
+     * @param skuId     SKU ID
+     * @param goodsType 商品类型
+     * @return 指定商品类型的赠品SKU
+     */
     private GoodsSku buildGiftSku(String skuId, GoodsTypeEnum goodsType) {
         GoodsSku giftSku = new GoodsSku();
         giftSku.setId(skuId);

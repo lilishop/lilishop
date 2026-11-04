@@ -22,6 +22,9 @@ class SmsUtilAliImplServiceTest {
     private SmsPluginFactory smsPluginFactory;
     private SmsPlugin smsPlugin;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         service = new SmsUtilAliImplService();
@@ -31,6 +34,9 @@ class SmsUtilAliImplServiceTest {
         when(smsPluginFactory.smsPlugin()).thenReturn(smsPlugin);
     }
 
+    /**
+     * 验证通知短信发送委托短信插件处理。
+     */
     @Test
     void sendNoticeSmsDelegatesToPlugin() {
         Map<String, String> params = Map.of("order_sn", "SN123");

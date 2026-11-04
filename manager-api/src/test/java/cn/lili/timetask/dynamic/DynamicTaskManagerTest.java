@@ -45,6 +45,9 @@ class DynamicTaskManagerTest {
     @InjectMocks
     private DynamicTaskManager dynamicTaskManager;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(dynamicTaskManager, "taskScheduler", taskScheduler);
@@ -52,6 +55,9 @@ class DynamicTaskManagerTest {
         ReflectionTestUtils.setField(dynamicTaskManager, "applicationContext", applicationContext);
     }
 
+    /**
+     * 验证动态任务列表查询结果。
+     */
     @Test
     void testGetTaskList() {
         TimedTask task = TimedTask.builder()
@@ -70,6 +76,9 @@ class DynamicTaskManagerTest {
         assertEquals("测试任务", list.get(0).getName());
     }
 
+    /**
+     * 验证手动触发指定动态任务。
+     */
     @Test
     void testTriggerTask() {
         TimedTask task = TimedTask.builder()
@@ -88,6 +97,9 @@ class DynamicTaskManagerTest {
         verify(timedTaskService, atLeastOnce()).updateById(any(TimedTask.class));
     }
 
+    /**
+     * 验证修改动态任务时拒绝非法Cron表达式。
+     */
     @Test
     void testUpdateTaskInvalidCron() {
         TimedTask task = TimedTask.builder()
@@ -105,6 +117,9 @@ class DynamicTaskManagerTest {
         assertThrows(ServiceException.class, () -> dynamicTaskManager.updateTask(dto));
     }
 
+    /**
+     * 验证修改动态任务时接受合法Cron表达式。
+     */
     @Test
     void testUpdateTaskValidCron() {
         TimedTask task = TimedTask.builder()

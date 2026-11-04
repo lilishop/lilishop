@@ -32,6 +32,9 @@ class OrderBuyerControllerCardKeyTest {
     @Mock
     private CardKeyService cardKeyService;
 
+    /**
+     * 验证订单归属校验通过后再补充卡密信息。
+     */
     @Test
     void detailEnrichesCardKeysAfterAccessCheck() {
         String orderSn = "O-BUYER-001";
@@ -50,6 +53,9 @@ class OrderBuyerControllerCardKeyTest {
         }
     }
 
+    /**
+     * 验证无权查看订单时不补充卡密信息。
+     */
     @Test
     void detailDoesNotEnrichCardKeysWhenAccessDenied() {
         String orderSn = "O-BUYER-002";

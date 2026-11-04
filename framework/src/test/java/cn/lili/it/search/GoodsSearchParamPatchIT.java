@@ -18,6 +18,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Tag("it")
 class GoodsSearchParamPatchIT {
 
+    /**
+     * 验证商品参数数据库补丁可以加载。
+     */
     @Test
     void dbPatchIsLoadable() {
         String patch = SearchPatchSql.load004();
@@ -25,6 +28,9 @@ class GoodsSearchParamPatchIT {
         assertThat(SearchPatchSql.findDbPatch()).isNotNull();
     }
 
+    /**
+     * 验证基础表存在时补丁在MySQL 8上可重复执行。
+     */
     @Test
     void patch004IsIdempotentOnMysql8WithBaseTablesPresent() throws Exception {
         String patch = SearchPatchSql.load004();
@@ -35,6 +41,9 @@ class GoodsSearchParamPatchIT {
         }
     }
 
+    /**
+     * 验证MariaDB在创建基础表前后均可应用补丁。
+     */
     @Test
     void patch004AppliesOnMariaDbBeforeAndAfterBaseTables() throws Exception {
         String patch = SearchPatchSql.load004();
@@ -48,6 +57,11 @@ class GoodsSearchParamPatchIT {
         }
     }
 
+    /**
+     * 校验参数倒排表及预期表结构已经创建。
+     *
+     * @param connection 数据库连接
+     */
     private static void assertSearchParamTable(Connection connection) throws Exception {
         try (Statement statement = connection.createStatement()) {
             try (ResultSet tables = statement.executeQuery(

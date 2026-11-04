@@ -41,6 +41,9 @@ class WechatSceneMessageSenderTest {
     private ConnectService connectService;
     private WechatAccessTokenUtil wechatAccessTokenUtil;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         sender = spy(new WechatSceneMessageSender());
@@ -55,6 +58,11 @@ class WechatSceneMessageSenderTest {
         doReturn("{\"errcode\":0,\"errmsg\":\"ok\"}").when(sender).postJson(anyString(), anyString());
     }
 
+    /**
+     * 构造已开启的微信订阅消息模板。
+     *
+     * @return 已开启的微信订阅消息模板
+     */
     private WechatMPMessage enabledTemplate() {
         WechatMPMessage template = new WechatMPMessage();
         template.setSceneCode("ORDER_DELIVER");
@@ -65,12 +73,20 @@ class WechatSceneMessageSenderTest {
         return template;
     }
 
+    /**
+     * 构造会员微信小程序绑定信息。
+     *
+     * @return 会员微信小程序绑定信息
+     */
     private Connect mpConnect() {
         Connect connect = new Connect();
         connect.setUnionId("mp_open_id_1");
         return connect;
     }
 
+    /**
+     * 验证微信消息模板缺失或禁用时跳过发送。
+     */
     @Test
     void skipsWhenTemplateMissingOrDisabled() {
         when(wechatMPMessageService.getOne(any(LambdaQueryWrapper.class), any(Boolean.class))).thenReturn(null);
@@ -89,6 +105,9 @@ class WechatSceneMessageSenderTest {
         verify(sender, never()).postJson(anyString(), anyString());
     }
 
+    /**
+     * 验证会员未绑定微信时跳过消息发送。
+     */
     @Test
     void skipsWhenConnectMissing() {
         when(wechatMPMessageService.getOne(any(LambdaQueryWrapper.class), any(Boolean.class))).thenReturn(enabledTemplate());
@@ -97,6 +116,9 @@ class WechatSceneMessageSenderTest {
         verify(sender, never()).postJson(anyString(), anyString());
     }
 
+    /**
+     * 验证微信订阅消息按上下文渲染关键词后发送。
+     */
     @Test
     void sendsWithRenderedKeywords() {
         when(wechatMPMessageService.getOne(any(LambdaQueryWrapper.class), any(Boolean.class))).thenReturn(enabledTemplate());
@@ -116,6 +138,9 @@ class WechatSceneMessageSenderTest {
                 .contains("订单编号").contains("商品名称");
     }
 
+    /**
+     * 验证微信订阅消息缺失关键词以短横线填充。
+     */
     @Test
     void rendersMissingKeywordAsDash() {
         when(wechatMPMessageService.getOne(any(LambdaQueryWrapper.class), any(Boolean.class))).thenReturn(enabledTemplate());
@@ -131,6 +156,11 @@ class WechatSceneMessageSenderTest {
         assertThat(bodyCaptor.getValue()).contains("商品名称\":{\"value\":\"-\"}");
     }
 
+    /**
+     * 构造已开启的微信公众号消息模板。
+     *
+     * @return 已开启的微信公众号消息模板
+     */
     private WechatMessage enabledOaTemplate() {
         WechatMessage template = new WechatMessage();
         template.setSceneCode("ORDER_DELIVER");
@@ -142,12 +172,20 @@ class WechatSceneMessageSenderTest {
         return template;
     }
 
+    /**
+     * 构造会员微信公众号绑定信息。
+     *
+     * @return 会员微信公众号绑定信息
+     */
     private Connect oaConnect() {
         Connect connect = new Connect();
         connect.setUnionId("oa_open_id_1");
         return connect;
     }
 
+    /**
+     * 验证公众号消息禁用或模板编码为空时跳过发送。
+     */
     @Test
     void oaSkipsWhenDisabledOrCodeBlank() {
         WechatMessage disabled = enabledOaTemplate();
@@ -163,6 +201,9 @@ class WechatSceneMessageSenderTest {
         verify(sender, never()).postJson(anyString(), anyString());
     }
 
+    /**
+     * 验证公众号模板消息包含首段、关键词及备注。
+     */
     @Test
     void oaSendsFirstKeywordRemark() {
         when(wechatMessageService.getOne(any(LambdaQueryWrapper.class), any(Boolean.class))).thenReturn(enabledOaTemplate());
@@ -184,6 +225,9 @@ class WechatSceneMessageSenderTest {
                 .contains("remark\":{\"value\":\"谢谢\"}");
     }
 
+    /**
+     * 验证公众号模板缺失关键词以短横线填充。
+     */
     @Test
     void oaRendersMissingKeywordAsDash() {
         when(wechatMessageService.getOne(any(LambdaQueryWrapper.class), any(Boolean.class))).thenReturn(enabledOaTemplate());
@@ -197,6 +241,9 @@ class WechatSceneMessageSenderTest {
         assertThat(bodyCaptor.getValue()).contains("keyword2\":{\"value\":\"-\"}");
     }
 
+    /**
+     * 验证微信接口返回非零错误码时记录错误。
+     */
     @Test
     void checkResultLogsErrorWhenErrcodeNonZero() {
         Logger logger = (Logger) LoggerFactory.getLogger(WechatSceneMessageSender.class);
@@ -214,6 +261,9 @@ class WechatSceneMessageSenderTest {
         });
     }
 
+    /**
+     * 验证微信接口成功或响应无法解析时结果检查不抛异常。
+     */
     @Test
     void checkResultQuietWhenErrcodeZeroOrUnparsable() {
         Logger logger = (Logger) LoggerFactory.getLogger(WechatSceneMessageSender.class);

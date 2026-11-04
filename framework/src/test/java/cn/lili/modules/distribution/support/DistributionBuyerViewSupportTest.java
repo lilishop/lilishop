@@ -16,11 +16,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class DistributionBuyerViewSupportTest {
 
+    /**
+     * 验证无分销记录时买家响应转换返回空值。
+     */
     @Test
     void forBuyerResponseReturnsNullWhenNoRecord() {
         assertThat(DistributionBuyerViewSupport.forBuyerResponse(null)).isNull();
     }
 
+    /**
+     * 验证已审核通过的分销记录保持原实例及数据。
+     */
     @Test
     void forBuyerResponseKeepsPassInstanceUnchanged() {
         Distribution pass = activeRecord(DistributionStatusEnum.PASS);
@@ -32,6 +38,9 @@ class DistributionBuyerViewSupportTest {
         assertThat(view.getRebateTotal()).isEqualTo(200D);
     }
 
+    /**
+     * 验证申请中及审核拒绝的分销记录不被脱敏。
+     */
     @Test
     void forBuyerResponseKeepsApplyAndRefuseUnmasked() {
         Distribution apply = activeRecord(DistributionStatusEnum.APPLY);
@@ -43,6 +52,9 @@ class DistributionBuyerViewSupportTest {
         assertThat(refuse.getWithdrawnTotal()).isEqualByComparingTo("12.30");
     }
 
+    /**
+     * 验证退出分销时对副本脱敏且不修改原记录。
+     */
     @Test
     void forBuyerResponseMasksRetreatCopyAndLeavesSourceIntact() {
         Distribution retreated = activeRecord(DistributionStatusEnum.RETREAT);
@@ -79,6 +91,12 @@ class DistributionBuyerViewSupportTest {
         assertThat(retreated.getInviteCount()).isEqualTo(2);
     }
 
+    /**
+     * 构造用于买家视图转换的有效分销记录。
+     *
+     * @param status 测试状态
+     * @return 用于买家视图转换的有效分销记录
+     */
     private static Distribution activeRecord(DistributionStatusEnum status) {
         Distribution distribution = new Distribution();
         distribution.setId("D1");

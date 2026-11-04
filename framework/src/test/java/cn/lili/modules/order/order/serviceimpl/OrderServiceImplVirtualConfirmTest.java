@@ -33,12 +33,18 @@ class OrderServiceImplVirtualConfirmTest {
     private OrderServiceImpl orderService;
     private CardKeyService cardKeyService;
 
+    /**
+     * 初始化订单实体的MyBatis-Plus元数据。
+     */
     @BeforeAll
     static void initOrderEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
         TableInfoHelper.initTableInfo(assistant, Order.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         orderService = spy(new OrderServiceImpl());
@@ -62,6 +68,9 @@ class OrderServiceImplVirtualConfirmTest {
         verify(orderService, never()).sendUpdateStatusMessage(any(OrderMessage.class));
     }
 
+    /**
+     * 验证虚拟订单状态条件更新失败时不执行核销。
+     */
     @Test
     void virtualOrderConfirmSkipsTakeWhenCasUpdateFails() {
         Order order = new Order();
@@ -77,6 +86,9 @@ class OrderServiceImplVirtualConfirmTest {
         verify(orderService, never()).sendUpdateStatusMessage(any(OrderMessage.class));
     }
 
+    /**
+     * 验证仅已付款虚拟订单确认后设置核销状态。
+     */
     @Test
     void virtualOrderConfirmSetsTakeOnlyForVirtualPaid() {
         Order order = new Order();

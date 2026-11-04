@@ -81,6 +81,9 @@ class DistributionRewardServiceImplPaymentRewardsTest {
     private Distribution direct;
     private Distribution invite;
 
+    /**
+     * 初始化当前测试使用的MyBatis-Plus实体元数据。
+     */
     @BeforeAll
     static void initMybatisEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
@@ -92,6 +95,9 @@ class DistributionRewardServiceImplPaymentRewardsTest {
         TableInfoHelper.initTableInfo(assistant, OrderItem.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         storedOrders.clear();

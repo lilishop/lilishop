@@ -56,6 +56,11 @@ class DistributionRecruitSettingSupportAutoModeTest {
         assertThat(setting.getFields()).isEmpty();
     }
 
+    /**
+     * 构造按条件申请模式的基础招募配置。
+     *
+     * @return 按条件申请模式的基础招募配置
+     */
     private static DistributionRecruitSetting conditionalBase() {
         DistributionRecruitSetting setting = new DistributionRecruitSetting();
         setting.setJoinConditionType(RecruitJoinConditionTypeEnum.CONDITIONAL.name());

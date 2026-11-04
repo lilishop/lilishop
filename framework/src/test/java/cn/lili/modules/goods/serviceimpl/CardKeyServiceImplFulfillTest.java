@@ -50,6 +50,9 @@ class CardKeyServiceImplFulfillTest {
     private CardKeyMapper cardKeyMapper;
     private GoodsSkuService goodsSkuService;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         cardKeyService = spy(new CardKeyServiceImpl());
@@ -73,6 +76,9 @@ class CardKeyServiceImplFulfillTest {
         when(orderService.systemCompleteECoupon(any())).thenReturn(true);
     }
 
+    /**
+     * 验证拼团订单付款后等待成团再交付卡密。
+     */
     @Test
     void fulfillAfterPaymentWaitsForPintuanGroup() {
         Order order = pintuanOrder(OrderStatusEnum.PAID.name());
@@ -84,6 +90,9 @@ class CardKeyServiceImplFulfillTest {
         verify(orderService, never()).systemCancelECoupon(any(), any(), any(Boolean.class));
     }
 
+    /**
+     * 验证已完成的卡密订单不重复履约。
+     */
     @Test
     void fulfillAfterPaymentSkipsWhenAlreadyCompleted() {
         Order order = purchaseTypeOrder(OrderStatusEnum.COMPLETED.name());
@@ -94,6 +103,9 @@ class CardKeyServiceImplFulfillTest {
         verify(orderService, never()).systemCompleteECoupon(any());
     }
 
+    /**
+     * 验证未付款的卡密订单不能履约。
+     */
     @Test
     void fulfillAfterPaymentRejectsWhenPayStatusNotPaid() {
         Order order = purchaseTypeOrder(OrderStatusEnum.PAID.name());
@@ -105,6 +117,9 @@ class CardKeyServiceImplFulfillTest {
         verify(orderService, never()).systemCompleteECoupon(any());
     }
 
+    /**
+     * 验证购买类型卡密订单完成付款后履约流程。
+     */
     @Test
     void fulfillAfterPaymentCompletesPurchaseTypeOrder() {
         Order order = purchaseTypeOrder(OrderStatusEnum.PAID.name());
@@ -116,6 +131,9 @@ class CardKeyServiceImplFulfillTest {
         verify(orderService).systemCompleteECoupon("O001");
     }
 
+    /**
+     * 验证积分卡密订单完成付款后履约流程。
+     */
     @Test
     void fulfillAfterPaymentCompletesPointsOrder() {
         Order order = purchaseTypeOrder(OrderStatusEnum.PAID.name());
@@ -128,6 +146,9 @@ class CardKeyServiceImplFulfillTest {
         verify(orderService).systemCompleteECoupon("O001");
     }
 
+    /**
+     * 验证砍价卡密订单完成付款后履约流程。
+     */
     @Test
     void fulfillAfterPaymentCompletesKanjiaOrder() {
         Order order = purchaseTypeOrder(OrderStatusEnum.PAID.name());
@@ -140,6 +161,9 @@ class CardKeyServiceImplFulfillTest {
         verify(orderService).systemCompleteECoupon("O001");
     }
 
+    /**
+     * 验证赠品卡密订单分配卡密并完成履约。
+     */
     @Test
     void fulfillAfterPaymentAllocatesAndCompletesGiftOrder() {
         Order gift = giftOrder(OrderStatusEnum.PAID.name());
@@ -152,6 +176,9 @@ class CardKeyServiceImplFulfillTest {
         verify(orderService, never()).systemCancelECoupon(any(), any(), any());
     }
 
+    /**
+     * 验证赠品卡密履约失败时取消订单、记录日志且不退款。
+     */
     @Test
     void fulfillAfterPaymentCancelsGiftWithoutRefundAndWritesLogs() {
         Order gift = giftOrder(OrderStatusEnum.PAID.name());
@@ -179,6 +206,9 @@ class CardKeyServiceImplFulfillTest {
         assertThat(logCaptor.getAllValues()).anyMatch(log -> "P001".equals(log.getOrderSn()));
     }
 
+    /**
+     * 验证购买订单卡密分配失败时触发取消处理。
+     */
     @Test
     void fulfillAfterPaymentCancelsWhenPurchaseAllocateFails() {
         Order order = purchaseTypeOrder(OrderStatusEnum.PAID.name());
@@ -198,6 +228,9 @@ class CardKeyServiceImplFulfillTest {
         verify(orderService).systemCancelECoupon(eq("O001"), eq("库存不足，出库失败"), eq(true));
     }
 
+    /**
+     * 验证非卡密订单不执行卡密付款履约。
+     */
     @Test
     void fulfillAfterPaymentSkipsNonECouponOrder() {
         Order order = purchaseTypeOrder(OrderStatusEnum.PAID.name());
@@ -209,6 +242,12 @@ class CardKeyServiceImplFulfillTest {
         verify(orderService, never()).systemCompleteECoupon(any());
     }
 
+    /**
+     * 模拟卡密分配成功的处理结果。
+     *
+     * @param orderSn 订单编号
+     * @param skuId   SKU ID
+     */
     private void stubSuccessfulAllocate(String orderSn, String skuId) {
         OrderItem item = new OrderItem();
         item.setSkuId(skuId);
@@ -222,6 +261,12 @@ class CardKeyServiceImplFulfillTest {
         when(cardKeyMapper.selectForAllocate(skuId, 1)).thenReturn(List.of(cardKey));
     }
 
+    /**
+     * 构造卡密商品SKU测试数据。
+     *
+     * @param skuId SKU ID
+     * @return 卡密商品SKU测试数据
+     */
     private GoodsSku eCouponSku(String skuId) {
         GoodsSku sku = new GoodsSku();
         sku.setId(skuId);
@@ -229,6 +274,12 @@ class CardKeyServiceImplFulfillTest {
         return sku;
     }
 
+    /**
+     * 构造指定购买类型的卡密订单。
+     *
+     * @param status 测试状态
+     * @return 指定购买类型的卡密订单
+     */
     private Order purchaseTypeOrder(String status) {
         Order order = new Order();
         order.setSn("O001");
@@ -241,6 +292,12 @@ class CardKeyServiceImplFulfillTest {
         return order;
     }
 
+    /**
+     * 构造卡密赠品订单测试数据。
+     *
+     * @param status 测试状态
+     * @return 卡密赠品订单测试数据
+     */
     private Order giftOrder(String status) {
         Order order = new Order();
         order.setSn("G001");
@@ -253,6 +310,12 @@ class CardKeyServiceImplFulfillTest {
         return order;
     }
 
+    /**
+     * 构造卡密拼团订单测试数据。
+     *
+     * @param status 测试状态
+     * @return 卡密拼团订单测试数据
+     */
     private Order pintuanOrder(String status) {
         Order order = new Order();
         order.setSn("PT-001");

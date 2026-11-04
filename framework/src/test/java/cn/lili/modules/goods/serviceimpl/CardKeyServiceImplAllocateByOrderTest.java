@@ -55,6 +55,9 @@ class CardKeyServiceImplAllocateByOrderTest {
     private GoodsSkuService goodsSkuService;
     private CardKeyMapper cardKeyMapper;
 
+    /**
+     * 初始化当前测试使用的MyBatis-Plus实体元数据。
+     */
     @BeforeAll
     static void initMybatisPlusEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
@@ -62,6 +65,9 @@ class CardKeyServiceImplAllocateByOrderTest {
         TableInfoHelper.initTableInfo(assistant, Order.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         cardKeyService = spy(new CardKeyServiceImpl());
@@ -75,6 +81,9 @@ class CardKeyServiceImplAllocateByOrderTest {
         ReflectionTestUtils.setField(cardKeyService, "baseMapper", cardKeyMapper);
     }
 
+    /**
+     * 验证购买数量为三时向订单分配并绑定三张卡密。
+     */
     @Test
     void allocateByOrderBindsThreeCardsForQuantityThree() {
         stubPurchaseOrderContext(3, List.of(unusedCard("ck-1"), unusedCard("ck-2"), unusedCard("ck-3")));
@@ -88,6 +97,9 @@ class CardKeyServiceImplAllocateByOrderTest {
         verify(cardKeyService).syncSkuStock("sku-1");
     }
 
+    /**
+     * 验证订单已分配卡密时不重复分配。
+     */
     @Test
     void allocateByOrderSkipsWhenAlreadyAllocated() {
         when(orderMapper.selectForUpdateBySn("O001")).thenReturn(purchaseOrder());
@@ -98,6 +110,9 @@ class CardKeyServiceImplAllocateByOrderTest {
         verify(cardKeyMapper, never()).selectForAllocate(anyString(), any(Integer.class));
     }
 
+    /**
+     * 验证卡池不足时拒绝分配并调用系统失败作废处理。
+     */
     @Test
     void allocateByOrderRejectsInsufficientPoolAndInvokesVoidOnSystemFailure() {
         stubPurchaseOrderContext(2, List.of(unusedCard("ck-1")));
@@ -112,6 +127,9 @@ class CardKeyServiceImplAllocateByOrderTest {
         verify(cardKeyService, never()).syncSkuStock(anyString());
     }
 
+    /**
+     * 验证分配中途更新失败时作废已处理的卡密。
+     */
     @Test
     void allocateByOrderVoidsPartialProgressWhenUpdateFailsMidAllocation() {
         stubPurchaseOrderContext(2, List.of(unusedCard("ck-1"), unusedCard("ck-2")));
@@ -129,6 +147,12 @@ class CardKeyServiceImplAllocateByOrderTest {
         verify(cardKeyService, never()).syncSkuStock(anyString());
     }
 
+    /**
+     * 模拟购买订单及订单项查询结果。
+     *
+     * @param num       增量或数量
+     * @param poolCards 卡池记录
+     */
     private void stubPurchaseOrderContext(int num, List<CardKey> poolCards) {
         when(orderMapper.selectForUpdateBySn("O001")).thenReturn(purchaseOrder());
         when(orderItemService.getByOrderSn("O001")).thenReturn(List.of(eCouponOrderItem(num)));
@@ -136,6 +160,11 @@ class CardKeyServiceImplAllocateByOrderTest {
         when(cardKeyMapper.selectForAllocate(eq("sku-1"), eq(num))).thenReturn(poolCards);
     }
 
+    /**
+     * 构造购买类型的卡密订单。
+     *
+     * @return 购买类型的卡密订单
+     */
     private Order purchaseOrder() {
         Order order = new Order();
         order.setSn("O001");
@@ -146,6 +175,12 @@ class CardKeyServiceImplAllocateByOrderTest {
         return order;
     }
 
+    /**
+     * 构造卡密订单项测试数据。
+     *
+     * @param num 增量或数量
+     * @return 卡密订单项测试数据
+     */
     private OrderItem eCouponOrderItem(int num) {
         OrderItem orderItem = new OrderItem();
         orderItem.setSn("OI001");
@@ -154,6 +189,11 @@ class CardKeyServiceImplAllocateByOrderTest {
         return orderItem;
     }
 
+    /**
+     * 构造卡密商品SKU测试数据。
+     *
+     * @return 卡密商品SKU测试数据
+     */
     private GoodsSku eCouponSku() {
         GoodsSku goodsSku = new GoodsSku();
         goodsSku.setId("sku-1");
@@ -161,6 +201,12 @@ class CardKeyServiceImplAllocateByOrderTest {
         return goodsSku;
     }
 
+    /**
+     * 构造未使用状态的卡密记录。
+     *
+     * @param id 测试数据ID
+     * @return 未使用状态的卡密记录
+     */
     private CardKey unusedCard(String id) {
         CardKey cardKey = new CardKey();
         cardKey.setId(id);

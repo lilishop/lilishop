@@ -43,6 +43,9 @@ class CardKeyServiceImplEnrichDetailTest {
     private OrderMapper orderMapper;
     private OrderItemService orderItemService;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         cardKeyService = spy(new CardKeyServiceImpl());
@@ -53,6 +56,9 @@ class CardKeyServiceImplEnrichDetailTest {
         ReflectionTestUtils.setField(cardKeyService, "cardKeySecretUtil", new cn.lili.modules.goods.util.CardKeySecretUtil());
     }
 
+    /**
+     * 验证订单详情补充已交付卡密信息。
+     */
     @Test
     void enrichOrderDetailReturnsDeliveredCardKeys() {
         Order order = purchaseECouponOrder(OrderStatusEnum.COMPLETED.name());
@@ -76,6 +82,9 @@ class CardKeyServiceImplEnrichDetailTest {
         assertThat(enriched.getCardKeys().get(0).getCardNo()).isEqualTo("NO-001");
     }
 
+    /**
+     * 验证已取消的赠品子订单显示卡密交付失败。
+     */
     @Test
     void enrichOrderDetailMarksGiftSubOrderFailedWhenCancelled() {
         Order giftOrder = giftOrder(OrderStatusEnum.CANCELLED.name(), "满赠电子卡券发放失败");
@@ -92,6 +101,9 @@ class CardKeyServiceImplEnrichDetailTest {
         assertThat(vo.getGiftECouponOrders()).isNull();
     }
 
+    /**
+     * 验证主订单详情汇总赠品子订单卡密信息。
+     */
     @Test
     void enrichOrderDetailAggregatesGiftSubOrderOnParentOrder() {
         Order parent = normalOrder("P001");
@@ -116,6 +128,9 @@ class CardKeyServiceImplEnrichDetailTest {
         assertThat(summary.getCardKeyDelivered()).isFalse();
     }
 
+    /**
+     * 验证已付款但未交付的购买订单显示待交付。
+     */
     @Test
     void enrichOrderDetailMarksPendingForPaidPurchaseOrder() {
         Order order = purchaseECouponOrder(OrderStatusEnum.PAID.name());
@@ -129,6 +144,12 @@ class CardKeyServiceImplEnrichDetailTest {
         assertThat(vo.getOrderItems().get(0).getCardKeyFulfillMessage()).contains("发放中");
     }
 
+    /**
+     * 构造普通订单测试数据。
+     *
+     * @param sn 订单编号
+     * @return 普通订单测试数据
+     */
     private Order normalOrder(String sn) {
         Order order = new Order();
         order.setSn(sn);
@@ -137,6 +158,12 @@ class CardKeyServiceImplEnrichDetailTest {
         return order;
     }
 
+    /**
+     * 构造购买类型的卡密订单测试数据。
+     *
+     * @param status 测试状态
+     * @return 购买类型的卡密订单测试数据
+     */
     private Order purchaseECouponOrder(String status) {
         Order order = new Order();
         order.setSn("O100");
@@ -147,6 +174,13 @@ class CardKeyServiceImplEnrichDetailTest {
         return order;
     }
 
+    /**
+     * 构造卡密赠品订单测试数据。
+     *
+     * @param status       测试状态
+     * @param cancelReason 取消原因
+     * @return 卡密赠品订单测试数据
+     */
     private Order giftOrder(String status, String cancelReason) {
         Order order = new Order();
         order.setSn("G001");
@@ -159,6 +193,13 @@ class CardKeyServiceImplEnrichDetailTest {
         return order;
     }
 
+    /**
+     * 构造订单项测试数据。
+     *
+     * @param orderSn 订单编号
+     * @param sn      订单编号
+     * @return 订单项测试数据
+     */
     private OrderItem orderItem(String orderSn, String sn) {
         OrderItem item = new OrderItem();
         item.setOrderSn(orderSn);

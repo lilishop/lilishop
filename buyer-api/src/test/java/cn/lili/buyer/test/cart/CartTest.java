@@ -37,6 +37,9 @@ class CartTest {
     private PaymentService paymentService;
 
 
+    /**
+     * 查询当前会员购物车及商品信息。
+     */
     @Test
     void getAll() {
         TradeDTO allTradeDTO = cartService.getAllTradeDTO();
@@ -44,12 +47,18 @@ class CartTest {
         log.info("{}", JSONUtil.toJsonStr(allTradeDTO));
     }
 
+    /**
+     * 调用购物车删除接口移除指定SKU。
+     */
     @Test
     void deleteAll() {
         cartService.delete(new String[]{"1344220459059404800"});
         Assertions.assertTrue(true);
     }
 
+    /**
+     * 使用默认交易参数创建交易。
+     */
     @Test
     void createTrade() {
 //       TradeDTO allTradeDTO = cartService.getAllTradeDTO();
@@ -58,6 +67,9 @@ class CartTest {
         cartService.createTrade(new TradeParams());
     }
 
+    /**
+     * 查询商品分类数据。
+     */
     @Test
     void getAllCategory() {
         List<CategoryVO> allCategory = categoryService.categoryTree();
@@ -68,6 +80,9 @@ class CartTest {
     }
 
 
+    /**
+     * 调用购物车接口选用指定优惠券。
+     */
     @Test
     void storeCoupon() {
         cartService.selectCoupon("1333318596239843328", CartTypeEnum.CART.name(), true);

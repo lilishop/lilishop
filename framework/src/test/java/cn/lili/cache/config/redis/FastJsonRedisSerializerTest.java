@@ -18,6 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FastJsonRedisSerializerTest {
 
+    /**
+     * 验证带类型标记的空店铺优惠券映射可反序列化。
+     */
     @Test
     void deserializeTradeDtoWithEmptyTypedStoreCoupons() {
         String json = "{\"@type\":\"cn.lili.modules.order.cart.entity.dto.TradeDTO\","
@@ -30,6 +33,9 @@ class FastJsonRedisSerializerTest {
         assertNotNull(result);
     }
 
+    /**
+     * 验证类型映射兼容处理仅替换空HashMap结构。
+     */
     @Test
     void normalizeEmptyTypedMapsOnlyReplacesEmptyHashMap() {
         String input = "{\"empty\":{\"@type\":\"java.util.HashMap\"},"
@@ -39,6 +45,9 @@ class FastJsonRedisSerializerTest {
                 + "\"filled\":{\"@type\":\"java.util.HashMap\",\"k\":{\"@type\":\"java.lang.String\",\"value\":\"v\"}}}", normalized);
     }
 
+    /**
+     * 验证立即购买交易数据序列化及反序列化后保持一致。
+     */
     @Test
     void roundTripBuyNowTradeDto() {
         FastJsonRedisSerializer<Object> serializer = new FastJsonRedisSerializer<>(Object.class);
@@ -47,6 +56,9 @@ class FastJsonRedisSerializerTest {
         assertDoesNotThrow(() -> serializer.deserialize(bytes));
     }
 
+    /**
+     * 验证包含店铺优惠券的交易数据可完整往返转换。
+     */
     @Test
     void roundTripTradeDtoWithPopulatedStoreCoupon() {
         FastJsonRedisSerializer<Object> serializer = new FastJsonRedisSerializer<>(Object.class);
@@ -66,6 +78,9 @@ class FastJsonRedisSerializerTest {
         assertEquals(158D, restored.getStoreCoupons().get("store-1").getSkuDetail().get("sku-1"));
     }
 
+    /**
+     * 验证Redis交易数据不包含派生的已选SKU列表。
+     */
     @Test
     void redisPayloadDoesNotContainDerivedCheckedSkuList() {
         FastJsonRedisSerializer<Object> serializer = new FastJsonRedisSerializer<>(Object.class);

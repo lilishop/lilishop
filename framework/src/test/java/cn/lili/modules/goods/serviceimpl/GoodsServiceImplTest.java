@@ -24,11 +24,14 @@ import cn.lili.modules.system.entity.enums.SettingEnum;
 import cn.lili.modules.system.service.SettingService;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -76,12 +79,18 @@ class GoodsServiceImplTest {
     private CategoryService categoryService;
     private WholesaleService wholesaleService;
 
+    /**
+     * 初始化商品实体的MyBatis-Plus元数据，支持测试中生成Lambda查询及更新条件
+     */
     @BeforeAll
     static void initGoodsEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
         TableInfoHelper.initTableInfo(assistant, Goods.class);
     }
 
+    /**
+     * 初始化商品服务及模拟依赖，为每个用例提供独立的店铺配置和商品数据
+     */
     @BeforeEach
     void setUp() {
         goodsService = spy(new GoodsServiceImpl());
@@ -124,6 +133,8 @@ class GoodsServiceImplTest {
             return true;
         }).when(goodsService).save(any(Goods.class));
         doReturn(true).when(goodsService).updateById(any(Goods.class));
+        doReturn(true).when(goodsService).update(any(Wrapper.class));
+        doNothing().when(goodsService).notifyGoodsDelete(anyList());
         doReturn(existingGoods()).when(goodsService).getById(GOODS_ID);
         doNothing().when(goodsSkuService).add(any(Goods.class), any(GoodsOperationDTO.class));
         doNothing().when(goodsSkuService).update(any(Goods.class), any(GoodsOperationDTO.class));
@@ -131,6 +142,69 @@ class GoodsServiceImplTest {
         when(cache.remove(any())).thenReturn(true);
     }
 
+    /**
+     * 验证新增商品无论选择上架还是下架，均按审核开关设置审核状态并同步至SKU
+     *
+     * @param release      是否上架
+     * @param goodsCheck   是否开启商品审核
+     * @param expectedAuth 预期审核状态
+     */
+    @ParameterizedTest
+    @CsvSource({"false,true,TOBEAUDITED", "true,true,TOBEAUDITED", "false,false,PASS", "true,false,PASS"})
+    void addGoodsAppliesAuditSettingRegardlessOfRelease(boolean release, boolean goodsCheck, String expectedAuth) {
+        GoodsSetting config = new GoodsSetting();
+        config.setGoodsCheck(goodsCheck);
+        Setting setting = new Setting();
+        setting.setSettingValue(JSON.toJSONString(config));
+        when(settingService.get(SettingEnum.GOODS_SETTING.name())).thenReturn(setting);
+        GoodsOperationDTO dto = validDto();
+        dto.setRelease(release);
+
+        try (MockedStatic<UserContext> context = mockStatic(UserContext.class)) {
+            context.when(UserContext::getCurrentUser).thenReturn(storeUser());
+            goodsService.addGoods(dto);
+        }
+
+        ArgumentCaptor<Goods> saved = ArgumentCaptor.forClass(Goods.class);
+        verify(goodsService).save(saved.capture());
+        assertThat(saved.getValue().getAuthFlag()).isEqualTo(expectedAuth);
+        assertThat(saved.getValue().getMarketEnable()).isEqualTo(release ? "UPPER" : "DOWN");
+        verify(goodsSkuService).add(saved.getValue(), dto);
+    }
+
+    /**
+     * 验证编辑商品无论选择上架还是下架，均重新按审核开关设置审核状态并同步至SKU
+     *
+     * @param release      是否上架
+     * @param goodsCheck   是否开启商品审核
+     * @param expectedAuth 预期审核状态
+     */
+    @ParameterizedTest
+    @CsvSource({"false,true,TOBEAUDITED", "true,true,TOBEAUDITED", "false,false,PASS", "true,false,PASS"})
+    void editGoodsAppliesAuditSettingRegardlessOfRelease(boolean release, boolean goodsCheck, String expectedAuth) {
+        GoodsSetting config = new GoodsSetting();
+        config.setGoodsCheck(goodsCheck);
+        Setting setting = new Setting();
+        setting.setSettingValue(JSON.toJSONString(config));
+        when(settingService.get(SettingEnum.GOODS_SETTING.name())).thenReturn(setting);
+        GoodsOperationDTO dto = validDto();
+        dto.setRelease(release);
+
+        try (MockedStatic<UserContext> context = mockStatic(UserContext.class)) {
+            context.when(UserContext::getCurrentUser).thenReturn(storeUser());
+            goodsService.editGoods(dto, GOODS_ID);
+        }
+
+        ArgumentCaptor<Goods> updated = ArgumentCaptor.forClass(Goods.class);
+        verify(goodsService).updateById(updated.capture());
+        assertThat(updated.getValue().getMarketEnable()).isEqualTo(release ? "UPPER" : "DOWN");
+        assertThat(updated.getValue().getAuthFlag()).isEqualTo(expectedAuth);
+        verify(goodsSkuService).update(updated.getValue(), dto);
+    }
+
+    /**
+     * 验证新增商品将非空参数列表写为JSON，并使用相同内容同步参数搜索倒排数据
+     */
     @Test
     void addGoodsWritesNonEmptyParamsJsonAndSyncsSameString() {
         GoodsParamsItemDTO item = indexedItem("内存", "8G");
@@ -149,6 +223,9 @@ class GoodsServiceImplTest {
         verify(goodsSearchParamService).syncByGoodsId(eq(GOODS_ID), eq(expectedJson));
     }
 
+    /**
+     * 验证新增商品传入空参数列表时写入空JSON数组，并同步清空参数搜索倒排数据
+     */
     @Test
     void addGoodsWritesEmptyArrayAndSyncsEmptyJson() {
         GoodsOperationDTO dto = validDto();
@@ -165,6 +242,9 @@ class GoodsServiceImplTest {
         verify(goodsSearchParamService).syncByGoodsId(eq(GOODS_ID), eq("[]"));
     }
 
+    /**
+     * 验证编辑商品将非空参数列表写为JSON，并使用相同内容同步参数搜索倒排数据
+     */
     @Test
     void editGoodsWritesNonEmptyParamsJsonAndSyncsSameString() {
         GoodsParamsItemDTO item = indexedItem("颜色", "黑色");
@@ -183,6 +263,9 @@ class GoodsServiceImplTest {
         verify(goodsSearchParamService).syncByGoodsId(eq(GOODS_ID), eq(expectedJson));
     }
 
+    /**
+     * 验证编辑商品传入空参数列表时写入空JSON数组，并同步清空参数搜索倒排数据
+     */
     @Test
     void editGoodsWritesEmptyArrayAndSyncsEmptyJson() {
         GoodsOperationDTO dto = validDto();
@@ -199,6 +282,9 @@ class GoodsServiceImplTest {
         verify(goodsSearchParamService).syncByGoodsId(eq(GOODS_ID), eq("[]"));
     }
 
+    /**
+     * 验证编辑商品未提供参数列表时不写入参数字段，也不触发参数搜索倒排同步
+     */
     @Test
     void editGoodsSkipsParamsAndSyncWhenListIsNull() {
         GoodsOperationDTO dto = validDto();
@@ -215,6 +301,9 @@ class GoodsServiceImplTest {
         verify(goodsSearchParamService, never()).syncByGoodsId(any(), any());
     }
 
+    /**
+     * 验证商品详情保留不参与索引的参数，避免详情展示丢失参数信息
+     */
     @Test
     void getGoodsVOKeepsNonIndexParams() {
         GoodsParamsItemDTO nonIndex = new GoodsParamsItemDTO();
@@ -239,6 +328,65 @@ class GoodsServiceImplTest {
         assertThat(vo.getGoodsParamsDTOList().get(0).getParamValue()).isEqualTo("广东");
     }
 
+    /**
+     * 验证商家及管理员取消计划时只清除指定方向的时间和原因，并使旧任务及商品缓存失效
+     *
+     * @param direction 计划方向：UPPER定时上架，DOWN定时下架
+     * @param manager   是否以管理员身份操作
+     */
+    @ParameterizedTest
+    @CsvSource({"UPPER,false", "DOWN,false", "UPPER,true", "DOWN,true"})
+    void cancelScheduleOnlyClearsRequestedDirection(String direction, boolean manager) {
+        Goods goods = existingGoods();
+        goods.setStoreId(STORE_ID);
+        java.util.Date time = new java.util.Date(1800000000000L);
+        goods.setScheduledUpperTime(time);
+        goods.setScheduledDownTime(time);
+        doReturn(goods).when(goodsService).getById(GOODS_ID);
+        cn.lili.trigger.interfaces.TimeTrigger trigger = mock(cn.lili.trigger.interfaces.TimeTrigger.class);
+        cn.lili.common.properties.RocketmqCustomProperties properties = new cn.lili.common.properties.RocketmqCustomProperties();
+        properties.setPromotionTopic("promotion");
+        ReflectionTestUtils.setField(goodsService, "timeTrigger", trigger);
+        ReflectionTestUtils.setField(goodsService, "rocketmqCustomProperties", properties);
+        try (MockedStatic<UserContext> context = mockStatic(UserContext.class)) {
+            context.when(UserContext::getCurrentUser).thenReturn(storeUser());
+            if (manager) context.when(UserContext::getCurrentUser).thenReturn(AuthUser.builder().role(UserEnums.MANAGER).id("manager-1").build());
+            goodsService.cancelGoodsMarketSchedule(GOODS_ID,
+                    cn.lili.modules.goods.entity.enums.GoodsStatusEnum.valueOf(direction));
+        }
+        ArgumentCaptor<com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<Goods>> wrapper = ArgumentCaptor.forClass(com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper.class);
+        verify(goodsService).update(wrapper.capture());
+        String prefix = direction.equals("UPPER") ? "scheduled_upper" : "scheduled_down";
+        String other = direction.equals("UPPER") ? "scheduled_down" : "scheduled_upper";
+        assertThat(wrapper.getValue().getSqlSet()).contains(prefix + "_time", prefix + "_reason")
+                .doesNotContain(other, "market_enable");
+        verify(trigger).delete(anyString(), eq(time.getTime()), anyString(), eq("promotion"));
+        verify(cache).remove(any());
+        verify(goodsSkuService, never()).updateGoodsSkuStatus(any());
+    }
+
+    /**
+     * 验证商家取消其他店铺的计划时被拒绝，且不更新商品或清除缓存
+     */
+    @Test
+    void cancelScheduleRejectsAnotherStoreBeforeAnyWrite() {
+        Goods goods = existingGoods();
+        goods.setStoreId("other-store");
+        doReturn(goods).when(goodsService).getById(GOODS_ID);
+        try (MockedStatic<UserContext> context = mockStatic(UserContext.class)) {
+            context.when(UserContext::getCurrentUser).thenReturn(storeUser());
+            org.junit.jupiter.api.Assertions.assertThrows(cn.lili.common.exception.ServiceException.class,
+                    () -> goodsService.cancelGoodsMarketSchedule(GOODS_ID, cn.lili.modules.goods.entity.enums.GoodsStatusEnum.UPPER));
+        }
+        verify(goodsService, never()).update(any(Wrapper.class));
+        verify(cache, never()).remove(any());
+    }
+
+    /**
+     * 构造包含基础信息、相册和库存的商品操作测试数据
+     *
+     * @return 商品操作参数
+     */
     private GoodsOperationDTO validDto() {
         GoodsOperationDTO dto = new GoodsOperationDTO();
         dto.setGoodsName("测试商品");
@@ -260,6 +408,13 @@ class GoodsServiceImplTest {
         return dto;
     }
 
+    /**
+     * 构造参与搜索索引的商品参数
+     *
+     * @param name  参数名称
+     * @param value 参数值
+     * @return 参与索引的商品参数
+     */
     private GoodsParamsItemDTO indexedItem(String name, String value) {
         GoodsParamsItemDTO item = new GoodsParamsItemDTO();
         item.setParamId("p-" + name);
@@ -270,6 +425,11 @@ class GoodsServiceImplTest {
         return item;
     }
 
+    /**
+     * 构造编辑及详情查询使用的已有商品
+     *
+     * @return 已有商品测试数据
+     */
     private Goods existingGoods() {
         Goods goods = new Goods();
         goods.setId(GOODS_ID);
@@ -279,6 +439,11 @@ class GoodsServiceImplTest {
         return goods;
     }
 
+    /**
+     * 构造归属于测试店铺的商家登录用户
+     *
+     * @return 商家登录用户
+     */
     private AuthUser storeUser() {
         return AuthUser.builder()
                 .id("clerk-1")
@@ -288,6 +453,11 @@ class GoodsServiceImplTest {
                 .build();
     }
 
+    /**
+     * 构造非自营测试店铺详情，用于商品保存时读取店铺信息及审核配置
+     *
+     * @return 店铺详情测试数据
+     */
     private StoreVO buildStoreDetail() {
         StoreVO store = new StoreVO();
         store.setId(STORE_ID);

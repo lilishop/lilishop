@@ -26,6 +26,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class OrderECouponTradeTypeTest {
 
+    /**
+     * 验证立即购买卡密商品设置卡密订单类型及虚拟配送方式。
+     */
     @Test
     void buyNowECouponSetsOrderTypeAndVirtualDelivery() {
         TradeDTO tradeDTO = new TradeDTO(CartTypeEnum.BUY_NOW);
@@ -42,6 +45,9 @@ class OrderECouponTradeTypeTest {
         assertThat(order.getPayStatus()).isEqualTo(PayStatusEnum.UNPAID.name());
     }
 
+    /**
+     * 验证卡密拼团订单保留卡密订单类型而不归入普通虚拟订单。
+     */
     @Test
     void pintuanECouponSetsOrderTypeECouponNotVirtual() {
         TradeDTO tradeDTO = new TradeDTO(CartTypeEnum.PINTUAN);
@@ -64,6 +70,13 @@ class OrderECouponTradeTypeTest {
         assertThat(order.getFreightPrice()).isZero();
     }
 
+    /**
+     * 构造包含卡密SKU的购物车并关联交易数据。
+     *
+     * @param tradeDTO 交易测试数据
+     * @param num      增量或数量
+     * @return 已关联交易数据的卡密购物车
+     */
     private CartVO cartWithECoupon(TradeDTO tradeDTO, int num) {
         CartSkuVO cartSkuVO = eCouponLine(num);
         CartVO cartVO = new CartVO(cartSkuVO);
@@ -75,6 +88,12 @@ class OrderECouponTradeTypeTest {
         return cartVO;
     }
 
+    /**
+     * 构造指定购买数量的卡密购物车行。
+     *
+     * @param num 增量或数量
+     * @return 指定购买数量的卡密购物车行
+     */
     private CartSkuVO eCouponLine(int num) {
         GoodsSku goodsSku = new GoodsSku();
         goodsSku.setId("sku-ecoupon");

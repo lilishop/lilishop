@@ -37,6 +37,9 @@ class AfterSaleServiceImplECouponAfterSaleTest {
     private OrderItemService orderItemService;
     private OrderService orderService;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         afterSaleService = new AfterSaleServiceImpl();
@@ -46,6 +49,9 @@ class AfterSaleServiceImplECouponAfterSaleTest {
         ReflectionTestUtils.setField(afterSaleService, "orderService", orderService);
     }
 
+    /**
+     * 验证卡密订单申请新售后时返回专用错误码。
+     */
     @Test
     void saveAfterSaleRejectsECouponWithDedicatedCodeWhenAfterSaleStatusIsNew() {
         stubOrderContext("OI001", "O001", OrderTypeEnum.E_COUPON, OrderItemAfterSaleStatusEnum.NEW.name());
@@ -57,6 +63,9 @@ class AfterSaleServiceImplECouponAfterSaleTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.CARD_KEY_E_COUPON_NO_AFTER_SALE);
     }
 
+    /**
+     * 验证查询新售后卡密订单信息时返回专用错误码。
+     */
     @Test
     void getAfterSaleVORejectsECouponWithDedicatedCodeWhenAfterSaleStatusIsNew() {
         Order order = stubOrderContext("OI001", "O001", OrderTypeEnum.E_COUPON, OrderItemAfterSaleStatusEnum.NEW.name());
@@ -70,6 +79,9 @@ class AfterSaleServiceImplECouponAfterSaleTest {
         }
     }
 
+    /**
+     * 验证非卡密订单仍遵循新售后状态校验。
+     */
     @Test
     void saveAfterSaleStillRejectsNonECouponWhenAfterSaleStatusIsNew() {
         stubOrderContext("OI002", "O002", OrderTypeEnum.NORMAL, OrderItemAfterSaleStatusEnum.NEW.name());
@@ -81,6 +93,15 @@ class AfterSaleServiceImplECouponAfterSaleTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.AFTER_SALES_BAN);
     }
 
+    /**
+     * 模拟售后校验所需的订单及订单项上下文。
+     *
+     * @param orderItemSn     订单项编号
+     * @param orderSn         订单编号
+     * @param orderType       订单类型
+     * @param afterSaleStatus 售后状态
+     * @return 售后测试使用的订单项
+     */
     private Order stubOrderContext(String orderItemSn, String orderSn, OrderTypeEnum orderType, String afterSaleStatus) {
         OrderItem orderItem = new OrderItem();
         orderItem.setSn(orderItemSn);
@@ -101,6 +122,12 @@ class AfterSaleServiceImplECouponAfterSaleTest {
         return order;
     }
 
+    /**
+     * 构造指定订单项的售后申请参数。
+     *
+     * @param orderItemSn 订单项编号
+     * @return 指定订单项的售后申请参数
+     */
     private AfterSaleDTO afterSaleDto(String orderItemSn) {
         AfterSaleDTO dto = new AfterSaleDTO();
         dto.setOrderItemSn(orderItemSn);

@@ -52,6 +52,9 @@ import static org.mockito.Mockito.when;
 
 class GoodsSearchServiceImplTest {
 
+    /**
+     * 验证商品索引构造时不自动填充上架时间。
+     */
     @Test
     void goodsIndexMainConstructorLeavesReleaseTimeNullUntilExplicitlySet() {
         Assertions.assertNull(new GoodsIndex(sku("sku-1", "goods-1", "测试商品")).getReleaseTime());
@@ -59,6 +62,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertEquals(browseTime, new GoodsIndex(sku("sku-1", "goods-1", "测试商品"), browseTime).getReleaseTime());
     }
 
+    /**
+     * 验证商品分页搜索使用MySQL的SKU数据并返回商品索引结果。
+     */
     @Test
     void searchGoodsByPageUsesMysqlSkuDtoListAndReturnsGoodsIndexes() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -105,6 +111,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertFalse(sqlSegment.contains("li_goods_search_param"));
     }
 
+    /**
+     * 验证按SKU ID查询时由MySQL SKU列表构建商品索引。
+     */
     @Test
     void getGoodsBySkuIdsReturnsIndexesFromMysqlSkuList() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -121,6 +130,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertEquals(List.of("sku-2"), captor.getValue().getSkuIds());
     }
 
+    /**
+     * 验证无搜索索引时根据MySQL促销绑定重建促销映射。
+     */
     @Test
     void noEsIndexFindByIdRebuildsPromotionMapFromMysqlPromotionBinding() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -139,6 +151,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertTrue(result.getPromotionMap().containsKey("FULL_DISCOUNT-promo-1"));
     }
 
+    /**
+     * 验证MySQL搜索按商品索引参数筛选。
+     */
     @Test
     void searchGoodsByPageFiltersByIndexedGoodsParamsInMysqlMode() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -166,6 +181,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertTrue(wrapper.getParamNameValuePairs().containsValue("8G"));
     }
 
+    /**
+     * 验证筛选聚合查询复用公共条件并排除已选参数名称。
+     */
     @Test
     void getSelectorPushdownQueriesShareBuildSharedWhereAndHideSelectedParamNames() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -209,6 +227,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertFalse(brandSql.contains("ORDER BY"));
     }
 
+    /**
+     * 验证未选择参数时聚合查询不生成NOT IN条件。
+     */
     @Test
     void getSelectorPushdownOmitsNotInWhenNoParamSelected() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -230,6 +251,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertTrue(selectorParamSql().contains("MIN(p.param_sort) IS NULL"));
     }
 
+    /**
+     * 验证筛选聚合过程只解析一次已选参数。
+     */
     @Test
     void getSelectorPushdownParsesSelectedPropsOnce() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -248,6 +272,9 @@ class GoodsSearchServiceImplTest {
         verify(service, times(1)).parseSelectedProps(any());
     }
 
+    /**
+     * 验证筛选参数维度中空排序排在末尾。
+     */
     @Test
     void getSelectorPushdownPutsNullParamSortDimensionLast() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -269,6 +296,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertEquals(List.of("16G", "8G"), result.getParamOptions().get(0).getValues());
     }
 
+    /**
+     * 验证一次查询按分类路径顺序解析类目名称。
+     */
     @Test
     void getSelectorPushdownResolvesCategoryNamesInPathOrderWithSingleQuery() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -297,6 +327,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertEquals(Set.of("c1", "c2", "c3"), new HashSet<>(idsCaptor.getValue()));
     }
 
+    /**
+     * 验证分类ID均为空时跳过分类查询。
+     */
     @Test
     void getSelectorPushdownSkipsCategoryLookupWhenAllIdsEmpty() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -315,6 +348,9 @@ class GoodsSearchServiceImplTest {
         verify(categoryService, never()).listByIdsOrderByLevel(any());
     }
 
+    /**
+     * 验证筛选聚合正确映射品牌结果。
+     */
     @Test
     void getSelectorPushdownMapsBrandRows() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -340,6 +376,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertTrue(brandSelectorSql().contains("${ew.customSqlSegment}"));
     }
 
+    /**
+     * 验证仅为当前页商品加载促销信息。
+     */
     @Test
     void searchGoodsByPageOnlyLoadsPromotionForCurrentPage() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -366,6 +405,9 @@ class GoodsSearchServiceImplTest {
         verify(promotionService, never()).getGoodsSkuPromotionMap("store-1", "sku-3");
     }
 
+    /**
+     * 验证不可变MySQL查询结果仍可按价格降序排序。
+     */
     @Test
     void searchGoodsByPageSortsImmutableMysqlResultByPriceDesc() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -386,6 +428,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertEquals(1, countOccurrences(sql, "ORDER BY"));
     }
 
+    /**
+     * 验证不可变MySQL查询结果仍可按销量升序排序。
+     */
     @Test
     void searchGoodsByPageSortsImmutableMysqlResultByBuyCountAsc() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -407,12 +452,21 @@ class GoodsSearchServiceImplTest {
         Assertions.assertEquals(1, countOccurrences(sql, "ORDER BY"));
     }
 
+    /**
+     * 验证SQL过滤不会误判销量及上架时间字段。
+     */
     @Test
     void sqlFilterDoesNotRejectBuyCountAndReleaseTime() {
         Assertions.assertFalse(SqlFilter.hit("buyCount"));
         Assertions.assertFalse(SqlFilter.hit("releaseTime"));
     }
 
+    /**
+     * 验证驼峰及下划线排序字段规范化为相同SQL表达式。
+     *
+     * @param sort       排序字段
+     * @param expression 查询表达式
+     */
     @ParameterizedTest
     @CsvSource({
             "price, gs.price",
@@ -438,6 +492,9 @@ class GoodsSearchServiceImplTest {
         }
     }
 
+    /**
+     * 验证缺少或无法识别排序字段时回退为SKU ID降序。
+     */
     @Test
     void applyOrderByFallsBackToGsIdDescWhenSortMissingOrUnknown() {
         Assertions.assertTrue(orderedWrapper(null, null, true).getCustomSqlSegment().contains("ORDER BY gs.id DESC"));
@@ -445,6 +502,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertTrue(orderedWrapper("drop table", "asc", true).getCustomSqlSegment().contains("ORDER BY gs.id DESC"));
     }
 
+    /**
+     * 验证公共筛选条件不包含排序子句。
+     */
     @Test
     void buildSharedWhereDoesNotContainOrderBy() {
         GoodsSearchServiceImpl service = new GoodsSearchServiceImpl(mock(GoodsSkuService.class));
@@ -456,6 +516,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertTrue(sql.contains("(g.delete_flag IS NULL OR g.delete_flag = 0)"));
     }
 
+    /**
+     * 验证公共条件包含品牌排除及未删除条件。
+     */
     @Test
     void buildSharedWherePushesBrandNeAndDeleteFlag() {
         GoodsSearchServiceImpl service = new GoodsSearchServiceImpl(mock(GoodsSkuService.class));
@@ -479,6 +542,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertFalse(sql.contains("ORDER BY"));
     }
 
+    /**
+     * 验证同名多值使用单个EXISTS加IN，不同参数名通过AND组合。
+     */
     @Test
     void buildSharedWhereSameNameValuesUseSingleExistsInAndCrossNameUseAndExists() {
         GoodsSearchServiceImpl service = new GoodsSearchServiceImpl(mock(GoodsSkuService.class));
@@ -503,6 +569,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertTrue(crossNameWrapper.getParamNameValuePairs().containsValue("黑色"));
     }
 
+    /**
+     * 验证多个参数值绑定时占位符不冲突。
+     */
     @Test
     void buildSharedWhereBindsTwelveParamValuesWithoutPlaceholderCollision() {
         GoodsSearchServiceImpl service = new GoodsSearchServiceImpl(mock(GoodsSkuService.class));
@@ -525,6 +594,9 @@ class GoodsSearchServiceImplTest {
         }
     }
 
+    /**
+     * 验证下推分页限制页大小且不重复挂载分页排序项。
+     */
     @Test
     void searchGoodsByPagePushdownCapsPageSizeAndDoesNotAttachPageOrderItems() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -551,6 +623,9 @@ class GoodsSearchServiceImplTest {
         Assertions.assertEquals(10, second.getSize());
     }
 
+    /**
+     * 验证下推分页使用Mapper总数而非当前内存列表长度。
+     */
     @Test
     void searchGoodsByPagePushdownUsesMapperTotalInsteadOfMemorySize() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -574,6 +649,9 @@ class GoodsSearchServiceImplTest {
         verify(promotionService).getGoodsSkuPromotionMap("store-1", "sku-1");
     }
 
+    /**
+     * 验证下推搜索使用商品创建时间填充上架时间。
+     */
     @Test
     void searchGoodsByPagePushdownSetsReleaseTimeFromGoodsCreateTime() {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -590,10 +668,25 @@ class GoodsSearchServiceImplTest {
         Assertions.assertEquals(spuCreateTime, result.getRecords().get(0).getReleaseTime());
     }
 
+    /**
+     * 构造使用SQL下推查询的商品搜索服务。
+     *
+     * @param goodsSkuService 商品SKU服务
+     * @return 使用SQL下推查询的商品搜索服务
+     */
     private GoodsSearchServiceImpl pushdownService(GoodsSkuService goodsSkuService) {
         return new GoodsSearchServiceImpl(goodsSkuService);
     }
 
+    /**
+     * 构造注入筛选聚合依赖的商品搜索服务。
+     *
+     * @param goodsSkuService        商品SKU服务
+     * @param goodsSkuMapper         商品SKU Mapper
+     * @param goodsSearchParamMapper 商品参数Mapper
+     * @param categoryService        分类服务
+     * @return 注入筛选聚合依赖的商品搜索服务
+     */
     private GoodsSearchServiceImpl pushdownSelectorService(GoodsSkuService goodsSkuService,
                                                            GoodsSkuMapper goodsSkuMapper,
                                                            GoodsSearchParamMapper goodsSearchParamMapper,
@@ -603,6 +696,14 @@ class GoodsSearchServiceImplTest {
         return service;
     }
 
+    /**
+     * 向商品搜索服务注入筛选聚合查询依赖。
+     *
+     * @param service                待测服务
+     * @param goodsSkuMapper         商品SKU Mapper
+     * @param goodsSearchParamMapper 商品参数Mapper
+     * @param categoryService        分类服务
+     */
     private void wireSelectorDeps(GoodsSearchServiceImpl service,
                                   GoodsSkuMapper goodsSkuMapper,
                                   GoodsSearchParamMapper goodsSearchParamMapper,
@@ -612,6 +713,11 @@ class GoodsSearchServiceImplTest {
         ReflectionTestUtils.setField(service, "categoryService", categoryService);
     }
 
+    /**
+     * 读取参数聚合Mapper中的SQL文本。
+     *
+     * @return 参数聚合Mapper中的SQL文本
+     */
     private String selectorParamSql() {
         try (var in = GoodsSearchParamMapper.class.getResourceAsStream("/mapper/GoodsSearchParamMapper.xml")) {
             Assertions.assertNotNull(in);
@@ -621,6 +727,11 @@ class GoodsSearchServiceImplTest {
         }
     }
 
+    /**
+     * 读取品牌聚合Mapper注解中的SQL文本。
+     *
+     * @return 品牌聚合Mapper注解中的SQL文本
+     */
     private String brandSelectorSql() {
         try {
             return GoodsSkuMapper.class.getMethod("selectSelectorBrands",
@@ -632,6 +743,14 @@ class GoodsSearchServiceImplTest {
         }
     }
 
+    /**
+     * 构造参数名称、值及排序组成的聚合结果行。
+     *
+     * @param name  名称
+     * @param value 测试值
+     * @param sort  排序字段
+     * @return 参数名称、值及排序组成的聚合结果行
+     */
     private GoodsSearchParamFacetRow facetRow(String name, String value, Integer sort) {
         GoodsSearchParamFacetRow row = new GoodsSearchParamFacetRow();
         row.setParamName(name);
@@ -640,6 +759,14 @@ class GoodsSearchServiceImplTest {
         return row;
     }
 
+    /**
+     * 构造指定ID、名称及层级的分类。
+     *
+     * @param id    测试数据ID
+     * @param name  名称
+     * @param level 分类层级
+     * @return 指定ID、名称及层级的分类
+     */
     private Category category(String id, String name, int level) {
         Category category = new Category();
         category.setId(id);
@@ -648,18 +775,38 @@ class GoodsSearchServiceImplTest {
         return category;
     }
 
+    /**
+     * 捕获商品搜索传递给SKU服务的查询条件。
+     *
+     * @param goodsSkuService 商品SKU服务
+     * @return 商品搜索传递给SKU服务的查询条件
+     */
     private QueryWrapper<GoodsSkuDTO> captureWrapper(GoodsSkuService goodsSkuService) {
         ArgumentCaptor<QueryWrapper<GoodsSkuDTO>> captor = ArgumentCaptor.forClass(QueryWrapper.class);
         verify(goodsSkuService).getGoodsSkuDTOByPage(any(Page.class), captor.capture());
         return captor.getValue();
     }
 
+    /**
+     * 捕获商品搜索传递给SKU服务的分页对象。
+     *
+     * @param goodsSkuService 商品SKU服务
+     * @return 商品搜索传递给SKU服务的分页对象
+     */
     private Page<GoodsSkuDTO> capturePage(GoodsSkuService goodsSkuService) {
         ArgumentCaptor<Page<GoodsSkuDTO>> captor = ArgumentCaptor.forClass(Page.class);
         verify(goodsSkuService).getGoodsSkuDTOByPage(captor.capture(), any());
         return captor.getValue();
     }
 
+    /**
+     * 构造并捕获应用指定排序条件后的商品查询包装器。
+     *
+     * @param sort       排序字段
+     * @param order      订单测试数据
+     * @param notConvert 是否跳过字段名转换
+     * @return 包含指定排序条件的商品查询包装器
+     */
     private QueryWrapper<GoodsSkuDTO> orderedWrapper(String sort, String order, boolean notConvert) {
         GoodsSearchServiceImpl service = new GoodsSearchServiceImpl(mock(GoodsSkuService.class));
         QueryWrapper<GoodsSkuDTO> wrapper = buildSharedWhere(service, new GoodsSearchDTO());
@@ -671,11 +818,25 @@ class GoodsSearchServiceImplTest {
         return wrapper;
     }
 
+    /**
+     * 通过反射构建商品搜索的公共查询条件。
+     *
+     * @param service   待测服务
+     * @param searchDTO 商品搜索条件
+     * @return 商品搜索公共查询条件
+     */
     private QueryWrapper<GoodsSkuDTO> buildSharedWhere(GoodsSearchServiceImpl service, GoodsSearchDTO searchDTO) {
         Map<String, List<String>> selectedProps = ReflectionTestUtils.invokeMethod(service, "parseSelectedProps", searchDTO);
         return ReflectionTestUtils.invokeMethod(service, "buildSharedWhere", searchDTO, selectedProps);
     }
 
+    /**
+     * 统计指定字符串片段在文本中出现的次数。
+     *
+     * @param text  待检查文本
+     * @param token 待统计的文本片段
+     * @return 指定字符串片段在文本中出现的次数
+     */
     private int countOccurrences(String text, String token) {
         int count = 0;
         int idx = 0;
@@ -686,6 +847,14 @@ class GoodsSearchServiceImplTest {
         return count;
     }
 
+    /**
+     * 构造商品搜索使用的SKU实体。
+     *
+     * @param skuId     SKU ID
+     * @param goodsId   商品ID
+     * @param goodsName 商品名称
+     * @return 商品搜索使用的SKU实体
+     */
     private GoodsSku sku(String skuId, String goodsId, String goodsName) {
         GoodsSku sku = new GoodsSku();
         sku.setId(skuId);
@@ -701,6 +870,16 @@ class GoodsSearchServiceImplTest {
         return sku;
     }
 
+    /**
+     * 构造包含商品参数的SKU搜索数据。
+     *
+     * @param skuId      SKU ID
+     * @param goodsId    商品ID
+     * @param goodsName  商品名称
+     * @param paramName  商品参数名称
+     * @param paramValue 商品参数值
+     * @return 包含商品参数的SKU搜索数据
+     */
     private GoodsSkuDTO skuDto(String skuId, String goodsId, String goodsName, String paramName, String paramValue) {
         GoodsSkuDTO sku = new GoodsSkuDTO();
         sku.setId(skuId);
@@ -719,6 +898,12 @@ class GoodsSearchServiceImplTest {
         return sku;
     }
 
+    /**
+     * 构造指定满额优惠活动的促销映射。
+     *
+     * @param promotionId 促销活动ID
+     * @return 指定满额优惠活动的促销映射
+     */
     private Map<String, Object> fullDiscountPromotionMap(String promotionId) {
         FullDiscount fullDiscount = new FullDiscount();
         fullDiscount.setId(promotionId);

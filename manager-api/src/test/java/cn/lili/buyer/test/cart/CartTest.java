@@ -21,6 +21,9 @@ class CartTest {
     private StockUpdateExecute stockUpdateExecute;
 
     //订单支付，库存扣减单元测试
+    /**
+     * 模拟订单支付消息并触发库存扣减。
+     */
     @Test
     void stockUpdate() {
         OrderMessage orderMessage = new OrderMessage();

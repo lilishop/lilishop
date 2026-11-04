@@ -40,6 +40,9 @@ class CardKeyServiceImplAuthFlagTest {
     private GoodsService goodsService;
     private StoreService storeService;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         cardKeyService = new CardKeyServiceImpl();
@@ -54,6 +57,9 @@ class CardKeyServiceImplAuthFlagTest {
         when(storeService.getById(STORE_ID)).thenReturn(buildOpenStore());
     }
 
+    /**
+     * 验证商品审核拒绝时不能管理卡密。
+     */
     @Test
     void validateSkuForManageRejectsRefusedGoods() {
         when(goodsService.getById(GOODS_ID)).thenReturn(buildGoods(GoodsAuthEnum.REFUSE));
@@ -63,6 +69,11 @@ class CardKeyServiceImplAuthFlagTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.CARD_KEY_GOODS_AUTH_REFUSE);
     }
 
+    /**
+     * 验证非审核拒绝状态允许通过卡密管理校验。
+     *
+     * @param authFlag 认证开关
+     */
     @ParameterizedTest
     @EnumSource(value = GoodsAuthEnum.class, names = {"TOBEAUDITED", "PASS"})
     void validateSkuForManageAllowsNonRefusedAuthFlags(GoodsAuthEnum authFlag) {
@@ -72,10 +83,22 @@ class CardKeyServiceImplAuthFlagTest {
         assertThat(sku.getId()).isEqualTo(SKU_ID);
     }
 
+    /**
+     * 通过反射调用卡密SKU管理权限校验。
+     *
+     * @param skuId   SKU ID
+     * @param storeId 店铺ID
+     * @return 校验通过的SKU
+     */
     private GoodsSku invokeValidateSkuForManage(String skuId, String storeId) {
         return ReflectionTestUtils.invokeMethod(cardKeyService, "validateSkuForManage", skuId, storeId);
     }
 
+    /**
+     * 构造SKU基础测试数据。
+     *
+     * @return SKU基础测试数据
+     */
     private GoodsSku buildSku() {
         GoodsSku sku = new GoodsSku();
         sku.setId(SKU_ID);
@@ -86,6 +109,12 @@ class CardKeyServiceImplAuthFlagTest {
         return sku;
     }
 
+    /**
+     * 构造商品基础测试数据。
+     *
+     * @param authFlag 认证开关
+     * @return 商品基础测试数据
+     */
     private Goods buildGoods(GoodsAuthEnum authFlag) {
         Goods goods = new Goods();
         goods.setId(GOODS_ID);
@@ -94,6 +123,11 @@ class CardKeyServiceImplAuthFlagTest {
         return goods;
     }
 
+    /**
+     * 构造正常营业的店铺测试数据。
+     *
+     * @return 正常营业的店铺测试数据
+     */
     private Store buildOpenStore() {
         Store store = new Store();
         store.setId(STORE_ID);

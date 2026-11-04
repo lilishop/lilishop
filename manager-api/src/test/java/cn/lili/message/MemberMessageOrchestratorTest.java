@@ -48,6 +48,9 @@ class MemberMessageOrchestratorTest {
     private MemberService memberService;
     private SettingService settingService;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         orchestrator = new MemberMessageOrchestrator();
@@ -63,6 +66,11 @@ class MemberMessageOrchestratorTest {
         ReflectionTestUtils.setField(orchestrator, "settingService", settingService);
     }
 
+    /**
+     * 构造所有通知渠道均开启的会员通知模板。
+     *
+     * @return 所有通知渠道均开启的会员通知模板
+     */
     private NoticeMessage openTemplate() {
         NoticeMessage template = new NoticeMessage();
         template.setNoticeNode("订单发货通知");
@@ -77,6 +85,11 @@ class MemberMessageOrchestratorTest {
         return template;
     }
 
+    /**
+     * 构造会员发货通知参数。
+     *
+     * @return 会员发货通知参数
+     */
     private NoticeMessageDTO dto() {
         NoticeMessageDTO dto = new NoticeMessageDTO();
         dto.setMemberId("m1");
@@ -88,18 +101,30 @@ class MemberMessageOrchestratorTest {
         return dto;
     }
 
+    /**
+     * 模拟指定签名及测试模式的短信配置。
+     *
+     * @param signName  短信签名
+     * @param testModel 短信测试模式
+     */
     private void mockSmsSetting(String signName, boolean testModel) {
         Setting setting = new Setting();
         setting.setSettingValue("{\"signName\":" + (signName == null ? "null" : "\"" + signName + "\"") + ",\"isTestModel\":" + testModel + "}");
         when(settingService.get(SettingEnum.SMS_SETTING.name())).thenReturn(setting);
     }
 
+    /**
+     * 模拟已填写手机号的会员查询结果。
+     */
     private void mockMemberWithMobile() {
         Member member = new Member();
         member.setMobile("13800000000");
         when(memberService.getById("m1")).thenReturn(member);
     }
 
+    /**
+     * 验证通知模板不存在时直接返回。
+     */
     @Test
     void returnsQuietlyWhenTemplateMissing() {
         when(noticeMessageService.getOne(any(LambdaQueryWrapper.class), anyBoolean())).thenReturn(null);
@@ -108,6 +133,9 @@ class MemberMessageOrchestratorTest {
         verify(noticeMessageService, never()).noticeMessage(any());
     }
 
+    /**
+     * 验证所有通知渠道开启时分别执行发送。
+     */
     @Test
     void dispatchesAllChannelsWhenAllOpen() {
         when(noticeMessageService.getOne(any(LambdaQueryWrapper.class), anyBoolean())).thenReturn(openTemplate());
@@ -122,6 +150,9 @@ class MemberMessageOrchestratorTest {
         verify(wechatSceneMessageSender).sendMpMessage(eq("ORDER_DELIVER"), eq("m1"), any(), eq("pages/order/orderDetail?sn=SN123"));
     }
 
+    /**
+     * 验证会员手机号为空时跳过短信发送。
+     */
     @Test
     void skipsSmsWhenMemberMobileBlank() {
         when(noticeMessageService.getOne(any(LambdaQueryWrapper.class), anyBoolean())).thenReturn(openTemplate());
@@ -133,6 +164,9 @@ class MemberMessageOrchestratorTest {
         verify(noticeMessageService).noticeMessage(any(NoticeMessageDTO.class));
     }
 
+    /**
+     * 验证缺少短信签名时跳过短信发送。
+     */
     @Test
     void skipsSmsWhenSignMissing() {
         when(noticeMessageService.getOne(any(LambdaQueryWrapper.class), anyBoolean())).thenReturn(openTemplate());
@@ -145,6 +179,9 @@ class MemberMessageOrchestratorTest {
         verify(noticeMessageService).noticeMessage(any(NoticeMessageDTO.class));
     }
 
+    /**
+     * 验证测试模式下跳过真实短信发送。
+     */
     @Test
     void skipsSmsInTestModel() {
         when(noticeMessageService.getOne(any(LambdaQueryWrapper.class), anyBoolean())).thenReturn(openTemplate());
@@ -156,6 +193,9 @@ class MemberMessageOrchestratorTest {
         verify(smsUtil, never()).sendNoticeSms(anyString(), anyString(), anyString(), any());
     }
 
+    /**
+     * 验证短信开关关闭时跳过发送。
+     */
     @Test
     void skipsSmsWhenSwitchOff() {
         NoticeMessage template = openTemplate();
@@ -168,6 +208,9 @@ class MemberMessageOrchestratorTest {
         verify(noticeMessageService).noticeMessage(any(NoticeMessageDTO.class));
     }
 
+    /**
+     * 验证单个通知渠道异常不影响其他渠道。
+     */
     @Test
     void channelExceptionDoesNotAffectOthers() {
         when(noticeMessageService.getOne(any(LambdaQueryWrapper.class), anyBoolean())).thenReturn(openTemplate());
@@ -182,6 +225,9 @@ class MemberMessageOrchestratorTest {
         verify(wechatSceneMessageSender).sendMpMessage(anyString(), anyString(), any(), any());
     }
 
+    /**
+     * 验证通知编排异常不会向调用方抛出。
+     */
     @Test
     void orchestrateNeverThrows() {
         when(noticeMessageService.getOne(any(LambdaQueryWrapper.class), anyBoolean())).thenReturn(openTemplate());
@@ -195,6 +241,9 @@ class MemberMessageOrchestratorTest {
         assertThatCode(() -> orchestrator.orchestrate(dto())).doesNotThrowAnyException();
     }
 
+    /**
+     * 验证通知模板查询限定会员模板类型。
+     */
     @Test
     @SuppressWarnings("unchecked")
     void templateLookupFiltersMemberType() {

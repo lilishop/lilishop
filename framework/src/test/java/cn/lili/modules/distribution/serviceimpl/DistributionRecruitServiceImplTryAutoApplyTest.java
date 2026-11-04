@@ -51,6 +51,9 @@ class DistributionRecruitServiceImplTryAutoApplyTest {
     private DistributionRecruitSettingSupport recruitSettingSupport;
     private DistributionRecruitPendingTokenSupport pendingTokenSupport;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         service = spy(new DistributionRecruitServiceImpl());
@@ -217,6 +220,12 @@ class DistributionRecruitServiceImplTryAutoApplyTest {
         verify(service, times(1)).submitApplicationForMember(eq("M1"), any());
     }
 
+    /**
+     * 构造自动申请模式的招募配置。
+     *
+     * @param agreement 是否同意协议
+     * @return 自动申请模式的招募配置
+     */
     private DistributionRecruitSetting autoSetting(String agreement) {
         DistributionRecruitSetting setting = new DistributionRecruitSetting();
         setting.setApplyMode(RecruitApplyModeEnum.AUTO.name());
@@ -228,12 +237,23 @@ class DistributionRecruitServiceImplTryAutoApplyTest {
         return setting;
     }
 
+    /**
+     * 构造满足招募条件的进度结果。
+     *
+     * @return 满足招募条件的进度结果
+     */
     private static DistributionRecruitConditionProgressVO satisfiedProgress() {
         DistributionRecruitConditionProgressVO progress = new DistributionRecruitConditionProgressVO();
         progress.setSatisfied(true);
         return progress;
     }
 
+    /**
+     * 构造指定分销状态的测试记录。
+     *
+     * @param status 测试状态
+     * @return 指定分销状态的测试记录
+     */
     private static Distribution status(DistributionStatusEnum status) {
         Distribution distribution = new Distribution();
         distribution.setDistributionStatus(status.name());

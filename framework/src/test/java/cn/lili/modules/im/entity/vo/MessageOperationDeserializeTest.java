@@ -9,6 +9,9 @@ class MessageOperationDeserializeTest {
 
     private final JsonMapper jsonMapper = JsonMapper.builder().build();
 
+    /**
+     * 验证订单消息的对象上下文能够反序列化并保留订单信息。
+     */
     @Test
     void shouldDeserializeOrderMessageWithObjectContext() throws Exception {
         String payload = """
@@ -35,6 +38,9 @@ class MessageOperationDeserializeTest {
         assertThat(messageOperation.getContext()).contains("mate80 白色");
     }
 
+    /**
+     * 验证纯文本消息上下文能够反序列化。
+     */
     @Test
     void shouldDeserializePlainTextContext() throws Exception {
         String payload = """

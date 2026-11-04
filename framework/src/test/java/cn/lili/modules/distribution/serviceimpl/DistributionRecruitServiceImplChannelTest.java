@@ -22,6 +22,9 @@ import static org.mockito.Mockito.when;
  */
 class DistributionRecruitServiceImplChannelTest {
 
+    /**
+     * 验证线上入口关闭且邀请码为空时返回入口关闭错误。
+     */
     @Test
     void closedEntry_blankToken_throwsOnlineEntryClosed() {
         DistributionRecruitServiceImpl service = newService();
@@ -37,6 +40,9 @@ class DistributionRecruitServiceImplChannelTest {
                         ResultCode.DISTRIBUTION_ONLINE_ENTRY_CLOSED));
     }
 
+    /**
+     * 验证线上入口关闭且邀请码无效时返回邀请无效错误。
+     */
     @Test
     void closedEntry_nonBlankInvalidToken_throwsInviteInvalid() {
         DistributionRecruitServiceImpl service = newService();
@@ -57,6 +63,9 @@ class DistributionRecruitServiceImplChannelTest {
                 });
     }
 
+    /**
+     * 验证线上入口关闭时仍允许有效邀请渠道并返回邀请人ID。
+     */
     @Test
     void closedEntry_validInviter_returnsInviterId() {
         DistributionRecruitServiceImpl service = newService();
@@ -69,6 +78,9 @@ class DistributionRecruitServiceImplChannelTest {
         assertThat(inviterId).isEqualTo("D1");
     }
 
+    /**
+     * 验证展示配置为空且无邀请码时按入口关闭处理。
+     */
     @Test
     void closedEntry_nullVisible_blankToken_throwsOnlineEntryClosed() {
         DistributionRecruitServiceImpl service = newService();
@@ -80,6 +92,9 @@ class DistributionRecruitServiceImplChannelTest {
                         ResultCode.DISTRIBUTION_ONLINE_ENTRY_CLOSED));
     }
 
+    /**
+     * 验证会员不能使用自己的邀请渠道申请。
+     */
     @Test
     void closedEntry_selfInvite_throwsInviteInvalid() {
         DistributionRecruitServiceImpl service = newService();
@@ -95,6 +110,9 @@ class DistributionRecruitServiceImplChannelTest {
                         ResultCode.DISTRIBUTION_RECRUIT_INVITE_INVALID));
     }
 
+    /**
+     * 验证未通过审核的邀请人不能提供有效邀请渠道。
+     */
     @Test
     void closedEntry_nonPassInviter_throwsInviteInvalid() {
         DistributionRecruitServiceImpl service = newService();
@@ -113,6 +131,9 @@ class DistributionRecruitServiceImplChannelTest {
                         ResultCode.DISTRIBUTION_RECRUIT_INVITE_INVALID));
     }
 
+    /**
+     * 验证线上入口开放且无邀请码时允许直接申请。
+     */
     @Test
     void openEntry_blankToken_returnsNullWithoutThrowing() {
         DistributionRecruitServiceImpl service = newService();
@@ -122,12 +143,24 @@ class DistributionRecruitServiceImplChannelTest {
         assertThat(service.assertOnlineRecruitChannelAllowed(setting, null, "M1")).isNull();
     }
 
+    /**
+     * 创建分销招募服务并注入测试依赖。
+     *
+     * @return 已注入测试依赖的分销招募服务
+     */
     private static DistributionRecruitServiceImpl newService() {
         DistributionRecruitServiceImpl service = new DistributionRecruitServiceImpl();
         ReflectionTestUtils.setField(service, "distributionMemberSupport", mock(DistributionMemberSupport.class));
         return service;
     }
 
+    /**
+     * 构造审核通过的邀请人记录。
+     *
+     * @param distributionId 分销员ID
+     * @param memberId       会员ID
+     * @return 审核通过的邀请人记录
+     */
     private static Distribution passInviter(String distributionId, String memberId) {
         Distribution inviter = new Distribution();
         inviter.setId(distributionId);
@@ -136,12 +169,23 @@ class DistributionRecruitServiceImplChannelTest {
         return inviter;
     }
 
+    /**
+     * 构造关闭线上招募入口的分销配置。
+     *
+     * @return 关闭线上招募入口的分销配置
+     */
     private static DistributionRecruitSetting closedEntry() {
         DistributionRecruitSetting setting = new DistributionRecruitSetting();
         setting.setOnlineEntryVisible(false);
         return setting;
     }
 
+    /**
+     * 执行渠道校验并断言业务错误码。
+     *
+     * @param ex       待校验异常
+     * @param expected 预期结果
+     */
     private static void assertChannelCode(ServiceException ex, ResultCode expected) {
         assertThat(ex.getResultCode()).isEqualTo(expected);
         assertThat(ex.getResultCode()).isNotEqualTo(ResultCode.DISTRIBUTION_CLOSE);

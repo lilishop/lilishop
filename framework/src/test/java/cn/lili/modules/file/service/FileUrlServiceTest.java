@@ -10,6 +10,9 @@ class FileUrlServiceTest {
 
     private final FileUrlService fileUrlService = new FileUrlService();
 
+    /**
+     * 验证关闭CDN时保留原始文件地址。
+     */
     @Test
     void toPublicUrlShouldKeepOriginalWhenCdnDisabled() {
         OssSetting setting = new OssSetting();
@@ -21,6 +24,9 @@ class FileUrlServiceTest {
         assertEquals("/files/MANAGER/a.png", fileUrlService.toPublicUrl("/files/MANAGER/a.png", setting));
     }
 
+    /**
+     * 验证开启CDN时重写本地存储文件地址。
+     */
     @Test
     void toPublicUrlShouldRewriteLocalStoragePathWhenCdnEnabled() {
         OssSetting setting = new OssSetting();
@@ -33,6 +39,9 @@ class FileUrlServiceTest {
                 fileUrlService.toPublicUrl("/files/MANAGER/a.png?x=1", setting));
     }
 
+    /**
+     * 验证开启CDN时重写云存储源站地址。
+     */
     @Test
     void toPublicUrlShouldRewriteCloudOriginWhenCdnEnabled() {
         OssSetting setting = new OssSetting();
@@ -46,6 +55,9 @@ class FileUrlServiceTest {
                 fileUrlService.toPublicUrl("https://demo-bucket.oss-cn-hangzhou.aliyuncs.com/goods/a.png", setting));
     }
 
+    /**
+     * 验证COS地址重写不附加图片处理参数。
+     */
     @Test
     void toPublicUrlShouldRewriteCosOriginWithoutImageProcessing() {
         OssSetting setting = new OssSetting();
@@ -59,6 +71,9 @@ class FileUrlServiceTest {
                 fileUrlService.toPublicUrl("https://demo-123.cos.ap-shanghai.myqcloud.com/goods/a.png", setting));
     }
 
+    /**
+     * 验证HTML及JSON文本中的文件地址能够重写。
+     */
     @Test
     void rewriteTextShouldHandleHtmlAndJsonContent() {
         OssSetting setting = new OssSetting();

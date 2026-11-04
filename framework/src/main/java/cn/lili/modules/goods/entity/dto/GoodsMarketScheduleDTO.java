@@ -1,5 +1,7 @@
 package cn.lili.modules.goods.entity.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.OptBoolean;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -19,8 +21,9 @@ public class GoodsMarketScheduleDTO {
     @NotEmpty
     private String status;
 
-    @Schema(description = "触发时间")
+    @Schema(description = "触发时间，格式yyyy-MM-dd HH:mm:ss，东八区")
     @NotNull
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8", lenient = OptBoolean.FALSE)
     private Date triggerTime;
 
     @Schema(description = "原因")

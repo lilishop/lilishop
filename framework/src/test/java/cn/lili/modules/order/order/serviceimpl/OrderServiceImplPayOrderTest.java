@@ -50,12 +50,18 @@ class OrderServiceImplPayOrderTest {
     private OrderLogService orderLogService;
     private ApplicationEventPublisher applicationEventPublisher;
 
+    /**
+     * 初始化当前测试使用的MyBatis-Plus实体元数据。
+     */
     @BeforeAll
     static void initMybatisEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
         TableInfoHelper.initTableInfo(assistant, Order.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         orderService = spy(new OrderServiceImpl());

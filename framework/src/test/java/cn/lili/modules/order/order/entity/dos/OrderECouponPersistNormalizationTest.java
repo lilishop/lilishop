@@ -14,6 +14,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class OrderECouponPersistNormalizationTest {
 
+    /**
+     * 验证卡密订单持久化规范化清除物流相关字段。
+     */
     @Test
     void applyECouponPersistNormalization_clearsLogisticsFields() {
         Order order = new Order();
@@ -41,6 +44,9 @@ class OrderECouponPersistNormalizationTest {
         assertThat(order.getLogisticsNo()).isNull();
     }
 
+    /**
+     * 验证非卡密订单不执行卡密持久化规范化。
+     */
     @Test
     void applyECouponPersistNormalization_skipsNonECoupon() {
         Order order = new Order();

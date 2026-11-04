@@ -20,6 +20,9 @@ class MemberCouponTest {
     @Autowired
     private MemberCouponService memberCouponService;
 
+    /**
+     * 调用会员领取优惠券流程。
+     */
     @Test
     void receiveCoupon() {
         memberCouponService.receiveCoupon("1333318596239843328", "1326834797335306240", "1");

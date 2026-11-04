@@ -29,6 +29,9 @@ class GoodsSearchParamParserTest {
     @Nested
     class ParseIndexed {
 
+        /**
+         * 验证标准分组嵌套结构的商品参数可以解析。
+         */
         @Test
         void parsesStandardNested() {
             List<GoodsParamsItemDTO> items = GoodsSearchParamParser.parseIndexed(NESTED);
@@ -38,6 +41,9 @@ class GoodsSearchParamParserTest {
             assertThat(items.get(0).getIsIndex()).isEqualTo(1);
         }
 
+        /**
+         * 验证缺少分组元数据的嵌套参数可以解析。
+         */
         @Test
         void parsesNestedWithoutGroupMetadata() {
             List<GoodsParamsItemDTO> items = GoodsSearchParamParser.parseIndexed(NESTED_NO_GROUP_META);
@@ -46,6 +52,9 @@ class GoodsSearchParamParserTest {
             assertThat(items.get(0).getParamValue()).isEqualTo("8G");
         }
 
+        /**
+         * 验证平铺结构的商品参数可以解析。
+         */
         @Test
         void parsesFlat() {
             List<GoodsParamsItemDTO> items = GoodsSearchParamParser.parseIndexed(FLAT);
@@ -54,6 +63,9 @@ class GoodsSearchParamParserTest {
             assertThat(items.get(0).getParamValue()).isEqualTo("黑色");
         }
 
+        /**
+         * 验证混合嵌套及平铺结构的商品参数可以解析。
+         */
         @Test
         void parsesMixedNestedAndFlat() {
             String json = """
@@ -63,12 +75,18 @@ class GoodsSearchParamParserTest {
             assertThat(items).extracting(GoodsParamsItemDTO::getParamName).containsExactly("内存", "颜色");
         }
 
+        /**
+         * 验证非法参数JSON返回空解析结果。
+         */
         @Test
         void illegalJsonReturnsEmpty() {
             assertThat(GoodsSearchParamParser.parseIndexed("{not-json")).isEmpty();
             assertThat(GoodsSearchParamParser.parseIndexed("not an array")).isEmpty();
         }
 
+        /**
+         * 验证空值及空参数结构返回空解析结果。
+         */
         @Test
         void nullAndEmptyReturnEmpty() {
             assertThat(GoodsSearchParamParser.parseIndexed(null)).isEmpty();
@@ -76,6 +94,9 @@ class GoodsSearchParamParserTest {
             assertThat(GoodsSearchParamParser.parseIndexed("[]")).isEmpty();
         }
 
+        /**
+         * 验证索引解析排除非索引参数及索引标识为空的参数。
+         */
         @Test
         void dropsNonIndexAndNullIndex() {
             String json = """
@@ -85,6 +106,9 @@ class GoodsSearchParamParserTest {
             assertThat(items).extracting(GoodsParamsItemDTO::getParamName).containsExactly("C");
         }
 
+        /**
+         * 验证索引解析排除名称或值缺失的参数。
+         */
         @Test
         void dropsMissingParamNameOrValue() {
             String json = """
@@ -93,6 +117,9 @@ class GoodsSearchParamParserTest {
             assertThat(GoodsSearchParamParser.parseIndexed(json)).isEmpty();
         }
 
+        /**
+         * 验证同名同值参数去重并保留最小排序值，空排序按最大值处理。
+         */
         @Test
         void dedupsSameNameValueAndKeepsMinSortTreatingNullAsMax() {
             String json = """
@@ -103,6 +130,9 @@ class GoodsSearchParamParserTest {
             assertThat(items.get(0).getSort()).isEqualTo(2);
         }
 
+        /**
+         * 验证索引解析去除参数名称及参数值首尾空白。
+         */
         @Test
         void trimsNameAndValue() {
             String json = """
@@ -114,6 +144,9 @@ class GoodsSearchParamParserTest {
             assertThat(items.get(0).getParamValue()).isEqualTo("8G");
         }
 
+        /**
+         * 验证索引解析排除长度超过255的参数字段。
+         */
         @Test
         void dropsFieldsLongerThan255() {
             String tooLong = "a".repeat(256);
@@ -125,6 +158,9 @@ class GoodsSearchParamParserTest {
             assertThat(items.get(0).getParamName()).hasSize(255);
         }
 
+        /**
+         * 验证索引解析结果均标记为参与索引。
+         */
         @Test
         void returnedItemsAlwaysHaveIsIndexOne() {
             String json = """
@@ -139,6 +175,9 @@ class GoodsSearchParamParserTest {
     @Nested
     class ParseAll {
 
+        /**
+         * 验证详情参数解析保留不参与索引的参数。
+         */
         @Test
         void keepsNonIndexItems() {
             String json = """
@@ -150,6 +189,9 @@ class GoodsSearchParamParserTest {
             assertThat(items.get(0).getParamName()).isEqualTo("产地");
         }
 
+        /**
+         * 验证详情参数解析保留长度超过255的字段。
+         */
         @Test
         void keepsFieldsLongerThan255() {
             String tooLong = "a".repeat(256);
@@ -162,6 +204,9 @@ class GoodsSearchParamParserTest {
             assertThat(items.get(0).getParamValue()).hasSize(256);
         }
 
+        /**
+         * 验证详情参数解析保留参数ID不同的同名同值记录。
+         */
         @Test
         void keepsDuplicateNameValueWithDifferentParamIds() {
             String json = """
@@ -172,6 +217,9 @@ class GoodsSearchParamParserTest {
             assertThat(items).extracting(GoodsParamsItemDTO::getParamId).containsExactly("a", "b");
         }
 
+        /**
+         * 验证详情参数解析保留参数值首尾空白。
+         */
         @Test
         void preservesLeadingAndTrailingSpacesOnParamValue() {
             String json = """
@@ -183,6 +231,9 @@ class GoodsSearchParamParserTest {
             assertThat(items.get(0).getParamValue()).isEqualTo(" 8G ");
         }
 
+        /**
+         * 验证详情解析同样兼容并规范化嵌套及平铺结构。
+         */
         @Test
         void sameFixturesAsIndexedStillNormalizeBothShapes() {
             assertThat(GoodsSearchParamParser.parseAll(NESTED)).extracting(GoodsParamsItemDTO::getParamName).containsExactly("口味");

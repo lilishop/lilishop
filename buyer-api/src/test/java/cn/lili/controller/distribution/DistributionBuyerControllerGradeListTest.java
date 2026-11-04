@@ -37,6 +37,9 @@ class DistributionBuyerControllerGradeListTest {
     @Mock
     private DistributionSettingSupport distributionSettingSupport;
 
+    /**
+     * 验证开启佣金展示时等级列表保留佣金比例。
+     */
     @Test
     void gradeListWhenVisibleTrueKeepsRates() {
         DistributionSetting setting = DistributionSetting.defaultSetting();
@@ -55,6 +58,9 @@ class DistributionBuyerControllerGradeListTest {
         verify(gradeService).listGrades();
     }
 
+    /**
+     * 验证关闭佣金展示时接口仍返回完整等级数据。
+     */
     @Test
     void gradeListWhenVisibleFalseStillReturnsCompleteGrades() {
         DistributionSetting setting = DistributionSetting.defaultSetting();
@@ -72,6 +78,9 @@ class DistributionBuyerControllerGradeListTest {
         assertThat(vo.getGrades().get(0).getEnableSalesCondition()).isTrue();
     }
 
+    /**
+     * 验证未配置展示开关时默认允许展示等级数据。
+     */
     @Test
     void gradeListWhenSettingFieldMissingDefaultsTrue() {
         DistributionSetting setting = new DistributionSetting();
@@ -87,6 +96,11 @@ class DistributionBuyerControllerGradeListTest {
         assertThat(message.getResult().getGrades()).hasSize(1);
     }
 
+    /**
+     * 构造包含商品佣金及邀请奖励的分销等级。
+     *
+     * @return 包含商品佣金及邀请奖励的分销等级
+     */
     private static DistributionGrade sampleGrade() {
         DistributionGrade grade = new DistributionGrade();
         grade.setGradeName("普通分销员");

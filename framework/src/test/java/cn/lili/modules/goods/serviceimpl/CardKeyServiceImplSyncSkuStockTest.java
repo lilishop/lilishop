@@ -35,11 +35,17 @@ class CardKeyServiceImplSyncSkuStockTest {
 
     private CardKeyServiceImpl serviceSpy;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         serviceSpy = spy(cardKeyService);
     }
 
+    /**
+     * 验证SKU库存按可用卡池数量同步。
+     */
     @Test
     void syncSkuStockWritesQuantityFromPoolCount() {
         GoodsSku sku = new GoodsSku();

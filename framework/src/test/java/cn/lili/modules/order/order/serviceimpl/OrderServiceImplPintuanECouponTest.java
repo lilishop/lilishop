@@ -33,6 +33,9 @@ class OrderServiceImplPintuanECouponTest {
     private CardKeyService cardKeyService;
     private PintuanService pintuanService;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         orderService = spy(new OrderServiceImpl());
@@ -42,6 +45,9 @@ class OrderServiceImplPintuanECouponTest {
         ReflectionTestUtils.setField(orderService, "pintuanService", pintuanService);
     }
 
+    /**
+     * 验证卡密拼团成功后确认预占并完成履约。
+     */
     @Test
     void pintuanOrderSuccessConfirmsReservationForECoupon() {
         Order order = new Order();
@@ -53,6 +59,9 @@ class OrderServiceImplPintuanECouponTest {
         verify(cardKeyService).confirmReservationAndComplete("PT-E001");
     }
 
+    /**
+     * 验证卡密拼团失败后释放预占并退款。
+     */
     @Test
     void agglomeratePintuanOrderFailedReleasesReservationAndRefundsECoupon() {
         Pintuan pintuan = new Pintuan();
@@ -71,6 +80,13 @@ class OrderServiceImplPintuanECouponTest {
         verify(orderService).systemCancelECoupon("PT-F001", "拼团人数不足，拼团失败！", true);
     }
 
+    /**
+     * 构造关联拼团主订单的卡密订单。
+     *
+     * @param sn            订单编号
+     * @param parentOrderSn 主订单编号
+     * @return 关联拼团主订单的卡密订单
+     */
     private Order pintuanECouponOrder(String sn, String parentOrderSn) {
         Order order = new Order();
         order.setSn(sn);

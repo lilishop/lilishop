@@ -16,6 +16,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 2026-11-03
  */
 class PageUtilSortTest {
+    /**
+     * 验证排序允许包含SQL关键字片段的合法字段名。
+     *
+     * @param sort 排序字段
+     */
     @ParameterizedTest
     @ValueSource(strings = {"sort_order", "sortOrder", "buy_count", "create_time", "description",
             "commission", "scheduled_upper_time", "a.sort", "a.sort_order"})
@@ -31,6 +36,11 @@ class PageUtilSortTest {
         assertThat(page.orders().get(0).isAsc()).isTrue();
     }
 
+    /**
+     * 验证排序拒绝表达式、非法标识符及保留字。
+     *
+     * @param sort 排序字段
+     */
     @ParameterizedTest
     @ValueSource(strings = {"id desc", "id,price", "rand()", "id;drop table users", "id--",
             "id/*comment*/", "id OR 1=1", "id/**/or/**/1=1", "'id'", "`id`", "id=1",
@@ -44,6 +54,9 @@ class PageUtilSortTest {
         assertThat(PageUtil.initPage(params).orders()).isEmpty();
     }
 
+    /**
+     * 验证排序处理保留默认方向及分页边界限制。
+     */
     @Test
     void preservesDefaultDirectionAndPaginationLimits() {
         PageVO params = new PageVO();
@@ -59,12 +72,22 @@ class PageUtilSortTest {
         assertThat(page.orders().get(0).isAsc()).isFalse();
     }
 
+    /**
+     * 验证SQL关键字检测不误判标识符片段。
+     *
+     * @param identifier 容器标识
+     */
     @ParameterizedTest
     @ValueSource(strings = {"sort_order", "buy_count", "description", "commission", "create_time"})
     void keywordFilterDoesNotMatchPartsOfIdentifiers(String identifier) {
         assertThat(SqlFilter.hit(identifier)).isFalse();
     }
 
+    /**
+     * 验证SQL关键字检测仍识别独立SQL标记。
+     *
+     * @param expression 查询表达式
+     */
     @ParameterizedTest
     @ValueSource(strings = {"SELECT", "order by id", "id DESC", "DROP TABLE goods", "sleep(1)", "OR", "CREATE"})
     void keywordFilterStillMatchesSqlTokens(String expression) {

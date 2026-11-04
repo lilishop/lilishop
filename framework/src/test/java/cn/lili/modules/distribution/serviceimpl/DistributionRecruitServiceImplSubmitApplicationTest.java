@@ -31,6 +31,9 @@ import static org.mockito.Mockito.when;
  */
 class DistributionRecruitServiceImplSubmitApplicationTest {
 
+    /**
+     * 验证已退出分销的会员重新申请时返回专用错误码。
+     */
     @Test
     void submitApplication_throwsIndependentCodeWhenRetreated() {
         DistributionRecruitServiceImpl service = spy(new DistributionRecruitServiceImpl());
@@ -65,6 +68,9 @@ class DistributionRecruitServiceImplSubmitApplicationTest {
         }
     }
 
+    /**
+     * 验证已通过分销审核的会员重复申请时返回已有申请错误码。
+     */
     @Test
     void submitApplication_reusesApplyCodeWhenAlreadyPass() {
         DistributionRecruitServiceImpl service = spy(new DistributionRecruitServiceImpl());
@@ -96,6 +102,9 @@ class DistributionRecruitServiceImplSubmitApplicationTest {
         }
     }
 
+    /**
+     * 验证入口关闭时已退出会员仍优先返回退出状态错误。
+     */
     @Test
     void submitApplication_stillThrowsRetreatedWhenOnlineEntryClosed() {
         DistributionRecruitServiceImpl service = spy(new DistributionRecruitServiceImpl());
@@ -130,6 +139,11 @@ class DistributionRecruitServiceImplSubmitApplicationTest {
         }
     }
 
+    /**
+     * 注入已开启分销功能的系统配置。
+     *
+     * @param service 待测服务
+     */
     private static void injectOpenDistribution(DistributionRecruitServiceImpl service) {
         DistributionSettingSupport settingSupport = mock(DistributionSettingSupport.class);
         DistributionSetting setting = new DistributionSetting();

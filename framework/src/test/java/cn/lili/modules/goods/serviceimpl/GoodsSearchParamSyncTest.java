@@ -25,6 +25,9 @@ import static org.mockito.Mockito.verify;
  */
 class GoodsSearchParamSyncTest {
 
+    /**
+     * 验证参数同步先删除旧记录再插入解析出的索引参数。
+     */
     @Test
     void syncByGoodsIdDeletesThenInsertsParsedIndexedRows() {
         GoodsSearchParamServiceImpl service = spy(new GoodsSearchParamServiceImpl());
@@ -49,6 +52,9 @@ class GoodsSearchParamSyncTest {
         assertThat(row.getParamSort()).isEqualTo(1);
     }
 
+    /**
+     * 验证参数解析结果为空时只删除旧倒排记录。
+     */
     @Test
     void syncByGoodsIdOnlyDeletesWhenParseResultIsEmpty() {
         GoodsSearchParamServiceImpl service = spy(new GoodsSearchParamServiceImpl());
@@ -60,6 +66,9 @@ class GoodsSearchParamSyncTest {
         verify(service, never()).saveBatch(anyCollection());
     }
 
+    /**
+     * 验证所有参数均不参与索引时只删除旧倒排记录。
+     */
     @Test
     void syncByGoodsIdOnlyDeletesWhenIndexedFilterDropsAll() {
         GoodsSearchParamServiceImpl service = spy(new GoodsSearchParamServiceImpl());

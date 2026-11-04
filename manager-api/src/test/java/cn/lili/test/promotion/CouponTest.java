@@ -35,6 +35,9 @@ class CouponTest {
     @Autowired
     private CouponService couponService;
 
+    /**
+     * 构造优惠券配置并执行新增流程。
+     */
     @Test
     void addCoupon() {
         CouponVO couponVO = new CouponVO();
@@ -92,6 +95,9 @@ class CouponTest {
         Assertions.assertNotNull(couponService.savePromotions(couponVO));
     }
 
+    /**
+     * 更新指定优惠券的活动信息。
+     */
     @Test
     void update() {
         CouponVO couponVO = new CouponVO();
@@ -154,6 +160,9 @@ class CouponTest {
         Assertions.assertTrue(couponService.updatePromotions(couponVO));
     }
 
+    /**
+     * 分页查询优惠券并检查返回结果。
+     */
     @Test
     void search() {
         CouponSearchParams queryParam = new CouponSearchParams();
@@ -166,6 +175,9 @@ class CouponTest {
         couponsByPage.getRecords().forEach(coupon -> log.info("{}", coupon));
     }
 
+    /**
+     * 输出商品下架状态枚举，保留优惠券删除调用示例。
+     */
     @Test
     void delete() {
 //       Assertions.assertTrue(couponService.deleteCoupon("1326001296591577088"));

@@ -25,6 +25,9 @@ import static org.mockito.Mockito.when;
  */
 class DistributionRecruitServiceImplOpenGateTest {
 
+    /**
+     * 验证分销关闭时提交申请返回分销关闭错误。
+     */
     @Test
     void submitApplication_throwsDistributionCloseWhenIsOpenFalse() {
         DistributionRecruitServiceImpl service = new DistributionRecruitServiceImpl();
@@ -41,6 +44,9 @@ class DistributionRecruitServiceImplOpenGateTest {
         }
     }
 
+    /**
+     * 验证分销关闭时获取招募页面返回关闭错误。
+     */
     @Test
     void getRecruitPage_throwsDistributionCloseWhenIsOpenFalse() {
         DistributionRecruitServiceImpl service = new DistributionRecruitServiceImpl();
@@ -51,6 +57,9 @@ class DistributionRecruitServiceImplOpenGateTest {
                 .satisfies(ex -> assertCloseCode((ServiceException) ex));
     }
 
+    /**
+     * 验证分销关闭时获取条件进度返回关闭错误。
+     */
     @Test
     void getConditionProgress_throwsDistributionCloseWhenIsOpenFalse() {
         DistributionRecruitServiceImpl service = new DistributionRecruitServiceImpl();
@@ -61,6 +70,11 @@ class DistributionRecruitServiceImplOpenGateTest {
                 .satisfies(ex -> assertCloseCode((ServiceException) ex));
     }
 
+    /**
+     * 注入已关闭分销功能的系统配置。
+     *
+     * @param service 待测服务
+     */
     private static void injectClosedDistribution(DistributionRecruitServiceImpl service) {
         DistributionSettingSupport settingSupport = mock(DistributionSettingSupport.class);
         DistributionSetting setting = new DistributionSetting();
@@ -69,6 +83,11 @@ class DistributionRecruitServiceImplOpenGateTest {
         ReflectionTestUtils.setField(service, "distributionSettingSupport", settingSupport);
     }
 
+    /**
+     * 断言业务异常使用分销关闭错误码。
+     *
+     * @param ex 待校验异常
+     */
     private static void assertCloseCode(ServiceException ex) {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.DISTRIBUTION_CLOSE);
         assertThat(ex.getResultCode()).isNotEqualTo(ResultCode.DISTRIBUTION_RETREATED);

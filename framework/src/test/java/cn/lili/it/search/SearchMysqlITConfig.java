@@ -58,6 +58,11 @@ import static org.mockito.Mockito.when;
 @Import({GoodsSearchParamServiceImpl.class, GoodsSearchParamRebuildConfig.class, MyMetaObjectHandler.class})
 class SearchMysqlITConfig {
 
+    /**
+     * 配置连接测试MySQL容器的数据源。
+     *
+     * @return 测试数据源
+     */
     @Bean
     DataSource dataSource() {
         HikariDataSource dataSource = new HikariDataSource();
@@ -68,6 +73,13 @@ class SearchMysqlITConfig {
         return dataSource;
     }
 
+    /**
+     * 创建启用MyBatis-Plus映射及元数据处理的测试会话工厂。
+     *
+     * @param dataSource        测试数据源
+     * @param metaObjectHandler 字段自动填充处理器
+     * @return 启用MyBatis-Plus映射及元数据处理的测试会话工厂
+     */
     @Bean
     SqlSessionFactory sqlSessionFactory(DataSource dataSource, MyMetaObjectHandler metaObjectHandler) throws Exception {
         MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
@@ -87,36 +99,76 @@ class SearchMysqlITConfig {
         return factoryBean.getObject();
     }
 
+    /**
+     * 创建测试使用的MyBatis会话模板。
+     *
+     * @param sqlSessionFactory MyBatis会话工厂
+     * @return 测试使用的MyBatis会话模板
+     */
     @Bean
     SqlSessionTemplate sqlSessionTemplate(SqlSessionFactory sqlSessionFactory) {
         return new SqlSessionTemplate(sqlSessionFactory);
     }
 
+    /**
+     * 创建基于测试数据源的事务管理器。
+     *
+     * @param dataSource 测试数据源
+     * @return 基于测试数据源的事务管理器
+     */
     @Bean
     PlatformTransactionManager transactionManager(DataSource dataSource) {
         return new DataSourceTransactionManager(dataSource);
     }
 
+    /**
+     * 注册商品Mapper测试Bean。
+     *
+     * @param sqlSessionFactory MyBatis会话工厂
+     * @return 商品Mapper测试Bean
+     */
     @Bean
     MapperFactoryBean<GoodsMapper> goodsMapper(SqlSessionFactory sqlSessionFactory) {
         return mapper(GoodsMapper.class, sqlSessionFactory);
     }
 
+    /**
+     * 注册商品SKU Mapper测试Bean。
+     *
+     * @param sqlSessionFactory MyBatis会话工厂
+     * @return 商品SKU Mapper测试Bean
+     */
     @Bean
     MapperFactoryBean<GoodsSkuMapper> goodsSkuMapper(SqlSessionFactory sqlSessionFactory) {
         return mapper(GoodsSkuMapper.class, sqlSessionFactory);
     }
 
+    /**
+     * 注册商品参数倒排Mapper测试Bean。
+     *
+     * @param sqlSessionFactory MyBatis会话工厂
+     * @return 商品参数倒排Mapper测试Bean
+     */
     @Bean
     MapperFactoryBean<GoodsSearchParamMapper> goodsSearchParamMapper(SqlSessionFactory sqlSessionFactory) {
         return mapper(GoodsSearchParamMapper.class, sqlSessionFactory);
     }
 
+    /**
+     * 提供不依赖Redis的重建进度内存缓存。
+     *
+     * @return 不依赖Redis的重建进度内存缓存
+     */
     @Bean
     Cache<RebuildStatus> cache() {
         return new ITCache();
     }
 
+    /**
+     * 提供能够获取重建锁的Redisson测试替身。
+     *
+     * @return 能够获取重建锁的Redisson测试替身
+     */
     @Bean
     RedissonClient redissonClient() throws InterruptedException {
         RLock lock = mock(RLock.class);
@@ -127,6 +179,11 @@ class SearchMysqlITConfig {
         return client;
     }
 
+    /**
+     * 提供按层级查询分类的服务测试替身。
+     *
+     * @return 按层级查询分类的服务测试替身
+     */
     @Bean
     CategoryService categoryService() {
         CategoryService categoryService = mock(CategoryService.class);
@@ -144,6 +201,11 @@ class SearchMysqlITConfig {
         return categoryService;
     }
 
+    /**
+     * 提供商品搜索使用的促销服务测试替身。
+     *
+     * @return 商品搜索使用的促销服务测试替身
+     */
     @Bean
     PromotionService promotionService() {
         PromotionService promotionService = mock(PromotionService.class);
@@ -151,11 +213,22 @@ class SearchMysqlITConfig {
         return promotionService;
     }
 
+    /**
+     * 提供促销商品关联服务测试替身。
+     *
+     * @return 促销商品关联服务测试替身
+     */
     @Bean
     PromotionGoodsService promotionGoodsService() {
         return mock(PromotionGoodsService.class);
     }
 
+    /**
+     * 组装使用测试Mapper的SKU服务。
+     *
+     * @param goodsSkuMapper 商品SKU Mapper
+     * @return 使用测试Mapper的SKU服务
+     */
     @Bean
     GoodsSkuService goodsSkuService(GoodsSkuMapper goodsSkuMapper) {
         GoodsSkuService goodsSkuService = mock(GoodsSkuService.class);
@@ -164,6 +237,17 @@ class SearchMysqlITConfig {
         return goodsSkuService;
     }
 
+    /**
+     * 组装使用测试依赖的商品搜索服务。
+     *
+     * @param goodsSkuService        商品SKU服务
+     * @param goodsSkuMapper         商品SKU Mapper
+     * @param goodsSearchParamMapper 商品参数Mapper
+     * @param categoryService        分类服务
+     * @param promotionService       促销服务
+     * @param promotionGoodsService  促销商品服务
+     * @return 使用测试依赖的商品搜索服务
+     */
     @Bean
     GoodsSearchServiceImpl goodsSearchService(GoodsSkuService goodsSkuService,
                                               GoodsSkuMapper goodsSkuMapper,
@@ -180,6 +264,13 @@ class SearchMysqlITConfig {
         return service;
     }
 
+    /**
+     * 创建指定Mapper接口对应的测试工厂Bean。
+     *
+     * @param type              类型
+     * @param sqlSessionFactory MyBatis会话工厂
+     * @return 指定Mapper接口对应的测试工厂Bean
+     */
     private static <T> MapperFactoryBean<T> mapper(Class<T> type, SqlSessionFactory sqlSessionFactory) {
         MapperFactoryBean<T> factoryBean = new MapperFactoryBean<>(type);
         factoryBean.setSqlSessionFactory(sqlSessionFactory);

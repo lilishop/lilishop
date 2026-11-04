@@ -22,23 +22,35 @@ class CategoryServiceImplGetCategoryNamesByPathTest {
 
     private CategoryServiceImpl categoryService;
 
+    /**
+     * 初始化当前测试使用的MyBatis-Plus实体元数据。
+     */
     @BeforeAll
     static void initEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
         TableInfoHelper.initTableInfo(assistant, Category.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         categoryService = spy(new CategoryServiceImpl());
     }
 
+    /**
+     * 验证分类路径为空时返回空名称列表。
+     */
     @Test
     void returnsEmptyWhenPathBlank() {
         assertThat(categoryService.getCategoryNamesByPath(null)).isEmpty();
         assertThat(categoryService.getCategoryNamesByPath("")).isEmpty();
     }
 
+    /**
+     * 验证分类名称按分类层级顺序返回。
+     */
     @Test
     void returnsNamesOrderedByLevel() {
         Category level1 = new Category();

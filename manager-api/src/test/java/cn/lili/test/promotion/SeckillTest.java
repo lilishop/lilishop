@@ -46,6 +46,9 @@ class SeckillTest {
     @Autowired
     private SettingService settingService;
 
+    /**
+     * 构造秒杀活动配置并执行新增流程。
+     */
     @Test
     void add() {
         Setting setting = settingService.get(SettingEnum.SECKILL_SETTING.name());
@@ -60,6 +63,9 @@ class SeckillTest {
         Assertions.assertTrue(result);
     }
 
+    /**
+     * 构造商品报名数据并提交秒杀申请。
+     */
     @Test
     void addApply() {
         List<SeckillApplyVO> seckillApplyVOS = new ArrayList<>();

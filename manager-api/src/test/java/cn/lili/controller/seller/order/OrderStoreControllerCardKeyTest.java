@@ -32,6 +32,9 @@ class OrderStoreControllerCardKeyTest {
     @Mock
     private CardKeyService cardKeyService;
 
+    /**
+     * 验证商家订单详情通过店铺权限校验后才补充卡密。
+     */
     @Test
     void detailEnrichesCardKeysAfterStoreAccessCheck() {
         String orderSn = "O-STORE-001";
@@ -51,6 +54,9 @@ class OrderStoreControllerCardKeyTest {
         }
     }
 
+    /**
+     * 验证店铺无权访问订单时不查询详情或补充卡密。
+     */
     @Test
     void detailDoesNotQueryOrEnrichWhenStoreAccessDenied() {
         String orderSn = "O-STORE-002";

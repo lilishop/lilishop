@@ -31,6 +31,9 @@ class ECouponPriceRenderTest {
     private CartPriceRender cartPriceRender;
     private CardKeyService cardKeyService;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         skuPromotionRender = new SkuPromotionRender();
@@ -39,6 +42,9 @@ class ECouponPriceRenderTest {
         ReflectionTestUtils.setField(skuPromotionRender, "cardKeyService", cardKeyService);
     }
 
+    /**
+     * 验证卡密交易经过价格渲染后生成正实付金额。
+     */
     @Test
     void eCouponTradeRenderStepsProducePositiveFlowPrice() {
         TradeDTO tradeDTO = buildECouponTrade(2, 158.0);
@@ -51,6 +57,13 @@ class ECouponPriceRenderTest {
         assertThat(tradeDTO.getCheckedSkuList().get(0).getPriceDetailDTO().getGoodsPrice()).isEqualTo(316.0);
     }
 
+    /**
+     * 构造卡密交易测试数据。
+     *
+     * @param num       增量或数量
+     * @param unitPrice 商品单价
+     * @return 卡密交易测试数据
+     */
     private TradeDTO buildECouponTrade(int num, double unitPrice) {
         GoodsSku goodsSku = new GoodsSku();
         goodsSku.setId("sku-ecoupon");

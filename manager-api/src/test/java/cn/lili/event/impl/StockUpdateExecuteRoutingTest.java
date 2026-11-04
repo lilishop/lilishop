@@ -55,6 +55,9 @@ class StockUpdateExecuteRoutingTest {
     private GoodsSkuService goodsSkuService;
     private DefaultRedisScript<Boolean> quantityScript;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         stockUpdateExecute = new StockUpdateExecute();
@@ -81,15 +84,24 @@ class StockUpdateExecuteRoutingTest {
         when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 
+    /**
+     * 模拟成功获取订单付款处理锁。
+     */
     private void mockPaidLockAcquired() {
         when(valueOperations.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenReturn(true);
         when(valueOperations.get(anyString())).thenReturn("token");
     }
 
+    /**
+     * 模拟订单付款处理锁已被其他流程占用。
+     */
     private void mockPaidLockBusy() {
         when(valueOperations.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenReturn(false);
     }
 
+    /**
+     * 验证卡密付款消息路由到订单确认且不执行SKU库存Lua。
+     */
     @Test
     void paidMessageRoutesECouponToAfterOrderConfirmWithoutSkuLua() {
         mockPaidLockAcquired();
@@ -120,6 +132,9 @@ class StockUpdateExecuteRoutingTest {
         verify(stringRedisTemplate, never()).execute(eq(quantityScript), anyList(), any());
     }
 
+    /**
+     * 验证已付款卡密取消时释放卡密且不执行SKU库存Lua。
+     */
     @Test
     void cancelledPaidECouponReleasesCardsAndSkipsSkuLua() {
         String orderSn = "O-ECOUPON-CANCEL";
@@ -146,6 +161,9 @@ class StockUpdateExecuteRoutingTest {
         verify(stringRedisTemplate, never()).execute(eq(quantityScript), anyList(), any());
     }
 
+    /**
+     * 验证付款消息未获取处理锁时跳过执行。
+     */
     @Test
     void paidMessageSkipsWhenLockNotAcquired() {
         mockPaidLockBusy();
@@ -160,6 +178,9 @@ class StockUpdateExecuteRoutingTest {
         verify(orderService, never()).afterOrderConfirm(any());
     }
 
+    /**
+     * 验证已完成卡密订单的付款消息不重复处理。
+     */
     @Test
     void paidMessageSkipsWhenECouponAlreadyCompleted() {
         mockPaidLockAcquired();
@@ -183,6 +204,9 @@ class StockUpdateExecuteRoutingTest {
         verify(orderService, never()).afterOrderConfirm(orderSn);
     }
 
+    /**
+     * 验证卡密付款消息同时处理促销库存扣减。
+     */
     @Test
     void paidMessageRoutesECouponWithPromotionStockDeduction() {
         mockPaidLockAcquired();
@@ -220,6 +244,9 @@ class StockUpdateExecuteRoutingTest {
         verify(orderService).afterOrderConfirm(orderSn);
     }
 
+    /**
+     * 验证已取消卡密订单不进入付款履约。
+     */
     @Test
     void paidMessageSkipsCancelledECouponBeforeFulfillment() {
         mockPaidLockAcquired();
@@ -246,6 +273,9 @@ class StockUpdateExecuteRoutingTest {
         verify(stringRedisTemplate, never()).execute(eq(quantityScript), anyList(), any());
     }
 
+    /**
+     * 验证尚未付款卡密订单不进入付款履约。
+     */
     @Test
     void paidMessageSkipsUnpaidECouponBeforeFulfillment() {
         mockPaidLockAcquired();
@@ -271,6 +301,9 @@ class StockUpdateExecuteRoutingTest {
         verify(orderService, never()).afterOrderConfirm(orderSn);
     }
 
+    /**
+     * 验证虚拟订单付款后扣减SKU库存并进入订单确认。
+     */
     @Test
     void paidMessageRoutesVirtualOrderToAfterOrderConfirmWithSkuLua() {
         mockPaidLockAcquired();
@@ -302,6 +335,9 @@ class StockUpdateExecuteRoutingTest {
         verify(cardKeyService, never()).fulfillAfterPayment(any());
     }
 
+    /**
+     * 验证任一SKU库存缓存缺失时先初始化缓存。
+     */
     @Test
     void paidMessageInitializesCacheWhenAnySkuCacheIsMissing() {
         mockPaidLockAcquired();
@@ -344,6 +380,9 @@ class StockUpdateExecuteRoutingTest {
         verify(orderService).afterOrderConfirm(orderSn);
     }
 
+    /**
+     * 验证付款消息处理完成后使用解锁脚本释放锁。
+     */
     @Test
     void paidMessageReleasesLockWithUnlockScript() {
         mockPaidLockAcquired();

@@ -11,11 +11,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  */
 class FinanceExportHelperTest {
 
+    /**
+     * 验证导出行数未超过限制时允许继续。
+     */
     @Test
     void checkRowLimit_withinLimit() {
         assertDoesNotThrow(() -> FinanceExportHelper.checkRowLimit(FinanceExportHelper.MAX_EXPORT_ROWS));
     }
 
+    /**
+     * 验证导出行数超过限制时抛出异常。
+     */
     @Test
     void checkRowLimit_exceedsLimit() {
         assertThrows(ServiceException.class,

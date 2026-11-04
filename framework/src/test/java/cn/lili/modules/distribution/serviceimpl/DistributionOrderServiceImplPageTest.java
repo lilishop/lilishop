@@ -23,12 +23,18 @@ class DistributionOrderServiceImplPageTest {
 
     private DistributionOrderServiceImpl service;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         service = spy(new DistributionOrderServiceImpl());
         doReturn(new Page<DistributionOrder>()).when(service).page(any(IPage.class), any(Wrapper.class));
     }
 
+    /**
+     * 验证分销订单分页使用无表别名条件及默认排序。
+     */
     @Test
     void getDistributionOrderPageUsesUnaliasedWrapperAndDefaultSort() {
         DistributionOrderSearchParams params = new DistributionOrderSearchParams();
@@ -47,6 +53,9 @@ class DistributionOrderServiceImplPageTest {
         assertThat(sqlSegment).doesNotContain("do.");
     }
 
+    /**
+     * 验证分销订单分页保留请求指定的排序。
+     */
     @Test
     void getDistributionOrderPageKeepsRequestedSort() {
         DistributionOrderSearchParams params = new DistributionOrderSearchParams();

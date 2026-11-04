@@ -18,9 +18,17 @@ final class MariaDbITSupport {
 
     static final MariaDBContainer MARIADB = createAndStart();
 
+    /**
+     * 限制MariaDB集成测试工具类的实例化。
+     */
     private MariaDbITSupport() {
     }
 
+    /**
+     * 创建并启动集成测试使用的数据库容器。
+     *
+     * @return 已启动的测试数据库容器
+     */
     private static MariaDBContainer createAndStart() {
         MariaDBContainer container = new MariaDBContainer(IMAGE)
                 .withDatabaseName("lilishop")
@@ -30,6 +38,11 @@ final class MariaDbITSupport {
         return container;
     }
 
+    /**
+     * 使用测试数据库配置创建JDBC连接。
+     *
+     * @return 测试数据库连接
+     */
     static Connection open() throws SQLException {
         String jdbcUrl = MARIADB.getJdbcUrl();
         String separator = jdbcUrl.contains("?") ? "&" : "?";

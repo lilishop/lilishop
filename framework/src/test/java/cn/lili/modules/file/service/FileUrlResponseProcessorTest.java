@@ -14,6 +14,9 @@ class FileUrlResponseProcessorTest {
 
     private final FileUrlService fileUrlService = new FileUrlService();
 
+    /**
+     * 验证响应地址重写覆盖嵌套商品、文章及装修数据。
+     */
     @Test
     void rewriteResponseShouldProcessNestedGoodsArticleAndPageData() {
         OssSetting setting = new OssSetting();

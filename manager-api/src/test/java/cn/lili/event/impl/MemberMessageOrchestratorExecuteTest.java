@@ -41,6 +41,9 @@ class MemberMessageOrchestratorExecuteTest {
     private OrderService orderService;
     private MemberService memberService;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         execute = new MemberMessageOrchestratorExecute();
@@ -52,6 +55,11 @@ class MemberMessageOrchestratorExecuteTest {
         ReflectionTestUtils.setField(execute, "memberService", memberService);
     }
 
+    /**
+     * 构造通知渲染所需的订单详情。
+     *
+     * @return 通知渲染所需的订单详情
+     */
     private OrderDetailVO orderDetail() {
         Order order = new Order();
         order.setSn("SN123");
@@ -72,6 +80,12 @@ class MemberMessageOrchestratorExecuteTest {
         return vo;
     }
 
+    /**
+     * 构造指定订单状态的变更消息。
+     *
+     * @param status 测试状态
+     * @return 指定订单状态的变更消息
+     */
     private OrderMessage orderMessage(OrderStatusEnum status) {
         OrderMessage message = new OrderMessage();
         message.setOrderSn("SN123");
@@ -79,6 +93,9 @@ class MemberMessageOrchestratorExecuteTest {
         return message;
     }
 
+    /**
+     * 验证订单发货事件映射为发货通知场景。
+     */
     @Test
     void deliveredMapsToOrderDeliver() {
         when(orderService.queryDetail("SN123")).thenReturn(orderDetail());
@@ -97,6 +114,9 @@ class MemberMessageOrchestratorExecuteTest {
         assertThat(dto.getPage()).isEqualTo("pages/order/orderDetail?sn=SN123");
     }
 
+    /**
+     * 验证付款及取消事件不在该通知执行器中重复发送。
+     */
     @Test
     void paidAndCancelledSendNothing() {
         when(orderService.queryDetail("SN123")).thenReturn(orderDetail());
@@ -107,6 +127,9 @@ class MemberMessageOrchestratorExecuteTest {
         verifyNoInteractions(orchestrator);
     }
 
+    /**
+     * 验证售后拒绝事件映射为审核结果通知。
+     */
     @Test
     void afterSaleRefuseMapsAuditResult() {
         AfterSale afterSale = new AfterSale();
@@ -128,6 +151,9 @@ class MemberMessageOrchestratorExecuteTest {
         assertThat(dto.getPage()).isEqualTo("pages/order/afterSales/applyDetail?sn=AS001");
     }
 
+    /**
+     * 验证积分变动通知填入会员当前积分。
+     */
     @Test
     void pointChangeFillsCurrentPoint() {
         Member member = new Member();
@@ -151,6 +177,9 @@ class MemberMessageOrchestratorExecuteTest {
         assertThat(dto.getPage()).isEqualTo("pages/mine/point/myPoint");
     }
 
+    /**
+     * 验证提现申请及成功事件不在该执行器中重复发送。
+     */
     @Test
     void withdrawalApplyAndSuccessSendNothing() {
         MemberWithdrawalMessage apply = new MemberWithdrawalMessage();
@@ -168,6 +197,9 @@ class MemberMessageOrchestratorExecuteTest {
         verifyNoInteractions(orchestrator);
     }
 
+    /**
+     * 验证提现审核失败映射为审核错误通知。
+     */
     @Test
     void withdrawalFailAuditMapsAuditError() {
         MemberWithdrawalMessage message = new MemberWithdrawalMessage();
@@ -186,6 +218,9 @@ class MemberMessageOrchestratorExecuteTest {
         assertThat(dto.getPage()).isEqualTo("pages/mine/deposit/withdrawApply");
     }
 
+    /**
+     * 验证通知所需订单详情缺失时不抛异常。
+     */
     @Test
     void orderDetailMissingDoesNotThrow() {
         when(orderService.queryDetail("SN123")).thenReturn(null);

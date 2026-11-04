@@ -197,6 +197,8 @@ public class GoodsSearchParams extends PageVO {
         if (CharSequenceUtil.isNotEmpty(goodsStatus)) {
             if (goodsStatus.equals("SCHEDULED_UPPER")) {
                 queryWrapper.isNotNull("scheduled_upper_time");
+            } else if (goodsStatus.equals("SCHEDULED_DOWN")) {
+                queryWrapper.isNotNull("scheduled_down_time");
             } else if (goodsStatus.equals(GoodsStatusEnum.UPPER.name())) {
                 queryWrapper.eq("auth_flag", GoodsAuthEnum.PASS.name());
                 queryWrapper.eq("market_enable", GoodsStatusEnum.UPPER.name());

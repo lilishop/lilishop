@@ -56,6 +56,9 @@ class OrderServiceImplECouponCasTest {
     private OrderItemService orderItemService;
     private ApplicationEventPublisher applicationEventPublisher;
 
+    /**
+     * 初始化当前测试使用的MyBatis-Plus实体元数据。
+     */
     @BeforeAll
     static void initMybatisEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
@@ -63,6 +66,9 @@ class OrderServiceImplECouponCasTest {
         TableInfoHelper.initTableInfo(assistant, OrderItem.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         orderService = spy(new OrderServiceImpl());
@@ -209,6 +215,12 @@ class OrderServiceImplECouponCasTest {
         }
     }
 
+    /**
+     * 构造已付款的卡密订单。
+     *
+     * @param sn 订单编号
+     * @return 已付款的卡密订单
+     */
     private Order paidECoupon(String sn) {
         Order order = new Order();
         order.setSn(sn);

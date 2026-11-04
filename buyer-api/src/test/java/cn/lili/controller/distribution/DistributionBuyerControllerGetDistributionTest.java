@@ -33,6 +33,9 @@ class DistributionBuyerControllerGetDistributionTest {
     @Mock
     private DistributionService distributionService;
 
+    /**
+     * 验证会员没有分销记录时返回空结果。
+     */
     @Test
     void getDistributionReturnsNullWhenNoRecord() {
         when(distributionService.getDistribution()).thenReturn(null);
@@ -44,6 +47,9 @@ class DistributionBuyerControllerGetDistributionTest {
         assertThat(message.getResult()).isNull();
     }
 
+    /**
+     * 验证已通过审核的分销记录按原信息返回。
+     */
     @Test
     void getDistributionReturnsPassRecordUnmasked() {
         Distribution pass = retreatedLikeRecord(DistributionStatusEnum.PASS);
@@ -56,6 +62,9 @@ class DistributionBuyerControllerGetDistributionTest {
         assertThat(message.getResult().getCanRebate()).isEqualTo(88.5D);
     }
 
+    /**
+     * 验证退出分销的响应信息经过脱敏且不回写原记录。
+     */
     @Test
     void getDistributionReturnsMaskedRetreatObjectWithoutPersisting() {
         Distribution retreated = retreatedLikeRecord(DistributionStatusEnum.RETREAT);
@@ -87,6 +96,12 @@ class DistributionBuyerControllerGetDistributionTest {
         assertThat(retreated.getCanRebate()).isEqualTo(88.5D);
     }
 
+    /**
+     * 构造指定状态的退出分销测试记录。
+     *
+     * @param status 测试状态
+     * @return 指定状态的退出分销测试记录
+     */
     private static Distribution retreatedLikeRecord(DistributionStatusEnum status) {
         Distribution distribution = new Distribution();
         distribution.setId("D1");

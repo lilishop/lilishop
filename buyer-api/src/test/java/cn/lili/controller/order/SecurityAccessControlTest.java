@@ -76,6 +76,9 @@ class SecurityAccessControlTest {
     private MockedStatic<UserContext> userContextMock;
     private AuthUser currentUser;
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         currentUser = new AuthUser();
@@ -88,6 +91,9 @@ class SecurityAccessControlTest {
         userContextMock.when(UserContext::getCurrentUser).thenReturn(currentUser);
     }
 
+    /**
+     * 释放当前用例创建的静态模拟资源。
+     */
     @AfterEach
     void tearDown() {
         if (userContextMock != null) {
@@ -97,6 +103,9 @@ class SecurityAccessControlTest {
 
     // ==================== 1. ReceiptBuyerController 越权防御测试 ====================
 
+    /**
+     * 验证售后单所属会员可以查询详情。
+     */
     @Test
     @DisplayName("发票详情：用户查询归属于本人的发票应正常放行")
     void getDetailOwnerAllowed() {
@@ -110,6 +119,9 @@ class SecurityAccessControlTest {
         assertThat(result.getResult().getId()).isEqualTo("receipt-1");
     }
 
+    /**
+     * 验证其他会员不能查询售后单详情。
+     */
     @Test
     @DisplayName("发票详情：用户越权查询归属于他人的发票应拦截并抛出 USER_AUTHORITY_ERROR")
     void getDetailNonOwnerForbidden() {
@@ -124,6 +136,9 @@ class SecurityAccessControlTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.USER_AUTHORITY_ERROR);
     }
 
+    /**
+     * 验证查询不存在的售后单时抛出异常。
+     */
     @Test
     @DisplayName("发票详情：查询不存在的发票应抛出 USER_RECEIPT_NOT_EXIST")
     void getDetailNotExistThrowsException() {
@@ -135,6 +150,9 @@ class SecurityAccessControlTest {
         assertThat(ex.getResultCode()).isEqualTo(ResultCode.USER_RECEIPT_NOT_EXIST);
     }
 
+    /**
+     * 验证售后分页查询强制使用当前会员ID。
+     */
     @Test
     @DisplayName("发票分页：强制绑定当前登录用户 memberId，防止全量发票数据泄露或跨用户越权")
     void getPageForcesCurrentMemberId() {
@@ -147,6 +165,9 @@ class SecurityAccessControlTest {
         verify(receiptService).getReceiptData(eq(params), any());
     }
 
+    /**
+     * 验证保存售后申请时强制使用当前会员ID。
+     */
     @Test
     @DisplayName("发票保存：强制覆盖 memberId 为当前登录用户，防止伪造其他用户发票")
     void saveForcesCurrentMemberId() {
@@ -162,6 +183,9 @@ class SecurityAccessControlTest {
 
     // ==================== 2. OrderComplaintBuyerController 越权防御测试 ====================
 
+    /**
+     * 验证售后单所属会员可以添加沟通记录。
+     */
     @Test
     @DisplayName("交易投诉对话：买家向属于本人的投诉添加沟通记录应正常放行")
     void addCommunicationOwnerAllowed() {
@@ -174,6 +198,9 @@ class SecurityAccessControlTest {
         verify(orderComplaintCommunicationService).addCommunication(any());
     }
 
+    /**
+     * 验证其他会员不能添加售后沟通记录。
+     */
     @Test
     @DisplayName("交易投诉对话：买家向他人的投诉注入沟通记录应拦截并抛出 USER_AUTHORITY_ERROR")
     void addCommunicationNonOwnerForbidden() {
@@ -190,6 +217,9 @@ class SecurityAccessControlTest {
 
     // ==================== 3. AfterSaleBuyerController 越权防御测试 ====================
 
+    /**
+     * 验证售后单所属会员可以查询售后日志。
+     */
     @Test
     @DisplayName("售后日志：查看属于本人的售后单日志应正常放行")
     void getAfterSaleLogOwnerAllowed() {
@@ -203,6 +233,9 @@ class SecurityAccessControlTest {
         verify(afterSaleLogService).getAfterSaleLog("AS-1001");
     }
 
+    /**
+     * 验证其他会员不能查询售后日志。
+     */
     @Test
     @DisplayName("售后日志：查看他人的售后单日志应拦截并抛出 USER_AUTHORITY_ERROR")
     void getAfterSaleLogNonOwnerForbidden() {
@@ -219,6 +252,9 @@ class SecurityAccessControlTest {
 
     // ==================== 4. MemberReceiptController 越权防御测试 ====================
 
+    /**
+     * 验证发票分页查询限定当前会员。
+     */
     @Test
     @DisplayName("客户发票分页：强制绑定当前用户 memberId")
     void memberReceiptPageForcesCurrentMemberId() {
@@ -229,6 +265,9 @@ class SecurityAccessControlTest {
         verify(memberReceiptService).getPage(eq(vo), any());
     }
 
+    /**
+     * 验证修改发票时向服务传递当前会员ID。
+     */
     @Test
     @DisplayName("客户发票修改：正确传入当前用户 memberId")
     void memberReceiptUpdatePassesCurrentUserMemberId() {

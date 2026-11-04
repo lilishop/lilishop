@@ -53,12 +53,18 @@ class GoodsServiceImplDelistECouponTest {
     private Cache<GoodsVO> cache;
     private ApplicationEventPublisher applicationEventPublisher;
 
+    /**
+     * 初始化商品实体的MyBatis-Plus元数据。
+     */
     @BeforeAll
     static void initGoodsEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
         TableInfoHelper.initTableInfo(assistant, Goods.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         goodsService = spy(new GoodsServiceImpl());
@@ -138,11 +144,21 @@ class GoodsServiceImplDelistECouponTest {
         verify(cardKeyService, never()).softDeletePoolOnSkuRemove(any());
     }
 
+    /**
+     * 模拟商品及SKU上下架状态更新成功。
+     *
+     * @param goodsList 商品测试数据列表
+     */
     private void stubMarketAbleUpdate(List<Goods> goodsList) {
         doReturn(true).when(goodsService).update(any());
         doNothing().when(goodsSkuService).updateGoodsSkuStatusByGoodsIds(any(), any());
     }
 
+    /**
+     * 构造卡密商品测试数据。
+     *
+     * @return 卡密商品测试数据
+     */
     private Goods eCouponGoods() {
         Goods goods = new Goods();
         goods.setId(GOODS_ID);
@@ -151,6 +167,11 @@ class GoodsServiceImplDelistECouponTest {
         return goods;
     }
 
+    /**
+     * 在模拟商家登录上下文中执行操作并释放模拟资源。
+     *
+     * @param action 待执行操作
+     */
     private void withStoreUser(Runnable action) {
         try (MockedStatic<UserContext> userContext = mockStatic(UserContext.class)) {
             userContext.when(UserContext::getCurrentUser).thenReturn(storeUser());
@@ -158,6 +179,11 @@ class GoodsServiceImplDelistECouponTest {
         }
     }
 
+    /**
+     * 构造测试店铺的商家登录用户。
+     *
+     * @return 测试店铺的商家登录用户
+     */
     private AuthUser storeUser() {
         return AuthUser.builder()
                 .id("clerk-1")

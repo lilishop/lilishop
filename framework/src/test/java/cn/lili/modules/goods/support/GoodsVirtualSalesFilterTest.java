@@ -13,11 +13,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 2026-11-03
  */
 class GoodsVirtualSalesFilterTest {
+    /**
+     * 验证查询全部商品时不附加虚拟销量筛选。
+     */
     @Test
     void allDoesNotFilterVirtualSales() {
         assertThat(new GoodsSearchParams().queryWrapper().getSqlSegment()).doesNotContain("virtual_sales");
     }
 
+    /**
+     * 验证已设置虚拟销量筛选要求销量大于零。
+     */
     @Test
     void configuredRequiresPositiveVirtualSales() {
         GoodsSearchParams params = new GoodsSearchParams();
@@ -27,6 +33,9 @@ class GoodsVirtualSalesFilterTest {
         assertThat(wrapper.getParamNameValuePairs()).containsValue(0);
     }
 
+    /**
+     * 验证未设置虚拟销量筛选包含零值及空值且保留其他条件。
+     */
     @Test
     void unconfiguredIncludesZeroAndNullWithinOtherFilters() {
         GoodsSearchParams params = new GoodsSearchParams();

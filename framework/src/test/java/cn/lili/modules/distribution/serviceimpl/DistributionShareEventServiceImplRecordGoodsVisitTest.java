@@ -38,12 +38,18 @@ class DistributionShareEventServiceImplRecordGoodsVisitTest {
     private DistributionShareEventServiceImpl service;
     private DistributionVisitEventMapper visitEventMapper;
 
+    /**
+     * 初始化当前测试使用的MyBatis-Plus实体元数据。
+     */
     @BeforeAll
     static void initMybatisEntityCache() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
         TableInfoHelper.initTableInfo(assistant, DistributionVisitEvent.class);
     }
 
+    /**
+     * 初始化当前用例的模拟依赖及测试数据。
+     */
     @BeforeEach
     void setUp() {
         service = new DistributionShareEventServiceImpl();
@@ -53,6 +59,9 @@ class DistributionShareEventServiceImplRecordGoodsVisitTest {
         when(visitEventMapper.insert(any(DistributionVisitEvent.class))).thenReturn(1);
     }
 
+    /**
+     * 验证商品访问事件使用组合事件ID写入记录。
+     */
     @Test
     void recordGoodsVisit_writesConcatenatedEventId() {
         service.recordGoodsVisit(DISTRIBUTION_ID, GOODS_ID, SKU_ID, null, VISITOR_ID, "M1");
@@ -66,6 +75,9 @@ class DistributionShareEventServiceImplRecordGoodsVisitTest {
         assertThat(captor.getValue().getEventId()).isEqualTo(expected);
     }
 
+    /**
+     * 验证相同商品访问事件已存在时不重复插入。
+     */
     @Test
     void recordGoodsVisit_skipsInsertWhenEventIdExists() {
         when(visitEventMapper.selectCount(any())).thenReturn(1L);
@@ -75,6 +87,9 @@ class DistributionShareEventServiceImplRecordGoodsVisitTest {
         verify(visitEventMapper, never()).insert(any(DistributionVisitEvent.class));
     }
 
+    /**
+     * 验证SKU ID为空时跳过访问事件记录。
+     */
     @Test
     void recordGoodsVisit_skipsWhenSkuIdBlank() {
         service.recordGoodsVisit(DISTRIBUTION_ID, GOODS_ID, "", null, VISITOR_ID, "M1");
@@ -85,6 +100,9 @@ class DistributionShareEventServiceImplRecordGoodsVisitTest {
         verify(visitEventMapper, never()).insert(any(DistributionVisitEvent.class));
     }
 
+    /**
+     * 验证同一商品的不同SKU共用商品访问事件ID。
+     */
     @Test
     void recordGoodsVisit_sameGoodsDifferentSkuSharesEventId() {
         service.recordGoodsVisit(DISTRIBUTION_ID, GOODS_ID, SKU_ID, null, VISITOR_ID, "M1");

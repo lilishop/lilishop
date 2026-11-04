@@ -711,6 +711,42 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void cancelGoodsMarketSchedule(String goodsId, GoodsStatusEnum status) {
+        // 获取当前用户；管理员可操作所有店铺，其他用户必须通过商家身份校验
+        AuthUser user = UserContext.getCurrentUser();
+        boolean manager = user != null && user.getRole() == UserEnums.MANAGER;
+        if (!manager && checkStoreAuthority() == null) throw new ServiceException(ResultCode.STORE_NOT_LOGIN_ERROR);
+        // 检查商品是否存在，并限制商家只能取消本店商品的定时计划
+        Goods goods = checkExist(goodsId);
+        if (!manager && !user.getStoreId().equals(goods.getStoreId())) throw new ServiceException(ResultCode.USER_AUTHORITY_ERROR);
+        // 仅支持取消定时上架或定时下架计划
+        if (status != GoodsStatusEnum.UPPER && status != GoodsStatusEnum.DOWN) throw new ServiceException("不支持的定时计划类型");
+        boolean upper = status == GoodsStatusEnum.UPPER;
+        Date time = upper ? goods.getScheduledUpperTime() : goods.getScheduledDownTime();
+        // 对应计划已不存在时直接返回，避免重复取消产生错误
+        if (time == null) return;
+        // 将读取到的计划时间作为更新条件，避免并发修改后误删新计划；只清除指定方向的时间和原因
+        LambdaUpdateWrapper<Goods> update = new LambdaUpdateWrapper<Goods>()
+                .eq(Goods::getId, goodsId).eq(!manager, Goods::getStoreId, user.getStoreId());
+        if (upper) {
+            update.eq(Goods::getScheduledUpperTime, time)
+                    .set(Goods::getScheduledUpperTime, null).set(Goods::getScheduledUpperReason, null);
+        } else {
+            update.eq(Goods::getScheduledDownTime, time)
+                    .set(Goods::getScheduledDownTime, null).set(Goods::getScheduledDownReason, null);
+        }
+        // 更新未命中说明计划可能已被修改或执行，提示刷新后重试
+        if (!this.update(update)) throw new ServiceException("定时计划已变化，请刷新后重试");
+        // 移除原延时任务的有效标识，使队列中尚未执行的旧任务失效
+        timeTrigger.delete(upper ? TimeExecuteConstant.GOODS_UPPER_EXECUTOR : TimeExecuteConstant.GOODS_DOWN_EXECUTOR,
+                time.getTime(), DelayQueueTools.wrapperUniqueKey(DelayTypeEnums.GOODS, goodsId),
+                rocketmqCustomProperties.getPromotionTopic());
+        // 清除商品详情缓存，确保后续查询读取最新的定时计划
+        cache.remove(CachePrefix.GOODS.getPrefix() + goodsId);
+    }
+
+    @Override
     public long countStoreGoodsNum(String storeId) {
         return this.count(
                 new LambdaQueryWrapper<Goods>()

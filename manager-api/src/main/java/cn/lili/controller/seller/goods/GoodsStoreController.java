@@ -207,6 +207,13 @@ public class GoodsStoreController {
         return ResultUtil.success();
     }
 
+    @Operation(summary = "取消商品定时上下架计划")
+    @DeleteMapping("/schedule/market/{goodsId}")
+    public ResultMessage<Object> cancelSchedule(@PathVariable String goodsId, @RequestParam GoodsStatusEnum status) {
+        goodsService.cancelGoodsMarketSchedule(goodsId, status);
+        return ResultUtil.success();
+    }
+
     @Operation(summary = "定时上下架商品", description = "触发时间为到秒的Date类型，建议格式：yyyy-MM-dd HH:mm:ss")
     @PostMapping(value = "/schedule/market", consumes = "application/json")
     public ResultMessage<Object> scheduleMarket(@RequestBody @Valid GoodsMarketScheduleDTO dto) {
