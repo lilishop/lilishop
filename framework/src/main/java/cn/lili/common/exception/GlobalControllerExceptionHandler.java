@@ -58,23 +58,9 @@ public class GlobalControllerExceptionHandler {
                 message = appendErrorMessage(message, serviceException.getMsg());
             }
 
-            // 对一些特殊异常处理，不再打印error级别的日志
-            if (serviceException.getResultCode().equals(ResultCode.DEMO_SITE_EXCEPTION)) {
-                log.debug("[DEMO_SITE_EXCEPTION]:{}", serviceException.getResultCode().message(), e);
-                return ResultUtil.error(code, message);
-            }
-            if (serviceException.getResultCode().equals(ResultCode.USER_AUTH_EXPIRED)) {
-                log.debug("403 :{}", serviceException.getResultCode().message(), e);
-                return ResultUtil.error(code, message);
-            }
-            if (serviceException.getResultCode().equals(ResultCode.USER_PASSWORD_ERROR)
-                    || serviceException.getResultCode().equals(ResultCode.VERIFICATION_ERROR)) {
-                log.debug("[{}]:{}", serviceException.getResultCode().name(), serviceException.getResultCode().message());
-                return ResultUtil.error(code, message);
-            }
-
-
-            log.error("全局异常[ServiceException]:{}-{}", serviceException.getResultCode().code(), serviceException.getResultCode().message(), e);
+            // ServiceException 均为预期内的业务异常，只记录单行 warn 日志，不打印堆栈；
+            // 系统级异常由通用异常处理器记录 ERROR 全堆栈
+            log.warn("业务异常[{}]:{} {}", code, message, request.getRequestURI());
             return ResultUtil.error(code, message);
 
         } else {
